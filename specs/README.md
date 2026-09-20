@@ -36,7 +36,7 @@ These tests use the build tag `//go:build e2e` and are excluded from `make test`
 
 Behavioral specs that exercise the compiled `spwn` CLI binary end-to-end. Located in `cli/<domain>/`. They spawn processes, interact with Docker, and assert on CLI output.
 
-Most of them are **documents** — a `<case>.spec.yaml` stating one terminal session — and the rest are chains in `<aspect>.test.ts`. Which is which, and why, is [TypeScript E2E Setup](#typescript-e2e-setup-cli) below.
+Most of them are **documents** — a `<case>.spec.yaml` stating one terminal session — and the rest are chains in `<aspect>.spec.ts`. Which is which, and why, is [TypeScript E2E Setup](#typescript-e2e-setup-cli) below.
 
 ```bash
 pnpm -C specs test               # run all TS E2E specs once
@@ -163,7 +163,7 @@ runs:
   mapping is read against the working directory as THAT run left it, so
   a path may be `absent` for one run and there for the next —
   `logs/lazily-created-log.spec.yaml` states exactly that.
-- The whole [token vocabulary](https://github.com/jterrazz/package-test/blob/main/docs/06-tokens.md)
+- The whole [token vocabulary](https://github.com/jterrazz/package-test/blob/main/docs/15-tokens.md)
   works in the streams and in `files:` texts — `{{workdir}}`, `{{path}}`,
   `{{time}}`, `{{iso8601}}`, `{{hex}}`, and `{{string#ref}}` for a value
   that must be the same wherever it reappears.
@@ -189,7 +189,7 @@ document before committing it**: a value the framework could not
 recognise as volatile (a temp path it did not substitute, a random agent
 name, a clock) comes back as a literal and has to be tokenised by hand.
 
-#### The chain — `<aspect>.test.ts`
+#### The chain — `<aspect>.spec.ts`
 
 Reach for code when the format cannot state what the spec is about. Each
 file that does says so in its own header; the reasons in this suite are:
@@ -197,13 +197,13 @@ file that does says so in its own header; the reasons in this suite are:
 | Reason                     | Example                                                                                                                  |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **containers**             | `world/`, `colony/`, `architect/`, `hooks/` — `.container(name)`, `await using`                                          |
-| **structural JSON**        | `check/json-report.test.ts`, `agent/agent-list.test.ts` — `result.json` by shape                                         |
-| **an absence**             | `dependency/scoped-refs.test.ts` — no entry may survive bare; `files:` says what a file contains, never what it does not |
+| **structural JSON**        | `check/json-report.spec.ts`, `agent/agent-list.spec.ts` — `result.json` by shape                                         |
+| **an absence**             | `dependency/scoped-refs.spec.ts` — no entry may survive bare; `files:` says what a file contains, never what it does not |
 | **a count**                | the same file — exactly one list entry after a repeated install                                                          |
-| **two runs compared**      | `agent/agent-list.test.ts` — the same header from two separate invocations                                               |
-| **a host shell-out**       | `agent/export.test.ts` (`tar tzf`), `build/build.test.ts` (`docker run`)                                                 |
-| **host-dependent output**  | `authentication/authentication.test.ts` — the dashboard reads the operator's keychain                                    |
-| **a long-running process** | `web/web.test.ts` — `.exec(…, { waitFor })` plus a `pgrep` orphan check                                                  |
+| **two runs compared**      | `agent/agent-list.spec.ts` — the same header from two separate invocations                                               |
+| **a host shell-out**       | `agent/export.spec.ts` (`tar tzf`), `build/build.spec.ts` (`docker run`)                                                 |
+| **host-dependent output**  | `authentication/authentication.spec.ts` — the dashboard reads the operator's keychain                                    |
+| **a long-running process** | `web/web.spec.ts` — `.exec(…, { waitFor })` plus a `pgrep` orphan check                                                  |
 
 When only ONE assertion needs code, the session still belongs in a
 document: `cli.run('<case>.spec.yaml')` runs it — its ground, its
@@ -298,7 +298,7 @@ under [the chain](#the-chain--aspecttestts).
 
 For a chain instead:
 
-1. Create `cli/<domain>/<aspect>.test.ts` and open its
+1. Create `cli/<domain>/<aspect>.spec.ts` and open its
    docblock with the reason the format cannot carry it.
 2. Import `cli` from `../cli.specification.js`.
 3. If only one ASSERTION needs code, put the session in a document and
@@ -314,7 +314,15 @@ For a chain instead:
 | Go unit     | `*_test.go` (next to source)                    | `manifest_test.go`        |
 | Go E2E      | `*_test.go` (in `../packages/world/tests/e2e/`) | `spawn_test.go`           |
 | TS document | `<case>.spec.yaml` (in `cli/<domain>/`)         | `valid-project.spec.yaml` |
-| TS chain    | `<aspect>.test.ts` (in `cli/<domain>/`)         | `json-report.test.ts`     |
+| TS chain    | `<aspect>.spec.ts` (in `cli/<domain>/`)         | `json-report.spec.ts`     |
+
+The suffix says the KIND (`@jterrazz/test` rule C12): under `specs/<facet>/`
+a chain meets the assembled product and is a `.spec.ts`; `.test.ts` is the
+unit, beside its module. Two files here keep `.test.ts` because they reach no
+runner — `cli/logs/api.test.ts`, a payload-shape assertion, and
+`cli/smoke/upgrade.e2e.test.ts`, which drives the binary with raw `execSync` —
+and the `lint/` suite is not a facet, so `lint/guards/guards.test.ts` keeps
+the word too. Both vitest includes state the two suffixes for that reason.
 
 Under this package, what a spec STANDS ON carries a leading underscore —
 `_fixtures/` and `_expected/` — while a spec's own folder never does, and

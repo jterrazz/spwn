@@ -92,10 +92,11 @@ spwn/
 │   │       └── index.test.mjs     ← SDK + sidecar tests (local HTTP server)
 
 │   └── web/
-│       ├── vitest.config.ts
+│       ├── vitest.config.mts             ← defineSpecConfig() + unit({ roots: ['src'] })
 │       └── src/
-│           └── api/__tests__/
-│               └── stream-chat.test.ts   ← Network behaviour via MSW, server per file
+│           └── api/
+│               ├── client.test.ts        ← Module test: the route, through intercept()
+│               └── stream-chat.test.ts   ← Module test: SSE behaviour, through intercept()
 
 ├── packages/
 │   ├── <module>/
@@ -134,8 +135,8 @@ spwn/
 │   │   ├── cli.specification.ts   ← The single runner (`cli`), docker-aware
 │   │   ├── check/
 │   │   │   ├── valid-project.spec.yaml   ← A document: one session, asserted whole
-│   │   │   ├── json-report.test.ts       ← A chain: structural JSON
-│   │   │   ├── manifest-grammar.test.ts  ← A chain: absences, bridged on documents
+│   │   │   ├── json-report.spec.ts       ← A chain: structural JSON
+│   │   │   ├── manifest-grammar.spec.ts  ← A chain: absences, bridged on documents
 │   │   │   ├── _fixtures/                ← Feature-local overlays, this leaf's own
 │   │   │   └── _expected/                ← Only what a document cannot carry
 │   │   ├── smoke/                 ← L6 real-build smoke (its own vitest config)
@@ -275,29 +276,27 @@ func TestWorldsDir_RespectsProjectRoot(t *testing.T) {
 
 ### Web: `apps/web/src/**/*.test.ts`
 
-Vitest with happy-dom. Pure logic and component tests run here; **network behavior is tested at the HTTP boundary via MSW**, not by stubbing `fetch`.
+Module tests beside their modules, collected by `unit()` in `vitest.config.mts`. No simulated DOM: **network behavior is stated at the HTTP boundary with `intercept()`**, never by stubbing `fetch`. The contract binds with `await using`, so the interception is torn down at scope exit.
 
 ```ts
-// apps/web/src/lib/__tests__/stream-chat.test.ts
-import { http, HttpResponse } from 'msw';
-import { server } from '@/test/msw/server';
+// apps/web/src/api/stream-chat.test.ts
+import { http, intercept } from '@jterrazz/test';
 
-test('falls back to JSON when SSE returns 404', async () => {
-    server.use(
-        http.post('/api/chat/stream', () =>
-            HttpResponse.json({ error: 'not found' }, { status: 404 }),
-        ),
-        http.post('/api/chat', () => HttpResponse.json({ message: 'hi' })),
-    );
+test('parses assistant text from an SSE response', async () => {
+    // Given - one assistant event, then the closing frame
+    await using _ = await intercept(http.post(primaryUrl), http.sse([assistantEvent, done]));
 
-    const result = await streamChat('hello');
-    expect(result).toBe('hi');
+    const cb = callbacks();
+    await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
+
+    // Then - the text block reaches the callback
+    expect(cb.blocks.flat()).toContainEqual({ type: 'text', content: 'hello world' });
 });
 ```
 
 ### Gate: `apps/gate/sdk/*.test.mjs`
 
-The Gate SDK is CommonJS but tests are ESM via `createRequire` (Vitest 4 doesn't allow `require('vitest')` from CJS). Tests cover MCP manifest generation, CLI dispatch, JSON-RPC method registration, and HTTP error propagation against a local `http.createServer` simulating the sidecar.
+The Gate SDK is CommonJS but tests are ESM via `createRequire` (vitest does not allow `require('vitest')` from CJS). Tests cover MCP manifest generation, CLI dispatch, JSON-RPC method registration, and HTTP error propagation against a local `http.createServer` simulating the sidecar.
 
 ### Automations: `packages/automation/*_test.go`
 
@@ -384,9 +383,9 @@ res, _ := http.Get(srv.URL + "/api/health")
 
 A new route is added by editing `registerRoutes` — _both_ production and tests pick it up. There is no parallel router definition that can drift.
 
-### Web client: MSW
+### Web client: `intercept()`
 
-`../apps/web/src/api/__tests__/stream-chat.test.ts` stands up its own MSW server with `setupServer()` from `msw/node`, listens with `onUnhandledRequest: 'error'`, and resets handlers between tests. Network-behavior tests (SSE streams, JSON fallback, HTTP errors, network errors, fallback URLs) all go through real `fetch` and an HTTP-level interceptor.
+`../apps/web/src/api/stream-chat.test.ts` and `client.test.ts` declare what the subject may call with `intercept(http.post(url), http.sse([...]))` — the framework owns the interceptor, its lifetime and its refusal of an unhandled request. Network-behavior tests (SSE streams, JSON fallback, HTTP errors, network errors, fallback URLs) all go through real `fetch`.
 
 ### Gate: local `http.createServer`
 
@@ -475,7 +474,7 @@ Every run is asserted, and a non-zero exit does not end the session — which is
 
 Regenerate a document's `exit`, `stdout` and `stderr` — and nothing else — with `TEST_UPDATE=1`; the full workflow, including what to read before committing a regenerated document, is in [README.md](README.md#the-document--casespecyaml).
 
-**The chain** — `<aspect>.test.ts`, for what the format cannot state: containers, structural JSON, an absence, a count, two runs compared to each other, a host shell-out, host-dependent output, a long-running process. Each such file opens with the reason in its docblock. When only one ASSERTION needs code, the session still belongs in a document and `cli.run('<case>.spec.yaml')` runs it whole:
+**The chain** — `<aspect>.spec.ts`, for what the format cannot state: containers, structural JSON, an absence, a count, two runs compared to each other, a host shell-out, host-dependent output, a long-running process. Each such file opens with the reason in its docblock. When only one ASSERTION needs code, the session still belongs in a document and `cli.run('<case>.spec.yaml')` runs it whole:
 
 ```ts
 test('the exported archive carries every mind layer', async () => {
@@ -580,7 +579,7 @@ Removes only containers that match `SPWN_TEST_LABEL`. The dev's local containers
 
 Real Claude/Codex CLIs, real provider APIs. Currently:
 
-- `make test-smoke` — the `cli/smoke/` domain (`init-up.test.ts`, `upgrade.e2e.test.ts`) exercises `spwn init` → `spwn up` against a live build (no live LLM call).
+- `make test-smoke` — the `cli/smoke/` domain (`init-up.spec.ts`, `upgrade.e2e.test.ts`) exercises `spwn init` → `spwn up` against a live build (no live LLM call).
 - **Planned** (Phase 9 of the test architecture plan): `real-runtime/` with `SPWN_REAL_RUNTIME=1` opt-in for live `spwn agent talk` against Claude/Codex/Gemini APIs, with hard timeout + cleanup.
 
 ---
@@ -663,7 +662,7 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 1. Pick a folder: `cli/<domain>/`.
 2. Write a document, `<case>.spec.yaml`: the ground (`fixture:`, `env:`), the `runs:`, and any `files:` assertion.
 3. `TEST_UPDATE=1 pnpm -C specs exec vitest run <path>` fills in the exit codes and the streams; read the result, tokenise what stayed literal, and run it again clean.
-4. Reach for a chain (`<aspect>.test.ts`) only for what the format cannot state — containers, structural JSON, an absence, a count, two runs compared, a host shell-out. Open the file with the reason, use `await using` if any container might spawn, and put the session in a document called through `cli.run()` when only one assertion needs code.
+4. Reach for a chain (`<aspect>.spec.ts`) only for what the format cannot state — containers, structural JSON, an absence, a count, two runs compared, a host shell-out. Open the file with the reason, use `await using` if any container might spawn, and put the session in a document called through `cli.run()` when only one assertion needs code.
 5. Add the command to `_contracts/cli-commands.yaml`.
 
 ### Add a Web E2E test
@@ -743,7 +742,7 @@ These will fail CI or get caught in review:
 - **Simulator** — An executable protocol contract for an external CLI (under `_simulators/`). Not a loose mock — a contract test guards the protocol shape.
 - **`cli`** — The single CLI E2E runner exported from `cli/cli.specification.ts`.
 - **Document** — A `<case>.spec.yaml` stating one terminal session: the ground, the `runs:`, the streams and `files:`. The default form for a CLI E2E spec.
-- **Chain** — A `<aspect>.test.ts` for what a document cannot state. Its docblock opens with the reason.
+- **Chain** — A `<aspect>.spec.ts` for what a document cannot state. Its docblock opens with the reason.
 - **Test label** — `SPWN_TEST_LABEL` (e.g. `web-e2e-<ts>-<rand>`) attached to every container created by a test run, so cleanup never affects unrelated containers.
 - **Ground folder** — What the specs stand on, carrying a leading underscore (`_contracts/`, `_simulators/`, `_fixtures/`, `_catalog/`, `_manual/`, `_support/`). Sorts above the facets and signals "this is not a spec." No spec lives inside one — `c1-domain-structure` fails the tree that puts one there.
 
