@@ -2,7 +2,7 @@ packages:
     - path: apps/web
       scripts: [test, build]
       tests:
-          - apps/web/src/api/__tests__/stream-chat.test.ts
+          - apps/web/src/api/stream-chat.test.ts
     - path: apps/gate
       scripts: [test]
       tests:
@@ -10,5 +10,5 @@ packages:
     - path: specs
       scripts: [test, test:contracts, test:web]
       tests:
-          - specs/cli/agent/talk.test.ts
+          - specs/cli/agent/talk.spec.ts
           - specs/web/navigation/sidebar/sidebar.e2e.ts

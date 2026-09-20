@@ -16,7 +16,9 @@ export default defineSpecConfig({
         exclude: ['web/**'],
         // Both real-build smokes are specs of the cli facet's `smoke` domain:
         // the framework-based scaffold smoke, and the raw-execSync upgrade one.
-        include: ['cli/smoke/**/*.test.ts'],
+        // `upgrade.e2e.test.ts` keeps `.test.ts`: it drives the binary with raw
+        // execSync and reaches no runner (C18, recorded).
+        include: ['cli/smoke/**/*.spec.ts', 'cli/smoke/**/*.test.ts'],
         // Each test builds a world image from scratch on a cold run.
         // First apt-get in a fresh layer can easily take 3-5 minutes.
         testTimeout: 600_000,

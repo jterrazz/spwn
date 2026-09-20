@@ -1,22 +1,22 @@
 generatedDocsDir: docs/reference
 requiredBehaviorSpecs:
     - command: spwn init
-      tests: [specs/cli/init/starter-scaffold.spec.yaml, specs/cli/init/scaffold-shape.test.ts]
+      tests: [specs/cli/init/starter-scaffold.spec.yaml, specs/cli/init/scaffold-shape.spec.ts]
     - command: spwn check
-      tests: [specs/cli/check/valid-project.spec.yaml, specs/cli/check/json-report.test.ts]
+      tests: [specs/cli/check/valid-project.spec.yaml, specs/cli/check/json-report.spec.ts]
     - command: spwn build
-      tests: [specs/cli/build/build.test.ts, specs/cli/build/tree-only.test.ts]
+      tests: [specs/cli/build/build.spec.ts, specs/cli/build/tree-only.spec.ts]
     - command: spwn up
-      tests: [specs/cli/world/up-down.test.ts]
+      tests: [specs/cli/world/up-down.spec.ts]
     - command: spwn down
-      tests: [specs/cli/world/up-down.test.ts]
+      tests: [specs/cli/world/up-down.spec.ts]
     - command: spwn agent talk
-      tests: [specs/cli/agent/talk.test.ts]
+      tests: [specs/cli/agent/talk.spec.ts]
     - command: spwn world list
-      tests: [specs/cli/world/world-list.test.ts]
+      tests: [specs/cli/world/world-list.spec.ts]
     - command: spwn skill
-      tests: [specs/cli/skill/skills.test.ts]
+      tests: [specs/cli/skill/skills.spec.ts]
     - command: spwn install
-      tests: [specs/cli/dependency/catalog-pin.spec.yaml, specs/cli/dependency/scoped-refs.test.ts]
+      tests: [specs/cli/dependency/catalog-pin.spec.yaml, specs/cli/dependency/scoped-refs.spec.ts]
     - command: spwn auth
-      tests: [specs/cli/authentication/authentication.test.ts]
+      tests: [specs/cli/authentication/authentication.spec.ts]
