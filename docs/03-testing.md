@@ -28,6 +28,8 @@ The rest are **chains**, `<aspect>.spec.ts`, for what the format cannot state: a
 
 The suffix says the kind: under `specs/<facet>/` a chain meets the assembled product and is a `.spec.ts`, while `.test.ts` is the unit and sits beside its module. Both forms bind to the same runner, `specs/cli/cli.specification.ts`. The full grammar and the `TEST_UPDATE=1` workflow are in [`../specs/README.md`](../specs/README.md#typescript-e2e-setup-cli).
 
+A first level under `specs/` that is NOT a facet name is neither: it is a repository suite, covering a tree rather than a product reached through an entry, and its word stays `.test.ts`. Two stand here — [`../specs/lint/`](../specs/lint/), the repo-wide source guards, and [`../specs/shapes/`](../specs/shapes/), the wire payloads the Go API promises. Neither reaches a runner, and neither is meant to.
+
 ## Running the suites
 
 All gates run through the `Makefile` (single entry point; CI mirrors it in `.github/workflows/validate.yaml`):
