@@ -62,8 +62,7 @@ describe('world snap', () => {
             .fixture('$FIXTURES/docker-pilot/')
             .exec(`world snap save ${worldId} --name round-trip`);
 
-        // Then - the save banner is product-owned deterministic output: pin it byte-for-byte
-        // (the snapshot tag's only dynamic segment is the world-id hash suffix — {{hex}})
+        // Then - the save banner is pinned byte-for-byte, its one dynamic segment ({{hex}}, the world-id suffix) tokenised
         expect(save.exitCode).toBe(0);
         expect(save.stderr).toMatch('snap-saved.txt');
 

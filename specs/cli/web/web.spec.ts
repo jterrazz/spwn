@@ -1,3 +1,4 @@
+import { waitUntil } from '@jterrazz/test';
 import { execSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
 
@@ -37,27 +38,32 @@ describe('spwn web', () => {
             expect(result.stdout).toContain('spwn API listening on');
         }
 
-        // Give the OS a brief moment to reap; retry a few times before failing outright
+        // Then - nothing carrying the marker survives, once the OS has reaped
         let orphans = 'not checked';
-        for (let i = 0; i < 5; i++) {
+        const readOrphans = () => {
+            let found: string;
             try {
-                orphans = execSync(`pgrep -fl "${homeMarker}" || true`, {
-                    encoding: 'utf8',
-                }).trim();
+                found = execSync(`pgrep -fl "${homeMarker}" || true`, { encoding: 'utf8' }).trim();
             } catch {
-                orphans = '';
+                found = '';
             }
             // Filter our own pgrep match and bare shell wrappers whose argv carries the marker via their env
-            orphans = orphans
+            orphans = found
                 .split('\n')
                 .filter((line) => line && !line.includes('pgrep'))
                 .filter((line) => !/^\s*\d+\s+sh\s*$/.test(line))
                 .filter((line) => !/^\s*\d+\s+(?:sh|bash)\s+-c\s/.test(line))
                 .join('\n');
-            if (orphans === '') {
-                break;
-            }
-            await new Promise((resolve) => setTimeout(resolve, 200));
+            return orphans === '';
+        };
+        try {
+            await waitUntil(readOrphans, {
+                interval: 200,
+                timeout: 5000,
+                why: 'the web child left no process carrying the marker',
+            });
+        } catch {
+            /* The assertion below is the one that reports WHICH process survived. */
         }
         expect(orphans).toBe('');
     });

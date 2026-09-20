@@ -20,8 +20,7 @@ const repoRoot = resolve(import.meta.dirname, '../../..');
 
 describe('repo regression guards', () => {
     test('no relative /api/ fetch calls in frontend (must use goApiUrl)', () => {
-        // Given - the web app must go through goApiUrl; relative /api/
-        // Calls would bypass the Go backend routing layer.
+        // Given - the web app must go through goApiUrl, since a relative /api/ call would bypass the Go backend routing layer
         const result = spawnSync(
             'grep',
             [
@@ -37,14 +36,12 @@ describe('repo regression guards', () => {
 
         const matches = (result.stdout ?? '').split('\n').filter((line) => line.trim().length > 0);
 
-        // Then - zero hits. Grep returns status 1 when there are no
-        // Matches, which is the happy path for this guard.
+        // Then - zero hits (grep exits 1 with no matches, which is this guard's happy path)
         expect(matches).toHaveLength(0);
     });
 
     test("no references to 'God' or 'god' role remain in source (rename regression)", () => {
-        // Given - the role was renamed to Architect. Any surviving
-        // 'God' reference in production code is a reintroduction.
+        // Given - the role was renamed to Architect, so any surviving 'God' reference in production code is a reintroduction
         const result = spawnSync(
             'grep',
             [

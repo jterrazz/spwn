@@ -1,19 +1,17 @@
 import { http, intercept } from '@jterrazz/test';
-import { beforeAll, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import type { World } from '@/domain/model';
 
 import { apiGet, setApiBase } from './client';
 
-beforeAll(() => {
-    setApiBase('http://spwn.test');
-});
-
 /**
- * The route declared in PATH FORM: it matches the path on any origin, so the
- * base the client was given does not have to be repeated here.
+ * The Given every test here calls: the base the client resolves against, and
+ * the route it answers. The route is declared in PATH FORM — it matches the
+ * path on any origin, so the base does not have to be repeated here.
  */
 async function worldsAnswer(payload: Record<string, unknown>[]) {
+    setApiBase('http://spwn.test');
     return await intercept(http.get('/api/worlds'), http.json(payload));
 }
 
