@@ -318,11 +318,14 @@ For a chain instead:
 
 The suffix says the KIND (`@jterrazz/test` rule C12): under `specs/<facet>/`
 a chain meets the assembled product and is a `.spec.ts`; `.test.ts` is the
-unit, beside its module. Two files here keep `.test.ts` because they reach no
-runner — `cli/logs/api.test.ts`, a payload-shape assertion, and
-`cli/smoke/upgrade.e2e.test.ts`, which drives the binary with raw `execSync` —
-and the `lint/` suite is not a facet, so `lint/guards/guards.test.ts` keeps
-the word too. Both vitest includes state the two suffixes for that reason.
+unit, beside its module. A first level that is NOT a facet is a repository
+suite — it covers a tree rather than a product reached through an entry, and
+its word stays `.test.ts`. Two suites stand here: `lint/`, the repo-wide
+source guards, and `shapes/`, the wire payloads the Go API promises
+(`shapes/activity/api.test.ts`). One file keeps `.test.ts` under a facet:
+`cli/smoke/upgrade.e2e.test.ts`, which drives the binary with raw `execSync`
+and so reaches no runner (C18, recorded on the ratchet). Both vitest includes
+state the two suffixes for that reason.
 
 Under this package, what a spec STANDS ON carries a leading underscore —
 `_fixtures/` and `_expected/` — while a spec's own folder never does, and
@@ -342,7 +345,7 @@ only one spec folder reaches for belongs beside that folder as
 
 ## Vitest Configuration
 
-`vitest.config.ts` is one project over `cli/**` and
+`vitest.config.ts` is one project over `cli/**`, `shapes/**` and
 `lint/**`, with the `literate()` plugin adding
 `cli/**/*.spec.yaml` to the include and binding every document to
 `cli/cli.specification.ts`.

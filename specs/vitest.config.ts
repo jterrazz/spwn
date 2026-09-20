@@ -33,12 +33,20 @@ export default defineSpecConfig({
         fileParallelism: true,
         /*
          * Under `specs/`, a chain that meets the assembled product is a
-         * `.spec.ts` (C12). Two files keep `.test.ts` because they reach no
-         * runner (C18, recorded): `cli/logs/api.test.ts`, a payload-shape
-         * assertion that spawns nothing. `lint/` is not a facet — it is a
-         * repository suite, and its word stays `.test.ts`.
+         * `.spec.ts` (C12). A first level that is not a facet is a repository
+         * suite: it covers a tree rather than a product reached through an
+         * entry, and its word stays `.test.ts` — `lint/`, the repo-wide source
+         * guards, and `shapes/`, the wire payloads the Go API promises.
+         * `cli/smoke/upgrade.e2e.test.ts` is the one `.test.ts` left under a
+         * facet: it drives the binary with raw execSync and reaches no runner
+         * (C18, recorded).
          */
-        include: ['cli/**/*.spec.ts', 'cli/**/*.test.ts', 'lint/**/*.test.ts'],
+        include: [
+            'cli/**/*.spec.ts',
+            'cli/**/*.test.ts',
+            'lint/**/*.test.ts',
+            'shapes/**/*.test.ts',
+        ],
         /*
          * Additive: the preset already excludes vitest's defaults and every
          * `_fixtures/` tree. Left to state is the playwright suite, and the

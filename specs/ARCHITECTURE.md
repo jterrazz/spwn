@@ -75,7 +75,7 @@ Each layer denies what's above: a unit test never spawns a container; a Docker E
 Two organising principles:
 
 - **Go tests are colocated** with the code they prove (idiomatic Go, tooling expects it).
-- **TS specs live under `specs/`**, organised by facet: top-level folders scream the product (`cli/`, `web/`, `lint/`), and within each surface the structure mirrors the surface's own grammar (CLI uses noun-verb; web uses domain-feature). Ground folders carry a leading underscore (`_contracts/`, `_simulators/`, …) so they sort above the facets and never get mistaken for one.
+- **TS specs live under `specs/`**, organised by facet: top-level folders scream the product (`cli/`, `web/`), beside the repository suites that cover a tree rather than a product (`lint/`, `shapes/`), and within each surface the structure mirrors the surface's own grammar (CLI uses noun-verb; web uses domain-feature). Ground folders carry a leading underscore (`_contracts/`, `_simulators/`, …) so they sort above the facets and never get mistaken for one.
 
 ```
 spwn/
@@ -142,8 +142,11 @@ spwn/
 │   │   ├── smoke/                 ← L6 real-build smoke (its own vitest config)
 │   │   └── agent/, world/, init/, build/, dependency/, logs/, …
 
-│   ├── lint/
+│   ├── lint/                      ← A repository suite: covers a tree, not a product
 │   │   └── guards/                ← Repo-wide source guards (plain vitest, no runner)
+
+│   ├── shapes/                    ← A repository suite: the Go API's wire payloads
+│   │   └── activity/              ← GET /api/activity response shape (no runner)
 
 │   ├── web/                       ← L5 Playwright (one folder per feature)
 │   │   ├── playwright.config.ts
