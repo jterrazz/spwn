@@ -25,7 +25,7 @@ describe('full agent lifecycle', () => {
             .Config?.Labels?.['sh.spwn.world.id'];
         expect(worldId).toMatch(/^world-/u);
 
-        // When - agent ls reports neo as running
+        // And agent ls reports neo as running
         await using agentLs = await cli.fixture('$FIXTURES/docker-pilot/').exec('agent ls --json');
 
         // Then - the project-mode report lists neo running
@@ -39,7 +39,7 @@ describe('full agent lifecycle', () => {
         expect(neoAgent).toBeDefined();
         expect(neoAgent?.status).toMatch(/running/);
 
-        // When - world list --json reports one running world
+        // And world list --json reports one running world
         await using worldLs = await cli
             .fixture('$FIXTURES/docker-pilot/')
             .exec('world list --json');
@@ -58,7 +58,7 @@ describe('full agent lifecycle', () => {
             status: 'running',
         });
 
-        // When - world inspect <id> renders stable field headers
+        // And world inspect <id> renders stable field headers
         await using inspect = await cli
             .fixture('$FIXTURES/docker-pilot/')
             .exec(`world inspect ${worldId}`);
@@ -68,7 +68,7 @@ describe('full agent lifecycle', () => {
         expect(inspect.stderr).toContain(worldId!);
         expect(inspect.stderr).toContain('Status');
 
-        // When - world logs <id> is read
+        // And world logs <id> is read
         await using logs = await cli
             .fixture('$FIXTURES/docker-pilot/')
             .exec(`world logs ${worldId}`);
@@ -76,7 +76,7 @@ describe('full agent lifecycle', () => {
         // Then - it exits cleanly
         expect(logs.exitCode).toBe(0);
 
-        // When - the world is torn down
+        // And the world is torn down
         await using down = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
 
         // Then - the destroy banners fire and the container is gone
