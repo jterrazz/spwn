@@ -63,12 +63,16 @@ lint: docs-layout  ## golangci-lint across go.work + the web/specs quality gates
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	@$(TURBO) run lint --filter='!go-workspace'
 
-# pnpm, not npx: npm's ephemeral install dies on `edgesOut` of null when it
-# resolves this package on the CI runner, with or without --package=. The lint
-# job already sets pnpm up for the workspace half, so there is nothing to add.
+# The INSTALLED @jterrazz/typescript, not an ephemeral one: `specs` declares
+# the package, `pnpm install` is what every CI job runs before a Makefile
+# target, and reading the binary from there leaves one version to bump instead
+# of two. `pnpm exec` puts the cwd at the member, so the root is passed as an
+# argument. (npm's ephemeral install is what this target used to use, and it
+# dies on `edgesOut` of null when it resolves this package on the CI runner,
+# with or without --package=.)
 docs-layout:  ## Check docs/ against the estate's manual spine
 	@echo "==> docs layout"
-	@pnpm --package=@jterrazz/typescript@10.1.10 dlx typescript docs-layout .
+	@pnpm -C specs exec typescript docs-layout $(CURDIR)
 
 ##@ Test — fast (no Docker)
 
