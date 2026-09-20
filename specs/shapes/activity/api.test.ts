@@ -1,10 +1,16 @@
 import { expect, test } from 'vitest';
 
 /**
- * GET /api/activity contract shape. The server-coupled paths in the legacy
+ * GET /api/activity payload shape. The server-coupled paths in the legacy
  * suite were skipped on CI and belong in a Go integration test; only the two
  * server-independent shape assertions actually ran, and they are ported here
  * verbatim. No CLI is exercised, so no result binds with `await using`.
+ *
+ * This is a repository suite (`@jterrazz/test`'s third door): what it covers
+ * is the wire payload the Go API promises, so there is no module to sit
+ * beside and no runner to reach. `shapes/` is a first-level folder that is
+ * not a facet, which is the address that shape has — and the word stays
+ * `.test.ts`.
  */
 
 interface ActivityEvent {
