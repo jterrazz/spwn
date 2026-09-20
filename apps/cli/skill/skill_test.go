@@ -162,6 +162,6 @@ func TestSkillEdit_NotFoundErrors(t *testing.T) {
 }
 
 // install/uninstall verb behavior is covered end-to-end in
-// specs/cli/skill/*.test.ts; the shared ref-classification
+// specs/cli/skill/*.spec.ts; the shared ref-classification
 // + lockfile-mutation logic lives in apps/cli/tool and is unit-tested
 // there. Keeping this file focused on author/ls/edit/rm semantics.

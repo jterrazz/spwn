@@ -13,7 +13,7 @@ spwn is built **spec-first**: the test suite is the living specification of what
 
 | Layer | Location | Speed | Infra |
 | ----- | -------- | ----- | ----- |
-| **Unit** | `*_test.go` next to source files | ~1s | none |
+| **Unit** | `*_test.go` next to source files, `*.test.ts` next to `apps/web` modules | ~1s | none |
 | **E2E (Go)** | `packages/world/tests/e2e/`, `packages/compile/e2e/` | ~30s | Docker |
 | **E2E (TS)** | `specs/cli/` | ~2–5min | built binary |
 | **Web E2E** | `specs/web/` | varies | Playwright + real Next.js + Go API |
@@ -24,9 +24,9 @@ Each domain tests only its own contract. Cross-domain flows (spawn world + agent
 
 Most CLI E2E specs are **documents**: a `<case>.spec.yaml` beside its siblings, stating one terminal session — the fixture it stands on, each command, each exit code, the streams byte-for-byte, and what the run left on disk. A document is the default because a spwn command IS a terminal session, and the format asserts every run of one instead of stopping at the first failure.
 
-The rest are **chains**, `<aspect>.test.ts`, for what the format cannot state: a container read back with `.container(name)`, JSON judged by shape, an ABSENCE (`files:` says what a file contains, never what it does not), a count, two runs compared to each other, a host shell-out, output that varies with the operator's machine, a long-running process. Every chain file opens with the reason it is one; when only a single assertion needs code, the session still lives in a document and `cli.run('<case>.spec.yaml')` asserts it whole.
+The rest are **chains**, `<aspect>.spec.ts`, for what the format cannot state: a container read back with `.container(name)`, JSON judged by shape, an ABSENCE (`files:` says what a file contains, never what it does not), a count, two runs compared to each other, a host shell-out, output that varies with the operator's machine, a long-running process. Every chain file opens with the reason it is one; when only a single assertion needs code, the session still lives in a document and `cli.run('<case>.spec.yaml')` asserts it whole.
 
-Both forms bind to the same runner, `specs/cli/cli.specification.ts`. The full grammar and the `TEST_UPDATE=1` workflow are in [`../specs/README.md`](../specs/README.md#typescript-e2e-setup-cli).
+The suffix says the kind: under `specs/<facet>/` a chain meets the assembled product and is a `.spec.ts`, while `.test.ts` is the unit and sits beside its module. Both forms bind to the same runner, `specs/cli/cli.specification.ts`. The full grammar and the `TEST_UPDATE=1` workflow are in [`../specs/README.md`](../specs/README.md#typescript-e2e-setup-cli).
 
 ## Running the suites
 
