@@ -31,7 +31,14 @@ export default defineSpecConfig({
          * so parallel specs both spawning a "neo" world route to their own container.
          */
         fileParallelism: true,
-        include: ['cli/**/*.test.ts', 'lint/**/*.test.ts'],
+        /*
+         * Under `specs/`, a chain that meets the assembled product is a
+         * `.spec.ts` (C12). Two files keep `.test.ts` because they reach no
+         * runner (C18, recorded): `cli/logs/api.test.ts`, a payload-shape
+         * assertion that spawns nothing. `lint/` is not a facet — it is a
+         * repository suite, and its word stays `.test.ts`.
+         */
+        include: ['cli/**/*.spec.ts', 'cli/**/*.test.ts', 'lint/**/*.test.ts'],
         /*
          * Additive: the preset already excludes vitest's defaults and every
          * `_fixtures/` tree. Left to state is the playwright suite, and the

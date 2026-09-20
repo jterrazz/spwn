@@ -19,7 +19,7 @@ runtimes:
             - packages/runtimes/codex/spawn_test.go
             - packages/runtimes/codex/codex_test.go
             - packages/runtimes/golden_test.go
-            - specs/cli/build/tree-only.test.ts
-            - specs/cli/build/build.test.ts
-            - specs/cli/agent/talk.test.ts
+            - specs/cli/build/tree-only.spec.ts
+            - specs/cli/build/build.spec.ts
+            - specs/cli/agent/talk.spec.ts
         goldenOutput: output_codex
