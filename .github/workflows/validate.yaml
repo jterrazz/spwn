@@ -31,7 +31,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -61,7 +61,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -87,7 +87,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: make test-contracts
@@ -99,7 +99,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -125,7 +125,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -155,7 +155,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -186,7 +186,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -224,7 +224,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -255,7 +255,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm -C specs exec playwright install --with-deps chromium
@@ -286,7 +286,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
@@ -312,7 +312,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache/restore@v4
