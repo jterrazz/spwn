@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { optional } from '../api/optional';
 import { DockerProvider, useDocker } from '../contexts/docker-context';
 import type { World } from '../domain/model';
 import { useBackgroundTask } from '../hooks/use-background-task';
@@ -27,14 +28,6 @@ const RefetchContext = createContext<() => void>(() => undefined);
 
 export function useRefetch() {
     return useContext(RefetchContext);
-}
-
-async function optional<Value>(promise: Promise<Value>): Promise<undefined | Value> {
-    try {
-        return await promise;
-    } catch {
-        return undefined;
-    }
 }
 
 function useOnboardingGate(onWelcome: boolean): void {

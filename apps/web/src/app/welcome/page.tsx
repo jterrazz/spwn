@@ -1,116 +1,32 @@
 'use client';
 
-import {
-    IconArrowRight,
-    IconBrandDocker,
-    IconCheck,
-    IconExternalLink,
-    IconKey,
-    IconLoader2,
-    IconMessage,
-    IconRefresh,
-    IconRocket,
-    IconWorld,
-} from '@tabler/icons-react';
-import Link from 'next/link';
+import { IconCheck, IconLoader2, IconRocket } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiAction, apiGet, apiPost } from '../../api/client';
+import { apiGet, apiPost } from '../../api/client';
+import { optional } from '../../api/optional';
+import { StepRow } from '../../components/welcome/step-row';
+import { nextStep, stepAfter, STEPS } from '../../components/welcome/steps';
+import type { OnboardingStatus, StepId } from '../../components/welcome/steps';
 import { inBackground } from '../../events/in-background';
+import { useBackgroundTask } from '../../hooks/use-background-task';
 import { usePageTitle } from '../../hooks/use-page-title';
 
-interface DockerStatus {
-    installed: boolean;
-    running: boolean;
-    version?: string;
-    error?: string;
-    hint?: string;
-    platform: string;
-}
-
-interface OnboardingStatus {
-    completed: boolean;
-    hasDocker: boolean;
-    hasAuth: boolean;
-    hasWorlds: boolean;
-    hasAgents: boolean;
-    docker: DockerStatus;
-}
-
-interface ProviderRow {
-    provider: string;
-    connected: boolean;
-    source?: string;
-    plan?: string;
-}
-
-type StepId = 'auth' | 'chat' | 'docker' | 'world';
-
-const STEPS: { id: StepId; title: string; subtitle: string; icon: typeof IconBrandDocker }[] = [
-    {
-        id: 'docker',
-        title: 'Connect Docker',
-        subtitle: 'spwn runs every agent inside an isolated Docker container.',
-        icon: IconBrandDocker,
-    },
-    {
-        id: 'auth',
-        title: 'Connect a model provider',
-        subtitle: 'Sign in to Anthropic or OpenAI so your agents can think.',
-        icon: IconKey,
-    },
-    {
-        id: 'world',
-        title: 'Spawn your first world',
-        subtitle: 'A world is an isolated workspace where one or more agents live.',
-        icon: IconWorld,
-    },
-    {
-        id: 'chat',
-        title: 'Talk to an agent',
-        subtitle: 'Send your first message and watch it work.',
-        icon: IconMessage,
-    },
-];
-
-export default function WelcomePage() {
-    usePageTitle('Welcome');
+function useOnboarding() {
     const router = useRouter();
     const [status, setStatus] = useState<null | OnboardingStatus>(null);
-    const [active, setActive] = useState<StepId>('docker');
+    const [open, setOpen] = useState<StepId>('docker');
     const [refreshing, setRefreshing] = useState(false);
-    const [finishing, setFinishing] = useState(false);
 
     const fetchStatus = useCallback(async () => {
-        try {
-            const s = await apiGet<OnboardingStatus>('/api/system/onboarding');
-            setStatus(s);
-            setActive((prev) => {
-                if (prev !== 'docker' && completed(prev, s)) {
-                    return nextStep(prev);
-                }
-                if (!s.hasDocker) {
-                    return 'docker';
-                }
-                if (!s.hasAuth) {
-                    return 'auth';
-                }
-                if (!s.hasWorlds) {
-                    return 'world';
-                }
-                return 'chat';
-            });
-        } catch {}
+        const next = await optional(apiGet<OnboardingStatus>('/api/system/onboarding'));
+        if (next !== undefined) {
+            setStatus(next);
+            setOpen((previous) => stepAfter(previous, next));
+        }
     }, []);
-
-    useEffect(() => {
-        void fetchStatus();
-        const id = setInterval(inBackground(fetchStatus), 4000);
-        return () => {
-            clearInterval(id);
-        };
-    }, [fetchStatus]);
+    useBackgroundTask(fetchStatus, 4000);
 
     useEffect(() => {
         if (status?.completed === true) {
@@ -118,16 +34,36 @@ export default function WelcomePage() {
         }
     }, [status?.completed, router]);
 
-    const handleRefresh = async () => {
+    const refresh = async () => {
         setRefreshing(true);
-        try {
-            await fetchStatus();
-        } finally {
-            setRefreshing(false);
-        }
+        await fetchStatus();
+        setRefreshing(false);
     };
+    return { open, refresh, refreshing, setOpen, status };
+}
 
-    const handleFinish = async () => {
+function Intro() {
+    return (
+        <header className="mb-10 text-center">
+            <div className="text-muted-foreground/70 mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] tracking-wider uppercase">
+                <IconRocket size={11} />
+                First-run setup
+            </div>
+            <h1 className="font-heading text-foreground/90 text-3xl tracking-wide">
+                Welcome to spwn
+            </h1>
+            <p className="text-muted-foreground/70 mx-auto mt-2 max-w-lg text-sm">
+                The control plane for AI agents. Four quick steps and you&apos;re ready to spawn
+                your first world.
+            </p>
+        </header>
+    );
+}
+
+function Footer({ ready, onSkip }: { ready: boolean; onSkip: () => void }) {
+    const router = useRouter();
+    const [finishing, setFinishing] = useState(false);
+    const finish = async () => {
         setFinishing(true);
         try {
             await apiPost('/api/system/onboarding/complete');
@@ -136,425 +72,68 @@ export default function WelcomePage() {
             setFinishing(false);
         }
     };
+    return (
+        <div className="mt-8 flex items-center justify-between border-t border-white/[0.06] pt-6">
+            <button
+                className="text-muted-foreground/60 hover:text-foreground/80 text-xs"
+                onClick={onSkip}
+                type="button"
+            >
+                Skip for now
+            </button>
+            <button
+                className="disabled:text-muted-foreground/40 inline-flex items-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-100 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.02]"
+                disabled={!ready || finishing}
+                onClick={inBackground(finish)}
+                type="button"
+            >
+                {finishing ? (
+                    <IconLoader2 className="animate-spin" size={12} />
+                ) : (
+                    <IconCheck size={12} />
+                )}
+                Finish setup
+            </button>
+        </div>
+    );
+}
 
-    const allDone = status?.hasDocker === true && status?.hasAuth && status?.hasWorlds;
+export default function WelcomePage() {
+    usePageTitle('Welcome');
+    const router = useRouter();
+    const { open, refresh, refreshing, setOpen, status } = useOnboarding();
+    const ready = status?.hasDocker === true && status.hasAuth && status.hasWorlds;
 
     return (
         <div className="min-h-full overflow-y-auto px-6 py-10">
             <div className="mx-auto max-w-3xl">
-                <header className="mb-10 text-center">
-                    <div className="text-muted-foreground/70 mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] tracking-wider uppercase">
-                        <IconRocket size={11} />
-                        First-run setup
-                    </div>
-                    <h1 className="font-heading text-foreground/90 text-3xl tracking-wide">
-                        Welcome to spwn
-                    </h1>
-                    <p className="text-muted-foreground/70 mx-auto mt-2 max-w-lg text-sm">
-                        The control plane for AI agents. Four quick steps and you&apos;re ready to
-                        spawn your first world.
-                    </p>
-                </header>
-
+                <Intro />
                 <ol className="space-y-3">
-                    {STEPS.map((step, idx) => {
-                        const done = status ? completed(step.id, status) : false;
-                        const isActive = active === step.id;
-                        const Icon = step.icon;
-                        let liClass: string;
-                        if (isActive) {
-                            liClass = 'border-white/15 bg-white/[0.04]';
-                        } else if (done) {
-                            liClass = 'border-emerald-500/20 bg-emerald-500/[0.03]';
-                        } else {
-                            liClass = 'border-white/[0.06] bg-white/[0.015]';
-                        }
-                        let circleClass: string;
-                        if (done) {
-                            circleClass =
-                                'border-emerald-400/40 bg-emerald-500/15 text-emerald-300';
-                        } else if (isActive) {
-                            circleClass = 'border-white/20 bg-white/[0.06] text-foreground/80';
-                        } else {
-                            circleClass =
-                                'border-white/10 bg-white/[0.02] text-muted-foreground/50';
-                        }
-                        let statusLabel: string;
-                        if (done) {
-                            statusLabel = 'Done';
-                        } else if (isActive) {
-                            statusLabel = 'Active';
-                        } else {
-                            statusLabel = 'Pending';
-                        }
-                        return (
-                            <li
-                                className={`overflow-hidden rounded-xl border transition-colors ${liClass}`}
-                                key={step.id}
-                            >
-                                <button
-                                    className="flex w-full items-center gap-4 px-4 py-3 text-left"
-                                    onClick={() => {
-                                        setActive(step.id);
-                                    }}
-                                    type="button"
-                                >
-                                    <div
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${circleClass}`}
-                                    >
-                                        {done ? <IconCheck size={14} /> : <Icon size={14} />}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground/40 text-[10px] tabular-nums">
-                                                {String(idx + 1).padStart(2, '0')}
-                                            </span>
-                                            <span
-                                                className={`text-sm font-medium ${
-                                                    done
-                                                        ? 'text-emerald-200/90'
-                                                        : 'text-foreground/90'
-                                                }`}
-                                            >
-                                                {step.title}
-                                            </span>
-                                        </div>
-                                        <p className="text-muted-foreground/60 mt-0.5 text-xs">
-                                            {step.subtitle}
-                                        </p>
-                                    </div>
-                                    <span className="text-muted-foreground/40 text-[10px] tracking-wider uppercase">
-                                        {statusLabel}
-                                    </span>
-                                </button>
-
-                                {isActive && (
-                                    <div className="border-t border-white/[0.06] px-4 py-4">
-                                        <StepBody
-                                            onAdvance={() => {
-                                                setActive(nextStep(step.id));
-                                            }}
-                                            onRefresh={inBackground(handleRefresh)}
-                                            refreshing={refreshing}
-                                            status={status}
-                                            stepId={step.id}
-                                        />
-                                    </div>
-                                )}
-                            </li>
-                        );
-                    })}
+                    {STEPS.map((step, index) => (
+                        <StepRow
+                            index={index}
+                            key={step.id}
+                            onAdvance={() => {
+                                setOpen(nextStep(step.id));
+                            }}
+                            onOpen={() => {
+                                setOpen(step.id);
+                            }}
+                            onRefresh={inBackground(refresh)}
+                            open={open === step.id}
+                            refreshing={refreshing}
+                            status={status}
+                            step={step}
+                        />
+                    ))}
                 </ol>
-
-                <div className="mt-8 flex items-center justify-between border-t border-white/[0.06] pt-6">
-                    <button
-                        className="text-muted-foreground/60 hover:text-foreground/80 text-xs"
-                        onClick={() => {
-                            router.replace('/');
-                        }}
-                        type="button"
-                    >
-                        Skip for now
-                    </button>
-                    <button
-                        className="disabled:text-muted-foreground/40 inline-flex items-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-100 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.02]"
-                        disabled={!allDone || finishing}
-                        onClick={inBackground(handleFinish)}
-                        type="button"
-                    >
-                        {finishing ? (
-                            <IconLoader2 className="animate-spin" size={12} />
-                        ) : (
-                            <IconCheck size={12} />
-                        )}
-                        Finish setup
-                    </button>
-                </div>
+                <Footer
+                    onSkip={() => {
+                        router.replace('/');
+                    }}
+                    ready={ready}
+                />
             </div>
         </div>
     );
-}
-
-function StepBody({
-    stepId,
-    status,
-    onRefresh,
-    refreshing,
-    onAdvance,
-}: {
-    stepId: StepId;
-    status: null | OnboardingStatus;
-    onRefresh: () => void;
-    refreshing: boolean;
-    onAdvance: () => void;
-}) {
-    if (stepId === 'docker') {
-        return (
-            <DockerStep
-                onAdvance={onAdvance}
-                onRefresh={onRefresh}
-                refreshing={refreshing}
-                status={status}
-            />
-        );
-    }
-    if (stepId === 'auth') {
-        return <AuthStep onAdvance={onAdvance} status={status} />;
-    }
-    if (stepId === 'world') {
-        return <WorldStep onAdvance={onAdvance} status={status} />;
-    }
-    return <ChatStep />;
-}
-
-function DockerStep({
-    status,
-    onRefresh,
-    refreshing,
-    onAdvance,
-}: {
-    status: null | OnboardingStatus;
-    onRefresh: () => void;
-    refreshing: boolean;
-    onAdvance: () => void;
-}) {
-    const docker = status?.docker;
-    const ok = docker?.installed === true && docker?.running;
-    const installUrl =
-        docker?.platform === 'linux'
-            ? 'https://docs.docker.com/engine/install/'
-            : 'https://www.docker.com/products/docker-desktop/';
-
-    return (
-        <div className="space-y-3">
-            <div
-                className={`rounded-lg border px-3 py-2.5 text-xs ${
-                    ok
-                        ? 'border-emerald-400/30 bg-emerald-500/[0.06] text-emerald-100'
-                        : 'border-red-400/30 bg-red-500/[0.06] text-red-100'
-                }`}
-            >
-                <div className="flex items-center gap-2">
-                    <IconBrandDocker size={14} />
-                    <span className="font-medium">
-                        {(() => {
-                            if (ok) {
-                                return `Docker ${docker?.version === undefined || docker?.version === '' ? '' : `v${docker.version}`} running`;
-                            }
-                            if (docker?.installed !== true) {
-                                return 'Docker is not installed on this machine';
-                            }
-                            return 'Docker is installed but the daemon is not running';
-                        })()}
-                    </span>
-                </div>
-                {!ok && docker?.hint !== undefined && docker?.hint !== '' && (
-                    <p className="mt-1 ml-[22px] text-[11px] opacity-80">{docker.hint}</p>
-                )}
-            </div>
-
-            {!ok && (
-                <div className="flex flex-wrap items-center gap-2">
-                    {docker?.installed !== true && (
-                        <a
-                            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                            href={installUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                        >
-                            Install Docker
-                            <IconExternalLink size={11} />
-                        </a>
-                    )}
-                    <button
-                        className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08] disabled:opacity-50"
-                        disabled={refreshing}
-                        onClick={onRefresh}
-                        type="button"
-                    >
-                        <IconRefresh className={refreshing ? 'animate-spin' : ''} size={11} />
-                        Recheck
-                    </button>
-                </div>
-            )}
-
-            {ok && (
-                <button
-                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                    onClick={onAdvance}
-                    type="button"
-                >
-                    Continue <IconArrowRight size={11} />
-                </button>
-            )}
-        </div>
-    );
-}
-
-const reconnect = async (provider: string) => {
-    await apiAction('/api/auth/reconnect', { provider });
-};
-
-function AuthStep({
-    status,
-    onAdvance,
-}: {
-    status: null | OnboardingStatus;
-    onAdvance: () => void;
-}) {
-    const [providers, setProviders] = useState<null | ProviderRow[]>(null);
-
-    useEffect(() => {
-        apiGet<{ providers: ProviderRow[] }>('/api/auth/providers')
-            .then((d) => {
-                setProviders(d.providers ?? []);
-            })
-            .catch(() => {
-                setProviders([]);
-            });
-    }, [status?.hasAuth]);
-
-    return (
-        <div className="space-y-3">
-            <p className="text-muted-foreground/60 text-[11px]">
-                spwn supports subscription sign-in (Anthropic / Codex) and API keys via env vars.
-            </p>
-            <div className="space-y-1.5">
-                {providers === null && (
-                    <div className="text-muted-foreground/50 rounded-md border border-white/[0.06] bg-white/[0.015] px-3 py-2 text-[11px]">
-                        Loading providers…
-                    </div>
-                )}
-                {providers?.map((p) => (
-                    <div
-                        className="flex items-center justify-between rounded-md border border-white/[0.06] bg-white/[0.015] px-3 py-2"
-                        key={p.provider}
-                    >
-                        <div className="flex items-center gap-2">
-                            <div
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                    p.connected ? 'bg-emerald-400' : 'bg-muted-foreground/30'
-                                }`}
-                            />
-                            <span className="text-foreground/90 text-xs font-medium capitalize">
-                                {p.provider}
-                            </span>
-                            {p.source !== undefined && p.source !== '' && (
-                                <span className="text-muted-foreground/40 text-[10px]">
-                                    {p.source}
-                                </span>
-                            )}
-                        </div>
-                        {!p.connected && (
-                            <button
-                                className="text-foreground/70 hover:text-foreground text-[11px]"
-                                onClick={inBackground(async () => {
-                                    await reconnect(p.provider);
-                                })}
-                                type="button"
-                            >
-                                Connect
-                            </button>
-                        )}
-                        {p.connected && (
-                            <span className="text-[10px] tracking-wider text-emerald-300/80 uppercase">
-                                Connected
-                            </span>
-                        )}
-                    </div>
-                ))}
-            </div>
-            {status?.hasAuth === true && (
-                <button
-                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                    onClick={onAdvance}
-                    type="button"
-                >
-                    Continue <IconArrowRight size={11} />
-                </button>
-            )}
-        </div>
-    );
-}
-
-function WorldStep({
-    status,
-    onAdvance,
-}: {
-    status: null | OnboardingStatus;
-    onAdvance: () => void;
-}) {
-    return (
-        <div className="space-y-3">
-            <p className="text-muted-foreground/60 text-[11px]">
-                Open the worlds page and click{' '}
-                <span className="text-foreground/80">Spawn world</span>. We&apos;ll detect it as
-                soon as a world is created.
-            </p>
-            <div className="flex items-center gap-2">
-                <Link
-                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                    href="/"
-                >
-                    Open worlds
-                    <IconArrowRight size={11} />
-                </Link>
-                {status?.hasWorlds === true && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-300/80">
-                        <IconCheck size={11} />
-                        World detected
-                    </span>
-                )}
-            </div>
-            {status?.hasWorlds === true && (
-                <button
-                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                    onClick={onAdvance}
-                    type="button"
-                >
-                    Continue <IconArrowRight size={11} />
-                </button>
-            )}
-        </div>
-    );
-}
-
-function ChatStep() {
-    return (
-        <div className="space-y-3">
-            <p className="text-muted-foreground/60 text-[11px]">
-                Open any world from the sidebar and send a message in the chat panel. Once you
-                finish here, click <span className="text-foreground/80">Finish setup</span> below.
-            </p>
-            <Link
-                className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
-                href="/"
-            >
-                Go to worlds <IconArrowRight size={11} />
-            </Link>
-        </div>
-    );
-}
-
-function completed(step: StepId, status: OnboardingStatus): boolean {
-    switch (step) {
-        case 'docker': {
-            return status.hasDocker;
-        }
-        case 'auth': {
-            return status.hasAuth;
-        }
-        case 'world': {
-            return status.hasWorlds;
-        }
-        case 'chat': {
-            return false;
-        }
-    }
-}
-
-function nextStep(step: StepId): StepId {
-    const order: StepId[] = ['docker', 'auth', 'world', 'chat'];
-    const i = order.indexOf(step);
-    return order[Math.min(i + 1, order.length - 1)] ?? step;
 }

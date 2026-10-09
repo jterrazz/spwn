@@ -3,17 +3,10 @@
 import { useCallback, useState } from 'react';
 
 import { apiAction, apiGet, apiPut, encPath } from '../../api/client';
+import { optional } from '../../api/optional';
 import type { AgentProfile, Organization, Team, World } from '../../domain/model';
 import { useBackgroundTask } from '../../hooks/use-background-task';
 import { useList } from '../../hooks/use-list';
-
-async function optional<Value>(promise: Promise<Value>): Promise<undefined | Value> {
-    try {
-        return await promise;
-    } catch {
-        return undefined;
-    }
-}
 
 /** An agent's profile and the tree of its mind's files, reloaded on demand. */
 export function useAgentProfile(name: string) {

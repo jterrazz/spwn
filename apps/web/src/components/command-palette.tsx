@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { optional } from '../api/optional';
 import { getWorldName } from '../domain/model';
 import type { World } from '../domain/model';
 import {
@@ -26,14 +27,6 @@ import {
 
 const ICON = 'text-muted-foreground/50';
 const HINT = 'text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]';
-
-async function optional<Value>(promise: Promise<Value>, fallback: Value): Promise<Value> {
-    try {
-        return await promise;
-    } catch {
-        return fallback;
-    }
-}
 
 function usePaletteShortcut(toggle: () => void): void {
     useEffect(() => {
@@ -59,11 +52,11 @@ function useCatalogue(open: boolean) {
         }
         const load = async () => {
             const [listedWorlds, listedAgents] = await Promise.all([
-                optional(apiGet<World[]>('/api/worlds'), []),
-                optional(apiGet<{ name: string }[]>('/api/agents'), []),
+                optional(apiGet<World[]>('/api/worlds')),
+                optional(apiGet<{ name: string }[]>('/api/agents')),
             ]);
-            setWorlds(listedWorlds);
-            setAgents(listedAgents);
+            setWorlds(listedWorlds ?? []);
+            setAgents(listedAgents ?? []);
         };
         void load();
     }, [open]);
