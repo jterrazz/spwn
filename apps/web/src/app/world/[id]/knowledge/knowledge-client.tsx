@@ -27,11 +27,7 @@ export default function KnowledgePage() {
                 description="Shared knowledge base for this world."
                 title="Knowledge"
             />
-            <KnowledgeBrowser
-                onSearchChange={setSearchQuery}
-                searchQuery={searchQuery}
-                worldId={worldId}
-            />
+            <KnowledgeBrowser searchQuery={searchQuery} worldId={worldId} />
         </Page>
     );
 }
