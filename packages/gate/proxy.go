@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"spwn.sh/packages/auth/mcp"
+	"spwn.sh/packages/authentication/mcp"
 )
 
 // ProxyElement is the generic auth-injecting reverse proxy. Any

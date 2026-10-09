@@ -19,7 +19,7 @@ import (
 	"spwn.sh/packages/activity"
 	agentpkg "spwn.sh/packages/agent"
 	"spwn.sh/packages/architect"
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/container/probe"
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/platform"
@@ -248,7 +248,7 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 	agents, _ := agentpkg.ListAgents()
 	docker := probe.CheckDocker(r.Context())
 	hasAuth := false
-	for _, c := range auth.ResolveAll() {
+	for _, c := range authentication.ResolveAll() {
 		if c != nil && c.Token != "" {
 			hasAuth = true
 			break
@@ -842,10 +842,10 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 	// E2E suite (which spawns against the spwn-test:latest mock
 	// runtime) doesn't need real provider creds on its CI runner.
 	if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") == "" {
-		creds := auth.ResolveAll()
+		creds := authentication.ResolveAll()
 		hasProvider := false
 		for _, cred := range creds {
-			if cred.Type != auth.CredTypeNone {
+			if cred.Type != authentication.CredTypeNone {
 				hasProvider = true
 				break
 			}
@@ -2098,7 +2098,7 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
-	creds := auth.ResolveAll()
+	creds := authentication.ResolveAll()
 
 	// detectionInfo surfaces every credential spwn found for a provider,
 	// not just the winner. The web UI can mirror the CLI dashboard's
@@ -2119,13 +2119,13 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 		Detections     []detectionInfo `json:"detections,omitempty"`
 		Error          string          `json:"error,omitempty"`
 		Plan           string          `json:"plan,omitempty"`
-		Usage          *auth.UsageInfo `json:"usage,omitempty"`
+		Usage          *authentication.UsageInfo `json:"usage,omitempty"`
 	}
 
 	var providers []providerInfo
 	for p, cred := range creds {
-		disabled := auth.IsProviderDisabled(p)
-		connected := cred.Type != auth.CredTypeNone && !disabled
+		disabled := authentication.IsProviderDisabled(p)
+		connected := cred.Type != authentication.CredTypeNone && !disabled
 		info := providerInfo{
 			Provider:       string(cred.Provider),
 			CredentialType: string(cred.Type),
@@ -2133,12 +2133,12 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 			Connected:      connected,
 			Disabled:       disabled,
 			Method:         string(cred.Method()),
-			ActiveMethod:   string(auth.ActiveMethod(p)),
+			ActiveMethod:   string(authentication.ActiveMethod(p)),
 		}
 		// Always publish detections — the UI can decide whether to
 		// render them — so "disabled provider with three detections"
 		// still carries the full context.
-		for _, d := range auth.DetectMethods(p) {
+		for _, d := range authentication.DetectMethods(p) {
 			info.Detections = append(info.Detections, detectionInfo{
 				Method:         string(d.Method()),
 				CredentialType: string(d.Type),
@@ -2158,8 +2158,8 @@ func (s *Server) handleAuthCheck(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), 400)
 		return
 	}
-	cred := auth.Resolve(auth.Provider(body.Provider))
-	status := auth.Validate(r.Context(), cred)
+	cred := authentication.Resolve(authentication.Provider(body.Provider))
+	status := authentication.Validate(r.Context(), cred)
 	jsonOK(w, status)
 }
 
@@ -2176,16 +2176,16 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "token required", 400)
 		return
 	}
-	if err := auth.SaveToken(body.Token); err != nil {
+	if err := authentication.SaveToken(body.Token); err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
 	// Re-enable provider if it was previously disabled
 	if body.Provider != "" {
-		_ = auth.EnableProvider(auth.Provider(body.Provider))
+		_ = authentication.EnableProvider(authentication.Provider(body.Provider))
 	}
 	// Re-sync credentials with new token
-	_ = auth.SyncCredentials()
+	_ = authentication.SyncCredentials()
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
@@ -2198,9 +2198,9 @@ func (s *Server) handleAuthReconnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if body.Provider != "" {
-		_ = auth.EnableProvider(auth.Provider(body.Provider))
+		_ = authentication.EnableProvider(authentication.Provider(body.Provider))
 	}
-	_ = auth.SyncCredentials()
+	_ = authentication.SyncCredentials()
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
@@ -2218,11 +2218,11 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 	// implementation called ClearToken unconditionally, which cleared
 	// Anthropic's `.auth-token` even when the UI asked to reset OpenAI
 	// — fixed here by routing through LogoutProvider.
-	result := &auth.LogoutResult{}
+	result := &authentication.LogoutResult{}
 	if body.Provider != "" {
-		p := auth.Provider(body.Provider)
-		result = auth.LogoutProvider(p, auth.LogoutOpts{})
-		_ = auth.DisableProvider(p)
+		p := authentication.Provider(body.Provider)
+		result = authentication.LogoutProvider(p, authentication.LogoutOpts{})
+		_ = authentication.DisableProvider(p)
 	}
 	// SyncCredentials runs inside LogoutProvider; no need to re-call.
 

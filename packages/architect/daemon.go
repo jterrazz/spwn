@@ -12,7 +12,7 @@ import (
 	"github.com/docker/docker/client"
 
 	"spwn.sh/packages/activity"
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/runtimes"
@@ -136,7 +136,7 @@ func StartDaemonWithOpts(ctx context.Context, opts StartDaemonOpts) (string, err
 	opts.progress("image_ready", image)
 
 	opts.progress("credentials_sync", "syncing host credentials")
-	_ = auth.SyncCredentials()
+	_ = authentication.SyncCredentials()
 
 	envVars := []string{
 		"SPWN_HOME=/home/spwn/.spwn",
@@ -273,7 +273,7 @@ func TalkExecArgs(message string) ([]string, error) {
 	args = append(args, "-u", "architect", "-w", "/me")
 	args = append(args, "-e", "SPWN_HOME=/home/spwn/.spwn")
 
-	_ = auth.SyncCredentials()
+	_ = authentication.SyncCredentials()
 
 	args = append(args, platform.ArchitectContainerName())
 

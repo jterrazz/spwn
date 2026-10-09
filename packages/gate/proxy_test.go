@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/auth/mcp"
+	"spwn.sh/packages/authentication/mcp"
 )
 
 // withFakeUpstream stands up an HTTP server impersonating an

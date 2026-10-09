@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/automation"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/platform"
@@ -88,7 +88,7 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 	// captured into the receipt. We log the error to stderr so a
 	// persistent keychain failure leaves a breadcrumb for the
 	// operator (silent swallow was hiding 401-loop root causes).
-	if err := auth.SyncCredentials(); err != nil {
+	if err := authentication.SyncCredentials(); err != nil {
 		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %s/%s: %v\n", req.World, req.Agent, err)
 	}
 	if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {

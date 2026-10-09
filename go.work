@@ -7,8 +7,9 @@ use (
 	./packages/activity
 	./packages/agent
 	./packages/architect
-	./packages/auth
+	./packages/authentication
 	./packages/automation
+	./packages/catalog
 	./packages/compile
 	./packages/container
 	./packages/dependency
@@ -20,5 +21,4 @@ use (
 	./packages/transpile
 	./packages/upgrade
 	./packages/world
-	./packages/catalog
 )

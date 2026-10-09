@@ -12,7 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/architect"
@@ -115,12 +115,12 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 
 		// Sync credentials before talking. Two layers:
-		//   1. packages/auth writes env vars + the codex auth.json into
+		//   1. packages/authentication writes env vars + the codex auth.json into
 		//      ~/.spwn/credentials/ (bind-mounted at /credentials/).
 		//   2. The runtime provider syncs its own host-side files
 		//      (e.g. Claude's ~/.claude/.credentials.json or the
 		//      macOS Keychain) into the same directory.
-		_ = auth.SyncCredentials()
+		_ = authentication.SyncCredentials()
 		if err := rtSpawner.SyncHostCredentials(platform.CredentialsDir()); err != nil {
 			return fmt.Errorf("sync credentials: %w", err)
 		}

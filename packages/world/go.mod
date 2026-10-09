@@ -7,7 +7,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
-	spwn.sh/packages/auth v0.0.0
+	spwn.sh/packages/authentication v0.0.0
 	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/container v0.0.0
 	spwn.sh/packages/platform v0.0.0
@@ -41,7 +41,7 @@ require (
 replace (
 	spwn.sh/packages/activity => ../activity
 	spwn.sh/packages/agent => ../agent
-	spwn.sh/packages/auth => ../auth
+	spwn.sh/packages/authentication => ../authentication
 	spwn.sh/packages/transpile => ../transpile
 	spwn.sh/packages/container => ../container
 	spwn.sh/packages/platform => ../platform

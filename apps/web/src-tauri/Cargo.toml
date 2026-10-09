@@ -7,6 +7,7 @@ edition = "2024"
 
 [lib]
 name = "spwn_app_lib"
+path = "src/desktop.rs"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

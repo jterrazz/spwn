@@ -85,7 +85,7 @@ func TestSpawner_BuildCommand_interactive(t *testing.T) {
 }
 
 // TestSpawner_SyncHostCredentials is a no-op today: codex creds are
-// resolved by packages/auth into /credentials/openai/auth.json,
+// resolved by packages/authentication into /credentials/openai/auth.json,
 // which the prelaunch shell then symlinks. Nothing runtime-specific
 // to sync on the host.
 func TestSpawner_SyncHostCredentials(t *testing.T) {

@@ -1,114 +1,107 @@
-version: "2"
+version: '2'
 run:
-  modules-download-mode: readonly
+    modules-download-mode: readonly
 linters:
-  enable:
-    - depguard
-  settings:
-    depguard:
-      # Layer architecture enforcement.
-      #
-      # L1 Foundation  →  (nothing)         paths
-      # L2 Platform    →  L1                activity, auth, upgrade
-      # L3 Domain      →  L1-L2             deps, agent
-      # L4 Project     →  L1-L3             project
-      # L5 Build       →  L1-L4             compile, image
-      # L6 Runtime     →  L1-L5             world
-      # L7 Surface     →  anything          apps/cli, api
-      #
-      # Each rule denies imports from the layers above it.
-      rules:
-        build-compile:
-          files:
-            - '**/packages/compile/**'
-          deny:
-            - pkg: spwn.sh/packages/world
-              desc: L5 (build) must not import L6 (runtime)
-        domain-agent:
-          files:
-            - '**/packages/agent/**'
-          deny:
-            - pkg: spwn.sh/packages/project
-              desc: L3 (domain) must not import L4 (project)
-            - pkg: spwn.sh/packages/compile
-              desc: L3 (domain) must not import L5 (build)
-            - pkg: spwn.sh/packages/world
-              desc: L3 (domain) must not import L6 (runtime)
-        domain-deps:
-          files:
-            - '**/packages/dependency/**'
-          deny:
-            - pkg: spwn.sh/packages/project
-              desc: L3 (domain) must not import L4 (project)
-            - pkg: spwn.sh/packages/compile
-              desc: L3 (domain) must not import L5 (build)
-            - pkg: spwn.sh/packages/world
-              desc: L3 (domain) must not import L6 (runtime)
-        platform:
-          files:
-            - '**/packages/platform/**'
-          deny:
-            - pkg: spwn.sh/packages/dependency
-            - pkg: spwn.sh/packages/agent
-            - pkg: spwn.sh/packages/project
-            - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/world
-        platform-activity:
-          files:
-            - '**/packages/activity/**'
-          deny:
-            - pkg: spwn.sh/packages/dependency
-            - pkg: spwn.sh/packages/agent
-            - pkg: spwn.sh/packages/project
-            - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/world
-        platform-auth:
-          files:
-            - '**/packages/auth/**'
-          deny:
-            - pkg: spwn.sh/packages/dependency
-            - pkg: spwn.sh/packages/agent
-            - pkg: spwn.sh/packages/project
-            - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/world
-        platform-upgrade:
-          files:
-            - '**/packages/upgrade/**'
-          deny:
-            - pkg: spwn.sh/packages/dependency
-            - pkg: spwn.sh/packages/agent
-            - pkg: spwn.sh/packages/project
-            - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/world
-        project-layer:
-          files:
-            - '**/packages/project/**'
-          deny:
-            - pkg: spwn.sh/packages/compile
-              desc: L4 (project) must not import L5 (build)
-            - pkg: spwn.sh/packages/world
-              desc: L4 (project) must not import L6 (runtime)
-    errcheck:
-      check-type-assertions: true
-  exclusions:
-    generated: lax
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
-    rules:
-      - linters:
-          - errcheck
-        path: _test\.go
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+    enable:
+        - depguard
+    settings:
+        depguard:
+            # invariant: each rule denies a layer the imports of the layers above it —
+            # L1 platform → nothing; L2 activity, authentication, upgrade → L1;
+            # L3 dependency, agent → L1-L2; L4 project → L1-L3; L5 compile → L1-L4;
+            # L6 world → L1-L5; L7 apps/cli and apps/api → anything
+            rules:
+                build-compile:
+                    files:
+                        - '**/packages/compile/**'
+                    deny:
+                        - pkg: spwn.sh/packages/world
+                          desc: L5 (build) must not import L6 (runtime)
+                domain-agent:
+                    files:
+                        - '**/packages/agent/**'
+                    deny:
+                        - pkg: spwn.sh/packages/project
+                          desc: L3 (domain) must not import L4 (project)
+                        - pkg: spwn.sh/packages/compile
+                          desc: L3 (domain) must not import L5 (build)
+                        - pkg: spwn.sh/packages/world
+                          desc: L3 (domain) must not import L6 (runtime)
+                domain-deps:
+                    files:
+                        - '**/packages/dependency/**'
+                    deny:
+                        - pkg: spwn.sh/packages/project
+                          desc: L3 (domain) must not import L4 (project)
+                        - pkg: spwn.sh/packages/compile
+                          desc: L3 (domain) must not import L5 (build)
+                        - pkg: spwn.sh/packages/world
+                          desc: L3 (domain) must not import L6 (runtime)
+                platform:
+                    files:
+                        - '**/packages/platform/**'
+                    deny:
+                        - pkg: spwn.sh/packages/dependency
+                        - pkg: spwn.sh/packages/agent
+                        - pkg: spwn.sh/packages/project
+                        - pkg: spwn.sh/packages/compile
+                        - pkg: spwn.sh/packages/world
+                platform-activity:
+                    files:
+                        - '**/packages/activity/**'
+                    deny:
+                        - pkg: spwn.sh/packages/dependency
+                        - pkg: spwn.sh/packages/agent
+                        - pkg: spwn.sh/packages/project
+                        - pkg: spwn.sh/packages/compile
+                        - pkg: spwn.sh/packages/world
+                platform-authentication:
+                    files:
+                        - '**/packages/authentication/**'
+                    deny:
+                        - pkg: spwn.sh/packages/dependency
+                        - pkg: spwn.sh/packages/agent
+                        - pkg: spwn.sh/packages/project
+                        - pkg: spwn.sh/packages/compile
+                        - pkg: spwn.sh/packages/world
+                platform-upgrade:
+                    files:
+                        - '**/packages/upgrade/**'
+                    deny:
+                        - pkg: spwn.sh/packages/dependency
+                        - pkg: spwn.sh/packages/agent
+                        - pkg: spwn.sh/packages/project
+                        - pkg: spwn.sh/packages/compile
+                        - pkg: spwn.sh/packages/world
+                project-layer:
+                    files:
+                        - '**/packages/project/**'
+                    deny:
+                        - pkg: spwn.sh/packages/compile
+                          desc: L4 (project) must not import L5 (build)
+                        - pkg: spwn.sh/packages/world
+                          desc: L4 (project) must not import L6 (runtime)
+        errcheck:
+            check-type-assertions: true
+    exclusions:
+        generated: lax
+        presets:
+            - comments
+            - common-false-positives
+            - legacy
+            - std-error-handling
+        rules:
+            - linters:
+                  - errcheck
+              path: _test\.go
+        paths:
+            - third_party$
+            - builtin$
+            - examples$
 formatters:
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+    exclusions:
+        generated: lax
+        paths:
+            - third_party$
+            - builtin$
+            - examples$

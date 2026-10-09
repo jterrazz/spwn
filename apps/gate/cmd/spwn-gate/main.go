@@ -101,7 +101,7 @@ func main() {
 //
 //   - ProxyElement (auth-injecting reverse proxy) for every spwn-known
 //     hosted MCP provider in mcp.Registry — notion today, linear etc.
-//     come for free as one-line additions in packages/auth/mcp/provider.go.
+//     come for free as one-line additions in packages/authentication/mcp/provider.go.
 //   - MCPServer (hand-rolled HTTP MCP) for backend-CLI elements — gmail
 //     and gcal both back onto the gws CLI installed in this image.
 func registerElements(reg *gate.Registry, logger *log.Logger) error {

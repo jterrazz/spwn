@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 
-	authgoogle "spwn.sh/packages/auth/google"
+	authgoogle "spwn.sh/packages/authentication/google"
 )
 
 // runGws executes a gws subprocess with credentials wired and returns

@@ -14,7 +14,7 @@ import (
 	"spwn.sh/packages/dependency"
 
 	ib "spwn.sh/packages/compile"
-	ibbase "spwn.sh/packages/compile/base"
+	ibbase "spwn.sh/packages/compile/baseimages"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/platform"

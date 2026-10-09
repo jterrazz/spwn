@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile/source"
 )
@@ -69,17 +69,17 @@ func projectDefault(src *source.ProjectSource) string {
 //
 //   - 0 runtime-mapped providers → "claude-code".
 //   - 1 runtime-mapped provider → the matching runtime.
-//   - 2+ runtime-mapped providers + auth.DefaultProvider set → that
+//   - 2+ runtime-mapped providers + authentication.DefaultProvider set → that
 //     provider's runtime (silent pick).
 //   - 2+ runtime-mapped providers + no default → disambiguation error.
 func fromAuth() (string, error) {
 	providerToRuntime := runtimeByProvider()
 
 	// Keep provider identity alongside the runtime name so we can
-	// Honor auth.DefaultProvider when the candidate list has more
+	// Honor authentication.DefaultProvider when the candidate list has more
 	// Than one entry.
 	type candidate struct {
-		provider auth.Provider
+		provider authentication.Provider
 		runtime  string
 	}
 	var cands []candidate
@@ -101,7 +101,7 @@ func fromAuth() (string, error) {
 	// Before erroring. Disabled providers never reach the candidate
 	// List (ResolveAll honors Disabled), so DefaultProvider pointing
 	// At a disabled one is simply ignored.
-	if def := auth.DefaultProvider(); def != "" {
+	if def := authentication.DefaultProvider(); def != "" {
 		for _, c := range cands {
 			if c.provider == def {
 				return c.runtime, nil
@@ -139,13 +139,13 @@ func runtimeByProvider() map[string]string {
 // connectedProviders returns the deterministically-ordered list of
 // Providers the user has credentials for. Only providers with a
 // Non-none credential type are included.
-func connectedProviders() []auth.Provider {
-	resolved := auth.ResolveAll()
-	ordered := []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI}
-	var out []auth.Provider
+func connectedProviders() []authentication.Provider {
+	resolved := authentication.ResolveAll()
+	ordered := []authentication.Provider{authentication.ProviderAnthropic, authentication.ProviderOpenAI}
+	var out []authentication.Provider
 	for _, p := range ordered {
 		cred := resolved[p]
-		if cred == nil || cred.Type == auth.CredTypeNone {
+		if cred == nil || cred.Type == authentication.CredTypeNone {
 			continue
 		}
 		out = append(out, p)

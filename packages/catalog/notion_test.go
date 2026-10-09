@@ -99,7 +99,7 @@ func TestNotion_WrapperHasOAuthGate(t *testing.T) {
 
 // TestNotion_WrapperHashMatchesProviderKey locks the URL-hash
 // sentinel in the wrapper: the bash sha256sum + cut must produce
-// the same key mcp2cli (and packages/auth/mcp.providerKey) use,
+// the same key mcp2cli (and packages/authentication/mcp.providerKey) use,
 // otherwise the `if [ -f ... ]` check looks at the wrong path
 // and login never appears authenticated inside the world.
 func TestNotion_WrapperHashMatchesProviderKey(t *testing.T) {

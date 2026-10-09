@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/project"
 	_ "spwn.sh/packages/runtimes/defaults"
 	"spwn.sh/packages/transpile/source"
@@ -138,7 +138,7 @@ func TestResolve_authDefaultProviderBreaksAmbiguity(t *testing.T) {
 	isolateAuth(t)
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
 	t.Setenv("OPENAI_API_KEY", "sk-openai")
-	if err := auth.SetDefaultProvider(auth.ProviderAnthropic); err != nil {
+	if err := authentication.SetDefaultProvider(authentication.ProviderAnthropic); err != nil {
 		t.Fatalf("SetDefaultProvider: %v", err)
 	}
 
@@ -161,10 +161,10 @@ func TestResolve_authDefaultIgnoredWhenProviderDisabled(t *testing.T) {
 	isolateAuth(t)
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
 	t.Setenv("OPENAI_API_KEY", "sk-openai")
-	if err := auth.SetDefaultProvider(auth.ProviderAnthropic); err != nil {
+	if err := authentication.SetDefaultProvider(authentication.ProviderAnthropic); err != nil {
 		t.Fatalf("SetDefaultProvider: %v", err)
 	}
-	if err := auth.DisableProvider(auth.ProviderAnthropic); err != nil {
+	if err := authentication.DisableProvider(authentication.ProviderAnthropic); err != nil {
 		t.Fatalf("DisableProvider: %v", err)
 	}
 

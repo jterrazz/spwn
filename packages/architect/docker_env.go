@@ -3,7 +3,7 @@ package architect
 import (
 	"os"
 
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 )
 
 // toolPassthroughEnvVars are the env-var names for credentials that
@@ -13,19 +13,19 @@ import (
 // New env-passthrough is a one-line change.
 //
 // Migration history:
-//   - GITHUB_PERSONAL_ACCESS_TOKEN → packages/auth/gh + /credentials/gh
-//   - NOTION_TOKEN → packages/auth/mcp + /credentials/mcp
+//   - GITHUB_PERSONAL_ACCESS_TOKEN → packages/authentication/gh + /credentials/gh
+//   - NOTION_TOKEN → packages/authentication/mcp + /credentials/mcp
 var toolPassthroughEnvVars = []string{}
 
 // DockerEnvArgs returns -e flags for docker exec/create that inject
 // Every resolved AI-provider credential plus any tool-passthrough
-// Env vars present on the host. Thin adapter over auth.ResolveAll()
+// Env vars present on the host. Thin adapter over authentication.ResolveAll()
 // For the Docker shell; kept here (not in auth) so the auth package
 // Stays runtime-neutral.
 func DockerEnvArgs() []string {
 	var args []string
-	for _, cred := range auth.ResolveAll() {
-		if cred.Type == auth.CredTypeNone || cred.Token == "" {
+	for _, cred := range authentication.ResolveAll() {
+		if cred.Type == authentication.CredTypeNone || cred.Token == "" {
 			continue
 		}
 		args = append(args, "-e", cred.EnvVar+"="+cred.Token)
@@ -42,8 +42,8 @@ func DockerEnvArgs() []string {
 // Via the Docker API (as opposed to the CLI flags from DockerEnvArgs).
 func DockerEnvVars() []string {
 	var envs []string
-	for _, cred := range auth.ResolveAll() {
-		if cred.Type == auth.CredTypeNone || cred.Token == "" {
+	for _, cred := range authentication.ResolveAll() {
+		if cred.Type == authentication.CredTypeNone || cred.Token == "" {
 			continue
 		}
 		envs = append(envs, cred.EnvVar+"="+cred.Token)

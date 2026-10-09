@@ -15,10 +15,10 @@ import (
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/architect/internal/deploy"
-	"spwn.sh/packages/auth"
-	authgh "spwn.sh/packages/auth/gh"
+	"spwn.sh/packages/authentication"
+	authgh "spwn.sh/packages/authentication/gh"
 	ib "spwn.sh/packages/compile"
-	ibbase "spwn.sh/packages/compile/base"
+	ibbase "spwn.sh/packages/compile/baseimages"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/gate"
@@ -372,7 +372,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Sync credentials to bind-mountable directory (live - containers see updates)
-	if err := auth.SyncCredentials(); err != nil {
+	if err := authentication.SyncCredentials(); err != nil {
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
 	binds = append(binds, platform.CredentialsDir()+":/credentials:ro")
@@ -415,10 +415,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// caches per-session). We only block the "zero credentials
 	// configured for any provider" case — the cheap, deterministic
 	// check that catches the class-1 bug.
-	creds := auth.ResolveAll()
+	creds := authentication.ResolveAll()
 	credSource := "none"
 	for _, cred := range creds {
-		if cred.Type != auth.CredTypeNone {
+		if cred.Type != authentication.CredTypeNone {
 			credSource = string(cred.Type)
 			break
 		}
@@ -434,8 +434,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") != "" {
 			credSource = "skipped"
 		} else if providerName := runtimeProvider(opts.runtimeName()); providerName != "" {
-			p := auth.Provider(providerName)
-			return nil, fmt.Errorf("no credentials configured for %s.\n%s", p, auth.NotConfiguredHint(p))
+			p := authentication.Provider(providerName)
+			return nil, fmt.Errorf("no credentials configured for %s.\n%s", p, authentication.NotConfiguredHint(p))
 		}
 	}
 	opts.progress("credentials_resolved", credSource)

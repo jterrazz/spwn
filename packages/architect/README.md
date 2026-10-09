@@ -23,7 +23,7 @@ The spawn pipeline is data-driven on runtime choice. `SpawnOpts.RuntimeName` sel
 - `Destroy(ctx, worldID)` — stop + remove container, persist mind state, emit activity.
 - `DeployAgent(ctx, worldID, name, role)` — hot-deploy into a running world.
 - `StartDaemon` / `StopDaemon` / `GetDaemonStatus` / `TalkExecArgs` — lifecycle for the architect daemon container.
-- `BuildArchitectImage` — cross-compiles `spwn` and builds the architect image from `packages/compile/base/architect.Dockerfile`.
+- `BuildArchitectImage` — cross-compiles `spwn` and builds the architect image from `packages/compile/baseimages/architect.Dockerfile`.
 
 ## Sub-packages
 

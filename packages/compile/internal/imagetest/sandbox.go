@@ -9,7 +9,7 @@ import (
 
 	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/compile/base"
+	"spwn.sh/packages/compile/baseimages"
 	"spwn.sh/packages/dependency/resolver"
 )
 
@@ -39,7 +39,7 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	tag := fmt.Sprintf("spwn-test:%d", time.Now().UnixNano())
 
 	result, err := builder.Build(ctx, ib.BuildRequest{
-		BaseDockerfile: base.WorldDockerfile,
+		BaseDockerfile: baseimages.WorldDockerfile,
 		Tools:          tools,
 		Tag:            tag,
 		SkipVerify:     true,

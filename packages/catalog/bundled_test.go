@@ -13,7 +13,7 @@ import (
 
 
 	"spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/base"
+	"spwn.sh/packages/compile/baseimages"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/runtimes"
 
@@ -123,7 +123,7 @@ func TestCatalogBundles(t *testing.T) {
 			// Base tree — the label line takes the constant below
 			// And everything else derives from the resolved tools.
 			got.dockerfile = compile.GenerateDockerfile(
-				base.WorldDockerfile,
+				baseimages.WorldDockerfile,
 				compile.ToolsToInputs(resolved),
 				"v-test",
 			)

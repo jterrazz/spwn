@@ -10,7 +10,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
-	"spwn.sh/packages/auth"
+	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world"
 )
@@ -373,14 +373,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	if providerName := runtimeAuthProvider(runtimeName); providerName != "" {
 		s.SubStart("Checking credentials…")
 		ctxCred, cancelCred := context.WithTimeout(ctx, 4*time.Second)
-		p := auth.Provider(providerName)
-		cred := auth.Resolve(p)
-		status := auth.ValidateWithCache(ctxCred, cred, 5*time.Minute)
+		p := authentication.Provider(providerName)
+		cred := authentication.Resolve(p)
+		status := authentication.ValidateWithCache(ctxCred, cred, 5*time.Minute)
 		cancelCred()
 		if status == nil || !status.Connected {
 			return s.SubFailHint("Credentials",
-				auth.CredentialError(p, cred, status),
-				auth.CredentialFixHint(p, cred))
+				authentication.CredentialError(p, cred, status),
+				authentication.CredentialFixHint(p, cred))
 		}
 		s.SubDone("Credentials", credentialDetail(cred))
 	}
@@ -581,7 +581,7 @@ func runtimeAuthProvider(runtimeName string) string {
 // credentialDetail renders the short right-hand detail for the
 // Successful Credentials sub-step. Shape: "<method> · <source>" —
 // Enough to eyeball which auth spwn resolved on this spawn.
-func credentialDetail(cred *auth.Credential) string {
+func credentialDetail(cred *authentication.Credential) string {
 	if cred == nil {
 		return ""
 	}
