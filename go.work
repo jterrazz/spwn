@@ -20,5 +20,5 @@ use (
 	./packages/transpile
 	./packages/upgrade
 	./packages/world
-	./specs/_catalog
+	./packages/catalog
 )

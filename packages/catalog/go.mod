@@ -1,4 +1,4 @@
-module spwn.sh/specs/_catalog
+module spwn.sh/packages/catalog
 
 go 1.25.0
 
@@ -44,9 +44,9 @@ require (
 )
 
 replace (
-	spwn.sh/packages/compile => ../../packages/compile
-	spwn.sh/packages/dependency => ../../packages/dependency
-	spwn.sh/packages/project => ../../packages/project
-	spwn.sh/packages/runtimes => ../../packages/runtimes
-	spwn.sh/packages/transpile => ../../packages/transpile
+	spwn.sh/packages/compile => ../compile
+	spwn.sh/packages/dependency => ../dependency
+	spwn.sh/packages/project => ../project
+	spwn.sh/packages/runtimes => ../runtimes
+	spwn.sh/packages/transpile => ../transpile
 )
