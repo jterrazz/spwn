@@ -11,6 +11,10 @@ async function worldsAnswer(payload: Record<string, unknown>[]) {
     return await intercept(http.get('/api/worlds'), http.json(payload));
 }
 
+function failed(error: unknown): string {
+    return error instanceof Error ? error.message : 'no error';
+}
+
 describe('client', () => {
     test('the worlds route — a declared world is known by its manifest name', async () => {
         // Given - a project that declares a world no container backs
@@ -184,8 +188,8 @@ describe('client', () => {
         );
     });
 
-    test('the connection status is announced once per change', async () => {
-        // Given - a connected app, then two refusals and two answers
+    test('the connection status is announced once per change, a refusal being an answer', async () => {
+        // Given - a connected app, an API that refuses one route and a host that does not answer
         setApiBase('http://spwn.test');
         await using _ = await intercept([
             { request: http.get('http://spwn.test/api/up'), response: http.json({}) },
@@ -198,17 +202,31 @@ describe('client', () => {
             heard.push(status);
         });
 
-        // When - the API refuses twice, answers twice, is unreachable, then refuses once the listener left
-        await expect(apiGet('/api/down')).rejects.toThrow('HTTP 503');
-        await expect(apiGet('/api/down')).rejects.toThrow('HTTP 503');
-        await apiGet('/api/up');
-        await apiGet('/api/up');
-        await expect(apiGet('/api/gone')).rejects.toThrow('Failed to connect to API');
+        // When - the API refuses, is unreachable twice, answers twice, refuses, then is unreachable once the listener left
+        const outcomes = [
+            await apiGet('/api/down').catch(failed),
+            await apiGet('/api/gone').catch(failed),
+            await apiGet('/api/gone').catch(failed),
+            await apiGet('/api/up'),
+            await apiGet('/api/up'),
+            await apiGet('/api/down').catch(failed),
+        ];
         stop();
-        await apiGet('/api/up');
+        outcomes.push(await apiGet('/api/gone').catch(failed));
 
-        // Then - one announcement per change while it listened
-        expect(heard).toStrictEqual(['disconnected', 'connected', 'disconnected']);
+        // Then - each call's outcome, and one announcement per change while it listened, a refusal announcing none
+        expect({ heard, outcomes }).toStrictEqual({
+            heard: ['disconnected', 'connected'],
+            outcomes: [
+                'HTTP 503',
+                'Failed to connect to API',
+                'Failed to connect to API',
+                {},
+                {},
+                'HTTP 503',
+                'Failed to connect to API',
+            ],
+        });
     });
 
     test('an agent route reads the profile with its defaults, other routes keep their fields', async () => {

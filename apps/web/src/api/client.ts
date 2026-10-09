@@ -102,13 +102,12 @@ async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
             ...init,
             signal: init?.signal ?? AbortSignal.timeout(10_000),
         });
+        setConnectionStatus('connected');
         if (!res.ok) {
-            setConnectionStatus('disconnected');
             // Stryker disable next-line ArrowFunction: an unreadable body and an empty one both fail to parse, into the status message
             const body = await res.text().catch(() => '');
             throw new ApiError(errorOf(body, res.status));
         }
-        setConnectionStatus('connected');
         const data: unknown = await res.json();
         return data;
     } catch (error) {
@@ -265,12 +264,12 @@ export async function apiAction(
             body: JSON.stringify(body),
             signal: AbortSignal.timeout(10_000),
         });
+        setConnectionStatus('connected');
         const data: unknown = await res.json();
         if (!res.ok) {
             const error = textOf(data, 'error');
             return { ok: false, error: error === '' ? 'Unknown error' : error };
         }
-        setConnectionStatus('connected');
         return { ok: true };
     } catch {
         setConnectionStatus('disconnected');
