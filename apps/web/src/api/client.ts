@@ -255,11 +255,12 @@ export async function apiDelete(goPath: string): Promise<void> {
 export async function apiAction(
     goPath: string,
     body?: unknown,
+    method: 'PATCH' | 'POST' = 'POST',
 ): Promise<{ ok: boolean; error?: string }> {
     try {
         const base = await resolveGoApiBase();
         const res = await fetch(`${base}${goPath}`, {
-            method: 'POST',
+            method,
             headers: { 'Content-Type': 'application/json' },
             ...(body === undefined ? {} : { body: JSON.stringify(body) }),
             signal: AbortSignal.timeout(10_000),
