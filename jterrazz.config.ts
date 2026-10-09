@@ -17,7 +17,24 @@ export default defineConfig({
                     'Go keeps its suites’ inputs and goldens in testdata/, which the go tool never builds and the Go tests compare byte for byte',
             },
         },
+        knip: {
+            entry: {
+                'apps/spwn-cookie-sync/background.js':
+                    'the extension service worker, which Chrome loads by the path manifest.json names',
+                'apps/spwn-cookie-sync/popup.js':
+                    'the extension popup script, which Chrome loads from popup.html',
+                'catalog/x/tools/x/index.js':
+                    'the X tool the gate runs by the path its tool.yaml names',
+            },
+            ignoreBinaries: {
+                pgrep: 'a system binary of macOS and Linux, never a package',
+            },
+            ignoreDependencies: {
+                turbo: 'the Makefile runs it as `pnpm exec turbo`; no source imports it',
+            },
+        },
         roots: {
+            docker: 'the test image’s build context: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
             scripts: 'the installer `make install-binary` runs, and the manual-pass harness',
         },
     },
