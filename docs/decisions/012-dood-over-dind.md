@@ -16,7 +16,7 @@ Use **Docker-out-of-Docker (DooD)**. The Architect container mounts `/var/run/do
 
 ### How It Works
 
-```
+```text
 Host machine
 └── Docker daemon (one daemon, controls everything)
     ├── Architect container (has /var/run/docker.sock mounted)

@@ -11,7 +11,7 @@ The SDK needs to communicate with processes running inside Universes. Docker pro
 
 We introduce the **Gate**—an abstraction layer that sits between the SDK and the transport. The SDK always talks to a Gate. The Gate translates to the appropriate transport for the active backend.
 
-```
+```text
 ┌──────────┐       ┌──────────┐       ┌──────────────┐
 │   SDK    │──────►│   Gate   │──────►│   Backend    │
 │          │       │          │       │  (transport) │

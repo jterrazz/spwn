@@ -8,7 +8,7 @@ Spwn is a transpiler the same way `tsc` is: you author a portable source languag
 
 The transpile phase is a **pure function**: `Input → *Tree`. No disk writes, no Docker. A `Tree` is a sorted, in-memory `path → bytes` map — same input, same bytes, deterministic for golden tests. Materialisation (writing the tree into a container or onto disk) is the compile phase, owned by `packages/compile`. Runtime-specific renderers live in `packages/runtimes/<runtime>/render.go` — thin layout adapters that read content from `worldbook/` (spwn's opinionated world defaults) and place files at runtime-specific paths.
 
-```
+```text
         spwn source                   target runtime
         ───────────                    ──────────────
        ┌───────────┐                  ┌──────────┐

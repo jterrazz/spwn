@@ -15,10 +15,10 @@ runtime renderer.
 
 ## What lives here
 
-| File | Content |
-|---|---|
-| `physics.go` | `GeneratePhysics`, `GenerateFaculties` — the world filesystem rules and the verified-tools briefing. |
-| `context.go` | `GenerateRoster` (who else is in this world) plus its `ColonyAgentSpec` value type. |
+| File           | Content                                                                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| `physics.go`   | `GeneratePhysics`, `GenerateFaculties` — the world filesystem rules and the verified-tools briefing.  |
+| `context.go`   | `GenerateRoster` (who else is in this world) plus its `ColonyAgentSpec` value type.                   |
 | `architect.go` | `ArchitectIdentity`, `ArchitectSystemFiles`, architect skills (fleet ops, task planning, monitoring). |
 
 ## What does NOT live here

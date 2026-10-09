@@ -29,7 +29,7 @@ The architecture:
 
 ### Session Persistence
 
-The container-side Gate manages sessions via ACP's `session/load` and `session/new`. Spwn manages session IDs so that an agent re-entering a universe (or entering a new one with the same Mind) can continue from where it left off. See [the ACP adoption decision](./006-acp-inside-container.md).
+The container-side Gate manages sessions via ACP's `session/load` and `session/new`. Spwn manages session IDs so that an agent re-entering a universe (or entering a new one with the same Mind) can continue from where it left off. See [the ACP adoption decision](./005-acp-inside-container.md).
 
 ### Mind ↔ Claude Code Mapping
 
@@ -56,7 +56,7 @@ The agent profile directory structure maps naturally to Claude Code's convention
 ### What Becomes Harder
 
 - **Vendor coupling.** Spwn depends on Claude Code CLI being available and maintained.
-- **Multi-model support.** Supporting other CLI agents (Codex CLI, Gemini CLI) needed an abstraction layer; [the ACP adoption decision](./006-acp-inside-container.md) supplied it, so swapping agent CLIs is a container image change.
+- **Multi-model support.** Supporting other CLI agents (Codex CLI, Gemini CLI) needed an abstraction layer; [the ACP adoption decision](./005-acp-inside-container.md) supplied it, so swapping agent CLIs is a container image change.
 - **Fine-grained control.** We can't control Claude Code's internal reasoning—only what we put in the environment.
 - **Licensing.** Claude Code's license terms apply inside universes.
 

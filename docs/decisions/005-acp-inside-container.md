@@ -17,7 +17,7 @@ Run an ACP client **inside** the container, alongside the agent CLI. The Gate br
 
 The architecture:
 
-```
+```text
 Host                           │  Universe (container)
                                     │
 Architect                           │

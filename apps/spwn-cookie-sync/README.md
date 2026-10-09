@@ -73,14 +73,14 @@ No shared secret. Two layers:
 
 ## Permissions explained
 
-| Permission | Why |
-|---|---|
-| `cookies` | Read session cookies for allowlisted domains so they can be synced. Cookies for non-allowlisted domains are never touched. |
-| `tabs` | Detect when a tab finishes loading on an allowlisted domain so we know when to sync. Page content is never read. |
-| `webNavigation` | Catch SPA route changes (X is heavily SPA — the page never reloads, but the URL and the relevant cookies change). |
-| `storage` | Reserved for future per-provider toggles. Currently unused. |
-| `host_permissions: x.com, …` | Required for the cookies API to read those specific hosts. |
-| `host_permissions: 127.0.0.1:9000` | Allow `fetch()` to the local gate. |
+| Permission                         | Why                                                                                                                        |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `cookies`                          | Read session cookies for allowlisted domains so they can be synced. Cookies for non-allowlisted domains are never touched. |
+| `tabs`                             | Detect when a tab finishes loading on an allowlisted domain so we know when to sync. Page content is never read.           |
+| `webNavigation`                    | Catch SPA route changes (X is heavily SPA — the page never reloads, but the URL and the relevant cookies change).          |
+| `storage`                          | Reserved for future per-provider toggles. Currently unused.                                                                |
+| `host_permissions: x.com, …`       | Required for the cookies API to read those specific hosts.                                                                 |
+| `host_permissions: 127.0.0.1:9000` | Allow `fetch()` to the local gate.                                                                                         |
 
 ## Troubleshooting
 

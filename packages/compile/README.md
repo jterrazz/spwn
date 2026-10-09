@@ -9,7 +9,7 @@ Two entry points live here because they share the Dockerfile generator and the c
 1. **`compile.New(registry, backend) → Builder.Build(req)`** — the shared base world image. Resolves a dependency set into a Dockerfile, runs `docker build`, probes the result to verify every tool works. Cached on a content-addressed version label. Called by `packages/architect` at spawn time.
 2. **`compile.BuildFromBase(ctx, cli, req)`** — project-specific derived images. Takes a base image plus a transpiled `Tree` (from `packages/transpile`) and produces `FROM <base> / COPY tree/ /world/` as a pushable artifact. Called by `spwn build`.
 
-```
+```text
 packages/transpile    →   Tree (in-memory path → bytes)
                               │
                               ▼

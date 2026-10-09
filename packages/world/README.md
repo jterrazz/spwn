@@ -4,7 +4,7 @@ The world domain — live container lifecycle primitives.
 
 ## Role
 
-A "world" is one Docker container deploying one or more agents into a sandboxed workspace. This package owns the primitives that sit *below* the orchestrator (see `packages/architect`) and *above* the Docker daemon (see `packages/container/backend`): world manifest parsing, state persistence (`~/.spwn/state.json`), the docker-cp + label-as-truth scheme, and the typed model of worlds/workspaces/agent-records every other layer consumes. The top-level `world.go` is a thin public facade over the sub-packages so external callers never reach into internals.
+A "world" is one Docker container deploying one or more agents into a sandboxed workspace. This package owns the primitives that sit _below_ the orchestrator (see `packages/architect`) and _above_ the Docker daemon (see `packages/container/backend`): world manifest parsing, state persistence (`~/.spwn/state.json`), the docker-cp + label-as-truth scheme, and the typed model of worlds/workspaces/agent-records every other layer consumes. The top-level `world.go` is a thin public facade over the sub-packages so external callers never reach into internals.
 
 Runtime adapters live in `packages/runtimes/` — they were moved out of `world/runtime/` when the spawn port (BuildCommand, credential sync, prelaunch shell) was consolidated next to its implementations.
 

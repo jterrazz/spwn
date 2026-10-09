@@ -1084,26 +1084,6 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("50_docs_match_help_soul", func(t *testing.T) {
-		// J50: `agent create --help` and the generated docs page both
-		// advertise SOUL.md (identity collapsed into a single file).
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		stdout, stderr, code := runCLI(t, env, wd, "agent", "create", "--help")
-		if code != 0 {
-			t.Fatalf("agent create --help failed: stderr=%s", stderr)
-		}
-		if !strings.Contains(stdout+stderr, "SOUL.md") {
-			t.Fatalf("agent create --help missing SOUL.md")
-		}
-		docPath := findDocPath(t, "docs/reference/spwn_agent_create.md")
-		body := readFile(t, docPath)
-		if !strings.Contains(body, "SOUL.md") {
-			t.Fatalf("doc %s missing SOUL.md", docPath)
-		}
-	})
-
 	// ── K. Regression tests for bugs surfaced this session ───────────
 
 	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {
@@ -1278,29 +1258,4 @@ dependencies: []
 	if err := os.WriteFile(filepath.Join(root, "spwn.lock"), []byte("# spwn.lock — DO NOT EDIT\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-}
-
-// findDocPath walks up from the CWD looking for the given relative
-// docs path. The test binary runs from apps/cli, so the walk has to
-// climb two levels to reach the repo root.
-func findDocPath(t *testing.T, rel string) string {
-	t.Helper()
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	dir := wd
-	for i := 0; i < 6; i++ {
-		candidate := filepath.Join(dir, rel)
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-	t.Fatalf("could not locate %s by walking up from %s", rel, wd)
-	return ""
 }

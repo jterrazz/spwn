@@ -17,12 +17,12 @@ Spwn state lives in four places. Each has its own lifecycle and
 deserves its own migration category. Only the first is wired today;
 the others are placeholders for when a real schema change lands.
 
-| Scope | Root | What lives there | Status |
-|---|---|---|---|
-| **user** | `~/.spwn/` | config.yaml, organizations/, credentials/, activity.jsonl, world-states/ | live — `user/` sub-package |
-| project | `./spwn.yaml` + `./spwn/` | manifest, agents, skills, tools, hooks, knowledge | not populated |
-| agent | `./spwn/agents/<name>/` | SOUL.md, agent.yaml, playbooks/, journal/ | not populated |
-| world | `~/.spwn/world-states/<id>/` | runtime.json, manifest snapshot, roster | not populated |
+| Scope    | Root                         | What lives there                                                         | Status                     |
+| -------- | ---------------------------- | ------------------------------------------------------------------------ | -------------------------- |
+| **user** | `~/.spwn/`                   | config.yaml, organizations/, credentials/, activity.jsonl, world-states/ | live — `user/` sub-package |
+| project  | `./spwn.yaml` + `./spwn/`    | manifest, agents, skills, tools, hooks, knowledge                        | not populated              |
+| agent    | `./spwn/agents/<name>/`      | SOUL.md, agent.yaml, playbooks/, journal/                                | not populated              |
+| world    | `~/.spwn/world-states/<id>/` | runtime.json, manifest snapshot, roster                                  | not populated              |
 
 The `Runner` + `Migration` types are scope-agnostic. Each category
 just needs its own root dir and version file; the mechanics are the
@@ -44,7 +44,7 @@ spawn).
 Each scope's sub-package has its own `testdata/` tree that mirrors
 the migrations catalogue:
 
-```
+```text
 packages/migration/<scope>/testdata/<NNN_migration_name>/
   before/   — seeded into t.TempDir() before Apply runs
   after/    — expected state of the tempdir once Apply returns
@@ -62,8 +62,8 @@ breaking the diff. Migrations whose output is not byte-deterministic
 (YAML round-trips, timestamp-suffixed renames) keep their happy-path
 tests inline; edge-case tests (no-op paths, idempotency, user-edit
 preservation) stay inline across the board. Fixtures express the
-*transformation contract*; inline tests express the *behavioural
-invariants*.
+_transformation contract_; inline tests express the _behavioural
+invariants_.
 
 ## History
 

@@ -8,11 +8,11 @@ A "runtime" is the thinking engine that actually executes an agent's prompts —
 
 A runtime has up to three orthogonal facets, bundled into a single `Adapter`:
 
-| Facet | What it owns | Where it runs |
-|---|---|---|
-| **Tool** | Install recipe (apt, curl, npm install, user-side config) | Image build time |
-| **Render** | Source → Tree (`transpile.Runtime`) — where each piece of content lands on disk | Compile time |
-| **Spawn** | `BuildCommand`, `SyncHostCredentials`, `PrelaunchShell`, `DefaultConfigFiles` | Host at spawn time + container prelaunch |
+| Facet      | What it owns                                                                    | Where it runs                            |
+| ---------- | ------------------------------------------------------------------------------- | ---------------------------------------- |
+| **Tool**   | Install recipe (apt, curl, npm install, user-side config)                       | Image build time                         |
+| **Render** | Source → Tree (`transpile.Runtime`) — where each piece of content lands on disk | Compile time                             |
+| **Spawn**  | `BuildCommand`, `SyncHostCredentials`, `PrelaunchShell`, `DefaultConfigFiles`   | Host at spawn time + container prelaunch |
 
 Each facet is optional. `claudecode` and `codex` both ship all three facets today (install recipe, renderer, and spawn-time adapter). A future YAML-first runtime could ship Tool only.
 
@@ -60,5 +60,5 @@ The spwn-opinionated world content (physics, faculties, roster, architect identi
 
 ## Related
 
-- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `specs/_catalog`
+- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `packages/catalog`
 - **Imports** — `packages/dependency` (tool interface), `packages/transpile` (render + Runtime interface)

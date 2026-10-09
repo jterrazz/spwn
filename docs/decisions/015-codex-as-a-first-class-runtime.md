@@ -8,7 +8,7 @@ Written 2026-09-09 from the change audit `docs/notes/codex-as-first-class-runtim
 
 ## Context
 
-codex was registered as an adapter, but only as an *installable binary*: it
+codex was registered as an adapter, but only as an _installable binary_: it
 carried a `Tool` facet and a partial `Spawn` facet, so `spwn install codex`
 worked and an image could be built with it. Nothing past that did.
 

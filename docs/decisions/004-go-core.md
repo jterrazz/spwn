@@ -13,7 +13,7 @@ This is infrastructure glue. The right language for Docker orchestration is the 
 
 Use Go for the core library and CLI. The architecture follows the `containerd` model:
 
-```
+```text
 ┌────────────────────────┐  ┌──────────────────────────┐
 │     spwn CLI            │  │       Thin SDKs           │
 │  (Go, cobra — primary   │  │  (TS, Python — ~50 lines) │

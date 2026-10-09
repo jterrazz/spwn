@@ -21,7 +21,7 @@ Without a top-level manifest, these concerns are scattered across individual wor
 
 ### Manifest Hierarchy (Cascading Overrides)
 
-```
+```text
 org.yaml          → Universe defaults (source of truth)
   world.yaml      → Per-world overrides
     profile.yaml     → Per-agent overrides
