@@ -14,6 +14,8 @@ export default defineConfig({
             },
         },
         roots: {
+            __setup__:
+                'what the cli and website specifications share: the lock that gives one spec at a time the architect container the product names once',
             cli: 'the cli specification: this member IS the specs tree, so its specification folders sit at its root',
             website:
                 'the website specification: this member IS the specs tree, so its specification folders sit at its root',
