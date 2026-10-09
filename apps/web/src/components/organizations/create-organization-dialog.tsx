@@ -1,7 +1,7 @@
 'use client';
 
 import { IconPlus } from '@tabler/icons-react';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { apiAction } from '../../api/client';
 import { focusOnMount } from '../focus-on-mount';
@@ -15,7 +15,8 @@ const FIELD =
 const LABEL = 'text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase';
 
 function useRoleDrafts() {
-    const [drafts, setDrafts] = useState<RoleDraft[]>(() => [emptyRoleDraft()]);
+    const drafted = useRef(1);
+    const [drafts, setDrafts] = useState<RoleDraft[]>(() => [emptyRoleDraft('draft-1')]);
     const change = (id: string, patch: Partial<RoleDraft>) => {
         setDrafts((previous) =>
             previous.map((draft) => (draft.id === id ? { ...draft, ...patch } : draft)),
@@ -25,7 +26,9 @@ function useRoleDrafts() {
         setDrafts((previous) => previous.filter((draft) => draft.id !== id));
     };
     const handleAdd = () => {
-        setDrafts((previous) => [...previous, emptyRoleDraft()]);
+        drafted.current += 1;
+        const draft = emptyRoleDraft(`draft-${drafted.current}`);
+        setDrafts((previous) => [...previous, draft]);
     };
     return { change, drafts, handleAdd, remove };
 }

@@ -9,14 +9,11 @@ export interface RoleDraft {
     permissions: string;
 }
 
-let drafted = 0;
-
-/** A blank role row of the creation form, with an id of its own for React. */
-export function emptyRoleDraft(): RoleDraft {
-    drafted += 1;
+/** A blank role row of the creation form, under the id React keys it by. */
+export function emptyRoleDraft(id: string): RoleDraft {
     return {
         canCommand: '',
-        id: `draft-${drafted}`,
+        id,
         level: 0,
         name: '',
         permissions: '',
@@ -62,6 +59,6 @@ export function organizationOf(
             permissions: listOf(draft.permissions),
             reports_to: draft.reportsTo.trim() === '' ? undefined : draft.reportsTo.trim(),
         })),
-        slug: slugOf(name.trim()),
+        slug: slugOf(name),
     };
 }

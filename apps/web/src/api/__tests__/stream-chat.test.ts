@@ -12,7 +12,7 @@ function assistant(content: Record<string, unknown>[]) {
     return { data: { message: { content }, type: 'assistant' } };
 }
 
-async function talk() {
+async function talk(options: { signal?: AbortSignal; withText?: boolean } = {}) {
     const heard = {
         blocks: [] as ActivityBlock[][],
         done: [] as StreamMeta[],
@@ -30,9 +30,14 @@ async function talk() {
         onError: (error) => {
             heard.errors.push(error);
         },
-        onText: (text) => {
-            heard.texts.push(text);
-        },
+        ...(options.withText === false
+            ? {}
+            : {
+                  onText: (text: string) => {
+                      heard.texts.push(text);
+                  },
+              }),
+        ...(options.signal === undefined ? {} : { signal: options.signal }),
         url: TALK,
     });
     return heard;
@@ -40,10 +45,11 @@ async function talk() {
 
 describe('streamChat', () => {
     test('an assistant reply streamed as events arrives as its blocks, then the result prices it', async () => {
-        // Given - a text block, a tool call, then the result event that prices the turn
+        // Given - a text block sent twice, a tool call, the result event that prices the turn, and an event after it
         await using _ = await intercept(
             http.post(TALK),
             http.sse([
+                assistant([{ text: 'hello world', type: 'text' }]),
                 assistant([{ text: 'hello world', type: 'text' }]),
                 assistant([{ id: 't1', input: { command: 'ls' }, name: 'bash', type: 'tool_use' }]),
                 {
@@ -54,11 +60,12 @@ describe('streamChat', () => {
                         type: 'result',
                     },
                 },
+                { data: { subtype: 'end', type: 'system' } },
                 END,
             ]),
         );
 
-        // Then - each block once, in order, and the turn's cost and duration
+        // Then - each block once, in order, and the cost and duration of the result alone
         await expect(talk()).resolves.toStrictEqual({
             blocks: [
                 [{ content: 'hello world', type: 'text' }],
@@ -154,6 +161,106 @@ describe('streamChat', () => {
         }).toStrictEqual({
             done: [],
             errors: [true],
+        });
+    });
+
+    test('a plain stream keeps its lines whole across chunks, drops comments, and reads JSON that is no event as text', async () => {
+        // Given - a CRLF line, a line cut across two chunks, an SSE comment, and three JSON lines that are no event
+        await using _ = await intercept(
+            http.post(TALK),
+            http.stream(['Hello\r\nSpl', 'it line\n: ping\n', 'null\n{"type":3}\n{"kind":"x"}\n'], {
+                contentType: 'text/plain',
+            }),
+        );
+
+        // Then - every text line once, its break restored
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [],
+            done: [{}],
+            errors: [],
+            texts: ['Hello\n', 'Split line\n', 'null\n', '{"type":3}\n', '{"kind":"x"}\n'],
+        });
+    });
+
+    test('without a text callback, plain lines arrive as text blocks', async () => {
+        // Given - a plain line and a listener of blocks alone
+        await using _ = await intercept(
+            http.post(TALK),
+            http.stream(['Plain\n'], { contentType: 'text/plain' }),
+        );
+
+        // Then - the line as a block
+        await expect(talk({ withText: false })).resolves.toStrictEqual({
+            blocks: [[{ content: 'Plain\n', type: 'text' }]],
+            done: [{}],
+            errors: [],
+            texts: [],
+        });
+    });
+
+    test('a JSON body that says nothing reads as no response', async () => {
+        // Given - a reply whose fields are all empty
+        await using _ = await intercept(http.post(TALK), http.json({ output: '', response: '' }));
+
+        // Then - the placeholder
+        await expect(talk()).resolves.toMatchObject({
+            blocks: [[{ content: 'No response', type: 'text' }]],
+        });
+    });
+
+    test('a JSON body is read from its first field that holds text, and the request is JSON', async () => {
+        // Given - a backend echoing the request's type and body in `message`, its `response` empty
+        await using _ = await intercept(http.post(TALK), (request) =>
+            http.json({
+                message: `${request.headers['content-type']} ${JSON.stringify(request.body)}`,
+                response: '',
+            }),
+        );
+
+        // Then - the echo
+        await expect(talk()).resolves.toMatchObject({
+            blocks: [[{ content: 'application/json {"message":"hi"}', type: 'text' }]],
+        });
+    });
+
+    test('an empty answer arrives as an empty text block', async () => {
+        // Given - a backend that answered with no body
+        await using _ = await intercept(http.post(TALK), http.empty(200));
+
+        // Then - one empty reply
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [[{ content: '', type: 'text' }]],
+            done: [{}],
+            errors: [],
+            texts: [],
+        });
+    });
+
+    test('a refusal without a reason reports its status', async () => {
+        // Given - a gateway error whose body names no error
+        await using _ = await intercept(http.post(TALK), http.error(502, { message: 'upstream' }));
+
+        // Then - the status
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [],
+            done: [],
+            errors: ['HTTP 502'],
+            texts: [],
+        });
+    });
+
+    test('a request cancelled by its caller reports the cancellation', async () => {
+        // Given - an answering backend, and a signal aborted before the message is sent
+        await using _ = await intercept(http.post(TALK), http.json({ response: 'too late' }));
+        const controller = new AbortController();
+        controller.abort();
+
+        // Then - the cancellation, not the answer
+        await expect(talk({ signal: controller.signal })).resolves.toStrictEqual({
+            blocks: [],
+            done: [],
+            errors: ['Request cancelled'],
+            texts: [],
         });
     });
 });

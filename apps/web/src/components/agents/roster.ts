@@ -46,7 +46,7 @@ export function rosterOf(worlds: World[], agents: ListedAgent[]): RosterAgent[] 
 }
 
 function deployed(agent: RosterAgent): boolean {
-    return agent.worldId !== undefined && agent.worldId !== '';
+    return agent.worldId !== undefined;
 }
 
 export function filtered(

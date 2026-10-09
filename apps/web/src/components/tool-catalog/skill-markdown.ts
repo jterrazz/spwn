@@ -23,6 +23,7 @@ function lineBlock(line: string): SkillBlock | undefined {
         return { kind: 'item', marker: '-', text: trimmed.slice(2) };
     }
     const numbered = NUMBERED.exec(trimmed)?.groups;
+    // Stryker disable next-line ConditionalExpression: the pattern's two groups match together or not at all
     if (numbered?.number !== undefined && numbered.text !== undefined) {
         return { kind: 'item', marker: `${numbered.number}.`, text: numbered.text };
     }

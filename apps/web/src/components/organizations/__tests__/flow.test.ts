@@ -12,19 +12,19 @@ describe('flow', () => {
         ]);
 
         // Then - the general alone on top, the captains side by side below, one declared edge
-        expect(nodes.map((node) => [node.id, node.position])).toStrictEqual([
-            ['general', { x: 0, y: 0 }],
-            ['captain-a', { x: -130, y: 200 }],
-            ['captain-b', { x: 130, y: 200 }],
+        expect(nodes.map((node) => [node.id, node.type, node.position])).toStrictEqual([
+            ['general', 'roleNode', { x: 0, y: 0 }],
+            ['captain-a', 'roleNode', { x: -130, y: 200 }],
+            ['captain-b', 'roleNode', { x: 130, y: 200 }],
         ]);
         expect(edges.map((edge) => edge.id)).toStrictEqual(['general->captain-a']);
     });
 
     test('with no reports_to declared, every role of a level is linked to every role of the next', () => {
-        // Given - two leads over one worker, no role naming its superior
+        // Given - two leads over one worker, no role naming its superior (an empty name counts as none)
         const { nodes, edges } = flowOf([
             { level: 0, name: 'lead-a' },
-            { level: 0, name: 'lead-b' },
+            { level: 0, name: 'lead-b', reports_to: '' },
             { level: 1, name: 'worker' },
         ]);
 

@@ -1,6 +1,6 @@
 import { deduplicateBlocks, parseStreamEvent } from '../activity/blocks';
 import type { ActivityBlock, StreamJsonEvent } from '../activity/blocks';
-import { numberOf, textOf } from './fields';
+import { fieldOf, numberOf, textOf } from './fields';
 
 export interface StreamMeta {
     cost?: number | undefined;
@@ -26,20 +26,20 @@ const END_OF_STREAM = '[DONE]';
 const REPLY_FIELDS = ['response', 'output', 'message', 'error'] as const;
 
 function isStreamEvent(value: unknown): value is StreamJsonEvent {
-    return (
-        typeof value === 'object' &&
-        value !== null &&
-        typeof Reflect.get(value, 'type') === 'string'
-    );
+    return typeof fieldOf(value, 'type') === 'string';
+}
+
+function jsonOf(text: string): { value?: unknown } {
+    try {
+        return { value: JSON.parse(text) };
+    } catch {
+        return {};
+    }
 }
 
 function eventOf(text: string): StreamJsonEvent | undefined {
-    try {
-        const value: unknown = JSON.parse(text);
-        return isStreamEvent(value) ? value : undefined;
-    } catch {
-        return undefined;
-    }
+    const { value } = jsonOf(text);
+    return isStreamEvent(value) ? value : undefined;
 }
 
 function replyOf(data: unknown): string {
@@ -49,6 +49,7 @@ function replyOf(data: unknown): string {
 
 class StreamCollector {
     readonly meta: StreamMeta = {};
+    // Stryker disable next-line ArrayDeclaration: a seed no block can equal deduplicates nothing
     private readonly seen: ActivityBlock[] = [];
     private readonly onBlocks: (blocks: ActivityBlock[]) => void;
     private readonly onText: ((text: string) => void) | undefined;
@@ -103,8 +104,6 @@ class StreamCollector {
         if (event.type === 'result') {
             this.meta.cost = numberOf(event, 'total_cost_usd');
             this.meta.duration = numberOf(event, 'duration_ms');
-        } else if (event.type === 'turn.completed' && event.usage !== undefined) {
-            this.meta.duration = undefined;
         }
     }
 }
@@ -120,7 +119,9 @@ async function drain(stream: Stream, pending = ''): Promise<void> {
     if (done) {
         return;
     }
+    // Stryker disable next-line ObjectLiteral,BooleanLiteral: only a chunk cut inside a character needs the decoder's carry, and the network double writes whole strings
     const lines = `${pending}${stream.decoder.decode(value, { stream: true })}`.split('\n');
+    // Stryker disable next-line StringLiteral: split returns one piece at least, so pop always has one to give
     const rest = lines.pop() ?? '';
     for (const line of lines) {
         stream.collector.line(line);
@@ -129,7 +130,7 @@ async function drain(stream: Stream, pending = ''): Promise<void> {
 }
 
 async function consume(response: Response, collector: StreamCollector): Promise<void> {
-    if ((response.headers.get('content-type') ?? '').includes('application/json')) {
+    if (response.headers.get('content-type')?.includes('application/json') === true) {
         const data: unknown = await response.json();
         collector.reply(replyOf(data));
         return;

@@ -4,49 +4,48 @@ import { listOf, textOf } from './fields';
 
 let goApiBase: null | string = null;
 
-function browserApiBase(): null | string {
-    if (process.env.NEXT_PUBLIC_API_URL !== undefined && process.env.NEXT_PUBLIC_API_URL !== '') {
-        return process.env.NEXT_PUBLIC_API_URL;
-    }
-    if (!globalThis.location?.hostname) {
-        return null;
-    }
-    return `http://${globalThis.location.hostname}:3001`;
+/** Where the Go API answers: the base the app was given, the desktop shell's port, the build's address, the page's host on 3001, then localhost. */
+export function apiBaseOf(sources: {
+    given: null | string;
+    desktop: null | string;
+    build: string | undefined;
+    host: string | undefined;
+}): string {
+    const host = sources.host ?? '';
+    const candidates = [
+        sources.given,
+        sources.desktop,
+        sources.build,
+        host === '' ? null : `http://${host}:3001`,
+    ];
+    return (
+        candidates.find((base) => base !== null && base !== undefined && base !== '') ??
+        'http://localhost:3001'
+    );
+}
+
+function currentBase(): string {
+    return apiBaseOf({
+        build: process.env.NEXT_PUBLIC_API_URL,
+        desktop: getTauriApiBase(),
+        given: goApiBase,
+        host: globalThis.location?.hostname,
+    });
 }
 
 async function resolveGoApiBase(): Promise<string> {
-    if (goApiBase !== null && goApiBase !== '') {
-        return goApiBase;
-    }
-
-    if (isTauri()) {
-        const port = await initTauriApiPort();
-        if (port !== null && port !== 0) {
-            goApiBase = `http://localhost:${port}`;
-            return goApiBase;
-        }
-    }
-
-    const tauriBase = getTauriApiBase();
-    if (tauriBase !== null && tauriBase !== '') {
-        goApiBase = tauriBase;
-        return tauriBase;
-    }
-
-    const browserBase = browserApiBase();
-    if (browserBase !== null && browserBase !== '') {
-        return browserBase;
-    }
-    return 'http://localhost:3001';
+    await initTauriApiPort();
+    return currentBase();
 }
 
 export function setApiBase(base: string) {
     goApiBase = base;
 }
 
-// hazard: resolved at module load so a synchronous caller (goApiUrl) already reads the Tauri port; a first fetch fired before the webview reports it would otherwise target the browser default
-if (globalThis.location !== undefined || isTauri()) {
-    void resolveGoApiBase();
+// hazard: the desktop shell's port is asked at module load, so a synchronous caller (goApiUrl) already reads it; a first fetch fired before the webview reports it would otherwise target the browser default
+// Stryker disable next-line ConditionalExpression: initTauriApiPort answers null outside the desktop shell, so asking anywhere else changes nothing
+if (isTauri()) {
+    void initTauriApiPort();
 }
 
 export type ConnectionStatus = 'connected' | 'disconnected';
@@ -105,6 +104,7 @@ async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
         });
         if (!res.ok) {
             setConnectionStatus('disconnected');
+            // Stryker disable next-line ArrowFunction: an unreadable body and an empty one both fail to parse, into the status message
             const body = await res.text().catch(() => '');
             throw new ApiError(errorOf(body, res.status));
         }
@@ -231,7 +231,7 @@ export async function apiPost<T>(
         await apiFetch(goPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+            body: JSON.stringify(body),
             ...options,
         }),
     );
@@ -242,7 +242,7 @@ export async function apiPut<T>(goPath: string, body?: unknown): Promise<T> {
         await apiFetch(goPath, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+            body: JSON.stringify(body),
         }),
     );
 }
@@ -262,7 +262,7 @@ export async function apiAction(
         const res = await fetch(`${base}${goPath}`, {
             method,
             headers: { 'Content-Type': 'application/json' },
-            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+            body: JSON.stringify(body),
             signal: AbortSignal.timeout(10_000),
         });
         const data: unknown = await res.json();
@@ -291,8 +291,7 @@ export async function isGoApiAvailable(): Promise<boolean> {
     }
 }
 
-/** Build the full Go API URL. Requires the port to have been resolved already (call resolveGoApiBase() first if unsure). Falls back to localhost:3001 if not yet initialized. */
+/** The full Go API URL of `path`, from the base known now: the desktop shell's port once it reported it. */
 export function goApiUrl(path: string): string {
-    const base = goApiBase ?? getTauriApiBase() ?? browserApiBase() ?? 'http://localhost:3001';
-    return `${base}${path}`;
+    return `${currentBase()}${path}`;
 }
