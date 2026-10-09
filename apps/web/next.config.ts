@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 const nextConfig: NextConfig = {
     ...(isStaticExport ? { output: 'export' } : {}),
     distDir: isStaticExport ? '.artifacts/next/export' : '.artifacts/next',
-    allowedDevOrigins: ['local://', '*.local', '192.168.*.*', '10.*.*.*'],
+    allowedDevOrigins: ['127.0.0.1', 'local://', '*.local', '192.168.*.*', '10.*.*.*'],
     images: {
         unoptimized: true,
     },

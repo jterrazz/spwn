@@ -22,6 +22,12 @@ export default defineConfig({
                 serial: SMOKE,
                 timeout: SMOKE ? 600_000 : 120_000,
             },
+            website: {
+                include: ['website/**/*.spec.ts'],
+                reason: 'this member IS the specs tree, so its specifications sit at its root, where the derived globs do not look; every file starts its own `spwn web` and `next dev`, and two dev servers of one app share its build folder, so the files run one at a time, and the first compile of a page outlasts the default budget',
+                serial: true,
+                timeout: 120_000,
+            },
         },
     },
 });
