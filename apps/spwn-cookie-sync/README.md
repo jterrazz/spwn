@@ -29,6 +29,8 @@ your browsing patterns refresh sessions naturally.
 4. Click **Load unpacked** → select the `apps/spwn-cookie-sync/`
    folder of this repo.
 
+The folder is the extension: Chrome loads `background.js` and `popup.js` exactly as they are committed, so they stay plain JavaScript with no build step, and the repository's toolchain lints them as such.
+
 That's it. No pairing, no secret. The popup shows live status:
 
 ```text
