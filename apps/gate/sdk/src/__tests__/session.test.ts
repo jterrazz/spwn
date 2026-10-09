@@ -1,6 +1,10 @@
+import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
 import { openSession } from '../session.ts';
@@ -74,6 +78,37 @@ function sent(url: string, body: unknown, method = 'POST'): Received {
     return { body, method, type: JSON_TYPE, url };
 }
 
+const X_TOOL = resolve(import.meta.dirname, '../../../../../catalog/x/tools/x/index.js');
+
+// outside: the gate hands a catalog tool this SDK through NODE_PATH, as @spwn/gate-tool
+function gateNodePath() {
+    const folder = mkdtempSync(join(tmpdir(), 'gate-node-path-'));
+    mkdirSync(join(folder, '@spwn'));
+    symlinkSync(resolve(import.meta.dirname, '../..'), join(folder, '@spwn', 'gate-tool'));
+    return {
+        folder,
+        [Symbol.dispose]() {
+            rmSync(folder, { force: true, recursive: true });
+        },
+    };
+}
+
+async function stdoutOf(args: string[], env: NodeJS.ProcessEnv): Promise<string> {
+    const child = spawn('node', args, { env });
+    const chunks: Buffer[] = [];
+    child.stdout.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+    });
+    await once(child, 'close');
+    return Buffer.concat(chunks).toString('utf8');
+}
+
+const CREATED = {
+    body: { data: { create_tweet: { tweet_results: { result: { rest_id: '42' } } } } },
+    status: 200,
+    url: 'https://x.com/i/api/graphql/q/CreateTweet',
+};
+
 describe('Session', () => {
     test('each action returns what the sidecar answered, nothing for an empty answer', async () => {
         // Given - a sidecar that evaluates to the page title and answers every other action empty
@@ -130,6 +165,58 @@ describe('Session', () => {
             server.close();
         },
     );
+
+    test('the catalog’s x tool posts a tweet through this session, each call one the sidecar routes', async () => {
+        // Given - the x tool handed this SDK as the gate hands it, and a sidecar that sees the tweet created
+        using nodePath = gateNodePath();
+        const { origin, received, server } = await sidecar(200, (url) => {
+            if (url === '/sessions') {
+                return JSON.stringify({ id: 'x-1' });
+            }
+            return url === '/sessions/x-1/wait-response' ? JSON.stringify(CREATED) : '';
+        });
+
+        // When - the tool's post-tweet runs as the gate runs it
+        const { NODE_OPTIONS: _, ...env } = process.env;
+        const stdout = await stdoutOf([X_TOOL, 'post-tweet', '--text', 'hello'], {
+            ...env,
+            GATE_BROWSER_URL: origin,
+            NODE_PATH: nodePath.folder,
+        });
+        server.close();
+
+        // Then - the session opened, browsed, typed, awaited the creation, clicked, ended, and the tweet it reports
+        const composer = '[data-testid="tweetTextarea_0"]';
+        const button = '[data-testid="tweetButton"]';
+        const path = '/sessions/x-1';
+        const [opened, ...browsed] = received;
+        const raced = browsed
+            .slice(4, 6)
+            .toSorted((left, right) => String(left.url).localeCompare(String(right.url)));
+        // invariant: the tool awaits the creation and clicks at once, so those two reach the sidecar in either order
+        const ordered = [opened, ...browsed.slice(0, 4), ...raced, ...browsed.slice(6)];
+        expect({ sent: ordered, stdout: JSON.parse(stdout) as unknown }).toStrictEqual({
+            sent: [
+                sent('/sessions', { provider: 'x' }),
+                sent(`${path}/goto`, {
+                    timeout_ms: 25_000,
+                    url: 'https://x.com/compose/post',
+                    wait_until: 'domcontentloaded',
+                }),
+                sent(`${path}/wait-selector`, { selector: composer, timeout_ms: 12_000 }),
+                sent(`${path}/type`, { selector: composer, text: 'hello' }),
+                sent(`${path}/wait-selector`, { selector: button, timeout_ms: 5000 }),
+                sent(`${path}/click`, { selector: button }),
+                sent(`${path}/wait-response`, {
+                    method: 'POST',
+                    timeout_ms: 20_000,
+                    url_pattern: '/CreateTweet',
+                }),
+                { body: null, method: 'DELETE', type: 'application/json', url: path },
+            ],
+            stdout: { external_id: '42', url: 'https://x.com/i/web/status/42', user: null },
+        });
+    });
 
     test('a session needs a provider to load its cookies from', async () => {
         // Given - no provider named
