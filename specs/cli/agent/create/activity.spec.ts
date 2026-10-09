@@ -6,7 +6,7 @@ const home = cli.with({ env: { SPWN_HOME: '$WORKDIR/spwn-home' } });
 
 describe('activity', () => {
     test('a created agent is one agent.created event', async () => {
-        // Given - one agent created in an isolated home
+        // Given - one agent created in the run's own spwn home
         await using result = await home.exec('agent create neo');
 
         // Then - the activity log holds that one event, whole

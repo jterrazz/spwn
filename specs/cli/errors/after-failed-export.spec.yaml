@@ -1,5 +1,4 @@
 description: a failed export leaves the agent roster intact
-env: isolated
 runs:
     - command: init
       exit: 0

@@ -1,5 +1,4 @@
 description: an event appears in the log after an agent is created
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

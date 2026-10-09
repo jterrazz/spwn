@@ -1,5 +1,4 @@
 description: creating the same agent twice fails cleanly
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

@@ -1,5 +1,4 @@
 description: events accumulate across multiple operations
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

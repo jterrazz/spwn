@@ -1,5 +1,4 @@
 description: import --as renames the agent on the way back in
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

@@ -1,5 +1,4 @@
 description: dreaming for a missing agent skips instead of failing
-env: isolated
 runs:
     - command: agent dream nonexistent
       exit: 0

@@ -1,5 +1,4 @@
 description: auth default refuses a provider that is currently disabled
-env: isolated
 runs:
     - command: auth disable openai
       exit: 0

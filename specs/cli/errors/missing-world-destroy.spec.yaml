@@ -1,5 +1,4 @@
 description: destroying a missing world names it, hints at world list and dumps no usage
-env: isolated
 runs:
     - command: down world-nonexistent-00000
       exit: 1

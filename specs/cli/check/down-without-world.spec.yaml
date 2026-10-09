@@ -1,5 +1,4 @@
 description: down with no world id names the argument it wants
-env: isolated
 runs:
     - command: down
       exit: 1

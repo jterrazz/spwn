@@ -1,5 +1,4 @@
 description: talking to a missing agent suggests creating one
-env: isolated
 runs:
     - command: agent talk nonexistent hello
       exit: 1

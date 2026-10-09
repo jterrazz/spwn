@@ -1,5 +1,4 @@
 description: auth default --clear unsets the preference
-env: isolated
 runs:
     - command: auth default openai
       exit: 0

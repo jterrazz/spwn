@@ -1,5 +1,4 @@
 description: agent rm with no name is refused by arity
-env: isolated
 runs:
     - command: agent rm
       exit: 1

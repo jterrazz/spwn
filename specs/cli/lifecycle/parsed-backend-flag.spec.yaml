@@ -1,5 +1,4 @@
 description: --backend on a missing agent fails on the agent, not on the flag
-env: isolated
 runs:
     - command: agent nonexistent --backend codex
       exit: 1

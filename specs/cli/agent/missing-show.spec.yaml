@@ -1,5 +1,4 @@
 description: show on a missing agent errors cleanly
-env: isolated
 runs:
     - command: agent show ghost
       exit: 1

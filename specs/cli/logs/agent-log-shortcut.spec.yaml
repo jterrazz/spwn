@@ -1,5 +1,4 @@
 description: agent logs <name> is a shortcut for --agent
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

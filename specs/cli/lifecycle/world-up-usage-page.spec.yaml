@@ -1,5 +1,4 @@
 description: spwn world up --help advertises the --backend flag
-env: isolated
 runs:
     - command: world up --help
       exit: 0

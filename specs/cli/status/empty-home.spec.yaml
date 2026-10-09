@@ -1,5 +1,4 @@
 description: status on a home with no worlds renders the empty dashboard
-env: isolated
 runs:
     - command: status
       exit: 0

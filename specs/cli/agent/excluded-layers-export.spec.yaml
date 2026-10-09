@@ -1,5 +1,4 @@
 description: export --exclude still writes the archive
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

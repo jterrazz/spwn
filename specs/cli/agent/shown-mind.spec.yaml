@@ -1,5 +1,4 @@
 description: show prints the agent details with all its mind layers
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

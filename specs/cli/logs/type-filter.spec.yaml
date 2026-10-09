@@ -1,5 +1,4 @@
 description: --type keeps one event type and drops the rest
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

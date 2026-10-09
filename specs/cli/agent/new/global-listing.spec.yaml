@@ -1,5 +1,4 @@
 description: in a home with no project, the roster table lists a new agent unattached
-env: isolated
 runs:
     - command: agent new neo
       exit: 0

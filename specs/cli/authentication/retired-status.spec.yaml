@@ -1,5 +1,4 @@
 description: the retired auth status subcommand returns a clean error
-env: isolated
 runs:
     - command: auth status
       exit: 1

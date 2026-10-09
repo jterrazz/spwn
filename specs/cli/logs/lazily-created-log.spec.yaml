@@ -1,5 +1,4 @@
 description: the activity log is created only by the first real event
-env: isolated
 runs:
     - command: --version
       exit: 0

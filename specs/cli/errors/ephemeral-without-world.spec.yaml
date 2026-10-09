@@ -1,5 +1,4 @@
 description: an ephemeral agent with no world to attach to is refused
-env: isolated
 runs:
     - command: agent --ephemeral lint-code
       exit: 1

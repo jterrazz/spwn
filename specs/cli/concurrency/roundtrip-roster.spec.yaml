@@ -1,5 +1,4 @@
 description: a create then list round-trip surfaces the agent in the roster
-env: isolated
 runs:
     - command: init
       exit: 0

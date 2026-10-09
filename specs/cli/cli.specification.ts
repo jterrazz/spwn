@@ -75,12 +75,7 @@ export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
         testRunLabel: 'sh.spwn.test.run',
     },
     env: {
-        isolated: { SPWN_HOME: '$WORKDIR/spwn-home' },
-        sealed: {
-            HOME: '$WORKDIR/empty-home',
-            SPWN_HOME: '$WORKDIR/spwn-home',
-            SPWN_SKIP_KEYCHAIN: '1',
-        },
+        sealed: { HOME: '$WORKDIR/empty-home' },
     },
 });
 

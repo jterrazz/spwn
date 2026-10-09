@@ -1,5 +1,4 @@
 description: three failed removals in a row do not compound
-env: isolated
 runs:
     - command: init
       exit: 0

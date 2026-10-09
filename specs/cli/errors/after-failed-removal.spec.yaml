@@ -1,5 +1,4 @@
 description: agent commands still work after a failed removal
-env: isolated
 runs:
     - command: init
       exit: 0

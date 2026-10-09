@@ -1,5 +1,4 @@
 description: auth login --help documents the MCP-provider path
-env: isolated
 runs:
     - command: auth login --help
       exit: 0

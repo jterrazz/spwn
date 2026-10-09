@@ -1,5 +1,4 @@
 description: auth default <provider> sets the preference and records it
-env: isolated
 runs:
     - command: auth default anthropic
       exit: 0

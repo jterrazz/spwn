@@ -1,5 +1,4 @@
 description: world logs with no world id is refused by arity
-env: isolated
 runs:
     - command: world logs
       exit: 1

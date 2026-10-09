@@ -24,7 +24,7 @@ Each layer refuses what the one above it does: a unit test never starts a contai
 - `__expected__/` — a golden too long to write in place.
 - `__setup__/` — code a domain's chains share, such as `up/__setup__/world.ts`, which reads a world's labels back.
 
-The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's working directory, the keychain and the providers' tokens are unset, and live credential validation is skipped. Two environments are named for a document's `env:` — `isolated`, and `sealed`, which also empties `HOME`. Every container a run starts carries the run's label, `sh.spwn.test.run`, and the runner removes them at scope exit.
+The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's working directory, the keychain and the providers' tokens are unset, and live credential validation is skipped. One environment is named for a document's `env:`, `sealed`, which also points `HOME` at an empty folder of the run, for a command that reads the user's home (`~/.codex`, `~/.claude`). Every container a run starts carries the run's label, `sh.spwn.test.run`, and the runner removes them at scope exit.
 
 ## The website specification
 

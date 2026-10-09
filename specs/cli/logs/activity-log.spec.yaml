@@ -1,5 +1,4 @@
 description: activity.jsonl records the whole shape of every event it appends
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

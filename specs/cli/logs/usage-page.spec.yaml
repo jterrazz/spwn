@@ -1,5 +1,4 @@
 description: logs --help prints the command usage
-env: isolated
 runs:
     - command: logs --help
       exit: 0

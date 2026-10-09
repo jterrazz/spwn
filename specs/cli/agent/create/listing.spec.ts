@@ -4,7 +4,7 @@ import { cli } from '../../cli.specification.js';
 
 describe('listing', () => {
     test('two created agents are listed unattached', async () => {
-        // Given - two agents created in an isolated home, then listed as JSON
+        // Given - two agents created in the run's own spwn home, then listed as JSON
         await using result = await cli
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec(['agent create neo', 'agent create trinity', 'agent ls --json']);

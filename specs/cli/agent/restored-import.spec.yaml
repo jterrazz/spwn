@@ -1,5 +1,4 @@
 description: import restores an agent from its own export
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

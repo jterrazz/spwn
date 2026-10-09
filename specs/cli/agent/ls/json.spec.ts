@@ -37,10 +37,8 @@ describe('json', () => {
     });
 
     test('on an empty home returns no agents', async () => {
-        // Given - an isolated home with no agents created
-        await using result = await cli
-            .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
-            .exec('agent ls --json');
+        // Given - the run's own spwn home, with no agent created
+        await using result = await cli.exec('agent ls --json');
 
         // Then - the JSON envelope reports an empty roster
         expect(result.exitCode).toBe(0);

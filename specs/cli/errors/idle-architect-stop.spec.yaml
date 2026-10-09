@@ -1,5 +1,4 @@
 description: stopping an architect that is not running exits clean
-env: isolated
 runs:
     - command: architect stop
       exit: 0

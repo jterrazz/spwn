@@ -1,5 +1,4 @@
 description: world inspect with no world id is refused by arity
-env: isolated
 runs:
     - command: world inspect
       exit: 1

@@ -1,5 +1,4 @@
 description: agent create with three positional args is refused by arity
-env: isolated
 runs:
     - command: agent create a b c
       exit: 1

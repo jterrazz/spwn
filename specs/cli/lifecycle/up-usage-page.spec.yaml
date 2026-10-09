@@ -1,5 +1,4 @@
 description: spwn up --help advertises the --backend flag
-env: isolated
 runs:
     - command: up --help
       exit: 0

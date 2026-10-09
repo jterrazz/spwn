@@ -1,5 +1,4 @@
 description: talk to an agent with no world fails with a helpful error
-env: isolated
 runs:
     - command: agent create neo
       exit: 0

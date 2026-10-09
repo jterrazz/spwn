@@ -1,5 +1,4 @@
 description: deleting a missing agent names it and hints at agent ls
-env: isolated
 runs:
     - command: agent rm ghost
       exit: 1

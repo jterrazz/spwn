@@ -1,5 +1,4 @@
 description: rm deletes the agent from disk
-env: isolated
 runs:
     - command: agent create temp
       exit: 0

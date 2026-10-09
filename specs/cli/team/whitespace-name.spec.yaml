@@ -1,5 +1,4 @@
 description: team new rejects a whitespace-only name
-env: isolated
 runs:
     - command: team new "   "
       exit: 1

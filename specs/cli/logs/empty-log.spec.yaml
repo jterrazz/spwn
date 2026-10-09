@@ -1,5 +1,4 @@
 description: an empty log shows a friendly message
-env: isolated
 runs:
     - command: logs
       exit: 0
