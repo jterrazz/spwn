@@ -9,7 +9,6 @@ import { Aurora } from '../components/aurora';
 import { CommandPalette } from '../components/command-palette';
 import { ThemeProvider } from '../components/theme-provider';
 import { ToastProvider } from '../components/toast-provider';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { ArchitectChatProvider } from '../contexts/architect-chat-context';
 
 const geistSans = Geist({
@@ -63,18 +62,16 @@ export default function RootLayout({
             <body className="relative h-svh overflow-hidden">
                 <div className="flex h-full flex-col">
                     <ThemeProvider>
-                        <TooltipProvider>
-                            <ToastProvider>
-                                <Aurora />
-                                <div className="relative z-10 h-full min-h-0 flex-1">
-                                    <ArchitectChatProvider>
-                                        <AppShell>{children}</AppShell>
-                                        <ArchitectChatWidget />
-                                    </ArchitectChatProvider>
-                                    <CommandPalette />
-                                </div>
-                            </ToastProvider>
-                        </TooltipProvider>
+                        <ToastProvider>
+                            <Aurora />
+                            <div className="relative z-10 h-full min-h-0 flex-1">
+                                <ArchitectChatProvider>
+                                    <AppShell>{children}</AppShell>
+                                    <ArchitectChatWidget />
+                                </ArchitectChatProvider>
+                                <CommandPalette />
+                            </div>
+                        </ToastProvider>
                     </ThemeProvider>
                 </div>
             </body>
