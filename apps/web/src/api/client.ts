@@ -216,12 +216,17 @@ export async function apiGet<T>(goPath: string): Promise<T> {
     return payload<T>(data);
 }
 
-export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
+export async function apiPost<T>(
+    goPath: string,
+    body?: unknown,
+    options: { signal?: AbortSignal } = {},
+): Promise<T> {
     return payload<T>(
         await apiFetch(goPath, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+            ...options,
         }),
     );
 }

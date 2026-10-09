@@ -1,4 +1,4 @@
-import { button, heading } from '@jterrazz/test';
+import { button, content, field, heading, main, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -204,7 +204,7 @@ describe('landing', () => {
               - button
               - heading "matrix" [level=3]
               - paragraph: matrix · stopped
-              - button:
+              - button "Close":
                 - img
               - paragraph: Uptime
               - paragraph: "-"
@@ -228,5 +228,20 @@ describe('landing', () => {
               - img
               - text: Architect offline
             - alert`);
+    });
+
+    test('the New World button opens the spawn form, previewing the command it runs', async () => {
+        // Given - the landing page, read
+        const result = await website.visit('/', async (visitor) => {
+            await visitor.see(button('2 worlds'));
+
+            // When - the visitor asks for a new world and picks neo
+            await visitor.click(within(main(), button('New World')));
+            await visitor.check(field('neo'));
+            await visitor.see(content('→ Deploys 1 agent: neo', { exact: false }));
+        });
+
+        // Then - the preview states the command, its default workspace mounted
+        expect(result.content.text).toContain('spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…');
     });
 });
