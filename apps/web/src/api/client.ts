@@ -1,5 +1,6 @@
 import type { Agent, AgentProfile, Workspace, World } from '../domain/model';
 import { getTauriApiBase, initTauriApiPort, isTauri } from '../tauri/runtime';
+import { textOf } from './fields';
 
 let goApiBase: null | string = null;
 
@@ -56,9 +57,9 @@ const statusListeners = new Set<(status: ConnectionStatus) => void>();
 function setConnectionStatus(status: ConnectionStatus) {
     if (connectionStatus !== status) {
         connectionStatus = status;
-        statusListeners.forEach((fn) => {
-            fn(status);
-        });
+        for (const listener of statusListeners) {
+            listener(status);
+        }
     }
 }
 
@@ -73,7 +74,29 @@ export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void)
     };
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- the caller names the shape its route returns; the parameter exists to carry it
+function payload<T>(data: unknown): T {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the Go API is this app's own backend; the route's shape is the contract its handler and this caller are both written to
+    return data as T;
+}
+
+function errorOf(body: string, status: number): string {
+    try {
+        const error = textOf(JSON.parse(body), 'error');
+        return error === '' ? `API error ${status}` : error;
+    } catch {
+        return `API error ${status}`;
+    }
+}
+
+class ApiError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
+
+async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
     try {
         const base = await resolveGoApiBase();
         const res = await fetch(`${base}${path}`, {
@@ -83,19 +106,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
         if (!res.ok) {
             setConnectionStatus('disconnected');
             const body = await res.text().catch(() => '');
-            let msg = `API error ${res.status}`;
-            try {
-                const j = JSON.parse(body);
-                if (j.error) {
-                    msg = j.error;
-                }
-            } catch {}
-            throw new Error(msg);
+            throw new ApiError(errorOf(body, res.status));
         }
         setConnectionStatus('connected');
-        return res.json();
+        const data: unknown = await res.json();
+        return data;
     } catch (error) {
-        if (error instanceof Error && error.message.startsWith('API error')) {
+        if (error instanceof ApiError) {
             throw error;
         }
         setConnectionStatus('disconnected');
@@ -186,44 +203,41 @@ export function encPath(segment: string): string {
     return encodeURIComponent(segment);
 }
 
-/** GET from Go API. */
+const AGENT_PATH = /^\/api\/agents\/[^/]+$/u;
+
 export async function apiGet<T>(goPath: string): Promise<T> {
-    const data = await apiFetch<T>(goPath);
+    const data = await apiFetch(goPath);
     if (goPath === '/api/worlds' && Array.isArray(data)) {
-        return normalizeWorlds(data) as T;
+        return payload<T>(normalizeWorlds(payload<RawWorld[]>(data)));
     }
-    if (
-        /^\/api\/agents\/[^/]+$/.exec(goPath) &&
-        data &&
-        typeof data === 'object' &&
-        'name' in (data as object)
-    ) {
-        return normalizeAgent(data as unknown as Partial<AgentProfile> & { name: string }) as T;
+    if (AGENT_PATH.test(goPath) && textOf(data, 'name') !== '') {
+        return payload<T>(normalizeAgent(payload<Partial<AgentProfile> & { name: string }>(data)));
     }
-    return data;
+    return payload<T>(data);
 }
 
-/** POST to Go API. */
 export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
-    return await apiFetch<T>(goPath, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
+    return payload<T>(
+        await apiFetch(goPath, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        }),
+    );
 }
 
-/** PUT to Go API. */
 export async function apiPut<T>(goPath: string, body?: unknown): Promise<T> {
-    return await apiFetch<T>(goPath, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
+    return payload<T>(
+        await apiFetch(goPath, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        }),
+    );
 }
 
-/** DELETE on Go API. */
 export async function apiDelete(goPath: string): Promise<void> {
-    await apiFetch<unknown>(goPath, { method: 'DELETE' });
+    await apiFetch(goPath, { method: 'DELETE' });
 }
 
 /** POST that returns { ok, error } shape - used for action buttons. */
@@ -239,9 +253,10 @@ export async function apiAction(
             ...(body === undefined ? {} : { body: JSON.stringify(body) }),
             signal: AbortSignal.timeout(10_000),
         });
-        const data = await res.json();
+        const data: unknown = await res.json();
         if (!res.ok) {
-            return { ok: false, error: data.error || 'Unknown error' };
+            const error = textOf(data, 'error');
+            return { ok: false, error: error === '' ? 'Unknown error' : error };
         }
         setConnectionStatus('connected');
         return { ok: true };

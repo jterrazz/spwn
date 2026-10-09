@@ -19,8 +19,9 @@ import { useRouter } from 'next/navigation';
 
 import { Page } from '../../components/page';
 import { PageHeader } from '../../components/page-header';
-import { TOOLS, toolSlug } from '../../domain/tools-catalog';
+import { toolSlug } from '../../domain/tools-catalog';
 import type { ToolDef, ToolStatus } from '../../domain/tools-catalog';
+import { TOOLS } from '../../domain/tools-catalog.data';
 import { usePageTitle } from '../../hooks/use-page-title';
 
 const TOOL_ICONS: Record<string, React.ReactNode> = {

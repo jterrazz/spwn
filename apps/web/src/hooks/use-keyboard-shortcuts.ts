@@ -8,32 +8,35 @@ interface ShortcutHandlers {
     onEscape?: () => void;
 }
 
-/** Global keyboard shortcut handler. - Cmd+K / Ctrl+K → onSearch (focus search / command palette) - Cmd+N / Ctrl+N → onSpawnWorld - Escape → onEscape (close dialogs) */
+const TYPING_TAGS = new Set(['INPUT', 'SELECT', 'TEXTAREA']);
+
+function isTyping(event: KeyboardEvent): boolean {
+    return event.target instanceof HTMLElement && TYPING_TAGS.has(event.target.tagName);
+}
+
+function handlerOf(event: KeyboardEvent, handlers: ShortcutHandlers): (() => void) | undefined {
+    const command = event.metaKey || event.ctrlKey;
+    if (command && event.key === 'k') {
+        return handlers.onSearch;
+    }
+    if (command && event.key === 'n' && !isTyping(event)) {
+        return handlers.onSpawnWorld;
+    }
+    return undefined;
+}
+
+/** Global keyboard shortcuts: ⌘K / Ctrl+K searches, ⌘N / Ctrl+N spawns a world outside a field, Escape closes. */
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const meta = e.metaKey || e.ctrlKey;
-
-            const tag = (e.target as HTMLElement)?.tagName;
-            const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-
-            if (meta && e.key === 'k') {
-                e.preventDefault();
-                handlers.onSearch?.();
-                return;
-            }
-
-            if (meta && e.key === 'n') {
-                if (!isInput) {
-                    e.preventDefault();
-                    handlers.onSpawnWorld?.();
-                }
-                return;
-            }
-
-            if (e.key === 'Escape') {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
                 handlers.onEscape?.();
                 return;
+            }
+            const handler = handlerOf(event, handlers);
+            if (handler !== undefined) {
+                event.preventDefault();
+                handler();
             }
         };
 

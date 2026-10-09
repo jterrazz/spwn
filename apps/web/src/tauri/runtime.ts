@@ -1,11 +1,49 @@
+interface UpdateDescriptor {
+    available: boolean;
+    version?: string;
+    notes?: string;
+    downloadAndInstall?: () => Promise<void>;
+}
+
+/** What the Tauri shell injects into the webview: the core command bridge and the plugins this app enables. */
+export interface TauriBridge {
+    core?: { invoke: (command: string) => Promise<unknown> };
+    updater?: { check: () => Promise<null | UpdateDescriptor> };
+    dialog?: {
+        ask: (
+            message: string,
+            options?: { title?: string; kind?: 'info' | 'warning' },
+        ) => Promise<boolean>;
+    };
+    process?: { relaunch: () => Promise<void> };
+}
+
+declare global {
+    var __TAURI__: TauriBridge | undefined;
+}
+
 let cachedPort: null | number = null;
 let initPromise: null | Promise<null | number> = null;
 
-export function isTauri(): boolean {
-    return typeof globalThis !== 'undefined' && '__TAURI__' in globalThis;
+export function tauriBridge(): TauriBridge | undefined {
+    return globalThis.__TAURI__;
 }
 
-/** Initialize the Tauri API port. Must be called (and awaited) once before any API calls. Safe to call multiple times - subsequent calls return the cached result. */
+export function isTauri(): boolean {
+    return tauriBridge() !== undefined;
+}
+
+async function askForPort(): Promise<null | number> {
+    try {
+        const port = await tauriBridge()?.core?.invoke('get_api_port');
+        cachedPort = typeof port === 'number' ? port : null;
+        return cachedPort;
+    } catch {
+        return null;
+    }
+}
+
+/** The port the desktop shell serves the API on; asked once, then cached. Null in a browser. */
 export async function initTauriApiPort(): Promise<null | number> {
     if (!isTauri()) {
         return null;
@@ -13,24 +51,7 @@ export async function initTauriApiPort(): Promise<null | number> {
     if (cachedPort !== null && cachedPort !== 0) {
         return cachedPort;
     }
-    if (initPromise) {
-        return await initPromise;
-    }
-
-    initPromise = (async () => {
-        try {
-            const { invoke } = (
-                globalThis as unknown as {
-                    __TAURI__: { core: { invoke: (cmd: string) => Promise<number> } };
-                }
-            ).__TAURI__.core;
-            cachedPort = await invoke('get_api_port');
-            return cachedPort;
-        } catch {
-            return null;
-        }
-    })();
-
+    initPromise ??= askForPort();
     return await initPromise;
 }
 

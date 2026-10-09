@@ -1,183 +1,180 @@
 import { deduplicateBlocks, parseStreamEvent } from '../activity/blocks';
 import type { ActivityBlock, StreamJsonEvent } from '../activity/blocks';
+import { numberOf, textOf } from './fields';
+
+export interface StreamMeta {
+    cost?: number | undefined;
+    duration?: number | undefined;
+}
 
 export interface StreamChatOptions {
-    /** Primary URL (Go API) */
     url: string;
-    /** @deprecated No longer used - Go API is the sole backend */
-    fallbackUrl?: string;
-    /** POST body */
     body: Record<string, unknown>;
-    /** Called with new ActivityBlocks as they arrive */
+    /** Receives the activity blocks as they arrive, each block once. */
     onBlocks: (blocks: ActivityBlock[]) => void;
-    /** Called with raw text chunks (for non-structured responses) */
+    /** Receives the lines that are not stream events; without it they arrive as text blocks. */
     onText?: (text: string) => void;
-    /** Called when the stream completes */
-    onDone: (meta: { cost?: number | undefined; duration?: number | undefined }) => void;
-    /** Called on error */
+    onDone: (meta: StreamMeta) => void;
     onError: (error: string) => void;
-    /** AbortSignal for cancellation */
     signal?: AbortSignal;
-    /** Timeout in ms (default 120s) */
+    /** Milliseconds before the request is abandoned, when no signal is given. */
     timeout?: number;
 }
 
-async function consumeSSEStream(
-    res: Response,
-    onBlocks: (blocks: ActivityBlock[]) => void,
-    onText?: (text: string) => void,
-): Promise<{ cost?: number | undefined; duration?: number | undefined }> {
-    const contentType = res.headers.get('content-type') ?? '';
+const DATA_PREFIX = 'data: ';
+const END_OF_STREAM = '[DONE]';
+const REPLY_FIELDS = ['response', 'output', 'message', 'error'] as const;
 
-    if (contentType.includes('application/json')) {
-        const data = await res.json();
-        const text = data.response || data.output || data.message || data.error || 'No response';
-        onBlocks([{ type: 'text', content: text }]);
-        return {};
-    }
-
-    const reader = res.body?.getReader();
-    if (!reader) {
-        const text = await res.text();
-        onBlocks([{ type: 'text', content: text }]);
-        return {};
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = '';
-    const meta: { cost?: number | undefined; duration?: number | undefined } = {};
-    const allBlocks: ActivityBlock[] = [];
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-            break;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-            const trimmed = line.trim();
-
-            if (trimmed.startsWith('data: ')) {
-                const data = trimmed.slice(6);
-
-                if (data === '[DONE]') {
-                    continue;
-                }
-
-                try {
-                    const event: StreamJsonEvent = JSON.parse(data);
-
-                    if (event.type === 'result') {
-                        meta.cost = event.total_cost_usd as number | undefined;
-                        meta.duration = event.duration_ms as number | undefined;
-                    }
-                    if (event.type === 'turn.completed') {
-                        const usage = event.usage as
-                            | undefined
-                            | { input_tokens?: number; output_tokens?: number };
-                        if (usage) {
-                            meta.duration = undefined;
-                        }
-                    }
-
-                    const newBlocks = parseStreamEvent(event);
-                    if (newBlocks) {
-                        const deduplicated = deduplicateBlocks(allBlocks, newBlocks);
-                        if (deduplicated.length > 0) {
-                            allBlocks.push(...deduplicated);
-                            onBlocks(deduplicated);
-                        }
-                    }
-                } catch {
-                    if (onText) {
-                        onText(data);
-                    } else {
-                        onBlocks([{ type: 'text', content: data }]);
-                    }
-                }
-            } else if (trimmed && !trimmed.startsWith(':')) {
-                try {
-                    const event: StreamJsonEvent = JSON.parse(trimmed);
-                    const newBlocks = parseStreamEvent(event);
-                    if (newBlocks) {
-                        const deduplicated = deduplicateBlocks(allBlocks, newBlocks);
-                        if (deduplicated.length > 0) {
-                            allBlocks.push(...deduplicated);
-                            onBlocks(deduplicated);
-                        }
-                    }
-                    if (event.type === 'result') {
-                        meta.cost = event.total_cost_usd as number | undefined;
-                        meta.duration = event.duration_ms as number | undefined;
-                    }
-                } catch {
-                    if (onText) {
-                        onText(`${trimmed}\n`);
-                    } else {
-                        onBlocks([{ type: 'text', content: `${trimmed}\n` }]);
-                    }
-                }
-            }
-        }
-    }
-
-    return meta;
+function isStreamEvent(value: unknown): value is StreamJsonEvent {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        typeof Reflect.get(value, 'type') === 'string'
+    );
 }
 
-export async function streamChat({
-    url,
-    fallbackUrl,
-    body,
-    onBlocks,
-    onText,
-    onDone,
-    onError,
-    signal,
-    timeout = 120_000,
-}: StreamChatOptions): Promise<void> {
-    const fetchOptions: RequestInit = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: signal || AbortSignal.timeout(timeout),
-    };
-
+function eventOf(text: string): StreamJsonEvent | undefined {
     try {
-        const res = await fetch(url, fetchOptions);
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.error || `HTTP ${res.status}`);
+        const value: unknown = JSON.parse(text);
+        return isStreamEvent(value) ? value : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function replyOf(data: unknown): string {
+    const field = REPLY_FIELDS.find((name) => textOf(data, name) !== '');
+    return field === undefined ? 'No response' : textOf(data, field);
+}
+
+class StreamCollector {
+    readonly meta: StreamMeta = {};
+    private readonly seen: ActivityBlock[] = [];
+    private readonly onBlocks: (blocks: ActivityBlock[]) => void;
+    private readonly onText: ((text: string) => void) | undefined;
+
+    constructor(
+        onBlocks: (blocks: ActivityBlock[]) => void,
+        onText: ((text: string) => void) | undefined,
+    ) {
+        this.onBlocks = onBlocks;
+        this.onText = onText;
+    }
+
+    line(raw: string): void {
+        const line = raw.trim();
+        if (line.startsWith(DATA_PREFIX)) {
+            const data = line.slice(DATA_PREFIX.length);
+            if (data !== END_OF_STREAM) {
+                this.payload(data, data);
+            }
+        } else if (line !== '' && !line.startsWith(':')) {
+            this.payload(line, `${line}\n`);
         }
-        const meta = await consumeSSEStream(res, onBlocks, onText);
-        onDone(meta);
-    } catch (primaryError) {
-        if (signal?.aborted === true) {
-            onError('Request cancelled');
+    }
+
+    reply(text: string): void {
+        this.onBlocks([{ content: text, type: 'text' }]);
+    }
+
+    private text(text: string): void {
+        if (this.onText === undefined) {
+            this.reply(text);
+        } else {
+            this.onText(text);
+        }
+    }
+
+    private payload(json: string, verbatim: string): void {
+        const event = eventOf(json);
+        if (event === undefined) {
+            this.text(verbatim);
             return;
         }
-
-        if (fallbackUrl === undefined || fallbackUrl === '') {
-            onError(primaryError instanceof Error ? primaryError.message : 'Failed to connect');
-        } else {
-            try {
-                const res = await fetch(fallbackUrl, {
-                    ...fetchOptions,
-                    signal: AbortSignal.timeout(timeout),
-                });
-                if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
-                    throw new Error(data.error || `HTTP ${res.status}`, { cause: primaryError });
-                }
-                const meta = await consumeSSEStream(res, onBlocks, onText);
-                onDone(meta);
-            } catch {
-                onError(primaryError instanceof Error ? primaryError.message : 'Failed to connect');
-            }
+        this.record(event);
+        const blocks = deduplicateBlocks(this.seen, parseStreamEvent(event) ?? []);
+        if (blocks.length > 0) {
+            this.seen.push(...blocks);
+            this.onBlocks(blocks);
         }
+    }
+
+    private record(event: StreamJsonEvent): void {
+        if (event.type === 'result') {
+            this.meta.cost = numberOf(event, 'total_cost_usd');
+            this.meta.duration = numberOf(event, 'duration_ms');
+        } else if (event.type === 'turn.completed' && event.usage !== undefined) {
+            this.meta.duration = undefined;
+        }
+    }
+}
+
+interface Stream {
+    collector: StreamCollector;
+    decoder: TextDecoder;
+    reader: ReadableStreamDefaultReader<Uint8Array>;
+}
+
+async function drain(stream: Stream, pending = ''): Promise<void> {
+    const { done, value } = await stream.reader.read();
+    if (done) {
+        return;
+    }
+    const lines = `${pending}${stream.decoder.decode(value, { stream: true })}`.split('\n');
+    const rest = lines.pop() ?? '';
+    for (const line of lines) {
+        stream.collector.line(line);
+    }
+    await drain(stream, rest);
+}
+
+async function consume(response: Response, collector: StreamCollector): Promise<void> {
+    if ((response.headers.get('content-type') ?? '').includes('application/json')) {
+        const data: unknown = await response.json();
+        collector.reply(replyOf(data));
+        return;
+    }
+    if (response.body === null) {
+        collector.reply(await response.text());
+        return;
+    }
+    await drain({ collector, decoder: new TextDecoder(), reader: response.body.getReader() });
+}
+
+async function failureOf(response: Response): Promise<string> {
+    try {
+        const data: unknown = await response.json();
+        const error = textOf(data, 'error');
+        return error === '' ? `HTTP ${response.status}` : error;
+    } catch {
+        return `HTTP ${response.status}`;
+    }
+}
+
+function messageOf(error: unknown, signal: AbortSignal | undefined): string {
+    if (signal?.aborted === true) {
+        return 'Request cancelled';
+    }
+    return error instanceof Error ? error.message : 'Failed to connect';
+}
+
+/** POST a chat message and read the reply as it streams: server-sent events, JSON lines, or one JSON body. */
+export async function streamChat(options: StreamChatOptions): Promise<void> {
+    const { body, onBlocks, onDone, onError, onText, signal, timeout = 120_000, url } = options;
+    const collector = new StreamCollector(onBlocks, onText);
+    try {
+        const response = await fetch(url, {
+            body: JSON.stringify(body),
+            headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+            signal: signal ?? AbortSignal.timeout(timeout),
+        });
+        if (!response.ok) {
+            throw new Error(await failureOf(response));
+        }
+        await consume(response, collector);
+        onDone(collector.meta);
+    } catch (error) {
+        onError(messageOf(error, signal));
     }
 }

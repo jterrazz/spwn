@@ -1,21 +1,24 @@
-import * as React from 'react';
+import { useSyncExternalStore } from 'react';
 
 const MOBILE_BREAKPOINT = 768;
+const NARROW = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
 
-export function useIsMobile() {
-    const [isMobile, setIsMobile] = React.useState<boolean | undefined>();
+function subscribe(onChange: () => void): () => void {
+    const query = globalThis.matchMedia(NARROW);
+    query.addEventListener('change', onChange);
+    return () => {
+        query.removeEventListener('change', onChange);
+    };
+}
 
-    React.useEffect(() => {
-        const mql = globalThis.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-        const onChange = () => {
-            setIsMobile(globalThis.innerWidth < MOBILE_BREAKPOINT);
-        };
-        mql.addEventListener('change', onChange);
-        setIsMobile(globalThis.innerWidth < MOBILE_BREAKPOINT);
-        return () => {
-            mql.removeEventListener('change', onChange);
-        };
-    }, []);
+function isNarrow(): boolean {
+    return globalThis.innerWidth < MOBILE_BREAKPOINT;
+}
 
-    return Boolean(isMobile);
+function onTheServer(): boolean {
+    return false;
+}
+
+export function useIsMobile(): boolean {
+    return useSyncExternalStore(subscribe, isNarrow, onTheServer);
 }

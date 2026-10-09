@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface ProgressStep {
     /** Seconds after start when this message activates */
@@ -8,34 +8,27 @@ export interface ProgressStep {
     text: string;
 }
 
+function messageAt(steps: ProgressStep[], elapsed: number): string {
+    return steps.findLast((step) => elapsed >= step.after)?.text ?? steps[0]?.text ?? '';
+}
+
 /** Returns a message string that automatically advances through the given steps based on elapsed time while `active` is true. Resets when `active` flips back to false. */
 export function useProgressMessages(active: boolean, messages: ProgressStep[]): string {
-    const fallback = messages[0]?.text ?? '';
-    const [message, setMessage] = useState(fallback);
-    const msgsRef = useRef(messages);
-    msgsRef.current = messages;
+    const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
         if (!active) {
-            setMessage(msgsRef.current[0]?.text ?? '');
             return;
         }
         const start = Date.now();
-        setMessage(msgsRef.current[0]?.text ?? '');
         const id = setInterval(() => {
-            const elapsed = (Date.now() - start) / 1000;
-            let current = msgsRef.current[0]?.text ?? '';
-            for (const m of msgsRef.current) {
-                if (elapsed >= m.after) {
-                    current = m.text;
-                }
-            }
-            setMessage(current);
+            setElapsed((Date.now() - start) / 1000);
         }, 1000);
         return () => {
             clearInterval(id);
+            setElapsed(0);
         };
     }, [active]);
 
-    return message;
+    return messageAt(messages, active ? elapsed : 0);
 }

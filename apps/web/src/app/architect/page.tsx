@@ -207,7 +207,6 @@ export default function ArchitectPage() {
         sendMessage,
         architectStatus,
         isRunning,
-        highlightTitle: _highlightTitle,
         setArchitectStatus,
         loading,
     } = useArchitectChat();

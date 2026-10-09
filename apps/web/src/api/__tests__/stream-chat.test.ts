@@ -1,103 +1,51 @@
-import { defineContracts, http, intercept } from '@jterrazz/test';
+import { http, intercept } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import type { ActivityBlock } from '../../activity/blocks';
 import { streamChat } from '../stream-chat';
+import type { StreamMeta } from '../stream-chat';
 
-const primaryUrl = 'http://spwn.test/api/worlds/w-1/talk';
-const fallbackUrl = 'http://fallback.test/api/architect/talk';
+const TALK = 'http://spwn.test/api/worlds/w-1/talk';
+const END = { data: '[DONE]' };
 
-const done = { data: '[DONE]' };
+function assistant(content: Record<string, unknown>[]) {
+    return { data: { message: { content }, type: 'assistant' } };
+}
 
-function callbacks() {
-    const blocks: unknown[][] = [];
-    const texts: string[] = [];
-    const errors: string[] = [];
-    const dones: { cost?: number | undefined; duration?: number | undefined }[] = [];
-
-    return {
-        blocks,
-        texts,
-        errors,
-        dones,
-        onBlocks: (value: unknown[]) => blocks.push(value),
-        onText: (value: string) => texts.push(value),
-        onDone: (value: { cost?: number | undefined; duration?: number | undefined }) =>
-            dones.push(value),
-        onError: (value: string) => errors.push(value),
+async function talk() {
+    const heard = {
+        blocks: [] as ActivityBlock[][],
+        done: [] as StreamMeta[],
+        errors: [] as string[],
+        texts: [] as string[],
     };
+    await streamChat({
+        body: { message: 'hi' },
+        onBlocks: (blocks) => {
+            heard.blocks.push(blocks);
+        },
+        onDone: (meta) => {
+            heard.done.push(meta);
+        },
+        onError: (error) => {
+            heard.errors.push(error);
+        },
+        onText: (text) => {
+            heard.texts.push(text);
+        },
+        url: TALK,
+    });
+    return heard;
 }
 
 describe('streamChat', () => {
-    test('parses assistant text from an SSE response', async () => {
-        // Given - one assistant event, then the closing frame
+    test('an assistant reply streamed as events arrives as its blocks, then the result prices it', async () => {
+        // Given - a text block, a tool call, then the result event that prices the turn
         await using _ = await intercept(
-            http.post(primaryUrl),
+            http.post(TALK),
             http.sse([
-                {
-                    data: {
-                        message: { content: [{ text: 'hello world', type: 'text' }] },
-                        type: 'assistant',
-                    },
-                },
-                done,
-            ]),
-        );
-
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.errors).toHaveLength(0);
-        expect(cb.dones).toHaveLength(1);
-        expect(cb.blocks.flat()).toContainEqual({ type: 'text', content: 'hello world' });
-    });
-
-    test('parses tool_use blocks from an SSE response', async () => {
-        // Given - an assistant event whose only content is a tool call
-        await using _ = await intercept(
-            http.post(primaryUrl),
-            http.sse([
-                {
-                    data: {
-                        message: {
-                            content: [
-                                {
-                                    id: 't1',
-                                    input: { command: 'ls' },
-                                    name: 'bash',
-                                    type: 'tool_use',
-                                },
-                            ],
-                        },
-                        type: 'assistant',
-                    },
-                },
-                done,
-            ]),
-        );
-
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'list files' }, ...cb });
-
-        expect(cb.errors).toHaveLength(0);
-        expect(cb.blocks.flat()).toContainEqual({
-            id: 't1',
-            input: { command: 'ls' },
-            tool: 'bash',
-            type: 'tool_use',
-        });
-    });
-
-    test('extracts cost and duration metadata from result events', async () => {
-        // Given - a reply followed by the result event that prices it
-        await using _ = await intercept(
-            http.post(primaryUrl),
-            http.sse([
-                {
-                    data: {
-                        message: { content: [{ text: 'done', type: 'text' }] },
-                        type: 'assistant',
-                    },
-                },
+                assistant([{ text: 'hello world', type: 'text' }]),
+                assistant([{ id: 't1', input: { command: 'ls' }, name: 'bash', type: 'tool_use' }]),
                 {
                     data: {
                         duration_ms: 1234,
@@ -106,140 +54,106 @@ describe('streamChat', () => {
                         type: 'result',
                     },
                 },
-                done,
+                END,
             ]),
         );
 
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.dones).toStrictEqual([{ cost: 0.05, duration: 1234 }]);
+        // Then - each block once, in order, and the turn's cost and duration
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [
+                [{ content: 'hello world', type: 'text' }],
+                [{ id: 't1', input: { command: 'ls' }, tool: 'bash', type: 'tool_use' }],
+            ],
+            done: [{ cost: 0.05, duration: 1234 }],
+            errors: [],
+            texts: [],
+        });
     });
 
-    test('handles plain text streams', async () => {
-        // Given - a body that is not SSE at all, arriving in two pieces
+    test('a thought and a failed result arrive as their own blocks', async () => {
+        // Given - a thought, then a result event carrying a failure
         await using _ = await intercept(
-            http.post(primaryUrl),
+            http.post(TALK),
+            http.sse([
+                assistant([{ text: 'Let me think', type: 'thinking' }]),
+                { data: { result: 'Rate limit exceeded', subtype: 'error', type: 'result' } },
+                END,
+            ]),
+        );
+
+        // Then - the thought, then the error
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [
+                [{ content: 'Let me think', type: 'thinking' }],
+                [{ content: 'Rate limit exceeded', type: 'error' }],
+            ],
+            done: [{ cost: undefined, duration: undefined }],
+            errors: [],
+            texts: [],
+        });
+    });
+
+    test('lines that are not events reach the text callback whole', async () => {
+        // Given - a plain-text body, arriving in two pieces
+        await using _ = await intercept(
+            http.post(TALK),
             http.stream(['Hello plain response.\n', 'Second line.\n'], {
                 contentType: 'text/plain',
             }),
         );
 
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.errors).toHaveLength(0);
-        expect(cb.dones).toHaveLength(1);
-        expect(cb.texts).toContain('Hello plain response.\n');
-    });
-
-    test('handles JSON responses', async () => {
-        // Given - a backend that answered in one serialised body
-        await using _ = await intercept(
-            http.post(primaryUrl),
-            http.json({ response: 'JSON fallback response' }),
-        );
-
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.errors).toHaveLength(0);
-        expect(cb.dones).toHaveLength(1);
-        expect(cb.blocks.flat()).toContainEqual({
-            type: 'text',
-            content: 'JSON fallback response',
+        // Then - each line, its line break kept
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [],
+            done: [{}],
+            errors: [],
+            texts: ['Hello plain response.\n', 'Second line.\n'],
         });
     });
 
-    test('reports network errors from the primary URL', async () => {
-        // Given - nothing answering at the primary URL
-        await using _ = await intercept(http.post(primaryUrl), http.unreachable());
+    test('a reply in one JSON body arrives as one text block', async () => {
+        // Given - a backend that answered in one serialised body
+        await using _ = await intercept(http.post(TALK), http.json({ response: 'one body' }));
 
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.dones).toHaveLength(0);
-        expect(cb.errors[0]).toMatch(/Failed to fetch|fetch failed/i);
+        // Then - the reply's text, as a block
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [[{ content: 'one body', type: 'text' }]],
+            done: [{}],
+            errors: [],
+            texts: [],
+        });
     });
 
-    test('reports JSON error payloads from non-2xx responses', async () => {
+    test('a refusal reports the error the backend gave', async () => {
         // Given - a backend that said no, and said why
         await using _ = await intercept(
-            http.post(primaryUrl),
+            http.post(TALK),
             http.error(500, { error: 'Internal server error' }),
         );
 
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.errors).toStrictEqual(['Internal server error']);
+        // Then - the reason, and no completion
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [],
+            done: [],
+            errors: ['Internal server error'],
+            texts: [],
+        });
     });
 
-    test('uses fallbackUrl when the primary URL fails', async () => {
-        // Given - a dead primary and a fallback that streams
-        await using _ = await intercept(
-            defineContracts(
-                { request: http.post(primaryUrl), response: http.unreachable() },
-                {
-                    request: http.post(fallbackUrl),
-                    response: http.sse([
-                        {
-                            data: {
-                                message: { content: [{ text: 'fallback response', type: 'text' }] },
-                                type: 'assistant',
-                            },
-                        },
-                        done,
-                    ]),
-                },
-            ),
-        );
+    test('an unreachable backend reports the failed fetch', async () => {
+        // Given - nothing answering
+        await using _ = await intercept(http.post(TALK), http.unreachable());
 
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, fallbackUrl, body: { message: 'hi' }, ...cb });
+        // When - the message is sent
+        const heard = await talk();
 
-        expect(cb.errors).toHaveLength(0);
-        expect(cb.dones).toHaveLength(1);
-        expect(cb.blocks.flat()).toContainEqual({ type: 'text', content: 'fallback response' });
-    });
-
-    test('reports the primary error when primary and fallback both fail', async () => {
-        // Given - neither URL answers
-        await using _ = await intercept(
-            defineContracts(
-                { request: http.post(primaryUrl), response: http.unreachable() },
-                { request: http.post(fallbackUrl), response: http.unreachable() },
-            ),
-        );
-
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, fallbackUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.errors[0]).toMatch(/Failed to fetch|fetch failed/i);
-    });
-
-    test('parses thinking and result error events', async () => {
-        // Given - a thought, then a result event that carries a failure
-        await using _ = await intercept(
-            http.post(primaryUrl),
-            http.sse([
-                {
-                    data: {
-                        message: { content: [{ text: 'Let me think', type: 'thinking' }] },
-                        type: 'assistant',
-                    },
-                },
-                {
-                    data: { result: 'Rate limit exceeded', subtype: 'error', type: 'result' },
-                },
-                done,
-            ]),
-        );
-
-        const cb = callbacks();
-        await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
-
-        expect(cb.blocks.flat()).toContainEqual({ type: 'thinking', content: 'Let me think' });
-        expect(cb.blocks.flat()).toContainEqual({ type: 'error', content: 'Rate limit exceeded' });
+        // Then - one error naming the failed fetch, and no completion
+        expect({
+            done: heard.done,
+            errors: heard.errors.map((error) => /fetch failed|Failed to fetch/iu.test(error)),
+        }).toStrictEqual({
+            done: [],
+            errors: [true],
+        });
     });
 });

@@ -1,3 +1,5 @@
+import { fieldOf, listOf, recordOf, textOf } from '../api/fields';
+
 /** Types for the ACP Live Activity system. Maps Claude Code stream-json events to renderable UI blocks. */
 
 export type ActivityBlock =
@@ -63,161 +65,84 @@ export interface StreamJsonEvent {
 export function parseStreamEvent(event: StreamJsonEvent): ActivityBlock[] | null {
     switch (event.type) {
         case 'assistant': {
-            return parseAssistantEvent(event);
+            return nonEmpty(listOf(event.message, 'content').flatMap(assistantBlockOf));
         }
         case 'user': {
-            return parseUserEvent(event);
+            return nonEmpty(listOf(event.message, 'content').flatMap(toolResultOf));
         }
         case 'result': {
-            return parseResultEvent(event);
+            return event.subtype === 'error' ? [{ content: errorOf(event), type: 'error' }] : null;
         }
-
         case 'item.completed': {
-            const item = event.item as undefined | { type?: string; text?: string };
-            if (item?.text !== undefined && item?.text !== '') {
-                return [{ type: 'text', content: item.text }];
-            }
-            return null;
+            const text = textOf(event.item, 'text');
+            return text === '' ? null : [{ content: text, type: 'text' }];
         }
-        case 'turn.completed': {
-            return null;
-        }
-
         default: {
             return null;
         }
     }
 }
 
-function parseAssistantEvent(event: StreamJsonEvent): ActivityBlock[] | null {
-    const message = event.message as
-        | undefined
-        | {
-              content?: {
-                  type: string;
-                  text?: string;
-                  name?: string;
-                  id?: string;
-                  input?: Record<string, unknown>;
-              }[];
-          };
+function errorOf(event: StreamJsonEvent): string {
+    const error = textOf(event, 'result');
+    return error === '' ? 'Unknown error' : error;
+}
 
-    if (!message?.content) {
-        return null;
-    }
-
-    const blocks: ActivityBlock[] = [];
-
-    for (const block of message.content) {
-        if (block.type === 'thinking' && block.text !== undefined && block.text !== '') {
-            blocks.push({ type: 'thinking', content: block.text });
-        } else if (block.type === 'text' && block.text !== undefined && block.text !== '') {
-            blocks.push({ type: 'text', content: block.text });
-        } else if (
-            block.type === 'tool_use' &&
-            block.name !== undefined &&
-            block.name !== '' &&
-            block.id !== undefined &&
-            block.id !== ''
-        ) {
-            blocks.push({
-                type: 'tool_use',
-                tool: block.name,
-                input: block.input || {},
-                id: block.id,
-            });
-        }
-    }
-
+function nonEmpty(blocks: ActivityBlock[]): ActivityBlock[] | null {
     return blocks.length > 0 ? blocks : null;
 }
 
-function parseUserEvent(event: StreamJsonEvent): ActivityBlock[] | null {
-    const message = event.message as
-        | undefined
-        | {
-              content?: {
-                  type: string;
-                  content?: string;
-                  tool_use_id?: string;
-                  is_error?: boolean;
-              }[];
-          };
-
-    if (!message?.content) {
-        return null;
+function assistantBlockOf(block: unknown): ActivityBlock[] {
+    const type = textOf(block, 'type');
+    const text = textOf(block, 'text');
+    if ((type === 'thinking' || type === 'text') && text !== '') {
+        return [{ content: text, type }];
     }
-
-    const blocks: ActivityBlock[] = [];
-
-    for (const block of message.content) {
-        if (
-            block.type === 'tool_result' &&
-            block.tool_use_id !== undefined &&
-            block.tool_use_id !== ''
-        ) {
-            blocks.push({
-                type: 'tool_result',
-                id: block.tool_use_id,
-                content:
-                    typeof block.content === 'string'
-                        ? block.content
-                        : JSON.stringify(block.content),
-                isError: block.is_error === true || false,
-            });
-        }
+    const tool = textOf(block, 'name');
+    const id = textOf(block, 'id');
+    if (type === 'tool_use' && tool !== '' && id !== '') {
+        return [{ id, input: recordOf(block, 'input'), tool, type: 'tool_use' }];
     }
-
-    return blocks.length > 0 ? blocks : null;
+    return [];
 }
 
-function parseResultEvent(event: StreamJsonEvent): ActivityBlock[] | null {
-    const blocks: ActivityBlock[] = [];
-
-    const resultText = event.result as string | undefined;
-    if (resultText !== undefined && resultText !== '' && event.subtype === 'success') {
+function toolResultOf(block: unknown): ActivityBlock[] {
+    const id = textOf(block, 'tool_use_id');
+    if (textOf(block, 'type') !== 'tool_result' || id === '') {
+        return [];
     }
-
-    if (event.subtype === 'error') {
-        const errorText = (event.result as string) || 'Unknown error';
-        blocks.push({ type: 'error', content: errorText });
-    }
-
-    return blocks.length > 0 ? blocks : null;
+    const content = fieldOf(block, 'content');
+    return [
+        {
+            content: typeof content === 'string' ? content : JSON.stringify(content),
+            id,
+            isError: fieldOf(block, 'is_error') === true,
+            type: 'tool_result',
+        },
+    ];
 }
 
-/** Deduplicate blocks from assistant events. Claude Code emits cumulative assistant events (each contains all content so far). We need to diff against previous blocks to extract only new content. */
+function lastOfType(
+    blocks: ActivityBlock[],
+    type: ActivityBlock['type'],
+): ActivityBlock | undefined {
+    return blocks.findLast((block) => block.type === type);
+}
+
+/** The blocks of a new event that are not already shown. Claude Code repeats every assistant event cumulatively, so a tool call is new by its id, and text and thinking are new only while the turn has shown none of their kind. */
 export function deduplicateBlocks(
     existingBlocks: ActivityBlock[],
     newBlocks: ActivityBlock[],
 ): ActivityBlock[] {
-    const added: ActivityBlock[] = [];
-
-    for (const block of newBlocks) {
+    return newBlocks.filter((block) => {
         if (block.type === 'tool_use') {
-            const exists = existingBlocks.some((b) => b.type === 'tool_use' && b.id === block.id);
-            if (!exists) {
-                added.push(block);
-            }
-        } else if (block.type === 'text') {
-            const lastExistingText = [...existingBlocks]
-                .toReversed()
-                .find((b) => b.type === 'text');
-            if (!lastExistingText) {
-                added.push(block);
-            } else if (block.content !== lastExistingText.content) {
-            }
-        } else if (block.type === 'thinking') {
-            const lastExistingThinking = [...existingBlocks]
-                .toReversed()
-                .find((b) => b.type === 'thinking');
-            if (!lastExistingThinking) {
-                added.push(block);
-            }
-        } else {
-            added.push(block);
+            return !existingBlocks.some(
+                (shown) => shown.type === 'tool_use' && shown.id === block.id,
+            );
         }
-    }
-
-    return added;
+        if (block.type === 'text' || block.type === 'thinking') {
+            return lastOfType(existingBlocks, block.type) === undefined;
+        }
+        return true;
+    });
 }

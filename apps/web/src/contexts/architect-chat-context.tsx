@@ -1,33 +1,13 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import type { ActivityBlock } from '../activity/blocks';
 import { apiGet, goApiUrl } from '../api/client';
 import { streamChat } from '../api/stream-chat';
-
-export interface ArchitectStatus {
-    status: 'running' | 'stopped';
-    containerId: null | string;
-    uptime: null | string;
-    error?: string;
-    kpis?: {
-        worlds: number;
-        agents: number;
-        tasksPending: number;
-        tasksCompleted: number;
-    };
-}
-
-export interface ChatMessage {
-    role: 'architect' | 'user';
-    content: string;
-    blocks: ActivityBlock[];
-    timestamp: Date;
-    error?: boolean | undefined;
-    cost?: number | undefined;
-    duration?: number | undefined;
-}
+import { failed, historyMessages, said, STOPPED_ARCHITECT, withBlocks } from '../domain/architect';
+import type { ArchitectStatus, ChatMessage } from '../domain/architect';
+import { useBackgroundTask } from '../hooks/use-background-task';
 
 interface ArchitectChatContextValue {
     messages: ChatMessage[];
@@ -37,276 +17,150 @@ interface ArchitectChatContextValue {
     sendMessage: () => Promise<void>;
     architectStatus: ArchitectStatus | null;
     isRunning: boolean;
-    highlightTitle: null | string;
-    refreshStatus: () => void;
     setArchitectStatus: React.Dispatch<React.SetStateAction<ArchitectStatus | null>>;
     loading: boolean;
 }
 
 const ArchitectChatContext = createContext<ArchitectChatContextValue | null>(null);
 
+const OFFLINE = 'Architect is offline. Start it first using the button above.';
+
 export function useArchitectChat() {
-    const ctx = useContext(ArchitectChatContext);
-    if (!ctx) {
+    const context = useContext(ArchitectChatContext);
+    if (context === null) {
         throw new Error('useArchitectChat must be used within ArchitectChatProvider');
     }
-    return ctx;
+    return context;
 }
 
-export function ArchitectChatProvider({ children }: { children: React.ReactNode }) {
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [chatInput, setChatInput] = useState('');
-    const [sending, setSending] = useState(false);
+function useArchitectStatus() {
     const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const refreshStatus = useCallback(() => {
-        void apiGet<ArchitectStatus>('/api/architect/status')
-            .catch(() => ({ status: 'stopped' as const, containerId: null, uptime: null }))
-            .then((archStatus) => {
-                setArchitectStatus(archStatus);
-                setLoading(false);
-            });
+    const refreshStatus = useCallback(async () => {
+        try {
+            setArchitectStatus(await apiGet<ArchitectStatus>('/api/architect/status'));
+        } catch {
+            setArchitectStatus(STOPPED_ARCHITECT);
+        }
+        setLoading(false);
     }, []);
 
-    useEffect(() => {
-        apiGet<{
-            sessions: {
-                id: string;
-                messages: {
-                    role: string;
-                    content: string;
-                    timestamp: string;
-                    type: string;
-                    toolName?: string;
-                    cost?: number;
-                    durationMs?: number;
-                }[];
-                startedAt: string;
-                cost?: number;
-            }[];
-        }>('/api/architect/history')
-            .then((data) => {
-                if (!data.sessions || data.sessions.length === 0) {
-                    return;
-                }
-                const historyMsgs: ChatMessage[] = [];
-                for (let si = 0; si < data.sessions.length; si++) {
-                    const session = data.sessions[si];
-                    if (session === undefined) {
-                        continue;
-                    }
-                    if (si > 0) {
-                        historyMsgs.push({
-                            role: 'architect',
-                            content: `── Session ${session.id.slice(0, 8)} · ${session.startedAt ? new Date(session.startedAt).toLocaleString() : 'unknown'} ──`,
-                            blocks: [{ type: 'text' as const, content: `── Previous session ──` }],
-                            timestamp: session.startedAt ? new Date(session.startedAt) : new Date(),
-                        });
-                    }
-                    for (const msg of session.messages) {
-                        if (msg.type === 'text' && msg.role === 'user') {
-                            historyMsgs.push({
-                                role: 'user',
-                                content: msg.content,
-                                blocks: [{ type: 'text' as const, content: msg.content }],
-                                timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-                            });
-                        } else if (msg.type === 'text' && msg.role === 'assistant') {
-                            historyMsgs.push({
-                                role: 'architect',
-                                content: msg.content,
-                                blocks: [{ type: 'text' as const, content: msg.content }],
-                                timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-                            });
-                        } else if (msg.type === 'tool_use') {
-                            historyMsgs.push({
-                                role: 'architect',
-                                content: `🔧 ${msg.toolName ?? 'tool'}`,
-                                blocks: [
-                                    {
-                                        type: 'tool_use',
-                                        tool: msg.toolName ?? 'tool',
-                                        input: {},
-                                        id: `hist-${si}-${historyMsgs.length}`,
-                                    },
-                                ],
-                                timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-                            });
-                        } else if (
-                            msg.type === 'result' &&
-                            msg.cost !== undefined &&
-                            msg.cost !== 0
-                        ) {
-                            const lastArch = [...historyMsgs]
-                                .toReversed()
-                                .find((m) => m.role === 'architect');
-                            if (lastArch) {
-                                lastArch.cost = msg.cost;
-                                lastArch.duration = msg.durationMs;
-                            }
-                        }
-                    }
-                }
-                if (historyMsgs.length > 0) {
-                    setMessages(historyMsgs);
-                }
-            })
-            .catch(() => {});
-    }, []);
+    useBackgroundTask(refreshStatus, 10_000);
+    return { architectStatus, loading, setArchitectStatus };
+}
 
-    useEffect(() => {
-        refreshStatus();
-        const interval = setInterval(refreshStatus, 10_000);
-        return () => {
-            clearInterval(interval);
-        };
-    }, [refreshStatus]);
+function useTalk(setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>) {
+    return useCallback(
+        async (message: string) => {
+            const reply = (update: (last: ChatMessage) => ChatMessage) => {
+                setMessages((previous) => {
+                    const last = previous.at(-1);
+                    return last?.role === 'architect'
+                        ? [...previous.slice(0, -1), update(last)]
+                        : previous;
+                });
+            };
+            const failure = (error: string) => (last: ChatMessage) => {
+                const block: ActivityBlock = { content: error, type: 'error' };
+                return { ...withBlocks(last, [block]), content: error, error: true };
+            };
+            setMessages((previous) => [
+                ...previous,
+                { blocks: [], content: '', role: 'architect', timestamp: new Date() },
+            ]);
 
-    const doTalk = useCallback(async (msg: string) => {
-        let msgIndex: number;
-        setMessages((prev) => {
-            msgIndex = prev.length;
-            return [
-                ...prev,
-                {
-                    role: 'architect' as const,
-                    content: '',
-                    blocks: [],
-                    timestamp: new Date(),
+            await streamChat({
+                body: { message },
+                onBlocks: (blocks) => {
+                    reply((last) => withBlocks(last, blocks));
                 },
-            ];
-        });
+                onDone: (meta) => {
+                    reply((last) => ({ ...last, cost: meta.cost, duration: meta.duration }));
+                },
+                onError: (error) => {
+                    reply(failure(error));
+                },
+                url: goApiUrl('/api/architect/talk'),
+            });
+        },
+        [setMessages],
+    );
+}
 
-        await streamChat({
-            url: goApiUrl('/api/architect/talk'),
-            body: { message: msg },
-            onBlocks: (newBlocks) => {
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    const last = updated[msgIndex!];
-                    if (last?.role === 'architect') {
-                        const allBlocks = [...last.blocks, ...newBlocks];
-                        const textContent = allBlocks
-                            .filter((b) => b.type === 'text')
-                            .map((b) => (b as { content: string }).content)
-                            .join('');
-                        updated[msgIndex!] = { ...last, blocks: allBlocks, content: textContent };
-                    }
-                    return updated;
-                });
-            },
-            onDone: (meta) => {
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    const last = updated[msgIndex!];
-                    if (last?.role === 'architect') {
-                        updated[msgIndex!] = { ...last, cost: meta.cost, duration: meta.duration };
-                    }
-                    return updated;
-                });
-            },
-            onError: (error) => {
-                setMessages((prev) => {
-                    const updated = [...prev];
-                    const last = updated[msgIndex!];
-                    if (last?.role === 'architect') {
-                        updated[msgIndex!] = {
-                            ...last,
-                            blocks: [...last.blocks, { type: 'error' as const, content: error }],
-                            content: error,
-                            error: true,
-                        };
-                    }
-                    return updated;
-                });
-            },
-        });
+function useConversation(running: boolean) {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [chatInput, setChatInput] = useState('');
+    const [sending, setSending] = useState(false);
+    const talk = useTalk(setMessages);
+
+    const loadHistory = useCallback(async () => {
+        try {
+            const history = historyMessages(await apiGet<unknown>('/api/architect/history'));
+            if (history.length > 0) {
+                setMessages(history);
+            }
+        } catch {
+            setMessages([]);
+        }
     }, []);
+    useBackgroundTask(loadHistory);
 
     const sendMessage = useCallback(async () => {
-        const msg = chatInput.trim();
-        if (!msg || sending) {
+        const message = chatInput.trim();
+        if (message === '' || sending) {
             return;
         }
-
-        const userMsg: ChatMessage = {
-            role: 'user',
-            content: msg,
-            blocks: [{ type: 'text', content: msg }],
-            timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, userMsg]);
+        setMessages((previous) => [...previous, said('user', message)]);
         setChatInput('');
-        setSending(true);
-
-        try {
-            const running = architectStatus?.status === 'running';
-
-            if (!running) {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        role: 'architect',
-                        content: 'Architect is offline. Start it first using the button above.',
-                        blocks: [
-                            {
-                                type: 'text' as const,
-                                content:
-                                    'Architect is offline. Start it first using the button above.',
-                            },
-                        ],
-                        timestamp: new Date(),
-                        error: true,
-                    },
-                ]);
-                setSending(false);
-                return;
-            }
-
-            await doTalk(msg);
-        } catch (error: unknown) {
-            const errMsg = error instanceof Error ? error.message : 'Unknown error';
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: 'architect',
-                    content: `Error: ${errMsg}`,
-                    blocks: [{ type: 'error' as const, content: errMsg }],
-                    timestamp: new Date(),
-                    error: true,
-                },
+        if (!running) {
+            setMessages((previous) => [
+                ...previous,
+                { ...said('architect', OFFLINE), error: true },
             ]);
+            return;
+        }
+        setSending(true);
+        try {
+            await talk(message);
+        } catch (error: unknown) {
+            const reason = error instanceof Error ? error.message : 'Unknown error';
+            setMessages((previous) => [...previous, failed(reason, `Error: ${reason}`)]);
         } finally {
             setSending(false);
         }
-    }, [chatInput, sending, architectStatus, doTalk]);
+    }, [chatInput, sending, running, talk]);
 
+    return { chatInput, messages, sending, sendMessage, setChatInput };
+}
+
+export function ArchitectChatProvider({ children }: { children: React.ReactNode }) {
+    const { architectStatus, loading, setArchitectStatus } = useArchitectStatus();
     const isRunning = architectStatus?.status === 'running';
+    const { chatInput, messages, sending, sendMessage, setChatInput } = useConversation(isRunning);
 
     const contextValue = useMemo(
         () => ({
-            messages,
+            architectStatus,
             chatInput,
-            setChatInput,
+            isRunning,
+            loading,
+            messages,
             sending,
             sendMessage,
-            architectStatus,
-            isRunning,
-            highlightTitle: null,
-            refreshStatus,
             setArchitectStatus,
-            loading,
+            setChatInput,
         }),
         [
-            messages,
+            architectStatus,
             chatInput,
+            isRunning,
+            loading,
+            messages,
             sending,
             sendMessage,
-            architectStatus,
-            isRunning,
-            refreshStatus,
-            loading,
+            setArchitectStatus,
+            setChatInput,
         ],
     );
 

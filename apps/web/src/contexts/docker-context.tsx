@@ -1,16 +1,9 @@
 'use client';
 
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { useBackgroundTask } from '../hooks/use-background-task';
 
 export interface DockerStatus {
     installed: boolean;
@@ -31,7 +24,9 @@ interface DockerContextValue {
 const DockerContext = createContext<DockerContextValue>({
     status: null,
     lastChecked: null,
-    refresh: async () => {},
+    refresh: async () => {
+        await Promise.resolve();
+    },
     ready: false,
 });
 
@@ -41,39 +36,19 @@ const POLL_INTERVAL_MS = 3000;
 export function DockerProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<DockerStatus | null | undefined>(null);
     const [lastChecked, setLastChecked] = useState<null | number>(null);
-    const mounted = useRef(true);
 
     const refresh = useCallback(async () => {
         try {
-            const data = await apiGet<DockerStatus>('/api/system/docker');
-            if (!mounted.current) {
-                return;
-            }
-            setStatus(data);
-            setLastChecked(Date.now());
+            setStatus(await apiGet<DockerStatus>('/api/system/docker'));
         } catch {
-            if (!mounted.current) {
-                return;
-            }
             setStatus(undefined);
-            setLastChecked(Date.now());
         }
+        setLastChecked(Date.now());
     }, []);
 
-    useEffect(() => {
-        mounted.current = true;
-        // oxlint-disable-next-line react-hooks/set-state-in-effect -- refresh() is async: it sets state only inside the resolved promise, never synchronously, so no render cascade
-        void refresh();
-        const id = setInterval(() => {
-            void refresh();
-        }, POLL_INTERVAL_MS);
-        return () => {
-            mounted.current = false;
-            clearInterval(id);
-        };
-    }, [refresh]);
+    useBackgroundTask(refresh, POLL_INTERVAL_MS);
 
-    const ready = Boolean(status?.installed === true && status.running);
+    const ready = status?.installed === true && status.running;
 
     const contextValue = useMemo(
         () => ({ status, lastChecked, refresh, ready }),

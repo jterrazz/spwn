@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 
 const isStaticExport = process.env.TAURI_STATIC_BUILD === '1';
 
-const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+const manifest: unknown = JSON.parse(readFileSync('./package.json', 'utf8'));
+const version: unknown =
+    typeof manifest === 'object' && manifest !== null
+        ? Reflect.get(manifest, 'version')
+        : undefined;
 
 const nextConfig: NextConfig = {
     ...(isStaticExport ? { output: 'export' } : {}),
@@ -13,7 +17,7 @@ const nextConfig: NextConfig = {
         unoptimized: true,
     },
     env: {
-        NEXT_PUBLIC_APP_VERSION: pkg.version,
+        NEXT_PUBLIC_APP_VERSION: typeof version === 'string' ? version : '',
     },
 };
 

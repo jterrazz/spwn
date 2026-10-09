@@ -1,45 +1,16 @@
-import { isTauri } from './runtime';
+import { tauriBridge } from './runtime';
 
-interface UpdateDescriptor {
-    available: boolean;
-    version?: string;
-    notes?: string;
-    downloadAndInstall?: () => Promise<void>;
-}
-
-interface TauriGlobal {
-    updater?: {
-        check: () => Promise<null | UpdateDescriptor>;
-    };
-    dialog?: {
-        ask: (
-            message: string,
-            opts?: { title?: string; kind?: 'info' | 'warning' },
-        ) => Promise<boolean>;
-    };
-    process?: {
-        relaunch: () => Promise<void>;
-    };
-}
-
-function getTauri(): null | TauriGlobal {
-    if (!isTauri()) {
-        return null;
-    }
-    return (globalThis as unknown as { __TAURI__: TauriGlobal }).__TAURI__;
-}
-
-/** Checks for a new release and, if one exists, prompts the user to install it. Called once at app startup from the shell. Silently no-ops in the browser. */
-export async function checkForUpdatesOnStartup(): Promise<void> {
-    const tauri = getTauri();
-    if (!tauri?.updater || !tauri.dialog || !tauri.process) {
-        return;
+/** Checks for a new release and, if one exists, prompts the user to install it; true once it is installed. Called once at app startup from the shell, and false in a browser. The check is best-effort: a failure leaves the running version in place. */
+export async function checkForUpdatesOnStartup(): Promise<boolean> {
+    const tauri = tauriBridge();
+    if (tauri?.updater === undefined || tauri.dialog === undefined || tauri.process === undefined) {
+        return false;
     }
 
     try {
         const update = await tauri.updater.check();
-        if (update?.available !== true || !update.downloadAndInstall) {
-            return;
+        if (update?.available !== true || update.downloadAndInstall === undefined) {
+            return false;
         }
 
         const ok = await tauri.dialog.ask(
@@ -47,10 +18,13 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
             { title: 'Update available', kind: 'info' },
         );
         if (!ok) {
-            return;
+            return false;
         }
 
         await update.downloadAndInstall();
         await tauri.process.relaunch();
-    } catch {}
+        return true;
+    } catch {
+        return false;
+    }
 }

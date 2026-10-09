@@ -12,8 +12,9 @@ import { useState } from 'react';
 
 import { Page } from '../../../components/page';
 import { PageHeader } from '../../../components/page-header';
-import { getToolByName, TOOLS } from '../../../domain/tools-catalog';
+import { getToolByName } from '../../../domain/tools-catalog';
 import type { SkillFile } from '../../../domain/tools-catalog';
+import { TOOLS } from '../../../domain/tools-catalog.data';
 import { usePageTitle } from '../../../hooks/use-page-title';
 
 function SkillContent({ content }: { content: string }) {

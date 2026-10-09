@@ -6,6 +6,13 @@ const SMOKE = process.env.SPWN_SMOKE !== undefined;
 export default defineConfig({
     platform: 'node',
     presets: [test()],
+    typescript: {
+        roots: {
+            cli: 'the cli specification: this member IS the specs tree, so its specification folders sit at its root',
+            website:
+                'the website specification: this member IS the specs tree, so its specification folders sit at its root',
+        },
+    },
     test: {
         projects: {
             cli: {
