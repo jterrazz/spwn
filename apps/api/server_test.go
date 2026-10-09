@@ -1216,6 +1216,14 @@ func TestAuthProviders(t *testing.T) {
 	if !ok {
 		t.Fatalf("providers should be an array, got %T", providers)
 	}
+	// The providers come in one order, read after read
+	var names []string
+	for _, p := range arr {
+		names = append(names, p.(map[string]interface{})["provider"].(string))
+	}
+	if strings.Join(names, ",") != "anthropic,openai" {
+		t.Errorf("providers should be listed anthropic then openai, got %v", names)
+	}
 	// Each provider should have expected fields
 	for _, p := range arr {
 		pm, ok := p.(map[string]interface{})

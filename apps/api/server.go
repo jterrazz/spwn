@@ -2147,6 +2147,8 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 		}
 		providers = append(providers, info)
 	}
+	// ResolveAll answers a map, whose order Go randomises on every read; the page lists the providers in this order.
+	sort.Slice(providers, func(i, j int) bool { return providers[i].Provider < providers[j].Provider })
 	jsonOK(w, map[string]interface{}{"providers": providers})
 }
 
