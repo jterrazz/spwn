@@ -230,6 +230,7 @@ describe('landing', () => {
         // Given - the landing page, read
         const result = await website.visit('/', async (visitor) => {
             await visitor.see(button('2 worlds'));
+            await visitor.see(settled);
 
             // When - the visitor asks for a new world and picks neo
             await visitor.click(within(main(), button('New World')));
@@ -238,8 +239,145 @@ describe('landing', () => {
         });
 
         // Then - the preview states the command, its default workspace mounted
-        expect(result.content.text).toContain(
-            'spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…',
-        );
+        expect(result.tree).toMatch(`
+            - link "⬡ spwn":
+              - /url: /
+            - text: connected
+            - button "Search (⌘K)":
+              - img
+            - list:
+              - listitem:
+                - button "Architect":
+                  - img
+                  - text: Architect
+              - listitem:
+                - button "Settings":
+                  - img
+                  - text: Settings
+            - text: Universe
+            - list:
+              - listitem:
+                - button "Worlds":
+                  - img
+                  - text: Worlds
+              - listitem:
+                - button "Agents":
+                  - img
+                  - text: Agents
+              - listitem:
+                - button "Tools":
+                  - img
+                  - text: Tools
+              - listitem:
+                - button "Organizations":
+                  - img
+                  - text: Organizations
+            - button "matrix stopped · 1 agent"
+            - button "startup"
+            - list:
+              - listitem:
+                - button "Home":
+                  - img
+                  - text: Home
+              - listitem:
+                - button "Knowledge":
+                  - img
+                  - text: Knowledge
+              - listitem:
+                - button "neo":
+                  - img
+                  - text: neo
+            - 'button "Docker status: v{{semver}}"':
+              - img
+              - text: v{{semver}}
+            - link "Docs":
+              - /url: https://spwn.sh/docs
+              - img
+            - link "GitHub":
+              - /url: https://github.com/jterrazz/spwn
+              - img
+            - link "Feedback":
+              - /url: https://github.com/jterrazz/spwn/issues/new
+              - img
+            - button "Toggle theme":
+              - img
+            - main:
+              - heading "Worlds" [level=1]
+              - paragraph: Isolated environments where your agents live and work.
+              - button "2 worlds":
+                - img
+                - text: 2 worlds
+              - button "0 alive":
+                - img
+                - text: 0 alive
+              - button "0 sleeping":
+                - img
+                - text: 0 sleeping
+              - button "New World":
+                - img
+                - text: New World
+              - button "matrix"
+              - button "startup"
+              - button
+              - button "Close"
+              - heading "New World" [level=2]
+              - paragraph: Create a new isolated world for your agent
+              - button "Close":
+                - img
+              - text: Name (optional)
+              - textbox "Name (optional)":
+                - /placeholder: My Project
+              - text: Agents (1 selected)
+              - button "Clear"
+              - list:
+                - listitem:
+                  - checkbox "analyst"
+                  - text: analyst
+                - listitem:
+                  - checkbox "ceo"
+                  - text: ceo
+                - listitem:
+                  - checkbox "neo" [checked]
+                  - text: neo
+              - textbox "New agent name":
+                - /placeholder: New agent name…
+              - button "+ Add" [disabled]
+              - text: Workspaces
+              - button "+ Add"
+              - textbox "Workspace name":
+                - /placeholder: name
+                - text: default
+              - textbox "Workspace path":
+                - /placeholder: /tmp/spwn-neo-…
+              - button "ro"
+              - button "Remove the workspace":
+                - img
+              - text: Config
+              - combobox "Config":
+                - option "default" [selected]
+                - option "backend"
+                - option "frontend"
+                - option "fullstack"
+                - option "devops"
+                - option "minimal"
+              - text: Agent Role
+              - combobox "Agent Role":
+                - option "Chief"
+                - option "Manager"
+                - option "Worker" [selected]
+              - paragraph: Preview
+              - text: spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…
+              - paragraph: → Creates isolated Docker container
+              - paragraph: "→ Deploys 1 agent: neo"
+              - paragraph: "→ default: /tmp/spwn-neo-…"
+              - button "New World":
+                - img
+                - text: New World
+            - button "Open glossary":
+              - img
+            - button "Architect offline":
+              - img
+              - text: Architect offline
+            - alert`);
     });
 });

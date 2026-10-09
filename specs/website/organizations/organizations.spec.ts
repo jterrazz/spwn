@@ -8,12 +8,113 @@ describe('organizations', () => {
         // Given - a host with only the built-in organization
         const result = await website.visit('/organizations', async (visitor) => {
             await visitor.see(content('Built-in three-tier organization'));
+            await visitor.see(content('reports to manager'));
+            await visitor.see(button('Docker status: v', { exact: false }));
         });
 
         // Then - its three levels are on the chart, with no button to delete it
-        expect(result.content.text).toContain('chief');
-        expect(result.content.text).toContain('reports to manager');
-        expect(result.content.text).not.toContain('Delete default');
+        expect(result.tree).toMatch(`
+            - link "⬡ spwn":
+              - /url: /
+            - text: connected
+            - button "Search (⌘K)":
+              - img
+            - list:
+              - listitem:
+                - button "Architect":
+                  - img
+                  - text: Architect
+              - listitem:
+                - button "Settings":
+                  - img
+                  - text: Settings
+            - text: Universe
+            - list:
+              - listitem:
+                - button "Worlds":
+                  - img
+                  - text: Worlds
+              - listitem:
+                - button "Agents":
+                  - img
+                  - text: Agents
+              - listitem:
+                - button "Tools":
+                  - img
+                  - text: Tools
+              - listitem:
+                - button "Organizations":
+                  - img
+                  - text: Organizations
+            - button "matrix stopped · 1 agent"
+            - button "startup"
+            - list:
+              - listitem:
+                - button "Home":
+                  - img
+                  - text: Home
+              - listitem:
+                - button "Knowledge":
+                  - img
+                  - text: Knowledge
+              - listitem:
+                - button "neo":
+                  - img
+                  - text: neo
+            - 'button "Docker status: v{{semver}}"':
+              - img
+              - text: v{{semver}}
+            - link "Docs":
+              - /url: https://spwn.sh/docs
+              - img
+            - link "GitHub":
+              - /url: https://github.com/jterrazz/spwn
+              - img
+            - link "Feedback":
+              - /url: https://github.com/jterrazz/spwn/issues/new
+              - img
+            - button "Toggle theme":
+              - img
+            - main:
+              - heading "Organizations" [level=1]
+              - paragraph: Define team structures and roles for multi-agent worlds.
+              - button "New Organization":
+                - img
+                - text: New Organization
+              - paragraph: Default
+              - application:
+                - img:
+                  - group "Edge from chief to manager"
+                - img:
+                  - group "Edge from manager to worker"
+                - group:
+                  - paragraph: chief
+                  - text: Level 0 max 1 delegate review orchestrate
+                  - paragraph: commands manager, worker
+                - group:
+                  - paragraph: manager
+                  - text: Level 1 delegate review execute
+                  - paragraph: reports to chief
+                  - paragraph: commands worker
+                - group:
+                  - paragraph: worker
+                  - text: Level 2 execute report
+                  - paragraph: reports to manager
+              - paragraph: Details
+              - paragraph: Slug
+              - text: default
+              - paragraph: Description
+              - text: Built-in three-tier organization
+              - paragraph: Roles
+              - text: "3"
+              - paragraph: Max Depth
+              - text: "2"
+            - button "Open glossary":
+              - img
+            - button "Architect offline":
+              - img
+              - text: Architect offline
+            - alert`);
     });
 
     test('an organization declared through the form joins the page, then is deleted', async () => {
@@ -30,9 +131,112 @@ describe('organizations', () => {
             await visitor.click(button('Delete Crew'));
             await visitor.click(button('Delete'));
             await visitor.gone(button('Delete Crew'));
+            await visitor.see(content('reports to manager'));
+            await visitor.see(button('Docker status: v', { exact: false }));
         });
 
         // Then - only the built-in organization remains
-        expect(result.content.text).not.toContain('captain');
+        expect(result.tree).toMatch(`
+            - link "⬡ spwn":
+              - /url: /
+            - text: connected
+            - button "Search (⌘K)":
+              - img
+            - list:
+              - listitem:
+                - button "Architect":
+                  - img
+                  - text: Architect
+              - listitem:
+                - button "Settings":
+                  - img
+                  - text: Settings
+            - text: Universe
+            - list:
+              - listitem:
+                - button "Worlds":
+                  - img
+                  - text: Worlds
+              - listitem:
+                - button "Agents":
+                  - img
+                  - text: Agents
+              - listitem:
+                - button "Tools":
+                  - img
+                  - text: Tools
+              - listitem:
+                - button "Organizations":
+                  - img
+                  - text: Organizations
+            - button "matrix stopped · 1 agent"
+            - button "startup"
+            - list:
+              - listitem:
+                - button "Home":
+                  - img
+                  - text: Home
+              - listitem:
+                - button "Knowledge":
+                  - img
+                  - text: Knowledge
+              - listitem:
+                - button "neo":
+                  - img
+                  - text: neo
+            - 'button "Docker status: v{{semver}}"':
+              - img
+              - text: v{{semver}}
+            - link "Docs":
+              - /url: https://spwn.sh/docs
+              - img
+            - link "GitHub":
+              - /url: https://github.com/jterrazz/spwn
+              - img
+            - link "Feedback":
+              - /url: https://github.com/jterrazz/spwn/issues/new
+              - img
+            - button "Toggle theme":
+              - img
+            - main:
+              - heading "Organizations" [level=1]
+              - paragraph: Define team structures and roles for multi-agent worlds.
+              - button "New Organization":
+                - img
+                - text: New Organization
+              - paragraph: Default
+              - application:
+                - img:
+                  - group "Edge from chief to manager"
+                - img:
+                  - group "Edge from manager to worker"
+                - group:
+                  - paragraph: chief
+                  - text: Level 0 max 1 delegate review orchestrate
+                  - paragraph: commands manager, worker
+                - group:
+                  - paragraph: manager
+                  - text: Level 1 delegate review execute
+                  - paragraph: reports to chief
+                  - paragraph: commands worker
+                - group:
+                  - paragraph: worker
+                  - text: Level 2 execute report
+                  - paragraph: reports to manager
+              - paragraph: Details
+              - paragraph: Slug
+              - text: default
+              - paragraph: Description
+              - text: Built-in three-tier organization
+              - paragraph: Roles
+              - text: "3"
+              - paragraph: Max Depth
+              - text: "2"
+            - button "Open glossary":
+              - img
+            - button "Architect offline":
+              - img
+              - text: Architect offline
+            - alert`);
     });
 });

@@ -1,4 +1,4 @@
-import { button, heading } from '@jterrazz/test';
+import { button, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -161,6 +161,7 @@ describe('agent', () => {
         // Given - neo's page
         const result = await website.visit('/agents/neo', async (visitor) => {
             await visitor.see(heading("Set up neo's identity"));
+            await visitor.see(button('Docker status: v', { exact: false }));
 
             // When - the visitor opens the profile and its empty purpose
             await visitor.click(button('Profile'));
@@ -169,10 +170,6 @@ describe('agent', () => {
         });
 
         // Then - the purpose is a field now, with its save and cancel
-        expect(result.tree.text).toContain(`- textbox "Define this agent's purpose..."
-  - button "Save":
-    - img
-  - button "Cancel":
-    - img`);
+        expect(result.tree).toMatch(file('./__expected__/profile-purpose-field.txt'));
     });
 });
