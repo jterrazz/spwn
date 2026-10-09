@@ -12,7 +12,7 @@ export function PageHeader({ title, description, actions, leading }: PageHeaderP
     return (
         <div className="flex items-start justify-between gap-4 overflow-visible">
             <div
-                className={`flex min-w-0 items-center overflow-visible ${leading ? 'gap-5 md:gap-6' : 'gap-3'}`}
+                className={`flex min-w-0 items-center overflow-visible ${leading === undefined ? 'gap-3' : 'gap-5 md:gap-6'}`}
             >
                 {leading}
                 <div className="min-w-0">
@@ -24,7 +24,9 @@ export function PageHeader({ title, description, actions, leading }: PageHeaderP
                     )}
                 </div>
             </div>
-            {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+            {actions !== undefined && (
+                <div className="flex shrink-0 items-center gap-2">{actions}</div>
+            )}
         </div>
     );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { IconArrowUp, IconX } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 
 import type { VersionInfo } from '../hooks/use-version';
 
@@ -11,21 +11,42 @@ interface UpgradeBannerProps {
     version: VersionInfo;
 }
 
+function subscribeToStorage(onChange: () => void): () => void {
+    globalThis.addEventListener('storage', onChange);
+    return () => {
+        globalThis.removeEventListener('storage', onChange);
+    };
+}
+
+function dismissedVersion(): null | string {
+    return localStorage.getItem(DISMISS_KEY);
+}
+
+// invariant: the server cannot read the browser's storage, so the banner stays hidden until the client knows whether this version was dismissed
+function unknownOnTheServer(): undefined {
+    return undefined;
+}
+
 export function UpgradeBanner({ version }: UpgradeBannerProps) {
-    const [dismissed, setDismissed] = useState(true);
+    const stored = useSyncExternalStore<null | string | undefined>(
+        subscribeToStorage,
+        dismissedVersion,
+        unknownOnTheServer,
+    );
+    const [dismissedNow, setDismissedNow] = useState(false);
 
-    useEffect(() => {
-        const dismissedVersion = localStorage.getItem(DISMISS_KEY);
-        setDismissed(dismissedVersion === version.latest);
-    }, [version.latest]);
-
-    if (!version.updateAvailable || dismissed) {
+    if (
+        !version.updateAvailable ||
+        dismissedNow ||
+        stored === undefined ||
+        stored === version.latest
+    ) {
         return null;
     }
 
     const handleDismiss = () => {
         localStorage.setItem(DISMISS_KEY, version.latest);
-        setDismissed(true);
+        setDismissedNow(true);
     };
 
     return (

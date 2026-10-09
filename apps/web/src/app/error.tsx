@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 export default function GlobalError({
     error,
@@ -10,10 +9,6 @@ export default function GlobalError({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
-    useEffect(() => {
-        console.error('Web UI error:', error);
-    }, [error]);
-
     return (
         <div className="flex min-h-screen flex-col items-center justify-center">
             <div className="text-center">
@@ -24,7 +19,7 @@ export default function GlobalError({
                     Something went wrong
                 </h2>
                 <p className="text-muted-foreground/40 mb-6 max-w-md font-mono text-sm">
-                    {error.message || 'An unexpected error occurred'}
+                    {error.message === '' ? 'An unexpected error occurred' : error.message}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                     <button

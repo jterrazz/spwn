@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
+import Script from 'next/script';
 
 import './globals.css';
 import { AppShell } from '../components/app-shell';
@@ -55,11 +56,9 @@ export default function RootLayout({
             suppressHydrationWarning
         >
             <head>
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `try{if(window.__TAURI_INTERNALS__||window.__TAURI__)document.documentElement.classList.add('tauri')}catch(e){}`,
-                    }}
-                />
+                <Script id="tauri-class" strategy="beforeInteractive">
+                    {`try{if(window.__TAURI_INTERNALS__||window.__TAURI__)document.documentElement.classList.add('tauri')}catch(e){}`}
+                </Script>
             </head>
             <body className="relative h-svh overflow-hidden">
                 <div className="flex h-full flex-col">

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 export default function WorldError({
     error,
@@ -10,10 +9,6 @@ export default function WorldError({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
-    useEffect(() => {
-        console.error('World error:', error);
-    }, [error]);
-
     return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center">
             <div className="text-center">
@@ -22,7 +17,7 @@ export default function WorldError({
                 </div>
                 <h2 className="font-heading text-foreground/80 mb-2 text-lg">World unavailable</h2>
                 <p className="text-muted-foreground/40 mb-6 max-w-sm font-mono text-sm">
-                    {error.message || 'Failed to load world data'}
+                    {error.message === '' ? 'Failed to load world data' : error.message}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                     <button

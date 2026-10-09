@@ -11,8 +11,7 @@ import { usePageTitle } from '../../../../hooks/use-page-title';
 
 export default function KnowledgePage() {
     usePageTitle('Knowledge');
-    const params = useParams();
-    const worldId = params.id as string;
+    const { id: worldId } = useParams<{ id: string }>();
     const [searchQuery, setSearchQuery] = useState('');
 
     return (

@@ -14,7 +14,7 @@ interface ToastContextValue {
 }
 
 const ToastContext = createContext<ToastContextValue>({
-    toast: () => {},
+    toast: () => undefined,
 });
 
 export function useToast() {

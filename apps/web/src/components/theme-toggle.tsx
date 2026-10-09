@@ -2,14 +2,12 @@
 
 import { IconMoonFilled, IconSunFilled } from '@tabler/icons-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+
+import { useHydrated } from '../hooks/use-hydrated';
 
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const mounted = useHydrated();
 
     if (!mounted) {
         return <div className="h-8 w-8" />;
