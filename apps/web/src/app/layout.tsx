@@ -1,7 +1,11 @@
+import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from 'geist/font/sans';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
 import Script from 'next/script';
 
+// hazard: a `next/font/google` face is fetched while a page compiles, and one failed fetch broke every later page of a
+// running `next dev`; each face ships in a package instead
+import '@fontsource-variable/space-grotesk/index.css';
 import './globals.css';
 import { AppShell } from '../components/app-shell';
 import { ArchitectChatWidget } from '../components/architect-chat-widget';
@@ -10,22 +14,6 @@ import { CommandPalette } from '../components/command-palette';
 import { ThemeProvider } from '../components/theme-provider';
 import { ToastProvider } from '../components/toast-provider';
 import { ArchitectChatProvider } from '../contexts/architect-chat-context';
-
-const geistSans = Geist({
-    variable: '--font-geist-sans',
-    subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-});
-
-const spaceGrotesk = Space_Grotesk({
-    variable: '--font-space-grotesk',
-    subsets: ['latin'],
-    weight: ['400', '500', '600', '700'],
-});
 
 export const metadata: Metadata = {
     title: {
@@ -50,7 +38,7 @@ export default function RootLayout({
 }>) {
     return (
         <html
-            className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full`}
+            className={`${GeistSans.variable} ${GeistMono.variable} h-full`}
             lang="en"
             suppressHydrationWarning
         >
