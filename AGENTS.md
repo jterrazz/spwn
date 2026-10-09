@@ -6,7 +6,7 @@ The operating system for autonomous agent worlds: compose tools, skills, and ide
 
 Three abstractions, each owning one concern:
 
-- **Runtime** (`packages/runtimes`) — how an agent runs (Claude Code today, codex next).
+- **Runtime** (`packages/runtimes`) — how an agent runs: `claude-code` or `codex`, both shipped.
 - **Backend** (`packages/container`) — where worlds run (Docker; labels are the source of truth).
 - **Mind** (`packages/agent`) — how an agent persists across worlds (`SOUL.md` + `playbooks/` + `journal/`).
 
