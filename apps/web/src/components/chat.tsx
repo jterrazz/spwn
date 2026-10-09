@@ -4,8 +4,8 @@ import { IconArrowUp } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { ActivityBlock } from '@/activity/blocks';
-import { ActivityMessageView } from '@/components/activity-blocks';
+import type { ActivityBlock } from '../activity/blocks';
+import { ActivityMessageView } from './activity-blocks';
 
 /**
  * ChatBubble is the minimal shape any caller must provide. The chat does

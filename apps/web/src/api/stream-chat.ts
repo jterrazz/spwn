@@ -3,8 +3,8 @@
  * Parses Claude Code stream-json events into ActivityBlocks.
  */
 
-import { deduplicateBlocks, parseStreamEvent } from '@/activity/blocks';
-import type { ActivityBlock, StreamJsonEvent } from '@/activity/blocks';
+import { deduplicateBlocks, parseStreamEvent } from '../activity/blocks';
+import type { ActivityBlock, StreamJsonEvent } from '../activity/blocks';
 
 export interface StreamChatOptions {
     /** Primary URL (Go API) */

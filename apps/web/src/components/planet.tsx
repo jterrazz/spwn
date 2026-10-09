@@ -4,8 +4,8 @@ import createGlobe from 'cobe';
 import type { Globe } from 'cobe';
 import { useEffect, useRef, useState } from 'react';
 
-import { getWorldName } from '@/domain/model';
-import type { World } from '@/domain/model';
+import { getWorldName } from '../domain/model';
+import type { World } from '../domain/model';
 
 interface PlanetProps {
     world: World;

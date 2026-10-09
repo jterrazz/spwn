@@ -4,18 +4,18 @@ import { IconCheck, IconPlus, IconUser, IconUsers, IconX } from '@tabler/icons-r
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { apiAction, apiGet, goApiUrl } from '@/api/client';
-import { ActionButton } from '@/components/action-button';
-import { useRefetch } from '@/components/app-shell';
-import { DataTable, SectionLabel, StatusDot } from '@/components/ds';
-import { ExpandingSearch } from '@/components/expanding-search';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getWorldName } from '@/domain/model';
-import type { Team, World } from '@/domain/model';
-import { usePageTitle } from '@/hooks/use-page-title';
-import { ROLE_BADGE } from '@/styles/status-colors';
+import { apiAction, apiGet, goApiUrl } from '../../api/client';
+import { ActionButton } from '../../components/action-button';
+import { useRefetch } from '../../components/app-shell';
+import { DataTable, SectionLabel, StatusDot } from '../../components/ds';
+import { ExpandingSearch } from '../../components/expanding-search';
+import { Page } from '../../components/page';
+import { PageHeader } from '../../components/page-header';
+import { Skeleton } from '../../components/ui/skeleton';
+import { getWorldName } from '../../domain/model';
+import type { Team, World } from '../../domain/model';
+import { usePageTitle } from '../../hooks/use-page-title';
+import { ROLE_BADGE } from '../../styles/status-colors';
 
 interface AgentListItem {
     name: string;

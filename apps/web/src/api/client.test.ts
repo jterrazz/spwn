@@ -1,7 +1,7 @@
 import { http, intercept } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import type { World } from '@/domain/model';
+import type { World } from '../domain/model';
 
 import { apiGet, setApiBase } from './client';
 

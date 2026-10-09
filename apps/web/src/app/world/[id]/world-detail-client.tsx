@@ -19,26 +19,26 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/api/client';
-import { ActionButton } from '@/components/action-button';
-import { useRefetch } from '@/components/app-shell';
+import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '../../../api/client';
+import { ActionButton } from '../../../components/action-button';
+import { useRefetch } from '../../../components/app-shell';
 import {
     DataTable,
     StatusDot as DSStatusDot,
     MetricGrid,
     SectionHeader,
     Separator,
-} from '@/components/ds';
-import { PageHeader } from '@/components/page-header';
-import { ProgressShimmer } from '@/components/progress-shimmer';
-import { useToast } from '@/components/toast-provider';
-import { Skeleton } from '@/components/ui/skeleton';
-import { WorldPlanet } from '@/components/world-planet';
-import { getWorkspaceSummary, getWorldName } from '@/domain/model';
-import type { Agent, World } from '@/domain/model';
-import { usePageTitle } from '@/hooks/use-page-title';
-import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { ROLE_BADGE } from '@/styles/status-colors';
+} from '../../../components/ds';
+import { PageHeader } from '../../../components/page-header';
+import { ProgressShimmer } from '../../../components/progress-shimmer';
+import { useToast } from '../../../components/toast-provider';
+import { Skeleton } from '../../../components/ui/skeleton';
+import { WorldPlanet } from '../../../components/world-planet';
+import { getWorkspaceSummary, getWorldName } from '../../../domain/model';
+import type { Agent, World } from '../../../domain/model';
+import { usePageTitle } from '../../../hooks/use-page-title';
+import { useProgressMessages } from '../../../hooks/use-progress-messages';
+import { ROLE_BADGE } from '../../../styles/status-colors';
 
 function timeAgo(iso: string): string {
     const d = Date.now() - new Date(iso).getTime();

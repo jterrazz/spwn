@@ -12,7 +12,7 @@ import {
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-import { goApiUrl } from '@/api/client';
+import { goApiUrl } from '../api/client';
 
 interface KnowledgeFile {
     path: string;

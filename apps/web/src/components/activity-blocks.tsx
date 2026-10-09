@@ -14,7 +14,7 @@ import {
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
-import type { ActivityBlock, ActivityMessage } from '@/activity/blocks';
+import type { ActivityBlock, ActivityMessage } from '../activity/blocks';
 
 // ── Tool icon mapping ──
 

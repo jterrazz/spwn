@@ -2,8 +2,8 @@
 
 import type { CSSProperties } from 'react';
 
-import { Planet as PlanetGlobe } from '@/components/planet';
-import type { World } from '@/domain/model';
+import { Planet as PlanetGlobe } from './planet';
+import type { World } from '../domain/model';
 
 // The placeholder "new world" record PlanetGlobe checks for via its id.
 // When id === "w-new-00000" it renders a centered "+" glyph instead of

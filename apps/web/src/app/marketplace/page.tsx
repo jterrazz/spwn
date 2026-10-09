@@ -3,11 +3,11 @@
 import { IconDownload, IconExternalLink, IconPackage } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import { goApiUrl } from '@/api/client';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { Skeleton } from '@/components/ui/skeleton';
-import { usePageTitle } from '@/hooks/use-page-title';
+import { goApiUrl } from '../../api/client';
+import { Page } from '../../components/page';
+import { PageHeader } from '../../components/page-header';
+import { Skeleton } from '../../components/ui/skeleton';
+import { usePageTitle } from '../../hooks/use-page-title';
 
 interface Dependency {
     name: string;

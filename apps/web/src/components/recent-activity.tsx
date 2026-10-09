@@ -16,7 +16,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import { apiGet } from '@/api/client';
+import { apiGet } from '../api/client';
 
 type ActivityType =
     | 'agent.created'

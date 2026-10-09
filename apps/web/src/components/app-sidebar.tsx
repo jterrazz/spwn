@@ -26,10 +26,10 @@ import {
     getConnectionStatus,
     isGoApiAvailable,
     onConnectionStatusChange,
-} from '@/api/client';
-import type { ConnectionStatus } from '@/api/client';
-import { DockerStatusPill } from '@/components/docker-status-pill';
-import { ThemeToggle } from '@/components/theme-toggle';
+} from '../api/client';
+import type { ConnectionStatus } from '../api/client';
+import { DockerStatusPill } from './docker-status-pill';
+import { ThemeToggle } from './theme-toggle';
 import {
     Sidebar,
     SidebarContent,
@@ -40,12 +40,12 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { UpgradeBanner } from '@/components/upgrade-banner';
-import { WorldPlanet } from '@/components/world-planet';
-import { getWorldName } from '@/domain/model';
-import type { Team, World } from '@/domain/model';
-import { useVersion } from '@/hooks/use-version';
+} from './ui/sidebar';
+import { UpgradeBanner } from './upgrade-banner';
+import { WorldPlanet } from './world-planet';
+import { getWorldName } from '../domain/model';
+import type { Team, World } from '../domain/model';
+import { useVersion } from '../hooks/use-version';
 
 interface StatusData {
     worlds: number;

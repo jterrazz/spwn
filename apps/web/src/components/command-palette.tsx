@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiGet } from '@/api/client';
+import { apiGet } from '../api/client';
 import {
     Command,
     CommandDialog,
@@ -21,8 +21,8 @@ import {
     CommandItem,
     CommandList,
     CommandSeparator,
-} from '@/components/ui/command';
-import type { World } from '@/domain/model';
+} from './ui/command';
+import type { World } from '../domain/model';
 
 interface AgentListItem {
     name: string;

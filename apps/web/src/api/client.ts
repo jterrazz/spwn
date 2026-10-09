@@ -3,8 +3,8 @@
  * The Go API is the sole backend - no fallback to Next.js API routes.
  */
 
-import type { Agent, AgentProfile, Workspace, World } from '@/domain/model';
-import { getTauriApiBase, initTauriApiPort, isTauri } from '@/tauri/runtime';
+import type { Agent, AgentProfile, Workspace, World } from '../domain/model';
+import { getTauriApiBase, initTauriApiPort, isTauri } from '../tauri/runtime';
 
 // Dynamic API base - Tauri app uses a random port, browser defaults to 3001
 let goApiBase: null | string = null;

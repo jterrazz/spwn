@@ -16,8 +16,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiAction, apiGet, apiPost } from '@/api/client';
-import { usePageTitle } from '@/hooks/use-page-title';
+import { apiAction, apiGet, apiPost } from '../../api/client';
+import { usePageTitle } from '../../hooks/use-page-title';
 
 interface DockerStatus {
     installed: boolean;

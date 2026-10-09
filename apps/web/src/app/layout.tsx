@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
 
 import './globals.css';
-import { AppShell } from '@/components/app-shell';
-import { ArchitectChatWidget } from '@/components/architect-chat-widget';
-import { Aurora } from '@/components/aurora';
-import { CommandPalette } from '@/components/command-palette';
-import { ThemeProvider } from '@/components/theme-provider';
-import { ToastProvider } from '@/components/toast-provider';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { ArchitectChatProvider } from '@/contexts/architect-chat-context';
+import { AppShell } from '../components/app-shell';
+import { ArchitectChatWidget } from '../components/architect-chat-widget';
+import { Aurora } from '../components/aurora';
+import { CommandPalette } from '../components/command-palette';
+import { ThemeProvider } from '../components/theme-provider';
+import { ToastProvider } from '../components/toast-provider';
+import { TooltipProvider } from '../components/ui/tooltip';
+import { ArchitectChatProvider } from '../contexts/architect-chat-context';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',

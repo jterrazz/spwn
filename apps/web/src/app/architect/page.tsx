@@ -10,18 +10,18 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { goApiUrl } from '@/api/client';
-import { ActionButton } from '@/components/action-button';
-import { Chat } from '@/components/chat';
-import type { ChatBubble } from '@/components/chat';
-import { MetricGrid } from '@/components/ds';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { ProgressShimmer } from '@/components/progress-shimmer';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useArchitectChat } from '@/contexts/architect-chat-context';
-import { usePageTitle } from '@/hooks/use-page-title';
-import { useProgressMessages } from '@/hooks/use-progress-messages';
+import { goApiUrl } from '../../api/client';
+import { ActionButton } from '../../components/action-button';
+import { Chat } from '../../components/chat';
+import type { ChatBubble } from '../../components/chat';
+import { MetricGrid } from '../../components/ds';
+import { Page } from '../../components/page';
+import { PageHeader } from '../../components/page-header';
+import { ProgressShimmer } from '../../components/progress-shimmer';
+import { Skeleton } from '../../components/ui/skeleton';
+import { useArchitectChat } from '../../contexts/architect-chat-context';
+import { usePageTitle } from '../../hooks/use-page-title';
+import { useProgressMessages } from '../../hooks/use-progress-messages';
 
 // ── Architect States ────────────────────────────────────────────────────
 

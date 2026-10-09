@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/styles/class-names';
+import { cn } from '../styles/class-names';
 
 export function Aurora({ className }: { className?: string }) {
     return (

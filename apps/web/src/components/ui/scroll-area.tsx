@@ -3,7 +3,7 @@
 import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area';
 import * as React from 'react';
 
-import { cn } from '@/styles/class-names';
+import { cn } from '../../styles/class-names';
 
 function ScrollArea({ className, children, ...props }: ScrollAreaPrimitive.Root.Props) {
     return (

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { getConnectionStatus, isGoApiAvailable, onConnectionStatusChange } from '@/api/client';
-import type { ConnectionStatus } from '@/api/client';
+import { getConnectionStatus, isGoApiAvailable, onConnectionStatusChange } from '../api/client';
+import type { ConnectionStatus } from '../api/client';
 
 const STATUS_CONFIG: Record<
     ConnectionStatus,

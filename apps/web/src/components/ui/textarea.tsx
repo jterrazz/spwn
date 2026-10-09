@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/styles/class-names';
+import { cn } from '../../styles/class-names';
 
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
     return (

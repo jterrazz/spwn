@@ -6,14 +6,14 @@ import type { Edge, Node, NodeProps } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import '@xyflow/react/dist/style.css';
-import { apiDelete, apiGet, apiPost } from '@/api/client';
-import { ActionButton } from '@/components/action-button';
-import { KeyValue, SectionHeader, Separator, SubLabel } from '@/components/ds';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { Organization, OrganizationRole } from '@/domain/model';
-import { usePageTitle } from '@/hooks/use-page-title';
+import { apiDelete, apiGet, apiPost } from '../../api/client';
+import { ActionButton } from '../../components/action-button';
+import { KeyValue, SectionHeader, Separator, SubLabel } from '../../components/ds';
+import { Page } from '../../components/page';
+import { PageHeader } from '../../components/page-header';
+import { Skeleton } from '../../components/ui/skeleton';
+import type { Organization, OrganizationRole } from '../../domain/model';
+import { usePageTitle } from '../../hooks/use-page-title';
 
 // ── Role colors by level ──────────────────────────────────────────
 const LEVEL_COLORS: Record<number, { border: string; text: string; bg: string; glow: string }> = {

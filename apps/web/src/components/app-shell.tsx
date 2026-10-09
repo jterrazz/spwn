@@ -3,15 +3,15 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-import { apiGet } from '@/api/client';
-import { AppSidebar } from '@/components/app-sidebar';
-import { DockerLockScreen } from '@/components/docker-lock-screen';
-import { ErrorBoundary } from '@/components/error-boundary';
-import { GlossaryButton } from '@/components/glossary-button';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { DockerProvider, useDocker } from '@/contexts/docker-context';
-import type { World } from '@/domain/model';
-import { checkForUpdatesOnStartup } from '@/tauri/updater';
+import { apiGet } from '../api/client';
+import { AppSidebar } from './app-sidebar';
+import { DockerLockScreen } from './docker-lock-screen';
+import { ErrorBoundary } from './error-boundary';
+import { GlossaryButton } from './glossary-button';
+import { SidebarInset, SidebarProvider } from './ui/sidebar';
+import { DockerProvider, useDocker } from '../contexts/docker-context';
+import type { World } from '../domain/model';
+import { checkForUpdatesOnStartup } from '../tauri/updater';
 
 // ── Refetch context: allows any child to trigger an immediate data refetch ──
 const RefetchContext = createContext<() => void>(() => {});

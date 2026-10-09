@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import { GLASS_PILL_CLASS } from '@/components/glass-pill';
-import { cn } from '@/styles/class-names';
+import { GLASS_PILL_CLASS } from './glass-pill';
+import { cn } from '../styles/class-names';
 
 // Icon-only round variant and icon+text pill variant share the same base
 // Glass chrome. See components/glass-pill.ts for the canonical styling.

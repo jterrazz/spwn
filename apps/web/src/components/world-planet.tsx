@@ -1,4 +1,4 @@
-import type { World } from '@/domain/model';
+import type { World } from '../domain/model';
 
 // Deterministic hue from world id - same world reads as the same color
 // Wherever it's rendered (sidebar hero, switcher pill, world page title).

@@ -3,8 +3,8 @@
 import { IconSearch } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from '@/components/glass-pill';
-import { cn } from '@/styles/class-names';
+import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from './glass-pill';
+import { cn } from '../styles/class-names';
 
 const COLLAPSED_WIDTH = GLASS_PILL_HEIGHT;
 const EXPAND_EASING = 'cubic-bezier(0.32, 0.72, 0.24, 1)'; // Apple-style soft-out

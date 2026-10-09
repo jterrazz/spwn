@@ -17,11 +17,11 @@ import {
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { TOOLS, toolSlug } from '@/domain/tools-catalog';
-import type { ToolDef, ToolStatus } from '@/domain/tools-catalog';
-import { usePageTitle } from '@/hooks/use-page-title';
+import { Page } from '../../components/page';
+import { PageHeader } from '../../components/page-header';
+import { TOOLS, toolSlug } from '../../domain/tools-catalog';
+import type { ToolDef, ToolStatus } from '../../domain/tools-catalog';
+import { usePageTitle } from '../../hooks/use-page-title';
 
 // ── Icon map ────────────────────────────────────────────────────────────
 

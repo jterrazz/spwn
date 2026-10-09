@@ -3,7 +3,7 @@
 import { IconBrandDocker, IconExternalLink, IconLoader2, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import { useDocker } from '@/contexts/docker-context';
+import { useDocker } from '../contexts/docker-context';
 
 /**
  * Full-area lock screen shown whenever the host Docker daemon is not

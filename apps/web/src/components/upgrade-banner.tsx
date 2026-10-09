@@ -3,7 +3,7 @@
 import { IconArrowUp, IconX } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import type { VersionInfo } from '@/hooks/use-version';
+import type { VersionInfo } from '../hooks/use-version';
 
 const DISMISS_KEY = 'spwn-upgrade-dismissed';
 

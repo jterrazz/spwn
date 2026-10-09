@@ -25,9 +25,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/api/client';
-import { ActionButton } from '@/components/action-button';
-import { useRefetch } from '@/components/app-shell';
+import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '../api/client';
+import { ActionButton } from '../components/action-button';
+import { useRefetch } from '../components/app-shell';
 import {
     ItemList,
     MetricGrid,
@@ -35,20 +35,20 @@ import {
     SectionLabel,
     Separator,
     StatusDot,
-} from '@/components/ds';
-import { GLASS_PILL_CLASS } from '@/components/glass-pill';
-import { NewWorldCard } from '@/components/new-world-card';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { Planet as PlanetGlobe } from '@/components/planet';
-import { ProgressShimmer } from '@/components/progress-shimmer';
-import { Skeleton } from '@/components/ui/skeleton';
-import { WorldPlanet } from '@/components/world-planet';
-import { AVAILABLE_CONFIGS, getWorldName } from '@/domain/model';
-import type { World } from '@/domain/model';
-import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
-import { usePageTitle } from '@/hooks/use-page-title';
-import { useProgressMessages } from '@/hooks/use-progress-messages';
+} from '../components/ds';
+import { GLASS_PILL_CLASS } from '../components/glass-pill';
+import { NewWorldCard } from '../components/new-world-card';
+import { Page } from '../components/page';
+import { PageHeader } from '../components/page-header';
+import { Planet as PlanetGlobe } from '../components/planet';
+import { ProgressShimmer } from '../components/progress-shimmer';
+import { Skeleton } from '../components/ui/skeleton';
+import { WorldPlanet } from '../components/world-planet';
+import { AVAILABLE_CONFIGS, getWorldName } from '../domain/model';
+import type { World } from '../domain/model';
+import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
+import { usePageTitle } from '../hooks/use-page-title';
+import { useProgressMessages } from '../hooks/use-progress-messages';
 
 interface AgentListItem {
     name: string;

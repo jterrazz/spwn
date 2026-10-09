@@ -3,11 +3,11 @@
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
-import { ExpandingSearch } from '@/components/expanding-search';
-import { KnowledgeBrowser } from '@/components/knowledge-browser';
-import { Page } from '@/components/page';
-import { PageHeader } from '@/components/page-header';
-import { usePageTitle } from '@/hooks/use-page-title';
+import { ExpandingSearch } from '../../../../components/expanding-search';
+import { KnowledgeBrowser } from '../../../../components/knowledge-browser';
+import { Page } from '../../../../components/page';
+import { PageHeader } from '../../../../components/page-header';
+import { usePageTitle } from '../../../../hooks/use-page-title';
 
 export default function KnowledgePage() {
     usePageTitle('Knowledge');

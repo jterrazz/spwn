@@ -2,7 +2,7 @@
 
 import { IconBrandDocker } from '@tabler/icons-react';
 
-import { useDocker } from '@/contexts/docker-context';
+import { useDocker } from '../contexts/docker-context';
 
 /**
  * Compact Docker status indicator for the sidebar footer. Always visible

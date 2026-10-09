@@ -2,9 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import type { ActivityBlock } from '@/activity/blocks';
-import { apiGet, goApiUrl } from '@/api/client';
-import { streamChat } from '@/api/stream-chat';
+import type { ActivityBlock } from '../activity/blocks';
+import { apiGet, goApiUrl } from '../api/client';
+import { streamChat } from '../api/stream-chat';
 
 // ── Types ──
 

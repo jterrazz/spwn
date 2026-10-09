@@ -10,9 +10,9 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { Chat } from '@/components/chat';
-import type { ChatBubble } from '@/components/chat';
-import { useArchitectChat } from '@/contexts/architect-chat-context';
+import { Chat } from './chat';
+import type { ChatBubble } from './chat';
+import { useArchitectChat } from '../contexts/architect-chat-context';
 
 function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
     return (

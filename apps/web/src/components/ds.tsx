@@ -8,7 +8,7 @@
 
 import type { ReactNode } from 'react';
 
-import { cn } from '@/styles/class-names';
+import { cn } from '../styles/class-names';
 
 // ── Section Header ──────────────────────────────────────────────────
 // Left accent bar + bold uppercase mono label.

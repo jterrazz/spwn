@@ -23,12 +23,12 @@ import {
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 
-import { apiAction, apiDelete, apiGet, apiPut, encPath, goApiUrl } from '@/api/client';
-import { streamChat } from '@/api/stream-chat';
-import { ActionButton } from '@/components/action-button';
-import { useRefetch } from '@/components/app-shell';
-import { Chat, ChatSuggestions } from '@/components/chat';
-import type { ChatBubble } from '@/components/chat';
+import { apiAction, apiDelete, apiGet, apiPut, encPath, goApiUrl } from '../../../api/client';
+import { streamChat } from '../../../api/stream-chat';
+import { ActionButton } from '../../../components/action-button';
+import { useRefetch } from '../../../components/app-shell';
+import { Chat, ChatSuggestions } from '../../../components/chat';
+import type { ChatBubble } from '../../../components/chat';
 import {
     ItemList,
     KeyValue,
@@ -38,16 +38,16 @@ import {
     Separator,
     StatusDot,
     SubLabel,
-} from '@/components/ds';
-import { InlineEdit, InlineTagsEdit } from '@/components/inline-edit';
-import { PageHeader } from '@/components/page-header';
-import { ProgressShimmer } from '@/components/progress-shimmer';
-import { Skeleton } from '@/components/ui/skeleton';
-import { AVAILABLE_ROLES, getWorldName } from '@/domain/model';
-import type { AgentProfile, Organization, Team, World } from '@/domain/model';
-import { usePageTitle } from '@/hooks/use-page-title';
-import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { ROLE_BADGE } from '@/styles/status-colors';
+} from '../../../components/ds';
+import { InlineEdit, InlineTagsEdit } from '../../../components/inline-edit';
+import { PageHeader } from '../../../components/page-header';
+import { ProgressShimmer } from '../../../components/progress-shimmer';
+import { Skeleton } from '../../../components/ui/skeleton';
+import { AVAILABLE_ROLES, getWorldName } from '../../../domain/model';
+import type { AgentProfile, Organization, Team, World } from '../../../domain/model';
+import { usePageTitle } from '../../../hooks/use-page-title';
+import { useProgressMessages } from '../../../hooks/use-progress-messages';
+import { ROLE_BADGE } from '../../../styles/status-colors';
 
 export default function AgentProfilePageWrapper() {
     return (

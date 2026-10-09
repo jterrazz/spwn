@@ -10,7 +10,7 @@ import {
     useState,
 } from 'react';
 
-import { apiGet } from '@/api/client';
+import { apiGet } from '../api/client';
 
 export interface DockerStatus {
     installed: boolean;
