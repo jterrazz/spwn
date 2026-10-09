@@ -1,0 +1,5 @@
+
+  → Destroying world...
+  ✗ Destroy failed           world neo not found
+    Check that world "neo" exists with "spwn world list"
+

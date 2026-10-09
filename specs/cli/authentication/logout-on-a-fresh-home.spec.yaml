@@ -1,0 +1,15 @@
+description: logging out of a provider a fresh home never logged into clears nothing, twice alike
+env: sealed
+runs:
+    - command: auth logout anthropic
+      exit: 0
+      stderr: |4+
+          
+            anthropic    already logged out
+
+    - command: auth logout anthropic
+      exit: 0
+      stderr: |4+
+          
+            anthropic    already logged out
+

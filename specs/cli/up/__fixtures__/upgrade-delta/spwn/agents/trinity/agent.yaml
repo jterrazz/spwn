@@ -1,0 +1,7 @@
+name: trinity
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"

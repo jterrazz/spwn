@@ -1,0 +1,20 @@
+description: in a home with no project, the roster table lists a new agent unattached
+env: isolated
+runs:
+    - command: agent new neo
+      exit: 0
+      stderr: |4+
+          
+            → Creating agent "neo"...
+            ✓ Created agent            neo
+            ✓ Created soul             SOUL.md
+
+            ✓ Spawn with: spwn up --agent neo
+
+    - command: agent ls
+      exit: 0
+      stderr: |4+
+          
+            AGENT   STATUS         WORLD   
+            neo     ○ unattached   —       
+

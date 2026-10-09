@@ -31,4 +31,4 @@ runs:
           spwn/agents/dylan/agent.yaml: exists
           spwn/agents/dylan/SOUL.md: exists
           spwn/knowledge: exists
-          spwn.yaml: { contains: "knowledge: ./spwn/knowledge" }
+          spwn.yaml: { contains: 'knowledge: ./spwn/knowledge' }

@@ -13,7 +13,7 @@ runs:
             ✓ Spawn with: spwn up --agent trinity
 
       files:
-          spwn/agents/trinity/SOUL.md: { contains: "# Default Soul" }
+          spwn/agents/trinity/SOUL.md: { contains: '# Default Soul' }
           spwn/agents/trinity/playbooks: exists
           spwn/agents/trinity/journal: exists
           spwn/agents/trinity/skills: absent

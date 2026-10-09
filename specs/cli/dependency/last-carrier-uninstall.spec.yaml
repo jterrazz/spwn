@@ -24,3 +24,57 @@ runs:
       stdout: |4
             ✓  uninstalled spwn:qmd
                1 agent updated
+      files:
+          spwn/agents/mark/agent.yaml:
+              equals: |
+                  name: mark
+                  description: Mark — team lead; reads the handbook first, delegates second, finishes the batch.
+                  role: chief
+                  runtime:
+                      backend: spwn:claude-code
+                  dependencies:
+                      - skill/refine
+          spwn/agents/helly/agent.yaml:
+              equals: |
+                  name: helly
+                  description: Helly — newest refiner; sharp, skeptical, surfaces the assumption everyone else skipped.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn/agents/irving/agent.yaml:
+              equals: |
+                  name: irving
+                  description: Irving — senior refiner by the book; cites the handbook, upholds procedure, escalates anything outside it.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn/agents/dylan/agent.yaml:
+              equals: |
+                  name: dylan
+                  description: Dylan — fastest refiner on the floor; results-hungry, metrics-first, always knows his batch count.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn.lock:
+              equals: |
+                  # spwn.lock — DO NOT EDIT
+                  spwn:git latest builtin
+                  spwn:unix latest builtin

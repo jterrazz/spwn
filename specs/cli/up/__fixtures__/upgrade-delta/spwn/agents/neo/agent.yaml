@@ -1,0 +1,10 @@
+name: neo
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  - "spwn:qmd"

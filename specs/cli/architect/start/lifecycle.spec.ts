@@ -1,0 +1,47 @@
+import { directory, file } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
+
+import { cli } from '../../cli.specification.js';
+import { ARCHITECT_IMAGE_OVERRIDE, withoutArchitect } from '../__setup__/architect.js';
+
+const architect = cli.with({ env: { SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE } });
+
+describe('lifecycle', () => {
+    test('start provisions the architect container on the override image', async () => {
+        // Given - the architect started
+        withoutArchitect();
+        await using result = await architect
+            .fixture(directory('../../__fixtures__/docker-pilot/'))
+            .exec('architect start');
+
+        // Then - the session names the container it created
+        expect(result.exitCode).toBe(0);
+        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
+        expect(result.stderr).toMatch(file('./__expected__/started.txt'));
+    });
+
+    test('a second start reports the architect already running', async () => {
+        // Given - the architect started twice
+        withoutArchitect();
+        await using result = await architect
+            .fixture(directory('../../__fixtures__/docker-pilot/'))
+            .exec(['architect start', 'architect start']);
+
+        // Then - the second start changes nothing and says so
+        expect(result.exitCode).toBe(0);
+        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
+        expect(result.stderr).toMatch(file('./__expected__/already-running.txt'));
+    });
+
+    test('a stopped architect reports not running', async () => {
+        // Given - the architect started, stopped, then asked for its status
+        withoutArchitect();
+        await using result = await architect
+            .fixture(directory('../../__fixtures__/docker-pilot/'))
+            .exec(['architect start', 'architect stop', 'architect status']);
+
+        // Then - the status report finds no container
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr).toMatch(file('../__expected__/not-running.txt'));
+    });
+});

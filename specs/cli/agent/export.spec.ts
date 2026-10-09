@@ -1,29 +1,24 @@
 import { file } from '@jterrazz/test';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/**
- * The one export spec whose subject is INSIDE the archive. The framework
- * reads file text, not tar entries, so this shells out to `tar tzf` over
- * the cwd — genuine test plumbing, not a file assertion. The session
- * itself stays in `exported-archive.spec.yaml`, asserted whole by
- * `cli.run()`; the code adds the listing.
- *
- * Every other export and import spec is a document beside this file.
- */
+describe('export', () => {
+    test('the exported archive carries the soul and both mind layers', async () => {
+        // Given - the create and export session, stated whole in the document
+        const result = await cli.run(file('./exported-archive.spec.yaml'));
 
-test('the exported archive carries every mind layer', async () => {
-    // Given - the create + export session, stated in the document
-    const result = await cli.run(file('./exported-archive.spec.yaml'));
-
-    // Then - the tarball listing carries the Soul plus the two Mind layer dirs
-    const listing = execSync(`tar tzf ${join(result.filesystem.cwd, 'neo.tar.gz')}`, {
-        encoding: 'utf8',
+        // Then - the archive lists the soul and the two layer folders, read with tar since the result reads files, not archive entries
+        const listing = execFileSync('tar', ['tzf', join(result.filesystem.cwd, 'neo.tar.gz')], {
+            encoding: 'utf8',
+        });
+        expect(
+            listing
+                .split('\n')
+                .filter((entry) => entry !== '')
+                .toSorted(),
+        ).toStrictEqual(['.', 'AGENTS.md', 'SOUL.md', 'agent.yaml', 'journal', 'playbooks']);
     });
-    expect(listing).toContain('SOUL.md');
-    expect(listing).toMatch(/(?:^|\n)playbooks(?:\/|\n|$)/);
-    expect(listing).toMatch(/(?:^|\n)journal(?:\/|\n|$)/);
 });

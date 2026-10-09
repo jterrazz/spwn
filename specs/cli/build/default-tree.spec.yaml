@@ -11,4 +11,4 @@ runs:
             2 file(s) written, runtime=claude-code
 
       files:
-          dist/agents/neo/CLAUDE.md: { contains: "## Role here" }
+          dist/agents/neo/CLAUDE.md: { contains: '## Role here' }

@@ -1,5 +1,5 @@
 # Overlay: docker-pilot base + a colony roster (worlds.neo carries the
-# [morpheus, neo] roster), layered after $FIXTURES/docker-pilot/ alongside
+# [morpheus, neo] roster), layered after the shared docker-pilot/ alongside
 # the morpheus agent tree.
 version: 1
 name: docker-pilot

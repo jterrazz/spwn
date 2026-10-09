@@ -1,0 +1,8 @@
+
+  → Destroying world...
+  ✓ Stopped agent
+  ✓ Removed container
+  ✓ Mind persisted           ~/.spwn/agents/neo
+
+  ✓ World destroyed. Agent survives.
+

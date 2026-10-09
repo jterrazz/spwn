@@ -25,4 +25,4 @@ runs:
 
 
       files:
-          spwn.yaml: { contains: "name: forced-project" }
+          spwn.yaml: { contains: 'name: forced-project' }

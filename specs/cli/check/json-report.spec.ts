@@ -1,55 +1,75 @@
-import { directory, file } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { directory } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
 
-import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
-/**
- * `spwn check --json` — the machine-readable report. These stay in code
- * because the comparison is STRUCTURAL: `expect(result.json).toMatch(…)`
- * judges the envelope by shape against `_expected/*.json`, and the compile
- * pass is filtered by a field rather than read as text. A document's
- * `stdout:` is byte-exact prose; it has no vocabulary for either. The text
- * reports next door are documents.
- *
- * The runner is docker-aware, so every result binds with `await using` even
- * though check spawns no containers (rule B5).
- */
+describe('json-report', () => {
+    test('a valid project reports no issue', async () => {
+        // Given - the single-agent project
+        await using result = await cli
+            .fixture(directory('../__fixtures__/single-agent/'))
+            .exec('check --json');
 
-test('emits a JSON report for a valid project', async () => {
-    // Given - the frozen single-agent fixture
-    await using result = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('check --json');
+        // Then - the envelope is valid and empty
+        expect(result.exitCode).toBe(0);
+        expect(result.json).toMatch({
+            issues: [],
+            manifestPath: '{{workdir}}/spwn.yaml',
+            summary: { errors: 0, info: 0, warnings: 0 },
+            valid: true,
+        });
+    });
 
-    // Then - exits zero and emits the canonical JSON envelope
-    expect(result.exitCode).toBe(0);
-    expect(result.json).toMatch(file('./__expected__/valid.json'));
-});
+    test('an unknown built-in is one manifest error naming every built-in', async () => {
+        // Given - a project whose agent depends on spwn:nonexistent
+        await using result = await cli
+            .fixture(directory('../__fixtures__/check-invalid-tool/'))
+            .exec('check --json');
 
-test('emits a JSON report listing rule violations', async () => {
-    // Given - check-invalid-tool references a nonexistent built-in
-    await using result = await cli.fixture(directory('../__fixtures__/check-invalid-tool/')).exec('check --json');
+        // Then - the envelope carries the one error and its hint
+        expect(result.exitCode).toBe(1);
+        expect(result.json).toMatch({
+            issues: [
+                {
+                    hint: 'available built-ins: spwn:architect, spwn:build, spwn:cli, spwn:docker-cli, spwn:gh, spwn:git, spwn:mcp2cli, spwn:mempalace, spwn:node, spwn:notion, spwn:python, spwn:qmd, spwn:unix, spwn:x, spwn:claude-code, spwn:codex',
+                    level: 'error',
+                    message: 'dependency "spwn:nonexistent" does not exist',
+                    path: 'spwn/agents/neo/agent.yaml#deps',
+                    source: 'manifest',
+                },
+            ],
+            manifestPath: '{{workdir}}/spwn.yaml',
+            summary: { errors: 1, info: 0, warnings: 0 },
+            valid: false,
+        });
+    });
 
-    // Then - exits non-zero and the issue list is structurally stable
-    expect(result.exitCode).toBe(1);
-    expect(result.json).toMatch(file('./__expected__/invalid-tool.json'));
-});
+    test('--deep reports an empty agent prompt as a compile issue', async () => {
+        // Given - the single-agent project with an empty AGENTS.md, checked deep
+        await using result = await cli
+            .fixture(directory('../__fixtures__/single-agent/'))
+            .fixture(directory('../__fixtures__/empty-agents-md/'))
+            .exec('check --deep --json');
 
-test('--deep --json tags compile issues with source=compile', async () => {
-    // Given - an overlay with an empty AGENTS.md, checked deep as JSON
-    await using result = await cli
-        .fixture(directory('../__fixtures__/single-agent/'))
-        .fixture(directory('./__fixtures__/empty-agents-md/'))
-        .exec('check --deep --json');
-
-    // Then - the report flags a compile-sourced issue (scalpel: the compile issue set is dynamic)
-    expect(result.exitCode).toBe(1);
-    const report = result.json.value as {
-        issues: { level: string; message: string; source?: string }[];
-        summary: { errors: number };
-        valid: boolean;
-    };
-    expect(report.valid).toBe(false);
-    const compileIssues = report.issues.filter((issue) => issue.source === 'compile');
-    expect(compileIssues.length).toBeGreaterThan(0);
-    expect(required(compileIssues[0], 'the first compile issue').message).toContain('agent prompt');
+        // Then - the envelope carries the compile issue
+        expect(result.exitCode).toBe(1);
+        expect(result.json).toMatch({
+            valid: false,
+            manifestPath: '{{workdir}}/spwn.yaml',
+            summary: {
+                errors: 1,
+                warnings: 0,
+                info: 0,
+            },
+            issues: [
+                {
+                    level: 'error',
+                    path: 'spwn/agents/neo/AGENTS.md',
+                    message: 'agent prompt is missing or empty',
+                    hint: "create spwn/agents/neo/AGENTS.md with the agent's system prompt",
+                    source: 'compile',
+                },
+            ],
+        });
+    });
 });

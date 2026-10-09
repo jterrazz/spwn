@@ -1,0 +1,6 @@
+
+  → Stopping project worlds...
+  ✓ Destroyed                world-neo-{{hex}} (neo)
+
+  ✓ 1 project world(s) destroyed.
+

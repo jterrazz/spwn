@@ -1,0 +1,7 @@
+
+  → Starting Architect (building image if needed)...
+  Connecting to Docker opening Docker client
+  already_running {{hex}}
+  ✓ Architect                already running
+
+  Container:   spwn-architect

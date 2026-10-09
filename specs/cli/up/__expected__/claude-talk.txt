@@ -1,0 +1,4 @@
+
+  Agent:       neo
+  World:       world-neo-{{hex}}
+

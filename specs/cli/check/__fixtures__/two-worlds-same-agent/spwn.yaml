@@ -1,5 +1,5 @@
 # Overlay: single-agent base + a second world "duplicate" claiming the same
-# neo agent, layered after $FIXTURES/single-agent/.
+# neo agent, layered after the shared single-agent/.
 version: 1
 name: single-agent
 

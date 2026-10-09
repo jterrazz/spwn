@@ -1,0 +1,11 @@
+
+  spwn vdev
+  {{workdir}}/spwn-home · not configured · 0 skills
+
+  ── world-neo-{{hex}} · neo {{any}} running · {{duration}} ──
+     {{workdir}}
+
+     ○ neo          worker   idle
+
+  ── Architect ──────────────────────────────── offline ──
+

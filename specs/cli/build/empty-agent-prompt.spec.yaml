@@ -1,7 +1,7 @@
 description: an empty AGENTS.md is rejected with a loud error
 fixture:
     - ../__fixtures__/docker-pilot/
-    - ./__fixtures__/empty-agents-md/
+    - ../__fixtures__/empty-agents-md/
 runs:
     - command: build --tree-only
       exit: 1

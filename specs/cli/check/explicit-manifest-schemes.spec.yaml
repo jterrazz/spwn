@@ -40,7 +40,15 @@ runs:
                1 agent updated, spwn.lock pinned
       files:
           spwn/agents/neo/agent.yaml:
-              contains:
-                  - 'spwn:qmd'
-                  - 'skill/focus'
-                  - 'spwn:unix'
+              equals: |
+                  name: neo
+                  description: A blank-slate agent — replace this one-liner with what neo is for.
+                  dependencies:
+                      - spwn:unix
+                      - spwn:git
+                      - spwn:python
+                      - skill/focus
+                      - tool/greet
+                      - hook/session-banner
+                      - command/refactor
+                      - spwn:qmd

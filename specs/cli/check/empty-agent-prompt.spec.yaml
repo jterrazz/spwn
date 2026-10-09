@@ -1,7 +1,7 @@
 description: an empty AGENTS.md passes the shallow check and fails the deep one
 fixture:
     - ../__fixtures__/single-agent/
-    - ./__fixtures__/empty-agents-md/
+    - ../__fixtures__/empty-agents-md/
 runs:
     - command: check
       exit: 0

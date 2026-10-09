@@ -1,0 +1,29 @@
+
+  ⬡ Waking neo
+
+  Environment
+    → Connecting to Docker…
+    ✓ Docker                 connected
+    → Checking credentials…
+    ✓ Credentials            none · not configured
+    ✓ Agent                  neo
+
+  Image
+    ├ tools: spwn:unix, spwn:git, spwn:claude-code
+    ✓ {{any}} spwn/world:latest
+
+  Spawn
+    ✓ Created container      world-neo-{{hex#world}}
+    ✓ Tools verified         3 verified
+    ✓ Prompt                 per-agent CLAUDE.md
+    → Spawning agent…
+    ✓ Agent spawned          detached
+
+  ✓ Agent is alive.
+
+  World:       world-neo-{{hex#world}}
+  Agent:       agent-neo-{{hex}}
+
+  Talk: spwn agent talk neo
+  Logs: spwn world logs world-neo-{{hex#world}}
+

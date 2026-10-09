@@ -24,8 +24,7 @@ build: ## Build the spwn binary into .artifacts/go/spwn
 generate: ## Run every //go:generate directive (refreshes the embedded catalog)
 	@$(TURBO) run generate --filter=dependency
 
-fix: ## Repair what a fixer can: gofmt, then every TypeScript fixer
-	gofmt -w apps packages
+fix: ## Repair what a fixer can: every fixer of the TypeScript toolchain
 	pnpm run lint:fix
 
 lint: ## golangci-lint across go.work, then every gate of the TypeScript toolchain
@@ -48,7 +47,7 @@ test-pkg: generate ## Verbose go test for one package, e.g. make test-pkg PKG=ag
 	else echo "no such package: $(PKG)" >&2; exit 1; fi
 
 test-image: ## Build spwn-test:latest, the base image holding the mock Claude and Codex runtimes
-	docker build --quiet -t spwn-test:latest -f specs/__fixtures__/simulators/Dockerfile specs/__fixtures__/simulators
+	docker build --quiet -t spwn-test:latest -f docker/spwn-test/Dockerfile docker/spwn-test
 
 test-go-e2e: generate test-image ## Go world E2E (//go:build e2e), Docker required
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
@@ -57,7 +56,7 @@ test-compile-e2e: generate ## Go image-build E2E (compile and Dockerfile renderi
 	cd packages/compile && go test -v -tags=e2e -timeout=15m ./e2e/...
 
 test-smoke: build ## Real image builds: spwn init, up, tool probe (~10 minutes cold)
-	SPWN_SMOKE=1 pnpm -C specs exec vitest --run --project cli specs/cli/smoke
+	SPWN_SMOKE=1 pnpm -C specs exec vitest --run --project cli
 
 install-binary: build ## Install the built binary into ~/.local/bin
 	@scripts/install.sh

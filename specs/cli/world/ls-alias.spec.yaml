@@ -1,0 +1,18 @@
+description: world ls is the short spelling of world list
+fixture: ../__fixtures__/single-agent/
+runs:
+    - command: world ls --json
+      exit: 0
+      stdout: |
+          {
+            "mode": "project",
+            "worlds": [
+              {
+                "name": "neo",
+                "status": "stopped",
+                "agents": [
+                  "neo"
+                ]
+              }
+            ]
+          }

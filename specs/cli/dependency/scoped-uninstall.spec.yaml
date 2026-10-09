@@ -25,7 +25,12 @@ runs:
             ✓  uninstalled spwn:qmd
                1 agent updated
       files:
-          spwn/agents/helly/agent.yaml: { contains: "spwn:qmd" }
-          spwn/agents/irving/agent.yaml: { contains: "spwn:qmd" }
-          spwn/agents/dylan/agent.yaml: { contains: "spwn:qmd" }
-          spwn.lock: { contains: "spwn:qmd" }
+          spwn/agents/mark/agent.yaml:
+              equals: |
+                  name: mark
+                  description: Mark — team lead; reads the handbook first, delegates second, finishes the batch.
+                  role: chief
+                  runtime:
+                      backend: spwn:claude-code
+                  dependencies:
+                      - skill/refine

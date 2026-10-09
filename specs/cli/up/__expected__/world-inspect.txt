@@ -1,0 +1,17 @@
+
+  World:       world-neo-{{hex}}
+
+  Config:      neo
+  Backend:     docker
+  Status:      running
+  Created:     {{date}} {{time}} ({{duration}} ago)
+
+  Agent:       agent-neo-{{hex}}
+
+  Laws:        Network: bridge
+
+  Workspaces:  1 mounted under /workspaces/
+    {{string}}: {{workdir}} → /workspaces/{{string}}
+  Agent homes: 
+    neo:       {{workdir}}/spwn/agents/neo → /agents/neo
+

@@ -1,0 +1,4 @@
+# spwn.lock — DO NOT EDIT
+spwn:git latest builtin
+spwn:python latest builtin
+spwn:unix latest builtin

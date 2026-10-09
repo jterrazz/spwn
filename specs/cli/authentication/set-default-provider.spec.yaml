@@ -8,4 +8,4 @@ runs:
             ✓ default provider set to anthropic
 
       files:
-          spwn-home/auth.yaml: { contains: "default_provider: anthropic" }
+          spwn-home/auth.yaml: { contains: 'default_provider: anthropic' }

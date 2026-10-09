@@ -1,0 +1,27 @@
+description: auth login with no flag renders the dashboard instead of prompting
+env: sealed
+runs:
+    - command: auth login anthropic
+      exit: 0
+      stderr: |4+
+          
+
+            ⬡ Credentials
+
+            Anthropic
+              · oauth          not set  ·  run `claude login` on the host — spwn picks up credentials automatically
+              · api_key        not set  ·  spwn auth login anthropic --api-key sk-ant-…
+
+            OpenAI
+              · oauth          not set  ·  run `codex login` on the host — spwn picks up credentials automatically
+              · api_key        not set  ·  spwn auth login openai --api-key sk-… or export OPENAI_API_KEY=sk-…
+
+            Tools (CLI)
+              · github         not set  ·  spwn auth login github
+              · google         not set  ·  spwn auth login google
+
+            Tools (MCP)
+              · notion         not set  ·  spwn auth login notion
+
+            Default: none set  ·  spwn auth default <provider>
+

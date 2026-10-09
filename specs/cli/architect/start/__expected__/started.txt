@@ -1,0 +1,19 @@
+
+  → Starting Architect (building image if needed)...
+  Connecting to Docker opening Docker client
+  Resolving image alpine:latest
+  Image ready  alpine:latest
+  Syncing credentials syncing host credentials
+  Preparing host files stack ready
+  Creating container spwn-architect
+  Starting container {{hex#container}}
+  Architect is ready {{hex#container}}
+  ✓ Docker connected
+
+  ✓ Architect started
+
+  Container:   spwn-architect
+  ID:          {{hex#container}}
+
+  Status: spwn architect status
+  Stop:   spwn architect stop
