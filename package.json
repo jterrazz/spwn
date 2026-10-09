@@ -1,14 +1,14 @@
 {
     "name": "spwn",
     "private": true,
-    "type": "module",
     "workspaces": [
         "apps/*",
         "specs"
     ],
+    "type": "module",
     "scripts": {
-        "lint": "typescript check --ignore-pattern \"**/testdata/**\"",
-        "lint:fix": "typescript fix --ignore-pattern \"**/testdata/**\""
+        "lint": "typescript check --ignore-pattern \"**/testdata\" --ignore-pattern \"**/testdata/**\" --ignore-pattern \"**/testdata/**/.*\" --ignore-pattern \"**/testdata/**/.*/**\"",
+        "lint:fix": "typescript fix --ignore-pattern \"**/testdata\" --ignore-pattern \"**/testdata/**\" --ignore-pattern \"**/testdata/**/.*\" --ignore-pattern \"**/testdata/**/.*/**\""
     },
     "devDependencies": {
         "@jterrazz/test": "file:.artifacts/packages/jterrazz-test-17.0.0.tgz",
@@ -16,12 +16,12 @@
         "turbo": "2.11.1",
         "vitest": "^5.0.1"
     },
-    "packageManager": "pnpm@9.15.9",
     "devEngines": {
         "packageManager": {
             "name": "pnpm",
             "version": "9.15.9",
             "onFail": "download"
         }
-    }
+    },
+    "packageManager": "pnpm@9.15.9"
 }
