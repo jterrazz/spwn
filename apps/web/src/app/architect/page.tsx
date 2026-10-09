@@ -434,7 +434,7 @@ export default function ArchitectPage() {
                     />
 
                     <Chat
-                        autoFocus
+                        focusInput
                         className="min-h-[320px] flex-1"
                         disabled={sending}
                         emptyState={

@@ -136,7 +136,6 @@ export function ArchitectChatWidget() {
                 </div>
 
                 <Chat
-                    autoFocus={expanded}
                     className="flex-1 px-3 pb-3"
                     disabled={sending}
                     emptyState={
@@ -159,6 +158,7 @@ export function ArchitectChatWidget() {
                         </div>
                     }
                     extras={() => null}
+                    focusInput={expanded}
                     input={chatInput}
                     messages={bubbles}
                     onInputChange={setChatInput}

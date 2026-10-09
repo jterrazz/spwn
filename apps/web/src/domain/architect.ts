@@ -109,10 +109,3 @@ export function historyMessages(history: unknown): ChatMessage[] {
     }
     return messages;
 }
-
-/** The reply with new blocks appended, its content the text they carry. */
-export function withBlocks(reply: ChatMessage, blocks: ActivityBlock[]): ChatMessage {
-    const all = [...reply.blocks, ...blocks];
-    const content = all.flatMap((block) => (block.type === 'text' ? [block.content] : [])).join('');
-    return { ...reply, blocks: all, content };
-}

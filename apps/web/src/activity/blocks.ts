@@ -146,3 +146,13 @@ export function deduplicateBlocks(
         return true;
     });
 }
+
+/** A message with new blocks appended, its content the text they carry. */
+export function withBlocks<Message extends { blocks: ActivityBlock[]; content: string }>(
+    message: Message,
+    blocks: ActivityBlock[],
+): Message {
+    const all = [...message.blocks, ...blocks];
+    const content = all.flatMap((block) => (block.type === 'text' ? [block.content] : [])).join('');
+    return { ...message, blocks: all, content };
+}

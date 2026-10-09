@@ -28,7 +28,7 @@ interface ChatProps {
     extras?: (msg: ChatBubble, index: number) => ReactNode;
     assistantLabel?: string;
     userLabel?: string;
-    autoFocus?: boolean;
+    focusInput?: boolean;
     className?: string;
     input?: string;
     onInputChange?: (value: string) => void;
@@ -45,7 +45,7 @@ export function Chat({
     extras,
     assistantLabel = 'assistant',
     userLabel = 'you',
-    autoFocus,
+    focusInput,
     className = '',
     input: controlledInput,
     onInputChange,
@@ -63,10 +63,10 @@ export function Chat({
     }, [messages.length, disabled]);
 
     useEffect(() => {
-        if (autoFocus === true) {
+        if (focusInput === true) {
             inputRef.current?.focus();
         }
-    }, [autoFocus]);
+    }, [focusInput]);
 
     const trimmed = input.trim();
 

@@ -1,6 +1,6 @@
 import type { Agent, AgentProfile, Workspace, World } from '../domain/model';
 import { getTauriApiBase, initTauriApiPort, isTauri } from '../tauri/runtime';
-import { textOf } from './fields';
+import { listOf, textOf } from './fields';
 
 let goApiBase: null | string = null;
 
@@ -184,17 +184,23 @@ function normalizeWorlds(data: RawWorld[]): World[] {
     });
 }
 
-function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
+// outside: the Go API writes an empty list as null and leaves an unset field out, so every field of a profile is read with its default
+function normalizeAgent(data: unknown): AgentProfile {
+    const team = textOf(data, 'team');
     return {
-        role: data.role ?? 'worker',
-        engine: '',
-        provider: '',
-        purpose: '',
-        profile: '',
-        traits: [],
-        skills: [],
-        journal: [],
-        ...data,
+        engine: textOf(data, 'engine'),
+        journal: listOf(data, 'journal').map((entry) => ({
+            date: textOf(entry, 'date'),
+            summary: textOf(entry, 'summary'),
+        })),
+        name: textOf(data, 'name'),
+        profile: textOf(data, 'profile'),
+        provider: textOf(data, 'provider'),
+        purpose: textOf(data, 'purpose'),
+        role: textOf(data, 'role') || 'worker',
+        skills: listOf(data, 'skills').map(String),
+        traits: listOf(data, 'traits').map(String),
+        ...(team === '' ? {} : { team }),
     };
 }
 
@@ -211,7 +217,7 @@ export async function apiGet<T>(goPath: string): Promise<T> {
         return payload<T>(normalizeWorlds(payload<RawWorld[]>(data)));
     }
     if (AGENT_PATH.test(goPath) && textOf(data, 'name') !== '') {
-        return payload<T>(normalizeAgent(payload<Partial<AgentProfile> & { name: string }>(data)));
+        return payload<T>(normalizeAgent(data));
     }
     return payload<T>(data);
 }

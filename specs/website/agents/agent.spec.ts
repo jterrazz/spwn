@@ -95,14 +95,17 @@ describe('agent', () => {
                 - text: Delete
               - heading "Set up neo's identity" [level=3]
               - paragraph: Give this agent a purpose so it knows what to focus on.
-              - button:
+              - button "Dismiss":
                 - img
               - text: Purpose
-              - textbox "What is this agent's purpose?"
+              - textbox "Purpose":
+                - /placeholder: What is this agent's purpose?
               - text: Profile
-              - textbox "Describe their profile..."
+              - textbox "Profile":
+                - /placeholder: Describe their profile...
               - text: Traits
-              - textbox "e.g. curious, creative, diligent"
+              - textbox "Traits":
+                - /placeholder: e.g. curious, creative, diligent
               - paragraph: Press Enter in any field to save. Fill purpose to dismiss this banner.
               - button "Chat":
                 - img

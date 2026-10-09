@@ -2,12 +2,11 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { ActivityBlock } from '../activity/blocks';
 import { apiGet, goApiUrl } from '../api/client';
-import { streamChat } from '../api/stream-chat';
-import { failed, historyMessages, said, STOPPED_ARCHITECT, withBlocks } from '../domain/architect';
+import { failed, historyMessages, said, STOPPED_ARCHITECT } from '../domain/architect';
 import type { ArchitectStatus, ChatMessage } from '../domain/architect';
 import { useBackgroundTask } from '../hooks/use-background-task';
+import { useReplyStream } from '../hooks/use-reply-stream';
 
 interface ArchitectChatContextValue {
     messages: ChatMessage[];
@@ -50,49 +49,15 @@ function useArchitectStatus() {
     return { architectStatus, loading, setArchitectStatus };
 }
 
-function useTalk(setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>) {
-    return useCallback(
-        async (message: string) => {
-            const reply = (update: (last: ChatMessage) => ChatMessage) => {
-                setMessages((previous) => {
-                    const last = previous.at(-1);
-                    return last?.role === 'architect'
-                        ? [...previous.slice(0, -1), update(last)]
-                        : previous;
-                });
-            };
-            const failure = (error: string) => (last: ChatMessage) => {
-                const block: ActivityBlock = { content: error, type: 'error' };
-                return { ...withBlocks(last, [block]), content: error, error: true };
-            };
-            setMessages((previous) => [
-                ...previous,
-                { blocks: [], content: '', role: 'architect', timestamp: new Date() },
-            ]);
-
-            await streamChat({
-                body: { message },
-                onBlocks: (blocks) => {
-                    reply((last) => withBlocks(last, blocks));
-                },
-                onDone: (meta) => {
-                    reply((last) => ({ ...last, cost: meta.cost, duration: meta.duration }));
-                },
-                onError: (error) => {
-                    reply(failure(error));
-                },
-                url: goApiUrl('/api/architect/talk'),
-            });
-        },
-        [setMessages],
-    );
+function isReply(message: ChatMessage): boolean {
+    return message.role === 'architect';
 }
 
 function useConversation(running: boolean) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [sending, setSending] = useState(false);
-    const talk = useTalk(setMessages);
+    const stream = useReplyStream(setMessages, isReply);
 
     const loadHistory = useCallback(async () => {
         try {
@@ -122,14 +87,18 @@ function useConversation(running: boolean) {
         }
         setSending(true);
         try {
-            await talk(message);
+            await stream(
+                goApiUrl('/api/architect/talk'),
+                { message },
+                { blocks: [], content: '', role: 'architect', timestamp: new Date() },
+            );
         } catch (error: unknown) {
             const reason = error instanceof Error ? error.message : 'Unknown error';
             setMessages((previous) => [...previous, failed(reason, `Error: ${reason}`)]);
         } finally {
             setSending(false);
         }
-    }, [chatInput, sending, running, talk]);
+    }, [chatInput, sending, running, stream]);
 
     return { chatInput, messages, sending, sendMessage, setChatInput };
 }

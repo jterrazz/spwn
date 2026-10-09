@@ -25,6 +25,7 @@ export interface World {
     created_at: string;
     workspaces?: undefined | Workspace[];
     manifest?: WorldManifest;
+    organization?: string;
 }
 
 /** Short human-readable summary of a world's workspace mounts, for display. Empty for ephemeral worlds (no host mounts). */
