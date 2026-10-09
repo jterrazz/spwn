@@ -1,6 +1,13 @@
 # spwn — the manual
 
-Everything this repository knows about itself, by what the reader came to do. What spwn is, and its quickstart, is the README at the root of the repository.
+Everything this repository knows about itself, by what the reader came to do. What spwn is, why it exists, and its quickstart, is the README at the root of the repository; new here, [Getting started](start/getting-started.md) comes next.
+
+## Start
+
+| Page                                        | Answers                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Getting started](start/getting-started.md) | What a project holds, and the four ideas: one file per agent, the repo, worlds, runtimes |
+| [Use cases](start/use-cases.md)             | Four sessions from an empty directory, end to end                                        |
 
 ## Guides
 
