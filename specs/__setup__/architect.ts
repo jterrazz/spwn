@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -10,6 +10,7 @@ export const ARCHITECT_IMAGE_OVERRIDE = 'alpine:latest';
 // this lock while its chain runs — the files run in parallel workers, and unlocked they removed each other's container
 const LOCK = join(tmpdir(), 'spwn-specs-architect.lock');
 const OWNER = join(LOCK, 'pid');
+const PID_WRITE_GRACE_MS = 5000;
 
 function holderAlive(): boolean {
     const pid = Number(readFileSync(OWNER, { encoding: 'utf8', flag: 'r' }));
@@ -25,11 +26,13 @@ function tryLock(): boolean {
     try {
         mkdirSync(LOCK);
     } catch {
-        let alive = true;
+        let alive: boolean;
         try {
             alive = holderAlive();
         } catch {
-            // value: a lock folder whose pid file is not written yet belongs to a live worker taking it
+            // invariant: a worker writes its pid right after taking the folder, so a folder without one past the grace was left by a worker that died between the two; a folder already gone is taken on the next turn
+            const taken = statSync(LOCK, { throwIfNoEntry: false });
+            alive = taken === undefined || Date.now() - taken.mtimeMs < PID_WRITE_GRACE_MS;
         }
         if (alive) {
             return false;
