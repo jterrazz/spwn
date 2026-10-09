@@ -1,4 +1,4 @@
-import { button, heading, link } from '@jterrazz/test';
+import { button, field, heading, link } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -126,5 +126,24 @@ describe('agents', () => {
         // Then - the address names the agent and the world it was opened from
         const address = new URL(result.url);
         expect(`${address.pathname}${address.search}`).toBe('/agents/neo?world=matrix');
+    });
+
+    test('a new agent is created in limbo and opened', async () => {
+        // Given - the roster
+        const result = await website.visit('/agents', async (visitor) => {
+            await visitor.see(link('neo worker stopped matrix'));
+
+            // When - the visitor creates trinity
+            await visitor.click(button('New Agent'));
+            await visitor.fill(
+                field('Creates a new agent identity in limbo. Deploy it to a world when ready.'),
+                'trinity',
+            );
+            await visitor.click(button('Create'));
+            await visitor.see(heading('trinity'));
+        });
+
+        // Then - the new agent's own page
+        expect(new URL(result.url).pathname).toBe('/agents/trinity');
     });
 });
