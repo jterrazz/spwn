@@ -5,10 +5,13 @@
     "description": "The Playwright sidecar inside the spwn gate: an HTTP service any catalog tool calls to drive a Chromium page loaded with the user's session cookies.",
     "type": "module",
     "scripts": {
-        "start": "node src/index.ts"
+        "start": "node src/index.ts",
+        "test": "vitest --run"
+    },
+    "dependencies": {
+        "playwright": "1.59.1"
     },
     "devDependencies": {
-        "@types/node": "^25.5.0",
-        "playwright": "1.59.1"
+        "@types/node": "^25.5.0"
     }
 }
