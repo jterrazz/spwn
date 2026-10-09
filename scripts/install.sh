@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Install .artifacts/go/spwn into ~/.local/bin (or $INSTALL_DIR if set) and
-# make sure that dir is on PATH.
-#
-# Expected precondition: the binary is already built (run `make build` first).
-# This script is invoked by `make install`.
 
 set -euo pipefail
 
@@ -20,17 +15,14 @@ mkdir -p "$INSTALL_DIR"
 cp "$BIN" "$INSTALL_DIR/spwn"
 chmod +x "$INSTALL_DIR/spwn"
 
-# Ad-hoc codesign on macOS so gatekeeper doesn't nag. Ignore failures
-# (non-darwin, missing codesign, unsigned identity, etc.).
+# outside: an ad-hoc signature keeps Gatekeeper quiet on macOS; elsewhere codesign is absent and the failure is moot
 codesign -s - "$INSTALL_DIR/spwn" 2>/dev/null || true
 
-# Ensure INSTALL_DIR is on PATH. If not, append an export line to the
-# First rc file we find; fall back to ~/.profile.
 case ":$PATH:" in
     *":$INSTALL_DIR:"*)
-        # Already on PATH, nothing to do.
         ;;
     *)
+        # value: the first shell rc file found gets the export, else ~/.profile
         added=false
         for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
             if [ -f "$rc" ]; then

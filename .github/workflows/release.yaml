@@ -1,185 +1,149 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+    push:
+        tags:
+            - 'v*'
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  # spwn ships two distinct artifacts on every release:
-  #
-  #   1. The CLI binary - built and uploaded by goreleaser into the
-  #      same GitHub Release this job creates. Stays inline because
-  #      goreleaser is materially better than the central
-  #      release-go.yaml's raw `go build` flow for our cross-compile
-  #      matrix + checksums + archive needs.
-  #
-  #   2. The Tauri desktop app - built, code-signed and notarized
-  #      by the centralized jterrazz/jterrazz-actions reusable
-  #      workflow. The desktop bundle ships the spwn CLI as a Tauri
-  #      sidecar, so the desktop job runs Go itself and re-builds
-  #      the CLI in-place via the pre-build-script input. The
-  #      goreleaser job above doesn't help here because tauri-action
-  #      needs the binary on disk, not in a release asset.
-  #
-  #   3. The updater manifest (latest.json) - generated AFTER the
-  #      desktop builds upload their .tar.gz artifacts. We sign each
-  #      artifact with the Tauri updater key and compose the JSON
-  #      that the desktop app checks on startup.
+    # value: a release ships three things — the CLI, built by goreleaser into the release this job opens (its cross-compiled matrix, checksums and archives); the Tauri desktop app, built, signed and notarized by the shared reusable workflow, which bundles the CLI as a sidecar and so rebuilds it on disk; and the updater manifest, latest.json, signed from the desktop archives once they are uploaded
+    cli:
+        name: CLI release
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-  cli:
-    name: CLI release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: '1.25'
+                  cache-dependency-path: apps/cli/go.sum
+
+            - name: Run GoReleaser
+              uses: goreleaser/goreleaser-action@v6
+              with:
+                  version: '~> v2'
+                  args: release --clean
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # value: the desktop app and its updater manifest are off (`if: false`) until the signing and notarization secrets are in place; the CLI job alone serves `curl | bash` and `spwn upgrade`
+    desktop:
+        name: Desktop release
+        if: false
+        needs: cli
+        uses: jterrazz/jterrazz-actions/.github/workflows/release-tauri.yaml@main
         with:
-          fetch-depth: 0
+            project-path: apps/web
+            go-version: '1.25'
+            pre-build-script: |
+                # invariant: the embedded catalog is a gitignored mirror only `go generate` writes; every build needs it first
+                cd packages/dependency && go generate ./... && cd ../..
+                cd apps/cli && go build -o ../../.artifacts/go/spwn ./cmd/spwn
+                cd ../..
+            release-name: 'spwn ${{ github.ref_name }}'
+            release-body: 'CLI + desktop app for managing AI agent worlds'
+        secrets: inherit
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.25'
-          cache-dependency-path: apps/cli/go.sum
+    updater:
+        name: Updater manifest
+        if: false
+        needs: desktop
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          version: '~> v2'
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Install Rust (for cargo-tauri signer)
+              uses: dtolnay/rust-toolchain@stable
 
-  # Desktop app + updater manifest are temporarily disabled while we
-  # stabilise the CLI release path. The Tauri build kept failing on
-  # signing/notarization secrets that aren't worth chasing right now;
-  # CLI artefacts ship via the `cli` job above and that's enough for
-  # `curl | bash` install + `spwn upgrade`. Re-enable both jobs by
-  # restoring the `if: false` guard below to a real condition (or
-  # removing the guard entirely) once the desktop pipeline is green.
-  desktop:
-    name: Desktop release
-    if: false  # disabled — see comment above
-    needs: cli
-    uses: jterrazz/jterrazz-actions/.github/workflows/release-tauri.yaml@main
-    with:
-      project-path: apps/web
-      go-version: "1.25"
-      pre-build-script: |
-        # Regenerate the embedded catalog mirror. `//go:embed all:content`
-        # in packages/dependency/internal/adapters/spwn/loader.go points
-        # at a gitignored tree that's only populated by this generate
-        # step — missing it makes every `go build` fail with "pattern
-        # all:content: no matching files found". `make build` wires
-        # this as a prerequisite; the release pipeline must too.
-        cd packages/dependency && go generate ./... && cd ../..
-        # Build the CLI sidecar that the Tauri app will spawn at runtime.
-        cd apps/cli && go build -o ../../.artifacts/go/spwn ./cmd/spwn
-        cd ../..
-      release-name: "spwn ${{ github.ref_name }}"
-      release-body: "CLI + desktop app for managing AI agent worlds"
-    secrets: inherit
+            - name: Install tauri-cli
+              run: cargo install tauri-cli --version "^2" --locked
 
-  updater:
-    name: Updater manifest
-    if: false  # disabled — depends on desktop, see comment on `desktop`
-    needs: desktop
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+            - name: Download release artifacts and generate latest.json
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+              run: |
+                  set -euo pipefail
+                  TAG="${{ github.ref_name }}"
+                  VERSION="${TAG#v}"
+                  REPO="${{ github.repository }}"
+                  BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
+                  WORKDIR=$(mktemp -d)
 
-      - name: Install Rust (for cargo-tauri signer)
-        uses: dtolnay/rust-toolchain@stable
+                  sign_and_add() {
+                    local platform="$1" asset="$2"
+                    local url="${BASE_URL}/${asset}"
 
-      - name: Install tauri-cli
-        run: cargo install tauri-cli --version "^2" --locked
+                    echo "Processing ${platform} → ${asset}"
 
-      - name: Download release artifacts and generate latest.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          TAG="${{ github.ref_name }}"
-          VERSION="${TAG#v}"
-          REPO="${{ github.repository }}"
-          BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
-          WORKDIR=$(mktemp -d)
+                    if ! gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null; then
+                      echo "  Skipping ${platform}: ${asset} not found"
+                      return 1
+                    fi
 
-          sign_and_add() {
-            local platform="$1" asset="$2"
-            local url="${BASE_URL}/${asset}"
+                    # hazard: the key is passed from the environment, never a file, whose encoding the signer misreads
+                    cargo tauri signer sign \
+                      --private-key "$TAURI_SIGNING_PRIVATE_KEY" \
+                      --password "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" \
+                      "${WORKDIR}/${asset}" 2>&1 || true
 
-            echo "Processing ${platform} → ${asset}"
+                    local sig=""
+                    if [ -f "${WORKDIR}/${asset}.sig" ]; then
+                      sig=$(cat "${WORKDIR}/${asset}.sig")
+                    fi
 
-            if ! gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null; then
-              echo "  Skipping ${platform}: ${asset} not found"
-              return 1
-            fi
+                    if [ -z "$sig" ]; then
+                      echo "  Warning: no signature for ${platform}"
+                      return 1
+                    fi
 
-            # Sign using env var directly (avoids file encoding issues)
-            cargo tauri signer sign \
-              --private-key "$TAURI_SIGNING_PRIVATE_KEY" \
-              --password "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" \
-              "${WORKDIR}/${asset}" 2>&1 || true
+                    echo "  Signed ${platform} ✓"
+                    # hazard: a file collects the entries, because a variable set inside this function's subshell is lost
+                    printf '"%s": { "signature": "%s", "url": "%s" }\n' \
+                      "$platform" "$sig" "$url" >> "${WORKDIR}/entries.txt"
+                  }
 
-            local sig=""
-            if [ -f "${WORKDIR}/${asset}.sig" ]; then
-              sig=$(cat "${WORKDIR}/${asset}.sig")
-            fi
+                  touch "${WORKDIR}/entries.txt"
 
-            if [ -z "$sig" ]; then
-              echo "  Warning: no signature for ${platform}"
-              return 1
-            fi
+                  sign_and_add "darwin-aarch64" "spwn_aarch64.app.tar.gz" || true
+                  sign_and_add "darwin-x86_64" "spwn_x64.app.tar.gz" || true
 
-            echo "  Signed ${platform} ✓"
-            # Append to entries file (avoids subshell variable scoping)
-            printf '"%s": { "signature": "%s", "url": "%s" }\n' \
-              "$platform" "$sig" "$url" >> "${WORKDIR}/entries.txt"
-          }
+                  # outside: Tauri uploads the Linux AppImage bare, with no .tar.gz around it
+                  sign_and_add "linux-x86_64" "spwn_${VERSION}_amd64.AppImage" || true
 
-          touch "${WORKDIR}/entries.txt"
+                  if [ ! -s "${WORKDIR}/entries.txt" ]; then
+                    echo "Warning: no platforms were signed - latest.json not generated"
+                    exit 0
+                  fi
 
-          # macOS arm64 + x86_64
-          sign_and_add "darwin-aarch64" "spwn_aarch64.app.tar.gz" || true
-          sign_and_add "darwin-x86_64" "spwn_x64.app.tar.gz" || true
+                  ENTRIES=$(paste -sd ',' "${WORKDIR}/entries.txt" | sed 's/,/, /g')
 
-          # Linux - Tauri uploads AppImage directly (no .tar.gz wrapper)
-          sign_and_add "linux-x86_64" "spwn_${VERSION}_amd64.AppImage" || true
+                  PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+                  python3 -c "
+                  import json, sys
+                  entries_raw = '''${ENTRIES}'''
+                  platforms = {}
+                  for entry in entries_raw.split('\n'):
+                    entry = entry.strip()
+                    if not entry: continue
+                    obj = json.loads('{' + entry + '}')
+                    platforms.update(obj)
+                  manifest = {
+                    'version': '${VERSION}',
+                    'notes': 'spwn ${TAG}',
+                    'pub_date': '${PUB_DATE}',
+                    'platforms': platforms
+                  }
+                  json.dump(manifest, open('${WORKDIR}/latest.json', 'w'), indent=2)
+                  json.dump(manifest, sys.stdout, indent=2)
+                  print()
+                  "
 
-          if [ ! -s "${WORKDIR}/entries.txt" ]; then
-            echo "Warning: no platforms were signed - latest.json not generated"
-            exit 0
-          fi
-
-          # Join entries with commas
-          ENTRIES=$(paste -sd ',' "${WORKDIR}/entries.txt" | sed 's/,/, /g')
-
-          # Compose latest.json
-          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          python3 -c "
-          import json, sys
-          entries_raw = '''${ENTRIES}'''
-          platforms = {}
-          for entry in entries_raw.split('\n'):
-            entry = entry.strip()
-            if not entry: continue
-            obj = json.loads('{' + entry + '}')
-            platforms.update(obj)
-          manifest = {
-            'version': '${VERSION}',
-            'notes': 'spwn ${TAG}',
-            'pub_date': '${PUB_DATE}',
-            'platforms': platforms
-          }
-          json.dump(manifest, open('${WORKDIR}/latest.json', 'w'), indent=2)
-          json.dump(manifest, sys.stdout, indent=2)
-          print()
-          "
-
-          # Upload
-          gh release upload "${TAG}" "${WORKDIR}/latest.json" --clobber
-          echo "latest.json uploaded to ${TAG} ✓"
+                  gh release upload "${TAG}" "${WORKDIR}/latest.json" --clobber
+                  echo "latest.json uploaded to ${TAG} ✓"
