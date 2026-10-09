@@ -1,22 +1,13 @@
 'use client';
 
-import { IconArrowUp } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import type { ActivityBlock } from '../activity/blocks';
-import { ActivityMessageView } from './activity-blocks';
+import { Bubble, Typing } from './chat/bubble';
+import type { ChatBubble } from './chat/bubble';
+import { Composer } from './chat/composer';
 
-/** ChatBubble is the minimal shape any caller must provide. The chat does not manage state - the parent owns the message list and passes it in. */
-export interface ChatBubble {
-    role: 'assistant' | 'user';
-    blocks: ActivityBlock[];
-    content: string;
-    timestamp: Date;
-    error?: boolean | undefined;
-    cost?: number | undefined;
-    duration?: number | undefined;
-}
+export type { ChatBubble } from './chat/bubble';
 
 interface ChatProps {
     messages: ChatBubble[];
@@ -25,7 +16,7 @@ interface ChatProps {
     disabled?: boolean;
     emptyState?: ReactNode;
     typingText?: string;
-    extras?: (msg: ChatBubble, index: number) => ReactNode;
+    extras?: (message: ChatBubble, index: number) => ReactNode;
     assistantLabel?: string;
     userLabel?: string;
     focusInput?: boolean;
@@ -34,165 +25,121 @@ interface ChatProps {
     onInputChange?: (value: string) => void;
 }
 
+interface MessagesProps {
+    messages: ChatBubble[];
+    extras: ChatProps['extras'];
+    assistantLabel: string;
+    userLabel: string;
+}
+
+function Messages({ messages, extras, assistantLabel, userLabel }: MessagesProps) {
+    return (
+        <>
+            {messages.map((message, index) => (
+                <Bubble
+                    extra={extras?.(message, index)}
+                    // oxlint-disable-next-line react/no-array-index-key -- a conversation only grows at its end and its messages carry no id; the index is each one's place in it
+                    key={`${message.timestamp.getTime()}-${message.role}-${index}`}
+                    label={message.role === 'assistant' ? assistantLabel : userLabel}
+                    message={message}
+                />
+            ))}
+        </>
+    );
+}
+
+interface ComposerState {
+    controlledInput: string | undefined;
+    onInputChange: ((value: string) => void) | undefined;
+    focusInput: boolean;
+    disabled: boolean;
+    onSend: (text: string) => void;
+}
+
+function useComposer({
+    controlledInput,
+    onInputChange,
+    focusInput,
+    disabled,
+    onSend,
+}: ComposerState) {
+    const [ownInput, setOwnInput] = useState('');
+    const controlled = controlledInput !== undefined && onInputChange !== undefined;
+    const input = controlled ? controlledInput : ownInput;
+    const setInput = controlled ? onInputChange : setOwnInput;
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (focusInput) {
+            inputRef.current?.focus();
+        }
+    }, [focusInput]);
+
+    const send = () => {
+        const text = input.trim();
+        if (text === '' || disabled) {
+            return;
+        }
+        onSend(text);
+        setInput('');
+        requestAnimationFrame(() => {
+            inputRef.current?.focus();
+        });
+    };
+    return { input, inputRef, send, setInput };
+}
+
+function scrollIntoView(element: HTMLDivElement | null): void {
+    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 /** Chat is the shared, presentational surface used by both the agent chat tab and the Architect chat widget. It's container-less by design - only the message bubbles and the focused input border carry backgrounds, so the chat blends into whatever page hosts it. */
 export function Chat({
     messages,
     onSend,
     placeholder = 'Message...',
-    disabled,
+    disabled = false,
     emptyState,
-    typingText,
+    typingText = '',
     extras,
     assistantLabel = 'assistant',
     userLabel = 'you',
-    focusInput,
+    focusInput = false,
     className = '',
     input: controlledInput,
     onInputChange,
 }: ChatProps) {
-    const [uncontrolledInput, setUncontrolledInput] = useState('');
-    const isControlled = controlledInput !== undefined && onInputChange !== undefined;
-    const input = isControlled ? controlledInput : uncontrolledInput;
-    const setInput = isControlled ? onInputChange : setUncontrolledInput;
-
-    const endRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, [messages.length, disabled]);
-
-    useEffect(() => {
-        if (focusInput === true) {
-            inputRef.current?.focus();
-        }
-    }, [focusInput]);
-
-    const trimmed = input.trim();
-
-    const handleSend = () => {
-        if (!trimmed || disabled === true) {
-            return;
-        }
-        onSend(trimmed);
-        setInput('');
-        requestAnimationFrame(() => inputRef.current?.focus());
-    };
+    const { input, inputRef, send, setInput } = useComposer({
+        controlledInput,
+        disabled,
+        focusInput,
+        onInputChange,
+        onSend,
+    });
 
     return (
         <div className={`flex min-h-0 flex-1 flex-col ${className}`}>
             <div className="min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto py-2 pr-1">
-                {messages.length === 0 && emptyState && (
+                {messages.length === 0 && emptyState !== undefined && (
                     <div className="flex h-full items-center justify-center">{emptyState}</div>
                 )}
-                {messages.map((msg, i) => {
-                    const msgKey = `${msg.timestamp.getTime()}-${msg.role}-${i}`;
-                    let bubbleClass: string;
-                    if (msg.role === 'user') {
-                        bubbleClass = 'bg-white/[0.08] text-foreground/85';
-                    } else if (msg.error === true) {
-                        bubbleClass = 'bg-red-500/10 border border-red-500/15 text-red-400/80';
-                    } else {
-                        bubbleClass =
-                            'bg-white/[0.03] border border-white/[0.06] text-foreground/75';
-                    }
-                    return (
-                        <div
-                            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                            key={msgKey}
-                        >
-                            <div
-                                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 transition-colors ${bubbleClass}`}
-                            >
-                                {msg.role === 'assistant' && msg.blocks.length > 0 ? (
-                                    <ActivityMessageView
-                                        message={{
-                                            role: 'agent',
-                                            blocks: msg.blocks,
-                                            timestamp: msg.timestamp,
-                                            cost: msg.cost,
-                                            duration: msg.duration,
-                                        }}
-                                    />
-                                ) : (
-                                    <p className="text-xs leading-relaxed break-words whitespace-pre-wrap">
-                                        {msg.content || (msg.role === 'assistant' ? '…' : '')}
-                                    </p>
-                                )}
-                                <p className="text-muted-foreground/25 mt-1 text-[9px]">
-                                    {msg.role === 'assistant' ? assistantLabel : userLabel}
-                                    {' · '}
-                                    {msg.timestamp.toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })}
-                                </p>
-                            </div>
-                            {extras?.(msg, i)}
-                        </div>
-                    );
-                })}
-                {disabled === true && typingText !== undefined && typingText !== '' && (
-                    <div className="flex items-start">
-                        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5">
-                            <div className="flex items-center gap-2">
-                                <div className="flex gap-1">
-                                    <span
-                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
-                                        style={{ animationDelay: '0ms' }}
-                                    />
-                                    <span
-                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
-                                        style={{ animationDelay: '150ms' }}
-                                    />
-                                    <span
-                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
-                                        style={{ animationDelay: '300ms' }}
-                                    />
-                                </div>
-                                <span className="text-muted-foreground/40 text-xs">
-                                    {typingText}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <div ref={endRef} />
+                <Messages
+                    assistantLabel={assistantLabel}
+                    extras={extras}
+                    messages={messages}
+                    userLabel={userLabel}
+                />
+                {disabled && typingText !== '' && <Typing text={typingText} />}
+                <div key={`${messages.length}-${String(disabled)}`} ref={scrollIntoView} />
             </div>
-
-            <div className="shrink-0 pt-3">
-                <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md transition-colors focus-within:border-white/[0.14] focus-within:bg-white/[0.06]">
-                    <input
-                        className="text-foreground/85 placeholder:text-muted-foreground/30 min-w-0 flex-1 bg-transparent px-1 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={disabled}
-                        onChange={(e) => {
-                            setInput(e.target.value);
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSend();
-                            }
-                        }}
-                        placeholder={placeholder}
-                        ref={inputRef}
-                        value={input}
-                    />
-                    <button
-                        aria-label="Send"
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all disabled:cursor-not-allowed disabled:opacity-20 ${
-                            trimmed
-                                ? 'bg-foreground/90 text-background hover:bg-foreground'
-                                : 'text-muted-foreground/40'
-                        }`}
-                        disabled={!trimmed || disabled}
-                        onClick={handleSend}
-                        type="button"
-                    >
-                        <IconArrowUp size={15} stroke={2.4} />
-                    </button>
-                </div>
-            </div>
+            <Composer
+                disabled={disabled}
+                input={input}
+                inputRef={inputRef}
+                onInput={setInput}
+                onSend={send}
+                placeholder={placeholder}
+            />
         </div>
     );
 }
@@ -207,16 +154,16 @@ export function ChatSuggestions({
 }) {
     return (
         <div className="flex max-w-sm flex-wrap justify-center gap-2">
-            {suggestions.map((s) => (
+            {suggestions.map((suggestion) => (
                 <button
                     className="text-muted-foreground/40 hover:text-foreground/70 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] transition-colors hover:bg-white/[0.06]"
-                    key={s}
+                    key={suggestion}
                     onClick={() => {
-                        onPick(s);
+                        onPick(suggestion);
                     }}
                     type="button"
                 >
-                    {s}
+                    {suggestion}
                 </button>
             ))}
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import {
-    IconBook2,
     IconBrain,
     IconPlus,
     IconRocket,
@@ -12,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { getWorldName } from '../domain/model';
 import type { World } from '../domain/model';
 import {
     Command,
@@ -24,54 +24,174 @@ import {
     CommandSeparator,
 } from './ui/command';
 
-interface AgentListItem {
-    name: string;
-    path: string;
-    layers: Record<string, string[]>;
-}
+const ICON = 'text-muted-foreground/50';
+const HINT = 'text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]';
 
-function extractName(id: null | string | undefined): string {
-    if (id === null || id === undefined || id === '') {
-        return '';
+async function optional<Value>(promise: Promise<Value>, fallback: Value): Promise<Value> {
+    try {
+        return await promise;
+    } catch {
+        return fallback;
     }
-    const [, middle] = id.split('-');
-    return middle === undefined || middle === ''
-        ? id
-        : middle.charAt(0).toUpperCase() + middle.slice(1);
 }
 
-export function CommandPalette() {
-    const [open, setOpen] = useState(false);
-    const [worlds, setWorlds] = useState<World[]>([]);
-    const [agents, setAgents] = useState<AgentListItem[]>([]);
-    const router = useRouter();
-
+function usePaletteShortcut(toggle: () => void): void {
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                setOpen((prev) => !prev);
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+                event.preventDefault();
+                toggle();
             }
         };
         globalThis.addEventListener('keydown', handleKeyDown);
         return () => {
             globalThis.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [toggle]);
+}
 
+function useCatalogue(open: boolean) {
+    const [worlds, setWorlds] = useState<World[]>([]);
+    const [agents, setAgents] = useState<{ name: string }[]>([]);
     useEffect(() => {
         if (!open) {
             return;
         }
-        void Promise.all([
-            apiGet<World[]>('/api/worlds').catch(() => [] as World[]),
-            apiGet<AgentListItem[]>('/api/agents').catch(() => [] as AgentListItem[]),
-        ]).then(([w, a]) => {
-            setWorlds(w ?? []);
-            setAgents(a ?? []);
-        });
+        const load = async () => {
+            const [listedWorlds, listedAgents] = await Promise.all([
+                optional(apiGet<World[]>('/api/worlds'), []),
+                optional(apiGet<{ name: string }[]>('/api/agents'), []),
+            ]);
+            setWorlds(listedWorlds);
+            setAgents(listedAgents);
+        };
+        void load();
     }, [open]);
+    return { agents, worlds };
+}
 
+function openSpawnDialog(): void {
+    globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { bubbles: true, key: 'n', metaKey: true }),
+    );
+}
+
+function AgentItems({
+    agents,
+    worlds,
+    navigate,
+}: {
+    agents: { name: string }[];
+    worlds: World[];
+    navigate: (path: string) => void;
+}) {
+    return (
+        <>
+            {agents.map((agent) => {
+                const world = worlds.find((candidate) =>
+                    candidate.agents.some((member) => member.name === agent.name),
+                );
+                const path = `/agents/${encodeURIComponent(agent.name)}`;
+                return (
+                    <CommandItem
+                        key={agent.name}
+                        onSelect={() => {
+                            navigate(world === undefined ? path : `${path}?world=${world.id}`);
+                        }}
+                    >
+                        <IconUserFilled className={ICON} size={14} />
+                        <span>{agent.name}</span>
+                        <span className={HINT}>
+                            {world === undefined ? 'limbo' : `in ${getWorldName(world)}`}
+                        </span>
+                    </CommandItem>
+                );
+            })}
+        </>
+    );
+}
+
+function NavigationGroup({ navigate }: { navigate: (path: string) => void }) {
+    return (
+        <CommandGroup heading="Navigation">
+            <CommandItem
+                onSelect={() => {
+                    navigate('/');
+                }}
+            >
+                <IconWorldFilled className={ICON} size={14} />
+                <span>Go to Dashboard</span>
+            </CommandItem>
+            <CommandItem
+                onSelect={() => {
+                    navigate('/architect');
+                }}
+            >
+                <IconBrain className={ICON} size={14} />
+                <span>Go to Architect</span>
+            </CommandItem>
+        </CommandGroup>
+    );
+}
+
+function WorldItems({ worlds, navigate }: { worlds: World[]; navigate: (path: string) => void }) {
+    if (worlds.length === 0) {
+        return null;
+    }
+    return (
+        <CommandGroup heading="Worlds">
+            {worlds.map((world) => (
+                <CommandItem
+                    key={world.id}
+                    onSelect={() => {
+                        navigate(`/world/${world.id}`);
+                    }}
+                >
+                    <IconWorldFilled className={ICON} size={14} />
+                    <span>{getWorldName(world)}</span>
+                    <span className={HINT}>
+                        {world.agents.length} agents · {world.status}
+                    </span>
+                </CommandItem>
+            ))}
+        </CommandGroup>
+    );
+}
+
+function Actions({ navigate }: { navigate: (path: string) => void }) {
+    return (
+        <CommandGroup heading="Actions">
+            <CommandItem
+                onSelect={() => {
+                    navigate('/');
+                    setTimeout(openSpawnDialog, 100);
+                }}
+            >
+                <IconRocket className={ICON} size={14} />
+                <span>Spawn World</span>
+                <span className={HINT}>⌘N</span>
+            </CommandItem>
+            <CommandItem
+                onSelect={() => {
+                    navigate('/agents');
+                }}
+            >
+                <IconPlus className={ICON} size={14} />
+                <span>Create Agent</span>
+            </CommandItem>
+        </CommandGroup>
+    );
+}
+
+/** The ⌘K palette: jump to a world or an agent, open a page, or start a world or an agent. */
+export function CommandPalette() {
+    const [open, setOpen] = useState(false);
+    const router = useRouter();
+    const { agents, worlds } = useCatalogue(open);
+    const toggle = useCallback(() => {
+        setOpen((previous) => !previous);
+    }, []);
+    usePaletteShortcut(toggle);
     const navigate = useCallback(
         (path: string) => {
             setOpen(false);
@@ -86,134 +206,19 @@ export function CommandPalette() {
                 <CommandInput placeholder="Search worlds, agents, commands..." />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
-
-                    {worlds.length > 0 && (
-                        <CommandGroup heading="Worlds">
-                            {worlds.map((world) => (
-                                <CommandItem
-                                    key={world.id}
-                                    onSelect={() => {
-                                        navigate(`/world/${world.id}`);
-                                    }}
-                                >
-                                    <IconWorldFilled
-                                        className="text-muted-foreground/50"
-                                        size={14}
-                                    />
-                                    <span>{extractName(world.id)}</span>
-                                    <span className="text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]">
-                                        {world.agents.length} agents · {world.status}
-                                    </span>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    )}
-
+                    <WorldItems navigate={navigate} worlds={worlds} />
                     {agents.length > 0 && (
                         <>
                             <CommandSeparator />
                             <CommandGroup heading="Agents">
-                                {agents.map((agent) => {
-                                    const agentWorld = worlds.find((w) =>
-                                        w.agents.some((a) => a.name === agent.name),
-                                    );
-                                    const href = agentWorld
-                                        ? `/agents/${encodeURIComponent(agent.name)}?world=${agentWorld.id}`
-                                        : `/agents/${encodeURIComponent(agent.name)}`;
-                                    return (
-                                        <CommandItem
-                                            key={agent.name}
-                                            onSelect={() => {
-                                                navigate(href);
-                                            }}
-                                        >
-                                            <IconUserFilled
-                                                className="text-muted-foreground/50"
-                                                size={14}
-                                            />
-                                            <span>{agent.name}</span>
-                                            {agentWorld && (
-                                                <span className="text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]">
-                                                    in {extractName(agentWorld.id)}
-                                                </span>
-                                            )}
-                                            {!agentWorld && (
-                                                <span className="text-muted-foreground/20 -mr-6 flex-1 text-right font-mono text-[10px]">
-                                                    limbo
-                                                </span>
-                                            )}
-                                        </CommandItem>
-                                    );
-                                })}
+                                <AgentItems agents={agents} navigate={navigate} worlds={worlds} />
                             </CommandGroup>
                         </>
                     )}
-
                     <CommandSeparator />
-                    <CommandGroup heading="Navigation">
-                        <CommandItem
-                            onSelect={() => {
-                                navigate('/');
-                            }}
-                        >
-                            <IconWorldFilled className="text-muted-foreground/50" size={14} />
-                            <span>Go to Dashboard</span>
-                        </CommandItem>
-                        <CommandItem
-                            onSelect={() => {
-                                navigate('/architect');
-                            }}
-                        >
-                            <IconBrain className="text-muted-foreground/50" size={14} />
-                            <span>Go to Architect</span>
-                        </CommandItem>
-                        <CommandItem
-                            onSelect={() => {
-                                navigate('/knowledge');
-                            }}
-                        >
-                            <IconBook2 className="text-muted-foreground/50" size={14} />
-                            <span>Go to Knowledge</span>
-                        </CommandItem>
-                    </CommandGroup>
-
+                    <NavigationGroup navigate={navigate} />
                     <CommandSeparator />
-                    <CommandGroup heading="Actions">
-                        <CommandItem
-                            onSelect={() => {
-                                setOpen(false);
-                                navigate('/');
-                                setTimeout(() => {
-                                    globalThis.dispatchEvent(
-                                        new KeyboardEvent('keydown', {
-                                            key: 'n',
-                                            metaKey: true,
-                                            bubbles: true,
-                                        }),
-                                    );
-                                }, 100);
-                            }}
-                        >
-                            <IconRocket className="text-muted-foreground/50" size={14} />
-                            <span>Spawn World</span>
-                            <span className="text-muted-foreground/20 -mr-6 flex-1 text-right font-mono text-[10px]">
-                                ⌘N
-                            </span>
-                        </CommandItem>
-                        <CommandItem
-                            onSelect={() => {
-                                setOpen(false);
-                                const name = prompt('Agent name:');
-                                const agentName = name?.trim() ?? '';
-                                if (agentName !== '') {
-                                    navigate(`/agents/${agentName}`);
-                                }
-                            }}
-                        >
-                            <IconPlus className="text-muted-foreground/50" size={14} />
-                            <span>Create Agent</span>
-                        </CommandItem>
-                    </CommandGroup>
+                    <Actions navigate={navigate} />
                 </CommandList>
             </Command>
         </CommandDialog>

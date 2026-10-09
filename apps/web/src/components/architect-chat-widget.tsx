@@ -1,242 +1,107 @@
 'use client';
 
-import {
-    IconArrowUp,
-    IconChevronDown,
-    IconHexagonFilled,
-    IconMaximize,
-    IconMessageCircle,
-} from '@tabler/icons-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useArchitectChat } from '../contexts/architect-chat-context';
-import { Chat } from './chat';
-import type { ChatBubble } from './chat';
+import { ArchitectGlyph } from './architect-widget/glyph';
+import { ArchitectPanel, PILL } from './architect-widget/panel';
+import { ArchitectPill } from './architect-widget/pill';
 
-function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
+function useFoldOnOutsidePointer(
+    expanded: boolean,
+    panel: React.RefObject<HTMLDivElement | null>,
+    fold: () => void,
+): void {
+    useEffect(() => {
+        if (!expanded) {
+            return;
+        }
+        const onPointerDown = (event: MouseEvent | TouchEvent) => {
+            if (event.target instanceof Node && panel.current?.contains(event.target) !== true) {
+                fold();
+            }
+        };
+        document.addEventListener('mousedown', onPointerDown);
+        document.addEventListener('touchstart', onPointerDown, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown);
+            document.removeEventListener('touchstart', onPointerDown);
+        };
+    }, [expanded, panel, fold]);
+}
+
+function OfflineButton({ onOpen }: { onOpen: () => void }) {
     return (
-        <span className="relative inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center self-center overflow-visible">
-            <style jsx>{`
-                @keyframes architect-rainbow-hue {
-                    0% {
-                        filter: hue-rotate(0deg) brightness(1.2);
-                    }
-                    100% {
-                        filter: hue-rotate(360deg) brightness(1.2);
-                    }
-                }
-            `}</style>
-            {isRunning && isActive ? (
-                <>
-                    <IconHexagonFilled
-                        className="absolute inset-0 m-auto text-pink-400 opacity-70 blur-[6px]"
-                        size={14}
-                        style={{ animation: 'architect-rainbow-hue 3s linear infinite' }}
-                    />
-                    <IconHexagonFilled
-                        className="absolute inset-0 m-auto text-pink-400"
-                        size={14}
-                        style={{ animation: 'architect-rainbow-hue 3s linear infinite' }}
-                    />
-                </>
-            ) : (
-                <span className="block translate-y-[0.5px] leading-none">
-                    <IconHexagonFilled className="text-muted-foreground/45" size={14} />
-                </span>
-            )}
-        </span>
+        <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
+            <button
+                className={`flex items-center gap-2.5 rounded-full border px-4 py-2.5 transition-colors hover:bg-white/[0.08] ${PILL}`}
+                onClick={onOpen}
+                title="Architect is offline - click to start"
+                type="button"
+            >
+                <ArchitectGlyph isActive={false} isRunning={false} />
+                <span className="text-muted-foreground/35 text-[12px]">Architect offline</span>
+            </button>
+        </div>
     );
 }
 
+/** The architect in the corner of every page but its own: offline, folded into a prompt, or unfolded into a chat. */
 export function ArchitectChatWidget() {
     const pathname = usePathname();
     const router = useRouter();
     const [expanded, setExpanded] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
-
     const { messages, chatInput, setChatInput, sending, sendMessage, isRunning } =
         useArchitectChat();
-
-    useEffect(() => {
-        if (!expanded) {
-            return;
-        }
-
-        const handlePointerDown = (event: MouseEvent | TouchEvent) => {
-            const target = event.target as Node | null;
-            if (!target) {
-                return;
-            }
-            if (panelRef.current?.contains(target) === true) {
-                return;
-            }
-            setExpanded(false);
-        };
-
-        document.addEventListener('mousedown', handlePointerDown);
-        document.addEventListener('touchstart', handlePointerDown, { passive: true });
-        return () => {
-            document.removeEventListener('mousedown', handlePointerDown);
-            document.removeEventListener('touchstart', handlePointerDown);
-        };
-    }, [expanded]);
+    const fold = useCallback(() => {
+        setExpanded(false);
+    }, []);
+    useFoldOnOutsidePointer(expanded, panelRef, fold);
 
     if (pathname === '/architect' || pathname.startsWith('/architect/')) {
         return null;
     }
-
-    const bubbles: ChatBubble[] = messages.map((m) => ({
-        role: m.role === 'architect' ? 'assistant' : 'user',
-        blocks: m.blocks,
-        content: m.content,
-        timestamp: m.timestamp,
-        error: m.error,
-        cost: m.cost,
-        duration: m.duration,
-    }));
-
-    const handleSend = () => {
+    const send = () => {
         void sendMessage();
     };
-
     if (expanded) {
         return (
-            <div
-                className="bg-background/95 animate-in slide-in-from-bottom-4 fade-in fixed right-4 bottom-4 z-[200] flex h-[540px] w-[420px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/30 backdrop-blur-xl duration-200"
-                ref={panelRef}
-            >
-                <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-                    <div className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-1 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
-                        <ArchitectGlyph isActive={sending} isRunning={isRunning} />
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <button
-                            className="text-muted-foreground/30 hover:text-foreground/60 flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-                            onClick={() => {
-                                setExpanded(false);
-                                router.push('/architect');
-                            }}
-                            title="Open full page"
-                            type="button"
-                        >
-                            <IconMaximize size={14} />
-                        </button>
-                        <button
-                            className="text-muted-foreground/30 hover:text-foreground/60 flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-                            onClick={() => {
-                                setExpanded(false);
-                            }}
-                            title="Minimize"
-                            type="button"
-                        >
-                            <IconChevronDown size={14} />
-                        </button>
-                    </div>
-                </div>
-
-                <Chat
-                    className="flex-1 px-3 pb-3"
-                    disabled={sending}
-                    emptyState={
-                        <div className="flex flex-col items-center justify-center text-center">
-                            <IconMessageCircle
-                                className="text-muted-foreground/15 mb-2"
-                                size={24}
-                            />
-                            <p className="text-muted-foreground/30 text-xs">
-                                Talk to the Architect
-                            </p>
-                            <p className="text-muted-foreground/20 mt-1 max-w-[260px] text-[10px]">
-                                Ask anything - create agents, manage worlds, or check status.
-                            </p>
-                            {!isRunning && (
-                                <p className="mt-2 font-mono text-[9px] text-yellow-400/40">
-                                    Architect is offline - start it from the Architect page
-                                </p>
-                            )}
-                        </div>
-                    }
-                    extras={() => null}
-                    focusInput={expanded}
-                    input={chatInput}
-                    messages={bubbles}
-                    onInputChange={setChatInput}
-                    onSend={handleSend}
-                    placeholder="Talk to the Architect..."
-                    typingText="Thinking…"
-                />
-            </div>
+            <ArchitectPanel
+                input={chatInput}
+                messages={messages}
+                onInput={setChatInput}
+                onMinimize={fold}
+                onOpenPage={() => {
+                    fold();
+                    router.push('/architect');
+                }}
+                onSend={send}
+                panelRef={panelRef}
+                running={isRunning}
+                sending={sending}
+            />
         );
     }
-
     if (!isRunning) {
         return (
-            <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
-                <button
-                    className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-2.5 rounded-full border px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md transition-colors hover:bg-white/[0.08] dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]"
-                    onClick={() => {
-                        router.push('/architect');
-                    }}
-                    title="Architect is offline - click to start"
-                    type="button"
-                >
-                    <ArchitectGlyph isActive={false} isRunning={false} />
-                    <span className="text-muted-foreground/35 text-[12px]">Architect offline</span>
-                </button>
-            </div>
+            <OfflineButton
+                onOpen={() => {
+                    router.push('/architect');
+                }}
+            />
         );
     }
-
     return (
-        <>
-            <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
-                <div className="border-foreground/[0.08] bg-foreground/[0.04] flex w-[300px] items-center gap-2 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
-                    <button
-                        className="flex h-[30px] shrink-0 items-center justify-center rounded-full border border-transparent px-2"
-                        onClick={() => {
-                            setExpanded(true);
-                        }}
-                        title="Architect alive"
-                        type="button"
-                    >
-                        <ArchitectGlyph isActive={sending} isRunning={isRunning} />
-                    </button>
-                    <input
-                        className="text-foreground/80 placeholder:text-muted-foreground/25 min-w-0 flex-1 bg-transparent text-[13px] focus:outline-none"
-                        disabled={sending}
-                        onChange={(e) => {
-                            setChatInput(e.target.value);
-                        }}
-                        onFocus={() => {
-                            setExpanded(true);
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                if (chatInput.trim()) {
-                                    handleSend();
-                                    setExpanded(true);
-                                }
-                            }
-                        }}
-                        placeholder="Ask the Architect..."
-                        value={chatInput}
-                    />
-                    {chatInput.trim() ? (
-                        <button
-                            className="text-foreground/70 shrink-0 rounded-full bg-white/[0.08] p-1.5 transition-all hover:bg-white/[0.12]"
-                            onClick={() => {
-                                handleSend();
-                                setExpanded(true);
-                            }}
-                            type="button"
-                        >
-                            <IconArrowUp size={14} />
-                        </button>
-                    ) : null}
-                </div>
-            </div>
-        </>
+        <ArchitectPill
+            input={chatInput}
+            onExpand={() => {
+                setExpanded(true);
+            }}
+            onInput={setChatInput}
+            onSend={send}
+            sending={sending}
+        />
     );
 }

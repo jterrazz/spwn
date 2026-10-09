@@ -1,7 +1,7 @@
 'use client';
 
 import { IconSearch } from '@tabler/icons-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cn } from '../styles/class-names';
 import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from './glass-pill';
@@ -22,6 +22,78 @@ interface ExpandingSearchProps {
     className?: string;
 }
 
+function useFoldOnOutsideClick(
+    expanded: boolean,
+    value: string,
+    root: React.RefObject<HTMLDivElement | null>,
+    fold: () => void,
+): void {
+    useEffect(() => {
+        if (!expanded) {
+            return;
+        }
+        const onPointerDown = (event: MouseEvent) => {
+            const outside =
+                event.target instanceof Node && root.current?.contains(event.target) !== true;
+            if (outside && value === '') {
+                fold();
+            }
+        };
+        document.addEventListener('mousedown', onPointerDown);
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown);
+        };
+    }, [expanded, value, root, fold]);
+}
+
+function SearchGlyph() {
+    return (
+        <span className="pointer-events-none absolute top-0 left-0 flex h-10 w-10 items-center justify-center">
+            <IconSearch className="translate-y-[0.5px]" size={16} stroke={2.4} />
+        </span>
+    );
+}
+
+interface SearchInputProps {
+    value: string;
+    shown: boolean;
+    placeholder: string;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+    onChange: (value: string) => void;
+    fold: () => void;
+}
+
+function SearchInput({ value, shown, placeholder, inputRef, onChange, fold }: SearchInputProps) {
+    return (
+        <input
+            aria-hidden={!shown}
+            className={cn(
+                'text-foreground/85 placeholder:text-muted-foreground/30 absolute top-0 right-0 bottom-0 left-10 bg-transparent pr-4 pl-1 text-sm leading-10 focus:outline-none',
+                !shown && 'pointer-events-none',
+            )}
+            onBlur={() => {
+                if (value === '') {
+                    fold();
+                }
+            }}
+            onChange={(event) => {
+                onChange(event.target.value);
+            }}
+            onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                    onChange('');
+                    fold();
+                    event.currentTarget.blur();
+                }
+            }}
+            placeholder={placeholder}
+            ref={inputRef}
+            tabIndex={shown ? 0 : -1}
+            value={value}
+        />
+    );
+}
+
 /** A search control that renders as a round icon button by default and expands horizontally into a full input field. The animation is purely geometric: the outer pill animates its width, and `overflow-hidden` reveals the input as the clip widens. The input never moves - it's always in its final position, hidden only by the clipping edge. */
 export function ExpandingSearch({
     value,
@@ -33,92 +105,50 @@ export function ExpandingSearch({
     const [expanded, setExpanded] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const rootRef = useRef<HTMLDivElement>(null);
-
-    const shouldShow = expanded || value.length > 0;
+    const shown = expanded || value.length > 0;
+    const fold = useCallback(() => {
+        setExpanded(false);
+    }, []);
+    useFoldOnOutsideClick(expanded, value, rootRef, fold);
 
     useEffect(() => {
-        if (shouldShow) {
+        if (shown) {
             inputRef.current?.focus();
         }
-    }, [shouldShow]);
-
-    useEffect(() => {
-        if (!expanded) {
-            return;
-        }
-        const onPointerDown = (e: MouseEvent) => {
-            const target = e.target as Node | null;
-            if (!target) {
-                return;
-            }
-            if (rootRef.current?.contains(target) === true) {
-                return;
-            }
-            if (!value) {
-                setExpanded(false);
-            }
-        };
-        document.addEventListener('mousedown', onPointerDown);
-        return () => {
-            document.removeEventListener('mousedown', onPointerDown);
-        };
-    }, [expanded, value]);
+    }, [shown]);
 
     return (
         <div
-            aria-label={shouldShow ? undefined : 'Search'}
             className={cn(
                 baseClass,
-                !shouldShow &&
-                    'hover:bg-foreground/[0.07] cursor-pointer dark:hover:bg-white/[0.08]',
+                !shown && 'hover:bg-foreground/[0.07] dark:hover:bg-white/[0.08]',
                 className,
             )}
-            onClick={() => {
-                if (!shouldShow) {
-                    setExpanded(true);
-                }
-            }}
-            onKeyDown={(e) => {
-                if (!shouldShow && (e.key === 'Enter' || e.key === ' ')) {
-                    e.preventDefault();
-                    setExpanded(true);
-                }
-            }}
             ref={rootRef}
-            role={shouldShow ? undefined : 'button'}
             style={{
-                width: shouldShow ? expandedWidth : COLLAPSED_WIDTH,
                 transition: `width 320ms ${EXPAND_EASING}, background-color 200ms ease-out`,
+                width: shown ? expandedWidth : COLLAPSED_WIDTH,
             }}
-            tabIndex={shouldShow ? -1 : 0}
         >
-            <span className="pointer-events-none absolute top-0 left-0 flex h-10 w-10 items-center justify-center">
-                <IconSearch className="translate-y-[0.5px]" size={16} stroke={2.4} />
-            </span>
-            <input
-                aria-hidden={!shouldShow}
-                className={cn(
-                    'text-foreground/85 placeholder:text-muted-foreground/30 absolute top-0 right-0 bottom-0 left-10 bg-transparent pr-4 pl-1 text-sm leading-10 focus:outline-none',
-                    !shouldShow && 'pointer-events-none',
-                )}
-                onBlur={() => {
-                    if (!value) {
-                        setExpanded(false);
-                    }
-                }}
-                onChange={(e) => {
-                    onChange(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                        onChange('');
-                        setExpanded(false);
-                        (e.target as HTMLInputElement).blur();
-                    }
-                }}
+            {shown && <SearchGlyph />}
+            {!shown && (
+                <button
+                    aria-label="Search"
+                    className="absolute inset-0 z-10 cursor-pointer"
+                    onClick={() => {
+                        setExpanded(true);
+                    }}
+                    type="button"
+                >
+                    <SearchGlyph />
+                </button>
+            )}
+            <SearchInput
+                fold={fold}
+                inputRef={inputRef}
+                onChange={onChange}
                 placeholder={placeholder}
-                ref={inputRef}
-                tabIndex={shouldShow ? 0 : -1}
+                shown={shown}
                 value={value}
             />
         </div>

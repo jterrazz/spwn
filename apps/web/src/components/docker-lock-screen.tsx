@@ -1,87 +1,113 @@
 'use client';
 
 import { IconBrandDocker, IconExternalLink, IconLoader2, IconRefresh } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useDocker } from '../contexts/docker-context';
+import type { DockerStatus } from '../contexts/docker-context';
 import { inBackground } from '../events/in-background';
+import { useClock } from '../hooks/use-clock';
+
+interface Lock {
+    title: string;
+    subtitle: string;
+    installUrl: string | undefined;
+    error: string | undefined;
+    hint: string | undefined;
+}
+
+function lockOf(status: DockerStatus | null | undefined): Lock | undefined {
+    if (status === undefined) {
+        return {
+            error: undefined,
+            hint: undefined,
+            installUrl: undefined,
+            subtitle: 'Start Docker Desktop and spwn will pick it up automatically.',
+            title: 'Waiting for Docker',
+        };
+    }
+    if (status === null || (status.installed && status.running)) {
+        return undefined;
+    }
+    const missing = !status.installed;
+    return {
+        error: status.error,
+        hint: status.hint,
+        installUrl: missing
+            ? status.platform === 'linux'
+                ? 'https://docs.docker.com/engine/install/'
+                : 'https://www.docker.com/products/docker-desktop/'
+            : undefined,
+        subtitle: missing
+            ? 'Every spwn world runs inside a Docker container. Install Docker to continue.'
+            : 'Start Docker Desktop and spwn will pick it up automatically.',
+        title: missing ? "Docker isn't installed" : 'Waiting for Docker',
+    };
+}
+
+function InstallLink({ href }: { href: string }) {
+    return (
+        <a
+            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.1]"
+            href={href}
+            rel="noreferrer"
+            target="_blank"
+        >
+            <IconBrandDocker size={14} />
+            Install Docker
+            <IconExternalLink size={11} />
+        </a>
+    );
+}
 
 /** Full-area lock screen shown whenever the host Docker daemon is not reachable. Replaces page content (the sidebar still renders, dimmed) so users cannot trigger any action that depends on Docker. The component is intentionally calm: spwn IS a Docker control plane, so "Docker offline" is the system state, not an emergency. We explain it, keep retrying in the background, and recover automatically. */
 export function DockerLockScreen() {
     const { status, lastChecked, refresh } = useDocker();
     const [refreshing, setRefreshing] = useState(false);
-    const [secondsAgo, setSecondsAgo] = useState(0);
+    const now = useClock();
+    const lock = lockOf(status);
 
-    useEffect(() => {
-        if (lastChecked === null || lastChecked === 0) {
-            return;
-        }
-        const tick = () => {
-            const elapsed = Math.floor((Date.now() - lastChecked) / 1000);
-            setSecondsAgo(Math.max(0, elapsed));
-        };
-        tick();
-        const id = setInterval(tick, 1000);
-        return () => {
-            clearInterval(id);
-        };
-    }, [lastChecked]);
-
-    const handleRetry = async () => {
-        setRefreshing(true);
-        try {
-            await refresh();
-        } finally {
-            setRefreshing(false);
-        }
-    };
-
-    const apiDown = status === undefined;
-    const dockerDown = Boolean(status && (!status.installed || !status.running));
-
-    if (!apiDown && !dockerDown) {
+    if (lock === undefined) {
         return null;
     }
-
-    const installed = status?.installed ?? false;
-    const showInstallCta = !apiDown && !installed;
-    const installUrl =
-        status?.platform === 'linux'
-            ? 'https://docs.docker.com/engine/install/'
-            : 'https://www.docker.com/products/docker-desktop/';
-
-    const title = !installed && !apiDown ? "Docker isn't installed" : 'Waiting for Docker';
-    const subtitle =
-        !installed && !apiDown
-            ? 'Every spwn world runs inside a Docker container. Install Docker to continue.'
-            : 'Start Docker Desktop and spwn will pick it up automatically.';
+    const retry = async () => {
+        setRefreshing(true);
+        await refresh();
+        setRefreshing(false);
+    };
+    const secondsAgo = lastChecked === null ? 0 : Math.max(0, now - Math.floor(lastChecked / 1000));
 
     return (
         <LockShell
-            error={apiDown ? undefined : status?.error}
-            hint={apiDown ? undefined : status?.hint}
+            error={lock.error}
+            hint={lock.hint}
             icon={<DockerPulse />}
             primaryAction={
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                    {showInstallCta && (
-                        <a
-                            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.1]"
-                            href={installUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                        >
-                            <IconBrandDocker size={14} />
-                            Install Docker
-                            <IconExternalLink size={11} />
-                        </a>
-                    )}
-                    <RetryButton loading={refreshing} onClick={inBackground(handleRetry)} />
+                    {lock.installUrl !== undefined && <InstallLink href={lock.installUrl} />}
+                    <RetryButton loading={refreshing} onClick={inBackground(retry)} />
                 </div>
             }
             secondsAgo={secondsAgo}
-            subtitle={subtitle}
-            title={title}
+            subtitle={lock.subtitle}
+            title={lock.title}
         />
+    );
+}
+
+function LockDetails({ error, hint }: { error: string; hint: string }) {
+    if (error === '' && hint === '') {
+        return null;
+    }
+    return (
+        <div className="mt-5 space-y-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-left">
+            {error !== '' && (
+                <p className="text-muted-foreground/70 font-mono text-[10.5px] leading-snug break-words">
+                    {error}
+                </p>
+            )}
+            {hint !== '' && <p className="text-foreground/70 text-[11px]">{hint}</p>}
+        </div>
     );
 }
 
@@ -119,18 +145,7 @@ function LockShell({
                         {subtitle}
                     </p>
 
-                    {(error ?? (hint !== undefined && hint !== '')) && (
-                        <div className="mt-5 space-y-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-left">
-                            {error !== undefined && error !== '' && (
-                                <p className="text-muted-foreground/70 font-mono text-[10.5px] leading-snug break-words">
-                                    {error}
-                                </p>
-                            )}
-                            {hint !== undefined && hint !== '' && (
-                                <p className="text-foreground/70 text-[11px]">{hint}</p>
-                            )}
-                        </div>
-                    )}
+                    <LockDetails error={error ?? ''} hint={hint ?? ''} />
 
                     <div className="mt-6">{primaryAction}</div>
 
