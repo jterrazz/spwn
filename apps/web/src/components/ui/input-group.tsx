@@ -2,14 +2,11 @@
 
 import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
-import * as React from 'react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../styles/class-names';
-import { Button } from './button';
-import { Input } from './input';
-import { Textarea } from './textarea';
 
-function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
+function InputGroup({ className, ...props }: ComponentProps<'div'>) {
     return (
         <div
             className={cn(
@@ -17,7 +14,6 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
                 className,
             )}
             data-slot="input-group"
-            role="group"
             {...props}
         />
     );
@@ -47,36 +43,15 @@ function InputGroupAddon({
     className,
     align = 'inline-start',
     ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
+}: ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
     return (
         <div
             className={cn(inputGroupAddonVariants({ align }), className)}
             data-align={align}
             data-slot="input-group-addon"
-            onClick={(e) => {
-                if ((e.target as HTMLElement).closest('button')) {
-                    return;
-                }
-                e.currentTarget.parentElement?.querySelector('input')?.focus();
-            }}
-            role="group"
             {...props}
         />
     );
 }
-
-const inputGroupButtonVariants = cva('flex items-center gap-2 text-sm shadow-none', {
-    variants: {
-        size: {
-            xs: "h-6 gap-1 rounded-[calc(var(--radius)-3px)] px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
-            sm: '',
-            'icon-xs': 'size-6 rounded-[calc(var(--radius)-3px)] p-0 has-[>svg]:p-0',
-            'icon-sm': 'size-8 p-0 has-[>svg]:p-0',
-        },
-    },
-    defaultVariants: {
-        size: 'xs',
-    },
-});
 
 export { InputGroup, InputGroupAddon };

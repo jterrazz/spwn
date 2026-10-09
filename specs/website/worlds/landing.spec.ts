@@ -93,10 +93,8 @@ describe('landing', () => {
               - button "New World":
                 - img
                 - text: New World
-              - button "matrix":
-                - paragraph: matrix
-              - button "startup":
-                - paragraph: startup
+              - button "matrix"
+              - button "startup"
               - button
             - button "Open glossary":
               - img
@@ -197,10 +195,8 @@ describe('landing', () => {
               - button "New World":
                 - img
                 - text: New World
-              - button "matrix":
-                - paragraph: matrix
-              - button "startup":
-                - paragraph: startup
+              - button "matrix"
+              - button "startup"
               - button
               - heading "matrix" [level=3]
               - paragraph: matrix · stopped
@@ -242,6 +238,8 @@ describe('landing', () => {
         });
 
         // Then - the preview states the command, its default workspace mounted
-        expect(result.content.text).toContain('spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…');
+        expect(result.content.text).toContain(
+            'spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…',
+        );
     });
 });

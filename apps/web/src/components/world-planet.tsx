@@ -1,15 +1,5 @@
 import type { World } from '../domain/model';
-
-function hashHue(id: null | string | undefined): number {
-    if (id === null || id === undefined || id === '') {
-        return 0;
-    }
-    let h = 0;
-    for (let i = 0; i < id.length; i++) {
-        h = (h * 31 + id.charCodeAt(i)) >>> 0;
-    }
-    return h % 360;
-}
+import { worldHue } from '../domain/world-hue';
 
 interface WorldPlanetProps {
     world: Pick<World, 'id' | 'status'>;
@@ -19,7 +9,7 @@ interface WorldPlanetProps {
 
 /** A small gradient sphere representing a world. Color is derived from the world's id hash so the same world is visually identifiable everywhere; saturation reflects activity (active worlds saturate, idle/stopped ones desaturate toward grey). Shared across sidebar, page headers, and any other surface where a world gets displayed - keeping rendering identical by construction. */
 export function WorldPlanet({ world, size = 'md', className = '' }: WorldPlanetProps) {
-    const hue = hashHue(world.id);
+    const hue = worldHue(world.id);
     const isActive = world.status === 'running' || world.status === 'creating';
     const sat = isActive ? 70 : 15;
 

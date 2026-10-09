@@ -36,7 +36,6 @@ export function NewWorldCard({
     return (
         <div
             className="group/new-world relative flex shrink-0 cursor-pointer flex-col items-center"
-            onClick={onClick}
             onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
                 e.currentTarget.style.transform = `scale(${scale * 1.08})`;

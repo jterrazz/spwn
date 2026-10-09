@@ -2,7 +2,7 @@
 
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
 import { IconX as XIcon } from '@tabler/icons-react';
-import * as React from 'react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../styles/class-names';
 import { Button } from './button';
@@ -71,7 +71,7 @@ function SheetContent({
     );
 }
 
-function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
+function SheetHeader({ className, ...props }: ComponentProps<'div'>) {
     return (
         <div
             className={cn('flex flex-col gap-0.5 p-4', className)}

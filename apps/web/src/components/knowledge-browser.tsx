@@ -235,7 +235,8 @@ export function KnowledgeBrowser({
                     const data = await res.json();
                     setFiles(data.files ?? []);
                 }
-            } catch {} finally {
+            } catch {
+            } finally {
                 setLoading(false);
             }
         };

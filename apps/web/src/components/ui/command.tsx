@@ -2,13 +2,13 @@
 
 import { IconCheck as CheckIcon, IconSearch as SearchIcon } from '@tabler/icons-react';
 import { Command as CommandPrimitive } from 'cmdk';
-import * as React from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '../../styles/class-names';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
 import { InputGroup, InputGroupAddon } from './input-group';
 
-function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
+function Command({ className, ...props }: ComponentProps<typeof CommandPrimitive>) {
     return (
         <CommandPrimitive
             className={cn(
@@ -28,12 +28,12 @@ function CommandDialog({
     className,
     showCloseButton = false,
     ...props
-}: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
+}: Omit<ComponentProps<typeof Dialog>, 'children'> & {
     title?: string;
     description?: string;
     className?: string;
     showCloseButton?: boolean;
-    children: React.ReactNode;
+    children: ReactNode;
 }) {
     return (
         <Dialog {...props}>
@@ -51,10 +51,7 @@ function CommandDialog({
     );
 }
 
-function CommandInput({
-    className,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+function CommandInput({ className, ...props }: ComponentProps<typeof CommandPrimitive.Input>) {
     return (
         <div className="p-1 pb-0" data-slot="command-input-wrapper">
             <InputGroup className="border-input/30 bg-input/30 h-8! rounded-lg! shadow-none! *:data-[slot=input-group-addon]:pl-2!">
@@ -74,7 +71,7 @@ function CommandInput({
     );
 }
 
-function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
+function CommandList({ className, ...props }: ComponentProps<typeof CommandPrimitive.List>) {
     return (
         <CommandPrimitive.List
             className={cn(
@@ -87,10 +84,7 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
     );
 }
 
-function CommandEmpty({
-    className,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.Empty>) {
+function CommandEmpty({ className, ...props }: ComponentProps<typeof CommandPrimitive.Empty>) {
     return (
         <CommandPrimitive.Empty
             className={cn('py-6 text-center text-sm', className)}
@@ -100,10 +94,7 @@ function CommandEmpty({
     );
 }
 
-function CommandGroup({
-    className,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.Group>) {
+function CommandGroup({ className, ...props }: ComponentProps<typeof CommandPrimitive.Group>) {
     return (
         <CommandPrimitive.Group
             className={cn(
@@ -119,7 +110,7 @@ function CommandGroup({
 function CommandSeparator({
     className,
     ...props
-}: React.ComponentProps<typeof CommandPrimitive.Separator>) {
+}: ComponentProps<typeof CommandPrimitive.Separator>) {
     return (
         <CommandPrimitive.Separator
             className={cn('bg-border -mx-1 h-px', className)}
@@ -133,7 +124,7 @@ function CommandItem({
     className,
     children,
     ...props
-}: React.ComponentProps<typeof CommandPrimitive.Item>) {
+}: ComponentProps<typeof CommandPrimitive.Item>) {
     return (
         <CommandPrimitive.Item
             className={cn(
