@@ -1,14 +1,18 @@
 import { heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { withoutArchitect } from '../../__setup__/architect.js';
 import { website } from '../website.specification.js';
 
 describe('architect', () => {
     test('an offline architect offers to start, from the page and from the terminal', async () => {
         // Given - a spwn home whose architect never started
-        const result = await website.visit('/architect', async (visitor) => {
-            await visitor.see(heading('Architect is offline'));
-        });
+        const result = await withoutArchitect(
+            async () =>
+                await website.visit('/architect', async (visitor) => {
+                    await visitor.see(heading('Architect is offline'));
+                }),
+        );
 
         // Then - the start button and the command that does the same
         expect(result.tree.text).toContain(`  - heading "Architect is offline" [level=2]
