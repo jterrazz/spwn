@@ -1,0 +1,25 @@
+description: a slept agent appends an agent.slept event the agent itself acts to the activity log
+runs:
+    - command: agent create neo
+      exit: 0
+      stderr: |4+
+          
+            → Creating agent "neo"...
+            ✓ Created agent            neo
+            ✓ Created soul             SOUL.md
+
+            ✓ Spawn with: spwn up --agent neo
+
+    - command: agent sleep neo
+      exit: 0
+      stderr: |4+
+          
+            → Sleep cycle for agent "neo"...
+            ✓ Archived playbooks       0
+            ✓ Pruned sessions          0
+
+      files:
+          spwn-home/activity.jsonl:
+              equals: |
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.slept","actor":"neo","verb":"slept","target":"neo","phrase":"neo slept","agent_id":"neo","metadata":{"archived_playbooks":0,"pruned_sessions":0}}

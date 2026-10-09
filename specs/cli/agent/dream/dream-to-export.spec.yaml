@@ -1,0 +1,40 @@
+description: dream, sleep, fork and export leave a forked mind and an archive
+fixture: ../../__fixtures__/docker-pilot/
+runs:
+    - command: agent dream neo
+      exit: 0
+      stderr: |4+
+          
+            → Dreaming for agent "neo"...
+            Skipped      no journal entries
+            Hint         Journal entries are created when worlds are destroyed. Use "spwn down <world>" first.
+
+    - command: agent sleep neo
+      exit: 0
+      stderr: |4+
+          
+            → Sleep cycle for agent "neo"...
+            ✓ Archived playbooks       0
+            ✓ Pruned sessions          0
+
+    - command: agent fork neo neo-v2
+      exit: 0
+      stderr: |4+
+          
+            → Forking "neo" -> "neo-v2"...
+            ✓ Source                   neo
+            ✓ Target                   neo-v2
+            ✓ Layers copied            playbooks, journal
+            ✓ Added world to spwn.yaml neo-v2
+
+      files:
+          spwn/agents/neo-v2/SOUL.md: exists
+    - command: agent export neo
+      exit: 0
+      stderr: |4+
+          
+            → Exporting agent neo...
+            ✓ Exported                 neo.tar.gz
+
+      files:
+          neo.tar.gz: exists

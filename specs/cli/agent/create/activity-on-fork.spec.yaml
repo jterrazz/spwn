@@ -1,0 +1,26 @@
+description: a fork appends an agent.forked event naming its source to the activity log
+runs:
+    - command: agent create neo
+      exit: 0
+      stderr: |4+
+          
+            → Creating agent "neo"...
+            ✓ Created agent            neo
+            ✓ Created soul             SOUL.md
+
+            ✓ Spawn with: spwn up --agent neo
+
+    - command: agent fork neo trinity
+      exit: 0
+      stderr: |4+
+          
+            → Forking "neo" -> "trinity"...
+            ✓ Source                   neo
+            ✓ Target                   trinity
+            ✓ Layers copied            playbooks, journal
+
+      files:
+          spwn-home/activity.jsonl:
+              equals: |
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.forked","actor":"user","verb":"forked","target":"trinity","phrase":"trinity forked from neo","agent_id":"trinity","metadata":{"layers":["playbooks","journal"],"source":"neo"}}

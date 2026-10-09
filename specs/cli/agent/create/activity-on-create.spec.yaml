@@ -1,0 +1,16 @@
+description: a created agent is one agent.created event in the activity log
+runs:
+    - command: agent create neo
+      exit: 0
+      stderr: |4+
+          
+            → Creating agent "neo"...
+            ✓ Created agent            neo
+            ✓ Created soul             SOUL.md
+
+            ✓ Spawn with: spwn up --agent neo
+
+      files:
+          spwn-home/activity.jsonl:
+              equals: |
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}

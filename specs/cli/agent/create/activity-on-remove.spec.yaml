@@ -1,0 +1,24 @@
+description: a removed agent appends an agent.deleted event to the activity log
+runs:
+    - command: agent create neo
+      exit: 0
+      stderr: |4+
+          
+            → Creating agent "neo"...
+            ✓ Created agent            neo
+            ✓ Created soul             SOUL.md
+
+            ✓ Spawn with: spwn up --agent neo
+
+    - command: agent rm neo
+      exit: 0
+      stderr: |4+
+          
+            → Deleting agent "neo"...
+            ✓ Deleted agent            neo
+
+      files:
+          spwn-home/activity.jsonl:
+              equals: |
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+                  {"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.deleted","actor":"user","verb":"deleted","target":"neo","phrase":"neo was deleted","agent_id":"neo"}
