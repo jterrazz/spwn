@@ -31,7 +31,7 @@ your browsing patterns refresh sessions naturally.
 
 That's it. No pairing, no secret. The popup shows live status:
 
-```
+```text
 spwn cookie sync                     ● gate connected
 ─────────────────────────────────────────────────────
 ● x          connected   synced 12s ago — x.com, twitter.com
@@ -47,7 +47,7 @@ cookies and it shows up in the popup at the next refresh.
 
 ## How it works
 
-```
+```text
 your Chrome (this extension)
   page-load on x.com           → cookies → POST 127.0.0.1:9000/sync/x
   cookie rotation (e.g. ct0)   → cookies → POST /sync/x

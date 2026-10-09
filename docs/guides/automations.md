@@ -320,29 +320,23 @@ worlds:
 
 ### Watch an inbox folder
 
+`curator` must be one of `brain`'s agents, declared as in the examples above.
+
 ```yaml
 worlds:
     brain:
-        agents: [curator]
-        workspaces: [.]
         automations:
             inbox-pull:
                 on:
-                    {
-                        fs:
-                            {
-                                path: ./inbox,
-                                events: [create],
-                                recursive: true,
-                                debounce: 10s,
-                                patterns: ['*.md', '*.pdf'],
-                            },
-                    }
+                    fs:
+                        path: ./inbox
+                        events: [create]
+                        recursive: true
+                        debounce: 10s
+                        patterns: ['*.md', '*.pdf']
                 agent: curator
                 prompt: |
-                    New file at {{ .Event.Path }}.
-                    Read it, decide whether to file under /world/knowledge or
-                    leave for human review.
+                    New file at {{ .Event.Path }}. File it under /world/knowledge, or leave it for human review.
 ```
 
 ### Reusable command body
