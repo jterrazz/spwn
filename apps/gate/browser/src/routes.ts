@@ -140,11 +140,9 @@ export const ROUTES: Route[] = [
     },
     {
         action: async (sessions, id, body) => {
-            await sessions
-                .get(id)
-                .page.click(required(body, 'selector'), {
-                    timeout: number(body, 'timeout_ms', OPERATION_TIMEOUT_MS),
-                });
+            await sessions.get(id).page.click(required(body, 'selector'), {
+                timeout: number(body, 'timeout_ms', OPERATION_TIMEOUT_MS),
+            });
             return done;
         },
         method: 'POST',

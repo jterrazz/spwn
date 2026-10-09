@@ -7,6 +7,12 @@ export default defineConfig({
     platform: 'node',
     presets: [test()],
     typescript: {
+        knip: {
+            entry: {
+                'website/__setup__/project.ts':
+                    'the throwaway project the website specification’s server command runs with node before `spwn web`',
+            },
+        },
         roots: {
             cli: 'the cli specification: this member IS the specs tree, so its specification folders sit at its root',
             website:
