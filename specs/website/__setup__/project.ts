@@ -34,6 +34,7 @@ function freshProject(): string {
         });
     }
     writeFileSync(join(root, 'spwn.yaml'), MANIFEST);
+    mkdirSync(join(root, 'home'));
     mkdirSync(join(root, 'spwn-home'));
     writeFileSync(join(root, 'spwn-home', '.onboarding-complete'), '');
     return root;
