@@ -2,7 +2,7 @@
 
 import { IconCheck } from '@tabler/icons-react';
 
-import { AuthStep } from './auth-step';
+import { AuthenticationStep } from './authentication-step';
 import { ChatStep, DockerStep, WorldStep } from './step-views';
 import { completed } from './steps';
 import type { OnboardingStatus, StepId, STEPS } from './steps';
@@ -59,7 +59,7 @@ function StepBody({
             );
         }
         case 'auth': {
-            return <AuthStep onAdvance={onAdvance} status={status} />;
+            return <AuthenticationStep onAdvance={onAdvance} status={status} />;
         }
         case 'world': {
             return <WorldStep onAdvance={onAdvance} status={status} />;

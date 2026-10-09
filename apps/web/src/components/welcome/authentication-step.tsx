@@ -65,7 +65,7 @@ function ProviderLine({ row }: { row: ProviderRow }) {
     );
 }
 
-export function AuthStep({
+export function AuthenticationStep({
     status,
     onAdvance,
 }: {

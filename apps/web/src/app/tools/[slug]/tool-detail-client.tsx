@@ -11,8 +11,8 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { Page } from '../../../components/page';
 import { PageHeader } from '../../../components/page-header';
-import { DetailSection, MetaCard } from '../../../components/tools/detail-parts';
-import { SkillViewer } from '../../../components/tools/skill-viewer';
+import { DetailSection, MetaCard } from '../../../components/tool-catalog/detail-parts';
+import { SkillViewer } from '../../../components/tool-catalog/skill-viewer';
 import { getToolByName, toolSlug } from '../../../domain/tools-catalog';
 import type { ToolDef } from '../../../domain/tools-catalog';
 import { usePageTitle } from '../../../hooks/use-page-title';
