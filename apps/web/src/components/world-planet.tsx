@@ -1,9 +1,7 @@
 import type { World } from '../domain/model';
 
-// Deterministic hue from world id - same world reads as the same color
-// Wherever it's rendered (sidebar hero, switcher pill, world page title).
 function hashHue(id: null | string | undefined): number {
-    if (!id) {
+    if (id === null || id === undefined || id === '') {
         return 0;
     }
     let h = 0;
@@ -15,20 +13,11 @@ function hashHue(id: null | string | undefined): number {
 
 interface WorldPlanetProps {
     world: Pick<World, 'id' | 'status'>;
-    /** Visual size. "lg" = 36px, "md" (default) = 24px, "sm" = 12px flat dot. */
     size?: 'lg' | 'md' | 'sm';
     className?: string;
 }
 
-/**
- * A small gradient sphere representing a world. Color is derived from the
- * world's id hash so the same world is visually identifiable everywhere;
- * saturation reflects activity (active worlds saturate, idle/stopped ones
- * desaturate toward grey).
- *
- * Shared across sidebar, page headers, and any other surface where a world
- * gets displayed - keeping rendering identical by construction.
- */
+/** A small gradient sphere representing a world. Color is derived from the world's id hash so the same world is visually identifiable everywhere; saturation reflects activity (active worlds saturate, idle/stopped ones desaturate toward grey). Shared across sidebar, page headers, and any other surface where a world gets displayed - keeping rendering identical by construction. */
 export function WorldPlanet({ world, size = 'md', className = '' }: WorldPlanetProps) {
     const hue = hashHue(world.id);
     const isActive = world.status === 'running' || world.status === 'creating';

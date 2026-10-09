@@ -1,8 +1,3 @@
-/**
- * Tauri integration - detect if running inside the native app
- * and get the dynamic API port.
- */
-
 let cachedPort: null | number = null;
 let initPromise: null | Promise<null | number> = null;
 
@@ -10,16 +5,12 @@ export function isTauri(): boolean {
     return typeof globalThis !== 'undefined' && '__TAURI__' in globalThis;
 }
 
-/**
- * Initialize the Tauri API port. Must be called (and awaited) once before
- * any API calls. Safe to call multiple times - subsequent calls return the
- * cached result.
- */
+/** Initialize the Tauri API port. Must be called (and awaited) once before any API calls. Safe to call multiple times - subsequent calls return the cached result. */
 export async function initTauriApiPort(): Promise<null | number> {
     if (!isTauri()) {
         return null;
     }
-    if (cachedPort) {
+    if (cachedPort !== null && cachedPort !== 0) {
         return cachedPort;
     }
     if (initPromise) {
@@ -44,7 +35,7 @@ export async function initTauriApiPort(): Promise<null | number> {
 }
 
 export function getTauriApiBase(): null | string {
-    if (cachedPort) {
+    if (cachedPort !== null && cachedPort !== 0) {
         return `http://localhost:${cachedPort}`;
     }
     return null;

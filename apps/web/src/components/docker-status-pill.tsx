@@ -4,15 +4,10 @@ import { IconBrandDocker } from '@tabler/icons-react';
 
 import { useDocker } from '../contexts/docker-context';
 
-/**
- * Compact Docker status indicator for the sidebar footer. Always visible
- * so the user can see daemon health at a glance from any screen. Clicking
- * forces a refresh.
- */
+/** Compact Docker status indicator for the sidebar footer. Always visible so the user can see daemon health at a glance from any screen. Clicking forces a refresh. */
 export function DockerStatusPill() {
     const { status, ready, refresh } = useDocker();
 
-    // First load: render a neutral placeholder so we don't flash red.
     const isLoading = status === null;
     const apiDown = status === undefined;
 
@@ -29,13 +24,16 @@ export function DockerStatusPill() {
         dotClass = 'bg-amber-400';
         title = 'Cannot reach the spwn API';
     } else if (ready) {
-        label = status?.version ? `v${status.version}` : 'connected';
+        label =
+            status?.version === undefined || status?.version === ''
+                ? 'connected'
+                : `v${status.version}`;
         dotClass = 'bg-emerald-400';
-        title = `Docker daemon running${status?.version ? ` (v${status.version})` : ''}`;
+        title = `Docker daemon running${status?.version === undefined || status?.version === '' ? '' : ` (v${status.version})`}`;
     } else {
         label = 'offline';
         dotClass = 'bg-red-400';
-        title = status?.error || 'Docker daemon is not reachable';
+        title = status?.error ?? 'Docker daemon is not reachable';
     }
 
     return (

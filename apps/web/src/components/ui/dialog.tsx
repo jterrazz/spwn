@@ -4,23 +4,15 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { IconX as XIcon } from '@tabler/icons-react';
 import * as React from 'react';
 
-import { Button } from './button';
 import { cn } from '../../styles/class-names';
+import { Button } from './button';
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
     return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
-    return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
-}
-
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
     return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
-}
-
-function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
-    return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
 function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
@@ -86,33 +78,6 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
     );
 }
 
-function DialogFooter({
-    className,
-    showCloseButton = false,
-    children,
-    ...props
-}: React.ComponentProps<'div'> & {
-    showCloseButton?: boolean;
-}) {
-    return (
-        <div
-            className={cn(
-                'bg-muted/50 -mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 sm:flex-row sm:justify-end',
-                className,
-            )}
-            data-slot="dialog-footer"
-            {...props}
-        >
-            {children}
-            {showCloseButton && (
-                <DialogPrimitive.Close render={<Button variant="outline" />}>
-                    Close
-                </DialogPrimitive.Close>
-            )}
-        </div>
-    );
-}
-
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     return (
         <DialogPrimitive.Title
@@ -138,13 +103,10 @@ function DialogDescription({ className, ...props }: DialogPrimitive.Description.
 
 export {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogOverlay,
     DialogPortal,
     DialogTitle,
-    DialogTrigger,
 };

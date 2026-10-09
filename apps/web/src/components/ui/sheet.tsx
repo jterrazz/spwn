@@ -4,19 +4,11 @@ import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
 import { IconX as XIcon } from '@tabler/icons-react';
 import * as React from 'react';
 
-import { Button } from './button';
 import { cn } from '../../styles/class-names';
+import { Button } from './button';
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
-}
-
-function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
-    return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
-}
-
-function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
-    return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
 function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
@@ -89,16 +81,6 @@ function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
     );
 }
 
-function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
-    return (
-        <div
-            className={cn('mt-auto flex flex-col gap-2 p-4', className)}
-            data-slot="sheet-footer"
-            {...props}
-        />
-    );
-}
-
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
     return (
         <SheetPrimitive.Title
@@ -119,13 +101,4 @@ function SheetDescription({ className, ...props }: SheetPrimitive.Description.Pr
     );
 }
 
-export {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-};
+export { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle };

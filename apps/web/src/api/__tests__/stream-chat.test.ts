@@ -1,12 +1,11 @@
 import { defineContracts, http, intercept } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { streamChat } from './stream-chat';
+import { streamChat } from '../stream-chat';
 
 const primaryUrl = 'http://spwn.test/api/worlds/w-1/talk';
 const fallbackUrl = 'http://fallback.test/api/architect/talk';
 
-/** The frame that closes a Claude Code stream. */
 const done = { data: '[DONE]' };
 
 function callbacks() {

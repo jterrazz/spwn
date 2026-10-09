@@ -83,13 +83,11 @@
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 
-    /* World status colors */
     --color-status-running: #22c55e;
     --color-status-idle: #eab308;
     --color-status-stopped: rgba(255, 255, 255, 0.2);
 }
 
-/* Dark-only cosmic palette — matching spwn-web landing page */
 :root {
     --radius: 0.625rem;
     --background: transparent;
@@ -164,7 +162,6 @@
     }
 }
 
-/* ── Grain overlay — subtle noise texture ── */
 body::before {
     content: '';
     position: fixed;
@@ -177,7 +174,6 @@ body::before {
     background-size: 48px 48px;
 }
 
-/* ── Glass panels ── */
 .glass {
     background: rgba(20, 20, 20, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -195,14 +191,12 @@ body::before {
     backdrop-filter: blur(12px) saturate(1.1);
 }
 
-/* ── World planet glow ── */
 .planet-glow {
     box-shadow:
         0 0 20px rgba(var(--glow-color), 0.3),
         0 0 60px rgba(var(--glow-color), 0.1);
 }
 
-/* ── Sidebar — macOS floating glass panel ── */
 [data-slot='sidebar'],
 [data-slot='sidebar-container'],
 [data-slot='sidebar-gap'] {
@@ -226,20 +220,17 @@ body::before {
         inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* ── Content area — transparent so space shows through ── */
 [data-sidebar='inset'],
 [data-slot='sidebar-inset'] {
     background: transparent !important;
 }
 
-/* ── Interactive defaults ── */
 button,
 [role='button'],
 a {
     cursor: pointer;
 }
 
-/* ── Smooth transitions everywhere ── */
 *,
 *::before,
 *::after {
@@ -249,7 +240,6 @@ a {
     transition-duration: 150ms;
 }
 
-/* Scrollbar */
 html,
 body {
     scrollbar-width: none;
@@ -265,7 +255,7 @@ html::-webkit-scrollbar {
     display: none;
 }
 
-/* ── Tauri: interactive elements sit above the drag region strip (z-100) ── */
+/* outside: the Tauri window's drag region is a z-100 strip across the top; controls sit above it (101), full-screen overlays above every control (500), dialog content above its overlay (501), and the pointer-events-none decorations (stars, aurora) behind everything */
 html.tauri button,
 html.tauri [role='button'],
 html.tauri a,
@@ -276,35 +266,28 @@ html.tauri textarea {
     z-index: 101;
 }
 
-/* ── Tauri: fixed overlays (modals, dialogs) must sit above everything ── */
-/* Exclude pointer-events-none elements (stars, aurora) which are background decorations */
 html.tauri [class*='fixed'][class*='inset-0']:not([class*='pointer-events-none']) {
     z-index: 500 !important;
 }
 
-/* ── Tauri: dialog content (centered modals) must sit above their overlay ── */
 html.tauri [data-slot='dialog-content'],
 html.tauri [data-slot='command'],
 html.tauri [role='dialog'] {
     z-index: 501 !important;
 }
 
-/* ── Tauri: ensure background decorations stay behind content ── */
 html.tauri [class*='fixed'][class*='inset-0'][class*='pointer-events-none'] {
     z-index: -1 !important;
 }
 
-/* ── Tauri: space below traffic lights ── */
 html.tauri [data-slot='sidebar-header'] {
     padding-top: 36px;
 }
 
-/* ── Tauri: main content area also needs top space ── */
 html.tauri [data-slot='sidebar-inset'] {
     padding-top: 8px;
 }
 
-/* ── Tauri native scroll: no rubber-band bounce ── */
 html.tauri,
 html.tauri body,
 html.tauri [data-slot='sidebar-content'],

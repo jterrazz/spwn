@@ -16,9 +16,8 @@ import { goApiUrl } from '../../api/client';
 import { Page } from '../../components/page';
 import { PageHeader } from '../../components/page-header';
 import { Skeleton } from '../../components/ui/skeleton';
+import { inBackground } from '../../events/in-background';
 import { usePageTitle } from '../../hooks/use-page-title';
-
-// ── Types ───────────────────────────────────────────────────────────────
 
 interface ProviderUsage {
     session?: { used: number; limit: number; label: string };
@@ -73,8 +72,6 @@ const PROVIDER_META: Record<
     },
 };
 
-// ── Helpers ─────────────────────────────────────────────────────────────
-
 function credLabel(type: null | string): { label: string; icon: React.ReactNode; color: string } {
     switch (type) {
         case 'api_key': {
@@ -104,8 +101,6 @@ function credLabel(type: null | string): { label: string; icon: React.ReactNode;
     }
 }
 
-// ── Sub-components ──────────────────────────────────────────────────────
-
 function UsageBar({
     label,
     used,
@@ -129,9 +124,9 @@ function UsageBar({
             <div className="flex items-center justify-between">
                 <span className="text-muted-foreground/40 text-[10px]">{label}</span>
                 <span className="text-muted-foreground/50 font-mono text-[10px]">
-                    {suffix
-                        ? `${suffix}${used.toFixed(2)} / ${suffix}${limit.toFixed(2)}`
-                        : `${pct.toFixed(0)}%`}
+                    {suffix === undefined || suffix === ''
+                        ? `${pct.toFixed(0)}%`
+                        : `${suffix}${used.toFixed(2)} / ${suffix}${limit.toFixed(2)}`}
                 </span>
             </div>
             <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
@@ -172,29 +167,25 @@ function ProviderRow({
 
     return (
         <div className="space-y-3 py-5">
-            {/* Main row */}
             <div className="flex items-center gap-4">
-                {/* Icon */}
                 <div
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04] text-base ${meta.color}`}
                 >
                     {meta.icon}
                 </div>
 
-                {/* Name + status */}
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2.5">
                         <span className="text-foreground/80 font-mono text-sm font-medium">
                             {meta.name}
                         </span>
                         {connected && <span className="h-1.5 w-1.5 rounded-full bg-green-400/70" />}
-                        {!connected && provider.error && (
+                        {!connected && provider.error !== null && provider.error !== '' && (
                             <span className="h-1.5 w-1.5 rounded-full bg-red-400/70" />
                         )}
-                        {!connected && !provider.error && (
+                        {!connected && (provider.error === null || provider.error === '') && (
                             <span className="h-1.5 w-1.5 rounded-full bg-white/15" />
                         )}
-                        {/* Credential type badge */}
                         {cred.label && (
                             <span
                                 className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[9px] ${cred.color}`}
@@ -217,26 +208,26 @@ function ProviderRow({
                     </div>
                 </div>
 
-                {/* Plan badge */}
-                {provider.plan && (
+                {provider.plan !== null && provider.plan !== '' && (
                     <span className="text-muted-foreground/35 rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 font-mono text-[9px] tracking-wider uppercase">
                         {provider.plan}
                     </span>
                 )}
 
-                {/* Actions */}
                 <div className="flex shrink-0 items-center gap-1">
                     {!connected && (
                         <>
                             <button
                                 className="text-foreground/60 hover:text-foreground/80 flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3 py-1.5 text-[11px] font-medium transition-all hover:bg-white/[0.08]"
                                 onClick={onReconnect}
+                                type="button"
                             >
                                 Reconnect
                             </button>
                             <button
                                 className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04]"
                                 onClick={onConfigure}
+                                type="button"
                             >
                                 How to connect
                             </button>
@@ -248,6 +239,7 @@ function ProviderRow({
                                 className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04] disabled:opacity-40"
                                 disabled={checking}
                                 onClick={onCheck}
+                                type="button"
                             >
                                 {checking ? (
                                     <span className="border-foreground/30 border-t-foreground/70 inline-block h-3 w-3 animate-spin rounded-full border-2" />
@@ -258,12 +250,14 @@ function ProviderRow({
                             <button
                                 className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04]"
                                 onClick={onConfigure}
+                                type="button"
                             >
                                 Change
                             </button>
                             <button
                                 className="text-muted-foreground/20 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-red-500/[0.04] hover:text-red-400/60"
                                 onClick={onReset}
+                                type="button"
                             >
                                 <IconX size={12} />
                             </button>
@@ -272,8 +266,7 @@ function ProviderRow({
                 </div>
             </div>
 
-            {/* Error */}
-            {provider.error && (
+            {provider.error !== null && provider.error !== '' && (
                 <div className="ml-13 flex items-start gap-2 rounded-lg border border-red-500/12 bg-red-500/8 px-3 py-2">
                     <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400/50" size={12} />
                     <p className="font-mono text-[10px] leading-relaxed text-red-400/50">
@@ -282,7 +275,6 @@ function ProviderRow({
                 </div>
             )}
 
-            {/* Usage bars */}
             {provider.usage && (
                 <div className="ml-13 max-w-xs space-y-2">
                     {provider.usage.session && (
@@ -327,6 +319,7 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
                     <button
                         className="text-muted-foreground/30 hover:text-muted-foreground/60 p-1 transition-colors"
                         onClick={onClose}
+                        type="button"
                     >
                         <IconX size={16} />
                     </button>
@@ -339,7 +332,7 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
                             credentials from your system keychain and shares them with all
                             containers automatically.
                         </p>
-                        {meta?.oauthNote && (
+                        {meta?.oauthNote !== undefined && meta?.oauthNote !== '' && (
                             <div className="text-foreground/50 flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 font-mono text-[11px]">
                                 <IconTerminal2
                                     className="text-muted-foreground/30 shrink-0"
@@ -357,6 +350,7 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
                     <button
                         className="text-muted-foreground/50 hover:text-foreground/70 w-full rounded-xl px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
                         onClick={onClose}
+                        type="button"
                     >
                         Done
                     </button>
@@ -365,8 +359,6 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
         </div>
     );
 }
-
-// ── Page ─────────────────────────────────────────────────────────────────
 
 export default function ProvidersPage() {
     usePageTitle('Settings');
@@ -381,7 +373,9 @@ export default function ProvidersPage() {
 
     const showFeedback = (message: string, type: 'error' | 'success') => {
         setFeedback({ message, type });
-        setTimeout(() => setFeedback(null), 3000);
+        setTimeout(() => {
+            setFeedback(null);
+        }, 3000);
     };
 
     const fetchProviders = async () => {
@@ -401,7 +395,7 @@ export default function ProvidersPage() {
     };
 
     useEffect(() => {
-        fetchProviders();
+        void fetchProviders();
     }, []);
 
     const handleCheck = async (providerName: string) => {
@@ -448,7 +442,7 @@ export default function ProvidersPage() {
             });
             if (res.ok) {
                 showFeedback(`${providerName} cleared`, 'success');
-                fetchProviders();
+                void fetchProviders();
             } else {
                 showFeedback('Failed to reset', 'error');
             }
@@ -466,7 +460,7 @@ export default function ProvidersPage() {
             });
             if (res.ok) {
                 showFeedback(`${providerName} reconnected`, 'success');
-                fetchProviders();
+                void fetchProviders();
             } else {
                 showFeedback('Failed to reconnect', 'error');
             }
@@ -479,7 +473,6 @@ export default function ProvidersPage() {
         <Page>
             <PageHeader description="Connect your AI providers to power agents." title="Settings" />
 
-            {/* Feedback toast */}
             {feedback && (
                 <div
                     className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
@@ -497,15 +490,13 @@ export default function ProvidersPage() {
                 </div>
             )}
 
-            {/* Error */}
-            {errorMessage && !loading && (
+            {errorMessage !== null && errorMessage !== '' && !loading && (
                 <div className="flex items-start gap-2 rounded-lg border border-red-500/15 bg-red-500/10 px-4 py-3">
                     <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400/60" size={14} />
                     <p className="font-mono text-xs text-red-400/70">{errorMessage}</p>
                 </div>
             )}
 
-            {/* Provider list */}
             {loading && (
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
@@ -520,45 +511,59 @@ export default function ProvidersPage() {
                     ))}
                 </div>
             )}
-            {!loading && providers.length === 0 && !errorMessage && (
-                <div className="-mt-12 flex flex-1 items-center justify-center">
-                    <div className="flex max-w-md flex-col items-center text-center">
-                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-                            <IconPlugConnected className="text-muted-foreground/20" size={28} />
-                        </div>
-                        <h2 className="font-heading text-foreground/70 mb-2 text-lg tracking-wide">
-                            No providers detected
-                        </h2>
-                        <p className="text-muted-foreground/40 mb-6 text-sm leading-relaxed">
-                            Agents need an AI provider to think. Add an API key or sign in with a
-                            subscription.
-                        </p>
-                        <div className="text-muted-foreground/25 flex items-center gap-2 font-mono text-[11px]">
-                            <IconTerminal2 size={13} />
-                            <span>export ANTHROPIC_API_KEY=sk-...</span>
+            {!loading &&
+                providers.length === 0 &&
+                (errorMessage === null || errorMessage === '') && (
+                    <div className="-mt-12 flex flex-1 items-center justify-center">
+                        <div className="flex max-w-md flex-col items-center text-center">
+                            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+                                <IconPlugConnected className="text-muted-foreground/20" size={28} />
+                            </div>
+                            <h2 className="font-heading text-foreground/70 mb-2 text-lg tracking-wide">
+                                No providers detected
+                            </h2>
+                            <p className="text-muted-foreground/40 mb-6 text-sm leading-relaxed">
+                                Agents need an AI provider to think. Add an API key or sign in with
+                                a subscription.
+                            </p>
+                            <div className="text-muted-foreground/25 flex items-center gap-2 font-mono text-[11px]">
+                                <IconTerminal2 size={13} />
+                                <span>export ANTHROPIC_API_KEY=sk-...</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
             {!loading && providers.length > 0 && (
                 <div className="divide-y divide-white/[0.06]">
                     {providers.map((provider) => (
                         <ProviderRow
                             checking={checking === provider.provider}
                             key={provider.provider}
-                            onCheck={async () => await handleCheck(provider.provider)}
-                            onConfigure={() => setConfiguring(provider.provider)}
-                            onReconnect={async () => await handleReconnect(provider.provider)}
-                            onReset={async () => await handleReset(provider.provider)}
+                            onCheck={inBackground(async () => {
+                                await handleCheck(provider.provider);
+                            })}
+                            onConfigure={() => {
+                                setConfiguring(provider.provider);
+                            }}
+                            onReconnect={inBackground(async () => {
+                                await handleReconnect(provider.provider);
+                            })}
+                            onReset={inBackground(async () => {
+                                await handleReset(provider.provider);
+                            })}
                             provider={provider}
                         />
                     ))}
                 </div>
             )}
 
-            {/* Configure Modal */}
-            {configuring && (
-                <ConfigureModal onClose={() => setConfiguring(null)} provider={configuring} />
+            {configuring !== null && configuring !== '' && (
+                <ConfigureModal
+                    onClose={() => {
+                        setConfiguring(null);
+                    }}
+                    provider={configuring}
+                />
             )}
         </Page>
     );

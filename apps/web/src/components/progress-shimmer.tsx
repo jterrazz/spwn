@@ -1,9 +1,4 @@
-/**
- * A thin animated shimmer bar + progress message for long-running operations.
- *
- * Usage:
- *   <ProgressShimmer active={isLoading} message="Building image..." />
- */
+/** A thin animated shimmer bar + progress message for long-running operations. Usage: <ProgressShimmer active={isLoading} message="Building image..." /> */
 export function ProgressShimmer({
     active,
     message,
@@ -18,7 +13,6 @@ export function ProgressShimmer({
     }
     return (
         <div className={`w-full space-y-1.5 ${className ?? ''}`}>
-            {/* Shimmer bar */}
             <div className="h-0.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
                 <div
                     className="h-full w-1/3 rounded-full bg-emerald-500/30"
@@ -27,8 +21,7 @@ export function ProgressShimmer({
                     }}
                 />
             </div>
-            {/* Message */}
-            {message && (
+            {message !== undefined && message !== '' && (
                 <p className="text-muted-foreground/40 animate-pulse font-mono text-[11px]">
                     {message}
                 </p>

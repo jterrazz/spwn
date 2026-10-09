@@ -3,14 +3,12 @@
 import { IconSearch } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from './glass-pill';
 import { cn } from '../styles/class-names';
+import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from './glass-pill';
 
 const COLLAPSED_WIDTH = GLASS_PILL_HEIGHT;
-const EXPAND_EASING = 'cubic-bezier(0.32, 0.72, 0.24, 1)'; // Apple-style soft-out
+const EXPAND_EASING = 'cubic-bezier(0.32, 0.72, 0.24, 1)';
 
-// Glass pill chrome from glass-pill.ts, plus overflow clipping for the
-// Expand animation and h-[42px] for the canonical height.
 const baseClass = cn(
     GLASS_PILL_CLASS,
     'hover:text-foreground relative h-[42px] shrink-0 overflow-hidden',
@@ -20,18 +18,11 @@ interface ExpandingSearchProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
-    /** Width (px) of the expanded input. Defaults to 240. */
     expandedWidth?: number;
     className?: string;
 }
 
-/**
- * A search control that renders as a round icon button by default and
- * expands horizontally into a full input field. The animation is purely
- * geometric: the outer pill animates its width, and `overflow-hidden`
- * reveals the input as the clip widens. The input never moves - it's
- * always in its final position, hidden only by the clipping edge.
- */
+/** A search control that renders as a round icon button by default and expands horizontally into a full input field. The animation is purely geometric: the outer pill animates its width, and `overflow-hidden` reveals the input as the clip widens. The input never moves - it's always in its final position, hidden only by the clipping edge. */
 export function ExpandingSearch({
     value,
     onChange,
@@ -43,8 +34,6 @@ export function ExpandingSearch({
     const inputRef = useRef<HTMLInputElement>(null);
     const rootRef = useRef<HTMLDivElement>(null);
 
-    // Keep it expanded as long as there's text. Search chrome shouldn't
-    // Collapse mid-typing, and it shouldn't hide an active filter value.
     const shouldShow = expanded || value.length > 0;
 
     useEffect(() => {
@@ -62,7 +51,7 @@ export function ExpandingSearch({
             if (!target) {
                 return;
             }
-            if (rootRef.current?.contains(target)) {
+            if (rootRef.current?.contains(target) === true) {
                 return;
             }
             if (!value) {
@@ -70,7 +59,9 @@ export function ExpandingSearch({
             }
         };
         document.addEventListener('mousedown', onPointerDown);
-        return () => document.removeEventListener('mousedown', onPointerDown);
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown);
+        };
     }, [expanded, value]);
 
     return (
@@ -101,17 +92,9 @@ export function ExpandingSearch({
             }}
             tabIndex={shouldShow ? -1 : 0}
         >
-            {/* Icon: absolutely positioned in a 40×40 square that exactly
-          matches the pill's padding-box (interior after the 1px
-          border). This makes the icon position totally independent of
-          outer width - it always sits at the geometric center (21, 21)
-          of the 42px pill whether collapsed, expanded, or mid-animation. */}
             <span className="pointer-events-none absolute top-0 left-0 flex h-10 w-10 items-center justify-center">
                 <IconSearch className="translate-y-[0.5px]" size={16} stroke={2.4} />
             </span>
-            {/* Input: filling the padding box from x=40 to the right edge.
-          When outer width is 42px (interior 40px), left:40 right:0
-          collapses to 0 width - fully behind the clipping edge. */}
             <input
                 aria-hidden={!shouldShow}
                 className={cn(
@@ -123,7 +106,9 @@ export function ExpandingSearch({
                         setExpanded(false);
                     }
                 }}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e) => {
+                    onChange(e.target.value);
+                }}
                 onKeyDown={(e) => {
                     if (e.key === 'Escape') {
                         onChange('');

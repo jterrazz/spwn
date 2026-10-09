@@ -1,6 +1,5 @@
 import KnowledgePage from './knowledge-client';
 
-// Inherits [id] from parent layout
 export function generateStaticParams() {
     return [{ id: '_' }];
 }

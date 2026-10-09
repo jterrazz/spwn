@@ -38,7 +38,6 @@ export default function MarketplacePage() {
 
     return (
         <Page>
-            {/* Header */}
             <PageHeader
                 actions={
                     <a
@@ -55,7 +54,6 @@ export default function MarketplacePage() {
                 title="Marketplace"
             />
 
-            {/* Loading state */}
             {loading && (
                 <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
@@ -71,7 +69,6 @@ export default function MarketplacePage() {
                 </div>
             )}
 
-            {/* Installed dependencies */}
             {!loading && packages.length > 0 && (
                 <div>
                     <h2 className="font-heading text-muted-foreground/40 mb-4 text-sm tracking-widest uppercase">
@@ -103,7 +100,10 @@ export default function MarketplacePage() {
                                         </p>
                                     )}
                                 </div>
-                                <button className="rounded-lg px-3 py-1.5 text-[11px] text-red-400/50 transition-colors hover:bg-red-500/10 hover:text-red-400">
+                                <button
+                                    className="rounded-lg px-3 py-1.5 text-[11px] text-red-400/50 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                                    type="button"
+                                >
                                     Uninstall
                                 </button>
                             </div>
@@ -112,7 +112,6 @@ export default function MarketplacePage() {
                 </div>
             )}
 
-            {/* Empty state */}
             {!loading && packages.length === 0 && (
                 <div className="py-20 text-center">
                     <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
@@ -138,12 +137,13 @@ export default function MarketplacePage() {
                         <button
                             className="text-muted-foreground/40 hover:text-foreground/60 flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm transition-all hover:bg-white/[0.04]"
                             disabled
+                            type="button"
                         >
                             <IconDownload size={16} />
                             Install from URL
                         </button>
                     </div>
-                    {error && (
+                    {error !== null && error !== '' && (
                         <p className="text-muted-foreground/25 mt-6 font-mono text-[11px]">
                             CLI: {error}
                         </p>

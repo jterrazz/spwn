@@ -3,13 +3,7 @@
 import { IconHelpCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface Term {
     word: string;
@@ -65,10 +59,7 @@ const TERMS: Term[] = [
     },
 ];
 
-/**
- * Floating ? button + glossary modal. Mounted globally so users can ask
- * "what is an architect?" from any screen without leaving the page.
- */
+/** Floating ? button + glossary modal. Mounted globally so users can ask "what is an architect?" from any screen without leaving the page. */
 export function GlossaryButton() {
     const [open, setOpen] = useState(false);
     return (
@@ -76,7 +67,9 @@ export function GlossaryButton() {
             <button
                 aria-label="Open glossary"
                 className="text-muted-foreground/70 hover:text-foreground fixed bottom-4 left-4 z-50 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-md transition-colors hover:border-white/20"
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                    setOpen(true);
+                }}
                 title="Glossary"
                 type="button"
             >

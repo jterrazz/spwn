@@ -1,19 +1,6 @@
-/**
- * Design system primitives - the diagnostics panel aesthetic.
- *
- * Dark background, mono font, uppercase labels with wide tracking,
- * bold metric values, accent bars on section headers, thin separators.
- * No cards, no glass, no rounded wrappers - raw on dark.
- */
-
 import type { ReactNode } from 'react';
 
 import { cn } from '../styles/class-names';
-
-// ── Section Header ──────────────────────────────────────────────────
-// Left accent bar + bold uppercase mono label.
-//
-//   ┃ IDENTITY
 
 interface SectionHeaderProps {
     children: ReactNode;
@@ -34,12 +21,6 @@ export function SectionHeader({ children, className }: SectionHeaderProps) {
     );
 }
 
-// ── Section Label ───────────────────────────────────────────────────
-// Bold uppercase white - used for content sections within a panel.
-// No accent bar (that's reserved for SectionHeader / main titles).
-//
-//   SERVICES
-
 interface SectionLabelProps {
     children: ReactNode;
     className?: string;
@@ -57,11 +38,6 @@ export function SectionLabel({ children, className }: SectionLabelProps) {
         </p>
     );
 }
-
-// ── Sub Label ───────────────────────────────────────────────────────
-// Smaller label without accent bar - used for nested fields.
-//
-//   PURPOSE
 
 interface SubLabelProps {
     children: ReactNode;
@@ -81,18 +57,9 @@ export function SubLabel({ children, className }: SubLabelProps) {
     );
 }
 
-// ── Separator ───────────────────────────────────────────────────────
-// Thin horizontal line between sections.
-
 export function Separator({ className }: { className?: string }) {
     return <div className={cn('h-px bg-white/[0.06]', className)} />;
 }
-
-// ── Metric Grid ─────────────────────────────────────────────────────
-// 2-column grid of large bold mono values with tiny labels.
-//
-//   FILES        LAYERS
-//   42           6
 
 interface MetricItem {
     label: string;
@@ -126,16 +93,10 @@ export function MetricGrid({ items, columns = 2, className }: MetricGridProps) {
     );
 }
 
-// ── Key Value ────────────────────────────────────────────────────────
-// Label left, value right. Optional status dot.
-//
-//   Engine                    claude-code
-//   Status                  ● Running
-
 interface KeyValueProps {
     label: string;
     value: number | string;
-    dot?: string; // Tailwind bg color class for status dot, e.g. "bg-green-500"
+    dot?: string;
     className?: string;
 }
 
@@ -144,18 +105,14 @@ export function KeyValue({ label, value, dot, className }: KeyValueProps) {
         <div className={cn('flex items-center justify-between', className)}>
             <SubLabel>{label}</SubLabel>
             <div className="flex items-center gap-1.5">
-                {dot && <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />}
+                {dot !== undefined && dot !== '' && (
+                    <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+                )}
                 <span className="text-foreground/80 font-mono text-xs font-medium">{value}</span>
             </div>
         </div>
     );
 }
-
-// ── Item List ────────────────────────────────────────────────────────
-// Dot-prefixed mono list - services / deployment history style.
-//
-//   ● Auth Service              Running · 99.99%
-//   ● Database                  Degraded · 92.11%
 
 interface ItemListEntry {
     name: string;
@@ -178,14 +135,14 @@ export function ItemList({ items, className }: ItemListProps) {
                         <span className="text-foreground/90 flex-1 truncate font-mono text-xs font-bold">
                             {item.name}
                         </span>
-                        {item.detail && (
+                        {item.detail !== undefined && item.detail !== '' && (
                             <span className="text-foreground/80 shrink-0 font-mono text-[10px]">
                                 {item.detail}
                             </span>
                         )}
                     </>
                 );
-                if (item.href) {
+                if (item.href !== undefined && item.href !== '') {
                     return (
                         <a
                             className="group hover:text-foreground flex items-center gap-2 transition-colors"
@@ -206,15 +163,9 @@ export function ItemList({ items, className }: ItemListProps) {
     );
 }
 
-// ── Progress Bar ────────────────────────────────────────────────────
-// Label left, percentage right, flat bar below.
-//
-//   AGENTS ALIVE                              100%
-//   ██████████████████████████████████████░░░░░░
-
 interface ProgressBarProps {
     label: string;
-    value: number; // 0–100
+    value: number;
     className?: string;
 }
 
@@ -238,9 +189,6 @@ export function ProgressBar({ label, value, className }: ProgressBarProps) {
         </div>
     );
 }
-
-// ── Status Dot ──────────────────────────────────────────────────────
-// Colored circle indicating running/idle/stopped/error state.
 
 const STATUS_DOT_COLORS: Record<string, string> = {
     running: 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]',
@@ -270,21 +218,9 @@ export function StatusDot({ status, size = 'sm', className }: StatusDotProps) {
     );
 }
 
-// ── Data Table ─────────────────────────────────────────────────────
-// Notion/Vercel-style table: thin border, header row, clean data rows.
-// Each column is defined by a key, label, and optional render function.
-//
-//   ┌─────────────────────────────────────────────┐
-//   │ NAME           ROLE        STATUS            │
-//   ├─────────────────────────────────────────────┤
-//   │ QA Eng         worker      ● running         │
-//   │ Coder          chief       ● idle            │
-//   └─────────────────────────────────────────────┘
-
 interface DataTableColumn<T> {
     key: string;
     label: string;
-    /** Column width as CSS grid value, e.g. "1fr", "80px" */
     width?: string;
     render: (row: T) => ReactNode;
 }
@@ -292,11 +228,8 @@ interface DataTableColumn<T> {
 interface DataTableProps<T> {
     columns: DataTableColumn<T>[];
     rows: T[];
-    /** Unique key extractor */
     rowKey: (row: T) => string;
-    /** If provided, rows become clickable links */
     rowHref?: (row: T) => string;
-    /** Show arrow on hover for clickable rows */
     showArrow?: boolean;
     className?: string;
     emptyText?: string;
@@ -314,13 +247,12 @@ export function DataTable<T>({
     const gridCols = columns.map((c) => c.width ?? '1fr').join(' ');
     const gridTemplate = showArrow && rowHref ? `${gridCols} 28px` : gridCols;
 
-    if (rows.length === 0 && emptyText) {
+    if (rows.length === 0 && emptyText !== undefined && emptyText !== '') {
         return <p className="text-muted-foreground/30 py-4 font-mono text-xs">{emptyText}</p>;
     }
 
     return (
         <div className={cn('overflow-hidden rounded-lg border border-white/[0.06]', className)}>
-            {/* Header */}
             <div
                 className="hidden items-center gap-3 border-b border-white/[0.06] bg-white/[0.02] px-3 py-2 sm:grid"
                 style={{ gridTemplateColumns: gridTemplate }}
@@ -332,7 +264,6 @@ export function DataTable<T>({
                 ))}
                 {showArrow && rowHref && <span />}
             </div>
-            {/* Rows */}
             {rows.map((row, i) => {
                 const content = (
                     <>

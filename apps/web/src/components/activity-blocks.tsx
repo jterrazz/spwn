@@ -16,8 +16,6 @@ import { useState } from 'react';
 
 import type { ActivityBlock, ActivityMessage } from '../activity/blocks';
 
-// ── Tool icon mapping ──
-
 const TOOL_ICONS: Record<string, typeof IconTool> = {
     Bash: IconTerminal,
     Read: IconFileText,
@@ -34,8 +32,6 @@ function ToolIcon({ tool }: { tool: string }) {
     const Icon = TOOL_ICONS[tool] || IconTool;
     return <Icon size={13} />;
 }
-
-// ── Collapsible wrapper ──
 
 function CollapsibleBlock({
     label,
@@ -56,7 +52,10 @@ function CollapsibleBlock({
         <div className="overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.02]">
             <button
                 className={`flex w-full items-center gap-2 px-3 py-1.5 font-mono text-[11px] ${accent} transition-colors hover:bg-white/[0.03]`}
-                onClick={() => setOpen(!open)}
+                onClick={() => {
+                    setOpen(!open);
+                }}
+                type="button"
             >
                 {open ? <IconChevronDown size={12} /> : <IconChevronRight size={12} />}
                 <span className="opacity-60">{icon}</span>
@@ -70,8 +69,6 @@ function CollapsibleBlock({
         </div>
     );
 }
-
-// ── Individual block renderers ──
 
 function ThinkingBlockView({ block }: { block: { content: string } }) {
     return (
@@ -94,17 +91,15 @@ function ToolUseBlockView({
     block: { tool: string; input: Record<string, unknown>; id: string };
     result?: undefined | { content: string; isError: boolean };
 }) {
-    // Build a concise label from the tool input
     const inputSummary = getToolInputSummary(block.tool, block.input);
 
     return (
         <CollapsibleBlock
-            accent={result?.isError ? 'text-red-400/60' : 'text-blue-400/50'}
+            accent={result?.isError === true ? 'text-red-400/60' : 'text-blue-400/50'}
             defaultOpen={Boolean(result?.isError)}
             icon={<ToolIcon tool={block.tool} />}
             label={`${block.tool}${inputSummary ? `  ${inputSummary}` : ''}`}
         >
-            {/* Input */}
             <div className="space-y-1">
                 {Object.entries(block.input || {}).map(([key, value]) => {
                     let displayValue: string;
@@ -122,7 +117,6 @@ function ToolUseBlockView({
                 })}
             </div>
 
-            {/* Result */}
             {result && (
                 <>
                     <div className="my-2 border-t border-white/[0.04]" />
@@ -161,7 +155,10 @@ function ErrorBlockView({ block }: { block: { content: string } }) {
 function StatusBlockView({ block }: { block: { status: string; tool?: string } }) {
     const labels: Record<string, string> = {
         thinking: 'Thinking...',
-        tool_calling: block.tool ? `Running ${block.tool}...` : 'Executing...',
+        tool_calling:
+            block.tool === undefined || block.tool === ''
+                ? 'Executing...'
+                : `Running ${block.tool}...`,
         responding: 'Responding...',
         done: 'Done',
     };
@@ -174,16 +171,12 @@ function StatusBlockView({ block }: { block: { status: string; tool?: string } }
         <div className="flex items-center gap-2 py-1">
             <div className="bg-foreground/30 h-2 w-2 animate-pulse rounded-full" />
             <span className="text-muted-foreground/40 text-[11px]">
-                {labels[block.status] || block.status}
+                {(labels[block.status] ?? '') !== '' || block.status}
             </span>
         </div>
     );
 }
 
-// ── Main activity renderer ──
-
-// Activity blocks stream append-only — a (type, running-index) pair is a stable
-// Identity for every block except tool_use, which carries its own id.
 function blockKey(block: ActivityBlock, i: number): string {
     if (block.type === 'tool_use') {
         return `tool-${block.id}`;
@@ -192,7 +185,6 @@ function blockKey(block: ActivityBlock, i: number): string {
 }
 
 export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) {
-    // Pair tool_use blocks with their results
     const resultMap = new Map<string, { content: string; isError: boolean }>();
     for (const block of blocks) {
         if (block.type === 'tool_result') {
@@ -203,7 +195,6 @@ export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) 
     return (
         <div className="space-y-2">
             {blocks.map((block, i) => {
-                // Skip tool_result blocks - they're rendered inline with tool_use
                 if (block.type === 'tool_result') {
                     return null;
                 }
@@ -240,13 +231,10 @@ export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) 
     );
 }
 
-// ── Activity message renderer (replaces simple <pre> in chat) ──
-
 export function ActivityMessageView({ message }: { message: ActivityMessage }) {
     const hasBlocks = message.blocks.length > 0;
     const hasOnlyText = message.blocks.every((b) => b.type === 'text');
 
-    // If it's just plain text (no tool calls, no thinking), render simply
     if (!hasBlocks || hasOnlyText) {
         const text = message.blocks
             .filter((b): b is { type: 'text'; content: string } => b.type === 'text')
@@ -260,7 +248,6 @@ export function ActivityMessageView({ message }: { message: ActivityMessage }) {
         );
     }
 
-    // Rich rendering with activity blocks
     return (
         <div className="space-y-2">
             <ActivityBlocksRenderer blocks={message.blocks} />
@@ -275,8 +262,6 @@ export function ActivityMessageView({ message }: { message: ActivityMessage }) {
         </div>
     );
 }
-
-// ── Helpers ──
 
 function getToolInputSummary(tool: string, input: Record<string, unknown>): string {
     switch (tool) {

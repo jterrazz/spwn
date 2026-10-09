@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import type { World } from '../domain/model';
 import {
     Command,
     CommandDialog,
@@ -22,7 +23,6 @@ import {
     CommandList,
     CommandSeparator,
 } from './ui/command';
-import type { World } from '../domain/model';
 
 interface AgentListItem {
     name: string;
@@ -31,11 +31,13 @@ interface AgentListItem {
 }
 
 function extractName(id: null | string | undefined): string {
-    if (!id) {
+    if (id === null || id === undefined || id === '') {
         return '';
     }
     const [, middle] = id.split('-');
-    return middle ? middle.charAt(0).toUpperCase() + middle.slice(1) : id;
+    return middle === undefined || middle === ''
+        ? id
+        : middle.charAt(0).toUpperCase() + middle.slice(1);
 }
 
 export function CommandPalette() {
@@ -44,7 +46,6 @@ export function CommandPalette() {
     const [agents, setAgents] = useState<AgentListItem[]>([]);
     const router = useRouter();
 
-    // Listen for Cmd+K
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -53,15 +54,16 @@ export function CommandPalette() {
             }
         };
         globalThis.addEventListener('keydown', handleKeyDown);
-        return () => globalThis.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            globalThis.removeEventListener('keydown', handleKeyDown);
+        };
     }, []);
 
-    // Fetch data when opening
     useEffect(() => {
         if (!open) {
             return;
         }
-        Promise.all([
+        void Promise.all([
             apiGet<World[]>('/api/worlds').catch(() => [] as World[]),
             apiGet<AgentListItem[]>('/api/agents').catch(() => [] as AgentListItem[]),
         ]).then(([w, a]) => {
@@ -85,13 +87,14 @@ export function CommandPalette() {
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
 
-                    {/* Worlds */}
                     {worlds.length > 0 && (
                         <CommandGroup heading="Worlds">
                             {worlds.map((world) => (
                                 <CommandItem
                                     key={world.id}
-                                    onSelect={() => navigate(`/world/${world.id}`)}
+                                    onSelect={() => {
+                                        navigate(`/world/${world.id}`);
+                                    }}
                                 >
                                     <IconWorldFilled
                                         className="text-muted-foreground/50"
@@ -106,13 +109,11 @@ export function CommandPalette() {
                         </CommandGroup>
                     )}
 
-                    {/* Agents */}
                     {agents.length > 0 && (
                         <>
                             <CommandSeparator />
                             <CommandGroup heading="Agents">
                                 {agents.map((agent) => {
-                                    // Find which world this agent is in
                                     const agentWorld = worlds.find((w) =>
                                         w.agents.some((a) => a.name === agent.name),
                                     );
@@ -122,7 +123,9 @@ export function CommandPalette() {
                                     return (
                                         <CommandItem
                                             key={agent.name}
-                                            onSelect={() => navigate(href)}
+                                            onSelect={() => {
+                                                navigate(href);
+                                            }}
                                         >
                                             <IconUserFilled
                                                 className="text-muted-foreground/50"
@@ -146,31 +149,39 @@ export function CommandPalette() {
                         </>
                     )}
 
-                    {/* Navigation */}
                     <CommandSeparator />
                     <CommandGroup heading="Navigation">
-                        <CommandItem onSelect={() => navigate('/')}>
+                        <CommandItem
+                            onSelect={() => {
+                                navigate('/');
+                            }}
+                        >
                             <IconWorldFilled className="text-muted-foreground/50" size={14} />
                             <span>Go to Dashboard</span>
                         </CommandItem>
-                        <CommandItem onSelect={() => navigate('/architect')}>
+                        <CommandItem
+                            onSelect={() => {
+                                navigate('/architect');
+                            }}
+                        >
                             <IconBrain className="text-muted-foreground/50" size={14} />
                             <span>Go to Architect</span>
                         </CommandItem>
-                        <CommandItem onSelect={() => navigate('/knowledge')}>
+                        <CommandItem
+                            onSelect={() => {
+                                navigate('/knowledge');
+                            }}
+                        >
                             <IconBook2 className="text-muted-foreground/50" size={14} />
                             <span>Go to Knowledge</span>
                         </CommandItem>
-                        {/* Marketplace - hidden until ready */}
                     </CommandGroup>
 
-                    {/* Actions */}
                     <CommandSeparator />
                     <CommandGroup heading="Actions">
                         <CommandItem
                             onSelect={() => {
                                 setOpen(false);
-                                // Trigger spawn world dialog on home page
                                 navigate('/');
                                 setTimeout(() => {
                                     globalThis.dispatchEvent(
@@ -193,8 +204,9 @@ export function CommandPalette() {
                             onSelect={() => {
                                 setOpen(false);
                                 const name = prompt('Agent name:');
-                                if (name?.trim()) {
-                                    navigate(`/agents/${name.trim()}`);
+                                const agentName = name?.trim() ?? '';
+                                if (agentName !== '') {
+                                    navigate(`/agents/${agentName}`);
                                 }
                             }}
                         >

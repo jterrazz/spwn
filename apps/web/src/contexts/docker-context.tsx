@@ -22,13 +22,9 @@ export interface DockerStatus {
 }
 
 interface DockerContextValue {
-    /** Latest probe result. null = haven't loaded yet, undefined = API offline. */
     status: DockerStatus | null | undefined;
-    /** Wall-clock timestamp of the last successful probe. */
     lastChecked: null | number;
-    /** Force an immediate refresh. */
     refresh: () => Promise<void>;
-    /** Convenience: true once we know Docker is fully usable. */
     ready: boolean;
 }
 
@@ -41,15 +37,7 @@ const DockerContext = createContext<DockerContextValue>({
 
 const POLL_INTERVAL_MS = 3000;
 
-/**
- * Single source of truth for Docker daemon health. Polls the Go API every
- * 3 seconds and exposes the latest probe result through React context.
- *
- * Status semantics:
- *   null       - first load, we don't know yet (render skeleton, not lock)
- *   undefined  - the API itself is unreachable (different failure mode)
- *   object     - actual probe result; check `installed && running`
- */
+/** Single source of truth for Docker daemon health. Polls the Go API every 3 seconds and exposes the latest probe result through React context. Status semantics: null       - first load, we don't know yet (render skeleton, not lock) undefined  - the API itself is unreachable (different failure mode) object     - actual probe result; check `installed && running` */
 export function DockerProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<DockerStatus | null | undefined>(null);
     const [lastChecked, setLastChecked] = useState<null | number>(null);
@@ -67,7 +55,6 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
             if (!mounted.current) {
                 return;
             }
-            // The API itself didn't answer - distinct from "Docker is down".
             setStatus(undefined);
             setLastChecked(Date.now());
         }
@@ -86,7 +73,7 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
         };
     }, [refresh]);
 
-    const ready = Boolean(status && status.installed && status.running);
+    const ready = Boolean(status?.installed === true && status.running);
 
     const contextValue = useMemo(
         () => ({ status, lastChecked, refresh, ready }),

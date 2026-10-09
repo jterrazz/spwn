@@ -4,15 +4,10 @@ interface PageHeaderProps {
     title: string;
     description?: string;
     actions?: ReactNode;
-    /** Optional leading element (e.g. a world planet) rendered before the title. */
     leading?: ReactNode;
 }
 
-/**
- * Unified page header: optional leading glyph + large title + subtle
- * description + optional right-aligned actions. Used across all top-level
- * pages for consistency.
- */
+/** Unified page header: optional leading glyph + large title + subtle description + optional right-aligned actions. Used across all top-level pages for consistency. */
 export function PageHeader({ title, description, actions, leading }: PageHeaderProps) {
     return (
         <div className="flex items-start justify-between gap-4 overflow-visible">
@@ -24,7 +19,7 @@ export function PageHeader({ title, description, actions, leading }: PageHeaderP
                     <h1 className="font-heading text-foreground/90 text-2xl tracking-wide">
                         {title}
                     </h1>
-                    {description && (
+                    {description !== undefined && description !== '' && (
                         <p className="text-muted-foreground/40 mt-1 text-xs">{description}</p>
                     )}
                 </div>

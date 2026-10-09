@@ -2,13 +2,8 @@
 
 import { useEffect, useMemo } from 'react';
 
-/**
- * Sets the document title dynamically.
- * Parts are joined with ' · ' and always ends with 'spwn'.
- * Example: usePageTitle('neo', 'Rhea') → 'neo · Rhea · spwn'
- */
+/** Sets the document title dynamically. Parts are joined with ' · ' and always ends with 'spwn'. Example: usePageTitle('neo', 'Rhea') → 'neo · Rhea · spwn' */
 export function usePageTitle(...parts: (null | string | undefined)[]) {
-    // Materialise the title once per render so the effect dep list is a single string.
     const title = useMemo(() => {
         const filtered = parts.filter(Boolean) as string[];
         return filtered.length === 0 ? 'spwn' : [...filtered, 'spwn'].join(' · ');

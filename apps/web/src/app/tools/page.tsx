@@ -23,8 +23,6 @@ import { TOOLS, toolSlug } from '../../domain/tools-catalog';
 import type { ToolDef, ToolStatus } from '../../domain/tools-catalog';
 import { usePageTitle } from '../../hooks/use-page-title';
 
-// ── Icon map ────────────────────────────────────────────────────────────
-
 const TOOL_ICONS: Record<string, React.ReactNode> = {
     'spwn:unix': <IconTerminal2 size={18} />,
     'spwn:node': <IconBrandNodejs size={18} />,
@@ -39,8 +37,6 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
     'spwn:cli': <IconRocket size={18} />,
     'spwn:architect': <IconPackage size={18} />,
 };
-
-// ── Components ──────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: ToolStatus }) {
     if (status === 'available') {
@@ -63,6 +59,7 @@ function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
                     : 'border-white/[0.07] bg-white/[0.03] hover:border-white/[0.12] hover:bg-white/[0.05]'
             }`}
             onClick={onClick}
+            type="button"
         >
             <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -138,8 +135,6 @@ function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
     );
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────
-
 export default function ToolsPage() {
     usePageTitle('Tools');
     const router = useRouter();
@@ -156,7 +151,9 @@ export default function ToolsPage() {
                 {TOOLS.map((tool) => (
                     <ToolCard
                         key={tool.name}
-                        onClick={() => router.push(`/tools/${toolSlug(tool.name)}`)}
+                        onClick={() => {
+                            router.push(`/tools/${toolSlug(tool.name)}`);
+                        }}
                         tool={tool}
                     />
                 ))}

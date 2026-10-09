@@ -4,15 +4,9 @@ import { IconCheck as CheckIcon, IconSearch as SearchIcon } from '@tabler/icons-
 import { Command as CommandPrimitive } from 'cmdk';
 import * as React from 'react';
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from './dialog';
-import { InputGroup, InputGroupAddon } from './input-group';
 import { cn } from '../../styles/class-names';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
+import { InputGroup, InputGroupAddon } from './input-group';
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
     return (
@@ -47,10 +41,6 @@ function CommandDialog({
                 className={cn('top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0', className)}
                 showCloseButton={showCloseButton}
             >
-                {/* Radix reads the dialog's accessible name and description
-                    from these two nodes, so they belong INSIDE the content:
-                    outside it they render whether the palette is open or
-                    not, leaving the title on the page of a closed dialog. */}
                 <DialogHeader className="sr-only">
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>
@@ -159,19 +149,6 @@ function CommandItem({
     );
 }
 
-function CommandShortcut({ className, ...props }: React.ComponentProps<'span'>) {
-    return (
-        <span
-            className={cn(
-                'text-muted-foreground group-data-selected/command-item:text-foreground ml-auto text-xs tracking-widest',
-                className,
-            )}
-            data-slot="command-shortcut"
-            {...props}
-        />
-    );
-}
-
 export {
     Command,
     CommandDialog,
@@ -181,5 +158,4 @@ export {
     CommandItem,
     CommandList,
     CommandSeparator,
-    CommandShortcut,
 };

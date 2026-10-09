@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { inBackground } from '../events/in-background';
 
-const VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const VERSION_CHECK_INTERVAL = 5 * 60 * 1000;
 
 export interface VersionInfo {
     current: string;
@@ -22,16 +23,17 @@ export function useVersion() {
             const data = await apiGet<VersionInfo>('/api/version');
             setVersion(data);
         } catch {
-            // Silently fail
         } finally {
             setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchVersion();
-        const interval = setInterval(fetchVersion, VERSION_CHECK_INTERVAL);
-        return () => clearInterval(interval);
+        void fetchVersion();
+        const interval = setInterval(inBackground(fetchVersion), VERSION_CHECK_INTERVAL);
+        return () => {
+            clearInterval(interval);
+        };
     }, [fetchVersion]);
 
     return { version, loading };

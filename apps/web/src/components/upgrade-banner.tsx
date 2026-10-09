@@ -12,10 +12,9 @@ interface UpgradeBannerProps {
 }
 
 export function UpgradeBanner({ version }: UpgradeBannerProps) {
-    const [dismissed, setDismissed] = useState(true); // Start hidden to avoid flash
+    const [dismissed, setDismissed] = useState(true);
 
     useEffect(() => {
-        // Check if this specific version was already dismissed
         const dismissedVersion = localStorage.getItem(DISMISS_KEY);
         setDismissed(dismissedVersion === version.latest);
     }, [version.latest]);
@@ -41,6 +40,7 @@ export function UpgradeBanner({ version }: UpgradeBannerProps) {
                 <button
                     className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
                     onClick={handleDismiss}
+                    type="button"
                 >
                     <IconX size={12} />
                 </button>

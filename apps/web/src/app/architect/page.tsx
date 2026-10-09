@@ -20,10 +20,9 @@ import { PageHeader } from '../../components/page-header';
 import { ProgressShimmer } from '../../components/progress-shimmer';
 import { Skeleton } from '../../components/ui/skeleton';
 import { useArchitectChat } from '../../contexts/architect-chat-context';
+import { inBackground } from '../../events/in-background';
 import { usePageTitle } from '../../hooks/use-page-title';
 import { useProgressMessages } from '../../hooks/use-progress-messages';
-
-// ── Architect States ────────────────────────────────────────────────────
 
 type ArchitectState = 'offline' | 'running' | 'starting' | 'stopping';
 
@@ -50,8 +49,6 @@ function describeState(s: ArchitectState): string {
     return 'Offline';
 }
 
-// ── Offline State ───────────────────────────────────────────────────────
-
 function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boolean }) {
     return (
         <div className="-mt-12 flex flex-1 items-center justify-center">
@@ -72,6 +69,7 @@ function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boo
                     className="group flex items-center gap-3 rounded-xl border border-white/[0.10] bg-white/[0.06] px-6 py-3 transition-all duration-200 hover:border-white/[0.16] hover:bg-white/[0.10] disabled:opacity-40"
                     disabled={disabled}
                     onClick={onStart}
+                    type="button"
                 >
                     <IconPlayerPlay
                         className="text-green-400/80 group-hover:text-green-400"
@@ -91,8 +89,6 @@ function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boo
     );
 }
 
-// ── Starting State ──────────────────────────────────────────────────────
-
 interface SpawnProgress {
     event: string;
     detail: string;
@@ -105,9 +101,7 @@ interface SpawnProgress {
     logTail?: string;
 }
 
-// Friendly labels for the stable event keys emitted by
-// Universe.StartArchitectDaemonWithOpts. Anything not in this map
-// Falls back to a humanised version of the key + the raw detail.
+// outside: keyed by the stable event names Universe.StartArchitectDaemonWithOpts emits; an event missing here falls back to its humanised key
 const PROGRESS_LABELS: Record<string, string> = {
     queued: 'Preparing to start architect…',
     docker_check: 'Connecting to Docker…',
@@ -192,7 +186,7 @@ function StartingView({
                     </button>
                 </div>
 
-                {showLogs && progress?.logTail && (
+                {showLogs && progress?.logTail !== undefined && progress?.logTail !== '' && (
                     <pre className="text-muted-foreground/70 mt-4 max-h-64 w-full overflow-auto rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2 text-left font-mono text-[10px] leading-snug">
                         {progress.logTail}
                     </pre>
@@ -201,8 +195,6 @@ function StartingView({
         </div>
     );
 }
-
-// ── Main Page ───────────────────────────────────────────────────────────
 
 export default function ArchitectPage() {
     usePageTitle('Architect');
@@ -229,8 +221,6 @@ export default function ArchitectPage() {
 
     const state = deriveState(isRunning, actionLoading);
 
-    // Fallback copy used only until the first /api/architect/status
-    // Poll returns. Real progress is then driven by spawnProgress.
     const startFallbackMessage = 'Sending start signal…';
 
     const stopProgressMessage = useProgressMessages(state === 'stopping', [
@@ -251,45 +241,43 @@ export default function ArchitectPage() {
 
     const showFeedback = (msg: string) => {
         setFeedback(msg);
-        setTimeout(() => setFeedback(null), 4000);
+        setTimeout(() => {
+            setFeedback(null);
+        }, 4000);
     };
 
-    // Poll for architect status after starting. The status endpoint
-    // Now carries a `progress` field with the latest event, detail,
-    // Log tail and final error from the universe spawn pipeline, so
-    // We feed it straight into spawnProgress for the StartingView.
     useEffect(() => {
         if (!startPolling) {
             return;
         }
-        pollRef.current = setInterval(async () => {
-            try {
-                const res = await fetch(goApiUrl('/api/architect/status'));
-                if (!res.ok) {
-                    return;
-                }
-                const data = await res.json();
-                if (data.progress) {
-                    setSpawnProgress(data.progress as SpawnProgress);
-                    if (data.progress.error) {
-                        // Stop polling on error so the failure message stays put.
-                        setStartPolling(false);
-                        setActionLoading(null);
+        pollRef.current = setInterval(
+            inBackground(async () => {
+                try {
+                    const res = await fetch(goApiUrl('/api/architect/status'));
+                    if (!res.ok) {
                         return;
                     }
-                }
-                if (data.status === 'running') {
-                    setStartPolling(false);
-                    setActionLoading(null);
-                    setSpawnProgress(null);
-                    setShowSpawnLogs(false);
-                    setArchitectStatus((s) => (s ? { ...s, status: 'running' } : s));
-                    showFeedback('Architect started');
-                }
-            } catch {
-                // Ignore polling errors
-            }
-        }, 2000);
+                    const data = await res.json();
+                    if (data.progress) {
+                        setSpawnProgress(data.progress as SpawnProgress);
+                        if (data.progress.error) {
+                            setStartPolling(false);
+                            setActionLoading(null);
+                            return;
+                        }
+                    }
+                    if (data.status === 'running') {
+                        setStartPolling(false);
+                        setActionLoading(null);
+                        setSpawnProgress(null);
+                        setShowSpawnLogs(false);
+                        setArchitectStatus((s) => (s ? { ...s, status: 'running' } : s));
+                        showFeedback('Architect started');
+                    }
+                } catch {}
+            }),
+            2000,
+        );
         return () => {
             if (pollRef.current) {
                 clearInterval(pollRef.current);
@@ -347,7 +335,7 @@ export default function ArchitectPage() {
                         disabled={actionLoading !== null}
                         icon={<IconRefresh size={16} stroke={2.2} />}
                         label="Restart"
-                        onClick={handleStart}
+                        onClick={inBackground(handleStart)}
                     />
                     <ActionButton
                         compact
@@ -355,7 +343,7 @@ export default function ArchitectPage() {
                         disabled={actionLoading !== null}
                         icon={<IconPlayerStop size={16} stroke={2.2} />}
                         label="Stop"
-                        onClick={handleStop}
+                        onClick={inBackground(handleStop)}
                     />
                 </>
             );
@@ -367,7 +355,7 @@ export default function ArchitectPage() {
                     disabled={actionLoading !== null}
                     icon={<IconPlayerPlay size={16} stroke={2.2} />}
                     label="Start"
-                    onClick={handleStart}
+                    onClick={inBackground(handleStart)}
                 />
             );
         }
@@ -382,8 +370,7 @@ export default function ArchitectPage() {
                 title="Architect"
             />
 
-            {/* Feedback toast */}
-            {feedback && (
+            {feedback !== null && feedback !== '' && (
                 <div
                     className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
                         feedback.startsWith('Error')
@@ -395,22 +382,24 @@ export default function ArchitectPage() {
                 </div>
             )}
 
-            {/* ── Offline ── */}
             {state === 'offline' && !loading && (
-                <OfflineView disabled={actionLoading !== null} onStart={handleStart} />
+                <OfflineView
+                    disabled={actionLoading !== null}
+                    onStart={inBackground(handleStart)}
+                />
             )}
 
-            {/* ── Starting ── */}
             {state === 'starting' && (
                 <StartingView
                     fallbackMessage={startFallbackMessage}
-                    onToggleLogs={() => setShowSpawnLogs((v) => !v)}
+                    onToggleLogs={() => {
+                        setShowSpawnLogs((v) => !v);
+                    }}
                     progress={spawnProgress}
                     showLogs={showSpawnLogs}
                 />
             )}
 
-            {/* ── Stopping ── */}
             {state === 'stopping' && (
                 <div className="-mt-12 flex flex-1 items-center justify-center">
                     <div className="flex flex-col items-center text-center">
@@ -424,7 +413,6 @@ export default function ArchitectPage() {
                 </div>
             )}
 
-            {/* ── Loading (initial) ── */}
             {loading && state === 'offline' && (
                 <div className="-mt-12 flex flex-1 items-center justify-center">
                     <div className="flex flex-col items-center gap-4">
@@ -435,10 +423,8 @@ export default function ArchitectPage() {
                 </div>
             )}
 
-            {/* ── Running ── */}
             {state === 'running' && (
                 <>
-                    {/* KPI Metrics */}
                     <MetricGrid
                         className="w-fit gap-x-10"
                         columns={2}
@@ -448,7 +434,6 @@ export default function ArchitectPage() {
                         ]}
                     />
 
-                    {/* Chat - fills remaining page height, input sticks to the bottom */}
                     <Chat
                         autoFocus
                         className="min-h-[320px] flex-1"

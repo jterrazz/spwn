@@ -36,6 +36,7 @@ import { Skeleton } from '../../../components/ui/skeleton';
 import { WorldPlanet } from '../../../components/world-planet';
 import { getWorkspaceSummary, getWorldName } from '../../../domain/model';
 import type { Agent, World } from '../../../domain/model';
+import { inBackground } from '../../../events/in-background';
 import { usePageTitle } from '../../../hooks/use-page-title';
 import { useProgressMessages } from '../../../hooks/use-progress-messages';
 import { ROLE_BADGE } from '../../../styles/status-colors';
@@ -62,7 +63,6 @@ const LOG_LEVEL_COLORS: Record<string, string> = {
 
 type Panel = 'logs' | 'snapshots' | null;
 
-// Hoisted out of the dashboard component so cell renderers are stable across renders.
 const AGENT_COLUMNS = [
     {
         key: 'name',
@@ -143,17 +143,18 @@ export default function WorldDashboard() {
     useEffect(() => {
         fetchWorld();
         const interval = setInterval(fetchWorld, 5000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+        };
     }, [fetchWorld]);
     const callAction = async (goPath: string, body?: unknown) => {
         setActionLoading(goPath);
         try {
             const result = await apiAction(goPath, body);
             if (!result.ok) {
-                showFeedback(`Error: ${result.error || 'Unknown error'}`);
+                showFeedback(`Error: ${result.error ?? 'Unknown error'}`);
                 return false;
             }
-            // Immediately refetch data after successful mutation
             fetchWorld();
             refetchSidebar();
             return true;
@@ -189,7 +190,6 @@ export default function WorldDashboard() {
         }
     };
 
-    // Snapshots are not yet available from the API
     const snapshots: {
         id: string;
         worldId: string;
@@ -199,7 +199,6 @@ export default function WorldDashboard() {
         agents: number;
     }[] = [];
 
-    // Event log state (was "logs" - now the per-world semantic event feed)
     const [logs, setLogs] = useState<
         { timestamp: string; level: string; source: string; message: string }[]
     >([]);
@@ -237,16 +236,22 @@ export default function WorldDashboard() {
             .catch(() => {
                 setLogs([]);
             })
-            .finally(() => setLogsLoading(false));
+            .finally(() => {
+                setLogsLoading(false);
+            });
 
-        return () => controller.abort();
+        return () => {
+            controller.abort();
+        };
     }, [activePanel, worldId]);
 
     const showFeedback = (msg: string) => {
         const isError = msg.toLowerCase().startsWith('error');
         toast(msg, isError ? 'error' : 'success');
         setActionFeedback(msg);
-        setTimeout(() => setActionFeedback(null), 2500);
+        setTimeout(() => {
+            setActionFeedback(null);
+        }, 2500);
     };
 
     if (loading) {
@@ -291,7 +296,6 @@ export default function WorldDashboard() {
 
     return (
         <div className="flex h-[calc(100vh-1px)] overflow-hidden">
-            {/* Main content */}
             <div className="flex-1 space-y-6 overflow-y-auto px-6 pt-6 pb-12 md:space-y-8 md:px-8 md:pt-8">
                 <PageHeader
                     actions={
@@ -301,28 +305,30 @@ export default function WorldDashboard() {
                                 disabled={actionLoading !== null}
                                 icon={<IconCamera size={16} stroke={2.2} />}
                                 label="Snapshot"
-                                onClick={async () => {
+                                onClick={inBackground(async () => {
                                     const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
                                     if (ok) {
                                         showFeedback('Snapshot saved!');
                                     }
-                                }}
+                                })}
                             />
                             <ActionButton
                                 compact
                                 icon={<IconFileText size={16} stroke={2.2} />}
                                 label="Logs"
-                                onClick={() =>
-                                    setActivePanel(activePanel === 'logs' ? null : 'logs')
-                                }
+                                onClick={() => {
+                                    setActivePanel(activePanel === 'logs' ? null : 'logs');
+                                }}
                             />
                             <ActionButton
                                 compact
                                 icon={<IconRestore size={16} stroke={2.2} />}
                                 label="Snapshots"
-                                onClick={() =>
-                                    setActivePanel(activePanel === 'snapshots' ? null : 'snapshots')
-                                }
+                                onClick={() => {
+                                    setActivePanel(
+                                        activePanel === 'snapshots' ? null : 'snapshots',
+                                    );
+                                }}
                             />
                             <ActionButton
                                 compact
@@ -338,7 +344,9 @@ export default function WorldDashboard() {
                                 danger
                                 icon={<IconTrash size={16} stroke={2.2} />}
                                 label="Destroy"
-                                onClick={() => setShowDestroyConfirm(true)}
+                                onClick={() => {
+                                    setShowDestroyConfirm(true);
+                                }}
                             />
                         </>
                     }
@@ -347,12 +355,13 @@ export default function WorldDashboard() {
                     title={name}
                 />
 
-                {/* Rename dialog */}
                 {showRenameDialog && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div
                             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                            onClick={() => !renaming && setShowRenameDialog(false)}
+                            onClick={() => {
+                                !renaming && setShowRenameDialog(false);
+                            }}
                         />
                         <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
                             <h3 className="font-heading text-foreground/90 mb-1 text-lg">
@@ -369,10 +378,12 @@ export default function WorldDashboard() {
                                 autoFocus
                                 className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                                 disabled={renaming}
-                                onChange={(e) => setRenameInput(e.target.value)}
+                                onChange={(e) => {
+                                    setRenameInput(e.target.value);
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        handleRename();
+                                        void handleRename();
                                     }
                                 }}
                                 placeholder="My Project"
@@ -383,14 +394,18 @@ export default function WorldDashboard() {
                                 <button
                                     className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={renaming}
-                                    onClick={() => setShowRenameDialog(false)}
+                                    onClick={() => {
+                                        setShowRenameDialog(false);
+                                    }}
+                                    type="button"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                     disabled={renaming}
-                                    onClick={handleRename}
+                                    onClick={inBackground(handleRename)}
+                                    type="button"
                                 >
                                     {renaming ? (
                                         <>
@@ -406,7 +421,6 @@ export default function WorldDashboard() {
                     </div>
                 )}
 
-                {/* Destroy confirmation */}
                 {showDestroyConfirm && (
                     <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
                         <div className="flex items-start gap-3">
@@ -431,7 +445,7 @@ export default function WorldDashboard() {
                                     <button
                                         className="rounded-lg border border-red-500/30 bg-red-500/20 px-4 py-2 text-xs text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-30"
                                         disabled={actionLoading !== null}
-                                        onClick={async () => {
+                                        onClick={inBackground(async () => {
                                             setActionLoading('destroy');
                                             try {
                                                 await apiDelete(`/api/worlds/${worldId}`);
@@ -445,7 +459,8 @@ export default function WorldDashboard() {
                                             } finally {
                                                 setActionLoading(null);
                                             }
-                                        }}
+                                        })}
+                                        type="button"
                                     >
                                         {actionLoading === 'destroy' ? (
                                             <span className="flex items-center gap-2">
@@ -458,7 +473,10 @@ export default function WorldDashboard() {
                                     </button>
                                     <button
                                         className="text-muted-foreground/50 hover:text-foreground/70 rounded-lg px-4 py-2 text-xs transition-colors hover:bg-white/[0.04]"
-                                        onClick={() => setShowDestroyConfirm(false)}
+                                        onClick={() => {
+                                            setShowDestroyConfirm(false);
+                                        }}
+                                        type="button"
                                     >
                                         Cancel
                                     </button>
@@ -468,14 +486,12 @@ export default function WorldDashboard() {
                     </div>
                 )}
 
-                {/* Action feedback toast */}
-                {actionFeedback && (
+                {actionFeedback !== null && actionFeedback !== '' && (
                     <div className="animate-in fade-in slide-in-from-top-2 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-2 font-mono text-xs text-green-400 duration-200">
                         {actionFeedback}
                     </div>
                 )}
 
-                {/* Stats */}
                 <MetricGrid
                     className="w-fit gap-x-10"
                     columns={4}
@@ -489,7 +505,6 @@ export default function WorldDashboard() {
 
                 <Separator />
 
-                {/* Elements */}
                 {world.manifest?.elements && world.manifest.elements.length > 0 && (
                     <>
                         <div>
@@ -509,14 +524,16 @@ export default function WorldDashboard() {
                     </>
                 )}
 
-                {/* Agents */}
                 <div>
                     <div className="mb-3 flex items-center justify-between">
                         <SectionHeader className="mb-0">Agents</SectionHeader>
                         {world.agents.length > 0 && (
                             <button
                                 className="text-muted-foreground/35 hover:text-foreground/70 font-mono text-[10px] transition-colors"
-                                onClick={() => router.push('/agents')}
+                                onClick={() => {
+                                    router.push('/agents');
+                                }}
+                                type="button"
                             >
                                 + Deploy
                             </button>
@@ -538,7 +555,6 @@ export default function WorldDashboard() {
                 </div>
             </div>
 
-            {/* ── Side panel for Logs/Snapshots ── */}
             {activePanel && (
                 <div className="border-border/30 hidden w-96 shrink-0 flex-col overflow-hidden border-l md:flex">
                     <div className="border-border/30 flex shrink-0 items-center justify-between border-b px-5 py-4">
@@ -547,7 +563,10 @@ export default function WorldDashboard() {
                         </h2>
                         <button
                             className="text-muted-foreground/40 hover:text-foreground/70 transition-colors"
-                            onClick={() => setActivePanel(null)}
+                            onClick={() => {
+                                setActivePanel(null);
+                            }}
+                            type="button"
                         >
                             <IconX size={16} />
                         </button>
@@ -625,23 +644,30 @@ export default function WorldDashboard() {
                                             <div className="flex gap-2">
                                                 <button
                                                     className="text-muted-foreground/50 hover:text-foreground/70 flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] transition-colors hover:bg-white/[0.04]"
-                                                    onClick={() =>
-                                                        showFeedback(`Restoring "${snap.name}"...`)
-                                                    }
+                                                    onClick={() => {
+                                                        showFeedback(`Restoring "${snap.name}"...`);
+                                                    }}
+                                                    type="button"
                                                 >
                                                     <IconPlayerPlay size={12} />
                                                     Restore
                                                 </button>
                                                 <button
                                                     className="text-muted-foreground/50 hover:text-foreground/70 flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] transition-colors hover:bg-white/[0.04]"
-                                                    onClick={() => showFeedback('Downloading...')}
+                                                    onClick={() => {
+                                                        showFeedback('Downloading...');
+                                                    }}
+                                                    type="button"
                                                 >
                                                     <IconDownload size={12} />
                                                     Export
                                                 </button>
                                                 <button
                                                     className="ml-auto flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] text-red-400/50 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                                                    onClick={() => showFeedback('Snapshot deleted')}
+                                                    onClick={() => {
+                                                        showFeedback('Snapshot deleted');
+                                                    }}
+                                                    type="button"
                                                 >
                                                     <IconTrash size={12} />
                                                     Delete
@@ -658,21 +684,6 @@ export default function WorldDashboard() {
         </div>
     );
 }
-
-// ── Empty-agents view ─────────────────────────────────────────────────
-//
-// Replaces the bare "No agents deployed" placeholder when a world has
-// Zero members. Two paths to populate:
-//
-//   1. One of the user's already-installed agents → POST
-//      /api/worlds/{id}/agents and refetch.
-//   2. A fresh template from the gallery → POST /api/examples/<slug>
-//      /install, then deploy the first installed agent that is
-//      Compatible (same flow but two requests instead of one).
-//
-// The component is self-contained - fetches its own data, has its own
-// Loading/error state, and reports back through onDeployed so the
-// Parent can refetch the world.
 
 interface InstalledAgentItem {
     name: string;
@@ -696,11 +707,19 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
 
     useEffect(() => {
         apiGet<InstalledAgentItem[]>('/api/agents')
-            .then((data) => setInstalled(data ?? []))
-            .catch(() => setInstalled([]));
+            .then((data) => {
+                setInstalled(data ?? []);
+            })
+            .catch(() => {
+                setInstalled([]);
+            });
         apiGet<{ examples: EmptyAgentsExample[] }>('/api/examples')
-            .then((data) => setGallery(data.examples ?? []))
-            .catch(() => setGallery([]));
+            .then((data) => {
+                setGallery(data.examples ?? []);
+            })
+            .catch(() => {
+                setGallery([]);
+            });
     }, []);
 
     const deploy = async (name: string, role: string = 'worker') => {
@@ -728,11 +747,9 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
         setBusy(ex.slug);
         setErrorMessage(null);
         try {
-            // 1. Install the template (idempotent - keeps user edits).
             await apiPost(`/api/examples/${ex.slug}/install`);
-            // 2. Deploy the example's primary agent into THIS world.
             const primary = ex.agents[0];
-            if (!primary) {
+            if (primary === undefined || primary === '') {
                 throw new Error('template has no agents');
             }
             await deploy(primary);
@@ -743,7 +760,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
     };
 
     const isLoading = installed === null || gallery === null;
-    const noInstalled = installed && installed.length === 0;
+    const noInstalled = installed?.length === 0;
 
     return (
         <div className="rounded-2xl border border-white/[0.06] bg-white/[0.01] px-5 py-6">
@@ -760,9 +777,10 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                 </div>
             </div>
 
-            {errorMessage && <p className="mb-3 text-[11px] text-red-300/80">{errorMessage}</p>}
+            {errorMessage !== null && errorMessage !== '' && (
+                <p className="mb-3 text-[11px] text-red-300/80">{errorMessage}</p>
+            )}
 
-            {/* ── Already-installed agents ─────────────────────────────── */}
             {isLoading && (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {[0, 1, 2].map((i) => (
@@ -778,12 +796,14 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
             )}
             {!isLoading && !noInstalled && (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {installed!.map((a) => (
+                    {installed.map((a) => (
                         <button
                             className="group flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={busy !== null}
                             key={a.name}
-                            onClick={async () => await deploy(a.name)}
+                            onClick={inBackground(async () => {
+                                await deploy(a.name);
+                            })}
                             type="button"
                         >
                             <div className="min-w-0">
@@ -810,11 +830,12 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                 </div>
             )}
 
-            {/* ── Gallery toggle / panel ──────────────────────────────── */}
             <div className="mt-5">
                 <button
                     className="text-muted-foreground/50 hover:text-foreground/80 inline-flex items-center gap-1.5 text-[11px] tracking-wider uppercase transition-colors"
-                    onClick={() => setShowGallery((v) => !v)}
+                    onClick={() => {
+                        setShowGallery((v) => !v);
+                    }}
                     type="button"
                 >
                     <IconSparkles size={11} />
@@ -837,7 +858,9 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                                     className="group flex items-start gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
                                     disabled={busy !== null}
                                     key={ex.slug}
-                                    onClick={async () => await installAndDeploy(ex)}
+                                    onClick={inBackground(async () => {
+                                        await installAndDeploy(ex);
+                                    })}
                                     type="button"
                                 >
                                     <IconWorld

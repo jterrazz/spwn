@@ -46,6 +46,7 @@ import { Skeleton } from '../components/ui/skeleton';
 import { WorldPlanet } from '../components/world-planet';
 import { AVAILABLE_CONFIGS, getWorldName } from '../domain/model';
 import type { World } from '../domain/model';
+import { inBackground } from '../events/in-background';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import { usePageTitle } from '../hooks/use-page-title';
 import { useProgressMessages } from '../hooks/use-progress-messages';
@@ -99,7 +100,9 @@ export default function UniverseMapPage() {
         fetchWorlds();
         fetchAgents();
         const interval = setInterval(fetchWorlds, 5000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+        };
     }, []);
 
     useEffect(() => {
@@ -126,12 +129,11 @@ export default function UniverseMapPage() {
             }
         };
         globalThis.addEventListener('keydown', handleKey);
-        return () => globalThis.removeEventListener('keydown', handleKey);
+        return () => {
+            globalThis.removeEventListener('keydown', handleKey);
+        };
     }, [worlds, selected, router, showSpawn]);
 
-    // ── Planet centering + drag system ──
-    // Uses offsetLeft (static layout position, unaffected by transform) to avoid circular deps.
-    // Single `tx` state = final translateX. Drag adds delta on top during gesture.
     const panelRef = useRef<HTMLDivElement>(null);
     const [, _forceRender] = useState(0);
     const [tx, setTx] = useState(0);
@@ -141,7 +143,6 @@ export default function UniverseMapPage() {
     const wasDragging = useRef(false);
     const lastFocusIdx = useRef<null | number>(null);
 
-    // Get the visible width of the viewport area (minus panel if showing)
     const getVisibleWidth = useCallback((withPanel: boolean) => {
         const parent = scrollRef.current?.parentElement;
         if (!parent) {
@@ -151,10 +152,9 @@ export default function UniverseMapPage() {
             return parent.clientWidth;
         }
         const panelW = panelRef.current?.offsetWidth ?? 380;
-        return parent.clientWidth - panelW - 24; // 24px gap between planet and panel
+        return parent.clientWidth - panelW - 24;
     }, []);
 
-    // Get the static center X of a planet (its layout position, not affected by transform)
     const getPlanetCenter = useCallback((idx: number) => {
         const el = planetRefs.current[idx];
         if (!el) {
@@ -163,7 +163,6 @@ export default function UniverseMapPage() {
         return el.offsetLeft + el.offsetWidth / 2;
     }, []);
 
-    // Compute translateX to center a planet (or group) in the visible area
     const centerOn = useCallback(
         (idx: null | number, withPanel: boolean) => {
             const vw = getVisibleWidth(withPanel);
@@ -173,7 +172,6 @@ export default function UniverseMapPage() {
                 return target - getPlanetCenter(idx);
             }
 
-            // Center the group of real planets
             const count = planetRefs.current.filter(Boolean).length;
             if (count === 0) {
                 return 0;
@@ -185,14 +183,14 @@ export default function UniverseMapPage() {
         [getVisibleWidth, getPlanetCenter],
     );
 
-    // Recenter when selection changes (double-RAF to ensure panel is mounted and measured)
     useEffect(() => {
         if (selected !== null) {
             lastFocusIdx.current = selected;
         }
         const focusIdx = selected ?? lastFocusIdx.current;
 
-        // Double rAF: first lets React render the panel, second measures it
+        // hazard: two frames — the first lets React mount the selection panel, the second measures it; one frame measures a panel that is not there yet
+
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 setTx(centerOn(focusIdx, selected !== null));
@@ -201,7 +199,6 @@ export default function UniverseMapPage() {
         });
     }, [selected, worlds.length, centerOn]);
 
-    // Drag handlers
     const onDragStart = useCallback((x: number) => {
         dragRef.current = { startX: x, startTx: 0, moved: false };
         setIsDragging(true);
@@ -228,7 +225,6 @@ export default function UniverseMapPage() {
             return;
         }
 
-        // Snap to nearest planet
         const vw = getVisibleWidth(selected !== null);
         const target = vw / 2;
         const currentTx = tx + dragDelta;
@@ -248,20 +244,25 @@ export default function UniverseMapPage() {
         setTx(target - getPlanetCenter(bestIdx));
     }, [tx, dragDelta, selected, worlds.length, getVisibleWidth, getPlanetCenter]);
 
-    // Global pointer listeners
     useEffect(() => {
         if (!isDragging) {
             return;
         }
-        const move = (e: MouseEvent) => onDragMove(e.clientX);
-        const up = () => onDragEnd();
+        const move = (e: MouseEvent) => {
+            onDragMove(e.clientX);
+        };
+        const up = () => {
+            onDragEnd();
+        };
         const tmove = (e: TouchEvent) => {
             const touch = e.touches[0];
             if (touch) {
                 onDragMove(touch.clientX);
             }
         };
-        const tend = () => onDragEnd();
+        const tend = () => {
+            onDragEnd();
+        };
         globalThis.addEventListener('mousemove', move);
         globalThis.addEventListener('mouseup', up);
         globalThis.addEventListener('touchmove', tmove, { passive: true });
@@ -279,35 +280,36 @@ export default function UniverseMapPage() {
         wasDragging.current = dragRef.current.moved;
     }, [isDragging]);
 
-    // Recenter on globalThis resize
     useEffect(() => {
         const onResize = () => {
             const focusIdx = selected ?? lastFocusIdx.current;
             setTx(centerOn(focusIdx, selected !== null));
         };
         globalThis.addEventListener('resize', onResize);
-        return () => globalThis.removeEventListener('resize', onResize);
+        return () => {
+            globalThis.removeEventListener('resize', onResize);
+        };
     }, [selected, centerOn]);
 
-    // Global keyboard shortcuts
     useKeyboardShortcuts({
-        onSpawnWorld: () => setShowSpawn(true),
-        onEscape: () => setShowSpawn(false),
+        onSpawnWorld: () => {
+            setShowSpawn(true);
+        },
+        onEscape: () => {
+            setShowSpawn(false);
+        },
     });
 
     const handleDestroyAll = async () => {
         setDestroyingAll(true);
         try {
-            // Destroy each world sequentially (Go API uses DELETE method)
             for (const world of worlds) {
                 await apiDelete(`/api/worlds/${world.id}`);
             }
-            // Immediately refetch
             fetchWorlds();
             refetchSidebar();
             setShowDestroyAll(false);
         } catch {
-            // Ignore errors - worlds may already be gone
         } finally {
             setDestroyingAll(false);
             setShowDestroyAll(false);
@@ -315,7 +317,6 @@ export default function UniverseMapPage() {
     };
 
     const handleSpawnComplete = () => {
-        // Immediately refetch after spawn
         fetchWorlds();
         refetchSidebar();
     };
@@ -335,7 +336,9 @@ export default function UniverseMapPage() {
                 actions={
                     <DashboardHeaderStats
                         idleAgents={idleAgents}
-                        onSpawn={() => setShowSpawn(true)}
+                        onSpawn={() => {
+                            setShowSpawn(true);
+                        }}
                         runningAgents={runningAgents}
                         worldsCount={worlds.length}
                     />
@@ -362,7 +365,6 @@ export default function UniverseMapPage() {
             )}
             {!loading && !(worlds.length === 0 && agents.length === 0 && !agentsLoading) && (
                 <>
-                    {/* Worlds */}
                     {worlds.length > 0 ? (
                         <div
                             className="relative -mx-6 min-h-[320px] flex-1 overflow-hidden md:-mx-8"
@@ -373,7 +375,6 @@ export default function UniverseMapPage() {
                             }}
                         >
                             <div className="flex h-full items-center pb-24">
-                                {/* Planets - full width scrollable */}
                                 <div
                                     className="flex items-center gap-10 will-change-transform select-none"
                                     onMouseDown={(e) => {
@@ -434,17 +435,18 @@ export default function UniverseMapPage() {
                                                             setSelected(selected === i ? null : i);
                                                         }
                                                     }}
-                                                    onEnter={() =>
-                                                        router.push(`/world/${world.id}`)
-                                                    }
+                                                    onEnter={() => {
+                                                        router.push(`/world/${world.id}`);
+                                                    }}
                                                     world={world}
                                                 />
                                             </div>
                                         );
                                     })}
-                                    {/* New world - same card, same animations */}
                                     <NewWorldCard
-                                        onClick={() => setShowSpawn(true)}
+                                        onClick={() => {
+                                            setShowSpawn(true);
+                                        }}
                                         opacity={selected === null ? 0.5 : 0.2}
                                         scale={selected === null ? 1 : 0.85}
                                         tint="creating"
@@ -452,9 +454,6 @@ export default function UniverseMapPage() {
                                 </div>
                             </div>
 
-                            {/* Floating world info panel - lives OUTSIDE the negative-margin
-                carousel so it doesn't cause horizontal overflow. Positioned
-                absolutely within the flex-1 parent that wraps the carousel. */}
                             {selected !== null &&
                                 worlds[selected] &&
                                 (() => {
@@ -468,7 +467,6 @@ export default function UniverseMapPage() {
                                                 ref={panelRef}
                                             >
                                                 <div className="space-y-5 p-5">
-                                                    {/* Header */}
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex min-w-0 items-center gap-3">
                                                             <WorldPlanet size="md" world={w} />
@@ -488,13 +486,15 @@ export default function UniverseMapPage() {
                                                         </div>
                                                         <button
                                                             className="text-muted-foreground/30 hover:text-foreground/70 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors"
-                                                            onClick={() => setSelected(null)}
+                                                            onClick={() => {
+                                                                setSelected(null);
+                                                            }}
+                                                            type="button"
                                                         >
                                                             <IconX size={14} />
                                                         </button>
                                                     </div>
 
-                                                    {/* Metrics */}
                                                     <MetricGrid
                                                         columns={3}
                                                         items={[
@@ -535,7 +535,6 @@ export default function UniverseMapPage() {
 
                                                     <Separator />
 
-                                                    {/* Agents alive */}
                                                     {w.agents.length > 0 && (
                                                         <ProgressBar
                                                             label="Alive"
@@ -559,7 +558,6 @@ export default function UniverseMapPage() {
                                                         />
                                                     )}
 
-                                                    {/* Agents */}
                                                     {w.agents.length > 0 && (
                                                         <div>
                                                             <SectionLabel>Agents</SectionLabel>
@@ -573,28 +571,28 @@ export default function UniverseMapPage() {
                                                         </div>
                                                     )}
 
-                                                    {/* Workspaces */}
                                                     {w.workspaces && w.workspaces.length > 0 && (
                                                         <div>
                                                             <SectionLabel>Workspaces</SectionLabel>
                                                             <ItemList
                                                                 items={w.workspaces.map((ws) => ({
                                                                     name: ws.name,
-                                                                    detail: ws.readonly
-                                                                        ? `${ws.path} (ro)`
-                                                                        : ws.path,
+                                                                    detail:
+                                                                        ws.readonly === true
+                                                                            ? `${ws.path} (ro)`
+                                                                            : ws.path,
                                                                 }))}
                                                             />
                                                         </div>
                                                     )}
 
-                                                    {/* Actions */}
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             className="text-foreground/70 hover:text-foreground/95 flex h-9 flex-1 items-center justify-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.06] font-mono text-xs font-medium transition-all hover:border-white/[0.12] hover:bg-white/[0.1]"
-                                                            onClick={() =>
-                                                                router.push(`/world/${w.id}`)
-                                                            }
+                                                            onClick={() => {
+                                                                router.push(`/world/${w.id}`);
+                                                            }}
+                                                            type="button"
                                                         >
                                                             Enter World
                                                             <IconArrowRight size={13} />
@@ -604,7 +602,7 @@ export default function UniverseMapPage() {
                                                                 className="text-muted-foreground/30 h-9 rounded-full border border-transparent px-3.5 font-mono text-[11px] transition-all hover:border-red-500/15 hover:bg-red-500/[0.06] hover:text-red-400"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    apiDelete(
+                                                                    void apiDelete(
                                                                         `/api/worlds/${w.id}`,
                                                                     ).then(() => {
                                                                         fetchWorlds();
@@ -612,6 +610,7 @@ export default function UniverseMapPage() {
                                                                         setSelected(null);
                                                                     });
                                                                 }}
+                                                                type="button"
                                                             >
                                                                 Shutdown
                                                             </button>
@@ -630,18 +629,21 @@ export default function UniverseMapPage() {
                                 fetchWorlds();
                                 refetchSidebar();
                             }}
-                            onSpawn={() => setShowSpawn(true)}
+                            onSpawn={() => {
+                                setShowSpawn(true);
+                            }}
                         />
                     )}
                 </>
             )}
 
-            {/* Destroy All Confirmation Dialog */}
             {showDestroyAll && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => !destroyingAll && setShowDestroyAll(false)}
+                        onClick={() => {
+                            !destroyingAll && setShowDestroyAll(false);
+                        }}
                     />
                     <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-red-500/30 p-6 shadow-2xl backdrop-blur-md">
                         <div className="flex flex-col items-center text-center">
@@ -663,14 +665,18 @@ export default function UniverseMapPage() {
                                 <button
                                     className="text-muted-foreground/50 hover:text-foreground/70 flex-1 rounded-xl px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-30"
                                     disabled={destroyingAll}
-                                    onClick={() => setShowDestroyAll(false)}
+                                    onClick={() => {
+                                        setShowDestroyAll(false);
+                                    }}
+                                    type="button"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     className="flex-1 rounded-xl border border-red-500/30 bg-red-500/20 px-4 py-2.5 text-sm text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                                     disabled={destroyingAll}
-                                    onClick={handleDestroyAll}
+                                    onClick={inBackground(handleDestroyAll)}
+                                    type="button"
                                 >
                                     {destroyingAll ? (
                                         <span className="flex items-center justify-center gap-2">
@@ -687,18 +693,17 @@ export default function UniverseMapPage() {
                 </div>
             )}
 
-            {/* New World Dialog */}
             {showSpawn && (
                 <SpawnWorldDialog
-                    onClose={() => setShowSpawn(false)}
+                    onClose={() => {
+                        setShowSpawn(false);
+                    }}
                     onComplete={handleSpawnComplete}
                 />
             )}
         </Page>
     );
 }
-
-/* ── Quick Start Wizard ── */
 
 function DashboardHeaderStats({
     worldsCount,
@@ -753,10 +758,18 @@ function DashboardHeaderStats({
         <div className="flex flex-wrap items-center justify-end gap-2 md:max-w-[620px]">
             <div
                 className={`${GLASS_PILL_CLASS} flex h-[42px] flex-nowrap items-center justify-end gap-1 px-2.5 transition-all duration-300 ease-out`}
-                onBlur={() => setExpanded(false)}
-                onFocus={() => setExpanded(true)}
-                onMouseEnter={() => setExpanded(true)}
-                onMouseLeave={() => setExpanded(false)}
+                onBlur={() => {
+                    setExpanded(false);
+                }}
+                onFocus={() => {
+                    setExpanded(true);
+                }}
+                onMouseEnter={() => {
+                    setExpanded(true);
+                }}
+                onMouseLeave={() => {
+                    setExpanded(false);
+                }}
             >
                 {items.map((item) => (
                     <button
@@ -832,20 +845,20 @@ function EmptyWorldsView({
 
     useEffect(() => {
         apiGet<{ examples: GalleryExample[] }>('/api/examples')
-            .then((data) => setGallery(data.examples ?? []))
-            .catch(() => setGallery([]));
+            .then((data) => {
+                setGallery(data.examples ?? []);
+            })
+            .catch(() => {
+                setGallery([]);
+            });
     }, []);
 
     const handleInstallAndSpawn = async (ex: GalleryExample) => {
         setInstalling(ex.slug);
         setInstallError(null);
         try {
-            // 1. Copy template files into ~/.spwn/ (idempotent - skips
-            //    Existing agents/worlds so users don't lose local edits).
             await apiPost(`/api/examples/${ex.slug}/install`);
 
-            // 2. Immediately spawn the first world with its canonical
-            //    Agent set so the user lands in a live container on click.
             const primaryWorld = ex.worlds[0];
             const body: Record<string, unknown> = { config: primaryWorld };
             if (ex.agents.length === 1) {
@@ -914,13 +927,15 @@ function EmptyWorldsView({
                                 example={ex}
                                 featured={i === 0}
                                 key={ex.slug}
-                                onInstall={async () => await handleInstallAndSpawn(ex)}
+                                onInstall={inBackground(async () => {
+                                    await handleInstallAndSpawn(ex);
+                                })}
                             />
                         ))}
                     </div>
                 )}
 
-                {installError && (
+                {installError !== null && installError !== '' && (
                     <p className="mt-4 text-center text-xs text-red-300/80">{installError}</p>
                 )}
 
@@ -928,6 +943,7 @@ function EmptyWorldsView({
                     <button
                         className="text-muted-foreground/50 hover:text-foreground/80 inline-flex items-center gap-2 text-[11px] tracking-wider uppercase transition-colors"
                         onClick={onSpawn}
+                        type="button"
                     >
                         <IconRocket size={12} />
                         Or build your own world from scratch
@@ -994,7 +1010,7 @@ function GalleryCard({
     return (
         <div
             className={`group relative flex h-full flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-all duration-200 ${
-                featured ? 'sm:col-span-2 lg:col-span-2' : ''
+                featured === true ? 'sm:col-span-2 lg:col-span-2' : ''
             } ${disabled ? 'opacity-50' : 'hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-lg hover:shadow-white/[0.02]'}`}
         >
             <div className="flex items-start gap-3">
@@ -1012,7 +1028,7 @@ function GalleryCard({
             </div>
 
             <p
-                className={`text-muted-foreground/70 mt-3 text-[11px] leading-relaxed ${featured ? 'line-clamp-4' : 'line-clamp-3'}`}
+                className={`text-muted-foreground/70 mt-3 text-[11px] leading-relaxed ${featured === true ? 'line-clamp-4' : 'line-clamp-3'}`}
             >
                 {firstParagraph}
             </p>
@@ -1029,7 +1045,7 @@ function GalleryCard({
                 ))}
             </div>
 
-            {example.command && (
+            {example.command !== undefined && example.command !== '' && (
                 <div className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5">
                     <code className="text-muted-foreground/50 font-mono text-[10px] leading-relaxed">
                         $ {example.command.split('\n')[0]}
@@ -1041,7 +1057,7 @@ function GalleryCard({
 
             <button
                 className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    featured
+                    featured === true
                         ? 'text-foreground/95 border-white/[0.15] bg-white/[0.08] hover:border-white/[0.25] hover:bg-white/[0.14]'
                         : 'text-foreground/90 border-white/[0.10] bg-white/[0.06] hover:border-white/[0.18] hover:bg-white/[0.10]'
                 }`}
@@ -1091,7 +1107,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         try {
             const result = await apiAction('/api/agents', { name: agentName.trim() });
             if (!result.ok) {
-                setError(result.error || 'Failed to create agent');
+                setError(result.error ?? 'Failed to create agent');
                 setWorking(false);
                 return;
             }
@@ -1104,7 +1120,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
     };
 
     const handleSetPurpose = async () => {
-        // Purpose is optional, proceed to step 3
         setStep(3);
     };
 
@@ -1124,7 +1139,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                     config: 'default',
                     role: 'worker',
                 }),
-                signal: AbortSignal.timeout(600_000), // 10 min - first run may build Docker images
+                signal: AbortSignal.timeout(600_000),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
@@ -1150,7 +1165,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
 
     return (
         <div className="mx-auto w-full max-w-lg px-4">
-            {/* Header */}
             <div className="mb-8 text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-br from-blue-500/20 to-purple-500/20">
                     <IconSparkles className="text-blue-400/60" size={28} />
@@ -1161,7 +1175,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 </p>
             </div>
 
-            {/* Step indicators */}
             <div className="mb-8 flex items-center justify-center gap-2">
                 {steps.map((s, i) => {
                     let stepClass: string;
@@ -1189,7 +1202,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 })}
             </div>
 
-            {/* Step content */}
             <div className="glass-subtle space-y-4 rounded-2xl p-6">
                 {step === 1 && (
                     <>
@@ -1200,10 +1212,12 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                             <input
                                 autoFocus
                                 className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                                onChange={(e) => setAgentName(e.target.value)}
+                                onChange={(e) => {
+                                    setAgentName(e.target.value);
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        handleCreateAgent();
+                                        void handleCreateAgent();
                                     }
                                 }}
                                 placeholder="e.g. atlas, neo, morpheus..."
@@ -1216,7 +1230,8 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                         <button
                             className="text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30"
                             disabled={!agentName.trim() || working}
-                            onClick={handleCreateAgent}
+                            onClick={inBackground(handleCreateAgent)}
+                            type="button"
                         >
                             {working ? (
                                 <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
@@ -1237,11 +1252,13 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                             <textarea
                                 autoFocus
                                 className="text-foreground/80 placeholder:text-muted-foreground/25 w-full resize-none rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                                onChange={(e) => setPurpose(e.target.value)}
+                                onChange={(e) => {
+                                    setPurpose(e.target.value);
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
-                                        handleSetPurpose();
+                                        void handleSetPurpose();
                                     }
                                 }}
                                 placeholder="e.g. Build a REST API, Manage my infrastructure, Write documentation..."
@@ -1254,7 +1271,8 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                         </div>
                         <button
                             className="text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1]"
-                            onClick={handleSetPurpose}
+                            onClick={inBackground(handleSetPurpose)}
+                            type="button"
                         >
                             <IconArrowRight size={16} />
                             {purpose.trim() ? 'Continue' : 'Skip for now'}
@@ -1271,10 +1289,12 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                             <input
                                 autoFocus
                                 className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 font-mono text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                                onChange={(e) => setWorkspace(e.target.value)}
+                                onChange={(e) => {
+                                    setWorkspace(e.target.value);
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        handleSpawnWorld();
+                                        void handleSpawnWorld();
                                     }
                                 }}
                                 placeholder={`/tmp/spwn-${agentName.trim() || 'agent'}`}
@@ -1285,7 +1305,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                             </p>
                         </div>
 
-                        {/* Preview */}
                         <div className="rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-3">
                             <p className="text-muted-foreground/30 mb-1 text-[10px] tracking-widest uppercase">
                                 Summary
@@ -1315,7 +1334,8 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                         <button
                             className={`text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30 ${working ? 'animate-pulse' : ''}`}
                             disabled={working}
-                            onClick={handleSpawnWorld}
+                            onClick={inBackground(handleSpawnWorld)}
+                            type="button"
                         >
                             {working ? (
                                 <>
@@ -1342,8 +1362,6 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         </div>
     );
 }
-
-/* ── New World Dialog ── */
 
 interface SpawnAgentListItem {
     name: string;
@@ -1392,18 +1410,19 @@ function SpawnWorldDialog({
         { after: 60, text: 'Almost there...' },
     ]);
 
-    // Generate a sensible default workspace path. Uses the first selected
-    // Agent's name when one exists, else a generic suffix.
     const defaultWorkspacePath = useMemo(() => {
         const first = [...selectedAgents][0];
         const rand = Math.random().toString(36).slice(2, 6);
-        return first ? `/tmp/spwn-${first}-${rand}` : `/tmp/spwn-workspace-${rand}`;
+        return first === undefined || first === ''
+            ? `/tmp/spwn-workspace-${rand}`
+            : `/tmp/spwn-${first}-${rand}`;
     }, [selectedAgents]);
 
-    // Fetch available agents for the checkable list
     useEffect(() => {
         apiGet<SpawnAgentListItem[]>('/api/agents')
-            .then((agents) => setAvailableAgents(agents ?? []))
+            .then((agents) => {
+                setAvailableAgents(agents ?? []);
+            })
             .catch(() => {});
     }, []);
 
@@ -1428,7 +1447,7 @@ function SpawnWorldDialog({
         try {
             const result = await apiAction('/api/agents', { name: newAgentName.trim() });
             if (!result.ok) {
-                setError(result.error || 'Failed to create agent');
+                setError(result.error ?? 'Failed to create agent');
                 return;
             }
             const name = newAgentName.trim();
@@ -1446,7 +1465,6 @@ function SpawnWorldDialog({
     const handleSpawn = async () => {
         setSpawning(true);
         setError('');
-        // Filter out blank rows and fill in defaults. A fully empty list = ephemeral world.
         const cleanWorkspaces = workspaces
             .map((w, i) => ({
                 name: w.name.trim() || (workspaces.length === 1 ? 'default' : `w${i}`),
@@ -1465,7 +1483,7 @@ function SpawnWorldDialog({
                     config,
                     role,
                 }),
-                signal: AbortSignal.timeout(600_000), // 10 min - first run may build Docker images
+                signal: AbortSignal.timeout(600_000),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
@@ -1475,7 +1493,6 @@ function SpawnWorldDialog({
             }
             onComplete();
             onClose();
-            // Redirect to the new world if we got an ID back
             if (data.id) {
                 router.push(`/world/${data.id}`);
             }
@@ -1487,15 +1504,14 @@ function SpawnWorldDialog({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                onClick={() => !spawning && onClose()}
+                onClick={() => {
+                    !spawning && onClose();
+                }}
             />
 
-            {/* Dialog */}
             <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
-                {/* Top shimmer bar */}
                 {spawning && (
                     <div className="h-0.5 w-full overflow-hidden bg-white/[0.04]">
                         <div
@@ -1504,7 +1520,6 @@ function SpawnWorldDialog({
                         />
                     </div>
                 )}
-                {/* Header */}
                 <div className="flex items-center justify-between px-6 pt-6 pb-4">
                     <div>
                         <h2 className="font-heading text-foreground/90 text-lg">New World</h2>
@@ -1516,14 +1531,13 @@ function SpawnWorldDialog({
                         className="text-muted-foreground/40 hover:text-foreground/60 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
                         disabled={spawning}
                         onClick={onClose}
+                        type="button"
                     >
                         <IconX size={18} />
                     </button>
                 </div>
 
-                {/* Form */}
                 <div className="space-y-4 px-6 pb-6">
-                    {/* World name (optional) */}
                     <div>
                         <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                             Name{' '}
@@ -1533,13 +1547,14 @@ function SpawnWorldDialog({
                         </label>
                         <input
                             className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                            onChange={(e) => setWorldName(e.target.value)}
+                            onChange={(e) => {
+                                setWorldName(e.target.value);
+                            }}
                             placeholder="My Project"
                             value={worldName}
                         />
                     </div>
 
-                    {/* Agents - checkable list, optional (0 = empty world) */}
                     <div>
                         <div className="mb-1.5 flex items-baseline justify-between">
                             <label className="text-muted-foreground/40 text-[10px] tracking-widest uppercase">
@@ -1555,7 +1570,9 @@ function SpawnWorldDialog({
                             {selectedAgents.size > 0 && (
                                 <button
                                     className="text-muted-foreground/40 hover:text-foreground/70 text-[10px] transition-colors"
-                                    onClick={() => setSelectedAgents(new Set())}
+                                    onClick={() => {
+                                        setSelectedAgents(new Set());
+                                    }}
                                     type="button"
                                 >
                                     Clear
@@ -1578,7 +1595,9 @@ function SpawnWorldDialog({
                                                     <input
                                                         checked={checked}
                                                         className="accent-foreground h-3.5 w-3.5 cursor-pointer rounded border-white/[0.15] bg-white/[0.04]"
-                                                        onChange={() => toggleAgent(a.name)}
+                                                        onChange={() => {
+                                                            toggleAgent(a.name);
+                                                        }}
                                                         type="checkbox"
                                                     />
                                                     <span
@@ -1592,14 +1611,15 @@ function SpawnWorldDialog({
                                     })}
                                 </ul>
                             )}
-                            {/* Inline "add new" row */}
                             <div className="flex gap-2 border-t border-white/[0.06] px-3 py-2">
                                 <input
                                     className="text-foreground/80 placeholder:text-muted-foreground/30 flex-1 bg-transparent text-xs focus:outline-none"
-                                    onChange={(e) => setNewAgentName(e.target.value)}
+                                    onChange={(e) => {
+                                        setNewAgentName(e.target.value);
+                                    }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleCreateInlineAgent();
+                                            void handleCreateInlineAgent();
                                         }
                                     }}
                                     placeholder="New agent name…"
@@ -1608,7 +1628,7 @@ function SpawnWorldDialog({
                                 <button
                                     className="text-foreground/70 shrink-0 rounded border border-white/[0.08] bg-white/[0.06] px-2.5 py-1 text-[11px] transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30"
                                     disabled={!newAgentName.trim() || creatingAgent}
-                                    onClick={handleCreateInlineAgent}
+                                    onClick={inBackground(handleCreateInlineAgent)}
                                     type="button"
                                 >
                                     {creatingAgent ? '…' : '+ Add'}
@@ -1617,7 +1637,6 @@ function SpawnWorldDialog({
                         </div>
                     </div>
 
-                    {/* Workspaces */}
                     <div>
                         <div className="mb-1.5 flex items-baseline justify-between">
                             <label className="text-muted-foreground/40 text-[10px] tracking-widest uppercase">
@@ -1630,7 +1649,7 @@ function SpawnWorldDialog({
                             </label>
                             <button
                                 className="text-muted-foreground/50 hover:text-foreground/80 text-[10px] transition-colors"
-                                onClick={() =>
+                                onClick={() => {
                                     setWorkspaces((prev) => [
                                         ...prev,
                                         newWorkspaceDraft({
@@ -1638,8 +1657,8 @@ function SpawnWorldDialog({
                                             path: '',
                                             readonly: false,
                                         }),
-                                    ])
-                                }
+                                    ]);
+                                }}
                                 type="button"
                             >
                                 + Add
@@ -1648,7 +1667,9 @@ function SpawnWorldDialog({
                         {workspaces.length === 0 ? (
                             <button
                                 className="text-muted-foreground/40 hover:text-foreground/60 w-full rounded-lg border border-dashed border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left text-[11px] transition-colors hover:border-white/[0.15]"
-                                onClick={() => setWorkspaces([newWorkspaceDraft()])}
+                                onClick={() => {
+                                    setWorkspaces([newWorkspaceDraft()]);
+                                }}
                                 type="button"
                             >
                                 Ephemeral world - click to add a host mount
@@ -1659,29 +1680,29 @@ function SpawnWorldDialog({
                                     <div className="flex items-center gap-1.5" key={ws.id}>
                                         <input
                                             className="text-foreground/80 placeholder:text-muted-foreground/25 w-24 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
                                                         i === idx
                                                             ? { ...w, name: e.target.value }
                                                             : w,
                                                     ),
-                                                )
-                                            }
+                                                );
+                                            }}
                                             placeholder="name"
                                             value={ws.name}
                                         />
                                         <input
                                             className="text-foreground/80 placeholder:text-muted-foreground/25 min-w-0 flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
                                                         i === idx
                                                             ? { ...w, path: e.target.value }
                                                             : w,
                                                     ),
-                                                )
-                                            }
+                                                );
+                                            }}
                                             placeholder={
                                                 idx === 0 ? defaultWorkspacePath : '/path/to/dir'
                                             }
@@ -1689,15 +1710,15 @@ function SpawnWorldDialog({
                                         />
                                         <button
                                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[10px] transition-colors ${ws.readonly ? 'border border-amber-500/25 bg-amber-500/15 text-amber-300' : 'text-muted-foreground/40 hover:text-foreground/70 border border-white/[0.08] bg-white/[0.03]'}`}
-                                            onClick={() =>
+                                            onClick={() => {
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
                                                         i === idx
                                                             ? { ...w, readonly: !w.readonly }
                                                             : w,
                                                     ),
-                                                )
-                                            }
+                                                );
+                                            }}
                                             title={ws.readonly ? 'Read-only' : 'Read-write'}
                                             type="button"
                                         >
@@ -1705,11 +1726,11 @@ function SpawnWorldDialog({
                                         </button>
                                         <button
                                             className="text-muted-foreground/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-red-500/10 hover:text-red-400"
-                                            onClick={() =>
+                                            onClick={() => {
                                                 setWorkspaces((prev) =>
                                                     prev.filter((_, i) => i !== idx),
-                                                )
-                                            }
+                                                );
+                                            }}
                                             type="button"
                                         >
                                             <IconX size={14} />
@@ -1720,7 +1741,6 @@ function SpawnWorldDialog({
                         )}
                     </div>
 
-                    {/* Config + Role row */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
@@ -1728,7 +1748,9 @@ function SpawnWorldDialog({
                             </label>
                             <select
                                 className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                                onChange={(e) => setConfig(e.target.value)}
+                                onChange={(e) => {
+                                    setConfig(e.target.value);
+                                }}
                                 value={config}
                             >
                                 {AVAILABLE_CONFIGS.map((c) => (
@@ -1744,7 +1766,9 @@ function SpawnWorldDialog({
                             </label>
                             <select
                                 className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                                onChange={(e) => setRole(e.target.value)}
+                                onChange={(e) => {
+                                    setRole(e.target.value);
+                                }}
                                 value={role}
                             >
                                 <option value="chief">Chief</option>
@@ -1754,7 +1778,6 @@ function SpawnWorldDialog({
                         </div>
                     </div>
 
-                    {/* Preview of what will happen */}
                     {(() => {
                         const wsFlags = workspaces
                             .filter((w) => w.path.trim())
@@ -1807,18 +1830,17 @@ function SpawnWorldDialog({
                         );
                     })()}
 
-                    {/* Error display */}
                     {error && (
                         <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400">
                             {error}
                         </div>
                     )}
 
-                    {/* Spawn button */}
                     <button
                         className={`text-foreground/70 hover:text-foreground/90 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30 ${spawning ? 'animate-pulse' : ''}`}
                         disabled={spawning}
-                        onClick={handleSpawn}
+                        onClick={inBackground(handleSpawn)}
+                        type="button"
                     >
                         {spawning ? (
                             <>

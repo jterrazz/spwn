@@ -14,6 +14,7 @@ import { PageHeader } from '../../components/page-header';
 import { Skeleton } from '../../components/ui/skeleton';
 import { getWorldName } from '../../domain/model';
 import type { Team, World } from '../../domain/model';
+import { inBackground } from '../../events/in-background';
 import { usePageTitle } from '../../hooks/use-page-title';
 import { ROLE_BADGE } from '../../styles/status-colors';
 
@@ -25,12 +26,11 @@ interface AgentListItem {
     layers: Record<string, null | string[]>;
 }
 
-// An agent enriched with its current deployment (if any).
 interface EnrichedAgent {
     name: string;
     role: string;
-    team?: string | undefined; // Team slug
-    status: string; // Running/waiting/idle/sleeping/stopped/limbo
+    team?: string | undefined;
+    status: string;
     worldID?: string | undefined;
     worldName?: string | undefined;
     journalEntries: number;
@@ -39,7 +39,6 @@ interface EnrichedAgent {
 
 type StatusFilter = 'all' | 'deployed' | 'limbo';
 
-// Hoisted out of the page component so cell renderers are stable across renders.
 const AGENT_COLUMNS = [
     {
         key: 'name',
@@ -82,12 +81,12 @@ const AGENT_COLUMNS = [
         label: 'World',
         width: '120px',
         render: (a: EnrichedAgent) =>
-            a.worldName ? (
+            a.worldName === undefined || a.worldName === '' ? (
+                <span className="text-muted-foreground/25 font-mono text-[11px]">-</span>
+            ) : (
                 <span className="text-foreground/60 truncate font-mono text-[11px]">
                     {a.worldName}
                 </span>
-            ) : (
-                <span className="text-muted-foreground/25 font-mono text-[11px]">-</span>
             ),
     },
 ];
@@ -144,7 +143,6 @@ export default function AgentsPage() {
 
             setTeams(rawTeams ?? []);
 
-            // Build name → { worldID, worldName, role, status } map from world records.
             const placement = new Map<
                 string,
                 { worldID: string; worldName: string; role: string; status: string }
@@ -183,18 +181,20 @@ export default function AgentsPage() {
     }, []);
 
     useEffect(() => {
-        fetchAll();
-        const id = setInterval(fetchAll, 5000);
-        return () => clearInterval(id);
+        void fetchAll();
+        const id = setInterval(inBackground(fetchAll), 5000);
+        return () => {
+            clearInterval(id);
+        };
     }, [fetchAll]);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
         return agents.filter((a) => {
-            if (filter === 'deployed' && !a.worldID) {
+            if (filter === 'deployed' && (a.worldID === undefined || a.worldID === '')) {
                 return false;
             }
-            if (filter === 'limbo' && a.worldID) {
+            if (filter === 'limbo' && a.worldID !== undefined && a.worldID !== '') {
                 return false;
             }
             if (q && !a.name.toLowerCase().includes(q)) {
@@ -208,12 +208,11 @@ export default function AgentsPage() {
         () => ({
             all: agents.length,
             deployed: agents.filter((a) => a.worldID).length,
-            limbo: agents.filter((a) => !a.worldID).length,
+            limbo: agents.filter((a) => a.worldID === undefined || a.worldID === '').length,
         }),
         [agents],
     );
 
-    // Group filtered agents by team for the list view.
     const grouped = useMemo(() => {
         const teamMap = new Map<string, Team>();
         for (const t of teams) {
@@ -225,16 +224,15 @@ export default function AgentsPage() {
         const solo: EnrichedAgent[] = [];
 
         for (const a of filtered) {
-            if (a.team) {
+            if (a.team === undefined || a.team === '') {
+                solo.push(a);
+            } else {
                 const list = bySlug.get(a.team) ?? [];
                 list.push(a);
                 bySlug.set(a.team, list);
-            } else {
-                solo.push(a);
             }
         }
 
-        // Teams first (sorted by name), then solo
         for (const [slug, members] of bySlug) {
             groups.push({ team: teamMap.get(slug) ?? { slug, name: slug }, agents: members });
         }
@@ -255,11 +253,10 @@ export default function AgentsPage() {
         try {
             const result = await apiAction('/api/agents', { name });
             if (!result.ok) {
-                setCreateError(result.error || 'Failed to create agent');
+                setCreateError(result.error ?? 'Failed to create agent');
                 setCreating(false);
                 return;
             }
-            // Assign team if selected
             if (newTeam) {
                 await fetch(goApiUrl(`/api/agents/${encodeURIComponent(name)}/identity`), {
                     method: 'PUT',
@@ -317,7 +314,6 @@ export default function AgentsPage() {
             setShowTeamDialog(false);
             await fetchAll();
         } catch {
-            // Ignore
         } finally {
             setSavingTeam(false);
         }
@@ -342,7 +338,9 @@ export default function AgentsPage() {
                             compact
                             icon={<IconUsers size={16} stroke={2.2} />}
                             label="New Team"
-                            onClick={() => openTeamDialog()}
+                            onClick={() => {
+                                openTeamDialog();
+                            }}
                         />
                         <ActionButton
                             compact
@@ -360,7 +358,6 @@ export default function AgentsPage() {
                 title="Agents"
             />
 
-            {/* Filter */}
             <div className="flex flex-wrap items-center gap-3">
                 <div className="glass-pill flex items-center gap-1 px-1 py-1">
                     {(['all', 'deployed', 'limbo'] as StatusFilter[]).map((f) => (
@@ -371,7 +368,10 @@ export default function AgentsPage() {
                                     : 'text-muted-foreground/50 hover:text-foreground/70'
                             }`}
                             key={f}
-                            onClick={() => setFilter(f)}
+                            onClick={() => {
+                                setFilter(f);
+                            }}
+                            type="button"
                         >
                             {f}{' '}
                             <span className="text-muted-foreground/40 ml-1 font-mono text-[10px]">
@@ -382,7 +382,6 @@ export default function AgentsPage() {
                 </div>
             </div>
 
-            {/* List */}
             {loading && (
                 <div className="space-y-2">
                     {[1, 2, 3].map((i) => (
@@ -406,14 +405,20 @@ export default function AgentsPage() {
                 <div className="space-y-8">
                     {grouped.map(({ team: t, agents: groupAgents }) => (
                         <div key={t?.slug ?? 'solo'}>
-                            {/* Team header */}
                             <div className="mb-3 flex items-center gap-2">
                                 {t ? (
                                     <>
                                         <button
                                             className="underline-offset-2 transition-colors hover:underline"
-                                            onClick={() => openTeamDialog(t)}
-                                            style={t.color ? { color: t.color } : undefined}
+                                            onClick={() => {
+                                                openTeamDialog(t);
+                                            }}
+                                            style={
+                                                t.color === undefined || t.color === ''
+                                                    ? undefined
+                                                    : { color: t.color }
+                                            }
+                                            type="button"
                                         >
                                             <SectionLabel className="mb-0">{t.name}</SectionLabel>
                                         </button>
@@ -432,13 +437,12 @@ export default function AgentsPage() {
                                     </>
                                 )}
                             </div>
-                            {/* Agent table */}
                             <DataTable<EnrichedAgent>
                                 columns={AGENT_COLUMNS}
                                 rowHref={(a) =>
-                                    a.worldID
-                                        ? `/agents/${encodeURIComponent(a.name)}?world=${a.worldID}`
-                                        : `/agents/${encodeURIComponent(a.name)}`
+                                    a.worldID === undefined || a.worldID === ''
+                                        ? `/agents/${encodeURIComponent(a.name)}`
+                                        : `/agents/${encodeURIComponent(a.name)}?world=${a.worldID}`
                                 }
                                 rowKey={(a) => a.name}
                                 rows={groupAgents}
@@ -448,12 +452,13 @@ export default function AgentsPage() {
                 </div>
             )}
 
-            {/* New Agent dialog */}
             {showNew && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => !creating && setShowNew(false)}
+                        onClick={() => {
+                            !creating && setShowNew(false);
+                        }}
                     />
                     <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
                         <h3 className="font-heading text-foreground/90 mb-1 text-lg">New Agent</h3>
@@ -464,10 +469,12 @@ export default function AgentsPage() {
                             autoFocus
                             className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 font-mono text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                             disabled={creating}
-                            onChange={(e) => setNewName(e.target.value)}
+                            onChange={(e) => {
+                                setNewName(e.target.value);
+                            }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                    handleCreate();
+                                    void handleCreate();
                                 }
                                 if (e.key === 'Escape') {
                                     setShowNew(false);
@@ -485,7 +492,9 @@ export default function AgentsPage() {
                         <select
                             className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                             disabled={creating}
-                            onChange={(e) => setNewTeam(e.target.value)}
+                            onChange={(e) => {
+                                setNewTeam(e.target.value);
+                            }}
                             value={newTeam}
                         >
                             <option value="">No team</option>
@@ -502,14 +511,18 @@ export default function AgentsPage() {
                             <button
                                 className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                 disabled={creating}
-                                onClick={() => setShowNew(false)}
+                                onClick={() => {
+                                    setShowNew(false);
+                                }}
+                                type="button"
                             >
                                 Cancel
                             </button>
                             <button
                                 className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                 disabled={creating || !newName.trim()}
-                                onClick={handleCreate}
+                                onClick={inBackground(handleCreate)}
+                                type="button"
                             >
                                 {creating ? (
                                     <>
@@ -528,19 +541,23 @@ export default function AgentsPage() {
                             aria-label="Close"
                             className="text-muted-foreground/30 hover:text-foreground/60 absolute top-4 right-4 transition-colors disabled:opacity-30"
                             disabled={creating}
-                            onClick={() => !creating && setShowNew(false)}
+                            onClick={() => {
+                                !creating && setShowNew(false);
+                            }}
+                            type="button"
                         >
                             <IconX size={16} />
                         </button>
                     </div>
                 </div>
             )}
-            {/* Team create/edit dialog */}
             {showTeamDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => !savingTeam && setShowTeamDialog(false)}
+                        onClick={() => {
+                            !savingTeam && setShowTeamDialog(false);
+                        }}
                     />
                     <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
                         <h3 className="font-heading text-foreground/90 mb-1 text-lg">
@@ -559,10 +576,12 @@ export default function AgentsPage() {
                                 <input
                                     autoFocus
                                     className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
-                                    onChange={(e) => setTeamName(e.target.value)}
+                                    onChange={(e) => {
+                                        setTeamName(e.target.value);
+                                    }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleSaveTeam();
+                                            void handleSaveTeam();
                                         }
                                     }}
                                     placeholder="e.g. Matrix Ops"
@@ -575,7 +594,9 @@ export default function AgentsPage() {
                                 </label>
                                 <input
                                     className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 font-mono text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
-                                    onChange={(e) => setTeamColor(e.target.value)}
+                                    onChange={(e) => {
+                                        setTeamColor(e.target.value);
+                                    }}
                                     placeholder="#8B5CF6 or purple"
                                     value={teamColor}
                                 />
@@ -589,7 +610,9 @@ export default function AgentsPage() {
                                 </label>
                                 <input
                                     className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
-                                    onChange={(e) => setTeamDesc(e.target.value)}
+                                    onChange={(e) => {
+                                        setTeamDesc(e.target.value);
+                                    }}
                                     placeholder="What this team does…"
                                     value={teamDesc}
                                 />
@@ -601,9 +624,10 @@ export default function AgentsPage() {
                                     <button
                                         className="text-[11px] text-red-400/60 transition-colors hover:text-red-400"
                                         onClick={() => {
-                                            handleDeleteTeam(editingTeam.slug);
+                                            void handleDeleteTeam(editingTeam.slug);
                                             setShowTeamDialog(false);
                                         }}
+                                        type="button"
                                     >
                                         Delete team
                                     </button>
@@ -613,14 +637,18 @@ export default function AgentsPage() {
                                 <button
                                     className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={savingTeam}
-                                    onClick={() => setShowTeamDialog(false)}
+                                    onClick={() => {
+                                        setShowTeamDialog(false);
+                                    }}
+                                    type="button"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                     disabled={savingTeam || !teamName.trim()}
-                                    onClick={handleSaveTeam}
+                                    onClick={inBackground(handleSaveTeam)}
+                                    type="button"
                                 >
                                     {(() => {
                                         if (savingTeam) {
@@ -635,7 +663,10 @@ export default function AgentsPage() {
                             aria-label="Close"
                             className="text-muted-foreground/30 hover:text-foreground/60 absolute top-4 right-4 transition-colors"
                             disabled={savingTeam}
-                            onClick={() => !savingTeam && setShowTeamDialog(false)}
+                            onClick={() => {
+                                !savingTeam && setShowTeamDialog(false);
+                            }}
+                            type="button"
                         >
                             <IconX size={16} />
                         </button>

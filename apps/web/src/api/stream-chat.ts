@@ -1,8 +1,3 @@
-/**
- * Shared utility for consuming streaming chat responses from the Go API.
- * Parses Claude Code stream-json events into ActivityBlocks.
- */
-
 import { deduplicateBlocks, parseStreamEvent } from '../activity/blocks';
 import type { ActivityBlock, StreamJsonEvent } from '../activity/blocks';
 
@@ -32,9 +27,8 @@ async function consumeSSEStream(
     onBlocks: (blocks: ActivityBlock[]) => void,
     onText?: (text: string) => void,
 ): Promise<{ cost?: number | undefined; duration?: number | undefined }> {
-    const contentType = res.headers.get('content-type') || '';
+    const contentType = res.headers.get('content-type') ?? '';
 
-    // If JSON response (non-streaming fallback), extract text
     if (contentType.includes('application/json')) {
         const data = await res.json();
         const text = data.response || data.output || data.message || data.error || 'No response';
@@ -62,14 +56,12 @@ async function consumeSSEStream(
 
         buffer += decoder.decode(value, { stream: true });
 
-        // Process complete lines
         const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+        buffer = lines.pop() ?? '';
 
         for (const line of lines) {
             const trimmed = line.trim();
 
-            // SSE format: "data: {...}"
             if (trimmed.startsWith('data: ')) {
                 const data = trimmed.slice(6);
 
@@ -80,7 +72,6 @@ async function consumeSSEStream(
                 try {
                     const event: StreamJsonEvent = JSON.parse(data);
 
-                    // Extract cost/duration from result events (Claude + Codex)
                     if (event.type === 'result') {
                         meta.cost = event.total_cost_usd as number | undefined;
                         meta.duration = event.duration_ms as number | undefined;
@@ -90,7 +81,6 @@ async function consumeSSEStream(
                             | undefined
                             | { input_tokens?: number; output_tokens?: number };
                         if (usage) {
-                            // Codex doesn't report cost directly - estimate from token count
                             meta.duration = undefined;
                         }
                     }
@@ -104,7 +94,6 @@ async function consumeSSEStream(
                         }
                     }
                 } catch {
-                    // Not valid JSON - treat as plain text
                     if (onText) {
                         onText(data);
                     } else {
@@ -112,7 +101,6 @@ async function consumeSSEStream(
                     }
                 }
             } else if (trimmed && !trimmed.startsWith(':')) {
-                // Plain text line (non-SSE format, e.g. from Next.js fallback)
                 try {
                     const event: StreamJsonEvent = JSON.parse(trimmed);
                     const newBlocks = parseStreamEvent(event);
@@ -128,7 +116,6 @@ async function consumeSSEStream(
                         meta.duration = event.duration_ms as number | undefined;
                     }
                 } catch {
-                    // Plain text
                     if (onText) {
                         onText(`${trimmed}\n`);
                     } else {
@@ -169,12 +156,14 @@ export async function streamChat({
         const meta = await consumeSSEStream(res, onBlocks, onText);
         onDone(meta);
     } catch (primaryError) {
-        if (signal?.aborted) {
+        if (signal?.aborted === true) {
             onError('Request cancelled');
             return;
         }
 
-        if (fallbackUrl) {
+        if (fallbackUrl === undefined || fallbackUrl === '') {
+            onError(primaryError instanceof Error ? primaryError.message : 'Failed to connect');
+        } else {
             try {
                 const res = await fetch(fallbackUrl, {
                     ...fetchOptions,
@@ -189,8 +178,6 @@ export async function streamChat({
             } catch {
                 onError(primaryError instanceof Error ? primaryError.message : 'Failed to connect');
             }
-        } else {
-            onError(primaryError instanceof Error ? primaryError.message : 'Failed to connect');
         }
     }
 }

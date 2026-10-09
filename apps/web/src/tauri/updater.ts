@@ -1,14 +1,3 @@
-/**
- * Tauri auto-updater integration.
- *
- * At app launch we ask the Tauri updater plugin to check the remote manifest
- * (https://github.com/jterrazz/spwn/releases/latest/download/latest.json).
- * If a newer signed release exists, we show a native confirmation dialog
- * and, on user approval, download + install + relaunch the app.
- *
- * Safe to call in the browser - it is a no-op outside the Tauri runtime.
- */
-
 import { isTauri } from './runtime';
 
 interface UpdateDescriptor {
@@ -40,10 +29,7 @@ function getTauri(): null | TauriGlobal {
     return (globalThis as unknown as { __TAURI__: TauriGlobal }).__TAURI__;
 }
 
-/**
- * Checks for a new release and, if one exists, prompts the user to install it.
- * Called once at app startup from the shell. Silently no-ops in the browser.
- */
+/** Checks for a new release and, if one exists, prompts the user to install it. Called once at app startup from the shell. Silently no-ops in the browser. */
 export async function checkForUpdatesOnStartup(): Promise<void> {
     const tauri = getTauri();
     if (!tauri?.updater || !tauri.dialog || !tauri.process) {
@@ -52,7 +38,7 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
 
     try {
         const update = await tauri.updater.check();
-        if (!update?.available || !update.downloadAndInstall) {
+        if (update?.available !== true || !update.downloadAndInstall) {
             return;
         }
 
@@ -66,7 +52,5 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
 
         await update.downloadAndInstall();
         await tauri.process.relaunch();
-    } catch {
-        // Never crash the app on a failed update check.
-    }
+    } catch {}
 }

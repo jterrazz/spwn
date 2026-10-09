@@ -10,9 +10,9 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { useArchitectChat } from '../contexts/architect-chat-context';
 import { Chat } from './chat';
 import type { ChatBubble } from './chat';
-import { useArchitectChat } from '../contexts/architect-chat-context';
 
 function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
     return (
@@ -58,7 +58,6 @@ export function ArchitectChatWidget() {
     const { messages, chatInput, setChatInput, sending, sendMessage, isRunning } =
         useArchitectChat();
 
-    // Close when clicking outside the expanded panel
     useEffect(() => {
         if (!expanded) {
             return;
@@ -69,7 +68,7 @@ export function ArchitectChatWidget() {
             if (!target) {
                 return;
             }
-            if (panelRef.current?.contains(target)) {
+            if (panelRef.current?.contains(target) === true) {
                 return;
             }
             setExpanded(false);
@@ -83,12 +82,10 @@ export function ArchitectChatWidget() {
         };
     }, [expanded]);
 
-    // Hide on architect page - the full page takes over
     if (pathname === '/architect' || pathname.startsWith('/architect/')) {
         return null;
     }
 
-    // Adapt the architect context's messages into the shared ChatBubble shape.
     const bubbles: ChatBubble[] = messages.map((m) => ({
         role: m.role === 'architect' ? 'assistant' : 'user',
         blocks: m.blocks,
@@ -99,21 +96,16 @@ export function ArchitectChatWidget() {
         duration: m.duration,
     }));
 
-    // Chat is controlled via chatInput/setChatInput - at send time the
-    // Context's chatInput is already the latest value, so sendMessage()
-    // Reads it directly. The `text` arg is the same as chatInput here.
     const handleSend = () => {
         void sendMessage();
     };
 
-    // ── Expanded panel ──
     if (expanded) {
         return (
             <div
                 className="bg-background/95 animate-in slide-in-from-bottom-4 fade-in fixed right-4 bottom-4 z-[200] flex h-[540px] w-[420px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/30 backdrop-blur-xl duration-200"
                 ref={panelRef}
             >
-                {/* Header */}
                 <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
                     <div className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-1 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
                         <ArchitectGlyph isActive={sending} isRunning={isRunning} />
@@ -126,21 +118,23 @@ export function ArchitectChatWidget() {
                                 router.push('/architect');
                             }}
                             title="Open full page"
+                            type="button"
                         >
                             <IconMaximize size={14} />
                         </button>
                         <button
                             className="text-muted-foreground/30 hover:text-foreground/60 flex h-7 w-7 items-center justify-center rounded-md transition-colors"
-                            onClick={() => setExpanded(false)}
+                            onClick={() => {
+                                setExpanded(false);
+                            }}
                             title="Minimize"
+                            type="button"
                         >
                             <IconChevronDown size={14} />
                         </button>
                     </div>
                 </div>
 
-                {/* Messages + input via shared Chat - indexed by the original
-            messages array so the extras closure can read stackAction etc. */}
                 <Chat
                     autoFocus={expanded}
                     className="flex-1 px-3 pb-3"
@@ -176,16 +170,16 @@ export function ArchitectChatWidget() {
         );
     }
 
-    // ── Collapsed bar ──
-
-    // When offline: show a compact button to navigate to architect page
     if (!isRunning) {
         return (
             <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
                 <button
                     className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-2.5 rounded-full border px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md transition-colors hover:bg-white/[0.08] dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]"
-                    onClick={() => router.push('/architect')}
+                    onClick={() => {
+                        router.push('/architect');
+                    }}
                     title="Architect is offline - click to start"
+                    type="button"
                 >
                     <ArchitectGlyph isActive={false} isRunning={false} />
                     <span className="text-muted-foreground/35 text-[12px]">Architect offline</span>
@@ -200,16 +194,23 @@ export function ArchitectChatWidget() {
                 <div className="border-foreground/[0.08] bg-foreground/[0.04] flex w-[300px] items-center gap-2 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
                     <button
                         className="flex h-[30px] shrink-0 items-center justify-center rounded-full border border-transparent px-2"
-                        onClick={() => setExpanded(true)}
+                        onClick={() => {
+                            setExpanded(true);
+                        }}
                         title="Architect alive"
+                        type="button"
                     >
                         <ArchitectGlyph isActive={sending} isRunning={isRunning} />
                     </button>
                     <input
                         className="text-foreground/80 placeholder:text-muted-foreground/25 min-w-0 flex-1 bg-transparent text-[13px] focus:outline-none"
                         disabled={sending}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onFocus={() => setExpanded(true)}
+                        onChange={(e) => {
+                            setChatInput(e.target.value);
+                        }}
+                        onFocus={() => {
+                            setExpanded(true);
+                        }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
@@ -229,6 +230,7 @@ export function ArchitectChatWidget() {
                                 handleSend();
                                 setExpanded(true);
                             }}
+                            type="button"
                         >
                             <IconArrowUp size={14} />
                         </button>

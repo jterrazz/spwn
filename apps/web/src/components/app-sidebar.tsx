@@ -28,6 +28,10 @@ import {
     onConnectionStatusChange,
 } from '../api/client';
 import type { ConnectionStatus } from '../api/client';
+import { getWorldName } from '../domain/model';
+import type { Team, World } from '../domain/model';
+import { inBackground } from '../events/in-background';
+import { useVersion } from '../hooks/use-version';
 import { DockerStatusPill } from './docker-status-pill';
 import { ThemeToggle } from './theme-toggle';
 import {
@@ -43,9 +47,6 @@ import {
 } from './ui/sidebar';
 import { UpgradeBanner } from './upgrade-banner';
 import { WorldPlanet } from './world-planet';
-import { getWorldName } from '../domain/model';
-import type { Team, World } from '../domain/model';
-import { useVersion } from '../hooks/use-version';
 
 interface StatusData {
     worlds: number;
@@ -61,7 +62,6 @@ interface AppSidebarProps {
 
 type AgentIcon = { icon: typeof IconBoltFilled; color: string; dim: boolean };
 
-/** What an unknown status renders as — also the `stopped` entry below. */
 const AGENT_ICON_STOPPED: AgentIcon = {
     icon: IconCircleFilled,
     color: 'text-zinc-500/30',
@@ -89,10 +89,11 @@ export function AppSidebar({
 
     const { version } = useVersion();
 
-    // Fetch teams to group agents in the selected world by team
     useEffect(() => {
         apiGet<Team[]>('/api/teams')
-            .then((t) => setTeams(t ?? []))
+            .then((t) => {
+                setTeams(t ?? []);
+            })
             .catch(() => {});
     }, []);
     const [connectionStatus, setConnectionStatus] =
@@ -104,25 +105,24 @@ export function AppSidebar({
             const goUp = await isGoApiAvailable();
             setConnectionStatus(goUp ? 'connected' : 'disconnected');
         };
-        check();
-        const interval = setInterval(check, 10_000);
+        void check();
+        const interval = setInterval(inBackground(check), 10_000);
         return () => {
             clearInterval(interval);
             unsub();
         };
     }, []);
 
-    // Always show a world context (first world as default), but only highlight when on a world page
     const activeWorldId =
-        currentWorldId || worlds.find((w) => pathname.startsWith(`/world/${w.id}`))?.id;
-    const selectedWorldId = activeWorldId || worlds[0]?.id;
-    const selectedWorld = selectedWorldId
-        ? worlds.find((w) => w.id === selectedWorldId)
-        : undefined;
+        currentWorldId ?? worlds.find((w) => pathname.startsWith(`/world/${w.id}`))?.id;
+    const selectedWorldId = activeWorldId ?? worlds[0]?.id;
+    const selectedWorld =
+        selectedWorldId === undefined || selectedWorldId === ''
+            ? undefined
+            : worlds.find((w) => w.id === selectedWorldId);
 
     return (
         <Sidebar>
-            {/* ── Header ── */}
             <SidebarHeader className="gap-0 pt-4 pb-4">
                 <div className="flex items-center justify-between gap-2 px-2">
                     <div className="group/logo flex min-w-0 flex-1 items-center">
@@ -145,15 +145,16 @@ export function AppSidebar({
                     <button
                         aria-label="Search (⌘K)"
                         className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors"
-                        onClick={() =>
+                        onClick={() => {
                             globalThis.dispatchEvent(
                                 new KeyboardEvent('keydown', {
                                     key: 'k',
                                     metaKey: true,
                                     bubbles: true,
                                 }),
-                            )
-                        }
+                            );
+                        }}
+                        type="button"
                     >
                         <IconSearch size={16} stroke={2.5} />
                     </button>
@@ -161,13 +162,14 @@ export function AppSidebar({
             </SidebarHeader>
 
             <SidebarContent>
-                {/* ── Global ── */}
                 <SidebarGroup className="pt-0">
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/architect'}
-                                onClick={() => router.push('/architect')}
+                                onClick={() => {
+                                    router.push('/architect');
+                                }}
                             >
                                 <IconHexagonFilled size={16} />
                                 <span>Architect</span>
@@ -176,7 +178,9 @@ export function AppSidebar({
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/providers'}
-                                onClick={() => router.push('/providers')}
+                                onClick={() => {
+                                    router.push('/providers');
+                                }}
                             >
                                 <IconSettingsFilled size={16} />
                                 <span>Settings</span>
@@ -185,7 +189,6 @@ export function AppSidebar({
                     </SidebarMenu>
                 </SidebarGroup>
 
-                {/* ── Universe ── */}
                 <SidebarGroup>
                     <SidebarGroupLabel className="text-sidebar-foreground/30 text-[10px] tracking-widest uppercase">
                         Universe
@@ -194,7 +197,9 @@ export function AppSidebar({
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/'}
-                                onClick={() => router.push('/')}
+                                onClick={() => {
+                                    router.push('/');
+                                }}
                             >
                                 <IconAssemblyFilled size={16} />
                                 <span>Worlds</span>
@@ -203,7 +208,9 @@ export function AppSidebar({
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/agents' || pathname.startsWith('/agents/')}
-                                onClick={() => router.push('/agents')}
+                                onClick={() => {
+                                    router.push('/agents');
+                                }}
                             >
                                 <IconUserFilled size={16} />
                                 <span>Agents</span>
@@ -212,7 +219,9 @@ export function AppSidebar({
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/tools'}
-                                onClick={() => router.push('/tools')}
+                                onClick={() => {
+                                    router.push('/tools');
+                                }}
                             >
                                 <IconBoltFilled size={16} />
                                 <span>Tools</span>
@@ -221,7 +230,9 @@ export function AppSidebar({
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 isActive={pathname === '/organizations'}
-                                onClick={() => router.push('/organizations')}
+                                onClick={() => {
+                                    router.push('/organizations');
+                                }}
                             >
                                 <IconBinaryTreeFilled size={16} />
                                 <span>Organizations</span>
@@ -230,8 +241,7 @@ export function AppSidebar({
                     </SidebarMenu>
                 </SidebarGroup>
 
-                {/* ── Quick start hint ── */}
-                {!loading && worlds.length === 0 && (
+                {loading !== true && worlds.length === 0 && (
                     <SidebarGroup>
                         <div className="mx-2 space-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3">
                             <p className="text-muted-foreground/30 text-[10px] tracking-widest uppercase">
@@ -242,7 +252,10 @@ export function AppSidebar({
                                     <span className="text-foreground/50 font-mono">1.</span> Go to{' '}
                                     <button
                                         className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
-                                        onClick={() => router.push('/providers')}
+                                        onClick={() => {
+                                            router.push('/providers');
+                                        }}
+                                        type="button"
                                     >
                                         Settings
                                     </button>{' '}
@@ -253,7 +266,10 @@ export function AppSidebar({
                                     an{' '}
                                     <button
                                         className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
-                                        onClick={() => router.push('/agents')}
+                                        onClick={() => {
+                                            router.push('/agents');
+                                        }}
+                                        type="button"
                                     >
                                         Agent
                                     </button>
@@ -262,7 +278,10 @@ export function AppSidebar({
                                     <span className="text-foreground/50 font-mono">3.</span> Spawn a{' '}
                                     <button
                                         className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
-                                        onClick={() => router.push('/')}
+                                        onClick={() => {
+                                            router.push('/');
+                                        }}
+                                        type="button"
                                     >
                                         World
                                     </button>
@@ -272,14 +291,15 @@ export function AppSidebar({
                     </SidebarGroup>
                 )}
 
-                {/* ── Worlds ── */}
                 <SidebarGroup>
                     {worlds.length > 0 && selectedWorld ? (
                         <div className="space-y-1.5 px-1">
-                            {/* Hero: current world */}
                             <button
                                 className="bg-sidebar-accent/50 hover:bg-sidebar-accent flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors"
-                                onClick={() => router.push(`/world/${selectedWorld.id}`)}
+                                onClick={() => {
+                                    router.push(`/world/${selectedWorld.id}`);
+                                }}
+                                type="button"
                             >
                                 <WorldPlanet size="md" world={selectedWorld} />
                                 <span className="min-w-0 flex-1">
@@ -293,15 +313,12 @@ export function AppSidebar({
                                 </span>
                             </button>
 
-                            {/* Quick-switch: other worlds. Condensed to one line with "+N" overflow; click to expand into a masonry wrap. */}
                             {(() => {
                                 const others = worlds.filter((w) => w.id !== selectedWorld.id);
                                 if (others.length === 0) {
                                     return null;
                                 }
 
-                                // Character-budget heuristic: fit as many pills on one line as reasonably possible.
-                                // Each pill costs name.length + 3 (planet + padding/gap). Adjust budget if sidebar width changes.
                                 const INLINE_CHAR_BUDGET = 22;
                                 const inlineItems: typeof others = [];
                                 const overflowItems: typeof others = [];
@@ -320,14 +337,17 @@ export function AppSidebar({
                                     }
                                 }
                                 if (worldsExpanded) {
-                                    overflowItems.length = 0; // All visible when expanded
+                                    overflowItems.length = 0;
                                 }
 
                                 const renderPill = (world: (typeof others)[number]) => (
                                     <button
                                         className="group/switch text-muted-foreground/50 hover:text-foreground hover:bg-sidebar-accent/40 flex h-6 shrink-0 items-center gap-1.5 rounded-md pr-2 pl-1 text-xs transition-colors"
                                         key={world.id}
-                                        onClick={() => router.push(`/world/${world.id}`)}
+                                        onClick={() => {
+                                            router.push(`/world/${world.id}`);
+                                        }}
+                                        type="button"
                                     >
                                         <WorldPlanet
                                             className="opacity-80 transition-opacity group-hover/switch:opacity-100"
@@ -344,7 +364,10 @@ export function AppSidebar({
                                             worldsExpanded ? 'Collapse worlds' : 'Show all worlds'
                                         }
                                         className="text-muted-foreground/40 hover:text-foreground hover:bg-sidebar-accent/40 flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-[11px] font-medium transition-colors"
-                                        onClick={() => setWorldsExpanded((v) => !v)}
+                                        onClick={() => {
+                                            setWorldsExpanded((v) => !v);
+                                        }}
+                                        type="button"
                                     >
                                         {label}
                                     </button>
@@ -377,7 +400,9 @@ export function AppSidebar({
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={pathname === `/world/${selectedWorld.id}`}
-                                    onClick={() => router.push(`/world/${selectedWorld.id}`)}
+                                    onClick={() => {
+                                        router.push(`/world/${selectedWorld.id}`);
+                                    }}
                                 >
                                     <IconHomeFilled size={16} />
                                     <span>Home</span>
@@ -386,9 +411,9 @@ export function AppSidebar({
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={pathname === `/world/${selectedWorld.id}/knowledge`}
-                                    onClick={() =>
-                                        router.push(`/world/${selectedWorld.id}/knowledge`)
-                                    }
+                                    onClick={() => {
+                                        router.push(`/world/${selectedWorld.id}/knowledge`);
+                                    }}
                                 >
                                     <IconKnowledgeFilled size={16} />
                                     <span>Knowledge</span>
@@ -396,7 +421,6 @@ export function AppSidebar({
                             </SidebarMenuItem>
 
                             {(() => {
-                                // Build agent-name → team lookup from teams data
                                 const agentTeamMap = new Map<string, Team>();
                                 for (const t of teams) {
                                     for (const m of t.members ?? []) {
@@ -404,7 +428,6 @@ export function AppSidebar({
                                     }
                                 }
 
-                                // Group world agents by team
                                 const grouped = new Map<
                                     string,
                                     { team: null | Team; agents: typeof selectedWorld.agents }
@@ -441,11 +464,11 @@ export function AppSidebar({
                                                         globalThis.location.search,
                                                     ).get('world') === selectedWorld.id
                                                 }
-                                                onClick={() =>
+                                                onClick={() => {
                                                     router.push(
                                                         `/agents/${encodeURIComponent(agent.name)}?world=${selectedWorld.id}`,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                             >
                                                 <span className="-mx-[2px] flex h-[20px] w-[20px] shrink-0 -translate-x-[0.5px] items-center justify-center rounded-full bg-white/[0.15]">
                                                     <StatusIcon
@@ -468,12 +491,10 @@ export function AppSidebar({
                                     );
                                 }
 
-                                // If no teams, render flat list (no headers)
                                 if (grouped.size === 0) {
                                     return soloAgents.map(renderAgent);
                                 }
 
-                                // Render grouped: team sections + solo at bottom
                                 return (
                                     <>
                                         {[...grouped.values()].map(({ team, agents }) => (
@@ -481,9 +502,9 @@ export function AppSidebar({
                                                 <p className="text-sidebar-foreground/25 flex items-center gap-1.5 px-2 py-1 text-[9px] tracking-[0.12em] uppercase">
                                                     <span
                                                         style={
-                                                            team!.color
-                                                                ? { color: team!.color }
-                                                                : undefined
+                                                            (team!.color ?? '') === ''
+                                                                ? undefined
+                                                                : { color: team!.color }
                                                         }
                                                     >
                                                         {team!.name}
@@ -510,9 +531,8 @@ export function AppSidebar({
                 </SidebarGroup>
             </SidebarContent>
 
-            {/* ── Footer ── */}
             <SidebarFooter>
-                {version?.updateAvailable &&
+                {version?.updateAvailable === true &&
                     version.latest !== process.env.NEXT_PUBLIC_APP_VERSION && (
                         <UpgradeBanner version={version} />
                     )}

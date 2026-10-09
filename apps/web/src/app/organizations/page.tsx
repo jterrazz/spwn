@@ -13,9 +13,9 @@ import { Page } from '../../components/page';
 import { PageHeader } from '../../components/page-header';
 import { Skeleton } from '../../components/ui/skeleton';
 import type { Organization, OrganizationRole } from '../../domain/model';
+import { inBackground } from '../../events/in-background';
 import { usePageTitle } from '../../hooks/use-page-title';
 
-// ── Role colors by level ──────────────────────────────────────────
 const LEVEL_COLORS: Record<number, { border: string; text: string; bg: string; glow: string }> = {
     0: {
         border: 'border-amber-500/30',
@@ -42,7 +42,6 @@ function roleColor(level: number) {
     );
 }
 
-// ── Custom React Flow node ────────────────────────────────────────
 type RoleNodeData = {
     role: OrganizationRole;
     isFirst: boolean;
@@ -57,7 +56,6 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
         <div
             className={`border ${c.border} min-w-[220px] rounded-xl bg-[#0a0a0c]/90 px-6 py-4 text-center backdrop-blur-sm ${c.glow} hover:border-opacity-60 transition-shadow`}
         >
-            {/* Handles for edges */}
             {!isFirst && (
                 <Handle
                     className="!h-1.5 !w-1.5 !border-0 !bg-white/[0.15]"
@@ -73,12 +71,10 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
                 />
             )}
 
-            {/* Role name */}
             <p className={`font-mono text-sm font-bold tracking-[0.06em] uppercase ${c.text}`}>
                 {role.name}
             </p>
 
-            {/* Level + constraints */}
             <div className="mt-2 flex items-center justify-center gap-1.5">
                 <span
                     className={`rounded-full px-2 py-0.5 font-mono text-[9px] ${c.bg} ${c.text} border ${c.border}`}
@@ -92,7 +88,6 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
                 )}
             </div>
 
-            {/* Permissions */}
             {role.permissions && role.permissions.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-1">
                     {role.permissions.map((p) => (
@@ -106,10 +101,9 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
                 </div>
             )}
 
-            {/* Relationships */}
-            {(role.reports_to || (role.can_command && role.can_command.length > 0)) && (
+            {(role.reports_to ?? (role.can_command && role.can_command.length > 0)) && (
                 <div className="mt-2.5 space-y-0.5">
-                    {role.reports_to && (
+                    {role.reports_to !== undefined && role.reports_to !== '' && (
                         <p className="text-muted-foreground/25 font-mono text-[8px]">
                             reports to{' '}
                             <span className="text-muted-foreground/40">{role.reports_to}</span>
@@ -131,7 +125,6 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
 
 const nodeTypes = { roleNode: RoleNodeComponent };
 
-// ── Build React Flow nodes + edges from organization roles ───────────
 const NODE_WIDTH = 220;
 const NODE_HEIGHT_BASE = 120;
 const NODE_GAP_Y = 80;
@@ -144,7 +137,6 @@ function buildFlowElements(roles: OrganizationRole[]): {
     const nodes: Node<RoleNodeData>[] = [];
     const edges: Edge[] = [];
 
-    // Group by level for horizontal spreading
     const levels = new Map<number, OrganizationRole[]>();
     for (const r of sorted) {
         const list = levels.get(r.level) ?? [];
@@ -175,9 +167,8 @@ function buildFlowElements(roles: OrganizationRole[]): {
         y += NODE_HEIGHT_BASE + NODE_GAP_Y;
     }
 
-    // Edges: connect based on reports_to
     for (const role of sorted) {
-        if (role.reports_to) {
+        if (role.reports_to !== undefined && role.reports_to !== '') {
             edges.push({
                 id: `${role.reports_to}->${role.name}`,
                 source: role.reports_to,
@@ -188,7 +179,6 @@ function buildFlowElements(roles: OrganizationRole[]): {
         }
     }
 
-    // If no reports_to defined, connect by level order
     if (edges.length === 0 && sortedLevels.length > 1) {
         for (let i = 0; i < sortedLevels.length - 1; i++) {
             const parentLevel = sortedLevels[i];
@@ -214,14 +204,12 @@ function buildFlowElements(roles: OrganizationRole[]): {
     return { nodes, edges };
 }
 
-// ── Organization Flow Visualization ──────────────────────────────────
 function OrganizationFlow({ organization }: { organization: Organization }) {
     const { nodes, edges } = useMemo(
         () => buildFlowElements(organization.roles),
         [organization.roles],
     );
 
-    // Compute height based on number of levels
     const levels = new Set(organization.roles.map((r) => r.level));
     const height = Math.max(300, levels.size * (NODE_HEIGHT_BASE + NODE_GAP_Y) + 40);
 
@@ -248,8 +236,6 @@ function OrganizationFlow({ organization }: { organization: Organization }) {
         </div>
     );
 }
-
-// ── Create Organization Dialog ───────────────────────────────────────
 
 interface RoleDraft {
     id: string;
@@ -364,6 +350,7 @@ function CreateOrganizationDialog({
                     <button
                         className="text-muted-foreground/40 hover:text-foreground/60 transition-colors"
                         onClick={onClose}
+                        type="button"
                     >
                         <IconX size={18} />
                     </button>
@@ -376,7 +363,9 @@ function CreateOrganizationDialog({
                         </label>
                         <input
                             className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                            }}
                             placeholder="Military Chain"
                             value={name}
                         />
@@ -387,7 +376,9 @@ function CreateOrganizationDialog({
                         </label>
                         <input
                             className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => {
+                                setDescription(e.target.value);
+                            }}
                             placeholder="A strict top-down command structure"
                             value={description}
                         />
@@ -411,7 +402,10 @@ function CreateOrganizationDialog({
                                         {roles.length > 1 && (
                                             <button
                                                 className="text-muted-foreground/30 transition-colors hover:text-red-400/70"
-                                                onClick={() => removeRole(idx)}
+                                                onClick={() => {
+                                                    removeRole(idx);
+                                                }}
+                                                type="button"
                                             >
                                                 <IconX size={14} />
                                             </button>
@@ -420,19 +414,19 @@ function CreateOrganizationDialog({
                                     <div className="grid grid-cols-[1fr_60px] gap-2">
                                         <input
                                             className="text-foreground/80 placeholder:text-muted-foreground/25 rounded border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                            onChange={(e) =>
-                                                updateRole(idx, { name: e.target.value })
-                                            }
+                                            onChange={(e) => {
+                                                updateRole(idx, { name: e.target.value });
+                                            }}
                                             placeholder="Role name"
                                             value={role.name}
                                         />
                                         <input
                                             className="text-foreground/80 placeholder:text-muted-foreground/25 rounded border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-center font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                                 updateRole(idx, {
                                                     level: Number.parseInt(e.target.value) || 0,
-                                                })
-                                            }
+                                                });
+                                            }}
                                             placeholder="Lvl"
                                             type="number"
                                             value={role.level}
@@ -445,9 +439,9 @@ function CreateOrganizationDialog({
                                             </span>
                                             <select
                                                 className="text-foreground/80 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                                onChange={(e) =>
-                                                    updateRole(idx, { reports_to: e.target.value })
-                                                }
+                                                onChange={(e) => {
+                                                    updateRole(idx, { reports_to: e.target.value });
+                                                }}
                                                 value={role.reports_to}
                                             >
                                                 <option value="">None</option>
@@ -466,9 +460,11 @@ function CreateOrganizationDialog({
                                             </span>
                                             <input
                                                 className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                                onChange={(e) =>
-                                                    updateRole(idx, { can_command: e.target.value })
-                                                }
+                                                onChange={(e) => {
+                                                    updateRole(idx, {
+                                                        can_command: e.target.value,
+                                                    });
+                                                }}
                                                 placeholder="role1, role2"
                                                 value={role.can_command}
                                             />
@@ -480,9 +476,9 @@ function CreateOrganizationDialog({
                                         </span>
                                         <input
                                             className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
-                                            onChange={(e) =>
-                                                updateRole(idx, { permissions: e.target.value })
-                                            }
+                                            onChange={(e) => {
+                                                updateRole(idx, { permissions: e.target.value });
+                                            }}
                                             placeholder="delegate, review, execute"
                                             value={role.permissions}
                                         />
@@ -492,7 +488,10 @@ function CreateOrganizationDialog({
                         </div>
                         <button
                             className="text-muted-foreground/50 hover:text-foreground/70 mt-2 flex items-center gap-1.5 font-mono text-[10px] transition-colors"
-                            onClick={() => setRoles((prev) => [...prev, emptyRoleDraft()])}
+                            onClick={() => {
+                                setRoles((prev) => [...prev, emptyRoleDraft()]);
+                            }}
+                            type="button"
                         >
                             <IconPlus size={12} /> Add Role
                         </button>
@@ -505,13 +504,15 @@ function CreateOrganizationDialog({
                             className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                             disabled={creating}
                             onClick={onClose}
+                            type="button"
                         >
                             Cancel
                         </button>
                         <button
                             className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-300 transition-colors hover:bg-emerald-500/30 disabled:opacity-50"
                             disabled={creating}
-                            onClick={handleCreate}
+                            onClick={inBackground(handleCreate)}
+                            type="button"
                         >
                             {creating ? (
                                 <>
@@ -529,7 +530,6 @@ function CreateOrganizationDialog({
     );
 }
 
-// ── Delete Confirmation Dialog ────────────────────────────────────
 function DeleteOrganizationDialog({
     organization,
     onClose,
@@ -574,13 +574,15 @@ function DeleteOrganizationDialog({
                         className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                         disabled={deleting}
                         onClick={onClose}
+                        type="button"
                     >
                         Cancel
                     </button>
                     <button
                         className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/20 px-4 py-2 text-sm text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                         disabled={deleting}
-                        onClick={handleDelete}
+                        onClick={inBackground(handleDelete)}
+                        type="button"
                     >
                         {deleting ? (
                             <>
@@ -599,8 +601,6 @@ function DeleteOrganizationDialog({
         </div>
     );
 }
-
-// ── Main Page ─────────────────────────────────────────────────────
 
 export default function OrganizationsPage() {
     usePageTitle('Organizations');
@@ -622,7 +622,7 @@ export default function OrganizationsPage() {
     }, []);
 
     useEffect(() => {
-        fetchOrganizations();
+        void fetchOrganizations();
     }, [fetchOrganizations]);
 
     return (
@@ -633,7 +633,9 @@ export default function OrganizationsPage() {
                         compact
                         icon={<IconPlus size={18} stroke={2.4} />}
                         label="New Organization"
-                        onClick={() => setShowCreate(true)}
+                        onClick={() => {
+                            setShowCreate(true);
+                        }}
                     />
                 }
                 description="Define team structures and roles for multi-agent worlds."
@@ -652,7 +654,10 @@ export default function OrganizationsPage() {
                     </p>
                     <button
                         className="text-muted-foreground/40 hover:text-foreground/60 mt-3 font-mono text-xs underline underline-offset-2 transition-colors"
-                        onClick={() => setShowCreate(true)}
+                        onClick={() => {
+                            setShowCreate(true);
+                        }}
+                        type="button"
                     >
                         Create your first organization
                     </button>
@@ -667,8 +672,11 @@ export default function OrganizationsPage() {
                                 {h.slug !== 'default' && (
                                     <button
                                         className="text-muted-foreground/20 p-1 transition-colors hover:text-red-400/70"
-                                        onClick={() => setDeleteTarget(h)}
+                                        onClick={() => {
+                                            setDeleteTarget(h);
+                                        }}
                                         title="Delete organization"
+                                        type="button"
                                     >
                                         <IconTrash size={14} />
                                     </button>
@@ -676,16 +684,14 @@ export default function OrganizationsPage() {
                             </div>
 
                             <div className="flex flex-col gap-8 lg:flex-row">
-                                {/* React Flow visualization */}
                                 <div className="min-w-0 flex-1">
                                     <OrganizationFlow organization={h} />
                                 </div>
 
-                                {/* Metadata sidebar */}
                                 <div className="shrink-0 space-y-2 lg:w-52">
                                     <SubLabel>Details</SubLabel>
                                     <KeyValue label="Slug" value={h.slug} />
-                                    {h.description && (
+                                    {h.description !== undefined && h.description !== '' && (
                                         <KeyValue label="Description" value={h.description} />
                                     )}
                                     <KeyValue label="Roles" value={h.roles.length} />
@@ -704,14 +710,18 @@ export default function OrganizationsPage() {
 
             {showCreate && (
                 <CreateOrganizationDialog
-                    onClose={() => setShowCreate(false)}
-                    onComplete={fetchOrganizations}
+                    onClose={() => {
+                        setShowCreate(false);
+                    }}
+                    onComplete={inBackground(fetchOrganizations)}
                 />
             )}
             {deleteTarget && (
                 <DeleteOrganizationDialog
-                    onClose={() => setDeleteTarget(null)}
-                    onComplete={fetchOrganizations}
+                    onClose={() => {
+                        setDeleteTarget(null);
+                    }}
+                    onComplete={inBackground(fetchOrganizations)}
                     organization={deleteTarget}
                 />
             )}

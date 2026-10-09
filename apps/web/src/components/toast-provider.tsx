@@ -49,7 +49,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return (
         <ToastContext.Provider value={contextValue}>
             {children}
-            {/* Toast container */}
             <div className="pointer-events-none fixed right-6 bottom-6 z-50 flex flex-col gap-2">
                 {toasts.map((t) => (
                     <div

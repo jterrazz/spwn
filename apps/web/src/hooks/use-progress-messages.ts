@@ -8,15 +8,10 @@ export interface ProgressStep {
     text: string;
 }
 
-/**
- * Returns a message string that automatically advances through the given
- * steps based on elapsed time while `active` is true. Resets when `active`
- * flips back to false.
- */
+/** Returns a message string that automatically advances through the given steps based on elapsed time while `active` is true. Resets when `active` flips back to false. */
 export function useProgressMessages(active: boolean, messages: ProgressStep[]): string {
     const fallback = messages[0]?.text ?? '';
     const [message, setMessage] = useState(fallback);
-    // Keep a stable ref to messages so the effect doesn't re-run on every render
     const msgsRef = useRef(messages);
     msgsRef.current = messages;
 
@@ -26,7 +21,6 @@ export function useProgressMessages(active: boolean, messages: ProgressStep[]): 
             return;
         }
         const start = Date.now();
-        // Set immediately
         setMessage(msgsRef.current[0]?.text ?? '');
         const id = setInterval(() => {
             const elapsed = (Date.now() - start) / 1000;
@@ -38,7 +32,9 @@ export function useProgressMessages(active: boolean, messages: ProgressStep[]): 
             }
             setMessage(current);
         }, 1000);
-        return () => clearInterval(id);
+        return () => {
+            clearInterval(id);
+        };
     }, [active]);
 
     return message;

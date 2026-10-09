@@ -6,8 +6,6 @@ import type { ActivityBlock } from '../activity/blocks';
 import { apiGet, goApiUrl } from '../api/client';
 import { streamChat } from '../api/stream-chat';
 
-// ── Types ──
-
 export interface ArchitectStatus {
     status: 'running' | 'stopped';
     containerId: null | string;
@@ -30,8 +28,6 @@ export interface ChatMessage {
     cost?: number | undefined;
     duration?: number | undefined;
 }
-
-// ── Context ──
 
 interface ArchitectChatContextValue {
     messages: ChatMessage[];
@@ -65,7 +61,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
     const [loading, setLoading] = useState(true);
 
     const refreshStatus = useCallback(() => {
-        apiGet<ArchitectStatus>('/api/architect/status')
+        void apiGet<ArchitectStatus>('/api/architect/status')
             .catch(() => ({ status: 'stopped' as const, containerId: null, uptime: null }))
             .then((archStatus) => {
                 setArchitectStatus(archStatus);
@@ -73,7 +69,6 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
             });
     }, []);
 
-    // Load conversation history on mount
     useEffect(() => {
         apiGet<{
             sessions: {
@@ -127,18 +122,22 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
                         } else if (msg.type === 'tool_use') {
                             historyMsgs.push({
                                 role: 'architect',
-                                content: `🔧 ${msg.toolName || 'tool'}`,
+                                content: `🔧 ${msg.toolName ?? 'tool'}`,
                                 blocks: [
                                     {
                                         type: 'tool_use',
-                                        tool: msg.toolName || 'tool',
+                                        tool: msg.toolName ?? 'tool',
                                         input: {},
                                         id: `hist-${si}-${historyMsgs.length}`,
-                                    } as ActivityBlock,
+                                    },
                                 ],
                                 timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
                             });
-                        } else if (msg.type === 'result' && msg.cost) {
+                        } else if (
+                            msg.type === 'result' &&
+                            msg.cost !== undefined &&
+                            msg.cost !== 0
+                        ) {
                             const lastArch = [...historyMsgs]
                                 .toReversed()
                                 .find((m) => m.role === 'architect');
@@ -156,11 +155,12 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
             .catch(() => {});
     }, []);
 
-    // Status polling
     useEffect(() => {
         refreshStatus();
         const interval = setInterval(refreshStatus, 10_000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+        };
     }, [refreshStatus]);
 
     const doTalk = useCallback(async (msg: string) => {
@@ -185,7 +185,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[msgIndex!];
-                    if (last && last.role === 'architect') {
+                    if (last?.role === 'architect') {
                         const allBlocks = [...last.blocks, ...newBlocks];
                         const textContent = allBlocks
                             .filter((b) => b.type === 'text')
@@ -200,7 +200,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[msgIndex!];
-                    if (last && last.role === 'architect') {
+                    if (last?.role === 'architect') {
                         updated[msgIndex!] = { ...last, cost: meta.cost, duration: meta.duration };
                     }
                     return updated;
@@ -210,7 +210,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[msgIndex!];
-                    if (last && last.role === 'architect') {
+                    if (last?.role === 'architect') {
                         updated[msgIndex!] = {
                             ...last,
                             blocks: [...last.blocks, { type: 'error' as const, content: error }],

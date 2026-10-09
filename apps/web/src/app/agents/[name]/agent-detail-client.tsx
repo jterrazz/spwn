@@ -45,6 +45,7 @@ import { ProgressShimmer } from '../../../components/progress-shimmer';
 import { Skeleton } from '../../../components/ui/skeleton';
 import { AVAILABLE_ROLES, getWorldName } from '../../../domain/model';
 import type { AgentProfile, Organization, Team, World } from '../../../domain/model';
+import { inBackground } from '../../../events/in-background';
 import { usePageTitle } from '../../../hooks/use-page-title';
 import { useProgressMessages } from '../../../hooks/use-progress-messages';
 import { ROLE_BADGE } from '../../../styles/status-colors';
@@ -94,14 +95,13 @@ function AgentProfilePage() {
     usePageTitle(agentName, 'Agent');
 
     const fetchProfile = useCallback(() => {
-        Promise.all([
+        void Promise.all([
             apiGet<AgentProfile>(`/api/agents/${encPath(agentName)}`).catch(() => null),
             apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`).catch(() => null),
         ]).then(([agentProfile, tree]) => {
             setProfile(agentProfile ?? null);
             setMindTree(tree ?? {});
             setLoading(false);
-            // Show wizard for new agents without a purpose
             if (agentProfile && !agentProfile.purpose) {
                 setShowWizard(true);
             }
@@ -111,22 +111,29 @@ function AgentProfilePage() {
     useEffect(() => {
         fetchProfile();
         apiGet<Team[]>('/api/teams')
-            .then((t) => setAvailableTeams(t ?? []))
+            .then((t) => {
+                setAvailableTeams(t ?? []);
+            })
             .catch(() => {});
         apiGet<World[]>('/api/worlds')
-            .then((w) => setAvailableWorlds(w ?? []))
+            .then((w) => {
+                setAvailableWorlds(w ?? []);
+            })
             .catch(() => {});
         apiGet<Organization[]>('/api/organizations')
-            .then((h) => setOrganizations(h ?? []))
+            .then((h) => {
+                setOrganizations(h ?? []);
+            })
             .catch(() => {});
-        if (worldId) {
+        if (worldId !== undefined && worldId !== '') {
             apiGet<World>(`/api/worlds/${worldId}`)
-                .then((w) => setWorldData(w ?? null))
+                .then((w) => {
+                    setWorldData(w ?? null);
+                })
                 .catch(() => {});
         }
     }, [fetchProfile, worldId]);
 
-    // Auto-detect world from available worlds - works even when single-world fetch fails
     useEffect(() => {
         if (availableWorlds.length === 0) {
             return;
@@ -142,14 +149,16 @@ function AgentProfilePage() {
 
     const showFeedback = (msg: string) => {
         setFeedback(msg);
-        setTimeout(() => setFeedback(null), 2500);
+        setTimeout(() => {
+            setFeedback(null);
+        }, 2500);
     };
 
     const saveIdentityField = async (field: string, content: string): Promise<boolean> => {
         try {
             await apiPut(`/api/agents/${agentName}/identity`, { field, content });
             showFeedback(`${field} updated`);
-            fetchProfile(); // Refresh data
+            fetchProfile();
             return true;
         } catch {
             showFeedback(`Error: failed to update ${field}`);
@@ -162,7 +171,7 @@ function AgentProfilePage() {
         try {
             const result = await apiAction(`/api/agents/${agentName}/${action}`, body);
             if (!result.ok) {
-                showFeedback(`Error: ${result.error || 'Unknown error'}`);
+                showFeedback(`Error: ${result.error ?? 'Unknown error'}`);
                 return false;
             }
             return true;
@@ -197,7 +206,7 @@ function AgentProfilePage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: agentName, role: deployRole }),
-                signal: AbortSignal.timeout(600_000), // 10 min - first run may build Docker images
+                signal: AbortSignal.timeout(600_000),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
@@ -252,7 +261,7 @@ function AgentProfilePage() {
                 <button
                     className="text-foreground/60 hover:text-foreground/80 mt-6 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-2.5 text-sm transition-all hover:bg-white/[0.08]"
                     onClick={() => {
-                        apiAction('/api/agents', { name: agentName }).then((result) => {
+                        void apiAction('/api/agents', { name: agentName }).then((result) => {
                             if (result.ok) {
                                 fetchProfile();
                                 showFeedback('Agent created!');
@@ -261,6 +270,7 @@ function AgentProfilePage() {
                             }
                         });
                     }}
+                    type="button"
                 >
                     <IconRocket size={16} />
                     Create &quot;{agentName}&quot;
@@ -284,8 +294,8 @@ function AgentProfilePage() {
                             disabled={actionLoading !== null}
                             icon={<IconRefresh size={16} stroke={2.2} />}
                             label="Dream"
-                            onClick={async () => {
-                                if ((profile?.journal?.length ?? 0) === 0) {
+                            onClick={inBackground(async () => {
+                                if (profile?.journal?.length === 0) {
                                     showFeedback(
                                         'Nothing to dream about yet - spawn the agent in a world first',
                                     );
@@ -298,35 +308,35 @@ function AgentProfilePage() {
                                     );
                                     fetchProfile();
                                 }
-                            }}
+                            })}
                         />
                         <ActionButton
                             compact
                             disabled={actionLoading !== null}
                             icon={<IconGitFork size={16} stroke={2.2} />}
                             label="Fork"
-                            onClick={async () => {
+                            onClick={inBackground(async () => {
                                 const target = prompt('Fork target name:');
-                                if (!target) {
+                                if (target === null || target === '') {
                                     return;
                                 }
                                 const ok = await callAction('fork', { target });
                                 if (ok) {
                                     showFeedback(`Forked to "${target}"`);
                                 }
-                            }}
+                            })}
                         />
                         <ActionButton
                             compact
                             disabled={actionLoading !== null}
                             icon={<IconDownload size={16} stroke={2.2} />}
                             label="Export"
-                            onClick={async () => {
+                            onClick={inBackground(async () => {
                                 const ok = await callAction('export');
                                 if (ok) {
                                     showFeedback('Export complete!');
                                 }
-                            }}
+                            })}
                         />
                         <ActionButton
                             compact
@@ -344,7 +354,9 @@ function AgentProfilePage() {
                             disabled={actionLoading !== null || deleting}
                             icon={<IconTrash size={16} stroke={2.2} />}
                             label="Delete"
-                            onClick={() => setShowDeleteConfirm(true)}
+                            onClick={() => {
+                                setShowDeleteConfirm(true);
+                            }}
                         />
                     </>
                 }
@@ -352,15 +364,15 @@ function AgentProfilePage() {
                 title={agentName}
             />
 
-            {/* Deploy dialog - select a running world to deploy this agent into */}
             {showDeployDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => !deploying && setShowDeployDialog(false)}
+                        onClick={() => {
+                            !deploying && setShowDeployDialog(false);
+                        }}
                     />
                     <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
-                        {/* Top shimmer bar */}
                         {deploying && (
                             <div className="h-0.5 w-full overflow-hidden bg-white/[0.04]">
                                 <div
@@ -406,9 +418,10 @@ function AgentProfilePage() {
                                                 className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${stateClass}`}
                                                 disabled={alreadyDeployed}
                                                 key={w.id}
-                                                onClick={() =>
-                                                    !alreadyDeployed && setDeployTargetWorld(w.id)
-                                                }
+                                                onClick={() => {
+                                                    !alreadyDeployed && setDeployTargetWorld(w.id);
+                                                }}
+                                                type="button"
                                             >
                                                 <span
                                                     className={`h-2 w-2 shrink-0 rounded-full ${
@@ -432,18 +445,18 @@ function AgentProfilePage() {
                                     })}
                                 </div>
                             )}
-                            {/* Role selector */}
                             <label className="text-muted-foreground/40 mt-4 mb-2 block text-[10px] tracking-[0.15em] uppercase">
                                 Role
                             </label>
                             <select
                                 className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                                 disabled={deploying}
-                                onChange={(e) => setDeployRole(e.target.value)}
+                                onChange={(e) => {
+                                    setDeployRole(e.target.value);
+                                }}
                                 value={deployRole}
                             >
                                 {(() => {
-                                    // Try to get roles from the selected world's organization, fall back to AVAILABLE_ROLES
                                     const selectedWorld = availableWorlds.find(
                                         (w) => w.id === deployTargetWorld,
                                     );
@@ -452,11 +465,13 @@ function AgentProfilePage() {
                                             | Record<string, unknown>
                                             | undefined
                                     )?.organization as string | undefined;
-                                    const org = worldOrganizationSlug
-                                        ? organizations.find(
-                                              (h) => h.slug === worldOrganizationSlug,
-                                          )
-                                        : null;
+                                    const org =
+                                        worldOrganizationSlug === undefined ||
+                                        worldOrganizationSlug === ''
+                                            ? null
+                                            : organizations.find(
+                                                  (h) => h.slug === worldOrganizationSlug,
+                                              );
                                     const roleNames = org
                                         ? org.roles.map((r) => r.name)
                                         : [...AVAILABLE_ROLES];
@@ -474,14 +489,18 @@ function AgentProfilePage() {
                                 <button
                                     className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={deploying}
-                                    onClick={() => setShowDeployDialog(false)}
+                                    onClick={() => {
+                                        setShowDeployDialog(false);
+                                    }}
+                                    type="button"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-300 transition-colors hover:bg-emerald-500/30 disabled:opacity-50"
                                     disabled={deploying || !deployTargetWorld}
-                                    onClick={handleDeploy}
+                                    onClick={inBackground(handleDeploy)}
+                                    type="button"
                                 >
                                     {deploying ? (
                                         <>
@@ -502,12 +521,13 @@ function AgentProfilePage() {
                 </div>
             )}
 
-            {/* Delete confirmation dialog */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setShowDeleteConfirm(false)}
+                        onClick={() => {
+                            setShowDeleteConfirm(false);
+                        }}
                     />
                     <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
                         <h3 className="font-heading text-foreground/90 mb-2 text-lg">
@@ -521,14 +541,18 @@ function AgentProfilePage() {
                         <div className="flex justify-end gap-3">
                             <button
                                 className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04]"
-                                onClick={() => setShowDeleteConfirm(false)}
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                }}
+                                type="button"
                             >
                                 Cancel
                             </button>
                             <button
                                 className="rounded-lg border border-red-500/20 bg-red-500/20 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                                 disabled={deleting}
-                                onClick={handleDelete}
+                                onClick={inBackground(handleDelete)}
+                                type="button"
                             >
                                 {deleting ? (
                                     <span className="flex items-center gap-2">
@@ -544,7 +568,6 @@ function AgentProfilePage() {
                 </div>
             )}
 
-            {/* Get Started Wizard Banner */}
             {showWizard && profile && !profile.purpose && (
                 <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 duration-300">
                     <div className="mb-3 flex items-start justify-between">
@@ -558,7 +581,10 @@ function AgentProfilePage() {
                         </div>
                         <button
                             className="text-emerald-300/30 transition-colors hover:text-emerald-300/60"
-                            onClick={() => setShowWizard(false)}
+                            onClick={() => {
+                                setShowWizard(false);
+                            }}
+                            type="button"
                         >
                             <IconX size={16} />
                         </button>
@@ -570,7 +596,7 @@ function AgentProfilePage() {
                             </label>
                             <input
                                 className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
-                                onKeyDown={async (e) => {
+                                onKeyDown={inBackground(async (e) => {
                                     if (e.key === 'Enter') {
                                         const val = (e.target as HTMLInputElement).value.trim();
                                         if (val) {
@@ -578,7 +604,7 @@ function AgentProfilePage() {
                                             setShowWizard(false);
                                         }
                                     }
-                                }}
+                                })}
                                 placeholder="What is this agent's purpose?"
                             />
                         </div>
@@ -589,14 +615,14 @@ function AgentProfilePage() {
                                 </label>
                                 <input
                                     className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
-                                    onKeyDown={async (e) => {
+                                    onKeyDown={inBackground(async (e) => {
                                         if (e.key === 'Enter') {
                                             const val = (e.target as HTMLInputElement).value.trim();
                                             if (val) {
                                                 await saveIdentityField('profile', val);
                                             }
                                         }
-                                    }}
+                                    })}
                                     placeholder="Describe their profile..."
                                 />
                             </div>
@@ -606,7 +632,7 @@ function AgentProfilePage() {
                                 </label>
                                 <input
                                     className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
-                                    onKeyDown={async (e) => {
+                                    onKeyDown={inBackground(async (e) => {
                                         if (e.key === 'Enter') {
                                             const val = (e.target as HTMLInputElement).value.trim();
                                             if (val) {
@@ -617,7 +643,7 @@ function AgentProfilePage() {
                                                 await saveIdentityField('traits', traits);
                                             }
                                         }
-                                    }}
+                                    })}
                                     placeholder="e.g. curious, creative, diligent"
                                 />
                             </div>
@@ -629,7 +655,6 @@ function AgentProfilePage() {
                 </div>
             )}
 
-            {/* Tab switcher */}
             <div className="flex gap-1 border-b border-white/[0.06] pb-px">
                 <button
                     className={`-mb-px flex items-center gap-1.5 border-b-2 px-4 py-2 text-xs font-medium transition-colors ${
@@ -637,7 +662,10 @@ function AgentProfilePage() {
                             ? 'border-foreground/50 text-foreground/80'
                             : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
-                    onClick={() => setActiveTab('chat')}
+                    onClick={() => {
+                        setActiveTab('chat');
+                    }}
+                    type="button"
                 >
                     <IconMessageCircle size={13} />
                     Chat
@@ -648,7 +676,10 @@ function AgentProfilePage() {
                             ? 'border-foreground/50 text-foreground/80'
                             : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
-                    onClick={() => setActiveTab('profile')}
+                    onClick={() => {
+                        setActiveTab('profile');
+                    }}
+                    type="button"
                 >
                     Profile
                 </button>
@@ -658,14 +689,16 @@ function AgentProfilePage() {
                             ? 'border-foreground/50 text-foreground/80'
                             : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
-                    onClick={() => setActiveTab('files')}
+                    onClick={() => {
+                        setActiveTab('files');
+                    }}
+                    type="button"
                 >
                     Files ({totalFiles})
                 </button>
             </div>
 
-            {/* Feedback toast */}
-            {feedback && (
+            {feedback !== null && feedback !== '' && (
                 <div
                     className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
                         feedback.startsWith('Error')
@@ -677,7 +710,6 @@ function AgentProfilePage() {
                 </div>
             )}
 
-            {/* Profile tab - diagnostics panel style */}
             {activeTab === 'profile' && (
                 <>
                     <MetricGrid
@@ -693,17 +725,16 @@ function AgentProfilePage() {
 
                     <Separator />
 
-                    {/* Team */}
                     <div className="flex items-center justify-between">
                         <SubLabel>Team</SubLabel>
                         <select
                             className="text-foreground/80 cursor-pointer bg-transparent text-right font-mono text-sm focus:outline-none"
-                            onChange={async (e) => {
+                            onChange={inBackground(async (e) => {
                                 const ok = await saveIdentityField('team', e.target.value);
                                 if (ok) {
                                     fetchProfile();
                                 }
-                            }}
+                            })}
                             value={profile.team ?? ''}
                         >
                             <option value="">-</option>
@@ -715,7 +746,6 @@ function AgentProfilePage() {
                         </select>
                     </div>
 
-                    {/* Deployment History */}
                     {(() => {
                         const journalFiles = mindTree.journal ?? [];
                         const worldIds = journalFiles
@@ -752,7 +782,6 @@ function AgentProfilePage() {
 
                     <Separator />
 
-                    {/* Identity */}
                     <div>
                         <SectionHeader>Identity</SectionHeader>
 
@@ -794,7 +823,6 @@ function AgentProfilePage() {
                         </div>
                     </div>
 
-                    {/* Skills */}
                     {(profile.skills?.length ?? 0) > 0 && (
                         <>
                             <Separator />
@@ -814,7 +842,6 @@ function AgentProfilePage() {
                         </>
                     )}
 
-                    {/* Journal */}
                     {(profile.journal?.length ?? 0) > 0 && (
                         <>
                             <Separator />
@@ -836,10 +863,8 @@ function AgentProfilePage() {
                 </>
             )}
 
-            {/* Chat tab */}
             {activeTab === 'chat' && <AgentChat agentName={agentName} worldId={worldId} />}
 
-            {/* Files tab */}
             {activeTab === 'files' && <MindFileViewer agentName={agentName} mindTree={mindTree} />}
         </div>
     );
@@ -847,12 +872,10 @@ function AgentProfilePage() {
     return (
         <div className="flex h-[calc(100vh-1px)] overflow-hidden">
             <div className="min-w-0 flex-1 overflow-y-auto">{mainContent}</div>
-            {/* ── Right: Quick info panel ── */}
             <div className="border-border/30 hidden w-72 shrink-0 overflow-y-auto border-l lg:block">
                 <div className="space-y-6 p-5">
                     <SectionHeader>Diagnostics</SectionHeader>
 
-                    {/* Identity */}
                     <div>
                         <SectionLabel>Identity</SectionLabel>
                         <div className="space-y-2">
@@ -886,13 +909,14 @@ function AgentProfilePage() {
                                 label="Runtime"
                                 value={worldData?.runtime ?? profile.engine}
                             />
-                            {profile.team && <KeyValue label="Team" value={profile.team} />}
+                            {profile.team !== undefined && profile.team !== '' && (
+                                <KeyValue label="Team" value={profile.team} />
+                            )}
                         </div>
                     </div>
 
                     <Separator />
 
-                    {/* Stats */}
                     <div>
                         <SectionLabel>Metrics</SectionLabel>
                         <MetricGrid
@@ -906,7 +930,6 @@ function AgentProfilePage() {
                         />
                     </div>
 
-                    {/* World info - only when deployed */}
                     {worldData && (
                         <>
                             <Separator />
@@ -942,15 +965,12 @@ function AgentProfilePage() {
     );
 }
 
-/* ── Agent Chat ── */
-
 function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string | undefined }) {
     const [messages, setMessages] = useState<ChatBubble[]>([]);
     const [sending, setSending] = useState(false);
 
-    // Load conversation history when in world context
     useEffect(() => {
-        if (!worldId) {
+        if (worldId === undefined || worldId === '') {
             return;
         }
         apiGet<{
@@ -1008,12 +1028,14 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
             { role: 'assistant', content: '', blocks: [], timestamp: new Date() },
         ]);
 
-        // When in world context, talk through the world endpoint (which routes to the deployed container).
-        // Otherwise, use the standalone agent talk endpoint (limbo / direct).
-        const chatUrl = worldId
-            ? goApiUrl(`/api/worlds/${worldId}/talk`)
-            : goApiUrl(`/api/agents/${encPath(agentName)}/talk`);
-        const chatBody = worldId ? { message: msg, agent: agentName } : { message: msg };
+        const chatUrl =
+            worldId === undefined || worldId === ''
+                ? goApiUrl(`/api/agents/${encPath(agentName)}/talk`)
+                : goApiUrl(`/api/worlds/${worldId}/talk`);
+        const chatBody =
+            worldId === undefined || worldId === ''
+                ? { message: msg }
+                : { message: msg, agent: agentName };
 
         await streamChat({
             url: chatUrl,
@@ -1022,7 +1044,7 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[assistantIndex];
-                    if (last && last.role === 'assistant') {
+                    if (last?.role === 'assistant') {
                         const allBlocks = [...last.blocks, ...newBlocks];
                         const textContent = allBlocks
                             .filter(
@@ -1043,7 +1065,7 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[assistantIndex];
-                    if (last && last.role === 'assistant') {
+                    if (last?.role === 'assistant') {
                         updated[assistantIndex] = {
                             ...last,
                             cost: meta.cost,
@@ -1057,7 +1079,7 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
                 setMessages((prev) => {
                     const updated = [...prev];
                     const last = updated[assistantIndex];
-                    if (last && last.role === 'assistant') {
+                    if (last?.role === 'assistant') {
                         updated[assistantIndex] = {
                             ...last,
                             content: error,
@@ -1087,7 +1109,9 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
                         Send messages directly to this agent in real-time
                     </p>
                     <ChatSuggestions
-                        onPick={async (s) => await handleSend(s)}
+                        onPick={inBackground(async (s) => {
+                            await handleSend(s);
+                        })}
                         suggestions={[
                             'What are you working on?',
                             'Show me the project structure',
@@ -1097,14 +1121,12 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
                 </div>
             }
             messages={messages}
-            onSend={handleSend}
+            onSend={inBackground(handleSend)}
             placeholder={`Message ${agentName}...`}
             typingText={`${agentName} is thinking…`}
         />
     );
 }
-
-/* ── Mind File Viewer ── */
 
 const LAYER_ICONS: Record<string, typeof IconFolder> = {
     core: IconUser,
@@ -1153,8 +1175,7 @@ function MindFileViewer({
 
         setExpandedFiles((prev) => new Set(prev).add(key));
 
-        // Fetch content if not cached
-        if (!fileContents[key]) {
+        if ((fileContents[key] ?? '') === '') {
             setLoadingFiles((prev) => new Set(prev).add(key));
             try {
                 const res = await fetch(goApiUrl(`/api/agents/${agentName}/files/${fullPath}`));
@@ -1206,10 +1227,12 @@ function MindFileViewer({
 
                 return (
                     <div className="glass-subtle overflow-hidden" key={layer}>
-                        {/* Layer header */}
                         <button
                             className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-white/[0.02]"
-                            onClick={() => toggleLayer(layer)}
+                            onClick={() => {
+                                toggleLayer(layer);
+                            }}
+                            type="button"
                         >
                             {isExpanded ? (
                                 <IconChevronDown
@@ -1235,7 +1258,6 @@ function MindFileViewer({
                             </span>
                         </button>
 
-                        {/* Files list */}
                         {isExpanded && files.length > 0 && (
                             <div className="border-t border-white/[0.04]">
                                 {files.map((file) => {
@@ -1248,7 +1270,10 @@ function MindFileViewer({
                                         <div key={file}>
                                             <button
                                                 className="flex w-full items-center gap-2.5 px-4 py-2 pl-10 text-left transition-colors hover:bg-white/[0.02]"
-                                                onClick={async () => await toggleFile(layer, file)}
+                                                onClick={inBackground(async () => {
+                                                    await toggleFile(layer, file);
+                                                })}
+                                                type="button"
                                             >
                                                 {isFileExpanded ? (
                                                     <IconChevronDown
@@ -1270,7 +1295,6 @@ function MindFileViewer({
                                                 </span>
                                             </button>
 
-                                            {/* File content */}
                                             {isFileExpanded && (
                                                 <div className="border-t border-white/[0.03] bg-white/[0.01] px-4 py-3 pl-16">
                                                     {isLoading ? (

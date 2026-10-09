@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react';
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     if (!mounted) {
         return <div className="h-8 w-8" />;
@@ -19,7 +21,10 @@ export function ThemeToggle() {
         <button
             aria-label="Toggle theme"
             className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            onClick={() => {
+                setTheme(isDark ? 'light' : 'dark');
+            }}
+            type="button"
         >
             {isDark ? <IconMoonFilled size={15} /> : <IconSunFilled size={15} />}
         </button>

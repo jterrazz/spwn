@@ -4,16 +4,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 import { apiGet } from '../api/client';
+import { DockerProvider, useDocker } from '../contexts/docker-context';
+import type { World } from '../domain/model';
+import { checkForUpdatesOnStartup } from '../tauri/updater';
 import { AppSidebar } from './app-sidebar';
 import { DockerLockScreen } from './docker-lock-screen';
 import { ErrorBoundary } from './error-boundary';
 import { GlossaryButton } from './glossary-button';
 import { SidebarInset, SidebarProvider } from './ui/sidebar';
-import { DockerProvider, useDocker } from '../contexts/docker-context';
-import type { World } from '../domain/model';
-import { checkForUpdatesOnStartup } from '../tauri/updater';
 
-// ── Refetch context: allows any child to trigger an immediate data refetch ──
 const RefetchContext = createContext<() => void>(() => {});
 export function useRefetch() {
     return useContext(RefetchContext);
@@ -41,15 +40,10 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     const [sidebarLoading, setSidebarLoading] = useState(true);
     const [statusData, setStatusData] = useState<null | StatusData>(null);
 
-    // The /welcome wizard is the user's path back to a working state, so it
-    // Is the one screen the lock must NOT cover. Same goes for redirect-to-
-    // Welcome on first run.
     const isWelcome = pathname === '/welcome';
     const dockerKnown = status !== null;
     const locked = dockerKnown && !ready && !isWelcome;
 
-    // First-run gate: redirect to /welcome if onboarding hasn't been
-    // Completed yet. Runs once on mount; the wizard itself polls for state.
     useEffect(() => {
         if (isWelcome) {
             return;
@@ -60,20 +54,16 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                     router.replace('/welcome');
                 }
             })
-            .catch(() => {
-                /* API not reachable - render normally */
-            });
+            .catch(() => {});
         // oxlint-disable-next-line react-hooks/exhaustive-deps -- the first-run gate fires once on mount; keying it on `isWelcome` would re-poll onboarding on every navigation
     }, []);
 
-    // Track the last-visited world so the sidebar remembers the selection
-    // Across page navigations (e.g. going from /world/w-x to /agents).
     const worldMatch = /^\/world\/(?<id>[^/]+)/.exec(pathname);
     const urlWorldId = worldMatch?.groups?.id;
     const [lastWorldId, setLastWorldId] = useState<string | undefined>(urlWorldId);
 
     useEffect(() => {
-        if (urlWorldId) {
+        if (urlWorldId !== undefined && urlWorldId !== '') {
             setLastWorldId(urlWorldId);
         }
     }, [urlWorldId]);
@@ -81,12 +71,10 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     const currentWorldId = urlWorldId ?? lastWorldId;
 
     const fetchWorlds = useCallback(() => {
-        // Don't hammer the API while Docker is down - every world endpoint
-        // Depends on it and will just return an empty list anyway.
         if (locked) {
             return;
         }
-        Promise.all([
+        void Promise.all([
             apiGet<World[]>('/api/worlds').catch(() => [] as World[]),
             apiGet<StatusData>('/api/status').catch(() => null),
         ]).then(([worldData, sData]) => {
@@ -99,10 +87,11 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         fetchWorlds();
         const interval = setInterval(fetchWorlds, 5000);
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+        };
     }, [fetchWorlds]);
 
-    // One-shot update check when the native Tauri app boots.
     useEffect(() => {
         void checkForUpdatesOnStartup();
     }, []);
@@ -110,15 +99,11 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     return (
         <RefetchContext.Provider value={fetchWorlds}>
             <SidebarProvider>
-                {/* Drag region for window movement - stays interactive even
-            while the rest of the app is locked. */}
                 <div
                     className="tauri-drag-region fixed top-0 right-0 left-0 z-[100] h-[32px]"
                     data-tauri-drag-region="true"
                     style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
                 />
-                {/* Sidebar dims and becomes non-interactive while locked, but
-            stays visible so the app's identity is preserved. */}
                 <div
                     aria-hidden={locked || undefined}
                     className={

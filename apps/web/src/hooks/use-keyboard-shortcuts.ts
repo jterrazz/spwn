@@ -8,18 +8,12 @@ interface ShortcutHandlers {
     onEscape?: () => void;
 }
 
-/**
- * Global keyboard shortcut handler.
- * - Cmd+K / Ctrl+K → onSearch (focus search / command palette)
- * - Cmd+N / Ctrl+N → onSpawnWorld
- * - Escape → onEscape (close dialogs)
- */
+/** Global keyboard shortcut handler. - Cmd+K / Ctrl+K → onSearch (focus search / command palette) - Cmd+N / Ctrl+N → onSpawnWorld - Escape → onEscape (close dialogs) */
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const meta = e.metaKey || e.ctrlKey;
 
-            // Don't trigger if user is typing in an input
             const tag = (e.target as HTMLElement)?.tagName;
             const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
@@ -44,6 +38,8 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
         };
 
         globalThis.addEventListener('keydown', handleKeyDown);
-        return () => globalThis.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            globalThis.removeEventListener('keydown', handleKeyDown);
+        };
     }, [handlers]);
 }

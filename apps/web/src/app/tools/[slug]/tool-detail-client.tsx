@@ -16,10 +16,7 @@ import { getToolByName, TOOLS } from '../../../domain/tools-catalog';
 import type { SkillFile } from '../../../domain/tools-catalog';
 import { usePageTitle } from '../../../hooks/use-page-title';
 
-// ── Markdown renderer (simple) ──────────────────────────────────────────
-
 function SkillContent({ content }: { content: string }) {
-    // Simple markdown → HTML: headings, code blocks, lists, inline code
     const lines = content.split('\n');
     const elements: React.ReactNode[] = [];
     let i = 0;
@@ -32,7 +29,6 @@ function SkillContent({ content }: { content: string }) {
             continue;
         }
 
-        // Code block
         if (line.trimStart().startsWith('```')) {
             const codeLines: string[] = [];
             i++;
@@ -44,7 +40,7 @@ function SkillContent({ content }: { content: string }) {
                 codeLines.push(codeLine);
                 i++;
             }
-            i++; // Skip closing ```
+            i++;
             elements.push(
                 <pre
                     className="text-foreground/60 my-3 overflow-x-auto rounded-lg border border-white/[0.06] bg-white/[0.03] px-4 py-3 font-mono text-[11px] leading-relaxed"
@@ -56,7 +52,6 @@ function SkillContent({ content }: { content: string }) {
             continue;
         }
 
-        // Heading
         if (line.startsWith('### ')) {
             elements.push(
                 <h4 className="text-foreground/60 mt-5 mb-2 text-xs font-medium" key={key++}>
@@ -76,12 +71,10 @@ function SkillContent({ content }: { content: string }) {
             continue;
         }
         if (line.startsWith('# ')) {
-            // Skip top-level heading (already shown in page header)
             i++;
             continue;
         }
 
-        // List item
         if (line.trimStart().startsWith('- ')) {
             elements.push(
                 <div
@@ -96,7 +89,6 @@ function SkillContent({ content }: { content: string }) {
             continue;
         }
 
-        // Numbered list
         const numMatch = /^(?<num>\d+)\.\s+(?<text>.+)/.exec(line.trimStart());
         if (numMatch) {
             elements.push(
@@ -114,13 +106,11 @@ function SkillContent({ content }: { content: string }) {
             continue;
         }
 
-        // Empty line
         if (line.trim() === '') {
             i++;
             continue;
         }
 
-        // Paragraph
         elements.push(
             <p className="text-muted-foreground/50 my-2 text-[12px] leading-relaxed" key={key++}>
                 {renderInlineCode(line)}
@@ -151,8 +141,6 @@ function renderInlineCode(text: string): React.ReactNode {
     });
 }
 
-// ── Skill tab viewer ────────────────────────────────────────────────────
-
 function SkillViewer({ skills }: { skills: SkillFile[] }) {
     const [active, setActive] = useState(0);
 
@@ -163,7 +151,6 @@ function SkillViewer({ skills }: { skills: SkillFile[] }) {
 
     return (
         <div className="overflow-hidden rounded-xl border border-white/[0.07]">
-            {/* Tab bar */}
             {skills.length > 1 && (
                 <div className="flex border-b border-white/[0.06] bg-white/[0.02]">
                     {skills.map((s, i) => (
@@ -174,7 +161,10 @@ function SkillViewer({ skills }: { skills: SkillFile[] }) {
                                     : 'text-muted-foreground/30 hover:text-muted-foreground/50 border-transparent'
                             }`}
                             key={s.name}
-                            onClick={() => setActive(i)}
+                            onClick={() => {
+                                setActive(i);
+                            }}
+                            type="button"
                         >
                             <IconBookFilled size={10} />
                             {s.name}
@@ -183,7 +173,6 @@ function SkillViewer({ skills }: { skills: SkillFile[] }) {
                 </div>
             )}
 
-            {/* Single skill header (when only one) */}
             {skills.length === 1 && (
                 <div className="flex items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-5 py-3">
                     <IconBookFilled className="text-purple-400/50" size={12} />
@@ -193,15 +182,12 @@ function SkillViewer({ skills }: { skills: SkillFile[] }) {
                 </div>
             )}
 
-            {/* Content */}
             <div className="px-5 py-4">
                 <SkillContent content={activeSkill.content} />
             </div>
         </div>
     );
 }
-
-// ── Page ─────────────────────────────────────────────────────────────────
 
 export default function ToolDetailPage() {
     const params = useParams();
@@ -217,7 +203,10 @@ export default function ToolDetailPage() {
                 <PageHeader description={`No tool named spwn:${slug}`} title="Tool Not Found" />
                 <button
                     className="text-muted-foreground/40 hover:text-foreground/60 text-sm transition-colors"
-                    onClick={() => router.push('/tools')}
+                    onClick={() => {
+                        router.push('/tools');
+                    }}
+                    type="button"
                 >
                     Back to Tools
                 </button>
@@ -232,7 +221,10 @@ export default function ToolDetailPage() {
                 leading={
                     <button
                         className="text-muted-foreground/30 hover:text-foreground/60 flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.05]"
-                        onClick={() => router.push('/tools')}
+                        onClick={() => {
+                            router.push('/tools');
+                        }}
+                        type="button"
                     >
                         <IconArrowLeft size={16} />
                     </button>
@@ -240,7 +232,6 @@ export default function ToolDetailPage() {
                 title={tool.name}
             />
 
-            {/* Meta grid */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <MetaCard
                     icon={
@@ -285,9 +276,7 @@ export default function ToolDetailPage() {
                 />
             </div>
 
-            {/* Details */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {/* Left: info */}
                 <div className="space-y-4">
                     <DetailSection label="Provides">
                         <p className="text-foreground/60 font-mono text-sm">{tool.provides}</p>
@@ -310,6 +299,7 @@ export default function ToolDetailPage() {
                                                 router.push(`/tools/${d.replace('spwn:', '')}`);
                                             }
                                         }}
+                                        type="button"
                                     >
                                         {d}
                                     </button>
@@ -333,7 +323,6 @@ export default function ToolDetailPage() {
                     </DetailSection>
                 </div>
 
-                {/* Right: manifest example */}
                 <div>
                     <DetailSection label="Add to world manifest">
                         <pre className="text-foreground/50 rounded-lg border border-white/[0.06] bg-white/[0.03] px-4 py-3 font-mono text-[12px] leading-relaxed">
@@ -349,7 +338,6 @@ export default function ToolDetailPage() {
                 </div>
             </div>
 
-            {/* Skills */}
             {tool.skills.length > 0 && (
                 <div className="space-y-3">
                     <h2 className="font-heading text-foreground/60 text-sm tracking-wide">
@@ -368,8 +356,6 @@ export default function ToolDetailPage() {
         </Page>
     );
 }
-
-// ── Helpers ──────────────────────────────────────────────────────────────
 
 function MetaCard({
     label,

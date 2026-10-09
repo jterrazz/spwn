@@ -1,72 +1,52 @@
-/**
- * API client for the Go API server.
- * The Go API is the sole backend - no fallback to Next.js API routes.
- */
-
 import type { Agent, AgentProfile, Workspace, World } from '../domain/model';
 import { getTauriApiBase, initTauriApiPort, isTauri } from '../tauri/runtime';
 
-// Dynamic API base - Tauri app uses a random port, browser defaults to 3001
 let goApiBase: null | string = null;
 
 function browserApiBase(): null | string {
-    if (process.env.NEXT_PUBLIC_API_URL) {
+    if (process.env.NEXT_PUBLIC_API_URL !== undefined && process.env.NEXT_PUBLIC_API_URL !== '') {
         return process.env.NEXT_PUBLIC_API_URL;
     }
-    if (globalThis.location === undefined || !globalThis.location.hostname) {
+    if (!globalThis.location?.hostname) {
         return null;
     }
     return `http://${globalThis.location.hostname}:3001`;
 }
 
-/**
- * Resolves the Go API base URL. In Tauri mode, waits for the port to be
- * retrieved from the Rust backend before returning. This ensures every API
- * call targets the correct port - even if the very first fetch fires before
- * the Tauri webview has finished initializing.
- */
 async function resolveGoApiBase(): Promise<string> {
-    if (goApiBase) {
+    if (goApiBase !== null && goApiBase !== '') {
         return goApiBase;
     }
 
-    // In Tauri, wait for the port from the Rust side
     if (isTauri()) {
         const port = await initTauriApiPort();
-        if (port) {
+        if (port !== null && port !== 0) {
             goApiBase = `http://localhost:${port}`;
             return goApiBase;
         }
     }
 
-    // Check if the port was already cached synchronously
     const tauriBase = getTauriApiBase();
-    if (tauriBase) {
+    if (tauriBase !== null && tauriBase !== '') {
         goApiBase = tauriBase;
         return tauriBase;
     }
 
     const browserBase = browserApiBase();
-    if (browserBase) {
+    if (browserBase !== null && browserBase !== '') {
         return browserBase;
     }
     return 'http://localhost:3001';
 }
 
-// Allow external code to set the port explicitly
 export function setApiBase(base: string) {
     goApiBase = base;
 }
 
-// Eagerly resolve the API base on module load so that even synchronous
-// Callers (goApiUrl) get the right value as soon as possible. The promise
-// Is fire-and-forget - by the time a user interaction triggers a fetch,
-// The port will be cached.
+// hazard: resolved at module load so a synchronous caller (goApiUrl) already reads the Tauri port; a first fetch fired before the webview reports it would otherwise target the browser default
 if (globalThis.location !== undefined || isTauri()) {
     void resolveGoApiBase();
 }
-
-// ── Connection status tracking ──
 
 export type ConnectionStatus = 'connected' | 'disconnected';
 
@@ -76,7 +56,9 @@ const statusListeners = new Set<(status: ConnectionStatus) => void>();
 function setConnectionStatus(status: ConnectionStatus) {
     if (connectionStatus !== status) {
         connectionStatus = status;
-        statusListeners.forEach((fn) => fn(status));
+        statusListeners.forEach((fn) => {
+            fn(status);
+        });
     }
 }
 
@@ -90,8 +72,6 @@ export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void)
         statusListeners.delete(fn);
     };
 }
-
-// ── Core fetch helper ──
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     try {
@@ -123,24 +103,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     }
 }
 
-// ── Data normalization ──
-
-/** One agent as a world lists it: a bare name, or a record of its own. */
 type RawAgent = {
     name: string;
     role?: string;
     status?: string;
 };
 
-/**
- * One world as the Go API hands it over. Two shapes arrive on
- * `/api/worlds`: a world that RUNS carries its container id, its
- * config name, its creation stamp and agent records; a world the
- * project only DECLARES carries its manifest name and lists its
- * agents and workspaces as plain strings (`declaredWorldItem` in
- * apps/api). `agent` and `workspace` are the older single-valued
- * fields some routes still emit.
- */
+// outside: /api/worlds hands two shapes — a world that runs carries its container id, config, creation stamp and agent records; a world the project only declares carries its manifest name and plain-string agents and workspaces (declaredWorldItem in apps/api); `agent` and `workspace` are the older single-valued fields some routes still emit
 interface RawWorld extends Omit<
     World,
     'agent' | 'agents' | 'config' | 'created_at' | 'id' | 'status' | 'workspaces'
@@ -155,7 +124,6 @@ interface RawWorld extends Omit<
     workspaces?: (string | Workspace)[];
 }
 
-/** A world lists an agent either by name alone or in full. */
 function normalizeWorldAgent(entry: RawAgent | string, worldStatus: World['status']): Agent {
     if (typeof entry === 'string') {
         return { name: entry, role: 'worker', status: worldStatus };
@@ -167,10 +135,6 @@ function normalizeWorldAgent(entry: RawAgent | string, worldStatus: World['statu
     };
 }
 
-/**
- * A declared workspace is a bare path, a mounted one carries its
- * name, and the legacy single `workspace` field is one unnamed mount.
- */
 function normalizeWorkspaces(
     declared: (string | Workspace)[] | undefined,
     legacy: string | undefined,
@@ -186,12 +150,6 @@ function normalizeWorkspaces(
     return [{ name: 'default', path: legacy }];
 }
 
-/**
- * Normalize Go API world data to match frontend World interface.
- * A declared world has no container, so its manifest name stands in
- * for the id and for the config it would be spawned from; its agents
- * inherit the world's own status.
- */
 function normalizeWorlds(data: RawWorld[]): World[] {
     return data.map(({ agent: _agent, workspace: _legacyWs, workspaces, ...w }) => {
         const status = w.status ?? 'idle';
@@ -209,13 +167,9 @@ function normalizeWorlds(data: RawWorld[]): World[] {
     });
 }
 
-/**
- * Normalize Go API agent data to match frontend AgentProfile interface.
- * Fills in defaults for any missing fields so the UI never crashes on undefined arrays.
- */
 function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
     return {
-        role: data.role || 'worker',
+        role: data.role ?? 'worker',
         engine: '',
         provider: '',
         purpose: '',
@@ -227,26 +181,17 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
     };
 }
 
-/**
- * Encode a value for use as a URL path segment. Handles spaces, special
- * chars, and non-ASCII - so agent names like "QA Eng" don't break API calls.
- */
+/** Encode a value for use as a URL path segment. Handles spaces, special chars, and non-ASCII - so agent names like "QA Eng" don't break API calls. */
 export function encPath(segment: string): string {
     return encodeURIComponent(segment);
 }
 
-// ── Public API ──
-
-/**
- * GET from Go API.
- */
+/** GET from Go API. */
 export async function apiGet<T>(goPath: string): Promise<T> {
     const data = await apiFetch<T>(goPath);
-    // Normalize world data from Go API
     if (goPath === '/api/worlds' && Array.isArray(data)) {
         return normalizeWorlds(data) as T;
     }
-    // Normalize agent profile data from Go API
     if (
         /^\/api\/agents\/[^/]+$/.exec(goPath) &&
         data &&
@@ -258,9 +203,7 @@ export async function apiGet<T>(goPath: string): Promise<T> {
     return data;
 }
 
-/**
- * POST to Go API.
- */
+/** POST to Go API. */
 export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
     return await apiFetch<T>(goPath, {
         method: 'POST',
@@ -269,9 +212,7 @@ export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
     });
 }
 
-/**
- * PUT to Go API.
- */
+/** PUT to Go API. */
 export async function apiPut<T>(goPath: string, body?: unknown): Promise<T> {
     return await apiFetch<T>(goPath, {
         method: 'PUT',
@@ -280,16 +221,12 @@ export async function apiPut<T>(goPath: string, body?: unknown): Promise<T> {
     });
 }
 
-/**
- * DELETE on Go API.
- */
+/** DELETE on Go API. */
 export async function apiDelete(goPath: string): Promise<void> {
     await apiFetch<unknown>(goPath, { method: 'DELETE' });
 }
 
-/**
- * POST that returns { ok, error } shape - used for action buttons.
- */
+/** POST that returns { ok, error } shape - used for action buttons. */
 export async function apiAction(
     goPath: string,
     body?: unknown,
@@ -314,9 +251,7 @@ export async function apiAction(
     }
 }
 
-/**
- * Check if the Go API server is reachable.
- */
+/** Check if the Go API server is reachable. */
 export async function isGoApiAvailable(): Promise<boolean> {
     try {
         const base = await resolveGoApiBase();
@@ -329,15 +264,8 @@ export async function isGoApiAvailable(): Promise<boolean> {
     }
 }
 
-/**
- * Build the full Go API URL for a path (useful for direct fetch calls).
- */
-/**
- * Build the full Go API URL. Requires the port to have been resolved
- * already (call resolveGoApiBase() first if unsure). Falls back to
- * localhost:3001 if not yet initialized.
- */
+/** Build the full Go API URL. Requires the port to have been resolved already (call resolveGoApiBase() first if unsure). Falls back to localhost:3001 if not yet initialized. */
 export function goApiUrl(path: string): string {
-    const base = goApiBase || getTauriApiBase() || browserApiBase() || 'http://localhost:3001';
+    const base = goApiBase ?? getTauriApiBase() ?? browserApiBase() ?? 'http://localhost:3001';
     return `${base}${path}`;
 }

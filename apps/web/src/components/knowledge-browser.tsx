@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import { goApiUrl } from '../api/client';
+import { inBackground } from '../events/in-background';
 
 interface KnowledgeFile {
     path: string;
@@ -28,7 +29,6 @@ interface TreeNode {
     file?: KnowledgeFile;
 }
 
-// Sort: dirs first, then alphabetically (recurses into children).
 function sortTreeNodes(nodes: TreeNode[]): TreeNode[] {
     nodes.sort((a, b) => {
         if (a.isDir && !b.isDir) {
@@ -133,8 +133,11 @@ function FileTreeNode({
             <div>
                 <button
                     className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-white/[0.03]"
-                    onClick={() => setExpanded(!expanded)}
+                    onClick={() => {
+                        setExpanded(!expanded);
+                    }}
                     style={{ paddingLeft: `${12 + depth * 16}px` }}
+                    type="button"
                 >
                     {expanded ? (
                         <IconChevronDown className="text-muted-foreground/40 shrink-0" size={12} />
@@ -177,8 +180,11 @@ function FileTreeNode({
                     ? 'border-l-2 border-blue-400/50 bg-white/[0.06]'
                     : 'hover:bg-white/[0.03]'
             }`}
-            onClick={() => onFileClick(node.path)}
+            onClick={() => {
+                onFileClick(node.path);
+            }}
             style={{ paddingLeft: `${12 + depth * 16}px` }}
+            type="button"
         >
             <span className="w-3" />
             <IconFile className="text-muted-foreground/30 shrink-0" size={13} />
@@ -199,9 +205,6 @@ function FileTreeNode({
 interface KnowledgeBrowserProps {
     compact?: boolean;
     worldId: string;
-    /** When provided, the parent owns the search state and this component
-     *  hides its own search input (e.g. when a PageHeader action bar
-     *  hosts an ExpandingSearch). */
     searchQuery?: string;
     onSearchChange?: (value: string) => void;
 }
@@ -233,12 +236,11 @@ export function KnowledgeBrowser({
                     setFiles(data.files ?? []);
                 }
             } catch {
-                // Ignore
             } finally {
                 setLoading(false);
             }
         };
-        fetchFiles();
+        void fetchFiles();
     }, [knowledgeApiBase]);
 
     const filteredFiles = useMemo(() => {
@@ -281,7 +283,6 @@ export function KnowledgeBrowser({
 
     return (
         <div className="glass-subtle overflow-hidden rounded-xl" style={{ height }}>
-            {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-4 py-3">
                 <IconBook2 className="text-muted-foreground/40" size={16} />
                 <h3 className="font-heading text-foreground/60 flex-1 text-xs tracking-wide">
@@ -292,8 +293,6 @@ export function KnowledgeBrowser({
                 </span>
             </div>
 
-            {/* Search - hidden when a parent controls searchQuery externally
-          (e.g. an ExpandingSearch in the page header). */}
             {!searchControlled && (
                 <div className="border-b border-white/[0.04] px-3 py-2">
                     <div className="relative">
@@ -303,7 +302,9 @@ export function KnowledgeBrowser({
                         />
                         <input
                             className="text-foreground/70 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.06] bg-white/[0.03] py-1.5 pr-3 pl-8 text-[11px] focus:border-white/[0.12] focus:outline-none"
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                            }}
                             placeholder="Search files..."
                             type="text"
                             value={searchQuery}
@@ -312,13 +313,11 @@ export function KnowledgeBrowser({
                 </div>
             )}
 
-            {/* Content */}
             <div
                 className={`flex ${searchControlled ? 'h-[calc(100%-40px)]' : 'h-[calc(100%-88px)]'}`}
             >
-                {/* File tree */}
                 <div
-                    className={`overflow-y-auto border-r border-white/[0.05] ${selectedPath ? 'w-1/3 min-w-[200px]' : 'w-full'}`}
+                    className={`overflow-y-auto border-r border-white/[0.05] ${selectedPath === null || selectedPath === '' ? 'w-full' : 'w-1/3 min-w-[200px]'}`}
                 >
                     {loading && (
                         <div className="space-y-2 p-4">
@@ -357,7 +356,7 @@ export function KnowledgeBrowser({
                                     depth={0}
                                     key={node.path}
                                     node={node}
-                                    onFileClick={handleFileClick}
+                                    onFileClick={inBackground(handleFileClick)}
                                     selectedPath={selectedPath}
                                 />
                             ))}
@@ -365,8 +364,7 @@ export function KnowledgeBrowser({
                     )}
                 </div>
 
-                {/* File content viewer */}
-                {selectedPath && (
+                {selectedPath !== null && selectedPath !== '' && (
                     <div className="flex-1 overflow-y-auto">
                         <div className="flex items-center gap-2 border-b border-white/[0.04] bg-white/[0.02] px-4 py-2">
                             <IconFile className="text-muted-foreground/30" size={13} />
@@ -393,28 +391,6 @@ export function KnowledgeBrowser({
                         </div>
                     </div>
                 )}
-            </div>
-        </div>
-    );
-}
-
-/** Inline card shown in chat when architect updates a knowledge file. */
-export function KnowledgeUpdateCard({ path, description }: { path: string; description?: string }) {
-    return (
-        <div className="animate-in slide-in-from-bottom-2 fade-in mt-1.5 max-w-[80%] duration-300">
-            <div className="overflow-hidden rounded-lg border border-indigo-500/20 bg-indigo-500/[0.06]">
-                <div className="flex items-center gap-1.5 border-b border-indigo-500/15 bg-indigo-500/10 px-3 py-1.5">
-                    <span className="text-[10px]">📘</span>
-                    <span className="font-mono text-[10px] tracking-wider text-indigo-400/70 uppercase">
-                        Knowledge Updated
-                    </span>
-                </div>
-                <div className="px-3 py-2">
-                    <p className="font-mono text-xs text-indigo-200/90">{path}</p>
-                    {description && (
-                        <p className="mt-1 text-[10px] text-indigo-400/40">{description}</p>
-                    )}
-                </div>
             </div>
         </div>
     );

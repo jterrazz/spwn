@@ -7,10 +7,7 @@ import type { ReactNode } from 'react';
 import type { ActivityBlock } from '../activity/blocks';
 import { ActivityMessageView } from './activity-blocks';
 
-/**
- * ChatBubble is the minimal shape any caller must provide. The chat does
- * not manage state - the parent owns the message list and passes it in.
- */
+/** ChatBubble is the minimal shape any caller must provide. The chat does not manage state - the parent owns the message list and passes it in. */
 export interface ChatBubble {
     role: 'assistant' | 'user';
     blocks: ActivityBlock[];
@@ -26,35 +23,18 @@ interface ChatProps {
     onSend: (text: string) => void;
     placeholder?: string;
     disabled?: boolean;
-    /** Shown when there are no messages. */
     emptyState?: ReactNode;
-    /** Typing indicator text, e.g. "morpheus is thinking...". Omit to hide. */
     typingText?: string;
-    /** Rendered immediately after each bubble - used for stack/knowledge cards. */
     extras?: (msg: ChatBubble, index: number) => ReactNode;
-    /** Optional label shown under the assistant's bubbles ("morpheus", "architect"). */
     assistantLabel?: string;
-    /** Optional label shown under the user's bubbles. Default "you". */
     userLabel?: string;
-    /** Focus the input on mount. */
     autoFocus?: boolean;
-    /** Extra className on the outer flex column. Use for height constraints. */
     className?: string;
-    /**
-     * Controlled-input props. When both are passed, the parent owns the
-     * input state (lets the architect widget share its draft between
-     * collapsed and expanded modes). When omitted, Chat owns state itself.
-     */
     input?: string;
     onInputChange?: (value: string) => void;
 }
 
-/**
- * Chat is the shared, presentational surface used by both the agent chat
- * tab and the Architect chat widget. It's container-less by design -
- * only the message bubbles and the focused input border carry backgrounds,
- * so the chat blends into whatever page hosts it.
- */
+/** Chat is the shared, presentational surface used by both the agent chat tab and the Architect chat widget. It's container-less by design - only the message bubbles and the focused input border carry backgrounds, so the chat blends into whatever page hosts it. */
 export function Chat({
     messages,
     onSend,
@@ -83,7 +63,7 @@ export function Chat({
     }, [messages.length, disabled]);
 
     useEffect(() => {
-        if (autoFocus) {
+        if (autoFocus === true) {
             inputRef.current?.focus();
         }
     }, [autoFocus]);
@@ -91,7 +71,7 @@ export function Chat({
     const trimmed = input.trim();
 
     const handleSend = () => {
-        if (!trimmed || disabled) {
+        if (!trimmed || disabled === true) {
             return;
         }
         onSend(trimmed);
@@ -101,19 +81,16 @@ export function Chat({
 
     return (
         <div className={`flex min-h-0 flex-1 flex-col ${className}`}>
-            {/* Messages area - grows, scrolls. Bottom padding leaves room for the
-          floating input dock so the last bubble isn't hidden under it. */}
             <div className="min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto py-2 pr-1">
                 {messages.length === 0 && emptyState && (
                     <div className="flex h-full items-center justify-center">{emptyState}</div>
                 )}
                 {messages.map((msg, i) => {
-                    // Messages are append-only; (timestamp, role, index) is a stable identity.
                     const msgKey = `${msg.timestamp.getTime()}-${msg.role}-${i}`;
                     let bubbleClass: string;
                     if (msg.role === 'user') {
                         bubbleClass = 'bg-white/[0.08] text-foreground/85';
-                    } else if (msg.error) {
+                    } else if (msg.error === true) {
                         bubbleClass = 'bg-red-500/10 border border-red-500/15 text-red-400/80';
                     } else {
                         bubbleClass =
@@ -155,7 +132,7 @@ export function Chat({
                         </div>
                     );
                 })}
-                {disabled && typingText && (
+                {disabled === true && typingText !== undefined && typingText !== '' && (
                     <div className="flex items-start">
                         <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5">
                             <div className="flex items-center gap-2">
@@ -183,14 +160,14 @@ export function Chat({
                 <div ref={endRef} />
             </div>
 
-            {/* Input dock - anchored to the bottom of the flex column, styled
-          as a pill so it reads like a messaging-app composer. */}
             <div className="shrink-0 pt-3">
                 <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md transition-colors focus-within:border-white/[0.14] focus-within:bg-white/[0.06]">
                     <input
                         className="text-foreground/85 placeholder:text-muted-foreground/30 min-w-0 flex-1 bg-transparent px-1 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={disabled}
-                        onChange={(e) => setInput(e.target.value)}
+                        onChange={(e) => {
+                            setInput(e.target.value);
+                        }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
@@ -220,11 +197,7 @@ export function Chat({
     );
 }
 
-/**
- * Suggestion pills shown inside the empty state. Each click fills the
- * input - onPick is usually just setInput. Kept here so both chats can
- * use the same styling.
- */
+/** Suggestion pills shown inside the empty state. Each click fills the input - onPick is usually just setInput. Kept here so both chats can use the same styling. */
 export function ChatSuggestions({
     suggestions,
     onPick,
@@ -238,7 +211,10 @@ export function ChatSuggestions({
                 <button
                     className="text-muted-foreground/40 hover:text-foreground/70 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] transition-colors hover:bg-white/[0.06]"
                     key={s}
-                    onClick={() => onPick(s)}
+                    onClick={() => {
+                        onPick(s);
+                    }}
+                    type="button"
                 >
                     {s}
                 </button>

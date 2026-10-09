@@ -4,24 +4,16 @@ import { IconBrandDocker, IconExternalLink, IconLoader2, IconRefresh } from '@ta
 import { useEffect, useState } from 'react';
 
 import { useDocker } from '../contexts/docker-context';
+import { inBackground } from '../events/in-background';
 
-/**
- * Full-area lock screen shown whenever the host Docker daemon is not
- * reachable. Replaces page content (the sidebar still renders, dimmed) so
- * users cannot trigger any action that depends on Docker.
- *
- * The component is intentionally calm: spwn IS a Docker control plane, so
- * "Docker offline" is the system state, not an emergency. We explain it,
- * keep retrying in the background, and recover automatically.
- */
+/** Full-area lock screen shown whenever the host Docker daemon is not reachable. Replaces page content (the sidebar still renders, dimmed) so users cannot trigger any action that depends on Docker. The component is intentionally calm: spwn IS a Docker control plane, so "Docker offline" is the system state, not an emergency. We explain it, keep retrying in the background, and recover automatically. */
 export function DockerLockScreen() {
     const { status, lastChecked, refresh } = useDocker();
     const [refreshing, setRefreshing] = useState(false);
     const [secondsAgo, setSecondsAgo] = useState(0);
 
-    // Tick the "last check" timer once a second so it feels alive.
     useEffect(() => {
-        if (!lastChecked) {
+        if (lastChecked === null || lastChecked === 0) {
             return;
         }
         const tick = () => {
@@ -30,7 +22,9 @@ export function DockerLockScreen() {
         };
         tick();
         const id = setInterval(tick, 1000);
-        return () => clearInterval(id);
+        return () => {
+            clearInterval(id);
+        };
     }, [lastChecked]);
 
     const handleRetry = async () => {
@@ -42,14 +36,6 @@ export function DockerLockScreen() {
         }
     };
 
-    // Three distinct states all get the same Docker-themed lock screen,
-    // Because for users the actionable next step is the same in every
-    // Case: make sure Docker is running. The "API offline" branding the
-    // Previous version showed was technically accurate but useless - most
-    // Users don't know what the spwn API is, only that Docker needs to
-    // Be on for any of this to work. We surface API status as a quiet
-    // Diagnostic line at the bottom instead.
-
     const apiDown = status === undefined;
     const dockerDown = Boolean(status && (!status.installed || !status.running));
 
@@ -58,19 +44,12 @@ export function DockerLockScreen() {
     }
 
     const installed = status?.installed ?? false;
-    // When the API is unreachable we don't actually know whether Docker is
-    // Installed, so default to the "running but offline" copy - that's the
-    // Most common cause and the install link would be wrong otherwise.
     const showInstallCta = !apiDown && !installed;
     const installUrl =
         status?.platform === 'linux'
             ? 'https://docs.docker.com/engine/install/'
             : 'https://www.docker.com/products/docker-desktop/';
 
-    // Two messages, not three. "API offline" collapses into "Waiting for
-    // Docker" because the user-visible fix is identical: start Docker.
-    // The only branch that needs different copy is "not installed",
-    // Because the action there is install rather than start.
     const title = !installed && !apiDown ? "Docker isn't installed" : 'Waiting for Docker';
     const subtitle =
         !installed && !apiDown
@@ -96,7 +75,7 @@ export function DockerLockScreen() {
                             <IconExternalLink size={11} />
                         </a>
                     )}
-                    <RetryButton loading={refreshing} onClick={handleRetry} />
+                    <RetryButton loading={refreshing} onClick={inBackground(handleRetry)} />
                 </div>
             }
             secondsAgo={secondsAgo}
@@ -105,8 +84,6 @@ export function DockerLockScreen() {
         />
     );
 }
-
-// ── Sub-components ────────────────────────────────────────────────────
 
 function LockShell({
     icon,
@@ -127,7 +104,6 @@ function LockShell({
 }) {
     return (
         <div className="relative flex h-full w-full items-center justify-center px-6 py-10">
-            {/* Ambient radial wash matching the Docker accent */}
             <div
                 aria-hidden
                 className="bg-gradient-radial pointer-events-none absolute inset-0 from-red-500/20 via-transparent to-transparent"
@@ -143,14 +119,16 @@ function LockShell({
                         {subtitle}
                     </p>
 
-                    {(error || hint) && (
+                    {(error ?? (hint !== undefined && hint !== '')) && (
                         <div className="mt-5 space-y-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-left">
-                            {error && (
+                            {error !== undefined && error !== '' && (
                                 <p className="text-muted-foreground/70 font-mono text-[10.5px] leading-snug break-words">
                                     {error}
                                 </p>
                             )}
-                            {hint && <p className="text-foreground/70 text-[11px]">{hint}</p>}
+                            {hint !== undefined && hint !== '' && (
+                                <p className="text-foreground/70 text-[11px]">{hint}</p>
+                            )}
                         </div>
                     )}
 

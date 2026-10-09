@@ -27,10 +27,7 @@ export interface World {
     manifest?: WorldManifest;
 }
 
-/**
- * Short human-readable summary of a world's workspace mounts, for display.
- * Empty for ephemeral worlds (no host mounts).
- */
+/** Short human-readable summary of a world's workspace mounts, for display. Empty for ephemeral worlds (no host mounts). */
 export function getWorkspaceSummary(world: Pick<World, 'workspaces'>): string {
     const ws = world.workspaces;
     if (!ws || ws.length === 0) {
@@ -43,20 +40,16 @@ export function getWorkspaceSummary(world: Pick<World, 'workspaces'>): string {
     return `${ws.length} workspaces`;
 }
 
-/**
- * Returns the user-facing name of a world: custom name if set, otherwise the
- * capitalized middle segment of the world id (e.g. "w-titan-abc123" → "Titan").
- */
+/** Returns the user-facing name of a world: custom name if set, otherwise the capitalized middle segment of the world id (e.g. "w-titan-abc123" → "Titan"). */
 export function getWorldName(world: Pick<World, 'id' | 'name'>): string {
-    if (world.name && world.name.trim()) {
-        return world.name.trim();
+    const name = world.name?.trim() ?? '';
+    if (name !== '') {
+        return name;
     }
     const [, middle] = world.id.split('-');
-    return middle ? middle.charAt(0).toUpperCase() + middle.slice(1) : world.id;
-}
-
-export interface LimboAgent {
-    name: string;
+    return middle === undefined || middle === ''
+        ? world.id
+        : middle.charAt(0).toUpperCase() + middle.slice(1);
 }
 
 export interface Team {
@@ -73,10 +66,6 @@ export interface AgentProfile {
     team?: string;
     engine: string;
     provider: string;
-    // Legacy three-field split (purpose/profile/traits). The on-disk
-    // Layout collapsed into a single SOUL.md at the agent root — these
-    // Fields now all derive from SOUL.md via the API. Kept separate
-    // Here until apps/web's profile editor is reworked around SOUL.md.
     purpose: string;
     profile: string;
     traits: string[];
@@ -84,33 +73,6 @@ export interface AgentProfile {
     journal: { date: string; summary: string }[];
 }
 
-export interface AgentMessage {
-    id: string;
-    from: string;
-    to: string;
-    content: string;
-    timestamp: string;
-    read: boolean;
-    channel: string;
-}
-
-export interface Snapshot {
-    id: string;
-    worldId: string;
-    name: string;
-    created_at: string;
-    size: string;
-    agents: number;
-}
-
-export interface LogEntry {
-    timestamp: string;
-    level: 'debug' | 'error' | 'info' | 'warn';
-    source: string;
-    message: string;
-}
-
-// Available configs for the Create World dialog
 export const AVAILABLE_CONFIGS = [
     'default',
     'backend',
@@ -120,7 +82,6 @@ export const AVAILABLE_CONFIGS = [
     'minimal',
 ];
 
-// Available roles for the Create Agent dialog
 export const AVAILABLE_ROLES = ['chief', 'manager', 'worker'] as const;
 
 export interface OrganizationRole {

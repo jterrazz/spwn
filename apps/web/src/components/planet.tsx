@@ -17,12 +17,6 @@ interface PlanetProps {
     hideLabels?: boolean;
 }
 
-// Status → planet "life signal": saturation (how vivid the hue renders) + brightness level.
-// We keep a semantic bottom-dot color independent so status is still readable at a glance.
-// Saturation is deliberately muted - each world still has a recognizable
-// Hue, but the palette leans toward grey so the planets read as part of
-// One cohesive set rather than a rainbow of competing colors. Error
-// Worlds stay vivid so they stand out.
 const STATUS_SAT: Record<string, number> = {
     running: 55,
     creating: 55,
@@ -31,9 +25,9 @@ const STATUS_SAT: Record<string, number> = {
     stopped: 15,
 };
 
-// Deterministic hue from world id - matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
+// invariant: the sidebar draws the same hue for the same world id, so a world reads as one planet everywhere
 function hashHue(id: null | string | undefined): number {
-    if (!id) {
+    if (id === null || id === undefined || id === '') {
         return 0;
     }
     let h = 0;
@@ -43,7 +37,6 @@ function hashHue(id: null | string | undefined): number {
     return h % 360;
 }
 
-// HSL → RGB normalized to [0,1] (cobe expects 0-1 tuples).
 function hslToRgb01(h: number, s: number, l: number): [number, number, number] {
     const sN = s / 100;
     const lN = l / 100;
@@ -54,29 +47,21 @@ function hslToRgb01(h: number, s: number, l: number): [number, number, number] {
 }
 
 function getPlanetConfig(worldId: string, status: string) {
-    // The "new world" placeholder is an abstract grey orb (saturation 0)
-    // So it reads as a creation affordance, not a specific world identity.
     const isPlaceholder = worldId === 'w-new-00000';
-    // Error worlds snap to red hue so they stand out regardless of their id hash.
     const hue = status === 'error' ? 0 : hashHue(worldId);
     const sat = isPlaceholder ? 0 : (STATUS_SAT[status] ?? 20);
     return {
         hue,
         sat,
-        // Key: glowColor must be DARKER than baseColor, otherwise cobe renders an inside-out halo
-        // (bright rim, dark center). We want a bright solid sphere with the halo coming from the outer
-        // CSS drop-shadow instead - matching the flat sidebar icon's look.
         base: hslToRgb01(hue, sat, 30),
         glow: hslToRgb01(hue, sat, 12),
         marker: hslToRgb01(hue, sat, 92),
-        // CSS color for the outer drop-shadow halo - matches the sidebar hero glow.
         haloCss: `hsl(${hue}, ${sat}%, 62%)`,
     };
 }
 
-// Deterministic seed from string so each planet/agent has unique position
 function hashCode(s: null | string | undefined): number {
-    if (!s) {
+    if (s === null || s === undefined || s === '') {
         return 0;
     }
     let h = 0;
@@ -86,7 +71,6 @@ function hashCode(s: null | string | undefined): number {
     return Math.abs(h);
 }
 
-// Generate a deterministic globe coordinate from a string
 function stringToLocation(name: string): [number, number] {
     const h = hashCode(name);
     const lat = ((h % 1000) / 1000) * 140 - 70;
@@ -94,7 +78,6 @@ function stringToLocation(name: string): [number, number] {
     return [lat, lng];
 }
 
-// Seeded pseudo-random
 function seeded(seed: number) {
     let s = seed;
     return () => {
@@ -103,7 +86,6 @@ function seeded(seed: number) {
     };
 }
 
-// Generate procedural "continent" markers - clusters of dots that form landmass shapes
 function generateContinents(
     worldId: string,
     count: number,
@@ -111,20 +93,18 @@ function generateContinents(
     const rng = seeded(hashCode(worldId));
     const markers: { location: [number, number]; size: number }[] = [];
 
-    // Generate 5-9 continent centers (more landmasses = less water)
     const numContinents = 5 + Math.floor(rng() * 5);
     const centers: [number, number][] = [];
     for (let i = 0; i < numContinents; i++) {
         centers.push([rng() * 140 - 70, rng() * 360 - 180]);
     }
 
-    // Scatter dots around each center - wider spread, more overlap between continents
     const dotsPerContinent = Math.floor(count / numContinents);
     for (const [cLat, cLng] of centers) {
-        const spread = 25 + rng() * 35; // Wider continents
+        const spread = 25 + rng() * 35;
         for (let j = 0; j < dotsPerContinent; j++) {
             const angle = rng() * Math.PI * 2;
-            const dist = ((rng() + rng() + rng()) / 3) * spread; // Smoother bell curve, tighter core
+            const dist = ((rng() + rng() + rng()) / 3) * spread;
             const lat = cLat + Math.cos(angle) * dist;
             const lng = cLng + Math.sin(angle) * dist;
             markers.push({
@@ -148,19 +128,23 @@ export function Planet({
 }: PlanetProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const globeRef = useRef<Globe | null>(null);
-    const phiRef = useRef((hashCode(world.id) % 628) / 100); // Unique starting angle
+    const phiRef = useRef((hashCode(world.id) % 628) / 100);
     const config = getPlanetConfig(world.id, world.status);
     const name = getWorldName(world);
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 768);
+        const check = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
         check();
         window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
+        return () => {
+            window.removeEventListener('resize', check);
+        };
     }, []);
 
-    const size: number = compact || isMobile ? 140 : 200;
+    const size: number = compact === true || isMobile ? 140 : 200;
 
     const wrapperRef = useRef<HTMLDivElement>(null);
     const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -172,11 +156,9 @@ export function Planet({
             return;
         }
 
-        // Scale dot count to globe size for consistent density
         const dotCount = Math.round(size * 5);
         const continentMarkers = generateContinents(world.id, dotCount);
 
-        // Agent markers (slightly larger, on top)
         const agentMarkers = (world.agents ?? []).map((a) => ({
             location: stringToLocation(a.name),
             size: 0.03,
@@ -190,26 +172,25 @@ export function Planet({
             theta: 0.15 + index * 0.3,
             dark: 1,
             diffuse: 1.3 + (hashCode(world.id) % 10) * 0.05,
-            mapSamples: 0, // Disable Earth map entirely
+            mapSamples: 0,
             mapBrightness: 0,
             mapBaseBrightness: 0,
             baseColor: config.base,
             markerColor: config.marker,
+            // outside: cobe renders an inside-out halo when glowColor is not darker than baseColor; the halo comes from the CSS drop-shadow instead
             glowColor: config.glow,
             markers: [...continentMarkers, ...agentMarkers],
             markerElevation: 0,
         });
         globeRef.current = globe;
 
-        // Auto-rotate with gentle oscillation when selected
         let raf: number;
         let frame = 0;
         const spin = () => {
             frame++;
             const sel = selectedRef.current;
 
-            // Throttle non-selected compact planets to every 3rd frame for performance
-            if (compact && !sel && frame % 3 !== 0) {
+            if (compact === true && !sel && frame % 3 !== 0) {
                 raf = requestAnimationFrame(spin);
                 return;
             }
@@ -217,14 +198,13 @@ export function Planet({
             let phiStep: number;
             if (sel) {
                 phiStep = 0.005;
-            } else if (compact) {
+            } else if (compact === true) {
                 phiStep = 0.006;
             } else {
                 phiStep = 0.002;
             }
             phiRef.current += phiStep;
 
-            // Selected: gentle theta wobble + breathing diffuse
             const theta = sel
                 ? 0.15 + index * 0.3 + Math.sin(frame * 0.008) * 0.12
                 : 0.15 + index * 0.3;
@@ -235,7 +215,6 @@ export function Planet({
 
             globe.update({ phi: phiRef.current, theta, diffuse, scale });
 
-            // Sync glow overlay positions from cobe's auto-generated anchor divs
             const wrapper = wrapperRef.current;
             if (wrapper) {
                 (world.agents ?? []).forEach((a) => {
@@ -246,7 +225,6 @@ export function Planet({
                     if (anchor && glow) {
                         glow.style.left = anchor.style.left;
                         glow.style.top = anchor.style.top;
-                        // Check visibility via computed custom property
                         const vis = getComputedStyle(anchor).getPropertyValue(
                             `--cobe-marker-visible-${a.name}`,
                         );
@@ -281,14 +259,14 @@ export function Planet({
     if (isSelected) {
         if (isMobile) {
             globeScale = 1.3;
-        } else if (compact) {
+        } else if (compact === true) {
             globeScale = 1.5;
         } else {
             globeScale = 1.8;
         }
     } else if (isMobile) {
         globeScale = 0.7;
-    } else if (compact) {
+    } else if (compact === true) {
         globeScale = 1.15;
     } else {
         globeScale = 0.85;
@@ -302,7 +280,6 @@ export function Planet({
             style={{ width: size, height: size }}
             tabIndex={0}
         >
-            {/* ── Globe (layout anchor) ── */}
             <div
                 className="will-change-[transform,filter]"
                 ref={wrapperRef}
@@ -360,8 +337,7 @@ export function Planet({
                 ))}
             </div>
 
-            {/* ── Name (absolute, above globe) ── */}
-            {!hideLabels && (
+            {hideLabels !== true && (
                 <p
                     className="font-heading pointer-events-none absolute left-1/2 -translate-x-1/2 text-center tracking-wider whitespace-nowrap"
                     style={{

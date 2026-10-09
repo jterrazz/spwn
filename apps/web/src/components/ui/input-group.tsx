@@ -4,10 +4,10 @@ import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
+import { cn } from '../../styles/class-names';
 import { Button } from './button';
 import { Input } from './input';
 import { Textarea } from './textarea';
-import { cn } from '../../styles/class-names';
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
     return (
@@ -79,70 +79,4 @@ const inputGroupButtonVariants = cva('flex items-center gap-2 text-sm shadow-non
     },
 });
 
-function InputGroupButton({
-    className,
-    type = 'button',
-    variant = 'ghost',
-    size = 'xs',
-    ...props
-}: Omit<React.ComponentProps<typeof Button>, 'size' | 'type'> &
-    VariantProps<typeof inputGroupButtonVariants> & {
-        type?: 'button' | 'reset' | 'submit';
-    }) {
-    return (
-        <Button
-            className={cn(inputGroupButtonVariants({ size }), className)}
-            data-size={size}
-            type={type}
-            variant={variant}
-            {...props}
-        />
-    );
-}
-
-function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
-    return (
-        <span
-            className={cn(
-                "text-muted-foreground flex items-center gap-2 text-sm [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
-                className,
-            )}
-            {...props}
-        />
-    );
-}
-
-function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>) {
-    return (
-        <Input
-            className={cn(
-                'flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 disabled:bg-transparent aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent',
-                className,
-            )}
-            data-slot="input-group-control"
-            {...props}
-        />
-    );
-}
-
-function InputGroupTextarea({ className, ...props }: React.ComponentProps<'textarea'>) {
-    return (
-        <Textarea
-            className={cn(
-                'flex-1 resize-none rounded-none border-0 bg-transparent py-2 shadow-none ring-0 focus-visible:ring-0 disabled:bg-transparent aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent',
-                className,
-            )}
-            data-slot="input-group-control"
-            {...props}
-        />
-    );
-}
-
-export {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupButton,
-    InputGroupInput,
-    InputGroupText,
-    InputGroupTextarea,
-};
+export { InputGroup, InputGroupAddon };

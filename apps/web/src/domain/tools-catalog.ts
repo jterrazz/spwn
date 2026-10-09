@@ -1,12 +1,9 @@
-/**
- * Static tool catalog - mirrors the /catalog/ tree at the repo root.
- * Skill content is inlined from the embedded markdown files.
- */
+/** Static tool catalog - mirrors the /catalog/ tree at the repo root. Skill content is inlined from the embedded markdown files. */
 
 export type ToolStatus = 'available' | 'planned';
 
 export interface SkillFile {
-    name: string; // E.g. "SKILL.md", "fleet-ops.md"
+    name: string;
     content: string;
 }
 

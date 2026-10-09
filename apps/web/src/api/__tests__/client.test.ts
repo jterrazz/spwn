@@ -1,22 +1,16 @@
 import { http, intercept } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import type { World } from '../domain/model';
+import type { World } from '../../domain/model';
+import { apiGet, setApiBase } from '../client';
 
-import { apiGet, setApiBase } from './client';
-
-/**
- * The Given every test here calls: the base the client resolves against, and
- * the route it answers. The route is declared in PATH FORM — it matches the
- * path on any origin, so the base does not have to be repeated here.
- */
 async function worldsAnswer(payload: Record<string, unknown>[]) {
     setApiBase('http://spwn.test');
     return await intercept(http.get('/api/worlds'), http.json(payload));
 }
 
-describe('the worlds route', () => {
-    test('a declared world is known by its manifest name', async () => {
+describe('client', () => {
+    test('the worlds route — a declared world is known by its manifest name', async () => {
         // Given - a project that declares a world no container backs
         await using _ = await worldsAnswer([
             { agents: ['neo'], name: 'matrix', status: 'stopped', workspaces: ['.'] },
@@ -37,7 +31,7 @@ describe('the worlds route', () => {
         });
     });
 
-    test('a running world keeps the container identity it was given', async () => {
+    test('the worlds route — a running world keeps the container identity it was given', async () => {
         // Given - a world with a container behind it
         await using _ = await worldsAnswer([
             {
@@ -61,7 +55,7 @@ describe('the worlds route', () => {
         });
     });
 
-    test('the single-valued agent and workspace fields still resolve', async () => {
+    test('the worlds route — the single-valued agent and workspace fields still resolve', async () => {
         // Given - the older shape, one agent and one mount
         await using _ = await worldsAnswer([
             {

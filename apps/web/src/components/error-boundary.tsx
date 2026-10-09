@@ -38,12 +38,17 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                         Something went wrong
                     </h2>
                     <p className="text-muted-foreground/40 mb-4 max-w-md text-center font-mono text-sm">
-                        {this.state.error?.message || 'An unexpected error occurred'}
+                        {(this.state.error?.message !== undefined &&
+                            this.state.error?.message !== '') ||
+                            'An unexpected error occurred'}
                     </p>
                     <button
                         className="text-foreground/60 hover:text-foreground/80 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-2 text-sm transition-all hover:bg-white/[0.08]"
                         // oxlint-disable-next-line react/no-set-state -- class-based ErrorBoundary has no hook alternative for resetting its own state
-                        onClick={() => this.setState({ hasError: false, error: null })}
+                        onClick={() => {
+                            this.setState({ hasError: false, error: null });
+                        }}
+                        type="button"
                     >
                         Try again
                     </button>

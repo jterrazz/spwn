@@ -5,10 +5,7 @@ interface PageProps {
     className?: string;
 }
 
-/**
- * Unified page container: consistent padding and vertical spacing for all pages.
- * Use inside a route's page.tsx as the outermost wrapper.
- */
+/** Unified page container: consistent padding and vertical spacing for all pages. Use inside a route's page.tsx as the outermost wrapper. */
 export function Page({ children, className = '' }: PageProps) {
     return (
         <div

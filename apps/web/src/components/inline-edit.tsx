@@ -3,6 +3,8 @@
 import { IconCheck, IconPencil, IconX } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { inBackground } from '../events/in-background';
+
 interface InlineEditProps {
     value: string;
     placeholder?: string;
@@ -57,11 +59,11 @@ export function InlineEdit({
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !multiline) {
             e.preventDefault();
-            handleSave();
+            void handleSave();
         }
         if (e.key === 'Enter' && multiline && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
-            handleSave();
+            void handleSave();
         }
         if (e.key === 'Escape') {
             handleCancel();
@@ -74,7 +76,9 @@ export function InlineEdit({
                 {multiline ? (
                     <textarea
                         className="text-foreground/80 flex-1 resize-none rounded-lg border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-white/[0.2] focus:outline-none"
-                        onChange={(e) => setDraft(e.target.value)}
+                        onChange={(e) => {
+                            setDraft(e.target.value);
+                        }}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                         ref={inputRef as React.RefObject<HTMLTextAreaElement>}
@@ -84,7 +88,9 @@ export function InlineEdit({
                 ) : (
                     <input
                         className="text-foreground/80 flex-1 rounded-lg border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-white/[0.2] focus:outline-none"
-                        onChange={(e) => setDraft(e.target.value)}
+                        onChange={(e) => {
+                            setDraft(e.target.value);
+                        }}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                         ref={inputRef as React.RefObject<HTMLInputElement>}
@@ -94,7 +100,8 @@ export function InlineEdit({
                 <button
                     className="rounded-lg p-1.5 text-green-400/70 transition-colors hover:bg-green-500/10 hover:text-green-400 disabled:opacity-30"
                     disabled={saving}
-                    onClick={handleSave}
+                    onClick={inBackground(handleSave)}
+                    type="button"
                 >
                     {saving ? (
                         <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
@@ -105,6 +112,7 @@ export function InlineEdit({
                 <button
                     className="text-muted-foreground/40 hover:text-foreground/60 rounded-lg p-1.5 transition-colors hover:bg-white/[0.04]"
                     onClick={handleCancel}
+                    type="button"
                 >
                     <IconX size={14} />
                 </button>
@@ -115,7 +123,9 @@ export function InlineEdit({
     return (
         <div
             className={`group relative cursor-pointer ${className}`}
-            onClick={() => setEditing(true)}
+            onClick={() => {
+                setEditing(true);
+            }}
         >
             <span className={value ? '' : 'text-muted-foreground/30 italic'}>
                 {value || placeholder}
@@ -182,7 +192,10 @@ export function InlineTagsEdit({
                         <button
                             className="ml-1.5 text-red-400/60 transition-colors hover:text-red-400"
                             disabled={saving}
-                            onClick={async () => await handleRemove(tag)}
+                            onClick={inBackground(async () => {
+                                await handleRemove(tag);
+                            })}
+                            type="button"
                         >
                             <IconX size={10} />
                         </button>
@@ -193,11 +206,13 @@ export function InlineTagsEdit({
                 <div className="flex items-center gap-1">
                     <input
                         className="text-foreground/70 w-24 rounded-full border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] transition-colors focus:border-white/[0.2] focus:outline-none"
-                        onChange={(e) => setNewTag(e.target.value)}
+                        onChange={(e) => {
+                            setNewTag(e.target.value);
+                        }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
-                                handleAdd();
+                                void handleAdd();
                             }
                             if (e.key === 'Escape') {
                                 setEditing(false);
@@ -209,7 +224,10 @@ export function InlineTagsEdit({
                     />
                     <button
                         className="text-muted-foreground/40 hover:text-foreground/60 p-1 transition-colors"
-                        onClick={() => setEditing(false)}
+                        onClick={() => {
+                            setEditing(false);
+                        }}
+                        type="button"
                     >
                         <IconCheck size={12} />
                     </button>
@@ -217,7 +235,10 @@ export function InlineTagsEdit({
             ) : (
                 <button
                     className="text-muted-foreground/30 hover:text-muted-foreground/50 rounded-full border border-dashed border-white/[0.1] px-2.5 py-1 font-mono text-[11px] transition-colors hover:border-white/[0.2]"
-                    onClick={() => setEditing(true)}
+                    onClick={() => {
+                        setEditing(true);
+                    }}
+                    type="button"
                 >
                     + add
                 </button>
