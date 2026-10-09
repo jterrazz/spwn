@@ -4,6 +4,8 @@ import { afterEach, describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts nor remove the snapshot images it tagged
+
 const WORLD = '$(ls .spwn/world-states | head -1)';
 
 describe('snapshots', () => {

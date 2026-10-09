@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot judge JSON by its structure: each report is compared whole as the value it parses to
+
 describe('json-report', () => {
     test('a valid project reports no issue', async () => {
         // Given - the single-agent project

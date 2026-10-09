@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot read a container back: the skills tree is listed inside the running world
+
 describe('skills', () => {
     test('a claude-code agent finds its resolved skills under its own .claude/skills', async () => {
         // Given - a project scaffolded for claude-code, then brought up

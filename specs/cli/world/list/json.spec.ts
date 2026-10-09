@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../../cli.specification.js';
 
+// hazard: a document cannot judge JSON by its structure: the listing is compared whole as the value it parses to
+
 describe('json', () => {
     test('a project lists its declared worlds, stopped', async () => {
         // Given - single-agent declares one world neo with one agent

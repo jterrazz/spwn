@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot run a table of examples nor read a container back
+
 const real = cli.with({ env: { SPWN_BASE_IMAGE: null } });
 
 describe('real-build', () => {

@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts: each session opens on `up`
+
 describe('inspect', () => {
     test('world inspect describes the running world', async () => {
         // Given - the project brought up, then its world inspected by id

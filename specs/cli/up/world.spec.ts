@@ -4,6 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 import { worldOf } from './__setup__/world.js';
 
+// hazard: a document cannot read a container back: its labels, mounts, network and agent home are the claim
+
 describe('world', () => {
     test('up brings the agent online in a bounded, unprivileged world on the bridge network', async () => {
         // Given - the docker-pilot project brought up

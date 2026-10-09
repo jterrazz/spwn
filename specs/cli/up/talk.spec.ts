@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot read a container back: the simulated runtime’s receipt is read inside the running world
+
 const simulated = cli.with({ env: { SPWN_BASE_IMAGE: 'spwn-test:latest' } });
 
 describe('talk', () => {

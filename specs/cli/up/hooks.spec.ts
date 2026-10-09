@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot read a container back: the hooks run inside the running world
+
 const SESSION_HOOK = 'echo "session-start=$(date -u +%FT%TZ)" > /tmp/hook-pilot-session.log';
 const BASH_HOOK = 'echo "bash $(date -u +%FT%TZ)" >> /tmp/hook-pilot-bash.log';
 

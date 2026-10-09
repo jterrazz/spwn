@@ -5,6 +5,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot read inside an archive: the exported tarball is listed with tar
+
 describe('export', () => {
     test('the exported archive carries the soul and both mind layers', async () => {
         // Given - the create and export session, stated whole in the document

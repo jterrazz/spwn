@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot read a container back: the agent homes are listed inside the running world
+
 describe('severance', () => {
     test('the mdr world of the severance example runs its four agents in one container', async () => {
         // Given - the severance example installed, then its mdr world brought up

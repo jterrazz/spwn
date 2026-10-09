@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot run a command inside the running world, which is what proves the mount
+
 describe('workspace', () => {
     test('the project is mounted read-write: the agent reads the host files and what it writes lands on the host', async () => {
         // Given - the docker-pilot project brought up

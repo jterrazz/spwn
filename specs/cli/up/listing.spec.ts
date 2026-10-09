@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts, and two listings are JSON judged by their structure
+
 describe('listing', () => {
     test('a world brought up is listed running with its agent', async () => {
         // Given - the project brought up, then its worlds listed

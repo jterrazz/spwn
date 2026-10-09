@@ -4,6 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { ARCHITECT_IMAGE_OVERRIDE, withoutArchitect } from '../../../__setup__/architect.js';
 import { cli } from '../../cli.specification.js';
 
+// hazard: a document cannot hold the architect lock nor read the container back: the product names its one container whatever the home
+
 const architect = cli.with({ env: { SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE } });
 
 describe('lifecycle', () => {

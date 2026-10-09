@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts nor read them back
+
 const simulated = cli.with({ env: { SPWN_BASE_IMAGE: 'spwn-test:latest' } });
 
 describe('ephemeral', () => {

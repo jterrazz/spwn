@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts nor read them back: each session opens on `up`
+
 describe('down', () => {
     test('down destroys the container and journals the session, the mind kept on disk', async () => {
         // Given - the project brought up, then torn down

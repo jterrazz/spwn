@@ -4,6 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 import { labelsOf } from './__setup__/world.js';
 
+// hazard: a document cannot compare two sessions nor read their containers back
+
 const real = cli.with({ env: { SPWN_BASE_IMAGE: null } });
 
 const INSIDE = [

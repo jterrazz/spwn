@@ -4,6 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { ARCHITECT_IMAGE_OVERRIDE, withoutArchitect } from '../../../__setup__/architect.js';
 import { cli } from '../../cli.specification.js';
 
+// hazard: a document cannot hold the architect lock the specs share on the one container the product names
+
 describe('idle', () => {
     test('status reports not running when no architect container exists', async () => {
         // Given - a project with no architect container up

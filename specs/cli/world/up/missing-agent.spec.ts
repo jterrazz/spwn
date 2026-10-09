@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../../cli.specification.js';
 
+// hazard: a document cannot list the containers a session leaves, and the refusal must leave none
+
 describe('missing-agent', () => {
     test('world up naming an agent that does not exist is refused, with the command that creates it', async () => {
         // Given - a world up naming an agent that does not exist

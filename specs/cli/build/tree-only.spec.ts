@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot judge JSON by its structure nor compare a directory tree whole
+
 describe('tree-only', () => {
     test('--json reports every file of the compiled tree', async () => {
         // Given - the docker-pilot project compiled with --json

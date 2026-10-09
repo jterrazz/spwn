@@ -48,7 +48,7 @@ A `specs/cli/<domain>/<case>.spec.yaml` document by default: the ground it stand
 3. Read what it wrote, and turn into a token whatever stayed literal and varies — a temporary path, a random name, a clock.
 4. Run it again without the flag; it passes twice in a row.
 
-A chain, `<aspect>.spec.ts`, is for what a document cannot state: a container read back, JSON judged by its shape, an absence, two runs compared, a long-running process. It opens with that reason, and a chain that spawns a container scopes its result with `await using`.
+A chain, `<aspect>.spec.ts`, is for what a document cannot state: a container read back, a session that starts one (the chain scopes it with `await using`), JSON judged by its structure, a command run inside a world, two runs compared, a long-running process. It opens, below its imports, with that reason, written as a `// hazard: a document cannot …` comment: what a document would lose. Everything else, an exit code, both streams, a file on disk whole, is a document.
 
 A spec that starts the architect, in `cli/` or in `website/`, runs its chain inside `withoutArchitect` (`specs/__setup__/architect.ts`): the product names that container `spwn-architect` whatever the home, and the spec files run in parallel workers, so without the lock they remove each other's container.
 

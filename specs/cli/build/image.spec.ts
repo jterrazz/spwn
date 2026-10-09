@@ -4,6 +4,8 @@ import { afterEach, describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot ask Docker for the images a build tagged, nor remove them after
+
 const build = cli.with({ env: { SPWN_BASE_IMAGE: 'spwn-test:latest' } });
 
 const BUILT_TAGS = ['spwn-docker-pilot:latest', 'spwn-codex-pilot:test', 'spwn-test-qa:v1'];

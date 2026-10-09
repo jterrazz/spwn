@@ -4,6 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot look for the processes a long-running server leaves once stopped
+
 const MARKER = 'spwn-web-shutdown-home';
 
 const survivorsCarrying = (marker: string): string =>

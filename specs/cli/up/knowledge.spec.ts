@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
+// hazard: a document cannot scope the containers a session starts: the session opens on `up`
+
 describe('knowledge', () => {
     test('world knowledge ls lists what the world knowledge folder holds', async () => {
         // Given - a project whose knowledge folder holds a note, brought up, then the world's knowledge listed by id
