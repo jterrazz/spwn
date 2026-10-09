@@ -5,11 +5,16 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { openSession } from '../session.ts';
 
-type Received = { body: unknown; method: string | undefined; url: string | undefined };
+type Received = {
+    body: unknown;
+    method: string | undefined;
+    type: string | undefined;
+    url: string | undefined;
+};
 
 async function sidecar(
     status: number,
-    reply: (url: string | undefined) => unknown,
+    reply: (url: string | undefined) => string,
 ): Promise<{ origin: string; received: Received[]; server: Server }> {
     const received: Received[] = [];
     const server = createServer((request, response) => {
@@ -22,11 +27,10 @@ async function sidecar(
             received.push({
                 body: raw === '' ? null : (JSON.parse(raw) as unknown),
                 method: request.method,
+                type: request.headers['content-type'],
                 url: request.url,
             });
-            response
-                .writeHead(status, { 'content-type': 'application/json' })
-                .end(JSON.stringify(reply(request.url)));
+            response.writeHead(status).end(reply(request.url));
         });
     });
     server.listen(0, '127.0.0.1');
@@ -39,76 +43,98 @@ async function sidecar(
     };
 }
 
+const JSON_TYPE = 'application/json';
+
+async function driven() {
+    const { origin, received, server } = await sidecar(200, (url) => {
+        if (url === '/sessions') {
+            return JSON.stringify({ id: 'session-1' });
+        }
+        return url === '/sessions/session-1/eval' ? JSON.stringify('Home / X') : '';
+    });
+    vi.stubEnv('GATE_BROWSER_URL', origin);
+    const session = await openSession('x');
+    const results = [
+        await session.goto('https://x.com/home', { wait_until: 'networkidle' }),
+        await session.waitResponse('/Bookmarks', { method: 'POST' }),
+        await session.click('[data-testid="tweetButton"]'),
+        await session.type('textarea', 'hello'),
+        await session.scroll({ count: 2, wait_ms: 0 }),
+        await session.waitSelector('[data-ready="true"]'),
+        await session.eval('document.title'),
+        await session.capturedResponses({ url_pattern: 'GraphQL' }),
+    ];
+    await session.end();
+    await session.end();
+    server.close();
+    return { received, results };
+}
+
+function sent(url: string, body: unknown, method = 'POST'): Received {
+    return { body, method, type: JSON_TYPE, url };
+}
+
 describe('Session', () => {
+    test('each action returns what the sidecar answered, nothing for an empty answer', async () => {
+        // Given - a sidecar that evaluates to the page title and answers every other action empty
+        const { results } = await driven();
+
+        // Then - the title for eval, null for the rest
+        expect(results).toStrictEqual([null, null, null, null, null, null, 'Home / X', null]);
+    });
+
     test('a session drives the sidecar route by route, and closes once', async () => {
-        // Given - a sidecar that opens session-1 and acknowledges every action
-        const { origin, received, server } = await sidecar(200, (url) =>
-            url === '/sessions' ? { id: 'session-1' } : { ok: true },
-        );
-        vi.stubEnv('GATE_BROWSER_URL', origin);
+        // Given - a tool that runs every action of a session, then ends it twice
+        const { received } = await driven();
 
-        // When - a tool runs every action of a session, then ends it twice
-        const session = await openSession('x');
-        await session.goto('https://x.com/home', { wait_until: 'networkidle' });
-        await session.waitResponse('/Bookmarks', { method: 'POST' });
-        await session.click('[data-testid="tweetButton"]');
-        await session.type('textarea', 'hello');
-        await session.scroll({ count: 2, wait_ms: 0 });
-        await session.waitSelector('[data-ready="true"]');
-        await session.eval('document.title');
-        await session.capturedResponses({ url_pattern: 'GraphQL' });
-        await session.end();
-        await session.end();
-        server.close();
-
-        // Then - the requests the sidecar received, in order
+        // Then - the requests the sidecar received, in order, each a JSON body
         expect(received).toStrictEqual([
-            { body: { provider: 'x' }, method: 'POST', url: '/sessions' },
-            {
-                body: { url: 'https://x.com/home', wait_until: 'networkidle' },
+            sent('/sessions', { provider: 'x' }),
+            sent('/sessions/session-1/goto', {
+                url: 'https://x.com/home',
+                wait_until: 'networkidle',
+            }),
+            sent('/sessions/session-1/wait-response', {
                 method: 'POST',
-                url: '/sessions/session-1/goto',
-            },
-            {
-                body: { method: 'POST', url_pattern: '/Bookmarks' },
-                method: 'POST',
-                url: '/sessions/session-1/wait-response',
-            },
-            {
-                body: { selector: '[data-testid="tweetButton"]' },
-                method: 'POST',
-                url: '/sessions/session-1/click',
-            },
-            {
-                body: { selector: 'textarea', text: 'hello' },
-                method: 'POST',
-                url: '/sessions/session-1/type',
-            },
-            { body: { count: 2, wait_ms: 0 }, method: 'POST', url: '/sessions/session-1/scroll' },
-            {
-                body: { selector: '[data-ready="true"]' },
-                method: 'POST',
-                url: '/sessions/session-1/wait-selector',
-            },
-            { body: { script: 'document.title' }, method: 'POST', url: '/sessions/session-1/eval' },
-            {
-                body: { url_pattern: 'GraphQL' },
-                method: 'POST',
-                url: '/sessions/session-1/captured-responses',
-            },
-            { body: null, method: 'DELETE', url: '/sessions/session-1' },
+                url_pattern: '/Bookmarks',
+            }),
+            sent('/sessions/session-1/click', { selector: '[data-testid="tweetButton"]' }),
+            sent('/sessions/session-1/type', { selector: 'textarea', text: 'hello' }),
+            sent('/sessions/session-1/scroll', { count: 2, wait_ms: 0 }),
+            sent('/sessions/session-1/wait-selector', { selector: '[data-ready="true"]' }),
+            sent('/sessions/session-1/eval', { script: 'document.title' }),
+            sent('/sessions/session-1/captured-responses', { url_pattern: 'GraphQL' }),
+            sent('/sessions/session-1', null, 'DELETE'),
         ]);
     });
 
-    test('a sidecar refusal fails the call with its method, URL, status and reason', async () => {
-        // Given - a sidecar answering 503 with its reason
-        const { origin, server } = await sidecar(503, () => ({ error: 'sidecar unavailable' }));
-        vi.stubEnv('GATE_BROWSER_URL', origin);
+    test.each([
+        {
+            body: JSON.stringify({ error: 'bad provider' }),
+            reason: 'bad provider',
+            status: 400,
+        },
+        { body: JSON.stringify({ error: 503 }), reason: '{"error":503}', status: 503 },
+        { body: 'upstream down', reason: 'upstream down', status: 502 },
+    ])(
+        'a sidecar refusal $status fails the call with its method, URL, status and reason',
+        async ({ body, reason, status }) => {
+            // Given - a sidecar refusing with a JSON reason, a reason that is not text, or plain text
+            const { origin, server } = await sidecar(status, () => body);
+            vi.stubEnv('GATE_BROWSER_URL', origin);
 
-        // Then - the open fails with every part of the refusal
-        await expect(openSession('x')).rejects.toThrow(
-            `POST ${origin}/sessions → 503: sidecar unavailable`,
-        );
-        server.close();
+            // Then - the open fails with the reason when it is text, the whole body otherwise
+            await expect(openSession('x')).rejects.toThrow(
+                `POST ${origin}/sessions → ${status}: ${reason}`,
+            );
+            server.close();
+        },
+    );
+
+    test('a session needs a provider to load its cookies from', async () => {
+        // Given - no provider named
+
+        // Then - the open is refused before any request
+        await expect(openSession('')).rejects.toThrow('openSession: provider name required');
     });
 });

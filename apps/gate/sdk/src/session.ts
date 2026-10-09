@@ -7,9 +7,9 @@ type Options = Record<string, unknown>;
 
 async function call(method: 'DELETE' | 'POST', url: string, body?: Json): Promise<Json> {
     const response = await fetch(url, {
+        body: JSON.stringify(body),
         headers: { 'content-type': 'application/json' },
         method,
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const text = await response.text();
     if (response.status >= 400) {

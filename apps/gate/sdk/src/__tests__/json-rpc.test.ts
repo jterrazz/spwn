@@ -19,9 +19,23 @@ const broken: Method = {
     name: 'broken',
     schema: { type: 'object' },
 };
+const echo: Method = {
+    description: 'Echo its arguments',
+    handler: ({ args }) => args,
+    name: 'echo',
+    schema: { type: 'object' },
+};
+const greet: Method = {
+    description: 'Greet',
+    handler: () => 'hello',
+    name: 'greet',
+    schema: { type: 'object' },
+};
 const METHODS = new Map([
     ['broken', broken],
     ['count', count],
+    ['echo', echo],
+    ['greet', greet],
 ]);
 
 describe('json-rpc', () => {
@@ -66,6 +80,16 @@ describe('json-rpc', () => {
                                 inputSchema: count.schema,
                                 name: 'count',
                             },
+                            {
+                                description: 'Echo its arguments',
+                                inputSchema: { type: 'object' },
+                                name: 'echo',
+                            },
+                            {
+                                description: 'Greet',
+                                inputSchema: { type: 'object' },
+                                name: 'greet',
+                            },
                         ],
                     },
                 },
@@ -102,6 +126,33 @@ describe('json-rpc', () => {
                 status: 200,
             },
             request: { id: 5, jsonrpc: '2.0', method: 'tools/call', params: { name: 'broken' } },
+        },
+        {
+            answer: {
+                body: {
+                    id: 9,
+                    jsonrpc: '2.0',
+                    result: { content: [{ text: '{}', type: 'text' }] },
+                },
+                status: 200,
+            },
+            request: {
+                id: 9,
+                jsonrpc: '2.0',
+                method: 'tools/call',
+                params: { arguments: 'limit', name: 'echo' },
+            },
+        },
+        {
+            answer: {
+                body: {
+                    id: 10,
+                    jsonrpc: '2.0',
+                    result: { content: [{ text: 'hello', type: 'text' }] },
+                },
+                status: 200,
+            },
+            request: { id: 10, jsonrpc: '2.0', method: 'tools/call', params: { name: 'greet' } },
         },
         {
             answer: {

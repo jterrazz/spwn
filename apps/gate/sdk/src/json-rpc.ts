@@ -44,7 +44,8 @@ async function called(
     }
     try {
         const result = await method.handler({
-            args: typeof args === 'object' && args !== null ? { ...args } : {},
+            // invariant: spreading null gives `{}`, so null needs no branch; a string would spread into its characters
+            args: typeof args === 'object' ? { ...args } : {},
         });
         const text = typeof result === 'string' ? result : JSON.stringify(result);
         return ok(id, { content: [{ text, type: 'text' }] });

@@ -33,9 +33,8 @@ async function readJson(request: IncomingMessage): Promise<Json> {
     for await (const chunk of request) {
         chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
     }
-    return chunks.length === 0
-        ? {}
-        : (JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown);
+    const parsed: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return parsed;
 }
 
 /** A catalog tool: the methods it registers, served as MCP tools to the gate and as a CLI to a host script. */
@@ -105,8 +104,8 @@ export class Tool {
     }
 
     private serve(): Server {
-        const port = Number.parseInt(process.env.GATE_TOOL_PORT ?? '0', 10);
-        if (port === 0) {
+        const port = Number(process.env.GATE_TOOL_PORT ?? '');
+        if (!Number.isInteger(port) || port <= 0) {
             throw new Error('mcp-serve: GATE_TOOL_PORT not set');
         }
         const server = createServer((request, response) => {
@@ -126,6 +125,7 @@ export class Tool {
     }
 
     private async respond(request: IncomingMessage, response: ServerResponse): Promise<void> {
+        // Stryker disable next-line OptionalChaining: node's http server sets `url` on every request it parses; the type allows a hand-built one
         if (request.method === 'GET' && request.url?.split('?')[0] === '/healthz') {
             send(response, 200, { methods: this.methods.size, name: this.identity.name, ok: true });
             return;
