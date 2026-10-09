@@ -1,4 +1,4 @@
-import { directory, file } from '@jterrazz/test';
+import { directory, file, text } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -10,16 +10,20 @@ describe('down', () => {
             .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down']);
 
-        // Then - the teardown session, no container, and one journal entry beside the soul
+        // Then - the teardown session, no container, the soul kept, and the journal holding the session's entry and its record
         expect(result.exitCode).toBe(0);
         // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/down.txt'));
-        const journal = await result.directory('spwn/agents/neo/journal').files();
         expect({
             containers: result.containerIds,
-            journal: journal.length,
             soul: result.file('spwn/agents/neo/SOUL.md').exists,
-        }).toStrictEqual({ containers: [], journal: 3, soul: true });
+        }).toStrictEqual({ containers: [], soul: true });
+        const journal = await result.directory('spwn/agents/neo/journal').files();
+        expect(text(journal.map((name) => `${name}\n`).join(''))).toMatch(`
+            .gitkeep
+            {{date}}_{{number}}_world-neo-{{hex#world}}.md
+            world-neo-{{hex#world}}.json
+        `);
     });
 
     test('a destroyed world is listed stopped, its agent unattached', async () => {
