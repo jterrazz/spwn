@@ -9,6 +9,15 @@
             "cache": true,
             "command": ["go", "build", "-o", "../../.artifacts/go/spwn", "./cmd/spwn"],
             "outputs": ["$TURBO_ROOT$/.artifacts/go/spwn"]
+        },
+        // invariant: cmd/gen-docs's tests compare the Cobra tree with two files outside this module, the generated
+        // commands page and the cli specification's command words, so either one changing reruns them.
+        "test": {
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                "$TURBO_ROOT$/docs/reference/commands.md",
+                "$TURBO_ROOT$/specs/cli/cli.specification.ts"
+            ]
         }
     }
 }
