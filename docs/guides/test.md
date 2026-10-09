@@ -50,6 +50,8 @@ A `specs/cli/<domain>/<case>.spec.yaml` document by default: the ground it stand
 
 A chain, `<aspect>.spec.ts`, is for what a document cannot state: a container read back, JSON judged by its shape, an absence, two runs compared, a long-running process. It opens with that reason, and a chain that spawns a container scopes its result with `await using`.
 
+A spec that starts the architect, in `cli/` or in `website/`, runs its chain inside `withoutArchitect` (`specs/__setup__/architect.ts`): the product names that container `spwn-architect` whatever the home, and the spec files run in parallel workers, so without the lock they remove each other's container.
+
 ### A website specification
 
 A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline — the accessibility tree — whole. Each file starts its own `spwn web` on a fresh project and its own `next dev`, so the files run one at a time.
