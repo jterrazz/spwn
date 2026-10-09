@@ -26,8 +26,8 @@ export class Session {
         this.context = context;
         this.page = page;
         page.on('response', (response) => {
-            const type = (response.headers()['content-type'] ?? '').toLowerCase();
-            if (!type.includes('json') && !type.includes('javascript')) {
+            const type = response.headers()['content-type']?.toLowerCase();
+            if (type?.includes('json') !== true && type?.includes('javascript') !== true) {
                 return;
             }
             this.captured.push({

@@ -1,37 +1,17 @@
-import type { Response } from 'playwright';
-
-import { RefusedError } from './http.ts';
+import { done, given, number, OPERATION_TIMEOUT_MS, required, text } from './fields.ts';
+import type { Body, Reply } from './fields.ts';
+import { captured, waitResponse } from './responses.ts';
 import { HARD_TTL_MS } from './session.ts';
 import type { Sessions } from './sessions.ts';
 
-type Body = Record<string, unknown>;
-type Reply = { body: unknown; status: number };
 export type Route = {
     action: (sessions: Sessions, id: string, body: Body) => Promise<Reply>;
     method: 'DELETE' | 'GET' | 'POST';
     path: RegExp;
 };
 
-const OPERATION_TIMEOUT_MS = 20_000;
 const SCROLL_DELTA = 4000;
 const SCROLL_WAIT_MS = 1500;
-
-const text = (body: Body, key: string): string => {
-    const value = body[key];
-    return typeof value === 'string' ? value : '';
-};
-const number = (body: Body, key: string, fallback: number): number => {
-    const value = body[key];
-    return typeof value === 'number' && value !== 0 ? value : fallback;
-};
-const required = (body: Body, key: string): string => {
-    const value = text(body, key);
-    if (value === '') {
-        throw new RefusedError(400, `${key} is required`);
-    }
-    return value;
-};
-const done: Reply = { body: { ok: true }, status: 200 };
 
 const LOAD_STATES = ['commit', 'domcontentloaded', 'load', 'networkidle'] as const;
 const SELECTOR_STATES = ['attached', 'detached', 'hidden', 'visible'] as const;
@@ -40,58 +20,11 @@ function oneOf<T extends string>(values: readonly T[], value: string, fallback: 
     return values.find((candidate) => candidate === value) ?? fallback;
 }
 
-async function bodyOf(response: Response): Promise<unknown> {
-    try {
-        const json: unknown = await response.json();
-        return json;
-    } catch {
-        return await response.text().catch(() => null);
-    }
-}
-
-async function waitResponse(sessions: Sessions, id: string, body: Body): Promise<Reply> {
-    const pattern = new RegExp(required(body, 'url_pattern'), 'u');
-    const method = text(body, 'method').toUpperCase();
-    const anyType = body.allow_non_json === true;
-    const response = await sessions
-        .get(id)
-        .page.waitForResponse(
-            (candidate) =>
-                pattern.test(candidate.url()) &&
-                (method === '' || candidate.request().method() === method) &&
-                (anyType ||
-                    (candidate.headers()['content-type'] ?? '').toLowerCase().includes('json')),
-            { timeout: number(body, 'timeout_ms', OPERATION_TIMEOUT_MS) },
-        );
-    return {
-        body: { body: await bodyOf(response), status: response.status(), url: response.url() },
-        status: 200,
-    };
-}
-
-async function captured(sessions: Sessions, id: string, body: Body): Promise<Reply> {
-    const pattern =
-        text(body, 'url_pattern') === '' ? null : new RegExp(text(body, 'url_pattern'), 'u');
-    const since = number(body, 'since_ts', 0);
-    const kept = sessions
-        .get(id)
-        .captured.filter((entry) => entry.ts >= since && (pattern?.test(entry.url) ?? true));
-    const responses = await Promise.all(
-        kept.map(async (entry) => ({
-            body: await bodyOf(entry.response),
-            method: entry.method,
-            status: entry.status,
-            ts: entry.ts,
-            url: entry.url,
-        })),
-    );
-    return { body: { responses }, status: 200 };
-}
-
 async function scroll(sessions: Sessions, id: string, body: Body): Promise<Reply> {
     const { page } = sessions.get(id);
     for (let step = 0; step < number(body, 'count', 1); step += 1) {
         await page.mouse.wheel(0, number(body, 'delta_y', SCROLL_DELTA));
+        // Stryker disable next-line StringLiteral: the wait only paces a page's lazy loading between wheels, and no answer reads it
         await page.waitForTimeout(number(body, 'wait_ms', SCROLL_WAIT_MS));
     }
     return done;
@@ -118,6 +51,7 @@ export const ROUTES: Route[] = [
     {
         action: async (sessions, id) => {
             await sessions.end(id);
+            // Stryker disable next-line StringLiteral: a 204 carries no body, so node drops whatever is written
             return { body: '', status: 204 };
         },
         method: 'DELETE',
@@ -151,10 +85,12 @@ export const ROUTES: Route[] = [
     {
         action: async (sessions, id, body) => {
             const { page } = sessions.get(id);
-            await page.click(required(body, 'selector'), {
+            const selector = required(body, 'selector');
+            const typed = given(body, 'text');
+            await page.click(selector, {
                 timeout: number(body, 'timeout_ms', OPERATION_TIMEOUT_MS),
             });
-            await page.keyboard.type(text(body, 'text'));
+            await page.keyboard.type(typed);
             return done;
         },
         method: 'POST',

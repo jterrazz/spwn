@@ -34,6 +34,7 @@ export function providerCookies(credentials: string, provider: string): Cookie[]
             'NO_COOKIES',
         );
     }
+    // Stryker disable next-line StringLiteral: JSON.parse reads a Buffer as its UTF-8 text, so no encoding reads differently
     const synced: unknown = JSON.parse(readFileSync(file, 'utf8'));
     const jar: unknown =
         typeof synced === 'object' && synced !== null ? Reflect.get(synced, 'cookies') : undefined;

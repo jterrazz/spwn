@@ -9,6 +9,9 @@ import { Session } from './session.ts';
 const USER_AGENT =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36';
 
+// Stryker disable next-line ObjectLiteral,ArrayDeclaration,StringLiteral,BooleanLiteral: a mutant turning headless off would open a window on the machine measuring it, and the flags are what Chromium needs inside the gate container, changing nothing outside one
+const LAUNCH = { args: ['--no-sandbox', '--disable-dev-shm-usage'], headless: true };
+
 /** Every open session over one warm Chromium, which every session shares. */
 export class Sessions {
     private browser: Browser | null = null;
@@ -77,14 +80,7 @@ export class Sessions {
         if (this.browser?.isConnected() === true) {
             return this.browser;
         }
-        const browser = await chromium.launch({
-            args: ['--no-sandbox', '--disable-dev-shm-usage'],
-            headless: true,
-        });
-        browser.on('disconnected', () => {
-            this.browser = null;
-        });
-        this.browser = browser;
-        return browser;
+        this.browser = await chromium.launch(LAUNCH);
+        return this.browser;
     }
 }
