@@ -1,39 +1,39 @@
 {
     "$schema": "https://turborepo.dev/schema.json",
-    // Both toolchains are one graph: `experimentalGoWorkspaces` reads go.work
-    // and turns every module into a package, beside the pnpm workspace's own.
-    // `experimentalTaskCommand` is what lets `lint` be golangci-lint instead of
-    // the `go vet` Turborepo would default to.
+    // outside: `experimentalGoWorkspaces` reads go.work and turns every module into a package beside the pnpm
+    // workspace's own; `experimentalTaskCommand` lets `lint` be golangci-lint instead of the `go vet` default.
     "futureFlags": {
         "experimentalGoWorkspaces": true,
         "experimentalTaskCommand": true
     },
-    // Artefacts have one root in this repository; the cache obeys it.
     "cacheDir": ".artifacts/turbo",
     "tasks": {
-        // No `^build` anywhere: spwn.sh/packages/world and
-        // spwn.sh/packages/transpile require each other, which Go permits and
-        // Turborepo rejects as a cyclic task dependency. Go resolves the order
-        // itself through go.work, so nothing is lost.
+        // hazard: no `^build` anywhere — spwn.sh/packages/world and spwn.sh/packages/transpile require each other,
+        // which Go permits and Turborepo rejects as a cyclic task dependency; Go orders them itself through go.work.
         "build": {
             "dependsOn": ["dependency#generate"]
         },
         "lint": {
             "dependsOn": ["dependency#generate"],
-            // golangci-lint, not `go vet`: the default would silently drop
-            // every rule .golangci.yml adds, layering included.
-            // `--allow-parallel-runners` is what makes it safe under a task
-            // graph — golangci-lint otherwise refuses to start beside itself.
+            // outside: golangci-lint refuses to start beside itself unless `--allow-parallel-runners` is passed.
             "command": {
                 "go": ["golangci-lint", "run", "--allow-parallel-runners", "./..."]
             },
-            // The rulebook and the pinned linter version are both inputs; a
-            // bump of either has to invalidate every lint result.
             "env": ["GOLANGCI_VERSION"],
             "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.golangci.yml"]
         },
+        // invariant: the TypeScript toolchain judges the whole repository at once — every member, the manual, the
+        // names, the comments of every script — so its one run is the root's, and nothing it reads is cacheable.
+        "//#lint": {
+            "cache": false
+        },
         "test": {
             "dependsOn": ["dependency#generate"]
+        },
+        // invariant: the cli and website specs drive the compiled binary at .artifacts/go/spwn.
+        "spwn-specs#test": {
+            "dependsOn": ["cli#build"],
+            "cache": false
         }
     }
 }

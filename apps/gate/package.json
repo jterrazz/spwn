@@ -5,7 +5,5 @@
     "scripts": {
         "test": "vitest --run"
     },
-    "devDependencies": {
-        "vitest": "^5.0.1"
-    }
+    "devDependencies": {}
 }

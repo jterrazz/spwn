@@ -1,8 +1,1 @@
-{
-    "extends": "@jterrazz/typescript/tsconfig/next",
-    "compilerOptions": {
-        "paths": {
-            "@/*": ["./src/*"]
-        }
-    }
-}
+{ "extends": "@jterrazz/typescript/tsconfig/next" }
