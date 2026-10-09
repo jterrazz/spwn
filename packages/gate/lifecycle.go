@@ -426,12 +426,12 @@ func buildImage(ctx context.Context, w io.Writer) error {
 	// gate-browser is the Playwright sidecar — a Node HTTP service
 	// that catalog tools call to drive a cookie-loaded Chromium.
 	// Stage the whole dir.
-	if err := copyDir(filepath.Join(root, "apps", "gate", "browser"), filepath.Join(stage, "browser")); err != nil {
+	if err := stageMember(filepath.Join(root, "apps", "gate", "browser"), filepath.Join(stage, "browser")); err != nil {
 		return fmt.Errorf("stage browser sidecar: %w", err)
 	}
 	// @spwn/gate-tool SDK — required by every catalog tool. Baked
 	// into /usr/lib/node_modules/@spwn/gate-tool/ inside the image.
-	if err := copyDir(filepath.Join(root, "apps", "gate", "sdk"), filepath.Join(stage, "sdk")); err != nil {
+	if err := stageMember(filepath.Join(root, "apps", "gate", "sdk"), filepath.Join(stage, "sdk")); err != nil {
 		return fmt.Errorf("stage @spwn/gate-tool SDK: %w", err)
 	}
 
@@ -453,12 +453,22 @@ func copyFile(src, dst string) error {
 	return os.WriteFile(dst, in, 0o755)
 }
 
-// copyDir recursively copies src to dst (file mode 0644, dirs 0755).
-// Used by the gate build to stage the Node sidecar tree.
-func copyDir(src, dst string) error {
-	return filepath.Walk(src, func(p string, info os.FileInfo, err error) error {
+// stageMember copies what the image runs of a Node workspace member — its
+// package.json and its src/ tree, the module tests under __tests__/ left out —
+// so a member's node_modules (pnpm's symlinks) never enters the build context.
+func stageMember(src, dst string) error {
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		return err
+	}
+	if err := copyFile(filepath.Join(src, "package.json"), filepath.Join(dst, "package.json")); err != nil {
+		return err
+	}
+	return filepath.Walk(filepath.Join(src, "src"), func(p string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		if info.IsDir() && info.Name() == "__tests__" {
+			return filepath.SkipDir
 		}
 		rel, err := filepath.Rel(src, p)
 		if err != nil {
@@ -468,11 +478,7 @@ func copyDir(src, dst string) error {
 		if info.IsDir() {
 			return os.MkdirAll(target, 0o755)
 		}
-		data, err := os.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(target, data, 0o644)
+		return copyFile(p, target)
 	})
 }
 

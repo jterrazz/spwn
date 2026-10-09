@@ -20,7 +20,7 @@ import (
 // The supervisor restarts the sidecar on crash with a small backoff,
 // so a tool that wedges Playwright doesn't take the gate with it.
 type SidecarBrowser struct {
-	cmd     []string // e.g. ["node", "/opt/gate-browser/index.js"]
+	cmd     []string // e.g. ["node", "/opt/gate-browser/src/index.ts"]
 	healthz string   // e.g. "http://127.0.0.1:9001/healthz"
 	logger  *log.Logger
 
@@ -32,7 +32,7 @@ type SidecarBrowser struct {
 // gate-browser. Caller starts/stops it via Run.
 func NewSidecarBrowser(logger *log.Logger) *SidecarBrowser {
 	return &SidecarBrowser{
-		cmd:     []string{"node", "/opt/gate-browser/index.js"},
+		cmd:     []string{"node", "/opt/gate-browser/src/index.ts"},
 		healthz: "http://127.0.0.1:9001/healthz",
 		logger:  logger,
 	}

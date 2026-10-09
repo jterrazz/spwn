@@ -1,108 +1,129 @@
-const GATE = "http://127.0.0.1:9000";
+const GATE = 'http://127.0.0.1:9000';
+const POLL_MS = 5000;
+const UNITS = [
+    [86_400, 'd'],
+    [3600, 'h'],
+    [60, 'm'],
+];
 
-const $ = (id) => document.getElementById(id);
+const element = (id) => document.querySelector(`#${id}`);
 
 function relativeTime(iso) {
-  if (!iso) return "no sync yet";
-  const t = new Date(iso).getTime();
-  const sec = Math.floor((Date.now() - t) / 1000);
-  if (sec < 5) return "just now";
-  if (sec < 60) return `${sec}s ago`;
-  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
-  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
-  return `${Math.floor(sec / 86400)}d ago`;
+    if (typeof iso !== 'string' || iso === '') {
+        return 'no sync yet';
+    }
+    const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (seconds < 5) {
+        return 'just now';
+    }
+    const [size, unit] = UNITS.find(([unitSeconds]) => seconds >= unitSeconds) ?? [1, 's'];
+    return `${Math.floor(seconds / size)}${unit} ago`;
 }
 
-// Build the host-permission origins for one provider's domains.
-// Chrome wants "https://*.x.com/*" pattern. Provider domains arrive
-// as bare hosts ("x.com").
-function originsFor(domains) {
-  return (domains || []).map((d) => `https://*.${d}/*`);
+// outside: Chrome grants a host permission by origin pattern, `https://*.x.com/*`, and the gate lists bare hosts
+const originsFor = (domains) => (domains ?? []).map((domain) => `https://*.${domain}/*`);
+
+function stateOf(provider, granted) {
+    const domains = provider.domains ?? [];
+    if (
+        provider.has_cookies === true ||
+        (typeof provider.last_sync === 'string' && provider.last_sync !== '')
+    ) {
+        return {
+            connected: true,
+            meta: `synced ${relativeTime(provider.last_sync)} — ${domains.join(', ')}`,
+            status: 'connected',
+            tag: 'tag-connected',
+        };
+    }
+    return granted
+        ? {
+              connected: false,
+              meta: `visit ${domains.join(' or ')} once to sync`,
+              status: 'pending',
+              tag: 'tag-pending',
+          }
+        : {
+              connected: false,
+              meta: 'click "Grant access" → confirm in Chrome → visit the site',
+              status: 'needs access',
+              tag: 'tag-needs',
+          };
 }
 
-async function hasPermission(domains) {
-  return chrome.permissions.contains({ origins: originsFor(domains) });
-}
-
-function requestPermission(domains) {
-  // Must be called synchronously from a user gesture — that's the
-  // popup's button click handler, hence wiring this here vs the bg
-  // worker.
-  return chrome.permissions.request({ origins: originsFor(domains) });
-}
-
-function renderProvider(p, granted) {
-  const connected = p.has_cookies || !!p.last_sync;
-  const status = connected ? "connected" : (granted ? "pending" : "needs access");
-  const tagClass = connected ? "tag-connected" : (granted ? "tag-pending" : "tag-needs");
-  const meta = connected
-    ? `synced ${relativeTime(p.last_sync)} — ${(p.domains || []).join(", ")}`
-    : (granted
-        ? `visit ${(p.domains || []).join(" or ")} once to sync`
-        : `click "Grant access" → confirm in Chrome → visit the site`);
-
-  const grantBtn = !granted
-    ? `<button class="grant" data-provider="${p.name}" data-domains="${(p.domains || []).join(",")}">Grant access</button>`
-    : "";
-
-  return `
+function renderProvider(provider, granted) {
+    const state = stateOf(provider, granted);
+    const button = granted
+        ? ''
+        : `<button class="grant" data-domains="${(provider.domains ?? []).join(',')}" type="button">Grant access</button>`;
+    return `
     <div class="provider">
-      <span class="glyph ${connected ? "glyph-on" : "glyph-off"}">${connected ? "●" : "○"}</span>
-      <span class="name">${p.name}</span>
-      <span class="tag ${tagClass}">${status}</span>
-      ${grantBtn}
+      <span class="glyph ${state.connected ? 'glyph-on' : 'glyph-off'}">${state.connected ? '●' : '○'}</span>
+      <span class="name">${provider.name}</span>
+      <span class="tag ${state.tag}">${state.status}</span>
+      ${button}
     </div>
-    <div class="meta">${meta}</div>
+    <div class="meta">${state.meta}</div>
   `;
 }
 
-async function refresh() {
-  let statusData = null;
-  try {
-    const r = await fetch(`${GATE}/sync/status`);
-    if (r.ok) statusData = await r.json();
-  } catch (_) {}
-
-  if (!statusData) {
-    $("gate-status").innerHTML = '<span class="gate-bad">●</span> gate not reachable on 127.0.0.1:9000 — run `spwn gate start`';
-    $("providers").className = "empty";
-    $("providers").textContent = "—";
-    return;
-  }
-
-  $("gate-status").innerHTML = '<span class="gate-ok">●</span> gate connected';
-
-  const list = statusData.providers || [];
-  if (list.length === 0) {
-    $("providers").className = "empty";
-    $("providers").textContent = "no providers registered yet — install a gate tool that uses cookies (e.g. `spwn install spwn:x`)";
-    return;
-  }
-
-  // Annotate each provider with whether the user has granted the
-  // host permissions for it. Renders "needs access" + Grant button
-  // when not granted, "pending" otherwise.
-  const enriched = await Promise.all(
-    list.map(async (p) => ({ ...p, _granted: await hasPermission(p.domains) })),
-  );
-
-  $("providers").className = "";
-  $("providers").innerHTML = enriched.map((p) => renderProvider(p, p._granted)).join("");
-
-  // Wire up the Grant buttons.
-  for (const btn of document.querySelectorAll("button.grant")) {
-    btn.addEventListener("click", async () => {
-      const domains = (btn.dataset.domains || "").split(",").filter(Boolean);
-      const granted = await requestPermission(domains);
-      if (granted) {
-        // Tell the bg worker to re-load providers (it'll pick up
-        // the new permission state on its next cookie/tab event).
-        chrome.runtime.sendMessage({ type: "refresh-providers" });
-        await refresh();
-      }
-    });
-  }
+async function gateStatus() {
+    try {
+        const response = await fetch(`${GATE}/sync/status`);
+        return response.ok ? await response.json() : null;
+    } catch {
+        return null;
+    }
 }
 
-refresh();
-setInterval(refresh, 5000); // popup is open: poll every 5s for live updates
+function showEmpty(text) {
+    element('providers').className = 'empty';
+    element('providers').textContent = text;
+}
+
+// invariant: chrome.permissions.request needs the click's own user gesture, which is why the grant runs here and not in the worker
+async function grant(button) {
+    const domains = (button.dataset.domains ?? '').split(',').filter((domain) => domain !== '');
+    if (await chrome.permissions.request({ origins: originsFor(domains) })) {
+        await chrome.runtime.sendMessage({ type: 'refresh-providers' });
+        await refresh();
+    }
+}
+
+async function refresh() {
+    const status = await gateStatus();
+    if (status === null) {
+        element('gate-status').innerHTML =
+            '<span class="gate-bad">●</span> gate not reachable on 127.0.0.1:9000 — run `spwn gate start`';
+        showEmpty('—');
+        return;
+    }
+    element('gate-status').innerHTML = '<span class="gate-ok">●</span> gate connected';
+    const list = status.providers ?? [];
+    if (list.length === 0) {
+        showEmpty(
+            'no providers registered yet — install a gate tool that uses cookies (e.g. `spwn install spwn:x`)',
+        );
+        return;
+    }
+    const granted = await Promise.all(
+        list.map(
+            async (provider) =>
+                await chrome.permissions.contains({ origins: originsFor(provider.domains) }),
+        ),
+    );
+    element('providers').className = '';
+    element('providers').innerHTML = list
+        .map((provider, index) => renderProvider(provider, granted[index]))
+        .join('');
+    for (const button of document.querySelectorAll('button.grant')) {
+        button.addEventListener('click', () => {
+            void grant(button);
+        });
+    }
+}
+
+await refresh();
+setInterval(() => {
+    void refresh();
+}, POLL_MS);

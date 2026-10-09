@@ -1,6 +1,7 @@
 packages:
-  - "apps/*"
-  - "specs"
+    - 'apps/*'
+    - 'apps/gate/*'
+    - 'specs'
 
 minimumReleaseAgeExclude:
-  - "@jterrazz/*"
+    - '@jterrazz/*'
