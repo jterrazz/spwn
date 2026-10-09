@@ -5,12 +5,10 @@ export default defineConfig({
     kind: 'workspace',
     presets: [test()],
     typescript: {
-        generated: {
-            catalog:
-                'the built-in `spwn:*` catalog, embedded into the binary and copied verbatim into a user’s project: its YAML comments and Markdown are that user’s documentation, kept as authored',
-        },
         oxfmt: {
             ignore: {
+                'catalog/**':
+                    'the built-in `spwn:*` catalog, embedded into the binary and copied verbatim into a user’s project: its YAML comments and Markdown are that user’s documentation, kept as authored',
                 'specs/cli/**/*.spec.yaml':
                     'a document’s streams are byte-exact, and the document formatter writes the blank first line of a `|+` stream (cobra’s help opens with one) as its indentation, which oxfmt strips as trailing whitespace — the two would rewrite each other forever',
                 '**/testdata/**':
@@ -38,6 +36,8 @@ export default defineConfig({
             },
         },
         roots: {
+            catalog:
+                'the built-in `spwn:*` catalog the binary embeds: worlds, agents, skills and tools a user installs by name',
             docker: 'the test image’s build context: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
             scripts: 'the installer `make install-binary` runs, and the manual-pass harness',
         },
