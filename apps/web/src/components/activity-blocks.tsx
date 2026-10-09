@@ -15,6 +15,7 @@ import {
 import { useState } from 'react';
 
 import type { ActivityBlock, ActivityMessage } from '../activity/blocks';
+import { toolInputSummary, truncateContent } from '../activity/tool-summary';
 
 const TOOL_ICONS: Record<string, typeof IconTool> = {
     Bash: IconTerminal,
@@ -29,7 +30,7 @@ const TOOL_ICONS: Record<string, typeof IconTool> = {
 };
 
 function ToolIcon({ tool }: { tool: string }) {
-    const Icon = TOOL_ICONS[tool] || IconTool;
+    const Icon = TOOL_ICONS[tool] ?? IconTool;
     return <Icon size={13} />;
 }
 
@@ -91,17 +92,17 @@ function ToolUseBlockView({
     block: { tool: string; input: Record<string, unknown>; id: string };
     result?: undefined | { content: string; isError: boolean };
 }) {
-    const inputSummary = getToolInputSummary(block.tool, block.input);
+    const inputSummary = toolInputSummary(block.tool, block.input);
 
     return (
         <CollapsibleBlock
             accent={result?.isError === true ? 'text-red-400/60' : 'text-blue-400/50'}
-            defaultOpen={Boolean(result?.isError)}
+            defaultOpen={result?.isError === true}
             icon={<ToolIcon tool={block.tool} />}
-            label={`${block.tool}${inputSummary ? `  ${inputSummary}` : ''}`}
+            label={`${block.tool}${inputSummary === '' ? '' : `  ${inputSummary}`}`}
         >
             <div className="space-y-1">
-                {Object.entries(block.input || {}).map(([key, value]) => {
+                {Object.entries(block.input).map(([key, value]) => {
                     let displayValue: string;
                     if (typeof value === 'string') {
                         displayValue = value.length > 200 ? `${value.slice(0, 200)}...` : value;
@@ -117,7 +118,7 @@ function ToolUseBlockView({
                 })}
             </div>
 
-            {result && (
+            {result !== undefined && (
                 <>
                     <div className="my-2 border-t border-white/[0.04]" />
                     <pre
@@ -261,46 +262,4 @@ export function ActivityMessageView({ message }: { message: ActivityMessage }) {
             )}
         </div>
     );
-}
-
-function getToolInputSummary(tool: string, input: Record<string, unknown>): string {
-    switch (tool) {
-        case 'Read': {
-            return (input.file_path as string) || '';
-        }
-        case 'Edit': {
-            return (input.file_path as string) || '';
-        }
-        case 'Write': {
-            return (input.file_path as string) || '';
-        }
-        case 'Bash': {
-            return truncateOneLine((input.command as string) || '', 60);
-        }
-        case 'Grep': {
-            return truncateOneLine((input.pattern as string) || '', 40);
-        }
-        case 'Glob': {
-            return (input.pattern as string) || '';
-        }
-        case 'Agent': {
-            return truncateOneLine((input.description as string) || '', 40);
-        }
-        default: {
-            return '';
-        }
-    }
-}
-
-function truncateOneLine(text: string, max: number): string {
-    const line = text.split('\n')[0] ?? '';
-    return line.length > max ? `${line.slice(0, max)}...` : line;
-}
-
-function truncateContent(content: string, maxLines: number): string {
-    const lines = content.split('\n');
-    if (lines.length <= maxLines) {
-        return content;
-    }
-    return `${lines.slice(0, maxLines).join('\n')}\n... (${lines.length - maxLines} more lines)`;
 }

@@ -4,7 +4,8 @@ import { encPath } from '../../api/client';
 import type { AgentProfile, Team } from '../../domain/model';
 import { inBackground } from '../../events/in-background';
 import { ItemList, MetricGrid, SectionHeader, Separator, SubLabel } from '../ds';
-import { InlineEdit, InlineTagsEdit } from '../inline-edit';
+import { InlineEdit } from '../inline-edit';
+import { InlineTagsEdit } from '../inline-tags-edit';
 import { agentMetrics } from './agent-diagnostics';
 
 interface ProfileTabProps {

@@ -156,4 +156,23 @@ describe('agent', () => {
             - alert`);
         expect(result.errors.text).toBe('');
     });
+
+    test('the profile tab lets each identity field be edited in place', async () => {
+        // Given - neo's page
+        const result = await website.visit('/agents/neo', async (visitor) => {
+            await visitor.see(heading("Set up neo's identity"));
+
+            // When - the visitor opens the profile and its empty purpose
+            await visitor.click(button('Profile'));
+            await visitor.click(button("Define this agent's purpose...", { exact: false }));
+            await visitor.see(button('Save'));
+        });
+
+        // Then - the purpose is a field now, with its save and cancel
+        expect(result.tree.text).toContain(`- textbox "Define this agent's purpose..."
+  - button "Save":
+    - img
+  - button "Cancel":
+    - img`);
+    });
 });
