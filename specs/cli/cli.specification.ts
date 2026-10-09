@@ -1,4 +1,4 @@
-import { specification } from '@jterrazz/test';
+import { directory, specification } from '@jterrazz/test';
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
 
@@ -7,7 +7,7 @@ import { afterAll } from 'vitest';
  *
  * The spwn binary IS the product: every spec exercises the compiled
  * binary directly, never a tool underneath it. Each spec runs in a fresh
- * temp cwd; `.fixture('$FIXTURES/<project>/')` spreads a committed project
+ * temp cwd; `.fixture(directory('../__fixtures__/<project>/'))` spreads a committed project
  * tree into it, `.env()` isolates the child environment.
  *
  * Docker-aware mode is opt-in via the `docker` option. The contract

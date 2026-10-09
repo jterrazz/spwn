@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -21,7 +22,7 @@ describe('agent --ephemeral (NPC)', () => {
     test('ephemeral dispatches a task into a running world', async () => {
         // Given - a world brought up, whose runtime id is read off the container labels
         await using up = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('up');
 
@@ -36,7 +37,7 @@ describe('agent --ephemeral (NPC)', () => {
 
         // When - an ephemeral is dispatched against the live world
         await using dispatch = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(`agent --ephemeral "lint the code" --world ${worldID}`);
 
@@ -51,7 +52,7 @@ describe('agent --ephemeral (NPC)', () => {
     test('ephemeral does not register a persistent agent', async () => {
         // Given - a world brought up, whose runtime id is read off the container labels
         await using up = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('up');
 
@@ -64,7 +65,7 @@ describe('agent --ephemeral (NPC)', () => {
 
         // When - an ephemeral is dispatched and agents are listed in the same run
         await using after = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec([`agent --ephemeral "check health" --world ${worldID}`, 'agent ls --json']);
 

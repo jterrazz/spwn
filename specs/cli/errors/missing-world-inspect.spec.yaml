@@ -1,5 +1,4 @@
 description: inspecting a missing world points at spwn world list
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: world inspect world-nonexistent-00000

@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -12,7 +13,7 @@ import { cli } from '../cli.specification.js';
 describe('severance catalog', () => {
     test('severance agents carry distinct SOUL.md content', async () => {
         // Given - the severance gallery installed into an empty dir
-        await using result = await cli.fixture('$FIXTURES/empty/').exec('init severance');
+        await using result = await cli.exec('init severance');
 
         // Then - every pair of agent souls is byte-different (no shared voice)
         expect(result.exitCode).toBe(0);
@@ -29,7 +30,6 @@ describe('severance catalog', () => {
     test('mdr world spawns all four agents in one container', async () => {
         // Given - the severance gallery installed then brought up as the mdr world
         await using result = await cli
-            .fixture('$FIXTURES/empty/')
             .exec(['init severance', 'up mdr']);
 
         // Then - the mdr container is running and its roster inlines every MDR member

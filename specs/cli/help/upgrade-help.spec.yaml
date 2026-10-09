@@ -1,5 +1,4 @@
 description: upgrade --help describes the install flow
-fixture: $FIXTURES/empty/
 runs:
     - command: upgrade --help
       exit: 0

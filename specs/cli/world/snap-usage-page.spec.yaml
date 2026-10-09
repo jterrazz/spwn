@@ -1,5 +1,5 @@
 description: world snap --help lists the save, ls, restore and rm subcommands
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: world snap --help
       exit: 0

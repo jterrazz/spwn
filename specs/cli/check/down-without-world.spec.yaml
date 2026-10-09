@@ -1,5 +1,4 @@
 description: down with no world id names the argument it wants
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: down

@@ -1,5 +1,4 @@
 description: spwn world up --help advertises the --backend flag
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: world up --help

@@ -1,5 +1,4 @@
 description: --limit restricts the number of events rendered
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create a

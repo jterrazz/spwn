@@ -1,5 +1,5 @@
 description: a valid project prints a clean success report
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: check
       exit: 0

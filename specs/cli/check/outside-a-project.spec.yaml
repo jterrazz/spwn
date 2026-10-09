@@ -1,5 +1,4 @@
 description: check outside a spwn project nudges the user at spwn init
-fixture: $FIXTURES/empty/
 runs:
     - command: check
       exit: 1

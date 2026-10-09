@@ -1,5 +1,4 @@
 description: --agent attaches an explicit local skill to one agent
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

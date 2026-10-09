@@ -1,5 +1,4 @@
 description: export --exclude still writes the archive
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

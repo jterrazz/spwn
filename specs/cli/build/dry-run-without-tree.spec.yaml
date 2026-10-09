@@ -1,5 +1,5 @@
 description: --dry-run without --tree-only names the flag it needs
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --dry-run
       exit: 1

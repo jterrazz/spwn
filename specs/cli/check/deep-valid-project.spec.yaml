@@ -1,5 +1,5 @@
 description: check --deep passes on a project whose prompts compile
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: check --deep
       exit: 0

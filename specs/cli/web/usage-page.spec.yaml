@@ -1,5 +1,4 @@
 description: web --help documents the core flags
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: web --help

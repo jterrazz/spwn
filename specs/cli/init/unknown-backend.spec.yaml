@@ -1,5 +1,4 @@
 description: --backend rejects an unknown runtime with a supported-list hint
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name bad-demo --backend does-not-exist
       exit: 1

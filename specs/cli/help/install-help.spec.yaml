@@ -1,5 +1,4 @@
 description: install --help documents scoping and the scheme grammar
-fixture: $FIXTURES/empty/
 runs:
     - command: install --help
       exit: 0

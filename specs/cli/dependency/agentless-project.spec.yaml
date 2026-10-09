@@ -1,5 +1,4 @@
 description: install refuses a project with no agents declared
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

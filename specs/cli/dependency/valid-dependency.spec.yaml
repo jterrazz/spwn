@@ -1,5 +1,5 @@
 description: an spwn:mempalace dependency is accepted without error
-fixture: check-valid-dep/
+fixture: ./__fixtures__/check-valid-dep/
 runs:
     - command: check
       exit: 0

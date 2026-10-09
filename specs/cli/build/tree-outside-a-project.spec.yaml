@@ -1,5 +1,4 @@
 description: build --tree-only outside a spwn project nudges the user at spwn init
-fixture: $FIXTURES/empty/
 runs:
     - command: build --tree-only
       exit: 1

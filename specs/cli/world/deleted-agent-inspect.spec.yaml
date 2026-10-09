@@ -1,5 +1,5 @@
 description: inspecting an agent that was just removed fails without crashing
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: agent rm neo
       exit: 0

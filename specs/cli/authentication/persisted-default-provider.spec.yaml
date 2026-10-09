@@ -1,5 +1,4 @@
 description: auth default reads back what was previously set
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: auth default anthropic

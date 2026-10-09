@@ -1,5 +1,4 @@
 description: the activity log is created only by the first real event
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: --version

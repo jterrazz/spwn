@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -12,12 +13,12 @@ import { cli } from '../cli.specification.js';
 describe('full agent lifecycle', () => {
     test('journey: up -> ls -> inspect -> logs -> down', async () => {
         // Given - a docker-pilot world brought up
-        await using up = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using up = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         // Then - the container is created and running, and carries a world id label
         expect(up.exitCode).toBe(0);
-        expect(up.stderr).toContain('Created container');
-        expect(up.stderr).toContain('Agent is alive');
+        expect(up.stderr.text).toContain('Created container');
+        expect(up.stderr.text).toContain('Agent is alive');
         const neo = up.container('neo');
         expect(neo.exists).toBe(true);
         expect(neo.running).toBe(true);
@@ -26,7 +27,7 @@ describe('full agent lifecycle', () => {
         expect(worldId).toMatch(/^world-/u);
 
         // And agent ls reports neo as running
-        await using agentLs = await cli.fixture('$FIXTURES/docker-pilot/').exec('agent ls --json');
+        await using agentLs = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('agent ls --json');
 
         // Then - the project-mode report lists neo running
         expect(agentLs.exitCode).toBe(0);
@@ -41,7 +42,7 @@ describe('full agent lifecycle', () => {
 
         // And world list --json reports one running world
         await using worldLs = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('world list --json');
 
         // Then - exactly one running project world attaches neo
@@ -60,36 +61,36 @@ describe('full agent lifecycle', () => {
 
         // And world inspect <id> renders stable field headers
         await using inspect = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(`world inspect ${worldId}`);
 
         // Then - the stepper echoes the world id and a Status field (scalpel: stepper output on stderr)
         expect(inspect.exitCode).toBe(0);
-        expect(inspect.stderr).toContain(worldId!);
-        expect(inspect.stderr).toContain('Status');
+        expect(inspect.stderr.text).toContain(worldId!);
+        expect(inspect.stderr.text).toContain('Status');
 
         // And world logs <id> is read
         await using logs = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(`world logs ${worldId}`);
 
         // Then - it exits cleanly
         expect(logs.exitCode).toBe(0);
 
         // And the world is torn down
-        await using down = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using down = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the destroy banners fire and the container is gone
         expect(down.exitCode).toBe(0);
-        expect(down.stderr).toContain('Destroyed');
-        expect(down.stderr).toContain('project world(s) destroyed');
+        expect(down.stderr.text).toContain('Destroyed');
+        expect(down.stderr.text).toContain('project world(s) destroyed');
         expect(down.container('neo').exists).toBe(false);
     });
 
     test('evolution: dream, sleep, fork, export', async () => {
         // Given - a chain of dream/sleep/fork/export against neo
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec([
                 'agent dream neo',
                 'agent sleep neo',
@@ -108,7 +109,7 @@ describe('full agent lifecycle', () => {
     test('error recovery: double destroy is idempotent', async () => {
         // Given - up then two downs in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'down']);
 
         // Then - no crash and the container is gone (scalpel: crash-signal absence)

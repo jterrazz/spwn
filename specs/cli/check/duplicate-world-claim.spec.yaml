@@ -1,7 +1,7 @@
 description: a second world claiming the same agent breaks the one-agent-one-world rule
 fixture:
-    - $FIXTURES/single-agent/
-    - two-worlds-same-agent/
+    - ../__fixtures__/single-agent/
+    - ./__fixtures__/two-worlds-same-agent/
 runs:
     - command: check
       exit: 1

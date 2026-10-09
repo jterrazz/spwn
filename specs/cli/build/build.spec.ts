@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { execSync } from 'node:child_process';
 import { afterEach, describe, expect, test } from 'vitest';
 
@@ -38,13 +39,13 @@ describe('spwn build', () => {
     test('produces a tagged image from docker-pilot', async () => {
         // Given - the docker-pilot fixture built against the test base image
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('build');
 
         // Then - build succeeds and the tagged image lands in docker (scalpel: image list is genuine docker plumbing)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Built image');
+        expect(result.stderr.text).toContain('Built image');
         const images = execSync('docker images --format "{{.Repository}}:{{.Tag}}"', {
             encoding: 'utf8',
         });
@@ -54,7 +55,7 @@ describe('spwn build', () => {
     test('--json emits a machine-readable report', async () => {
         // Given - the docker-pilot fixture built with --json
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('build --json');
 
@@ -77,13 +78,13 @@ describe('spwn build', () => {
     test('codex image contains AGENTS.md, .codex config, and native skills', async () => {
         // Given - the codex-pilot fixture built with a custom tag
         await using result = await cli
-            .fixture('$FIXTURES/codex-pilot/')
+            .fixture(directory('../__fixtures__/codex-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('build --tag spwn-codex-pilot:test');
 
         // Then - the image internals follow codex conventions (scalpel: inspecting a built image needs a docker run)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('runtime=codex');
+        expect(result.stderr.text).toContain('runtime=codex');
         const check = execSync(
             [
                 'docker run --rm --entrypoint sh spwn-codex-pilot:test -lc',
@@ -110,7 +111,7 @@ describe('spwn build', () => {
     test('--tag uses a custom image tag', async () => {
         // Given - the docker-pilot fixture built with an explicit tag
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('build --tag spwn-test-qa:v1');
 

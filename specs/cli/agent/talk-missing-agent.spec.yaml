@@ -1,5 +1,5 @@
 description: talk to a non-existent agent hints at agent create
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: agent talk does-not-exist hello
       exit: 1

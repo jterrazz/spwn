@@ -1,7 +1,7 @@
 description: dreaming twice leaves one reflexion
 fixture:
-    - $FIXTURES/single-agent/
-    - journal/
+    - ../__fixtures__/single-agent/
+    - ./__fixtures__/journal/
 runs:
     - command: agent dream neo
       exit: 0

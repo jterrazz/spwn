@@ -1,5 +1,4 @@
 description: a local ref in a multi-agent project still needs --agent
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

@@ -1,5 +1,5 @@
 description: build --tree-only writes a tree to ./dist on a minimal project
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --tree-only
       exit: 0

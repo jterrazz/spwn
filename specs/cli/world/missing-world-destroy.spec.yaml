@@ -1,5 +1,5 @@
 description: destroying a world key the project does not declare fails cleanly
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: down world-nonexistent-00000
       exit: 1

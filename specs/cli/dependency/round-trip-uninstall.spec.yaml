@@ -1,5 +1,5 @@
 description: uninstall removes the ref from agent.yaml and the lockfile
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:python
       exit: 0

@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -13,45 +14,45 @@ import { cli } from '../cli.specification.js';
 describe('error recovery', () => {
     test('double destroy — second destroy fails with a clean not-found error', async () => {
         // Given - a world upped then destroyed, so the container is already gone
-        await using up = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using up = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
         expect(up.exitCode).toBe(0);
         expect(up.container('neo').exists).toBe(false);
 
         // When - a second down runs against the clean project
-        await using secondDown = await cli.fixture('$FIXTURES/docker-pilot/').exec('down neo');
+        await using secondDown = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('down neo');
 
         // Then - non-zero with a clean message, no stack trace or usage dump (scalpel: dynamic error wording + absence probes)
         expect(secondDown.exitCode).toBe(1);
         expect(secondDown.stderr.text).toMatch(/not (?:found|running)|no (?:running )?worlds?/i);
-        expect(secondDown.stderr).not.toContain('panic');
-        expect(secondDown.stderr).not.toContain('goroutine');
-        expect(secondDown.stdout).not.toContain('Available Commands:');
-        expect(secondDown.stdout).not.toContain('Global Flags:');
+        expect(secondDown.stderr.text).not.toContain('panic');
+        expect(secondDown.stderr.text).not.toContain('goroutine');
+        expect(secondDown.stdout.text).not.toContain('Available Commands:');
+        expect(secondDown.stdout.text).not.toContain('Global Flags:');
     });
 
     test('spawn with an invalid world name leaks no container', async () => {
         // Given - a project-mode up requesting a world key that is not in the manifest
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('up nonexistent-world');
 
         // Then - non-zero and no container left behind (scalpel: absence probes)
         expect(result.exitCode).toBe(1);
         expect(result.container('neo').exists).toBe(false);
         expect(result.container('nonexistent-world').exists).toBe(false);
-        expect(result.stderr).not.toContain('panic');
-        expect(result.stderr).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
     });
 
     test('an error does not corrupt state — the next command still works', async () => {
         // Given - a failing destroy, then a normal list in a fresh project dir
         await using errorResult = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('down world-ghost-00000');
         expect(errorResult.exitCode).toBe(1);
 
         await using listResult = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('world list --json');
 
         // Then - the follow-up command succeeds and reports project mode
@@ -66,7 +67,7 @@ describe('error recovery', () => {
     test('spawn and destroy cycle — world can be recreated after destroy', async () => {
         // Given - up, down, up again in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'up']);
 
         // Then - the final state is a running neo container

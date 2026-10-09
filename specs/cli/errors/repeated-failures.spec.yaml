@@ -1,5 +1,4 @@
 description: three failed removals in a row do not compound
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: init

@@ -1,5 +1,5 @@
 description: a nonexistent dependency ref is rejected with the same wording as tools
-fixture: check-invalid-dep/
+fixture: ./__fixtures__/check-invalid-dep/
 runs:
     - command: check
       exit: 1

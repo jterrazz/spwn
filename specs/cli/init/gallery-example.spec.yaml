@@ -1,5 +1,4 @@
 description: init spwn:matrix installs the bundled example
-fixture: $FIXTURES/empty/
 runs:
     - command: init spwn:matrix
       exit: 0

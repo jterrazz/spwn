@@ -1,5 +1,5 @@
 description: installing the same ref twice leaves the manifest unchanged
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:python
       exit: 0

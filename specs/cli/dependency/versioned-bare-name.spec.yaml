@@ -1,5 +1,5 @@
 description: the @version suffix survives the resolution of a bare name
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install python@latest
       exit: 0

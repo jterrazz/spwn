@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { spawnSync } from 'node:child_process';
 import { beforeAll, describe, expect, test } from 'vitest';
 
@@ -50,62 +51,62 @@ describe('spwn architect', () => {
     test('status reports not running when no architect container exists', async () => {
         // Given - a project with no architect container up
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec('architect status');
 
         // Then - status reports idle (scalpel: the status line carries a dynamic image/id)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('not running');
+        expect(result.stderr.text).toContain('not running');
     });
 
     test('start provisions a running architect container', async () => {
         // Given - architect started then re-queried (only the last exec's streams are exposed)
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect status']);
 
         // Then - status sees it running against the override image (scalpel: dynamic status line)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('running');
-        expect(result.stderr).toContain(ARCHITECT_IMAGE_OVERRIDE);
+        expect(result.stderr.text).toContain('running');
+        expect(result.stderr.text).toContain(ARCHITECT_IMAGE_OVERRIDE);
     });
 
     test('start is idempotent — second start reports already running', async () => {
         // Given - architect started twice in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect start']);
 
         // Then - the second start is a no-op naming the running container (scalpel: dynamic status line)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('already running');
+        expect(result.stderr.text).toContain('already running');
     });
 
     test('stop tears the architect container down', async () => {
         // Given - architect started, stopped, then re-queried
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect stop', 'architect status']);
 
         // Then - after stop the status reports idle (scalpel: dynamic status line)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('not running');
+        expect(result.stderr.text).toContain('not running');
     });
 
     test('stop when nothing is running is a clean no-op', async () => {
         // Given - a stop issued with no architect container up
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec('architect stop');
 
         // Then - it reports idle without panicking (scalpel: dynamic status line + absence probe)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('not running');
-        expect(result.stderr).not.toContain('panic');
+        expect(result.stderr.text).toContain('not running');
+        expect(result.stderr.text).not.toContain('panic');
     });
 });

@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
@@ -16,7 +17,7 @@ import { cli } from '../cli.specification.js';
 
 test('the exported archive carries every mind layer', async () => {
     // Given - the create + export session, stated in the document
-    const result = await cli.run('exported-archive.spec.yaml');
+    const result = await cli.run(file('./exported-archive.spec.yaml'));
 
     // Then - the tarball listing carries the Soul plus the two Mind layer dirs
     const listing = execSync(`tar tzf ${join(result.filesystem.cwd, 'neo.tar.gz')}`, {

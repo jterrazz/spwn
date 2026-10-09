@@ -1,5 +1,4 @@
 description: agent inspect does not duplicate the journal as sessions
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

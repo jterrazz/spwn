@@ -1,5 +1,5 @@
 description: agent create inside a project writes the mind under spwn/agents/
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent create trinity
       exit: 0

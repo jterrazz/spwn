@@ -1,5 +1,4 @@
 description: init scaffolds the starter project in an empty directory
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name demo-project
       exit: 0

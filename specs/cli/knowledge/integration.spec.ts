@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -16,7 +17,7 @@ import { cli } from '../cli.specification.js';
 describe('world knowledge integration', () => {
     test('world knowledge ls reflects files written into the container', async () => {
         // Given - a docker-pilot world brought online
-        await using empty = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using empty = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         expect(empty.exitCode).toBe(0);
         const neo = empty.container('neo');
@@ -35,10 +36,10 @@ describe('world knowledge integration', () => {
 
         // Then - host-side `world knowledge ls` picks up the new file (container-log probe)
         await using ls = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(`world knowledge ls ${worldId}`);
 
         expect(ls.exitCode).toBe(0);
-        expect(ls.stdout).toContain('note.md');
+        expect(ls.stdout.text).toContain('note.md');
     });
 });

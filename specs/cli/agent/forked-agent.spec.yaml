@@ -1,5 +1,5 @@
 description: fork copies an agent to a new name
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent fork neo neo-v2
       exit: 0

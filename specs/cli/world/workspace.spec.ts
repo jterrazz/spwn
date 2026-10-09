@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -13,7 +14,7 @@ import { cli } from '../cli.specification.js';
 
 test('workspace is bind-mounted read-write and syncs between host and container', async () => {
     // Given - a freshly-upped docker-pilot world (declares workspaces: [.])
-    await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+    await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
     // Then - the container is running with the project root bind-mounted under /workspaces
     expect(result.exitCode).toBe(0);
@@ -58,14 +59,14 @@ test('workspace is bind-mounted read-write and syncs between host and container'
 test('up with a non-existent workspace path fails gracefully', async () => {
     // Given - docker-pilot with an overlay pointing worlds.neo at a missing host path
     await using result = await cli
-        .fixture('$FIXTURES/docker-pilot/')
-        .fixture('bad-workspace/')
+        .fixture(directory('../__fixtures__/docker-pilot/'))
+        .fixture(directory('./__fixtures__/bad-workspace/'))
         .exec('up');
 
     // Then - non-zero with no crash and no container leaked (scalpel: absence probes on an error path)
     expect(result.exitCode).toBe(1);
-    expect(result.stderr).not.toContain('TypeError');
-    expect(result.stderr).not.toContain('panic');
-    expect(result.stderr).not.toContain('goroutine');
+    expect(result.stderr.text).not.toContain('TypeError');
+    expect(result.stderr.text).not.toContain('panic');
+    expect(result.stderr.text).not.toContain('goroutine');
     expect(result.container('neo').exists).toBe(false);
 });

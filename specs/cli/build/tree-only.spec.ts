@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -19,7 +20,7 @@ import { cli } from '../cli.specification.js';
 test('--json emits a machine-readable report', async () => {
     // Given - the docker-pilot fixture compiled with --json
     await using result = await cli
-        .fixture('$FIXTURES/docker-pilot/')
+        .fixture(directory('../__fixtures__/docker-pilot/'))
         .exec('build --tree-only --json');
 
     // Then - the report carries stable fields (scalpel: treeFiles count + outDir are dynamic)
@@ -42,7 +43,7 @@ test('--json emits a machine-readable report', async () => {
 test('the codex runtime writes AGENTS.md, .codex config and native skills', async () => {
     // Given - the codex-pilot fixture compiled with --json
     await using result = await cli
-        .fixture('$FIXTURES/codex-pilot/')
+        .fixture(directory('../__fixtures__/codex-pilot/'))
         .exec('build --tree-only --json');
 
     // Then - the codex conventions hold in both the report and on disk (scalpel: path set probes for absence/presence)

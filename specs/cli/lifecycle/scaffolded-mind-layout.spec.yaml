@@ -1,5 +1,4 @@
 description: init scaffolds the default agent with the expected mind layout
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name layout-check
       exit: 0

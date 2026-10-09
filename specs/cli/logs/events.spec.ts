@@ -1,6 +1,7 @@
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { required } from '../../_support/required.js';
+import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -16,7 +17,7 @@ import { cli } from '../cli.specification.js';
  * Every result binds with `await using` (rule B5).
  */
 
-const isolated = () => cli.fixture('$FIXTURES/empty/').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
+const isolated = () => cli.env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 interface ActivityEvent {
     actor: string;

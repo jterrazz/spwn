@@ -1,5 +1,5 @@
 description: check passes once every declared ref is installed
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:unix
       exit: 0

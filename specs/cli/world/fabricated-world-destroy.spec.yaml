@@ -1,5 +1,5 @@
 description: destroying a fabricated world id fails gracefully
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: down world-fake-99999
       exit: 1

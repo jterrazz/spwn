@@ -1,5 +1,4 @@
 description: agent create --force succeeds even when the agent already exists
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

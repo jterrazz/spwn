@@ -1,5 +1,4 @@
 description: logs for a missing world yield nothing at all
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: world logs world-nonexistent-00000

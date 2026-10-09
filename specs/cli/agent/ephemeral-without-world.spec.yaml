@@ -1,5 +1,5 @@
 description: an ephemeral dispatched with no world is refused
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: agent --ephemeral "do something"
       exit: 1

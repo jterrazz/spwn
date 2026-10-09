@@ -1,5 +1,4 @@
 description: a project-wide install over a partly-installed project stays idempotent
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

@@ -1,5 +1,4 @@
 description: exporting a missing agent names it and hints at agent ls
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent export nonexistent

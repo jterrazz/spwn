@@ -1,5 +1,4 @@
 description: a freshly initialised project passes check cleanly
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name init-check-test
       exit: 0

@@ -1,6 +1,7 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { required } from '../../_support/required.js';
+import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -22,7 +23,7 @@ describe('agent talk', () => {
     test("talk against a live world exec's the runtime inside the container", async () => {
         // Given - a world brought up, then talked to with the mock runtime image
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'agent talk neo "list files in /workspace"']);
 
@@ -43,7 +44,7 @@ describe('agent talk', () => {
     test('talk against a codex world sees AGENTS.md, native skills, and resumes the thread', async () => {
         // Given - a codex world brought up, then talked to twice to resume the thread
         await using result = await cli
-            .fixture('$FIXTURES/codex-pilot/')
+            .fixture(directory('../__fixtures__/codex-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec([
                 'up',
@@ -88,7 +89,7 @@ describe('agent talk', () => {
     test('talk can be invoked multiple times on the same world', async () => {
         // Given - a world brought up, then talked to twice back-to-back
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'agent talk neo hello', 'agent talk neo "hello again"']);
 
@@ -102,7 +103,7 @@ describe('agent talk', () => {
     test('agent ls --json shows neo attached to the running world', async () => {
         // Given - a world brought up, then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'agent ls --json']);
 
         // Then - neo is reported running under a project-mode roster (scalpel: structural probe over dynamic runtime status)
@@ -120,7 +121,7 @@ describe('agent talk', () => {
     test('world list --json surfaces the running world with its agents', async () => {
         // Given - a world brought up, then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'world list --json']);
 
         // Then - one running project world attaches neo
@@ -139,7 +140,7 @@ describe('agent talk', () => {
     test('after down, agent ls shows neo as unattached', async () => {
         // Given - a world brought up then torn down, then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'agent ls --json']);
 
         // Then - neo is no longer reported running (scalpel: structural probe over dynamic status)
@@ -155,7 +156,7 @@ describe('agent talk', () => {
     test('talk routes to the live world after a previous world was destroyed', async () => {
         // Given - a full up/down cycle followed by a fresh second up, then talked to
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'down', 'up', 'agent talk neo hello']);
 
@@ -174,7 +175,7 @@ describe('agent talk', () => {
     test('agent inspect prints layer details when attached to a world', async () => {
         // Given - a world brought up, then the agent inspected
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'agent inspect neo']);
 
         // Then - the Mind tree renders on stderr (scalpel: regex over the mind-tree render)

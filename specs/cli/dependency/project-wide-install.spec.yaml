@@ -1,5 +1,4 @@
 description: a project-wide install reaches every agent in a multi-agent project
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

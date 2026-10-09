@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -13,25 +14,25 @@ import { cli } from '../cli.specification.js';
 describe('spwn status with an active world (docker)', () => {
     test('shows the running project world and its agent', async () => {
         // Given - a live docker-pilot world, then status in the same run
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'status']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'status']);
 
         // Then - the container is live and status surfaces the neo world (renderer writes stderr)
         expect(result.exitCode).toBe(0);
         expect(result.container('neo').running).toBe(true);
-        expect(result.stderr).toContain('spwn');
-        expect(result.stderr).toContain('neo');
+        expect(result.stderr.text).toContain('spwn');
+        expect(result.stderr.text).toContain('neo');
     });
 
     test('status and ls report the same running worlds', async () => {
         // Given - a running world listed via `world list`
         await using ls = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'world list']);
 
         // And - `spwn status` runs under the same project
         await using status = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'status']);
 

@@ -1,5 +1,4 @@
 description: init severance installs a check-passing four-agent project
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

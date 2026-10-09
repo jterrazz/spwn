@@ -1,5 +1,4 @@
 description: logs --help prints the command usage
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: logs --help

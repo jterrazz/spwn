@@ -1,5 +1,4 @@
 description: rm then show reports the agent as not found
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create temp

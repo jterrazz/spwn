@@ -1,5 +1,4 @@
 description: root --help renders the grouped help page
-fixture: $FIXTURES/empty/
 runs:
     - command: --help
       exit: 0

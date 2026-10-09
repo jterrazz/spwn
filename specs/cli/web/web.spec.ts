@@ -16,7 +16,7 @@ import { cli } from '../cli.specification.js';
  * `await using` (rule B5).
  */
 
-const isolated = () => cli.fixture('$FIXTURES/empty/').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
+const isolated = () => cli.env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 describe('spwn web', () => {
     test('web child exits cleanly on SIGTERM, leaves no orphans', async () => {
@@ -26,7 +26,6 @@ describe('spwn web', () => {
         {
             // When - the server reaches the listening banner, then the scope exits and the framework SIGTERMs the child
             await using result = await cli
-                .fixture('$FIXTURES/empty/')
                 .env({ SPWN_HOME: `$WORKDIR/${homeMarker}` })
                 .exec('web --no-open --port 0', {
                     timeout: 15_000,
@@ -35,7 +34,7 @@ describe('spwn web', () => {
 
             // Then - the server really started (otherwise the orphan check below is trivially satisfied)
             expect(result.exitCode).toBe(0);
-            expect(result.stdout).toContain('spwn API listening on');
+            expect(result.stdout.text).toContain('spwn API listening on');
         }
 
         // Then - nothing carrying the marker survives, once the OS has reaped
@@ -77,7 +76,7 @@ describe('spwn web', () => {
 
         // Then - waitFor fires (exit 0; 124 would mean the banner never appeared) with no runtime errors on stderr
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toContain('spwn API listening on');
+        expect(result.stdout.text).toContain('spwn API listening on');
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('ReferenceError');
         expect(result.stderr.text).not.toContain('panic:');

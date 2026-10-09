@@ -1,5 +1,4 @@
 description: a bare catalog slug resolves to the gallery entry
-fixture: $FIXTURES/empty/
 runs:
     - command: init matrix
       exit: 0

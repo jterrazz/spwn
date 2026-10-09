@@ -1,5 +1,4 @@
 description: an empty log shows a friendly message
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: logs

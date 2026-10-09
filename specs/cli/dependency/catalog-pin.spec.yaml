@@ -1,5 +1,5 @@
 description: install pins an spwn ref into spwn.lock
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:python
       exit: 0

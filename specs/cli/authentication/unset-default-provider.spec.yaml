@@ -1,5 +1,4 @@
 description: auth default on a fresh home reports that none is set
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: auth default

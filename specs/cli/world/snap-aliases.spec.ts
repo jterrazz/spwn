@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { spawnSync } from 'node:child_process';
 import { afterEach, describe, expect, test } from 'vitest';
 
@@ -46,7 +47,7 @@ describe('world snap', () => {
 
     test('world snap save + snap ls + snap rm round-trip', async () => {
         // Given - a running world whose runtime id is read off its container labels
-        await using up = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using up = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
         expect(up.exitCode).toBe(0);
         const neo = up.container('neo');
         expect(neo.running).toBe(true);
@@ -59,26 +60,26 @@ describe('world snap', () => {
 
         // When - a snapshot is saved by id
         await using save = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(`world snap save ${worldId} --name round-trip`);
 
         // Then - the save banner is pinned byte-for-byte, its one dynamic segment ({{hex}}, the world-id suffix) tokenised
         expect(save.exitCode).toBe(0);
-        expect(save.stderr).toMatch('snap-saved.txt');
+        expect(save.stderr).toMatch(file('./__expected__/snap-saved.txt'));
 
         // And the snapshot appears in the ls table
-        await using list = await cli.fixture('$FIXTURES/docker-pilot/').exec('world snap ls');
+        await using list = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('world snap ls');
         expect(list.exitCode).toBe(0);
-        expect(list.stderr).toContain('round-trip');
+        expect(list.stderr.text).toContain('round-trip');
 
         // And after rm the snapshot is absent from both streams
         await using rm = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(`world snap rm ${worldId}--round-trip`);
         expect(rm.exitCode).toBe(0);
-        await using after = await cli.fixture('$FIXTURES/docker-pilot/').exec('world snap ls');
+        await using after = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('world snap ls');
         expect(after.exitCode).toBe(0);
-        expect(after.stderr).not.toContain('round-trip');
-        expect(after.stdout).not.toContain('round-trip');
+        expect(after.stderr.text).not.toContain('round-trip');
+        expect(after.stdout.text).not.toContain('round-trip');
     });
 });

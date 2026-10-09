@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -17,7 +18,7 @@ import { cli } from '../cli.specification.js';
 
 test('dream writes no empty-id session row', async () => {
     // Given - a fresh agent dreamt with no real journal entries
-    await using result = await cli.fixture('$FIXTURES/empty/').exec(['init', 'agent dream neo']);
+    await using result = await cli.exec(['init', 'agent dream neo']);
 
     // Then - if a reflexion is written, no row carries an empty session id
     expect(result.exitCode).toBe(0);

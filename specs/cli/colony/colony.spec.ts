@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -13,13 +14,13 @@ describe('colony', () => {
     test('roster.md inside the container names both colony members', async () => {
         // Given - a colony of neo + morpheus brought online
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
-            .fixture('colony/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/colony/'))
             .exec('up');
 
         // Then - the container is running and neo's CLAUDE.md inlines both members
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Created container');
+        expect(result.stderr.text).toContain('Created container');
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
         const claude = neo.file('/agents/neo/CLAUDE.md').content;
@@ -31,14 +32,14 @@ describe('colony', () => {
     test('destroying the colony removes the container but both agent minds survive', async () => {
         // Given - a colony brought up and then torn down in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
-            .fixture('colony/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/colony/'))
             .exec(['up', 'down']);
 
         // Then - the container is gone but both on-disk minds survive teardown
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Destroyed');
-        expect(result.stderr).toContain('project world(s) destroyed');
+        expect(result.stderr.text).toContain('Destroyed');
+        expect(result.stderr.text).toContain('project world(s) destroyed');
         expect(result.container('neo').exists).toBe(false);
         expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn/agents/morpheus/SOUL.md').exists).toBe(true);

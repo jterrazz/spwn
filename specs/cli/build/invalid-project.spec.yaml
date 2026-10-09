@@ -1,5 +1,5 @@
 description: build stops at project validation before it touches Docker
-fixture: $FIXTURES/check-invalid-tool/
+fixture: ../__fixtures__/check-invalid-tool/
 runs:
     - command: build
       exit: 1

@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -15,20 +16,20 @@ import { cli } from '../cli.specification.js';
 describe('world destroy', () => {
     test('destroys a running project world', async () => {
         // Given - a running project world brought up then torn down
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the project-mode destroy banners fire and the container is gone
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Stopping project worlds');
-        expect(result.stderr).toContain('Destroyed');
-        expect(result.stderr).toContain('project world(s) destroyed');
+        expect(result.stderr.text).toContain('Stopping project worlds');
+        expect(result.stderr.text).toContain('Destroyed');
+        expect(result.stderr.text).toContain('project world(s) destroyed');
         expect(result.container('neo').exists).toBe(false);
     });
 
     test('destroy removes world from list', async () => {
         // Given - a world upped, destroyed, then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'world list --json']);
 
         // Then - no running worlds remain and the container is gone
@@ -45,13 +46,13 @@ describe('world destroy', () => {
     test('per-id destroy prints the detailed step banners', async () => {
         // Given - a running world torn down by its explicit id (resolved from .spwn/world-states)
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down $(ls .spwn/world-states 2>/dev/null | head -1)']);
 
         // Then - the per-id path emits the richer per-step banners
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Stopped agent');
-        expect(result.stderr).toContain('Removed container');
-        expect(result.stderr).toContain('Mind persisted');
+        expect(result.stderr.text).toContain('Stopped agent');
+        expect(result.stderr.text).toContain('Removed container');
+        expect(result.stderr.text).toContain('Mind persisted');
     });
 });

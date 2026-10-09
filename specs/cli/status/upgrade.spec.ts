@@ -13,11 +13,11 @@ import { cli } from '../cli.specification.js';
 describe('cli upgrade', () => {
     test('upgrade --check queries the release feed and prints a version', async () => {
         // Given - the upgrade command hits the GitHub release feed
-        await using result = await cli.fixture('$FIXTURES/empty/').exec('upgrade --check');
+        await using result = await cli.exec('upgrade --check');
 
         // Then - the stable banner lines render (scalpel: latest tag + network state are dynamic)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Current version');
-        expect(result.stderr).toContain('Checking for updates');
+        expect(result.stderr.text).toContain('Current version');
+        expect(result.stderr.text).toContain('Checking for updates');
     });
 });

@@ -1,5 +1,4 @@
 description: --backend accepts the spwn scheme form verbatim
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name scheme-demo --backend spwn:claude-code
       exit: 0

@@ -1,5 +1,4 @@
 description: init rejects a --name that fails the manifest regex
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name "Has Spaces"
       exit: 1

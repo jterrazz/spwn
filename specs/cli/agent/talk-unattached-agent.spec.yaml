@@ -1,5 +1,5 @@
 description: talk to an unattached agent fails cleanly
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: agent create orphan
       exit: 0

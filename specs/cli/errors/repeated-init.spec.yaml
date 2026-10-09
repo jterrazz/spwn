@@ -1,5 +1,4 @@
 description: a second init refuses to overwrite and the commands after it still work
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: init

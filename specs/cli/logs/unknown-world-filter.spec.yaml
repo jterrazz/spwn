@@ -1,5 +1,5 @@
 description: --world naming a world the manifest does not declare errors
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 env: isolated
 runs:
     - command: logs --world doesnotexist

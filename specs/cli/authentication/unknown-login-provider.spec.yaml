@@ -1,5 +1,4 @@
 description: auth login with an unknown provider lists both registries
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: auth login bogus-name

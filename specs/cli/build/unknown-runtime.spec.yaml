@@ -1,5 +1,5 @@
 description: --runtime naming an unregistered runtime lists the known ones
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --tree-only --runtime unknown-runtime
       exit: 1

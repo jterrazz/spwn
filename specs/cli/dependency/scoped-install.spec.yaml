@@ -1,5 +1,4 @@
 description: --agent narrows an install to a single agent
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

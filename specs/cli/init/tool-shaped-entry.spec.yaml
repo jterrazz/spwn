@@ -1,5 +1,4 @@
 description: init refuses a tool-shaped catalog entry that is not gallery-eligible
-fixture: $FIXTURES/empty/
 runs:
     - command: init qmd
       exit: 1

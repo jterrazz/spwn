@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -18,7 +19,7 @@ function bareEntries(manifest: string): null | string[] {
 
 test('a bare name accepted on the cli never lands bare in agent.yaml', async () => {
     // Given - the whole session, stated in the document: init, install python, check
-    const result = await cli.run('promoted-bare-ref.spec.yaml');
+    const result = await cli.run(file('./promoted-bare-ref.spec.yaml'));
 
     // Then - the promotion left nothing bare behind
     const manifest = result.file('spwn/agents/neo/agent.yaml').content;
@@ -27,7 +28,7 @@ test('a bare name accepted on the cli never lands bare in agent.yaml', async () 
 
 test('no manifest entry survives without an explicit scheme', async () => {
     // Given - init followed by three installs mixing bare, local and catalog refs
-    const result = await cli.run('explicit-manifest-schemes.spec.yaml');
+    const result = await cli.run(file('./explicit-manifest-schemes.spec.yaml'));
 
     // Then - every entry on disk carries its scheme
     const bare = bareEntries(result.file('spwn/agents/neo/agent.yaml').content);

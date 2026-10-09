@@ -1,5 +1,4 @@
 description: an unknown slug errors with the catalog hint
-fixture: $FIXTURES/empty/
 runs:
     - command: init nonesuch
       exit: 1

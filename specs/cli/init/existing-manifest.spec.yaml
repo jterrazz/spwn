@@ -1,5 +1,5 @@
 description: init errors when spwn.yaml already exists
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: init
       exit: 1

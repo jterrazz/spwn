@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -15,11 +16,11 @@ import { cli } from '../cli.specification.js';
 describe('system skills infrastructure (docker)', () => {
     test('per-agent CLAUDE.md is laid down with world context inlined', async () => {
         // Given - a docker-pilot world brought online
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         // Then - neo's CLAUDE.md exists, is non-trivial, and carries every standard section header
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Created container');
+        expect(result.stderr.text).toContain('Created container');
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
         const claude = neo.file('/agents/neo/CLAUDE.md');
@@ -40,7 +41,6 @@ describe('system skills infrastructure (docker)', () => {
     test('.claude/skills is materialised directly under the agent home', async () => {
         // Given - an empty project scaffolded with a claude-code backend then brought up (docker-pilot ships no skills)
         await using result = await cli
-            .fixture('$FIXTURES/empty/')
             .exec(['init --backend claude-code', 'up']);
 
         // Then - the transpile layer writes the resolved skill under the agent's native .claude/skills tree via docker-cp

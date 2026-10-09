@@ -1,5 +1,4 @@
 description: import --as renames the agent on the way back in
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

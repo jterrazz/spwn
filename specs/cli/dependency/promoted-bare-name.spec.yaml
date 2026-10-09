@@ -1,5 +1,5 @@
 description: a bare name matching the catalog installs the scheme form
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install python
       exit: 0

@@ -1,5 +1,4 @@
 description: multiple agents coexist in the same project
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name multi-agent
       exit: 0

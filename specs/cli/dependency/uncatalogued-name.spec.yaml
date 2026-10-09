@@ -1,5 +1,5 @@
 description: a bare name that misses the catalog is rejected with a known-list hint
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install my-local-tool
       exit: 1

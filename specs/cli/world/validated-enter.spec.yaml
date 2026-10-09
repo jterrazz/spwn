@@ -1,5 +1,4 @@
 description: world enter validates the world before printing any banner
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

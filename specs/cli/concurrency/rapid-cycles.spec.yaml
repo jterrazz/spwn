@@ -1,5 +1,4 @@
 description: rapid sequential create and remove cycles do not corrupt state
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: init

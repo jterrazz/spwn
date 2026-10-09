@@ -1,5 +1,4 @@
 description: agent rm cleans the manifest so check stays green
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

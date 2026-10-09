@@ -1,5 +1,5 @@
 description: world inspect on an id that never existed fails cleanly
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: world inspect world-ghost-99999
       exit: 1

@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -12,7 +13,7 @@ import { cli } from '../cli.specification.js';
 
 test('the scaffolded agent.yaml carries no colon-form local ref', async () => {
     // Given - the scaffolding session, stated in the document
-    const result = await cli.run('starter-scaffold.spec.yaml');
+    const result = await cli.run(file('./starter-scaffold.spec.yaml'));
 
     // Then - local refs are path-form only; the retired `skill:`/`tool:`/`hook:` forms are gone
     const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
@@ -23,7 +24,7 @@ test('the scaffolded agent.yaml carries no colon-form local ref', async () => {
 
 test('the manifest points knowledge at spwn/knowledge, never at the root', async () => {
     // Given - the same session, pinning the 2026-04 knowledge relocation
-    const result = await cli.run('starter-scaffold.spec.yaml');
+    const result = await cli.run(file('./starter-scaffold.spec.yaml'));
 
     // Then - the retired root-level path never sneaks back in
     expect(result.file('spwn.yaml').content).not.toMatch(/knowledge: \.\/knowledge$/m);
@@ -31,7 +32,7 @@ test('the manifest points knowledge at spwn/knowledge, never at the root', async
 
 test('the default scaffold leaves the runtime backend unpinned', async () => {
     // Given - the same session; the resolver should pick the backend at spawn time
-    const result = await cli.run('starter-scaffold.spec.yaml');
+    const result = await cli.run(file('./starter-scaffold.spec.yaml'));
 
     // Then - no non-comment line declares a runtime block or a backend key
     for (const raw of result.file('spwn/agents/neo/agent.yaml').content.split('\n')) {

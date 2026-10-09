@@ -1,5 +1,4 @@
 description: agent --help lists the agent subcommands
-fixture: $FIXTURES/empty/
 runs:
     - command: agent --help
       exit: 0

@@ -1,5 +1,4 @@
 description: agent create inside a project scaffolds a check-valid agent
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

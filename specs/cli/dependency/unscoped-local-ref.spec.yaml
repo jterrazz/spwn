@@ -1,5 +1,5 @@
 description: a local ref without --agent is refused
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install skill/paper-reading
       exit: 1

@@ -1,5 +1,5 @@
 description: talking to a declared agent with no live world nudges at spwn up
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 env: isolated
 runs:
     - command: agent talk neo hello

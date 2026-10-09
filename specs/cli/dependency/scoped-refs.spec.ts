@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -23,7 +24,7 @@ function entriesOf(manifest: string, ref: string): string[] {
 
 test('a repeated install leaves exactly one manifest entry', async () => {
     // Given - the same ref installed twice, stated in the document
-    const result = await cli.run('repeated-install.spec.yaml');
+    const result = await cli.run(file('./repeated-install.spec.yaml'));
 
     // Then - the manifest carries one list entry, not two
     expect(
@@ -33,7 +34,7 @@ test('a repeated install leaves exactly one manifest entry', async () => {
 
 test('a project-wide install over a partly-installed project duplicates nothing', async () => {
     // Given - mark already carries the ref when the project-wide install runs
-    const result = await cli.run('mixed-state-install.spec.yaml');
+    const result = await cli.run(file('./mixed-state-install.spec.yaml'));
 
     // Then - every agent ends with exactly one entry, mark included
     for (const name of AGENTS) {
@@ -47,7 +48,7 @@ test('a project-wide install over a partly-installed project duplicates nothing'
 
 test('a scoped install leaves the other agents untouched', async () => {
     // Given - the ref installed against mark only
-    const result = await cli.run('scoped-install.spec.yaml');
+    const result = await cli.run(file('./scoped-install.spec.yaml'));
 
     // Then - the other three manifests never mention it
     for (const name of ['helly', 'irving', 'dylan']) {
@@ -60,7 +61,7 @@ test('a scoped install leaves the other agents untouched', async () => {
 
 test('a round-trip uninstall leaves neither the manifest nor the lockfile carrying it', async () => {
     // Given - a ref installed then immediately uninstalled
-    const result = await cli.run('round-trip-uninstall.spec.yaml');
+    const result = await cli.run(file('./round-trip-uninstall.spec.yaml'));
 
     // Then - the manifest drops the ref, and any surviving lockfile drops the pin
     expect(result.file('spwn/agents/neo/agent.yaml').content).not.toContain('spwn:python');
@@ -72,7 +73,7 @@ test('a round-trip uninstall leaves neither the manifest nor the lockfile carryi
 
 test('a scoped uninstall takes the ref from that agent only', async () => {
     // Given - all four agents carry the ref, then mark loses it
-    const result = await cli.run('scoped-uninstall.spec.yaml');
+    const result = await cli.run(file('./scoped-uninstall.spec.yaml'));
 
     // Then - mark is clean; the document already proved the other three kept it
     expect(result.file('spwn/agents/mark/agent.yaml').content).not.toContain('spwn:qmd');
@@ -80,7 +81,7 @@ test('a scoped uninstall takes the ref from that agent only', async () => {
 
 test('the last carrier losing a ref clears it everywhere', async () => {
     // Given - only mark carried the ref, then mark loses it
-    const result = await cli.run('last-carrier-uninstall.spec.yaml');
+    const result = await cli.run(file('./last-carrier-uninstall.spec.yaml'));
 
     // Then - no agent carries it and the lockfile no longer pins it
     for (const name of AGENTS) {
@@ -97,7 +98,7 @@ test('the last carrier losing a ref clears it everywhere', async () => {
 
 test('a bare-name uninstall removes the scheme form it added', async () => {
     // Given - a ref installed and uninstalled both by its bare name
-    const result = await cli.run('bare-name-uninstall.spec.yaml');
+    const result = await cli.run(file('./bare-name-uninstall.spec.yaml'));
 
     // Then - the resolver is present on the uninstall path too
     expect(result.file('spwn/agents/neo/agent.yaml').content).not.toContain('spwn:python');

@@ -1,5 +1,5 @@
 description: dream with no journal entries skips
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent dream neo
       exit: 0

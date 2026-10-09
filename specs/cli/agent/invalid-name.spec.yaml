@@ -1,5 +1,4 @@
 description: agent create rejects a name with a space and writes nothing
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create "bad name"

@@ -14,7 +14,7 @@ function smokeTest(args: string) {
     test(`spwn init ${args || '(default)'} + spwn up produces a running world`, async () => {
         // Given - an empty project scaffolded (optionally from a catalog ref) then brought up with a real image build
         const initArgs = args ? `init ${args}` : 'init';
-        await using result = await cli.fixture('$FIXTURES/empty/').exec([initArgs, 'up']);
+        await using result = await cli.exec([initArgs, 'up']);
 
         // Then - the build + tool-probe path succeeds (a zero exit is itself the assertion) and any captured world is running
         expect(

@@ -1,7 +1,7 @@
 description: a stray file under an agent directory is invisible to the validator
 fixture:
-    - $FIXTURES/single-agent/
-    - stray-skill/
+    - ../__fixtures__/single-agent/
+    - ./__fixtures__/stray-skill/
 runs:
     - command: check
       exit: 0

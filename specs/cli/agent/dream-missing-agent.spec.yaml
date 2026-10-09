@@ -1,5 +1,5 @@
 description: dream on a missing agent skips gracefully
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent dream ghost
       exit: 0

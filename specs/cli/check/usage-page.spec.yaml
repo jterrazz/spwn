@@ -1,5 +1,4 @@
 description: check --help prints the command usage
-fixture: $FIXTURES/empty/
 runs:
     - command: check --help
       exit: 0

@@ -1,5 +1,4 @@
 description: architect talk --help lists its usage and flags
-fixture: $FIXTURES/empty/
 runs:
     - command: architect talk --help
       exit: 0

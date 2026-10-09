@@ -1,5 +1,5 @@
 description: an agent referencing a non-existent built-in tool is flagged
-fixture: $FIXTURES/check-invalid-tool/
+fixture: ../__fixtures__/check-invalid-tool/
 runs:
     - command: check
       exit: 1

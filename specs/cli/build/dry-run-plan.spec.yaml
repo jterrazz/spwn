@@ -1,5 +1,5 @@
 description: --dry-run prints the plan without touching disk
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --tree-only --dry-run
       exit: 0

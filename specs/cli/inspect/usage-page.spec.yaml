@@ -1,5 +1,4 @@
 description: inspect --help prints the command usage
-fixture: $FIXTURES/empty/
 runs:
     - command: inspect --help
       exit: 0

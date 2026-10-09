@@ -1,5 +1,5 @@
 description: catalog and local tool refs mixed in one manifest pass without error
-fixture: $FIXTURES/mixed-tool-refs/
+fixture: ../__fixtures__/mixed-tool-refs/
 runs:
     - command: check
       exit: 0

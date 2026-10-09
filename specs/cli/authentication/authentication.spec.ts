@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -19,11 +20,11 @@ import { cli } from '../cli.specification.js';
  * hermetic and CLI-only.
  */
 
-const isolated = () => cli.fixture('$FIXTURES/empty/').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
+const isolated = () => cli.env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 /** A fresh home with the keychain skipped, so nothing reads as authenticated. */
 const withoutKeychain = () =>
-    cli.fixture('$FIXTURES/empty/').env({
+    cli.env({
         HOME: '$WORKDIR/empty-home',
         SPWN_HOME: '$WORKDIR/spwn-home',
         SPWN_SKIP_KEYCHAIN: '1',
@@ -36,12 +37,12 @@ describe('cli - auth dashboard', () => {
 
         // Then - the stable scaffolding renders (scalpel: row content is host-dependent)
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Credentials');
-        expect(result.stderr).toContain('Anthropic');
-        expect(result.stderr).toContain('OpenAI');
-        expect(result.stderr).toContain('oauth');
-        expect(result.stderr).toContain('api_key');
-        expect(result.stderr).toContain('Default:');
+        expect(result.stderr.text).toContain('Credentials');
+        expect(result.stderr.text).toContain('Anthropic');
+        expect(result.stderr.text).toContain('OpenAI');
+        expect(result.stderr.text).toContain('oauth');
+        expect(result.stderr.text).toContain('api_key');
+        expect(result.stderr.text).toContain('Default:');
     });
 
     test("'spwn auth' surfaces the MCP-tools section", async () => {
@@ -50,9 +51,9 @@ describe('cli - auth dashboard', () => {
 
         // Then - the MCP section header, a provider row, and its login hint are present
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Tools (MCP)');
-        expect(result.stderr).toContain('notion');
-        expect(result.stderr).toContain('spwn auth login notion');
+        expect(result.stderr.text).toContain('Tools (MCP)');
+        expect(result.stderr.text).toContain('notion');
+        expect(result.stderr.text).toContain('spwn auth login notion');
     });
 
     test("'spwn auth' surfaces the CLI-tools section (github)", async () => {
@@ -61,9 +62,9 @@ describe('cli - auth dashboard', () => {
 
         // Then - the CLI-tools section advertises the github login path
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Tools (CLI)');
-        expect(result.stderr).toContain('github');
-        expect(result.stderr).toContain('spwn auth login github');
+        expect(result.stderr.text).toContain('Tools (CLI)');
+        expect(result.stderr.text).toContain('github');
+        expect(result.stderr.text).toContain('spwn auth login github');
     });
 
     test("'spwn auth' lists every supported method per provider", async () => {
@@ -84,8 +85,8 @@ describe('cli - auth dashboard', () => {
 
         // Then - the dashboard surfaces the default at a glance
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Default:');
-        expect(result.stderr).toContain('anthropic');
+        expect(result.stderr.text).toContain('Default:');
+        expect(result.stderr.text).toContain('anthropic');
     });
 
     /*
@@ -98,7 +99,6 @@ describe('cli - auth dashboard', () => {
     test("'spwn auth login notion' takes the MCP branch (not the API-key branch)", async () => {
         // Given - a dead DOCKER_HOST so login fails fast at the helper-image build
         await using result = await cli
-            .fixture('$FIXTURES/empty/')
             .env({
                 DOCKER_HOST: 'tcp://127.0.0.1:1',
                 SPWN_HOME: '$WORKDIR/spwn-home',

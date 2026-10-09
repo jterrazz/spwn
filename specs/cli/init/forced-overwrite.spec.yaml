@@ -1,5 +1,5 @@
 description: --force overwrites an existing spwn.yaml
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: init --force --name forced-project
       exit: 0

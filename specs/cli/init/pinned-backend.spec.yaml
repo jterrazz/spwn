@@ -1,5 +1,4 @@
 description: --backend writes runtime.backend into the scaffolded agent
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name codex-demo --backend codex
       exit: 0

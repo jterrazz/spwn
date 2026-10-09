@@ -1,5 +1,5 @@
 description: a pre-2026 world id is refused with an actionable not-found message
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: down w-acme-12345
       exit: 1

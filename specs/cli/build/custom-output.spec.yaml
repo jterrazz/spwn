@@ -1,5 +1,5 @@
 description: --output writes the tree to a custom location
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --tree-only --output build/preview
       exit: 0

@@ -1,5 +1,4 @@
 description: agent commands still work after a failed removal
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: init

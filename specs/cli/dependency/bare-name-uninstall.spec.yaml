@@ -1,5 +1,5 @@
 description: uninstall accepts a bare name and removes the scheme form it added
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install python
       exit: 0

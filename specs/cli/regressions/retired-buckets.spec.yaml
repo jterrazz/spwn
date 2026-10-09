@@ -1,5 +1,5 @@
 description: every retired top-level bucket is flagged with a migration hint
-fixture: legacy-layout/
+fixture: ./__fixtures__/legacy-layout/
 runs:
     - command: check
       exit: 1

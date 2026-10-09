@@ -1,5 +1,4 @@
 description: the lockfile pin goes when the last carrier loses the ref
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

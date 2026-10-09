@@ -1,5 +1,5 @@
 description: sleep on a fresh agent reports zero-count archives
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent sleep neo
       exit: 0

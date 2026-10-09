@@ -1,5 +1,4 @@
 description: agent logs <name> is a shortcut for --agent
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

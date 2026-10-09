@@ -1,5 +1,4 @@
 description: init then ls, dream and rm walk the whole non-docker journey
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: init --name lifecycle

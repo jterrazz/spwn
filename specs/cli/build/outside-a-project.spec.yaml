@@ -1,5 +1,4 @@
 description: build outside a spwn project nudges the user at spwn init
-fixture: $FIXTURES/empty/
 runs:
     - command: build
       exit: 1

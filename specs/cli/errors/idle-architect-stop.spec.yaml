@@ -1,5 +1,4 @@
 description: stopping an architect that is not running exits clean
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: architect stop

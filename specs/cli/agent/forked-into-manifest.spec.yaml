@@ -1,5 +1,4 @@
 description: fork is symmetric with create in spwn.yaml
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

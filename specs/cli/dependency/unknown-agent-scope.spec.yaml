@@ -1,5 +1,4 @@
 description: --agent naming an agent that does not exist lists the real ones
-fixture: $FIXTURES/empty/
 runs:
     - command: init severance
       exit: 0

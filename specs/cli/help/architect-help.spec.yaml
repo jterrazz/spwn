@@ -1,5 +1,4 @@
 description: architect --help lists the architect subcommands
-fixture: $FIXTURES/empty/
 runs:
     - command: architect --help
       exit: 0

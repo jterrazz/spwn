@@ -1,5 +1,4 @@
 description: the manifest is the strict boundary even where the cli accepts a shorthand
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

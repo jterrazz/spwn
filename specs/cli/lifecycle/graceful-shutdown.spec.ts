@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -12,19 +13,19 @@ import { cli } from '../cli.specification.js';
 describe('graceful shutdown', () => {
     test('down on a running project world removes the container cleanly', async () => {
         // Given - a world brought up then torn down
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the destroy banners fire and the container is gone
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Destroyed');
-        expect(result.stderr).toContain('project world(s) destroyed');
+        expect(result.stderr.text).toContain('Destroyed');
+        expect(result.stderr.text).toContain('project world(s) destroyed');
         expect(result.container('neo').exists).toBe(false);
     });
 
     test('world list --json reports no running worlds after down', async () => {
         // Given - a world brought up, torn down, then listed in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'world list --json']);
 
         // Then - no world remains running
@@ -40,7 +41,7 @@ describe('graceful shutdown', () => {
     test('double down is idempotent with no panic or stack trace', async () => {
         // Given - up then two downs in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'down']);
 
         // Then - no crash signals and the container stays gone (scalpel: crash-signal absence)
@@ -53,7 +54,7 @@ describe('graceful shutdown', () => {
 
     test('down appends a journal entry to the destroyed agent', async () => {
         // Given - a running world with neo, brought up then down
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the architect's destroy path wrote at least one journal entry for neo
         expect(result.exitCode).toBe(0);

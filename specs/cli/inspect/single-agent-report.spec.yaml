@@ -1,5 +1,5 @@
 description: inspect renders a single-agent project end to end
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: inspect --offline
       exit: 0

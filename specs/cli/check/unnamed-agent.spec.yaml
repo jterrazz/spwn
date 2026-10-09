@@ -1,5 +1,4 @@
 description: agent create with no name picks a random planet name
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create

@@ -1,5 +1,4 @@
 description: skill new inside a project writes into the project tree
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

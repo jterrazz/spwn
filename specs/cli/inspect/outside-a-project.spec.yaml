@@ -1,5 +1,4 @@
 description: inspect outside a spwn project names the missing manifest
-fixture: $FIXTURES/empty/
 runs:
     - command: inspect --offline
       exit: 1

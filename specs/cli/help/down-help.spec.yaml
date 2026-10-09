@@ -1,5 +1,4 @@
 description: down --help renders the lifecycle usage block
-fixture: $FIXTURES/empty/
 runs:
     - command: down --help
       exit: 0

@@ -1,5 +1,5 @@
 description: inspect scoped to one agent renders exactly its block
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: inspect neo --offline
       exit: 0

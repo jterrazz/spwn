@@ -1,5 +1,4 @@
 description: export writes a tar.gz next to the project
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

@@ -1,5 +1,5 @@
 description: the lockfile rule stays silent when no lockfile exists
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: check
       exit: 0

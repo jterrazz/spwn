@@ -1,5 +1,4 @@
 description: world enter --help renders the enter usage block
-fixture: $FIXTURES/empty/
 runs:
     - command: world enter --help
       exit: 0

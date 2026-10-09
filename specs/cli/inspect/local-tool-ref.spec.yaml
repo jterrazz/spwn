@@ -1,5 +1,5 @@
 description: a local tool dependency renders as a bare name
-fixture: $FIXTURES/mixed-tool-refs/
+fixture: ../__fixtures__/mixed-tool-refs/
 runs:
     - command: inspect --offline
       exit: 0

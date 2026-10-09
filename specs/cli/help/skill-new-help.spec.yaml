@@ -1,5 +1,4 @@
 description: skill new --help documents the local authoring flow
-fixture: $FIXTURES/empty/
 runs:
     - command: skill new --help
       exit: 0

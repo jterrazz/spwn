@@ -1,5 +1,4 @@
 description: agent create --help documents the Mind layout
-fixture: $FIXTURES/empty/
 runs:
     - command: agent create --help
       exit: 0

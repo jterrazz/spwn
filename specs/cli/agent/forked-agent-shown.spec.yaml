@@ -1,5 +1,5 @@
 description: a forked agent is inspectable via show
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent fork neo neo-clone
       exit: 0

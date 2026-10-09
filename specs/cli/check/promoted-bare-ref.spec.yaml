@@ -1,5 +1,4 @@
 description: a bare name accepted on the cli lands as spwn:<name> in agent.yaml
-fixture: $FIXTURES/empty/
 runs:
     - command: init
       exit: 0

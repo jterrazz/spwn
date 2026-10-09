@@ -1,5 +1,4 @@
 description: import restores an agent from its own export
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent create neo

@@ -1,5 +1,5 @@
 description: an incomplete lockfile is flagged by name
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install spwn:unix
       exit: 0

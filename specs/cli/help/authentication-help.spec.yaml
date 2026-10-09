@@ -1,5 +1,4 @@
 description: auth --help lists the auth subcommands
-fixture: $FIXTURES/empty/
 runs:
     - command: auth --help
       exit: 0

@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -27,56 +28,53 @@ const extractAgentLsHeader = (txt: string) =>
 describe('agent ls --json', () => {
     test('reports declared agents with their world for a project', async () => {
         // Given - single-agent has one declared agent, neo, in world neo
-        await using result = await cli.fixture('$FIXTURES/single-agent/').exec('agent ls --json');
+        await using result = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('agent ls --json');
 
         // Then - the JSON envelope lists neo as stopped, attached to neo
         expect(result.exitCode).toBe(0);
-        expect(result.json).toMatch('declared.json');
+        expect(result.json).toMatch(file('./__expected__/declared.json'));
     });
 
     test('marks an undeclared agent dir as orphan', async () => {
         // Given - single-agent base + a ghost agent dir that is not in spwn.yaml
         await using result = await cli
-            .fixture('$FIXTURES/single-agent/')
-            .fixture('ghost/')
+            .fixture(directory('../__fixtures__/single-agent/'))
+            .fixture(directory('./__fixtures__/ghost/'))
             .exec('agent ls --json');
 
         // Then - ghost appears as orphan with no world, neo stays declared
         expect(result.exitCode).toBe(0);
-        expect(result.json).toMatch('with-orphan.json');
+        expect(result.json).toMatch(file('./__expected__/with-orphan.json'));
     });
 
     test('lists created agents structurally', async () => {
         // Given - two agents created then listed as JSON in an isolated home
         await using result = await cli
-            .fixture('$FIXTURES/empty/')
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec(['agent create neo', 'agent create trinity', 'agent ls --json']);
 
         // Then - the JSON envelope lists both agents unattached
         expect(result.exitCode).toBe(0);
-        expect(result.json).toMatch('ls-two-agents.json');
+        expect(result.json).toMatch(file('./__expected__/ls-two-agents.json'));
     });
 
     test('on an empty home returns no agents', async () => {
         // Given - an isolated home with no agents created
         await using result = await cli
-            .fixture('$FIXTURES/empty/')
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec('agent ls --json');
 
         // Then - the JSON envelope reports an empty roster
         expect(result.exitCode).toBe(0);
-        expect(result.json).toMatch('ls-empty.json');
+        expect(result.json).toMatch(file('./__expected__/ls-empty.json'));
     });
 
     test('the header is stable across project and global mode', async () => {
         // Given - global mode (isolated home) and project mode both render a table
         await using global = await cli
-            .fixture('$FIXTURES/empty/')
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec(['agent new neo', 'agent ls']);
-        await using project = await cli.fixture('$FIXTURES/single-agent/').exec('agent ls');
+        await using project = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('agent ls');
 
         expect(global.exitCode).toBe(0);
         expect(project.exitCode).toBe(0);

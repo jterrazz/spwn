@@ -1,5 +1,5 @@
 description: a github registry ref is refused as unsupported
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: install github:acme/foo
       exit: 1

@@ -1,5 +1,4 @@
 description: init --help advertises the gallery shorthand
-fixture: $FIXTURES/empty/
 runs:
     - command: init --help
       exit: 0

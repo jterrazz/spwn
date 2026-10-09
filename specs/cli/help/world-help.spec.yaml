@@ -1,5 +1,4 @@
 description: world --help lists the lifecycle subcommands
-fixture: $FIXTURES/empty/
 runs:
     - command: world --help
       exit: 0

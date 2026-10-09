@@ -1,5 +1,5 @@
 description: --force replaces the stale files a filtered run left behind
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: build --tree-only
       exit: 0

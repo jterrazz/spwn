@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -13,7 +14,7 @@ import { cli } from '../cli.specification.js';
 
 test('default container has a bounded pids limit', async () => {
     // Given - a freshly-upped docker-pilot world
-    await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+    await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
     // Then - the container is running with a real (non-unlimited) pids limit
     expect(result.exitCode).toBe(0);

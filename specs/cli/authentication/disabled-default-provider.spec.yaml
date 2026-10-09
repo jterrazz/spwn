@@ -1,5 +1,4 @@
 description: auth default refuses a provider that is currently disabled
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: auth disable openai

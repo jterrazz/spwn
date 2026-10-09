@@ -1,5 +1,5 @@
 description: inspect errors cleanly when the named agent is missing
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: inspect ghost --offline
       exit: 1

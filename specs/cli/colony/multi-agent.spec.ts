@@ -1,6 +1,7 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { required } from '../../_support/required.js';
+import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -13,14 +14,14 @@ describe('colony multi-agent', () => {
     test('up spawns one world containing two agents', async () => {
         // Given - a two-agent colony brought online
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
-            .fixture('colony/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/colony/'))
             .exec('up');
 
         // Then - both minds are on disk and docker-cp'd into the running container
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Created container');
-        expect(result.stderr).toContain('Agent is alive');
+        expect(result.stderr.text).toContain('Created container');
+        expect(result.stderr.text).toContain('Agent is alive');
         expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn/agents/morpheus/SOUL.md').exists).toBe(true);
         const neo = result.container('neo');
@@ -31,15 +32,15 @@ describe('colony multi-agent', () => {
         expect(neo.file('/agents/morpheus/SOUL.md').exists).toBe(true);
         const ls = await neo.exec('ls /agents');
         expect(ls.exitCode).toBe(0);
-        expect(ls.stdout).toContain('neo');
-        expect(ls.stdout).toContain('morpheus');
+        expect(ls.stdout.text).toContain('neo');
+        expect(ls.stdout.text).toContain('morpheus');
     });
 
     test('world list --json shows the full colony', async () => {
         // Given - the colony brought up, then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
-            .fixture('colony/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/colony/'))
             .exec(['up', 'world list --json']);
 
         // Then - one running project world attaches both agents
@@ -61,14 +62,14 @@ describe('colony multi-agent', () => {
     test('destroying the colony cleans up both agents at once', async () => {
         // Given - the colony brought up then torn down in one chain
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
-            .fixture('colony/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/colony/'))
             .exec(['up', 'down']);
 
         // Then - the container is fully gone from docker
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Destroyed');
-        expect(result.stderr).toContain('project world(s) destroyed');
+        expect(result.stderr.text).toContain('Destroyed');
+        expect(result.stderr.text).toContain('project world(s) destroyed');
         expect(result.container('neo').exists).toBe(false);
     });
 });

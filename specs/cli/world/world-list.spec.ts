@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -12,8 +13,8 @@ import { cli } from '../cli.specification.js';
 
 test('world ls is an alias for world list', async () => {
     // Given - single-agent declares one world neo, listed via both spellings
-    await using viaLs = await cli.fixture('$FIXTURES/single-agent/').exec('world ls --json');
-    await using viaList = await cli.fixture('$FIXTURES/single-agent/').exec('world list --json');
+    await using viaLs = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('world ls --json');
+    await using viaList = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('world list --json');
 
     // Then - the short form emits byte-identical JSON to the canonical form
     expect(viaLs.exitCode).toBe(0);
@@ -23,9 +24,9 @@ test('world ls is an alias for world list', async () => {
 
 test('reports declared worlds for a project', async () => {
     // Given - single-agent declares one world neo with one agent
-    await using result = await cli.fixture('$FIXTURES/single-agent/').exec('world list --json');
+    await using result = await cli.fixture(directory('../__fixtures__/single-agent/')).exec('world list --json');
 
     // Then - the JSON envelope lists the declared world in stopped state
     expect(result.exitCode).toBe(0);
-    expect(result.json).toMatch('project.json');
+    expect(result.json).toMatch(file('./__expected__/project.json'));
 });

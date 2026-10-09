@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -17,12 +18,12 @@ import { cli } from '../cli.specification.js';
 describe('world spawn', () => {
     test('up lays down the full agent home, world context, and container labels', async () => {
         // Given - a freshly-upped docker-pilot world
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         // Then - the boot banners fire and the container is running
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Created container');
-        expect(result.stderr).toContain('Agent is alive');
+        expect(result.stderr.text).toContain('Created container');
+        expect(result.stderr.text).toContain('Agent is alive');
         const neo = result.container('neo');
         expect(neo.exists).toBe(true);
         expect(neo.running).toBe(true);
@@ -52,9 +53,9 @@ describe('world spawn', () => {
         }
         const ls = await neo.exec('ls /agents/neo');
         expect(ls.exitCode).toBe(0);
-        expect(ls.stdout).toContain('SOUL.md');
+        expect(ls.stdout.text).toContain('SOUL.md');
         for (const layer of ['playbooks', 'journal']) {
-            expect(ls.stdout).toContain(layer);
+            expect(ls.stdout.text).toContain(layer);
         }
         expect(neo.file('/world/knowledge').exists).toBe(true);
 
@@ -93,7 +94,7 @@ describe('world spawn', () => {
     test('spawned world appears in world list --json', async () => {
         // Given - the world upped then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'world list --json']);
 
         // Then - one running project world with the neo agent
@@ -114,12 +115,12 @@ describe('world spawn', () => {
     test('spawn with an unknown world name fails cleanly with no container leaked', async () => {
         // Given - a project-mode up requesting a world key that is not in spwn.yaml
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('up nonexistent-world');
 
         // Then - non-zero with the canonical hint (full stderr golden) and no container left behind
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('spawn-unknown-world.txt');
+        expect(result.stderr).toMatch(file('./__expected__/spawn-unknown-world.txt'));
         expect(result.container('neo').exists).toBe(false);
         expect(result.container('nonexistent-world').exists).toBe(false);
     });
@@ -127,22 +128,22 @@ describe('world spawn', () => {
     test('spawn with a non-existent agent fails cleanly', async () => {
         // Given - a world up naming an agent that does not exist
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('world up --agent ghost');
 
         // Then - non-zero with the "agent new" hint (full stderr golden) and no container left behind
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch('spawn-missing-agent.txt');
+        expect(result.stderr).toMatch(file('./__expected__/spawn-missing-agent.txt'));
         expect(result.container('ghost').exists).toBe(false);
     });
 
     test('spwn down fully removes the container', async () => {
         // Given - up followed by down
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the teardown banner fires and the container is gone
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toContain('Destroyed');
+        expect(result.stderr.text).toContain('Destroyed');
         expect(result.container('neo').exists).toBe(false);
     });
 });

@@ -1,5 +1,4 @@
 description: agent new scaffolds the same mind as agent create
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: agent new neo

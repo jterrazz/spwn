@@ -1,6 +1,7 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { required } from '../../_support/required.js';
+import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -16,18 +17,18 @@ import { cli } from '../cli.specification.js';
 describe('state tracking', () => {
     test('after up, banners fire and world list --json reports the world', async () => {
         // Given - a docker-pilot world brought online
-        await using up = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using up = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         expect(up.exitCode).toBe(0);
-        expect(up.stderr).toContain('Created container');
-        expect(up.stderr).toContain('Agent is alive');
+        expect(up.stderr.text).toContain('Created container');
+        expect(up.stderr.text).toContain('Agent is alive');
 
         const neo = up.container('neo');
         expect(neo.exists).toBe(true);
         expect(neo.running).toBe(true);
 
         // When - a second run queries the list; the first container is still live under the label
-        await using list = await cli.fixture('$FIXTURES/docker-pilot/').exec('world list --json');
+        await using list = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('world list --json');
 
         // Then - one running project world named neo is reported
         expect(list.exitCode).toBe(0);
@@ -46,15 +47,15 @@ describe('state tracking', () => {
 
     test('down removes the world from state and from docker', async () => {
         // Given - up then down so the last step carries the destroy banners
-        await using destroy = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using destroy = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         expect(destroy.exitCode).toBe(0);
-        expect(destroy.stderr).toContain('Destroyed');
-        expect(destroy.stderr).toContain('project world(s) destroyed');
+        expect(destroy.stderr.text).toContain('Destroyed');
+        expect(destroy.stderr.text).toContain('project world(s) destroyed');
         expect(destroy.container('neo').exists).toBe(false);
 
         // Then - list --json reports no running worlds
-        await using list = await cli.fixture('$FIXTURES/docker-pilot/').exec('world list --json');
+        await using list = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('world list --json');
 
         expect(list.exitCode).toBe(0);
         const report = list.json.value as {
@@ -68,7 +69,7 @@ describe('state tracking', () => {
     test('world list is stable across repeated calls', async () => {
         // Given - a spawned world and its first list snapshot
         await using first = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec(['up', 'world list --json']);
 
         expect(first.exitCode).toBe(0);
@@ -83,7 +84,7 @@ describe('state tracking', () => {
         );
 
         // When - a second list runs while the first container is still live under the label
-        await using second = await cli.fixture('$FIXTURES/docker-pilot/').exec('world list --json');
+        await using second = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('world list --json');
 
         // Then - the second snapshot matches the first
         expect(second.exitCode).toBe(0);

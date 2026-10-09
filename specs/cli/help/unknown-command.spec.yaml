@@ -1,5 +1,4 @@
 description: unknown command errors with a helpful cobra message
-fixture: $FIXTURES/empty/
 runs:
     - command: nonexistent
       exit: 1

@@ -1,5 +1,4 @@
 description: auth default <provider> sets the preference and records it
-fixture: $FIXTURES/empty/
 env: isolated
 runs:
     - command: auth default anthropic

@@ -1,5 +1,5 @@
 description: sleep on a missing agent is a no-op
-fixture: $FIXTURES/single-agent/
+fixture: ../__fixtures__/single-agent/
 runs:
     - command: agent sleep ghost
       exit: 0

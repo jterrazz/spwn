@@ -1,6 +1,7 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { required } from '../../_support/required.js';
+import { required } from '../__setup__/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -13,7 +14,7 @@ import { cli } from '../cli.specification.js';
 describe('world up/down (docker pilot)', () => {
     test('spwn up brings a declared world into running state', async () => {
         // Given - the docker-pilot fixture with one declared world neo
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
         // Then - the neo container exists and is running
         expect(result.exitCode).toBe(0);
@@ -26,7 +27,7 @@ describe('world up/down (docker pilot)', () => {
     test('spwn up on a running world is idempotent', async () => {
         // Given - a world brought up twice then listed as JSON
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'up', 'world list --json']);
 
@@ -43,7 +44,7 @@ describe('world up/down (docker pilot)', () => {
     test('spwn up is repeatable without host-side cleanup', async () => {
         // Given - up, down, up again with no manual cleanup between steps
         await using result = await cli
-            .fixture('$FIXTURES/docker-pilot/')
+            .fixture(directory('../__fixtures__/docker-pilot/'))
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'down', 'up']);
 
@@ -54,7 +55,7 @@ describe('world up/down (docker pilot)', () => {
 
     test('up then down removes the container entirely', async () => {
         // Given - up followed by down (spwn down fully destroys, not just stops)
-        await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec(['up', 'down']);
+        await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec(['up', 'down']);
 
         // Then - the post-run label lookup finds no container
         expect(result.exitCode).toBe(0);

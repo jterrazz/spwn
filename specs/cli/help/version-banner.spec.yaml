@@ -1,5 +1,4 @@
 description: --version prints the spwn version line
-fixture: $FIXTURES/empty/
 runs:
     - command: --version
       exit: 0

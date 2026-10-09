@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -15,7 +16,7 @@ import { cli } from '../cli.specification.js';
 
 test('declared deps expand into live binaries and the container runs bounded on bridge', async () => {
     // Given - a freshly-upped docker-pilot world (worlds/default.yaml declares spwn:unix + spwn:git)
-    await using result = await cli.fixture('$FIXTURES/docker-pilot/').exec('up');
+    await using result = await cli.fixture(directory('../__fixtures__/docker-pilot/')).exec('up');
 
     // Then - the container is running with the declared dependency binaries present
     expect(result.exitCode).toBe(0);
@@ -24,11 +25,11 @@ test('declared deps expand into live binaries and the container runs bounded on 
 
     const bash = await neo.exec('which bash');
     expect(bash.exitCode).toBe(0);
-    expect(bash.stdout).toContain('bash');
+    expect(bash.stdout.text).toContain('bash');
 
     const git = await neo.exec('which git');
     expect(git.exitCode).toBe(0);
-    expect(git.stdout).toContain('git');
+    expect(git.stdout.text).toContain('git');
 
     // Faculties (the tool list) is inlined into CLAUDE.md (scalpel: probing inlined markers, not a full golden)
     const claude = neo.file('/agents/neo/CLAUDE.md').content;

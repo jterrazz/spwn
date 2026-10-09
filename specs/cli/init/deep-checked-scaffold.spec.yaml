@@ -1,5 +1,4 @@
 description: the fresh scaffold passes check --deep with no edits
-fixture: $FIXTURES/empty/
 runs:
     - command: init --name sanity-check
       exit: 0

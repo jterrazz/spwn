@@ -1,5 +1,5 @@
 description: down with no running worlds succeeds with an explicit zero-count banner
-fixture: $FIXTURES/docker-pilot/
+fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: down
       exit: 0
