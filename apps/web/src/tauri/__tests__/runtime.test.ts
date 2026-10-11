@@ -81,6 +81,19 @@ describe('runtime', () => {
         ]);
     });
 
+    test('a page that gains the bridge after a first ask is asked again, not answered from the first', async () => {
+        // Given - a page asked before the shell injected its bridge
+        const runtime = await freshRuntime(undefined);
+        const before = await runtime.initTauriApiPort();
+
+        // When - the shell injects its bridge and the page asks again
+        globalThis.__TAURI__ = answering(4321);
+        const after = await runtime.initTauriApiPort();
+
+        // Then - none, then the port
+        expect([before, after]).toStrictEqual([null, 4321]);
+    });
+
     test('a shell without the core bridge answers no port', async () => {
         // Given - a bridge that enables no core commands
         const runtime = await freshRuntime({});

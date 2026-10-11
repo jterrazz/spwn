@@ -144,10 +144,11 @@ describe('blocks', () => {
         };
         const added: ActivityBlock[] = [
             { id: 't-1', input: {}, tool: 'Read', type: 'tool_use' },
+            { content: 'weighing', type: 'thinking' },
             { content: 'b', type: 'text' },
         ];
 
-        // Then - the blocks follow in order and the content joins the texts
+        // Then - the blocks follow in order and the content joins the texts alone
         expect(withBlocks(message, added)).toStrictEqual({
             blocks: [{ content: 'a', type: 'text' }, ...added],
             content: 'ab',

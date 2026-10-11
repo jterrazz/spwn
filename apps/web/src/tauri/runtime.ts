@@ -35,6 +35,7 @@ export function isTauri(): boolean {
 
 async function askForPort(): Promise<null | number> {
     try {
+        // Stryker disable next-line OptionalChaining: a missing bridge or core throws inside the try and is answered null, as the chain does
         const port = await tauriBridge()?.core?.invoke('get_api_port');
         cachedPort = typeof port === 'number' ? port : null;
         return cachedPort;
@@ -47,9 +48,6 @@ async function askForPort(): Promise<null | number> {
 export async function initTauriApiPort(): Promise<null | number> {
     if (!isTauri()) {
         return null;
-    }
-    if (cachedPort !== null && cachedPort !== 0) {
-        return cachedPort;
     }
     initPromise ??= askForPort();
     return await initPromise;
