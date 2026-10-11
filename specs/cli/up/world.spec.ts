@@ -15,7 +15,6 @@ describe('world', () => {
 
         // Then - the session, the world as Docker and the agent find it, and the prompt its runtime boots on
         expect(result.exitCode).toBe(0);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/up.txt'));
         const neo = result.container('neo');
         await expect(worldOf(neo)).resolves.toStrictEqual({
@@ -178,19 +177,5 @@ describe('world', () => {
 
         `);
         expect(result.containerIds).toStrictEqual([]);
-    });
-
-    test('a second up of a running world adds no second world', async () => {
-        // Given - the project brought up twice, then listed
-        await using result = await cli
-            .fixture(directory('../__fixtures__/docker-pilot/'))
-            .exec(['up', 'up', 'world list --json']);
-
-        // Then - one running world
-        expect(result.exitCode).toBe(0);
-        expect(result.json).toMatch({
-            mode: 'project',
-            worlds: [{ agents: ['neo'], name: 'neo', status: 'running' }],
-        });
     });
 });

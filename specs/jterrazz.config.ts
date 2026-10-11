@@ -24,11 +24,9 @@ export default defineConfig({
     test: {
         projects: {
             cli: {
-                exclude: SMOKE
-                    ? []
-                    : ['cli/init/real-build.spec.ts', 'cli/up/upgrade-cycle.spec.ts'],
+                exclude: SMOKE ? [] : ['cli/up/real-build.spec.ts', 'cli/up/upgrade-cycle.spec.ts'],
                 include: SMOKE
-                    ? ['cli/init/real-build.spec.ts', 'cli/up/upgrade-cycle.spec.ts']
+                    ? ['cli/up/real-build.spec.ts', 'cli/up/upgrade-cycle.spec.ts']
                     : ['cli/**/*.spec.ts'],
                 literate: SMOKE
                     ? false

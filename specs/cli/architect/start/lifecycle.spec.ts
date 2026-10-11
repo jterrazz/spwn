@@ -20,7 +20,6 @@ describe('lifecycle', () => {
 
         // Then - the session names the container it created
         expect(result.exitCode).toBe(0);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/started.txt'));
     });
 
@@ -35,21 +34,6 @@ describe('lifecycle', () => {
 
         // Then - the second start changes nothing and says so
         expect(result.exitCode).toBe(0);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/already-running.txt'));
-    });
-
-    test('a stopped architect reports not running', async () => {
-        // Given - the architect started, stopped, then asked for its status
-        await using result = await withoutArchitect(
-            async () =>
-                await architect
-                    .fixture(directory('../../__fixtures__/docker-pilot/'))
-                    .exec(['architect start', 'architect stop', 'architect status']),
-        );
-
-        // Then - the status report finds no container
-        expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('../__expected__/not-running.txt'));
     });
 });

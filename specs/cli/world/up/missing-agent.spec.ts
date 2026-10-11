@@ -14,7 +14,6 @@ describe('missing-agent', () => {
 
         // Then - non-zero with the "agent new" hint (full stderr golden) and no container left behind
         expect(result.exitCode).toBe(1);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/missing-agent.txt'));
         expect(result.containerIds).toStrictEqual([]);
     });

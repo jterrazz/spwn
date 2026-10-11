@@ -19,6 +19,6 @@ describe('idle', () => {
 
         // Then - the status report finds no container
         expect(result.exitCode).toBe(0);
-        expect(result.stderr).toMatch(file('../__expected__/not-running.txt'));
+        expect(result.stderr).toMatch(file('./__expected__/not-running.txt'));
     });
 });

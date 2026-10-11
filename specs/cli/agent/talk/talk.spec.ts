@@ -1,7 +1,7 @@
 import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { cli } from '../cli.specification.js';
+import { cli } from '../../cli.specification.js';
 
 // hazard: a document cannot read a container back: the simulated runtime’s receipt is read inside the running world
 
@@ -11,12 +11,11 @@ describe('talk', () => {
     test('a talk runs the Claude Code runtime inside the world, which finds the mind, its prompt and the workspace', async () => {
         // Given - the project brought up on the simulator image, then talked to
         await using result = await simulated
-            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('../../__fixtures__/docker-pilot/'))
             .exec(['up', 'agent talk neo "list files in /workspace"']);
 
         // Then - the talk's banner, and the receipt the simulated runtime wrote inside the container
         expect(result.exitCode).toBe(0);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/claude-talk.txt'));
         const receipt = await result.container('neo').exec('cat /tmp/claude-mock.json');
         expect(JSON.parse(receipt.stdout.text)).toStrictEqual({
@@ -36,7 +35,7 @@ describe('talk', () => {
     test('a second talk to a codex world resumes the codex thread, with AGENTS.md and the native skill in sight', async () => {
         // Given - a codex project brought up, then talked to twice
         await using result = await simulated
-            .fixture(directory('../__fixtures__/codex-pilot/'))
+            .fixture(directory('../../__fixtures__/codex-pilot/'))
             .exec([
                 'up',
                 'agent talk neo "Do you see your native skills?"',
@@ -70,7 +69,7 @@ describe('talk', () => {
     test('a talk after the world was torn down and brought up again reaches the new container', async () => {
         // Given - the project up, down, up again, then talked to
         await using result = await simulated
-            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('../../__fixtures__/docker-pilot/'))
             .exec(['up', 'down', 'up', 'agent talk neo hello']);
 
         // Then - the live container's runtime ran the talk

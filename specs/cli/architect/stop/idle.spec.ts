@@ -19,7 +19,6 @@ describe('idle', () => {
 
         // Then - it reports nothing to stop
         expect(result.exitCode).toBe(0);
-        // checker-disable-next-line ground-shared-or-inline -- a stream that opens on a line break and shares an indentation cannot be written in place: the comparison dedents such a literal, its quoted form included
         expect(result.stderr).toMatch(file('./__expected__/nothing-to-stop.txt'));
     });
 });
