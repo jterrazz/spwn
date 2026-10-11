@@ -1,5 +1,5 @@
 ---
-name: common
+name: base-rules
 description: Shared project skill; exercises the per-agent .claude/skills / .agents/skills emission.
 ---
 # Common
