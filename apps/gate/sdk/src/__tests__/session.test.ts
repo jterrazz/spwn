@@ -1,3 +1,4 @@
+import { originalOf } from '@jterrazz/typescript/rules';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
@@ -78,7 +79,11 @@ function sent(url: string, body: unknown, method = 'POST'): Received {
     return { body, method, type: JSON_TYPE, url };
 }
 
-const X_TOOL = resolve(import.meta.dirname, '../../../../../catalog/x/tools/x/index.js');
+// outside: a mutation run copies the member into a sandbox, where the repository's catalog is not
+const X_TOOL = resolve(
+    originalOf(import.meta.dirname),
+    '../../../../../catalog/x/tools/x/index.js',
+);
 
 // outside: the gate hands a catalog tool this SDK through NODE_PATH, as @spwn/gate-tool
 function gateNodePath() {
