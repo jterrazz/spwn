@@ -1,3 +1,4 @@
+import { http, intercept } from '@jterrazz/test';
 import { originalOf } from '@jterrazz/typescript/rules';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
@@ -146,6 +147,25 @@ describe('Session', () => {
             sent('/sessions/session-1/captured-responses', { url_pattern: 'GraphQL' }),
             sent('/sessions/session-1', null, 'DELETE'),
         ]);
+    });
+
+    test('a session opens on the sidecar the gate publishes at 127.0.0.1:9001 unless told another', async () => {
+        // Given - no sidecar address in the environment, and the published address answering an open
+        vi.stubEnv('GATE_BROWSER_URL', undefined);
+        await using _ = await intercept([
+            {
+                request: http.post('http://127.0.0.1:9001/sessions'),
+                response: http.json({ id: 'session-1' }),
+            },
+            {
+                request: http.delete('http://127.0.0.1:9001/sessions/session-1'),
+                response: http.json({}),
+            },
+        ]);
+
+        // Then - the open and the close both reached it, and nowhere else
+        const session = await openSession('x');
+        await expect(session.end()).resolves.toBeUndefined();
     });
 
     test.each([
