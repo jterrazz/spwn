@@ -1,14 +1,13 @@
 description: auth login notion takes the MCP helper path and writes no token without Docker
+# hazard: the build line is BuildKit's; a host whose Docker lacks the buildx plugin, or whose HOME hides it, prints the legacy builder's notice instead
 env:
-    - sealed
     - DOCKER_HOST=tcp://127.0.0.1:1
 runs:
     - command: auth login notion
       exit: 1
       stdout: |
           Building spwn-mcp-auth:latest (one-time setup)...
-          {{any}}
-          Cannot connect to the Docker daemon at tcp://127.0.0.1:1. Is the docker daemon running?
+          ERROR: Cannot connect to the Docker daemon at tcp://127.0.0.1:1. Is the docker daemon running?
       stderr: |4+
           
             Logging in to notion a browser link will appear; click Allow, then this command exits
