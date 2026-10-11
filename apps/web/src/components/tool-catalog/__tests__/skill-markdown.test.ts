@@ -9,6 +9,7 @@ describe('skill-markdown', () => {
             '# Codex',
             '',
             'Codex runs tasks.',
+            'Step 3. then continue',
             '## Usage',
             '```bash',
             'codex "task"',
@@ -27,6 +28,7 @@ describe('skill-markdown', () => {
         // Then - one block per form, in order
         expect(skillBlocks(content)).toStrictEqual([
             { kind: 'paragraph', text: 'Codex runs tasks.' },
+            { kind: 'paragraph', text: 'Step 3. then continue' },
             { kind: 'heading', level: 2, text: 'Usage' },
             { kind: 'code', text: 'codex "task"\ncodex --help' },
             { kind: 'item', marker: '-', text: 'one' },

@@ -249,15 +249,32 @@ describe('client', () => {
                 request: http.get('http://spwn.test/api/agents/ghost'),
                 response: http.json({ error: 'none' }),
             },
+            {
+                request: http.get('http://spwn.test/api/agents/neo/journal'),
+                response: http.json({ name: 'neo' }),
+            },
+            {
+                request: http.get('http://spwn.test/v2/api/agents/neo'),
+                response: http.json({ name: 'neo' }),
+            },
         ]);
 
-        // Then - the whole profile, then both other answers untouched
+        // Then - the whole profile, then the other answers untouched, a deeper or a prefixed route among them
         expect([
             await apiGet('/api/agents/neo'),
             await apiGet('/api/agents/trinity'),
             await apiGet('/api/teams/ops'),
             await apiGet('/api/agents/ghost'),
-        ]).toStrictEqual([NEO, TRINITY, { name: 'Ops' }, { error: 'none' }]);
+            await apiGet('/api/agents/neo/journal'),
+            await apiGet('/v2/api/agents/neo'),
+        ]).toStrictEqual([
+            NEO,
+            TRINITY,
+            { name: 'Ops' },
+            { error: 'none' },
+            { name: 'neo' },
+            { name: 'neo' },
+        ]);
     });
 
     const NONE = { build: undefined, desktop: null, given: null, host: undefined };

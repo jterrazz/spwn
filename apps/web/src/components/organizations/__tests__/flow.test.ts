@@ -18,6 +18,9 @@ describe('flow', () => {
             ['captain-b', 'roleNode', { x: 130, y: 200 }],
         ]);
         expect(edges.map((edge) => edge.id)).toStrictEqual(['general->captain-a']);
+        expect(edges.map((edge) => edge.style)).toStrictEqual([
+            { stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1.5 },
+        ]);
     });
 
     test('with no reports_to declared, every role of a level is linked to every role of the next', () => {
