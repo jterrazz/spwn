@@ -10,7 +10,7 @@ import (
 // TestRetireAgentKnowledge_Fixture covers the byte-deterministic
 // happy path: agents/<name>/knowledge/ with only a .gitkeep inside
 // (trivially empty) is removed cleanly; the agent dir survives.
-// Fixture at __fixtures__/user/014_retire_agent_knowledge/.
+// Fixture at __tests__/__fixtures__/user/014_retire_agent_knowledge/.
 func TestRetireAgentKnowledge_Fixture(t *testing.T) {
 	runFixture(t, RetireAgentKnowledge, "014_retire_agent_knowledge")
 }

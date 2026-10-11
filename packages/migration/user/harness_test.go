@@ -14,11 +14,11 @@ import (
 )
 
 // runFixture drives a migration against a golden before/after tree
-// under packages/migration/user/__fixtures__/<fixtureName>/.
+// under packages/migration/user/__tests__/__fixtures__/<fixtureName>/.
 //
 // Layout:
 //
-//	packages/migration/user/__fixtures__/<fixtureName>/
+//	packages/migration/user/__tests__/__fixtures__/<fixtureName>/
 //	  before/   → seeded into a fresh t.TempDir() before Apply runs
 //	  after/    → expected state of the tempdir once Apply returns
 //
@@ -35,7 +35,7 @@ import (
 func runFixture(t *testing.T, m migration.Migration, fixtureName string) {
 	t.Helper()
 
-	fixtureRoot := filepath.Join("__fixtures__", fixtureName)
+	fixtureRoot := filepath.Join("__tests__/__fixtures__", fixtureName)
 	beforeDir := filepath.Join(fixtureRoot, "before")
 	afterDir := filepath.Join(fixtureRoot, "after")
 
@@ -113,7 +113,7 @@ func runFixture(t *testing.T, m migration.Migration, fixtureName string) {
 // sorted. A missing root is treated as "empty set" so after/ can be
 // absent when the expected end state is "nothing left".
 //
-// `.gitkeep` markers are filtered: __fixtures__ fixtures use them to
+// `.gitkeep` markers are filtered: __tests__/__fixtures__ fixtures use them to
 // preserve otherwise-empty directories in git, but migrations don't
 // create them. Treating .gitkeep as invisible lets fixtures declare
 // directory presence without breaking the diff.

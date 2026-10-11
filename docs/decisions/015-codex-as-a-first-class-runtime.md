@@ -64,7 +64,7 @@ runtime is now an adapter rather than a sweep.
   container.
 - A second runtime doubles the test surface. `specs/_simulators/codex`
   stands in for the real CLI so no E2E hits OpenAI, and every golden case
-  under `packages/runtimes/__fixtures__/` carries a codex output tree beside its
+  under `packages/runtimes/__tests__/__fixtures__/` carries a codex output tree beside its
   claude-code one — 31 of them today, regenerated with `UPDATE_GOLDEN=1`.
 - Two items of the audit stayed unbuilt on purpose. Neither runtime has a
   `catalog/<runtime>/spwn.yaml` stub, so neither is browsable from

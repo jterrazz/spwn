@@ -7,6 +7,8 @@ export default defineConfig({
     typescript: {
         oxfmt: {
             ignore: {
+                'packages/**/__tests__/__fixtures__/**':
+                    'the Go tests’ input trees and expected outputs, compared byte for byte with what the product writes: a fixture reformatted or re-commented would no longer be the one the product reads or emits',
                 'catalog/**':
                     'the built-in `spwn:*` catalog, embedded into the binary and copied verbatim into a user’s project: its YAML comments and Markdown are that user’s documentation, kept as authored',
                 'specs/cli/**/*.spec.yaml':

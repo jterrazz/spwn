@@ -55,6 +55,6 @@ A spec pins the image with `SPWN_BASE_IMAGE=spwn-test:latest`. The scripts are c
 - `NewTestContext(t)` gives each test a spwn home in `t.TempDir()`, a unique label, and a cleanup that destroys every world it spawned.
 - `NewSpawnBuilder(t)` spawns a world fluently and returns an assertion chain — `ExpectState`, `ExpectContainer`, `ExpectMock` — one assertion type per observable surface.
 - `WaitFor(t, timeout, interval, desc, condition)` polls a condition; no test sleeps.
-- `FixturesDir()` is the folder of seed projects beside the suite, `__fixtures__/`.
+- `FixturesDir()` is the folder of seed projects beside the suite, `__tests__/__fixtures__/`.
 
 `MockAssertion` reads the simulator's `/tmp/claude-mock.json` back: `SawMind()`, `SawClaudeMD()`, `SawSkill("focus")`.

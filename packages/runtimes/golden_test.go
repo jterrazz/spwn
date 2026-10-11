@@ -1,10 +1,10 @@
 // Package runtimes_test holds the cross-runtime golden suite.
 //
-// Each fixture under __fixtures__/<case>/ declares one `input/` source
+// Each fixture under __tests__/__fixtures__/<case>/ declares one `input/` source
 // tree (a tiny spwn project) plus one expected-output directory per
 // runtime the case exercises:
 //
-//	__fixtures__/<name>/
+//	__tests__/__fixtures__/<name>/
 //	  input/                        -- spwn.yaml + spwn/**
 //	  output_<runtime>/             -- expected rendered Tree
 //	  output_<runtime>_error.txt    -- expected error substring
@@ -52,16 +52,16 @@ const outputDirPrefix = "output_"
 
 // errorSuffix marks per-runtime expected-error fixtures for cases
 // Where the renderer should fail instead of producing a tree. The
-// File lives at __fixtures__/<case>/output_<runtime>_error.txt.
+// File lives at __tests__/__fixtures__/<case>/output_<runtime>_error.txt.
 const errorSuffix = "_error.txt"
 
-// TestGoldenFixtures walks every case under __fixtures__/, finds every
+// TestGoldenFixtures walks every case under __tests__/__fixtures__/, finds every
 // Declared output_<runtime>/ (or output_<runtime>_error.txt), and
 // Drives the same input through each matching runtime.
 func TestGoldenFixtures(t *testing.T) {
-	entries, err := os.ReadDir("__fixtures__")
+	entries, err := os.ReadDir("__tests__/__fixtures__")
 	if err != nil {
-		t.Fatalf("read __fixtures__: %v", err)
+		t.Fatalf("read __tests__/__fixtures__: %v", err)
 	}
 
 	update := os.Getenv("UPDATE_GOLDEN")
@@ -71,7 +71,7 @@ func TestGoldenFixtures(t *testing.T) {
 			continue
 		}
 		caseName := entry.Name()
-		caseDir := filepath.Join("__fixtures__", caseName)
+		caseDir := filepath.Join("__tests__/__fixtures__", caseName)
 		inputDir := filepath.Join(caseDir, "input")
 
 		targets, err := discoverRuntimeTargets(caseDir)

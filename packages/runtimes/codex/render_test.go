@@ -9,7 +9,7 @@ import (
 )
 
 // Renderer contract tests. See golden fixtures under
-// packages/runtimes/__fixtures__/*/output_codex/ for whole-tree
+// packages/runtimes/__tests__/__fixtures__/*/output_codex/ for whole-tree
 // diffing; these cases exercise individual invariants at the
 // section level so a failing test points at a specific section
 // rather than "goldens diverged".

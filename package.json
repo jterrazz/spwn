@@ -8,8 +8,8 @@
     ],
     "type": "module",
     "scripts": {
-        "lint": "typescript check --ignore-pattern \"**/testdata\" --ignore-pattern \"**/testdata/**\" --ignore-pattern \"**/testdata/**/.*\" --ignore-pattern \"**/testdata/**/.*/**\"",
-        "lint:fix": "typescript fix --ignore-pattern \"**/testdata\" --ignore-pattern \"**/testdata/**\" --ignore-pattern \"**/testdata/**/.*\" --ignore-pattern \"**/testdata/**/.*/**\""
+        "lint": "typescript check",
+        "lint:fix": "typescript fix"
     },
     "devDependencies": {
         "@jterrazz/test": "file:.artifacts/packages/jterrazz-test-17.0.0.tgz",

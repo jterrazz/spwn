@@ -9,7 +9,7 @@ import (
 
 // TestSimplifyArchitectDir_Fixture is the happy path via the shared
 // fixture harness. The before/after tree lives at
-// __fixtures__/user/010_simplify_architect_dir/ — the transformation is
+// __tests__/__fixtures__/user/010_simplify_architect_dir/ — the transformation is
 // visible on disk instead of hidden inside an inline setup.
 func TestSimplifyArchitectDir_Fixture(t *testing.T) {
 	runFixture(t, SimplifyArchitectDir, "010_simplify_architect_dir")
