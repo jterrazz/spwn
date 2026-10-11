@@ -40,5 +40,6 @@ export async function readJson(request: IncomingMessage): Promise<Record<string,
             `bad json: ${error instanceof Error ? error.message : String(error)}`,
         );
     }
+    // Stryker disable next-line ConditionalExpression: spreading null gives the same empty object, so a null check that always passes changes nothing
     return typeof parsed === 'object' && parsed !== null ? { ...parsed } : {};
 }
