@@ -9,7 +9,7 @@ import (
 
 // TestRenameHierarchies_Fixture verifies the directory rename via
 // the shared harness. Fixture lives at
-// testdata/user/012_rename_hierarchies/.
+// __fixtures__/user/012_rename_hierarchies/.
 func TestRenameHierarchies_Fixture(t *testing.T) {
 	runFixture(t, RenameHierarchiesToOrganizations, "012_rename_hierarchies")
 }

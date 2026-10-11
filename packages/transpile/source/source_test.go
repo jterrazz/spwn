@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadMinimalProject(t *testing.T) {
-	src, err := Load(filepath.Join("testdata", "minimal"))
+	src, err := Load(filepath.Join("__fixtures__", "minimal"))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestLoadMissingManifest(t *testing.T) {
 }
 
 func TestToCompileInputPicksSoleWorld(t *testing.T) {
-	src, err := Load(filepath.Join("testdata", "minimal"))
+	src, err := Load(filepath.Join("__fixtures__", "minimal"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestToCompileInputPicksSoleWorld(t *testing.T) {
 }
 
 func TestToCompileInputMissingWorld(t *testing.T) {
-	src, err := Load(filepath.Join("testdata", "minimal"))
+	src, err := Load(filepath.Join("__fixtures__", "minimal"))
 	if err != nil {
 		t.Fatal(err)
 	}

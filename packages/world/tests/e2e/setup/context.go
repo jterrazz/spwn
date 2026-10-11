@@ -214,12 +214,12 @@ func (tc *TestContext) TryReadMockOutput(containerID string) *MockOutput {
 	return &mock
 }
 
-// TestdataDir returns the absolute path of the e2e suite's testdata/, which
+// FixturesDir returns the absolute path of the e2e suite's __fixtures__/, which
 // go test resolves from the package it runs, packages/world/tests/e2e.
-func TestdataDir() string {
-	dir, err := filepath.Abs("testdata")
+func FixturesDir() string {
+	dir, err := filepath.Abs("__fixtures__")
 	if err != nil {
-		return "testdata"
+		return "__fixtures__"
 	}
 	return dir
 }

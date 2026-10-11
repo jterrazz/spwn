@@ -22,7 +22,7 @@ import (
 	_ "spwn.sh/packages/runtimes/codex"
 )
 
-// TestCatalogBundles walks every subdir under testdata/bundles and
+// TestCatalogBundles walks every subdir under __fixtures__/bundles and
 // asserts what each catalog entry contributes to the final image:
 //
 //   - the resolved tool list (after transitive-dependency expansion)
@@ -33,7 +33,7 @@ import (
 //
 // Layout of each fixture:
 //
-//	testdata/bundles/<name>/
+//	__fixtures__/bundles/<name>/
 //	  input.yaml          — tools: [...] list of refs to resolve
 //	  expected/
 //	    tools.txt         — resolved tool names, one per line, in order
@@ -50,9 +50,9 @@ import (
 // a silent regression in a catalog entry's bundled skills file (or
 // the INDEX.md template) would slip through to production.
 func TestCatalogBundles(t *testing.T) {
-	entries, err := os.ReadDir("testdata/bundles")
+	entries, err := os.ReadDir("__fixtures__/bundles")
 	if err != nil {
-		t.Fatalf("read testdata/bundles: %v", err)
+		t.Fatalf("read __fixtures__/bundles: %v", err)
 	}
 
 	update := os.Getenv("UPDATE_GOLDEN") == "1"
@@ -63,7 +63,7 @@ func TestCatalogBundles(t *testing.T) {
 		}
 		name := entry.Name()
 		t.Run(name, func(t *testing.T) {
-			fixtureDir := filepath.Join("testdata/bundles", name)
+			fixtureDir := filepath.Join("__fixtures__/bundles", name)
 
 			// Load input spec.
 			inputBytes, err := os.ReadFile(filepath.Join(fixtureDir, "input.yaml"))

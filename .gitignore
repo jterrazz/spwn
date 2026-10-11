@@ -25,7 +25,7 @@ Thumbs.db
 # test agent dir, and the project an e2e run scaffolds when it is given
 # `specs/` as its cwd. Every one is anchored to the repository root:
 # unanchored, `.claude/` and `.spwn/` also swallowed the committed golden
-# fixtures under packages/runtimes/testdata/ and specs/, and four
+# fixtures under packages/runtimes/__fixtures__/ and specs/, and four
 # `!` lines had to rescue them.
 /.claude/
 /.spwn/

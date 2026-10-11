@@ -8,7 +8,7 @@ import (
 // TestDropLegacyStateJSON_Fixture covers the pre-labels install
 // shape end-to-end via the shared harness. Before: state.json +
 // state.json.bak + runtime/ with a per-world file. After: all
-// three gone. Fixture at testdata/user/016_drop_legacy_state_json/.
+// three gone. Fixture at __fixtures__/user/016_drop_legacy_state_json/.
 func TestDropLegacyStateJSON_Fixture(t *testing.T) {
 	runFixture(t, DropLegacyStateJSON, "016_drop_legacy_state_json")
 }

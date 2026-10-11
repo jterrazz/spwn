@@ -41,11 +41,11 @@ spawn).
 
 ## Testing pattern
 
-Each scope's sub-package has its own `testdata/` tree that mirrors
+Each scope's sub-package has its own `__fixtures__/` tree that mirrors
 the migrations catalogue:
 
 ```text
-packages/migration/<scope>/testdata/<NNN_migration_name>/
+packages/migration/<scope>/__fixtures__/<NNN_migration_name>/
   before/   — seeded into t.TempDir() before Apply runs
   after/    — expected state of the tempdir once Apply returns
 ```

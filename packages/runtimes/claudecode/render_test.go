@@ -9,7 +9,7 @@ import (
 )
 
 // Renderer contract tests for claude-code. Whole-tree coverage lives
-// under packages/runtimes/testdata/*/output_claude_code/; the cases
+// under packages/runtimes/__fixtures__/*/output_claude_code/; the cases
 // here pin individual invariants so a break points at a specific
 // section (settings.json shape, skill path convention, model pin)
 // rather than a generic "goldens diverged".

@@ -51,7 +51,7 @@ func TestSpawn_WithWorkspace(t *testing.T) {
 	// When - a world is spawned with that workspace mounted
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
-		WithWorkspace(filepath.Join(setup.TestdataDir(), "project")).
+		WithWorkspace(filepath.Join(setup.FixturesDir(), "project")).
 		Execute()
 
 	// Then - the workspace should be mounted and contain the test project files
@@ -88,7 +88,7 @@ func TestSpawn_MockSeesEverything(t *testing.T) {
 	// When - the mock agent runs
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
-		WithWorkspace(filepath.Join(setup.TestdataDir(), "project")).
+		WithWorkspace(filepath.Join(setup.FixturesDir(), "project")).
 		Detached().
 		Execute()
 

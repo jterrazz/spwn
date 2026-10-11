@@ -34,7 +34,7 @@ func TestSpawn_SingleNamedWorkspace(t *testing.T) {
 	// When - a world is spawned with a single named workspace
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
-		WithNamedWorkspace("proj", filepath.Join(setup.TestdataDir(), "project")).
+		WithNamedWorkspace("proj", filepath.Join(setup.FixturesDir(), "project")).
 		Execute()
 
 	// Then - the project should be visible at /workspaces/proj

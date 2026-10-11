@@ -58,4 +58,4 @@ User-authored skills (`spwn/skills/...`) and tool-shipped skills (`SKILL.md` fil
 ## Testing
 
 - Unit tests next to each file (`tool_test.go`, `spawn_test.go`).
-- Golden-fixture tests at the render boundary: `packages/runtimes/golden_test.go` walks `testdata/<case>/` and diffs the rendered tree against `output_claude_code/`. Regenerate with `UPDATE_GOLDEN=1 go test ./packages/runtimes/...`.
+- Golden-fixture tests at the render boundary: `packages/runtimes/golden_test.go` walks `__fixtures__/<case>/` and diffs the rendered tree against `output_claude_code/`. Regenerate with `UPDATE_GOLDEN=1 go test ./packages/runtimes/...`.

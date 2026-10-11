@@ -13,7 +13,7 @@ import (
 // config.yaml is byte-exact. Regression guard: if the
 // platform.CurrentConfigAPIVersion constant or the seed template
 // drifts, the fixture diff surfaces it immediately.
-// Fixture at testdata/user/015_ensure_user_config/.
+// Fixture at __fixtures__/user/015_ensure_user_config/.
 func TestEnsureUserConfig_Fixture(t *testing.T) {
 	runFixture(t, EnsureUserConfig, "015_ensure_user_config")
 }

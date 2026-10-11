@@ -37,7 +37,7 @@ make test-pkg PKG=agent # one Go module, verbose
 
 A `*_test.go` beside the code it proves, named `TestSubject_Scenario`, table-driven where a rule has several cases. Every filesystem state lives in `t.TempDir()`, with `t.Setenv("SPWN_HOME", …)`: no test reads the operator's `~/.spwn`. A Docker test goes under `packages/world/tests/e2e/` behind `//go:build e2e`, spawning through `setup.NewSpawnBuilder(t)`.
 
-A golden — the runtime renderers' output under `packages/runtimes/testdata/`, the catalog bundles under `packages/catalog/` — is rewritten with `UPDATE_GOLDEN=1 go test ./…` in its module, and read before it is committed.
+A golden — the runtime renderers' output under `packages/runtimes/__fixtures__/`, the catalog bundles under `packages/catalog/` — is rewritten with `UPDATE_GOLDEN=1 go test ./…` in its module, and read before it is committed.
 
 ### A CLI specification
 
