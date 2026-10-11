@@ -44,8 +44,26 @@ function tryLock(): boolean {
     return true;
 }
 
+const REMOVAL_BUDGET_MS = 60_000;
+const REMOVAL_POLL_MS = 500;
+
+function containerExists(): boolean {
+    return (
+        spawnSync('docker', ['container', 'inspect', 'spwn-architect'], { timeout: 10_000 })
+            .status === 0
+    );
+}
+
+// hazard: under load the daemon outlives a client that gave up on `docker rm -f`, and the next spec's start then meets a removal still in progress — so the removal is asked again until the container is gone
 function removeContainer(): void {
-    spawnSync('docker', ['rm', '-f', 'spwn-architect'], { encoding: 'utf8', timeout: 10_000 });
+    const deadline = Date.now() + REMOVAL_BUDGET_MS;
+    do {
+        spawnSync('docker', ['rm', '-f', 'spwn-architect'], { encoding: 'utf8', timeout: 20_000 });
+        if (!containerExists()) {
+            return;
+        }
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, REMOVAL_POLL_MS);
+    } while (Date.now() < deadline);
 }
 
 function pullOverrideImage(): void {
