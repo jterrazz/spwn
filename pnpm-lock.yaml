@@ -1007,11 +1007,11 @@ packages:
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
   '@jterrazz/test@file:.artifacts/packages/jterrazz-test-17.0.0.tgz':
-    resolution: {integrity: sha512-5qn/8JfFpezWTVbtYF680/6OWYx7JbNUVIxxAHhcURBnmQANBs4EhzqZVHgnpwSQ/lPINVlXGZM6dgYrV4qWzA==, tarball: file:.artifacts/packages/jterrazz-test-17.0.0.tgz}
+    resolution: {integrity: sha512-e30bSMzU29iYfi0SsS2IlMmPAqW+8gEn7ODdjk1CJsz/q+/dlCmqfqz5M0+tKu4ijIVxzSO79Vxtym39SAiBYw==, tarball: file:.artifacts/packages/jterrazz-test-17.0.0.tgz}
     version: 17.0.0
     engines: {node: '>=24'}
     peerDependencies:
-      '@jterrazz/typescript': file:../package-typescript
+      '@jterrazz/typescript': ^11.0.0
       '@vitest/browser-playwright': '*'
       appium: ^3.0.0
       better-sqlite3: ^12.11.1 || ^13
@@ -1055,7 +1055,7 @@ packages:
         optional: true
 
   '@jterrazz/typescript@file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz':
-    resolution: {integrity: sha512-z+xbd3AjCdD1nk8l3Is8ZkZkluLKbjTtUMIfSd6qeGyJMY7+S3ajdvqe7Lh5qYc7KbATsEsdhIj0SP4/umt7pw==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
+    resolution: {integrity: sha512-jezRvbXMFkWz2CRU4/L7PP6ofmPTaGT8lIh9Jk5gbE9M88EYtJ+F/EYeMBFaPdvxBWecHcveBh5MTiYA5xKThw==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
     version: 11.0.0
     engines: {node: '>=24.0.0'}
     hasBin: true
