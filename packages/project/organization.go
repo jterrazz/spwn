@@ -1,11 +1,3 @@
-// Organization management lives here (not in packages/agent) because
-// organizations define project-level role hierarchies that govern how
-// agents interact within a world.
-//
-// An organization is a first-class entity stored as a YAML file under ~/.spwn/organizations/.
-// Each organization defines a set of roles with levels, command relationships,
-// and permissions that govern how agents interact within a world.
-
 package project
 
 import (
@@ -68,7 +60,6 @@ func ValidateOrganization(h Organization) error {
 		names[r.Name] = struct{}{}
 	}
 
-	// Validate references after collecting all names.
 	for _, r := range h.Roles {
 		if r.ReportsTo != "" {
 			if _, ok := names[r.ReportsTo]; !ok {
@@ -139,7 +130,7 @@ func ListOrganizations() ([]Organization, error) {
 		slug := strings.TrimSuffix(e.Name(), ".yaml")
 		h, err := GetOrganization(slug)
 		if err != nil {
-			continue // skip corrupted files
+			continue
 		}
 		organizations = append(organizations, *h)
 	}

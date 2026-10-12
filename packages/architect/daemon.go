@@ -294,12 +294,6 @@ func TalkExecArgs(message string) ([]string, error) {
 		escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
 	}
 
-	// The architect container bundles every built-in runtime (claude,
-	// codex, …) so their OAuth/API-key files are all available under
-	// /credentials/<provider>/ and need to be plumbed into each
-	// runtime's expected home location. Compose the prelaunch from
-	// every adapter that supplies one — each adapter owns its own
-	// container-side wiring (symlinks, config-file copies, etc).
 	setupParts := []string{"source /credentials/.env 2>/dev/null"}
 	for _, a := range runtimes.All() {
 		if a.Spawn == nil {

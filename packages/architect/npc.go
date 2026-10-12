@@ -29,11 +29,6 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		return err
 	}
 
-	// Build a minimal one-shot command — no Mind, no session. NPCs
-	// receive their full context via the task prompt itself (see the
-	// `Prompt:` field below); nothing needs to be written to disk.
-	// The runtime adapter decides what "one-shot" means — claude
-	// takes `-p --print`, codex takes `exec`, etc.
 	cmd := rt.BuildCommand(runtimes.SpawnConfig{
 		Prompt: task,
 	})

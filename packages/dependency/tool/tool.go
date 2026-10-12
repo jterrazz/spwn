@@ -10,25 +10,16 @@ import (
 // Tool is the contract that any installable capability must implement.
 // Built-in tools in catalog/ implement this; third-party tools can too.
 type Tool interface {
-	// Name returns the tool identifier (e.g., "spwn:qmd", "spwn:node").
 	Name() string
 
-	// Version returns the tool's version (semver or "latest").
 	Version() string
 
-	// Dependencies returns names of other tools this one requires.
-	// The engine resolves these transitively, deduplicates, and topologically sorts.
 	Dependencies() []string
 
-	// Install returns the recipe to compile this tool into a Docker compile.
 	Install() InstallSpec
 
-	// Verify returns commands to run post-build to confirm installation.
-	// Each must exit 0. Typically "command -v <binary>" or "<binary> --version".
 	Verify() []string
 
-	// Skills returns embedded skill files (Vercel SKILL.md convention).
-	// Return nil if the dependency ships no skills.
 	Skills() fs.FS
 }
 
@@ -64,7 +55,6 @@ type Packages struct {
 // key so users can fix the manifest directly rather than chasing a
 // silent no-op.
 func (p *Packages) UnmarshalYAML(node *yaml.Node) error {
-	// Allow explicit null / missing blocks (zero-value Packages).
 	if node.Kind == yaml.ScalarNode && node.Tag == "!!null" {
 		return nil
 	}
@@ -72,12 +62,8 @@ func (p *Packages) UnmarshalYAML(node *yaml.Node) error {
 		return fmt.Errorf("install.packages: want a mapping (e.g. `packages: { apt: [...] }`), got %s at line %d", nodeKind(node), node.Line)
 	}
 
-	// Known keys must stay in sync with the Packages struct fields
-	// above. One entry per field, keyed by the struct tag.
 	known := map[string]bool{"apt": true}
 
-	// Keys come in pairs (key, value) under Content. Reject anything
-	// not in `known` before delegating to the default decoder.
 	for i := 0; i+1 < len(node.Content); i += 2 {
 		keyNode := node.Content[i]
 		if !known[keyNode.Value] {
@@ -85,8 +71,6 @@ func (p *Packages) UnmarshalYAML(node *yaml.Node) error {
 		}
 	}
 
-	// Decode into a sibling type so we don't recurse back into
-	// UnmarshalYAML. Same fields, no methods.
 	type packagesRaw Packages
 	var raw packagesRaw
 	if err := node.Decode(&raw); err != nil {

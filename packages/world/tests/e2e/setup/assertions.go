@@ -12,8 +12,6 @@ import (
 	"spwn.sh/packages/world"
 )
 
-// --- AssertionChain ---
-
 // AssertionChain provides fluent assertions on a spawned world.
 type AssertionChain struct {
 	tc *TestContext
@@ -114,8 +112,6 @@ func (a *AssertionChain) Inspect() *InspectAssertionChain {
 	return &InspectAssertionChain{tc: a.tc, w: u}
 }
 
-// --- StateAssertion ---
-
 type StateAssertion struct {
 	tc *TestContext
 }
@@ -159,8 +155,6 @@ func (s *StateAssertion) HasNoAgent() {
 		}
 	}
 }
-
-// --- ContainerAssertion ---
 
 type ContainerAssertion struct {
 	tc          *TestContext
@@ -216,8 +210,6 @@ func (c *ContainerAssertion) FileNotContains(path, substring string) {
 	}
 }
 
-// --- MindAssertion ---
-
 type MindAssertion struct {
 	tc        *TestContext
 	agentName string
@@ -241,8 +233,6 @@ func (m *MindAssertion) HasFile(relPath string) {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
 
-	// Root-level files (SOUL.md, AGENTS.md, agent.yaml) live directly
-	// under info.Path — no layer prefix. Fall back to a stat check.
 	if !strings.Contains(relPath, "/") {
 		p := filepath.Join(info.Path, relPath)
 		if _, err := os.Stat(p); err != nil {
@@ -251,13 +241,10 @@ func (m *MindAssertion) HasFile(relPath string) {
 		return
 	}
 
-	// relPath is like "skills/coding.md" or "journal/2025-01-01.md".
-	// Try to match against known layers (longest prefix first).
 	var matchedLayer, file string
 	for layer := range info.Layers {
 		prefix := layer + "/"
 		if strings.HasPrefix(relPath, prefix) {
-			// Pick the longest matching layer prefix
 			if len(layer) > len(matchedLayer) {
 				matchedLayer = layer
 				file = relPath[len(prefix):]
@@ -266,7 +253,6 @@ func (m *MindAssertion) HasFile(relPath string) {
 	}
 
 	if matchedLayer == "" {
-		// Fallback: simple split for single-level layers
 		parts := strings.SplitN(relPath, "/", 2)
 		if len(parts) != 2 {
 			m.tc.T.Fatalf("Invalid relPath %q, expected layer/file", relPath)
@@ -285,8 +271,6 @@ func (m *MindAssertion) HasFile(relPath string) {
 	}
 	m.tc.T.Fatalf("Expected file %q in Mind layer %q, not found. Files: %v", file, matchedLayer, files)
 }
-
-// --- MockAssertion ---
 
 type MockAssertion struct {
 	tc   *TestContext
@@ -363,8 +347,6 @@ func (m *MockAssertion) WasNotResumed() {
 	}
 }
 
-// --- SessionAssertion ---
-
 type SessionAssertion struct {
 	tc        *TestContext
 	agentName string
@@ -393,8 +375,6 @@ func (s *SessionAssertion) SessionIDIsDeterministic(worldID string) {
 		s.tc.T.Fatalf("Expected 36-char UUID session ID, got %d: %q", len(id1), id1)
 	}
 }
-
-// --- JournalAssertion ---
 
 type JournalAssertion struct {
 	tc        *TestContext
@@ -437,8 +417,6 @@ func (j *JournalAssertion) LatestWorldID(expected string) {
 	}
 }
 
-// --- ExportAssertion ---
-
 type ExportAssertion struct {
 	tc          *TestContext
 	archivePath string
@@ -466,8 +444,6 @@ func (e *ExportAssertion) Path() string {
 	return e.archivePath
 }
 
-// --- ListAssertionChain ---
-
 type ListAssertionChain struct {
 	tc     *TestContext
 	worlds []world.World
@@ -490,8 +466,6 @@ func (l *ListAssertionChain) ExpectWorld(index int, fn func(e *ListEntryAssertio
 	return l
 }
 
-// --- ListEntryAssertion ---
-
 type ListEntryAssertion struct {
 	tc *TestContext
 	w  world.World
@@ -503,8 +477,6 @@ func (e *ListEntryAssertion) StatusIs(status world.Status) {
 		e.tc.T.Fatalf("Expected status %q, got %q", status, e.w.Status)
 	}
 }
-
-// --- InspectAssertionChain ---
 
 type InspectAssertionChain struct {
 	tc *TestContext
@@ -518,8 +490,6 @@ func (i *InspectAssertionChain) ExpectConfig(name string) *InspectAssertionChain
 	}
 	return i
 }
-
-// --- AgentAssertionChain ---
 
 type AgentAssertionChain struct {
 	tc        *TestContext
@@ -571,4 +541,3 @@ func (m *MindAssertion) HasJournalEntries(minCount int) {
 		m.tc.T.Fatalf("Expected at least %d journal entries, got %d", minCount, len(entries))
 	}
 }
-

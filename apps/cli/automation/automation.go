@@ -44,8 +44,6 @@ func init() {
 	Cmd.SetHelpFunc(automationHelp)
 }
 
-// automationHelp keeps the help screen consistent with the rest of
-// the CLI (skill, agent, world all use ui.RenderGroupedHelp).
 func automationHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "automation" {
 		ui.MinimalHelp(cmd, args)

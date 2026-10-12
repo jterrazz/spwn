@@ -69,9 +69,6 @@ var RetireAgentKnowledge = migration.Migration{
 	},
 }
 
-// isTriviallyEmpty reports whether a directory has nothing worth
-// preserving — either truly empty, or contains only .gitkeep and/or
-// empty subdirectories.
 func isTriviallyEmpty(dir string) (bool, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {

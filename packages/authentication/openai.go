@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-// detectOpenAI enumerates every detected OpenAI credential in
-// discovery order:
-//  1. env OPENAI_API_KEY       (api_key)
-//  2. file ~/.codex/auth.json  (oauth — ChatGPT subscription via codex)
-//
-// Returned credentials flow into pickByPref to honour any user-declared
-// method preference (`spwn auth use openai oauth` / `api_key`).
 func detectOpenAI() []*Credential {
 	var out []*Credential
 
@@ -57,7 +50,7 @@ func validateOpenAI(ctx context.Context, cred *Credential) *ProviderStatus {
 		CredType: cred.Type,
 		Source:   cred.Source,
 	}
-	// OAuth tokens from `codex login` are ChatGPT-subscription-scoped
+	// outside: OAuth tokens from `codex login` are ChatGPT-subscription-scoped
 	// And do NOT authenticate against the OpenAI /v1/models endpoint
 	// The way API keys do — they're a different auth universe. We
 	// Can't cheaply verify them from here without hitting codex's

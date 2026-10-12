@@ -27,10 +27,6 @@ var (
 )
 
 func init() {
-	// Both the bare `spwn world` parent and the explicit `spwn world up`
-	// subcommand carry the spawn flag set. `spwn world` with at least one
-	// spawn flag still spawns (the original ergonomic shortcut); `spwn world`
-	// with no args drops to help.
 	registerSpawnFlags(Cmd)
 	registerSpawnFlags(upCmd)
 
@@ -48,9 +44,6 @@ func SetSpawnBackend(backend string) {
 	spawnBackend = backend
 }
 
-// registerSpawnFlags attaches the spawn flag set to a cobra command. It's
-// Reused by `spwn world up`, the top-level `spwn up` alias, and any future
-// Shortcut that needs the same surface.
 func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
 	c.Flags().StringVarP(&spawnName, "name", "n", "", "Display name for the world")
@@ -63,7 +56,6 @@ func registerSpawnFlags(c *cobra.Command) {
 }
 
 func worldHelp(cmd *cobra.Command, args []string) {
-	// Only override help for the parent "world" command itself
 	if cmd.Name() != "world" {
 		ui.MinimalHelp(cmd, args)
 		return
@@ -120,9 +112,8 @@ func worldHelp(cmd *cobra.Command, args []string) {
 var Cmd = &cobra.Command{
 	Use:   "world [name]",
 	Short: "Manage worlds - ephemeral runtime instances for agents",
-	Args:  cobra.ArbitraryArgs, // we inspect args manually so subcommands still resolve
+	Args:  cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// If no spawn flags and no positional arg, just render help.
 		spawnFlagNames := []string{"config", "name", "agent", "workspace", "world", "interactive"}
 		anySet := false
 		for _, n := range spawnFlagNames {
@@ -134,7 +125,6 @@ var Cmd = &cobra.Command{
 		if !anySet && len(args) == 0 {
 			return cmd.Help()
 		}
-		// `spwn world <name>` with no flags -> start the named world.
 		if !anySet && len(args) == 1 {
 			return composeUpRunE(cmd, args)
 		}
@@ -142,10 +132,6 @@ var Cmd = &cobra.Command{
 	},
 }
 
-// upCmd is `spwn world up` - the canonical spawn verb. The top-level
-// `spwn up` alias in aliases.go just reuses upCmd.RunE. When invoked
-// with no positional arg inside a spwn project, it brings up every
-// world declared in spwn.yaml compose-style.
 var upCmd = &cobra.Command{
 	Use:   "up [name]",
 	Short: "Spawn a world - an isolated reality for agents",
@@ -165,25 +151,18 @@ a one-off world from ~/.spwn/worlds/<config>.yaml.`,
 	RunE: composeUpRunE,
 }
 
-// composeUpRunE is the top-level entry point for `spwn up`.
-// With no args and a project active, it iterates every world in
-// spwn.yaml. With one positional arg, it forwards to spawnRunE.
 func composeUpRunE(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		return spawnRunE(cmd, args)
 	}
-	// No positional arg: try compose-style iteration if a project is loaded.
 	p, err := loadProject()
 	if err != nil || p == nil || len(p.Manifest.Worlds) == 0 {
 		return spawnRunE(cmd, args)
 	}
 	names := sortedWorldNames(p)
 	if len(names) == 1 {
-		// Single-world project: behave identically to `spwn up <name>`.
 		return spawnRunE(cmd, []string{names[0]})
 	}
-	// Multi-world: iterate. Reset flag state between iterations so each
-	// world gets its own resolved agents/workspaces from the inline map.
 	for _, name := range names {
 		resetSpawnFlags(cmd)
 		if err := spawnRunE(cmd, []string{name}); err != nil {
@@ -193,9 +172,6 @@ func composeUpRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// resetSpawnFlags zeroes out the flag-backed globals between successive
-// spawnRunE calls in compose-style iteration. Without this, the second
-// world would inherit the first world's agents/workspaces.
 func resetSpawnFlags(cmd *cobra.Command) {
 	spawnConfig = ""
 	spawnName = ""
@@ -213,23 +189,8 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		positionalName = args[0]
 	}
 
-	// Idempotency guard: if a world with the same config name is
-	// Already running, treat `spwn up` as a no-op. This matches docker
-	// Compose semantics and prevents the duplicate-container bug where
-	// Two invocations of `spwn up` would spawn two containers for the
-	// Same world. See finding #7.
 	if positionalName != "" {
 		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
-			// Runtime-drift guard: the world was spawned with some
-			// Runtime (claude-code / codex / …) recorded on its
-			// Container labels. If the user has since changed
-			// `runtime.backend` in agent.yaml / spwn.yaml / via
-			// `--backend`, the OLD binary baked into the container
-			// Won't match the NEW resolved runtime. Taking the
-			// Idempotency no-op branch in that case silently leaves
-			// The user talking to the wrong binary. Force a
-			// Destroy+respawn so the image rebuilds with the right
-			// Tools.
 			wanted := resolveWantedRuntime(positionalName, spawnBackend)
 			if wanted != "" && existing.Runtime != "" && existing.Runtime != wanted {
 				s.Blank()
@@ -240,8 +201,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 				if arc, derr := architect.NewFromEnv(); derr == nil {
 					_, _ = arc.Destroy(ctx, existing.ID)
 				}
-				// Fall through to normal spawn flow with the lock,
-				// Fresh project resolve, image rebuild.
 			} else {
 				s.Blank()
 				s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, existing.ID))
@@ -253,10 +212,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Per-world spawn lock: prevents two concurrent `spwn up` calls
-	// From racing past the idempotency check above and both creating
-	// Containers. The lock lives under the project's local state dir
-	// And is released in a defer. See finding #8.
 	if positionalName != "" {
 		unlock, lockErr := acquireUpLock(positionalName)
 		if lockErr != nil {
@@ -267,10 +222,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		defer unlock()
 	}
 
-	// If we're inside a spwn project, prefer the inline spwn.yaml world
-	// Over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
-	// Active we synthesize a world.Manifest straight from the inline
-	// Map, so no stub file needs to exist on disk.
 	pw, projectErr := applyProjectDefaults(cmd, positionalName, spawnBackend)
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
@@ -287,7 +238,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	)
 	switch {
 	case pw != nil && spawnWorld == "":
-		// Project mode: manifest is fully synthesized from spwn.yaml.
 		m = pw.Manifest
 		configName = pw.Name
 	case spawnWorld != "":
@@ -304,17 +254,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		return s.FailHint("Config invalid", err, "Check ~/.spwn/worlds/"+configName+".yaml")
 	}
 
-	// Build spawn opts based on --agent flags. No --agent = empty world.
 	agentName := ""
 	var agents []architect.AgentSpec
 
 	switch len(spawnAgents) {
 	case 0:
-		// Empty world.
 	case 1:
 		agentName = spawnAgents[0]
 	default:
-		// Multi-agent mode: first is chief, rest are workers.
 		agents = append(agents, architect.AgentSpec{Name: spawnAgents[0], Role: "chief"})
 		for _, name := range spawnAgents[1:] {
 			agents = append(agents, architect.AgentSpec{Name: name, Role: "worker"})
@@ -327,7 +274,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			`Expected: "path", "name=path", or "name=path:ro"`)
 	}
 
-	// ── Hero ─────────────────────────────────────────────────────────
 	s.Blank()
 	switch {
 	case agentName != "":
@@ -338,7 +284,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.Hero("⬡", "Waking "+configName)
 	}
 
-	// ── Phase: Environment ───────────────────────────────────────────
 	s.Phase("Environment")
 	s.SubStart("Connecting to Docker…")
 	arc, err := architect.NewFromEnv()
@@ -348,12 +293,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 	s.SubDone("Docker", "connected")
 
-	// ── Spawn pipeline ───────────────────────────────────────────────
-	//
-	// The architect fires an event stream we turn into sub-steps. The
-	// Phase state machine below idempotently transitions from
-	// Environment → Image → Spawn as the relevant events arrive, so
-	// Callers don't have to keep the visual shape in their head.
 	knowledge := ""
 	runtimeName := ""
 	if pw != nil {
@@ -361,15 +300,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		runtimeName = pw.Runtime
 	}
 
-	// Pre-flight credential check. Before we build the image and
-	// Burn the 30–60 seconds a cold spawn costs, confirm the host's
-	// Credentials for the chosen runtime's provider actually validate
-	// Against the live API. Catches the class of bug where the
-	// Keychain (or ~/.claude/.credentials.json, or a CI env var) is
-	// Present but stale/expired — previously the container would
-	// Spawn, the runtime would 401, and the user would see nothing
-	// Pointing them at the fix. Result is cached for 5 minutes so
-	// Repeat spawns in the same session are instant.
 	if providerName := runtimeAuthProvider(runtimeName); providerName != "" {
 		s.SubStart("Checking credentials…")
 		ctxCred, cancelCred := context.WithTimeout(ctx, 4*time.Second)
@@ -426,23 +356,13 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		OnProgress: func(event, detail string) {
 			switch event {
 			case "mind_validated":
-				// Still in Environment — the agent's on-disk Mind
-				// Has been located and parsed. Detail is the agent
-				// Name.
 				s.SubDone("Agent", detail)
 			case "tools_resolved":
-				// Transition to Image phase and record the resolved
-				// Tool set as the first tree child — the rest of the
-				// Tree (build Step N/M lines) streams in via
-				// BuildProgressWriter underneath.
 				enterImage()
 				if detail != "" {
 					s.TreeLine("tools: "+ui.Faint(detail), "")
 				}
 			case "image_resolving", "image_building":
-				// No visual — BuildProgressWriter drives the live
-				// Spinner on each docker Step as it arrives, and
-				// Completed steps leave frozen ├ tree lines behind.
 			case "image_built":
 				buildProgress.CompleteCurrent()
 				s.SubDone("Built", detail)
@@ -453,12 +373,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 				buildProgress.CompleteCurrent()
 				s.SubDone("Ready", detail)
 			case "credentials_resolved":
-				// Pre-flight Credentials check in Environment phase
-				// Already showed the user what's been resolved. The
-				// Architect's own "credentials_resolved" event is
-				// Internal to the spawn pipeline — surface it as
-				// Part of Spawn transition, not as a distinct
-				// sub-step.
 				enterSpawn()
 			case "container_created":
 				enterSpawn()
@@ -473,26 +387,16 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		},
 	})
 	if err != nil {
-		// Freeze any live build-spinner so the ✗ banner below doesn't
-		// Leave a stale spinner line above it.
 		buildProgress.CompleteCurrent()
 		return s.SubFailHint("Spawn failed", err, spawnHint(err, agentName, agents))
 	}
 
 	u := result.World
 
-	// Non-fatal warnings from the architect surface as yellow `!`
-	// Lines after the Spawn phase — scoped enough that we don't need
-	// A separate phase for them.
 	for _, w := range result.Warnings {
 		s.Warn("Warning", w)
 	}
 
-	// Agent spawn. Colony mode vs single-agent vs empty world, plus
-	// The interactive / detached split. In interactive mode the
-	// Runtime's own banner (Claude Code's `╭─ claude ─╮`, codex's
-	// REPL header, …) takes over the next instant, so we stay quiet
-	// And hand off cleanly.
 	if len(agents) > 0 {
 		enterSpawn()
 		s.SubStart("Spawning colony…")
@@ -502,7 +406,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.SubDone("Colony spawned", fmt.Sprintf("%d agent(s)", len(agents)))
 	} else if agentName != "" {
 		if spawnInteractive {
-			// Silent handoff — the runtime's banner replaces ours.
 			if err := arc.SpawnAgent(ctx, u.ID, agentName); err != nil {
 				return err
 			}
@@ -516,12 +419,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.SubDone("Agent spawned", "detached")
 	}
 
-	// Footer is only useful for non-interactive spawns where the
-	// User's shell stays their shell afterwards. Interactive agent
-	// Sessions returned above; colony / detached / empty-world land
-	// Here. Success banner first so "Agent is alive." reads as the
-	// Punctuation mark at the end of the phase sequence, followed by
-	// The cold info block with IDs + quick-action hints.
 	s.Blank()
 	switch {
 	case agentName == "" && len(agents) == 0:
@@ -544,13 +441,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// resolveWantedRuntime returns the runtime name the current project
-// + flag state would spawn, as a cheap pre-resolve used only by the
-// Idempotency-drift guard. Mirrors the logic in resolveProjectWorld
-// But skips the full manifest validation — we only need to know
-// Which runtime comes out at the end. Returns "" on any resolution
-// Error; the caller treats that as "don't know, fall through to the
-// Normal path" rather than blocking.
 func resolveWantedRuntime(worldName, backendOverride string) string {
 	p, err := loadProject()
 	if err != nil || p == nil {
@@ -563,13 +453,9 @@ func resolveWantedRuntime(worldName, backendOverride string) string {
 	return pw.Runtime
 }
 
-// runtimeAuthProvider returns the auth provider string ("anthropic",
-// "openai", …) for a runtime name. Empty when the runtime has no
-// Registered adapter or no DefaultProvider declared — we skip the
-// Pre-flight credential check rather than guess.
 func runtimeAuthProvider(runtimeName string) string {
 	if runtimeName == "" {
-		runtimeName = "claude-code" // same default as runtime_route.go
+		runtimeName = "claude-code"
 	}
 	adapter, ok := runtimes.Get(runtimeName)
 	if !ok {
@@ -578,9 +464,6 @@ func runtimeAuthProvider(runtimeName string) string {
 	return adapter.DefaultProvider
 }
 
-// credentialDetail renders the short right-hand detail for the
-// Successful Credentials sub-step. Shape: "<method> · <source>" —
-// Enough to eyeball which auth spwn resolved on this spawn.
 func credentialDetail(cred *authentication.Credential) string {
 	if cred == nil {
 		return ""
@@ -595,8 +478,6 @@ func credentialDetail(cred *authentication.Credential) string {
 	return method + " · " + cred.Source
 }
 
-// dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint
-// When Docker is not running.
 func dockerHint(err error) error {
 	if strings.Contains(err.Error(), "cannot connect to Docker") {
 		return fmt.Errorf("cannot reach Docker — is Docker Desktop or OrbStack running?")
@@ -604,18 +485,6 @@ func dockerHint(err error) error {
 	return err
 }
 
-// parseWorkspaceFlags parses a list of "-w" values into world.Workspace.
-// Accepted forms:
-//
-//	"path"           → auto-named from the path basename (lowercased) when
-//	                   slug-compliant; "workspace<N>" otherwise.
-//	"name=path"      → explicit name
-//	"name=path:ro"   → same, read-only
-//
-// Users never write container paths. The container-side layout is
-// decided by the spawn pipeline (currently /workspaces/<name>/).
-//
-// Empty input returns a nil slice (ephemeral world — no mounts).
 func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil
@@ -627,8 +496,6 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 			continue
 		}
 
-		// Strip optional :ro suffix. Only accept :ro at the very end —
-		// anything else in the entry is path content.
 		readOnly := false
 		if strings.HasSuffix(raw, ":ro") {
 			readOnly = true
@@ -652,7 +519,6 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	return result, nil
 }
 
-// spawnHint returns an actionable hint for common spawn errors.
 func spawnHint(err error, agentName string, agents []architect.AgentSpec) string {
 	msg := err.Error()
 	switch {
@@ -681,15 +547,6 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 	}
 }
 
-// applyProjectDefaults resolves the current spwn.yaml (if any) and
-// overlays its inline world entry on the flag state. It returns the
-// projectWorld used so callers can build from its synthesized manifest
-// directly. Silently no-ops (returning nil, nil) when no project is
-// active, so the legacy global-mode CLI still works unchanged.
-//
-// If requestedName is non-empty and the project has no such world,
-// this returns a hard error - we refuse to silently fall through to
-// the legacy config path because the user asked for a specific name.
 func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride string) (*projectWorld, error) {
 	p, err := loadProject()
 	if err != nil || p == nil {
@@ -697,7 +554,6 @@ func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride str
 	}
 	pw, err := resolveProjectWorld(p, requestedName, backendOverride)
 	if err != nil {
-		// Named world explicitly requested but missing -> hard error.
 		if requestedName != "" {
 			return nil, err
 		}
@@ -715,4 +571,3 @@ func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride str
 	}
 	return pw, nil
 }
-

@@ -78,7 +78,6 @@ func ExtractBinary(archivePath, binaryName, destPath string) error {
 // (e.g. /usr/local/bin owned by root), the caller should re-invoke itself
 // under sudo or ask the user to install to a writable prefix.
 func AtomicReplace(newFile, target string) error {
-	// Ensure the new binary is executable.
 	if err := os.Chmod(newFile, 0755); err != nil {
 		return fmt.Errorf("chmod new binary: %w", err)
 	}
@@ -87,8 +86,6 @@ func AtomicReplace(newFile, target string) error {
 		return atomicReplaceWindows(newFile, target)
 	}
 
-	// POSIX: same filesystem → atomic rename. The OS frees the inode of
-	// the running binary when the last process holding it exits.
 	if err := os.Rename(newFile, target); err != nil {
 		return fmt.Errorf("rename %s → %s: %w", newFile, target, err)
 	}
@@ -96,18 +93,15 @@ func AtomicReplace(newFile, target string) error {
 }
 
 func atomicReplaceWindows(newFile, target string) error {
-	// Windows holds a lock on the running .exe; move the old aside first.
 	old := target + ".old"
-	_ = os.Remove(old) // stale from previous failed upgrade
+	_ = os.Remove(old)
 	if err := os.Rename(target, old); err != nil {
 		return fmt.Errorf("move old binary aside: %w", err)
 	}
 	if err := os.Rename(newFile, target); err != nil {
-		// Try to roll back.
 		_ = os.Rename(old, target)
 		return fmt.Errorf("rename new binary: %w", err)
 	}
-	// `old` will be removed at next launch / by the OS eventually.
 	return nil
 }
 

@@ -46,7 +46,6 @@ func Export(name string, outputPath string, excludeLayers []string) (string, err
 			return err
 		}
 
-		// Skip excluded layers
 		topDir := strings.SplitN(relPath, string(os.PathSeparator), 2)[0]
 		if exclude[topDir] && relPath != "." {
 			if info.IsDir() {
@@ -116,7 +115,6 @@ func Import(name string, archivePath string) error {
 			return fmt.Errorf("read tar: %w", err)
 		}
 
-		// Path traversal protection
 		target := filepath.Join(dir, header.Name)
 		if !strings.HasPrefix(filepath.Clean(target), filepath.Clean(dir)) {
 			return fmt.Errorf("invalid path in archive: %s", header.Name)

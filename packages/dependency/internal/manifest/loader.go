@@ -27,12 +27,8 @@ const ToolManifest = "tool.yaml"
 // over "read from disk" (local tools) vs "read from go:embed"
 // (catalog tools) so both paths share the parser.
 type Resolver interface {
-	// ReadFile returns the bytes of the named file relative to the
-	// tool's directory. Returns os.ErrNotExist when absent.
 	ReadFile(rel string) ([]byte, error)
 
-	// SkillsFS returns an fs.FS rooted at <toolDir>/skills/, or nil
-	// when the directory is absent or empty.
 	SkillsFS() fs.FS
 }
 
@@ -63,7 +59,7 @@ type ParseOptions struct {
 type Parsed struct {
 	Schema    Schema
 	FileBytes map[string][]byte
-	SkillsFS  any // fs.FS but typed as any to avoid the import on the public type
+	SkillsFS  any
 }
 
 // Parse reads the manifest file via the Resolver and returns a
@@ -99,8 +95,6 @@ func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 		s.Version = "latest"
 	}
 
-	// Read every file in the files map eagerly so the returned Tool
-	// doesn't depend on the resolver staying alive.
 	fileBytes := make(map[string][]byte, len(s.Files))
 	for imagePath, sourcePath := range s.Files {
 		b, err := res.ReadFile(sourcePath)
@@ -193,4 +187,3 @@ func (e EmbedResolver) SkillsFS() fs.FS {
 	}
 	return sub
 }
-

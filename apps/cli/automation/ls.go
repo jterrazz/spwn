@@ -12,11 +12,6 @@ import (
 	"spwn.sh/packages/project"
 )
 
-// lsCmd renders every automation in the current project's spwn.yaml
-// as a table. The renderer reads only the manifest + the on-disk
-// receipt log to derive last-fired times — no architect / Docker
-// roundtrips, so the command stays useful even when the daemon is
-// not running.
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List every automation declared in spwn.yaml",
@@ -33,8 +28,6 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 
-		// Receipts file is optional — projects that have never run
-		// the daemon won't have one yet, the column just shows "—".
 		lastFired, _ := readLastFiredFromReceipts(p.Root)
 
 		w := tabwriter.NewWriter(cmd.OutOrStdout(), 0, 0, 2, ' ', 0)
@@ -50,16 +43,12 @@ var lsCmd = &cobra.Command{
 	},
 }
 
-// listEntry pairs a world key with one automation under it. Stable
-// sort key used by collectAutomations.
 type listEntry struct {
 	World string
 	Name  string
 	Auto  project.Automation
 }
 
-// collectAutomations flattens manifest.Worlds[*].Automations into a
-// stable-sorted slice for rendering.
 func collectAutomations(p *project.Project) []listEntry {
 	var out []listEntry
 	if p == nil || p.Manifest == nil {
@@ -79,9 +68,6 @@ func collectAutomations(p *project.Project) []listEntry {
 	return out
 }
 
-// formatTrigger turns an Automation's trigger into a one-line label.
-// Cron exprs render as the expression; fs triggers render as
-// "fs:<path>" — both readable in a 80-column table.
 func formatTrigger(a project.Automation) string {
 	switch {
 	case a.On.Cron != "":
@@ -93,9 +79,6 @@ func formatTrigger(a project.Automation) string {
 	}
 }
 
-// humanTimeAgo renders a duration as "5m ago" / "2h ago" / "3d ago".
-// Same idiom git uses; agents reading the table parse it the same way
-// users do.
 func humanTimeAgo(t time.Time) string {
 	d := time.Since(t)
 	switch {

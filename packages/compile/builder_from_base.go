@@ -107,23 +107,15 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 		logw = io.Discard
 	}
 
-	// Build the Dockerfile.
 	df := generateDockerfile(req.BaseImage, dest, req.Labels)
 
-	// Build the tar context: Dockerfile at root, tree entries under
-	// "world/" (an arbitrary stable prefix chosen by us — the
-	// Dockerfile references this same prefix).
 	var ctxTar bytes.Buffer
 	tw := tar.NewWriter(&ctxTar)
 
-	// Dockerfile first so `docker build` finds it quickly.
 	if err := writeTarFile(tw, "Dockerfile", df); err != nil {
 		return nil, fmt.Errorf("tar Dockerfile: %w", err)
 	}
 
-	// Spool the tree into a temporary buffer so we can rewrite each
-	// entry's name with the "world/" prefix before emitting it into
-	// the build context tar.
 	var treeBuf bytes.Buffer
 	if err := req.Tree.Tar(&treeBuf); err != nil {
 		return nil, fmt.Errorf("serialise tree: %w", err)
@@ -137,10 +129,6 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 		if err != nil {
 			return nil, fmt.Errorf("read tree tar: %w", err)
 		}
-		// Skip anything that's not a regular file — trees are flat
-		// today, but be defensive.
-		// The reader normalises the old TypeRegA ('\x00') to TypeReg, so
-		// one comparison covers both spellings of "regular file".
 		if hdr.Typeflag != tar.TypeReg {
 			continue
 		}
@@ -171,9 +159,6 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 	}
 	defer resp.Body.Close()
 
-	// Stream build output — Docker returns JSON lines with a
-	// "stream" field. We also watch for "error" which terminates
-	// the build.
 	type buildMsg struct {
 		Stream string `json:"stream"`
 		Error  string `json:"error"`
@@ -192,12 +177,8 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 		}
 	}
 
-	// Inspect for the image ID.
 	info, _, err := cli.ImageInspectWithRaw(ctx, req.Tag)
 	if err != nil {
-		// A missing image after a clean build is unusual but we
-		// don't want to fail the whole command over a display
-		// detail — return the tag without an ID.
 		if client.IsErrNotFound(err) {
 			return &BuildFromBaseResult{Tag: req.Tag}, nil
 		}
@@ -210,17 +191,12 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 	}, nil
 }
 
-// generateDockerfile renders the tiny derived-image Dockerfile.
 func generateDockerfile(baseImage, dest string, labels map[string]string) []byte {
 	var b strings.Builder
 	b.WriteString("# syntax=docker/dockerfile:1\n")
 	fmt.Fprintf(&b, "FROM %s\n", baseImage)
-	// Copy the tree entries under "world/" (our build context
-	// prefix) into the requested destination. Docker normalises
-	// trailing slashes.
 	fmt.Fprintf(&b, "COPY world/ %s/\n", strings.TrimRight(dest, "/"))
 
-	// Sort labels for deterministic output.
 	if len(labels) > 0 {
 		keys := make([]string, 0, len(labels))
 		for k := range labels {
@@ -234,8 +210,6 @@ func generateDockerfile(baseImage, dest string, labels map[string]string) []byte
 	return []byte(b.String())
 }
 
-// writeTarFile appends a single regular-file entry to tw with fixed
-// mode / modtime / uid / gid so the resulting tar is reproducible.
 func writeTarFile(tw *tar.Writer, name string, data []byte) error {
 	hdr := &tar.Header{
 		Name:    name,

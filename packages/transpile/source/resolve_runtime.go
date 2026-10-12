@@ -6,21 +6,11 @@ import (
 	"strings"
 )
 
-// runtimeCanonical maps catalog-style runtime refs (e.g.
-// "spwn:claude-code") to the short names used by the compile runtime
-// registry (e.g. "claude-code"). Agents declare their runtime via
-// `runtime.backend: spwn:claude-code` to match the tool-catalog
-// namespace, but transpile.Register uses the short name. This map is
-// the one-way bridge between the two.
 var runtimeCanonical = map[string]string{
 	"spwn:claude-code": "claude-code",
 	"spwn:codex":       "codex",
 }
 
-// canonicalRuntime returns the short registry name for a runtime
-// reference. Unknown names pass through unchanged, on the assumption
-// they are already canonical (or will fail later at Compile time with
-// a clearer "unknown runtime" error).
 func canonicalRuntime(name string) string {
 	if mapped, ok := runtimeCanonical[name]; ok {
 		return mapped

@@ -11,18 +11,8 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// localToolDir is where the project-local dependency loader looks
-// for tool/<name> refs at image-build time. Mirrors what the
-// validator (rulePacksExist) expects, so `spwn check` and
-// `spwn build` resolve refs through the same on-disk layout.
 const localToolDir = "tools"
 
-// wrappedLocalTool forwards every tool.Tool method to an underlying
-// packyaml-parsed dependency but forces Name() to the "local:<basename>"
-// form. Catalog refs and local refs share a single registry keyed by
-// name, so the `local:` prefix keeps them in separate namespaces —
-// any future promotion of a local name to an spwn: dependency doesn't
-// collide with existing `tool/` references in agent.yaml.
 type wrappedLocalTool struct {
 	inner tool.Tool
 	name  string
@@ -108,10 +98,6 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string, error) {
 	loaded := map[string]bool{}
 
-	// hydrateOne loads one tool/<name> (recursively following its
-	// own `tool/` deps so the registry ends up with every local
-	// tool reachable from the project). Deduplicated via `loaded`;
-	// returns the registry key ("local:<name>") for the caller.
 	var hydrateOne func(name string) (string, error)
 	hydrateOne = func(name string) (string, error) {
 		if loaded[name] {
@@ -123,11 +109,6 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 		}
 		loaded[name] = true
 
-		// Collect inner deps BEFORE wrapping swaps "tool/" →
-		// "local:" on the returned slice. Type-assert down to the
-		// wrapper we constructed in LoadTool so we can read the
-		// original Dependencies() entries that still carry the
-		// `tool/<x>` ref form.
 		var innerDeps []string
 		if wrapped, ok := t.(*wrappedLocalTool); ok {
 			innerDeps = wrapped.inner.Dependencies()
@@ -139,12 +120,6 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 			return "", fmt.Errorf("register local dependency %q: %w", name, err)
 		}
 
-		// Recurse into local-tool inner deps so the registry has
-		// every transitively-reachable local tool. Without this, a
-		// local tool whose tool.yaml declares `dependencies: [tool/b]`
-		// causes resolver.Resolve to error with "local:b not
-		// registered" at spawn, masking real cycles behind a
-		// missing-dep message.
 		for _, innerRaw := range innerDeps {
 			innerRef := refs.ParseRef(innerRaw)
 			if innerRef.Kind == refs.KindLocalTool && innerRef.Name != "" {
@@ -161,21 +136,14 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 		ref := refs.ParseRef(raw)
 		switch ref.Kind {
 		case refs.KindLocalSkill, refs.KindLocalHook, refs.KindLocalCommand:
-			// Strip — compile step consumes these, image builder
-			// doesn't know how to.
 			continue
 		case refs.KindLocalTool:
-			// Fall through to the hydrate path below.
 		default:
-			// spwn:, github:, KindInvalid — pass through untouched.
 			out = append(out, raw)
 			continue
 		}
 
 		if ref.Name == "" {
-			// Malformed local ref — let Resolve surface a clear
-			// "unknown tool" error rather than crashing on an empty
-			// filesystem lookup.
 			out = append(out, raw)
 			continue
 		}

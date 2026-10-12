@@ -7,15 +7,6 @@ import (
 	"spwn.sh/packages/transpile/worldbook"
 )
 
-// renderer is the transpile.Runtime implementation for codex.
-//
-// Codex reads `AGENTS.md` from the process cwd on startup and uses
-// it as its system prompt. Unlike Claude Code, codex does not
-// resolve `@path/to/file.md` imports — everything the runtime must
-// see has to be inlined. This renderer emits one self-contained
-// AGENTS.md per agent and a parallel worlds/<id>/role.md that exists
-// for parity with claudecode (not referenced by codex today;
-// future-proofing for when codex learns imports).
 type renderer struct{}
 
 // Renderer is the exported render adapter for codex. Bundled into
@@ -81,9 +72,6 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				KnowledgeMounted: input.WorldKnowledgeMounted,
 			}),
 		)
-		// Skills land under `.agents/skills/<n>/SKILL.md` (not
-		// `.codex/skills/` — codex follows the cross-vendor AGENTS.md
-		// ecosystem convention where skills live at `.agents/skills/`).
 		for _, skill := range input.Skills {
 			for relPath, body := range skill.Files {
 				t.Add(
@@ -92,10 +80,6 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				)
 			}
 		}
-		// Config: always emit the project-local config.toml so codex
-		// picks up spwn-owned flags without user intervention. Trust
-		// for this directory is seeded by the spawn adapter's
-		// PrelaunchShell via the user-level ~/.codex/config.toml.
 		t.Add(
 			fmt.Sprintf("agents/%s/.codex/config.toml", a.Name),
 			GenerateAgentConfigTOML(ConfigInput{
@@ -110,8 +94,6 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				body,
 			)
 		}
-		// Commands: one file per slash-invoked prompt, written
-		// verbatim into Codex's native commands directory.
 		for _, cmd := range a.Commands {
 			t.Add(
 				fmt.Sprintf("agents/%s/.codex/commands/%s.md", a.Name, cmd.Name),

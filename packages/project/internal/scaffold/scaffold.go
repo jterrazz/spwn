@@ -16,8 +16,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/dependency"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
 //go:embed templates/*.tmpl
@@ -62,11 +62,6 @@ func Init(dir string, opts Opts) error {
 		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
 		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
 		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
-		// One example per local scheme so users land on a project that
-		// demonstrates skill/, tool/, hook/, command/ out of the box.
-		// All four are iso: a path-style ref `<scheme>/<name>`
-		// selected per agent in agent.yaml#dependencies, resolving
-		// to a single file or directory on disk.
 		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
 		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
 		{"templates/hook.session-banner.yaml.tmpl", "spwn/hooks/session-banner.yaml"},
@@ -78,13 +73,6 @@ func Init(dir string, opts Opts) error {
 		}
 	}
 
-	// Empty layer dirs: preserve them with .gitkeep so git tracks
-	// them. Knowledge is NOT a Mind layer — it's world-scoped and
-	// lives at `./spwn/knowledge/` by default so the entire spwn
-	// project tree is self-contained under `spwn/` (no sibling
-	// `./knowledge/` directory cluttering the repo root). The
-	// default spwn.yaml template wires the auto-world to this path
-	// via its `knowledge: ./spwn/knowledge` key.
 	layerDirs := []string{
 		"spwn/agents/neo/playbooks",
 		"spwn/agents/neo/journal",
@@ -100,10 +88,6 @@ func Init(dir string, opts Opts) error {
 		}
 	}
 
-	// Seed spwn.lock with the initial spwn:* refs baked into
-	// the template agent.yaml so `spwn check` is clean on the very
-	// first run. Without this the lockfile rule would flag drift on
-	// any brand-new project.
 	initialLock := dependency.EmptyLockfile()
 	for _, ref := range []string{"spwn:unix", "spwn:git", "spwn:python"} {
 		initialLock.Add(ref, dependency.LockEntry{Source: dependency.SourceBuiltin})
@@ -143,7 +127,6 @@ func AddAgentWorld(manifestPath, agentName string) error {
 
 	worlds := findMapValue(root, "worlds")
 	if worlds == nil {
-		// Create a worlds: map.
 		worlds = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
 		root.Content = append(root.Content,
 			&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "worlds"},
@@ -153,7 +136,6 @@ func AddAgentWorld(manifestPath, agentName string) error {
 	if worlds.Kind != yaml.MappingNode {
 		return fmt.Errorf("spwn.yaml#worlds must be a mapping")
 	}
-	// Idempotency: already present?
 	if findMapValue(worlds, agentName) != nil {
 		return nil
 	}
@@ -313,7 +295,6 @@ func RemoveAgentFromManifest(manifestPath, agentName string) error {
 	}
 
 	changed := false
-	// Walk worlds in reverse so we can delete empty entries in place.
 	for i := len(worlds.Content) - 2; i >= 0; i -= 2 {
 		entry := worlds.Content[i+1]
 		if entry.Kind != yaml.MappingNode {
@@ -333,9 +314,6 @@ func RemoveAgentFromManifest(manifestPath, agentName string) error {
 		}
 		agents.Content = kept
 		if len(agents.Content) == 0 {
-			// Drop the whole world entry (key + value) — leaving a
-			// world with zero agents would be rejected by
-			// ruleWorldNames anyway.
 			worlds.Content = append(worlds.Content[:i], worlds.Content[i+2:]...)
 			changed = true
 		}

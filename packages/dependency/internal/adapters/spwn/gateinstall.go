@@ -26,14 +26,11 @@ import (
 func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	entryRoot := path.Join(contentRoot, refName)
 	if _, err := fs.Stat(catalogFS, entryRoot); err != nil {
-		// Entry doesn't ship in the embedded catalog — caller likely
-		// resolved a local or registry ref. Not our problem.
 		return nil, nil
 	}
 	toolsDir := path.Join(entryRoot, "tools")
 	subs, err := fs.ReadDir(catalogFS, toolsDir)
 	if err != nil {
-		// Entry has no tools/ subdir (skill-only or template).
 		return nil, nil
 	}
 	var copied []string
@@ -54,9 +51,6 @@ func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	return copied, nil
 }
 
-// hasGateSection peeks at a tool.yaml to decide whether it's
-// gate-shaped. Avoids materializing the full schema — we only need
-// to know if `gate:` is present and non-empty.
 func hasGateSection(toolDir string) bool {
 	raw, err := fs.ReadFile(catalogFS, path.Join(toolDir, "tool.yaml"))
 	if err != nil {
@@ -71,10 +65,6 @@ func hasGateSection(toolDir string) bool {
 	return probe.Gate.Kind != 0 && len(probe.Gate.Content) > 0
 }
 
-// copyEmbedDir recursively writes every file in `src` (a path inside
-// the catalog embed FS) to `dst` on the host filesystem. Directories
-// are 0700 (gate cred-dir convention), files are 0644 except *.js
-// scripts which get 0755 so they're directly executable.
 func copyEmbedDir(src, dst string) error {
 	if err := os.MkdirAll(dst, 0o700); err != nil {
 		return err

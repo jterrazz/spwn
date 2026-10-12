@@ -2,8 +2,7 @@ package worldbook
 
 import (
 	"strings"
-
-	)
+)
 
 // GeneratePhysics returns the world-physics markdown block. The
 // claude-code renderer inlines it into each agent's CLAUDE.md under
@@ -20,12 +19,10 @@ func GeneratePhysics(knowledgeMounted bool) string {
 
 	sb.WriteString("# Physics of This World\n\n")
 
-	// Laws
 	sb.WriteString("## Laws\n")
 	sb.WriteString("- Network: bridge (outbound access enabled)\n")
 	sb.WriteString("- Filesystem is ephemeral except /workspaces and /agents\n\n")
 
-	// Topology — where the agent can read and write.
 	sb.WriteString("## Topology\n")
 	sb.WriteString("/agents/<your-name>/ - your home: SOUL.md, playbooks/, journal/ (read-write, persists across worlds)\n")
 	sb.WriteString("/workspaces/         - host project dirs mounted read-write, your actual work surface\n")
@@ -36,7 +33,6 @@ func GeneratePhysics(knowledgeMounted bool) string {
 	}
 	sb.WriteString("/tmp                 - ephemeral scratch\n\n")
 
-	// Communication
 	sb.WriteString("## Communication\n")
 	sb.WriteString("Agents communicate via the inbox at /world/inbox/.\n")
 	sb.WriteString("To send a message: write a file to /world/inbox/{recipient}/.\n")

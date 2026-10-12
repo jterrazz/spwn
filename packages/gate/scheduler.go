@@ -52,8 +52,6 @@ func (s *Scheduler) Run(ctx context.Context) {
 
 func (s *Scheduler) tick(ctx context.Context) {
 	s.registry.Each(func(e Element) {
-		// Per-element timeout — one slow upstream can't hold up the
-		// rest of the refresh sweep.
 		eCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
 		if err := e.Refresh(eCtx); err != nil {

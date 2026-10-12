@@ -26,7 +26,6 @@ func main() {
 	}
 }
 
-// render writes the page for the tree under root.
 func render(root *cobra.Command) []byte {
 	root.DisableAutoGenTag = true
 

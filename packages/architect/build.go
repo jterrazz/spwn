@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"runtime/debug"
 
-	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/dependency"
+	runtimes "spwn.sh/packages/runtimes"
 
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/baseimages"
@@ -29,7 +29,6 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		logw = io.Discard
 	}
 
-	// Cross-compile the spwn binary for linux/amd64
 	fmt.Fprintln(logw, "Cross-compiling spwn for linux/amd64...")
 	spwnBinary, err := crossCompileSpwn(ctx, logw)
 	if err != nil {
@@ -42,7 +41,6 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		return fmt.Errorf("read cross-compiled binary: %w", err)
 	}
 
-	// Resolve architect tools via the image package to generate install steps
 	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)
@@ -50,18 +48,12 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register runtimes: %w", err)
 	}
-	// The architect needs these tools installed in the image.
-	// spwn:cli is handled separately (cross-compiled binary), so we only need
-	// the other tools that spwn:architect depends on.
 	architectTools := []string{"spwn:unix", "spwn:node", "spwn:claude-code", "spwn:docker-cli"}
 	resolved, err := reg.Resolve(architectTools)
 	if err != nil {
 		return fmt.Errorf("resolve architect tools: %w", err)
 	}
 
-	// Convert to generator inputs and generate the Dockerfile.
-	// SkipFooter: architect has its own COPY/entrypoint directives appended below.
-	// User/Home: architect image uses "architect" user, not "spwn".
 	toolInputs := ib.ToolsToInputs(resolved)
 	df := ib.GenerateDockerfile(ibbase.ArchitectDockerfile, toolInputs, platform.ArchitectImageVersion, ib.GenerateOpts{
 		SkipFooter: true,
@@ -69,11 +61,6 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		Home:       "/home/architect",
 	})
 
-	// Append architect-specific Dockerfile directives (COPY binary,
-	// system files, entrypoint). Runtime-user config (dotfiles etc.)
-	// is not written during the image build — each runtime adapter's
-	// DefaultConfigFiles method materialises it at spawn time into
-	// the actual per-agent HOME.
 	architectFooter := `
 # Architect: cross-compiled spwn binary
 COPY spwn /usr/local/bin/spwn
@@ -100,21 +87,16 @@ CMD ["sleep", "infinity"]
 `
 	df = append(df, []byte(architectFooter)...)
 
-	// Build the context map with architect-specific files
 	contextFiles := make(map[string][]byte)
 
-	// Cross-compiled spwn binary
 	contextFiles["spwn"] = binaryData
 
-	// Entrypoint script for Docker socket GID alignment
 	contextFiles["entrypoint.sh"] = ibbase.ArchitectEntrypoint
 
-	// Architect system files (ARCHITECT.md, AGENTS.md, skills, stack)
 	for path, content := range worldbook.ArchitectSystemFiles() {
 		contextFiles[path] = []byte(content)
 	}
 
-	// Build the image
 	_, err = docker.EnsureImageWithContext(
 		ctx,
 		platform.ArchitectImage,
@@ -126,16 +108,12 @@ CMD ["sleep", "infinity"]
 	return err
 }
 
-// crossCompileSpwn builds the spwn CLI binary for linux/amd64.
-// It returns the path to the temporary binary file. The caller must remove it.
 func crossCompileSpwn(ctx context.Context, logw io.Writer) (string, error) {
 	srcRoot, err := findSourceRoot()
 	if err != nil {
 		return "", err
 	}
 
-	// Determine target architecture: use the host's arch for Docker (works with
-	// Docker Desktop which runs containers matching the host arch).
 	goarch := runtime.GOARCH
 
 	tmpFile, err := os.CreateTemp("", "spwn-linux-*")
@@ -162,7 +140,6 @@ func crossCompileSpwn(ctx context.Context, logw io.Writer) (string, error) {
 	return tmpFile.Name(), nil
 }
 
-// findSourceRoot locates the spwn workspace root directory.
 func findSourceRoot() (string, error) {
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		for _, s := range bi.Settings {

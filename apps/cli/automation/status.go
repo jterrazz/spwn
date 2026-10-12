@@ -10,10 +10,6 @@ import (
 	"spwn.sh/apps/cli/cliproject"
 )
 
-// statusCmd shows a richer per-automation snapshot than `ls`:
-// last fire, success/failure ratio, missed count for the last
-// catch-up. Reads only from the on-disk receipt log — works whether
-// or not the engine is currently running.
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Engine state and last-fired snapshot",
@@ -53,8 +49,6 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-// stats is the aggregate per-automation derived from the receipts
-// file. Zero value is fine for "never fired".
 type stats struct {
 	fires     int
 	okCount   int
@@ -63,9 +57,6 @@ type stats struct {
 	lastOK    bool
 }
 
-// summariseReceipts walks the receipt rows and rolls up per-key
-// stats. Stable iteration order isn't important here — callers who
-// need it (status table) sort the keys upstream.
 func summariseReceipts(rows []receiptRow) map[string]stats {
 	out := map[string]stats{}
 	for _, r := range rows {
@@ -85,4 +76,3 @@ func summariseReceipts(rows []receiptRow) map[string]stats {
 	}
 	return out
 }
-

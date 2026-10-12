@@ -35,7 +35,7 @@ const (
 type AgentView struct {
 	Name    string
 	Role    string
-	Runtime string // stripped of spwn: prefix for display
+	Runtime string
 	World   string
 	Status  Status
 
@@ -59,7 +59,7 @@ type AgentView struct {
 type DepNode struct {
 	Name      string
 	Version   string
-	Skills    int // count of markdown files in the tool's skills/ dir
+	Skills    int
 	DedupSeen bool
 	Children  []DepNode
 }
@@ -90,7 +90,6 @@ func Render(w io.Writer, m Model) {
 }
 
 func renderAgent(w io.Writer, a AgentView) {
-	// Header — kubectl-describe: Key <pad> Value, one per line.
 	fmt.Fprintf(w, "Name         %s\n", a.Name)
 	fmt.Fprintf(w, "Role         %s\n", a.Role)
 	if a.Runtime != "" {
@@ -100,7 +99,6 @@ func renderAgent(w io.Writer, a AgentView) {
 		fmt.Fprintf(w, "World        %s   (%s)\n", a.World, renderStatus(a.Status))
 	}
 
-	// Dependencies section.
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "Dependencies (%s)\n",
 		depCountLabel(a.DirectDepsCount, a.TransitiveDepsCount))
@@ -108,7 +106,6 @@ func renderAgent(w io.Writer, a AgentView) {
 		renderDep(w, root, 0)
 	}
 
-	// Skills section — two-column: Name<pad>Origin.
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "Skills (%d)\n", len(a.Skills))
 	if len(a.Skills) == 0 {
@@ -126,7 +123,6 @@ func renderAgent(w io.Writer, a AgentView) {
 		}
 	}
 
-	// Hooks section.
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "Hooks (%d)\n", len(a.Hooks))
 	if len(a.Hooks) == 0 {
@@ -145,9 +141,6 @@ func renderAgent(w io.Writer, a AgentView) {
 	}
 }
 
-// renderDep prints one dep subtree. badgeCol is the column at which
-// composition badges (skills(N) · config · runtime) start so they
-// line up across siblings at the same depth.
 func renderDep(w io.Writer, d DepNode, depth int) {
 	indent := strings.Repeat("  ", depth+1)
 	label := d.Name
@@ -171,10 +164,6 @@ func renderDep(w io.Writer, d DepNode, depth int) {
 	}
 }
 
-// badgeColumn is the fixed column where composition badges start.
-// Wide enough to cover "  spwn:paperclip-factory@latest" + one
-// space of breathing room at depth 1; deeper nodes lose alignment
-// only when the name is extraordinarily long.
 const badgeColumn = 35
 
 func composeBadges(d DepNode) string {
@@ -200,17 +189,10 @@ func depCountLabel(direct, transitive int) string {
 	return fmt.Sprintf("%d direct, %d transitive", direct, transitive)
 }
 
-// visibleLen strips the (*) dedup suffix from a line for padding
-// math so dedup markers don't push badges out of alignment.
 func visibleLen(s string) int {
-	// No ANSI in inspect output (pipe-safe), so a rune count suffices.
 	return len([]rune(s))
 }
 
-// sortSkills keeps skills deterministically ordered: project-local
-// first (origin starts with "spwn/"), then catalog-provided (starts
-// with "@"), then local tools. Within each group, alphabetical by
-// origin then by name.
 func sortSkills(s []SkillRef) {
 	sort.SliceStable(s, func(i, j int) bool {
 		pi, pj := skillOriginPriority(s[i].Origin), skillOriginPriority(s[j].Origin)

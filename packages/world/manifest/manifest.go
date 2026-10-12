@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/world/models"
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/world/models"
 )
 
-// rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
 	Deps yaml.Node `yaml:"dependencies"`
 }
@@ -36,7 +35,6 @@ func LoadPath(path string) (models.Manifest, error) {
 
 	m := models.Manifest{}
 
-	// Parse packages (plain list of strings, root-level)
 	if raw.Deps.Kind == yaml.SequenceNode {
 		m.Deps = parseDeps(&raw.Deps)
 	}
@@ -45,7 +43,6 @@ func LoadPath(path string) (models.Manifest, error) {
 	return m, nil
 }
 
-// parseDeps extracts dep refs from a YAML sequence node.
 func parseDeps(node *yaml.Node) []string {
 	var elems []string
 	for _, item := range node.Content {

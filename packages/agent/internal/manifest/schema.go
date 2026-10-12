@@ -62,10 +62,6 @@ type DepPolicy struct {
 	Deny  []string `yaml:"deny,omitempty"`
 }
 
-// rawManifest mirrors Manifest but exposes Deps as a yaml.Node so
-// we can split string vs mapping entries before populating Deps +
-// DepPolicies. Kept private; the public Manifest.UnmarshalYAML
-// converts between the two.
 type rawManifest struct {
 	Name        string        `yaml:"name,omitempty"`
 	Description string        `yaml:"description,omitempty"`

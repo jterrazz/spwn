@@ -12,16 +12,6 @@ import (
 	"spwn.sh/packages/transpile"
 )
 
-// parsePlaybookHeader extracts the `name:` + `description:` pair
-// from a playbook's YAML frontmatter. Returns ok=false when the
-// block is missing, unterminated, unparseable, or lacks either
-// required key.
-//
-// Duplicated from packages/transpile/source to avoid the
-// transpile/source import cycle (transpile/source imports transpile,
-// architect imports both transpile and a lot more). The parser is
-// ~30 lines; the duplication is cheaper than reshuffling the layer
-// graph.
 func parsePlaybookHeader(body []byte) (transpile.PlaybookEntry, bool) {
 	r := bufio.NewReader(bytes.NewReader(body))
 	first, err := r.ReadString('\n')

@@ -6,15 +6,6 @@ import (
 	"spwn.sh/packages/authentication"
 )
 
-// toolPassthroughEnvVars are the env-var names for credentials that
-// Tool servers can consume directly. Empty today — every tool has
-// Migrated to a bind-mounted token cache (`spwn auth login
-// <provider>`). Kept as a slice (rather than deleted) so adding a
-// New env-passthrough is a one-line change.
-//
-// Migration history:
-//   - GITHUB_PERSONAL_ACCESS_TOKEN → packages/authentication/gh + /credentials/gh
-//   - NOTION_TOKEN → packages/authentication/mcp + /credentials/mcp
 var toolPassthroughEnvVars = []string{}
 
 // DockerEnvArgs returns -e flags for docker exec/create that inject

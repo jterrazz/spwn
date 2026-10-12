@@ -20,21 +20,18 @@ import (
 func Sleep(mindPath string) (*SleepResult, error) {
 	result := &SleepResult{Timestamp: time.Now()}
 
-	// 1. Archive stale playbooks (older than 30 days, not recently referenced)
 	archived, err := archiveStaleFiles(mindPath, "playbooks", 30*24*time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("archiving playbooks: %w", err)
 	}
 	result.ArchivedPlaybooks = archived
 
-	// 2. Prune old journal entries (sessions merged into journal)
 	pruned, err := pruneOldSessions(mindPath, 90*24*time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("pruning journal: %w", err)
 	}
 	result.PrunedSessions = pruned
 
-	// 3. Write sleep log
 	journalDir := filepath.Join(mindPath, "journal")
 	if err := os.MkdirAll(journalDir, 0755); err != nil {
 		return nil, fmt.Errorf("creating the journal layer: %w", err)
@@ -45,7 +42,6 @@ func Sleep(mindPath string) (*SleepResult, error) {
 		return nil, fmt.Errorf("writing the sleep log: %w", err)
 	}
 
-	// Emit activity event
 	agentName := filepath.Base(mindPath)
 	activity.Log(activity.Event{
 		Type:    activity.TypeAgentSlept,

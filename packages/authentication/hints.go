@@ -5,17 +5,6 @@ import (
 	"strings"
 )
 
-// Hints is the single source of truth for per-(provider × method × state)
-// User-facing phrases. One place to edit the wording, one place to keep
-// Commands and env var names in sync. Consumed by the `spwn auth`
-// Dashboard and by the spawn pre-flight (apps/cli/world).
-//
-// No raw file paths ever leak through these helpers. Users see
-// Actionable verbs (`claude login`, `spwn auth login …`, `export VAR=`)
-// Not implementation details (`~/.claude/.credentials.json`,
-// `~/.spwn/credentials/…`). If spwn changes where it stores API keys
-// Tomorrow, none of these strings flip.
-
 // Method identifies a credential style supported by a provider.
 type HintMethod string
 
@@ -67,14 +56,12 @@ func NotSetHint(p Provider, m HintMethod) string {
 // In their shell, not in a stored file.
 func RejectedHint(p Provider, cred *Credential) string {
 	if cred == nil {
-		return NotSetHint(p, HintMethodOAuth) // generic fallback
+		return NotSetHint(p, HintMethodOAuth)
 	}
-	// Env-var backed creds — tell the user which var is stale.
 	if strings.HasPrefix(cred.Source, "env:") {
 		varName := strings.TrimPrefix(cred.Source, "env:")
 		return "unset " + varName + " (stale in your shell) or replace with a fresh credential"
 	}
-	// OAuth / keychain / file — point at the tool's native login.
 	switch p {
 	case ProviderAnthropic:
 		return "run `claude login` to refresh"

@@ -16,12 +16,12 @@ import (
 
 // ReadOpts filters the returned events.
 type ReadOpts struct {
-	Limit   int       // 0 = no limit
-	Type    Type      // "" = any type
-	WorldID string    // "" = any world
-	AgentID string    // "" = any agent
-	Actor   string    // "" = any actor
-	Since   time.Time // zero = no lower bound
+	Limit   int
+	Type    Type
+	WorldID string
+	AgentID string
+	Actor   string
+	Since   time.Time
 }
 
 // Read returns events matching the filter, newest first.
@@ -38,7 +38,6 @@ func Read(opts ReadOpts) ([]Event, error) {
 
 	var events []Event
 	sc := bufio.NewScanner(f)
-	// Allow longer lines for rich metadata
 	buf := make([]byte, 0, 64*1024)
 	sc.Buffer(buf, 1024*1024)
 
@@ -49,7 +48,7 @@ func Read(opts ReadOpts) ([]Event, error) {
 		}
 		var e Event
 		if err := json.Unmarshal([]byte(line), &e); err != nil {
-			continue // skip malformed lines
+			continue
 		}
 		if !matchesFilter(e, opts) {
 			continue
@@ -60,7 +59,6 @@ func Read(opts ReadOpts) ([]Event, error) {
 		return events, err
 	}
 
-	// Sort newest first
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].Timestamp.After(events[j].Timestamp)
 	})

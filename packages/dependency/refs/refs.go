@@ -69,8 +69,8 @@ const (
 type Ref struct {
 	Raw   string
 	Kind  RefKind
-	Owner string // "spwn" for builtin, owner for registry, "" otherwise
-	Name  string // dependency name (or repo for registry refs)
+	Owner string
+	Name  string
 }
 
 // ParseRef classifies a ref string. Trims whitespace. Does NOT strip a
@@ -117,16 +117,9 @@ func ParseRef(s string) Ref {
 		}
 	}
 
-	// Everything else (bare names, unknown schemes, the retired
-	// colon-form local schemes, `@`-prefixed refs) is invalid.
 	return Ref{Raw: raw, Kind: KindInvalid}
 }
 
-// splitScheme peels off a leading `<scheme>:<target>` when the scheme
-// names a known SOURCE. Returns ok=false when the string has no colon,
-// the colon is the first character, or the scheme is unknown. Source
-// schemes are reserved for repos / catalogs; local types use the path
-// form parsed by splitPathStyle.
 func splitScheme(s string) (scheme, target string, ok bool) {
 	colon := strings.IndexByte(s, ':')
 	if colon <= 0 {
@@ -145,13 +138,6 @@ func splitScheme(s string) (scheme, target string, ok bool) {
 	return "", "", false
 }
 
-// splitPathStyle peels off a leading `<type>/<name>` for local refs.
-// Returns ok=false when the string has no slash, the slash is the
-// first character, the type is unknown, or the name is empty / contains
-// further `/` or `:`. Restricting to known types and a single slash
-// keeps the grammar unambiguous and leaves room for source-prefixed
-// path forms (e.g. `github:owner/repo/tool/foo`) in the future without
-// reinterpreting today's syntax.
 func splitPathStyle(s string) (typ, name string, ok bool) {
 	slash := strings.IndexByte(s, '/')
 	if slash <= 0 {

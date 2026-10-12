@@ -37,9 +37,6 @@ var forkCmd = &cobra.Command{
 		s.Done("Target", result.Target)
 		s.Done("Layers copied", strings.Join(result.LayersCopied, ", "))
 
-		// Auto-world for the forked agent, symmetric with
-		// `agent create`. Without this, `spwn check` flags the
-		// forked agent as an orphan — surprising and silent.
 		if cwd, werr := os.Getwd(); werr == nil {
 			if p, perr := project.Find(cwd); perr == nil && p != nil {
 				if err := project.AddAgentToManifest(p.ManifestPath, target); err != nil {

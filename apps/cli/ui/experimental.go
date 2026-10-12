@@ -7,8 +7,6 @@ import "github.com/spf13/cobra"
 // or warn about experimental commands.
 const ExperimentalAnnotation = "spwn:experimental"
 
-// experimentalNotice is the one-line warning appended to a command's Long
-// description so `--help` shows it without requiring a custom help template.
 const experimentalNotice = "\n\n⚠ Experimental: this command is in development and may change or break without notice."
 
 // MarkExperimental tags a cobra command (and every subcommand below it)

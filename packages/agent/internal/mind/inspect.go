@@ -1,10 +1,10 @@
 package mind
 
 import (
-	"spwn.sh/packages/platform"
 	"fmt"
 	"os"
 	"path/filepath"
+	"spwn.sh/packages/platform"
 
 	"gopkg.in/yaml.v3"
 )
@@ -22,7 +22,6 @@ func Inspect(name string) (*AgentInfo, error) {
 		Layers: make(map[string][]string),
 	}
 
-	// Read team from agent.yaml (if exists).
 	manifestPath := filepath.Join(dir, "agent.yaml")
 	if data, err := os.ReadFile(manifestPath); err == nil {
 		var p struct {

@@ -59,8 +59,6 @@ func (r *Registry) List() []tool.Tool {
 // deduplicates, and returns a topologically sorted build order.
 func (r *Registry) Resolve(requested []string) ([]tool.Tool, error) {
 
-	// Canonicalise every input ref up-front so the rest of the
-	// algorithm deals in one consistent key space.
 	canon := make([]string, len(requested))
 	for i, name := range requested {
 		if _, ok := r.tools[name]; ok {
@@ -71,14 +69,12 @@ func (r *Registry) Resolve(requested []string) ([]tool.Tool, error) {
 	}
 	requested = canon
 
-	// Validate all requested tools exist
 	for _, name := range requested {
 		if r.tools[name] == nil {
 			return nil, fmt.Errorf("%w: %s", ErrToolNotFound, name)
 		}
 	}
 
-	// Collect all tools transitively
 	visited := make(map[string]bool)
 	var allNames []string
 	var collect func(name string) error
@@ -109,9 +105,8 @@ func (r *Registry) Resolve(requested []string) ([]tool.Tool, error) {
 		}
 	}
 
-	// Topological sort (Kahn's algorithm)
 	inDegree := make(map[string]int)
-	dependents := make(map[string][]string) // dep → tools that depend on it
+	dependents := make(map[string][]string)
 	nameSet := make(map[string]bool)
 
 	for _, name := range allNames {

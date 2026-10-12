@@ -50,9 +50,6 @@ func GenerateAgentSettingsJSON(in SettingsInput) []byte {
 	return append(out, '\n')
 }
 
-// buildHooksMap translates a flat []HookEntry into Claude Code's
-// nested {event: [{matcher, hooks: [{type, command}]}]} shape. Returns
-// nil when there are no hooks so the JSON doesn't carry an empty key.
 func buildHooksMap(entries []transpile.HookEntry) map[string]any {
 	if len(entries) == 0 {
 		return nil

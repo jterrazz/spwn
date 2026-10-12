@@ -12,10 +12,10 @@ import (
 
 // Server is the gate's HTTP frontend. Three route namespaces:
 //
-//   /healthz         operational liveness
-//   /mcp/<element>/  the element bridge (proxy or hand-rolled MCP)
-//   /sync/*          cookie-sync receive-end for the spwn-cookie-sync
-//                    browser extension; nil cookies disables it
+//	/healthz         operational liveness
+//	/mcp/<element>/  the element bridge (proxy or hand-rolled MCP)
+//	/sync/*          cookie-sync receive-end for the spwn-cookie-sync
+//	                 browser extension; nil cookies disables it
 type Server struct {
 	addr     string
 	registry *Registry
@@ -48,9 +48,6 @@ func NewServer(addr string, reg *Registry, cookies *CookieSync, logger *log.Logg
 		cookies.RegisterRoutes(mux)
 	}
 
-	// /healthz — liveness probe, used by `spwn gate status` and
-	// kubernetes-style health checks. Always 200 if the server is
-	// answering; element-specific health is per-element.
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -59,9 +56,6 @@ func NewServer(addr string, reg *Registry, cookies *CookieSync, logger *log.Logg
 		})
 	})
 
-	// /mcp/<element>/* — the element bridge. Path-strip before
-	// handing off so each element sees requests relative to its own
-	// root (`/`, `/initialize`, …) instead of `/mcp/<name>/...`.
 	mux.HandleFunc("/mcp/", func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/mcp/")
 		slash := strings.IndexByte(path, '/')
@@ -82,8 +76,6 @@ func NewServer(addr string, reg *Registry, cookies *CookieSync, logger *log.Logg
 			http.Error(w, fmt.Sprintf("unknown element %q", name), http.StatusNotFound)
 			return
 		}
-		// Hand off with the path rewritten so the element handler
-		// sees URLs relative to its own root.
 		r2 := r.Clone(r.Context())
 		r2.URL.Path = rest
 		el.Handler().ServeHTTP(w, r2)

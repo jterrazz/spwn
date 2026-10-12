@@ -40,8 +40,6 @@ func dockerHint(err error) error {
 	return err
 }
 
-// --- save ---
-
 var saveCmd = &cobra.Command{
 	Use:   "save <world-id>",
 	Short: "Save world state as a snapshot",
@@ -65,8 +63,6 @@ var saveCmd = &cobra.Command{
 		return nil
 	},
 }
-
-// --- ls ---
 
 var lsCmd = &cobra.Command{
 	Use:   "ls",
@@ -103,8 +99,6 @@ var lsCmd = &cobra.Command{
 		return nil
 	},
 }
-
-// --- restore ---
 
 var restoreCmd = &cobra.Command{
 	Use:   "restore <snapshot>",
@@ -157,8 +151,6 @@ var restoreCmd = &cobra.Command{
 	},
 }
 
-// --- rm ---
-
 var rmCmd = &cobra.Command{
 	Use:   "rm <snapshot>",
 	Short: "Remove a snapshot",
@@ -183,10 +175,6 @@ var rmCmd = &cobra.Command{
 	},
 }
 
-// --- helpers ---
-
-// parseSnapWorkspaces parses -w values into world.Workspace. Mirrors the
-// parser in apps/cli/world so snap restores accept the same syntax.
 func parseSnapWorkspaces(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil

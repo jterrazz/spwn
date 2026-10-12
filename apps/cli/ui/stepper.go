@@ -20,7 +20,7 @@ type Stepper struct {
 	isTTY bool
 
 	mu     sync.Mutex
-	label  string // current spinner label; live-updatable via UpdateLabel
+	label  string
 	stopCh chan struct{}
 	doneCh chan struct{}
 }
@@ -62,15 +62,11 @@ func (s *Stepper) Start(msg string) {
 			s.mu.Unlock()
 
 			frame := spinnerFrames[i%len(spinnerFrames)]
-			// Clear the entire line before redraw so a shorter
-			// label doesn't leave trailing characters from the
-			// previous (longer) render.
 			fmt.Fprintf(s.w, "\r\033[2K  %s %s", green.Sprint(frame), label)
 			i++
 
 			select {
 			case <-stopCh:
-				// Clear the spinner line using ANSI escape (handles color codes)
 				fmt.Fprintf(s.w, "\r\033[2K")
 				return
 			case <-ticker.C:
@@ -152,8 +148,6 @@ type BuildProgress interface {
 	CompleteCurrent()
 }
 
-// discardBuildProgress is a BuildProgress that eats everything. Used
-// On non-TTY output where there is no spinner to drive.
 type discardBuildProgress struct{}
 
 func (discardBuildProgress) Write(p []byte) (int, error) { return len(p), nil }
@@ -197,17 +191,9 @@ func (s *Stepper) Info(label, value string) {
 	fmt.Fprintf(s.w, "  %-12s %s\n", strong(label), value)
 }
 
-// ── Phase / sub-step / tree primitives ────────────────────────────
-//
-// These shape the "tight tree" UI used by `spwn up` / `spwn agent
-// <name>`: a small Hero header, a phase label (col 2), sub-steps
-// (col 4), and tree lines (col 4, prefixed with ├). The existing
-// Start/Done/Info primitives are unchanged — callers that don't want
-// The phased shape keep working.
-
 const (
-	subIndent    = "    " // col 4 — sub-step body
-	subLabelCols = 22     // width of the bold label column after the ✓
+	subIndent    = "    "
+	subLabelCols = 22
 )
 
 // Hero prints the top-of-command banner like
@@ -373,7 +359,6 @@ func (s *Stepper) TreeSpin(text string) {
 	}()
 }
 
-// stopSpinner stops any running spinner goroutine.
 func (s *Stepper) stopSpinner() {
 	s.mu.Lock()
 	ch := s.stopCh
@@ -387,4 +372,3 @@ func (s *Stepper) stopSpinner() {
 		<-done
 	}
 }
-

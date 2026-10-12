@@ -35,7 +35,7 @@ var DefaultOrganization = Organization{
 // not already exist. It is safe to call multiple times.
 func EnsureDefaultOrganization() error {
 	if _, err := GetOrganization(DefaultOrganization.Slug); err == nil {
-		return nil // already exists
+		return nil
 	}
 	return CreateOrganization(DefaultOrganization)
 }

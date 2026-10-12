@@ -13,10 +13,6 @@ import (
 	"spwn.sh/packages/world"
 )
 
-// mergeDepPolicy unions two per-tool policies for the same ref:
-// deny is the union (any agent denying wins), allow is the
-// intersection (must be allowed by every agent that opined).
-// Empty policy on either side passes the other through unchanged.
 func mergeDepPolicy(a, b world.DepPolicy) world.DepPolicy {
 	if len(a.Allow) == 0 && len(a.Deny) == 0 {
 		return b
@@ -49,9 +45,6 @@ func mergeDepPolicy(a, b world.DepPolicy) world.DepPolicy {
 	return out
 }
 
-// projectWorld is the fully-resolved spawn plan for one inline world
-// entry in spwn.yaml. It contains everything spawnRunE needs to skip
-// the legacy ~/.spwn/worlds/<name>.yaml file load entirely.
 type projectWorld struct {
 	Project    *project.Project
 	Name       string
@@ -73,15 +66,10 @@ type projectWorld struct {
 	Runtime string
 }
 
-// loadProject is kept as a thin alias over cliproject.Find so the
-// existing call sites under apps/cli/world/ stay concise while the
-// canonical walker lives in cliproject.
 func loadProject() (*project.Project, error) {
 	return cliproject.Find()
 }
 
-// sortedWorldNames returns the project's world-map keys in stable
-// alphabetic order so callers iterate predictably.
 func sortedWorldNames(p *project.Project) []string {
 	if p == nil || p.Manifest == nil {
 		return nil
@@ -94,13 +82,6 @@ func sortedWorldNames(p *project.Project) []string {
 	return names
 }
 
-// resolveProjectWorld synthesizes a projectWorld for the named world
-// entry. If name is empty, the first entry (sorted) is used. Returns
-// an error when the requested world does not exist.
-//
-// The resulting world.Manifest has Packages unioned from (1) the
-// inline world's explicit Packages list and (2) every referenced
-// agent's agent.yaml Packages field.
 func resolveProjectWorld(p *project.Project, name, backendOverride string) (*projectWorld, error) {
 	if p == nil || p.Manifest == nil {
 		return nil, fmt.Errorf("no project loaded")
@@ -109,7 +90,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		return nil, fmt.Errorf("spwn.yaml has no worlds")
 	}
 	if name == "" {
-		// Pick the first sorted entry as the implicit default.
 		name = sortedWorldNames(p)[0]
 	}
 	w, ok := p.Manifest.Worlds[name]
@@ -117,7 +97,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
 	}
 
-	// Union: project-level deps + every agent.yaml dependency.
 	pkgSet := map[string]struct{}{}
 	var pkgs []string
 	add := func(t string) {
@@ -133,8 +112,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	for _, t := range p.Manifest.Deps {
 		add(t)
 	}
-	// p.Agents is the deployable set. We only want the subset referenced
-	// by this particular world entry, so re-resolve by name.
 	agentPath := map[string]string{}
 	for _, a := range p.Agents {
 		agentPath[a.Name] = a.Path
@@ -142,10 +119,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	for _, a := range p.OrphanAgents {
 		agentPath[a.Name] = a.Path
 	}
-	// Per-tool policy union across agents in this world. Strategy:
-	// deny-takes-precedence — any agent denying a method denies it
-	// for the world image; allows must intersect across agents.
-	// Single-agent worlds get the agent's policy verbatim.
 	policies := map[string]world.DepPolicy{}
 	for _, aname := range w.Agents {
 		dir, ok := agentPath[aname]
@@ -166,10 +139,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 
 	m := world.Manifest{Deps: pkgs, DepPolicies: policies}
 
-	// Resolve the knowledge path (if any) relative to the project root
-	// so SpawnOpts receives an absolute host path. Empty string means
-	// "no knowledge base" — the spawn pipeline drops the bind mount and
-	// compile omits every /world/knowledge/ reference.
 	var knowledge string
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
 		if filepath.IsAbs(kp) {
@@ -179,15 +148,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		}
 	}
 
-	// Resolve the runtime across every agent in the project. Agents
-	// in the selected world dominate the source-wide resolution; we
-	// go through runtimeres.Resolve so the same auth-state cascade
-	// `spwn build` uses also drives `spwn up` (override → agent
-	// pin → single authenticated provider → claude-code fallback).
-	// Errors from the resolver — runtime conflicts between agents,
-	// multiple authenticated providers with no pinned choice — are
-	// propagated so the user sees them before the spawn starts
-	// rather than after a mismatched container boots.
 	var runtimeName string
 	if src, srcErr := source.Load(p.Root); srcErr == nil && src != nil {
 		rn, rnErr := runtimeres.Resolve(src, backendOverride)

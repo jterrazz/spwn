@@ -15,17 +15,6 @@ import (
 	"spwn.sh/packages/transpile"
 )
 
-// loadRuntimeHooks walks <root>/spwn/hooks/*.yaml and returns one
-// transpile.HookEntry per file. Filename (minus .yaml) is the hook
-// Name; file body holds `event: / matcher: / command:`. Mirrors the
-// source package's loadHooks but lives here so the spawn flow doesn't
-// need to construct a full ProjectSource just to read hooks.
-// Malformed files are skipped rather than erroring — `spwn check` is
-// the authoring-side gate; spawn is best-effort.
-//
-// The returned slice is the project-wide pool. Agents only inherit
-// the subset they declare via `hook/<name>` in agent.yaml#dependencies
-// — the per-agent filter happens later in rosterCompileAgents.
 func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
 	if projectRoot == "" {
 		return nil
@@ -67,11 +56,6 @@ func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
 	return out
 }
 
-// agentHookSelection returns the subset of the project hook pool the
-// agent's agent.yaml dependencies select via `hook/<n>` refs. Mirrors
-// the source-side selectAgentHooks; duplicated rather than imported so
-// the architect package doesn't pull in transpile/source. Returns nil
-// when the agent declares no hook deps or none of them resolve.
 func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpile.HookEntry {
 	if len(pool) == 0 {
 		return nil
@@ -110,11 +94,6 @@ func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpil
 	return out
 }
 
-// loadRuntimeCommands walks <root>/spwn/commands/*.md at spawn time
-// and returns one transpile.CommandEntry per file. Mirrors the
-// source-side loadCommands but lives here so the spawn flow doesn't
-// need to construct a full ProjectSource. Body bytes pass through
-// verbatim — the runtime parses any frontmatter at runtime.
 func loadRuntimeCommands(projectRoot string) []transpile.CommandEntry {
 	if projectRoot == "" {
 		return nil
@@ -146,9 +125,6 @@ func loadRuntimeCommands(projectRoot string) []transpile.CommandEntry {
 	return out
 }
 
-// agentCommandSelection returns the subset of the project command
-// pool that the agent's agent.yaml dependencies select via
-// `command/<n>` refs. Mirrors agentHookSelection.
 func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []transpile.CommandEntry {
 	if len(pool) == 0 {
 		return nil
@@ -187,23 +163,6 @@ func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []tr
 	return out
 }
 
-// collectRuntimeSkills assembles every skill the compiled tree should
-// emit into each agent's native skill directory (.claude/skills/ for
-// claude-code, .agents/skills/ for codex). Two sources feed it:
-//
-//  1. User-authored skills under <projectRoot>/spwn/skills/<name>/
-//     (SKILL.md + optional sidecar files) or legacy bare-markdown
-//     <projectRoot>/spwn/skills/<name>.md.
-//  2. Tool-shipped skills exposed by each resolved tool's Skills()
-//     fs.FS — each top-level sub-directory containing SKILL.md is
-//     one skill; a Skills() root with SKILL.md at its top is treated
-//     as a single skill named after the tool.
-//
-// Both flow into the same []SkillEntry slice so the renderer sees one
-// uniform shape. Tool name collisions with user skills are left
-// intact — later-registered entries overwrite earlier ones (tools
-// last, users first), which matches today's precedence where the
-// user's project spec is explicit.
 func collectRuntimeSkills(projectRoot string, tools []tool.Tool) []transpile.SkillEntry {
 	out := make([]transpile.SkillEntry, 0)
 	out = append(out, loadUserSkills(projectRoot)...)
@@ -212,11 +171,6 @@ func collectRuntimeSkills(projectRoot string, tools []tool.Tool) []transpile.Ski
 	return out
 }
 
-// facultiesForRuntime returns the entries shown in the prompt's
-// Faculties section during a real spawn. Tool refs come from the
-// runtime probe so failed tools stay hidden; local skills are copied
-// directly into the agent home rather than probed, so declared
-// skill/<name> deps are appended here for discoverability.
 func facultiesForRuntime(verifiedTools, deps []string) []string {
 	out := make([]string, 0, len(verifiedTools)+len(deps))
 	seen := map[string]struct{}{}
@@ -248,11 +202,6 @@ func facultiesForRuntime(verifiedTools, deps []string) []string {
 	return out
 }
 
-// loadUserSkills walks <root>/spwn/skills/ following the same rules as
-// packages/transpile/source.loadSkills. Kept inline here (not a call
-// into source) because the spawn path doesn't go through ProjectSource
-// — it constructs transpile.Input manually. Missing project root or
-// missing skills dir both return nil.
 func loadUserSkills(projectRoot string) []transpile.SkillEntry {
 	if projectRoot == "" {
 		return nil
@@ -290,10 +239,6 @@ func loadUserSkills(projectRoot string) []transpile.SkillEntry {
 	return out
 }
 
-// loadUserSkillDir reads a directory-form skill into a SkillEntry.
-// Returns ok=false (without error) when SKILL.md is missing — the
-// architect tolerates half-authored skills rather than failing the
-// whole spawn; spwn check is the authoring-side gate.
 func loadUserSkillDir(dir, name string) (transpile.SkillEntry, bool) {
 	files := map[string][]byte{}
 	err := filepath.Walk(dir, func(p string, info os.FileInfo, walkErr error) error {
@@ -321,16 +266,6 @@ func loadUserSkillDir(dir, name string) (transpile.SkillEntry, bool) {
 	return transpile.SkillEntry{Name: name, Files: files}, true
 }
 
-// toolSkillEntries converts every resolved tool's Skills() fs.FS into
-// one or more SkillEntry values. Shape detection:
-//
-//   - Skills() nil → no contribution.
-//   - SKILL.md at the root of the tool's FS → one SkillEntry whose
-//     name equals the tool name (stripped of the leading "@").
-//   - Otherwise → one SkillEntry per top-level sub-directory that
-//     contains a SKILL.md (sub-directories without SKILL.md are
-//     ignored — the tool can ship auxiliary assets without them
-//     being mistaken for skills).
 func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 	var out []transpile.SkillEntry
 	for _, t := range tools {
@@ -338,15 +273,8 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 		if skillFS == nil {
 			continue
 		}
-		// Strip the dependency scheme prefix so the skill directory
-		// matches the bare skill slug (`qmd`) rather than the dep ref
-		// (`spwn:qmd`). Colons in path components are legal on Linux
-		// but break plenty of downstream tooling — and the SKILL.md's
-		// own `name:` frontmatter uses the bare slug, so the dir name
-		// should agree.
 		toolName := skillDirName(t.Name())
 
-		// Flat form: SKILL.md at FS root.
 		if rootBody, err := fs.ReadFile(skillFS, "SKILL.md"); err == nil {
 			files := map[string][]byte{"SKILL.md": rootBody}
 			collectSidecar(skillFS, ".", files)
@@ -354,7 +282,6 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 			continue
 		}
 
-		// Nested form: each top-level sub-directory with SKILL.md.
 		topLevel, err := fs.ReadDir(skillFS, ".")
 		if err != nil {
 			continue
@@ -379,10 +306,6 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 	return out
 }
 
-// collectSidecar walks an fs.FS rooted at `root` and records every
-// non-SKILL.md file into `out`, keyed by path relative to the root.
-// Used so tools that ship templates / scripts / references alongside
-// their SKILL.md keep those files together in the rendered output.
 func collectSidecar(fsys fs.FS, root string, out map[string][]byte) {
 	_ = fs.WalkDir(fsys, root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
@@ -391,7 +314,6 @@ func collectSidecar(fsys fs.FS, root string, out map[string][]byte) {
 		if p == "SKILL.md" {
 			return nil
 		}
-		// Normalise root == "." → clean relative path.
 		rel := p
 		if root != "." && root != "" {
 			rel = strings.TrimPrefix(p, root+"/")
@@ -405,10 +327,6 @@ func collectSidecar(fsys fs.FS, root string, out map[string][]byte) {
 	})
 }
 
-// ensureSkillFrontmatter matches the loader's helper in
-// packages/transpile/source.  Duplicated (not imported) so the
-// architect package doesn't pull in the source loader just for this
-// four-line shim.
 func ensureSkillFrontmatter(body []byte, name string) []byte {
 	trimmed := strings.TrimLeft(string(body), "\n\t ")
 	if strings.HasPrefix(trimmed, "---") {
@@ -418,20 +336,12 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
-// skillDirName turns a dep ref into the directory component used under
-// `.claude/skills/`. The goal is the bare slug: `spwn:qmd` → `qmd`,
-// `local:my-skill` → `my-skill` (post-hydrate registry key),
-// `tool/foo` → `foo`, `skill/bar` → `bar`, `hook/baz` → `baz`. Keep
-// in lockstep with refs.Kind recognisers in packages/dependency/refs.
 func skillDirName(ref string) string {
-	// Internal post-hydrate registry keys (`spwn:`, `local:`) are not
-	// user-facing and don't go through the parser.
 	for _, scheme := range []string{"spwn:", "local:"} {
 		if strings.HasPrefix(ref, scheme) {
 			return strings.TrimPrefix(ref, scheme)
 		}
 	}
-	// User-facing path-style local refs (tool/foo, skill/bar, hook/baz).
 	for _, prefix := range []string{"tool/", "skill/", "hook/"} {
 		if strings.HasPrefix(ref, prefix) {
 			return strings.TrimPrefix(ref, prefix)

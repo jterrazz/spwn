@@ -6,7 +6,6 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// dependencyAdapter backs a parsed Schema as a tool.Tool.
 type dependencyAdapter struct {
 	schema    Schema
 	fileBytes map[string][]byte

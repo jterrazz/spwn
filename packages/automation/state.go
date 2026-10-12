@@ -54,18 +54,8 @@ func (s *MemoryStateStore) RecordFire(world, name string, scheduled time.Time) e
 	return nil
 }
 
-// stateSchemaVersion is the on-disk format version. Bump when the
-// schema changes incompatibly. The store reads any version it
-// recognises and writes the current version; a future version's
-// file format is detected via the explicit `version` field, which
-// lets readers branch on schema generation without guessing.
 const stateSchemaVersion = 1
 
-// stateFile is the on-disk shape. Versioned envelope around the
-// flat map so future widenings (struct values for entries, etc) can
-// land without breaking existing files. Old format (a bare flat
-// map without the envelope) is detected at load time and migrated
-// in-memory.
 type stateFile struct {
 	Version int                  `json:"version"`
 	Entries map[string]time.Time `json:"entries"`
@@ -102,8 +92,8 @@ type FileStateStore struct {
 
 	mu      sync.Mutex
 	loaded  bool
-	tainted error                // non-nil if the file existed but failed to parse
-	entries map[string]time.Time // in-memory cache, mirrors disk
+	tainted error
+	entries map[string]time.Time
 }
 
 // NewFileStateStore constructs a writer rooted at path. The file is
@@ -143,12 +133,6 @@ func (s *FileStateStore) RecordFire(world, name string, scheduled time.Time) err
 	return s.writeLocked(s.entries)
 }
 
-// ensureLoadedLocked populates the in-memory cache from disk on
-// first call. Subsequent calls are O(1). Caller holds s.mu.
-//
-// Tries the v1 envelope shape first; falls back to the legacy bare-
-// map shape so existing on-disk files keep working without a
-// migration step. The next RecordFire rewrites in v1 shape.
 func (s *FileStateStore) ensureLoadedLocked() {
 	if s.loaded {
 		return
@@ -156,20 +140,13 @@ func (s *FileStateStore) ensureLoadedLocked() {
 	s.loaded = true
 	data, err := os.ReadFile(s.Path)
 	if err != nil {
-		// Missing file is the empty-state case, not an error.
 		s.entries = map[string]time.Time{}
 		return
 	}
 
-	// Try v1 envelope first. If it parses with a non-empty Entries
-	// (or with version >= 1), it's a v1 file.
 	var v1 stateFile
 	if err := json.Unmarshal(data, &v1); err == nil && (v1.Version >= 1 || v1.Entries != nil) {
-		// Future-version file: warn but try our best to load. A
-		// reader from the future may have added fields per-entry;
-		// we only know how to read time.Time values.
 		if v1.Version > stateSchemaVersion {
-			// Tainted: writing back would lose the future fields.
 			s.tainted = fmt.Errorf("state file is version %d, this engine knows version %d", v1.Version, stateSchemaVersion)
 		}
 		if v1.Entries == nil {
@@ -179,11 +156,8 @@ func (s *FileStateStore) ensureLoadedLocked() {
 		return
 	}
 
-	// Legacy bare-map shape (pre-v1). Migrate in memory.
 	var legacy map[string]time.Time
 	if err := json.Unmarshal(data, &legacy); err != nil {
-		// File exists but parses as neither shape. Keep cache empty
-		// + mark tainted so the engine won't clobber it.
 		s.entries = map[string]time.Time{}
 		s.tainted = err
 		return
@@ -207,10 +181,6 @@ func (s *FileStateStore) IsTainted() error {
 	return s.tainted
 }
 
-// writeLocked atomically replaces the state file. Caller holds s.mu.
-// Always writes the v1 envelope shape, even when the loaded file
-// was legacy bare-map — first successful RecordFire upgrades the
-// on-disk format.
 func (s *FileStateStore) writeLocked(entries map[string]time.Time) error {
 	if err := os.MkdirAll(filepath.Dir(s.Path), 0o755); err != nil {
 		return fmt.Errorf("state dir: %w", err)
@@ -233,10 +203,6 @@ func (s *FileStateStore) writeLocked(entries map[string]time.Time) error {
 	return nil
 }
 
-// stateKey is the registry key for a (world, name) pair. The
-// "<world>/<name>" form mirrors the user-facing CLI form
-// (`spwn automation run brain/morning-brief`) so logs and on-disk
-// state match what users type.
 func stateKey(world, name string) string {
 	return world + "/" + name
 }

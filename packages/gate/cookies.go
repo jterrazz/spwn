@@ -24,9 +24,9 @@ import (
 // (see XCookieProvider in x.go for the pattern), and wired into the
 // CookieSync at startup in apps/gate/cmd/spwn-gate/main.go.
 type CookieProvider struct {
-	Name    string   `json:"name"`    // url-safe id, e.g. "x", "linkedin"
-	Domains []string `json:"domains"` // suffix-matched against tab hostnames
-	Cookies []string `json:"cookies"` // allowlisted cookie names
+	Name    string   `json:"name"`
+	Domains []string `json:"domains"`
+	Cookies []string `json:"cookies"`
 }
 
 // CookieSync owns the /sync/* endpoints — the receive-end of the
@@ -40,8 +40,8 @@ type CookieProvider struct {
 // per provider are persisted; anything else is dropped silently).
 type CookieSync struct {
 	mu        sync.RWMutex
-	providers map[string]CookieProvider // keyed by name
-	lastSync  map[string]time.Time      // provider name → most-recent successful sync
+	providers map[string]CookieProvider
+	lastSync  map[string]time.Time
 }
 
 // NewCookieSync returns an empty sync service. Register providers
@@ -72,8 +72,6 @@ func (cs *CookieSync) RegisterRoutes(mux *http.ServeMux) {
 
 func (cs *CookieSync) handleProviders(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Localhost-only binding makes CORS lax safe — the only origins
-	// that can reach this endpoint live on this machine.
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	_ = json.NewEncoder(w).Encode(cs.Providers())
 }
@@ -93,9 +91,6 @@ func (cs *CookieSync) handleStatus(w http.ResponseWriter, _ *http.Request) {
 		if t, ok := cs.lastSync[p.Name]; ok {
 			r.LastSync = t.UTC().Format(time.RFC3339)
 		}
-		// has_cookies is on-disk presence — survives gate restarts so
-		// the popup can still say "connected" even if in-memory
-		// lastSync is empty after a fresh start.
 		if _, err := os.Stat(CookieFile(p.Name)); err == nil {
 			r.HasCookies = true
 		}

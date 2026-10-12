@@ -20,10 +20,6 @@ const DefaultRefreshLeeway = 5 * time.Minute
 var (
 	httpClient = &http.Client{Timeout: 15 * time.Second}
 
-	// In-process serialization of refreshes. Without this, two
-	// concurrent gate requests racing on an expiring token can
-	// double-spend the refresh_token (Google rotates them on each
-	// refresh in some configurations).
 	refreshMu sync.Mutex
 )
 
@@ -53,8 +49,6 @@ func AccessToken(ctx context.Context) (string, error) {
 	refreshMu.Lock()
 	defer refreshMu.Unlock()
 
-	// Double-check after taking the lock — another goroutine may
-	// have refreshed while we waited.
 	t, _ = LoadTokens()
 	if t != nil && !t.Expired(DefaultRefreshLeeway) {
 		return t.AccessToken, nil
@@ -72,8 +66,6 @@ func AccessToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// Preserve the refresh_token across responses that don't return
-	// a new one (most Google refreshes don't).
 	if newT.RefreshToken == "" {
 		newT.RefreshToken = t.RefreshToken
 	}

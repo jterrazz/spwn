@@ -5,14 +5,7 @@ import (
 	"strings"
 )
 
-// Phrase helpers centralize natural-language event descriptions.
-// All phrases are authored here so the copy stays consistent.
-
-// extractName pulls the human-readable name out of a world ID.
-// Expects the canonical "world-{name}-{hex}" format; falls back to the
-// first non-prefix segment for any other shape.
 func extractName(id string) string {
-	// Canonical format: world-{name}-{hex}
 	if strings.HasPrefix(id, "world-") {
 		trimmed := strings.TrimPrefix(id, "world-")
 		if idx := strings.LastIndex(trimmed, "-"); idx > 0 {
@@ -22,7 +15,6 @@ func extractName(id string) string {
 			}
 		}
 	}
-	// Fallback: take the segment after the first hyphen.
 	parts := strings.Split(id, "-")
 	if len(parts) >= 2 {
 		n := parts[1]

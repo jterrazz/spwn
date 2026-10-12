@@ -42,7 +42,6 @@ func CollectSkills(tools []tool.Tool) (map[string][]byte, error) {
 		}
 	}
 
-	// Generate INDEX.md
 	if len(skillTools) > 0 {
 		result["/world/skills/INDEX.md"] = generateSkillIndex(skillTools)
 	}

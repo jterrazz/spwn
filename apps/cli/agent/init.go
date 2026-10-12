@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 
-	"spwn.sh/packages/project"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project"
 )
 
 var (
@@ -52,10 +52,6 @@ already exists.`,
 			name = platform.RandomAgentName()
 		}
 
-		// Reject empty / invalid names before touching disk. The
-		// same slug regex the manifest enforces for world names is
-		// applied here so we never leave a half-created agent
-		// directory that `spwn check` cannot reconcile.
 		if name == "" {
 			return fmt.Errorf("agent name is required")
 		}
@@ -63,9 +59,6 @@ already exists.`,
 			return fmt.Errorf("agent name %q is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most %d characters", name, project.MaxAgentNameLen)
 		}
 
-		// Reject names that would shadow `spwn agent <subcommand>`.
-		// Caught here, before InitMind writes anything to disk, so
-		// the user never sees a half-created agent directory.
 		if project.IsReservedAgentName(name) {
 			return fmt.Errorf("agent name %q is reserved (collides with `spwn agent %s`). Reserved names: %s",
 				name, name, strings.Join(project.ReservedAgentNames(), ", "))
@@ -76,9 +69,6 @@ already exists.`,
 		_, err := agent.InitMind(name)
 		if err != nil {
 			if initForce && strings.Contains(err.Error(), "already exists") {
-				// --force: re-scaffold any missing files over the
-				// existing Mind and proceed as if the create had
-				// succeeded.
 				if ferr := agent.RepairMind(name); ferr != nil {
 					return s.FailHint("Force re-scaffold failed", ferr,
 						"Check that the agent directory is writable")
@@ -99,9 +89,6 @@ already exists.`,
 		s.Done("Created agent", name)
 		s.Done("Created soul", "SOUL.md")
 
-		// Auto-world: when a spwn project is active, also add a
-		// single-agent world entry to spwn.yaml so the agent is
-		// immediately deployable via `spwn up` or `spwn agent <name>`.
 		if cwd, werr := os.Getwd(); werr == nil {
 			if p, perr := project.Find(cwd); perr == nil && p != nil {
 				if addErr := project.AddAgentToManifest(p.ManifestPath, name); addErr != nil {
@@ -112,7 +99,6 @@ already exists.`,
 			}
 		}
 
-		// Assign team if provided
 		if initTeam != "" {
 			if err := project.SetAgentTeam(name, initTeam); err != nil {
 				s.Warn("Warning", fmt.Sprintf("could not set team: %v", err))

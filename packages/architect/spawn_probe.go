@@ -8,15 +8,6 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// probeTools runs each resolved tool's Verify() commands inside
-// the container. The catalog is the single source of truth — this
-// used to fall back to a static list of binaries which drifted as
-// new tools were added.
-//
-// Build one shell script; on any failure the block emits
-// "FAIL <tool> :: <cmd>" and exits 1. On success the block emits
-// "OK <tool>". The final exit 0 is only reached when every tool
-// passed.
 func (a *Architect) probeTools(ctx context.Context, containerID string, tools []tool.Tool) ([]string, error) {
 	if len(tools) == 0 {
 		return nil, nil

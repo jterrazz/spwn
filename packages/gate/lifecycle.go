@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-// Container/image identity. Stable across upgrades so docker
-// recognises restarts vs new installs.
 const (
 	ImageName     = "spwn-gate:latest"
 	ContainerName = "spwn-gate"
@@ -49,9 +47,6 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 	}
 
 	if forceRebuild {
-		// Stop+rm so the new image takes effect, then drop the image
-		// so build runs unconditionally. Errors are non-fatal: missing
-		// container/image is the success state we're heading toward.
 		_ = Stop(ctx)
 		_ = removeImage(ctx)
 	}
@@ -62,7 +57,6 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 		return nil
 	}
 
-	// Container exists but stopped → start it.
 	if exists, err := containerExists(ctx); err != nil {
 		return fmt.Errorf("check container: %w", err)
 	} else if exists {
@@ -73,7 +67,6 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 		return nil
 	}
 
-	// Container doesn't exist. Ensure image, then run.
 	if has, err := imageExists(ctx); err != nil {
 		return fmt.Errorf("check image: %w", err)
 	} else if !has {
@@ -139,8 +132,6 @@ func LogsCmd(ctx context.Context, follow bool, tail int) *exec.Cmd {
 	return exec.CommandContext(ctx, "docker", args...)
 }
 
-// --- internals ---
-
 func runContainer(ctx context.Context) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -157,27 +148,11 @@ func runContainer(ctx context.Context) error {
 		"--name", ContainerName,
 		"--restart", "unless-stopped",
 		"-p", "127.0.0.1:" + HostPort + ":" + HostPort,
-		// Gate is the credential BROKER — owns the tokens, refreshes
-		// them on its own schedule, and rotates them in-place via
-		// atomic-replace (write tmp + rename). Worlds get the same
-		// path as :ro; only the gate gets rw.
 		"-v", credsDir + ":/credentials",
 		"-v", gateDir + ":/gate",
-		// Match the in-container default cred path; the gate reads
-		// `mcp.ProviderTokenPath` which expands to /credentials/mcp/...
 		"-e", "SPWN_HOME=/",
 	}
 
-	// Orchestration broker mounts. Optional — if any of these aren't
-	// resolvable, the gate still starts (cookie sync + element
-	// brokering work without them); the spwn:dispatch tool inside
-	// just fails fast with a clear error when invoked.
-	//
-	// Three things a dispatch tool needs to call `spwn agent talk`:
-	//   1. The spwn binary on PATH (linux ELF, cross-compiled on host)
-	//   2. /var/run/docker.sock so spwn can `docker exec` into worlds
-	//   3. ~/.spwn/state.json + activity.jsonl so spwn finds the live
-	//      world IDs bound to the project on the host
 	if spwnBin, ok := resolveLinuxSpwnBinary(); ok {
 		args = append(args,
 			"-v", spwnBin+":/usr/local/bin/spwn:ro",
@@ -187,31 +162,12 @@ func runContainer(ctx context.Context) error {
 		args = append(args,
 			"-v", sockPath+":/var/run/docker.sock",
 			"--group-add", gid,
-			// OrbStack + Docker Desktop both expose the bind-mounted
-			// socket as root-owned inside the container regardless of
-			// the host file's GID. Add group 0 (root) so the gate's
-			// non-root spwn user can read the socket. On a true Linux
-			// host this is a no-op; on macOS it's the only thing that
-			// makes `docker ps` work from inside the gate.
 			"--group-add", "0",
 		)
 	}
-	// Mount host ~/.spwn into the gate user's home so spwn-the-binary
-	// finds its state. The gate runs as user `spwn` (see Dockerfile)
-	// whose home is /home/spwn — that's where spwn looks for ~/.spwn.
 	args = append(args,
 		"-v", spwnHome+":/home/spwn/.spwn",
 	)
-	// Mirror-mount the user's home directory at the same path inside
-	// the gate (read-only). The spwn:dispatch tool needs to chdir to
-	// a project workspace before invoking `spwn agent talk`, and it
-	// reads the workspace host path from the target world container's
-	// labels (sh.spwn.world.workspaces). Mirroring the path keeps the
-	// label data directly usable — no host→container translation.
-	//
-	// Trust note: the gate is already a privileged broker (owns OAuth
-	// tokens, talks to Docker daemon). Read-only access to the user's
-	// home extends nothing meaningful in the threat model.
 	args = append(args,
 		"-v", home+":"+home+":ro",
 	)
@@ -220,20 +176,6 @@ func runContainer(ctx context.Context) error {
 	return dockerCmd(ctx, args...)
 }
 
-// resolveLinuxSpwnBinary returns the absolute host path of a Linux
-// spwn binary suitable for bind-mounting into the gate. The gate
-// container is linux/<host-arch>; the host's macOS Mach-O binary
-// would yield "Exec format error" inside the container.
-//
-// Order of resolution:
-//  1. SPWN_BINARY env var — must point to a Linux ELF (test seam).
-//  2. Cached cross-compile at ~/.spwn/cache/spwn-linux. If missing
-//     OR older than 24h, rebuild via the same go-build path the
-//     gate-binary build uses. Falls back to stale cache on rebuild
-//     failure (a stale binary beats no binary).
-//
-// Returns ok=false on any unrecoverable failure. The gate still
-// starts; only the spwn:dispatch tool inside loses functionality.
 func resolveLinuxSpwnBinary() (string, bool) {
 	if env := os.Getenv("SPWN_BINARY"); env != "" {
 		if st, err := os.Stat(env); err == nil && !st.IsDir() {
@@ -259,8 +201,6 @@ func resolveLinuxSpwnBinary() (string, bool) {
 	}
 	root, err := findSourceRoot()
 	if err != nil {
-		// Fall back to stale cache if we can't locate the source tree
-		// (binary distribution case — no source on disk).
 		if st, err2 := os.Stat(cached); err2 == nil && !st.IsDir() {
 			return cached, true
 		}
@@ -286,7 +226,6 @@ func resolveLinuxSpwnBinary() (string, bool) {
 		"CGO_ENABLED=0",
 	)
 	if err := build.Run(); err != nil {
-		// Fall back to stale cache.
 		if st, err2 := os.Stat(cached); err2 == nil && !st.IsDir() {
 			return cached, true
 		}
@@ -299,18 +238,6 @@ func resolveLinuxSpwnBinary() (string, bool) {
 	return cached, true
 }
 
-// resolveDockerSocket finds the host docker.sock path and the GID
-// it's owned by. The gate's `spwn` user needs that GID added via
-// --group-add to actually read the bind-mounted socket.
-//
-// macOS rabbit hole: /var/run/docker.sock is typically a symlink to
-// the actual socket which lives under the user's ~/.docker (Docker
-// Desktop), ~/.orbstack (OrbStack), or ~/.colima (Colima). We try
-// DOCKER_HOST first (authoritative), then the well-known symlinks,
-// then the runtime-specific direct paths.
-//
-// Returns the path to bind-mount + the GID as a string. ok=false if
-// no socket found or GID couldn't be resolved.
 func resolveDockerSocket() (string, string, bool) {
 	candidates := []string{}
 	if h := os.Getenv("DOCKER_HOST"); strings.HasPrefix(h, "unix://") {
@@ -341,10 +268,6 @@ func resolveDockerSocket() (string, string, bool) {
 }
 
 func isRunning(ctx context.Context) (bool, error) {
-	// `docker container inspect` (vs the bare `docker inspect`) is
-	// scoped to containers only — without `container`, docker matches
-	// images by the same name first, which yields a false positive
-	// because the image and container share the `spwn-gate` name.
 	out, err := exec.CommandContext(ctx, "docker", "container", "inspect", "-f", "{{.State.Running}}", ContainerName).Output()
 	if err != nil {
 		return false, nil
@@ -380,11 +303,6 @@ func buildImage(ctx context.Context, w io.Writer) error {
 		return err
 	}
 
-	// Cross-compile the gate binary for linux/<host-arch> (Docker
-	// Desktop runs containers matching the host arch on macOS).
-	// Building inside Docker fails because go.work references every
-	// module in the workspace, which a docker build context can't
-	// see piecewise — the architect image solves this the same way.
 	tmpBin, err := os.CreateTemp("", "spwn-gate-linux-*")
 	if err != nil {
 		return fmt.Errorf("create temp binary: %w", err)
@@ -409,8 +327,6 @@ func buildImage(ctx context.Context, w io.Writer) error {
 		return fmt.Errorf("cross-compile spwn-gate: %w", err)
 	}
 
-	// Stage the binary into a temp build context next to a copy of
-	// the Dockerfile so docker build sees just `./spwn-gate` + Dockerfile.
 	stage, err := os.MkdirTemp("", "spwn-gate-build-*")
 	if err != nil {
 		return err
@@ -423,14 +339,9 @@ func buildImage(ctx context.Context, w io.Writer) error {
 	if err := copyFile(filepath.Join(root, "apps", "gate", "Dockerfile"), filepath.Join(stage, "Dockerfile")); err != nil {
 		return fmt.Errorf("stage Dockerfile: %w", err)
 	}
-	// gate-browser is the Playwright sidecar — a Node HTTP service
-	// that catalog tools call to drive a cookie-loaded Chromium.
-	// Stage the whole dir.
 	if err := stageMember(filepath.Join(root, "apps", "gate", "browser"), filepath.Join(stage, "browser")); err != nil {
 		return fmt.Errorf("stage browser sidecar: %w", err)
 	}
-	// @spwn/gate-tool SDK — required by every catalog tool. Baked
-	// into /usr/lib/node_modules/@spwn/gate-tool/ inside the image.
 	if err := stageMember(filepath.Join(root, "apps", "gate", "sdk"), filepath.Join(stage, "sdk")); err != nil {
 		return fmt.Errorf("stage @spwn/gate-tool SDK: %w", err)
 	}
@@ -453,9 +364,6 @@ func copyFile(src, dst string) error {
 	return os.WriteFile(dst, in, 0o755)
 }
 
-// stageMember copies what the image runs of a Node workspace member — its
-// package.json and its src/ tree, the module tests under __tests__/ left out —
-// so a member's node_modules (pnpm's symlinks) never enters the build context.
 func stageMember(src, dst string) error {
 	if err := os.MkdirAll(dst, 0o755); err != nil {
 		return err
@@ -492,10 +400,6 @@ func dockerCmd(ctx context.Context, args ...string) error {
 	return nil
 }
 
-// findSourceRoot locates the spwn workspace (contains go.work and
-// apps/gate/Dockerfile). Mirrors the equivalent in
-// packages/architect/build.go — kept inline because architect is in
-// a sibling layer, importing it would create a cross-module dep.
 func findSourceRoot() (string, error) {
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		for _, s := range bi.Settings {

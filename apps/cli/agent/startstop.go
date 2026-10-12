@@ -8,22 +8,6 @@ import (
 	"spwn.sh/apps/cli/cliproject"
 )
 
-// startCmd and stopCmd are reserved for a future world where agents
-// run as autonomous daemons - they have their own loop, react to
-// events without a human trigger, and have a meaningful "started" vs
-// "stopped" state. Today that's not how spwn works: an agent is a
-// tool you pick up, not a service you boot. Every invocation is
-// user-initiated (`spwn agent <name>`), and between invocations the
-// container is just an idle sandbox.
-//
-// Rather than pretending otherwise, these commands are registered but
-// return a friendly "not yet" error so the command space is reserved
-// and users who reach for them get a clear explanation.
-
-// Hidden: true keeps both stubs invokable (they still return a
-// friendly exit-2 "not yet implemented" when someone runs them
-// programmatically) but strips them from `spwn agent --help`. Flip
-// Hidden to false the day the daemon loop lands.
 var startCmd = &cobra.Command{
 	Use:    "start <name>",
 	Short:  "Start an agent as a background daemon [planned]",
@@ -67,9 +51,6 @@ func notYetImplemented(verb, name string) error {
 	)
 }
 
-// findWorldForAgent locates the first spwn.yaml world entry that
-// references the named agent. Returns a descriptive error when no
-// project is active or the agent is absent from every world.
 func findWorldForAgent(agentName string) (string, error) {
 	p, err := cliproject.Require()
 	if err != nil {

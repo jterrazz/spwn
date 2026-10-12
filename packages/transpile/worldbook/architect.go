@@ -1,9 +1,5 @@
 package worldbook
 
-// Architect-specific system files written into the architect container at build time.
-// These are the files from platform/system/architect/ that the Dockerfile.architect
-// previously COPYd from the build context.
-
 // ArchitectIdentity is the ARCHITECT.md identity file placed at /me/ARCHITECT.md.
 const ArchitectIdentity = `# Architect
 
@@ -180,15 +176,12 @@ spwn world knowledge <id>         # View world knowledge
 // in Dockerfile.architect).
 func ArchitectSystemFiles() map[string]string {
 	files := map[string]string{
-		// Architect identity
 		"system/architect/ARCHITECT.md": ArchitectIdentity,
 
-		// Architect-specific skills
 		"system/architect/skills/fleet-ops.md":     ArchitectSkillFleetOps,
 		"system/architect/skills/task-planning.md": ArchitectSkillTaskPlanning,
 		"system/architect/skills/monitoring.md":    ArchitectSkillMonitoring,
 
-		// Default stack
 		"system/architect/stack.md": "# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n",
 	}
 	return files

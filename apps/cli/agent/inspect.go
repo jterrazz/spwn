@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/platform"
 )
 
 func init() {
@@ -34,7 +34,6 @@ var inspectCmd = &cobra.Command{
 		s.Info("Agent:", info.Name)
 		s.Info("Path:", info.Path)
 
-		// Show world association
 		agentMap := buildAgentWorldMap()
 		if wInfo, ok := agentMap[name]; ok {
 			s.Info("World:", wInfo.WorldID)
@@ -45,13 +44,11 @@ var inspectCmd = &cobra.Command{
 
 		s.Blank()
 
-		// Mind layers with file sizes
 		for _, layer := range platform.MindLayers {
 			files := info.Layers[layer]
 			if len(files) == 0 {
 				s.Info(layer+"/", "(empty)")
 			} else {
-				// Show file names and sizes
 				details := make([]string, 0, len(files))
 				for _, f := range files {
 					fpath := filepath.Join(info.Path, layer, f)
@@ -73,14 +70,6 @@ var inspectCmd = &cobra.Command{
 			}
 		}
 
-		// The legacy "Sessions:" block used to list the same files as
-		// the journal layer (sessions were stored there). That made
-		// `agent inspect` render the same tree twice and confused
-		// users about whether two sources existed (Finding #18). The
-		// journal layer above is the single source of truth; suppress
-		// the duplicate block entirely.
-
-		// Show recent journal entries
 		entries, err := agent.ListJournal(info.Path, 5)
 		if err == nil && len(entries) > 0 {
 			s.Blank()
@@ -97,7 +86,6 @@ var inspectCmd = &cobra.Command{
 	},
 }
 
-// formatSize formats a byte count into a human-readable string.
 func formatSize(bytes int64) string {
 	switch {
 	case bytes < 1024:

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"spwn.sh/packages/architect"
-	"spwn.sh/packages/agent"
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/agent"
+	"spwn.sh/packages/architect"
 )
 
 func init() {
@@ -61,13 +61,6 @@ var inspectCmd = &cobra.Command{
 					s.Info("  "+ws.Name+":", ws.Path+" → /workspaces/"+ws.Name+ro)
 				}
 			}
-			// Agent homes are visible at /agents/<name>; per-world data
-			// (inbox, notes) at /agents/<name>/worlds/<world-id>/.
-			// AgentDir resolves against the project tree when running
-			// inside a project, and ~/.spwn/agents/ otherwise. Prefer
-			// u.Agents (multi-agent list) when present, otherwise fall
-			// back to the primary u.Agent — never print both for the
-			// same agent or the line appears twice.
 			switch {
 			case len(u.Agents) > 0:
 				s.Info("Agent homes:", "")

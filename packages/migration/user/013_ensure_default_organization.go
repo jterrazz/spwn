@@ -20,7 +20,7 @@ var EnsureDefaultOrganization = migration.Migration{
 		path := filepath.Join(dir, "default.yaml")
 
 		if _, err := os.Stat(path); err == nil {
-			return nil // already exists
+			return nil
 		}
 
 		if err := os.MkdirAll(dir, 0755); err != nil {

@@ -15,8 +15,6 @@ import (
 	"spwn.sh/packages/world"
 )
 
-// --- SpawnBuilder ---
-
 // SpawnBuilder configures and executes a world spawn.
 type SpawnBuilder struct {
 	tc         *TestContext
@@ -26,7 +24,7 @@ type SpawnBuilder struct {
 	yamlConfig string
 	noAgent    bool
 	detach     bool
-	runAgent   bool // run agent to completion (blocking, writes journal)
+	runAgent   bool
 }
 
 // Spawn creates a SpawnBuilder from a TestContext.
@@ -51,7 +49,6 @@ func (b *SpawnBuilder) WithConfigYAML(yamlContent string) *SpawnBuilder {
 
 func (b *SpawnBuilder) WithAgent(name string) *SpawnBuilder {
 	b.agentName = name
-	// Auto-init agent if it doesn't exist
 	agentDir := filepath.Join(b.tc.BaseDir, "agents", name)
 	if _, err := os.Stat(agentDir); os.IsNotExist(err) {
 		b.tc.InitAgent(name)
@@ -124,14 +121,10 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 	u := result.World
 	b.tc.TrackWorld(u.ID)
 
-	// Run agent if requested
 	if !b.noAgent && b.agentName != "" {
 		if b.runAgent {
-			// Blocking: runs agent to completion, writes session + journal
 			err := b.tc.Arc.SpawnAgent(context.Background(), u.ID, b.agentName)
 			if err != nil {
-				// Non-fatal: mock may exit with code 0, which is fine
-				// Only fatal if it's a real error (not exit code)
 				b.tc.T.Logf("SpawnAgent returned: %v", err)
 			}
 		} else if b.detach {
@@ -139,7 +132,6 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 			if err != nil {
 				b.tc.T.Fatalf("SpawnAgentDetached failed: %v", err)
 			}
-			// Wait for the mock to write its output
 			WaitFor(b.tc.T, 5*time.Second, 100*time.Millisecond, "mock to write output", func() bool {
 				return b.tc.TryReadMockOutput(u.ContainerID) != nil
 			})
@@ -188,7 +180,6 @@ func (b *SpawnBuilder) buildManifest() world.Manifest {
 		return b.parseInlineYAML()
 	}
 
-	// Ensure config exists on disk (idempotent - no-ops if already present)
 	configPath := filepath.Join(b.tc.BaseDir, "worlds", b.configName+".yaml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if b.configName == "default" {
@@ -209,7 +200,6 @@ func (b *SpawnBuilder) buildManifest() world.Manifest {
 func (b *SpawnBuilder) parseInlineYAML() world.Manifest {
 	b.tc.T.Helper()
 
-	// Strip leading tabs from inline YAML (Go source uses tabs for indentation)
 	cleaned := dedentYAML(b.yamlConfig)
 
 	tmpPath := filepath.Join(b.tc.BaseDir, "worlds", "_inline.yaml")
@@ -226,11 +216,9 @@ func (b *SpawnBuilder) parseInlineYAML() world.Manifest {
 	return m
 }
 
-// dedentYAML removes common leading whitespace (tabs or spaces) from each line.
 func dedentYAML(s string) string {
 	lines := strings.Split(s, "\n")
 
-	// Find minimum indentation (ignoring empty lines)
 	minIndent := -1
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -263,8 +251,6 @@ func dedentYAML(s string) string {
 	}
 	return strings.Join(result, "\n")
 }
-
-// --- AgentBuilder ---
 
 // AgentBuilder configures and executes agent operations.
 type AgentBuilder struct {

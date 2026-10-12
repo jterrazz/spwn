@@ -27,7 +27,6 @@ type Status = models.Status
 // reach into models/ directly.
 type DepPolicy = models.DepPolicy
 
-// Re-export status constants.
 const (
 	StatusCreating  = models.StatusCreating
 	StatusRunning   = models.StatusRunning
@@ -42,20 +41,17 @@ type AgentRecord = models.AgentRecord
 type Backend = backend.Backend
 type ImageInfo = backend.ImageInfo
 type ContainerInfo = backend.ContainerInfo
+
 // Store is the world-facing store: enumerates worlds from Docker
 // labels and persists per-world mutable data (session ids, deployed
 // agents, editable display name) under ~/.spwn/world-states/.
 type Store = runtimestate.Store
-
-// --- Backend constructors ---
 
 // NewDocker returns a Docker-based container backend initialised from the
 // host's Docker daemon environment (DOCKER_HOST, etc.).
 func NewDocker() (*backend.Docker, error) {
 	return backend.NewDocker()
 }
-
-// --- Store constructors ---
 
 // NewStore returns a production Store wired to the host Docker
 // daemon and the user's world-state directory.
@@ -70,8 +66,6 @@ func NewStore() (*Store, error) {
 func NewStoreAt(dir string) (*Store, error) {
 	return runtimestate.NewStoreAt(dir)
 }
-
-// --- Manifest operations ---
 
 // LoadManifest reads and parses the world config named {name} from
 // ~/.spwn/worlds/{name}.yaml.
@@ -120,8 +114,6 @@ func LoadAgentManifest(agentDir string) (*agent.Manifest, error) {
 	return agent.LoadManifestPath(agentDir)
 }
 
-// workspaceNameRe mirrors the slug rule enforced by validate.ruleWorkspaceMounts.
-// Kept inline here to avoid pulling packages/project into the world layer.
 var workspaceNameRe = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
 
 // AutoWorkspaceName derives a workspace name from a host path when the
@@ -143,4 +135,3 @@ func AutoWorkspaceName(path string, index int) string {
 	}
 	return fmt.Sprintf("workspace%d", index)
 }
-

@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/project"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/architect"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -26,10 +26,9 @@ func init() {
 	Cmd.AddCommand(listCmd)
 }
 
-// agentListReport is the CLI-owned JSON schema for `spwn agent ls`.
 type agentListReport struct {
-	Mode   string          `json:"mode"`
-	Agents []agentListRow  `json:"agents"`
+	Mode   string         `json:"mode"`
+	Agents []agentListRow `json:"agents"`
 }
 
 type agentListRow struct {
@@ -50,7 +49,6 @@ func emitAgentListJSON(cmd *cobra.Command, report agentListReport) error {
 	return nil
 }
 
-// agentWorldInfo holds cross-referenced world data for an agent.
 type agentWorldInfo struct {
 	WorldID string
 	Status  string
@@ -66,9 +64,6 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"list"},
 	Short:   "List all agents on this Host",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Project-aware mode: three-column AGENT | STATUS | WORLD
-		// view driven by spwn.yaml + live runtime state. Falls back
-		// to the legacy global view when no project is present.
 		if cwd, werr := os.Getwd(); werr == nil {
 			if p, perr := project.Find(cwd); perr == nil && p != nil {
 				return renderSmartAgentList(cmd, p)
@@ -80,10 +75,8 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("cannot list agents: %w", err)
 		}
 
-		// Build agent -> world mapping from state
 		agentMap := buildAgentWorldMap()
 
-		// Filter by world if requested
 		if listFilterWorld != "" {
 			filtered := make([]agent.Info, 0)
 			for _, a := range agents {
@@ -121,9 +114,6 @@ var listCmd = &cobra.Command{
 			return emitAgentListJSON(cmd, agentListReport{Mode: "global", Agents: rows})
 		}
 
-		// Unified schema: AGENT | STATUS | WORLD. Matches the
-		// project-mode renderer so the header row stays stable no
-		// matter where the user runs `spwn agent ls`. See finding #24.
 		t := ui.NewTable("AGENT", "STATUS", "WORLD")
 		for _, a := range agents {
 			worldID := "\u2014"
@@ -142,14 +132,7 @@ var listCmd = &cobra.Command{
 	},
 }
 
-// renderSmartAgentList renders the project-aware AGENT | STATUS |
-// WORLD view. Status values:
-//
-//	"● running (<dur>)"      — the agent's world is currently up
-//	"○ deployed, stopped"    — declared in spwn.yaml but not running
-//	"─ orphan"               — on-disk agent not referenced by any world
 func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
-	// Build declared-agent → world map from the manifest.
 	declared := map[string]string{}
 	if p.Manifest != nil {
 		for wname, wdef := range p.Manifest.Worlds {
@@ -159,9 +142,6 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 		}
 	}
 
-	// Gather on-disk agents (deployable + orphan) into a single set,
-	// so the view lines up with `spwn/agents/` regardless of whether
-	// spwn.yaml references them.
 	allAgents := map[string]bool{}
 	for _, a := range p.Agents {
 		allAgents[a.Name] = true
@@ -170,14 +150,9 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 		allAgents[a.Name] = true
 	}
 	for a := range declared {
-		// Agents declared in spwn.yaml but missing on disk still
-		// surface in the list (as orphan/stopped depending on the
-		// rest of the rules below).
 		allAgents[a] = true
 	}
 
-	// Live world → duration lookup. We match a live world to a
-	// declared world by config name (set by world spawn).
 	running := map[string]time.Duration{}
 	if arc, aerr := architect.NewFromEnv(); aerr == nil {
 		ctx := context.Background()
@@ -206,7 +181,6 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 		return nil
 	}
 
-	// Stable order: alpha by name. Matches the table order.
 	names := make([]string, 0, len(allAgents))
 	for name := range allAgents {
 		names = append(names, name)
@@ -254,8 +228,6 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 	return nil
 }
 
-// shortDur formats a duration like "3m", "2h17m", "1d" - good enough
-// for a status column without pulling in a humanization library.
 func shortDur(d time.Duration) string {
 	switch {
 	case d < time.Minute:
@@ -274,8 +246,6 @@ func shortDur(d time.Duration) string {
 	}
 }
 
-// sortStrings is a tiny in-place sort - avoids pulling in "sort" at
-// the top of this file's imports which are already getting crowded.
 func sortStrings(s []string) {
 	for i := 1; i < len(s); i++ {
 		for j := i; j > 0 && s[j-1] > s[j]; j-- {
@@ -284,9 +254,6 @@ func sortStrings(s []string) {
 	}
 }
 
-// buildAgentWorldMap lists every live world (Docker labels, hydrated
-// from runtimestate) and returns a map of agent name → the world it
-// is currently attached to.
 func buildAgentWorldMap() map[string]agentWorldInfo {
 	result := make(map[string]agentWorldInfo)
 
@@ -306,7 +273,6 @@ func buildAgentWorldMap() map[string]agentWorldInfo {
 			continue
 		}
 
-		// Check primary agent
 		if u.Agent != "" {
 			result[u.Agent] = agentWorldInfo{
 				WorldID: u.ID,
@@ -314,7 +280,6 @@ func buildAgentWorldMap() map[string]agentWorldInfo {
 			}
 		}
 
-		// Check multi-agent records
 		for _, a := range u.Agents {
 			result[a.Name] = agentWorldInfo{
 				WorldID: u.ID,

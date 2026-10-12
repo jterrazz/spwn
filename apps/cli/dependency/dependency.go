@@ -33,9 +33,6 @@ import (
 	"spwn.sh/packages/project"
 )
 
-// installCmd and uninstallCmd are retained so the dependency_test
-// suite can drive the install/uninstall flow directly without going
-// through the top-level root command.
 var installAgentFilter string
 
 var installCmd = &cobra.Command{
@@ -79,10 +76,6 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 		return err
 	}
 
-	// Run the raw input through the shared CLI resolver so bare names
-	// auto-promote to spwn:<name> ("spwn install qmd" → "spwn install
-	// spwn:qmd"). Explicit schemes pass through unchanged. Manifests
-	// always receive the canonical scheme-form.
 	resolved, rerr := refs.ResolveCLI(raw, knownCatalogNames())
 	if rerr != nil {
 		return rerr
@@ -92,19 +85,10 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	parsed := refs.ParseRef(ref)
 	switch parsed.Kind {
 	case refs.KindLocalSkill, refs.KindLocalTool, refs.KindLocalHook, refs.KindLocalCommand:
-		// Local refs ARE installable (they attach the in-repo block
-		// To an agent's manifest), but only when a specific agent is
-		// Named — bolting a local skill onto every agent in the
-		// Project is almost never what the user wants. Without
-		// --agent, point them at the flag.
 		if agentFilter == "" {
 			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
 				ref, parsed.Name, parsed.Name, parsed.Name, parsed.Name)
 		}
-		// Validate the target file/dir actually exists. Installing a
-		// ref to a missing local block lets the user accumulate broken
-		// state quietly (the failure only surfaces at `spwn up` time).
-		// Catch it at install time with an actionable hint.
 		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
 			switch parsed.Kind {
 			case refs.KindLocalSkill:
@@ -131,9 +115,6 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 			raw)
 	}
 
-	// Catalog-existence check applies only to spwn:<name> refs; local
-	// Schemes are authored in-repo so the catalog lookup doesn't gate
-	// Them.
 	if parsed.Kind == refs.KindSpwnBuiltin && !catalogHas(ref) {
 		return fmt.Errorf("unknown builtin %q — see the catalog for available dependencies", ref)
 	}
@@ -167,12 +148,6 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	fmt.Fprintf(out, "     %d agent%s updated, %s pinned\n",
 		mutated, plural(mutated), dependency.LockFileName)
 
-	// Catalog tools that declare a gate: section in their tool.yaml
-	// (cookies / mcp.entry) need to land under ~/.spwn/gate/tools/
-	// for the gate daemon to pick them up. Do this transparently as
-	// part of `spwn install` so users don't have to copy files by
-	// hand. Lockfile + agent.yaml are already updated; this is purely
-	// the "make the gate aware" half.
 	if parsed.Kind == refs.KindSpwnBuiltin {
 		gateToolsRoot, err := platform.GateToolsDir()
 		if err == nil {
@@ -200,10 +175,6 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 		return err
 	}
 
-	// Symmetry with install: run the input through the CLI resolver
-	// so `spwn uninstall python` finds `spwn:python` in the manifest
-	// just like `spwn install python` would have written it there.
-	// Explicit schemes pass through unchanged.
 	resolved, rerr := refs.ResolveCLI(raw, knownCatalogNames())
 	if rerr != nil {
 		return rerr
@@ -217,9 +188,6 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 	if parsed.Kind == refs.KindInvalid {
 		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill/<name>, tool/<name>, hook/<name>, or command/<name>", raw)
 	}
-	// Local refs are authorable in-repo but also attachable via
-	// `install skill/foo --agent mark` — so uninstall accepts them
-	// Symmetrically. The underlying file is left alone.
 
 	targets, terr := filterAgents(p.Agents, agentFilter)
 	if terr != nil {
@@ -237,10 +205,6 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 	if err != nil {
 		return err
 	}
-	// Only drop the lockfile entry when no agent still carries the
-	// Ref. This matters for scoped uninstalls: `uninstall python
-	// --agent mark` shouldn't nuke python's lockfile pin if dylan
-	// Still depends on it.
 	if !anyAgentCarriesRef(p.Agents, ref) {
 		lock.Remove(ref)
 	}
@@ -254,11 +218,6 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 	return nil
 }
 
-// filterAgents narrows the project's agent list to the set targeted
-// by an install/uninstall run. An empty filter returns every agent
-// that exists on disk; a non-empty filter returns exactly the named
-// agent or errors with a list of valid names so the user can
-// correct a typo.
 func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, error) {
 	available := make([]project.AgentRef, 0, len(all))
 	for _, a := range all {
@@ -284,9 +243,6 @@ func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, er
 	return nil, fmt.Errorf("agent %q is not in this project.\nknown: %s", filter, strings.Join(names, ", "))
 }
 
-// anyAgentCarriesRef reports whether any agent still carries the
-// given ref in its agent.yaml after a scoped uninstall. Used to
-// decide whether the lockfile pin should be dropped.
 func anyAgentCarriesRef(all []project.AgentRef, ref string) bool {
 	for _, a := range all {
 		if !a.Exists {
@@ -305,15 +261,10 @@ func anyAgentCarriesRef(all []project.AgentRef, ref string) bool {
 	return false
 }
 
-// findProject is an alias over cliproject.Require so the install
-// verbs stay concise. The canonical walker lives in apps/cli/cliproject.
 func findProject() (*project.Project, error) {
 	return cliproject.Require()
 }
 
-// catalogLookup checks whether `ref` is a known spwn:* dependency.
-// The catalog list is supplied by the parent CLI — this package
-// doesn't import spwn.sh/catalog to avoid a cycle.
 var (
 	catalogLookup func(ref string) bool
 	catalogNames  func() []string
@@ -330,7 +281,7 @@ func SetCatalogLookup(has func(ref string) bool, names func() []string) {
 
 func catalogHas(ref string) bool {
 	if catalogLookup == nil {
-		return true // permissive when no catalog wired — fallback for tests
+		return true
 	}
 	return catalogLookup(ref)
 }

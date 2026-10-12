@@ -19,14 +19,10 @@ func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(inspectCmd)
 
-	// Organizations are still a design sketch; hide the whole subtree
-	// until the surface stabilises. Name-invocation still works.
 	ui.HideExperimental(Cmd)
 	ui.HideExperimental(lsCmd)
 	ui.HideExperimental(inspectCmd)
 }
-
-// ── spwn organization ls ──
 
 var lsCmd = &cobra.Command{
 	Use:   "ls",
@@ -63,8 +59,6 @@ var lsCmd = &cobra.Command{
 		return nil
 	},
 }
-
-// ── spwn organization inspect ──
 
 var inspectCmd = &cobra.Command{
 	Use:   "inspect <slug>",

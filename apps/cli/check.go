@@ -10,9 +10,9 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/transpile/source"
-	"spwn.sh/packages/project"
 )
 
 func init() {
@@ -28,14 +28,11 @@ var (
 	checkDeep   bool
 )
 
-// checkReport is the CLI-owned JSON schema for `spwn check`. It's
-// intentionally decoupled from the internal validate.Issue type so the
-// JSON contract can evolve independently of the rule engine internals.
 type checkReport struct {
-	Valid        bool          `json:"valid"`
-	ManifestPath string        `json:"manifestPath"`
-	Summary      checkSummary  `json:"summary"`
-	Issues       []checkIssue  `json:"issues"`
+	Valid        bool         `json:"valid"`
+	ManifestPath string       `json:"manifestPath"`
+	Summary      checkSummary `json:"summary"`
+	Issues       []checkIssue `json:"issues"`
 }
 
 type checkSummary struct {
@@ -79,13 +76,6 @@ severity. Exits non-zero when errors are found (or warnings, with
 		if checkDeep {
 			compileIssues = runCompileDeepCheck(p.Root)
 		}
-		// Cross-check: an agent may declare a runtime the catalog
-		// recognises (e.g. `spwn:codex`) even when no compile
-		// adapter is registered for it. Without this warning,
-		// `spwn check` happily reports "valid" and the user only
-		// discovers the gap when `spwn build` fails with
-		// "unknown runtime". Surface it as a warning at every
-		// severity (not just --deep) so the inconsistency is loud.
 		compileIssues = append(compileIssues, crossCheckRuntimeAdapters(p.Root)...)
 
 		errors := filter(issues, project.LevelError)
@@ -172,20 +162,13 @@ func buildCheckReport(manifestPath string, errors, warnings, infos []project.Iss
 	}
 }
 
-// compileIssue is one finding produced by the --deep compile pass.
-// Kept parallel to project.Issue so the two can be merged in the
-// report without forcing a dependency from packages/compile onto the
-// project rule engine.
 type compileIssue struct {
-	Level   string // "error" | "warning"
+	Level   string
 	Path    string
 	Message string
 	Hint    string
 }
 
-// runCompileDeepCheck loads the project from disk and runs a compile
-// dry-run. Errors become "error" issues; suspicious render output
-// (agent with no files in the Tree) becomes "warning" issues.
 func runCompileDeepCheck(projectRoot string) []compileIssue {
 	src, err := source.Load(projectRoot)
 	if err != nil {
@@ -198,11 +181,6 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	}
 	input, err := source.ToCompileInput(src, "")
 	if err != nil {
-		// Multi-world projects (or manifests with no world at all)
-		// surface as a warning rather than an error — deep-check is
-		// best-effort, not a world selector. `check` has no --world
-		// flag of its own, so the hint points users at the compile
-		// command.
 		return []compileIssue{{
 			Level:   "warning",
 			Path:    "spwn.yaml#worlds",
@@ -212,11 +190,6 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	}
 	var issues []compileIssue
 
-	// Every agent in the selected world must have an AGENTS.md on
-	// disk — the manifest rule engine checks that spwn/agents/<name>/
-	// exists, but not that the entrypoint prompt is there. Missing
-	// AGENTS.md would silently render an empty CLAUDE.md, which is
-	// worse than a loud error, so the deep check promotes it.
 	byName := make(map[string]int, len(src.Agents))
 	for i, a := range src.Agents {
 		byName[a.Name] = i
@@ -245,9 +218,6 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 			Hint:    "runtime renderer rejected the project",
 		})
 	}
-	// Warn about any roster agent that produced no files in the
-	// Tree — usually means the agent directory is missing the
-	// entrypoint or the renderer silently dropped it.
 	for _, a := range input.Agents {
 		prefix := "agents/" + a.Name + "/"
 		found := false
@@ -269,11 +239,6 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	return issues
 }
 
-// crossCheckRuntimeAdapters inspects each agent.yaml's declared
-// runtime.backend and warns when the value is catalog-recognised but
-// has no compile adapter registered. This closes the gap where
-// `spwn check` says "valid" and `spwn build` then fails with
-// `unknown runtime`.
 func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 	src, err := source.Load(projectRoot)
 	if err != nil || src == nil {
@@ -289,9 +254,6 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 		if raw == "" {
 			continue
 		}
-		// Map catalog refs to their bare runtime id: both "spwn:codex"
-		// and "spwn:codex" need to strip down to "codex" for
-		// transpile.Register lookup (ResolveRuntime uses the same map).
 		canonical := raw
 		if strings.HasPrefix(raw, "spwn:") {
 			canonical = strings.TrimPrefix(raw, "spwn:")
@@ -345,9 +307,6 @@ func printCompileIssues(out interface{ Write([]byte) (int, error) }, ci []compil
 	if len(ci) == 0 {
 		return
 	}
-	// Header color reflects the max severity present: red when any
-	// issue is an error, yellow for warning-only batches. Previously
-	// always red — misleading for deep-check "skipped" warnings.
 	headerColor := ui.Yellow
 	if hasCompileErrors(ci) {
 		headerColor = ui.Red

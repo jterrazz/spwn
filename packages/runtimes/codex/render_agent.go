@@ -97,11 +97,6 @@ func GenerateAgentAgentsMD(in AgentAgentsMDInput) string {
 	return sb.String()
 }
 
-// conventionsSection mirrors claudecode's conventionsSection but
-// references codex-native paths and entry-file conventions. Kept
-// line-for-line parallel with the claude version so content authors
-// don't have to learn two sets of boilerplate; one edit in one place
-// keeps the story consistent.
 func conventionsSection(in AgentAgentsMDInput) string {
 	var sb strings.Builder
 	sb.WriteString("1. **Read your identity first** every session. It shapes your voice, values, and priorities.\n")
@@ -120,10 +115,6 @@ func conventionsSection(in AgentAgentsMDInput) string {
 	return sb.String()
 }
 
-// bytesTrim returns b with leading/trailing whitespace trimmed.
-// Used to treat a body of only whitespace as "effectively empty" so
-// we don't emit an empty "## Identity" heading when SOUL.md is a
-// blank file.
 func bytesTrim(b []byte) []byte {
 	s := strings.TrimSpace(string(b))
 	if s == "" {

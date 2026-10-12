@@ -38,15 +38,11 @@ func ResolveCLI(input string, catalog []string) (string, error) {
 	name, _ := SplitVersion(trimmed)
 	parsed := ParseRef(name)
 
-	// Explicit form: pass through unchanged. The caller still runs
-	// its own existence check (catalog miss / local file missing);
-	// ResolveCLI's job ends at grammar.
 	switch parsed.Kind {
 	case KindSpwnBuiltin, KindRegistry, KindLocalSkill, KindLocalTool, KindLocalHook, KindLocalCommand:
 		return trimmed, nil
 	}
 
-	// Bare name path: only accept the shape we want docs to show.
 	if isBareIdentifier(name) {
 		for _, entry := range catalog {
 			if entry == name {
@@ -56,14 +52,9 @@ func ResolveCLI(input string, catalog []string) (string, error) {
 		return "", fmt.Errorf("%q is not in the catalog.\n%s\n\nhint: pass skill/%s, tool/%s, hook/%s, or command/%s for a local block", input, formatKnown(catalog), name, name, name, name)
 	}
 
-	// Anything else: malformed under the grammar.
 	return "", fmt.Errorf("ref %q is malformed: pass spwn:<name>, skill/<name>, tool/<name>, hook/<name>, command/<name>, or github:<owner>/<repo>", input)
 }
 
-// isBareIdentifier reports whether s is a lowercase-kebab identifier
-// suitable for catalog lookup: [a-z0-9] then [a-z0-9-]*. Anything else
-// (uppercase, whitespace, path separators, colons) falls through to
-// the scheme grammar error.
 func isBareIdentifier(s string) bool {
 	if s == "" {
 		return false
@@ -83,9 +74,6 @@ func isBareIdentifier(s string) bool {
 	return true
 }
 
-// formatKnown renders the catalog list for the "known:" line of the
-// bare-name-miss error. Sorted for stable output, wrapped as a single
-// line so the error message stays scannable.
 func formatKnown(catalog []string) string {
 	if len(catalog) == 0 {
 		return "known: (catalog is empty)"

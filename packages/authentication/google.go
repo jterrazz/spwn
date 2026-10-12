@@ -8,9 +8,6 @@ import (
 	"time"
 )
 
-// detectGoogle enumerates every detected Google credential.
-//  1. env GOOGLE_API_KEY
-//  2. env GEMINI_API_KEY (alias)
 func detectGoogle() []*Credential {
 	var out []*Credential
 	if key := os.Getenv("GOOGLE_API_KEY"); key != "" {

@@ -47,10 +47,10 @@ func NewDocker() (*Docker, error) {
 // The user having to set DOCKER_HOST by hand.
 //
 // Discovery precedence (see probe.CheckDocker):
-//   1. SPWN_DOCKER_HOST  — explicit spwn escape hatch.
-//   2. DOCKER_HOST       — standard SDK env var.
-//   3. /var/run/docker.sock — system default.
-//   4. Per-user socket fallback list (every runtime we know about).
+//  1. SPWN_DOCKER_HOST  — explicit spwn escape hatch.
+//  2. DOCKER_HOST       — standard SDK env var.
+//  3. /var/run/docker.sock — system default.
+//  4. Per-user socket fallback list (every runtime we know about).
 //
 // The returned error is already humanized (which socket we tried last,
 // Which runtime it looks like, what the user can do) so CLI callers
@@ -145,9 +145,6 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 	}
 	defer resp.Close()
 
-	// Resolve output sinks: explicit ExecConfig writers (used by
-	// the automation dispatcher to capture output into a buffer)
-	// or process stdout/stderr by default.
 	stdout := io.Writer(os.Stdout)
 	if cfg.Stdout != nil {
 		stdout = cfg.Stdout
@@ -160,12 +157,8 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 	if cfg.TTY {
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err == nil {
-			// A terminal we cannot hand back is one the session is
-			// leaving anyway; the exit code below is what matters.
 			defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }()
 		}
-		// Both pumps end when the exec's connection does. Their errors
-		// are the disconnection itself, which the exit code reports.
 		go func() { _, _ = io.Copy(resp.Conn, os.Stdin) }()
 		_, _ = io.Copy(stdout, resp.Reader)
 	} else {
@@ -200,12 +193,9 @@ func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []strin
 	defer resp.Close()
 
 	var buf bytes.Buffer
-	// A demultiplexing failure leaves buf with what did arrive; the exit
-	// code inspected below decides whether that output is trusted.
 	_, _ = stdcopy.StdCopy(&buf, io.Discard, resp.Reader)
 	output := strings.TrimSpace(buf.String())
 
-	// Check exit code
 	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)
 	if err != nil {
 		return output, fmt.Errorf("exec inspect: %w", err)
@@ -261,8 +251,6 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
-	// Write a top-level directory entry for destDir so the extract
-	// side has an explicit mkdir.
 	rootHdr := &tar.Header{
 		Name:     strings.TrimPrefix(destDir, "/") + "/",
 		Mode:     0o755,
@@ -284,8 +272,6 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 		if rel == "." {
 			return nil
 		}
-		// Build the tar entry name relative to the tarball root (/)
-		// so it lands under destDir inside the container.
 		entryName := strings.TrimPrefix(destDir, "/") + "/" + filepath.ToSlash(rel)
 
 		if fi.IsDir() {
@@ -310,7 +296,7 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 			return tw.WriteHeader(hdr)
 		}
 		if !fi.Mode().IsRegular() {
-			return nil // skip devices, sockets, fifos
+			return nil
 		}
 		content, err := os.ReadFile(path)
 		if err != nil {
@@ -357,9 +343,6 @@ func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir str
 	}
 
 	tr := tar.NewReader(rc)
-	// Docker's tar stream includes the source directory itself as
-	// the top-level entry (e.g. "journal/"). We strip that first
-	// component so the contents land directly under hostDestDir.
 	srcBase := filepath.Base(srcDir)
 	for {
 		hdr, err := tr.Next()
@@ -381,7 +364,6 @@ func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir str
 			if err := os.MkdirAll(target, os.FileMode(hdr.Mode)&0o777); err != nil {
 				return fmt.Errorf("mkdir %s: %w", target, err)
 			}
-		// The reader normalises the old TypeRegA ('\x00') to TypeReg.
 		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return fmt.Errorf("mkdir parent of %s: %w", target, err)
@@ -447,7 +429,6 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		logw = io.Discard
 	}
 
-	// Check current version
 	currentVersion, err := d.ImageVersion(ctx, tag, "sh.spwn.image-version")
 	if err != nil {
 		return false, fmt.Errorf("check image version: %w", err)
@@ -457,16 +438,13 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		return false, nil
 	}
 
-	// Log what we're doing
 	if currentVersion == "" {
 		fmt.Fprintf(logw, "Building %s (v%s)...\n", tag, expectedVersion)
 	} else {
 		fmt.Fprintf(logw, "Rebuilding %s (v%s → v%s)...\n", tag, currentVersion, expectedVersion)
-		// Remove old image before rebuilding
 		_ = d.ImageRemove(ctx, tag)
 	}
 
-	// Create tar context containing the Dockerfile and any extra files
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 	hdr := &tar.Header{Name: "Dockerfile", Size: int64(len(dockerfile)), Mode: 0644}
@@ -477,11 +455,6 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		return false, fmt.Errorf("tar write: %w", err)
 	}
 
-	// Add extra context files (create parent directories first).
-	// Sort names for deterministic tar ordering - with map iteration
-	// order randomized, two builds of the same input would otherwise
-	// produce different tar bytes and the docker build layer cache
-	// would fragment.
 	names := make([]string, 0, len(extraFiles))
 	for name := range extraFiles {
 		names = append(names, name)
@@ -527,7 +500,6 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 	}
 	defer resp.Body.Close()
 
-	// Stream build output - Docker returns JSON lines with a "stream" field.
 	type buildMsg struct {
 		Stream string `json:"stream"`
 		Error  string `json:"error"`
@@ -656,7 +628,7 @@ func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) (
 	}
 
 	containers, err := d.client.ContainerList(ctx, containerTypes.ListOptions{
-		All:     true, // include stopped - a stopped world is still a world
+		All:     true,
 		Filters: args,
 	})
 	if err != nil {

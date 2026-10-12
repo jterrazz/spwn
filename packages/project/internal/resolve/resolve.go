@@ -17,9 +17,6 @@ import (
 	"strings"
 )
 
-// importRe matches `@path` references at word boundaries. It's
-// intentionally conservative: `@foo` is an import, `email@foo.com`
-// is not (the `@` follows an alphanumeric).
 var importRe = regexp.MustCompile(`(^|[^\w/])@([\w.\-/]+\.md)\b`)
 
 // Result is the outcome of a single Walk - every file visited, every
@@ -83,13 +80,11 @@ func Walk(root, startFile string) (*Result, error) {
 	}
 
 	r := &Result{Root: absRoot}
-	visiting := map[string]int{} // path → depth on the current path
+	visiting := map[string]int{}
 	visited := map[string]bool{}
 
 	var walk func(path string, stack []string)
 	walk = func(path string, stack []string) {
-		// Cycle check first: if the target is already on the
-		// current call stack, it's a back-edge.
 		if _, onStack := visiting[path]; onStack {
 			cycleStart := 0
 			for i, p := range stack {
@@ -103,7 +98,6 @@ func Walk(root, startFile string) (*Result, error) {
 			r.Cycles = append(r.Cycles, cycle)
 			return
 		}
-		// Already fully processed on a previous branch: skip.
 		if visited[path] {
 			return
 		}
@@ -143,9 +137,6 @@ func Walk(root, startFile string) (*Result, error) {
 	return r, nil
 }
 
-// extractImports pulls every @-reference out of the given markdown
-// body. Source is the path to the containing file, preserved in the
-// returned References.
 func extractImports(source, body string) []Reference {
 	var out []Reference
 	seen := map[string]bool{}
@@ -163,8 +154,6 @@ func extractImports(source, body string) []Reference {
 	return out
 }
 
-// resolveCandidates returns the list of absolute paths Walk should
-// try, in order of preference, for a given @-import target.
 func resolveCandidates(root, source, target string) []string {
 	if filepath.IsAbs(target) {
 		return []string{target}

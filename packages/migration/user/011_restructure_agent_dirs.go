@@ -21,7 +21,7 @@ var RestructureAgentDirs = migration.Migration{
 	Apply: func(_ context.Context, baseDir string) error {
 		agentsDir := filepath.Join(baseDir, "agents")
 		if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
-			return nil // no agents directory
+			return nil
 		}
 
 		entries, err := os.ReadDir(agentsDir)
@@ -43,7 +43,6 @@ var RestructureAgentDirs = migration.Migration{
 }
 
 func restructureAgent(agentDir string) error {
-	// 1. Rename core/ -> identity/ (if core/ exists and identity/ does not)
 	coreDir := filepath.Join(agentDir, "core")
 	identityDir := filepath.Join(agentDir, "identity")
 	if dirExists(coreDir) && !dirExists(identityDir) {
@@ -52,17 +51,14 @@ func restructureAgent(agentDir string) error {
 		}
 	}
 
-	// 2. Move memory/knowledge/ -> knowledge/
 	if err := moveSubdir(agentDir, filepath.Join("memory", "knowledge"), "knowledge"); err != nil {
 		return err
 	}
 
-	// 3. Move memory/playbooks/ -> playbooks/
 	if err := moveSubdir(agentDir, filepath.Join("memory", "playbooks"), "playbooks"); err != nil {
 		return err
 	}
 
-	// 4. Move memory/journal/* -> journal/ (merge)
 	memJournalDir := filepath.Join(agentDir, "memory", "journal")
 	journalDir := filepath.Join(agentDir, "journal")
 	if dirExists(memJournalDir) {
@@ -72,7 +68,6 @@ func restructureAgent(agentDir string) error {
 		os.RemoveAll(memJournalDir)
 	}
 
-	// 5. Move sessions/* -> journal/ (merge)
 	sessionsDir := filepath.Join(agentDir, "sessions")
 	if dirExists(sessionsDir) {
 		if err := mergeDir(sessionsDir, journalDir); err != nil {
@@ -81,13 +76,11 @@ func restructureAgent(agentDir string) error {
 		os.RemoveAll(sessionsDir)
 	}
 
-	// 6. Remove empty memory/ dir
 	memoryDir := filepath.Join(agentDir, "memory")
 	if dirExists(memoryDir) {
 		removeIfEmpty(memoryDir)
 	}
 
-	// 7. Slim profile.yaml: remove identity, requires, delegation, memory blocks
 	if err := slimProfileYAML(agentDir); err != nil {
 		return err
 	}
@@ -100,8 +93,6 @@ func dirExists(path string) bool {
 	return err == nil && fi.IsDir()
 }
 
-// moveSubdir moves agentDir/src to agentDir/dst if src exists and dst does not.
-// If both exist, merges src into dst.
 func moveSubdir(agentDir, src, dst string) error {
 	srcPath := filepath.Join(agentDir, src)
 	dstPath := filepath.Join(agentDir, dst)
@@ -111,21 +102,18 @@ func moveSubdir(agentDir, src, dst string) error {
 	}
 
 	if !dirExists(dstPath) {
-		// Simple rename
 		if err := os.MkdirAll(filepath.Dir(dstPath), 0755); err != nil {
 			return err
 		}
 		return os.Rename(srcPath, dstPath)
 	}
 
-	// Both exist - merge
 	if err := mergeDir(srcPath, dstPath); err != nil {
 		return err
 	}
 	return os.RemoveAll(srcPath)
 }
 
-// mergeDir copies all files from src into dst, skipping files that already exist in dst.
 func mergeDir(src, dst string) error {
 	if err := os.MkdirAll(dst, 0755); err != nil {
 		return err
@@ -145,12 +133,10 @@ func mergeDir(src, dst string) error {
 			return os.MkdirAll(target, 0755)
 		}
 
-		// Skip if destination already exists
 		if _, err := os.Stat(target); err == nil {
 			return nil
 		}
 
-		// Copy file
 		in, err := os.Open(path)
 		if err != nil {
 			return err
@@ -166,7 +152,6 @@ func mergeDir(src, dst string) error {
 	})
 }
 
-// slimProfileYAML rewrites profile.yaml to keep only role, team, runtime, skills.
 func slimProfileYAML(agentDir string) error {
 	path := filepath.Join(agentDir, "profile.yaml")
 	data, err := os.ReadFile(path)
@@ -177,33 +162,26 @@ func slimProfileYAML(agentDir string) error {
 		return err
 	}
 
-	// Parse into generic map to preserve unknown fields we want to keep
 	var raw map[string]interface{}
 	if err := yaml.Unmarshal(data, &raw); err != nil {
-		return nil // skip unparseable files
+		return nil
 	}
 
-	// Remove deprecated fields
 	for _, key := range []string{"identity", "requires", "delegation", "memory"} {
 		delete(raw, key)
 	}
 
-	// Only rewrite if we actually removed something
 	rewritten, err := yaml.Marshal(raw)
 	if err != nil {
 		return nil
 	}
 
-	// Only write if content changed
 	if strings.TrimSpace(string(rewritten)) != strings.TrimSpace(string(data)) {
 		return os.WriteFile(path, rewritten, 0644)
 	}
 	return nil
 }
 
-// removeIfEmpty removes a directory only if it contains no entries.
-// Best-effort — errors are swallowed so a migration can call this
-// without guarding every call site.
 func removeIfEmpty(dir string) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {

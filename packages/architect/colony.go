@@ -15,8 +15,8 @@ import (
 // AgentSpec describes an agent to spawn in a world.
 type AgentSpec struct {
 	Name      string
-	Role      string // "chief", "manager", "worker", or "npc"
-	Ephemeral bool   // true for NPC-style throwaway agents
+	Role      string
+	Ephemeral bool
 }
 
 // DeployAgent adds a single agent to a running world: validates the
@@ -58,28 +58,17 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		Status:  models.StatusRunning,
 	}
 
-	// 1. Create the per-agent per-world layout on the host. This
-	// brings hot-deployed agents up to first-class parity with
-	// spawn-time agents - inbox/outbox/notes/role.md all in place.
 	if err := initAgentDeploymentDirs(rec, worldID); err != nil {
 		return fmt.Errorf("init deployment: %w", err)
 	}
 
-	// Sync the agent's home tree into the container at /agents/<name>/
-	// — the same copy-in step spawn uses. Without this the runtime
-	// process started in step 4 would find no SOUL.md,
-	// no agent.yaml, nothing.
 	agentHome := "/agents/" + agentName
 	if err := deploy.SyncIn(ctx, a.backend, u.ContainerID, map[string]string{agentName: agentHome}); err != nil {
 		return fmt.Errorf("sync agent into container: %w", err)
 	}
 
-	// Render just this agent's content (CLAUDE.md + per-world
-	// role.md) through the compiler and docker-cp it on top of the
-	// copied-in home. We only handle agents/* entries — the world/*
-	// files already exist from spawn time.
 	hotTree, err := transpile.Compile(resolveRuntimeName(u), transpile.Input{
-		Deps: nil,
+		Deps:          nil,
 		VerifiedTools: nil,
 		WorldID:       worldID,
 		Agents:        []transpile.AgentInput{{Name: rec.Name, Role: resolvedRole}},
@@ -105,19 +94,10 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		return hotCpErr
 	}
 
-	// 2. Register in runtimestate so the next List() includes the
-	// agent in u.Agents.
 	if err := a.rstate.AddAgent(worldID, rec); err != nil {
 		return fmt.Errorf("register agent: %w", err)
 	}
 
-	// NOTE: roster is inlined into each agent's CLAUDE.md at render
-	// time. Hot-deploy does NOT regenerate the CLAUDE.md of already-
-	// running agents — they'll see the new teammate on their next
-	// spawn. TODO: re-render every agent's CLAUDE.md on DeployAgent
-	// to close that gap.
-
-	// 3. Start the runtime process in the background.
 	if err := a.SpawnAgentDetached(ctx, worldID, agentName); err != nil {
 		_ = a.rstate.RemoveAgent(worldID, agentID)
 		return fmt.Errorf("start agent: %w", err)
@@ -133,14 +113,12 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		return nil
 	}
 
-	// 1. Validate all agents exist and have valid Minds
 	for _, spec := range agents {
 		if err := agent.ValidateMind(spec.Name); err != nil {
 			return fmt.Errorf("agent %q: %w", spec.Name, err)
 		}
 	}
 
-	// 2. Separate chiefs, managers, and workers
 	var chiefs, managers, workers []AgentSpec
 	for _, spec := range agents {
 		role := agent.DefaultRole(spec.Role)
@@ -160,12 +138,9 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		return fmt.Errorf("at most one chief allowed, got %d.\nRemove extra chiefs from the colony spec", len(chiefs))
 	}
 
-	// 3. Update existing agent records to "creating" status
-	// (agents are already registered by Spawn() - avoid duplicates)
 	for _, spec := range agents {
 		agentID := platform.GenerateAgentID(spec.Name)
 		if err := a.rstate.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
-			// Agent not yet registered (shouldn't happen in normal flow) - add it
 			role := agent.DefaultRole(spec.Role)
 			rec := models.AgentRecord{
 				Name:    spec.Name,
@@ -179,21 +154,18 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		}
 	}
 
-	// 4. Spawn chief first (detached - chiefs run in background like others)
 	for _, ch := range chiefs {
 		if err := a.SpawnAgentDetached(ctx, worldID, ch.Name); err != nil {
 			return fmt.Errorf("spawn chief %q: %w", ch.Name, err)
 		}
 	}
 
-	// 5. Spawn managers detached
 	for _, mgr := range managers {
 		if err := a.SpawnAgentDetached(ctx, worldID, mgr.Name); err != nil {
 			return fmt.Errorf("spawn manager %q: %w", mgr.Name, err)
 		}
 	}
 
-	// 6. Spawn workers detached
 	for _, wkr := range workers {
 		if err := a.SpawnAgentDetached(ctx, worldID, wkr.Name); err != nil {
 			return fmt.Errorf("spawn worker %q: %w", wkr.Name, err)

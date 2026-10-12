@@ -11,17 +11,6 @@ import (
 	authgoogle "spwn.sh/packages/authentication/google"
 )
 
-// runGws executes a gws subprocess with credentials wired and returns
-// its stdout as a parsed JSON value. Falls back to raw text content
-// when the response isn't JSON (gws errors are sometimes plain text).
-//
-// Auth is always-fresh: every call asks google.AccessToken for a
-// non-expired access token (refreshing on demand) and passes it to
-// gws via GOOGLE_WORKSPACE_CLI_TOKEN. This means tokens managed by
-// `spwn auth login google` on the host land here without any
-// per-call credential file shuffling — google.LoadTokens reads from
-// ~/.spwn/credentials/google/tokens.json which is bind-mounted as
-// /credentials/google/tokens.json inside the gate container.
 func runGws(ctx context.Context, args ...string) (any, error) {
 	tok, err := authgoogle.AccessToken(ctx)
 	if err != nil {
@@ -66,9 +55,6 @@ func runGws(ctx context.Context, args ...string) (any, error) {
 func NewGmailElement() *MCPServer {
 	s := NewMCPServer("gmail", "Gmail (via gws)", "0.1.0")
 	s.OnRefresh = func(ctx context.Context) error {
-		// Pre-warm google access token alongside the gate's other
-		// scheduled refreshes so the first gmail call after a long
-		// idle period doesn't pay the OAuth-refresh round-trip.
 		_, err := authgoogle.Refresh(ctx)
 		return err
 	}

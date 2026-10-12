@@ -50,9 +50,6 @@ func Resolve(src *source.ProjectSource, override string) (string, error) {
 	return fromAuth()
 }
 
-// projectDefault returns the canonical runtime name declared at
-// Project scope in spwn.yaml#runtime.backend. Empty when no default
-// Is set, the source is nil, or the manifest is absent.
 func projectDefault(src *source.ProjectSource) string {
 	if src == nil || src.Manifest == nil {
 		return ""
@@ -64,20 +61,9 @@ func projectDefault(src *source.ProjectSource) string {
 	return source.CanonicalRuntime(backend)
 }
 
-// fromAuth returns the runtime name that matches the user's
-// Authenticated providers. See Resolve for the surrounding rules.
-//
-//   - 0 runtime-mapped providers → "claude-code".
-//   - 1 runtime-mapped provider → the matching runtime.
-//   - 2+ runtime-mapped providers + authentication.DefaultProvider set → that
-//     provider's runtime (silent pick).
-//   - 2+ runtime-mapped providers + no default → disambiguation error.
 func fromAuth() (string, error) {
 	providerToRuntime := runtimeByProvider()
 
-	// Keep provider identity alongside the runtime name so we can
-	// Honor authentication.DefaultProvider when the candidate list has more
-	// Than one entry.
 	type candidate struct {
 		provider authentication.Provider
 		runtime  string
@@ -97,10 +83,6 @@ func fromAuth() (string, error) {
 		return cands[0].runtime, nil
 	}
 
-	// Multi-provider: let the user's auth.yaml default break the tie
-	// Before erroring. Disabled providers never reach the candidate
-	// List (ResolveAll honors Disabled), so DefaultProvider pointing
-	// At a disabled one is simply ignored.
 	if def := authentication.DefaultProvider(); def != "" {
 		for _, c := range cands {
 			if c.provider == def {
@@ -123,9 +105,6 @@ func fromAuth() (string, error) {
 	)
 }
 
-// runtimeByProvider builds a provider→runtime map from the registered
-// Adapter list. A provider with no registered runtime (e.g. "google"
-// today) is simply absent from the map.
 func runtimeByProvider() map[string]string {
 	out := make(map[string]string, len(runtimes.All()))
 	for _, a := range runtimes.All() {
@@ -136,9 +115,6 @@ func runtimeByProvider() map[string]string {
 	return out
 }
 
-// connectedProviders returns the deterministically-ordered list of
-// Providers the user has credentials for. Only providers with a
-// Non-none credential type are included.
 func connectedProviders() []authentication.Provider {
 	resolved := authentication.ResolveAll()
 	ordered := []authentication.Provider{authentication.ProviderAnthropic, authentication.ProviderOpenAI}

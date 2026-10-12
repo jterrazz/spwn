@@ -38,10 +38,8 @@ func colorizeCmd(name string) string {
 		case strings.HasPrefix(p, "<") || strings.HasPrefix(p, "["):
 			colored[i] = Faint(p)
 		case strings.HasPrefix(p, "-"):
-			// Flags are yellow, whether standalone or inline
 			colored[i] = Yellow(p)
 		case isFlag:
-			// Non-placeholder words in a flag entry (e.g. value hint)
 			colored[i] = Yellow(p)
 		default:
 			colored[i] = Cyan(p)
@@ -101,7 +99,6 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
 	fmt.Fprintln(w)
 
-	// Description - prefer Long, fall back to Short. Flush-left.
 	if long := strings.TrimSpace(cmd.Long); long != "" {
 		fmt.Fprintln(w, long)
 		fmt.Fprintln(w)
@@ -110,7 +107,6 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(w)
 	}
 
-	// Usage.
 	if cmd.Runnable() || cmd.HasSubCommands() {
 		fmt.Fprintf(w, "%s\n", Strong("Usage:"))
 		if cmd.Runnable() {
@@ -122,25 +118,20 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(w)
 	}
 
-	// Aliases.
 	if len(cmd.Aliases) > 0 {
 		fmt.Fprintf(w, "%s\n", Strong("Aliases:"))
 		fmt.Fprintf(w, "%s%s\n", Indent, cmd.NameAndAliases())
 		fmt.Fprintln(w)
 	}
 
-	// Examples.
 	if cmd.HasExample() {
 		fmt.Fprintf(w, "%s\n", Strong("Examples:"))
-		// Cobra examples are often pre-indented 2 spaces; strip then re-indent
-		// consistently so our one-level rule holds.
 		for _, line := range strings.Split(strings.TrimRight(cmd.Example, "\n"), "\n") {
 			fmt.Fprintf(w, "%s%s\n", Indent, strings.TrimPrefix(line, "  "))
 		}
 		fmt.Fprintln(w)
 	}
 
-	// Subcommands.
 	if cmd.HasAvailableSubCommands() {
 		fmt.Fprintf(w, "%s\n", Strong("Commands:"))
 		for _, c := range cmd.Commands() {
@@ -152,14 +143,12 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(w)
 	}
 
-	// Local flags - FlagUsages comes pre-indented; re-indent to our width.
 	if cmd.HasAvailableLocalFlags() {
 		fmt.Fprintf(w, "%s\n", Strong("Flags:"))
 		writeIndentedFlagUsages(w, cmd.LocalFlags().FlagUsages())
 		fmt.Fprintln(w)
 	}
 
-	// Global flags.
 	if cmd.HasAvailableInheritedFlags() {
 		fmt.Fprintf(w, "%s\n", Strong("Global flags:"))
 		writeIndentedFlagUsages(w, cmd.InheritedFlags().FlagUsages())
@@ -167,9 +156,6 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	}
 }
 
-// writeIndentedFlagUsages writes FlagUsages output with the pflag-supplied
-// 2-space leading whitespace replaced by our standard Indent (also 2
-// spaces, but kept routed through the constant for consistency).
 func writeIndentedFlagUsages(w io.Writer, usages string) {
 	usages = strings.TrimRight(usages, "\n")
 	if usages == "" {

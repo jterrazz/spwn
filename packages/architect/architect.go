@@ -10,11 +10,6 @@ import (
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"
 
-	// Register every built-in runtime adapter so resolveSpawner
-	// finds them at lookup time. The blank import is the whole
-	// contract — nothing in this file refers to the runtimes
-	// package directly any more; the per-world resolver in
-	// runtime_route.go owns that.
 	_ "spwn.sh/packages/runtimes/defaults"
 )
 

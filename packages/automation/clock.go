@@ -14,11 +14,7 @@ import (
 // After. Everything else (Sleep, AfterFunc, etc.) can be expressed
 // in terms of those two.
 type Clock interface {
-	// Now returns the current wall time.
 	Now() time.Time
-	// After returns a channel that fires once at d duration from
-	// the call. With RealClock this delegates to time.After. With
-	// FakeClock the channel fires when Advance crosses the deadline.
 	After(d time.Duration) <-chan time.Time
 }
 
@@ -47,7 +43,7 @@ type FakeClock struct {
 type pendingTimer struct {
 	deadline time.Time
 	ch       chan time.Time
-	done     bool // set when fired so a re-Advance doesn't double-send
+	done     bool
 }
 
 // NewFakeClock constructs a FakeClock anchored at the given time.
@@ -76,8 +72,6 @@ func (c *FakeClock) After(d time.Duration) <-chan time.Time {
 	}
 	c.pending = append(c.pending, t)
 	if d <= 0 {
-		// Zero-or-negative duration: fire immediately, exactly as
-		// time.After does.
 		t.ch <- t.deadline
 		close(t.ch)
 		t.done = true
@@ -107,8 +101,6 @@ func (c *FakeClock) Advance(d time.Duration) {
 	}
 	c.pending = keep
 	c.mu.Unlock()
-	// Fire in deadline order. Sort outside the lock to avoid holding
-	// it while channels send (the receiver may run synchronously).
 	sort.Slice(due, func(i, j int) bool { return due[i].deadline.Before(due[j].deadline) })
 	for _, t := range due {
 		t.ch <- t.deadline

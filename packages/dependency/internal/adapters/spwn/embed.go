@@ -10,9 +10,6 @@ import "io/fs"
 func EmbedFS() fs.FS {
 	sub, err := fs.Sub(catalogFS, contentRoot)
 	if err != nil {
-		// Embed always matches content/ at build time; this panic
-		// would only fire if the mirror is empty (go generate
-		// didn't run) — fail loudly.
 		panic("spwn adapter: missing content/ mirror (run `go generate ./packages/dependency/...`)")
 	}
 	return sub

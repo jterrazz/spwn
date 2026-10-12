@@ -78,8 +78,8 @@ type Project struct {
 
 // AgentRef points at one agent directory under spwn/agents/.
 type AgentRef struct {
-	Name   string // directory basename
-	Path   string // absolute path to ./spwn/agents/<name>/
+	Name   string
+	Path   string
 	Exists bool
 }
 

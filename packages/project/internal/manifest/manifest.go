@@ -262,21 +262,11 @@ func ApplyDefaults(m *Manifest) {
 	}
 }
 
-// applyAutomationDefaults fills in per-automation defaults so the
-// engine + validator can read a single canonical shape regardless of
-// how terse the author was. Only fills the fields the author left
-// blank — explicit values are never overridden.
-//
-// Modifies the map values in place.
 func applyAutomationDefaults(autos map[string]Automation) {
 	for name, a := range autos {
-		// Catchup default — collapse for cron, blank for fs (the
-		// concept doesn't apply to filesystem watchers, which always
-		// stack-on-diff via the seen-list).
 		if a.On.Cron != "" && a.Catchup == "" {
 			a.Catchup = "collapse"
 		}
-		// FS-trigger defaults.
 		if a.On.FS != nil {
 			fs := a.On.FS
 			if len(fs.Events) == 0 {
@@ -307,14 +297,10 @@ func (m *Manifest) AllAgentNames() []string {
 	for name := range seen {
 		out = append(out, name)
 	}
-	// stable order without importing sort here would be ugly; use
-	// sort to keep callers predictable.
 	sortStrings(out)
 	return out
 }
 
-// sortStrings is a tiny insertion sort kept local so this file doesn't
-// pull in "sort" just for AllAgentNames.
 func sortStrings(s []string) {
 	for i := 1; i < len(s); i++ {
 		for j := i; j > 0 && s[j-1] > s[j]; j-- {

@@ -27,7 +27,6 @@ import (
 // `docker inspect` output and easy to filter on.
 const Prefix = "sh.spwn."
 
-// Kind enumerates the categories of containers spwn creates.
 const (
 	KindKey       = Prefix + "kind"
 	KindWorld     = "world"
@@ -61,21 +60,18 @@ func ApplyTestRun(m map[string]string) {
 	}
 }
 
-// World metadata keys. These map 1:1 onto the immutable fields of
-// models.World. Anything that can change after creation lives in
-// runtimestate, not here.
 const (
-	WorldID           = Prefix + "world.id"
-	WorldName         = Prefix + "world.name"
-	WorldConfig       = Prefix + "world.config"
-	WorldAgent        = Prefix + "world.agent"    // primary/legacy single-agent name
-	WorldAgentID      = Prefix + "world.agent_id" // primary/legacy single-agent id
-	WorldOrganization = Prefix + "world.organization"
-	WorldWorkspaces   = Prefix + "world.workspaces" // JSON-encoded []models.Workspace
-	WorldAgents       = Prefix + "world.agents"     // JSON-encoded []models.AgentRecord (creation-time only)
-	WorldCreatedAt    = Prefix + "world.created_at" // RFC3339
-	WorldKnowledgeMounted = Prefix + "world.knowledge_mounted" // "1" when a knowledge dir was bound
-	WorldRuntime      = Prefix + "world.runtime" // short-name runtime adapter ("claude-code", "codex")
+	WorldID               = Prefix + "world.id"
+	WorldName             = Prefix + "world.name"
+	WorldConfig           = Prefix + "world.config"
+	WorldAgent            = Prefix + "world.agent"
+	WorldAgentID          = Prefix + "world.agent_id"
+	WorldOrganization     = Prefix + "world.organization"
+	WorldWorkspaces       = Prefix + "world.workspaces"
+	WorldAgents           = Prefix + "world.agents"
+	WorldCreatedAt        = Prefix + "world.created_at"
+	WorldKnowledgeMounted = Prefix + "world.knowledge_mounted"
+	WorldRuntime          = Prefix + "world.runtime"
 )
 
 // WorldLabels builds the full label map for a world container. The
@@ -146,9 +142,7 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		Agent:        lbls[WorldAgent],
 		AgentID:      lbls[WorldAgentID],
 		Organization: lbls[WorldOrganization],
-		// Backend is always Docker for spwn-managed containers - labels
-		// don't store it because there's only one backend in production.
-		Backend: "docker",
+		Backend:      "docker",
 	}
 
 	if raw := lbls[WorldCreatedAt]; raw != "" {
@@ -199,8 +193,6 @@ func SortKeysForDebug(lbls map[string]string) []string {
 			keys = append(keys, k)
 		}
 	}
-	// stdlib sort would pull in another import; keep it local since
-	// the list is tiny (≤ 12 entries).
 	for i := 1; i < len(keys); i++ {
 		for j := i; j > 0 && keys[j-1] > keys[j]; j-- {
 			keys[j-1], keys[j] = keys[j], keys[j-1]

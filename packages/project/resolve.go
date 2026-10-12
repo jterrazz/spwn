@@ -8,10 +8,6 @@ import (
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
-// resolveRefs walks the agents declared by every world in the manifest
-// and turns each name into a filesystem path + existence flag. It also
-// scans spwn/agents/ on disk for "orphan" directories — agents that
-// exist but aren't referenced by any world.
 func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []AgentRef) {
 	declared := map[string]struct{}{}
 	for _, w := range m.Worlds {
@@ -20,7 +16,6 @@ func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []Ag
 		}
 	}
 
-	// Deployable agents: the union of names from every world.
 	names := make([]string, 0, len(declared))
 	for n := range declared {
 		names = append(names, n)
@@ -35,7 +30,6 @@ func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []Ag
 		})
 	}
 
-	// Orphans: directories under spwn/agents/ not in declared.
 	agentsDir := filepath.Join(root, "spwn", "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err == nil {

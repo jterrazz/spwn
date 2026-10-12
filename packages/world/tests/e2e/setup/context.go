@@ -28,7 +28,7 @@ type TestContext struct {
 	Backend world.Backend
 	State   *world.Store
 	Arc     *architect.Architect
-	Spawned []string // world IDs to clean up
+	Spawned []string
 }
 
 // NewTestContext creates an isolated test environment with temp dirs and real Docker.
@@ -38,22 +38,10 @@ func NewTestContext(t *testing.T) *TestContext {
 	baseDir := t.TempDir()
 	t.Setenv("SPWN_HOME", baseDir)
 
-	// Skip the spawn pre-flight credential check. These tests run
-	// against the mock spwn-test:latest image (mock-claude / mock-codex),
-	// which doesn't need real provider credentials — but the architect
-	// still hard-fails on "no credentials configured" without this hint
-	// (see packages/architect/spawn.go). CI runners have zero host
-	// credentials, so the bypass is mandatory there; locally it just
-	// shaves the validate-cache round-trip too.
 	t.Setenv("SPWN_SKIP_AUTH_VALIDATION", "1")
 
-	// Stamp every container spawned by this test with a unique label
-	// so List()/Get() only see THIS test's containers, not leftovers
-	// from prior runs or concurrently-running tests. The architect
-	// reads labels.TestRunEnv inside Spawn() to apply the label.
 	t.Setenv(labels.TestRunEnv, fmt.Sprintf("e2e-%s-%d", t.Name(), time.Now().UnixNano()))
 
-	// Create required subdirectories
 	os.MkdirAll(filepath.Join(baseDir, "worlds"), 0755)
 	os.MkdirAll(filepath.Join(baseDir, "agents"), 0755)
 
@@ -76,7 +64,6 @@ func NewTestContext(t *testing.T) *TestContext {
 		Arc:     architect.New(docker, store),
 	}
 
-	// Verify test image exists
 	exists, err := docker.ImageExists(context.Background(), TestImage)
 	if err != nil {
 		t.Fatalf("Failed to check test image: %v", err)
@@ -86,13 +73,6 @@ func NewTestContext(t *testing.T) *TestContext {
 	}
 
 	t.Cleanup(func() {
-		// Bound each Destroy with a timeout. Without this, a single
-		// hung Docker API call (seen on OrbStack under load after
-		// ~15+ rapid spawn/destroy cycles) would wedge the whole
-		// test process and every subsequent test would see "e2e
-		// [setup failed]" with an unrelated goroutine dump. 30s is
-		// generous for a graceful container teardown and bounds the
-		// worst case at len(Spawned) * 30s.
 		for _, id := range ctx.Spawned {
 			destroyCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			_, _ = ctx.Arc.Destroy(destroyCtx, id)

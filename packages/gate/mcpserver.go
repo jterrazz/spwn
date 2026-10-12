@@ -13,9 +13,9 @@ import (
 // JSON-RPC 2.0 over HTTP POST and implements the three methods every
 // MCP client (mcp2cli, claude-code, …) calls during a typical session:
 //
-//   initialize  — handshake / capability negotiation
-//   tools/list  — enumerate the tools this server exposes
-//   tools/call  — invoke a named tool with arguments
+//	initialize  — handshake / capability negotiation
+//	tools/list  — enumerate the tools this server exposes
+//	tools/call  — invoke a named tool with arguments
 //
 // Notifications and the streaming SSE half of "streamable HTTP" are
 // not implemented — our gws-backed tools are synchronous and can
@@ -84,8 +84,6 @@ func (s *MCPServer) Refresh(ctx context.Context) error {
 	return nil
 }
 
-// --- JSON-RPC framing ---
-
 type jsonrpcRequest struct {
 	JSONRPC string          `json:"jsonrpc"`
 	ID      json.RawMessage `json:"id,omitempty"`
@@ -106,8 +104,6 @@ type jsonrpcError struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-// MCP error code conventions mirror JSON-RPC's, plus the MCP-specific
-// -32000 "method not implemented" range.
 const (
 	codeParseError     = -32700
 	codeInvalidRequest = -32600
@@ -118,9 +114,6 @@ const (
 
 func (s *MCPServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		// MCP "streamable HTTP" also defines GET for SSE streams. We
-		// don't stream, so respond 405 to GET so clients fall back to
-		// POST — no broken half-open SSE.
 		http.Error(w, "POST only", http.StatusMethodNotAllowed)
 		return
 	}
@@ -144,7 +137,6 @@ func (s *MCPServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	case "initialize":
 		s.handleInitialize(w, req)
 	case "notifications/initialized":
-		// Notification: no response.
 		w.WriteHeader(http.StatusAccepted)
 	case "tools/list":
 		s.handleToolsList(w, req)
@@ -161,8 +153,6 @@ func (s *MCPServer) handleInitialize(w http.ResponseWriter, req jsonrpcRequest) 
 	writeJSONRPCResult(w, req.ID, map[string]any{
 		"protocolVersion": "2025-06-18",
 		"capabilities": map[string]any{
-			// Only tools today. Add resources/prompts capabilities
-			// when we expose those primitives.
 			"tools": map[string]any{},
 		},
 		"serverInfo": map[string]any{
@@ -185,7 +175,6 @@ func (s *MCPServer) handleToolsList(w http.ResponseWriter, req jsonrpcRequest) {
 		if len(t.InputSchema) > 0 {
 			entry["inputSchema"] = json.RawMessage(t.InputSchema)
 		} else {
-			// MCP requires an inputSchema; default to an empty object schema.
 			entry["inputSchema"] = map[string]any{"type": "object"}
 		}
 		out = append(out, entry)
@@ -195,9 +184,9 @@ func (s *MCPServer) handleToolsList(w http.ResponseWriter, req jsonrpcRequest) {
 
 func (s *MCPServer) handleToolsCall(ctx context.Context, w http.ResponseWriter, req jsonrpcRequest) {
 	var p struct {
-		Name      string                 `json:"name"`
-		Arguments map[string]any         `json:"arguments,omitempty"`
-		Meta      map[string]any         `json:"_meta,omitempty"`
+		Name      string         `json:"name"`
+		Arguments map[string]any `json:"arguments,omitempty"`
+		Meta      map[string]any `json:"_meta,omitempty"`
 	}
 	if err := json.Unmarshal(req.Params, &p); err != nil {
 		writeJSONRPCError(w, req.ID, codeInvalidParams, "parse params: "+err.Error())
@@ -221,10 +210,6 @@ func (s *MCPServer) handleToolsCall(ctx context.Context, w http.ResponseWriter, 
 
 	result, err := tool.Handler(ctx, p.Arguments)
 	if err != nil {
-		// MCP convention: errors during tool execution come back as a
-		// successful tools/call response with isError=true and the
-		// error message as content. Reserves JSON-RPC-level errors
-		// for protocol-level failures.
 		writeJSONRPCResult(w, req.ID, map[string]any{
 			"isError": true,
 			"content": []map[string]any{
@@ -234,8 +219,6 @@ func (s *MCPServer) handleToolsCall(ctx context.Context, w http.ResponseWriter, 
 		return
 	}
 
-	// Stringify non-string results as JSON; pass strings through as
-	// text content directly.
 	content, err := toolResultContent(result)
 	if err != nil {
 		writeJSONRPCError(w, req.ID, codeInternalError, err.Error())

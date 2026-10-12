@@ -33,10 +33,6 @@ var deleteCmd = &cobra.Command{
 
 		s.Done("Deleted agent", name)
 
-		// Keep spwn.yaml in sync when inside a project: scrub any
-		// world references to the deleted agent (symmetric with the
-		// auto-world that `agent create` adds). Without this, the
-		// next `spwn check` fails with "agent directory not found".
 		if cwd, werr := os.Getwd(); werr == nil {
 			if p, perr := project.Find(cwd); perr == nil && p != nil {
 				if err := project.RemoveAgentFromManifest(p.ManifestPath, name); err != nil {

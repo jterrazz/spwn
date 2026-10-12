@@ -6,29 +6,21 @@ import (
 	"strings"
 )
 
-// dockerFriendlyPaths returns OS-specific directories where docker, colima,
-// orbstack, or Homebrew binaries are commonly installed but which macOS
-// launchd GUIs (Finder, Tauri-bundled apps) do NOT have on their PATH by
-// default. Prepending these to PATH at process start is how we make
-// `exec.Command("docker", ...)` work when the spwn binary is spawned by
-// the Tauri desktop app.
 func dockerFriendlyPaths() []string {
 	switch runtime.GOOS {
 	case "darwin":
 		return []string{
-			"/opt/homebrew/bin", // Apple Silicon Homebrew
+			"/opt/homebrew/bin",
 			"/opt/homebrew/sbin",
-			"/usr/local/bin", // Intel Homebrew + Docker Desktop
+			"/usr/local/bin",
 			"/usr/local/sbin",
-			// Docker Desktop symlinks its CLI into both the above AND this
-			// app-resource path; include it as a last-resort fallback.
 			"/Applications/Docker.app/Contents/Resources/bin",
 		}
 	case "linux":
 		return []string{
 			"/usr/local/bin",
 			"/usr/local/sbin",
-			"/snap/bin", // Docker via snap on Ubuntu
+			"/snap/bin",
 		}
 	default:
 		return nil

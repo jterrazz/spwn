@@ -117,9 +117,6 @@ func NewBrowserElement() *MCPServer {
 	return s
 }
 
-// sessionSchema builds the inputSchema JSON for a tool that takes
-// session_id plus any number of extra fields and required keys.
-// Variadic args after the first string are required-key names.
 func sessionSchema(extraProps string, required ...string) json.RawMessage {
 	props := `"session_id": { "type": "string" }`
 	if extraProps != "" {
@@ -144,9 +141,6 @@ func joinComma(in []string) string {
 	return out
 }
 
-// forwardToSession returns a handler that POSTs to /sessions/:id/<op>
-// with whichever fields are present in args. Keeps tool wiring to one
-// line per method.
 func forwardToSession(c *browserClient, op string, fields ...string) func(context.Context, map[string]any) (any, error) {
 	return func(ctx context.Context, args map[string]any) (any, error) {
 		id, ok := args["session_id"].(string)
@@ -163,8 +157,6 @@ func forwardToSession(c *browserClient, op string, fields ...string) func(contex
 	}
 }
 
-// browserClient is a thin HTTP client for the in-container sidecar.
-// Marshals body to JSON, parses response back to any.
 type browserClient struct {
 	base string
 	http *http.Client

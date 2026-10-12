@@ -9,22 +9,11 @@ import (
 	"spwn.sh/apps/cli/ui"
 )
 
-// ── agent publish / get ────────────────────────────────────────────────
-//
-// Lifecycle stubs for the planned registry. Composition itself lives
-// on the root `spwn install` / `spwn uninstall` verbs (with an
-// optional --agent <name> to scope to a single agent); the legacy
-// `agent add` / `agent remove` composition commands were retired when
-// install picked up agent scoping.
-
 func init() {
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(getCmd)
 }
 
-// Hidden: true keeps these reachable programmatically but strips
-// them from `spwn agent --help`. Flip to false when the registry
-// ships.
 var publishCmd = &cobra.Command{
 	Use:    "publish <agent-name>",
 	Short:  "Publish an agent to the registry (memory stripped)",
@@ -62,10 +51,6 @@ Not yet implemented — tracks the registry port (planned).`,
 	},
 }
 
-// notImplemented writes a structured "not yet implemented" message to
-// stderr and returns a DisplayedError that carries exit code 2 —
-// the dedicated "feature unavailable" code used across the CLI so
-// scripts can distinguish a missing feature from a runtime failure.
 func notImplemented(what, detail string) error {
 	fmt.Fprintf(os.Stderr, "\n  %s %s: not yet implemented\n", ui.Red("✗"), what)
 	if detail != "" {
@@ -75,10 +60,6 @@ func notImplemented(what, detail string) error {
 	return &notImplementedError{what: what}
 }
 
-// notImplementedError carries the exit-2 ("feature unavailable")
-// signal back to the process entry point while keeping the
-// already-rendered banner untouched (it embeds DisplayedError so
-// root.Execute skips its generic "Error:" line).
 type notImplementedError struct {
 	what string
 }

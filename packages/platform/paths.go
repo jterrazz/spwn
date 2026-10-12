@@ -94,8 +94,6 @@ func LocalStateDir() string {
 	return UserDir()
 }
 
-// --- Project-aware data paths ---
-
 // WorldsDir returns the worlds config directory.
 func WorldsDir() string {
 	return filepath.Join(DataDir(), WorldsSubDir)
@@ -110,8 +108,6 @@ func AgentsDir() string {
 func SkillsDir() string {
 	return filepath.Join(DataDir(), SkillsSubDir)
 }
-
-// --- User-level paths (never project-aware) ---
 
 // CredentialsDir always returns the user-level credentials directory.
 // Credentials are intentionally never project-scoped - projects must

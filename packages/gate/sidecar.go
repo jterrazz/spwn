@@ -20,8 +20,8 @@ import (
 // The supervisor restarts the sidecar on crash with a small backoff,
 // so a tool that wedges Playwright doesn't take the gate with it.
 type SidecarBrowser struct {
-	cmd     []string // e.g. ["node", "/opt/gate-browser/src/index.ts"]
-	healthz string   // e.g. "http://127.0.0.1:9001/healthz"
+	cmd     []string
+	healthz string
 	logger  *log.Logger
 
 	mu   sync.Mutex
@@ -58,7 +58,6 @@ func (s *SidecarBrowser) Run(ctx context.Context) {
 			}
 			continue
 		}
-		// Clean exit — reset backoff before re-spawn.
 		backoff = time.Second
 		if ctx.Err() != nil {
 			return
@@ -68,8 +67,6 @@ func (s *SidecarBrowser) Run(ctx context.Context) {
 
 func (s *SidecarBrowser) runOnce(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, s.cmd[0], s.cmd[1:]...)
-	// Stream sidecar logs into the gate log with a prefix so they're
-	// distinguishable from the Go logs in `docker logs spwn-gate`.
 	cmd.Stdout = prefixWriter{logger: s.logger, prefix: "[browser] "}
 	cmd.Stderr = prefixWriter{logger: s.logger, prefix: "[browser] "}
 	s.mu.Lock()
@@ -87,8 +84,6 @@ func (s *SidecarBrowser) runOnce(ctx context.Context) error {
 	return cmd.Wait()
 }
 
-// waitHealthy polls /healthz until it answers 200 or the context
-// dies. Sidecar takes ~1-3s to be ready (Chromium warmup).
 func (s *SidecarBrowser) waitHealthy(ctx context.Context) error {
 	deadline := time.Now().Add(15 * time.Second)
 	client := &http.Client{Timeout: time.Second}
@@ -98,8 +93,6 @@ func (s *SidecarBrowser) waitHealthy(ctx context.Context) error {
 		}
 		resp, err := client.Get(s.healthz)
 		if err == nil {
-			// Drain so the connection can be reused; a probe that cannot
-			// be drained is retried by the loop either way.
 			_, _ = io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 			if resp.StatusCode == 200 {
@@ -111,17 +104,12 @@ func (s *SidecarBrowser) waitHealthy(ctx context.Context) error {
 	return fmt.Errorf("sidecar not healthy within deadline")
 }
 
-// prefixWriter is an io.Writer that splits on newline and forwards
-// each line to a logger with a prefix. Keeps multi-line sidecar
-// output readable in the gate's logs.
 type prefixWriter struct {
 	logger *log.Logger
 	prefix string
 }
 
 func (p prefixWriter) Write(b []byte) (int, error) {
-	// Naive: treat each Write as one record. Node typically flushes
-	// a line at a time; not worth a buffered scanner.
 	p.logger.Printf("%s%s", p.prefix, string(b))
 	return len(b), nil
 }

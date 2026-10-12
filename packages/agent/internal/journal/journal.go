@@ -52,7 +52,6 @@ func Append(mindPath, worldID string, exitCode int, duration time.Duration) erro
 		return err
 	}
 
-	// Emit session-ended activity event
 	agentName := filepath.Base(mindPath)
 	activity.Log(activity.Event{
 		Type:       activity.TypeSessionEnded,
@@ -91,7 +90,6 @@ func List(mindPath string, n int) ([]Entry, error) {
 		parsed = append(parsed, *entry)
 	}
 
-	// Sort newest first
 	sort.Slice(parsed, func(i, j int) bool {
 		return parsed[i].CreatedAt.After(parsed[j].CreatedAt)
 	})
@@ -110,7 +108,6 @@ func parseEntry(dir, filename string) (*Entry, error) {
 
 	entry := &Entry{Filename: filename}
 
-	// Parse filename for timestamp: 2006-01-02_150405_world-id.md
 	parts := strings.SplitN(strings.TrimSuffix(filename, ".md"), "_", 3)
 	if len(parts) == 3 {
 		t, err := time.Parse("2006-01-02_150405.000000000", parts[0]+"_"+parts[1])
@@ -120,7 +117,6 @@ func parseEntry(dir, filename string) (*Entry, error) {
 		entry.WorldID = parts[2]
 	}
 
-	// Parse metadata from content
 	lines := strings.Split(string(data), "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -128,8 +124,6 @@ func parseEntry(dir, filename string) (*Entry, error) {
 			entry.Outcome = strings.TrimSpace(strings.TrimPrefix(line, "- **Outcome:**"))
 		}
 		if strings.HasPrefix(line, "- **Exit Code:**") {
-			// A line whose code does not parse leaves ExitCode at zero,
-			// which reads as "completed" — the same as an absent line.
 			if code, err := strconv.Atoi(strings.TrimSpace(strings.TrimPrefix(line, "- **Exit Code:**"))); err == nil {
 				entry.ExitCode = code
 			}

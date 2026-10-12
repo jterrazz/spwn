@@ -70,29 +70,14 @@ import (
 	"spwn.sh/packages/project"
 )
 
-// promptSHA returns the first 12 hex chars of sha256(prompt). 48
-// bits of identifier is plenty for "did the prompt change between
-// fires?" debugging without storing the full body in every receipt.
 func promptSHA(prompt string) string {
 	sum := sha256.Sum256([]byte(prompt))
 	return hex.EncodeToString(sum[:])[:12]
 }
 
-// newRunID returns a 16-hex-char unique identifier for one fire.
-// Used as the receipt's run_id so dashboards can trace a fire across
-// the receipt log + structured-logger output. crypto/rand for
-// uniqueness; 64 bits of entropy is overkill for per-day fire
-// counts but cheap.
-//
-// On the off chance crypto/rand fails (kernel entropy starvation
-// on a freshly-booted VM), fall back to a clock-derived id so the
-// fire path never fails — receipts are observability, not
-// correctness.
 func newRunID() string {
 	var b [8]byte
 	if _, err := rand.Read(b[:]); err != nil {
-		// Fallback: nanoseconds since epoch in hex. Not unique
-		// across processes but never repeats within one process.
 		now := time.Now().UnixNano()
 		for i := 7; i >= 0; i-- {
 			b[i] = byte(now)
@@ -111,18 +96,12 @@ type Logger interface {
 	Warnf(format string, args ...any)
 }
 
-// stderrLogger is the default Logger. Wraps the standard log package
-// with a fixed prefix so a single grep ("spwn: automation:") finds
-// every dropped-error line in journalctl / `tail -f /var/log`.
 type stderrLogger struct{ l *log.Logger }
 
 func (s stderrLogger) Warnf(format string, args ...any) {
 	s.l.Printf("spwn: automation: "+format, args...)
 }
 
-// defaultLogger writes to os.Stderr and is used when Config.Logger
-// is nil. Constructed lazily in New so tests that inject a Logger
-// don't see stray output.
 func defaultLogger() Logger {
 	return stderrLogger{l: log.New(os.Stderr, "", log.LstdFlags|log.Lmsgprefix)}
 }
@@ -135,37 +114,28 @@ type Engine struct {
 	dispatcher Dispatcher
 	receipts   ReceiptWriter
 	state      StateStore
-	fs         *FSWatcher      // nil if no fs triggers were registered
-	commands   CommandResolver // nil → only prompt: bodies allowed
-	logger     Logger          // never nil; defaults to stderr
+	fs         *FSWatcher
+	commands   CommandResolver
+	logger     Logger
 
 	cronParser cron.Parser
 	registered []*registered
 
-	// agentLocks serialises Dispatch per (world, agent) pair. The registry
-	// hands out one mutex per key under agentLocksMu; the handed-out mutex
-	// is what a dispatch actually holds.
 	agentLocksMu sync.Mutex
 	agentLocks   map[agentLockKey]*sync.Mutex
 
 	mu      sync.Mutex
 	started bool
 	cancel  context.CancelFunc
-	// runCtx is the cancellable context handed out to per-trigger
-	// goroutines (cron loops and fs handlers). Set in Start, cancelled
-	// in Stop. Nil before Start; readers should check.
-	runCtx context.Context
-	wg     sync.WaitGroup
+	runCtx  context.Context
+	wg      sync.WaitGroup
 }
 
-// registered is the engine's view of one automation: the parsed
-// trigger, the body, and the cron schedule object built from the
-// expression at Register time so we don't re-parse on every tick.
 type registered struct {
 	World    string
 	Name     string
 	Auto     project.Automation
-	Schedule cron.Schedule // nil for fs (Phase 3)
+	Schedule cron.Schedule
 }
 
 // Config bundles the engine's collaborators. Clock/Dispatcher/
@@ -259,8 +229,6 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 			if e.fs == nil {
 				return fmt.Errorf("automation %s/%s: fs trigger registered but engine Config.FS is nil", world, name)
 			}
-			// Capture r in the closure so the handler routes to the
-			// right registered{} when its fired.
 			rr := r
 			spec := FSWatchSpec{
 				ID:            stateKey(world, name),
@@ -272,26 +240,15 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 				IncludeHidden: a.On.FS.IncludeHidden,
 			}
 			handler := func(ev DebouncedFSEvent) {
-				// Capture the engine's runCtx at fire time so an
-				// in-flight Dispatch is interruptible by Stop. Until
-				// Start runs, runCtx is nil — and the watcher's pump
-				// also doesn't dispatch until Start, so the nil
-				// branch is unreachable in normal flow. Defensive
-				// fallback to Background keeps a misuse safe.
 				ctx := e.runCtx
 				if ctx == nil {
 					ctx = context.Background()
 				}
 				now := e.clock.Now()
 				e.fire(ctx, rr, FireSource{
-					Kind: "fs",
-					Reason: ev.Kind + ":" + filepath.Base(ev.Paths[0]),
-					Now:  now,
-					// Scheduled = Now for fs fires so the state
-					// cursor advances. The replay-on-startup logic
-					// uses this cursor to decide which files are
-					// "new" since the last fire; a zero cursor would
-					// match every file forever.
+					Kind:       "fs",
+					Reason:     ev.Kind + ":" + filepath.Base(ev.Paths[0]),
+					Now:        now,
 					Scheduled:  now,
 					EventPaths: ev.Paths,
 					EventKind:  ev.Kind,
@@ -301,12 +258,10 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 				return fmt.Errorf("automation %s/%s: fs watch: %w", world, name, err)
 			}
 		default:
-			// Validation already rejects this; defence-in-depth.
 			return fmt.Errorf("automation %s/%s: no trigger (validation should have caught this)", world, name)
 		}
 		e.registered = append(e.registered, r)
 	}
-	// Stable order for tests + receipt determinism.
 	sort.Slice(e.registered, func(i, j int) bool {
 		if e.registered[i].World != e.registered[j].World {
 			return e.registered[i].World < e.registered[j].World
@@ -344,10 +299,6 @@ func (e *Engine) Start(ctx context.Context) error {
 		e.wg.Add(1)
 		go e.runCron(ctx, r)
 	}
-	// Fs replay-on-startup: synthesise create events for files
-	// whose mtime is newer than the last successful fire. Mirrors
-	// cron's catch-up so a daemon-down window doesn't lose files
-	// dropped into the inbox during the gap.
 	for _, r := range e.registered {
 		if r.Auto.On.FS == nil {
 			continue
@@ -357,8 +308,6 @@ func (e *Engine) Start(ctx context.Context) error {
 		}
 		e.runFSReplay(ctx, r)
 	}
-	// Fs watcher pump runs only if fs triggers were registered.
-	// Idempotent: harmless to call when no specs exist.
 	if e.fs != nil {
 		if err := e.fs.Start(ctx); err != nil {
 			return fmt.Errorf("automation: fs Start: %w", err)
@@ -390,9 +339,6 @@ func (e *Engine) Stop() {
 	e.wg.Wait()
 }
 
-// runCron is the per-automation loop: compute the next scheduled
-// time, sleep until then via the Clock (so fakes can advance), fire,
-// repeat. Exits when the context is cancelled.
 func (e *Engine) runCron(ctx context.Context, r *registered) {
 	defer e.wg.Done()
 	for {
@@ -400,7 +346,7 @@ func (e *Engine) runCron(ctx context.Context, r *registered) {
 		next := r.Schedule.Next(now)
 		d := next.Sub(now)
 		if d < 0 {
-			// Schedule.Next is documented to never return a time
+			// hazard: Schedule.Next is documented to never return a time
 			// before its argument; guard anyway so a bug elsewhere
 			// can't spin the goroutine.
 			d = 0
@@ -419,33 +365,8 @@ func (e *Engine) runCron(ctx context.Context, r *registered) {
 	}
 }
 
-// catchUpStackCap caps how many missed slots a `catchup: stack`
-// automation will fire on resume. Without it, a 7-day downtime of a
-// minutely cron would dispatch 10080 receipts in a row, hammering
-// the agent and the receipt log. 100 is enough to express
-// "yesterday's queued work is processed individually" without
-// blast-radius pathologies.
 const catchUpStackCap = 100
 
-// runCatchUp inspects the state store and, if the automation has been
-// fired before, fires the catch-up dispatch(es). Three modes:
-//
-//   - collapse (default): one fire on resume regardless of slot count
-//   - skip:               no fires on resume
-//   - stack:              one fire per missed slot, capped at
-//                         catchUpStackCap
-//
-// Called synchronously from Start so a caller that immediately
-// inspects receipts after Start sees the catch-up entries already
-// committed. Tests rely on this ordering.
-// firstBootCatchUpWindow caps how far back the engine looks on its
-// first-ever boot. A daily 6am cron installed at noon should still
-// fire today's missed slot; a daily cron installed three months ago
-// (and only just enabled) should NOT replay a hundred old slots.
-// 24h is the smallest window that covers a daily cron without
-// risking a flood. Hourly crons see at most one fire (collapse
-// semantics) regardless of catchup mode — the engine treats them
-// like a missed one-shot, not a backlog to drain.
 const firstBootCatchUpWindow = 24 * time.Hour
 
 func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
@@ -454,23 +375,12 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 	}
 	last, ok := e.state.LastFired(r.World, r.Name)
 	if !ok {
-		// First-ever boot — fire ONCE for the most recent past slot
-		// if it's within firstBootCatchUpWindow. Apple-Reminders
-		// behaviour: a 6am cron whose daemon comes online at noon
-		// still triggers today's brief. Slots older than the window
-		// are silently dropped — the engine doesn't replay arbitrary
-		// history on first install.
 		e.runFirstBootCatchUp(ctx, r)
 		return
 	}
 	now := e.clock.Now()
 
 	if r.Auto.Catchup == "stack" {
-		// One fire per missed slot. Walk the schedule from `last`
-		// forward, firing for each occurrence ≤ now, up to the cap.
-		// Each fire records the slot it covered as Scheduled so a
-		// catch-up that ran 1h late for the 06:00 slot still
-		// receipts as "scheduled: 06:00".
 		count := 0
 		t := r.Schedule.Next(last)
 		for !t.After(now) {
@@ -484,10 +394,7 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 				Scheduled: t,
 				Now:       e.clock.Now(),
 				LastFired: last,
-				// Missed=1 marks each row in stack mode as a single
-				// missed-slot replay, distinct from collapse mode's
-				// rolled-up Missed=N.
-				Missed: 1,
+				Missed:    1,
 			})
 			count++
 			t = r.Schedule.Next(t)
@@ -495,7 +402,6 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 		return
 	}
 
-	// collapse mode (default).
 	missed := countMissed(r.Schedule, last, now)
 	if missed == 0 {
 		return
@@ -510,28 +416,11 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 	})
 }
 
-// runFirstBootCatchUp fires the most recent past slot for a fresh
-// install when there's no LastFired cursor in state. Exists to make
-// `daemon → start at 12:00 → daily 6am cron` produce today's brief,
-// not "wait until tomorrow morning".
-//
-// The lookback is bounded by firstBootCatchUpWindow (24h) so a long-
-// dormant cron doesn't replay months of slots when its daemon is
-// finally started. Inside that window we fire ONCE regardless of
-// catchup mode (collapse/stack) — first boot is treated as a
-// missed-one-shot, not a backlog drain.
-//
-// Recording the fired slot via fire() → state.RecordFire() means the
-// next runCatchUp tick sees a real cursor and uses the configured
-// mode normally.
 func (e *Engine) runFirstBootCatchUp(ctx context.Context, r *registered) {
 	now := e.clock.Now()
 	cutoff := now.Add(-firstBootCatchUpWindow)
 	scheduled := lastScheduled(r.Schedule, cutoff, now)
 	if scheduled.IsZero() {
-		// No occurrence in the window — schedule sparser than 24h or
-		// already fired since the cutoff but before the daemon came
-		// up (impossible without a cursor, but defensive).
 		return
 	}
 	e.fire(ctx, r, FireSource{
@@ -540,46 +429,24 @@ func (e *Engine) runFirstBootCatchUp(ctx context.Context, r *registered) {
 		Scheduled: scheduled,
 		Now:       now,
 		Missed:    1,
-		// LastFired stays zero — there genuinely was no previous fire.
 	})
 }
 
-// runFSReplay synthesises create events for files newer than the
-// last successful fire. Bridges the gap between architect-down
-// windows (when fsnotify isn't running) and "files dropped into
-// inbox during downtime should be processed".
-//
-// Walks the watched directory, filters by the spec's pattern +
-// events allow-list, and if any matches exist with mtime > last,
-// fires once with the full path list as the burst payload. Same
-// debounce-coalesces semantics as a real fsnotify burst — the
-// agent sees one "burst of N files" prompt, not N separate fires.
-//
-// Skipped on first boot (no last-fired cursor → no comparison
-// baseline). Skipped when catchup == "skip" — matches cron's
-// catchup-skip semantics so users have one knob for both.
-//
-// Errors during the walk are logged but don't abort: a permission-
-// denied subdirectory shouldn't block replay of the rest. The
-// engine receipts the synthesised fire normally.
 func (e *Engine) runFSReplay(ctx context.Context, r *registered) {
 	last, ok := e.state.LastFired(r.World, r.Name)
 	if !ok {
-		return // first boot — nothing to compare against
+		return
 	}
 
 	spec := r.Auto.On.FS
 	if spec == nil {
-		return // defensive — caller should have filtered
+		return
 	}
 
-	// The replay synthesises create events. If the spec doesn't
-	// allow Create, skip — there's no other event we can sensibly
-	// reconstruct from a static directory snapshot.
 	allowsCreate := false
 	events := spec.Events
 	if len(events) == 0 {
-		events = []string{"create"} // mirror ApplyDefaults
+		events = []string{"create"}
 	}
 	for _, ev := range events {
 		if ev == "create" {
@@ -608,8 +475,6 @@ func (e *Engine) runFSReplay(ctx context.Context, r *registered) {
 	if spec.Recursive {
 		err := filepath.Walk(spec.Path, func(p string, info os.FileInfo, walkErr error) error {
 			if walkErr != nil {
-				// Permission denied / vanished directory. Log and
-				// skip — don't abort the whole replay.
 				e.logger.Warnf("fs replay walk %s: %v", p, walkErr)
 				return nil
 			}
@@ -651,9 +516,6 @@ func (e *Engine) runFSReplay(ctx context.Context, r *registered) {
 	})
 }
 
-// fire is the dispatch path shared by on-time + catch-up cron fires
-// and fs events. Renders the prompt, serialises on the per-agent
-// lock, dispatches, writes a receipt.
 func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	body := r.Auto.Prompt
 	if body == "" && r.Auto.Command != "" {
@@ -670,10 +532,6 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	}
 	prompt, renderErr := renderPrompt(body, "", src)
 
-	// EnqueuedAt: stamped BEFORE the per-agent lock so dashboards
-	// can render lock-wait time = Fired - EnqueuedAt. Otherwise a
-	// Fired stamp set inside the critical section conflates queue
-	// time with runtime time.
 	enqueuedAt := e.clock.Now()
 	mu := e.lockForAgent(r.World, r.Auto.Agent)
 	mu.Lock()
@@ -725,16 +583,7 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		rec.Error = result.Err.Error()
 	} else {
 		rec.OK = true
-		// Record success so the next catch-up math has a fresh
-		// anchor. We record the SCHEDULED time, not Fired — a
-		// catch-up that ran 2h late should advance the cursor to
-		// the slot it covered, not to "now".
 		if serr := e.state.RecordFire(r.World, r.Name, src.Scheduled); serr != nil {
-			// State write failure is non-fatal: the next catch-up
-			// will re-detect the missed slot and re-fire (collapse
-			// mode) or skip (skip mode). Surface the error so an
-			// operator with a tainted state file or a disk-full
-			// condition has a trail.
 			e.logger.Warnf("state cursor write failed for %s/%s: %v", r.World, r.Name, serr)
 		}
 	}
@@ -743,9 +592,6 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	}
 }
 
-// failFire commits a not-OK receipt without ever calling Dispatch.
-// Used when prompt rendering / command resolution fails — the
-// dispatcher would have nothing to send anyway.
 func (e *Engine) failFire(r *registered, src FireSource, cause error) {
 	now := e.clock.Now()
 	rec := Receipt{
@@ -775,19 +621,11 @@ func (e *Engine) failFire(r *registered, src FireSource, cause error) {
 	}
 }
 
-// agentLockKey is the registry key for a (world, agent) pair. We use
-// a struct rather than `world+"/"+agent` because the slug regex
-// allows `-` but not `/` per validation, however a programmatic
-// caller (or a future scheme that does allow `/`) could collide
-// `("foo/bar","baz")` with `("foo","bar/baz")` and silently
-// serialise unrelated agents on a single mutex.
 type agentLockKey struct {
 	world string
 	agent string
 }
 
-// lockForAgent returns the mutex serialising Dispatch for a given
-// (world, agent) pair. Lazy-allocated.
 func (e *Engine) lockForAgent(world, agent string) *sync.Mutex {
 	key := agentLockKey{world: world, agent: agent}
 	e.agentLocksMu.Lock()
@@ -803,23 +641,8 @@ func (e *Engine) lockForAgent(world, agent string) *sync.Mutex {
 	return m
 }
 
-// catchUpIterCap bounds catch-up math iterations across both
-// countMissed and lastScheduled. 10k slots covers seven days of
-// minutely cron (most-frequent realistic cadence × longest realistic
-// daemon-down window without the user noticing). Hand-edited or
-// corrupt state cursors that produce millions of slots would
-// otherwise block Engine.Start; the cap keeps boot bounded at ~6.5ms
-// per registered cron in pathological cases.
 const catchUpIterCap = 10_000
 
-// countMissed returns the number of cron occurrences strictly after
-// `last` and at-or-before `now`. The exclusive-inclusive boundary is
-// intentional: `last` is the time of the previous successful fire,
-// not a missed slot itself.
-//
-// Capped at catchUpIterCap iterations. Hitting the cap means catch-up
-// "saw" 10000 missed slots — the user should treat this as "many"
-// rather than a precise count.
 func countMissed(schedule cron.Schedule, last, now time.Time) int {
 	count := 0
 	t := schedule.Next(last)
@@ -833,15 +656,6 @@ func countMissed(schedule cron.Schedule, last, now time.Time) int {
 	return count
 }
 
-// lastScheduled returns the most recent scheduled occurrence in
-// (last, now]. Used as the receipt's "scheduled" field for catch-up
-// fires so the dashboard renders the slot the fire covered, not a
-// time that doesn't match the cron grid.
-//
-// Capped at catchUpIterCap iterations. Mirrors countMissed; in the
-// cap-hit case the returned time is the catchUpIterCap'th slot after
-// `last`, not the truly-most-recent slot. The user trades precision
-// for bounded boot time.
 func lastScheduled(schedule cron.Schedule, last, now time.Time) time.Time {
 	prev := time.Time{}
 	t := schedule.Next(last)

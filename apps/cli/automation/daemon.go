@@ -15,17 +15,6 @@ import (
 	"spwn.sh/packages/project"
 )
 
-// daemonCmd runs the automation engine for the current project and
-// blocks until the user interrupts. The engine reads spwn.yaml,
-// registers every automation, fires triggers, and dispatches to the
-// architect. Receipts land at <root>/.spwn/runs.jsonl, state at
-// <root>/.spwn/automations/state.json.
-//
-// This is the "make it actually run" path. The eventual home is the
-// long-running architect daemon (`spwn architect start`) which would
-// host one engine per project; for now this is the simplest one-
-// project-at-a-time entry point users can drive from a terminal or
-// a launchd/systemd unit.
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "Run the engine for the current project until interrupted",
@@ -49,20 +38,11 @@ resumes at the next scheduled time.`,
 			return err
 		}
 
-		// Skip the Docker handshake when there's nothing to run.
-		// Lets a freshly-scaffolded project run `automation daemon`
-		// without first installing Docker.
 		if countAutomations(p) == 0 {
 			fmt.Fprintln(cmd.OutOrStdout(), "no automations declared — nothing to run")
 			return nil
 		}
 
-		// Cross-process safety: hold an exclusive flock on
-		// `.spwn/automations/daemon.lock` for the daemon's lifetime.
-		// A second `spwn automation daemon` for the same project
-		// would otherwise interleave appended receipts and race the
-		// state cursor's tmp+rename. Released automatically on
-		// process exit (OS releases flock on close).
 		lockPath := filepath.Join(p.Root, ".spwn", "automations", "daemon.lock")
 		if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
 			return fmt.Errorf("create lockfile directory: %w", err)
@@ -78,11 +58,7 @@ resumes at the next scheduled time.`,
 			return fmt.Errorf("connect to architect: %w", err)
 		}
 
-		// Production engine: fsnotify-backed source for fs triggers,
-		// real clock for cron. The factory wires up the rest
-		// (dispatcher, receipts, state, command resolver) from the
-		// project root.
-		fsSource, err := automation.NewFSNotifySource(nil) // nil → stderr default
+		fsSource, err := automation.NewFSNotifySource(nil)
 		if err != nil {
 			return fmt.Errorf("fsnotify: %w", err)
 		}
@@ -97,7 +73,6 @@ resumes at the next scheduled time.`,
 			return fmt.Errorf("automation engine: %w", err)
 		}
 
-		// SIGINT / SIGTERM → cancel context → engine.Stop drains.
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 
@@ -118,9 +93,6 @@ resumes at the next scheduled time.`,
 	},
 }
 
-// countAutomations sums the per-world automation maps. Used by
-// daemonCmd as a quick "is there anything to run" check before
-// reaching for Docker.
 func countAutomations(p *project.Project) int {
 	if p == nil || p.Manifest == nil {
 		return 0

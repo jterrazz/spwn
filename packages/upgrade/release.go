@@ -47,11 +47,11 @@ type ReleaseClient interface {
 // GitHubClient talks to the real GitHub REST API. Zero value is valid
 // and uses default endpoints / the default http.Client.
 type GitHubClient struct {
-	Owner   string        // e.g. "jterrazz"
-	Repo    string        // e.g. "spwn"
-	BaseURL string        // default: https://api.github.com
-	HTTP    *http.Client  // default: http.Client with 10s timeout
-	Token   string        // optional, for private repos / higher rate limits
+	Owner   string
+	Repo    string
+	BaseURL string
+	HTTP    *http.Client
+	Token   string
 }
 
 func (c *GitHubClient) httpClient() *http.Client {
@@ -136,7 +136,6 @@ func ResolveTarget(ctx context.Context, client ReleaseClient, channel Channel) (
 		if len(list) == 0 {
 			return nil, fmt.Errorf("no releases found")
 		}
-		// GitHub returns newest first. Just take the first.
 		r := list[0]
 		return &r, nil
 	default:

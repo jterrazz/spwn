@@ -24,12 +24,6 @@ func CacheDir() string {
 	return filepath.Join(platform.CredentialsDir(), "mcp")
 }
 
-// providerKey mirrors mcp2cli's FileTokenStorage hash:
-//
-//	hashlib.sha256(server_url.encode()).hexdigest()[:16]
-//
-// Keep these in lock-step — the on-disk directory is what makes
-// the host cache reusable from inside the container.
 func providerKey(url string) string {
 	sum := sha256.Sum256([]byte(url))
 	return hex.EncodeToString(sum[:])[:16]

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	ib "spwn.sh/packages/compile"
-	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/compile/baseimages"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 )
 
@@ -59,8 +59,6 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	}
 
 	if err := docker.Start(ctx, containerID); err != nil {
-		// The start error is what the test must read; a failed cleanup
-		// would only bury it.
 		_ = docker.Remove(ctx, containerID)
 		t.Fatalf("start container: %v", err)
 	}

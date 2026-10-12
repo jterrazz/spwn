@@ -69,9 +69,6 @@ func IsProviderDisabled(p Provider) bool {
 	return LoadConfig().Pref(p).Disabled
 }
 
-// mutateConfig runs fn against the current Config under configMu, then
-// persists the result. Keeps concurrent DisableProvider / SetActiveMethod
-// callers from clobbering each other's writes.
 func mutateConfig(fn func(*Config)) error {
 	configMu.Lock()
 	defer configMu.Unlock()

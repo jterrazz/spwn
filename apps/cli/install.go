@@ -6,15 +6,6 @@ import (
 	"spwn.sh/apps/cli/dependency"
 )
 
-// installCmd creates the root-level `spwn install <ref>` command.
-// Delegates to dependency.RunInstall for the actual install logic.
-// Like `go get` or `npm install` — one verb, no subcommand.
-//
-// The optional `--agent <name>` flag narrows scope to a single
-// agent in the project. Without it, the ref is added to every
-// agent (npm-style). Local refs (skill/, tool/, hook/) require
-// --agent because bolting a local block onto every agent by
-// default is almost never what the user wants.
 func installCmd() *cobra.Command {
 	var agentFilter string
 	cmd := &cobra.Command{
@@ -41,10 +32,6 @@ Examples:
 	return cmd
 }
 
-// uninstallCmd creates the root-level `spwn uninstall <ref>` command.
-// Symmetric with installCmd; the --agent flag narrows the removal to
-// a single agent. The lockfile pin is kept when any other agent
-// still carries the ref.
 func uninstallCmd() *cobra.Command {
 	var agentFilter string
 	cmd := &cobra.Command{

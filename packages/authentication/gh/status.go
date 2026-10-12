@@ -14,8 +14,5 @@ func IsAuthenticated() bool {
 	if err != nil {
 		return false
 	}
-	// hosts.yml stored via gh's keyring path is functionally
-	// useless to us — the container can't reach the host keychain.
-	// Require an explicit oauth_token: line.
 	return strings.Contains(string(b), "oauth_token:")
 }

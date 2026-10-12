@@ -7,14 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/agent/internal/journal"
 	"spwn.sh/packages/activity"
+	"spwn.sh/packages/agent/internal/journal"
 )
 
 // Dream analyzes recent journal entries and promotes successful patterns to playbooks.
 // This is the primary function - formerly called Reflect.
 func Dream(mindPath string) (*ReflexionResult, error) {
-	// 1. Read journal entries
 	entries, err := journal.List(mindPath, 20)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read journal: %w", err)
@@ -23,13 +22,11 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 		return &ReflexionResult{Skipped: true, Reason: "no journal entries"}, nil
 	}
 
-	// 2. Analyze patterns
 	result := &ReflexionResult{
 		EntriesAnalyzed: len(entries),
 		Timestamp:       time.Now(),
 	}
 
-	// Count outcomes: 0 = success, -1 = destroyed (neutral), >0 = failed
 	completed := 0
 	failed := 0
 	destroyed := 0
@@ -51,7 +48,6 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 		result.SuccessRate = float64(completed) / float64(scorable)
 	}
 
-	// 3. Write reflexion summary to playbooks
 	playbooksDir := filepath.Join(mindPath, "playbooks")
 	if err := os.MkdirAll(playbooksDir, 0755); err != nil {
 		return nil, fmt.Errorf("creating the playbooks layer: %w", err)
@@ -64,7 +60,6 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 	}
 	result.OutputPath = outPath
 
-	// Emit activity event. Agent name = last path component of mindPath.
 	agentName := filepath.Base(mindPath)
 	activity.Log(activity.Event{
 		Type:    activity.TypeAgentDreamed,
@@ -106,9 +101,6 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 	fmt.Fprintf(&b, "- Destroyed: %d\n", r.DestroyedTasks)
 	fmt.Fprintf(&b, "- Success rate: %.0f%%\n\n", r.SuccessRate*100)
 
-	// List recent sessions. Skip entries whose WorldID is empty —
-	// without this guard, stray journal files leak in as phantom
-	// "- : completed (0s)" rows (Finding #19).
 	b.WriteString("## Recent Sessions\n\n")
 	for _, e := range entries {
 		if e.WorldID == "" {

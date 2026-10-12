@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
+	"spwn.sh/packages/activity"
 	"spwn.sh/packages/agent/internal/evolution"
 	"spwn.sh/packages/agent/internal/journal"
 	"spwn.sh/packages/agent/internal/mind"
 	"spwn.sh/packages/agent/internal/session"
-	"spwn.sh/packages/activity"
 )
 
 // ErrNotFound is returned when an agent name has no matching on-disk
@@ -58,8 +58,6 @@ func DeleteAgent(name string) error {
 	})
 	return nil
 }
-
-// --- Mind operations ---
 
 // AgentDir returns the absolute path to the agent's Mind directory.
 // Resolves to <projectRoot>/spwn/agents/{name}/ when running inside
@@ -132,8 +130,6 @@ func ImportMind(name string, archivePath string) error {
 	return mind.Import(name, archivePath)
 }
 
-// --- Journal operations ---
-
 // AppendJournal writes a timestamped journal entry for the given world
 // session to the agent's journal directory.
 func AppendJournal(mindPath, worldID string, exitCode int, duration time.Duration) error {
@@ -145,8 +141,6 @@ func AppendJournal(mindPath, worldID string, exitCode int, duration time.Duratio
 func ListJournal(mindPath string, n int) ([]JournalEntry, error) {
 	return journal.List(mindPath, n)
 }
-
-// --- Session operations ---
 
 // DeterministicSessionID generates a stable session ID derived from the agent
 // name and world ID, ensuring the same pair always maps to the same session.
@@ -170,8 +164,6 @@ func SaveSession(mindPath string, s *Session) error {
 func ListSessions(mindPath string) ([]Session, error) {
 	return session.List(mindPath)
 }
-
-// --- Evolution operations ---
 
 // Dream analyzes the named agent's recent journal entries and promotes
 // successful strategies into playbooks/auto-reflexion.md.

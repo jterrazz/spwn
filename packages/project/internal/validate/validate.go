@@ -14,10 +14,10 @@ import (
 	"sort"
 	"strings"
 
-	intmanifest "spwn.sh/packages/project/internal/manifest"
-	"spwn.sh/packages/project/internal/resolve"
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/refs"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/internal/resolve"
 
 	"gopkg.in/yaml.v3"
 )
@@ -164,23 +164,13 @@ func IsValidProjectName(name string) bool {
 	return name != "" && projectName.MatchString(name)
 }
 
-// reservedAgentSubcommands is the set of names that collide with
-// `spwn agent <subcommand>` OR with top-level `spwn <noun>` commands
-// that the `spwn <agent-name>` shortcut form would ambiguously match.
-// The former group prevents `spwn agent create agent` shadowing the
-// subcommand; the latter prevents `spwn architect` meaning both "run
-// the daemon" and "talk to the agent named architect".
 var reservedAgentSubcommands = map[string]struct{}{
-	// `spwn agent <subcommand>` collisions
 	"create": {}, "new": {}, "ls": {}, "rm": {}, "fork": {}, "inspect": {},
 	"logs": {}, "add": {}, "remove": {}, "talk": {}, "send": {}, "inbox": {},
 	"watch": {}, "dream": {}, "sleep": {}, "publish": {}, "get": {},
 	"export": {}, "import": {}, "start": {}, "stop": {}, "delete": {},
 	"deploy": {}, "compose": {}, "list": {}, "init": {},
 
-	// `spwn <top-level>` collisions — the bare-name shortcut
-	// `spwn <agent-name>` would route to the top-level command
-	// instead of the agent session, shadowing it permanently.
 	"architect": {}, "world": {}, "agent": {}, "check": {}, "up": {},
 	"down": {}, "build": {}, "install": {}, "uninstall": {}, "skill": {},
 	"auth": {}, "status": {}, "web": {}, "upgrade": {}, "team": {},
@@ -208,14 +198,11 @@ func ReservedAgentNames() []string {
 	return out
 }
 
-// reservedWorldSubcommands is the equivalent for `spwn world ...`.
 var reservedWorldSubcommands = map[string]struct{}{
 	"create": {}, "start": {}, "stop": {}, "ls": {}, "rm": {}, "inspect": {},
 	"logs": {}, "enter": {}, "destroy": {}, "rename": {}, "knowledge": {},
 	"new": {}, "list": {}, "remove": {}, "up": {}, "down": {}, "snap": {},
 }
-
-// ----- Rules -----
 
 func ruleManifestVersion(in Input) []Issue {
 	if in.Manifest == nil {
@@ -253,9 +240,6 @@ func ruleManifestName(in Input) []Issue {
 	return nil
 }
 
-// ruleWorldsMap requires at least one world entry — unless the project
-// has zero agents on disk too (a brand-new init that hasn't created
-// anything yet).
 func ruleWorldsMap(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -380,15 +364,6 @@ func ruleAgentStructure(in Input) []Issue {
 	return out
 }
 
-// agentYAML is the validator's local view of agent.yaml. Just enough
-// to drive rules.
-//
-// Deps replaces the old Tools/Dependencies/Skills trichotomy under the
-// unified package model — see packages/agent/manifest.go. Each entry
-// can be either a scalar string ("spwn:x") or a mapping with name +
-// optional allow/deny ("name: spwn:x\n  deny: [...]"). The local
-// agentYAML keeps only the ref name; per-method policies are the
-// runtime's concern, not the validator's.
 type agentYAML struct {
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
@@ -398,11 +373,6 @@ type agentYAML struct {
 	} `yaml:"runtime"`
 }
 
-// rawAgentYAML mirrors agentYAML but exposes Deps as a yaml.Node so
-// we can split string vs mapping entries before populating Deps. The
-// mapping form (with allow/deny) was previously rejected by a strict
-// []string decode — leading to spurious "cannot unmarshal !!map into
-// string" errors on perfectly valid agent.yamls.
 type rawAgentYAML struct {
 	Name        string    `yaml:"name"`
 	Description string    `yaml:"description"`
@@ -433,8 +403,6 @@ func (a *agentYAML) UnmarshalYAML(node *yaml.Node) error {
 		case yaml.ScalarNode:
 			a.Deps = append(a.Deps, entry.Value)
 		case yaml.MappingNode:
-			// Look for "name:" key — that's the dep ref. Other keys
-			// (allow/deny) are runtime concerns the validator skips.
 			var name string
 			for j := 0; j < len(entry.Content)-1; j += 2 {
 				k := entry.Content[j]
@@ -477,7 +445,7 @@ func ruleAgentYAMLParses(in Input) []Issue {
 		data, err := os.ReadFile(yamlPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				continue // already reported by ruleAgentStructure
+				continue
 			}
 			out = append(out, Issue{
 				Level: LevelError, Path: relPath(in.Root, yamlPath),
@@ -503,13 +471,6 @@ func ruleAgentYAMLParses(in Input) []Issue {
 	return out
 }
 
-// ruleAgentYAMLLegacyKeys flags legacy top-level keys in agent.yaml
-// (`tools:`, `skills:`, `hooks:`) that pre-date the unified
-// `dependencies:` list. The YAML parser silently ignores unknown
-// top-level keys, which meant a pre-refactor manifest upgraded
-// in-place would lose every dep without any user-visible signal.
-// This rule catches that case with a migration hint pointing at the
-// current schema.
 func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 	var out []Issue
 	legacyKeys := []string{"tools", "skills", "hooks"}
@@ -522,9 +483,6 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 		if err != nil {
 			continue
 		}
-		// Parse into a generic map so unknown top-level keys are
-		// visible. A strict-typed struct would silently drop them,
-		// which is exactly the rot this rule exists to catch.
 		var raw map[string]yaml.Node
 		if yaml.Unmarshal(data, &raw) != nil {
 			continue
@@ -544,14 +502,6 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 	return out
 }
 
-// ruleAgentDescription enforces that every agent.yaml sets a
-// non-empty `description:`. The description is a one-line pitch of
-// the agent's purpose — what inspect, status, and the web UI render
-// without opening AGENTS.md. Mirrors the skill frontmatter
-// convention (name + description) applied at the agent level.
-//
-// Unparseable agent.yaml files are already flagged by
-// ruleAgentYAMLParses; here we just skip them to avoid double-reporting.
 func ruleAgentDescription(in Input) []Issue {
 	var out []Issue
 	for _, a := range in.AgentRefs {
@@ -595,13 +545,11 @@ func ruleReservedAgentNames(in Input) []Issue {
 	return out
 }
 
-// ruleOneAgentOneWorld enforces that the same agent name does not
-// appear in more than one worlds[*].agents list.
 func ruleOneAgentOneWorld(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
-	first := map[string]string{} // agent → first world
+	first := map[string]string{}
 	var out []Issue
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
@@ -620,18 +568,6 @@ func ruleOneAgentOneWorld(in Input) []Issue {
 	return out
 }
 
-// ruleWorkspaceMounts enforces the workspace mount form. Accepted
-// entries:
-//
-//   - "path"           (bare host path — auto-named from the path basename
-//                       when slug-compliant, falling back to workspace<N>)
-//   - "name=path"      (named mount; container-side becomes /workspaces/<name>)
-//   - "name=path:ro"   (same, read-only)
-//
-// Container paths never appear in the manifest. Users don't write
-// `/workspaces/...` — that's an implementation detail of where the
-// mount lands inside the container. See world.AutoWorkspaceName for
-// the bare-path naming logic.
 func ruleWorkspaceMounts(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -641,7 +577,6 @@ func ruleWorkspaceMounts(in Input) []Issue {
 		w := in.Manifest.Worlds[wname]
 		for _, entry := range w.Workspaces {
 			raw := strings.TrimSuffix(entry, ":ro")
-			// If there's an `=`, the left side must be a valid name.
 			if eq := strings.Index(raw, "="); eq > 0 {
 				name := strings.TrimSpace(raw[:eq])
 				path := strings.TrimSpace(raw[eq+1:])
@@ -660,9 +595,6 @@ func ruleWorkspaceMounts(in Input) []Issue {
 				}
 				continue
 			}
-			// Bare entry: any host path. Container-path-on-RHS form is no
-			// longer accepted — colons in the entry mean the user likely
-			// tried to hand-craft the container side.
 			if strings.Contains(raw, ":") {
 				out = append(out, Issue{
 					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
@@ -675,9 +607,6 @@ func ruleWorkspaceMounts(in Input) []Issue {
 	return out
 }
 
-// rulePackVersionConflict flags multi-agent worlds whose members
-// declare the same package at different versions. Versions are
-// detected via the `@scope/name@version` suffix convention.
 func rulePackVersionConflict(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -688,8 +617,7 @@ func rulePackVersionConflict(in Input) []Issue {
 		if len(w.Agents) < 2 {
 			continue
 		}
-		// dependency-name → seen versions
-		versions := map[string]map[string]string{} // dependency → version → first-agent
+		versions := map[string]map[string]string{}
 		for _, agentName := range w.Agents {
 			a := findAgent(in.AgentRefs, agentName)
 			if a == nil || !a.Exists {
@@ -726,9 +654,6 @@ func rulePackVersionConflict(in Input) []Issue {
 	return out
 }
 
-// ruleRuntimeBackendConflict flags multi-agent worlds whose members
-// disagree on a non-empty runtime backend. Empty (default) is
-// compatible with anything explicit.
 func ruleRuntimeBackendConflict(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -768,13 +693,6 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// rulePacksExist checks every dependency referenced by any agent or
-// world against the BuiltinTools catalog (for spwn:* refs) and
-// against the filesystem (for local refs: skill/, tool/, hook/).
-//
-// Every ref must use an explicit form. Bare names and the retired
-// `skill:` / `tool:` / `hook:` / `local:` colon-schemes are rejected
-// with a hint pointing the author at the path-style local grammar.
 func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -813,7 +731,6 @@ func rulePacksExist(in Input) []Issue {
 			}}
 		}
 
-		// ResolveNotFound falls through here.
 		switch ref.Kind {
 		case refs.KindLocalSkill:
 			return []Issue{{
@@ -848,7 +765,6 @@ func rulePacksExist(in Input) []Issue {
 	}
 
 	var out []Issue
-	// Project-level deps (top-level deps: in spwn.yaml).
 	for _, t := range in.Manifest.Deps {
 		out = append(out, check(t, "spwn.yaml#deps")...)
 	}
@@ -868,16 +784,6 @@ func rulePacksExist(in Input) []Issue {
 	return out
 }
 
-// ruleLockfileConsistent compares every spwn:* or @<owner>/*
-// dependency ref declared in any agent.yaml or spwn.yaml world against
-// spwn.lock. Missing entries become errors so `spwn build` fails
-// loudly and points the user at `spwn install`.
-//
-// Local (bare) refs are never lockfile-tracked.
-//
-// If no lockfile exists yet, the rule is silent — the project has
-// never been installed against. `spwn init` seeds an initial lockfile
-// so freshly-scaffolded projects pass.
 func ruleLockfileConsistent(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -891,7 +797,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		}}
 	}
 	if lock == nil {
-		return nil // no lockfile yet, nothing to compare against
+		return nil
 	}
 
 	type refRec struct {
@@ -906,7 +812,6 @@ func ruleLockfileConsistent(in Input) []Issue {
 		}
 	}
 
-	// Project-level dependency.
 	collect(in.Manifest.Deps, "spwn.yaml#deps")
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
@@ -925,9 +830,6 @@ func ruleLockfileConsistent(in Input) []Issue {
 	for _, rec := range all {
 		depRef, _ := refs.SplitVersion(rec.raw)
 		ref := refs.ParseRef(depRef)
-		// Local refs are never lockfile entries. Invalid refs are
-		// already surfaced by rulePacksExist with a crisper error;
-		// skip them here to avoid double-reporting.
 		if refs.IsLocalKind(ref.Kind) || ref.Kind == refs.KindInvalid {
 			continue
 		}
@@ -947,10 +849,6 @@ func ruleLockfileConsistent(in Input) []Issue {
 	return out
 }
 
-// ruleRuntimeSupported checks each agent's runtime backend against
-// the host's SupportedRuntimes list. Accepts either ref syntax —
-// `spwn:claude-code` and `spwn:claude-code` both resolve to the
-// same entry in the supported-runtime set.
 func ruleRuntimeSupported(in Input) []Issue {
 	if len(in.SupportedRuntimes) == 0 {
 		return nil
@@ -959,8 +857,6 @@ func ruleRuntimeSupported(in Input) []Issue {
 	for _, r := range in.SupportedRuntimes {
 		supported[refs.Canonical(r)] = struct{}{}
 	}
-	// Display list stays in the canonical scheme form so the hint
-	// matches what scaffold/docs advertise.
 	display := make([]string, len(in.SupportedRuntimes))
 	for i, r := range in.SupportedRuntimes {
 		display[i] = refs.Canonical(r)
@@ -976,8 +872,8 @@ func ruleRuntimeSupported(in Input) []Issue {
 		}
 		if _, ok := supported[refs.Canonical(parsed.Runtime.Backend)]; !ok {
 			out = append(out, Issue{
-				Level: LevelError,
-				Path:  relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
+				Level:   LevelError,
+				Path:    relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
 				Message: fmt.Sprintf("runtime backend %q is not supported", parsed.Runtime.Backend),
 				Hint:    "supported: " + strings.Join(display, ", "),
 			})
@@ -999,8 +895,8 @@ func ruleMarkdownImports(in Input) []Issue {
 		}
 		for _, ref := range result.Missing {
 			out = append(out, Issue{
-				Level: LevelError,
-				Path:  fmt.Sprintf("%s @%s", relPath(in.Root, ref.Source), ref.Target),
+				Level:   LevelError,
+				Path:    fmt.Sprintf("%s @%s", relPath(in.Root, ref.Source), ref.Target),
 				Message: "broken @-import: " + ref.Target,
 				Hint:    "create " + relPath(in.Root, ref.ResolvedPath) + " or remove the reference",
 			})
@@ -1019,25 +915,6 @@ func ruleMarkdownImports(in Input) []Issue {
 	return out
 }
 
-// ruleSkillFrontmatter enforces the skill markdown convention:
-// every .md under spwn/skills/ and spwn/tools/<name>/skills/ must
-// start with a YAML frontmatter block declaring `name:` and
-// `description:`.
-//
-// Shape (the "SKILL" convention, kept as generic markdown
-// frontmatter so non-skill .md can opt in later):
-//
-//	---
-//	name: paper-reading
-//	description: Use when summarising academic papers …
-//	---
-//
-//	<markdown body>
-//
-// Missing block, missing field, or unterminated block all surface
-// as LevelError with a fix-it hint. Other fields in the
-// frontmatter are accepted and ignored so authors can attach
-// their own metadata without tripping the rule.
 func ruleSkillFrontmatter(in Input) []Issue {
 	var out []Issue
 	for _, path := range collectSkillFiles(in.Root) {
@@ -1077,16 +954,6 @@ func ruleSkillFrontmatter(in Input) []Issue {
 	return out
 }
 
-// collectSkillFiles walks every place a user authors skills in a
-// spwn project and returns the full list of markdown files found
-// there. The two locations are:
-//
-//   - spwn/skills/              — project-wide bare skills
-//   - spwn/tools/<name>/skills/ — skills shipped by a local tool
-//
-// Each location is walked recursively so nested skill directories
-// (spwn/skills/reviewing/code-review.md) are covered. Missing
-// locations return an empty slice, never an error.
 func collectSkillFiles(root string) []string {
 	var out []string
 	for _, rel := range skillSearchRoots(root) {
@@ -1104,17 +971,11 @@ func collectSkillFiles(root string) []string {
 	return out
 }
 
-// skillSearchRoots lists every directory under which skill markdown
-// files may appear. Directories that don't exist are silently skipped
-// by the walker (filepath.WalkDir returns os.ErrNotExist which the
-// collector drops).
 func skillSearchRoots(root string) []string {
 	var roots []string
 
-	// Project-wide skills.
 	roots = append(roots, filepath.Join(root, "spwn", "skills"))
 
-	// Local-tool skills. One skills/ dir per tool.
 	if entries, err := os.ReadDir(filepath.Join(root, "spwn", "tools")); err == nil {
 		for _, e := range entries {
 			if e.IsDir() {
@@ -1138,12 +999,6 @@ func ruleOrphanAgents(in Input) []Issue {
 	return out
 }
 
-// ruleKnowledgePath surfaces issues around the worlds.<name>.knowledge
-// key. When a world declares a path, the path must exist on disk
-// (LevelWarning if missing — spawn still works, it just skips the
-// bind mount). When a world declares no path, an info-level hint
-// reminds the user that agents in that world will never be told a
-// knowledge base exists.
 func ruleKnowledgePath(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -1178,26 +1033,6 @@ func ruleKnowledgePath(in Input) []Issue {
 	return out
 }
 
-// ----- helpers -----
-
-// ruleHookEventsSupported walks every spwn/hooks/<n>.yaml and warns
-// when the event field targets a runtime that doesn't support it —
-// the silent-no-op path the user almost certainly didn't intend.
-//
-// Strategy:
-//   - Build "selecting agents" per hook from each agent.yaml's deps:
-//     `hook/<n>` means the agent subscribes to that hook.
-//   - For each selecting agent, resolve the agent's runtime backend
-//     (agent-level override falls back to the project-level
-//     spwn.yaml#runtime.backend, then to claude-code).
-//   - Look up the runtime's event registry. If the hook's event is
-//     not in it, emit a LevelWarning naming both the hook and the
-//     agent whose runtime would drop it.
-//   - When a hook is declared but no agent in the project subscribes,
-//     emit a LevelInfo so dead hook files don't accumulate silently.
-//
-// Skips entirely when HookEventsByRuntime is empty (golden tests +
-// catalog scaffold paths that don't construct a full registry).
 func ruleHookEventsSupported(in Input) []Issue {
 	if len(in.HookEventsByRuntime) == 0 || in.Manifest == nil {
 		return nil
@@ -1208,11 +1043,8 @@ func ruleHookEventsSupported(in Input) []Issue {
 		return nil
 	}
 
-	// Project-default runtime, used when agent.yaml leaves runtime.backend
-	// blank. Mirrors the architect resolver's fallback chain.
 	defaultRuntime := strings.TrimSpace(in.Manifest.Runtime.Backend)
 
-	// Map agent name → resolved runtime short name (no `spwn:` prefix).
 	agentRuntime := make(map[string]string, len(in.AgentRefs))
 	agentDeps := make(map[string][]string, len(in.AgentRefs))
 	for _, a := range in.AgentRefs {
@@ -1231,7 +1063,6 @@ func ruleHookEventsSupported(in Input) []Issue {
 		agentDeps[a.Name] = y.Deps
 	}
 
-	// Build selecting-agents per hook from the deps lists.
 	selectors := make(map[string][]string)
 	for agentName, deps := range agentDeps {
 		for _, dep := range deps {
@@ -1273,7 +1104,6 @@ func ruleHookEventsSupported(in Input) []Issue {
 		picked := selectors[hookName]
 		sort.Strings(picked)
 
-		// Orphan hook: no agent subscribes via hook/<n>.
 		if len(picked) == 0 {
 			out = append(out, Issue{
 				Level:   LevelInfo,
@@ -1284,7 +1114,6 @@ func ruleHookEventsSupported(in Input) []Issue {
 			continue
 		}
 
-		// Per selecting agent, check the event is in that runtime's set.
 		seen := map[string]struct{}{}
 		for _, agentName := range picked {
 			runtime := agentRuntime[agentName]
@@ -1293,7 +1122,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 			}
 			supported, ok := in.HookEventsByRuntime[runtime]
 			if !ok {
-				continue // unknown runtime is reported by ruleRuntimeSupported
+				continue
 			}
 			if eventInList(event, supported) {
 				continue
@@ -1320,9 +1149,6 @@ func ruleHookEventsSupported(in Input) []Issue {
 	return out
 }
 
-// eventInList does a linear membership check; the event lists are
-// short (≤10 entries) so allocating a map per call would cost more
-// than the scan.
 func eventInList(want string, set []string) bool {
 	for _, s := range set {
 		if s == want {
@@ -1332,9 +1158,6 @@ func eventInList(want string, set []string) bool {
 	return false
 }
 
-// stripCatalogPrefix turns "spwn:claude-code" → "claude-code" and
-// leaves bare names untouched. Matches what the architect resolver
-// passes to runtime adapters at compile time.
 func stripCatalogPrefix(ref string) string {
 	if strings.HasPrefix(ref, "spwn:") {
 		return strings.TrimPrefix(ref, "spwn:")
@@ -1368,16 +1191,8 @@ func relPath(root, path string) string {
 	return rel
 }
 
-// invalidRefHint produces the canonical "use skill/, tool/, or hook/"
-// hint for a bare/malformed dependency ref. When the bare name happens
-// to match exactly one on-disk target (skill file, tool dir, or hook
-// script) we point at that specific form so the author's fix is a
-// one-character edit; otherwise we list all three options.
 func invalidRefHint(root, raw string) string {
 	name := strings.TrimSpace(raw)
-	// Drop any accidental leading `@` or retired colon-form prefixes
-	// so the path-style suggestion still works for legacy authorings
-	// that sneak through.
 	name = strings.TrimPrefix(name, "@")
 	for _, retired := range []string{"local:", "skill:", "tool:", "hook:"} {
 		if strings.HasPrefix(name, retired) {
@@ -1417,11 +1232,6 @@ func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
 		return "check the dependency name, or add it as a local tool under ./spwn/tools/"
 	}
-	// Display every catalog entry in the canonical scheme form
-	// (`spwn:unix`, not `spwn:unix`) so the hint matches what
-	// scaffold output and docs now advertise. Legacy input like
-	// `spwn:nonexistent` still matches — the check side uses
-	// refs.ParseRef, not string equality.
 	display := make([]string, len(catalog))
 	for i, c := range catalog {
 		display[i] = refs.Canonical(c)

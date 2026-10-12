@@ -62,16 +62,11 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		return transpile.Input{}, fmt.Errorf("world %q not in manifest (have: %v)", selected, names)
 	}
 
-	// Index agents on disk by name.
 	byName := make(map[string]AgentSource, len(src.Agents))
 	for _, a := range src.Agents {
 		byName[a.Name] = a
 	}
 
-	// Index project hooks by name so we can attach per-agent slices
-	// based on each agent's `hook/<n>` deps. Hooks an agent doesn't
-	// declare are silently absent for that agent — selection is
-	// explicit, mirroring how skill/<name> and tool/<name> work.
 	hookByName := make(map[string]transpile.HookEntry, len(src.Hooks))
 	for _, h := range src.Hooks {
 		hookByName[h.Name] = transpile.HookEntry{
@@ -82,7 +77,6 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		}
 	}
 
-	// Same pattern for slash-invoked commands.
 	commandByName := make(map[string]transpile.CommandEntry, len(src.Commands))
 	for _, c := range src.Commands {
 		commandByName[c.Name] = transpile.CommandEntry{
@@ -91,10 +85,6 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		}
 	}
 
-	// Collect the union of packages from every agent in this world.
-	// This mirrors what spawn does before probing the container: the
-	// render doesn't need a verified list, it just needs to know what
-	// the manifest *claims* is available.
 	packages := map[string]struct{}{}
 	agents := make([]transpile.AgentInput, 0, len(world.Agents))
 	for _, name := range world.Agents {
@@ -118,7 +108,6 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 			Commands:  selectAgentCommands(a.Config.Deps, commandByName),
 		})
 	}
-	// Add project-level deps (top-level deps: in spwn.yaml).
 	for _, p := range src.Manifest.Deps {
 		packages[p] = struct{}{}
 	}
@@ -129,13 +118,6 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 	}
 	sort.Strings(packageList)
 
-	// WorldKnowledgeMounted mirrors what the spawn pipeline would do
-	// at runtime: when the world declares a knowledge path AND the
-	// directory exists on disk, the renderer emits the "with
-	// knowledge" boilerplate. Empty key or missing dir → omit every
-	// /world/knowledge/ reference so the agent is never told a
-	// knowledge base exists. This matches the architect's behaviour
-	// in packages/architect/spawn.go.
 	knowledgeMounted := false
 	if kp := strings.TrimSpace(world.Knowledge); kp != "" {
 		resolved := kp
@@ -185,10 +167,6 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 	}, nil
 }
 
-// selectAgentCommands returns the subset of project commands the
-// agent's dependency list explicitly subscribes to via `command/<n>`
-// refs. Mirrors selectAgentHooks; unknown command names are dropped
-// silently here and surface as resolver errors via the validator.
 func selectAgentCommands(deps []string, byName map[string]transpile.CommandEntry) []transpile.CommandEntry {
 	if len(deps) == 0 || len(byName) == 0 {
 		return nil
@@ -219,11 +197,6 @@ func selectAgentCommands(deps []string, byName map[string]transpile.CommandEntry
 	return out
 }
 
-// selectAgentHooks returns the subset of project hooks the agent's
-// dependency list explicitly subscribes to via `hook/<n>` refs.
-// Unknown hook names (declared in agent.yaml but not present under
-// spwn/hooks/) are silently dropped here — the validator surfaces
-// those as proper errors via the ResolveTool path.
 func selectAgentHooks(deps []string, byName map[string]transpile.HookEntry) []transpile.HookEntry {
 	if len(deps) == 0 || len(byName) == 0 {
 		return nil

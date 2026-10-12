@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-// receiptTimeFormat is the canonical timestamp format on disk. RFC3339
-// with nanosecond precision keeps logs sortable as plain text (string
-// comparison matches chronological order) and matches what the
-// jterrazz-os occurrences.jsonl prior art emits.
 const receiptTimeFormat = time.RFC3339Nano
 
 // EngineVersion identifies the engine that wrote a receipt. Semver
@@ -100,17 +96,8 @@ type Receipt struct {
 	EnqueuedAt time.Time `json:"enqueued_at,omitempty"`
 }
 
-// maxReceiptOutputBytes caps how much runtime output we record per
-// receipt. 8KB is enough for an error message + a tail of stack
-// trace; longer runs are truncated with a "…[truncated]" marker.
-// The architect dispatcher already truncates at 32KB upstream;
-// this lower bound is the engine's own safety net for non-architect
-// dispatchers that might forget to truncate.
 const maxReceiptOutputBytes = 8 * 1024
 
-// truncateOutput returns at most maxReceiptOutputBytes of s, with a
-// trailing "…[truncated]" marker when it had to cut. Used by the
-// fire path to bound how much output ends up in runs.jsonl.
 func truncateOutput(s string) string {
 	if len(s) <= maxReceiptOutputBytes {
 		return s
@@ -211,8 +198,6 @@ type FileReceiptWriter struct {
 	mu         sync.Mutex
 }
 
-// Default rotation config. 100MB × 5 retained = 500MB max footprint
-// per project's receipt log, ~6 months of brisk-pace fires.
 const (
 	DefaultRotateSize = 100 * 1024 * 1024
 	DefaultRotateKeep = 5
@@ -247,9 +232,6 @@ func (w *FileReceiptWriter) Write(r Receipt) error {
 		return fmt.Errorf("receipt dir: %w", err)
 	}
 
-	// Check size BEFORE appending so a single oversized line
-	// doesn't push the file past the cap; rotate proactively when
-	// the existing file is already at or beyond the threshold.
 	if w.RotateSize > 0 {
 		if info, err := os.Stat(w.Path); err == nil && info.Size() >= w.RotateSize {
 			_ = w.rotateLocked()
@@ -271,17 +253,11 @@ func (w *FileReceiptWriter) Write(r Receipt) error {
 	return nil
 }
 
-// rotateLocked renames runs.jsonl → runs.jsonl.1, .1 → .2, …, drops
-// the oldest beyond RotateKeep. Caller holds w.mu. Errors are
-// returned so a future logging hook can surface them; today the
-// caller ignores rotation errors (write proceeds against the
-// existing file).
 func (w *FileReceiptWriter) rotateLocked() error {
 	keep := w.RotateKeep
 	if keep < 1 {
-		keep = 1 // at least always have a .1 so historic data survives one rotation
+		keep = 1
 	}
-	// Drop the oldest first, then shift each .N → .(N+1).
 	oldest := fmt.Sprintf("%s.%d", w.Path, keep)
 	_ = os.Remove(oldest)
 	for i := keep - 1; i >= 1; i-- {

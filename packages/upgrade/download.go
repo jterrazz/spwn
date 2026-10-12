@@ -23,7 +23,6 @@ func DownloadHTTP(ctx context.Context, url, dest string) (int64, error) {
 			return n, nil
 		}
 		lastErr = err
-		// No retry on 4xx, only transient failures.
 		if strings.Contains(err.Error(), "HTTP 4") {
 			return 0, err
 		}
@@ -83,7 +82,6 @@ func ParseChecksums(r io.Reader) (map[string]string, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		// Accept either "digest  name" (two spaces) or "digest name" (one).
 		fields := strings.Fields(line)
 		if len(fields) != 2 {
 			return nil, fmt.Errorf("checksums line %d: want 2 fields, got %d: %q", lineNum, len(fields), line)

@@ -3,7 +3,6 @@ package transpile
 import (
 	"fmt"
 	"sort"
-
 )
 
 // Runtime renders a project into a runtime-specific Tree. A Runtime
@@ -13,19 +12,10 @@ import (
 // Each concrete runtime lives in its own sub-package under
 // packages/compile/runtimes/ and registers itself via init().
 type Runtime interface {
-	// Name identifies the runtime (e.g. "claude-code", "codex").
 	Name() string
 
-	// Render translates the generic project into this runtime's
-	// conventions. May inspect manifest + agents + skills + hooks.
 	Render(input Input) (*Tree, error)
 
-	// SupportedHookEvents returns the runtime hook event names this
-	// adapter actually fires inside the container. Used by `spwn
-	// check` to warn when an agent's hook targets an event the
-	// agent's runtime would silently ignore. The returned slice
-	// should be alphabetically sorted; an empty slice means the
-	// adapter has no opinion (validator skips the check for it).
 	SupportedHookEvents() []string
 }
 

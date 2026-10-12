@@ -13,11 +13,14 @@
 //
 //   - Mutable per-world data lives as JSON under
 //     ~/.spwn/world-states/<world-id>/runtime.json. This covers:
-//       • the deployed-agent list (agents added/removed after spawn)
-//       • per-agent runtime session ids (chat continuity)
-//       • DisplayName — the editable human name that overrides the
-//         creation-time label for rendering. Supports `spwn world
-//         rename` without destroying + recreating the container.
+//
+//   - the deployed-agent list (agents added/removed after spawn)
+//
+//   - per-agent runtime session ids (chat continuity)
+//
+//   - DisplayName — the editable human name that overrides the
+//     creation-time label for rendering. Supports `spwn world
+//     rename` without destroying + recreating the container.
 //
 // The same world-state directory also holds the world's manifest,
 // physics.md, faculties.md, roster.md and shared/ scratchpad. Co-
@@ -114,14 +117,6 @@ func NewStoreAt(dir string) (*Store, error) {
 	return &Store{dir: dir}, nil
 }
 
-
-// ── World enumeration (Docker-label-backed) ───────────────────────────
-
-// testRunFilter returns the SPWN_TEST_LABEL value when set, empty
-// otherwise. Used to scope enumeration to a single test run so
-// parallel tests with identically-named worlds don't collide at
-// routing time. In production the env var is unset and this is a
-// no-op pass-through.
 func testRunFilter() string { return os.Getenv(labels.TestRunEnv) }
 
 func belongsToTestRun(containerLabels map[string]string) bool {
@@ -154,9 +149,6 @@ func (s *Store) List() ([]models.World, error) {
 		}
 		w, err := labels.ParseWorld(c.Labels)
 		if err != nil {
-			// Container tagged as a world but with unparseable
-			// metadata is a developer bug, not a user-facing error.
-			// Skip rather than failing the whole list.
 			continue
 		}
 		w.ContainerID = c.ID
@@ -166,7 +158,6 @@ func (s *Store) List() ([]models.World, error) {
 		liveIDs = append(liveIDs, w.ID)
 	}
 
-	// Best-effort GC. Failures here never block a list call.
 	_ = s.GC(liveIDs)
 	return worlds, nil
 }
@@ -198,13 +189,6 @@ func (s *Store) Get(id string) (*models.World, error) {
 	return nil, fmt.Errorf("world %s %w", id, ErrNotFound)
 }
 
-// hydrate fills the mutable bits of a World from runtime state.
-// Labels carry the creation-time agent list + creation-time name;
-// runtimestate carries post-spawn add/remove, per-agent mutable
-// fields (status, session ids), and the display-name override. The
-// two must be merged so hot-deployed agents appear alongside
-// originals without discarding either, and so `spwn world rename`
-// surfaces in every subsequent List.
 func (s *Store) hydrate(w *models.World) {
 	rs, _ := s.Load(w.ID)
 	if len(rs.SessionIDs) > 0 {
@@ -237,9 +221,6 @@ func (s *Store) hydrate(w *models.World) {
 	w.Agents = merged
 }
 
-// derivedStatus maps a container's runtime state into the spwn
-// Status vocabulary. Stopped containers are NOT removed from
-// listings — they remain a world, just one the user can restart.
 func derivedStatus(c backend.ContainerInfo) models.Status {
 	if c.Running {
 		return models.StatusRunning
@@ -252,8 +233,6 @@ func derivedStatus(c backend.ContainerInfo) models.Status {
 	}
 	return models.StatusIdle
 }
-
-// ── Per-world mutable state ───────────────────────────────────────────
 
 // Load returns the runtime state for a world. Missing files yield an
 // empty File without an error — a freshly-spawned world legitimately
@@ -423,8 +402,6 @@ func (s *Store) GC(liveIDs []string) error {
 	}
 	return nil
 }
-
-// ── internals ──────────────────────────────────────────────────────────
 
 func (s *Store) path(worldID string) string {
 	return filepath.Join(s.dir, worldID, "runtime.json")

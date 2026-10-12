@@ -20,14 +20,11 @@ import (
 // mark — still 5min of headroom for the request itself.
 const DefaultRefreshLeeway = 5 * time.Minute
 
-// httpClient is package-private so tests can swap it. Never call
+// hazard: httpClient is package-private so tests can swap it. Never call
 // http.DefaultClient directly from package code — that timeout-less
 // client can hang an entire spawn if a token endpoint stalls.
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
-// tokenFile mirrors the on-disk shape mcp2cli writes. Field names
-// match RFC 6749's token response so a refresh response decodes
-// directly into this struct.
 type tokenFile struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type,omitempty"`
@@ -36,16 +33,12 @@ type tokenFile struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
-// clientFile mirrors mcp2cli's client.json. We only need the few
-// fields used during refresh (auth method, id/secret).
 type clientFile struct {
 	ClientID                string `json:"client_id"`
 	ClientSecret            string `json:"client_secret,omitempty"`
 	TokenEndpointAuthMethod string `json:"token_endpoint_auth_method,omitempty"`
 }
 
-// metadata is the subset of OAuth Authorization Server Metadata
-// (RFC 8414) we consume for refresh.
 type metadata struct {
 	TokenEndpoint string `json:"token_endpoint"`
 }
@@ -77,13 +70,12 @@ func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error
 		return false, fmt.Errorf("parse tokens: %w", err)
 	}
 
-	// No expires_in → assume non-expiring (some providers).
 	if t.ExpiresIn <= 0 {
 		return false, nil
 	}
 	expiry := fi.ModTime().Add(time.Duration(t.ExpiresIn) * time.Second)
 	if time.Until(expiry) > leeway {
-		return false, nil // still fresh
+		return false, nil
 	}
 
 	if t.RefreshToken == "" {
@@ -115,8 +107,6 @@ func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
-	// Auth: client_secret_basic (default per spec) when we have a secret.
-	// Public clients (PKCE without secret) put client_id in the form.
 	if c.ClientSecret != "" {
 		req.SetBasicAuth(c.ClientID, c.ClientSecret)
 	} else if c.ClientID != "" {
@@ -144,9 +134,6 @@ func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error
 		return false, fmt.Errorf("token response had no access_token")
 	}
 
-	// Preserve refresh_token across rotation policies. Some providers
-	// rotate (return a new one); others don't. If absent in the
-	// response, we keep the existing refresh_token alive.
 	if newT.RefreshToken == "" {
 		newT.RefreshToken = t.RefreshToken
 	}
@@ -156,7 +143,7 @@ func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error
 		return false, err
 	}
 
-	// Atomic replace so a partial write never corrupts tokens.json.
+	// invariant: Atomic replace so a partial write never corrupts tokens.json.
 	tmp := tokensPath + ".tmp"
 	if err := os.WriteFile(tmp, out, 0o600); err != nil {
 		return false, err
@@ -192,11 +179,6 @@ func RefreshAll(ctx context.Context, leeway time.Duration) (refreshed int, errs 
 	return refreshed, errs
 }
 
-// discoverTokenEndpoint fetches OAuth Authorization Server Metadata
-// (RFC 8414) for the given resource server URL. Tries the resource
-// URL's well-known first, then falls back to the origin
-// (scheme://host) — different providers host the document at
-// different levels.
 func discoverTokenEndpoint(ctx context.Context, resourceURL string) (string, error) {
 	candidates := []string{
 		strings.TrimRight(resourceURL, "/") + "/.well-known/oauth-authorization-server",

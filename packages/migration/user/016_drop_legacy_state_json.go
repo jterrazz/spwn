@@ -21,10 +21,6 @@ var DropLegacyStateJSON = migration.Migration{
 	Number:      16,
 	Description: "drop legacy ~/.spwn/state.json + ~/.spwn/runtime/ (superseded by labels-as-truth)",
 	Apply: func(_ context.Context, baseDir string) error {
-		// All three removals are best-effort: a fresh install has
-		// neither, and an already-evicted install (thanks to the old
-		// side-effect path) also has neither. Either way this is a
-		// no-op.
 		_ = os.Remove(filepath.Join(baseDir, "state.json"))
 		_ = os.Remove(filepath.Join(baseDir, "state.json.bak"))
 		_ = os.RemoveAll(filepath.Join(baseDir, "runtime"))

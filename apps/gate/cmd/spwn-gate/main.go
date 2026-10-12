@@ -33,12 +33,6 @@ func main() {
 
 	cookies := gate.NewCookieSync()
 
-	// Load catalog tools installed under ~/.spwn/gate/tools/ (mounted
-	// at /gate/tools/ inside the container). Each tool with a `gate:`
-	// section in its tool.yaml gets:
-	//   - its CookieProvider auto-registered with cookie-sync
-	//   - its MCP subprocess spawned + supervised
-	//   - its /mcp/<name>/ route auto-wired into the registry once healthy
 	tools, err := gate.LoadTools(gate.InContainerToolsDir)
 	if err != nil {
 		logger.Printf("warning: load catalog tools: %v", err)
@@ -52,9 +46,6 @@ func main() {
 
 	logger.Printf("cookie-sync ready: %d provider(s) registered", len(cookies.Providers()))
 
-	// Persist the per-provider domain hint to /credentials/<p>/.domains
-	// so the gate-browser sidecar knows which hosts to seed cookies on
-	// when a session for that provider is opened.
 	if err := cookies.WriteDomainHints(); err != nil {
 		logger.Printf("warning: write cookie-provider domain hints: %v", err)
 	}
@@ -74,8 +65,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Catch SIGTERM/SIGINT for graceful shutdown — when the container
-	// stops or a user Ctrl-Cs the foreground process.
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
@@ -84,8 +73,6 @@ func main() {
 		cancel()
 	}()
 
-	// Scheduler + Playwright sidecar + tool subprocesses run
-	// alongside the HTTP server; all stop on cancel.
 	go sched.Run(ctx)
 	go sidecar.Run(ctx)
 	go tsup.Run(ctx)
@@ -96,22 +83,12 @@ func main() {
 	logger.Printf("clean shutdown")
 }
 
-// registerElements wires every gate element into the registry.
-// Two layers:
-//
-//   - ProxyElement (auth-injecting reverse proxy) for every spwn-known
-//     hosted MCP provider in mcp.Registry — notion today, linear etc.
-//     come for free as one-line additions in packages/authentication/mcp/provider.go.
-//   - MCPServer (hand-rolled HTTP MCP) for backend-CLI elements — gmail
-//     and gcal both back onto the gws CLI installed in this image.
 func registerElements(reg *gate.Registry, logger *log.Logger) error {
 	added, err := gate.RegisterAllProviders(reg)
 	if err != nil {
 		logger.Printf("warning: register providers: %v", err)
 	}
 
-	// gws-backed elements. Construction never fails — credentials are
-	// checked per-request and surfaced as actionable errors.
 	if err := reg.Add(gate.NewGmailElement()); err != nil {
 		logger.Printf("warning: add gmail: %v", err)
 	} else {
@@ -122,9 +99,6 @@ func registerElements(reg *gate.Registry, logger *log.Logger) error {
 	} else {
 		added++
 	}
-	// Generic browser primitive — Stagehand-style escape hatch.
-	// Agents that need ad-hoc browsing reach this via /mcp/browser;
-	// agents that only use catalog tools (spwn:x, etc.) ignore it.
 	if err := reg.Add(gate.NewBrowserElement()); err != nil {
 		logger.Printf("warning: add browser: %v", err)
 	} else {

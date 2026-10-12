@@ -23,7 +23,6 @@ type Session struct {
 func DeterministicID(agentName, worldID string) string {
 	h := sha256.Sum256([]byte(agentName + ":" + worldID))
 	hex := hex.EncodeToString(h[:16])
-	// Format as UUID: 8-4-4-4-12
 	return hex[0:8] + "-" + hex[8:12] + "-4" + hex[13:16] + "-a" + hex[17:20] + "-" + hex[20:32]
 }
 

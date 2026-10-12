@@ -14,17 +14,17 @@ type Plan struct {
 	Current       Version
 	Latest        Version
 	Release       *Release
-	Asset         *Asset   // platform-matched binary archive
-	ChecksumAsset *Asset   // SHA256SUMS file in the same release (optional)
-	Platform      string   // GOOS_GOARCH
-	UpdateAvail   bool     // true when Latest > Current (and Current isn't same as Latest)
-	Notes         []string // human-readable lines to display before installing
+	Asset         *Asset
+	ChecksumAsset *Asset
+	Platform      string
+	UpdateAvail   bool
+	Notes         []string
 }
 
 // CheckOpts configures CheckForUpdate.
 type CheckOpts struct {
 	Channel  Channel
-	Platform string // override, defaults to runtime GOOS_GOARCH
+	Platform string
 }
 
 // CheckForUpdate fetches the latest release on the requested channel and
@@ -66,9 +66,9 @@ func CheckForUpdate(ctx context.Context, client ReleaseClient, currentVersion st
 
 // ApplyOpts configures Apply.
 type ApplyOpts struct {
-	BinaryName string // name of the binary inside the tar.gz (e.g. "spwn")
-	TargetPath string // where the current binary lives on disk (os.Executable())
-	WorkDir    string // temp scratch dir; if empty, uses os.MkdirTemp
+	BinaryName string
+	TargetPath string
+	WorkDir    string
 	// Progress is called with human-readable status lines so the CLI can
 	// render them with its stepper. Safe to leave nil.
 	Progress func(msg string)
@@ -96,14 +96,12 @@ func Apply(ctx context.Context, plan *Plan, opts ApplyOpts) error {
 		workDir = d
 	}
 
-	// 1) Download the archive.
 	progress(fmt.Sprintf("Downloading %s", plan.Asset.Name))
 	archivePath := filepath.Join(workDir, plan.Asset.Name)
 	if _, err := DownloadHTTP(ctx, plan.Asset.DownloadURL, archivePath); err != nil {
 		return fmt.Errorf("download archive: %w", err)
 	}
 
-	// 2) Verify checksum (skip silently if the release doesn't ship one).
 	if plan.ChecksumAsset != nil {
 		progress("Verifying checksum")
 		checksumsPath := filepath.Join(workDir, plan.ChecksumAsset.Name)
@@ -128,7 +126,6 @@ func Apply(ctx context.Context, plan *Plan, opts ApplyOpts) error {
 		}
 	}
 
-	// 3) Extract the binary.
 	progress("Extracting binary")
 	newBin := filepath.Join(workDir, "spwn.new")
 	binaryName := opts.BinaryName
@@ -136,14 +133,12 @@ func Apply(ctx context.Context, plan *Plan, opts ApplyOpts) error {
 		binaryName = "spwn"
 	}
 	if strings.HasSuffix(plan.Asset.Name, ".zip") {
-		// .zip handling is Windows-only; implement when we ship a Windows build.
 		return fmt.Errorf("zip archives not yet supported; open an issue if you need Windows support")
 	}
 	if err := ExtractBinary(archivePath, binaryName, newBin); err != nil {
 		return err
 	}
 
-	// 4) Atomic replace.
 	progress("Installing")
 	if !IsWritable(opts.TargetPath) {
 		return fmt.Errorf("cannot write to %s\nRun with elevated privileges or reinstall to a user-writable path", opts.TargetPath)

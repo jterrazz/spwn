@@ -65,7 +65,7 @@ func AddDependency(agentName, ref string) error {
 	}
 	for _, p := range m.Deps {
 		if p == ref {
-			return nil // already present
+			return nil
 		}
 	}
 	m.Deps = append(m.Deps, ref)

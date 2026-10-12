@@ -17,11 +17,11 @@ import (
 
 	"context"
 
-	"spwn.sh/apps/cli/ui"
+	"github.com/spf13/cobra"
 	"spwn.sh/apps/api"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -41,8 +41,6 @@ in your default browser. Blocks until Ctrl+C.`,
 func init() {
 	Cmd.Flags().StringVarP(&portFlag, "port", "p", "3001", "API server port")
 	Cmd.Flags().BoolVar(&noOpen, "no-open", false, "Don't open the browser")
-	// Web UI is still thin; hide from help + docs until the dashboard
-	// ships enough to be worth advertising. Still runnable by name.
 	ui.HideExperimental(Cmd)
 }
 
@@ -53,7 +51,6 @@ func runWeb(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(w, "  %s\n", ui.Strong("⬡ spwn web"))
 	fmt.Fprintln(w)
 
-	// Start the Next.js frontend in the background
 	webDir := findWebDir()
 	var webCmd *exec.Cmd
 	webURL := "http://localhost:3000"
@@ -80,7 +77,6 @@ func runWeb(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintln(w)
 
-	// Start the Go API server
 	store, err := world.NewStore()
 	if err != nil {
 		return err
@@ -99,7 +95,6 @@ func runWeb(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(w, "  %s\n", ui.Faint("Press Ctrl+C to stop"))
 	fmt.Fprintln(w)
 
-	// Graceful shutdown: kill the frontend when we exit
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
@@ -111,7 +106,6 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		os.Exit(0)
 	}()
 
-	// Open browser after a small delay so the frontend has a moment to bind.
 	if !noOpen && webCmd != nil {
 		go func() {
 			time.Sleep(750 * time.Millisecond)
@@ -130,7 +124,6 @@ func runWeb(cmd *cobra.Command, args []string) error {
 	return srv.Start()
 }
 
-// openBrowser opens url in the default browser on macOS, Linux, or Windows.
 func openBrowser(url string) error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
@@ -144,7 +137,6 @@ func openBrowser(url string) error {
 	return cmd.Start()
 }
 
-// findWebDir locates the web UI Next.js app.
 func findWebDir() string {
 	candidates := []string{
 		"apps/web",
@@ -163,7 +155,6 @@ func findWebDir() string {
 	return "apps/web"
 }
 
-// getLanIP returns the first non-loopback IPv4 address, or "" if none found.
 func getLanIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {

@@ -55,19 +55,10 @@ type Config struct {
 	Providers       map[Provider]ProviderPref `yaml:"providers,omitempty"`
 }
 
-// currentConfigVersion is bumped whenever the YAML shape changes in a
-// way that requires migration on load.
 const currentConfigVersion = 1
 
-// configMu serialises read-modify-write cycles so `spwn auth disable`
-// racing with `spwn auth use` (or with a parallel test) doesn't drop
-// one of the updates. The file is tiny; holding the lock for I/O is
-// cheap and simpler than optimistic retries.
 var configMu sync.Mutex
 
-// configPath returns the absolute path to the user's auth config. It
-// honours SPWN_HOME via platform.UserDir so tests and container-side
-// callers see the right file.
 func configPath() string {
 	return filepath.Join(platform.UserDir(), "auth.yaml")
 }
@@ -87,9 +78,6 @@ func LoadConfig() *Config {
 	return c
 }
 
-// loadLocked does the read + migration without taking configMu (caller
-// holds it). Returns (cfg, migrated) where migrated=true means the
-// caller should persist the result to durably absorb legacy state.
 func loadLocked() (*Config, bool) {
 	c := &Config{Version: currentConfigVersion, Providers: map[Provider]ProviderPref{}}
 
@@ -104,18 +92,11 @@ func loadLocked() (*Config, bool) {
 		}
 	}
 
-	// Absorb legacy `.disabled-<provider>` marker files. These were
-	// written by older `DisableProvider` impls; treat them as the
-	// authoritative source on first read, then rely on YAML forever
-	// after.
 	migrated := migrateDisabledMarkers(c)
 
 	return c, migrated
 }
 
-// migrateDisabledMarkers folds legacy `.disabled-<provider>` files
-// under CredentialsDir() into the Config and deletes the marker files.
-// Returns true when anything changed (so the caller persists).
 func migrateDisabledMarkers(c *Config) bool {
 	dir := platform.CredentialsDir()
 	changed := false
@@ -144,9 +125,6 @@ func SaveConfig(c *Config) error {
 	return saveLocked(c)
 }
 
-// saveLocked is the non-locking body of SaveConfig. Callers inside
-// this file hold configMu themselves to chain a load + mutate + save
-// atomically.
 func saveLocked(c *Config) error {
 	if c == nil {
 		return fmt.Errorf("nil config")

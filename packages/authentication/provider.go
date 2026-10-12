@@ -24,8 +24,8 @@ type Credential struct {
 	Provider Provider
 	Type     CredentialType
 	Token    string
-	Source   string // human-readable source description ("env:ANTHROPIC_API_KEY", "file:~/.spwn/.auth-token", "keychain")
-	EnvVar   string // the env var to use when injecting (ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN)
+	Source   string
+	EnvVar   string
 }
 
 // Method returns the user-facing credential method (oauth | api_key)

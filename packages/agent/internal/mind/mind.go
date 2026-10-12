@@ -1,19 +1,13 @@
 package mind
 
 import (
-	"spwn.sh/packages/platform"
 	"fmt"
 	"os"
 	"path/filepath"
+	"spwn.sh/packages/platform"
 	"strings"
-
 )
 
-// defaultAgentYAMLTmpl is the baseline agent.yaml written by
-// Init/Repair so `spwn check` passes immediately after
-// `agent create`. Matches the shape of
-// packages/project/internal/scaffold/templates/agent.yaml.tmpl but
-// parameterised by name.
 const defaultAgentYAMLTmpl = `# Agent composition — the source of truth for the agent's packages
 # and runtime. When the agent is deployed in a world alongside others,
 # the union of every member's packages is what gets compiled into the
@@ -31,12 +25,6 @@ dependencies:
   - "spwn:python"
 `
 
-// defaultAgentMDTmpl is the baseline source AGENTS.md written by
-// Init/Repair. Mirrors packages/project/internal/scaffold/templates/
-// AGENTS.md.tmpl. This is the provider-neutral agent prompt file; a
-// runtime-specific renderer (e.g. packages/compile/runtimes/
-// claudecode) is what eventually turns it into CLAUDE.md inside the
-// container.
 const defaultAgentMDTmpl = `# __NAME__
 
 You are **__NAME__**, an agent running inside a spwn world.
@@ -95,7 +83,6 @@ func Init(name string) (string, error) {
 		}
 	}
 
-	// Create default SOUL.md — the agent's identity in one file.
 	soul := `# Default Soul
 
 You are a spwn agent - a persistent AI worker living inside an isolated world.
@@ -124,9 +111,6 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		return "", fmt.Errorf("create soul: %w", err)
 	}
 
-	// Write the baseline agent.yaml and AGENTS.md so `spwn check`
-	// passes immediately after `agent create`. Both files are
-	// required by the project validator (ruleAgentStructure).
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create agent.yaml: %w", err)
 	}
@@ -168,8 +152,6 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		}
 	}
 
-	// Re-scaffold agent.yaml / AGENTS.md when missing so --force can
-	// rescue a partially-deleted agent tree.
 	agentYAMLPath := filepath.Join(dir, "agent.yaml")
 	if _, err := os.Stat(agentYAMLPath); err != nil && os.IsNotExist(err) {
 		if err := os.WriteFile(agentYAMLPath, renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {

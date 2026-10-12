@@ -115,10 +115,6 @@ var newCmd = &cobra.Command{
 		if _, err := os.Stat(path); err == nil {
 			return fmt.Errorf("skill %q already exists at %s", name, path)
 		}
-		// Prepend a YAML frontmatter block so the file passes the
-		// `spwn check` skill-frontmatter rule as-authored. Without
-		// this the user has to hand-edit before `check` will accept a
-		// freshly-scaffolded skill — a paper-cut we surfaced in QA.
 		template := fmt.Sprintf(`---
 name: %s
 description: One-line description of what this skill does.

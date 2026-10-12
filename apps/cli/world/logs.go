@@ -1,8 +1,8 @@
 package world
 
 import (
-	"spwn.sh/apps/cli/logs"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/logs"
 )
 
 var logsLimit int
@@ -18,11 +18,7 @@ var logsCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return logs.Run(cmd, logs.RunOpts{
-			Limit: logsLimit,
-			// The scoped `world logs <id>` shortcut accepts a live
-			// world ID (e.g. `w-abc123`), which never appears in
-			// spwn.yaml — skip the manifest-backed filter check so
-			// the argument isn't rejected as "unknown world".
+			Limit:               logsLimit,
 			WorldID:             args[0],
 			SkipWorldValidation: true,
 		})

@@ -25,12 +25,9 @@ var EnsureUserConfig = migration.Migration{
 	Apply: func(_ context.Context, baseDir string) error {
 		path := filepath.Join(baseDir, platform.ConfigFileName)
 		if _, err := os.Stat(path); err == nil {
-			return nil // already exists — do not overwrite
+			return nil
 		}
 
-		// Mirror SaveConfig output deterministically but against the
-		// explicit baseDir the migration runner gave us (tests point
-		// this at a temp dir; prod runs it at ~/.spwn/).
 		content := `# spwn user config — edit freely; spwn re-reads on every CLI invocation.
 # Docs: https://spwn.sh/docs/config
 apiVersion: ` + platform.CurrentConfigAPIVersion + `

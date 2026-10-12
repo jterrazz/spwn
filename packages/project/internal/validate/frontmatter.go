@@ -57,10 +57,6 @@ func ParseMarkdownFrontmatterBytes(data []byte) (*Frontmatter, error) {
 }
 
 func parseFrontmatterReader(r *bufio.Reader) (*Frontmatter, error) {
-	// Peek the first line. The convention requires the opening
-	// `---` to be the very first line of the file; we reject
-	// leading whitespace / BOM / comments so the format stays
-	// strict and predictable.
 	first, err := r.ReadString('\n')
 	if err != nil && err.Error() != "EOF" {
 		return nil, err
@@ -78,9 +74,6 @@ func parseFrontmatterReader(r *bufio.Reader) (*Frontmatter, error) {
 		}
 		body.WriteString(line)
 		if err != nil {
-			// Unterminated frontmatter block — treat as a parse
-			// failure so the caller reports a clear error rather
-			// than silently dropping the body on the floor.
 			return nil, fmt.Errorf("unterminated frontmatter (missing closing ---)")
 		}
 	}
@@ -95,7 +88,6 @@ func parseFrontmatterReader(r *bufio.Reader) (*Frontmatter, error) {
 	if err := yaml.Unmarshal([]byte(raw), &node); err != nil {
 		return nil, fmt.Errorf("parse frontmatter: %w", err)
 	}
-	// Expect a mapping node as the top-level shape.
 	if node.Kind != yaml.DocumentNode || len(node.Content) == 0 {
 		return fm, nil
 	}
@@ -108,9 +100,6 @@ func parseFrontmatterReader(r *bufio.Reader) (*Frontmatter, error) {
 		if k.Kind != yaml.ScalarNode {
 			continue
 		}
-		// Collapse scalars to their string value; everything else
-		// keeps its YAML source so callers that need structured
-		// access can re-parse the sub-chunk themselves.
 		if v.Kind == yaml.ScalarNode {
 			fm.Keys[k.Value] = v.Value
 			continue

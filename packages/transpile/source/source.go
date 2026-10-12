@@ -230,35 +230,30 @@ func Load(projectRoot string) (*ProjectSource, error) {
 		RootDir:  abs,
 	}
 
-	// Agents
 	agents, err := loadAgents(abs, p)
 	if err != nil {
 		return nil, err
 	}
 	src.Agents = agents
 
-	// Skills
 	skills, err := loadSkills(abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Skills = skills
 
-	// Hooks
 	hooks, err := loadHooks(abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Hooks = hooks
 
-	// Commands (optional slash-invoked prompts)
 	commands, err := loadCommands(abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Commands = commands
 
-	// Profiles (optional)
 	profiles, err := loadProfiles(abs)
 	if err != nil {
 		return nil, err
@@ -269,16 +264,9 @@ func Load(projectRoot string) (*ProjectSource, error) {
 }
 
 func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
-	// The set of agent directories to load = the union of p.Agents
-	// (deployable) and p.OrphanAgents (present on disk but not
-	// referenced). Renderers decide what to do with orphans — Load's
-	// job is just to surface every agent directory the user has.
 	seen := map[string]string{}
 	for _, a := range p.Agents {
 		if !a.Exists {
-			// Manifest references a name with no directory on
-			// disk. Skip it here — the caller (manifest validate
-			// or ToCompileInput) is the one that reports it.
 			continue
 		}
 		seen[a.Name] = a.Path
@@ -308,10 +296,6 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 		out = append(out, src)
 	}
 
-	// Also pick up directories on disk that neither list surfaced —
-	// defensive against drift between manifest and disk (e.g. user
-	// added a directory without touching spwn.yaml). They show up
-	// here so renderers / validation see them.
 	agentsDir := filepath.Join(root, "spwn", "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil && !os.IsNotExist(err) {
@@ -337,7 +321,6 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 func loadAgent(name, dir string) (AgentSource, error) {
 	src := AgentSource{Name: name}
 
-	// AGENTS.md
 	agentMDPath := filepath.Join(dir, "AGENTS.md")
 	if b, err := os.ReadFile(agentMDPath); err == nil {
 		src.AgentMD = b
@@ -345,9 +328,6 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		return src, fmt.Errorf("read %s: %w", agentMDPath, err)
 	}
 
-	// SOUL.md — identity body. Missing is fine (renderers that need
-	// it surface a clear error later; tolerant-reads keep the loader
-	// useful during scaffolding and partial-project states).
 	soulPath := filepath.Join(dir, "SOUL.md")
 	if b, err := os.ReadFile(soulPath); err == nil {
 		src.Soul = b
@@ -355,7 +335,6 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		return src, fmt.Errorf("read %s: %w", soulPath, err)
 	}
 
-	// agent.yaml
 	configPath := filepath.Join(dir, "agent.yaml")
 	if b, err := os.ReadFile(configPath); err == nil {
 		var cfg AgentConfig
@@ -367,7 +346,6 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		return src, fmt.Errorf("read %s: %w", configPath, err)
 	}
 
-	// Layer dirs
 	layers, err := loadLayers(dir)
 	if err != nil {
 		return src, err
@@ -389,9 +367,6 @@ func loadLayers(agentDir string) (LayerFiles, error) {
 	return lf, nil
 }
 
-// readTree walks dir recursively and returns a map of relative-path ->
-// content. Returns nil (not an error) if dir does not exist. Skips
-// .gitkeep and other hidden files.
 func readTree(dir string) (map[string][]byte, error) {
 	if _, err := os.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
@@ -429,20 +404,6 @@ func readTree(dir string) (map[string][]byte, error) {
 	return out, nil
 }
 
-// loadSkills walks <root>/spwn/skills/ and returns one SkillSource per
-// directory-form skill plus one per legacy bare-markdown skill. Both
-// forms coexist without conflict — a directory `foo/` and a file
-// `foo.md` would produce two distinct SkillSource entries called "foo"
-// which the renderer would then flag as a duplicate.
-//
-// Directory form accepts any sidecar layout; every file under the dir
-// (including nested paths) is captured in SkillSource.Files keyed by
-// its path relative to the skill root. SKILL.md is required; skills
-// missing it are skipped silently (spwn check surfaces the warning).
-//
-// Bare form wraps the file as `<name>/SKILL.md`. If the markdown
-// lacks YAML frontmatter we inject minimal `name:`/`description:`
-// front-matter so the output is a valid Claude/Codex skill.
 func loadSkills(root string) ([]SkillSource, error) {
 	dir := filepath.Join(root, "spwn", "skills")
 	entries, err := os.ReadDir(dir)
@@ -486,10 +447,6 @@ func loadSkills(root string) ([]SkillSource, error) {
 	return out, nil
 }
 
-// loadSkillDir reads every file under a skill directory into a
-// SkillSource. Returns ok=false (without error) when SKILL.md is
-// missing — treat those dirs as "not yet a skill" rather than failing
-// the whole project load so half-authored skills don't block spwn check.
 func loadSkillDir(root, name string) (SkillSource, bool, error) {
 	files := map[string][]byte{}
 	err := filepath.Walk(root, func(p string, info os.FileInfo, err error) error {
@@ -521,11 +478,6 @@ func loadSkillDir(root, name string) (SkillSource, bool, error) {
 	return SkillSource{Name: name, Files: files}, true, nil
 }
 
-// ensureSkillFrontmatter injects a minimal `name:`/`description:`
-// YAML front-matter block when one is absent. Claude Code and Codex
-// both reject SKILL.md files without these fields; synthesising them
-// lets legacy bare-markdown skills render without forcing authors to
-// rewrite every file the day we ship this.
 func ensureSkillFrontmatter(body []byte, name string) []byte {
 	trimmed := strings.TrimLeft(string(body), "\n\t ")
 	if strings.HasPrefix(trimmed, "---") {
@@ -535,28 +487,6 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
-// loadHooks walks <root>/spwn/hooks/*.yaml and returns one HookSource
-// per file. Filename (minus .yaml) is the hook Name; the file body
-// is the entry shape (`event:` / `matcher:` / `command:`). Missing
-// directory → nil, nil. Malformed file surfaces as an error so
-// `spwn check` can flag it before the user hits a silent spawn.
-//
-// Per-file schema:
-//
-//	# spwn/hooks/bash-audit.yaml
-//	event: PreToolUse
-//	matcher: Bash
-//	command: echo "[audit] $CLAUDE_TOOL_INPUT"
-//
-// `event` is required and passed through verbatim; `matcher` is
-// optional; `command` is the shell fragment that the runtime invokes
-// when the hook fires. Keep V1 inline-only — if the shell fragment
-// gets long, author it as a file under a skill and invoke it here.
-//
-// The legacy <root>/spwn/hooks.yaml form (one project-level file with
-// a `hooks:` array) is rejected with a migration hint — `spwn check`
-// surfaces this so users update before downstream silently drops their
-// hooks.
 func loadHooks(root string) ([]HookSource, error) {
 	if legacy := filepath.Join(root, "spwn", "hooks.yaml"); fileExists(legacy) {
 		return nil, fmt.Errorf(
@@ -617,15 +547,6 @@ func fileExists(path string) bool {
 	return err == nil && !info.IsDir()
 }
 
-// loadCommands walks <root>/spwn/commands/*.md and returns one
-// CommandSource per file. Filename minus `.md` is the slash command
-// name (`refactor.md` → `/refactor`). Missing directory → nil, nil.
-//
-// Subdirectories and dotfiles are skipped so authors can drop helper
-// files alongside the command markdown without spwn picking them up
-// as commands. Body bytes pass through verbatim — runtimes that read
-// frontmatter (Claude Code's `description:` / `allowed-tools:`)
-// consume it directly without spwn parsing it.
 func loadCommands(root string) ([]CommandSource, error) {
 	dir := filepath.Join(root, "spwn", "commands")
 	entries, err := os.ReadDir(dir)

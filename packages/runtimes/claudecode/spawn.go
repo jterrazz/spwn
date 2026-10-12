@@ -28,7 +28,6 @@ func (c *spawner) Name() string { return "claude-code" }
 func (c *spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
 	cmd := []string{"claude", "--dangerously-skip-permissions"}
 
-	// NPC mode: no named agent, just print
 	if cfg.AgentName == "" {
 		if cfg.Prompt != "" {
 			cmd = append(cmd, "-p", cfg.Prompt, "--print")
@@ -36,10 +35,6 @@ func (c *spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
 		return cmd
 	}
 
-	// Worker/Manager/Chief: session management via --resume
-	// If a SessionID is provided (from a previous response), resume that session.
-	// Otherwise start a fresh session. The session_id is returned in the JSON
-	// response and should be captured by the caller for subsequent messages.
 	if cfg.SessionID != "" {
 		cmd = append(cmd, "--resume", cfg.SessionID)
 	}
@@ -97,8 +92,6 @@ func (c *spawner) ParseOneShotResult(raw []byte) (string, string, error) {
 	return resp.Result, resp.SessionID, nil
 }
 
-// ── Container-side setup ─────────────────────────────────────────
-
 // DefaultConfigFiles pre-dismisses Claude Code's first-run UI.
 // Without these, every invocation of `claude` inside a fresh agent
 // home walks the user through onboarding, trust dialogs, and
@@ -110,11 +103,6 @@ func (c *spawner) ParseOneShotResult(raw []byte) (string, string, error) {
 // Previous attempts compiled these into the base image at build time
 // and lost to the HOME override.
 func (c *spawner) DefaultConfigFiles(agentHome string) map[string][]byte {
-	// Trust the agent's own home + the workspaces mount root so
-	// Claude Code doesn't prompt on first access. We can't
-	// enumerate the resolved workspace names here without plumbing
-	// them through; trusting /workspaces (the root every bind mount
-	// lands under) covers any child path the agent will cd into.
 	claudeJSON := map[string]any{
 		"hasCompletedOnboarding": true,
 		"projects": map[string]any{
@@ -128,17 +116,10 @@ func (c *spawner) DefaultConfigFiles(agentHome string) map[string][]byte {
 	}
 	claudeJSONBytes, _ := json.Marshal(claudeJSON)
 
-	// `.claude/settings.json` is owned by the transpile renderer —
-	// it wires permissions + hooks + model pins alongside
-	// skipDangerousModePermissionPrompt, and the overwrite-order at
-	// spawn time (DefaultConfigFiles first, tree second) could hide
-	// a renderer bug if we wrote settings from two places.
 	return map[string][]byte{
 		".claude.json": claudeJSONBytes,
 	}
 }
-
-// ── Host-side credential sync ────────────────────────────────────
 
 // SyncHostCredentials copies the host's Claude Code OAuth token into
 // credsDir so the containerised runtime can read it via the
@@ -166,19 +147,17 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 	dstDir := filepath.Join(credsDir, "anthropic")
 	dst := filepath.Join(dstDir, ".credentials.json")
 
-	// Source 1: host credentials file.
 	if b, ok := readHostCredentialsFile(); ok {
 		return writeCredsFile(dstDir, dst, b)
 	}
 
-	// Source 2: macOS Keychain (silent no-op on other platforms).
 	if goruntime.GOOS == "darwin" {
 		if b, ok := extractFromMacOSKeychain(); ok {
 			return writeCredsFile(dstDir, dst, b)
 		}
 	}
 
-	// No file/Keychain source available — but DO NOT clear an existing
+	// hazard: No file/Keychain source available — but DO NOT clear an existing
 	// dst. The keychain probe can transiently fail (non-interactive
 	// shells, launchd-spawned daemons, gate-side spwn invocations
 	// inside containers where keychain isn't reachable at all). If
@@ -208,22 +187,12 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 // the outer prelaunch composition (daemon.go / talk.go) which chains
 // every registered Spawner's PrelaunchShell and owns the env load.
 func (c *spawner) PrelaunchShell() string {
-	// Credential copy only: bring /credentials/anthropic/.credentials.json
-	// into $HOME/.claude/ so the claude CLI finds it on startup. Skills
-	// are no longer delivered via a spawn-time symlink — the transpile
-	// renderer writes them directly into $HOME/.claude/skills/<name>/
-	// alongside CLAUDE.md, so Claude Code's native discovery sees them
-	// without any bind-mount indirection.
 	return `mkdir -p "$HOME/.claude"; ` +
 		`if [ -f /credentials/anthropic/.credentials.json ]; then ` +
 		`cp /credentials/anthropic/.credentials.json "$HOME/.claude/.credentials.json" && ` +
 		`chmod 600 "$HOME/.claude/.credentials.json"; fi`
 }
 
-// ── internal helpers ─────────────────────────────────────────────
-
-// readHostCredentialsFile returns the content of
-// ~/.claude/.credentials.json when it exists and is non-empty.
 func readHostCredentialsFile() ([]byte, bool) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -237,9 +206,6 @@ func readHostCredentialsFile() ([]byte, bool) {
 	return b, true
 }
 
-// extractFromMacOSKeychain pulls the Claude Code-credentials entry
-// out of the macOS Keychain via the `security` CLI. Returns ok=false
-// on any failure (missing entry, locked Keychain, non-macOS).
 func extractFromMacOSKeychain() ([]byte, bool) {
 	cmd := exec.Command("security", "find-generic-password",
 		"-s", "Claude Code-credentials", "-w")
@@ -254,9 +220,6 @@ func extractFromMacOSKeychain() ([]byte, bool) {
 	return out, true
 }
 
-// writeCredsFile atomically writes b to dst with mode 0600 (Claude
-// Code requires tight perms on .credentials.json). Creates dir if
-// missing.
 func writeCredsFile(dir, dst string, b []byte) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return fmt.Errorf("mkdir %s: %w", dir, err)

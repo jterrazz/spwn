@@ -8,14 +8,6 @@ import (
 	"spwn.sh/packages/world/models"
 )
 
-// buildWorkspaceBinds generates Docker bind specs for the resolved
-// workspaces. Layout is uniform:
-//
-//   - 0 workspaces: no binds. /workspaces does not exist; the
-//     agent's only writable space is its own home at /agents/<name>.
-//   - 1+ workspaces: each mounted at /workspaces/<name>. There is no
-//     special-cased single-workspace path — `ls /workspaces` always
-//     tells the agent what projects it can touch.
 func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 	if len(workspaces) == 0 {
 		return nil
@@ -31,18 +23,11 @@ func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 	return binds
 }
 
-// workspaceContainerPath returns the absolute path inside the container
-// where a workspace named `name` is mounted. Single source of truth
-// for the container-side workspace path scheme.
 func workspaceContainerPath(name string, totalWorkspaces int) string {
-	_ = totalWorkspaces // legacy parameter; layout is uniform now
+	_ = totalWorkspaces
 	return "/workspaces/" + name
 }
 
-// worldStateDirFor returns the host-side directory where a given
-// world's per-instance state is stored. Used by both spawn (initial
-// write) and DeployAgent (roster regeneration).
 func worldStateDirFor(worldID string) string {
 	return filepath.Join(platform.LocalStateDir(), "world-states", worldID)
 }
-

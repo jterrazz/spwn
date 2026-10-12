@@ -33,8 +33,8 @@ type DepPolicy struct {
 // zero or more workspaces. When a world has zero workspaces it is "ephemeral"
 // and works inside the image's pre-baked /workspace dir.
 type Workspace struct {
-	Name     string `json:"name"`              // Mount subdirectory under /workspaces (e.g. "web", "api").
-	Path     string `json:"path"`              // Absolute host path.
+	Name     string `json:"name"`
+	Path     string `json:"path"`
 	ReadOnly bool   `json:"readonly,omitempty"`
 }
 
@@ -42,36 +42,36 @@ type Workspace struct {
 type AgentRecord struct {
 	Name      string `json:"name"`
 	AgentID   string `json:"agent_id"`
-	Role      string `json:"role"`               // "chief", "manager", "worker", or "npc"
-	Ephemeral bool   `json:"ephemeral,omitempty"` // true for NPC-style throwaway agents
+	Role      string `json:"role"`
+	Ephemeral bool   `json:"ephemeral,omitempty"`
 	Status    Status `json:"status"`
 }
 
 // World represents a running or stopped world instance.
 type World struct {
-	ID          string        `json:"id"`
-	Name        string        `json:"name,omitempty"` // Optional display name; when empty UIs fall back to the ID.
-	Config      string        `json:"config"`
-	Agent       string        `json:"agent,omitempty"`
-	AgentID     string        `json:"agent_id,omitempty"`
-	Backend     string        `json:"backend"`
+	ID      string `json:"id"`
+	Name    string `json:"name,omitempty"`
+	Config  string `json:"config"`
+	Agent   string `json:"agent,omitempty"`
+	AgentID string `json:"agent_id,omitempty"`
+	Backend string `json:"backend"`
 	// Runtime is the short-name runtime adapter ("claude-code",
 	// "codex") selected for this world. Used at hot-deploy and talk
 	// time to route through the right transpile.Runtime and
 	// runtimes.Spawner. Empty on legacy state files — callers fall
 	// back to "claude-code".
-	Runtime     string        `json:"runtime,omitempty"`
-	ContainerID string        `json:"container_id"`
-	Workspaces  []Workspace   `json:"workspaces,omitempty"`
+	Runtime     string      `json:"runtime,omitempty"`
+	ContainerID string      `json:"container_id"`
+	Workspaces  []Workspace `json:"workspaces,omitempty"`
 	// Legacy single-workspace field. Retained so old state files unmarshal cleanly.
 	// The state store migrates this into Workspaces on load and clears it.
 	Workspace    string            `json:"workspace,omitempty"`
-	Organization string            `json:"organization,omitempty"` // optional organization name
-	SessionIDs   map[string]string `json:"session_ids,omitempty"`  // agent name → runtime session ID
-	Status      Status            `json:"status"`
-	CreatedAt   time.Time     `json:"created_at"`
-	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support
-	Manifest    Manifest      `json:"manifest,omitempty"`
+	Organization string            `json:"organization,omitempty"`
+	SessionIDs   map[string]string `json:"session_ids,omitempty"`
+	Status       Status            `json:"status"`
+	CreatedAt    time.Time         `json:"created_at"`
+	Agents       []AgentRecord     `json:"agents,omitempty"`
+	Manifest     Manifest          `json:"manifest,omitempty"`
 	// KnowledgeMounted records whether the spawn pipeline bound a host
 	// knowledge directory into this world's /world/knowledge/. When
 	// false, the rendered roster and per-agent prompts omit every

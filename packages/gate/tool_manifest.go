@@ -22,8 +22,8 @@ import (
 // version, transitive deps, files for COPY-into-image) lives in the
 // same tool.yaml but is the build pipeline's concern, not the gate's.
 type Tool struct {
-	Name string // slug, derived from the tool dir name (e.g. "x")
-	Dir  string // absolute path to the tool's dir
+	Name string
+	Dir  string
 	Spec ToolGateSpec
 }
 
@@ -47,20 +47,16 @@ type ToolCookies struct {
 // ToolMCP declares the subprocess that serves the tool's MCP HTTP
 // endpoint. Gate spawns it with these env vars set:
 //
-//   GATE_TOOL_NAME       — slug (= /mcp/<slug>/ route)
-//   GATE_TOOL_PORT       — port assigned by gate, tool must listen on
-//                          127.0.0.1:$GATE_TOOL_PORT/mcp/
-//   GATE_BROWSER_URL     — http://127.0.0.1:9001 (sidecar)
-//   GATE_CREDENTIALS_DIR — typically /credentials, where cookie + OAuth
-//                          files live
+//	GATE_TOOL_NAME       — slug (= /mcp/<slug>/ route)
+//	GATE_TOOL_PORT       — port assigned by gate, tool must listen on
+//	                       127.0.0.1:$GATE_TOOL_PORT/mcp/
+//	GATE_BROWSER_URL     — http://127.0.0.1:9001 (sidecar)
+//	GATE_CREDENTIALS_DIR — typically /credentials, where cookie + OAuth
+//	                       files live
 type ToolMCP struct {
 	Entry []string `yaml:"entry"`
 }
 
-// toolFileSchema is what we parse out of tool.yaml — only the gate-
-// relevant fields. Everything else (install, verify, …) is handled
-// by the dependency package elsewhere; we deliberately don't import
-// it here to keep the gate self-contained.
 type toolFileSchema struct {
 	Name string       `yaml:"name"`
 	Gate ToolGateSpec `yaml:"gate"`
@@ -106,7 +102,6 @@ func LoadTools(dir string) ([]Tool, error) {
 		if err := yaml.Unmarshal(raw, &sch); err != nil {
 			return nil, fmt.Errorf("parse %s: %w", manifest, err)
 		}
-		// Skip tools with no gate-relevant config.
 		if sch.Gate.Cookies == nil && sch.Gate.MCP == nil {
 			continue
 		}

@@ -38,17 +38,12 @@ const webVersionCheckInterval = 1 * time.Hour
 // Server serves the HTTP API.
 type Server struct {
 	rstate *runtimestate.Store
-	arch   *architect.Architect // nil = read-only mode
+	arch   *architect.Architect
 	addr   string
 	srv    *http.Server
 
-	// spawnArchitectFn is injected by the cli wiring (world pkg
-	// can't be imported here without a cycle). When nil, the
-	// /api/architect/start handler returns a 503.
 	spawnArchitectFn ArchitectSpawnFunc
 
-	// architectMu guards architectSpawnState. The state is mutated
-	// from the spawn goroutine and read by status/logs handlers.
 	architectMu         sync.Mutex
 	architectSpawnState *architectSpawn
 }
@@ -66,7 +61,6 @@ func New(s *runtimestate.Store, arch *architect.Architect, addr string) *Server 
 	return &Server{rstate: s, arch: arch, addr: addr}
 }
 
-// cors wraps a handler with CORS headers.
 func cors(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -80,23 +74,17 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// jsonError writes an error response.
 func jsonError(w http.ResponseWriter, msg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	// A failed write means the client hung up mid-response: the status line is
-	// already on the wire and there is nothing left to tell anyone.
 	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
 
-// jsonOK writes a JSON success response.
 func jsonOK(w http.ResponseWriter, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	// Same as jsonError: the only reachable failure is a client that left.
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// requireArch checks that the architect is available (non-read-only mode).
 func (s *Server) requireArch(w http.ResponseWriter) bool {
 	if s.arch == nil {
 		jsonError(w, "server is in read-only mode (no architect configured)", http.StatusServiceUnavailable)
@@ -114,7 +102,6 @@ func (s *Server) Handler() http.Handler {
 }
 
 func (s *Server) registerRoutes(mux *http.ServeMux) {
-	// --- READ endpoints ---
 	mux.HandleFunc("GET /api/health", cors(s.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(s.handleStatus))
 	mux.HandleFunc("GET /api/version", cors(s.handleVersion))
@@ -131,7 +118,6 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/agents/{name}/mind", cors(s.handleGetAgentMind))
 	mux.HandleFunc("GET /api/agents/{name}/files/{path...}", cors(s.handleGetAgentFile))
 
-	// --- WRITE endpoints ---
 	mux.HandleFunc("POST /api/worlds", cors(s.handleCreateWorld))
 	mux.HandleFunc("PATCH /api/worlds/{id}", cors(s.handleRenameWorld))
 	mux.HandleFunc("DELETE /api/worlds/{id}", cors(s.handleDestroyWorld))
@@ -146,20 +132,17 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/agents/{name}/export", cors(s.handleExport))
 	mux.HandleFunc("PUT /api/agents/{name}/identity", cors(s.handleUpdateIdentity))
 
-	// --- Team endpoints ---
 	mux.HandleFunc("GET /api/teams", cors(s.handleListTeams))
 	mux.HandleFunc("POST /api/teams", cors(s.handleCreateTeam))
 	mux.HandleFunc("PUT /api/teams/{slug}", cors(s.handleUpdateTeam))
 	mux.HandleFunc("DELETE /api/teams/{slug}", cors(s.handleDeleteTeam))
 
-	// --- Organization endpoints ---
 	mux.HandleFunc("GET /api/organizations", cors(s.handleListOrganizations))
 	mux.HandleFunc("GET /api/organizations/{slug}", cors(s.handleGetOrganization))
 	mux.HandleFunc("POST /api/organizations", cors(s.handleCreateOrganization))
 	mux.HandleFunc("PUT /api/organizations/{slug}", cors(s.handleUpdateOrganization))
 	mux.HandleFunc("DELETE /api/organizations/{slug}", cors(s.handleDeleteOrganization))
 
-	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
 	mux.HandleFunc("GET /api/architect/history", cors(s.handleArchitectHistory))
 	mux.HandleFunc("GET /api/architect/logs", cors(s.handleArchitectLogs))
@@ -169,31 +152,23 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/architect/stack", cors(s.handleArchitectStackGet))
 	mux.HandleFunc("POST /api/architect/stack", cors(s.handleArchitectStackUpdate))
 
-	// --- History endpoints ---
 	mux.HandleFunc("GET /api/worlds/{id}/history", cors(s.handleWorldHistory))
 
-	// --- Activity log ---
 	mux.HandleFunc("GET /api/activity", cors(s.handleActivity))
 
-	// --- Auth endpoints ---
 	mux.HandleFunc("GET /api/auth/providers", cors(s.handleAuthProviders))
 	mux.HandleFunc("POST /api/auth/check", cors(s.handleAuthCheck))
 	mux.HandleFunc("POST /api/auth/configure", cors(s.handleAuthConfigure))
 	mux.HandleFunc("POST /api/auth/reset", cors(s.handleAuthReset))
 	mux.HandleFunc("POST /api/auth/reconnect", cors(s.handleAuthReconnect))
 
-	// --- Knowledge endpoints (per-world, via docker exec) ---
 	mux.HandleFunc("GET /api/worlds/{id}/knowledge", cors(s.handleWorldKnowledgeList))
 	mux.HandleFunc("GET /api/worlds/{id}/knowledge/{path...}", cors(s.handleWorldKnowledgeRead))
 	mux.HandleFunc("PUT /api/worlds/{id}/knowledge/{path...}", cors(s.handleWorldKnowledgeWrite))
 
-	// --- Architect knowledge endpoints (reads from architect container) ---
-
-	// --- Root redirect + CORS ---
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
-			// Same as jsonError: the only reachable failure is a client that left.
 			_ = json.NewEncoder(w).Encode(map[string]string{
 				"name":      "spwn spwn API",
 				"version":   upgrade.CLIVersion,
@@ -222,28 +197,19 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-// ============================================================
-// READ handlers
-// ============================================================
-
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
-// handleSystemDocker reports the host Docker daemon status. Used by the
-// welcome banner and the onboarding wizard.
 func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, probe.CheckDocker(r.Context()))
 }
 
-// handleSystemOnboarding reports whether the user has completed the
-// first-run onboarding wizard.
 func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) {
 	completed := false
 	if _, err := os.Stat(filepath.Join(platform.BaseDir(), ".onboarding-complete")); err == nil {
 		completed = true
 	}
-	// Also surface a couple of useful first-run signals.
 	worlds, _ := s.rstate.List()
 	agents, _ := agentpkg.ListAgents()
 	docker := probe.CheckDocker(r.Context())
@@ -264,8 +230,6 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// handleListExamples returns the full gallery of bundled catalog.
-// Used by the worlds-page empty state.
 func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
 	list, err := dependency.Gallery()
 	if err != nil {
@@ -275,8 +239,6 @@ func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]interface{}{"examples": list})
 }
 
-// handleGetExample returns one example's metadata including its
-// bundled README body.
 func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 	ex, err := dependency.GalleryEntryBySlug(slug)
@@ -291,9 +253,6 @@ func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, ex)
 }
 
-// handleInstallExample copies the example's world configs and
-// agent dirs into ~/.spwn. Existing files are preserved (never
-// overwritten), so repeated installs are safe.
 func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 	rep, err := dependency.InstallInto(slug)
@@ -308,7 +267,6 @@ func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, rep)
 }
 
-// handleSystemOnboardingComplete marks the wizard as completed.
 func (s *Server) handleSystemOnboardingComplete(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join(platform.BaseDir(), ".onboarding-complete")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -344,9 +302,6 @@ func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, vi)
 }
 
-// declaredWorldItem is the project-aware view of one world entry.
-// Returned by handleListWorlds when a spwn project is discoverable.
-// Falls back to the raw runtime world list otherwise.
 type declaredWorldItem struct {
 	Name       string   `json:"name"`
 	Agents     []string `json:"agents"`
@@ -359,9 +314,6 @@ type declaredWorldItem struct {
 }
 
 func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
-	// Project-aware mode: when a spwn.yaml is present, return the
-	// declared worlds enriched with live status. Falls back to the
-	// runtime world list if we can't read the manifest.
 	if pm, ok := loadProjectManifest(); ok {
 		running := map[string]bool{}
 		if liveWorlds, err := s.rstate.List(); err == nil {
@@ -385,10 +337,6 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 				Status:     status,
 			})
 		}
-		// The manifest holds its worlds in a map, whose range order Go
-		// randomises. The web UI selects a world by its POSITION in
-		// this list and re-reads the list every few seconds, so an
-		// unsorted answer moves the user's selection under them.
 		sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 		jsonOK(w, out)
 		return
@@ -402,8 +350,6 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, worlds)
 }
 
-// agentListItem is the enriched response for GET /api/agents, including the
-// role read from agent.yaml so the frontend can display it for undeployed agents.
 type agentListItem struct {
 	Name   string              `json:"name"`
 	Path   string              `json:"path"`
@@ -428,8 +374,7 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Project context: map each agent to its declared world, if any.
-	agentWorld := map[string]string{} // agent → world name in spwn.yaml
+	agentWorld := map[string]string{}
 	runningWorlds := map[string]bool{}
 	if pm, ok := loadProjectManifest(); ok {
 		for wname, world := range pm.Worlds {
@@ -438,7 +383,6 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	// Index running worlds by config name.
 	if liveWorlds, lerr := s.rstate.List(); lerr == nil {
 		for _, lw := range liveWorlds {
 			if lw.Config != "" {
@@ -480,9 +424,6 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, result)
 }
 
-// projectManifest is the minimal view of spwn.yaml the web API needs
-// to annotate agents with their world and compute world status.
-// Hydrated from packages/project so parsing stays in one place.
 type projectManifest struct {
 	Version int
 	Name    string
@@ -495,15 +436,6 @@ type projectWorldDef struct {
 	Deps       []string
 }
 
-// loadInlineWorldManifest synthesises a world.Manifest for the named
-// inline world entry in spwn.yaml#worlds, mirroring what the CLI's
-// resolveProjectWorld does. Returns ok=false when no project is
-// active or the requested world isn't declared inline so callers can
-// fall back to the legacy <projectRoot>/spwn/worlds/<name>.yaml file.
-//
-// Deps are the union of project-wide dependencies and every
-// referenced agent's agent.yaml dependencies, matching how `spwn up`
-// composes the spawn input.
 func loadInlineWorldManifest(name string) (models.Manifest, bool) {
 	root := platform.ProjectRoot()
 	if root == "" {
@@ -556,10 +488,6 @@ func loadInlineWorldManifest(name string) (models.Manifest, bool) {
 	return models.Manifest{Deps: deps}, true
 }
 
-// loadProjectManifest returns a view of the current project's
-// spwn.yaml if a project is active. Returns ok=false when no project
-// is discoverable or the manifest fails to load so callers can fall
-// back silently.
 func loadProjectManifest() (projectManifest, bool) {
 	if platform.ProjectRoot() == "" {
 		return projectManifest{}, false
@@ -582,7 +510,6 @@ func loadProjectManifest() (projectManifest, bool) {
 	return out, true
 }
 
-// agentYAML represents the agent.yaml manifest for an agent.
 type agentYAML struct {
 	Role    string `yaml:"role,omitempty" json:"role,omitempty"`
 	Team    string `yaml:"team,omitempty" json:"team,omitempty"`
@@ -593,7 +520,6 @@ type agentYAML struct {
 	} `yaml:"runtime,omitempty" json:"runtime,omitempty"`
 }
 
-// agentProfileResponse is the full profile sent to the frontend.
 type agentProfileResponse struct {
 	Name     string              `json:"name"`
 	Path     string              `json:"path"`
@@ -613,7 +539,6 @@ type journalEntry struct {
 	Summary string `json:"summary"`
 }
 
-// readFirstLineContent reads the first non-empty, non-heading line of a file.
 func readFirstLineContent(path string) string {
 	f, err := os.Open(path)
 	if err != nil {
@@ -631,7 +556,6 @@ func readFirstLineContent(path string) string {
 	return ""
 }
 
-// parseTraits reads a traits.md file and returns individual traits as a slice.
 func parseTraits(path string) []string {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -643,7 +567,6 @@ func parseTraits(path string) []string {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		// Strip leading list markers (-, *, •)
 		line = strings.TrimLeft(line, "-*• ")
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -653,7 +576,6 @@ func parseTraits(path string) []string {
 	return traits
 }
 
-// parseJournalFiles reads journal directory and returns structured entries.
 func parseJournalFiles(dir string) []journalEntry {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -665,7 +587,6 @@ func parseJournalFiles(dir string) []journalEntry {
 			continue
 		}
 		date := strings.TrimSuffix(e.Name(), ".md")
-		// Try to read first content line as summary
 		summary := readFirstLineContent(filepath.Join(dir, e.Name()))
 		journal = append(journal, journalEntry{Date: date, Summary: summary})
 	}
@@ -687,8 +608,6 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 
 	mindPath := info.Path
 
-	// Load agent.yaml for role/engine/provider
-	// Engine/provider are intentionally empty - runtime is per-world, not per-agent
 	role := "worker"
 	engine := ""
 	provider := ""
@@ -708,7 +627,6 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Read identity files
 	purpose := readFirstLineContent(filepath.Join(mindPath, "identity", "purpose.md"))
 	profileText := readFirstLineContent(filepath.Join(mindPath, "identity", "profile.md"))
 	traits := parseTraits(filepath.Join(mindPath, "identity", "traits.md"))
@@ -716,7 +634,6 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		traits = []string{}
 	}
 
-	// Journal entries (now at root level)
 	journal := parseJournalFiles(filepath.Join(mindPath, "journal"))
 	if journal == nil {
 		journal = []journalEntry{}
@@ -755,32 +672,21 @@ func (s *Server) handleGetAgentJournal(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, entries)
 }
 
-// ============================================================
-// WRITE handlers
-// ============================================================
-
-// agentSpec is one entry in the multi-agent `agents` field.
 type agentSpec struct {
 	Name string `json:"name"`
 	Role string `json:"role,omitempty"`
 }
 
-// createWorldRequest is the JSON body accepted by POST /api/worlds.
-// Exported at package scope so its JSON shape can be unit-tested - a stale
-// binary once silently dropped the `workspaces` field when the struct had
-// only the legacy `workspace` string, spawning empty worlds.
 type createWorldRequest struct {
 	ConfigName string             `json:"config"`
 	Name       string             `json:"name"`
-	AgentName  string             `json:"agent"`  // Legacy single-agent field.
-	Agents     []agentSpec        `json:"agents"` // New multi-agent list.
+	AgentName  string             `json:"agent"`
+	Agents     []agentSpec        `json:"agents"`
 	Workspaces []models.Workspace `json:"workspaces"`
 	// Legacy single-workspace field; accepted for backward compatibility.
 	Workspace string `json:"workspace"`
 }
 
-// resolveWorkspaces returns the effective workspace list, migrating the
-// legacy single-workspace field into the new slice when the slice is empty.
 func (req createWorldRequest) resolveWorkspaces() []models.Workspace {
 	if len(req.Workspaces) == 0 && req.Workspace != "" {
 		return []models.Workspace{{Name: "default", Path: req.Workspace}}
@@ -788,11 +694,6 @@ func (req createWorldRequest) resolveWorkspaces() []models.Workspace {
 	return req.Workspaces
 }
 
-// resolveAgents returns the architect's AgentSpec slice. When the
-// client sent the multi-agent `agents` field, that wins. Otherwise we
-// fall back to the legacy single `agent` field (for backward compat
-// with older UIs and CLI callers). A fully empty list means spawn the
-// world with no agents.
 func (req createWorldRequest) resolveAgents() []architect.AgentSpec {
 	if len(req.Agents) > 0 {
 		out := make([]architect.AgentSpec, 0, len(req.Agents))
@@ -820,7 +721,6 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 
 	workspaces := body.resolveWorkspaces()
 
-	// Load manifest with defaults (same as CLI does)
 	cfgName := body.ConfigName
 	if cfgName == "" {
 		cfgName = "default"
@@ -836,11 +736,6 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 	}
 	manifest.ApplyDefaults(&m)
 
-	// Verify at least one AI provider is connected before spawning.
-	// SPWN_SKIP_AUTH_VALIDATION matches the bypass honoured by the
-	// CLI spawn pre-flight + the validate-cache layer, so the web
-	// E2E suite (which spawns against the spwn-test:latest mock
-	// runtime) doesn't need real provider creds on its CI runner.
 	if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") == "" {
 		creds := authentication.ResolveAll()
 		hasProvider := false
@@ -967,8 +862,6 @@ func (s *Server) handleSnapshot(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Name string `json:"name"`
 	}
-	// The body is optional: with none, or with one this shape cannot read,
-	// `body` keeps its zero value and Snapshot names the tag itself.
 	_ = json.NewDecoder(r.Body).Decode(&body)
 
 	tag, err := s.arch.Snapshot(r.Context(), worldID, body.Name)
@@ -1079,17 +972,13 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 
 	var body struct {
 		Message string `json:"message"`
-		Agent   string `json:"agent"` // which agent to talk to (required for multi-agent worlds)
+		Agent   string `json:"agent"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Message == "" {
 		jsonError(w, "message is required", 400)
 		return
 	}
 
-	// Resolve which agent to talk to. Priority:
-	// 1. Explicit agent field in request body (multi-agent aware)
-	// 2. Legacy single-agent field on the world (u.Agent)
-	// 3. First agent in the world's Agents slice
 	worlds, err := s.rstate.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
@@ -1118,9 +1007,6 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute spwn agent talk with streaming JSON output, pinned to the
-	// world from the URL path so the same agent name in other worlds
-	// doesn't capture the request.
 	cmd := exec.CommandContext(r.Context(), "spwn", "agent", "talk", agentName, body.Message,
 		"--world", worldID,
 		"--output-format", "stream-json", "--verbose")
@@ -1129,14 +1015,13 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "failed to create stdout pipe: "+err.Error(), 500)
 		return
 	}
-	cmd.Stderr = nil // ignore stderr
+	cmd.Stderr = nil
 
 	if err := cmd.Start(); err != nil {
 		jsonError(w, "failed to start agent talk: "+err.Error(), 500)
 		return
 	}
 
-	// Stream as SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -1144,7 +1029,7 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 	flusher, _ := w.(http.Flusher)
 
 	scanner := bufio.NewScanner(stdout)
-	scanner.Buffer(make([]byte, 1024*1024), 1024*1024) // 1MB buffer for large tool results
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" {
@@ -1156,8 +1041,6 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// The stream above IS the answer; a non-zero exit has already surfaced in
-	// it. Wait only reaps the process.
 	_ = cmd.Wait()
 	fmt.Fprintf(w, "data: [DONE]\n\n")
 	if flusher != nil {
@@ -1184,7 +1067,6 @@ func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
-	// Check if the spwn-architect Docker container is actually running
 	status := "stopped"
 	var containerID interface{} = nil
 	var uptime interface{} = nil
@@ -1206,11 +1088,9 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Build KPIs - always included regardless of Docker status
 	worlds, _ := s.rstate.List()
 	agents, _ := agentpkg.ListAgents()
 
-	// Count stack tasks from file
 	tasksPending := 0
 	tasksCompleted := 0
 	stackPath := s.architectStackPath()
@@ -1237,10 +1117,6 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	// Surface in-flight (or just-finished) spawn diagnostics. The
-	// frontend uses this to render real-time progress, log tail, and
-	// final error if the spawn failed. Absent when no spawn has been
-	// attempted in this server process.
 	s.architectMu.Lock()
 	if s.architectSpawnState != nil {
 		resp["progress"] = s.architectSpawnState.snapshot()
@@ -1250,9 +1126,6 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, resp)
 }
 
-// handleArchitectLogs streams the architect container's stdout/stderr
-// over SSE. Used by the desktop app's "View logs" panel so users can
-// see what claude-code or the daemon is doing without leaving spwn.
 func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 	follow := r.URL.Query().Get("follow") == "true"
 	tail := r.URL.Query().Get("tail")
@@ -1272,7 +1145,7 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "stdout pipe: "+err.Error(), 500)
 		return
 	}
-	cmd.Stderr = cmd.Stdout // merge - docker logs is happy to do that
+	cmd.Stderr = cmd.Stdout
 	if err := cmd.Start(); err != nil {
 		jsonError(w, "start docker logs: "+err.Error(), 500)
 		return
@@ -1299,7 +1172,6 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// architectStackPath returns the path to the architect's stack file.
 func (s *Server) architectStackPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -1312,7 +1184,6 @@ func (s *Server) architectStackPath() string {
 	return filepath.Join(spwnHome, "architect", "stack.md")
 }
 
-// handleArchitectStackGet returns the raw content of the architect stack file.
 func (s *Server) handleArchitectStackGet(w http.ResponseWriter, r *http.Request) {
 	stackPath := s.architectStackPath()
 	if stackPath == "" {
@@ -1322,7 +1193,6 @@ func (s *Server) handleArchitectStackGet(w http.ResponseWriter, r *http.Request)
 
 	data, err := os.ReadFile(stackPath)
 	if err != nil {
-		// Return empty template if file doesn't exist
 		defaultContent := "# Architect Stack\n\n## Focus\n\n## Queued\n\n## Done\n"
 		jsonOK(w, map[string]string{"content": defaultContent})
 		return
@@ -1331,7 +1201,6 @@ func (s *Server) handleArchitectStackGet(w http.ResponseWriter, r *http.Request)
 	jsonOK(w, map[string]string{"content": string(data)})
 }
 
-// handleArchitectStackUpdate writes new content to the architect stack file.
 func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Content string `json:"content"`
@@ -1347,7 +1216,6 @@ func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(stackPath), 0755); err != nil {
 		jsonError(w, "failed to create directory: "+err.Error(), 500)
 		return
@@ -1362,17 +1230,12 @@ func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Reque
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
-	// Fast path: already running.
 	checkCmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Running}}", "spwn-architect")
 	if out, err := checkCmd.Output(); err == nil && strings.TrimSpace(string(out)) == "true" {
 		jsonOK(w, map[string]string{"status": "running", "message": "already running"})
 		return
 	}
 
-	// Kick off the spawn in the background. The frontend already polls
-	// /api/architect/status every 3s - that endpoint now carries the
-	// real progress event, log tail and final result, so the user
-	// sees what's happening instead of guessing from elapsed time.
 	if err := s.startArchitectAsync(os.Getenv("SPWN_ARCHITECT_IMAGE")); err != nil {
 		jsonError(w, err.Error(), http.StatusServiceUnavailable)
 		return
@@ -1385,7 +1248,6 @@ func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
-	// Try to stop the spwn-architect container
 	cmd := exec.CommandContext(r.Context(), "docker", "stop", "spwn-architect")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		jsonError(w, fmt.Sprintf("failed to stop architect container: %s (%s)", strings.TrimSpace(string(output)), err), 500)
@@ -1396,14 +1258,12 @@ func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 
 // StackAction represents a parsed stack action from the architect's response.
 type StackAction struct {
-	Type        string `json:"type"` // "push", "pop", "update"
+	Type        string `json:"type"`
 	Title       string `json:"title"`
 	Priority    string `json:"priority,omitempty"`
 	Description string `json:"description,omitempty"`
 }
 
-// parseStackAction extracts a stack action marker from the architect's response.
-// It looks for [STACK_PUSH], [STACK_POP], or [STACK_UPDATE] at the start of lines.
 func parseStackAction(text string) *StackAction {
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
@@ -1431,7 +1291,6 @@ func parseStackAction(text string) *StackAction {
 			Title: title,
 		}
 
-		// Look at subsequent lines for Priority: and description
 		for j := i + 1; j < len(lines) && j <= i+3; j++ {
 			next := strings.TrimSpace(lines[j])
 			if next == "" {
@@ -1466,34 +1325,28 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if architect is running, auto-start if needed
 	containerName := "spwn-architect"
 	checkCmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Status}}", containerName)
 	checkOut, checkErr := checkCmd.Output()
 	isRunning := checkErr == nil && strings.TrimSpace(string(checkOut)) == "running"
 
 	if !isRunning {
-		// Use background context - image builds can take minutes
 		bgCtx := context.Background()
 		startCmd := exec.CommandContext(bgCtx, "docker", "start", containerName)
 		if startErr := startCmd.Run(); startErr != nil {
-			// Container doesn't exist, try spwn architect start
 			spwnCmd := exec.CommandContext(bgCtx, "spwn", "architect", "start")
 			if spwnErr := spwnCmd.Run(); spwnErr != nil {
 				jsonError(w, "failed to start architect: "+spwnErr.Error(), 500)
 				return
 			}
 		}
-		// Wait for container to be ready
 		time.Sleep(3 * time.Second)
 	}
 
-	// Docker exec into the architect container running Claude Code
 	dockerArgs := []string{
 		"exec", "-u", "architect", "-w", "/me",
 		"-e", "SPWN_HOME=/home/spwn/.spwn",
 	}
-	// Pass auth tokens
 	dockerArgs = append(dockerArgs, architect.DockerEnvArgs()...)
 	dockerArgs = append(dockerArgs, containerName,
 		"claude", "--dangerously-skip-permissions",
@@ -1521,7 +1374,6 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Stream as SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -1541,8 +1393,6 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// The stream above IS the answer; a non-zero exit has already surfaced in
-	// it. Wait only reaps the process.
 	_ = cmd.Wait()
 	fmt.Fprintf(w, "data: [DONE]\n\n")
 	if flusher != nil {
@@ -1550,7 +1400,6 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// getWorldContainerID looks up the container ID for a world by its ID.
 func (s *Server) getWorldContainerID(worldID string) (string, error) {
 	worlds, err := s.rstate.List()
 	if err != nil {
@@ -1567,7 +1416,6 @@ func (s *Server) getWorldContainerID(worldID string) (string, error) {
 	return "", fmt.Errorf("world not found: %s", worldID)
 }
 
-// dockerExecOutput runs a command inside a container and returns stdout.
 func dockerExecOutput(ctx context.Context, containerID string, args ...string) (string, error) {
 	cmdArgs := append([]string{"exec", containerID}, args...)
 	cmd := exec.CommandContext(ctx, "docker", cmdArgs...)
@@ -1575,10 +1423,6 @@ func dockerExecOutput(ctx context.Context, containerID string, args ...string) (
 	return string(out), err
 }
 
-// decodeJSONBody decodes the request body into v with DisallowUnknownFields
-// off (so new client versions don't break older handlers) but returns a
-// clear error when the body is malformed. Callers should jsonError 400 on
-// a non-nil return rather than silently accepting zero-valued fields.
 func decodeJSONBody(r *http.Request, v interface{}) error {
 	if r.Body == nil {
 		return fmt.Errorf("empty request body")
@@ -1589,21 +1433,10 @@ func decodeJSONBody(r *http.Request, v interface{}) error {
 	return nil
 }
 
-// sanitizeKnowledgePath validates that relPath is safe to concatenate
-// under /world/knowledge/ inside a container. Rejects absolute paths,
-// paths that escape the base via "..", and empty cleaned paths. The
-// returned string is the forward-slash-cleaned form to use.
-//
-// A plain strings.Contains("..") check is not sufficient: legitimate
-// filenames like "..foo.md" would be blocked. We clean the path and
-// reject anything that's absolute or that still starts with ".." after
-// cleaning (which indicates an escape attempt).
 func sanitizeKnowledgePath(relPath string) (string, bool) {
 	if relPath == "" {
 		return "", false
 	}
-	// Reject absolute paths outright; /world/knowledge/ is the only
-	// root allowed and it's prepended by the caller.
 	if strings.HasPrefix(relPath, "/") {
 		return "", false
 	}
@@ -1611,17 +1444,12 @@ func sanitizeKnowledgePath(relPath string) (string, bool) {
 	if cleaned == "." {
 		return "", false
 	}
-	// After Clean, a path that still starts with "..", or is exactly
-	// "..", has escaped the logical root. Block it. Note: a filename
-	// like "..foo.md" is fine because Clean leaves it alone and it
-	// does not start with "../".
 	if cleaned == ".." || strings.HasPrefix(cleaned, "../") {
 		return "", false
 	}
 	return cleaned, true
 }
 
-// handleWorldKnowledgeList returns all files in the knowledge directory inside a world container.
 func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
@@ -1635,12 +1463,10 @@ func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Use find inside the container to list all files under /world/knowledge/
 	out, err := dockerExecOutput(r.Context(), containerID,
 		"find", "/world/knowledge/", "-type", "f", "-not", "-name", ".*",
 		"-printf", "%P\\t%s\\t%T@\\n")
 	if err != nil {
-		// Directory might not exist yet - return empty list
 		jsonOK(w, map[string]interface{}{"files": []interface{}{}})
 		return
 	}
@@ -1660,9 +1486,6 @@ func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request
 		if len(parts) < 3 {
 			continue
 		}
-		// A row whose size or mtime does not parse is a row the shell did not
-		// produce: skipped, like the short ones above, rather than reported as
-		// an empty file from 1970.
 		size, err := strconv.ParseInt(parts[1], 10, 64)
 		if err != nil {
 			continue
@@ -1687,7 +1510,6 @@ func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request
 	jsonOK(w, map[string]interface{}{"files": files})
 }
 
-// handleWorldKnowledgeRead returns the content of a specific knowledge file from a world container.
 func (s *Server) handleWorldKnowledgeRead(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
@@ -1723,7 +1545,6 @@ func (s *Server) handleWorldKnowledgeRead(w http.ResponseWriter, r *http.Request
 	jsonOK(w, map[string]string{"path": safe, "content": out})
 }
 
-// handleWorldKnowledgeWrite writes content to a specific knowledge file inside a world container.
 func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
@@ -1759,14 +1580,12 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 
 	fullPath := "/world/knowledge/" + safe
 
-	// Ensure parent directory exists inside container
 	dir := filepath.Dir(fullPath)
 	if _, err := dockerExecOutput(r.Context(), containerID, "mkdir", "-p", dir); err != nil {
 		jsonError(w, "failed to create directory: "+err.Error(), 500)
 		return
 	}
 
-	// Write file using docker exec -i ... tee
 	cmdArgs := []string{"exec", "-i", containerID, "tee", fullPath}
 	cmd := exec.CommandContext(r.Context(), "docker", cmdArgs...)
 	cmd.Stdin = strings.NewReader(body.Content)
@@ -1778,7 +1597,6 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
 }
 
-// handleGetAgentMind returns the mind tree (layers → files) for an agent.
 func (s *Server) handleGetAgentMind(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	if name == "" {
@@ -1795,7 +1613,6 @@ func (s *Server) handleGetAgentMind(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, info.Layers)
 }
 
-// handleUpdateIdentity updates a single identity field for an agent.
 func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	if name == "" {
@@ -1812,7 +1629,6 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Special case: "team" writes to agent.yaml, not identity/*.md.
 	if body.Field == "team" {
 		if err := projectpkg.SetAgentTeam(name, body.Content); err != nil {
 			jsonError(w, err.Error(), 500)
@@ -1822,7 +1638,6 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate field name to prevent directory traversal
 	allowed := map[string]bool{"purpose": true, "profile": true, "traits": true}
 	if !allowed[body.Field] {
 		jsonError(w, "invalid field: must be one of purpose, profile, traits, team", 400)
@@ -1843,7 +1658,6 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 
 	filePath := filepath.Join(identityDir, body.Field+".md")
 
-	// Write content with a heading
 	heading := strings.ToUpper(body.Field[:1]) + body.Field[1:]
 	content := fmt.Sprintf("# %s\n\n%s\n", heading, body.Content)
 
@@ -1855,10 +1669,6 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "ok", "field": body.Field})
 }
 
-// ============================================================
-// Team handlers
-// ============================================================
-
 func (s *Server) handleListTeams(w http.ResponseWriter, r *http.Request) {
 	teams, err := projectpkg.ListTeams()
 	if err != nil {
@@ -1868,7 +1678,6 @@ func (s *Server) handleListTeams(w http.ResponseWriter, r *http.Request) {
 	if teams == nil {
 		teams = []projectpkg.Team{}
 	}
-	// Enrich each team with its member names.
 	type teamWithMembers struct {
 		projectpkg.Team
 		Members []string `json:"members"`
@@ -1921,7 +1730,6 @@ func (s *Server) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
 	}
-	// Merge: only overwrite fields that are non-empty in the request.
 	if body.Name != "" {
 		existing.Name = body.Name
 	}
@@ -1950,10 +1758,6 @@ func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonOK(w, map[string]string{"status": "ok"})
 }
-
-// ============================================================
-// Organization handlers
-// ============================================================
 
 func (s *Server) handleListOrganizations(w http.ResponseWriter, r *http.Request) {
 	organizations, err := projectpkg.ListOrganizations()
@@ -2018,7 +1822,6 @@ func (s *Server) handleUpdateOrganization(w http.ResponseWriter, r *http.Request
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
 	}
-	// Merge: only overwrite fields that are non-empty in the request.
 	if body.Name != "" {
 		existing.Name = body.Name
 	}
@@ -2053,8 +1856,6 @@ func (s *Server) handleDeleteOrganization(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// handleGetAgentFile returns the content of a specific file within the agent's mind directory.
-// The path is validated to prevent directory traversal.
 func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	filePath := r.PathValue("path")
@@ -2063,7 +1864,6 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prevent directory traversal
 	if strings.Contains(filePath, "..") {
 		jsonError(w, "invalid path", 400)
 		return
@@ -2077,7 +1877,6 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 
 	absPath := filepath.Join(info.Path, filePath)
 
-	// Ensure the resolved path is still under the agent's mind directory
 	cleanPath := filepath.Clean(absPath)
 	if !strings.HasPrefix(cleanPath, filepath.Clean(info.Path)) {
 		jsonError(w, "path outside agent directory", 400)
@@ -2093,32 +1892,25 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"path": filePath, "content": string(data)})
 }
 
-// ============================================================
-// Auth handlers
-// ============================================================
-
 func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 	creds := authentication.ResolveAll()
 
-	// detectionInfo surfaces every credential spwn found for a provider,
-	// not just the winner. The web UI can mirror the CLI dashboard's
-	// multi-method view without a second round-trip.
 	type detectionInfo struct {
-		Method         string `json:"method"`         // "oauth" | "api_key"
-		CredentialType string `json:"credentialType"` // internal: api_key | oauth | keychain
+		Method         string `json:"method"`
+		CredentialType string `json:"credentialType"`
 		Source         string `json:"source"`
 	}
 	type providerInfo struct {
-		Provider       string          `json:"provider"`
-		Connected      bool            `json:"connected"`
-		Disabled       bool            `json:"disabled,omitempty"`
-		Method         string          `json:"method,omitempty"`       // active method if any
-		ActiveMethod   string          `json:"activeMethod,omitempty"` // user's pref, if set
-		CredentialType string          `json:"credentialType"`
-		Source         string          `json:"source"`
-		Detections     []detectionInfo `json:"detections,omitempty"`
-		Error          string          `json:"error,omitempty"`
-		Plan           string          `json:"plan,omitempty"`
+		Provider       string                    `json:"provider"`
+		Connected      bool                      `json:"connected"`
+		Disabled       bool                      `json:"disabled,omitempty"`
+		Method         string                    `json:"method,omitempty"`
+		ActiveMethod   string                    `json:"activeMethod,omitempty"`
+		CredentialType string                    `json:"credentialType"`
+		Source         string                    `json:"source"`
+		Detections     []detectionInfo           `json:"detections,omitempty"`
+		Error          string                    `json:"error,omitempty"`
+		Plan           string                    `json:"plan,omitempty"`
 		Usage          *authentication.UsageInfo `json:"usage,omitempty"`
 	}
 
@@ -2135,9 +1927,6 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 			Method:         string(cred.Method()),
 			ActiveMethod:   string(authentication.ActiveMethod(p)),
 		}
-		// Always publish detections — the UI can decide whether to
-		// render them — so "disabled provider with three detections"
-		// still carries the full context.
 		for _, d := range authentication.DetectMethods(p) {
 			info.Detections = append(info.Detections, detectionInfo{
 				Method:         string(d.Method()),
@@ -2147,7 +1936,6 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 		}
 		providers = append(providers, info)
 	}
-	// ResolveAll answers a map, whose order Go randomises on every read; the page lists the providers in this order.
 	sort.Slice(providers, func(i, j int) bool { return providers[i].Provider < providers[j].Provider })
 	jsonOK(w, map[string]interface{}{"providers": providers})
 }
@@ -2182,11 +1970,9 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), 500)
 		return
 	}
-	// Re-enable provider if it was previously disabled
 	if body.Provider != "" {
 		_ = authentication.EnableProvider(authentication.Provider(body.Provider))
 	}
-	// Re-sync credentials with new token
 	_ = authentication.SyncCredentials()
 	jsonOK(w, map[string]string{"status": "ok"})
 }
@@ -2215,18 +2001,12 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Reset = logout (real, per-provider) + disable so keychain/env
-	// creds aren't silently re-resolved on the next refresh. The old
-	// implementation called ClearToken unconditionally, which cleared
-	// Anthropic's `.auth-token` even when the UI asked to reset OpenAI
-	// — fixed here by routing through LogoutProvider.
 	result := &authentication.LogoutResult{}
 	if body.Provider != "" {
 		p := authentication.Provider(body.Provider)
 		result = authentication.LogoutProvider(p, authentication.LogoutOpts{})
 		_ = authentication.DisableProvider(p)
 	}
-	// SyncCredentials runs inside LogoutProvider; no need to re-call.
 
 	jsonOK(w, map[string]interface{}{
 		"status":    "ok",
@@ -2234,10 +2014,6 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 		"remaining": result.Remaining,
 	})
 }
-
-// ============================================================
-// History handlers - read Claude Code JSONL conversation logs
-// ============================================================
 
 type historyMessage struct {
 	Role      string  `json:"role"`
@@ -2257,7 +2033,6 @@ type historySession struct {
 	Cost      float64          `json:"cost,omitempty"`
 }
 
-// parseJSONLSessions reads JSONL files from a container and returns parsed sessions.
 func (s *Server) parseJSONLSessions(ctx context.Context, container, user, basePath string, limit int) []historySession {
 	lsCmd := exec.CommandContext(ctx, "docker", "exec", "-u", user,
 		container, "ls", "-t", basePath)
@@ -2360,7 +2135,6 @@ func (s *Server) parseJSONLSessions(ctx context.Context, container, user, basePa
 		}
 	}
 
-	// Reverse so oldest session is first (chronological order)
 	for i, j := 0, len(sessions)-1; i < j; i, j = i+1, j-1 {
 		sessions[i], sessions[j] = sessions[j], sessions[i]
 	}
@@ -2385,7 +2159,6 @@ func (s *Server) handleWorldHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Find container ID from state
 	worlds, err := s.rstate.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
@@ -2412,8 +2185,6 @@ func (s *Server) handleWorldHistory(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]interface{}{"sessions": sessions})
 }
 
-// handleActivity serves the activity log, newest first.
-// Query params: limit (default 50, max 500), type, world, agent, actor, since (RFC3339).
 func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	opts := activity.ReadOpts{

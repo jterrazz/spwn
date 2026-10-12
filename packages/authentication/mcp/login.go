@@ -78,18 +78,11 @@ func Login(ctx context.Context, p Provider, w io.Writer) error {
 		return fmt.Errorf("mcp oauth login failed: %w", err)
 	}
 	if !IsAuthenticated(p) {
-		// mcp2cli exited 0 but no tokens.json landed — likely a bind-
-		// mount or path mismatch. Surface this loudly rather than
-		// silently claiming success.
 		return fmt.Errorf("login completed but no tokens persisted at %s", ProviderTokenPath(p))
 	}
 	return nil
 }
 
-// ensureHelperImage builds spwn-mcp-auth:latest if Docker doesn't
-// already have it. Streams build output to w so the user sees what's
-// happening during the (one-time, slow-ish) initial pull of
-// python:3.12-slim.
 func ensureHelperImage(ctx context.Context, w io.Writer) error {
 	check := exec.CommandContext(ctx, "docker", "image", "inspect", HelperImage)
 	check.Stdout = io.Discard
@@ -117,11 +110,6 @@ func ensureHelperImage(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
-// freeTCPPort asks the kernel for an unused TCP port on loopback by
-// binding :0 and reading back the assigned port. Race window between
-// close + docker bind is negligible in practice (worst case the user
-// retries), and avoids a hard-coded port that conflicts with the
-// user's other local services.
 func freeTCPPort() (int, error) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {

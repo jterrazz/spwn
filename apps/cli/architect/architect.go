@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	arch "spwn.sh/packages/architect"
 	"spwn.sh/packages/platform"
-	"github.com/spf13/cobra"
 )
 
 var defaultArchitectHelp func(*cobra.Command, []string)
@@ -91,12 +91,8 @@ func runStart(cmd *cobra.Command, args []string) error {
 	s.Blank()
 	s.Start("Starting Architect (building image if needed)...")
 
-	// Resolve image (allow override via env var for testing)
 	imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
 
-	// Friendly labels for the stable spawn events. Anything not in
-	// this map is shown verbatim - keeps unknown future events
-	// readable rather than crashing the stepper.
 	labels := map[string]string{
 		"docker_check":       "Connecting to Docker",
 		"cleanup":            "Cleaning up old container",
@@ -142,7 +138,6 @@ func runStart(cmd *cobra.Command, args []string) error {
 
 	s.Done("Docker connected", "")
 
-	// Show success
 	s.Blank()
 	s.Success("Architect started")
 	s.Blank()
@@ -232,7 +227,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	s := ui.New()
 
-	// Check if architect container is running. If not, auto-start it.
 	info, err := arch.GetDaemonStatus(ctx)
 	if err != nil || !info.Running {
 		fmt.Fprintf(cmd.ErrOrStderr(), "\n  Architect not running. Starting...\n")
@@ -240,13 +234,12 @@ func runTalk(cmd *cobra.Command, args []string) error {
 		_, startErr := arch.StartDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 		if startErr != nil {
 			if strings.Contains(startErr.Error(), "already running") {
-				// Race condition - it started between check and start, that's fine
 			} else {
 				return s.FailHint("Architect", fmt.Errorf("failed to auto-start architect: %w", startErr),
 					"Start manually with: spwn architect start")
 			}
 		}
-		time.Sleep(2 * time.Second) // Wait for container to be ready
+		time.Sleep(2 * time.Second)
 		fmt.Fprintf(cmd.ErrOrStderr(), "  ✓ Architect started\n\n")
 	}
 
@@ -255,7 +248,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 		message = args[0]
 	}
 
-	// Check the container exists and is responsive
 	checkCmd := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", platform.ArchitectContainerName())
 	checkOut, err := checkCmd.Output()
 	if err != nil || strings.TrimSpace(string(checkOut)) != "true" {
@@ -263,15 +255,12 @@ func runTalk(cmd *cobra.Command, args []string) error {
 			"Start it with: spwn architect start")
 	}
 
-	// Get docker exec args from universe package
 	dockerArgs, err := arch.TalkExecArgs(message)
 	if err != nil {
 		return s.FailHint("Talk", err, "")
 	}
 
-	// If stream-json output requested, swap --print for --output-format stream-json --verbose
 	if talkOutputFormat == "stream-json" && message != "" {
-		// Replace --print with --output-format stream-json --verbose in the args
 		filtered := make([]string, 0, len(dockerArgs))
 		for _, a := range dockerArgs {
 			if a == "--print" {
@@ -285,7 +274,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 
 	if message != "" {
 		if talkOutputFormat == "stream-json" {
-			// Stream mode: pipe stdout directly for real-time output
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
@@ -293,7 +281,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("architect exec failed: %w", err)
 			}
 		} else {
-			// One-shot text mode
 			s.Blank()
 			s.Info("Architect:", "thinking...")
 			s.Blank()
@@ -309,7 +296,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 			fmt.Fprint(os.Stdout, string(output))
 		}
 	} else {
-		// Interactive mode
 		s.Blank()
 		s.Info("Architect:", "entering interactive session")
 		s.Info("Container:", platform.ArchitectContainerName())
@@ -328,7 +314,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// formatDuration formats a duration into a human-readable string.
 func formatDuration(d time.Duration) string {
 	if d < time.Minute {
 		return fmt.Sprintf("%ds", int(d.Seconds()))

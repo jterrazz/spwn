@@ -9,8 +9,6 @@ import (
 	"spwn.sh/packages/platform"
 )
 
-// runMigrations applies any pending schema migrations to ~/.spwn.
-// Skipped entirely for fresh installs (directory does not exist yet).
 func runMigrations() error {
 	baseDir := platform.BaseDir()
 	if _, err := os.Stat(baseDir); os.IsNotExist(err) {

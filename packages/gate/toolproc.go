@@ -72,9 +72,10 @@ const (
 // clean 503 from the proxy's ErrorHandler instead of hanging.
 //
 // Caller flow:
-//   tsup := NewToolSupervisor(tools, logger)
-//   for _, el := range tsup.Elements() { reg.Add(el) }
-//   go tsup.Run(ctx)
+//
+//	tsup := NewToolSupervisor(tools, logger)
+//	for _, el := range tsup.Elements() { reg.Add(el) }
+//	go tsup.Run(ctx)
 func NewToolSupervisor(tools []Tool, logger *log.Logger) *ToolSupervisor {
 	s := &ToolSupervisor{
 		tools:    tools,
@@ -98,8 +99,6 @@ func NewToolSupervisor(tools []Tool, logger *log.Logger) *ToolSupervisor {
 				logger.Printf("tool %q upstream error: %v", name, err)
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusServiceUnavailable)
-				// The status is already on the wire; a failed body write
-				// means the caller hung up.
 				_, _ = fmt.Fprintf(w, `{"error":"tool %q not ready"}`, name)
 			}
 		}(t.Name)
@@ -192,9 +191,6 @@ func (s *ToolSupervisor) spawnOne(ctx context.Context, t Tool, port int) error {
 	return cmd.Wait()
 }
 
-// waitToolHealthy polls the subprocess's /healthz until it answers
-// or the deadline passes. Tools should expose this on their assigned
-// port at the same path the sidecar uses.
 func waitToolHealthy(ctx context.Context, port int) error {
 	deadline := time.Now().Add(15 * time.Second)
 	client := &http.Client{Timeout: time.Second}
@@ -205,8 +201,6 @@ func waitToolHealthy(ctx context.Context, port int) error {
 		}
 		resp, err := client.Get(addr)
 		if err == nil {
-			// Drain so the connection can be reused; a probe that cannot
-			// be drained is retried by the loop either way.
 			_, _ = io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 			if resp.StatusCode == 200 {

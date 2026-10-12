@@ -2,19 +2,11 @@ package platform
 
 import "os"
 
-// Default runtime constants.
-//
-// These live in paths/ rather than world/ because architect (a
-// sub-package of world) needs them, and having them in world/ would
-// create an import cycle with world/architect. paths/ is the natural
-// lowest-layer home for "runtime naming conventions" alongside the
-// directory-name constants.
 const (
 	DefaultMaxProcs = 64
 	DefaultBackend  = "docker"
 )
 
-// Runtime image identifiers.
 const (
 	WorldImage            = "spwn/world:latest"
 	ArchitectImage        = "spwn/architect:latest"

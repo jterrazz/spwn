@@ -50,50 +50,24 @@ func init() {
 	Cmd.AddCommand(enableCmd)
 	Cmd.AddCommand(defaultCmd)
 
-	// `spwn auth login <provider>` today only persists API keys —
-	// OAuth is owned by the upstream tool (`claude login` /
-	// `codex login`). The --oauth flag is retired: bare `spwn auth`
-	// Already surfaces the "run claude login" hint when no OAuth
-	// Credential is detected.
 	loginCmd.Flags().StringVar(&loginAPIKey, "api-key", "", "Save an API key for this provider")
 	logoutCmd.Flags().StringVar(&logoutMethod, "method", "", "Scope logout to a single method (oauth | api_key)")
 	defaultCmd.Flags().Bool("clear", false, "Remove the default preference (revert to auto-resolve)")
 }
 
-// providers is the set we render + accept as CLI args. Google is left
-// off because it has no runtime wired in today; keeping it here would
-// pollute the dashboard with a permanently-empty row.
 var providers = []authentication.Provider{authentication.ProviderAnthropic, authentication.ProviderOpenAI}
 
-// methods is the fixed set of user-facing credential styles.
 var methods = []authentication.Method{authentication.MethodOAuth, authentication.MethodAPIKey}
 
-// ── dashboard (bare `spwn auth`) ────────────────────────────────────
-
-// runStatus renders the Extended-C credentials dashboard. For every
-// Supported provider it emits one row per supported method (even if
-// Unset) — each row reports what was detected, whether it validated
-// Against the live API, and the next action: source+age for ✓ rows,
-// Refresh hint for ✗ rows, setup command for · rows.
-//
-// Validations run in parallel with a 3-second budget. The 5-minute
-// Positive-only cache (packages/authentication/validate_cache.go) makes every
-// Run after the first one instant.
-//
-// No file paths leak into user-visible text. Every "how to fix this"
-// String comes from packages/authentication/hints so the spawn pre-flight and
-// This dashboard stay aligned.
 func runStatus() error {
 	w := os.Stderr
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	// Kick off every provider's methods in parallel. Each job returns
-	// A single rendered row plus any follow-up action hint.
 	type providerBlock struct {
 		title  string
 		rows   []dashboardRow
-		active string // human-readable active-method line when multi-valid
+		active string
 	}
 
 	blocks := make([]providerBlock, 0, len(providers))
@@ -114,20 +88,10 @@ func runStatus() error {
 		fmt.Fprintln(w)
 	}
 
-	// CLI tools (gh, …) — third bucket below "models" and "MCP".
-	// CLI tools have their own auth shape (gh device-flow + a host
-	// Hosts.yml) and a single row per tool covers it.
 	renderCLISection(w)
 
-	// MCP providers (Notion, …) — separate section because they're
-	// A different kind of credential (OAuth token cached for an MCP
-	// Server) than the AI-provider blocks above. We deliberately
-	// Don't fold them in: users mentally separate "models" from
-	// "Tools", and so should the dashboard.
 	renderMCPSection(w)
 
-	// Default provider footer. Faint label + bold value + faint
-	// "change" hint, all on one line.
 	def := authentication.DefaultProvider()
 	defText := "none set"
 	if def != "" {
@@ -142,9 +106,6 @@ func runStatus() error {
 	return nil
 }
 
-// renderCLISection prints the "Tools (CLI)" block — gh today, plus
-// google (BYO-GCP, OAuth installed-app flow). Adding future CLIs is
-// a one-liner once their auth package is wired.
 func renderCLISection(w io.Writer) {
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Tools (CLI)"))
 
@@ -175,10 +136,6 @@ func renderCLISection(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
-// renderMCPSection prints the "Tools (MCP)" block under the AI
-// Provider blocks. One row per known MCP provider; the row says
-// Whether tokens are cached and points at the right verb to set
-// Or clear them.
 func renderMCPSection(w io.Writer) {
 	names := authmcp.Names()
 	if len(names) == 0 {
@@ -202,20 +159,14 @@ func renderMCPSection(w io.Writer) {
 	fmt.Fprintln(w)
 }
 
-// dashboardRow is one rendered method line, fully resolved — the
-// Renderer is pure formatting.
 type dashboardRow struct {
-	glyph       string // green ✓, red ✗, faint ·
-	method      string // bold method name
-	detail      string // right-hand "source · age" or "not set"
-	hintCommand string // trailing action; rendered cyan (inline cmd)
+	glyph       string
+	method      string
+	detail      string
+	hintCommand string
 }
 
-// renderDashboardRow prints one method row at col 4.
 func renderDashboardRow(w io.Writer, row dashboardRow) {
-	// Method column is padded so the detail columns line up across
-	// Rows. 14 chars is wide enough for "api_key"/"oauth" without
-	// Hogging screen width.
 	const methodCol = 14
 	methodPadded := ui.PadVisible(ui.Strong(row.method), methodCol)
 	line := fmt.Sprintf("    %s %s %s", row.glyph, methodPadded, ui.Faint(row.detail))
@@ -225,10 +176,6 @@ func renderDashboardRow(w io.Writer, row dashboardRow) {
 	fmt.Fprintln(w, line)
 }
 
-// renderProviderBlock resolves + validates every supported method
-// For one provider and returns the rendered rows plus any active-
-// Method note. Parallelises the method probes so the whole block
-// Finishes in max(one API call) rather than sum(all).
 func renderProviderBlock(ctx context.Context, p authentication.Provider) struct {
 	title  string
 	rows   []dashboardRow
@@ -245,20 +192,15 @@ func renderProviderBlock(ctx context.Context, p authentication.Provider) struct 
 		return result
 	}
 
-	// Detect once so we see every source, not just the winner. The
-	// Resolver's "pick one" logic is what the active: line names.
 	detected := authentication.DetectMethods(p)
 	disabled := authentication.IsProviderDisabled(p)
 	byMethod := map[authentication.Method]*authentication.Credential{}
 	for _, c := range detected {
-		// First detection per method wins the row — mirrors the
-		// Discovery order the resolver uses.
 		if _, seen := byMethod[c.Method()]; !seen {
 			byMethod[c.Method()] = c
 		}
 	}
 
-	// Parallel validate. Cached positives come back instantly.
 	type valResult struct {
 		method authentication.Method
 		cred   *authentication.Credential
@@ -269,7 +211,6 @@ func renderProviderBlock(ctx context.Context, p authentication.Provider) struct 
 	for _, m := range methods {
 		cred := byMethod[authentication.Method(m)]
 		if cred == nil {
-			// Nothing to validate — skip the goroutine.
 			continue
 		}
 		wg.Add(1)
@@ -288,7 +229,6 @@ func renderProviderBlock(ctx context.Context, p authentication.Provider) struct 
 		validations[r.method] = r
 	}
 
-	// Build one row per supported method.
 	var validCreds []*authentication.Credential
 	for _, m := range methods {
 		method := authentication.Method(m)
@@ -323,8 +263,6 @@ func renderProviderBlock(ctx context.Context, p authentication.Provider) struct 
 		result.rows = append(result.rows, row)
 	}
 
-	// Active note only when there's an ambiguity to resolve — 2+
-	// Methods validated.
 	if len(validCreds) >= 2 && !disabled {
 		pref := authentication.ActiveMethod(p)
 		winner := validCreds[0]
@@ -341,9 +279,6 @@ func renderProviderBlock(ctx context.Context, p authentication.Provider) struct 
 	return result
 }
 
-// providerTitle returns the human-facing provider name ("Anthropic",
-// "OpenAI") rather than the lowercase provider id. Small detail but
-// The dashboard is the one place where branding is worth the cycles.
 func providerTitle(p authentication.Provider) string {
 	switch p {
 	case authentication.ProviderAnthropic:
@@ -354,18 +289,12 @@ func providerTitle(p authentication.Provider) string {
 	return string(p)
 }
 
-// credSourceDetail returns the right-hand detail for a ✓ row:
-// "<source> · <age>" where source is the credential origin
-// (keychain, env var name, …) and age is the cached validation age
-// When available.
 func credSourceDetail(cred *authentication.Credential) string {
 	if cred == nil {
 		return ""
 	}
 	return cred.Source
 }
-
-// ── use ─────────────────────────────────────────────────────────────
 
 var useCmd = &cobra.Command{
 	Use:   "use <provider> <method>",
@@ -404,8 +333,6 @@ Example:
 	},
 }
 
-// ── login ───────────────────────────────────────────────────────────
-
 var (
 	loginAPIKey string
 )
@@ -432,30 +359,22 @@ approve in your browser, the token persists for every world:
   spwn auth login notion`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// CLI-tool branch (gh) — host import or device-flow.
 		if strings.EqualFold(args[0], "github") {
 			return runGitHubLogin(cmd)
 		}
-		// Google branch — BYO-GCP wizard + installed-app PKCE flow.
 		if strings.EqualFold(args[0], "google") {
 			return runGoogleLogin(cmd)
 		}
-		// MCP providers branch — ref-by-name and own a different
-		// storage path than AI providers.
 		if mp, ok := authmcp.Lookup(args[0]); ok {
 			return runMCPLogin(cmd, mp)
 		}
 		p, err := parseProvider(args[0])
 		if err != nil {
-			// If the user passed something that's neither an AI
-			// provider, an MCP provider, nor a CLI-tool provider,
-			// surface every list so the help is complete.
 			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github, google)", err, strings.Join(authmcp.Names(), ", "))
 		}
 		s := ui.New()
 		s.Blank()
 
-		// Explicit API-key path: persist into the provider's cache.
 		if loginAPIKey != "" {
 			if err := saveAPIKey(p, strings.TrimSpace(loginAPIKey)); err != nil {
 				return s.FailHint("Save failed", err,
@@ -467,22 +386,11 @@ approve in your browser, the token persists for every world:
 			return nil
 		}
 
-		// No flags: fall through to the same dashboard that bare
-		// `spwn auth` renders. Users who reach for `spwn auth login
-		// Anthropic` with no flag expecting a wizard get the
-		// Self-explanatory method catalog instead, which surfaces
-		// The exact commands for both OAuth (run claude login) and
-		// API-key paths.
 		_ = authentication.SyncCredentials()
 		return runStatus()
 	},
 }
 
-// runGitHubLogin imports an existing host gh login (the happy path
-// — most users already ran `gh auth login` once on their machine)
-// or, in the future, drives a device-flow login when host gh isn't
-// available. Either way the result is a plaintext hosts.yml under
-// ~/.spwn/credentials/gh that bind-mounts cleanly into every world.
 func runGitHubLogin(cmd *cobra.Command) error {
 	s := ui.New()
 	s.Blank()
@@ -507,10 +415,6 @@ func runGitHubLogin(cmd *cobra.Command) error {
 	return nil
 }
 
-// runMCPLogin drives `spwn auth login <mcp>`. The OAuth dance runs in
-// a one-shot helper container; mcp2cli streams the "open this URL"
-// hint to the user's terminal, waits for the redirect, exchanges the
-// code, and persists tokens to ~/.spwn/credentials/mcp/.
 func runMCPLogin(cmd *cobra.Command, p authmcp.Provider) error {
 	s := ui.New()
 	s.Blank()
@@ -527,11 +431,6 @@ func runMCPLogin(cmd *cobra.Command, p authmcp.Provider) error {
 	return nil
 }
 
-// saveAPIKey persists a user-entered API key into the right per-provider
-// slot. Anthropic reuses the legacy `.auth-token` cache so downstream
-// tools that read it directly (Claude CLI, VS Code extension) keep
-// working. OpenAI needs a net-new cache since `~/.codex/auth.json` is
-// OAuth-shaped and owned by codex; we drop ours under CredentialsDir.
 func saveAPIKey(p authentication.Provider, key string) error {
 	if key == "" {
 		return errors.New("empty key")
@@ -545,17 +444,6 @@ func saveAPIKey(p authentication.Provider, key string) error {
 	return fmt.Errorf("unsupported provider %q", p)
 }
 
-// runGoogleLogin walks the user through the one-time GCP setup the
-// first time it's invoked, then runs Google's OAuth installed-app
-// PKCE flow. Tokens land in ~/.spwn/credentials/google/, ready for
-// the gate to consume via google.AccessToken on every gws call.
-//
-// Why an interactive wizard instead of `claude login`-style "go run
-// this other tool first" — Google's restricted scopes (Gmail) make
-// shipping a single OAuth client cost-prohibitive ($15k/yr CASA
-// audit), so every spwn user runs their own OAuth client. The
-// wizard keeps that ~10 min experience as low-friction as we can
-// without paying for verification.
 func runGoogleLogin(cmd *cobra.Command) error {
 	s := ui.New()
 	s.Blank()
@@ -566,8 +454,6 @@ func runGoogleLogin(cmd *cobra.Command) error {
 			"Check ~/.spwn/credentials/google/ permissions")
 	}
 	if c == nil {
-		// First run: walk the user through GCP project setup, capture
-		// their client_id/secret, persist before doing OAuth.
 		c, err = authgoogle.PromptClient(cmd.InOrStdin(), cmd.OutOrStderr())
 		if err != nil {
 			return s.FailHint("OAuth client setup cancelled", err, "")
@@ -592,8 +478,6 @@ func runGoogleLogin(cmd *cobra.Command) error {
 	return nil
 }
 
-// ── logout ──────────────────────────────────────────────────────────
-
 var logoutMethod string
 
 var logoutCmd = &cobra.Command{
@@ -609,7 +493,6 @@ to unset them manually.
   spwn auth logout anthropic --method api_key   # spare keychain`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// CLI-tool branch (github).
 		if strings.EqualFold(args[0], "github") {
 			s := ui.New()
 			s.Blank()
@@ -626,9 +509,6 @@ to unset them manually.
 			s.Blank()
 			return nil
 		}
-		// Google branch — delete client.json + tokens.json from
-		// ~/.spwn/credentials/google/. Idempotent: removing a missing
-		// file is a no-op.
 		if strings.EqualFold(args[0], "google") {
 			s := ui.New()
 			s.Blank()
@@ -651,7 +531,6 @@ to unset them manually.
 			s.Blank()
 			return nil
 		}
-		// MCP providers branch first, same shape as login.
 		if mp, ok := authmcp.Lookup(args[0]); ok {
 			s := ui.New()
 			s.Blank()
@@ -706,8 +585,6 @@ to unset them manually.
 	},
 }
 
-// ── disable / enable ────────────────────────────────────────────────
-
 var disableCmd = &cobra.Command{
 	Use:   "disable <provider>",
 	Short: "Tell spwn not to use this provider, even if creds exist",
@@ -751,8 +628,6 @@ var enableCmd = &cobra.Command{
 		return runStatus()
 	},
 }
-
-// ── default ─────────────────────────────────────────────────────────
 
 var defaultCmd = &cobra.Command{
 	Use:   "default [provider]",
@@ -817,8 +692,6 @@ Example:
 	},
 }
 
-// ── help ────────────────────────────────────────────────────────────
-
 func authHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "auth" {
 		if defaultAuthHelp != nil {
@@ -852,8 +725,6 @@ func authHelp(cmd *cobra.Command, args []string) {
 		"",
 	)
 }
-
-// ── shared helpers ──────────────────────────────────────────────────
 
 func parseProvider(raw string) (authentication.Provider, error) {
 	lower := strings.ToLower(strings.TrimSpace(raw))

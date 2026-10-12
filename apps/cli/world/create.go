@@ -16,10 +16,6 @@ var (
 	createWorkspaces []string
 )
 
-// createCmd is `spwn world create <name>` — declare a new world by
-// appending a worlds.<name> entry to spwn.yaml. Pure config write,
-// nothing touches Docker. Pair with `spwn world start <name>` to
-// actually spawn it.
 var createCmd = &cobra.Command{
 	Use:   "create <name>",
 	Short: "Declare a new world in spwn.yaml",
@@ -61,9 +57,6 @@ spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 	},
 }
 
-// rmCmd is `spwn world rm <name>` — remove a world entry from
-// spwn.yaml. Errors if the world is currently running (caller must
-// `world stop` first).
 var rmCmd = &cobra.Command{
 	Use:     "rm <name>",
 	Aliases: []string{"remove"},

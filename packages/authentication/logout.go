@@ -62,26 +62,12 @@ func LogoutProvider(p Provider, opts LogoutOpts) *LogoutResult {
 	case ProviderGoogle:
 		logoutGoogle(opts, res)
 	}
-	// Always best-effort re-sync the bind-mount credential dir so the
-	// Next container spawn doesn't inject a stale token it remembers
-	// But that we just cleared on the host.
 	_ = SyncCredentials()
-	// Clear any positive-validation cache for this provider so the
-	// Next spawn re-checks from scratch instead of trusting a stale
-	// "last time it worked" marker for creds we just deleted.
 	InvalidateValidation(p)
 	return res
 }
 
-// logoutAnthropic removes:
-//   - the macOS keychain entry "Claude Code-credentials" (OAuth)
-//   - ~/.spwn/.auth-token, when method-scoped or when unscoped
-//   - ~/.spwn/credentials/anthropic/ mirror dir
-//
-// Honours opts.Method: api_key scope spares the keychain; oauth scope
-// spares `.auth-token` when it holds an sk-ant- key.
 func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
-	// Keychain — OAuth only.
 	if opts.Method == "" || opts.Method == MethodOAuth {
 		if hasAnthropicKeychain() {
 			if err := deleteAnthropicKeychain(); err != nil {
@@ -92,7 +78,6 @@ func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
 		}
 	}
 
-	// ~/.spwn/.auth-token — kind depends on prefix.
 	tokenPath := platform.BaseDir() + "/.auth-token"
 	if cached, err := os.ReadFile(tokenPath); err == nil {
 		trimmed := strings.TrimSpace(string(cached))
@@ -109,7 +94,7 @@ func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
 		}
 	}
 
-	// Mirrored dir under credentials/anthropic/ (written by sync for
+	// invariant: Mirrored dir under credentials/anthropic/ (written by sync for
 	// runtime-specific formats). Safe to nuke unconditionally regardless
 	// of method — it's a derived artefact, never the source of truth.
 	if opts.Method == "" {
@@ -123,7 +108,6 @@ func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
 		}
 	}
 
-	// Env vars we can't touch — surface them so the UI warns.
 	if opts.Method == "" || opts.Method == MethodAPIKey {
 		if v := os.Getenv("ANTHROPIC_API_KEY"); v != "" {
 			res.Remaining = append(res.Remaining, "env:ANTHROPIC_API_KEY")
@@ -139,14 +123,6 @@ func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
 	}
 }
 
-// logoutOpenAI removes:
-//   - ~/.codex/auth.json (OAuth from the codex CLI)
-//   - ~/.spwn/credentials/openai/auth.json (our mirror)
-//
-// Nuking ~/.codex/auth.json is aggressive — it signs the user out of
-// the codex CLI globally — but it is the explicit intent of `spwn auth
-// logout openai`. Users who only want to disable the provider for spwn
-// without touching codex should run `spwn auth disable openai` instead.
 func logoutOpenAI(opts LogoutOpts, res *LogoutResult) {
 	if opts.Method == "" || opts.Method == MethodOAuth {
 		home, _ := os.UserHomeDir()
@@ -174,9 +150,6 @@ func logoutOpenAI(opts LogoutOpts, res *LogoutResult) {
 	}
 }
 
-// logoutGoogle has no on-disk state to remove — Google creds only
-// flow through env vars today. We surface them in Remaining so the
-// user knows why the provider is still "connected" after logout.
 func logoutGoogle(opts LogoutOpts, res *LogoutResult) {
 	if opts.Method == "" || opts.Method == MethodAPIKey {
 		for _, key := range []string{"GOOGLE_API_KEY", "GEMINI_API_KEY"} {
@@ -187,9 +160,6 @@ func logoutGoogle(opts LogoutOpts, res *LogoutResult) {
 	}
 }
 
-// hasAnthropicKeychain reports whether the "Claude Code-credentials"
-// keychain entry exists without reading its contents. On non-darwin or
-// when SPWN_SKIP_KEYCHAIN is set, always false.
 func hasAnthropicKeychain() bool {
 	if runtime.GOOS != "darwin" {
 		return false
@@ -201,10 +171,6 @@ func hasAnthropicKeychain() bool {
 	return cmd.Run() == nil
 }
 
-// deleteAnthropicKeychain removes the macOS keychain entry that
-// `claude login` writes. Returns nil on darwin when the entry is
-// successfully removed; returns an error when deletion itself failed
-// (not "not found" — that's handled by hasAnthropicKeychain above).
 func deleteAnthropicKeychain() error {
 	if runtime.GOOS != "darwin" {
 		return errors.New("keychain deletion is macOS-only")

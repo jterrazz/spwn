@@ -22,8 +22,8 @@ type Version struct {
 	Major      int
 	Minor      int
 	Patch      int
-	Prerelease string // "beta.1", "nightly.20260405", "" for stable
-	Raw        string // original string including any leading "v"
+	Prerelease string
+	Raw        string
 }
 
 // ParseVersion parses a version tag. Accepts a leading "v" prefix.
@@ -37,7 +37,6 @@ func ParseVersion(s string) (Version, error) {
 		return Version{Raw: raw}, nil
 	}
 
-	// Split off prerelease: {core}-{prerelease}
 	core := s
 	pre := ""
 	if idx := strings.Index(s, "-"); idx >= 0 {
@@ -103,7 +102,6 @@ func (v Version) Compare(other Version) int {
 		return c
 	}
 
-	// Per semver: a version WITH a prerelease is older than one WITHOUT.
 	if v.Prerelease == "" && other.Prerelease != "" {
 		return 1
 	}

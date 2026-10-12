@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/compile/internal/dockerfile"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 )
@@ -28,9 +28,6 @@ type ToolPolicy struct {
 	Deny  []string
 }
 
-// shortNameFromRef pulls the slug out of a tool ref (e.g.
-// "spwn:x" → "x"). Catalog tools register their wrapper + policy
-// file under this slug so on-disk paths stay short and stable.
 func shortNameFromRef(ref string) string {
 	if i := strings.Index(ref, ":"); i >= 0 {
 		return ref[i+1:]
@@ -90,7 +87,7 @@ func (req *BuildRequest) Validate() error {
 // BuildResult describes the outcome of a successful build.
 type BuildResult struct {
 	Tag    string
-	Tools  []string // Resolved tool list (after dependency expansion)
+	Tools  []string
 	Cached bool
 }
 
@@ -104,7 +101,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		logw = io.Discard
 	}
 
-	// Resolve tools (expand deps, topo sort)
 	resolved, err := b.registry.Resolve(req.Tools)
 	if err != nil {
 		return nil, fmt.Errorf("resolve tools: %w", err)
@@ -117,7 +113,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 
 	fmt.Fprintf(logw, "Resolved tools: %s\n", strings.Join(resolvedNames, ", "))
 
-	// Convert to generator input
 	toolInputs := make([]dockerfile.ToolInput, len(resolved))
 	for i, t := range resolved {
 		spec := t.Install()
@@ -138,11 +133,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		toolInputs[i] = ti
 	}
 
-	// Collect extra files for build context (tool install files only).
-	// Skills no longer flow through the image: the transpile layer
-	// emits them per-agent at .claude/skills/ / .agents/skills/
-	// directly (see packages/architect/skills.go), so nothing image-
-	// resident is needed for Claude Code's native discovery.
 	extraFiles := make(map[string][]byte)
 
 	for _, t := range resolved {
@@ -153,15 +143,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		}
 	}
 
-	// Content-addressed versioning: hash the Dockerfile we'd
-	// generate + the extra-files tarball contents. Any change to the
-	// base Dockerfile, a tool's install spec, the generator logic,
-	// or the selected tool set flows through to a different hash and
-	// automatically triggers a rebuild. No manual version bumps.
-	//
-	// Two-pass generation: first pass without the version label so
-	// the LABEL value itself doesn't affect the hash, then regenerate
-	// with the hash embedded as the label.
 	dfNoLabel := dockerfile.Generate(req.BaseDockerfile, toolInputs, "")
 	version := hashBuildContext(dfNoLabel, extraFiles)
 	df := dockerfile.Generate(req.BaseDockerfile, toolInputs, version)
@@ -170,13 +151,11 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		_ = b.backend.ImageRemove(ctx, req.Tag)
 	}
 
-	// Build image
 	rebuilt, err := b.backend.EnsureImageWithContext(ctx, req.Tag, version, df, extraFiles, logw)
 	if err != nil {
 		return nil, &BuildError{Tag: req.Tag, Cause: err}
 	}
 
-	// Post-build verification
 	if !req.SkipVerify {
 		fmt.Fprintf(logw, "Verifying tools...\n")
 		if err := b.verify(ctx, req.Tag, resolved, logw); err != nil {
@@ -193,12 +172,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	return result, nil
 }
 
-// hashBuildContext produces a 12-char hex digest of the Dockerfile +
-// sorted extra-files contents. Used as the content-addressed image
-// version label so every input change invalidates the cache without
-// any manual bumping. Order-independent: sorts file names and hashes
-// each path:content pair so map iteration order can't affect the
-// result.
 func hashBuildContext(dockerfile []byte, extraFiles map[string][]byte) string {
 	h := sha256.New()
 	h.Write([]byte("dockerfile:"))
@@ -218,8 +191,6 @@ func hashBuildContext(dockerfile []byte, extraFiles map[string][]byte) string {
 	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
-// verify creates a temporary container from the built image and runs each tool's
-// verify commands inside it.
 func (b *Builder) verify(ctx context.Context, imageTag string, tools []tool.Tool, logw io.Writer) error {
 	containerID, err := b.backend.Create(ctx, backend.ContainerConfig{
 		Image: imageTag,

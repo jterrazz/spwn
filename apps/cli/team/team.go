@@ -31,10 +31,6 @@ func init() {
 	Cmd.AddCommand(assignCmd)
 	Cmd.AddCommand(membersCmd)
 
-	// The team subsystem is in active design - the manifest, storage layout,
-	// and CLI surface are all subject to change. Hide every entry point
-	// from `--help` and generated docs; still invokable by name for
-	// design-iteration purposes.
 	ui.HideExperimental(Cmd)
 	ui.HideExperimental(newCmd)
 	ui.HideExperimental(lsCmd)
@@ -43,8 +39,6 @@ func init() {
 	ui.HideExperimental(assignCmd)
 	ui.HideExperimental(membersCmd)
 }
-
-// ── spwn team new ──
 
 var newCmd = &cobra.Command{
 	Use:   "new <name>",
@@ -80,8 +74,6 @@ var newCmd = &cobra.Command{
 	},
 }
 
-// ── spwn team ls ──
-
 var lsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
@@ -106,8 +98,6 @@ var lsCmd = &cobra.Command{
 		return nil
 	},
 }
-
-// ── spwn team edit ──
 
 var editCmd = &cobra.Command{
 	Use:   "edit <slug>",
@@ -160,8 +150,6 @@ func init() {
 	editCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
 }
 
-// ── spwn team rm ──
-
 var rmCmd = &cobra.Command{
 	Use:     "rm <slug>",
 	Aliases: []string{"remove", "delete"},
@@ -182,8 +170,6 @@ var rmCmd = &cobra.Command{
 		return nil
 	},
 }
-
-// ── spwn team assign (shorthand for spwn agent team) ──
 
 var assignCmd = &cobra.Command{
 	Use:   "assign <agent-name> <team-slug>",
@@ -219,8 +205,6 @@ var assignCmd = &cobra.Command{
 func init() {
 	assignCmd.Flags().Bool("clear", false, "Remove agent from team")
 }
-
-// ── spwn team members ──
 
 var membersCmd = &cobra.Command{
 	Use:     "members <slug>",

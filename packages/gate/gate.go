@@ -18,18 +18,10 @@ const DefaultListenAddr = ":9000"
 // Implementations must be safe for concurrent use — the HTTP server
 // invokes Handler concurrently across requests.
 type Element interface {
-	// Name is the URL-safe identifier the world container's wrapper
-	// targets, e.g. `notion`, `gcp`. Must match `^[a-z][a-z0-9-]*$`.
 	Name() string
 
-	// Handler serves the element's portion of the MCP surface. The
-	// HTTP request URL has been path-stripped — Handler sees paths
-	// relative to /mcp/<name>/. Handler must inject auth and forward
-	// upstream.
 	Handler() http.Handler
 
-	// Refresh is called by the gate's internal scheduler ahead of
-	// token expiry. Elements that don't manage tokens return nil.
 	Refresh(ctx context.Context) error
 }
 

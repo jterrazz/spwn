@@ -44,7 +44,5 @@ func DemoteHeadings(body string) string {
 		out.WriteString(line)
 		out.WriteByte('\n')
 	}
-	// strings.Split adds a trailing empty element for bodies ending
-	// in \n; trim the extra newline so callers chain cleanly.
 	return strings.TrimRight(out.String(), "\n") + "\n"
 }

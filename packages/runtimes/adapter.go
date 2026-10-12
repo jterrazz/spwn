@@ -48,8 +48,6 @@ type Adapter struct {
 	Spawn Spawner
 }
 
-// all is the package-global list of registered adapters, populated
-// via Register at each subpackage's init time.
 var all []Adapter
 
 // Register appends an Adapter to the global registry. Also registers

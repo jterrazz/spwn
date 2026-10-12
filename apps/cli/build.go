@@ -13,32 +13,28 @@ import (
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/runtimeres"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/transpile"
-	_ "spwn.sh/packages/runtimes/defaults" // register every built-in runtime
-	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/compile"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/project"
+	_ "spwn.sh/packages/runtimes/defaults"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/transpile/source"
 )
 
 func init() {
-	// ── What to build ─────────────────────────────────────────
 	buildCmd.Flags().StringVar(&buildRuntime, "runtime", "", "Target runtime. Defaults to the runtime declared in agent.yaml (fallback: claude-code)")
 	buildCmd.Flags().StringVar(&buildWorld, "world", "", "World from spwn.yaml to build (required for multi-world projects)")
 	buildCmd.Flags().StringVar(&buildAgent, "agent", "", "Compile only the named agent (tree-only mode)")
 
-	// ── Image-mode flags ──────────────────────────────────────
 	buildCmd.Flags().StringVar(&buildTag, "tag", "", "Image tag (default: spwn-<project>:latest)")
 	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest)")
 	buildCmd.Flags().BoolVar(&buildNoCache, "no-cache", false, "Disable Docker build cache")
 
-	// ── Tree-only mode flags ──────────────────────────────────
 	buildCmd.Flags().BoolVar(&buildTreeOnly, "tree-only", false, "Stop after the compile step; write the Tree to --output instead of building a Docker image")
 	buildCmd.Flags().StringVarP(&buildOut, "output", "o", "dist", "Output directory for --tree-only mode")
 	buildCmd.Flags().BoolVar(&buildDryRun, "dry-run", false, "Print paths that would be written, don't touch disk (requires --tree-only)")
 	buildCmd.Flags().BoolVar(&buildForce, "force", false, "Overwrite existing files in --output without prompting (requires --tree-only)")
 
-	// ── Output ────────────────────────────────────────────────
 	buildCmd.Flags().BoolVar(&buildJSON, "json", false, "Emit a machine-readable build report on stdout")
 
 	rootCmd.AddCommand(buildCmd)
@@ -58,14 +54,11 @@ var (
 	buildJSON     bool
 )
 
-// buildReport is the CLI-owned JSON schema for `spwn build --json`.
-// Tree-only runs populate the TreeOnly + OutDir + Paths fields and
-// leave image fields empty; image runs do the reverse.
 type buildReport struct {
-	Runtime   string   `json:"runtime"`
-	World     string   `json:"world"`
-	TreeFiles int      `json:"treeFiles"`
-	TreeOnly  bool     `json:"treeOnly"`
+	Runtime   string `json:"runtime"`
+	World     string `json:"world"`
+	TreeFiles int    `json:"treeFiles"`
+	TreeOnly  bool   `json:"treeOnly"`
 	// Tree-only fields
 	OutDir string   `json:"outDir,omitempty"`
 	Paths  []string `json:"paths,omitempty"`
@@ -107,9 +100,6 @@ Examples:
   spwn build --tree-only --dry-run            # list paths, touch nothing
   spwn build --tree-only --agent neo          # filter to one agent`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Flag combination guardrails. Keep these tight so users
-		// don't silently pass a tree-only flag in image mode and
-		// wonder why it had no effect.
 		if buildDryRun && !buildTreeOnly {
 			return fmt.Errorf("--dry-run requires --tree-only")
 		}
@@ -136,11 +126,6 @@ Examples:
 			return err
 		}
 
-		// Validate before touching Docker - same rules as `spwn
-		// check`. This keeps bad manifests from turning into
-		// confusing docker build errors downstream. Skipped in
-		// tree-only mode because the whole point of that path is
-		// "render what you have, regardless of validation state".
 		if !buildTreeOnly {
 			issues := project.Validate(p, project.ValidateOpts{
 				BuiltinTools:        catalogToolNames(),
@@ -157,12 +142,6 @@ Examples:
 			return fmt.Errorf("load project source: %w", err)
 		}
 
-		// Resolve runtime: --runtime override > agent declaration >
-		// single authenticated provider > claude-code fallback. See
-		// runtimeres.Resolve for the full precedence cascade; it
-		// wraps source.ResolveRuntime with auth-state awareness so a
-		// scaffold without a pinned backend picks the right runtime
-		// for the logged-in user.
 		runtimeName, err := runtimeres.Resolve(src, buildRuntime)
 		if err != nil {
 			return err
@@ -173,20 +152,12 @@ Examples:
 			return err
 		}
 
-		// Fail loudly when an agent in the selected world has an
-		// empty / missing AGENTS.md. The renderer itself doesn't
-		// inspect AGENTS.md bytes yet, so without this guard the
-		// user gets a successful compile for a silently-broken
-		// agent. `spwn check --deep` reports the same finding.
 		if err := requireAgentPrompts(src, input); err != nil {
 			return err
 		}
 
 		tree, err := transpile.Compile(runtimeName, input)
 		if err != nil {
-			// Surface the known runtime list so typos ("codex" ->
-			// "claude-code") are self-correcting. Query the real
-			// registry rather than hardcoding the list.
 			if strings.Contains(err.Error(), "unknown runtime") {
 				return fmt.Errorf(
 					"%v\n\nKnown runtimes: %s", err,
@@ -212,10 +183,6 @@ Examples:
 	},
 }
 
-// runBuildTreeOnly materialises the compiled Tree to disk. This is
-// the path formerly known as `spwn compile`: pure, no Docker,
-// useful for previewing renderer output and writing new runtime
-// backends.
 func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *transpile.Tree) error {
 	out := cmd.OutOrStdout()
 
@@ -231,7 +198,6 @@ func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *tra
 		return fmt.Errorf("resolve --output: %w", err)
 	}
 
-	// Guard against clobbering a non-empty dir unless --force.
 	if !buildForce {
 		if nonEmpty, err := dirNonEmpty(absOut); err != nil {
 			return fmt.Errorf("inspect --output: %w", err)
@@ -241,9 +207,6 @@ func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *tra
 				absOut)
 		}
 	} else if absOut != "" {
-		// --force = replace the tree. Remove the existing directory
-		// first so stale files from a prior build (or a prior
-		// --agent filter) don't mix with the new output.
 		if err := safeRemoveOutDir(absOut); err != nil {
 			return fmt.Errorf("clean --output: %w", err)
 		}
@@ -277,23 +240,12 @@ func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *tra
 	return nil
 }
 
-// runBuildImage compiles the tree into a derived Docker compile.
-// The project's name becomes the default tag, labels identify the
-// runtime and world, and the base image defaults to
-// spwn-world:latest so the result is layered on top of whatever
-// the user's `spwn up` would have spawned from.
 func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID string, tree *transpile.Tree) error {
-	// Compute the image tag: explicit flag wins, otherwise
-	// spwn-<project>:latest.
 	tag := buildTag
 	if tag == "" {
 		tag = fmt.Sprintf("spwn-%s:latest", p.Manifest.Name)
 	}
 
-	// Resolve the base image: --base > $SPWN_BASE_IMAGE >
-	// spwn-world:latest. This mirrors how spawn discovers the
-	// base image, so e2e tests pinning SPWN_BASE_IMAGE don't
-	// need an extra flag.
 	baseImage := buildBase
 	if baseImage == "" {
 		if env := os.Getenv("SPWN_BASE_IMAGE"); env != "" {
@@ -303,9 +255,6 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 		}
 	}
 
-	// Labels: identify the project + mark the image kind so
-	// test cleanup can scope to built images without touching
-	// world or architect containers.
 	labels := map[string]string{
 		"sh.spwn.kind":    "project-build",
 		"sh.spwn.project": p.Manifest.Name,
@@ -319,11 +268,6 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 	out := cmd.OutOrStdout()
 	errOut := cmd.ErrOrStderr()
 
-	// Docker client. Routed through backend.NewDockerClient so
-	// `spwn build` picks up the same per-user socket discovery as
-	// `spwn up` (OrbStack without admin rights, per-user Docker
-	// Desktop, rootless Podman, etc.). stdout stays clean for --json;
-	// build logs go to stderr further down.
 	ctx := context.Background()
 	dockerCli, err := backend.NewDockerClient(ctx)
 	if err != nil {
@@ -373,12 +317,6 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 	return nil
 }
 
-// ── shared helpers (formerly in transpile.go) ──────────────────────
-
-// filterTreeByAgent returns a new Tree containing only entries that
-// belong to the named agent (prefix "agents/<name>/"), along with the
-// sorted set of agent names observed in the input tree — useful for
-// error messages when the filter drops everything.
 func filterTreeByAgent(t *transpile.Tree, name string) (*transpile.Tree, []string) {
 	out := transpile.New()
 	prefix := "agents/" + name + "/"
@@ -392,8 +330,6 @@ func filterTreeByAgent(t *transpile.Tree, name string) (*transpile.Tree, []strin
 	return out, listTreeAgents(t)
 }
 
-// listTreeAgents returns the sorted set of agent names present in the
-// Tree (extracted from paths of shape "agents/<name>/...").
 func listTreeAgents(t *transpile.Tree) []string {
 	seen := map[string]struct{}{}
 	for _, p := range t.Paths() {
@@ -412,10 +348,6 @@ func listTreeAgents(t *transpile.Tree) []string {
 	return out
 }
 
-// requireAgentPrompts validates that every agent selected for this
-// build has a non-empty AGENTS.md on disk. Empty prompts would
-// otherwise produce a silently-templated CLAUDE.md with no system
-// instructions — worse than a loud error.
 func requireAgentPrompts(src *source.ProjectSource, input transpile.Input) error {
 	if src == nil {
 		return nil
@@ -442,11 +374,6 @@ func requireAgentPrompts(src *source.ProjectSource, input transpile.Input) error
 		strings.Join(missing, ", "))
 }
 
-// safeRemoveOutDir removes dir if and only if it looks like a real,
-// project-relative output directory. It refuses to touch filesystem
-// roots, the user's home, and missing paths (which are a no-op). The
-// guard is cheap insurance against a bogus --output value wiping
-// more than the compile tree.
 func safeRemoveOutDir(dir string) error {
 	if dir == "" {
 		return fmt.Errorf("empty output directory")
@@ -455,7 +382,6 @@ func safeRemoveOutDir(dir string) error {
 	if clean == "/" || clean == "." || clean == ".." {
 		return fmt.Errorf("refusing to remove %q", clean)
 	}
-	// Refuse to touch $HOME exactly.
 	if home, err := os.UserHomeDir(); err == nil && clean == filepath.Clean(home) {
 		return fmt.Errorf("refusing to remove home directory %q", clean)
 	}

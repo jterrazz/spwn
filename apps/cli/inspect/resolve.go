@@ -15,7 +15,6 @@ import (
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 
-
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile/source"
@@ -64,7 +63,6 @@ func Build(cwd string, opts Opts) (*Model, error) {
 		return nil, fmt.Errorf("register local tools: %w", err)
 	}
 
-	// world-name → Status for every running agent.
 	var statusByAgent map[string]Status
 	var worldByAgent map[string]string
 	if opts.LiveStatus {
@@ -101,8 +99,6 @@ func Build(cwd string, opts Opts) (*Model, error) {
 			if s, ok := statusByAgent[a.Name]; ok {
 				status = s
 			}
-			// If the agent's world isn't tracked but a live world
-			// with the same config name is, use it as a tiebreaker.
 			if status == StatusUnknown {
 				if wname, ok := worldByAgent[a.Name]; ok {
 					world = wname
@@ -126,8 +122,6 @@ func Build(cwd string, opts Opts) (*Model, error) {
 		views = append(views, view)
 	}
 
-	// Stable order: alphabetical by name so two runs against the
-	// same tree produce identical output.
 	sort.Slice(views, func(i, j int) bool { return views[i].Name < views[j].Name })
 
 	if opts.Agent != "" && len(views) == 0 {
@@ -137,13 +131,8 @@ func Build(cwd string, opts Opts) (*Model, error) {
 	return &Model{Agents: views}, nil
 }
 
-// buildNode recursively constructs a DepNode. `seen` carries the
-// set of dep names already emitted at any depth — the second (and
-// further) visits return a DedupSeen node (cargo-tree `(*)` marker)
-// with no children.
 func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) DepNode {
 	if _, already := seen[ref]; already {
-		// Still resolve version for the display, but short-circuit children.
 		n := DepNode{Name: ref, DedupSeen: true}
 		if t := reg.Get(ref); t != nil {
 			n.Version = t.Version()
@@ -154,9 +143,6 @@ func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) Dep
 
 	t := reg.Get(ref)
 	if t == nil {
-		// Unknown ref — render as-is with no composition. Lets us
-		// show `spwn inspect` even when `spwn check` would flag the
-		// ref as missing.
 		return DepNode{Name: ref}
 	}
 	node := DepNode{
@@ -187,10 +173,6 @@ func countSkills(fsys fs.FS) int {
 	return n
 }
 
-// registerLocalTools walks <root>/spwn/tools/ and registers every
-// directory-form dependency it finds, prefixing names with "local:"
-// to stay out of the spwn: namespace (mirrors the hydration path
-// in packages/architect/localtools.go).
 func registerLocalTools(reg *resolver.Registry, root string) error {
 	toolsDir := filepath.Join(root, "spwn", "tools")
 	entries, err := os.ReadDir(toolsDir)
@@ -204,10 +186,6 @@ func registerLocalTools(reg *resolver.Registry, root string) error {
 		if !e.IsDir() {
 			continue
 		}
-		// dependency.LoadLocalTool reads tool.yaml + skills/ + files/ and wraps
-		// The result as a tool.Tool — the same path the spawn
-		// Pipeline takes. Missing tool.yaml is not fatal; users may
-		// Author the dir before filling it in, so we skip silently.
 		tool, err := dependency.LoadLocalTool(root, e.Name())
 		if err != nil {
 			continue
@@ -218,28 +196,22 @@ func registerLocalTools(reg *resolver.Registry, root string) error {
 	return nil
 }
 
-// localToolAdapter forces Name() to a bare basename (no @-scope) so
-// the renderer prints `my-parser` instead of `local:my-parser`.
 type localToolAdapter struct {
 	inner tool.Tool
 	name  string
 }
 
-func (t *localToolAdapter) Name() string             { return t.name }
-func (t *localToolAdapter) Version() string          { return t.inner.Version() }
-func (t *localToolAdapter) Dependencies() []string   { return t.inner.Dependencies() }
+func (t *localToolAdapter) Name() string              { return t.name }
+func (t *localToolAdapter) Version() string           { return t.inner.Version() }
+func (t *localToolAdapter) Dependencies() []string    { return t.inner.Dependencies() }
 func (t *localToolAdapter) Install() tool.InstallSpec { return t.inner.Install() }
-func (t *localToolAdapter) Verify() []string         { return t.inner.Verify() }
-func (t *localToolAdapter) Skills() fs.FS            { return t.inner.Skills() }
+func (t *localToolAdapter) Verify() []string          { return t.inner.Verify() }
+func (t *localToolAdapter) Skills() fs.FS             { return t.inner.Skills() }
 
-// findWorldFor returns the first world name that lists the agent.
-// Returns "" when no world claims it (orphan agent).
 func findWorldFor(m *project.Manifest, agentName string) string {
 	if m == nil {
 		return ""
 	}
-	// Deterministic order — a project may declare the same agent
-	// under multiple worlds; return the alphabetically-first.
 	var names []string
 	for name := range m.Worlds {
 		names = append(names, name)
@@ -256,10 +228,6 @@ func findWorldFor(m *project.Manifest, agentName string) string {
 	return ""
 }
 
-// liveAgentStatus queries the architect for current world state and
-// maps every live agent name to its world's status. Unreachable
-// architect (typical in CI / tests) returns empty maps so callers
-// fall back to StatusUnknown without error.
 func liveAgentStatus() (map[string]Status, map[string]string) {
 	arc, err := architect.NewFromEnv()
 	if err != nil {
@@ -298,20 +266,13 @@ func fromWorldStatus(s wmodels.Status) Status {
 	}
 }
 
-// collectSkills enumerates every markdown skill the agent will see
-// at spawn-time: project-local (spwn/skills/) and tool-provided
-// (spwn:<tool>/skills/ or my-tool/skills/).
 func collectSkills(_ source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *resolver.Registry) []SkillRef {
 	var out []SkillRef
 
-	// Project-wide bare-markdown skills.
 	for _, s := range src.Skills {
 		out = append(out, SkillRef{Name: s.Name, Origin: "spwn/skills"})
 	}
 
-	// Tool-provided skills (via each dep's Skills() fs.FS). Walk
-	// the tree with dedup so a skill doesn't appear twice when two
-	// agents share a tool ancestor.
 	seen := map[string]struct{}{}
 	for _, ref := range fullDeps {
 		collectToolSkills(reg, ref, seen, &out)
@@ -347,7 +308,7 @@ func collectToolSkills(reg *resolver.Registry, ref string, seen map[string]struc
 }
 
 func collectHooks(src *source.ProjectSource, a source.AgentSource) []HookRef {
-	_ = a // per-agent hooks not distinguished from project today
+	_ = a
 	out := make([]HookRef, 0, len(src.Hooks))
 	for _, h := range src.Hooks {
 		out = append(out, HookRef{Name: h.Name, Origin: "spwn/hooks"})
@@ -361,9 +322,6 @@ func collectHooks(src *source.ProjectSource, a source.AgentSource) []HookRef {
 	return out
 }
 
-// shortRuntime strips the spwn scope so "claude-code" shows instead
-// of "spwn:claude-code" or "spwn:claude-code" in the header. Falls
-// back to the raw value when the ref has no recognised prefix.
 func shortRuntime(backend string) string {
 	if strings.HasPrefix(backend, "spwn:") {
 		return backend[len("spwn:"):]

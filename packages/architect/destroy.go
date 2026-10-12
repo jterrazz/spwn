@@ -7,14 +7,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"spwn.sh/packages/agent"
 	"spwn.sh/packages/activity"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/architect/internal/deploy"
-	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/world/models"
 )
 
-// formatUptime returns a human-readable duration like "47m" or "2h".
 func formatUptime(d time.Duration) string {
 	if d < time.Minute {
 		return "just now"
@@ -43,9 +42,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		return nil, err
 	}
 
-	// Collect the agent home mapping so we can sync out before the
-	// container is stopped. Both multi-agent (Agents list) and
-	// legacy single-agent (Agent scalar) shapes feed the same map.
 	agentHomes := map[string]string{}
 	for _, rec := range u.Agents {
 		if rec.Name != "" {
@@ -56,7 +52,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		agentHomes[u.Agent] = "/agents/" + u.Agent
 	}
 
-	// Sync memory layers out of the container before stopping it.
+	// invariant: Sync memory layers out of the container before stopping it.
 	// Best-effort: warnings surface via log but never block destroy.
 	if len(agentHomes) > 0 {
 		for _, w := range deploy.SyncOut(ctx, a.backend, u.ContainerID, agentHomes) {
@@ -64,10 +60,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		}
 	}
 
-	// Stop may fail benignly when the container already exited; log
-	// but continue so Remove still runs. Remove failures are the real
-	// problem (zombie container with state.json already cleared below);
-	// surface them so operators know to docker rm manually.
 	if err := a.backend.Stop(ctx, u.ContainerID); err != nil {
 		log.Printf("warning: stop container %s: %v", u.ContainerID, err)
 	}
@@ -75,9 +67,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		log.Printf("warning: remove container %s: %v", u.ContainerID, err)
 	}
 
-	// Write a journal entry for every agent that was deployed in
-	// this world. Happens after the sync-out so the new entry joins
-	// the already-freshened on-disk journal, not a stale copy.
 	duration := time.Since(u.CreatedAt)
 	for name := range agentHomes {
 		agentPath := filepath.Join(platform.AgentsDir(), name)
@@ -90,7 +79,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		log.Printf("warning: delete rstate for %s: %v", worldID, err)
 	}
 
-	// Emit activity events
 	uptime := formatUptime(duration)
 	for name := range agentHomes {
 		activity.Log(activity.Event{

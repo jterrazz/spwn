@@ -91,35 +91,27 @@ func (s DockerStatus) Summary() string {
 // FIRST host that answered; subsequent hosts are not contacted.
 //
 // Discovery order:
-//   1. SPWN_DOCKER_HOST env var — explicit spwn-specific escape hatch
-//      that takes priority over every other source. Useful for CI,
-//      remote podman sockets, or any pathological host config.
-//   2. SDK default (DOCKER_HOST, /var/run/docker.sock).
-//   3. Per-user socket fallback list (OrbStack, Colima, Docker Desktop
-//      per-user, Rancher, Lima, Podman rootless) + system defaults.
+//  1. SPWN_DOCKER_HOST env var — explicit spwn-specific escape hatch
+//     that takes priority over every other source. Useful for CI,
+//     remote podman sockets, or any pathological host config.
+//  2. SDK default (DOCKER_HOST, /var/run/docker.sock).
+//  3. Per-user socket fallback list (OrbStack, Colima, Docker Desktop
+//     per-user, Rancher, Lima, Podman rootless) + system defaults.
 func CheckDocker(ctx context.Context) DockerStatus {
 	st := DockerStatus{Platform: runtime.GOOS}
 
-	// 1. Explicit spwn override — highest priority. Lets users with
-	// Pathological setups (per-user OrbStack without admin rights, CI,
-	// Remote Podman) unstick spwn with one env var.
 	if override := strings.TrimSpace(os.Getenv("SPWN_DOCKER_HOST")); override != "" {
 		if res := tryHost(ctx, override, 2*time.Second); res.ok {
 			return res.apply(st)
 		}
 	}
 
-	// 2. Default attempt - honors DOCKER_HOST, ~/.docker/contexts, etc.
 	if res := tryHost(ctx, "", 4*time.Second); res.ok {
 		return res.apply(st)
 	}
 
-	// 3. Probe well-known per-user sockets sequentially. Each attempt is
-	// Short so the worst-case total stays well under the 10s API window.
 	var lastErr error
 	for _, host := range candidateHosts() {
-		// Cheap pre-check for unix sockets: skip the SDK round-trip if
-		// The file does not exist or is not a socket.
 		if path, ok := unixPath(host); ok {
 			info, err := os.Stat(path)
 			if err != nil || info.Mode()&os.ModeSocket == 0 {
@@ -135,9 +127,6 @@ func CheckDocker(ctx context.Context) DockerStatus {
 		}
 	}
 
-	// Nothing answered. Surface a single, honest error message -
-	// Re-using the daemon error from the default attempt is more useful
-	// Than the last fallback's generic "no such file" noise.
 	if defRes := tryHost(ctx, "", 1500*time.Millisecond); defRes.err != nil {
 		st.Error = humanizeDaemonError(defRes.err)
 	} else if lastErr != nil {
@@ -149,8 +138,6 @@ func CheckDocker(ctx context.Context) DockerStatus {
 	return st
 }
 
-// ── Internals ─────────────────────────────────────────────────────────
-
 type probeResult struct {
 	ok         bool
 	err        error
@@ -159,7 +146,6 @@ type probeResult struct {
 	host       string
 }
 
-// apply copies the successful probe result into a DockerStatus base.
 func (r probeResult) apply(base DockerStatus) DockerStatus {
 	base.Installed = true
 	base.Running = true
@@ -173,8 +159,6 @@ func (r probeResult) apply(base DockerStatus) DockerStatus {
 	return base
 }
 
-// tryHost creates a one-shot Docker SDK client pointed at the given
-// host (empty = inherit from environment) and pings it.
 func tryHost(ctx context.Context, host string, timeout time.Duration) probeResult {
 	opts := []client.Opt{client.WithAPIVersionNegotiation()}
 	if host == "" {
@@ -196,9 +180,6 @@ func tryHost(ctx context.Context, host string, timeout time.Duration) probeResul
 		return probeResult{err: err, host: cli.DaemonHost()}
 	}
 
-	// ServerVersion is non-fatal - Ping is the source of truth, but
-	// version is nice to have. Use the ping context so we don't double
-	// the timeout budget.
 	var version string
 	if v, err := cli.ServerVersion(cctx); err == nil {
 		version = v.Version
@@ -212,7 +193,7 @@ func tryHost(ctx context.Context, host string, timeout time.Duration) probeResul
 	}
 }
 
-// candidateHosts returns the well-known per-user socket paths for every
+// invariant: candidateHosts returns the well-known per-user socket paths for every
 // common Docker runtime, plus the system default. Order matters - we
 // put per-user sockets first so we never accidentally connect to a
 // system-wide daemon the user wasn't using.
@@ -220,19 +201,17 @@ func candidateHosts() []string {
 	hosts := []string{}
 	if home, err := os.UserHomeDir(); err == nil && home != "" {
 		hosts = append(hosts,
-			"unix://"+home+"/.orbstack/run/docker.sock",         // OrbStack
-			"unix://"+home+"/.colima/default/docker.sock",       // Colima default profile
-			"unix://"+home+"/.docker/run/docker.sock",           // Docker Desktop (per-user)
-			"unix://"+home+"/.rd/docker.sock",                   // Rancher Desktop
-			"unix://"+home+"/.lima/default/sock/docker.sock",    // Lima
+			"unix://"+home+"/.orbstack/run/docker.sock",
+			"unix://"+home+"/.colima/default/docker.sock",
+			"unix://"+home+"/.docker/run/docker.sock",
+			"unix://"+home+"/.rd/docker.sock",
+			"unix://"+home+"/.lima/default/sock/docker.sock",
 		)
 	}
 	hosts = append(hosts,
-		"unix:///var/run/docker.sock", // System Docker / Linux default
+		"unix:///var/run/docker.sock",
 	)
 
-	// Linux rootless installs use $XDG_RUNTIME_DIR/docker.sock
-	// (typically /run/user/<uid>/docker.sock).
 	if runtime.GOOS == "linux" {
 		if xdg := os.Getenv("XDG_RUNTIME_DIR"); xdg != "" {
 			hosts = append(hosts, "unix://"+xdg+"/docker.sock")
@@ -242,8 +221,6 @@ func candidateHosts() []string {
 	return hosts
 }
 
-// unixPath returns the filesystem path of a unix:// host, and a flag
-// indicating whether the input was a unix host at all.
 func unixPath(host string) (string, bool) {
 	if !strings.HasPrefix(host, "unix://") {
 		return "", false
@@ -251,9 +228,6 @@ func unixPath(host string) (string, bool) {
 	return strings.TrimPrefix(host, "unix://"), true
 }
 
-// inferRuntime guesses a friendly runtime name from the answering
-// daemon's socket path. Best-effort: returns "Docker" when no marker
-// is recognised, and "" when host is empty.
 func inferRuntime(host string) string {
 	if host == "" {
 		return ""
@@ -276,9 +250,6 @@ func inferRuntime(host string) string {
 	return "Docker"
 }
 
-// humanizeDaemonError turns the SDK's wrapped error into something a
-// non-engineer can act on. The SDK wraps net.OpError + syscall errno;
-// we recognise the most common shapes.
 func humanizeDaemonError(err error) string {
 	if err == nil {
 		return "docker daemon is not reachable"
@@ -295,7 +266,6 @@ func humanizeDaemonError(err error) string {
 		errors.Is(err, context.DeadlineExceeded):
 		return "docker daemon did not respond in time"
 	}
-	// Fall back to the last meaningful line of the error.
 	for _, line := range strings.Split(msg, "\n") {
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -316,4 +286,3 @@ func startDockerHint(os string) string {
 	}
 	return "Start your Docker daemon and retry."
 }
-

@@ -76,9 +76,6 @@ func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
 	return sb.String()
 }
 
-// conventionsSection folds the content of the four retired
-// /world/skills/*.md files into one block of rules. Content is
-// preserved in spirit; wording is tightened.
 func conventionsSection(in AgentClaudeMDInput) string {
 	var sb strings.Builder
 
@@ -98,9 +95,3 @@ func conventionsSection(in AgentClaudeMDInput) string {
 
 	return sb.String()
 }
-
-// Markdown-shape helpers — `stripLeadingH1` and `demoteHeadings` —
-// used to live here; they moved to `packages/transpile/mdfmt.go` when
-// codex became a first-class renderer that needed the same inlining
-// primitives. Refer to `transpile.StripLeadingH1` and
-// `transpile.DemoteHeadings`.

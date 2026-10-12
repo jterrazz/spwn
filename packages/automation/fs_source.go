@@ -17,14 +17,8 @@ import (
 // Events() returns a single read-only channel — the watcher's pump
 // goroutine drains it. Close() must be safe to call multiple times.
 type RawFSSource interface {
-	// Add registers path with the source. Recursive=true means the
-	// source must walk the tree and watch every subdirectory + handle
-	// new subdirs created later.
 	Add(path string, recursive bool) error
-	// Events returns the read side of the source's event stream. The
-	// channel closes when Close is called.
 	Events() <-chan RawFSEvent
-	// Close stops the source and closes the Events channel.
 	Close() error
 }
 
@@ -34,27 +28,17 @@ type RawFSSource interface {
 // REMOVE/RENAME enum to our string allow-list.
 type RawFSEvent struct {
 	Path string
-	Kind string // create | write | rename
+	Kind string
 }
 
-// ── Production source: fsnotify wrapper ─────────────────────────────
-
-// fsnotifySource is the production RawFSSource. It owns one
-// fsnotify.Watcher, walks the tree on Add when recursive, and watches
-// new subdirectories as they appear.
 type fsnotifySource struct {
-	mu       sync.Mutex
-	watcher  *fsnotify.Watcher
-	out      chan RawFSEvent
-	doneOnce sync.Once
-	done     chan struct{}
-	// recursiveRoots tracks which Add calls were recursive so we
-	// know whether to follow new subdirs created under them.
+	mu             sync.Mutex
+	watcher        *fsnotify.Watcher
+	out            chan RawFSEvent
+	doneOnce       sync.Once
+	done           chan struct{}
 	recursiveRoots map[string]struct{}
-	// logger receives every fsnotify error. Critical for diagnosing
-	// "watcher silently died" scenarios (kqueue exhaustion, ENFILE,
-	// directory deleted out from under us).
-	logger Logger
+	logger         Logger
 }
 
 // NewFSNotifySource constructs a production RawFSSource backed by
@@ -104,9 +88,6 @@ func (s *fsnotifySource) Add(path string, recursive bool) error {
 	return s.watcher.Add(path)
 }
 
-// pump translates fsnotify events into RawFSEvent shape and forwards
-// them. Auto-watches newly-created subdirs that fall under a
-// recursive root.
 func (s *fsnotifySource) pump() {
 	defer close(s.out)
 	for {
@@ -121,8 +102,6 @@ func (s *fsnotifySource) pump() {
 			if kind == "" {
 				continue
 			}
-			// Auto-watch new directories under a recursive root. The
-			// fsnotify lib doesn't recurse natively; we do it here.
 			if kind == "create" && s.shouldRecurseInto(ev.Name) {
 				if info, err := os.Stat(ev.Name); err == nil && info.IsDir() {
 					_ = s.watcher.Add(ev.Name)
@@ -137,12 +116,6 @@ func (s *fsnotifySource) pump() {
 			if !ok {
 				return
 			}
-			// fsnotify errors are non-fatal — the watcher continues
-			// where possible. Surface them through the logger so
-			// kqueue exhaustion / ENFILE / "watched dir deleted"
-			// scenarios leave a trail; without this the watcher
-			// would silently die and the user would only notice
-			// from "no receipts" hours later.
 			if err != nil && s.logger != nil {
 				s.logger.Warnf("fsnotify: %v", err)
 			}
@@ -150,8 +123,6 @@ func (s *fsnotifySource) pump() {
 	}
 }
 
-// shouldRecurseInto reports whether path is a descendant of any
-// recursive root.
 func (s *fsnotifySource) shouldRecurseInto(path string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -174,9 +145,6 @@ func (s *fsnotifySource) Close() error {
 	return err
 }
 
-// mapFSNotifyOp folds fsnotify's bitmask into our string enum. Only
-// translates the three ops the engine cares about; chmod-only events
-// produce empty string and get dropped upstream.
 func mapFSNotifyOp(op fsnotify.Op) string {
 	switch {
 	case op&fsnotify.Create == fsnotify.Create:
@@ -190,8 +158,6 @@ func mapFSNotifyOp(op fsnotify.Op) string {
 	}
 }
 
-// ── Test source: manually-driven emitter ────────────────────────────
-
 // FakeFSSource is a RawFSSource for tests. Events are pushed via
 // Emit; the watcher pump reads them as if they came from fsnotify.
 //
@@ -204,8 +170,6 @@ type FakeFSSource struct {
 	added  []addCall
 }
 
-// addCall records each Add invocation so tests can assert on the
-// watcher's setup behaviour (e.g. "the recursive root was registered").
 type addCall struct {
 	Path      string
 	Recursive bool

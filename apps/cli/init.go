@@ -70,9 +70,6 @@ func runInitLocal(cmd *cobra.Command) error {
 		return fmt.Errorf("resolve cwd: %w", err)
 	}
 
-	// Reject invalid --name up-front so we never leave an unvalidated
-	// spwn.yaml on disk that `spwn check` immediately rejects. Uses
-	// the same regex the manifest enforces.
 	if initName != "" && !project.IsValidProjectName(initName) {
 		return fmt.Errorf("invalid --name %q — must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)", initName)
 	}
@@ -118,11 +115,6 @@ func runInitLocal(cmd *cobra.Command) error {
 	return nil
 }
 
-// resolveInitBackend normalises the --backend flag value to a canonical
-// `spwn:<name>` ref after verifying it's a known runtime. Accepts either
-// the short name (`claude-code`, `codex`) or the full scheme form
-// (`spwn:claude-code`). Empty input passes through as empty — the
-// scaffold omits the runtime block entirely in that case.
 func resolveInitBackend(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -140,23 +132,12 @@ func resolveInitBackend(raw string) (string, error) {
 	return "", fmt.Errorf("unknown --backend %q — supported: %s", raw, strings.Join(supportedRuntimes(), ", "))
 }
 
-// parseExampleRef normalises an init argument to the bare slug. Accepts:
-//   - "spwn:<slug>" — explicit form, slug extracted.
-//   - "<slug>"      — bare form, resolved against the gallery
-//     (spwn.ShippedSlugs) and rejected with a known-list hint when
-//     no gallery entry matches.
-//
-// Anything else (uppercase, other schemes, legacy `@owner/name`) is
-// rejected with the scheme grammar error.
 func parseExampleRef(ref string) (string, error) {
 	trimmed := strings.TrimSpace(ref)
 	resolved, err := refs.ResolveCLI(trimmed, dependency.GallerySlugs())
 	if err != nil {
 		return "", err
 	}
-	// After resolution the ref must be `spwn:<slug>` — `spwn init`
-	// only accepts catalog gallery entries. Local-scheme refs
-	// (skill:/tool:/hook:) and github: refs are not installable.
 	if !strings.HasPrefix(resolved, exampleRefPrefix) {
 		return "", fmt.Errorf("example ref must be a gallery entry (e.g. spwn:matrix), got %q", ref)
 	}
@@ -183,9 +164,6 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 		return fmt.Errorf("resolve cwd: %w", err)
 	}
 
-	// Honor --force: if the user passed it and a manifest already
-	// exists, clear it so dependency.Install can write fresh content
-	// (dependency.Install itself never overwrites).
 	if initForce {
 		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove existing spwn.yaml: %w", err)
@@ -197,9 +175,6 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 		return fmt.Errorf("install example %s: %w", ref, err)
 	}
 
-	// Example installs ship a `.spwn/` runtime state dir at first
-	// spawn; make sure `.gitignore` excludes it so users don't
-	// accidentally commit local world state.
 	if err := project.AppendGitignore(cwd); err != nil {
 		return fmt.Errorf("update .gitignore: %w", err)
 	}

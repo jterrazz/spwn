@@ -60,10 +60,6 @@ func NewProxyElement(p mcp.Provider) (*ProxyElement, error) {
 		Director: func(req *http.Request) {
 			req.URL.Scheme = upstream.Scheme
 			req.URL.Host = upstream.Host
-			// The server has already stripped /mcp/<name> from the
-			// request path, so req.URL.Path is the suffix the agent
-			// asked for (e.g. "/", "/initialize"). Concatenate the
-			// upstream's own path prefix to land at the right route.
 			req.URL.Path = upstreamPath + req.URL.Path
 			req.Host = upstream.Host
 
@@ -72,17 +68,12 @@ func NewProxyElement(p mcp.Provider) (*ProxyElement, error) {
 				req.Header.Set("Authorization", "Bearer "+tok)
 			}
 		},
-		// MCP streamable HTTP can produce SSE-style chunked bodies.
-		// 100ms flush keeps streamed tool output snappy without
-		// pegging the gate process on per-byte writes.
 		FlushInterval: 100 * time.Millisecond,
 		ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
 			http.Error(w, fmt.Sprintf("upstream %s: %v", p.Name, err), http.StatusBadGateway)
 		},
 	}
 
-	// Best-effort initial load — first request after gate startup
-	// shouldn't 503 if the token is already cached on disk.
 	_ = e.loadToken()
 	return e, nil
 }
@@ -94,9 +85,6 @@ func (e *ProxyElement) Name() string { return e.provider.Name }
 func (e *ProxyElement) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if e.cachedToken() == "" {
-			// Surface the actionable next step in the response body so
-			// the world's wrapper can print it verbatim — no agent
-			// has to grep stack traces or guess.
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusServiceUnavailable)
 			_ = json.NewEncoder(w).Encode(map[string]string{
@@ -124,8 +112,6 @@ func (e *ProxyElement) cachedToken() string {
 	return e.token
 }
 
-// loadToken reads tokens.json into the cache. Missing file → empty
-// cache (handled at request time as 503 with hint).
 func (e *ProxyElement) loadToken() error {
 	raw, err := os.ReadFile(mcp.ProviderTokenPath(e.provider))
 	if err != nil {

@@ -17,7 +17,6 @@ var SimplifyArchitectDir = migration.Migration{
 	Apply: func(_ context.Context, baseDir string) error {
 		archDir := filepath.Join(baseDir, "architect")
 
-		// If the architect directory doesn't exist, nothing to do.
 		if _, err := os.Stat(archDir); os.IsNotExist(err) {
 			return nil
 		}
@@ -26,9 +25,7 @@ var SimplifyArchitectDir = migration.Migration{
 		directivesPath := filepath.Join(archDir, "directives.md")
 		todoPath := filepath.Join(archDir, "todo.md")
 
-		// Merge directives.md into stack.md if it exists.
 		if data, err := os.ReadFile(directivesPath); err == nil && len(data) > 0 {
-			// Ensure stack.md exists (may be empty or absent).
 			existing, _ := os.ReadFile(stackPath)
 
 			merged := existing
@@ -42,12 +39,10 @@ var SimplifyArchitectDir = migration.Migration{
 			}
 		}
 
-		// Remove directives.md.
 		if err := os.Remove(directivesPath); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 
-		// Remove todo.md.
 		if err := os.Remove(todoPath); err != nil && !os.IsNotExist(err) {
 			return err
 		}

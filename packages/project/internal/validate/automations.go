@@ -13,39 +13,6 @@ import (
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
-// ruleAutomations validates spwn.yaml#worlds.<name>.automations entries.
-//
-// Each automation describes "trigger → wake this agent → with this
-// prompt body". The validator's job is to refuse files that the engine
-// (packages/automation, landing in Phase 2) couldn't run sensibly.
-//
-// Rules per entry — references match the comments inline below:
-//
-//	(1) Name slug — same regex as world names (^[a-z][a-z0-9-]*$).
-//	(2) Trigger XOR — exactly one of `on.cron` / `on.fs`.
-//	(3) Cron parses — standard 5-field grammar (matches launchd's
-//	    StartCalendarInterval semantics, the prior art in jterrazz-os).
-//	(4) fs.path resolves on disk — LevelWarning when missing, since
-//	    a typo is far more common than "the dir will be created later"
-//	    and the engine would silently never fire otherwise.
-//	(5) fs.events ⊂ {create, write, rename}. "remove" is intentionally
-//	    unsupported in v1 — agents reacting to deletions almost always
-//	    need "what was the file" context the watcher can't provide.
-//	(6) fs.debounce ∈ [100ms, 1h]. Below 100ms the engine spends more
-//	    time coalescing than firing; above 1h burst protection becomes
-//	    a worse latency penalty than the burst itself.
-//	(7) fs.patterns are non-empty strings. Glob syntax validation is
-//	    deferred to engine-time — doublestar's grammar is permissive
-//	    enough that errors here would be false positives.
-//	(8) Body XOR — exactly one of `prompt` / `command`.
-//	(9) command refs use the `command/<name>` shape and resolve to
-//	    spwn/commands/<name>.md on disk.
-//	(10) catchup ∈ {"", "collapse", "skip"}. Cron-only — flagged as
-//	    LevelInfo on fs (no semantic effect, but worth telling the
-//	    user we ignored it).
-//	(11) agent ∈ world.agents (the engine picks the agent from inside
-//	    the world's container, so any other name would dispatch to
-//	    nowhere).
 func ruleAutomations(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -58,7 +25,6 @@ func ruleAutomations(in Input) []Issue {
 		if len(w.Automations) == 0 {
 			continue
 		}
-		// World-local agent set powers the membership check (11).
 		agentSet := map[string]struct{}{}
 		for _, a := range w.Agents {
 			agentSet[a] = struct{}{}
@@ -68,7 +34,6 @@ func ruleAutomations(in Input) []Issue {
 			a := w.Automations[aname]
 			pathPrefix := "spwn.yaml#worlds." + wname + ".automations." + aname
 
-			// (1) Slug.
 			if !slugRe.MatchString(aname) {
 				out = append(out, Issue{
 					Level:   LevelError,
@@ -78,7 +43,6 @@ func ruleAutomations(in Input) []Issue {
 				})
 			}
 
-			// (2) Trigger XOR.
 			hasCron := strings.TrimSpace(a.On.Cron) != ""
 			hasFS := a.On.FS != nil
 			switch {
@@ -98,7 +62,6 @@ func ruleAutomations(in Input) []Issue {
 				})
 			}
 
-			// (3) Cron expression parses.
 			if hasCron {
 				schedule, err := parser.Parse(a.On.Cron)
 				if err != nil {
@@ -109,15 +72,6 @@ func ruleAutomations(in Input) []Issue {
 						Hint:    "use 5 fields (min hour dom month dow) — e.g. \"0 6 * * *\" for daily 6am",
 					})
 				} else {
-					// Sub-minute cadence sanity check. cron's
-					// minimum granularity is 1 minute (5-field
-					// expressions don't have seconds), so the only
-					// way to fire faster than 1/min is to write
-					// `* * * * *`. That's almost always a footgun:
-					// the user wanted "once a day" and forgot the
-					// hour. Probe the schedule by looking at the
-					// next two slots — if their gap is ≤ 1 minute,
-					// emit an info reminding the user.
 					next := schedule.Next(time.Time{})
 					afterNext := schedule.Next(next)
 					if afterNext.Sub(next) <= time.Minute {
@@ -131,12 +85,10 @@ func ruleAutomations(in Input) []Issue {
 				}
 			}
 
-			// (4)-(7) FS-trigger validation.
 			if hasFS {
 				out = append(out, validateFS(in.Root, pathPrefix+".on.fs", a.On.FS)...)
 			}
 
-			// (8) Body XOR.
 			hasPrompt := strings.TrimSpace(a.Prompt) != ""
 			hasCommand := strings.TrimSpace(a.Command) != ""
 			switch {
@@ -156,15 +108,12 @@ func ruleAutomations(in Input) []Issue {
 				})
 			}
 
-			// (9) Command ref shape + resolution.
 			if hasCommand {
 				out = append(out, validateAutomationCommandRef(in.Root, pathPrefix+".command", a.Command)...)
 			}
 
-			// (10) Catchup mode + cron-only enforcement.
 			switch a.Catchup {
 			case "", "collapse", "skip", "stack":
-				// OK
 			default:
 				out = append(out, Issue{
 					Level:   LevelError,
@@ -173,12 +122,7 @@ func ruleAutomations(in Input) []Issue {
 					Hint:    "use \"collapse\" (single fire on resume; default), \"skip\" (drop missed slots), or \"stack\" (one fire per missed slot, capped at 100)",
 				})
 			}
-			// catchup is meaningful for fs in v1+: `skip` disables
-			// replay-on-startup. Earlier versions emitted an info
-			// "fs is cron-only" — that's been wrong since the
-			// replay path landed.
 
-			// (11) Agent membership.
 			if a.Agent == "" {
 				out = append(out, Issue{
 					Level:   LevelError,
@@ -199,13 +143,9 @@ func ruleAutomations(in Input) []Issue {
 	return out
 }
 
-// validateFS owns the inner checks for an fs trigger so the parent
-// rule reads as a flat checklist. Returns one Issue per failed check;
-// callers append directly to the parent's running slice.
 func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 	var out []Issue
 
-	// fs.path required.
 	if strings.TrimSpace(fs.Path) == "" {
 		out = append(out, Issue{
 			Level:   LevelError,
@@ -213,14 +153,9 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 			Message: "fs trigger requires `path:`",
 			Hint:    "set the host path to watch (project-relative paths resolve against the project root)",
 		})
-		// No point continuing the per-path checks below.
 		return out
 	}
 
-	// Reject paths that contain glob meta-characters at the path
-	// position — these belong in `patterns:`, not `path:`. Without
-	// this, the validator's "does not exist" hint would tell users
-	// to `mkdir -p ./inbox/*.md`, which is nonsense.
 	pathHasGlob := strings.ContainsAny(fs.Path, "*?[")
 	if pathHasGlob {
 		out = append(out, Issue{
@@ -231,12 +166,6 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		})
 	}
 
-	// fs.path must exist on disk. The watcher's recursive-walk on
-	// Add (filepath.Walk) returns an error when the root is missing
-	// — the daemon dies at register time with a confusing
-	// "lstat ./inbox: no such file" error rather than the friendly
-	// hint here. Upgrading missing-path from warning to error so
-	// `spwn check` blocks before the daemon ever fails.
 	resolved := strings.TrimSpace(fs.Path)
 	if !filepath.IsAbs(resolved) {
 		resolved = filepath.Join(root, resolved)
@@ -259,8 +188,6 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		}
 	}
 
-	// fs.events allow-list. The default ([create]) was applied by
-	// ApplyDefaults; here we only need to validate explicit values.
 	allowed := map[string]struct{}{
 		"create": {},
 		"write":  {},
@@ -277,10 +204,6 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		}
 	}
 
-	// fs.debounce range. Zero is the apply-defaults sentinel — already
-	// substituted to 1s; explicit zero from the author would also have
-	// landed here, which is fine: validating against the post-default
-	// state matches what the engine actually runs.
 	d := fs.Debounce.AsDuration()
 	if d < 100*time.Millisecond {
 		out = append(out, Issue{
@@ -299,13 +222,6 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		})
 	}
 
-	// fs.patterns — non-empty + supported-syntax. The engine uses
-	// stdlib filepath.Match which does NOT support brace expansion
-	// (`{md,txt}`) or doublestar (`**`). Both are common shell-glob
-	// idioms; users copy-paste from .gitignore and silently get zero
-	// matches. Probe each pattern with filepath.Match against a
-	// dummy basename — Match returns ErrBadPattern for syntactically
-	// invalid globs.
 	for i, p := range fs.Patterns {
 		field := fmt.Sprintf("%s.patterns[%d]", pathPrefix, i)
 		trimmed := strings.TrimSpace(p)
@@ -349,11 +265,6 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 	return out
 }
 
-// validateAutomationCommandRef checks the `command:` shape and that
-// the referenced markdown file exists. The naming intentionally
-// avoids `validateCommandRef` to leave room for the slash-command
-// validator (commands consumed by agents directly), which lives
-// elsewhere in this package.
 func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 	var out []Issue
 	const prefix = "command/"
@@ -388,9 +299,6 @@ func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 	return out
 }
 
-// sortedAutomationKeys returns the automation map's keys in stable
-// alphabetical order so issues emit deterministically (test goldens
-// stay portable).
 func sortedAutomationKeys(autos map[string]intmanifest.Automation) []string {
 	out := make([]string, 0, len(autos))
 	for k := range autos {

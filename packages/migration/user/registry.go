@@ -11,12 +11,12 @@ import "spwn.sh/packages/migration"
 // unchanged; pre-version-9 installs do not exist in the wild.
 func All() []migration.Migration {
 	r := migration.NewRegistry()
-	r.Register(SimplifyArchitectDir)             // 010
-	r.Register(RestructureAgentDirs)             // 011
-	r.Register(RenameHierarchiesToOrganizations) // 012
-	r.Register(EnsureDefaultOrganization)        // 013
-	r.Register(RetireAgentKnowledge)             // 014
-	r.Register(EnsureUserConfig)                 // 015
-	r.Register(DropLegacyStateJSON)              // 016
+	r.Register(SimplifyArchitectDir)
+	r.Register(RestructureAgentDirs)
+	r.Register(RenameHierarchiesToOrganizations)
+	r.Register(EnsureDefaultOrganization)
+	r.Register(RetireAgentKnowledge)
+	r.Register(EnsureUserConfig)
+	r.Register(DropLegacyStateJSON)
 	return r.All()
 }

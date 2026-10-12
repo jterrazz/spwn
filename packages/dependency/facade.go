@@ -1,18 +1,3 @@
-// This file is the package's public operation surface — one door
-// for every dependency-resolution concern. Adapters (spwn catalog,
-// local blocks, future registries) live hidden under internal/ and
-// never appear in caller import paths.
-//
-// Every exported function here either:
-//   - enumerates tools from one or more adapters (Tools, Gallery),
-//   - installs or loads by ref from the right adapter (Install,
-//     LoadLocalTool),
-//   - or binds adapter output into a caller-supplied target
-//     (RegisterBuiltins, HydrateLocals).
-//
-// Callers never need to know which adapter produced a given Tool —
-// the Tool interface is the contract.
-
 package dependency
 
 import (
@@ -35,8 +20,6 @@ type InstallReport = spwn.InstallReport
 // underlying is a plain sentinel).
 var ErrNotFound = spwn.ErrNotFound
 
-// ── Builtin catalog (the spwn adapter) ─────────────────────────────
-
 // BuiltinTools returns every builtin tool shipped in the compiled binary
 // (the spwn: catalog). These are ref-by-name installables —
 // spwn:unix, spwn:python, etc. Project-template entries (matrix,
@@ -56,8 +39,6 @@ func RegisterBuiltins(target tool.Registry) error {
 	}
 	return nil
 }
-
-// ── Gallery (init-able catalog entries) ────────────────────────────
 
 // Gallery returns every init-able catalog entry with metadata,
 // sorted in canonical display order (startup first, then matrix,
@@ -97,8 +78,6 @@ func InstallInto(slug string) (InstallReport, error) { return spwn.InstallInto(s
 func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	return spwn.CopyGateTools(refName, gateToolsRoot)
 }
-
-// ── Project-local blocks (the local adapter) ──────────────────────
 
 // LoadLocalTool reads spwn/tools/<name>/ inside projectRoot and
 // returns a Tool. Used by `spwn inspect` to render local

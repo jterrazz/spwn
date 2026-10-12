@@ -50,25 +50,12 @@ type InstallReport struct {
 // match any gallery-eligible entry (i.e. one with worlds: defined).
 var ErrNotFound = errors.New("example not found")
 
-// topLevelSubdirs enumerates which directories under a catalog entry
-// get wrapped under dest/spwn/ at init time. spwn.yaml and spwn.lock
-// stay at the root; everything listed here moves under spwn/.
-//
-// `knowledge` is included so a catalog entry's seed knowledge base
-// (handbook, starter notes) lands at `spwn/knowledge/`, matching
-// the `knowledge: ./spwn/knowledge` convention in
-// spwn.yaml#worlds.<name>.knowledge. Historically this lived at the
-// project root as `./knowledge/`; that layout was moved under spwn/
-// so the whole project tree is self-contained in one directory.
 var topLevelSubdirs = []string{"agents", "skills", "tools", "hooks", "files", "knowledge"}
 
 // ShippedSlugs returns the list of gallery-eligible entries (those
 // with a `worlds:` section in spwn.yaml), sorted by display order.
 func ShippedSlugs() []string {
 	slugs := galleryBacked()
-	// Canonical gallery order: startup first (multi-agent showcase),
-	// matrix second (zero-to-hello-world), then the rest
-	// alphabetically.
 	sort.SliceStable(slugs, func(i, j int) bool {
 		p := func(s string) int {
 			switch s {
@@ -88,8 +75,6 @@ func ShippedSlugs() []string {
 	return slugs
 }
 
-// galleryBacked returns every embedded subdir whose spwn.yaml
-// defines a non-empty `worlds:` section.
 func galleryBacked() []string {
 	entries, err := fs.ReadDir(catalogFS, contentRoot)
 	if err != nil {
@@ -222,9 +207,6 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	return rep, nil
 }
 
-// copyAgents implements the per-agent granularity Install wants:
-// records per-agent added/skipped in the report and repairs an
-// agent dir that exists but is missing SOUL.md.
 func copyAgents(src fs.FS, agentsSrc, spwnRoot string, rep *InstallReport) error {
 	agentsDst := filepath.Join(spwnRoot, "agents")
 	if err := os.MkdirAll(agentsDst, 0o755); err != nil {
@@ -243,7 +225,6 @@ func copyAgents(src fs.FS, agentsSrc, spwnRoot string, rep *InstallReport) error
 		if exists(dst) {
 			soulDst := filepath.Join(dst, platform.SoulFileName)
 			if !exists(soulDst) {
-				// Repair: seed the missing SOUL.md from the catalog copy.
 				if data, rerr := fs.ReadFile(src, agentsSrc+"/"+name+"/"+platform.SoulFileName); rerr == nil {
 					_ = os.MkdirAll(dst, 0o755)
 					_ = os.WriteFile(soulDst, data, 0o644)
@@ -279,10 +260,6 @@ func InstallInto(slug string) (InstallReport, error) {
 	return Install(slug, root)
 }
 
-// ── internals ─────────────────────────────────────────────────────────
-
-// loadEntrySchema reads an entry's spwn.yaml into the shared
-// manifest.Schema so every catalog face reads the same bytes.
 func loadEntrySchema(slug string) (*manifest.Schema, error) {
 	data, err := catalogFS.ReadFile(contentRoot + "/" + slug + "/spwn.yaml")
 	if err != nil {
@@ -299,8 +276,6 @@ func hasWorlds(s *manifest.Schema) bool {
 	return s != nil && len(s.Worlds.Content) > 0
 }
 
-// worldsAndAgents derives the flat world-name and agent-name slices
-// from the parsed worlds yaml.Node, sorted for stability.
 func worldsAndAgents(s *manifest.Schema) (worlds, agents []string) {
 	if s == nil || s.Worlds.Kind != yaml.MappingNode {
 		return nil, nil
@@ -341,8 +316,6 @@ func deriveTitle(slug string, s *manifest.Schema) string {
 	return titleWords(strings.ReplaceAll(slug, "-", " "))
 }
 
-// titleWords upper-cases the first rune of every word. strings.Title is
-// deprecated and x/text/cases is a dependency a slug does not justify.
 func titleWords(s string) string {
 	words := strings.Fields(s)
 	for i, w := range words {
@@ -352,8 +325,6 @@ func titleWords(s string) string {
 	return strings.Join(words, " ")
 }
 
-// copyDirFS recursively copies a directory from the embedded FS onto
-// the host filesystem. Never overwrites existing files.
 func copyDirFS(src fs.FS, srcRoot, dstRoot string) error {
 	return fs.WalkDir(src, srcRoot, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {

@@ -47,8 +47,6 @@ func Login(ctx context.Context, w io.Writer) error {
 	}
 	user, err := readHostUser(ctx, ghBin)
 	if err != nil {
-		// Username failure isn't fatal — gh works without it. Log
-		// And continue with an empty user line.
 		fmt.Fprintf(w, "warning: could not resolve username (%v); continuing\n", err)
 		user = ""
 	}
@@ -85,17 +83,6 @@ func readHostUser(ctx context.Context, ghBin string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// writeHostsYAML emits the plaintext-token form of gh's hosts.yml.
-// The shape matches what gh writes when it can't reach a keyring:
-//
-//	github.com:
-//	    oauth_token: <token>
-//	    user: <login>
-//	    git_protocol: https
-//
-// We don't try to preserve the host's git_protocol (often ssh) —
-// inside a container we never use SSH for git over the GitHub MCP,
-// and https avoids needing the host's SSH key.
 func writeHostsYAML(token, user string) error {
 	var b strings.Builder
 	b.WriteString("github.com:\n")

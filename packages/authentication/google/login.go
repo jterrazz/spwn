@@ -39,8 +39,6 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 		scopes = DefaultScopes
 	}
 
-	// Pick a free loopback port so concurrent logins (or other
-	// processes binding 8080) don't collide.
 	port, err := freeTCPPort()
 	if err != nil {
 		return fmt.Errorf("pick callback port: %w", err)
@@ -56,7 +54,6 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 		return err
 	}
 
-	// Build the authorization URL.
 	q := url.Values{}
 	q.Set("response_type", "code")
 	q.Set("client_id", c.ClientID)
@@ -65,11 +62,10 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 	q.Set("code_challenge", challenge)
 	q.Set("code_challenge_method", "S256")
 	q.Set("state", state)
-	q.Set("access_type", "offline") // ask Google for a refresh_token
-	q.Set("prompt", "consent")      // force consent so refresh_token is always returned
+	q.Set("access_type", "offline")
+	q.Set("prompt", "consent")
 	authURL := AuthorizationEndpoint + "?" + q.Encode()
 
-	// Spin up the loopback callback server.
 	type result struct {
 		code  string
 		state string
@@ -106,14 +102,10 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 		_ = server.Shutdown(shutCtx)
 	}()
 
-	// Stream the URL + try to open the browser. The browser open is
-	// best-effort: on headless systems the user copy-pastes from the
-	// printed URL.
 	fmt.Fprintln(w, "Open this URL in your browser to authorize spwn:")
 	fmt.Fprintln(w, authURL)
 	_ = openBrowser(authURL)
 
-	// Wait for the callback or timeout.
 	var res result
 	select {
 	case res = <-done:
@@ -126,7 +118,6 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 		return res.err
 	}
 
-	// Exchange the authorization code for tokens.
 	tokens, err := exchangeCode(ctx, c, redirect, res.code, verifier)
 	if err != nil {
 		return fmt.Errorf("exchange code: %w", err)
@@ -137,9 +128,6 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 	return nil
 }
 
-// exchangeCode trades an authorization code for tokens using the
-// PKCE code_verifier (no client_secret required for Desktop apps,
-// but we send it when present for Web app type clients).
 func exchangeCode(ctx context.Context, c *ClientConfig, redirect, code, verifier string) (*Tokens, error) {
 	form := url.Values{}
 	form.Set("grant_type", "authorization_code")
@@ -177,8 +165,6 @@ func exchangeCode(ctx context.Context, c *ClientConfig, redirect, code, verifier
 	return &t, nil
 }
 
-// newPKCE generates a code_verifier (43-128 unreserved chars per
-// RFC 7636) and the matching SHA-256 code_challenge.
 func newPKCE() (verifier, challenge string, err error) {
 	verifier, err = newRandom(64)
 	if err != nil {
@@ -189,8 +175,6 @@ func newPKCE() (verifier, challenge string, err error) {
 	return verifier, challenge, nil
 }
 
-// newRandom returns a URL-safe random string of length n bytes
-// (base64-url no-pad encoded → ~1.33n chars).
 func newRandom(n int) (string, error) {
 	b := make([]byte, n)
 	if _, err := rand.Read(b); err != nil {
@@ -212,8 +196,6 @@ func freeTCPPort() (int, error) {
 	return addr.Port, nil
 }
 
-// openBrowser is best-effort — failures are non-fatal because the
-// auth URL is also printed to the terminal for headless / SSH cases.
 func openBrowser(url string) error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {

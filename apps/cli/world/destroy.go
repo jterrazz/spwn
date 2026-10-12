@@ -17,11 +17,6 @@ func init() {
 	destroyCmd.Flags().BoolVar(&destroyAll, "all", false, "Destroy all running worlds")
 }
 
-// composeDownRunE is the compose-aware entry point for `spwn down`.
-// With no positional arg inside a project, it stops every running
-// world whose Config name matches an entry in spwn.yaml. Otherwise it
-// forwards to destroyCmd.RunE, which handles both <world-id> and
-// --all.
 func composeDownRunE(cmd *cobra.Command, args []string) error {
 	if destroyAll || len(args) > 0 {
 		return destroyCmd.RunE(cmd, args)
@@ -91,7 +86,6 @@ var destroyCmd = &cobra.Command{
 			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}
 
-		// --all: destroy all running worlds sequentially
 		if destroyAll {
 			s.Blank()
 			s.Start("Stopping all worlds...")
@@ -119,7 +113,6 @@ var destroyCmd = &cobra.Command{
 			return nil
 		}
 
-		// Single world destroy
 		if len(args) == 0 {
 			return fmt.Errorf("requires a world-id argument or --all flag")
 		}

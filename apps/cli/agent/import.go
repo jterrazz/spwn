@@ -36,19 +36,15 @@ The archive must contain at least a SOUL.md at the agent root.`,
 		archivePath := args[0]
 		s := ui.New()
 
-		// Validate the archive exists
 		if _, err := os.Stat(archivePath); err != nil {
 			s.Blank()
 			return s.FailHint("Archive not found", err,
 				"Provide the path to a .tar.gz file created by \"spwn agent export\"")
 		}
 
-		// Derive agent name from filename: neo.tar.gz → neo (unless
-		// --as was given, which takes precedence).
 		base := filepath.Base(archivePath)
 		name := strings.TrimSuffix(base, ".tar.gz")
 		if name == base {
-			// Try .tgz as well
 			name = strings.TrimSuffix(base, ".tgz")
 		}
 		if name == "" || name == base {
@@ -60,7 +56,6 @@ The archive must contain at least a SOUL.md at the agent root.`,
 			name = importAs
 		}
 
-		// Check if agent already exists
 		agentDir := agent.AgentDir(name)
 		if _, err := os.Stat(agentDir); err == nil {
 			s.Blank()
@@ -72,13 +67,11 @@ The archive must contain at least a SOUL.md at the agent root.`,
 		s.Start(fmt.Sprintf("Importing agent %s...", name))
 
 		if err := agent.ImportMind(name, archivePath); err != nil {
-			// Clean up partial import
 			os.RemoveAll(agentDir)
 			return s.FailHint("Import failed", err,
 				"Check that the archive is a valid tar.gz created by \"spwn agent export\"")
 		}
 
-		// Validate extracted structure has SOUL.md at the agent root.
 		soulPath := filepath.Join(agentDir, platform.SoulFileName)
 		if _, err := os.Stat(soulPath); err != nil {
 			os.RemoveAll(agentDir)
@@ -87,10 +80,6 @@ The archive must contain at least a SOUL.md at the agent root.`,
 				"Archive must contain a SOUL.md at the agent root")
 		}
 
-		// When --as was used, rewrite agent.yaml so the embedded
-		// `name:` field matches the new directory name. We keep this
-		// best-effort - a missing or unparseable agent.yaml does not
-		// fail the import.
 		if importAs != "" {
 			yamlPath := filepath.Join(agentDir, "agent.yaml")
 			if data, err := os.ReadFile(yamlPath); err == nil {

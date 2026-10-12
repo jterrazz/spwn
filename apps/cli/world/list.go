@@ -13,8 +13,8 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/project"
 	"spwn.sh/packages/architect"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -25,12 +25,9 @@ func init() {
 	Cmd.AddCommand(listCmd)
 }
 
-// worldListReport is the CLI-owned JSON schema for `spwn world ls`.
-// Kept separate from world.World so the JSON contract can evolve
-// independently of the internal runtime type.
 type worldListReport struct {
-	Mode   string          `json:"mode"`
-	Worlds []worldListRow  `json:"worlds"`
+	Mode   string         `json:"mode"`
+	Worlds []worldListRow `json:"worlds"`
 }
 
 type worldListRow struct {
@@ -52,8 +49,6 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		// Legacy global mode: no project discovered → keep the old
-		// Docker-only listing as a fallback.
 		if proj == nil || proj.Manifest == nil {
 			return renderRunningOnly(ctx, s, cmd)
 		}
@@ -74,8 +69,6 @@ func emitWorldListJSON(cmd *cobra.Command, report worldListReport) error {
 	return nil
 }
 
-// renderDeclared lists worlds declared in spwn.yaml with a status
-// column derived from the live Docker query.
 func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, cmd *cobra.Command) error {
 	declared := proj.Manifest.Worlds
 	if len(declared) == 0 {
@@ -88,16 +81,11 @@ func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, c
 		return nil
 	}
 
-	// Live world state, keyed by world name (Config). A world may have
-	// multiple running instances historically; we pick the newest.
 	running := map[string]world.World{}
 	if arc, err := architect.NewFromEnv(); err == nil {
 		if ws, err := arc.List(ctx); err == nil {
 			for _, w := range ws {
-				// Skip stale entries whose containers no longer exist.
 				if w.ContainerID != "" && !containerExists(w.ContainerID) {
-					// Best-effort sweep of a record whose container is gone:
-					// A failure leaves the stale record for the next list.
 					_, _ = arc.Destroy(ctx, w.ID)
 					continue
 				}
@@ -127,9 +115,6 @@ func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, c
 	return nil
 }
 
-// buildDeclaredJSONRows is the JSON-facing version of buildDeclaredRows.
-// It emits a plain status token ("running"/"stopped") without the
-// human-formatted duration so snapshots stay machine-stable.
 func buildDeclaredJSONRows(
 	declared map[string]project.World,
 	running map[string]world.World,
@@ -160,11 +145,6 @@ func buildDeclaredJSONRows(
 	return rows
 }
 
-// buildDeclaredRows is the pure table-row construction used by
-// renderDeclared. It takes the declared-world map, a map of live
-// worlds keyed by name, and a "now" timestamp (for deterministic
-// running-duration formatting in tests). Rows are returned sorted by
-// world name.
 func buildDeclaredRows(
 	declared map[string]project.World,
 	running map[string]world.World,
@@ -192,8 +172,6 @@ func buildDeclaredRows(
 	return rows
 }
 
-// renderRunningOnly keeps the legacy "list live containers" rendering
-// used when no spwn project is discovered.
 func renderRunningOnly(ctx context.Context, s *ui.Stepper, cmd *cobra.Command) error {
 	arc, err := architect.NewFromEnv()
 	if err != nil {
@@ -211,7 +189,6 @@ func renderRunningOnly(ctx context.Context, s *ui.Stepper, cmd *cobra.Command) e
 	var liveWorlds []world.World
 	for _, w := range worlds {
 		if w.ContainerID != "" && !containerExists(w.ContainerID) {
-			// Best-effort sweep, as above: the listing drops it either way.
 			_, _ = arc.Destroy(ctx, w.ID)
 			continue
 		}
@@ -255,8 +232,6 @@ func renderRunningOnly(ctx context.Context, s *ui.Stepper, cmd *cobra.Command) e
 	return nil
 }
 
-// collectAgentList returns agent names as a slice (JSON-friendly).
-// Mirrors collectAgentNames which returns the comma-joined string.
 func collectAgentList(u world.World) []string {
 	names := make([]string, 0)
 	if u.Agent != "" {
@@ -270,16 +245,13 @@ func collectAgentList(u world.World) []string {
 	return names
 }
 
-// collectAgentNames returns a comma-separated list of agent names for a world.
 func collectAgentNames(u world.World) string {
 	names := make([]string, 0)
 
-	// Primary agent
 	if u.Agent != "" {
 		names = append(names, u.Agent)
 	}
 
-	// Multi-agent records (avoid duplicating the primary agent)
 	for _, a := range u.Agents {
 		if a.Name != u.Agent {
 			names = append(names, a.Name)
@@ -292,22 +264,8 @@ func collectAgentNames(u world.World) string {
 	return strings.Join(names, ", ")
 }
 
-// containerExists checks if a Docker container exists (running or
-// stopped). Uses the `docker` CLI when available; falls back to
-// "assume present" when the CLI is missing — this is critical when
-// spwn is invoked from INSIDE a chief-mode world container, which
-// has the docker daemon socket bind-mounted but no `docker` binary
-// on PATH. Without the fallback, containerExists returns false for
-// every world (including the chief's own), which triggers
-// arc.Destroy in renderDeclared → SIGKILL on the chief's own
-// container (exit 137). The conservative "assume present" keeps the
-// list honest from inside (it'll show worlds it can't verify) and
-// only fires the cleanup path from host context where the CLI is
-// guaranteed.
 func containerExists(containerID string) bool {
 	if _, err := exec.LookPath("docker"); err != nil {
-		// Likely running inside a world container — skip the existence
-		// probe entirely so the auto-Destroy cleanup never fires here.
 		return true
 	}
 	err := exec.Command("docker", "inspect", "--format", "{{.Id}}", containerID).Run()
@@ -331,9 +289,6 @@ func timeAgo(t time.Time) string {
 	}
 }
 
-// durationSince formats the "how long it has been up" string for the
-// STATUS column, e.g. "3m", "2h", "5d". Takes an explicit "now" so
-// tests can be deterministic.
 func durationSince(now, t time.Time) string {
 	if t.IsZero() {
 		return "?"

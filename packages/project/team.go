@@ -1,10 +1,3 @@
-// Team management lives here (not in packages/agent) because teams
-// are project-scoped entities that group agents across worlds.
-//
-// A team is a first-class entity stored as a YAML file under ~/.spwn/teams/.
-// Each agent's profile can reference a team by slug. Teams carry display
-// metadata (name, color, description) for the UI.
-
 package project
 
 import (
@@ -98,7 +91,7 @@ func ListTeams() ([]Team, error) {
 		slug := strings.TrimSuffix(e.Name(), ".yaml")
 		t, err := GetTeam(slug)
 		if err != nil {
-			continue // skip corrupted files
+			continue
 		}
 		teams = append(teams, *t)
 	}
@@ -167,7 +160,6 @@ func SetAgentTeam(agentName, teamSlug string) error {
 	}
 	manifestPath := filepath.Join(agentDir, "agent.yaml")
 
-	// Read existing manifest (if any).
 	var m map[string]any
 	data, err := os.ReadFile(manifestPath)
 	if err == nil {

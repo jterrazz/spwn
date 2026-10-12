@@ -6,7 +6,7 @@ import "time"
 // wizard from the GCP console.
 type ClientConfig struct {
 	ClientID     string   `json:"client_id"`
-	ClientSecret string   `json:"client_secret,omitempty"` // optional for Desktop apps using PKCE
+	ClientSecret string   `json:"client_secret,omitempty"`
 	Scopes       []string `json:"scopes"`
 }
 
@@ -18,8 +18,8 @@ type Tokens struct {
 	TokenType    string    `json:"token_type,omitempty"`
 	RefreshToken string    `json:"refresh_token,omitempty"`
 	Scope        string    `json:"scope,omitempty"`
-	ExpiresIn    int       `json:"expires_in,omitempty"` // seconds, present in fresh responses
-	ExpiresAt    time.Time `json:"expires_at,omitempty"` // computed on save
+	ExpiresIn    int       `json:"expires_in,omitempty"`
+	ExpiresAt    time.Time `json:"expires_at,omitempty"`
 }
 
 // Expired reports whether t is past its expires_at, with a leeway
@@ -27,7 +27,7 @@ type Tokens struct {
 // token.
 func (t Tokens) Expired(leeway time.Duration) bool {
 	if t.ExpiresAt.IsZero() {
-		return false // unknown expiry — treat as fresh, refresh if API returns 401
+		return false
 	}
 	return time.Now().Add(leeway).After(t.ExpiresAt)
 }
@@ -41,9 +41,6 @@ var DefaultScopes = []string{
 	"https://www.googleapis.com/auth/calendar",
 }
 
-// AuthorizationEndpoint and TokenEndpoint are Google's well-known
-// URLs. They're stable across all Workspace OAuth flows and don't
-// vary by tenant, so we hardcode rather than discover.
 const (
 	AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
 	TokenEndpoint         = "https://oauth2.googleapis.com/token"

@@ -10,9 +10,6 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// encodePolicyJSON serializes a Policy to its on-disk shape. Keeps
-// only the allow/deny lists — short is encoded in the filename, not
-// the body.
 func encodePolicyJSON(p *Policy) string {
 	type wire struct {
 		Allow []string `json:"allow,omitempty"`
@@ -22,11 +19,6 @@ func encodePolicyJSON(p *Policy) string {
 	return string(b)
 }
 
-// escapeSingleQuoteForShell turns ' into '"'"' so the value can be
-// embedded inside a single-quoted shell argument without breaking
-// out of it. Shell-safe; no risk of arbitrary execution from policy
-// content because we control the entire string and JSON-escape it
-// first.
 func escapeSingleQuoteForShell(s string) string {
 	return strings.ReplaceAll(s, "'", `'"'"'`)
 }
@@ -52,7 +44,7 @@ type ToolInput struct {
 // one tool. Empty Allow + empty Deny means no policy file is
 // written (caller normalizes).
 type Policy struct {
-	Short string   // slug used in the filename (e.g. "x")
+	Short string
 	Allow []string `json:"allow,omitempty"`
 	Deny  []string `json:"deny,omitempty"`
 }
@@ -86,34 +78,12 @@ func (o GenerateOpts) home() string {
 	return "/home/" + o.user()
 }
 
-// writeRunCommand emits a `RUN` directive for cmd. Single-line
-// commands land as plain `RUN <cmd>`. Multi-line commands — typically
-// tool.yaml entries authored as a YAML `|` block scalar that wants to
-// `cat > /bin/foo <<HEREDOC` — are wrapped so Docker treats the
-// whole block as one shell invocation.
-//
-// Plain `RUN` only accepts one shell-command-line; a naive
-// fmt.Sprintf("RUN %s\n", multiLine) emits the first line as the
-// command and the rest as subsequent unrelated Dockerfile lines,
-// which parses but does nothing useful — shell heredocs end up as
-// empty files. We pipe the whole thing through `bash -c`, which
-// gives the author the shell semantics they expect (including
-// heredocs, `set -e`, subshells, pipes) without them having to
-// escape anything.
 func writeRunCommand(sb *strings.Builder, cmd string) {
 	trimmed := strings.TrimRight(cmd, "\n")
 	if !strings.ContainsRune(trimmed, '\n') {
 		fmt.Fprintf(sb, "RUN %s\n", trimmed)
 		return
 	}
-	// Multi-line cmd — tool.yaml authored as a YAML `|` block scalar,
-	// typically wrapping a `cat > /bin/foo <<HEREDOC`. Plain `RUN
-	// <multi-line>` makes Docker split on newlines and emit only the
-	// first line, dropping the heredoc body + EOF marker and producing
-	// empty files. We encode the whole command as base64 and decode-
-	// execute at build time — zero escaping concerns, preserves exact
-	// bytes, works with plain Dockerfile syntax (no BuildKit heredoc
-	// dependency).
 	encoded := base64.StdEncoding.EncodeToString([]byte(trimmed))
 	sb.WriteString("RUN echo " + encoded + " | base64 -d | bash -e\n")
 }
@@ -127,19 +97,13 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 	}
 	var sb strings.Builder
 
-	// Write base Dockerfile (OS + user creation, still running as root)
 	sb.Write(baseDockerfile)
 	sb.WriteString("\n")
 
-	// Version label
 	if imageVersion != "" {
 		fmt.Fprintf(&sb, "LABEL sh.spwn.image-version=%q\n\n", imageVersion)
 	}
 
-	// Collect apt packages across tools (deduplicated). New
-	// managers (apk/brew/...) add their own collect+emit block
-	// mirroring this one — each manager has its own flag shape and
-	// cache-cleanup pattern, so they don't trivially share code.
 	var allAptPackages []string
 	seenApt := make(map[string]bool)
 	for _, t := range tools {
@@ -151,7 +115,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		}
 	}
 
-	// Single apt-get install for all apt packages
 	if len(allAptPackages) > 0 {
 		sort.Strings(allAptPackages)
 		sb.WriteString("# Packages (merged from all tools)\n")
@@ -162,7 +125,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString("    && rm -rf /var/lib/apt/lists/*\n\n")
 	}
 
-	// Per-tool sections: ENV, FILES, RUN commands (all as root)
 	for _, t := range tools {
 		hasContent := len(t.Commands) > 0 || len(t.Env) > 0 || len(t.Files) > 0
 		if !hasContent {
@@ -171,9 +133,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 		fmt.Fprintf(&sb, "# %s\n", t.Name)
 
-		// Sort env keys for deterministic output (Go map iteration
-		// order is randomized; content-addressed image hashing
-		// requires stable bytes).
 		envKeys := make([]string, 0, len(t.Env))
 		for k := range t.Env {
 			envKeys = append(envKeys, k)
@@ -199,10 +158,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			writeRunCommand(&sb, cmd)
 		}
 
-		// Per-agent method allow/deny — materialized as a JSON file
-		// the tool's wrapper reads at runtime. Catalog tools emit a
-		// `spwn-policy-check <short> <method>` step in their wrappers
-		// that consults this file.
 		if t.Policy != nil && (len(t.Policy.Allow) > 0 || len(t.Policy.Deny) > 0) && t.Policy.Short != "" {
 			policyJSON := encodePolicyJSON(t.Policy)
 			fmt.Fprintf(&sb,
@@ -215,25 +170,15 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString("\n")
 	}
 
-	// Skills no longer live in the image — the transpile layer writes
-	// them into each agent's `.claude/skills/` / `.agents/skills/` at
-	// spawn time via docker-cp. No COPY directive needed here.
-
 	if !opt.SkipFooter {
 		user := opt.user()
 		home := opt.home()
 
-		// Fix ownership before switching user
 		sb.WriteString("# Final setup\n")
 		fmt.Fprintf(&sb, "RUN chown -R %s:%s %s\n", user, user, home)
 		fmt.Fprintf(&sb, "USER %s\n", user)
 		fmt.Fprintf(&sb, "WORKDIR %s\n", home)
 
-		// No VOLUME declaration. /world and /workspaces/<name> are
-		// bind-mounted by the spawner at container creation time;
-		// pre-declaring them as image volumes makes Docker auto-create
-		// anonymous volumes per container that `docker rm` never
-		// cleans up (leading to 10k+ leaked volumes on heavy e2e runs).
 		sb.WriteString("ENTRYPOINT [\"sleep\", \"infinity\"]\n")
 	}
 

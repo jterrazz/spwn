@@ -23,31 +23,17 @@ type ArchitectSpawnOpts struct {
 // at server construction time.
 type ArchitectSpawnFunc func(ctx context.Context, opts ArchitectSpawnOpts) (string, error)
 
-// architectSpawn is the in-memory record of an in-progress (or
-// just-completed) architect daemon spawn. The the API exposes its
-// fields via /api/architect/status so the desktop app can render
-// real-time progress instead of guessing from elapsed time.
-//
-// Lifecycle:
-//   - nil               → no spawn has been attempted in this process
-//   - InProgress=true   → goroutine is running, Event/Detail tick
-//   - InProgress=false  → finished; Error is set on failure, ContainerID
-//                          on success. Frontend can use this to render
-//                          a final state until the next spawn is started.
 type architectSpawn struct {
 	StartedAt   time.Time
 	FinishedAt  time.Time
 	InProgress  bool
-	Event       string // last progress event key (e.g. "image_building")
-	Detail      string // last progress detail (free-form)
-	Error       string // populated if the spawn failed
-	ContainerID string // populated on success
-	// Build log tail. Capped to keep the JSON response small.
+	Event       string
+	Detail      string
+	Error       string
+	ContainerID string
 	logBuffer *boundedBuffer
 }
 
-// snapshot returns a JSON-serialisable view of the spawn state. Safe
-// to call from any goroutine.
 func (s *architectSpawn) snapshot() map[string]interface{} {
 	out := map[string]interface{}{
 		"event":          s.Event,
@@ -71,12 +57,6 @@ func (s *architectSpawn) snapshot() map[string]interface{} {
 	return out
 }
 
-// startArchitectAsync launches the daemon spawn in a goroutine and
-// updates the server's spawn tracker as the world code emits
-// progress events. Returns immediately. Calling it again while a
-// spawn is already in progress is a no-op (the existing spawn keeps
-// running and the new caller subscribes to its progress via the
-// status endpoint).
 func (s *Server) startArchitectAsync(imageOverride string) error {
 	if s.spawnArchitectFn == nil {
 		return errSpawnNotWired
@@ -91,7 +71,7 @@ func (s *Server) startArchitectAsync(imageOverride string) error {
 		InProgress: true,
 		Event:      "queued",
 		Detail:     "preparing to start architect",
-		logBuffer:  newBoundedBuffer(64 * 1024), // 64 KB tail is plenty
+		logBuffer:  newBoundedBuffer(64 * 1024),
 	}
 	s.architectSpawnState = state
 	s.architectMu.Unlock()
@@ -125,9 +105,6 @@ type errSpawn string
 
 func (e errSpawn) Error() string { return string(e) }
 
-// boundedBuffer is a process-local writer that keeps the most recent
-// N bytes written to it. It's used to capture the architect build log
-// tail without growing unbounded.
 type boundedBuffer struct {
 	mu    sync.Mutex
 	buf   bytes.Buffer
@@ -148,9 +125,7 @@ func (b *boundedBuffer) Write(p []byte) (int, error) {
 		return 0, err
 	}
 	if b.buf.Len() > b.limit {
-		// Trim to keep the most recent <limit> bytes.
 		excess := b.buf.Len() - b.limit
-		// Discard from the head by reading and dropping.
 		_ = b.buf.Next(excess)
 	}
 	return len(p), nil

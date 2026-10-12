@@ -13,15 +13,11 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/architect"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world"
 )
 
-// containerExistsStatus mirrors the helper in apps/cli/world/list.go.
-// Duplicated here to avoid pulling the world subpackage into the root
-// cli package just for a one-liner (and the subpackage already imports
-// cli, which would create a cycle).
 func containerExistsStatus(containerID string) bool {
 	return exec.Command("docker", "inspect", "--format", "{{.Id}}", containerID).Run() == nil
 }
@@ -29,8 +25,6 @@ func containerExistsStatus(containerID string) bool {
 func init() {
 	rootCmd.AddCommand(statusCmd)
 }
-
-// --- helpers -----------------------------------------------------------------
 
 func abbreviatePath(p string) string {
 	home, err := os.UserHomeDir()
@@ -55,8 +49,6 @@ func visibleLen(s string) int {
 	return utf8.RuneCountInString(stripAnsi(s))
 }
 
-// isASCIILetter reports whether b terminates a CSI escape sequence: the
-// Final byte of one is always an ASCII letter.
 func isASCIILetter(b byte) bool {
 	return (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z')
 }
@@ -95,10 +87,8 @@ func pr(format string, args ...any) {
 	fmt.Fprintf(w, format, args...)
 }
 
-// ruleWidth is the total visible width of section rule lines.
 const ruleWidth = 56
 
-// rule renders a section header like: ── Label ──── right ──
 func rule(label, right string) string {
 	left := "\u2500\u2500 " + label + " "
 	rightPart := ""
@@ -112,18 +102,13 @@ func rule(label, right string) string {
 	return ui.Faint(left + repeatStr("\u2500", fillLen) + rightPart)
 }
 
-// --- status command ----------------------------------------------------------
-
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show the full status of your spwn environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		// ── Gather data ─────────────────────────────────────────────
-
 		baseDir := platform.BaseDir()
 
-		// Auth
 		authLabel := "not configured"
 		authToken := ""
 		if data, err := os.ReadFile(filepath.Join(baseDir, ".auth-token")); err == nil {
@@ -135,7 +120,6 @@ var statusCmd = &cobra.Command{
 			authLabel = "API key"
 		}
 
-		// Skills
 		skillCount := 0
 		if entries, err := os.ReadDir(platform.SkillsDir()); err == nil {
 			for _, e := range entries {
@@ -145,12 +129,6 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Worlds. Mirror the filtering used by `spwn ls` so the two
-		// commands agree on what's running:
-		//   1. dead containers are pruned (fixes stale drift), and
-		//   2. duplicates by config name are collapsed to the newest.
-		// Together with the `spwn up` idempotency guard this keeps
-		// `status` and `ls` in lockstep. See finding #10.
 		var worlds []world.World
 		arc, arcErr := architect.NewFromEnv()
 		if arcErr == nil {
@@ -175,10 +153,8 @@ var statusCmd = &cobra.Command{
 			worlds = append(worlds, ungrouped...)
 		}
 
-		// Agents
 		agentList, _ := agent.ListAgents()
 
-		// Agent → world mapping
 		worldMap := make(map[string]*world.World)
 		for i := range worlds {
 			ww := &worlds[i]
@@ -190,7 +166,6 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Active worlds
 		var activeWorlds []world.World
 		for _, ww := range worlds {
 			if ww.Status == world.StatusRunning || ww.Status == world.StatusIdle || ww.Status == world.StatusCreating {
@@ -198,7 +173,6 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Idle agents (not attached to any active world)
 		var idleAgents []agent.Info
 		for _, a := range agentList {
 			if _, attached := worldMap[a.Name]; !attached {
@@ -206,11 +180,7 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// ── Render ──────────────────────────────────────────────────
-
 		pr("\n")
-
-		// ── Header ──────────────────────────────────────────────────
 
 		pr("  %s %s\n", ui.Strong("spwn"), ui.Faint("v"+Version))
 
@@ -222,8 +192,6 @@ var statusCmd = &cobra.Command{
 		}
 		infoparts = append(infoparts, ui.Faint(fmt.Sprintf("%d skills", skillCount)))
 		pr("  %s\n", strings.Join(infoparts, ui.Faint(" \u00b7 ")))
-
-		// ── World sections ──────────────────────────────────────────
 
 		pr("\n")
 
@@ -237,8 +205,6 @@ var statusCmd = &cobra.Command{
 			pr("\n")
 		}
 
-		// ── Idle agents ─────────────────────────────────────────────
-
 		if len(idleAgents) > 0 {
 			pr("  %s\n", rule("Idle", fmt.Sprintf("%d agent%s", len(idleAgents), plural(len(idleAgents)))))
 			for _, a := range idleAgents {
@@ -246,8 +212,6 @@ var statusCmd = &cobra.Command{
 			}
 			pr("\n")
 		}
-
-		// ── Architect ───────────────────────────────────────────────
 
 		pr("  %s\n", rule("Architect", "offline"))
 
@@ -263,17 +227,13 @@ func plural(n int) string {
 	return "s"
 }
 
-// renderWorldSection draws a world as a rule-header section with agents listed below.
 func renderWorldSection(ww world.World) {
-	// ── Section header rule ─────────────────────────────────────
 
-	// Left: world ID + optional config
 	label := ww.ID
 	if ww.Config != "" && ww.Config != "default" {
 		label += " \u00b7 " + ww.Config
 	}
 
-	// Right: status + uptime
 	statusText := string(ww.Status)
 	uptime := ""
 	if !ww.CreatedAt.IsZero() {
@@ -286,29 +246,24 @@ func renderWorldSection(ww world.World) {
 
 	pr("  %s\n", rule(label, rightText))
 
-	// ── Detail lines (indented) ─────────────────────────────────
-
 	indent := "     "
 
-	// Workspaces
 	wsPaths := collectWorkspacePaths(ww)
 	if len(wsPaths) > 0 {
 		pr("%s%s\n", indent, strings.Join(wsPaths, ", "))
 	}
 
-	// Packages
 	if len(ww.Manifest.Deps) > 0 {
 		pr("%s%s\n", indent, ui.Faint(strings.Join(ww.Manifest.Deps, " ")))
 	}
 
-	// Agents
 	agents := collectAgents(ww)
 	if len(agents) > 0 {
 		pr("\n")
 		for _, a := range agents {
-			dot := ui.Faint("\u25cb") // ○
+			dot := ui.Faint("\u25cb")
 			if a.status == world.StatusRunning {
-				dot = ui.Green("\u25cf") // ●
+				dot = ui.Green("\u25cf")
 			}
 			rolePart := padRight(a.role, 8)
 			statusPart := string(a.status)

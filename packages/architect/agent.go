@@ -34,16 +34,11 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		return err
 	}
 
-	// Session management lives entirely in the runtime adapter —
-	// BuildCommand knows whether to pass --resume (claude), --thread
-	// (codex), etc. Status is derived from container state on every
-	// List/Get — no explicit transition needed here.
 	cmd := rt.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
 
-	// Forward auth credentials to the exec
 	env := agentEnv()
 
 	startTime := time.Now()
@@ -56,8 +51,6 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 	duration := time.Since(startTime)
 
-	// Save session + journal (best-effort) - both live in the agent's
-	// persistent home dir, addressed by name.
 	agentPath := agent.AgentDir(agentName)
 	sessID := agent.DeterministicSessionID(agentName, worldID)
 	sess := &agent.Session{
@@ -116,7 +109,6 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 
 	env := agentEnv()
 
-	// Save session for detached mode (best-effort, no journal since exit unknown)
 	agentPath := agent.AgentDir(agentName)
 	sessID := agent.DeterministicSessionID(agentName, worldID)
 	sess := &agent.Session{
@@ -136,8 +128,6 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 	})
 }
 
-// agentEnv builds environment variables for agent execution inside containers.
 func agentEnv() []string {
 	return DockerEnvVars()
 }
-
