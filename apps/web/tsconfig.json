@@ -1,1 +1,12 @@
-{ "extends": "@jterrazz/typescript/tsconfig/next" }
+{
+    "extends": "@jterrazz/typescript/tsconfig/next",
+    "exclude": [
+        "${configDir}/node_modules",
+        "${configDir}/.artifacts",
+        "${configDir}/**/__expected__",
+        "${configDir}/**/__fixtures__",
+        "${configDir}/**/__requests__",
+        "${configDir}/**/__seeds__",
+        "${configDir}/public"
+    ]
+}
