@@ -1007,7 +1007,7 @@ packages:
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
   '@jterrazz/test@file:.artifacts/packages/jterrazz-test-17.0.0.tgz':
-    resolution: {integrity: sha512-e30bSMzU29iYfi0SsS2IlMmPAqW+8gEn7ODdjk1CJsz/q+/dlCmqfqz5M0+tKu4ijIVxzSO79Vxtym39SAiBYw==, tarball: file:.artifacts/packages/jterrazz-test-17.0.0.tgz}
+    resolution: {integrity: sha512-K/+uthEPw+2aQ2QpPRI/MNqWdb5lk2eAqrA+oEOOAUhJMNvblw9+adbth5hfFHBo/WO8ik4YkLpcxDRSO9Xv+w==, tarball: file:.artifacts/packages/jterrazz-test-17.0.0.tgz}
     version: 17.0.0
     engines: {node: '>=24'}
     peerDependencies:
@@ -1055,7 +1055,7 @@ packages:
         optional: true
 
   '@jterrazz/typescript@file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz':
-    resolution: {integrity: sha512-blpbtHqQm0wvCmodCUrfseXjNcP8S9LW7rhqRdQFMNv58xN9hQgFmsBSETNws8RE7UxO3s3atwp3jhjWbGKBTQ==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
+    resolution: {integrity: sha512-6sRAc48v4OMYS0K5tcP9rf9o7KJ5K8GcAtKjZYkwYcNg7XTplPwpDNJazvFl1O4DZPCyQdzBeW3oK4o2Av5rvg==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
     version: 11.0.0
     engines: {node: '>=24.0.0'}
     hasBin: true
