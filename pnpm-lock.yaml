@@ -1055,7 +1055,7 @@ packages:
         optional: true
 
   '@jterrazz/typescript@file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz':
-    resolution: {integrity: sha512-6sRAc48v4OMYS0K5tcP9rf9o7KJ5K8GcAtKjZYkwYcNg7XTplPwpDNJazvFl1O4DZPCyQdzBeW3oK4o2Av5rvg==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
+    resolution: {integrity: sha512-x6Fp14zot2xbW2enamv6ug1FLvE3Fx7uZQNNR4w9oKu5BVCAwOnQXmxymslxbxrJH19IUVrINxlhdG20FPCdjg==, tarball: file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz}
     version: 11.0.0
     engines: {node: '>=24.0.0'}
     hasBin: true
