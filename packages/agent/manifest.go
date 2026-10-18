@@ -7,7 +7,7 @@ import (
 	intmanifest "spwn.sh/packages/agent/internal/manifest"
 )
 
-// Manifest is the parsed agent.yaml — composition + runtime config.
+// Manifest is the parsed agent.yaml: composition + runtime config.
 // Re-exported as a type alias so callers stay on the single `agent`
 // import and never need to know the yaml schema lives under internal/.
 type Manifest = intmanifest.Manifest

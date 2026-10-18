@@ -16,7 +16,7 @@ import (
 
 // CookieProvider is one site whose session cookies the spwn-cookie-sync
 // extension is allowed to push at the gate. Only the named cookies
-// are persisted — anything else in the request body is silently
+// are persisted: anything else in the request body is silently
 // dropped as defense-in-depth against fork extensions trying to leak
 // unrelated cookies.
 //
@@ -29,7 +29,7 @@ type CookieProvider struct {
 	Cookies []string `json:"cookies"`
 }
 
-// CookieSync owns the /sync/* endpoints — the receive-end of the
+// CookieSync owns the /sync/* endpoints, the receive-end of the
 // browser extension. Wired into the server's mux alongside /mcp/*.
 //
 // Trust model: localhost-only binding + cookie-name allowlist. No
@@ -199,7 +199,7 @@ func (cs *CookieSync) ProviderLastSync(name string) time.Time {
 // WriteDomainHints persists each provider's `Domains` to
 // /credentials/<provider>/.domains (one host per line) so the
 // gate-browser sidecar can seed cookies on the right hosts when a
-// session for that provider is opened. Idempotent — overwrites on
+// session for that provider is opened. Idempotent: it overwrites on
 // every gate startup.
 func (cs *CookieSync) WriteDomainHints() error {
 	for _, p := range cs.Providers() {

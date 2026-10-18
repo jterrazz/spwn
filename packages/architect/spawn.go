@@ -61,7 +61,7 @@ type SpawnOpts struct {
 	// RuntimeName selects the runtime adapter that drives spawn-time
 	// behavior (BuildCommand, credential sync, prelaunch shell) and
 	// the transpile target. Short form: "claude-code", "codex".
-	// Empty defaults to "claude-code" — the historical behavior and
+	// Empty defaults to "claude-code", the historical behavior and
 	// the only runtime with a Renderer today.
 	RuntimeName string
 	// Knowledge is an absolute host path to bind into /world/knowledge/.

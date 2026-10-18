@@ -1,4 +1,4 @@
-# Agent composition — the source of truth for what this agent needs.
+# Agent composition: the source of truth for what this agent needs.
 #
 # dependencies: lists every external and local dep with an explicit form.
 # The prefix tells you the source; the leading path segment tells you
@@ -9,15 +9,15 @@
 #   tool/<name>                  local tool    (./spwn/tools/<name>/)
 #   hook/<name>                  local hook    (./spwn/hooks/<name>.yaml)
 #   command/<name>               local command (./spwn/commands/<name>.md)
-# Bare names are invalid — always use one of the forms above.
+# Bare names are invalid; always use one of the forms above.
 #
 # Hooks fire on runtime events (PreToolUse, SessionStart, ...) and are
-# selected per-agent via the dependency list — same shape as skills
+# selected per-agent via the dependency list, same shape as skills
 # and tools. An agent inherits only the hooks it lists here.
 #
 # Commands are slash-invoked prompt shortcuts (`/refactor`, `/review`)
 # the runtime exposes inside the agent's session. Same per-agent
-# selection — only the commands the agent subscribes to land in its
+# selection: only the commands the agent subscribes to land in its
 # native commands directory.
 #
 # Optional `runtime.backend:` pins this agent to a specific backend
@@ -30,7 +30,7 @@ dependencies:
   - "spwn:unix"
   - "spwn:git"
   - "spwn:python"
-  # Local blocks scaffolded by `spwn init` — one of each form so you
+  # Local blocks scaffolded by `spwn init`, one of each form so you
   # can see how they're authored and used. Keep, edit, or delete them;
   # `spwn check` is happy either way.
   - "skill/focus"           # ./spwn/skills/focus.md

@@ -27,8 +27,8 @@ func (t *wrappedLocalTool) Skills() fs.FS             { return t.inner.Skills() 
 // Dependencies rewrites `tool/<x>` inner deps to the `local:<x>`
 // registry key so the resolver's lookups match the name under which
 // we registered each local tool. Without this, a local tool whose
-// tool.yaml lists `dependencies: [tool/b]` can't find tool/b —
-// the registry only knows it as `local:b` — and the whole resolve
+// tool.yaml lists `dependencies: [tool/b]` can't find tool/b
+// (the registry only knows it as `local:b`) and the whole resolve
 // step errors with "not registered", masking dependency cycles as
 // missing-dep errors.
 func (t *wrappedLocalTool) Dependencies() []string {
@@ -47,7 +47,7 @@ func (t *wrappedLocalTool) Dependencies() []string {
 
 // LoadTool parses spwn/tools/<name>/tool.yaml via the
 // shared packyaml parser and wraps the result so Name() returns
-// "local:<name>". Missing manifest is a crisp authoring error — an
+// "local:<name>". Missing manifest is a crisp authoring error: an
 // empty local dependency would render to nothing and the user would
 // spend an afternoon debugging a no-op.
 func LoadTool(projectRoot, name string) (tool.Tool, error) {
@@ -82,7 +82,7 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 // registry key.
 //
 // skill/, hook/, and command/ refs are stripped from the list
-// entirely — those are compile-time artifacts that the runtime
+// entirely: those are compile-time artifacts that the runtime
 // renderer weaves into the Tree (as /world/skills/<name>/SKILL.md,
 // hook entries in settings.json/hooks.json, and slash-invoked
 // commands respectively), not image-builder inputs. Passing them
@@ -93,7 +93,7 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 // resolver to handle.
 //
 // Order is preserved so users see their ref list echoed back in the
-// same shape they declared it. Duplicates are tolerated — the
+// same shape they declared it. Duplicates are tolerated: the
 // registry's Register is called once per unique name.
 func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string, error) {
 	loaded := map[string]bool{}

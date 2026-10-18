@@ -37,7 +37,7 @@ func TestRenameHierarchies_AlreadyMigrated(t *testing.T) {
 }
 
 // TestRenameHierarchies_NoHierarchiesDir: fresh installs have no
-// hierarchies/ — migration is a no-op.
+// hierarchies/: migration is a no-op.
 func TestRenameHierarchies_NoHierarchiesDir(t *testing.T) {
 	dir := t.TempDir()
 	if err := RenameHierarchiesToOrganizations.Apply(context.Background(), dir); err != nil {

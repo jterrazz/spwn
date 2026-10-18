@@ -34,7 +34,7 @@ var helperDockerfile []byte
 //     spwn-mcp-auth:latest --mcp <p.URL> --oauth
 //     --oauth-redirect-uri http://127.0.0.1:<port>/callback --list
 //
-// --list is the cheapest mcp2cli call that triggers the OAuth init —
+// --list is the cheapest mcp2cli call that triggers the OAuth init:
 // it returns once the server has handed back a tools list, which
 // only happens after the token exchange.
 func Login(ctx context.Context, p Provider, w io.Writer) error {

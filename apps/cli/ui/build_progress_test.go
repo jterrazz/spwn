@@ -90,7 +90,7 @@ func TestSummariseInstruction(t *testing.T) {
 // Live-updates to reflect the currently-running step.
 func TestBuildProgressWriter_ParsesStepLines(t *testing.T) {
 	// Direct-construct a Stepper writing into a harmless sink so the
-	// Spinner goroutine (TreeSpin) has something to print into — the
+	// Spinner goroutine (TreeSpin) has something to print into; the
 	// Test asserts on state, not on captured output.
 	s := &Stepper{isTTY: true, w: io.Discard}
 	bp := s.BuildProgressWriter()
@@ -104,7 +104,7 @@ func TestBuildProgressWriter_ParsesStepLines(t *testing.T) {
 
 	// Feed the stream in a few chunks that split across line
 	// Boundaries. This exercises the bytes.Buffer half of the
-	// Writer — a naive line-based parser would miss partial lines.
+	// Writer: a naive line-based parser would miss partial lines.
 	fragments := []string{
 		"Step 1/3 : FROM ubuntu:24.04\n",
 		"Step 2/3 : RUN apt-ge",
@@ -122,7 +122,7 @@ func TestBuildProgressWriter_ParsesStepLines(t *testing.T) {
 	}
 
 	// After streaming the three Step lines in, the CURRENT live step
-	// Should be `[3/3] Copying files` — the spinner label tracks it.
+	// Should be `[3/3] Copying files`: the spinner label tracks it.
 	s.mu.Lock()
 	got := s.label
 	s.mu.Unlock()

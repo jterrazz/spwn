@@ -1,7 +1,7 @@
 // Package transpile turns a provider-neutral spwn project
 // (spwn.yaml + spwn/agents/* + skills + hooks) into a runtime-
 // specific file layout (Tree) that can then be materialised to
-// disk or handed to packages/compile for the build step —
+// disk or handed to packages/compile for the build step:
 // linking the tree with tools into a Docker image.
 //
 // Think tsc: source = .ts files, intermediate = typed AST, emit =
@@ -10,9 +10,9 @@
 // a concrete runtime understands.
 //
 // Pipeline:
-//   packages/transpile — transpile source → Tree (pure)
-//   packages/compile   — compile Tree + tools → Docker image
-//   packages/architect — spawn a world from the image
+//   packages/transpile: transpile source to Tree (pure)
+//   packages/compile:   compile Tree + tools to Docker image
+//   packages/architect: spawn a world from the image
 package transpile
 
 import (

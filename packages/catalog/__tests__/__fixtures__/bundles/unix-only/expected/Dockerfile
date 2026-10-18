@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:24.04
 
-# Minimal base — tools are added by the compile package
+# Minimal base: tools are added by the compile package
 RUN apt-get update && apt-get install -y ca-certificates sudo \
     && rm -rf /var/lib/apt/lists/*
 

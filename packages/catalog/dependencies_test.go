@@ -73,8 +73,8 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 
 // isTemplateTool returns true when the spwn:<slug> is a gallery
 // template (has a `worlds:` section) rather than a pure dependency.
-// Uses the exported Get API — returns ErrNotFound on non-gallery
-// entries — so no internal state is reached.
+// Uses the exported Get API (returns ErrNotFound on non-gallery
+// entries), so no internal state is reached.
 func isTemplateTool(toolName string) bool {
 	slug := strings.TrimPrefix(toolName, "spwn:")
 	if _, err := dependency.GalleryEntryBySlug(slug); err == nil {
@@ -139,7 +139,7 @@ func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 	for _, tool := range dependency.BuiltinTools() {
 		if isTemplateTool(tool.Name()) {
 			// Template entries ship project-shared skills (no SKILL.md
-			// contract — those live in per-agent agent.yaml refs).
+			// contract: those live in per-agent agent.yaml refs).
 			continue
 		}
 		s := tool.Skills()

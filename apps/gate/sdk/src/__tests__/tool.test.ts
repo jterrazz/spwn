@@ -12,7 +12,7 @@ const demo = (): Tool =>
         schema: { properties: { text: { type: 'string' } }, type: 'object' },
     });
 
-// hazard: `run` sets process.exitCode, and the test process would exit with it — it is read, then reset
+// hazard: `run` sets process.exitCode, and the test process would exit with it, so it is read, then reset
 async function captured(
     stream: NodeJS.WriteStream,
     run: () => Promise<unknown>,

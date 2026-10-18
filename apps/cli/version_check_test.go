@@ -53,7 +53,7 @@ func TestVersionCheckCache_MissingCacheFile(t *testing.T) {
 // TestApplyLatestVersion_SemverCompare pins the bug where the banner
 // Fired on any "latest != current" instead of "latest > current".
 // The stale-cache-below-current case (cached v0.17.0 after force-
-// Upgrade to v0.17.4) must NOT produce a banner — that would tell
+// Upgrade to v0.17.4) must NOT produce a banner: that would tell
 // The user to "upgrade" to an older version.
 func TestApplyLatestVersion_SemverCompare(t *testing.T) {
 	cases := []struct {
@@ -120,7 +120,7 @@ func TestStartVersionCheck_FreshCacheSetsPendingSynchronously(t *testing.T) {
 	pendingUpgrade = ""
 	startVersionCheck()
 
-	// No goroutine race — the cache path is synchronous, so
+	// No goroutine race: the cache path is synchronous, so
 	// PendingUpgrade must be populated immediately on return.
 	if pendingUpgrade != "9.9.9" {
 		t.Errorf("pendingUpgrade = %q, want 9.9.9 (fresh-cache path must be synchronous)", pendingUpgrade)

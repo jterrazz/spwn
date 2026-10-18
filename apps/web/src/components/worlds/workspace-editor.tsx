@@ -9,7 +9,7 @@ interface WorkspaceEditorProps {
     onChange: (workspaces: WorkspaceDraft[]) => void;
 }
 
-/** The host folders a new world mounts — none makes it ephemeral — each named, pathed and read-only or not. */
+/** The host folders a new world mounts (none makes it ephemeral), each named, pathed and read-only or not. */
 export function WorkspaceEditor({ workspaces, defaultPath, onChange }: WorkspaceEditorProps) {
     const add = () => {
         onChange([

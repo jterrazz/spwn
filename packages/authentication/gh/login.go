@@ -16,7 +16,7 @@ import (
 var ErrGhNotInstalled = errors.New("gh CLI not installed on host")
 
 // ErrHostNotLoggedIn means gh exists on the host but `gh auth
-// token` failed — user hasn't run `gh auth login` yet.
+// token` failed: user hasn't run `gh auth login` yet.
 var ErrHostNotLoggedIn = errors.New("host gh CLI is not logged in")
 
 // Login imports an existing host gh authentication into the spwn
@@ -29,7 +29,7 @@ var ErrHostNotLoggedIn = errors.New("host gh CLI is not logged in")
 //
 // Future: if `gh` isn't on the host, fall back to running
 // `gh auth login --web` inside a helper container. For v1 we
-// require host gh — most users have it; we emit a clear hint
+// require host gh: most users have it; we emit a clear hint
 // otherwise.
 func Login(ctx context.Context, w io.Writer) error {
 	if w == nil {

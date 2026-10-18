@@ -28,7 +28,7 @@ const (
 //   - if it exists but stopped, start it
 //   - if it's already running, no-op
 //
-// Safe to call from spwn up's hot path on every spawn — running case
+// Safe to call from spwn up's hot path on every spawn: running case
 // is a single docker inspect.
 func EnsureRunning(ctx context.Context, w io.Writer) error {
 	return ensureRunning(ctx, w, false)

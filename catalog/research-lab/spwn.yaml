@@ -1,4 +1,4 @@
-# Research Lab — a scientific agent with Python, QMD, and local skills.
+# Research Lab: a scientific agent with Python, QMD, and local skills.
 #
 # Project-wide dependencies are inherited by every agent.
 # Curie's agent.yaml adds no extra deps; it only references local skills

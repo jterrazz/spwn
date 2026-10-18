@@ -27,7 +27,7 @@ type ConfigInput struct {
 	// HasHooks toggles the `[features] codex_hooks = true` line. The
 	// config.toml is emitted unconditionally (codex reads it even
 	// when empty), but the feature flag is only written when hooks
-	// actually exist — otherwise the file carries a dormant flag for
+	// actually exist; otherwise the file carries a dormant flag for
 	// a capability the project doesn't use.
 	HasHooks bool
 }
@@ -65,7 +65,7 @@ func GenerateAgentConfigTOML(in ConfigInput) []byte {
 }
 
 // GenerateAgentHooksJSON emits the per-agent `.codex/hooks.json` body.
-// Shape matches Claude Code's hooks schema closely — codex adopted
+// Shape matches Claude Code's hooks schema closely: codex adopted
 // the same event/matcher layering intentionally, so the transpile
 // layer's HookEntry maps 1:1 across runtimes.
 //

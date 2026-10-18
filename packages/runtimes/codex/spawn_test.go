@@ -35,7 +35,7 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 		}
 	}
 
-	// The snippet must NOT source /credentials/.env — that's the
+	// The snippet must NOT source /credentials/.env: that's the
 	// outer composer's job, not the adapter's. Including it here
 	// would double-source when multiple adapters chain in daemon.go.
 	if strings.Contains(got, "source /credentials/.env") {
@@ -46,7 +46,7 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 // TestSpawner_SupportsSession pins codex's resumable-session
 // contract. Codex sessions are identified by `thread_id`; the CLI
 // resumes via `--thread <id>`. spwn plumbs the id through
-// SpawnConfig.SessionID and BuildCommand emits the flag — see the
+// SpawnConfig.SessionID and BuildCommand emits the flag; see the
 // oneshot_test.go suite for the detailed argv round-trip.
 func TestSpawner_SupportsSession(t *testing.T) {
 	if !Spawner.SupportsSession() {
@@ -56,12 +56,12 @@ func TestSpawner_SupportsSession(t *testing.T) {
 
 // TestSpawner_BuildCommand_interactive pins the argv for interactive
 // Codex: `codex --dangerously-bypass-approvals-and-sandbox`. Only the
-// Top-level-accepted flag belongs here — codex ≥ 0.122 treats
+// Top-level-accepted flag belongs here: codex ≥ 0.122 treats
 // --skip-git-repo-check as an `exec` subcommand flag and rejects it
 // On the interactive REPL with "error: unexpected argument". The
 // Trusted-directory check is instead satisfied by PrelaunchShell,
 // Which writes a trust_level=trusted entry into ~/.codex/config.toml
-// AND runs `git init -q $HOME` — together they pass codex's two-step
+// AND runs `git init -q $HOME`; together they pass codex's two-step
 // "is this a trusted git repo" check without needing an exec-only
 // Flag that the interactive binary doesn't understand.
 //

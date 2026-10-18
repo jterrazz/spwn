@@ -142,7 +142,7 @@ func (m *mockBackend) Exec(_ context.Context, containerID string, cfg backend.Ex
 	m.execCalls = append(m.execCalls, execCall{containerID, cfg})
 	// Honour the test-injected stdout payload so the automation E2E
 	// suite can assert "the dispatcher captured the runtime's
-	// output" without a real container. Stderr left empty —
+	// output" without a real container. Stderr left empty:
 	// dispatcher uses the same writer for both, so writing to one
 	// is enough to exercise the capture path.
 	if cfg.Stdout != nil && len(m.execStdoutWrite) > 0 {
@@ -396,7 +396,7 @@ func TestRename_PersistsAcrossInspect(t *testing.T) {
 // TestRename_NonexistentWorld verifies that renaming a world that
 // doesn't exist surfaces the Docker-side "not found" error instead of
 // silently creating a runtimestate file for a ghost id. This is the
-// second half of the rename fix — the user needs to know the world
+// second half of the rename fix: the user needs to know the world
 // isn't there.
 func TestRename_NonexistentWorld(t *testing.T) {
 	mb := newMockBackend()

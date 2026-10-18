@@ -2,7 +2,7 @@ package transpile
 
 import "strings"
 
-// StripLeadingH1 drops a leading `# …` heading from body, so a
+// StripLeadingH1 drops a leading `# ...` heading from body, so a
 // worldbook-generated block (which has its own H1 by convention)
 // can be inlined under a wrapper heading without doubling up.
 //
@@ -25,7 +25,7 @@ func StripLeadingH1(body string) string {
 // one extra "#". A block whose top-level sections were H2s nests
 // cleanly under the H2 wrapper its parent emits.
 //
-// Code fences (``` …  ```) are preserved verbatim so shell examples
+// Code fences (``` ...  ```) are preserved verbatim so shell examples
 // that happen to start a line with `#` (shell comments, magic
 // comments) aren't mistaken for headings and mangled.
 func DemoteHeadings(body string) string {

@@ -54,7 +54,7 @@ type projectWorld struct {
 	// Knowledge is the absolute host path to bind into
 	// /world/knowledge/, resolved from the manifest's
 	// worlds.<name>.knowledge key relative to the project root.
-	// Empty when the manifest declares no knowledge path — in which
+	// Empty when the manifest declares no knowledge path, in which
 	// case the spawn pipeline skips the bind mount entirely and the
 	// rendered per-agent CLAUDE.md omits every reference to
 	// /world/knowledge/.

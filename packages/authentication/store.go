@@ -31,7 +31,7 @@ func ClearToken() error {
 	return os.Remove(tokenPath())
 }
 
-// DisableProvider marks a provider as disabled — the resolver will
+// DisableProvider marks a provider as disabled: the resolver will
 // Behave as though it had no credentials. Backed by the auth.yaml
 // User config so the choice survives across spwn upgrades and is
 // Visible to any tool that reads the same file.
@@ -48,7 +48,7 @@ func DisableProvider(p Provider) error {
 }
 
 // EnableProvider re-enables a previously-disabled provider. Idempotent
-// — calling it on an already-enabled provider is a cheap no-op aside
+// and calling it on an already-enabled provider is a cheap no-op aside
 // From the file rewrite.
 func EnableProvider(p Provider) error {
 	err := mutateConfig(func(c *Config) {

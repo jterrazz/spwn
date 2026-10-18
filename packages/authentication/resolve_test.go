@@ -6,7 +6,7 @@ import (
 
 // TestDetectMethods_listsAllAnthropicSources checks that the detection
 // layer is transparent: when two env vars are set simultaneously, both
-// credentials surface. The dashboard depends on this — users need to
+// credentials surface. The dashboard depends on this: users need to
 // see every credential spwn could use, not just the winner.
 func TestDetectMethods_listsAllAnthropicSources(t *testing.T) {
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
@@ -64,7 +64,7 @@ func TestResolve_ActiveMethodOverridesDiscoveryOrder(t *testing.T) {
 
 // TestResolve_ActiveMethodFallsBackWhenMissing checks that a stale
 // preference (user asked for api_key but only oauth is detected)
-// doesn't strand them — resolution falls back to whatever's available
+// doesn't strand them: resolution falls back to whatever's available
 // rather than erroring out at runtime.
 func TestResolve_ActiveMethodFallsBackWhenMissing(t *testing.T) {
 	t.Setenv("ANTHROPIC_API_KEY", "")
@@ -82,7 +82,7 @@ func TestResolve_ActiveMethodFallsBackWhenMissing(t *testing.T) {
 	}
 }
 
-// TestResolve_DisabledReturnsNone — a disabled provider must return a
+// TestResolve_DisabledReturnsNone: a disabled provider must return a
 // CredTypeNone sentinel regardless of whether credentials exist. This
 // is the explicit-logout-without-deletion behaviour the new UX relies
 // on.
@@ -105,7 +105,7 @@ func TestResolve_DisabledReturnsNone(t *testing.T) {
 	}
 }
 
-// TestDetectMethods_isNotFilteredByDisabled — the dashboard needs to
+// TestDetectMethods_isNotFilteredByDisabled: the dashboard needs to
 // render every known credential even when the provider is disabled,
 // so the user can re-enable and resume without re-discovering them.
 func TestDetectMethods_isNotFilteredByDisabled(t *testing.T) {

@@ -82,19 +82,19 @@ type Input struct {
 	OrphanRefs []AgentRef
 
 	// BuiltinTools is the authoritative catalog of known built-in
-	// dependencies (tools, skills, runtimes). Nil → fall back to
+	// dependencies (tools, skills, runtimes). Nil: fall back to
 	// spwn:* prefix heuristic.
 	BuiltinTools []string
 
 	// SupportedRuntimes is the list of runtime backends the host can
-	// actually spawn (e.g. "spwn:claude-code"). Nil → don't check.
+	// actually spawn (e.g. "spwn:claude-code"). Nil: don't check.
 	SupportedRuntimes []string
 
 	// HookEventsByRuntime maps the runtime adapter's short name
 	// (e.g. "claude-code", "codex") to the list of hook events that
 	// runtime fires inside the container. The validator uses it to
 	// warn when an agent's runtime would silently drop a hook
-	// because it doesn't know the event. Nil or empty → skip the
+	// because it doesn't know the event. Nil or empty: skip the
 	// check (golden tests + edge cases that don't construct a full
 	// catalog stay quiet).
 	HookEventsByRuntime map[string][]string
@@ -144,12 +144,12 @@ var (
 // limit likely to matter in practice. Most Linux filesystems allow
 // up to 255 bytes per path component; `docker cp` uses tar headers
 // that have their own length rules. 63 mirrors the DNS label limit
-// and is plenty for a human-memorable agent name — anything longer
+// and is plenty for a human-memorable agent name; anything longer
 // is probably a typo or pathological test input.
 const MaxAgentNameLen = 63
 
 // IsValidAgentName reports whether the given name is a valid agent
-// name — a slug matching the same regex the manifest enforces for
+// name, a slug matching the same regex the manifest enforces for
 // world names (`^[a-z][a-z0-9-]*$`) and at most MaxAgentNameLen
 // bytes. Empty names are invalid. Callers use this to reject bad
 // names at creation time, before anything is written to disk.

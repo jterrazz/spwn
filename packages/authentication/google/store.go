@@ -9,7 +9,7 @@ import (
 )
 
 // LoadClient reads ClientConfig from ClientPath(). Returns
-// (nil, nil) if absent — callers (the wizard) treat that as "user
+// (nil, nil) if absent; callers (the wizard) treat that as "user
 // hasn't done first-run setup yet".
 func LoadClient() (*ClientConfig, error) {
 	raw, err := os.ReadFile(ClientPath())

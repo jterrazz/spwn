@@ -17,11 +17,11 @@ import (
 // intervals (per-spawn, per-talk) so we don't churn refreshes, but
 // small enough that we re-issue well before a hard expiry. For
 // Notion's 1h tokens this means refresh kicks in around the 55min
-// mark — still 5min of headroom for the request itself.
+// mark, still 5min of headroom for the request itself.
 const DefaultRefreshLeeway = 5 * time.Minute
 
 // hazard: httpClient is package-private so tests can swap it. Never call
-// http.DefaultClient directly from package code — that timeout-less
+// http.DefaultClient directly from package code: that timeout-less
 // client can hang an entire spawn if a token endpoint stalls.
 var httpClient = &http.Client{Timeout: 15 * time.Second}
 
@@ -50,7 +50,7 @@ type metadata struct {
 // Silent on already-fresh tokens (returns false, nil). Silent on
 // missing tokens (returns false, nil) so callers can call this
 // unconditionally without first checking IsAuthenticated. Errors
-// are non-fatal for callers — log and continue.
+// are non-fatal for callers: log and continue.
 func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error) {
 	tokensPath := ProviderTokenPath(p)
 	fi, err := os.Stat(tokensPath)
@@ -158,7 +158,7 @@ func Refresh(ctx context.Context, p Provider, leeway time.Duration) (bool, error
 // RefreshAll iterates the Registry and refreshes any provider whose
 // tokens are expired or expiring within leeway. Returns the count of
 // successful refreshes and per-provider errors. Per-provider failures
-// don't stop iteration — one broken provider shouldn't lock out the rest.
+// don't stop iteration: one broken provider shouldn't lock out the rest.
 //
 // Each provider gets a 30s deadline. Calling RefreshAll from a hot
 // path (every world spawn) is safe: it's a no-op when tokens are

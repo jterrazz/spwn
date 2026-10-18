@@ -23,7 +23,7 @@ func TestIsAuthenticated_RequiresInlineToken(t *testing.T) {
 	}
 
 	// hosts.yml that points at the keyring is functionally useless
-	// inside a container — IsAuthenticated must reject it.
+	// inside a container: IsAuthenticated must reject it.
 	keyringOnly := []byte("github.com:\n    user: jterrazz\n")
 	if err := os.WriteFile(HostsPath(), keyringOnly, 0o600); err != nil {
 		t.Fatal(err)

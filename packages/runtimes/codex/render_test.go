@@ -52,7 +52,7 @@ func TestRender_EmitsAgentsMDAndRoleMD(t *testing.T) {
 	}
 }
 
-// TestRender_SkillsLandInAgentsSkillsTree — codex follows the
+// TestRender_SkillsLandInAgentsSkillsTree: codex follows the
 // cross-vendor `.agents/skills/` convention (NOT `.codex/skills/`).
 // All file types in a skill survive the emission.
 func TestRender_SkillsLandInAgentsSkillsTree(t *testing.T) {
@@ -87,7 +87,7 @@ func TestRender_SkillsLandInAgentsSkillsTree(t *testing.T) {
 	}
 }
 
-// TestRender_ConfigTOML_SkeletonAlwaysPresent — even with no model
+// TestRender_ConfigTOML_SkeletonAlwaysPresent: even with no model
 // and no hooks, the config.toml is still emitted so codex always sees
 // the spwn header + picks up any future knobs we add.
 func TestRender_ConfigTOML_SkeletonAlwaysPresent(t *testing.T) {
@@ -104,7 +104,7 @@ func TestRender_ConfigTOML_SkeletonAlwaysPresent(t *testing.T) {
 	}
 }
 
-// TestRender_ConfigTOML_ModelPinsProfile — AgentInput.Model drives the
+// TestRender_ConfigTOML_ModelPinsProfile: AgentInput.Model drives the
 // `profile = "<agent>"` + `[profiles.<agent>] model = "..."` pair so
 // codex auto-selects the model when invoked from the agent cwd.
 func TestRender_ConfigTOML_ModelPinsProfile(t *testing.T) {
@@ -125,7 +125,7 @@ func TestRender_ConfigTOML_ModelPinsProfile(t *testing.T) {
 	}
 }
 
-// TestRender_ConfigTOML_NoModelOmitsProfile — an unset model must not
+// TestRender_ConfigTOML_NoModelOmitsProfile: an unset model must not
 // emit an empty profile pin that codex would interpret as an active
 // profile with no model pinned.
 func TestRender_ConfigTOML_NoModelOmitsProfile(t *testing.T) {
@@ -139,7 +139,7 @@ func TestRender_ConfigTOML_NoModelOmitsProfile(t *testing.T) {
 	}
 }
 
-// TestRender_HooksJSON_emittedWhenHooksExist — presence of any hook
+// TestRender_HooksJSON_emittedWhenHooksExist: presence of any hook
 // must produce both `.codex/hooks.json` AND the `codex_hooks = true`
 // feature flag in `.codex/config.toml`. Without the flag, codex
 // ignores the hooks file entirely.
@@ -166,7 +166,7 @@ func TestRender_HooksJSON_emittedWhenHooksExist(t *testing.T) {
 	}
 }
 
-// TestRender_HooksJSON_omittedWhenEmpty — no hooks in the input means
+// TestRender_HooksJSON_omittedWhenEmpty: no hooks in the input means
 // no hooks.json file + no `codex_hooks` flag (dormant flags invite
 // misleading config audits).
 func TestRender_HooksJSON_omittedWhenEmpty(t *testing.T) {
@@ -183,7 +183,7 @@ func TestRender_HooksJSON_omittedWhenEmpty(t *testing.T) {
 	}
 }
 
-// TestRender_HooksJSON_shape — matches the cross-runtime envelope
+// TestRender_HooksJSON_shape: matches the cross-runtime envelope
 // (same shape claude uses in settings.json#hooks) so a single spwn
 // HookEntry fans into both targets without format drift.
 func TestRender_HooksJSON_shape(t *testing.T) {
@@ -222,7 +222,7 @@ func TestRender_HooksJSON_shape(t *testing.T) {
 	}
 }
 
-// TestRender_RoleInlinedIntoAgentsMD — role flows into the AGENTS.md
+// TestRender_RoleInlinedIntoAgentsMD: role flows into the AGENTS.md
 // "## Role here" block as a single sentence. No separate role.md file.
 func TestRender_RoleInlinedIntoAgentsMD(t *testing.T) {
 	tree, _ := Renderer.Render(transpile.Input{
@@ -238,7 +238,7 @@ func TestRender_RoleInlinedIntoAgentsMD(t *testing.T) {
 	}
 }
 
-// TestRender_EmptyRoleDefaultsToWorker — an unset role is still
+// TestRender_EmptyRoleDefaultsToWorker: an unset role is still
 // surfaced in the AGENTS.md, defaulting to "worker" so the agent
 // always knows its stance in the world.
 func TestRender_EmptyRoleDefaultsToWorker(t *testing.T) {

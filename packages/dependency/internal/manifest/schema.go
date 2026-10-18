@@ -1,4 +1,4 @@
-// Package manifest is the shared parser for tool.yaml — the
+// Package manifest is the shared parser for tool.yaml, the
 // declarative manifest format that describes a spwn dependency's
 // image-build recipe. Catalog entries keep their manifests under
 // catalog/<slug>/tools/<name>/tool.yaml (one dir per tool, so a
@@ -9,12 +9,12 @@
 //
 // A dependency is whatever its fields say it is: install steps +
 // verify make it a tool; a SKILL.md sibling or content-only body
-// makes it a skill. There is no explicit type field — composability
+// makes it a skill. There is no explicit type field: composability
 // determines identity.
 //
 // The parser produces tool.Tool instances (via the adapter in
-// packages/dependency/internal/adapters/), so everything downstream —
-// registry resolution, dockerfile generation, skill collection — is
+// packages/dependency/internal/adapters/), so everything downstream
+// (registry resolution, dockerfile generation, skill collection) is
 // oblivious to whether a given dependency came from Go or YAML.
 package manifest
 
@@ -39,7 +39,7 @@ type Schema struct {
 	Version string `yaml:"version"`
 
 	// Title is a human display name for the catalog gallery
-	// (e.g. "The Matrix"). Optional — when empty, callers fall back
+	// (e.g. "The Matrix"). Optional: when empty, callers fall back
 	// to the slug. Distinct from Name (which is the spwn:<slug>
 	// identifier).
 	Title string `yaml:"title,omitempty"`
@@ -57,18 +57,18 @@ type Schema struct {
 	Dependencies []string `yaml:"dependencies"`
 
 	// Worlds is the project-world map for entries that double as
-	// installable templates (matrix, startup, …). Opaque here — the
+	// installable templates (matrix, startup, ...). Opaque here: the
 	// init path reads it by copying spwn.yaml verbatim; the install
 	// path ignores it because worlds don't make sense as an
 	// installable dep (they are a compose-level concept).
 	Worlds yaml.Node `yaml:"worlds,omitempty"`
 
 	// Install is the build-time recipe for baking this dependency
-	// into the image. All sub-fields are optional — a dependency
+	// into the image. All sub-fields are optional: a dependency
 	// that only ships skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 
-	// Files is a map of image-target-path → source path relative to
+	// Files is a map of image-target-path to source path relative to
 	// this dependency's directory. Contents are read at parse time
 	// and compiled into the image via the Dockerfile's COPY layer.
 	Files map[string]string `yaml:"files"`
@@ -82,14 +82,14 @@ type Schema struct {
 	// and prelaunch shell setup at spawn time. Only runtimes
 	// ("spwn:claude-code", "spwn:codex") need this today; a tool
 	// that leaves it blank gets no spawn-time hooks. The string is
-	// looked up against a Go-side registry — unknown names fail at
+	// looked up against a Go-side registry: unknown names fail at
 	// load time so typos are caught early.
 	RuntimeProvider string `yaml:"runtime-provider,omitempty"`
 }
 
 // InstallSection mirrors packages/tool.InstallSpec for the wire
 // format. Keeping the domain struct (tool.Packages) in both layers
-// avoids a parallel schema — the yaml tags on tool.Packages are the
+// avoids a parallel schema: the yaml tags on tool.Packages are the
 // on-disk contract.
 type InstallSection struct {
 	// Packages groups package-manager installs by manager (apt today;
@@ -101,7 +101,7 @@ type InstallSection struct {
 	// Commands run as root, before the USER switch. Each item
 	// becomes one RUN line in the Dockerfile, so order matters.
 	//
-	// Runtime-user config belongs at spawn time, not here — see the
+	// Runtime-user config belongs at spawn time, not here; see the
 	// runtime adapter's DefaultConfigFiles (e.g.
 	// packages/runtimes/claudecode/spawn.go) for files that need to
 	// land in the agent's real HOME rather than the image's

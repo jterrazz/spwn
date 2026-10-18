@@ -1,4 +1,4 @@
-# spwn:notion — Notion's hosted MCP server exposed as agent-callable
+# spwn:notion: Notion's hosted MCP server exposed as agent-callable
 # CLI. `notion-mcp ...` routes through mcp2cli over HTTP/MCP; auth
 # is OAuth via `spwn auth login notion` on the host. Tokens persist
 # in ~/.spwn/credentials/mcp/ and are bind-mounted into every world.

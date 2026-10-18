@@ -15,7 +15,7 @@ import (
 // from the manifest to compile; pass an empty string and ToCompileInput
 // will pick "the only world" (error if multiple worlds exist).
 //
-// Tool verification is skipped here — callers feeding the result
+// Tool verification is skipped here: callers feeding the result
 // through a real spawn can override VerifiedTools; for CLI dry-runs
 // the union of agent tools is the best we can do without probing a
 // container.

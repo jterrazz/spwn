@@ -1,4 +1,4 @@
-// outside: Chrome MV3 reads a site's cookies only once the user grants its host, which takes a gesture — so the popup
+// outside: Chrome MV3 reads a site's cookies only once the user grants its host, which takes a gesture, so the popup
 // grants, and this worker syncs every granted provider's cookies to the gate on 127.0.0.1, which keeps only the cookies
 // its provider allowlist names.
 

@@ -1,10 +1,10 @@
 // Package transpile is the spwn transpiler: provider-neutral source
-// (spwn.yaml + spwn/agents/* + skills + hooks) → runtime-specific
+// (spwn.yaml + spwn/agents/* + skills + hooks) into runtime-specific
 // file layout a concrete agent runtime can boot from.
 //
 // Phase 1, Compile(name, input), is a pure function: given an
-// Input it returns a *Tree, a deterministic path→bytes map. No
-// disk writes, no Docker. Same input → same bytes → golden tests
+// Input it returns a *Tree, a deterministic map of path to bytes. No
+// disk writes, no Docker. Same input, same bytes, so golden tests
 // diff cleanly.
 //
 // Phase 2, materialisation, lives in packages/architect (spawn-time

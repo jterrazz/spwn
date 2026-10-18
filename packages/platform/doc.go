@@ -8,6 +8,6 @@
 // AgentsDir / SkillsDir / LocalStateDir so project-aware paths
 // resolve under the project instead of the user dir).
 //
-// platform has zero spwn dependencies — stdlib only — so it's
+// platform has zero spwn dependencies (stdlib only), so it's
 // import-cycle-proof at the base of the layer graph.
 package platform

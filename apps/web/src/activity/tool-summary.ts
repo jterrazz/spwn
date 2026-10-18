@@ -23,7 +23,7 @@ export function truncateContent(content: string, maxLines: number): string {
     return `${lines.slice(0, maxLines).join('\n')}\n... (${lines.length - maxLines} more lines)`;
 }
 
-/** The one input field that tells a tool call apart — the file read, the command run, the pattern searched — shortened to a line. */
+/** The one input field that tells a tool call apart (the file read, the command run, the pattern searched), shortened to a line. */
 export function toolInputSummary(tool: string, input: Record<string, unknown>): string {
     const summary = SUMMARIES[tool];
     if (summary === undefined) {

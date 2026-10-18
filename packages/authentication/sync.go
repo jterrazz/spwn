@@ -45,7 +45,7 @@ func SyncCredentials() error {
 
 	// invariant: Refresh expiring MCP OAuth tokens (Notion etc) so containers
 	// spawned with the cred bind mount get fresh tokens. Per-provider
-	// failures are logged but never block sync — a broken refresh
+	// failures are logged but never block sync: a broken refresh
 	// shouldn't take down `spwn up` or `spwn agent talk`.
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()

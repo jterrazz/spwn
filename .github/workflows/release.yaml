@@ -9,7 +9,7 @@ permissions:
     contents: write
 
 jobs:
-    # value: a release ships three things — the CLI, built by goreleaser into the release this job opens (its cross-compiled matrix, checksums and archives); the Tauri desktop app, built, signed and notarized by the shared reusable workflow, which bundles the CLI as a sidecar and so rebuilds it on disk; and the updater manifest, latest.json, signed from the desktop archives once they are uploaded
+    # value: a release ships three things: the CLI, built by goreleaser into the release this job opens (its cross-compiled matrix, checksums and archives); the Tauri desktop app, built, signed and notarized by the shared reusable workflow, which bundles the CLI as a sidecar and so rebuilds it on disk; and the updater manifest, latest.json, signed from the desktop archives once they are uploaded
     cli:
         name: CLI release
         runs-on: ubuntu-latest

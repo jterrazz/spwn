@@ -53,7 +53,7 @@ interface HeaderStatsProps {
     onSpawn: () => void;
 }
 
-/** The counters of the worlds page — worlds, agents alive, agents sleeping — each label unfolding on hover, and the button that spawns a world. */
+/** The counters of the worlds page (worlds, agents alive, agents sleeping), each label unfolding on hover, and the button that spawns a world. */
 export function HeaderStats({ worldsCount, runningAgents, idleAgents, onSpawn }: HeaderStatsProps) {
     const [expanded, setExpanded] = useState(false);
     const stats: Stat[] = [

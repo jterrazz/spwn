@@ -106,7 +106,7 @@ dependencies:
   - "spwn:git"
   - "spwn:mempalace"
 `)
-	// Lockfile only has spwn:unix — git and mempalace are drift.
+	// Lockfile only has spwn:unix: git and mempalace are drift.
 	l := dependency.EmptyLockfile()
 	l.Add("spwn:unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
@@ -119,7 +119,7 @@ dependencies:
 	issues := ruleLockfileConsistent(in)
 	var sawGit, sawMempalace, sawUnix bool
 	// Messages now render in the canonical `spwn:<name>` form.
-	// Drift on spwn:git → "spwn:git"; spwn:unix is in the
+	// Drift on spwn:git gives "spwn:git"; spwn:unix is in the
 	// lockfile (as spwn:unix), so no message should mention it
 	// in either form.
 	for _, iss := range issues {
@@ -153,7 +153,7 @@ func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 dependencies:
   - tool/my-tool
 `)
-	// Empty lockfile — local refs should not produce lockfile errors.
+	// Empty lockfile: local refs should not produce lockfile errors.
 	writeLockfile(t, root, dependency.EmptyLockfile())
 
 	in := Input{

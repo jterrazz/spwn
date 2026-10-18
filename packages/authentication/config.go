@@ -14,10 +14,10 @@ import (
 // Method is the user-facing style of credential for a provider:
 // OAuth (subscription-flavored, short-lived) or API key (long-lived
 // secret). Sources like "keychain" or "env var" are different ways of
-// delivering one of these two methods — callers who want to pick
+// delivering one of these two methods; callers who want to pick
 // between an OAuth token and an API key talk in these terms.
 //
-// Empty Method means "auto-select" — the resolver falls back to the
+// Empty Method means "auto-select": the resolver falls back to the
 // per-provider discovery order. This is the default for users who
 // never ran `spwn auth use`.
 type Method string
@@ -47,7 +47,7 @@ type Config struct {
 	Version int `yaml:"version"`
 	// DefaultProvider names the provider spwn uses when multiple are
 	// Authenticated and no runtime is pinned at the project/agent
-	// Level. Empty means "no preference" — the resolver then either
+	// Level. Empty means "no preference": the resolver then either
 	// Silently picks the only connected provider or errors with a
 	// Disambiguation hint when more than one is present. Soft
 	// Preference only; disabled providers are skipped regardless.
@@ -64,7 +64,7 @@ func configPath() string {
 }
 
 // LoadConfig reads auth.yaml and returns a validated Config. A missing
-// file is not an error — callers get an empty (but initialised) config
+// file is not an error: callers get an empty (but initialised) config
 // and can proceed. Once loaded, legacy `.disabled-<provider>` marker
 // files in CredentialsDir() are folded into the returned Config and
 // also persisted back so subsequent reads don't need to check them.

@@ -22,7 +22,7 @@ type Team struct {
 var slugRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$`)
 
 // Slugify converts a display name to a filesystem-safe slug.
-// "Matrix Ops" → "matrix-ops", "infra" → "infra".
+// "Matrix Ops" gives "matrix-ops", "infra" gives "infra".
 func Slugify(name string) string {
 	s := strings.ToLower(strings.TrimSpace(name))
 	s = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(s, "-")

@@ -7,7 +7,7 @@ on:
         branches: [main]
 
 # invariant: every job calls one Makefile gesture, and Turborepo reads go.work and pnpm-workspace.yaml into one task graph, so a job needs pnpm even when its work is pure Go; a job running anything `make` does not is a bug
-# value: each job restores and saves the Turborepo cache at .artifacts/turbo under a key of its own, one entry per run, restored by prefix — this branch's newest run, then any branch on this lockfile, then any — because two jobs saving one key race, and a job only replays the tasks it ran
+# value: each job restores and saves the Turborepo cache at .artifacts/turbo under a key of its own, one entry per run, restored by prefix (this branch's newest run, then any branch on this lockfile, then any), because two jobs saving one key race, and a job only replays the tasks it ran
 
 jobs:
     lint:

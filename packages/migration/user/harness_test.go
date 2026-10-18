@@ -19,12 +19,12 @@ import (
 // Layout:
 //
 //	packages/migration/user/__tests__/__fixtures__/<fixtureName>/
-//	  before/   → seeded into a fresh t.TempDir() before Apply runs
-//	  after/    → expected state of the tempdir once Apply returns
+//	  before/   seeded into a fresh t.TempDir() before Apply runs
+//	  after/    expected state of the tempdir once Apply returns
 //
 // The harness walks both after/ and the tempdir: any missing file,
 // extra file, or content mismatch fails the test with the path. This
-// makes migration transformations self-documenting — the before/
+// makes migration transformations self-documenting: the before/
 // tree is the realistic input, the after/ tree is the realistic
 // output, and the test code stays a one-liner.
 //

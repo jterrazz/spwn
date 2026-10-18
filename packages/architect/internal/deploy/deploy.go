@@ -1,5 +1,5 @@
 // Package deploy owns the "materialise a compiled world into a
-// running container" primitives — splitting a compile tree by
+// running container" primitives: splitting a compile tree by
 // prefix, docker-cp'ing agent home trees in, syncing the
 // allowlisted memory dirs back out at graceful shutdown.
 //
@@ -23,9 +23,9 @@ import (
 // MaterialiseTree splits a compiled tree by top-level prefix and
 // delivers each half to its destination:
 //
-//   - world/*   — written to the host-side worldStateDir (surfaced
+//   - world/*:  written to the host-side worldStateDir (surfaced
 //                 into the container via a /world/ bind mount).
-//   - agents/*  — docker-cp'd into the already-running container at
+//   - agents/*: docker-cp'd into the already-running container at
 //                 /agents/<rest>.
 //
 // Any other prefix is an error; the caller must namespace every
@@ -70,7 +70,7 @@ func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string
 // Note: docker's CopyToContainer extracts tar entries as root (tar
 // headers don't carry uid/gid today), so every file under
 // /agents/<name>/ lands owned root:root. The caller must re-own via
-// ChownAgentHomes *after* all docker-cp operations complete —
+// ChownAgentHomes *after* all docker-cp operations complete:
 // including the runtime default-config writes that happen downstream.
 // A single chown here wouldn't catch those later writes.
 func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
@@ -92,11 +92,11 @@ func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHo
 // home (SyncIn + runtime default-config writes + any other source).
 // Without this, the claude-code PrelaunchShell's credential cp into
 // $HOME/.claude/.credentials.json fails silently, and the agent then
-// launches un-authenticated and exits 0 with empty output — the
+// launches un-authenticated and exits 0 with empty output; the
 // failure mode that made `spwn agent talk` look like a black hole.
 //
 // `docker exec` honours the image's USER directive, which the base
-// Dockerfile sets to "spwn" — a non-root account that can't chown
+// Dockerfile sets to "spwn", a non-root account that can't chown
 // files owned by root. We route through sudo instead; the base image
 // grants spwn NOPASSWD sudo specifically so post-cp bookkeeping like
 // this stays straightforward.
@@ -119,12 +119,12 @@ func ChownAgentHomes(ctx context.Context, be backend.Backend, containerID string
 //
 // Knowledge is NOT in the list: it lives at /world/knowledge/ (world-
 // scoped, bind-mounted from spwn/worlds/<name>/knowledge/), so
-// in-container edits hit the project dir directly — no sync needed.
+// in-container edits hit the project dir directly, no sync needed.
 // Skills aren't synced either: they're build-time dependencies
 // injected into /world/skills/, not a runtime-writable memory layer.
 //
 // Failures are collected as warnings rather than aborting the
-// teardown — a best-effort snapshot is better than none, and the
+// teardown: a best-effort snapshot is better than none, and the
 // container is about to be removed anyway.
 func SyncOut(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) []string {
 	syncDirs := []string{"journal", "playbooks"}

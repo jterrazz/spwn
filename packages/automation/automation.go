@@ -1,6 +1,6 @@
 // Package automation is the trigger-driven agent wakeup engine.
 //
-// The architect daemon owns the engine — automations only fire while
+// The architect daemon owns the engine: automations only fire while
 // architect is running. The engine reads a project's spwn.yaml,
 // registers each declared automation, and dispatches a "wake the
 // agent with this prompt" call when the trigger fires.
@@ -15,26 +15,26 @@
 // The package is organised around four collaborators that the engine
 // composes:
 //
-//	Clock       — wall time abstraction; production = RealClock,
+//	Clock       wall time abstraction; production = RealClock,
 //	              tests = FakeClock you advance manually.
-//	Dispatcher  — the "send this prompt to this agent in this world"
+//	Dispatcher  the "send this prompt to this agent in this world"
 //	              callback. Architect-side adapter handles world
 //	              auto-spawn + the actual exec into the runtime.
-//	Receipts    — append-only log at <project>/.spwn/runs.jsonl,
+//	Receipts    append-only log at <project>/.spwn/runs.jsonl,
 //	              one line per fire (matches jterrazz-os' prior art).
-//	State       — last-fired timestamps, used at startup to compute
+//	State       last-fired timestamps, used at startup to compute
 //	              missed slots for catch-up.
 //
 // All four are interfaces. The engine has no Docker, fsnotify, or
-// architect imports — it is testable in isolation against fakes.
+// architect imports: it is testable in isolation against fakes.
 //
 // # Catch-up semantics
 //
 // On Engine.Start, for each cron automation:
 //
 //   - Read State.LastFired(world, name).
-//   - If zero → no catch-up; just register with the scheduler.
-//   - If non-zero → count the cron occurrences strictly after the
+//   - If zero: no catch-up; just register with the scheduler.
+//   - If non-zero: count the cron occurrences strictly after the
 //     last fired time and at-or-before clock.Now().
 //   - In "collapse" mode (default), fire ONCE with reason="catchup",
 //     missed=N, last_fired=prev. Mirrors Apple Reminders semantics:
@@ -47,7 +47,7 @@
 //     own clock.After(d) for the next scheduled tick.
 //   - Per-agent serialisation: a sync.Mutex keyed on (world, agent)
 //     gates Dispatch. Two cron expressions both targeting curie at
-//     6am will fire one after the other, never in parallel — agents
+//     6am will fire one after the other, never in parallel: agents
 //     can't sensibly talk to themselves twice at once.
 //   - Cross-agent dispatches in the same tick run in parallel.
 package automation
@@ -107,7 +107,7 @@ func defaultLogger() Logger {
 }
 
 // Engine is the in-process trigger scheduler. One Engine per
-// architect daemon — Register tracked automations before Start, then
+// architect daemon: Register tracked automations before Start, then
 // Stop on shutdown.
 type Engine struct {
 	clock      Clock
@@ -139,7 +139,7 @@ type registered struct {
 }
 
 // Config bundles the engine's collaborators. Clock/Dispatcher/
-// Receipts/State are required; FS is optional — projects with only
+// Receipts/State are required; FS is optional: projects with only
 // cron automations can leave it nil. New rejects fs-trigger
 // registrations when FS is nil.
 //
@@ -175,7 +175,7 @@ type CommandResolverFunc func(ref string) (string, error)
 func (f CommandResolverFunc) Resolve(ref string) (string, error) { return f(ref) }
 
 // New constructs an Engine. Returns an error if any collaborator is
-// nil — callers can defer those decisions to a builder, but this
+// nil; callers can defer those decisions to a builder, but this
 // package keeps the constructor strict so a missing dependency is a
 // loud panic at boot rather than a silent no-op at trigger time.
 func New(cfg Config) (*Engine, error) {
@@ -208,7 +208,7 @@ func New(cfg Config) (*Engine, error) {
 }
 
 // Register adds a world's automations to the engine. Must be called
-// before Start. fs triggers are tolerated but ignored in Phase 2 —
+// before Start. fs triggers are tolerated but ignored in Phase 2:
 // they'll be wired in Phase 3 without API changes here.
 func (e *Engine) Register(world string, autos map[string]project.Automation) error {
 	e.mu.Lock()
@@ -272,7 +272,7 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 }
 
 // Start performs catch-up for every cron automation, then launches
-// one scheduler goroutine per registered cron. Returns immediately —
+// one scheduler goroutine per registered cron. Returns immediately;
 // goroutines run in the background. Call Stop to drain them.
 //
 // Calling Start twice is a programming error and returns an error.
@@ -319,7 +319,7 @@ func (e *Engine) Start(ctx context.Context) error {
 // Stop cancels the engine's context and waits for every scheduler
 // goroutine to drain. Safe to call before Start (no-op).
 //
-// The fs watcher's Close() is called too — its pump goroutine and
+// The fs watcher's Close() is called too: its pump goroutine and
 // any in-flight debounce timers exit before Stop returns.
 func (e *Engine) Stop() {
 	e.mu.Lock()

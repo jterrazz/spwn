@@ -1,13 +1,13 @@
 // Package source loads a spwn project from disk into the rich
 // ProjectSource struct that compile Runtimes consume. It is the
 // disk-IO half of the two-phase compiler: tsc analogy == the parser.
-// Runtimes themselves are pure functions — they never touch the
+// Runtimes themselves are pure functions: they never touch the
 // filesystem.
 //
 // A ProjectSource is intentionally generous: it carries every file a
 // renderer might want (AGENTS.md, agent.yaml, profile, layer dirs,
-// skills, hooks, profiles) so the claude-code renderer — and the
-// future codex renderer — can pick whatever subset they need.
+// skills, hooks, profiles) so the claude-code renderer (and the
+// future codex renderer) can pick whatever subset they need.
 package source
 
 import (
@@ -26,7 +26,7 @@ import (
 // ProjectSource is the in-memory representation of a spwn project on
 // disk, ready to feed into a compile Runtime. Fields mirror what
 // runtimes need to translate, not what the manifest strictly defines.
-// This is the parsed IR — a Runtime consumes it.
+// This is the parsed IR; a Runtime consumes it.
 type ProjectSource struct {
 	// Manifest is the parsed spwn.yaml.
 	Manifest *project.Manifest
@@ -55,7 +55,7 @@ type ProjectSource struct {
 	// Empty if the directory does not exist.
 	Profiles []ProfileSource
 
-	// RootDir is the absolute path of the project root — useful for
+	// RootDir is the absolute path of the project root, useful for
 	// error messages and debugging.
 	RootDir string
 }
@@ -65,11 +65,11 @@ type AgentSource struct {
 	// Name is the directory basename under spwn/agents/.
 	Name string
 
-	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md — the
+	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md, the
 	// provider-neutral prompt. May be nil if the file is missing.
 	AgentMD []byte
 
-	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md — the
+	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md, the
 	// agent's identity body. May be nil if the file is missing.
 	// Renderers that can @-import (claude-code) don't need this;
 	// renderers that must inline (codex) do.
@@ -89,7 +89,7 @@ type AgentSource struct {
 }
 
 // AgentConfig is the parsed agent.yaml. Only fields the compiler cares
-// about are kept — the full agent package has a richer type that the
+// about are kept; the full agent package has a richer type that the
 // host-side runtime uses for things like auth and mounts.
 type AgentConfig struct {
 	Name        string        `yaml:"name,omitempty"`
@@ -110,9 +110,9 @@ type RuntimeConfig struct {
 
 // LayerFiles are the content-bearing per-agent layer directories
 // (identity is loaded separately via the entry file pipeline).
-// Knowledge is NOT a per-agent layer — it's world-scoped at
+// Knowledge is NOT a per-agent layer: it's world-scoped at
 // spwn/worlds/<name>/knowledge/ and bind-mounted into /world/knowledge/.
-// Skills are NOT a per-agent layer either — they're build-time
+// Skills are NOT a per-agent layer either: they're build-time
 // dependencies resolved via the `skill:` scheme or shipped by tools,
 // injected into /world/skills/ at image time.
 type LayerFiles struct {
@@ -125,15 +125,15 @@ type LayerFiles struct {
 //
 //	spwn/skills/<name>/
 //	  SKILL.md          (required; YAML frontmatter + body)
-//	  template.md       (optional sidecar — anything goes)
-//	  scripts/run.sh    (optional sidecar — preserved verbatim)
+//	  template.md       (optional sidecar, anything goes)
+//	  scripts/run.sh    (optional sidecar, preserved verbatim)
 //
 // Legacy bare-markdown form (`spwn/skills/<name>.md`) is still
 // accepted: the loader synthesises a `<name>/SKILL.md` entry (and
 // injects minimal `name:`/`description:` frontmatter when the file
 // has none) so downstream renderers can treat both forms identically.
 type SkillSource struct {
-	// Name is the skill identifier — either the sub-directory name
+	// Name is the skill identifier: either the sub-directory name
 	// under spwn/skills/ (dir form) or the bare filename minus .md.
 	Name string
 
@@ -147,12 +147,12 @@ type SkillSource struct {
 
 // HookSource is one runtime hook entry loaded from
 // <root>/spwn/hooks/<name>.yaml. Runtime hooks fire on runtime-defined
-// events (PreToolUse, UserPromptSubmit, SessionStart, …) inside the
-// container — they are NOT host-side lifecycle scripts.
+// events (PreToolUse, UserPromptSubmit, SessionStart, ...) inside the
+// container; they are NOT host-side lifecycle scripts.
 //
 // One file = one hook. The filename (minus .yaml) is the hook's Name;
 // each file's body is just `event: / matcher: / command:`. Per-agent
-// selection happens via `hook/<name>` in agent.yaml#dependencies — an
+// selection happens via `hook/<name>` in agent.yaml#dependencies: an
 // agent only receives hooks it explicitly declares, mirroring how
 // `skill/<name>` and `tool/<name>` work.
 type HookSource struct {
@@ -164,7 +164,7 @@ type HookSource struct {
 	// runtime-specific events degrade gracefully (the renderer skips
 	// events the target runtime doesn't know).
 	Event string
-	// Matcher narrows the event to a subset — e.g. `Bash` for
+	// Matcher narrows the event to a subset, e.g. `Bash` for
 	// PreToolUse. Empty matches every instance of the event. The
 	// value is written verbatim into the target config, so both
 	// runtimes' glob/regex conventions are honoured.
@@ -186,16 +186,16 @@ type ProfileSource struct {
 // <root>/spwn/commands/<name>.md. The body becomes the prompt the
 // runtime injects when the user types `/<name>` inside an agent
 // session. Per-agent selection happens via `command/<name>` in
-// agent.yaml#dependencies — an agent only ships the commands it
+// agent.yaml#dependencies: an agent only ships the commands it
 // explicitly subscribes to, mirroring how `skill/<name>`,
 // `tool/<name>`, and `hook/<name>` work.
 type CommandSource struct {
-	// Name is the filename minus `.md` — used as the slash invocation
-	// (e.g. `refactor.md` → `/refactor`).
+	// Name is the filename minus `.md`, used as the slash invocation
+	// (e.g. `refactor.md` gives `/refactor`).
 	Name string
 	// Body is the raw markdown that gets written verbatim into each
 	// runtime's command directory. spwn does not parse frontmatter
-	// here — runtimes that read frontmatter (Claude Code's
+	// here: runtimes that read frontmatter (Claude Code's
 	// `description:`, `allowed-tools:`) consume it directly.
 	Body []byte
 }

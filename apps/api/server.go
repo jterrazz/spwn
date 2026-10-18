@@ -361,9 +361,9 @@ type agentListItem struct {
 	// (orphan) or no project is active.
 	World string `json:"world,omitempty"`
 	// Status is the agent's live state:
-	//   "running"  — its world is currently up
-	//   "stopped"  — referenced by a world in spwn.yaml that's down
-	//   "orphan"   — on-disk agent dir not referenced by any world
+	//   "running":  its world is currently up
+	//   "stopped":  referenced by a world in spwn.yaml that's down
+	//   "orphan":   on-disk agent dir not referenced by any world
 	Status string `json:"status"`
 }
 

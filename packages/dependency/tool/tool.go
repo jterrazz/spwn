@@ -29,8 +29,8 @@ type Tool interface {
 // Today only Apt is wired end-to-end: the base image is Debian-family,
 // so apt-get is the only manager the Dockerfile generator knows how
 // to call. New managers (Apk for Alpine, Brew for macOS, Pacman for
-// Arch, …) are added as new fields here *and* as matching cases in
-// the generator. Splitting by field is intentional — each manager has
+// Arch, ...) are added as new fields here *and* as matching cases in
+// the generator. Splitting by field is intentional: each manager has
 // its own flag shape, cache-cleanup pattern, and dedup semantics, so
 // a single flat `[]string` couldn't be reliably translated.
 //
@@ -104,7 +104,7 @@ type InstallSpec struct {
 
 	// Commands are RUN lines executed as root, in the order declared.
 	// Runtime-user config (dotfiles, per-agent settings) does NOT
-	// belong here — it's materialised at spawn time by each runtime
+	// belong here: it's materialised at spawn time by each runtime
 	// adapter's DefaultConfigFiles method, which lands files directly
 	// under the agent's real HOME (/agents/<name>/) instead of the
 	// image's build-time /home/spwn.
@@ -113,6 +113,6 @@ type InstallSpec struct {
 	// Env are ENV key=value directives added to the Dockerfile.
 	Env map[string]string
 
-	// Files are paths→content pairs COPYd into the image.
+	// Files are path and content pairs COPYd into the image.
 	Files map[string][]byte
 }

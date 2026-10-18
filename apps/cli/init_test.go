@@ -25,7 +25,7 @@ func TestParseExampleRef(t *testing.T) {
 		{"startup", "startup", false},
 		// Bare names that don't match any gallery entry error out.
 		// `qmd` is a real catalog tool but NOT a gallery entry (no
-		// worlds: section) so init rejects it here — the caller needs
+		// worlds: section) so init rejects it here: the caller needs
 		// to either pick a gallery slug or use `agent add --dep`.
 		{"qmd", "", true},
 		{"nonesuch", "", true},
@@ -116,7 +116,7 @@ func TestRunInitExample_RejectsBadRef(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	// A bare name that isn't a gallery entry must still error — the
+	// A bare name that isn't a gallery entry must still error: the
 	// resolver only auto-promotes when the catalog has the slug.
 	if err := runInitExample(cmd, "nonesuch-gallery-slug"); err == nil {
 		t.Fatalf("expected error for bad ref, got nil")

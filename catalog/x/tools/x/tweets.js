@@ -1,4 +1,4 @@
-// outside: X's GraphQL shapes vary — promoted tweets, ads and tombstones carry their author elsewhere — so every
+// outside: X's GraphQL shapes vary (promoted tweets, ads and tombstones carry their author elsewhere), so every
 // reader here falls back rather than drop the row.
 
 const SELF_HOSTS = new Set(['twitter.com', 'x.com']);

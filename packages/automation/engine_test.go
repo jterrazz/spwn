@@ -117,7 +117,7 @@ func TestEngine_StopBeforeStartIsNoop(t *testing.T) {
 func TestEngine_CronFiresAtScheduledTime(t *testing.T) {
 	f := newEngineFixture(t) // anchored at testEpoch = 2026-05-01T00:00:00Z
 	// Pre-seed state so first-boot catch-up doesn't muddy the receipt
-	// stream — this test asserts a clean on-time fire path.
+	// stream; this test asserts a clean on-time fire path.
 	must(t, f.state.RecordFire("brain", "morning-brief", mustParse(t, testEpoch)))
 	must(t, f.engine.Register("brain", map[string]project.Automation{
 		"morning-brief": cronAuto("0 6 * * *", "editor", "Brief."),
@@ -128,7 +128,7 @@ func TestEngine_CronFiresAtScheduledTime(t *testing.T) {
 	// Give the runCron goroutine a moment to register its first After().
 	waitForPending(t, f.clock, 1, 200*time.Millisecond)
 
-	// Advance to 6:00 — the timer fires, dispatch records, receipt
+	// Advance to 6:00: the timer fires, dispatch records, receipt
 	// commits (asynchronously).
 	f.clock.AdvanceTo(mustParse(t, "2026-05-01T06:00:00Z"))
 	f.waitForReceipts(t, 1, 500*time.Millisecond)
@@ -178,7 +178,7 @@ func TestEngine_CatchupCollapseFiresOnceForMissedSlots(t *testing.T) {
 	last := mustParse(t, "2026-04-26T06:00:00Z")
 	must(t, f.state.RecordFire("brain", "morning-brief", last))
 
-	// Anchor the clock at 2026-04-29 08:14 — three 6am slots have
+	// Anchor the clock at 2026-04-29 08:14: three 6am slots have
 	// passed since the last fire (Mon, Tue, Wed).
 	f.clock = NewFakeClock(mustParse(t, "2026-04-29T08:14:00Z"))
 	f.engine, _ = New(Config{
@@ -238,7 +238,7 @@ func TestEngine_CatchupSkipFiresZero(t *testing.T) {
 		t.Errorf("skip mode produced %d catch-up receipts, want 0", got)
 	}
 
-	// Sanity: schedule still resumes — advance to next 6am, fire normally.
+	// Sanity: schedule still resumes; advance to next 6am, fire normally.
 	waitForPending(t, f.clock, 1, 200*time.Millisecond)
 	f.clock.AdvanceTo(mustParse(t, "2026-04-30T06:00:00Z"))
 	f.waitForReceipts(t, 1, 500*time.Millisecond)
@@ -248,7 +248,7 @@ func TestEngine_CatchupSkipFiresZero(t *testing.T) {
 }
 
 func TestEngine_CatchupStack_FiresOncePerMissedSlot(t *testing.T) {
-	// catchup: stack — one fire per missed cron slot, in order.
+	// catchup: stack, one fire per missed cron slot, in order.
 	// Setup: cursor at Mon 06:00, boot at Wed 08:00, 6am cron.
 	// Should produce 2 catch-up receipts (Tue + Wed slots) plus
 	// schedule resumes for Thu onwards.
@@ -287,7 +287,7 @@ func TestEngine_CatchupStack_FiresOncePerMissedSlot(t *testing.T) {
 }
 
 func TestEngine_CatchupStack_RespectsCap(t *testing.T) {
-	// 200 missed minutely slots → cap caps at 100. Verify we don't
+	// 200 missed minutely slots: the cap caps at 100. Verify we don't
 	// blast 200 receipts.
 	f := newEngineFixture(t)
 	last := mustParse(t, "2026-05-01T00:00:00Z")
@@ -311,7 +311,7 @@ func TestEngine_CatchupStack_RespectsCap(t *testing.T) {
 }
 
 func TestEngine_FirstBootFiresMostRecentSlotInWindow(t *testing.T) {
-	// First-ever boot at 08:14 with a daily 6am cron — the 06:00
+	// First-ever boot at 08:14 with a daily 6am cron: the 06:00
 	// slot two hours ago is the latest missed within the 24h first-
 	// boot lookback window, so the engine fires exactly ONCE for it.
 	// Apple-Reminders behaviour: install the daemon at noon, you
@@ -350,10 +350,10 @@ func TestEngine_FirstBootSkipsWhenNoSlotInWindow(t *testing.T) {
 	// First-ever boot but the schedule's most recent slot was more
 	// than 24h ago (here: weekly Sunday 9am, daemon comes up the
 	// following Friday). The engine doesn't replay arbitrary history
-	// — older slots are dropped silently. Avoids a brand-new daemon
+	// and older slots are dropped silently. Avoids a brand-new daemon
 	// firing months of weekly briefs the moment it starts.
 	f := newEngineFixture(t)
-	// Fri 2026-05-01 12:00 — last Sunday 9am was 2026-04-26, ~5 days
+	// Fri 2026-05-01 12:00: last Sunday 9am was 2026-04-26, ~5 days
 	// ago, well outside the 24h window.
 	f.clock = NewFakeClock(mustParse(t, "2026-05-01T12:00:00Z"))
 	f.engine, _ = New(Config{
@@ -374,7 +374,7 @@ func TestEngine_FirstBootSkipsWhenNoSlotInWindow(t *testing.T) {
 }
 
 func TestEngine_FirstBootSkipsWhenCatchupSkip(t *testing.T) {
-	// Catchup: skip is honoured even on first boot — the user opted
+	// Catchup: skip is honoured even on first boot; the user opted
 	// out of any catch-up behaviour, including the first-boot one.
 	f := newEngineFixture(t)
 	f.clock = NewFakeClock(mustParse(t, "2026-04-29T08:14:00Z"))
@@ -442,7 +442,7 @@ func TestEngine_PerAgentSerialisation(t *testing.T) {
 
 	// Pre-seed state so the first-boot catch-up path doesn't fire
 	// against the held dispatcher and deadlock Start. This test is
-	// about cron-tick serialisation, not catch-up — handing each
+	// about cron-tick serialisation, not catch-up: handing each
 	// automation a non-zero LastFired routes Start through the
 	// regular collapse-mode path (which finds 0 missed and exits).
 	must(t, f.state.RecordFire("brain", "a", mustParse(t, testEpoch)))
@@ -470,7 +470,7 @@ func TestEngine_PerAgentSerialisation(t *testing.T) {
 		t.Errorf("after first hold: count = %d, want exactly 1 in flight", got)
 	}
 
-	// Release first — second should now proceed.
+	// Release first; second should now proceed.
 	hold <- struct{}{}
 	hold <- struct{}{}
 	f.waitForReceipts(t, 2, 500*time.Millisecond)
@@ -501,7 +501,7 @@ func TestEngine_CrossAgentParallel(t *testing.T) {
 
 	// Both should reach Dispatch quickly even with hold blocking.
 	// "Reach Dispatch" = the request slice has both entries (each
-	// goroutine appends BEFORE waiting on hold in MockDispatcher? —
+	// goroutine appends BEFORE waiting on hold in MockDispatcher?
 	// no, the mock waits on hold first, THEN records. So we observe
 	// "two goroutines blocked on hold" via concurrent receipt
 	// counting after we release.).
@@ -535,7 +535,7 @@ func TestEngine_DispatchErrorRecordedInReceipt(t *testing.T) {
 }
 
 func TestEngine_DispatchErrorDoesNotAdvanceState(t *testing.T) {
-	// Failed dispatches must NOT advance the state cursor — otherwise
+	// Failed dispatches must NOT advance the state cursor, otherwise
 	// a transient failure would silently swallow that scheduled slot
 	// from the next catch-up's view, and the user would notice their
 	// agent missed a brief without any receipt-level reason.
@@ -750,7 +750,7 @@ func TestEngine_CommandResolverErrorWritesFailedReceipt(t *testing.T) {
 // ── FS replay-on-startup ─────────────────────────────────────────
 
 func TestEngine_FSReplay_FiresForNewerFiles(t *testing.T) {
-	// Setup: last_fired cursor points at T0; two files exist —
+	// Setup: last_fired cursor points at T0; two files exist:
 	// "old.md" with mtime T-1h, "new.md" with mtime T+1h. On Start,
 	// only new.md should be replayed.
 	source := NewFakeFSSource()
@@ -812,7 +812,7 @@ func TestEngine_FSReplay_FiresForNewerFiles(t *testing.T) {
 }
 
 func TestEngine_FSReplay_SkippedOnFirstBoot(t *testing.T) {
-	// No state cursor — engine has no baseline to compare against.
+	// No state cursor: engine has no baseline to compare against.
 	// Replay must skip even if files exist with future mtimes.
 	source := NewFakeFSSource()
 	clock := NewFakeClock(mustParse(t, testEpoch))

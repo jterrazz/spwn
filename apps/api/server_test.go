@@ -69,7 +69,7 @@ func createTestAgent(t *testing.T, name string) string {
 		}
 	}
 
-	// Write SOUL.md at the agent root — the new canonical identity file.
+	// Write SOUL.md at the agent root, the new canonical identity file.
 	writeFile(t, filepath.Join(agentDir, "SOUL.md"), "# Soul\n\nA helpful test agent.\n")
 
 	// Write legacy identity files (the API's GetAgentProfile handler still
@@ -446,7 +446,7 @@ func TestGetAgentMind(t *testing.T) {
 	}
 
 	// Response should be a JSON object (layers map). Identity is no
-	// longer a layer — it collapsed into SOUL.md at the agent root.
+	// longer a layer: it collapsed into SOUL.md at the agent root.
 	// Skills moved to build-time dependencies at /world/skills/.
 	// The mind tree still exposes playbooks/journal.
 	body := decodeBody(t, w)

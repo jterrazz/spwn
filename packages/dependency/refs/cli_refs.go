@@ -27,7 +27,7 @@ import (
 //     grammar error.
 //
 // This helper is ONLY for CLI input boundaries. Manifest parsers must
-// keep calling ParseRef directly — the explicit-form grammar there is
+// keep calling ParseRef directly: the explicit-form grammar there is
 // load-bearing.
 func ResolveCLI(input string, catalog []string) (string, error) {
 	trimmed := strings.TrimSpace(input)

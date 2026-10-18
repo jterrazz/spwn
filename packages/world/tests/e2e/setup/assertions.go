@@ -291,7 +291,7 @@ func (m *MockAssertion) SawMind() {
 	}
 }
 
-// SawClaudeMD asserts the mock observed the per-agent CLAUDE.md —
+// SawClaudeMD asserts the mock observed the per-agent CLAUDE.md:
 // the single self-contained system prompt that replaces the old
 // /world/AGENTS.md + /world/physics.md + /world/faculties.md +
 // /world/skills/* split emission.

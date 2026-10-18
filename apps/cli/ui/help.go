@@ -21,9 +21,9 @@ type HelpEntry struct {
 }
 
 // ColorizeHelpName applies colors to a command entry name:
-//   - flags (starting with -) → yellow
-//   - <placeholders> → faint
-//   - command words → cyan
+//   - flags (starting with -): yellow
+//   - <placeholders>: faint
+//   - command words: cyan
 func ColorizeHelpName(name string) string {
 	return colorizeCmd(name)
 }

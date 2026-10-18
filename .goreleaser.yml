@@ -2,7 +2,7 @@ version: 2
 
 project_name: spwn
 
-# value: goreleaser's staging area is an artefact — uploaded to the release and never read back — so it lives under .artifacts/, which `release --clean` empties alone
+# value: goreleaser's staging area is an artefact (uploaded to the release and never read back), so it lives under .artifacts/, which `release --clean` empties alone
 dist: .artifacts/goreleaser
 
 before:

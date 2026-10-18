@@ -101,7 +101,7 @@ function drawGlobe(
     });
 }
 
-/** Draws a world's planet on the canvas and keeps it spinning — faster and breathing while it is selected — with its agents' glows following their markers. */
+/** Draws a world's planet on the canvas and keeps it spinning (faster and breathing while it is selected), with its agents' glows following their markers. */
 export function useGlobe(options: GlobeOptions) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLSpanElement>(null);

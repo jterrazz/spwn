@@ -11,7 +11,7 @@ import (
 )
 
 // Tests for ruleAutomations. The rule covers 11 numbered checks (see
-// the godoc on ruleAutomations) — each test below targets one or two
+// the godoc on ruleAutomations); each test below targets one or two
 // of them with a minimal failure case + a happy-path counterpart.
 //
 // Test naming: TestAutomations_<rule-area>_<scenario>.
@@ -132,7 +132,7 @@ func TestAutomations_Cron_StandardFiveFieldAccepted(t *testing.T) {
 }
 
 func TestAutomations_Cron_EveryMinuteWarns(t *testing.T) {
-	// `* * * * *` parses as valid cron but fires 1440×/day —
+	// `* * * * *` parses as valid cron but fires 1440×/day;
 	// almost always a footgun (user meant "once a day at midnight"
 	// and forgot the hour field). Validator emits a LevelWarning.
 	in := automationInput(t, t.TempDir(), automationFixture{
@@ -266,7 +266,7 @@ func TestAutomations_FS_DoublestarRejected(t *testing.T) {
 
 func TestAutomations_FS_FileInsteadOfDirErrors(t *testing.T) {
 	root := t.TempDir()
-	// Create a file at the watched path — fs triggers want directories.
+	// Create a file at the watched path: fs triggers want directories.
 	filePath := filepath.Join(root, "inbox.md")
 	if err := os.WriteFile(filePath, []byte("hi"), 0o644); err != nil {
 		t.Fatal(err)
@@ -573,7 +573,7 @@ func TestAutomations_Agent_MissingRejected(t *testing.T) {
 	expectIssue(t, ruleAutomations(in), LevelError, "must declare an `agent:`")
 }
 
-// ── Happy path — full valid automation produces zero errors ─────────
+// ── Happy path: full valid automation produces zero errors ──────────
 
 func TestAutomations_FullValid_ZeroErrors(t *testing.T) {
 	root := t.TempDir()
@@ -628,7 +628,7 @@ type worldFixture struct {
 
 // automationInput builds a validate.Input rooted at the given disk
 // directory with the given world declarations. Mirrors minimalInput
-// from validate_edge_test.go but skips the agent.yaml scaffolding —
+// from validate_edge_test.go but skips the agent.yaml scaffolding;
 // the automations rule only reads the manifest, not agent dirs.
 func automationInput(t *testing.T, root string, fx automationFixture) Input {
 	t.Helper()
@@ -652,7 +652,7 @@ func automationInput(t *testing.T, root string, fx automationFixture) Input {
 
 // expectIssue asserts that the given issues contain exactly one entry
 // at the expected level whose Message contains needle. Used to keep
-// the test bodies short — the rule emits Hint text we don't want to
+// the test bodies short: the rule emits Hint text we don't want to
 // pin in goldens.
 func expectIssue(t *testing.T, issues []Issue, level Level, needle string) {
 	t.Helper()

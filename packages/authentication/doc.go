@@ -1,7 +1,7 @@
 // Package auth resolves AI-provider credentials (Anthropic, OpenAI,
-// Google) from their canonical host-side locations — env vars,
-// Claude Code's OAuth cache, Codex's auth.json, the macOS Keychain
-// — and syncs them into the bind-mountable /credentials/ directory
+// Google) from their canonical host-side locations (env vars,
+// Claude Code's OAuth cache, Codex's auth.json, the macOS Keychain)
+// and syncs them into the bind-mountable /credentials/ directory
 // that every spwn container reads at startup.
 //
 // Callers use Resolve(provider) for a single provider, ResolveAll()

@@ -8,7 +8,7 @@ import (
 )
 
 // TestParseMarkdownFrontmatter_happyPath: canonical "---\n...\n---"
-// header → Found=true, Keys populated with scalar values.
+// header: Found=true, Keys populated with scalar values.
 func TestParseMarkdownFrontmatter_happyPath(t *testing.T) {
 	body := `---
 name: my-skill
@@ -61,7 +61,7 @@ func TestParseMarkdownFrontmatter_unterminated(t *testing.T) {
 
 // TestParseMarkdownFrontmatter_extraKeysKept: other keys beyond
 // name/description are retained so authors can attach metadata
-// (version, tags, …) without the parser choking or silently
+// (version, tags, ...) without the parser choking or silently
 // discarding them.
 func TestParseMarkdownFrontmatter_extraKeysKept(t *testing.T) {
 	body := `---
@@ -86,7 +86,7 @@ body
 }
 
 // TestParseMarkdownFrontmatter_emptyHeader: an empty `---\n---`
-// block is legal — Found=true, Keys empty. The caller rule decides
+// block is legal: Found=true, Keys empty. The caller rule decides
 // whether that's acceptable.
 func TestParseMarkdownFrontmatter_emptyHeader(t *testing.T) {
 	fm, err := ParseMarkdownFrontmatterBytes([]byte("---\n---\n\nbody\n"))

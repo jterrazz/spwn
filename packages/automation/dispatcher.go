@@ -9,7 +9,7 @@ import (
 // Dispatcher is what the engine calls when an automation fires. The
 // architect-side adapter implements this by exec'ing the agent's
 // runtime with the rendered prompt and capturing the output. The
-// engine itself has no Docker / runtime awareness — Dispatch is the
+// engine itself has no Docker / runtime awareness: Dispatch is the
 // contract that hides all of that.
 //
 // Implementations must:
@@ -48,7 +48,7 @@ type DispatchRequest struct {
 	// Agent is the agent name to wake (one of the world's agents).
 	Agent string
 	// Prompt is the rendered prompt body. Already templated against
-	// the trigger event — the dispatcher just delivers bytes.
+	// the trigger event; the dispatcher just delivers bytes.
 	Prompt string
 	// Source carries trigger-kind metadata (cron / fs, on-time /
 	// catchup, scheduled time, missed count). Receipts and any
@@ -63,7 +63,7 @@ type DispatchRequest struct {
 type FireSource struct {
 	// Kind is "cron" or "fs".
 	Kind string
-	// Reason is a short categorical label for the receipt — "on-time",
+	// Reason is a short categorical label for the receipt: "on-time",
 	// "catchup", "create:foo.md", etc. Free-form for fs paths so the
 	// dashboard can group by "create" / "write" without reparsing.
 	Reason string
@@ -91,7 +91,7 @@ type MockDispatcher struct {
 	mu       sync.Mutex
 	requests []DispatchRequest
 	// Err, when non-nil, makes Dispatch return that error every call.
-	// Tests assertions for the "dispatch failed → receipt OK=false"
+	// Tests assertions for the "dispatch failed, so receipt OK=false"
 	// path set this.
 	Err error
 	// Output, when non-empty, makes Dispatch return that as its
@@ -99,7 +99,7 @@ type MockDispatcher struct {
 	Output string
 	// Hold blocks each Dispatch on this channel before returning. Lets
 	// tests drive concurrency: send N values for the first N calls to
-	// proceed serially, or close to release everything. Nil → no hold.
+	// proceed serially, or close to release everything. Nil means no hold.
 	Hold chan struct{}
 }
 
@@ -110,7 +110,7 @@ func NewMockDispatcher() *MockDispatcher { return &MockDispatcher{} }
 // Dispatch records the request on entry, optionally blocks on Hold,
 // then returns d.Err wrapped in a DispatchResult. Recording before
 // Hold lets tests observe "the engine has reached Dispatch but
-// Dispatch has not yet returned" via Count() — which is what
+// Dispatch has not yet returned" via Count(), which is what
 // serialisation checks need (e.g. only one request in flight per
 // agent).
 func (d *MockDispatcher) Dispatch(ctx context.Context, req DispatchRequest) DispatchResult {

@@ -27,7 +27,7 @@ func writeFile(t *testing.T, dir, name, body string) {
 
 func TestLoadTools_PicksUpGateShapedTools(t *testing.T) {
 	root := t.TempDir()
-	// A gate-shaped tool: cookies + mcp.entry → discovered.
+	// A gate-shaped tool: cookies + mcp.entry, discovered.
 	writeFile(t, filepath.Join(root, "x"), "tool.yaml", `
 name: spwn:x
 gate:
@@ -37,14 +37,14 @@ gate:
   mcp:
     entry: ["node", "index.js", "mcp-serve"]
 `)
-	// A non-gate tool (only install steps) — should be silently
+	// A non-gate tool (only install steps): should be silently
 	// skipped, not error.
 	writeFile(t, filepath.Join(root, "qmd"), "tool.yaml", `
 name: spwn:qmd
 install:
   packages: { apt: [grep] }
 `)
-	// A subdir without tool.yaml — also silently skipped.
+	// A subdir without tool.yaml: also silently skipped.
 	if err := os.MkdirAll(filepath.Join(root, "stale"), 0o755); err != nil {
 		t.Fatal(err)
 	}

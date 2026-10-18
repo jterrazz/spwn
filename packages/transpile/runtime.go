@@ -49,7 +49,7 @@ type Input struct {
 	// host knowledge directory into /world/knowledge. Runtimes use
 	// this to decide whether to mention the "knowledge base" in the
 	// per-agent CLAUDE.md's Roster / Conventions sections. When
-	// false, every reference to /world/knowledge/ is omitted — the
+	// false, every reference to /world/knowledge/ is omitted: the
 	// agent is never told a knowledge base exists.
 	WorldKnowledgeMounted bool
 
@@ -67,7 +67,7 @@ type Input struct {
 	Skills []SkillEntry
 
 	// Hooks is every runtime hook the project declares under
-	// spwn/hooks/<name>.yaml. This is the project-wide pool — agents
+	// spwn/hooks/<name>.yaml. This is the project-wide pool: agents
 	// receive only the subset they explicitly select via `hook/<name>`
 	// in their agent.yaml#dependencies. Per-agent selection lands on
 	// each AgentInput.Hooks; renderers should consume that, not this
@@ -86,7 +86,7 @@ type Input struct {
 // SkillEntry is one complete skill the renderer must emit into each
 // agent's native skill directory. Files is keyed by path relative to
 // the skill's own root (`SKILL.md`, optional sidecar files like
-// `template.md`, `scripts/run.sh`). SKILL.md is always required —
+// `template.md`, `scripts/run.sh`). SKILL.md is always required;
 // both Claude Code and Codex refuse to load a skill without it.
 type SkillEntry struct {
 	Name  string
@@ -101,7 +101,7 @@ type SkillEntry struct {
 //
 // Name keys the entry so re-renders stay idempotent; Event is the
 // runtime-defined trigger (PreToolUse, UserPromptSubmit, SessionStart,
-// Stop, …); Matcher scopes the event (e.g. `Bash`); Command is the
+// Stop, ...); Matcher scopes the event (e.g. `Bash`); Command is the
 // shell fragment invoked when the hook fires.
 type HookEntry struct {
 	Name    string
@@ -115,7 +115,7 @@ type HookEntry struct {
 //   - claude-code: agents/<name>/.claude/commands/<Name>.md
 //   - codex:       agents/<name>/.codex/commands/<Name>.md
 //
-// Body is written verbatim — frontmatter (description, allowed-tools,
+// Body is written verbatim: frontmatter (description, allowed-tools,
 // version) is interpreted by the runtime, not by spwn.
 type CommandEntry struct {
 	Name string
@@ -130,11 +130,11 @@ type AgentInput struct {
 	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md. Renderers
 	// that can @-import (claude-code) ignore this; renderers that
 	// must inline everything into a single boot prompt (codex) read
-	// it as the agent's identity body. Nil when SOUL.md is missing —
+	// it as the agent's identity body. Nil when SOUL.md is missing:
 	// renderers that rely on it treat a nil Soul as "agent has no
 	// declared identity".
 	Soul []byte
-	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md — the
+	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md, the
 	// user-authored provider-neutral prompt body. Renderers that
 	// consume it inline it at the bottom of the per-agent boot prompt
 	// (codex) so the user's own instructions survive transpilation.
@@ -143,7 +143,7 @@ type AgentInput struct {
 	// point doesn't reference it.
 	AgentMD []byte
 
-	// Playbooks lists the agent's promotable playbooks — the subset of
+	// Playbooks lists the agent's promotable playbooks, the subset of
 	// files under spwn/agents/<name>/playbooks/ that carry valid
 	// `name:` + `description:` frontmatter. The renderer emits the list
 	// as a discoverability index in the entry file (CLAUDE.md for
@@ -158,7 +158,7 @@ type AgentInput struct {
 	// `.claude/settings.json` / `[profiles.<agent>]` in codex
 	// config.toml. Empty string means "use the runtime's default".
 	Model string
-	// Provider mirrors `runtime.provider` (anthropic, openai, …).
+	// Provider mirrors `runtime.provider` (anthropic, openai, ...).
 	// Mostly informational today; future renderers may use it to
 	// pick between API-key-vs-OAuth config paths.
 	Provider string

@@ -8,7 +8,7 @@ import (
 
 // FuzzSchemaUnmarshal feeds arbitrary bytes into the Schema
 // unmarshaller. The parser must either succeed or return a clean
-// error — never panic.
+// error, never panic.
 func FuzzSchemaUnmarshal(f *testing.F) {
 	// Seed corpus: known-good + known-malformed samples.
 	f.Add([]byte(`name: "spwn:unix"

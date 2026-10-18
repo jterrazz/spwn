@@ -13,7 +13,7 @@ import (
 // where they can access the embed FS white-box. This file covers
 // the public facade only.
 
-// TestList_StartupIsFirst verifies the gallery ordering — startup
+// TestList_StartupIsFirst verifies the gallery ordering: startup
 // should be the first example users see since it's the multi-agent
 // showcase.
 func TestList_StartupIsFirst(t *testing.T) {

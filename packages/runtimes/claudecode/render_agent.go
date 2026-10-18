@@ -22,7 +22,7 @@ type AgentClaudeMDInput struct {
 	KnowledgeMounted bool
 }
 
-// GenerateAgentCLAUDEMD returns the per-agent CLAUDE.md — the file
+// GenerateAgentCLAUDEMD returns the per-agent CLAUDE.md, the file
 // Claude Code loads on startup. It:
 //
 //   - imports the agent's identity via `@SOUL.md`
@@ -36,7 +36,7 @@ type AgentClaudeMDInput struct {
 //     standalone world/AGENTS.md
 //
 // Tool-shipped skills land in `.claude/skills/<n>/SKILL.md` at render
-// time (see render.go) — Claude Code's native walker picks them up
+// time (see render.go); Claude Code's native walker picks them up
 // with no boot-time indirection.
 func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
 	var sb strings.Builder

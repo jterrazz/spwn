@@ -69,7 +69,7 @@ func AgentDir(name string) string {
 
 // Init scaffolds a new Mind (playbooks/ + journal/) plus SOUL.md
 // at the agent root. Skills used to be a Mind layer but were
-// retired — they are build-time dependencies resolved via
+// retired: they are build-time dependencies resolved via
 // skill/<name> in agent.yaml now.
 func Init(name string) (string, error) {
 	dir := AgentDir(name)
@@ -123,7 +123,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 
 // Repair re-creates any missing layer directories and the default
 // profile for an already-existing Mind. Unlike Init, Repair never
-// errors when the agent directory already exists — it is idempotent
+// errors when the agent directory already exists; it is idempotent
 // and only writes what is missing, making it safe for --force
 // re-scaffold platform.
 func Repair(name string) error {

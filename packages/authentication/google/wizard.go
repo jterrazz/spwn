@@ -9,7 +9,7 @@ import (
 
 // WizardWalkthrough is the user-facing instructions printed when
 // no client.json exists yet. Kept here (vs the CLI package) so the
-// language stays consistent across callers — the same text gets
+// language stays consistent across callers: the same text gets
 // printed by the dashboard and by `spwn auth login google` itself.
 const WizardWalkthrough = `Google requires a one-time GCP project setup (Google policy: they don't allow
 shared OAuth clients for sensitive scopes). 5 to 10 minutes, free, no credit card.
@@ -44,7 +44,7 @@ shared OAuth clients for sensitive scopes). 5 to 10 minutes, free, no credit car
 
 // PromptClient walks the user through the GCP setup and captures
 // their OAuth client_id / client_secret. Reads from in, prints to
-// out — both injectable for tests.
+// out, both injectable for tests.
 func PromptClient(in io.Reader, out io.Writer) (*ClientConfig, error) {
 	fmt.Fprintln(out, WizardWalkthrough)
 	fmt.Fprintln(out)

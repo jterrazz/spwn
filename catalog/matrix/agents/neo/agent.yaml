@@ -5,7 +5,7 @@ role: worker
 runtime:
   backend: "spwn:claude-code"
 
-# Agent-specific deps — additions only.
+# Agent-specific deps, additions only.
 # Project-wide deps (unix, git) are inherited from spwn.yaml.
 # Only list what THIS agent needs beyond the shared set.
 #

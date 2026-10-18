@@ -1,4 +1,4 @@
-// Package cookiesync hosts the `spwn cookie-sync ...` subcommands —
+// Package cookiesync hosts the `spwn cookie-sync ...` subcommands:
 // the host-side counterpart to apps/spwn-cookie-sync, the browser
 // extension that pushes session cookies to the gate.
 //
@@ -19,7 +19,7 @@ import (
 
 const gateURL = "http://127.0.0.1:9000"
 
-// Cmd is the parent for `spwn cookie-sync …`.
+// Cmd is the parent for `spwn cookie-sync ...`.
 var Cmd = &cobra.Command{
 	Use:   "cookie-sync",
 	Short: "Browser extension that auto-syncs session cookies to the gate (status + providers)",

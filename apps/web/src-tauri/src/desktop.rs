@@ -62,11 +62,11 @@ pub fn run() {
     // spawn the spwn child so every `exec.Command("docker", ...)` call
     // inside the Go process resolves correctly. The Go side also
     // re-runs the same augmentation at process start (defense in
-    // depth — if a user launches spwn directly via Spotlight, the
+    // depth: if a user launches spwn directly via Spotlight, the
     // GUI-launched spwn binary still fixes its own PATH).
     let augmented_path = augmented_path();
 
-    // Find spwn binary — check PATH first, then common locations
+    // Find spwn binary: check PATH first, then common locations
     let spwn_bin = which_spwn(&augmented_path);
 
     // Run migrations before starting the API server.
@@ -178,7 +178,7 @@ pub fn run() {
 
 /// Return PATH with well-known Homebrew / Docker Desktop locations
 /// prepended, de-duplicated. Matches the Go-side
-/// `base.EnsureDockerFriendlyPATH` — keep in sync.
+/// `base.EnsureDockerFriendlyPATH`; keep in sync.
 fn augmented_path() -> String {
     let current = std::env::var("PATH").unwrap_or_default();
     let extras: &[&str] = if cfg!(target_os = "macos") {
@@ -263,6 +263,6 @@ fn which_spwn(augmented_path: &str) -> String {
         }
     }
 
-    // Fallback — hope it's in PATH
+    // Fallback: hope it's in PATH
     "spwn".to_string()
 }

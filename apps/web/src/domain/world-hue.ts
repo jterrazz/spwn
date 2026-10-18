@@ -1,7 +1,7 @@
 const UINT32 = 4_294_967_296;
 const INT32_MAX = 2_147_483_647;
 
-/** The 31-multiplier string hash, unsigned 32-bit — the same value for the same id on every surface. */
+/** The 31-multiplier string hash, unsigned 32-bit: the same value for the same id on every surface. */
 export function stringHash(text: string): number {
     let hash = 0;
     for (const character of text) {

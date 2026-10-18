@@ -51,7 +51,7 @@ type BuildRequest struct {
 	// Policies is the per-tool allow/deny filter inferred from the
 	// agent's manifest. Keyed by the tool ref (e.g. "spwn:x"). Tools
 	// without an entry are unfiltered. Materialized at image build
-	// time as /etc/spwn/policy/<short>.json — catalog tool wrappers
+	// time as /etc/spwn/policy/<short>.json; catalog tool wrappers
 	// consult that file at runtime.
 	Policies map[string]ToolPolicy
 

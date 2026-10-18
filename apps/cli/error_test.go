@@ -91,7 +91,7 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Composition lives on `spwn install`/`spwn uninstall` now —
+	// Composition lives on `spwn install`/`spwn uninstall` now;
 	// The Compose section was retired when agent add/remove were.
 	for _, section := range []string{"Lifecycle:", "Conversation:", "Evolution:", "Portability:"} {
 		assertContains(t, out, section, "agent help sections")

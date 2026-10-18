@@ -89,7 +89,7 @@ function Destinations({ destinations }: { destinations: Destination[] }) {
     );
 }
 
-/** The app's destinations: the architect and the settings, then the universe — worlds, agents, tools, organizations. */
+/** The app's destinations: the architect and the settings, then the universe of worlds, agents, tools and organizations. */
 export function Navigation() {
     return (
         <>

@@ -5,7 +5,7 @@
 // (Validate) that backs `spwn check`.
 //
 // Also lives here: project-scoped entities that span multiple
-// agents — Teams and Organizations (role hierarchies). These were
+// agents: Teams and Organizations (role hierarchies). These were
 // part of packages/agent until the boundary audit surfaced that
 // they're project-level concerns stored under ~/.spwn/teams and
 // ~/.spwn/organizations.

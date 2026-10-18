@@ -18,7 +18,7 @@ import (
 
 // All is populated at package init from every YAML-backed tool in
 // the embedded catalog tree. Init panics if any manifest fails to
-// parse — a malformed catalog is a programmer error and should fail
+// parse: a malformed catalog is a programmer error and should fail
 // loudly at CLI startup.
 var All []tool.Tool
 

@@ -73,7 +73,7 @@ func (e *notImplementedError) Error() string {
 // implemented" features; exit 1 stays for runtime failures.
 func (e *notImplementedError) ExitCode() int { return 2 }
 
-// IsSpwnExitCoder marks this as spwn's own ExitCoder — satisfies the
+// IsSpwnExitCoder marks this as spwn's own ExitCoder; it satisfies the
 // marker on cli.ExitCoder so Execute() distinguishes it from
 // stdlib's os/exec.*ExitError (which also has ExitCode()).
 func (e *notImplementedError) IsSpwnExitCoder() {}

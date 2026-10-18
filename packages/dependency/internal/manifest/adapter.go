@@ -58,7 +58,7 @@ func (t *dependencyAdapter) RuntimeProvider() string {
 
 // ToolFromParsed adapts a Parsed result into a tool.Tool.
 // This is the bridge between the manifest domain and the rest of
-// the codebase — adapters call this to hand Tool-shaped values to
+// the codebase: adapters call this to hand Tool-shaped values to
 // packages/compile's Registry.
 func ToolFromParsed(p *Parsed) tool.Tool {
 	skillsFS, _ := p.SkillsFS.(fs.FS)

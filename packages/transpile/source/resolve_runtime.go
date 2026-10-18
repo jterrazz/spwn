@@ -29,10 +29,10 @@ func CanonicalRuntime(name string) string {
 // ResolveRuntime picks the runtime name declared by a project.
 // Precedence:
 //
-//  1. Explicit override (CLI flag) — canonicalised then returned.
+//  1. Explicit override (CLI flag): canonicalised then returned.
 //  2. Per-agent runtime (all agents must agree, after canonicalisation).
-//  3. Empty string — "no preference declared". The caller chooses
-//     how to break the tie (consult auth state, hardcode a default, …).
+//  3. Empty string: "no preference declared". The caller chooses
+//     how to break the tie (consult auth state, hardcode a default, ...).
 //
 // Returns an error if agents declare conflicting runtimes and no
 // override is set; the user must disambiguate with --runtime.

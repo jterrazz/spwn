@@ -120,7 +120,7 @@ func IsWritable(path string) bool {
 }
 
 // AssetNameFor returns the expected GoReleaser archive name for the given
-// binary name + platform. E.g. AssetNameFor("spwn", "darwin_arm64") →
+// binary name + platform. E.g. AssetNameFor("spwn", "darwin_arm64") gives
 // "spwn_darwin_arm64.tar.gz".
 func AssetNameFor(binary, platform string) string {
 	ext := ".tar.gz"

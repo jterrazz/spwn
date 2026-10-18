@@ -62,7 +62,7 @@ func TestCookies_ProvidersListsRegistry(t *testing.T) {
 	if len(got) != 2 {
 		t.Errorf("expected 2 registered providers, got %d", len(got))
 	}
-	// Sorted by name → linkedin first, x second.
+	// Sorted by name: linkedin first, x second.
 	if len(got) >= 2 && (got[0].Name != "linkedin" || got[1].Name != "x") {
 		t.Errorf("provider order should be sorted by name: got %+v", got)
 	}

@@ -7,7 +7,7 @@ import (
 	"spwn.sh/packages/runtimes"
 )
 
-// Codex one-shot contract — lives separately from spawn_test.go so
+// Codex one-shot contract, kept separately from spawn_test.go so
 // the argv + JSONL-parsing shape is readable on its own. See
 // apps/cli/agent/talk.go for how these are chained at runtime.
 
@@ -32,7 +32,7 @@ func TestBuildCommand_oneShotResume(t *testing.T) {
 
 func TestBuildCommand_namedAgentNoPromptIsInteractive(t *testing.T) {
 	// Named agent without a prompt is how the architect spawns an
-	// Agent in detached mode — it wants a blocking REPL process
+	// Agent in detached mode: it wants a blocking REPL process
 	// Running inside the container. Interactive codex only accepts
 	// --dangerously-bypass-approvals-and-sandbox at the top level;
 	// --skip-git-repo-check is an `exec` subcommand flag. The
@@ -49,7 +49,7 @@ func TestBuildCommand_namedAgentNoPromptIsInteractive(t *testing.T) {
 func TestOneShotFlags_isNoOp(t *testing.T) {
 	// Codex's `--json` flag must precede the positional prompt, so
 	// it's baked into BuildCommand rather than appended here. The
-	// talk path still calls OneShotFlags on every invocation —
+	// talk path still calls OneShotFlags on every invocation;
 	// verify it returns the input untouched so we don't accidentally
 	// reintroduce the "--json appears after prompt" bug.
 	base := []string{"codex", "exec", "--json", "hi"}
@@ -124,7 +124,7 @@ func TestParseOneShotResult_multiTurnLastWins(t *testing.T) {
 
 func TestParseOneShotResult_nonAgentItemsIgnored(t *testing.T) {
 	// Reasoning and tool-execution items surface inside the stream
-	// alongside agent replies — they're not "the answer" and must
+	// alongside agent replies: they're not "the answer" and must
 	// be skipped.
 	raw := []byte(strings.Join([]string{
 		`{"type":"thread.started","thread_id":"th_abc"}`,
@@ -157,7 +157,7 @@ func TestParseOneShotResult_noJSONErrors(t *testing.T) {
 
 func TestParseOneShotResult_malformedLinesIgnored(t *testing.T) {
 	// A warning on stderr that somehow snuck into stdout, a truncated
-	// final line, a stray blank line — none of these should stop us
+	// final line, a stray blank line: none of these should stop us
 	// extracting what IS valid.
 	raw := []byte(strings.Join([]string{
 		`warning: this is not json`,

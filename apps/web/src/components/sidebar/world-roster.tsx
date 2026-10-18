@@ -114,7 +114,7 @@ function Agents({ world }: { world: World }) {
     );
 }
 
-/** The selected world's own destinations — its home, its knowledge — and its agents, grouped by team. */
+/** The selected world's own destinations (its home, its knowledge) and its agents, grouped by team. */
 export function WorldRoster({ world }: { world: World }) {
     const router = useRouter();
     const pathname = usePathname();

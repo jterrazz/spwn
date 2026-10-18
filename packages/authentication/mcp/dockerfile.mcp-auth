@@ -4,7 +4,7 @@ RUN pip install --no-cache-dir mcp2cli==3.0.2
 
 # mcp2cli pins the OAuth callback server's bind to a loopback
 # address, which Docker's -p flag can't forward into on macOS. Flip
-# both bind paths to 0.0.0.0 — the one in the explicit
+# both bind paths to 0.0.0.0: the one in the explicit
 # --oauth-redirect-uri branch and the implicit-default branch. The
 # Redirect URI the OAuth server sees stays a 127.0.0.1 host-loopback,
 # Which Docker forwards into the container. Linux --network host

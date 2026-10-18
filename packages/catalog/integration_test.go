@@ -13,7 +13,7 @@ import (
 	"spwn.sh/packages/transpile/source"
 )
 
-// TestCatalog_EveryGalleryEntryBuilds exercises the check→build
+// TestCatalog_EveryGalleryEntryBuilds exercises the check-to-build
 // pipeline against every gallery-eligible catalog entry. For each
 // slug it:
 //

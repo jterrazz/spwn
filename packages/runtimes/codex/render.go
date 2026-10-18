@@ -20,7 +20,7 @@ var Renderer = &renderer{}
 func (r *renderer) Name() string { return "codex" }
 
 // SupportedHookEvents returns every hook event Codex recognises today.
-// Codex's set is narrower than Claude Code's — events outside this
+// Codex's set is narrower than Claude Code's: events outside this
 // list (Notification, SubagentStop, PreCompact, SessionEnd) ship into
 // `.codex/hooks.json` but never fire. `spwn check` warns when an
 // agent backed by codex declares one of those. See events.go for the
@@ -38,7 +38,7 @@ func (r *renderer) SupportedHookEvents() []string {
 //
 // The AGENTS.md file inlines SOUL + physics + faculties + roster +
 // playbooks + conventions + role + user's AGENTS.md body (if any).
-// Nothing lands under worlds/ — codex doesn't resolve imports and
+// Nothing lands under worlds/: codex doesn't resolve imports and
 // the per-deployment role line is inlined into AGENTS.md directly.
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()

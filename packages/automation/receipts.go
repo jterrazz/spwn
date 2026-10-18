@@ -75,7 +75,7 @@ type Receipt struct {
 	// queries ("which files did this fire process?") aren't lossy.
 	// Only populated for fs triggers.
 	EventPaths []string `json:"event_paths,omitempty"`
-	// EventKind is the dominant op for an fs burst — create / write /
+	// EventKind is the dominant op for an fs burst: create / write /
 	// rename. Mirrors the kind embedded in Reason but exposed as a
 	// separate field so dashboards filter without string parsing.
 	EventKind string `json:"event_kind,omitempty"`
@@ -87,9 +87,9 @@ type Receipt struct {
 	Output string `json:"output,omitempty"`
 	// PromptSHA is the first 12 hex chars of sha256(prompt). Lets
 	// dashboards answer "did the prompt change between fires?"
-	// without storing the full prompt. Same body → same hash.
+	// without storing the full prompt. Same body, same hash.
 	PromptSHA string `json:"prompt_sha,omitempty"`
-	// EnqueuedAt is when the fire entered the dispatch path —
+	// EnqueuedAt is when the fire entered the dispatch path,
 	// before the per-agent mutex was acquired. Lock-wait time =
 	// Fired - EnqueuedAt; dispatch time = Finished - Fired.
 	// Without this, lock-wait got conflated with runtime latency.
@@ -177,11 +177,11 @@ type ReceiptWriter interface {
 // FileReceiptWriter persists receipts as JSON Lines to a file with
 // size-triggered rotation. One row per Write call, atomic at the
 // line level (line-buffered append behind a mutex). A SIGKILL
-// mid-write may leave a torn final line — acceptable because the
+// mid-write may leave a torn final line, acceptable because the
 // dashboard's parser tolerates trailing partial lines.
 //
 // Rotation: when the active file exceeds RotateSize, it's renamed
-// to <path>.1 (with .1→.2, .2→.3, etc up to RotateKeep), then a
+// to <path>.1 (with .1 to .2, .2 to .3, etc up to RotateKeep), then a
 // fresh empty file replaces it. Default 100MB / keep 5 files keeps
 // roughly six months of brisk-pace receipts on disk without
 // unbounded growth.
@@ -204,7 +204,7 @@ const (
 )
 
 // NewFileReceiptWriter constructs a writer rooted at path with the
-// default rotation policy. The file is created on first Write —
+// default rotation policy. The file is created on first Write;
 // early construction failures (e.g. directory missing) surface
 // there, not at New time, because the engine boot path constructs
 // receipts before knowing whether any will actually fire.
@@ -218,7 +218,7 @@ func NewFileReceiptWriter(path string) *FileReceiptWriter {
 
 // Write appends the receipt as one JSON Lines row. Creates parent
 // directories on first call. Errors propagate up so the engine can
-// log them, but a write error never aborts dispatch — receipts are
+// log them, but a write error never aborts dispatch: receipts are
 // observability, not correctness.
 //
 // Triggers rotation when the active file's size after append would

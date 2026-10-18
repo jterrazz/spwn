@@ -13,8 +13,8 @@ import (
 // Sleep consolidates experience into durable knowledge.
 // It archives stale files and prunes sessions for destroyed worlds.
 //
-// Knowledge is no longer agent-owned — it lives at /world/knowledge/
-// and is committed to the project tree — so sleep only touches
+// Knowledge is no longer agent-owned: it lives at /world/knowledge/
+// and is committed to the project tree, so sleep only touches
 // agent-scoped layers (playbooks, journal). The world knowledge base
 // is maintained by humans via git, not pruned automatically.
 func Sleep(mindPath string) (*SleepResult, error) {

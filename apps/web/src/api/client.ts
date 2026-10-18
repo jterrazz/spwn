@@ -125,7 +125,7 @@ type RawAgent = {
     status?: string;
 };
 
-// outside: /api/worlds hands two shapes — a world that runs carries its container id, config, creation stamp and agent records; a world the project only declares carries its manifest name and plain-string agents and workspaces (declaredWorldItem in apps/api); `agent` and `workspace` are the older single-valued fields some routes still emit
+// outside: /api/worlds hands two shapes: a world that runs carries its container id, config, creation stamp and agent records; a world the project only declares carries its manifest name and plain-string agents and workspaces (declaredWorldItem in apps/api); `agent` and `workspace` are the older single-valued fields some routes still emit
 interface RawWorld extends Omit<
     World,
     'agent' | 'agents' | 'config' | 'created_at' | 'id' | 'status' | 'workspaces'

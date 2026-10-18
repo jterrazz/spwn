@@ -49,11 +49,11 @@ type Manifest struct {
 
 // Runtime is the project-wide runtime block. Exactly one field today
 // (Backend), but authored as a sub-map for parity with agent.yaml so
-// future additions (provider, flags…) don't reshape existing files.
+// future additions (provider, flags...) don't reshape existing files.
 type Runtime struct {
 	// Backend is the runtime adapter ref agents inherit when their
 	// agent.yaml#runtime.backend is empty. Accepts the same forms as
-	// the agent-level field — scheme ("spwn:codex") or short name
+	// the agent-level field: scheme ("spwn:codex") or short name
 	// ("codex"). Empty means "no project-wide preference".
 	Backend string `yaml:"backend,omitempty"`
 }
@@ -74,22 +74,22 @@ type World struct {
 	// a directory that will be bind-mounted into the container at
 	// /world/knowledge/. When empty, no bind mount is performed and
 	// the agent's system prompt omits every reference to the knowledge
-	// base — the agent is never told a knowledge base exists.
+	// base: the agent is never told a knowledge base exists.
 	Knowledge string `yaml:"knowledge,omitempty"`
 
 	// Automations is the per-world map of trigger-driven agent wakeups.
 	// Each entry binds an event (cron or filesystem) to one of the
 	// world's agents and renders a prompt. The architect daemon owns
-	// the engine — automations only fire while architect is running.
+	// the engine: automations only fire while architect is running.
 	// See packages/automation/ for the runtime.
 	Automations map[string]Automation `yaml:"automations,omitempty"`
 }
 
-// Automation is one trigger → agent wakeup binding inside a world.
+// Automation is one binding of a trigger to an agent wakeup inside a world.
 //
 // Schema (v1):
 //
-//	on:           — exactly one of cron / fs
+//	on:           exactly one of cron / fs
 //	  cron: "0 6 * * *"
 //	  fs:
 //	    path: ./inbox
@@ -97,10 +97,10 @@ type World struct {
 //	    recursive: false      # default: false
 //	    debounce: 1s          # default: 1s
 //	    patterns: ["*.md"]    # default: [] (matches all)
-//	agent: <agent-name>      — must be one of the world's agents
-//	prompt: <inline body>    — exactly one of prompt / command
-//	command: command/<name>  — references spwn/commands/<name>.md
-//	catchup: collapse|skip   — cron only; default collapse
+//	agent: <agent-name>      must be one of the world's agents
+//	prompt: <inline body>    exactly one of prompt / command
+//	command: command/<name>  references spwn/commands/<name>.md
+//	catchup: collapse|skip   cron only; default collapse
 //
 // Catchup semantics mirror Apple Reminders: when the architect was
 // down across one or more cron slots, `collapse` fires once on resume
@@ -130,10 +130,10 @@ type Automation struct {
 	// missing one or more cron slots. Cron-only.
 	//
 	// Values:
-	//   "collapse" (default) — single fire on resume regardless of
+	//   "collapse" (default): single fire on resume regardless of
 	//                          missed count; .Missed exposed to
 	//                          template
-	//   "skip"               — no fire on resume; schedule continues
+	//   "skip":              no fire on resume; schedule continues
 	//
 	// Empty string defaults to "collapse" for cron triggers and is
 	// ignored for fs triggers.
@@ -154,13 +154,13 @@ type Trigger struct {
 // FSTrigger is a filesystem-watch event source.
 type FSTrigger struct {
 	// Path is the host path to watch. Project-relative paths resolve
-	// against the project root. Must exist when the engine starts —
+	// against the project root. Must exist when the engine starts:
 	// validation warns if the path is missing on disk.
 	Path string `yaml:"path"`
 
 	// Events filters which fsnotify ops fire the automation.
 	// Allowed: "create" | "write" | "rename". Default: ["create"].
-	// "remove" is intentionally unsupported in v1 — agents reacting
+	// "remove" is intentionally unsupported in v1: agents reacting
 	// to deletions tend to want "the file used to be there" context
 	// the watcher can't provide.
 	Events []string `yaml:"events,omitempty"`
@@ -183,7 +183,7 @@ type FSTrigger struct {
 
 	// IncludeHidden enables fires for files inside dot-prefixed
 	// directories (.git/, .cache/, etc) when Recursive is true. By
-	// default the recursive watcher silently excludes them — most
+	// default the recursive watcher silently excludes them: most
 	// users don't want their inbox watcher woken by every git
 	// operation. Set true for cases where the hidden tree is
 	// intentional content (e.g. dotfile editors).
@@ -192,7 +192,7 @@ type FSTrigger struct {
 
 // Duration wraps time.Duration so spwn.yaml can use the natural
 // "10s" / "1m" / "1h30m" string form. The standard yaml.v3 lib does
-// not parse durations natively — without this wrapper authors would
+// not parse durations natively: without this wrapper authors would
 // have to write nanosecond integers.
 type Duration time.Duration
 

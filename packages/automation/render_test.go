@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// ── prompt → identity (no templating) ───────────────────────────────
+// ── prompt to identity (no templating) ──────────────────────────────
 
 func TestRender_PlainPromptUnchanged(t *testing.T) {
 	got, err := renderPrompt("hello world", "", FireSource{Now: time.Now()})
@@ -89,12 +89,12 @@ func TestRender_OnTimeSuppressesMissedClause(t *testing.T) {
 	}
 }
 
-// ── fs event variables (Phase 3 — ensure no crash on missing) ───────
+// ── fs event variables (Phase 3: ensure no crash on missing) ────────
 
 func TestRender_EventNilSafe(t *testing.T) {
 	// Cron fires set EventPaths empty. A template that defensively
 	// references {{ .Event.Path }} should produce empty string, not
-	// panic — keeps the templates of mixed-trigger projects simple.
+	// panic, which keeps the templates of mixed-trigger projects simple.
 	body := `path is {{ if .Event }}{{ .Event.Path }}{{ else }}none{{ end }}`
 	got, err := renderPrompt(body, "", FireSource{Kind: "cron", Now: time.Now()})
 	if err != nil {
@@ -132,7 +132,7 @@ func TestRender_BadTemplateSyntaxErrors(t *testing.T) {
 }
 
 func TestRender_BadTemplateExecErrors(t *testing.T) {
-	// Reference an unknown function — execute-time error.
+	// Reference an unknown function: execute-time error.
 	if _, err := renderPrompt(`{{ .Now | nonexistent }}`, "", FireSource{Now: time.Now()}); err == nil {
 		t.Error("expected execute error")
 	}

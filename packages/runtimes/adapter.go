@@ -6,15 +6,15 @@ import (
 )
 
 // Adapter is the umbrella contract for a runtime. A runtime has up to
-// three orthogonal facets: an install recipe (Tool), a source→Tree
+// three orthogonal facets: an install recipe (Tool), a source-to-Tree
 // renderer (Render), and a host-side spawn-time adapter (Spawn). Each
-// is optional — a YAML-first runtime may ship Tool only; a pure
+// is optional: a YAML-first runtime may ship Tool only; a pure
 // renderer may ship Render only; a stub runtime may ship none and
 // serve purely as a declaration.
 //
 // Concrete runtimes live under packages/runtimes/<name>/ and register
 // themselves at init() time via Register. The top-level package never
-// imports subpackages directly, so there is no import cycle — callers
+// imports subpackages directly, so there is no import cycle: callers
 // that want the built-in set blank-import each subpackage (or the
 // convenience umbrella) they need.
 type Adapter struct {
@@ -24,7 +24,7 @@ type Adapter struct {
 	Name string
 
 	// DefaultProvider names the auth provider this runtime uses by
-	// default ("anthropic", "openai", …). Empty means the runtime
+	// default ("anthropic", "openai", ...). Empty means the runtime
 	// does not require an auth provider or supports multiple without
 	// a clear default. Purely informational today; consumed by UI
 	// surfaces and future auth-routing logic.
@@ -32,7 +32,7 @@ type Adapter struct {
 
 	// Tool is the image-build recipe for this runtime (apt packages,
 	// install commands, user commands, env). nil when the runtime
-	// does not ship an install step — e.g. a renderer-only adapter
+	// does not ship an install step, e.g. a renderer-only adapter
 	// or a stub declaration.
 	Tool tool.Tool
 
@@ -81,7 +81,7 @@ func Get(name string) (Adapter, bool) {
 
 // Names returns the sorted-insertion-order list of registered runtime
 // names. Used by the CLI to render human error messages ("unknown
-// runtime; available: …").
+// runtime; available: ...").
 func Names() []string {
 	out := make([]string, 0, len(all))
 	for _, a := range all {

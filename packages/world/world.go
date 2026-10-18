@@ -61,7 +61,7 @@ func NewStore() (*Store, error) {
 
 // NewStoreAt returns a Store rooted at dir with no Docker backend.
 // Suitable for tests that only exercise the mutable-state methods
-// (SetSessionID, AddAgent, SetDisplayName, …). List/Get error until
+// (SetSessionID, AddAgent, SetDisplayName, ...). List/Get error until
 // a backend is wired in via NewStoreWith.
 func NewStoreAt(dir string) (*Store, error) {
 	return runtimestate.NewStoreAt(dir)
@@ -106,7 +106,7 @@ func ApplyDefaults(m *Manifest) {
 }
 
 // LoadAgentManifest reads an agent.yaml file from the given agent
-// directory. Returns (nil, nil) when agent.yaml is absent — callers
+// directory. Returns (nil, nil) when agent.yaml is absent; callers
 // treat the manifest as optional. External callers (notably the CLI
 // project resolver) use this to compute the tool union across a
 // world's referenced agents without reaching into internal packages.

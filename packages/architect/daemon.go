@@ -40,7 +40,7 @@ type StartDaemonOpts struct {
 	// canonical image is built/refreshed by the image package.
 	ImageOverride string
 	// LogWriter receives raw output from the image build (npm install,
-	// docker build steps, …). nil → io.Discard.
+	// docker build steps, ...). nil means io.Discard.
 	LogWriter io.Writer
 	// OnProgress is called at each step of the spawn pipeline with
 	// (event, detail) pairs. Events are stable strings that the

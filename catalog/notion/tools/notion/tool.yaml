@@ -11,14 +11,14 @@ install:
     # --flag`) even though the transport is HTTP MCP. mcp2cli reads
     # cached OAuth tokens from $MCP2CLI_CACHE_DIR (set to
     # /credentials/mcp by spwn at spawn time), which is bind-mounted
-    # rw from the host's ~/.spwn/credentials/mcp/ — so a one-time
+    # rw from the host's ~/.spwn/credentials/mcp/, so a one-time
     # `spwn auth login notion` on the host unlocks Notion for every
     # world that ships this dep, regardless of which runtime owns
     # the agent's HOME.
     - |
       cat > /usr/local/bin/notion-mcp <<'WRAPPER'
       #!/bin/bash
-      # notion-mcp — Notion hosted MCP exposed as a CLI via mcp2cli.
+      # notion-mcp: Notion hosted MCP exposed as a CLI via mcp2cli.
       # Auth: OAuth tokens cached at $MCP2CLI_CACHE_DIR (defaults to
       # /credentials/mcp inside spwn worlds, bind-mounted from host).
       # Path-checks happen against the same dir mcp2cli will read.

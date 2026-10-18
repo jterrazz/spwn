@@ -84,7 +84,7 @@ func TestPackages_UnmarshalYAML_unknownManager(t *testing.T) {
 }
 
 // TestPackages_UnmarshalYAML_wrongShape rejects the legacy flat list
-// form (`packages: [python3, ...]`) at the type boundary — the key
+// form (`packages: [python3, ...]`) at the type boundary: the key
 // is now a keyed map, and a flat list is almost certainly a project
 // that was never migrated off the old schema.
 func TestPackages_UnmarshalYAML_wrongShape(t *testing.T) {

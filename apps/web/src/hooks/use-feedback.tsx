@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 
 const SHOWN_FOR_MS = 2500;
 
-/** A one-line notice shown for a moment after an action: its outcome, or 'Error: …'. */
+/** A one-line notice shown for a moment after an action: its outcome, or 'Error: ...'. */
 export function useFeedback() {
     const [feedback, setFeedback] = useState<null | string>(null);
     const show = useCallback((message: string) => {

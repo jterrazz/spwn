@@ -7,7 +7,7 @@ import (
 )
 
 // FuzzManifestUnmarshal hammers the project manifest parser with
-// arbitrary bytes. It must never panic — malformed input should
+// arbitrary bytes. It must never panic: malformed input should
 // surface as a yaml error, not a runtime crash.
 func FuzzManifestUnmarshal(f *testing.F) {
 	f.Add([]byte(`version: 1

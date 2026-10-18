@@ -48,7 +48,7 @@ func runCLI(t *testing.T, env []string, wd string, args ...string) (string, stri
 	cmd := exec.Command(spwnBinary, args...)
 	cmd.Dir = wd
 	// Inherit PATH etc. but wipe anything that could leak host state
-	// into the test — particularly a user's real SPWN_HOME and any
+	// into the test, particularly a user's real SPWN_HOME and any
 	// provider credentials that would tip the runtime auto-resolver
 	// (runtimeres.Resolve) away from the default claude-code path.
 	leakyPrefixes := []string{
@@ -132,7 +132,7 @@ func readFile(t *testing.T, path string) string {
 // image-generator cleanup).
 func TestReleaseReadiness(t *testing.T) {
 	// --------------------------------------------------------------------
-	// A — init + scaffold
+	// A: init + scaffold
 	// --------------------------------------------------------------------
 
 	t.Run("01_init_name_flag_writes_manifest", func(t *testing.T) {
@@ -269,7 +269,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// B — ref syntax + lockfile
+	// B: ref syntax + lockfile
 	// --------------------------------------------------------------------
 
 	t.Run("09_install_scheme_form_to_lock", func(t *testing.T) {
@@ -306,7 +306,7 @@ func TestReleaseReadiness(t *testing.T) {
 
 	t.Run("11_check_reports_registry_unsupported", func(t *testing.T) {
 		// B11: github: refs surface as "not yet supported" at install
-		// Time — they never reach agent.yaml, so check has nothing
+		// Time: they never reach agent.yaml, so check has nothing
 		// To complain about.
 		t.Parallel()
 		env, _ := freshEnv(t)
@@ -411,7 +411,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// C — agent CRUD
+	// C: agent CRUD
 	// --------------------------------------------------------------------
 
 	t.Run("15_agent_create_global_soul_and_2_layer", func(t *testing.T) {
@@ -525,7 +525,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// D — install (project-scope + --agent scope)
+	// D: install (project-scope + --agent scope)
 	// --------------------------------------------------------------------
 
 	t.Run("22_install_appends_dep", func(t *testing.T) {
@@ -581,7 +581,7 @@ func TestReleaseReadiness(t *testing.T) {
 
 	t.Run("25_uninstall_absent_is_silent", func(t *testing.T) {
 		// D25: uninstalling a dep no agent carries is a silent no-op
-		// (matches npm — install/uninstall are declarative, not
+		// (matches npm: install/uninstall are declarative, not
 		// Transactional).
 		t.Parallel()
 		env, _ := freshEnv(t)
@@ -593,7 +593,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// E — install extra: scoping + lockfile
+	// E: install extra, scoping + lockfile
 	// --------------------------------------------------------------------
 
 	t.Run("26_install_updates_agents_and_lockfile", func(t *testing.T) {
@@ -669,7 +669,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// F — skill / tool / hook verbs
+	// F: skill / tool / hook verbs
 	// --------------------------------------------------------------------
 
 	t.Run("30_skill_new_writes_frontmatter", func(t *testing.T) {
@@ -749,7 +749,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// G — help text consistency
+	// G: help text consistency
 	// --------------------------------------------------------------------
 
 	t.Run("34_agent_help_mentions_soul_and_layers", func(t *testing.T) {
@@ -842,7 +842,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// H — config.yaml + migrations
+	// H: config.yaml + migrations
 	// --------------------------------------------------------------------
 
 	t.Run("39_first_invocation_creates_config_yaml", func(t *testing.T) {
@@ -937,7 +937,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// I — check rules
+	// I: check rules
 	// --------------------------------------------------------------------
 
 	t.Run("44_check_flags_missing_description", func(t *testing.T) {
@@ -1055,7 +1055,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// J — misc release-readiness
+	// J: misc release-readiness
 	// --------------------------------------------------------------------
 
 	t.Run("48_version_prints_non_empty", func(t *testing.T) {
@@ -1088,7 +1088,7 @@ func TestReleaseReadiness(t *testing.T) {
 
 	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {
 		// Regression for commit 6319e3a6: `spwn init spwn:<name>` used
-		// to drop the catalog's knowledge/ dir on the floor — the
+		// to drop the catalog's knowledge/ dir on the floor: the
 		// installer only copied agents/tools/hooks/files under spwn/.
 		// After the fix, the knowledge/ tree ships too, so seed
 		// handbooks + starter notes actually materialise. The path
@@ -1128,7 +1128,7 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("53_catalog_install_research_lab_passes_check", func(t *testing.T) {
-		// Parallel coverage for research-lab — the other bundled
+		// Parallel coverage for research-lab, the other bundled
 		// example that uses the knowledge/ ship. If either catalog
 		// entry drifts out of sync with the current manifest schema
 		// this fires.
@@ -1159,7 +1159,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if _, stderr, code := runCLI(t, env, wd, "skill", "new", "note-taking"); code != 0 {
 			t.Fatalf("skill new: %s", stderr)
 		}
-		// Attach via the new scheme grammar and re-run check — must pass.
+		// Attach via the new scheme grammar and re-run check: it must pass.
 		agentYAML := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		body, err := os.ReadFile(agentYAML)
 		if err != nil {
@@ -1199,8 +1199,8 @@ func TestReleaseReadiness(t *testing.T) {
 			filepath.Join(agentDir, "auth.json")); err != nil {
 			t.Fatal(err)
 		}
-		// `auth status` triggers PersistentPreRunE → migration
-		// runner → pre-migration backup → walk SPWN_HOME. Must not
+		// `auth status` triggers PersistentPreRunE, then the migration
+		// runner, the pre-migration backup and a walk of SPWN_HOME. Must not
 		// blow up on the broken link.
 		_, stderr, code := runCLI(t, env, t.TempDir(), "auth")
 		if code != 0 {

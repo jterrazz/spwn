@@ -28,7 +28,7 @@ func TestValidateWithCache_PositiveCacheHit(t *testing.T) {
 	t.Cleanup(ts.Close)
 
 	cred := &Credential{
-		Provider: ProviderOpenAI, // OpenAI is the simplest validator — just /v1/models
+		Provider: ProviderOpenAI, // OpenAI is the simplest validator, just /v1/models
 		Type:     CredTypeAPIKey,
 		Token:    "sk-test",
 		Source:   "env:OPENAI_API_KEY",
@@ -40,7 +40,7 @@ func TestValidateWithCache_PositiveCacheHit(t *testing.T) {
 	if got := ValidateWithCache(context.Background(), cred, 5*time.Minute); !got.Connected {
 		t.Errorf("cached result should report Connected=true, got %+v", got)
 	}
-	// Zero network calls — we never even set up the HTTP client path
+	// Zero network calls: we never even set up the HTTP client path
 	// Because the cache hit short-circuited.
 	if calls != 0 {
 		t.Errorf("cache hit should skip network, saw %d calls", calls)
@@ -78,7 +78,7 @@ func TestValidateWithCache_ExpiredCacheRevalidates(t *testing.T) {
 	status := ValidateWithCache(context.Background(), cred, 5*time.Minute)
 	// A cache-hit path would have returned Connected=true with no
 	// Error. Either the network call returned something real, or it
-	// Errored — both are acceptable here; a stale cache hit is not.
+	// Errored; both are acceptable here, a stale cache hit is not.
 	if status != nil && status.Connected && status.Error == "" {
 		// Could only happen if the test is somehow online AND the
 		// Token is valid, which it isn't. Treat as regression.
@@ -87,7 +87,7 @@ func TestValidateWithCache_ExpiredCacheRevalidates(t *testing.T) {
 }
 
 // TestValidateWithCache_CacheKeyMismatchIgnoresCache confirms that
-// Swapping methods (oauth → api_key) or rotating keychain source
+// Swapping methods (oauth to api_key) or rotating keychain source
 // Forces a fresh validation. Would-be regression: user switches from
 // Keychain to API key and spwn silently reports the old keychain
 // Validation.

@@ -85,7 +85,7 @@ dependencies:
 	}
 }
 
-// ── Agent with no deps but project has deps → agent inherits them ───────────
+// ── Agent with no deps but project has deps: agent inherits them ────────────
 
 func TestToCompileInput_AgentInheritsProjectDeps(t *testing.T) {
 	manifest := `version: 1
@@ -114,7 +114,7 @@ role: worker
 		t.Fatalf("ToCompileInput: %v", err)
 	}
 
-	// Agent has 0 deps, project has 2 — the compile input should have
+	// Agent has 0 deps, project has 2: the compile input should have
 	// the project-level dependency.
 	want := []string{"spwn:git", "spwn:unix"}
 	if !equalStrings(in.Deps, want) {
@@ -122,7 +122,7 @@ role: worker
 	}
 }
 
-// ── Agent with no agent.yaml at all → project deps still present ────────────
+// ── Agent with no agent.yaml at all: project deps still present ─────────────
 
 func TestToCompileInput_NoAgentYAML(t *testing.T) {
 	manifest := `version: 1
@@ -134,7 +134,7 @@ worlds:
     agents: [ghost]
     workspaces: [.]
 `
-	// Pass empty string for agent YAML — no agent.yaml will be written.
+	// Pass empty string for agent YAML: no agent.yaml will be written.
 	root := scaffoldProject(t, manifest, map[string]string{"ghost": ""})
 
 	src, err := Load(root)
@@ -191,7 +191,7 @@ dependencies:
 	}
 }
 
-// ── No project deps, no agent deps → empty list ────────────────────────────
+// ── No project deps, no agent deps: empty list ─────────────────────────────
 
 func TestToCompileInput_NoDepsAnywhere(t *testing.T) {
 	manifest := `version: 1

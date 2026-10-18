@@ -24,12 +24,12 @@ import (
 //  1. Explicit override (--runtime / --backend flag), canonicalised.
 //  2. Per-agent declaration in agent.yaml (all agents must agree).
 //  3. Project-wide default (spwn.yaml#runtime.backend).
-//  4. Exactly one authenticated provider → its runtime (silent pick).
+//  4. Exactly one authenticated provider: its runtime (silent pick).
 //  5. Multiple authenticated providers + user default (auth.yaml
-//     `default_provider`) → that provider's runtime (silent pick).
+//     `default_provider`): that provider's runtime (silent pick).
 //  6. Hardcoded default "claude-code".
 //
-// Returns an error when (2) has conflicts OR (4/5) is ambiguous — the
+// Returns an error when (2) has conflicts OR (4/5) is ambiguous; the
 // User is logged into multiple providers and hasn't pinned a backend
 // Anywhere. The error names the candidates and suggests how to
 // Disambiguate (pin in config, set auth default, or pass --backend).

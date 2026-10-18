@@ -28,7 +28,7 @@ func (RealClock) Now() time.Time { return time.Now() }
 func (RealClock) After(d time.Duration) <-chan time.Time { return time.After(d) }
 
 // FakeClock is a manually-driven Clock for tests. Time only advances
-// when Advance is called — Now never moves on its own. Pending
+// when Advance is called; Now never moves on its own. Pending
 // After channels fire (with the synthetic deadline as the value)
 // the moment the fake time crosses their deadline.
 //
@@ -61,7 +61,7 @@ func (c *FakeClock) Now() time.Time {
 }
 
 // After registers a synthetic timer firing at Now+d. Returns a buffered
-// channel of size 1 — Advance pushes a value when the deadline elapses,
+// channel of size 1: Advance pushes a value when the deadline elapses,
 // then closes the channel so receivers don't block on extra reads.
 func (c *FakeClock) After(d time.Duration) <-chan time.Time {
 	c.mu.Lock()
@@ -110,7 +110,7 @@ func (c *FakeClock) Advance(d time.Duration) {
 }
 
 // AdvanceTo moves the fake clock to the absolute time t. Panics if
-// t is before the current time — moving backwards in tests is
+// t is before the current time: moving backwards in tests is
 // almost always a bug.
 //
 // Computes the delta under the same lock that holds c.now so a
@@ -129,7 +129,7 @@ func (c *FakeClock) AdvanceTo(t time.Time) {
 }
 
 // Pending reports the number of timers waiting to fire. Test helper
-// only — useful when asserting "no goroutine has registered a timer
+// only, useful when asserting "no goroutine has registered a timer
 // yet" or "every loop iteration registered exactly one new wait".
 func (c *FakeClock) Pending() int {
 	c.mu.Lock()

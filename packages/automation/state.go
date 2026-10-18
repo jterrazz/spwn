@@ -19,7 +19,7 @@ import (
 // The cursor is the SCHEDULED time of the last successful fire, not
 // the wall-clock Fired time. Recording the scheduled time means a
 // catch-up that ran 2h late advances the cursor to the slot it
-// covered, not to "now+2h" — preventing the next catch-up from
+// covered, not to "now+2h", preventing the next catch-up from
 // double-counting that slot or skipping the next.
 type StateStore interface {
 	LastFired(world, name string) (time.Time, bool)
@@ -97,7 +97,7 @@ type FileStateStore struct {
 }
 
 // NewFileStateStore constructs a writer rooted at path. The file is
-// loaded lazily on first read — boot stays fast even for projects
+// loaded lazily on first read: boot stays fast even for projects
 // with no prior state.
 func NewFileStateStore(path string) *FileStateStore {
 	return &FileStateStore{Path: path}
@@ -114,7 +114,7 @@ func (s *FileStateStore) LastFired(world, name string) (time.Time, bool) {
 }
 
 // RecordFire persists scheduled and rewrites the file atomically.
-// Returns an error when the on-disk file was corrupt at load — the
+// Returns an error when the on-disk file was corrupt at load: the
 // store refuses to write so the existing data isn't clobbered.
 // Engine treats other state-write failures as non-fatal (the next
 // catch-up re-detects the missed slot), but a tainted store means
@@ -172,7 +172,7 @@ func (s *FileStateStore) ensureLoadedLocked() {
 // to parse error. Returns the underlying parse error or nil.
 //
 // Callers (CLI status, daemon boot) should check this and surface
-// the error to the user — a silent tainted store means catch-up
+// the error to the user: a silent tainted store means catch-up
 // won't fire and the user gets no warning.
 func (s *FileStateStore) IsTainted() error {
 	s.mu.Lock()

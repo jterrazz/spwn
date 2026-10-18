@@ -12,14 +12,14 @@ import (
 // arguments to GenerateAgentSettingsJSON) keeps the render API stable
 // as more Claude Code settings become first-class spwn primitives.
 type SettingsInput struct {
-	// Hooks from Input.Hooks — rendered into the JSON `hooks` map
+	// Hooks from Input.Hooks, rendered into the JSON `hooks` map
 	// under each event name. Unsupported events are passed through;
 	// Claude Code tolerates unknown events silently.
 	Hooks []transpile.HookEntry
 
 	// Model mirrors agent.yaml#runtime.model. Written verbatim into
 	// `.claude/settings.json#model` so Claude Code pins the agent to
-	// the requested model at startup. Empty string → key omitted.
+	// the requested model at startup. An empty string omits the key.
 	Model string
 }
 

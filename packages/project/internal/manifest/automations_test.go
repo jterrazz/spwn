@@ -9,7 +9,7 @@ import (
 
 // Parser tests for the automations field on a world. The validation
 // layer (packages/project/internal/validate) owns the cross-field
-// rules — here we only assert the YAML round-trips into the struct
+// rules; here we only assert the YAML round-trips into the struct
 // shape downstream code expects.
 
 // ── Cron variant ────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ worlds:
 `)
 
 	a := m.Worlds["brain"].Automations["brief"]
-	// Explicit catchup must be preserved by ApplyDefaults — the
+	// Explicit catchup must be preserved by ApplyDefaults: the
 	// default substitution only fires for empty strings.
 	if a.Catchup != "skip" {
 		t.Errorf("catchup = %q, want %q (no default override on explicit value)", a.Catchup, "skip")

@@ -33,7 +33,7 @@ func (r *renderer) SupportedHookEvents() []string {
 //   - agents/<name>/.claude/settings.json       hooks + model + permissions
 //   - agents/<name>/.claude/skills/<n>/SKILL.md every resolved skill (+ sidecar)
 //
-// Nothing lands under world/ or worlds/ — world-shared context
+// Nothing lands under world/ or worlds/: world-shared context
 // (physics, faculties, roster) and the per-deployment role line are
 // all inlined into each CLAUDE.md, so the runtime boots with every
 // required context block already in the prompt. No @-import side

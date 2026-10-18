@@ -50,7 +50,7 @@ func TestParseOneShotResult_happy(t *testing.T) {
 }
 
 func TestParseOneShotResult_emptyFieldsAccepted(t *testing.T) {
-	// A valid envelope with blank fields is not an error — blank text
+	// A valid envelope with blank fields is not an error: blank text
 	// can mean "prompt produced no reply", blank session_id means the
 	// runtime didn't return one. Caller decides whether that's useful.
 	raw := []byte(`{"result":"","session_id":""}`)

@@ -55,7 +55,7 @@ func TestParse_AtPrefixMalformed(t *testing.T) {
 }
 
 func TestParse_VersionedRefNotStripped(t *testing.T) {
-	// Parse does NOT strip the @version suffix — that is the caller's job
+	// Parse does NOT strip the @version suffix: that is the caller's job
 	// via SplitVersion. So "spwn:unix@24.04" should be parsed with
 	// the version baked into the name.
 	got := refs.ParseRef("spwn:unix@24.04")
@@ -152,7 +152,7 @@ func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 	mustMkdirEdge(t, filepath.Join(root, "spwn", "skills", "trick.md"))
 
 	got := refs.ResolveSkill(root, refs.ParseRef("skill/trick"), nil, false)
-	// The .md path exists but is a directory, not a file — should NOT resolve.
+	// The .md path exists but is a directory, not a file: should NOT resolve.
 	if got != refs.ResolveNotFound {
 		t.Errorf("md-is-directory skill: want NotFound, got %v", got)
 	}

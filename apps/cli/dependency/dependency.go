@@ -6,7 +6,7 @@
 // Reference kinds (delegated to packages/dependency):
 //
 //   - spwn:<name>                built-in catalog (compiled into the binary)
-//   - github:<owner>/<repo>      third-party (planned — git tags as versions)
+//   - github:<owner>/<repo>      third-party (planned, git tags as versions)
 //   - skill/<name>               local skill (./spwn/skills/<name>.md)
 //   - tool/<name>                local tool (./spwn/tools/<name>/)
 //   - hook/<name>                local hook (./spwn/hooks/<name>.yaml)
@@ -67,7 +67,7 @@ func init() {
 //
 // agentFilter narrows scope: empty means "every agent in the project"
 // (npm-style), a non-empty value means "only this agent" (poetry-
-// group-style). The lockfile is project-scoped either way — it
+// group-style). The lockfile is project-scoped either way: it
 // tracks the set of refs that are pinned somewhere in the project,
 // not which agents carry them.
 func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {

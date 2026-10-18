@@ -14,7 +14,7 @@ install:
     # Runtime user's ~/.local/bin which isn't on PATH at first
     # Spawn.
     - "HOME=/root pip install --break-system-packages mcp2cli==3.0.2"
-    # spwn-policy-check — shared per-agent allow/deny enforcer.
+    # spwn-policy-check: shared per-agent allow/deny enforcer.
     # Catalog tool wrappers call `spwn-policy-check <tool> <method>`
     # before forwarding to mcp2cli; the script no-ops when no policy
     # file is present and exits non-zero with a clear message when

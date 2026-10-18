@@ -52,7 +52,7 @@ function useToggleShortcut(isMobile: boolean, toggle: (mobile: boolean) => void)
     }, [isMobile, toggle]);
 }
 
-/** The sidebar's state — open on a desktop, a sheet on a phone — toggled by ⌘B. */
+/** The sidebar's state (open on a desktop, a sheet on a phone), toggled by ⌘B. */
 function SidebarProvider({ className, style, children, ...props }: ComponentProps<'div'>) {
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(true);

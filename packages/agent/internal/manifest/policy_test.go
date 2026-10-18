@@ -96,7 +96,7 @@ func TestManifest_RoundtripPreservesPolicy(t *testing.T) {
 }
 
 func TestManifest_EmptyDepPolicy_NotMaterialized(t *testing.T) {
-	// Empty {allow: [], deny: []} mapping — should still skip the
+	// Empty {allow: [], deny: []} mapping: should still skip the
 	// DepPolicies map entry (no filter to apply).
 	src := `
 dependencies:

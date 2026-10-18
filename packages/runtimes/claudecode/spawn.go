@@ -12,7 +12,7 @@ import (
 	"spwn.sh/packages/runtimes"
 )
 
-// Spawner is the claude-code spawn-time adapter — implements the
+// Spawner is the claude-code spawn-time adapter; it implements the
 // runtimes.Spawner interface (BuildCommand, credential sync,
 // prelaunch shell, default config files). Distinct from Tool (the
 // tool.Tool for image builds) which lives in tool.go and from
@@ -53,12 +53,12 @@ func (c *spawner) Available() bool       { return true }
 // OneShotFlags wraps BuildCommand's argv with Claude Code's non-
 // interactive output flags. Claude has two relevant modes:
 //
-//   - `--print --output-format json` — single envelope on stdout:
+//   - `--print --output-format json`: single envelope on stdout:
 //     {"result": "<text>", "session_id": "<id>", ...}. The CLI's
 //     `spwn agent talk` one-shot path uses this when the caller
 //     doesn't ask for streaming. ParseOneShotResult unmarshals it.
 //
-//   - `--output-format stream-json --verbose` — one JSONL event per
+//   - `--output-format stream-json --verbose`: one JSONL event per
 //     turn as it happens. Used by the web UI's SSE relay so users
 //     see live token arrival. Each line is its own JSON envelope
 //     with a session_id repeated on every event; the talk path
@@ -157,7 +157,7 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 		}
 	}
 
-	// hazard: No file/Keychain source available — but DO NOT clear an existing
+	// hazard: No file/Keychain source available, but DO NOT clear an existing
 	// dst. The keychain probe can transiently fail (non-interactive
 	// shells, launchd-spawned daemons, gate-side spwn invocations
 	// inside containers where keychain isn't reachable at all). If
@@ -166,7 +166,7 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 	// still no-op cleanly.
 	//
 	// The cost is that an explicit logout won't propagate via this
-	// path — but `spwn auth logout` writes a cleared file directly,
+	// path, but `spwn auth logout` writes a cleared file directly,
 	// it doesn't rely on the next sync to "discover" the absence.
 	return nil
 }
@@ -178,12 +178,12 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 //
 // Runs as the agent user with /credentials bind-mounted read-only.
 // Guards with test-before-act so missing creds never break the
-// launch — the container may still have working auth via env vars
+// launch: the container may still have working auth via env vars
 // already sourced from /credentials/.env by the outer composer. Uses
 // a copy rather than a symlink so Claude Code's in-place token
 // refresh doesn't mutate the bind-mounted source.
 //
-// Intentionally omits `source /credentials/.env` — that belongs to
+// Intentionally omits `source /credentials/.env`: that belongs to
 // the outer prelaunch composition (daemon.go / talk.go) which chains
 // every registered Spawner's PrelaunchShell and owns the env load.
 func (c *spawner) PrelaunchShell() string {

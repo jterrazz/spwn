@@ -13,7 +13,7 @@ const DefaultRefreshInterval = 15 * time.Minute
 
 // Scheduler runs each element's Refresh on a periodic ticker. It's
 // the gate-internal replacement for the host-side spwn auth daemon
-// (kardianos service) — since the gate is itself a long-running
+// (kardianos service), since the gate is itself a long-running
 // container, it owns the cron.
 type Scheduler struct {
 	registry *Registry

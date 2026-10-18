@@ -26,7 +26,7 @@ func TestHelperDockerfile_ContainsBindPatch(t *testing.T) {
 
 // TestHelperDockerfile_PinsVersion locks the mcp2cli version.
 // The 0.0.0.0 patch is keyed to specific source lines in
-// mcp2cli/__init__.py — bumping the dep without re-verifying the
+// mcp2cli/__init__.py; bumping the dep without re-verifying the
 // patch lines would silently break login.
 func TestHelperDockerfile_PinsVersion(t *testing.T) {
 	df := string(helperDockerfile)
@@ -39,7 +39,7 @@ func TestHelperDockerfile_PinsVersion(t *testing.T) {
 	}
 }
 
-// TestFreeTCPPort_ReturnsValidPort sanity-checks the port picker —
+// TestFreeTCPPort_ReturnsValidPort sanity-checks the port picker:
 // kernel may hand back an ephemeral port outside the typical user
 // range, but it should always be > 0 and < 65536.
 func TestFreeTCPPort_ReturnsValidPort(t *testing.T) {
@@ -52,7 +52,7 @@ func TestFreeTCPPort_ReturnsValidPort(t *testing.T) {
 	}
 }
 
-// TestFreeTCPPort_DistinctAcrossCalls — two consecutive calls
+// TestFreeTCPPort_DistinctAcrossCalls: two consecutive calls
 // usually return different ports because the kernel rotates the
 // ephemeral pool. Not a hard guarantee but a strong smell test
 // for "we accidentally hardcoded a port".
@@ -72,7 +72,7 @@ func TestFreeTCPPort_DistinctAcrossCalls(t *testing.T) {
 	}
 }
 
-// TestHelperImageConstant_NotEmpty would be embarrassing to fail —
+// TestHelperImageConstant_NotEmpty would be embarrassing to fail:
 // a typo turning HelperImage into "" would make `docker run` fail
 // in a confusing way.
 func TestHelperImageConstant_NotEmpty(t *testing.T) {

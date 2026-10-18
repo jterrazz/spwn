@@ -14,7 +14,7 @@ import (
 // FakeFSSource (also this file) so debounce + pattern + recursive
 // logic is exercised without real filesystem timing.
 //
-// Events() returns a single read-only channel — the watcher's pump
+// Events() returns a single read-only channel: the watcher's pump
 // goroutine drains it. Close() must be safe to call multiple times.
 type RawFSSource interface {
 	Add(path string, recursive bool) error
@@ -23,7 +23,7 @@ type RawFSSource interface {
 }
 
 // RawFSEvent is the source-side event shape. A subset of fsnotify.Event
-// — we drop ChMod (which fires on every metadata touch and is too
+// (we drop ChMod, which fires on every metadata touch and is too
 // noisy for the spwn use case) and we map fsnotify's CREATE/WRITE/
 // REMOVE/RENAME enum to our string allow-list.
 type RawFSEvent struct {
@@ -43,7 +43,7 @@ type fsnotifySource struct {
 
 // NewFSNotifySource constructs a production RawFSSource backed by
 // fsnotify. Returns an error if the OS-level watcher can't be
-// allocated (rare — typically inotify/kqueue exhaustion).
+// allocated (rare, typically inotify/kqueue exhaustion).
 //
 // The logger receives non-fatal fsnotify errors that would otherwise
 // be dropped (e.g. kqueue exhaustion mid-flight). Pass nil for the
@@ -203,7 +203,7 @@ func (s *FakeFSSource) AddCalls() []addCall {
 func (s *FakeFSSource) Events() <-chan RawFSEvent { return s.out }
 
 // Emit pushes a synthetic event to the pump. Blocks if the buffer is
-// full — tests should consume promptly or raise the buffer.
+// full: tests should consume promptly or raise the buffer.
 func (s *FakeFSSource) Emit(ev RawFSEvent) {
 	s.mu.Lock()
 	if s.closed {

@@ -22,11 +22,11 @@ import (
 )
 
 // Cmd is the auth command group. The bare invocation renders the
-// Credential dashboard — auto-validates, shows every supported
+// Credential dashboard: auto-validates, shows every supported
 // Method for every provider, surfaces the exact command to set or
 // Refresh each one. Unknown positional args fail loudly so that
 // Retired verbs (`status`, `check`, `token`) don't silently succeed
-// With misleading output — users get an "unknown command" and see
+// With misleading output: users get an "unknown command" and see
 // The real command list in help.
 var Cmd = &cobra.Command{
 	Use:   "auth",

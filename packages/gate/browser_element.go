@@ -14,12 +14,12 @@ import (
 // It thin-wraps the gate-browser sidecar's HTTP API so agents that
 // need ad-hoc browsing (Stagehand-style escape hatch) have access
 // to navigate / click / type / eval primitives without a dedicated
-// catalog tool — useful for one-off scrapes or sites that don't
+// catalog tool, useful for one-off scrapes or sites that don't
 // justify a full tool yet.
 //
 // Sessions opened via this element load cookies for the named
 // provider (must be a registered cookie-sync provider). To browse
-// without cookies, pass provider:"" — the sidecar opens an empty
+// without cookies, pass provider:""; the sidecar opens an empty
 // context.
 //
 // Cost trade-off: each MCP call is one HTTP RTT to the sidecar +

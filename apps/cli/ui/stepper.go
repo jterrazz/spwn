@@ -140,7 +140,7 @@ func (s *Stepper) Writer() io.Writer {
 // BuildProgress is the interface spawnRunE uses to stream docker
 // Build output into the Stepper's tree view and to flush the live
 // In-progress step when the build finishes. Writing to it consumes
-// `Step N/M : …` lines; calling CompleteCurrent freezes any live
+// `Step N/M : ...` lines; calling CompleteCurrent freezes any live
 // Spinner as a permanent tree line so the summary row that follows
 // Sits cleanly below.
 type BuildProgress interface {
@@ -154,7 +154,7 @@ func (discardBuildProgress) Write(p []byte) (int, error) { return len(p), nil }
 func (discardBuildProgress) CompleteCurrent()            {}
 
 // BuildProgressWriter returns a BuildProgress that streams docker
-// Build output into the Stepper's tree view — one frozen ├ line per
+// Build output into the Stepper's tree view, one frozen ├ line per
 // `Step N/M` with a live spinner on the currently-running step.
 // Non-TTY writers get a discard sink (the phase-summary lines cover
 // Non-interactive mode).
@@ -223,9 +223,9 @@ func (s *Stepper) PhaseBreak() {
 	fmt.Fprintln(s.w)
 }
 
-// SubStart begins a sub-step inside a phase — the indented cousin
+// SubStart begins a sub-step inside a phase, the indented cousin
 // Of Start(). Works on TTY and non-TTY: the non-TTY fallback emits a
-// One-shot "    → <msg>" line since there is no in-place animation.
+// One-shot "    → <msg>" line, since there is no in-place animation.
 func (s *Stepper) SubStart(msg string) {
 	s.stopSpinner()
 
@@ -305,8 +305,8 @@ func (s *Stepper) SubFailHint(label string, err error, hint string) error {
 // TreeLine prints a single tree child at col 4, prefixed with a
 // Faint ├. Text is printed as given (callers colour the pieces they
 // Care about); a trailing faint detail can follow the main text.
-// Used for the build sub-event stream — one line per docker Step
-// N/M — so scrollback preserves the whole install history.
+// Used for the build sub-event stream: one line per docker Step
+// N/M, so scrollback preserves the whole install history.
 func (s *Stepper) TreeLine(text, detail string) {
 	s.stopSpinner()
 	if detail != "" {
@@ -316,10 +316,10 @@ func (s *Stepper) TreeLine(text, detail string) {
 	}
 }
 
-// TreeSpin prints a tree child currently in progress — spinner in
+// TreeSpin prints a tree child currently in progress: spinner in
 // Place of the ├ char. When the next TreeLine / TreeSpin / SubDone
 // Lands, the spinner line is overwritten in place. Non-TTY falls
-// Back to a TreeLine with a faint "…" detail so scrollback still
+// Back to a TreeLine with a faint "..." detail so scrollback still
 // Shows the attempted step.
 func (s *Stepper) TreeSpin(text string) {
 	s.stopSpinner()

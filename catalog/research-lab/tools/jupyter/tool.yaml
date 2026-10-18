@@ -8,7 +8,7 @@ install:
   commands:
     # Ubuntu 24.04 enforces PEP 668 (externally-managed-environment),
     # so bare `pip install` errors out. The container is a sealed
-    # spwn-managed environment with no other Python tooling — safe
+    # spwn-managed environment with no other Python tooling, safe
     # to opt out via --break-system-packages.
     - pip install --break-system-packages jupyter
 

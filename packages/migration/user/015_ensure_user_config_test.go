@@ -44,7 +44,7 @@ func TestEnsureUserConfig_keepsExistingFile(t *testing.T) {
 }
 
 // TestEnsureUserConfig_idempotent: running twice is a no-op after
-// the first run — the second Apply does not touch the file.
+// the first run: the second Apply does not touch the file.
 func TestEnsureUserConfig_idempotent(t *testing.T) {
 	base := t.TempDir()
 	if err := EnsureUserConfig.Apply(context.Background(), base); err != nil {

@@ -86,7 +86,7 @@ func TestGenerateAgentHooksJSON_validJSON(t *testing.T) {
 	}
 }
 
-// TestGenerateAgentHooksJSON_mirrorsClaudeSchema — the cross-runtime
+// TestGenerateAgentHooksJSON_mirrorsClaudeSchema: the cross-runtime
 // envelope {event: [{matcher, hooks:[{type:"command", command}]}]}
 // is a deliberate design choice so one spwn HookEntry fans out to both
 // targets. Schema drift here would break the parity.
@@ -121,7 +121,7 @@ func TestGenerateAgentHooksJSON_mirrorsClaudeSchema(t *testing.T) {
 	}
 }
 
-// TestGenerateAgentHooksJSON_groupsByEvent — multiple entries under
+// TestGenerateAgentHooksJSON_groupsByEvent: multiple entries under
 // the same event must collapse into one array (valid JSON), not
 // duplicate keys.
 func TestGenerateAgentHooksJSON_groupsByEvent(t *testing.T) {

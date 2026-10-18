@@ -7,7 +7,7 @@ import (
 )
 
 // GalleryEntry is the public-facing description of one catalog
-// entry that ships a `worlds:` section — installable as a project
+// entry that ships a `worlds:` section, installable as a project
 // template via `spwn init <slug>`. Adapter-backed type aliased
 // through so external callers stay on one import.
 type GalleryEntry = spwn.Example
@@ -21,15 +21,15 @@ type InstallReport = spwn.InstallReport
 var ErrNotFound = spwn.ErrNotFound
 
 // BuiltinTools returns every builtin tool shipped in the compiled binary
-// (the spwn: catalog). These are ref-by-name installables —
+// (the spwn: catalog). These are ref-by-name installables:
 // spwn:unix, spwn:python, etc. Project-template entries (matrix,
-// severance, …) are excluded; see Gallery for those.
+// severance, ...) are excluded; see Gallery for those.
 func BuiltinTools() []tool.Tool { return spwn.All }
 
 // RegisterBuiltins registers every builtin tool into the given
 // target registry. Convenience wrapper around iterating Tools()
 // and calling target.Register for each. Returns the first
-// registration error (typically a duplicate name — a programmer
+// registration error (typically a duplicate name, a programmer
 // error in the catalog).
 func RegisterBuiltins(target tool.Registry) error {
 	for _, t := range spwn.All {
@@ -50,7 +50,7 @@ func Gallery() ([]GalleryEntry, error) { return spwn.List() }
 // doesn't exist or it's a dep-only entry without `worlds:`).
 func GalleryEntryBySlug(slug string) (GalleryEntry, error) { return spwn.Get(slug) }
 
-// GallerySlugs returns just the slug names of gallery entries —
+// GallerySlugs returns just the slug names of gallery entries,
 // the bare-name lookup set for `spwn init <slug>` resolution.
 // Sorted in display order.
 func GallerySlugs() []string { return spwn.ShippedSlugs() }
@@ -70,11 +70,11 @@ func InstallInto(slug string) (InstallReport, error) { return spwn.InstallInto(s
 // that has a `gate:` section into `<gateToolsRoot>/<short>/`. Called
 // from the install CLI immediately after the manifest mutation so a
 // `spwn install spwn:x` followed by `spwn gate restart` picks up
-// the new tool with no manual file dance. Idempotent — overwrites
+// the new tool with no manual file dance. Idempotent: it overwrites
 // existing files so catalog updates flow through on re-install.
 //
 // Returns the list of slugs copied (empty when the entry has no
-// gate-shaped tools — most catalog entries are agent-side only).
+// gate-shaped tools; most catalog entries are agent-side only).
 func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	return spwn.CopyGateTools(refName, gateToolsRoot)
 }
@@ -91,7 +91,7 @@ func LoadLocalTool(projectRoot, name string) (tool.Tool, error) {
 // loads each from <projectRoot>/spwn/tools/<name>/, registers it
 // into target, and returns the rewritten list where each `tool/`
 // ref is replaced by its registered `local:<name>` key. `skill/`
-// and `hook/` refs are stripped (consumed elsewhere — the image
+// and `hook/` refs are stripped (consumed elsewhere: the image
 // builder has no use for them). `spwn:` and `github:` refs pass
 // through untouched.
 //

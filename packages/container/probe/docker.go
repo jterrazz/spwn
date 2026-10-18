@@ -14,7 +14,7 @@
 //     "client newer than server" errors against an older engine.
 //   - We get a real ping + ServerVersion call instead of parsing CLI
 //     output, which means errors are typed (network, perm, version
-//     mismatch, …) rather than scraped strings.
+//     mismatch, ...) rather than scraped strings.
 //
 // The probe is best-effort: it tries the user's default configuration
 // first (DOCKER_HOST, ~/.docker/config.json, contexts) and only falls
@@ -47,7 +47,7 @@ type DockerStatus struct {
 	Version string `json:"version,omitempty"`
 	// APIVersion is the negotiated engine API version.
 	APIVersion string `json:"apiVersion,omitempty"`
-	// Host is the URL the SDK ended up talking to (e.g. unix:///…/docker.sock).
+	// Host is the URL the SDK ended up talking to (e.g. unix:///.../docker.sock).
 	Host string `json:"host,omitempty"`
 	// Socket is the unix socket path that answered, when applicable.
 	// Empty for TCP/named-pipe daemons.
@@ -91,7 +91,7 @@ func (s DockerStatus) Summary() string {
 // FIRST host that answered; subsequent hosts are not contacted.
 //
 // Discovery order:
-//  1. SPWN_DOCKER_HOST env var — explicit spwn-specific escape hatch
+//  1. SPWN_DOCKER_HOST env var: explicit spwn-specific escape hatch
 //     that takes priority over every other source. Useful for CI,
 //     remote podman sockets, or any pathological host config.
 //  2. SDK default (DOCKER_HOST, /var/run/docker.sock).

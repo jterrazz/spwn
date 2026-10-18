@@ -20,7 +20,7 @@ const CurrentConfigAPIVersion = "spwn/v2"
 //
 // Cascade: env vars override file values; a project spwn.yaml can
 // override runtime defaults on top. Unset fields mean "use the
-// built-in default" — callers should read via the accessor methods
+// built-in default"; callers should read via the accessor methods
 // on this struct so zero-values resolve consistently.
 type Config struct {
 	// APIVersion is the config schema version. Must match
@@ -34,7 +34,7 @@ type Config struct {
 	// freshly-scaffolded agent starts with.
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
 
-	// Telemetry gates usage reporting. Opt-in, not opt-out — enabled
+	// Telemetry gates usage reporting. Opt-in, not opt-out: enabled
 	// only when the user explicitly sets Enabled: true.
 	Telemetry TelemetryConfig `yaml:"telemetry,omitempty"`
 
@@ -92,7 +92,7 @@ func ConfigPath() string {
 
 // LoadConfig reads ~/.spwn/config.yaml. Returns the default config
 // (not an error) when the file is missing so first-run callers can
-// proceed unchanged. Malformed YAML IS an error — silent fallback
+// proceed unchanged. Malformed YAML IS an error: silent fallback
 // would hide user edits.
 func LoadConfig() (Config, error) {
 	path := ConfigPath()

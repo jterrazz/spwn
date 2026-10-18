@@ -1,9 +1,9 @@
 // Package cliproject centralises the "find the active spwn project"
 // dance every CLI subcommand otherwise reimplements. Two entry points:
 //
-//   - Find()    — returns (nil, nil) when no project is present so
+//   - Find()    returns (nil, nil) when no project is present so
 //                 callers can fall back to legacy global mode.
-//   - Require() — returns a crisp "no spwn.yaml" error when no
+//   - Require() returns a crisp "no spwn.yaml" error when no
 //                 project is present, for commands that require one.
 package cliproject
 

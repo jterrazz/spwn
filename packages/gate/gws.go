@@ -50,7 +50,7 @@ func runGws(ctx context.Context, args ...string) (any, error) {
 
 // NewGmailElement returns a gate element exposing common Gmail tools
 // over MCP, backed by the gws CLI. Tools are deliberately a small
-// curated set covering the 90% case (search, read, draft, labels) —
+// curated set covering the 90% case (search, read, draft, labels);
 // the gws surface is huge but most agents only need a handful.
 func NewGmailElement() *MCPServer {
 	s := NewMCPServer("gmail", "Gmail (via gws)", "0.1.0")

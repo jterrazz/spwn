@@ -36,7 +36,7 @@ const (
 // TestRun tags containers created during a test run. Populated from
 // the SPWN_TEST_LABEL environment variable when set, giving test
 // frameworks a stable handle to find and clean up containers scoped
-// to a single test — even when multiple tests run in parallel against
+// to a single test, even when multiple tests run in parallel against
 // the same Docker daemon.
 //
 // Unset in production: the label is only applied when SPWN_TEST_LABEL

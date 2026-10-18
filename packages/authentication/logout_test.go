@@ -47,7 +47,7 @@ func TestLogoutAnthropic_methodScopingSparesMismatch(t *testing.T) {
 	t.Setenv("CLAUDE_CODE_OAUTH_TOKEN", "")
 	t.Setenv("ANTHROPIC_AUTH_TOKEN", "")
 
-	// Non-sk-ant- prefix → stored as OAuth-style.
+	// Non-sk-ant- prefix: stored as OAuth-style.
 	if err := SaveToken("oauth-cached-value"); err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestLogoutAnthropic_methodScopingSparesMismatch(t *testing.T) {
 	}
 }
 
-// TestLogoutAnthropic_methodScopingTargetsMatch — the same cache,
+// TestLogoutAnthropic_methodScopingTargetsMatch: the same cache,
 // this time storing an sk-ant- API key. api_key-scoped logout deletes
 // it; oauth-scoped logout leaves it.
 func TestLogoutAnthropic_methodScopingTargetsMatch(t *testing.T) {
@@ -83,7 +83,7 @@ func TestLogoutAnthropic_methodScopingTargetsMatch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// oauth scope: mismatch → cache untouched.
+	// oauth scope: a mismatch leaves the cache untouched.
 	res := LogoutProvider(ProviderAnthropic, LogoutOpts{Method: MethodOAuth})
 	if res.HasErrors() {
 		t.Fatalf("unexpected errors: %v", res.Errors)
@@ -92,7 +92,7 @@ func TestLogoutAnthropic_methodScopingTargetsMatch(t *testing.T) {
 		t.Error("oauth-scoped logout should not delete an api_key cache")
 	}
 
-	// api_key scope: match → cache deleted.
+	// api_key scope: a match deletes the cache.
 	res = LogoutProvider(ProviderAnthropic, LogoutOpts{Method: MethodAPIKey})
 	if res.HasErrors() {
 		t.Fatalf("unexpected errors: %v", res.Errors)
@@ -102,7 +102,7 @@ func TestLogoutAnthropic_methodScopingTargetsMatch(t *testing.T) {
 	}
 }
 
-// TestLogoutAnthropic_surfacesEnvVars — env vars we cannot touch must
+// TestLogoutAnthropic_surfacesEnvVars: env vars we cannot touch must
 // show up in Remaining so the UI can warn the user.
 func TestLogoutAnthropic_surfacesEnvVars(t *testing.T) {
 	tmp := t.TempDir()
@@ -152,7 +152,7 @@ func TestLogoutOpenAI_removesCodexAuth(t *testing.T) {
 	}
 }
 
-// TestLogoutProvider_idempotent — running logout twice against an
+// TestLogoutProvider_idempotent: running logout twice against an
 // already-clean provider is a no-op (no errors, empty Cleared).
 func TestLogoutProvider_idempotent(t *testing.T) {
 	tmp := t.TempDir()
@@ -177,7 +177,7 @@ func TestLogoutProvider_idempotent(t *testing.T) {
 	}
 }
 
-// TestLogoutProvider_doesNotDisable — logout removes creds but does
+// TestLogoutProvider_doesNotDisable: logout removes creds but does
 // NOT flip the Disabled flag. Distinct verbs, distinct intents.
 func TestLogoutProvider_doesNotDisable(t *testing.T) {
 	tmp := t.TempDir()

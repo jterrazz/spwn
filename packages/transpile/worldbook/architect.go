@@ -170,7 +170,7 @@ spwn world knowledge <id>         # View world knowledge
 - Memory full: trigger sleep cycle
 `
 
-// ArchitectSystemFiles returns a map of container-path → content for all files
+// ArchitectSystemFiles returns a map of container-path to content for all files
 // that need to be written into the architect Docker build context.
 // The keys are paths relative to the build context root (matching COPY destinations
 // in Dockerfile.architect).

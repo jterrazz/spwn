@@ -17,7 +17,7 @@ type Provider struct {
 }
 
 // Registry is the set of MCP providers spwn ships login support for.
-// Keep entries minimal — anything that requires a custom OAuth
+// Keep entries minimal: anything that requires a custom OAuth
 // scope or DCR client name belongs as fields on Provider, not as
 // a special case at the call site.
 var Registry = map[string]Provider{

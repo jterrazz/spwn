@@ -1,4 +1,4 @@
-// This file is the init-template face of the catalog — the
+// This file is the init-template face of the catalog: the
 // List/Get/Install surface used by `spwn init <slug>` and the web UI
 // gallery. Every catalog entry is a raw directory (no spwn/ nesting);
 // the subset with a `worlds:` section in its spwn.yaml is what the
@@ -141,9 +141,9 @@ func Get(slug string) (Example, error) {
 //	└── spwn/
 //	    ├── agents/<name>/   (from <slug>/agents/...)
 //	    ├── skills/          (from <slug>/skills/...)
-//	    └── …                (hooks/, tools/, files/)
+//	    └── ...                (hooks/, tools/, files/)
 //
-// Existing files are NEVER overwritten — whatever the user already
+// Existing files are NEVER overwritten: whatever the user already
 // has on disk wins. The report records what was added vs skipped.
 func Install(slug, baseDir string) (InstallReport, error) {
 	schema, err := loadEntrySchema(slug)

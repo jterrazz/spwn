@@ -1,5 +1,5 @@
-# The repository's own ignores — node_modules, OS and editor junk, the
-# archives — are at the root. This file carries what only this Next app
+# The repository's own ignores (node_modules, OS and editor junk, the
+# archives) are at the root. This file carries what only this Next app
 # produces.
 
 # Build, test and lint artefacts (@jterrazz/typescript)

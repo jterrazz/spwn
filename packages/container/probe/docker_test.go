@@ -145,9 +145,9 @@ func TestCheckDocker_AlwaysReturnsPlatform(t *testing.T) {
 }
 
 // TestCheckDocker_SpwnDockerHostTakesPriority proves that when users
-// Set SPWN_DOCKER_HOST, the probe connects to that socket before
-// Anything else — including DOCKER_HOST, /var/run/docker.sock, or the
-// Per-user fallback list. Stands up a minimal HTTP server on a temp
+// set SPWN_DOCKER_HOST, the probe connects to that socket before
+// anything else (including DOCKER_HOST, /var/run/docker.sock, or the
+// per-user fallback list). Stands up a minimal HTTP server on a temp
 // Unix socket that speaks enough of the Docker /_ping API to satisfy
 // The SDK, points SPWN_DOCKER_HOST at it, and asserts the probe
 // Lands on exactly that socket.

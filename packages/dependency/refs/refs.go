@@ -20,12 +20,12 @@
 //	hook/<name>                  local, resolves to ./spwn/hooks/<name>.yaml
 //	command/<name>               local, resolves to ./spwn/commands/<name>.md
 //
-// Anything else — bare names, the retired `skill:` / `tool:` / `hook:`
-// schemes, the retired `local:<name>` alias, legacy `@owner/name` —
+// Anything else (bare names, the retired `skill:` / `tool:` / `hook:`
+// schemes, the retired `local:<name>` alias, legacy `@owner/name`)
 // parses to KindInvalid so callers can surface a clear error pointing
 // at the new grammar.
 //
-// Versioned refs like `spwn:unix@24.04` are handled via SplitVersion —
+// Versioned refs like `spwn:unix@24.04` are handled via SplitVersion;
 // strip the version first, then call ParseRef on the name part.
 //
 // This package has no dependencies on the validator or compiler so it
@@ -49,7 +49,7 @@ const (
 	// KindSpwnBuiltin is a spwn:<name> dependency compiled into the
 	// binary.
 	KindSpwnBuiltin
-	// KindRegistry is github:<owner>/<repo> — reserved for a future
+	// KindRegistry is github:<owner>/<repo>, reserved for a future
 	// remote resolver, not yet implemented.
 	KindRegistry
 	// KindLocalSkill is skill/<name>, resolving to spwn/skills/<name>.md.
@@ -74,7 +74,7 @@ type Ref struct {
 }
 
 // ParseRef classifies a ref string. Trims whitespace. Does NOT strip a
-// `@version` suffix — call SplitVersion first if the caller accepts
+// `@version` suffix; call SplitVersion first if the caller accepts
 // versioned refs.
 //
 // Rules:
@@ -84,9 +84,9 @@ type Ref struct {
 //   - "tool/<name>": KindLocalTool, Name=<name>.
 //   - "hook/<name>": KindLocalHook, Name=<name>.
 //   - "command/<name>": KindLocalCommand, Name=<name>.
-//   - Anything else — bare names, unknown source schemes, the retired
+//   - Anything else (bare names, unknown source schemes, the retired
 //     `skill:` / `tool:` / `hook:` / `local:` colon-schemes,
-//     `@`-prefixed refs — parses to KindInvalid.
+//     `@`-prefixed refs) parses to KindInvalid.
 func ParseRef(s string) Ref {
 	raw := s
 	s = strings.TrimSpace(s)
@@ -221,7 +221,7 @@ const (
 	// absent).
 	ResolveNotFound
 	// ResolveRegistryUnsupported means the ref is a github:<owner>/<repo>
-	// registry ref — reserved for a future remote resolver, not yet
+	// registry ref, reserved for a future remote resolver, not yet
 	// implemented.
 	ResolveRegistryUnsupported
 	// ResolveInvalid means the ref didn't match any recognised form
@@ -377,7 +377,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 }
 
 // IsLocalKind reports whether the RefKind refers to an on-disk local
-// block (skill, tool, hook, or command) — i.e. not a spwn: catalog
+// block (skill, tool, hook, or command), i.e. not a spwn: catalog
 // ref, not a github: registry ref, and not KindInvalid.
 func IsLocalKind(k RefKind) bool {
 	switch k {

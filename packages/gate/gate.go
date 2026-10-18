@@ -15,7 +15,7 @@ const DefaultListenAddr = ":9000"
 // element owns a path prefix under /mcp/<name>/* and serves MCP
 // requests with credentials injected.
 //
-// Implementations must be safe for concurrent use — the HTTP server
+// Implementations must be safe for concurrent use: the HTTP server
 // invokes Handler concurrently across requests.
 type Element interface {
 	Name() string

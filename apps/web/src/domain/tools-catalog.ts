@@ -22,7 +22,7 @@ export function getToolByName(name: string): ToolDef | undefined {
     return TOOLS.find((t) => t.name === name);
 }
 
-/** Get the slug from a tool name (e.g. "spwn:qmd" → "qmd"). */
+/** Get the slug from a tool name (e.g. "spwn:qmd" gives "qmd"). */
 export function toolSlug(name: string): string {
     return name.replace('spwn:', '');
 }

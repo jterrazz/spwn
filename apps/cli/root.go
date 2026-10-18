@@ -84,7 +84,7 @@ func init() {
 // Execute runs the root command.
 //
 // Wraps cobra's lifecycle so the upgrade-banner middleware always
-// Fires — even on error returns, subcommand-help short-circuits, or
+// Fires even on error returns, subcommand-help short-circuits, or
 // Handlers that os.Exit without returning. The pre-hook kicks off the
 // Version check (synchronous cache read + async refresh); the deferred
 // Post-hook renders the banner. Both short-circuit in architect mode
@@ -117,7 +117,7 @@ func Execute() error {
 // ExitCoder is implemented by spwn-side errors that want to set a
 // non-default process exit code. The marker method distinguishes
 // spwn's own wrappers from stdlib errors that happen to expose an
-// ExitCode() — notably os/exec's *ExitError, which implements
+// ExitCode(), notably os/exec's *ExitError, which implements
 // ExitCode via *os.ProcessState. Without the marker, any docker/
 // subcommand failure would be treated as a "silent" spwn-managed
 // exit and the Execute() error banner would be suppressed, hiding

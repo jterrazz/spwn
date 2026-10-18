@@ -34,11 +34,11 @@ import (
 // Layout of each fixture:
 //
 //	__tests__/__fixtures__/bundles/<name>/
-//	  input.yaml          — tools: [...] list of refs to resolve
+//	  input.yaml          tools: [...] list of refs to resolve
 //	  expected/
-//	    tools.txt         — resolved tool names, one per line, in order
-//	    Dockerfile        — full rendered Dockerfile bytes
-//	    skills/           — mirror of the /world/skills/ tree the image
+//	    tools.txt         resolved tool names, one per line, in order
+//	    Dockerfile        full rendered Dockerfile bytes
+//	    skills/           mirror of the /world/skills/ tree the image
 //	                        will carry (paths relative here; content
 //	                        byte-identical to what CollectSkills emits)
 //
@@ -46,7 +46,7 @@ import (
 //
 //	UPDATE_GOLDEN=1 go test -run TestCatalogBundles ./catalog/...
 //
-// This is the gap-coverage for the catalog→image path: without it,
+// This is the gap-coverage for the catalog-to-image path: without it,
 // a silent regression in a catalog entry's bundled skills file (or
 // the INDEX.md template) would slip through to production.
 func TestCatalogBundles(t *testing.T) {
@@ -120,7 +120,7 @@ func TestCatalogBundles(t *testing.T) {
 			got.skills = skills
 			// Render the Dockerfile with a pinned image version so
 			// The golden stays stable across version bumps of the
-			// Base tree — the label line takes the constant below
+			// Base tree: the label line takes the constant below
 			// And everything else derives from the resolved tools.
 			got.dockerfile = compile.GenerateDockerfile(
 				baseimages.WorldDockerfile,

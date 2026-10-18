@@ -1,4 +1,4 @@
-// Package skill implements the `spwn skill` command group —
+// Package skill implements the `spwn skill` command group:
 // authoring bare-markdown skill files. Skills are procedures,
 // playbooks, or pieces of knowledge authored in markdown that agents
 // can invoke.

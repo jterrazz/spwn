@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TestSpawner_PrelaunchShell is pure container-side plumbing now —
+// TestSpawner_PrelaunchShell is pure container-side plumbing now:
 // the outer composer (daemon, talk.go) owns `source /credentials/
 // .env`. The adapter's job is the claude-specific cred copy.
 // Pinning this layering prevents a future refactor from silently
@@ -20,7 +20,7 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 		t.Errorf("PrelaunchShell must not source /credentials/.env (outer composer owns env loading); got: %s", got)
 	}
 	// Spot-check the credential copy lands in the claude-specific
-	// location. Skills no longer flow through PrelaunchShell — the
+	// location. Skills no longer flow through PrelaunchShell: the
 	// renderer writes them directly under the agent's .claude/skills
 	// tree via docker-cp, so no symlink is needed.
 	for _, want := range []string{

@@ -14,7 +14,7 @@ import (
 // opined). Empty policy on either side passes the other through.
 //
 // These rules matter because a multi-agent world ships ONE image
-// — picking "tightest possible" means a watcher with deny:[post-*]
+// and picking "tightest possible" means a watcher with deny:[post-*]
 // can't be loosened just because a marketer (in the same world)
 // allows everything.
 

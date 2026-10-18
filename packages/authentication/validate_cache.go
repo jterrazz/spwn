@@ -25,7 +25,7 @@ type validationEntry struct {
 	// CredType is the credential type, same reason as Source.
 	CredType CredentialType `json:"cred_type"`
 	// ValidatedAt is when the API last returned success. Positive
-	// Only — 401/403 responses are NEVER cached, so a user who
+	// Only: 401/403 responses are NEVER cached, so a user who
 	// Just ran `claude login` never has to wait a TTL to see the
 	// Result take effect.
 	ValidatedAt time.Time `json:"validated_at"`
@@ -38,7 +38,7 @@ type validationCache map[Provider]validationEntry
 // Is (provider, source, cred type) so swapping OAuth for API key,
 // Or refreshing the keychain entry, bypasses the cache naturally.
 //
-// Negative results (401, connection errors) are never cached — users
+// Negative results (401, connection errors) are never cached: users
 // Who fix a broken credential should see the fix immediately, not
 // After a TTL.
 //

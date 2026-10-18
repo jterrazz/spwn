@@ -23,7 +23,7 @@ export interface TeamGroup {
     agents: RosterAgent[];
 }
 
-/** Every agent the project knows, placed in the world that deploys it — or in limbo — by name. */
+/** Every agent the project knows, placed by name in the world that deploys it, or in limbo. */
 export function rosterOf(worlds: World[], agents: ListedAgent[]): RosterAgent[] {
     const placements = new Map(
         worlds.flatMap((world) =>

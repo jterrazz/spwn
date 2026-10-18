@@ -11,7 +11,7 @@ import (
 // fsFixture bundles the FakeClock + FSWatcher tests almost always
 // need. Tests dispatch events directly via watcher.handle so the
 // pump goroutine isn't in the timing path. One integration test
-// (TestFSWatcher_PumpDeliversFromSource) covers the source→pump
+// (TestFSWatcher_PumpDeliversFromSource) covers the source-to-pump
 // edge separately.
 type fsFixture struct {
 	source  *FakeFSSource
@@ -32,8 +32,8 @@ func newFSFixture(t *testing.T) *fsFixture {
 }
 
 // emit dispatches a synthetic event synchronously through the
-// watcher's filter chain — no goroutine in the timing path. Use
-// this in any test asserting "burst → 1 fire" semantics.
+// watcher's filter chain, no goroutine in the timing path. Use
+// this in any test asserting "a burst gives 1 fire" semantics.
 func (f *fsFixture) emit(path, kind string) {
 	f.watcher.handle(f.ctx, RawFSEvent{Path: path, Kind: kind})
 }
@@ -118,13 +118,13 @@ func TestFSWatcher_BurstCoalescedIntoSingleFire(t *testing.T) {
 		f.emit("/inbox/"+name, "create")
 	}
 
-	// Less than debounce — no fire yet.
+	// Less than debounce: no fire yet.
 	f.clock.Advance(500 * time.Millisecond)
 	if got := len(getter()); got != 0 {
 		t.Errorf("fired early: got %d events", got)
 	}
 
-	// Cross debounce — single fire with all 5 paths.
+	// Cross debounce: single fire with all 5 paths.
 	f.clock.Advance(600 * time.Millisecond)
 	waitForEvents(t, getter, 1, 200*time.Millisecond)
 
@@ -145,7 +145,7 @@ func TestFSWatcher_BurstCoalescedIntoSingleFire(t *testing.T) {
 }
 
 func TestFSWatcher_BurstResetsTimer(t *testing.T) {
-	// Each new event during the debounce window resets the timer —
+	// Each new event during the debounce window resets the timer:
 	// the burst doesn't fire until quiet for spec.Debounce.
 	f := newFSFixture(t)
 	handler, getter := captureHandler()
@@ -157,10 +157,10 @@ func TestFSWatcher_BurstResetsTimer(t *testing.T) {
 
 	f.emit("/x/a.md", "create")
 	f.clock.Advance(800 * time.Millisecond)
-	// 800ms in — still pending.
+	// 800ms in: still pending.
 
 	f.emit("/x/b.md", "create")
-	// Burst extended. Advance another 800ms — total 1.6s but only
+	// Burst extended. Advance another 800ms: total 1.6s but only
 	// 800ms since the last event, so still pending.
 	f.clock.Advance(800 * time.Millisecond)
 	if got := len(getter()); got != 0 {
@@ -412,7 +412,7 @@ func TestFSWatcher_TwoSpecsDifferentPathsIsolated(t *testing.T) {
 }
 
 func TestFSWatcher_TwoSpecsSamePathDifferentPatternsBothFire(t *testing.T) {
-	// The same /shared dir watched twice with different filters —
+	// The same /shared dir watched twice with different filters:
 	// both handlers see the events that match their own pattern.
 	f := newFSFixture(t)
 	hMD, getMD := captureHandler()
@@ -463,7 +463,7 @@ func TestFSWatcher_PassesRecursiveFlagToSource(t *testing.T) {
 func TestFSWatcher_PumpDeliversFromSource(t *testing.T) {
 	// One end-to-end test that runs through the channel + pump
 	// goroutine. Confirms the lifecycle is wired correctly: source
-	// emits → pump dequeues → handle filters → debounce fires.
+	// emits, the pump dequeues, handle filters, the debounce fires.
 	source := NewFakeFSSource()
 	clock := NewFakeClock(mustParse(t, testEpoch))
 	w := NewFSWatcher(source, clock)

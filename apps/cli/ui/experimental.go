@@ -12,7 +12,7 @@ const experimentalNotice = "\n\n⚠ Experimental: this command is in development
 // MarkExperimental tags a cobra command (and every subcommand below it)
 // as experimental. The marker shows up in three places:
 //
-//  1. cmd.Annotations[ExperimentalAnnotation] = "true" — for programmatic
+//  1. cmd.Annotations[ExperimentalAnnotation] = "true", for programmatic
 //     filtering (e.g. grouped help renderers).
 //  2. cmd.Short gets a "[experimental] " prefix so list views surface it.
 //  3. cmd.Long gets the experimentalNotice appended so `<cmd> --help` shows
@@ -53,7 +53,7 @@ func IsExperimental(cmd *cobra.Command) bool {
 
 // HideExperimental tags a command as experimental AND hides it from help +
 // generated docs. Intended for commands that aren't ready to be advertised
-// yet (team, organization, web) — they still function at the keyboard, but
+// yet (team, organization, web): they still function at the keyboard, but
 // the surface area is too unstable to promise anyone they work. Callers
 // reaching for the command by name get the full `--help` and normal
 // execution; browsers of `spwn --help` and the docs site never see them.

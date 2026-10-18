@@ -123,7 +123,7 @@ func TestFileReceiptWriter_AppendsAcrossWrites(t *testing.T) {
 
 func TestFileReceiptWriter_OmitsEmptyOptionals(t *testing.T) {
 	// On-time receipts shouldn't carry Missed: 0 / LastFired: zero
-	// to disk — the json tags use omitempty for clarity in the
+	// to disk; the json tags use omitempty for clarity in the
 	// dashboard's grep.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
@@ -164,7 +164,7 @@ func TestFileReceiptWriter_RotatesPastSizeThreshold(t *testing.T) {
 	// Tiny RotateSize so the test fires fast.
 	w := &FileReceiptWriter{Path: path, RotateSize: 200, RotateKeep: 3}
 	must(t, w.Write(sampleReceipt(t)))
-	must(t, w.Write(sampleReceipt(t))) // ~360B total → next Write triggers
+	must(t, w.Write(sampleReceipt(t))) // ~360B total, so the next Write triggers
 	must(t, w.Write(sampleReceipt(t)))
 
 	// .1 should exist (the original got renamed before the third write).
@@ -221,7 +221,7 @@ func TestFileReceiptWriter_RotationDisabledWhenSizeZero(t *testing.T) {
 
 func TestFileReceiptWriter_ConcurrentSafe(t *testing.T) {
 	// Many writers append concurrently. The mutex serialises file
-	// opens — no torn lines, every receipt persisted.
+	// opens: no torn lines, every receipt persisted.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
 	w := NewFileReceiptWriter(path)
@@ -240,7 +240,7 @@ func TestFileReceiptWriter_ConcurrentSafe(t *testing.T) {
 	}
 	wg.Wait()
 
-	// Every line decodes cleanly — no torn writes.
+	// Every line decodes cleanly: no torn writes.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read: %v", err)

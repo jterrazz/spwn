@@ -63,7 +63,7 @@ func TestProxyElement_RewritesPathAndInjectsAuth(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
-	// Request as it'd arrive at the gate's element handler — the
+	// Request as it'd arrive at the gate's element handler: the
 	// server has already stripped /mcp/<name>, so the element sees
 	// just the suffix.
 	req := httptest.NewRequest("POST", "/initialize", strings.NewReader(`{}`))
@@ -165,7 +165,7 @@ func TestProxyElement_RefreshUpdatesTokenCache(t *testing.T) {
 		t.Fatal("cache should be empty before any token exists")
 	}
 
-	// Seed a token, then call Refresh — should re-read cache.
+	// Seed a token, then call Refresh: should re-read cache.
 	dir := filepath.Dir(mcp.ProviderTokenPath(p))
 	_ = os.MkdirAll(dir, 0o700)
 	body, _ := json.Marshal(map[string]any{

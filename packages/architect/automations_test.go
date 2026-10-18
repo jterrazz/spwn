@@ -98,7 +98,7 @@ func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 	if res.Err != nil {
 		t.Fatalf("dispatch: %v", res.Err)
 	}
-	// Expect at least 1 exec — the runtime dispatch. A prelaunch
+	// Expect at least 1 exec: the runtime dispatch. A prelaunch
 	// shell call may precede it (per-fire credentials refresh), so
 	// the dispatch is the LAST exec, not the first.
 	if len(f.mb.execCalls) < 1 {
@@ -108,7 +108,7 @@ func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 	if dispatch.containerID != "mock-1" {
 		t.Errorf("container = %q", dispatch.containerID)
 	}
-	// The runtime command embeds the prompt — assert it propagated.
+	// The runtime command embeds the prompt: assert it propagated.
 	if !cmdContains(dispatch.cfg.Cmd, "go") {
 		t.Errorf("prompt %q not in exec command %v", "go", dispatch.cfg.Cmd)
 	}
@@ -157,7 +157,7 @@ func TestAutomationDispatcher_RuntimeExitNonZeroErrors(t *testing.T) {
 	f.mb.execErr = nil
 	// mockBackend.Exec returns 0 on success; we override to simulate
 	// a non-zero runtime exit by setting execErr.
-	f.mb.execErr = nil // explicit nil — non-zero exit comes via the mock's default return
+	f.mb.execErr = nil // explicit nil: non-zero exit comes via the mock's default return
 
 	// Re-wire the mock to return a non-zero exit code for the next call.
 	// The mock's Exec returns 0 when execErr is nil; instead, inject
@@ -226,7 +226,7 @@ func TestNewAutomationEngine_AssemblesCorrectly(t *testing.T) {
 	}
 
 	// Receipts + state files should land at <root>/.spwn/.
-	// They're created lazily — an immediate Stat will fail. That's
+	// They're created lazily: an immediate Stat will fail. That's
 	// fine, the assertion is "factory succeeds with the right paths
 	// configured", not "files exist yet".
 
@@ -262,7 +262,7 @@ func TestNewAutomationEngine_RejectsMissingManifest(t *testing.T) {
 
 // errFakeExit is a sentinel for "the runtime exited non-zero". The
 // mockBackend.Exec returns its execErr verbatim; the dispatcher
-// wraps it as "exec runtime in world …: <err>". Keeping the
+// wraps it as "exec runtime in world ...: <err>". Keeping the
 // sentinel value local to the test file so it doesn't leak into
 // production use.
 var errFakeExit = fakeExitError("runtime exited 1")

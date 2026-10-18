@@ -151,7 +151,7 @@ func TestResolveTool_LocalCommand(t *testing.T) {
 func TestResolveTool_InvalidBareName(t *testing.T) {
 	root := t.TempDir()
 	// Even if a file named "present" existed in spwn/tools/, a bare
-	// ref must NOT resolve — the grammar rejects it up front.
+	// ref must NOT resolve: the grammar rejects it up front.
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
 
 	got := refs.ResolveTool(root, refs.ParseRef("present"), nil, false)
@@ -206,7 +206,7 @@ func TestResolveTool_Registry(t *testing.T) {
 func TestResolveSkill_PathForm(t *testing.T) {
 	root := t.TempDir()
 
-	// skill/ form — file.
+	// skill/ form: file.
 	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
 	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
@@ -216,7 +216,7 @@ func TestResolveSkill_PathForm(t *testing.T) {
 		t.Errorf("skill/ form resolves: want OK, got %v", got)
 	}
 
-	// tool/ form — directory.
+	// tool/ form: directory.
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "debug"))
 	got = refs.ResolveSkill(root, refs.ParseRef("tool/debug"), nil, false)
 	if got != refs.ResolveOK {

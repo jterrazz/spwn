@@ -29,8 +29,8 @@ type Credential struct {
 }
 
 // Method returns the user-facing credential method (oauth | api_key)
-// for this Credential. Callers that present a choice to the user —
-// "use OAuth or API key?" — talk in Method rather than Type so that
+// for this Credential. Callers that present a choice to the user
+// ("use OAuth or API key?") talk in Method rather than Type so that
 // "OAuth from keychain" and "OAuth from env" collapse into one bucket.
 // Returns the empty Method when the credential is not configured.
 func (c *Credential) Method() Method {

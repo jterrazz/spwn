@@ -13,21 +13,21 @@ install:
   commands:
     # Pre-fetch the MCP server package so first invocation isn't
     # Slow. `npx -y` would download lazily; baking it in shaves
-    # ~5–10s off every cold call from the agent.
+    # ~5 to 10s off every cold call from the agent.
     - "npm install -g @modelcontextprotocol/server-github"
     # Install the gh-mcp wrapper so the agent invokes a normal CLI
     # (`gh-mcp <tool> --flag`) and never has to think about the MCP
     # transport. Auth comes from the bind-mounted gh hosts.yml at
     # $GH_CONFIG_DIR (set to /credentials/gh by spwn at spawn time)
-    # — the wrapper extracts the token via `gh auth token`. One
+    # (the wrapper extracts the token via `gh auth token`). One
     # `spwn auth login github` on the host unlocks both `gh` cobra
     # commands AND `gh-mcp` for every world.
     - |
       cat > /usr/local/bin/gh-mcp <<'WRAPPER'
       #!/bin/bash
-      # gh-mcp — GitHub MCP server exposed as a CLI via mcp2cli.
+      # gh-mcp: GitHub MCP server exposed as a CLI via mcp2cli.
       # Auth: derived from `gh auth token` (which reads
-      # $GH_CONFIG_DIR/hosts.yml — bind-mounted from the host).
+      # $GH_CONFIG_DIR/hosts.yml, bind-mounted from the host).
       TOKEN=$(gh auth token 2>/dev/null)
       if [ -z "$TOKEN" ]; then
         echo "gh-mcp: not authenticated." >&2
@@ -40,12 +40,12 @@ install:
       exec mcp2cli --mcp-stdio "mcp-server-github" "$@"
       WRAPPER
     - "chmod +x /usr/local/bin/gh-mcp"
-    # Wire git's credential helper to gh — `git push` over HTTPS
+    # Wire git's credential helper to gh: `git push` over HTTPS
     # Then borrows the same token gh has, instead of prompting for a
     # Username/password (which hangs in agent contexts). Equivalent
     # To running `gh auth setup-git` per-user, but baked into
     # /etc/gitconfig so every spawn inherits it without any per-
-    # Container setup. The empty `helper =` line is gh's pattern —
+    # Container setup. The empty `helper =` line is gh's pattern:
     # It clears any previously-configured helper before adding ours.
     - |
       mkdir -p /etc && cat > /etc/gitconfig <<'GITCONFIG'

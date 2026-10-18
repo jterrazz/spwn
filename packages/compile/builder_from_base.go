@@ -18,7 +18,7 @@ import (
 
 // TreeTarballer is anything that can serialise itself as a tar stream.
 // packages/transpile's *Tree satisfies this interface via its Tar
-// method — we keep the contract minimal so packages/compile avoids a
+// method: we keep the contract minimal so packages/compile avoids a
 // hard dependency on packages/transpile (which would otherwise create
 // an import cycle once packages/world pulls us both in).
 type TreeTarballer interface {
@@ -29,7 +29,7 @@ type TreeTarballer interface {
 // a compiled tree" build.
 type BuildFromBaseRequest struct {
 	// BaseImage is the existing image to derive from. Must be
-	// locally available (pulled or built) — this function does not
+	// locally available (pulled or built); this function does not
 	// pull it.
 	BaseImage string
 
@@ -81,7 +81,7 @@ type DockerImageBuilder interface {
 //	COPY <tree-prefix>/ <TreeDestination>/
 //	LABEL <key>=<value> ...
 //
-// Everything is streamed into docker build as an in-memory tar — no
+// Everything is streamed into docker build as an in-memory tar: no
 // disk materialisation required.
 func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBaseRequest) (*BuildFromBaseResult, error) {
 	if req.BaseImage == "" {

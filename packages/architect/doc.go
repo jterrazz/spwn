@@ -5,11 +5,11 @@
 //
 // The public entry points are:
 //
-//   - (*Architect).Spawn(ctx, opts) — build image, render tree,
+//   - (*Architect).Spawn(ctx, opts): build image, render tree,
 //     start container, sync agents.
-//   - (*Architect).Destroy(ctx, worldID) — stop + remove container,
+//   - (*Architect).Destroy(ctx, worldID): stop + remove container,
 //     sync memory back, persist state.
-//   - StartDaemon / StopDaemon / GetDaemonStatus / TalkExecArgs —
+//   - StartDaemon / StopDaemon / GetDaemonStatus / TalkExecArgs:
 //     lifecycle for the always-on `spwn-architect` container that
 //     hosts the CLI inside Docker-over-Docker.
 //

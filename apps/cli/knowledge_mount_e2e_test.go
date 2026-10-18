@@ -1,6 +1,6 @@
 //go:build e2e
 
-// Package cli_test — knowledge mount E2E coverage for the
+// Package cli_test: knowledge mount E2E coverage for the
 // worlds.<name>.knowledge refactor. Each test spawns a real container
 // via the architect (against the existing spwn-test:latest mock
 // image) and inspects the resulting binds / file tree to prove the
@@ -49,7 +49,7 @@ func spawnForKnowledgeTest(t *testing.T, tc *setup.TestContext, agentName, confi
 }
 
 // TestKnowledgeMountE1_UnsetMeansNoBind covers scenario E1:
-// the world declares no knowledge path → no bind mount, AND the
+// the world declares no knowledge path, so no bind mount, AND the
 // per-agent CLAUDE.md omits every reference to /world/knowledge/.
 func TestKnowledgeMountE1_UnsetMeansNoBind(t *testing.T) {
 	// NewTestContext uses t.Setenv so t.Parallel would panic here.
@@ -67,7 +67,7 @@ func TestKnowledgeMountE1_UnsetMeansNoBind(t *testing.T) {
 
 	// Inside the container, /world/knowledge must NOT exist as a
 	// bind mount. It MIGHT exist as an empty inherited dir from the
-	// state dir — the spec accepts that case — but in our new model
+	// state dir (the spec accepts that case), but in our new model
 	// we skip creating the knowledge subdir when no mount is set, so
 	// a plain `test -d /world/knowledge` should fail.
 	if tc.DirExistsInContainer(w.ContainerID, "/world/knowledge") {
@@ -87,7 +87,7 @@ func TestKnowledgeMountE1_UnsetMeansNoBind(t *testing.T) {
 }
 
 // TestKnowledgeMountE2_SetMeansBindAndInjection covers scenario E2:
-// the world declares a knowledge path AND the dir exists → bind
+// the world declares a knowledge path AND the dir exists, so bind
 // mount flows through + the agent's system prompt is told about it.
 func TestKnowledgeMountE2_SetMeansBindAndInjection(t *testing.T) {
 	// NewTestContext uses t.Setenv so t.Parallel would panic here.

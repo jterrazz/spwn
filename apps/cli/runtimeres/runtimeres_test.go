@@ -46,7 +46,7 @@ func TestResolve_overrideWinsEverything(t *testing.T) {
 }
 
 func TestResolve_agentDeclarationWinsOverAuth(t *testing.T) {
-	// Agent pinned codex but user is also logged into Anthropic —
+	// Agent pinned codex but user is also logged into Anthropic:
 	// The pin must win, no auth-state ambiguity error.
 	isolateAuth(t)
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
@@ -68,7 +68,7 @@ func TestResolve_singleAuthProviderPicks(t *testing.T) {
 	isolateAuth(t)
 	t.Setenv("OPENAI_API_KEY", "sk-openai")
 
-	// No agent pin, no override — fall through to auth. Exactly one
+	// No agent pin, no override: fall through to auth. Exactly one
 	// Provider connected, so we silently land on its runtime.
 	src := &source.ProjectSource{Agents: []source.AgentSource{
 		{Name: "neo", Config: source.AgentConfig{}},
@@ -99,7 +99,7 @@ func TestResolve_noAuthFallsBackToClaudeCode(t *testing.T) {
 
 func TestResolve_multipleAuthProvidersErrors(t *testing.T) {
 	// The loud case. User has both providers authenticated and hasn't
-	// Pinned a backend — we must surface a disambiguation hint instead
+	// Pinned a backend: we must surface a disambiguation hint instead
 	// Of silently picking one.
 	isolateAuth(t)
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
@@ -132,7 +132,7 @@ func TestResolve_multipleAuthProvidersErrors(t *testing.T) {
 }
 
 func TestResolve_authDefaultProviderBreaksAmbiguity(t *testing.T) {
-	// Two providers authenticated, no config pin — but the user set
+	// Two providers authenticated, no config pin, but the user set
 	// `spwn auth default anthropic`. Resolver should silently pick
 	// Claude-code instead of erroring.
 	isolateAuth(t)
@@ -155,7 +155,7 @@ func TestResolve_authDefaultProviderBreaksAmbiguity(t *testing.T) {
 }
 
 func TestResolve_authDefaultIgnoredWhenProviderDisabled(t *testing.T) {
-	// Default provider is set but that provider is disabled — the
+	// Default provider is set but that provider is disabled: the
 	// Disabled flag dominates (ResolveAll filters it out), so the
 	// Candidate list only has one entry and we silently pick it.
 	isolateAuth(t)
@@ -181,7 +181,7 @@ func TestResolve_authDefaultIgnoredWhenProviderDisabled(t *testing.T) {
 }
 
 func TestResolve_agentConflictSurfacesBeforeAuth(t *testing.T) {
-	// Two agents pin different runtimes — resolver should surface the
+	// Two agents pin different runtimes: resolver should surface the
 	// Agent-level conflict rather than fall through to auth.
 	isolateAuth(t)
 	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
@@ -200,7 +200,7 @@ func TestResolve_agentConflictSurfacesBeforeAuth(t *testing.T) {
 }
 
 func TestResolve_projectDefaultPicked(t *testing.T) {
-	// Project-wide default in spwn.yaml#runtime.backend — no agent
+	// Project-wide default in spwn.yaml#runtime.backend, no agent
 	// Pin, no auth, no override. Default should win over the
 	// Hardcoded claude-code fallback.
 	isolateAuth(t)
@@ -223,7 +223,7 @@ func TestResolve_projectDefaultPicked(t *testing.T) {
 }
 
 func TestResolve_agentPinBeatsProjectDefault(t *testing.T) {
-	// Agent-level pin must win over spwn.yaml — local overrides global.
+	// Agent-level pin must win over spwn.yaml: local overrides global.
 	isolateAuth(t)
 
 	src := &source.ProjectSource{

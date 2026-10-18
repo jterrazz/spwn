@@ -13,7 +13,7 @@ import (
 // The browser element is a thin proxy: every MCP tool maps 1:1 to
 // an HTTP call against the gate-browser sidecar. Since the sidecar
 // itself is an external Node process, we substitute a Go test
-// server that records the HTTP calls — this checks our forwarding
+// server that records the HTTP calls: this checks our forwarding
 // shape (correct path, method, body fields) without needing
 // Playwright in the test loop.
 
@@ -63,12 +63,12 @@ func TestBrowserElement_ForwardsToSessionEndpoints(t *testing.T) {
 	el := NewBrowserElement()
 	// Re-point the element's client at our test server. We reach
 	// inside via reflection-free knowledge that the handlers all
-	// closure over a single browserClient — the only way to test
+	// closure over a single browserClient, the only way to test
 	// is to swap base URLs on each tool's underlying client.
 	for _, tl := range el.tools {
 		// Each handler closes over the client; we can re-create a
 		// fresh element with the test base by re-running the
-		// constructor logic — the simpler path is to call the
+		// constructor logic: the simpler path is to call the
 		// handlers directly with a synthesised client.
 		_ = tl
 	}

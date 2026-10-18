@@ -1,9 +1,9 @@
-// Package inspect implements the `spwn inspect` command — a
+// Package inspect implements the `spwn inspect` command, a
 // kubectl-describe / cargo-tree blend that prints, per agent:
 // identity header, resolved dependency tree with (*)-dedup and
 // composition badges, skills list, and hooks list.
 //
-// Rendering is a pure function (Model → io.Writer) so golden tests
+// Rendering is a pure function (from Model to io.Writer) so golden tests
 // pin the exact bytes without hitting disk or the Docker API.
 package inspect
 
@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// Model is the top-level inspect document — one block per agent.
+// Model is the top-level inspect document, one block per agent.
 type Model struct {
 	Agents []AgentView
 }
@@ -78,7 +78,7 @@ type HookRef struct {
 }
 
 // Render writes the whole model to w. Multiple agents are separated
-// by a single blank line — terraform/helm convention: whitespace is
+// by a single blank line (the terraform/helm convention): whitespace is
 // the only separator.
 func Render(w io.Writer, m Model) {
 	for i, a := range m.Agents {

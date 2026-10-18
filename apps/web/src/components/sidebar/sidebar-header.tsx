@@ -12,7 +12,7 @@ function openPalette(): void {
     );
 }
 
-/** The logo — its hexagon green while the API answers — and the button that opens the command palette. */
+/** The logo (its hexagon green while the API answers) and the button that opens the command palette. */
 export function SpwnSidebarHeader() {
     const connection = useConnection();
     const connected = connection === 'connected';

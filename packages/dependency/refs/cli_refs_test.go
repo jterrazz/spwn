@@ -17,7 +17,7 @@ func TestResolveCLI(t *testing.T) {
 		name   string
 		input  string
 		want   string
-		errSub string // substring expected in error, "" ⇒ must succeed
+		errSub string // substring expected in error, "" means must succeed
 	}{
 		// Happy path: bare catalog match.
 		{"bare match", "qmd", "spwn:qmd", ""},
@@ -35,7 +35,7 @@ func TestResolveCLI(t *testing.T) {
 		{"explicit tool", "tool/my-parser", "tool/my-parser", ""},
 		{"explicit hook", "hook/pre-spawn", "hook/pre-spawn", ""},
 		{"explicit tool version", "tool/my-parser@0.1", "tool/my-parser@0.1", ""},
-		// Unknown spwn: passes grammar — caller validates existence.
+		// Unknown spwn: passes grammar; caller validates existence.
 		{"explicit spwn unknown", "spwn:nonesuch", "spwn:nonesuch", ""},
 
 		// Bare name with no catalog match: error names the input and
@@ -81,7 +81,7 @@ func TestResolveCLI(t *testing.T) {
 }
 
 // TestResolveCLI_EmptyCatalog verifies the resolver is usable even
-// when the caller has no catalog entries to match against — explicit
+// when the caller has no catalog entries to match against: explicit
 // scheme refs still pass through, but bare names always miss.
 func TestResolveCLI_EmptyCatalog(t *testing.T) {
 	got, err := refs.ResolveCLI("spwn:unix", nil)

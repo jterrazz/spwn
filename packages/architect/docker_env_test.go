@@ -46,7 +46,7 @@ func TestDockerEnvVars(t *testing.T) {
 }
 
 // TestDockerEnvVars_NoToolEnvLeaks locks in that no tool-credential
-// env vars (NOTION_TOKEN, GITHUB_PERSONAL_ACCESS_TOKEN, …) are
+// env vars (NOTION_TOKEN, GITHUB_PERSONAL_ACCESS_TOKEN, ...) are
 // forwarded. Every tool now goes through a `spwn auth login
 // <provider>` cache + bind-mount; re-introducing a passthrough
 // silently re-enables a foot-gun (host shell env leaking into

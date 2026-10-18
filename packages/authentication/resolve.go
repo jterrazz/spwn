@@ -15,7 +15,7 @@ func Resolve(p Provider) *Credential {
 
 // DetectMethods returns every detected credential for a provider, in
 // the provider's discovery order. Unlike Resolve, it does not honour
-// the Disabled flag or ActiveMethod — callers use this to show the
+// the Disabled flag or ActiveMethod; callers use this to show the
 // user every credential spwn could pick from.
 func DetectMethods(p Provider) []*Credential {
 	switch p {
@@ -30,7 +30,7 @@ func DetectMethods(p Provider) []*Credential {
 }
 
 // ResolveAll returns credentials for every supported provider. Google
-// is intentionally excluded — it has no runtime wired up and keeping
+// is intentionally excluded: it has no runtime wired up and keeping
 // it here would pollute the dashboard and credential sync.
 func ResolveAll() map[Provider]*Credential {
 	result := make(map[Provider]*Credential)

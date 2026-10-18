@@ -3,12 +3,12 @@
 //
 // Two entry points:
 //
-//   - CheckForUpdate(ctx, client, current, CheckOpts) → *Plan —
+//   - CheckForUpdate(ctx, client, current, CheckOpts) returns *Plan:
 //     queries GitHub releases (stable or beta channel), resolves
 //     the right platform asset, returns a Plan containing
 //     Release/Asset/Platform/Latest/UpdateAvail without
 //     side-effects.
-//   - Apply(ctx, plan, ApplyOpts) — downloads the binary, verifies
+//   - Apply(ctx, plan, ApplyOpts): downloads the binary, verifies
 //     its SHA256 against the release's SHA256SUMS, and atomically
 //     replaces the current executable.
 //

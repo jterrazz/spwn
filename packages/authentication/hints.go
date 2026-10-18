@@ -52,7 +52,7 @@ func NotSetHint(p Provider, m HintMethod) string {
 
 // RejectedHint returns the cure for a credential that was detected
 // But the provider's API rejected (401 / invalid). Tailored to the
-// Source type — env vars get "unset X" so the user knows the fix is
+// Source type: env vars get "unset X" so the user knows the fix is
 // In their shell, not in a stored file.
 func RejectedHint(p Provider, cred *Credential) string {
 	if cred == nil {
@@ -89,7 +89,7 @@ func NotConfiguredHint(p Provider) string {
 //
 //	"anthropic credentials rejected (keychain:Claude Code): invalid or expired OAuth token"
 //
-// The (source) detail is what makes the error diagnostic — tells
+// The (source) detail is what makes the error diagnostic: it tells
 // The user exactly which of their credentials spwn picked up.
 func CredentialError(p Provider, cred *Credential, status *ProviderStatus) error {
 	source := "no credentials configured"

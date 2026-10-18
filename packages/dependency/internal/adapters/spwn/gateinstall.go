@@ -21,7 +21,7 @@ import (
 // catalog update picks up the new tool code.
 //
 // Returns an empty list (no error) when the entry has no
-// gate-shaped tools — most catalog entries are agent-side only
+// gate-shaped tools; most catalog entries are agent-side only
 // (spwn:python, spwn:gh, ...).
 func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	entryRoot := path.Join(contentRoot, refName)

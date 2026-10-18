@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Frontmatter is the parsed YAML header of a markdown file — the
+// Frontmatter is the parsed YAML header of a markdown file: the
 // shared convention for skill / prompt / playbook metadata. The
 // header sits between two `---` delimiters at the very top of the
 // file:
@@ -24,7 +24,7 @@ import (
 //
 // The Raw field carries the block verbatim (bytes between the
 // delimiters, no surrounding ---); Keys is the parsed map with
-// scalar values as strings — nested types collapse to their YAML
+// scalar values as strings; nested types collapse to their YAML
 // source form so callers that only care about top-level strings
 // (name, description) can read them without re-unmarshalling.
 //

@@ -17,7 +17,7 @@ func TestRetireAgentKnowledge_Fixture(t *testing.T) {
 
 // TestRetireAgentKnowledge_nonEmpty lives inline because the
 // retired dir name embeds a timestamp when a second retire ever
-// happens — not byte-stable enough for a golden fixture.
+// happens, not byte-stable enough for a golden fixture.
 func TestRetireAgentKnowledge_nonEmpty(t *testing.T) {
 	base := t.TempDir()
 	agentDir := filepath.Join(base, "agents", "bob")
@@ -47,7 +47,7 @@ func TestRetireAgentKnowledge_nonEmpty(t *testing.T) {
 }
 
 // TestRetireAgentKnowledge_noAgentsDir: fresh install, no agents/ at
-// all — migration must be a no-op.
+// all: migration must be a no-op.
 func TestRetireAgentKnowledge_noAgentsDir(t *testing.T) {
 	base := t.TempDir()
 	if err := RetireAgentKnowledge.Apply(context.Background(), base); err != nil {
@@ -56,7 +56,7 @@ func TestRetireAgentKnowledge_noAgentsDir(t *testing.T) {
 }
 
 // TestRetireAgentKnowledge_noKnowledgeDir: agents exist but none
-// have a knowledge/ dir — another no-op, agent dirs survive.
+// have a knowledge/ dir: another no-op, agent dirs survive.
 func TestRetireAgentKnowledge_noKnowledgeDir(t *testing.T) {
 	base := t.TempDir()
 	agentDir := filepath.Join(base, "agents", "carol")

@@ -47,11 +47,11 @@ type ToolCookies struct {
 // ToolMCP declares the subprocess that serves the tool's MCP HTTP
 // endpoint. Gate spawns it with these env vars set:
 //
-//	GATE_TOOL_NAME       — slug (= /mcp/<slug>/ route)
-//	GATE_TOOL_PORT       — port assigned by gate, tool must listen on
+//	GATE_TOOL_NAME       slug (= /mcp/<slug>/ route)
+//	GATE_TOOL_PORT       port assigned by gate, tool must listen on
 //	                       127.0.0.1:$GATE_TOOL_PORT/mcp/
-//	GATE_BROWSER_URL     — http://127.0.0.1:9001 (sidecar)
-//	GATE_CREDENTIALS_DIR — typically /credentials, where cookie + OAuth
+//	GATE_BROWSER_URL     http://127.0.0.1:9001 (sidecar)
+//	GATE_CREDENTIALS_DIR typically /credentials, where cookie + OAuth
 //	                       files live
 type ToolMCP struct {
 	Entry []string `yaml:"entry"`

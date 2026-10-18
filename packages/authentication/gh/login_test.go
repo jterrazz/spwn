@@ -29,7 +29,7 @@ func TestLogin_NoHostLogin(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	// Stub gh that always exits non-zero — simulates "not logged
+	// Stub gh that always exits non-zero, simulating "not logged
 	// in" without actually running gh.
 	stubPath := tmp + "/gh"
 	stub := "#!/bin/bash\nexit 1\n"

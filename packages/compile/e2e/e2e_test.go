@@ -64,7 +64,7 @@ func TestPython_E2E(t *testing.T) {
 func TestClaudeCode_E2E(t *testing.T) {
 	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:claude-code")
 
-	// The native installer ships a self-contained claude binary — no
+	// The native installer ships a self-contained claude binary: no
 	// node, no SKILL.md (runtimes are transport, tools ship skills).
 	imagetest.AssertBinaryExists(t, s, "claude")
 
@@ -79,7 +79,7 @@ func TestQmd_E2E(t *testing.T) {
 	imagetest.AssertBinaryExists(t, s, "qmd")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
 	// Skill content assertions retired alongside the /world/skills
-	// pipeline — spwn:qmd's SKILL.md now reaches agents via the
+	// pipeline: spwn:qmd's SKILL.md now reaches agents via the
 	// transpile layer, not the base image.
 }
 
@@ -88,7 +88,7 @@ func TestCodex_E2E(t *testing.T) {
 
 	imagetest.AssertBinaryExists(t, s, "codex")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
-	// Runtimes don't ship a SKILL.md — only tools do (qmd, cli, …).
+	// Runtimes don't ship a SKILL.md; only tools do (qmd, cli, ...).
 	//
 	// Project trust seeding (~/.codex/config.toml with
 	// `[projects."<cwd>"] trust_level = "trusted"`) moved to spawn-time
@@ -110,7 +110,7 @@ func TestFullWorldStack_E2E(t *testing.T) {
 		imagetest.AssertBinaryExists(t, s, bin)
 	}
 
-	// Skills no longer land in the image — they're emitted per-agent
+	// Skills no longer land in the image: they're emitted per-agent
 	// under each agent's `.claude/skills/` at spawn time via the
 	// transpile renderer (see packages/architect/skills.go). The
 	// skill-install assertions that used to live here exercised the

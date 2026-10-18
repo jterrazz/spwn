@@ -18,7 +18,7 @@ import (
 // ProxyElement is the generic auth-injecting reverse proxy. Any
 // provider in mcp.Registry can become a gate element with three
 // lines: parse the upstream URL, construct, register. Notion was
-// the first instance — adding linear, atlassian, etc. is now
+// the first instance; adding linear, atlassian, etc. is now
 // trivial.
 //
 // Behaviour:
@@ -137,7 +137,7 @@ func (e *ProxyElement) loadToken() error {
 
 // RegisterAllProviders walks mcp.Registry and adds a ProxyElement
 // for every provider. Returns the count and the first per-provider
-// construction error (which is non-fatal — other providers continue
+// construction error (which is non-fatal: other providers continue
 // to register). Idempotent additions are not safe; call once at
 // startup.
 func RegisterAllProviders(reg *Registry) (int, error) {

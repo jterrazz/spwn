@@ -26,7 +26,7 @@ var commandSlugRe = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
 // into a running world's container and exec'ing the agent's runtime
 // in one-shot mode with the rendered prompt.
 //
-// World lookup is by manifest key (worlds.<key>) — the engine speaks
+// World lookup is by manifest key (worlds.<key>); the engine speaks
 // in the user's vocabulary, not in generated world IDs. Cold worlds
 // are auto-spawned per the design: a 6am cron whose target world is
 // down should bring the world up, run, and leave it warm.
@@ -195,7 +195,7 @@ func NewCommandFileResolver(projectRoot string) *CommandFileResolver {
 
 // Resolve loads the markdown body of a command ref. Returns a
 // descriptive error when the ref is malformed or the file is
-// missing — surfaces in the engine's failed-receipt path so the
+// missing, surfaced in the engine's failed-receipt path so the
 // user sees "command file not found" in the dashboard, not a
 // silent dispatch.
 func (r *CommandFileResolver) Resolve(ref string) (string, error) {
@@ -221,7 +221,7 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 // AutomationEngineConfig bundles the per-project bits the engine
 // needs from the architect's perspective. Construction order matters:
 // the engine needs a Dispatcher that knows about the architect, and
-// a CommandResolver rooted at the project — both are derived here so
+// a CommandResolver rooted at the project; both are derived here so
 // callers don't have to wire them by hand.
 type AutomationEngineConfig struct {
 	// ProjectRoot is the directory containing spwn.yaml + spwn/.

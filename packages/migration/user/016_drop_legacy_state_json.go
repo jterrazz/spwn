@@ -14,7 +14,7 @@ import (
 // per-world runtime.json files under ~/.spwn/world-states/.
 //
 // Before this migration, runtimestate.NewStore() performed the same
-// eviction as a side effect on every CLI boot — a parallel migration
+// eviction as a side effect on every CLI boot: a parallel migration
 // system. Folded in here so there's one source of truth for schema
 // transitions and version.json tracks this alongside every other.
 var DropLegacyStateJSON = migration.Migration{

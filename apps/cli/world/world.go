@@ -37,9 +37,9 @@ func init() {
 // SetSpawnBackend overrides the runtime backend used by the next
 // Spawn. Intended for callers in sibling packages (apps/cli/agent)
 // That delegate to UpCmd.RunE without going through cobra flag parsing
-// On the world command itself — see agent.runInteractiveSession where
+// On the world command itself (see agent.runInteractiveSession where
 // `spwn agent neo --backend codex` routes the backend through here
-// Before handing off to UpCmd.
+// before handing off to UpCmd).
 func SetSpawnBackend(backend string) {
 	spawnBackend = backend
 }
@@ -104,7 +104,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// Cmd is the parent for `spwn world …`. Bare `spwn world` shows help.
+// Cmd is the parent for `spwn world ...`. Bare `spwn world` shows help.
 // `spwn world <name>` is a compose-style shortcut that starts the
 // named world from spwn.yaml (equivalent to `spwn world start <name>`).
 // `spwn world --agent neo` (with at least one spawn flag) also still

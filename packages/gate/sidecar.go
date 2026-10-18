@@ -13,7 +13,7 @@ import (
 
 // SidecarBrowser supervises the gate-browser Node process, the
 // Playwright sidecar baked into the gate image at /opt/gate-browser.
-// It exposes an HTTP API on 127.0.0.1:9001 (gate-internal — never
+// It exposes an HTTP API on 127.0.0.1:9001 (gate-internal, never
 // reachable from the host or worlds) that catalog tools call to
 // drive cookie-loaded Chromium sessions.
 //
@@ -39,7 +39,7 @@ func NewSidecarBrowser(logger *log.Logger) *SidecarBrowser {
 }
 
 // Run spawns the sidecar and restarts it on exit until the context
-// is cancelled. Blocks until shutdown — call from a goroutine.
+// is cancelled. Blocks until shutdown: call from a goroutine.
 func (s *SidecarBrowser) Run(ctx context.Context) {
 	backoff := time.Second
 	for {

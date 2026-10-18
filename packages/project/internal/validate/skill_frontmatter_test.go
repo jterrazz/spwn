@@ -48,7 +48,7 @@ version: "1.0"
 }
 
 // TestRuleSkillFrontmatter_missingName: frontmatter present but
-// name blank → error mentioning `name`.
+// name blank: error mentioning `name`.
 func TestRuleSkillFrontmatter_missingName(t *testing.T) {
 	root := t.TempDir()
 	writeSkill(t, root, "spwn/skills", "nameless.md", `---
@@ -84,8 +84,8 @@ body
 }
 
 // TestRuleSkillFrontmatter_walksAuthoredSkillRoots: the rule covers
-// every authoring location — project-wide (spwn/skills/) and per-tool
-// (spwn/tools/<name>/skills/) — so a convention violation in either
+// every authoring location, project-wide (spwn/skills/) and per-tool
+// (spwn/tools/<name>/skills/), so a convention violation in either
 // produces an issue.
 func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 	root := t.TempDir()

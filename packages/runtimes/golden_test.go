@@ -47,7 +47,7 @@ import (
 // outputDirPrefix marks the directories the test treats as
 // per-runtime expected-output trees. Anything under a case that
 // Starts with this prefix names the target runtime after the
-// Underscore: `output_claude_code/` → `claude-code`.
+// Underscore: `output_claude_code/` maps to `claude-code`.
 const outputDirPrefix = "output_"
 
 // errorSuffix marks per-runtime expected-error fixtures for cases
@@ -149,7 +149,7 @@ func TestGoldenFixtures(t *testing.T) {
 }
 
 // runtimeTarget pairs a discovered runtime name with the fixture
-// Path the test should assert against — either a directory of
+// Path the test should assert against: either a directory of
 // Expected bytes or a single error substring file.
 type runtimeTarget struct {
 	runtime   string

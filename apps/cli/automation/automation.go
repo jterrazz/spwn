@@ -2,13 +2,13 @@
 //
 // Subcommands:
 //
-//	ls      — list every automation declared in spwn.yaml plus its
+//	ls      list every automation declared in spwn.yaml plus its
 //	          last-fired status (cron) or watcher path (fs).
-//	logs    — tail the project's <root>/.spwn/runs.jsonl receipt log,
+//	logs    tail the project's <root>/.spwn/runs.jsonl receipt log,
 //	          either as a one-shot dump or with --follow.
-//	status  — engine state snapshot: how many automations are
+//	status  engine state snapshot: how many automations are
 //	          registered per world, last fire times, freshness.
-//	daemon  — run the engine for the current project and block until
+//	daemon  run the engine for the current project and block until
 //	          interrupted. The architect daemon (long-running) is the
 //	          eventual home; for now this is the simplest "run my
 //	          automations" path.

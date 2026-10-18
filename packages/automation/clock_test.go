@@ -17,7 +17,7 @@ func mustParse(t *testing.T, s string) time.Time {
 	return got
 }
 
-// ── FakeClock — basic Now/Advance ───────────────────────────────────
+// ── FakeClock: basic Now/Advance ────────────────────────────────────
 
 func TestFakeClock_NowReflectsAdvance(t *testing.T) {
 	c := NewFakeClock(mustParse(t, testEpoch))
@@ -48,7 +48,7 @@ func TestFakeClock_AdvanceToBackwardsPanics(t *testing.T) {
 	c.AdvanceTo(mustParse(t, "2026-05-01T00:00:00Z"))
 }
 
-// ── FakeClock — After fires deterministically ───────────────────────
+// ── FakeClock: After fires deterministically ────────────────────────
 
 func TestFakeClock_AfterFiresOnAdvance(t *testing.T) {
 	c := NewFakeClock(mustParse(t, testEpoch))
@@ -128,11 +128,11 @@ func TestFakeClock_PendingCountAccurate(t *testing.T) {
 	}
 }
 
-// ── FakeClock — concurrency safety ──────────────────────────────────
+// ── FakeClock: concurrency safety ───────────────────────────────────
 
 func TestFakeClock_ConcurrentSafe(t *testing.T) {
 	// Stress test: many goroutines registering After() while another
-	// goroutine advances. We don't assert specific firings — only
+	// goroutine advances. We don't assert specific firings, only
 	// that the package never deadlocks or races (run with -race).
 	c := NewFakeClock(mustParse(t, testEpoch))
 	var wg sync.WaitGroup
@@ -156,7 +156,7 @@ func TestFakeClock_ConcurrentSafe(t *testing.T) {
 	wg.Wait()
 }
 
-// ── RealClock — sanity check ────────────────────────────────────────
+// ── RealClock: sanity check ─────────────────────────────────────────
 
 func TestRealClock_NowMatchesSystem(t *testing.T) {
 	r := RealClock{}

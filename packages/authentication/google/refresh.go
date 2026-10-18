@@ -25,7 +25,7 @@ var (
 
 // AccessToken returns a non-expired access token, refreshing on
 // demand if the cached one is past its leeway. Reads client.json +
-// tokens.json from CacheDir each call (cheap — they're tiny files);
+// tokens.json from CacheDir each call (cheap: they're tiny files);
 // if the user re-runs `spwn auth login google` the next AccessToken
 // call picks up the new tokens automatically.
 //

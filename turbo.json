@@ -8,7 +8,7 @@
     },
     "cacheDir": ".artifacts/turbo",
     "tasks": {
-        // hazard: no `^build` anywhere — spwn.sh/packages/world and spwn.sh/packages/transpile require each other,
+        // hazard: no `^build` anywhere: spwn.sh/packages/world and spwn.sh/packages/transpile require each other,
         // which Go permits and Turborepo rejects as a cyclic task dependency; Go orders them itself through go.work.
         "build": {
             "dependsOn": ["dependency#generate"]
@@ -22,8 +22,8 @@
             "env": ["GOLANGCI_VERSION"],
             "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.golangci.yml"]
         },
-        // invariant: the TypeScript toolchain judges the whole repository at once — every member, the manual, the
-        // names, the comments of every script — so its one run is the root's, and nothing it reads is cacheable.
+        // invariant: the TypeScript toolchain judges the whole repository at once (every member, the manual, the
+        // names, the comments of every script), so its one run is the root's, and nothing it reads is cacheable.
         "//#lint": {
             "cache": false
         },

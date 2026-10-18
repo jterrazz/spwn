@@ -52,7 +52,7 @@ func validateOpenAI(ctx context.Context, cred *Credential) *ProviderStatus {
 	}
 	// outside: OAuth tokens from `codex login` are ChatGPT-subscription-scoped
 	// And do NOT authenticate against the OpenAI /v1/models endpoint
-	// The way API keys do — they're a different auth universe. We
+	// The way API keys do: they're a different auth universe. We
 	// Can't cheaply verify them from here without hitting codex's
 	// Private backend, so we trust the presence of a well-formed
 	// Auth.json file and let the runtime surface any real failure at

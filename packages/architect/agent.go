@@ -13,7 +13,7 @@ import (
 
 // SpawnAgent execs the world's runtime interactively inside its
 // container. The runtime is whatever the world record declares
-// (`spwn:claude-code`, `spwn:codex`, …) — resolved per-call so one
+// (`spwn:claude-code`, `spwn:codex`, ...), resolved per-call so one
 // Architect drives heterogeneous worlds without re-instantiation.
 func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) error {
 	u, err := a.rstate.Get(worldID)
@@ -81,7 +81,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 // SpawnAgentDetached starts the world's runtime in the background.
 // Mirrors SpawnAgent for session continuity but returns as soon as
-// the exec is accepted by the container — no TTY, no blocking on
+// the exec is accepted by the container: no TTY, no blocking on
 // the runtime process.
 func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName string) error {
 	u, err := a.rstate.Get(worldID)

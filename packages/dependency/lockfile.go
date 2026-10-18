@@ -1,14 +1,14 @@
 // Package dependency owns spwn.lock: the committed, deterministic
 // pin of every spwn:* and github:*/* dependency the project uses.
 //
-// Format is Go-style, line-oriented text — one entry per line:
+// Format is Go-style, line-oriented text, one entry per line:
 //
 //	# spwn.lock: DO NOT EDIT
 //	spwn:unix v24.04 builtin
 //	spwn:git v2.43 builtin
 //	github:jterrazz/research-skills v0.3.0 sha256:b7e12...
 //
-// Local refs (skill:, tool:, hook:) never land in the lockfile — they
+// Local refs (skill:, tool:, hook:) never land in the lockfile: they
 // are authored in-place under spwn/skills/, spwn/tools/, and spwn/hooks/.
 //
 // Load/Save round-trip is deterministic: entries are sorted lexically

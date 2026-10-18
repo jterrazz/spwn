@@ -2,8 +2,8 @@ package tool
 
 // Registry is the narrow contract any Tool-store must satisfy to
 // receive tools registered by the dependency package. The concrete
-// registry — *resolver.Registry under packages/dependency/resolver
-// — satisfies it structurally. Keeping the interface in the tool
+// registry (*resolver.Registry under packages/dependency/resolver)
+// satisfies it structurally. Keeping the interface in the tool
 // subpackage lets adapters (spwn catalog, project-local) hydrate
 // any registry without importing resolver.
 //

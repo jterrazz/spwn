@@ -29,7 +29,7 @@ func (*spawner) Name() string { return "codex" }
 // BuildCommand constructs the codex CLI argv. The exec subcommand
 // runs a single prompt and exits, which is what `spwn agent talk`
 // with a message expects. When no prompt is provided (interactive
-// session), the argv is just `codex` — the caller supplies a TTY.
+// session), the argv is just `codex`; the caller supplies a TTY.
 //
 // SessionID threads resumption through codex's `--thread <id>` flag
 // (codex calls its session identifier "thread"; extractSessionID in
@@ -83,7 +83,7 @@ func (*spawner) SyncHostCredentials(credsDir string) error { return nil }
 // /credentials bind-mounted read-only; guards with test-before-act so
 // the launch never fails when OpenAI creds aren't configured.
 //
-// Intentionally omits `source /credentials/.env` — that belongs to the
+// Intentionally omits `source /credentials/.env`: that belongs to the
 // outer prelaunch composition, not this adapter. Callers that need
 // env sourcing chain it themselves.
 func (*spawner) PrelaunchShell() string {
@@ -102,7 +102,7 @@ func (*spawner) PrelaunchShell() string {
 // the fact. Kept on the interface so other runtimes can still layer
 // mode-specific flags post-hoc.
 //
-// `stream-json` and the default both map to `--json` — codex has no
+// `stream-json` and the default both map to `--json`: codex has no
 // separate "final envelope" format, the stream IS the contract. The
 // talk path either scans the JSONL in-flight (stream mode) or joins
 // everything and asks ParseOneShotResult to pull out the final text.
@@ -124,7 +124,7 @@ func (*spawner) OneShotFlags(base []string, outputFormat string) []string {
 // thread_id on thread.started persists across future invocations as
 // the session id.
 //
-// Returns a non-nil error if no JSONL events could be parsed at all —
+// Returns a non-nil error if no JSONL events could be parsed at all:
 // callers fall back to printing raw output and scanning for session
 // id via extractSessionID as a safety net.
 func (*spawner) ParseOneShotResult(raw []byte) (string, string, error) {

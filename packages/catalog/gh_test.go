@@ -7,7 +7,7 @@ import (
 
 // TestGh_WrapperUsesGhAuthToken locks in that the gh-mcp wrapper
 // derives its credential from `gh auth token` (which reads
-// $GH_CONFIG_DIR/hosts.yml — bind-mounted by spwn) rather than
+// $GH_CONFIG_DIR/hosts.yml, bind-mounted by spwn) rather than
 // expecting an env-var. This is the regression-trap for re-
 // introducing the GITHUB_PERSONAL_ACCESS_TOKEN env passthrough
 // path, which was deleted along with the migration to
@@ -45,7 +45,7 @@ func TestGh_WrapperUsesGhAuthToken(t *testing.T) {
 // TestGh_GitCredentialHelperBakedIn locks in that /etc/gitconfig
 // gets written with the gh credential helper at install time.
 // Without it, `git push` over HTTPS prompts for a username and
-// hangs in an agent context — the helper is what makes the same
+// hangs in an agent context; the helper is what makes the same
 // gh token usable for git operations as for `gh ...` and
 // `gh-mcp ...`. Per-user `gh auth setup-git` would die with the
 // container; the system-level config survives.

@@ -6,10 +6,10 @@ linters:
         - depguard
     settings:
         depguard:
-            # invariant: each rule denies a layer the imports of the layers above it —
-            # L1 platform → nothing; L2 activity, authentication, upgrade → L1;
-            # L3 dependency, agent → L1-L2; L4 project → L1-L3; L5 compile → L1-L4;
-            # L6 world → L1-L5; L7 apps/cli and apps/api → anything
+            # invariant: each rule denies a layer the imports of the layers above it.
+            # L1 platform imports nothing; L2 activity, authentication, upgrade import L1;
+            # L3 dependency, agent import L1-L2; L4 project L1-L3; L5 compile L1-L4;
+            # L6 world L1-L5; L7 apps/cli and apps/api anything
             rules:
                 build-compile:
                     files:

@@ -5,13 +5,13 @@ description: "X (Twitter) read + write via session cookies (Playwright in the ga
 dependencies:
   - "spwn:mcp2cli"
 
-# gate: section — the gate parses this on startup and:
+# gate: section. The gate parses this on startup and:
 #   1. Auto-registers `cookies` with the cookie-sync extension
 #      (the extension picks it up next refresh cycle).
 #   2. Spawns `mcp.entry` as a long-lived subprocess, reverse-proxies
-#      /mcp/x → that subprocess.
+#      /mcp/x to that subprocess.
 #
-# Tool authors only ever touch this file + index.js — no Go.
+# Tool authors only ever touch this file + index.js, no Go.
 gate:
   cookies:
     domains: [x.com, twitter.com]
@@ -24,14 +24,14 @@ gate:
 # HTTP/MCP to the gate. Same wrapper pattern as spwn:notion.
 #
 # The wrapper consults spwn-policy-check (installed by spwn:mcp2cli)
-# before forwarding — when agent.yaml denies a method, the call fails
+# before forwarding: when agent.yaml denies a method, the call fails
 # fast with a clear message instead of hitting the gate.
 install:
   commands:
     - |
       cat > /usr/local/bin/x-mcp <<'WRAPPER'
       #!/bin/bash
-      # x-mcp — X (Twitter) read + write via the gate's spwn:x element.
+      # x-mcp: X (Twitter) read + write via the gate's spwn:x element.
       # Session cookies come from the spwn-cookie-sync browser
       # extension. Install + load it once, browse x.com normally,
       # and the gate's Playwright pool uses your session.

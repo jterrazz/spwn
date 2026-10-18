@@ -86,14 +86,14 @@ func TestFileStateStore_MissingFileEmptyState(t *testing.T) {
 
 func TestFileStateStore_AtomicReplace(t *testing.T) {
 	// We can't easily simulate a crash mid-write, but we can verify
-	// the .tmp file is cleaned up on a successful write — a leftover
+	// the .tmp file is cleaned up on a successful write: a leftover
 	// would mean Rename failed silently.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "state.json")
 	s := NewFileStateStore(path)
 	must(t, s.RecordFire("brain", "x", mustParse(t, "2026-05-01T06:00:00Z")))
 
-	// No .tmp leftover — Rename succeeded.
+	// No .tmp leftover: Rename succeeded.
 	if _, err := os.Stat(path + ".tmp"); err == nil {
 		t.Errorf(".tmp file leaked after RecordFire")
 	}
@@ -101,7 +101,7 @@ func TestFileStateStore_AtomicReplace(t *testing.T) {
 
 func TestFileStateStore_CorruptFileTaintsStore(t *testing.T) {
 	// Corrupt JSON in state.json must NOT silently produce an empty
-	// map that the next RecordFire could atomically overwrite —
+	// map that the next RecordFire could atomically overwrite;
 	// that would clobber every other automation's cursor with one
 	// hand-edit. The store flips into "tainted" mode and refuses
 	// RecordFire until the file is repaired.
@@ -136,7 +136,7 @@ func TestFileStateStore_CorruptFileTaintsStore(t *testing.T) {
 }
 
 func TestFileStateStore_LoadOnceCachesAcrossReads(t *testing.T) {
-	// LastFired re-reads the file every call before this fix —
+	// LastFired re-reads the file every call before this fix:
 	// 100×5.7ms = 576ms boot stall. After the fix, the cache loads
 	// once. We can't time it directly but we can confirm a corrupt
 	// file written AFTER load doesn't change behaviour.
@@ -221,7 +221,7 @@ func TestFileStateStore_FutureVersionTaintsStore(t *testing.T) {
 
 func TestFileStateStore_ParentDirCreated(t *testing.T) {
 	dir := t.TempDir()
-	// Nested path that doesn't exist yet — RecordFire should mkdir it.
+	// Nested path that doesn't exist yet: RecordFire should mkdir it.
 	path := filepath.Join(dir, "deep", "nested", "state.json")
 	s := NewFileStateStore(path)
 	if err := s.RecordFire("brain", "x", time.Now()); err != nil {

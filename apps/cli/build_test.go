@@ -13,7 +13,7 @@ import (
 // Test_requireAgentPrompts pins the QA-surfaced behaviour: compile
 // refuses to render an empty / missing AGENTS.md rather than
 // templating an empty CLAUDE.md. Before the fix, `spwn compile`
-// succeeded silently while `spwn check --deep` flagged it — a loud
+// succeeded silently while `spwn check --deep` flagged it: a loud
 // inconsistency between the two commands.
 func Test_requireAgentPrompts(t *testing.T) {
 	cases := []struct {
@@ -84,7 +84,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 // Test_crossCheckRuntimeAdapters locks the `spwn check` warning that
 // fires when an agent declares a catalog-known but compile-unimplemented
 // runtime (e.g. `spwn:codex`). Without this warning, `check` says
-// "valid" and `compile` fails with "unknown runtime" — a silent gap
+// "valid" and `compile` fails with "unknown runtime", a silent gap
 // between the two commands.
 func Test_crossCheckRuntimeAdapters(t *testing.T) {
 	// Safety-net warning for agents that declare a runtime whose

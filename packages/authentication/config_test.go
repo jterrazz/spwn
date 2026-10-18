@@ -148,7 +148,7 @@ func TestDisableProvider_doesNotTouchMethod(t *testing.T) {
 	if err := DisableProvider(ProviderOpenAI); err != nil {
 		t.Fatal(err)
 	}
-	// Method survives a disable — re-enabling restores the prior choice
+	// Method survives a disable: re-enabling restores the prior choice
 	// rather than forcing the user to pick again.
 	if got := ActiveMethod(ProviderOpenAI); got != MethodOAuth {
 		t.Errorf("DisableProvider clobbered Method: got %q, want oauth", got)

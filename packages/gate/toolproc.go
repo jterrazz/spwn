@@ -28,7 +28,7 @@ type ToolElement struct {
 	proxy *httputil.ReverseProxy
 }
 
-// Name returns the tool slug — used by the gate router to dispatch
+// Name returns the tool slug, used by the gate router to dispatch
 // /mcp/<name>/* requests.
 func (e *ToolElement) Name() string { return e.tool.Name }
 
@@ -38,7 +38,7 @@ func (e *ToolElement) Name() string { return e.tool.Name }
 // would.
 func (e *ToolElement) Handler() http.Handler { return e.proxy }
 
-// Refresh is a no-op for tool elements — token refresh is owned
+// Refresh is a no-op for tool elements: token refresh is owned
 // by the subprocess (or by the user re-syncing cookies).
 func (e *ToolElement) Refresh(_ context.Context) error { return nil }
 
@@ -68,7 +68,7 @@ const (
 // NewToolSupervisor prepares a supervisor and eagerly builds one
 // ToolElement per tool with an MCP entry, each pointed at the port
 // the subprocess will listen on. Elements are registry-ready
-// immediately — until the subprocess is healthy, requests get a
+// immediately; until the subprocess is healthy, requests get a
 // clean 503 from the proxy's ErrorHandler instead of hanging.
 //
 // Caller flow:
@@ -129,7 +129,7 @@ func (s *ToolSupervisor) Elements() []*ToolElement {
 
 // Run spawns every tool's subprocess and restarts it on crash with
 // backoff. Blocks until ctx is cancelled. Each tool runs in its own
-// goroutine — one tool crashing doesn't impact the others.
+// goroutine: one tool crashing doesn't impact the others.
 func (s *ToolSupervisor) Run(ctx context.Context) {
 	var wg sync.WaitGroup
 	for _, el := range s.Elements() {

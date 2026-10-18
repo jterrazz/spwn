@@ -17,7 +17,7 @@ import (
 // supervised goroutines, (c) restart on crash with backoff, (d)
 // surface upstream errors as clean 503s while the subprocess boots.
 //
-// We don't spawn real Node here — that's an integration concern.
+// We don't spawn real Node here: that's an integration concern.
 // Pin construction-time invariants and the proxy's error path.
 
 func TestNewToolSupervisor_AllocatesPortsSequentially(t *testing.T) {
@@ -66,7 +66,7 @@ func TestToolSupervisor_503WhenUpstreamDown(t *testing.T) {
 	}
 	// We re-create the proxy here to point at port 1 (the eager
 	// constructor used the supervisor's allocated port, which IS
-	// listening for nothing — same effect).
+	// listening for nothing, same effect).
 	_ = target
 
 	rec := httptest.NewRecorder()
@@ -82,7 +82,7 @@ func TestToolSupervisor_503WhenUpstreamDown(t *testing.T) {
 }
 
 func TestToolElement_RefreshIsNoOp(t *testing.T) {
-	// Tool subprocesses own their own auth refresh — the gate-side
+	// Tool subprocesses own their own auth refresh: the gate-side
 	// element shouldn't try to do anything on tick.
 	s := NewToolSupervisor([]Tool{{
 		Name: "x",

@@ -1,7 +1,7 @@
 // Command spwn-gate is the host-side credential broker / element
 // bridge daemon. Run as a long-lived Docker container by `spwn gate
 // start` (see apps/cli/gate). One-shot use is supported for testing
-// and debugging — `spwn-gate run` starts the server in foreground
+// and debugging: `spwn-gate run` starts the server in foreground
 // until SIGTERM.
 package main
 

@@ -36,7 +36,7 @@ export function useAgentProfile(name: string) {
     return { fetchProfile, loading, mindTree, profile };
 }
 
-/** What surrounds an agent: the teams and organizations it may join, the worlds it may be deployed to, and the world it lives in — the one it is deployed to, else the one the address names. */
+/** What surrounds an agent: the teams and organizations it may join, the worlds it may be deployed to, and the world it lives in (the one it is deployed to, else the one the address names). */
 export function useAgentSurroundings(name: string, worldId: string | undefined) {
     const teams = useList<Team>('/api/teams');
     const worlds = useList<World>('/api/worlds');
@@ -56,7 +56,7 @@ export function useAgentSurroundings(name: string, worldId: string | undefined) 
     return { organizations, teams, world: deployedIn ?? named, worlds };
 }
 
-/** The agent's own actions — identity edits and the mind's verbs — each reported through `report`. */
+/** The agent's own actions (identity edits and the mind's verbs), each reported through `report`. */
 export function useAgentActions(
     name: string,
     report: (message: string) => void,

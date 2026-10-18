@@ -71,7 +71,7 @@ func FileSHA256(path string) (string, error) {
 }
 
 // ParseChecksums parses GoReleaser-style "checksums.txt" - one entry per line,
-// `{hex-digest}  {filename}`. Returns a map filename → digest.
+// `{hex-digest}  {filename}`. Returns a map of filename to digest.
 func ParseChecksums(r io.Reader) (map[string]string, error) {
 	out := map[string]string{}
 	scanner := bufio.NewScanner(r)

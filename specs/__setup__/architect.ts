@@ -7,7 +7,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 export const ARCHITECT_IMAGE_OVERRIDE = 'alpine:latest';
 
 // invariant: the product names its architect container spwn-architect whatever the home, so every spec driving it holds
-// this lock while its chain runs — the files run in parallel workers, and unlocked they removed each other's container
+// this lock while its chain runs: the files run in parallel workers, and unlocked they removed each other's container
 const LOCK = join(tmpdir(), 'spwn-specs-architect.lock');
 const OWNER = join(LOCK, 'pid');
 const PID_WRITE_GRACE_MS = 5000;
@@ -54,7 +54,7 @@ function containerExists(): boolean {
     );
 }
 
-// hazard: under load the daemon outlives a client that gave up on `docker rm -f`, and the next spec's start then meets a removal still in progress — so the removal is asked again until the container is gone
+// hazard: under load the daemon outlives a client that gave up on `docker rm -f`, and the next spec's start then meets a removal still in progress, so the removal is asked again until the container is gone
 function removeContainer(): void {
     const deadline = Date.now() + REMOVAL_BUDGET_MS;
     do {

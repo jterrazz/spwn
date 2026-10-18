@@ -103,7 +103,7 @@ export function useCarousel(count: number, selected: null | number) {
             setOffset(centringOffset(lastFocus.current, selected !== null));
             setDelta(0);
         };
-        // hazard: two frames — the first lets React mount the selection panel, the second measures it; one frame measures a panel that is not there yet
+        // hazard: two frames, the first lets React mount the selection panel, the second measures it; one frame measures a panel that is not there yet
         const frame = requestAnimationFrame(() => {
             requestAnimationFrame(recentre);
         });

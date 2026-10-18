@@ -10,7 +10,7 @@ import (
 // AgentAgentsMDInput carries everything the codex renderer needs to
 // build the per-agent AGENTS.md. Parallel to
 // claudecode.AgentClaudeMDInput but with bodies where claude uses
-// `@-imports` — codex doesn't resolve markdown imports at startup,
+// `@-imports`: codex doesn't resolve markdown imports at startup,
 // so everything that must reach the runtime has to be inlined.
 //
 // Soul and AgentMD may be empty; the renderer handles each omission
@@ -28,7 +28,7 @@ type AgentAgentsMDInput struct {
 	KnowledgeMounted bool
 }
 
-// GenerateAgentAgentsMD returns the per-agent AGENTS.md — the file
+// GenerateAgentAgentsMD returns the per-agent AGENTS.md, the file
 // codex reads at cwd on startup. It inlines:
 //
 //   - Identity: the body of SOUL.md (if any), under an "## Identity"
@@ -48,7 +48,7 @@ type AgentAgentsMDInput struct {
 // source file name: the user writes `spwn/agents/<name>/AGENTS.md`
 // as the provider-neutral seed, and this renderer's output also lands
 // at `/agents/<name>/AGENTS.md` inside the container. That's by
-// design — codex reads from cwd and the source body shows up as
+// design: codex reads from cwd and the source body shows up as
 // "## Task" at the bottom of the final file.
 func GenerateAgentAgentsMD(in AgentAgentsMDInput) string {
 	var sb strings.Builder

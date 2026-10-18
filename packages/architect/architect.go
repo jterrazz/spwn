@@ -24,7 +24,7 @@ type Architect struct {
 
 // New creates an Architect with the given backend and runtimestate
 // store. Runtime adapters are looked up per-world at call time, so
-// the constructor takes no runtime dependency — the blank-import of
+// the constructor takes no runtime dependency: the blank-import of
 // runtimes/defaults at the top of this file is the only wiring needed
 // to make every built-in adapter discoverable.
 func New(b backend.Backend, s *runtimestate.Store) *Architect {

@@ -33,7 +33,7 @@ type VersionInfo struct {
 // A fresh network lookup. Called by `spwn upgrade` on successful
 // Completion so the banner doesn't cling to the pre-upgrade "latest"
 // Value until its 24-hour TTL expires. Safe to call when the cache
-// File is missing — not-found errors are swallowed.
+// File is missing: not-found errors are swallowed.
 func InvalidateVersionCache() error {
 	path := filepath.Join(platform.BaseDir(), versionCheckFile)
 	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {

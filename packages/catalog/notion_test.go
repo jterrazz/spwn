@@ -43,7 +43,7 @@ func TestNotion_DependsOnMcp2cli(t *testing.T) {
 
 // TestNotion_NoNodeDependency catches the regression where someone
 // re-introduces `npm install -g @notionhq/notion-mcp-server`. The
-// hosted MCP at mcp.notion.com handles the protocol — local stdio
+// hosted MCP at mcp.notion.com handles the protocol; local stdio
 // server is not used and node is not needed.
 func TestNotion_NoNodeDependency(t *testing.T) {
 	tool := findTool("spwn:notion")
@@ -122,7 +122,7 @@ func TestNotion_WrapperHashMatchesProviderKey(t *testing.T) {
 		t.Errorf("notion wrapper must hash the literal URL %q (so the bash + Go hashes match); got:\n%s", url, all)
 	}
 	// Sanity: confirm the hash for our URL is what we expect today.
-	// Drift here ⇒ either url constant moved (other test catches it)
+	// Drift here means either url constant moved (other test catches it)
 	// or sha256 stopped being sha256 (the world ended).
 	const wantSentinel = "1cbd18bf1818c780"
 	if want != wantSentinel {

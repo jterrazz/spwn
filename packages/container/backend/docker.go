@@ -47,9 +47,9 @@ func NewDocker() (*Docker, error) {
 // The user having to set DOCKER_HOST by hand.
 //
 // Discovery precedence (see probe.CheckDocker):
-//  1. SPWN_DOCKER_HOST  — explicit spwn escape hatch.
-//  2. DOCKER_HOST       — standard SDK env var.
-//  3. /var/run/docker.sock — system default.
+//  1. SPWN_DOCKER_HOST: explicit spwn escape hatch.
+//  2. DOCKER_HOST: standard SDK env var.
+//  3. /var/run/docker.sock: system default.
 //  4. Per-user socket fallback list (every runtime we know about).
 //
 // The returned error is already humanized (which socket we tried last,
@@ -113,7 +113,7 @@ func (d *Docker) Stop(ctx context.Context, containerID string) error {
 
 // Remove forcibly removes a container along with any anonymous
 // volumes it owns. RemoveVolumes is defense-in-depth against image
-// VOLUME declarations that might slip in — without it, every such
+// VOLUME declarations that might slip in: without it, every such
 // volume becomes an unreachable dangling entry that `docker rm`
 // never reclaims.
 func (d *Docker) Remove(ctx context.Context, containerID string) error {
@@ -233,7 +233,7 @@ func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string
 // to CopyToContainer in a single round-trip.
 //
 // The destination is the absolute container path where the contents
-// should land — e.g. hostSrcDir=/host/spwn/agents/neo, destDir=/agents/neo
+// should land, e.g. hostSrcDir=/host/spwn/agents/neo, destDir=/agents/neo
 // drops every file from the host tree under /agents/neo/ inside the
 // container.
 func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir string, hostSrcDir string) error {

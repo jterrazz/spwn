@@ -14,14 +14,14 @@ type ColonyAgentSpec struct {
 
 // GenerateRoster produces the world's authoritative list of who is
 // currently in this world. Inlined by the claude-code renderer into
-// each agent's CLAUDE.md under a "## Roster" heading — how agents
+// each agent's CLAUDE.md under a "## Roster" heading, how agents
 // learn "who am I in here with?" and how to address messages.
 //
 // Each agent still reads their own identity from SOUL.md and their
 // per-deployment role from worlds/<world-id>/role.md.
 //
 // knowledgeMounted controls whether the roster advertises the shared
-// /world/knowledge/ directory. When false, the paragraph is omitted —
+// /world/knowledge/ directory. When false, the paragraph is omitted:
 // the agent is never told a knowledge base exists.
 func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted bool) string {
 	var b strings.Builder

@@ -48,7 +48,7 @@ export function flowHeight(roles: OrganizationRole[]): number {
     return Math.max(300, new Set(roles.map((role) => role.level)).size * ROW_HEIGHT + 40);
 }
 
-/** An organization drawn as a chart: one row per level, centred, linked by `reports_to` — or, when no role declares one, each level to the next. */
+/** An organization drawn as a chart: one row per level, centred, linked by `reports_to` or, when no role declares one, each level to the next. */
 export function flowOf(roles: OrganizationRole[]): { nodes: Node<RoleNodeData>[]; edges: Edge[] } {
     const rows = [...byLevel(roles).values()];
     const nodes = rows.flatMap((row, rowIndex) => {

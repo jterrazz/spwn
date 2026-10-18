@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-# Minimal test base — mock tools only
+# Minimal test base: mock tools only
 RUN apt-get update && apt-get install -y ca-certificates sudo \
     && rm -rf /var/lib/apt/lists/*
 

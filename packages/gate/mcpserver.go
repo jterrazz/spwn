@@ -11,14 +11,14 @@ import (
 
 // MCPServer is a minimal hand-rolled HTTP MCP server. It speaks
 // JSON-RPC 2.0 over HTTP POST and implements the three methods every
-// MCP client (mcp2cli, claude-code, …) calls during a typical session:
+// MCP client (mcp2cli, claude-code, ...) calls during a typical session:
 //
-//	initialize  — handshake / capability negotiation
-//	tools/list  — enumerate the tools this server exposes
-//	tools/call  — invoke a named tool with arguments
+//	initialize  handshake / capability negotiation
+//	tools/list  enumerate the tools this server exposes
+//	tools/call  invoke a named tool with arguments
 //
 // Notifications and the streaming SSE half of "streamable HTTP" are
-// not implemented — our gws-backed tools are synchronous and can
+// not implemented: our gws-backed tools are synchronous and can
 // answer in a single response. If we add streaming tools later,
 // upgrade this to handle SSE on GET.
 //

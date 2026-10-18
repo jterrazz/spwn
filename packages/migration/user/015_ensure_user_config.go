@@ -11,7 +11,7 @@ import (
 
 // EnsureUserConfig writes a default ~/.spwn/config.yaml on first
 // upgrade if the file does not exist. This is the one-time seed of
-// the user-level preferences file introduced in 2026-04 —
+// the user-level preferences file introduced in 2026-04;
 // subsequent runs read whatever the user has customised.
 //
 // No content is ever overwritten: if config.yaml already exists we

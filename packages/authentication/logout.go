@@ -24,14 +24,14 @@ type LogoutOpts struct {
 
 // LogoutResult summarises what LogoutProvider did. Surfaced to the
 // CLI so users see exactly which stores were touched, which remain,
-// and anything that failed — credentials are sensitive enough that
+// and anything that failed: credentials are sensitive enough that
 // silent partial-failures would be a footgun.
 type LogoutResult struct {
 	// Cleared lists human-readable descriptions of what was removed
 	// (e.g. "keychain:Claude Code", "file:~/.spwn/.auth-token").
 	Cleared []string
 	// Remaining lists things spwn can SEE but cannot clear on its own
-	// — active env vars, mostly. The caller tells the user to unset
+	// (active env vars, mostly). The caller tells the user to unset
 	// them manually.
 	Remaining []string
 	// Errors collects per-store failures. Logout keeps going through
@@ -49,7 +49,7 @@ func (r *LogoutResult) HasErrors() bool { return len(r.Errors) > 0 }
 // vars cannot be unset from the caller's shell; those are recorded
 // in LogoutResult.Remaining for the UI to surface.
 //
-// Does NOT flip the provider's Disabled flag — logout is about
+// Does NOT flip the provider's Disabled flag: logout is about
 // removing creds, disable is about saying "never use this provider".
 // Distinct verbs, distinct intents.
 func LogoutProvider(p Provider, opts LogoutOpts) *LogoutResult {
@@ -96,7 +96,7 @@ func logoutAnthropic(opts LogoutOpts, res *LogoutResult) {
 
 	// invariant: Mirrored dir under credentials/anthropic/ (written by sync for
 	// runtime-specific formats). Safe to nuke unconditionally regardless
-	// of method — it's a derived artefact, never the source of truth.
+	// of method: it's a derived artefact, never the source of truth.
 	if opts.Method == "" {
 		mirror := filepath.Join(platform.CredentialsDir(), "anthropic")
 		if _, err := os.Stat(mirror); err == nil {

@@ -32,7 +32,7 @@ func TestAdapterRegistration(t *testing.T) {
 }
 
 // TestAdapterIdentityFields locks in the invariant that every
-// built-in adapter declares Name and DefaultProvider — the two bits
+// built-in adapter declares Name and DefaultProvider, the two bits
 // of metadata the rest of the codebase reads to route work (auth
 // plumbing, runtime lookup).
 func TestAdapterIdentityFields(t *testing.T) {
@@ -102,7 +102,7 @@ func TestGet(t *testing.T) {
 }
 
 // TestNames returns every registered adapter name. Used by the CLI
-// error-hint path ("unknown runtime; available: …"). Sort-order is
+// error-hint path ("unknown runtime; available: ..."). Sort-order is
 // insertion-order; the test just checks the content, not order.
 func TestNames(t *testing.T) {
 	names := runtimes.Names()

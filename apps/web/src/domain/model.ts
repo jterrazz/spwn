@@ -41,7 +41,7 @@ export function getWorkspaceSummary(world: Pick<World, 'workspaces'>): string {
     return `${ws.length} workspaces`;
 }
 
-/** Returns the user-facing name of a world: custom name if set, otherwise the capitalized middle segment of the world id (e.g. "w-titan-abc123" → "Titan"). */
+/** Returns the user-facing name of a world: custom name if set, otherwise the capitalized middle segment of the world id (e.g. "w-titan-abc123" gives "Titan"). */
 export function getWorldName(world: Pick<World, 'id' | 'name'>): string {
     const name = world.name?.trim() ?? '';
     if (name !== '') {

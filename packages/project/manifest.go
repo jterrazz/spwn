@@ -13,7 +13,7 @@
 //	└── .spwn/              - gitignored local state
 //	    └── state.json
 //
-// Worlds are no longer separate yaml files — they live as inline map
+// Worlds are no longer separate yaml files: they live as inline map
 // entries under spwn.yaml#worlds. Agents are the source of truth for
 // the project roster: every directory under spwn/agents/ that the
 // manifest's worlds reference is "deployable", everything else is
@@ -36,7 +36,7 @@ type World = intmanifest.World
 // Runtime is the project-wide runtime block from spwn.yaml.
 type Runtime = intmanifest.Runtime
 
-// Automation is one trigger → agent wakeup binding inside a world.
+// Automation is one binding of a trigger to an agent wakeup inside a world.
 // See packages/project/internal/manifest for full schema docs.
 type Automation = intmanifest.Automation
 
@@ -65,8 +65,8 @@ type Project struct {
 	Manifest *Manifest
 
 	// Agents is one entry per *deployable* agent (referenced by at
-	// least one world in the manifest). Orphan agents — directories
-	// under spwn/agents/ not listed in any world — are surfaced via
+	// least one world in the manifest). Orphan agents (directories
+	// under spwn/agents/ not listed in any world) are surfaced via
 	// OrphanAgents.
 	Agents []AgentRef
 
@@ -196,8 +196,8 @@ var ErrWorldNotFound = scaffold.ErrWorldNotFound
 
 // IsReservedAgentName reports whether the given name collides with
 // a `spwn agent <subcommand>` reserved verb. CLI callers should
-// reject such names at creation time — before a directory is ever
-// written — so the user never lands in a half-broken state.
+// reject such names at creation time, before a directory is ever
+// written, so the user never lands in a half-broken state.
 func IsReservedAgentName(name string) bool {
 	return validate.IsReservedAgentName(name)
 }

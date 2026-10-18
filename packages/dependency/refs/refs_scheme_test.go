@@ -105,7 +105,7 @@ func TestParse_PathFormUnknownTypeInvalid(t *testing.T) {
 }
 
 // TestParse_PathFormDeepPathInvalid: only one slash is allowed in
-// path-form local refs. `tool/foo/bar` is rejected — names with
+// path-form local refs. `tool/foo/bar` is rejected: names with
 // embedded slashes aren't supported, and accepting them now would
 // box future grammars (e.g. `github:owner/repo/tool/foo`) into a
 // reinterpretation.
@@ -119,7 +119,7 @@ func TestParse_PathFormDeepPathInvalid(t *testing.T) {
 }
 
 // TestParse_UnknownSchemeInvalid: a ref with an unknown source
-// scheme (`gitlab:…`, `foo:bar`) is invalid.
+// scheme (`gitlab:...`, `foo:bar`) is invalid.
 func TestParse_UnknownSchemeInvalid(t *testing.T) {
 	got := refs.ParseRef("gitlab:x/y")
 	if got.Kind != refs.KindInvalid {

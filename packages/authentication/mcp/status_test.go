@@ -29,7 +29,7 @@ func TestIsAuthenticated(t *testing.T) {
 }
 
 // TestIsAuthenticated_DirectoryAtPath protects against the
-// "tokens.json is a directory" anti-state — could happen if a user
+// "tokens.json is a directory" anti-state, which could happen if a user
 // hand-creates the path. We treat it as not-authenticated rather
 // than misreporting truthy on os.Stat success.
 func TestIsAuthenticated_DirectoryAtPath(t *testing.T) {
@@ -41,7 +41,7 @@ func TestIsAuthenticated_DirectoryAtPath(t *testing.T) {
 	if err := os.MkdirAll(tokens, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	// Today this returns true — os.Stat succeeds on directories. If
+	// Today this returns true: os.Stat succeeds on directories. If
 	// We tighten this in the future, flip the assertion. For now
 	// the test documents the current behaviour explicitly so a
 	// future regression is intentional, not accidental.
@@ -83,7 +83,7 @@ func TestLogout_NotLoggedIn(t *testing.T) {
 }
 
 // TestLogout_ScopedToProvider verifies removing one provider's
-// tokens leaves siblings intact — the cache holds many providers
+// tokens leaves siblings intact: the cache holds many providers
 // in one dir, accidental wipe-all would be ugly to recover from.
 func TestLogout_ScopedToProvider(t *testing.T) {
 	tmp := t.TempDir()

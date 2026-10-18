@@ -9,7 +9,7 @@ function titleOf(parts: (null | string | undefined)[]): string {
     return [...named, 'spwn'].join(' · ');
 }
 
-/** Sets the document title: the parts joined with ' · ', ending with 'spwn' — usePageTitle('neo', 'Rhea') → 'neo · Rhea · spwn'. */
+/** Sets the document title: the parts joined with ' · ', ending with 'spwn', so usePageTitle('neo', 'Rhea') gives 'neo · Rhea · spwn'. */
 export function usePageTitle(...parts: (null | string | undefined)[]) {
     const title = titleOf(parts);
 

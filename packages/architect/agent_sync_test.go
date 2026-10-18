@@ -44,7 +44,7 @@ func TestMaterialiseWorldTree_SplitsByPrefix(t *testing.T) {
 		}
 	}
 
-	// agents/* went via docker cp — one CopyTo per entry, using the
+	// agents/* went via docker cp, one CopyTo per entry, using the
 	// absolute container path.
 	wantCp := map[string]string{
 		"/agents/neo/CLAUDE.md":      "neo entrypoint",
@@ -86,7 +86,7 @@ func TestMaterialiseWorldTree_UnknownPrefixIsError(t *testing.T) {
 }
 
 // TestSyncAgentsInto_SkipsMissingHostDirs ensures that an agent whose
-// host-side home does not exist does not fail the spawn — it's treated
+// host-side home does not exist does not fail the spawn; it's treated
 // as a no-op so first-time scaffolds work.
 func TestSyncAgentsInto_SkipsMissingHostDirs(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())

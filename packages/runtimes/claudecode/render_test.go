@@ -20,8 +20,8 @@ func TestRenderer_Name(t *testing.T) {
 	}
 }
 
-// TestRender_BasePaths — every agent gets CLAUDE.md + settings.json.
-// Nothing under worlds/ — the per-deployment role is inlined into
+// TestRender_BasePaths: every agent gets CLAUDE.md + settings.json.
+// Nothing under worlds/: the per-deployment role is inlined into
 // CLAUDE.md (dropping the worlds/<id>/role.md side file entirely).
 func TestRender_BasePaths(t *testing.T) {
 	tree, err := Renderer.Render(transpile.Input{
@@ -48,7 +48,7 @@ func TestRender_BasePaths(t *testing.T) {
 	}
 }
 
-// TestRender_RoleInlinedIntoCLAUDEMD — role flows into the CLAUDE.md
+// TestRender_RoleInlinedIntoCLAUDEMD: role flows into the CLAUDE.md
 // "## Role here" block as a single sentence instead of being linked
 // via @worlds/<id>/role.md.
 func TestRender_RoleInlinedIntoCLAUDEMD(t *testing.T) {
@@ -65,7 +65,7 @@ func TestRender_RoleInlinedIntoCLAUDEMD(t *testing.T) {
 	}
 }
 
-// TestRender_SettingsAlwaysSkipsDangerous — even the null input must
+// TestRender_SettingsAlwaysSkipsDangerous: even the null input must
 // emit a settings.json whose permissions flag is on; spwn containers
 // are sandboxed and the prompt would block every one-shot invocation.
 func TestRender_SettingsAlwaysSkipsDangerous(t *testing.T) {
@@ -86,7 +86,7 @@ func TestRender_SettingsAlwaysSkipsDangerous(t *testing.T) {
 	}
 }
 
-// TestRender_ModelPinFlowsThrough — AgentInput.Model must land in
+// TestRender_ModelPinFlowsThrough: AgentInput.Model must land in
 // settings.json so Claude Code auto-selects it at startup.
 func TestRender_ModelPinFlowsThrough(t *testing.T) {
 	tree, _ := Renderer.Render(transpile.Input{
@@ -101,7 +101,7 @@ func TestRender_ModelPinFlowsThrough(t *testing.T) {
 	}
 }
 
-// TestRender_EmptyModelOmitsKey — when no model override is set, we
+// TestRender_EmptyModelOmitsKey: when no model override is set, we
 // must not write `"model": ""` (Claude Code would treat that as
 // "pin to the empty model"). Absence is correct.
 func TestRender_EmptyModelOmitsKey(t *testing.T) {
@@ -117,11 +117,11 @@ func TestRender_EmptyModelOmitsKey(t *testing.T) {
 	}
 }
 
-// TestRender_HooksFanIntoSettings — hooks selected by the agent
+// TestRender_HooksFanIntoSettings: hooks selected by the agent
 // (via hook/<n> deps in agent.yaml) must surface as Claude Code's
 // nested {event: [{matcher, hooks:[{type, command}]}]} structure
 // inside settings.json. Hooks the agent didn't subscribe to are
-// silently absent — see TestRender_HooksAreAgentScoped below.
+// silently absent; see TestRender_HooksAreAgentScoped below.
 func TestRender_HooksFanIntoSettings(t *testing.T) {
 	agentHooks := []transpile.HookEntry{
 		{Name: "audit", Event: "PreToolUse", Matcher: "Bash", Command: "echo audit"},
@@ -163,7 +163,7 @@ func TestRender_HooksFanIntoSettings(t *testing.T) {
 	}
 }
 
-// TestRender_EmptyMatcherDefaultsToStar — every runtime interprets
+// TestRender_EmptyMatcherDefaultsToStar: every runtime interprets
 // "*" as "match anything"; emitting an empty matcher would be a
 // schema violation in both Claude Code and Codex.
 func TestRender_EmptyMatcherDefaultsToStar(t *testing.T) {
@@ -181,7 +181,7 @@ func TestRender_EmptyMatcherDefaultsToStar(t *testing.T) {
 	}
 }
 
-// TestRender_NoHooksOmitsHooksKey — absence is correct when no hooks
+// TestRender_NoHooksOmitsHooksKey: absence is correct when no hooks
 // are declared (keeps the file minimal + matches Claude Code's tolerant
 // "hooks is optional" schema).
 func TestRender_NoHooksOmitsHooksKey(t *testing.T) {
@@ -197,7 +197,7 @@ func TestRender_NoHooksOmitsHooksKey(t *testing.T) {
 	}
 }
 
-// TestRender_SkillsLandInClaudeSkillsTree — every skill emits every
+// TestRender_SkillsLandInClaudeSkillsTree: every skill emits every
 // file it carries into `.claude/skills/<skill>/<relpath>` so the
 // native walker finds both SKILL.md and any sidecar (templates,
 // scripts).
@@ -227,7 +227,7 @@ func TestRender_SkillsLandInClaudeSkillsTree(t *testing.T) {
 	}
 }
 
-// TestRender_SkillsEmittedPerAgent — with multiple agents in a world,
+// TestRender_SkillsEmittedPerAgent: with multiple agents in a world,
 // every agent gets its own copy of every skill. This is world-wide
 // distribution: all agents see the same skill set, but the paths are
 // per-agent so Claude Code's walker under each home works in
@@ -251,7 +251,7 @@ func TestRender_SkillsEmittedPerAgent(t *testing.T) {
 	}
 }
 
-// TestRender_NoSkillsLeavesNoSkillDir — a skill-less input must not
+// TestRender_NoSkillsLeavesNoSkillDir: a skill-less input must not
 // emit a dangling `.claude/skills/` path. Absence is correct.
 func TestRender_NoSkillsLeavesNoSkillDir(t *testing.T) {
 	tree, _ := Renderer.Render(transpile.Input{

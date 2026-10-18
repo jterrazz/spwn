@@ -35,7 +35,7 @@ type ToolInput struct {
 	// at /etc/spwn/policy/<short>.json. Catalog-tool wrappers (the
 	// scripts emitted by Commands) read this file at runtime to
 	// reject denied methods. Short is the tool's slug, e.g. "x" for
-	// "spwn:x" — used both as the filename and as the JSON object's
+	// "spwn:x", used both as the filename and as the JSON object's
 	// implicit subject.
 	Policy *Policy
 }

@@ -100,7 +100,7 @@ func TestRender_DedupSuppressesChildren(t *testing.T) {
 	}
 }
 
-// TestRender_SkillsAndHooksAlignOrigin — the two-column layout
+// TestRender_SkillsAndHooksAlignOrigin: the two-column layout
 // (name + origin, separated by at least 4 spaces) is what makes
 // the block scannable. Verify every origin aligns to the same
 // column across rows of unequal name length.
@@ -131,7 +131,7 @@ func TestRender_SkillsAndHooksAlignOrigin(t *testing.T) {
 	}
 }
 
-// TestRender_MultiAgentSeparatedByBlankLine — two agent blocks
+// TestRender_MultiAgentSeparatedByBlankLine: two agent blocks
 // must be separated by exactly one blank line (the helm/terraform
 // "whitespace is enough" convention).
 func TestRender_MultiAgentSeparatedByBlankLine(t *testing.T) {
@@ -144,7 +144,7 @@ func TestRender_MultiAgentSeparatedByBlankLine(t *testing.T) {
 	got := buf.String()
 
 	// Find where block 2 starts and confirm a single "\n\n" (one
-	// blank line) precedes it — no divider chars, no extra blanks.
+	// blank line) precedes it, with no divider chars and no extra blanks.
 	idx := strings.Index(got, "Name         trinity")
 	if idx < 0 {
 		t.Fatalf("second agent block missing:\n%s", got)
@@ -179,7 +179,7 @@ func TestRender_StatusGlyphs(t *testing.T) {
 	}
 }
 
-// TestRender_ComposeBadges — the skills count is the only badge
+// TestRender_ComposeBadges: the skills count is the only badge
 // today; empty deps render nothing.
 func TestRender_ComposeBadges(t *testing.T) {
 	cases := []struct {
@@ -199,7 +199,7 @@ func TestRender_ComposeBadges(t *testing.T) {
 	}
 }
 
-// TestRender_EmptyAgentDoesNotCrash — no deps, no skills, no hooks
+// TestRender_EmptyAgentDoesNotCrash: no deps, no skills, no hooks
 // is a legitimate state (a just-scaffolded agent). Section headers
 // must still render with their (0) counts and the "- " placeholder.
 func TestRender_EmptyAgentDoesNotCrash(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 )
 
 // claudeEvents and codexEvents mirror packages/runtimes/<runtime>/events.go
-// without importing those packages — depguard forbids the validate
+// without importing those packages: depguard forbids the validate
 // (project layer) from depending on the runtimes (build layer). Keep
 // them in sync; if the runtime sets ever drift far enough that a test
 // drift becomes likely, hoist a shared registry into a layer below

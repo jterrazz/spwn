@@ -11,7 +11,7 @@ import (
 
 // RetireAgentKnowledge removes the now-unused knowledge/ directory
 // from every agent in ~/.spwn/agents/. Knowledge moved to the world
-// in 2026-04 — it's environmental (about the domain), not about the
+// in 2026-04: it's environmental (about the domain), not about the
 // agent's personality. The world owns /world/knowledge/, bind-mounted
 // from the project tree at spwn/worlds/<name>/knowledge/.
 //

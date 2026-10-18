@@ -1,4 +1,4 @@
-# Build, test and lint artefacts — one root, one `rm -rf`. Turborepo's cache
+# Build, test and lint artefacts: one root, one `rm -rf`. Turborepo's cache
 # obeys it through `cacheDir` in turbo.json; the per-task log it drops at
 # `<package>/.turbo/turbo-<task>.log` is not configurable, and an unignored one
 # feeds its own hash back into the next run, so a second `turbo run` never hits
@@ -20,7 +20,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Local state a run leaves on this checkout — never a build's output:
+# Local state a run leaves on this checkout, never a build's output:
 # Claude Code's harness folder, spwn's own runtime state, the chief-mode
 # test agent dir, and the project an e2e run scaffolds when it is given
 # `specs/` as its cwd. Every one is anchored to the repository root:

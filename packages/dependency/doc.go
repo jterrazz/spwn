@@ -14,6 +14,6 @@
 // resolves to something on disk. Lockfile owns the line-oriented
 // spwn.lock text format (plus a legacy-YAML fallback for migration).
 //
-// The package has zero spwn dependencies — only stdlib — so every
+// The package has zero spwn dependencies (only stdlib), so every
 // upstream layer can import it.
 package dependency

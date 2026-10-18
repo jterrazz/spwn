@@ -7,9 +7,9 @@
 //
 //   - Docker container LABELS are the canonical source of truth for
 //     "does this world exist" and for creation-time metadata (id,
-//     config, workspaces, creation timestamp, …). Enumeration goes
+//     config, workspaces, creation timestamp, ...). Enumeration goes
 //     through the container backend, so `docker rm` or a crashed
-//     container disappear from List() naturally — no state-file drift.
+//     container disappear from List() naturally, no state-file drift.
 //
 //   - Mutable per-world data lives as JSON under
 //     ~/.spwn/world-states/<world-id>/runtime.json. This covers:
@@ -18,7 +18,7 @@
 //
 //   - per-agent runtime session ids (chat continuity)
 //
-//   - DisplayName — the editable human name that overrides the
+//   - DisplayName: the editable human name that overrides the
 //     creation-time label for rendering. Supports `spwn world
 //     rename` without destroying + recreating the container.
 //
@@ -28,7 +28,7 @@
 // one place that can be inspected, archived, or destroyed atomically.
 //
 // GC removes runtime.json from any world-state directory whose
-// container is no longer present — the rest of the directory is left
+// container is no longer present; the rest of the directory is left
 // alone, because destroying a container should never destroy user-
 // authored notes.
 package runtimestate
@@ -57,7 +57,7 @@ type File struct {
 	// Agents is the deployed-agent list, including agents added
 	// after initial spawn via hot-deploy.
 	Agents []models.AgentRecord `json:"agents,omitempty"`
-	// SessionIDs is agent-name → runtime session id, used for chat
+	// SessionIDs maps agent name to runtime session id, used for chat
 	// continuity across talks.
 	SessionIDs map[string]string `json:"session_ids,omitempty"`
 	// DisplayName overrides the container label's name for UI
@@ -70,7 +70,7 @@ type File struct {
 // per-world mutable data under ~/.spwn/world-states/<id>/runtime.json.
 //
 // A Store without a backend is valid for callers that only exercise
-// the mutable-data methods (SetSessionID, AddAgent, …). Enumeration
+// the mutable-data methods (SetSessionID, AddAgent, ...). Enumeration
 // methods (List, Get) require a backend and return an error when
 // none is wired in.
 type Store struct {
@@ -83,7 +83,7 @@ type Store struct {
 // NewStore returns a production Store wired to the host Docker
 // daemon and rooted at ~/.spwn/world-states/. The legacy
 // ~/.spwn/state.json and ~/.spwn/runtime/ paths are removed by the
-// 016 migration at CLI boot — not here — so there's a single
+// 016 migration at CLI boot, not here, so there's a single
 // source of truth for schema transitions.
 func NewStore() (*Store, error) {
 	docker, err := backend.NewDocker()
@@ -235,7 +235,7 @@ func derivedStatus(c backend.ContainerInfo) models.Status {
 }
 
 // Load returns the runtime state for a world. Missing files yield an
-// empty File without an error — a freshly-spawned world legitimately
+// empty File without an error: a freshly-spawned world legitimately
 // has no runtime data yet.
 func (s *Store) Load(worldID string) (File, error) {
 	s.mu.Lock()
@@ -252,7 +252,7 @@ func (s *Store) Save(worldID string, f File) error {
 
 // Delete removes a world's runtime state file. Missing files are not
 // an error. The rest of the world-state directory (manifest,
-// physics, shared scratchpad…) is intentionally left alone —
+// physics, shared scratchpad...) is intentionally left alone:
 // destroying a container should not destroy user-authored notes.
 func (s *Store) Delete(worldID string) error {
 	s.mu.Lock()
@@ -326,7 +326,7 @@ func (s *Store) RemoveAgent(worldID, agentID string) error {
 }
 
 // UpdateAgentStatus mutates one agent's status in place. No-op when
-// the agent isn't tracked yet — status updates are best-effort.
+// the agent isn't tracked yet; status updates are best-effort.
 func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -348,7 +348,7 @@ func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status)
 // when non-empty. Empty clears the override; the label-derived name
 // wins again.
 //
-// Returns ErrNotFound when no container with this id is running —
+// Returns ErrNotFound when no container with this id is running;
 // this is the one mutable-state method that checks liveness, because
 // renaming a ghost world is a user mistake worth surfacing. When the
 // Store has no backend configured, the liveness check is skipped
@@ -373,8 +373,8 @@ func (s *Store) SetDisplayName(worldID, name string) error {
 // not in the supplied liveIDs set. Called by List() on every call so
 // runtime data naturally stays in sync with Docker.
 //
-// Only runtime.json is removed — the world-state directory itself
-// (manifest, physics, shared scratchpad…) is left alone. Use a
+// Only runtime.json is removed: the world-state directory itself
+// (manifest, physics, shared scratchpad...) is left alone. Use a
 // dedicated `spwn world prune` flow for archival cleanup.
 func (s *Store) GC(liveIDs []string) error {
 	s.mu.Lock()

@@ -46,7 +46,7 @@ func TestGenerateAgentSettingsJSON_omitsHooksWhenEmpty(t *testing.T) {
 	}
 }
 
-// TestGenerateAgentSettingsJSON_groupsHooksByEvent — two hooks on the
+// TestGenerateAgentSettingsJSON_groupsHooksByEvent: two hooks on the
 // same event must collapse into the SAME event's array (not produce
 // two competing PreToolUse keys, which isn't valid JSON anyway).
 func TestGenerateAgentSettingsJSON_groupsHooksByEvent(t *testing.T) {
@@ -74,7 +74,7 @@ func TestGenerateAgentSettingsJSON_groupsHooksByEvent(t *testing.T) {
 	}
 }
 
-// TestGenerateAgentSettingsJSON_hookShapeMatchesClaudeSchema — the
+// TestGenerateAgentSettingsJSON_hookShapeMatchesClaudeSchema: the
 // inner envelope must be `{matcher, hooks:[{type:"command", command}]}`
 // per https://code.claude.com/docs/en/hooks.md. Drift here silently
 // breaks claude at runtime.
@@ -113,7 +113,7 @@ func TestGenerateAgentSettingsJSON_emptyMatcherBecomesStar(t *testing.T) {
 	}
 }
 
-// TestGenerateAgentSettingsJSON_isValidJSONWithTrailingNewline — the
+// TestGenerateAgentSettingsJSON_isValidJSONWithTrailingNewline: the
 // helper appends a trailing newline so `cat` output is POSIX-clean
 // and the file diffs cleanly against goldens.
 func TestGenerateAgentSettingsJSON_isValidJSONWithTrailingNewline(t *testing.T) {

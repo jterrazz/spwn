@@ -8,7 +8,7 @@ import (
 )
 
 // TestRuleAgentDescription_flagsMissing: an agent.yaml that doesn't
-// declare description: → LevelError with a fix-it hint.
+// declare description: gives LevelError with a fix-it hint.
 func TestRuleAgentDescription_flagsMissing(t *testing.T) {
 	root := t.TempDir()
 	agentDir := writeAgentYAML(t, root, "neo", `name: neo
@@ -58,7 +58,7 @@ runtime:
 	}
 }
 
-// TestRuleAgentDescription_passes: description present → no issue.
+// TestRuleAgentDescription_passes: description present, no issue.
 func TestRuleAgentDescription_passes(t *testing.T) {
 	root := t.TempDir()
 	agentDir := writeAgentYAML(t, root, "neo", `name: neo

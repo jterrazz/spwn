@@ -47,7 +47,7 @@ func NewFSWatcher(source RawFSSource, clock Clock) *FSWatcher {
 
 // FSWatchSpec is one filesystem trigger registration.
 type FSWatchSpec struct {
-	// ID is the engine's stable identifier for this watch — typically
+	// ID is the engine's stable identifier for this watch, typically
 	// "<world>/<automation>". Surfaces in dispatched events so the
 	// handler knows which automation to fire.
 	ID string
@@ -73,7 +73,7 @@ type FSWatchSpec struct {
 
 	// IncludeHidden, when true, fires for paths inside directories
 	// whose basename starts with `.` (e.g. `.cache/foo.md`). Default
-	// false — most recursive watches don't want git/cache-internal
+	// false: most recursive watches don't want git/cache-internal
 	// noise.
 	IncludeHidden bool
 }
@@ -93,7 +93,7 @@ type DebouncedFSEvent struct {
 	Paths []string
 
 	// Kind is the dominant op for the burst. When the burst includes
-	// mixed ops, "create" wins over "write" wins over "rename" — the
+	// mixed ops, "create" wins over "write" wins over "rename"; the
 	// rationale is "what's the most actionable label for the agent's
 	// receipt". Tests pin the precedence.
 	Kind string
@@ -116,7 +116,7 @@ type fsDebounceTimer struct {
 }
 
 // Watch registers spec with the watcher. Multiple specs may target
-// the same path with different patterns/handlers — the source is
+// the same path with different patterns/handlers: the source is
 // asked once, the handler set fans out internally.
 //
 // Must be called before Start. Watch on a closed watcher returns an
@@ -211,7 +211,7 @@ func (w *FSWatcher) Close() error {
 // HandleForTest is a test-only entry point that synchronously drives
 // the watcher's filter chain for one event. Skips the source pump
 // goroutine so integration tests don't race fsnotify timing. Same
-// semantics as a real raw event arriving via the source — passes
+// semantics as a real raw event arriving via the source; it passes
 // through pathCoveredBy / events filter / pattern match / debounce.
 func (w *FSWatcher) HandleForTest(path, kind string) {
 	w.handle(context.Background(), RawFSEvent{Path: path, Kind: kind})

@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Manifest is the parsed agent.yaml — composition + runtime config.
+// Manifest is the parsed agent.yaml: composition + runtime config.
 //
 // The composition is a single flat dependency list. Every entry is a
 // `scheme:target` ref resolved via one of the known schemes
@@ -22,7 +22,7 @@ type Manifest struct {
 	Name string `yaml:"name,omitempty"`
 
 	// Description is a mandatory one-line pitch of what this agent is
-	// for — the equivalent of the `description:` field in the skill
+	// for, the equivalent of the `description:` field in the skill
 	// frontmatter convention. `spwn check` flags an empty description
 	// as LevelError so every agent in a project has a human-readable
 	// purpose line that the inspector, web UI, and external tooling
@@ -33,9 +33,9 @@ type Manifest struct {
 	Runtime     RuntimeConfig `yaml:"runtime,omitempty"`
 
 	// Deps is the flat list of dependency refs (`spwn:x`,
-	// `skill:refine`, …). Populated by UnmarshalYAML from either
+	// `skill:refine`, ...). Populated by UnmarshalYAML from either
 	// scalar entries (legacy / no policy) or mapping entries with
-	// allow/deny — see DepPolicies for the policy side.
+	// allow/deny; see DepPolicies for the policy side.
 	Deps []string `yaml:"-"`
 
 	// DepPolicies indexes per-dep allow/deny lists, keyed by the
@@ -56,7 +56,7 @@ type Manifest struct {
 // DepPolicy filters which methods of a dependency the agent may
 // call. allow is a positive list (everything else denied); deny is
 // a negative list (everything else allowed). Setting both is valid
-// — deny takes precedence. Empty policy = unfiltered.
+// and deny takes precedence. Empty policy = unfiltered.
 type DepPolicy struct {
 	Allow []string `yaml:"allow,omitempty"`
 	Deny  []string `yaml:"deny,omitempty"`
@@ -122,7 +122,7 @@ func (m *Manifest) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-// MarshalYAML round-trips the parsed form back to the wire format —
+// MarshalYAML round-trips the parsed form back to the wire format:
 // mapping entries for policied deps, scalars for everything else.
 // Keeps `spwn agent inspect` and Save() output stable.
 func (m Manifest) MarshalYAML() (any, error) {

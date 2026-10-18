@@ -41,12 +41,12 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		}
 	}
 
-	// Agent no longer owns a knowledge layer — it moved to the world.
+	// Agent no longer owns a knowledge layer: it moved to the world.
 	if _, err := os.Stat(filepath.Join(dir, "spwn", "agents", "neo", "knowledge")); err == nil {
 		t.Errorf("spwn/agents/neo/knowledge/ should not exist (knowledge moved to world scope)")
 	}
 
-	// The old per-world nested location should be gone — knowledge now
+	// The old per-world nested location should be gone: knowledge now
 	// lives flat at the project root by convention.
 	if _, err := os.Stat(filepath.Join(dir, "spwn", "worlds")); err == nil {
 		t.Errorf("spwn/worlds/ should not exist (retired in favour of explicit manifest paths)")
@@ -106,7 +106,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		}
 	}
 	// The retired colon-form local schemes (skill:/tool:/hook:)
-	// should no longer leak into new projects — a fresh scaffold
+	// should no longer leak into new projects: a fresh scaffold
 	// must use the path-style form exclusively.
 	for _, retired := range []string{"skill:", "tool:", "hook:"} {
 		if strings.Contains(string(agentYAML), retired) {
@@ -114,7 +114,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		}
 	}
 
-	// spwn/hooks/<name>.yaml carries the runtime-hook examples now —
+	// spwn/hooks/<name>.yaml carries the runtime-hook examples now;
 	// one file per hook, body is just the entry shape.
 	hookYAML, err := os.ReadFile(filepath.Join(dir, "spwn/hooks/session-banner.yaml"))
 	if err != nil {
@@ -125,7 +125,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 			t.Errorf("hooks/session-banner.yaml missing %q, got:\n%s", part, hookYAML)
 		}
 	}
-	// The legacy single-file project hooks.yaml must NOT be created —
+	// The legacy single-file project hooks.yaml must NOT be created:
 	// it's the migration error condition the loader rejects.
 	if _, err := os.Stat(filepath.Join(dir, "spwn/hooks.yaml")); err == nil {
 		t.Errorf("legacy spwn/hooks.yaml leaked into the scaffold output")
@@ -153,7 +153,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		t.Errorf("skill focus.md should start with YAML frontmatter, got:\n%s", skill)
 	}
 
-	// Tool must declare a name and a verify command — the two fields
+	// Tool must declare a name and a verify command, the two fields
 	// the dep resolver cares about. No YAML parse needed; substring
 	// checks are enough to catch regressions in the template.
 	tool, err := os.ReadFile(filepath.Join(dir, "spwn/tools/greet/tool.yaml"))
@@ -170,7 +170,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 }
 
 // TestInit_defaultScaffoldOmitsRuntimeBackend pins the 2026-04 decision
-// to ship a blank scaffold without pinning runtime.backend — agents
+// to ship a blank scaffold without pinning runtime.backend: agents
 // resolve their backend at spawn time, so `spwn init` should not
 // hard-pick one on the user's behalf. Regressions here would bring
 // back the opinionated default and silently lock new projects to
@@ -362,7 +362,7 @@ func TestValidate_workspaceMountRules(t *testing.T) {
 	}
 	manifestPath := filepath.Join(dir, "spwn.yaml")
 
-	// Two bare entries are fine under the unified form — each gets
+	// Two bare entries are fine under the unified form: each gets
 	// auto-named workspace0, workspace1 at spawn time. A container-
 	// path-on-RHS entry (legacy manifest form) is rejected because
 	// users should never write container platform.

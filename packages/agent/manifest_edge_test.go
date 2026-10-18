@@ -41,7 +41,7 @@ plugins:
 func TestAddDependency_CreatesManifestIfMissing(t *testing.T) {
 	initAgent(t, "fresh")
 
-	// No agent.yaml exists yet — AddDependency should create it.
+	// No agent.yaml exists yet: AddDependency should create it.
 	if err := AddDependency("fresh", "spwn:python"); err != nil {
 		t.Fatalf("AddDependency: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestAddDependency_CreatesManifestIfMissing(t *testing.T) {
 	}
 }
 
-// ── RemoveDependency for ref not in list → no error ────────────────────────────────
+// ── RemoveDependency for ref not in list: no error ────────────────────────────────
 
 func TestRemoveDependency_AbsentRefNoError(t *testing.T) {
 	initAgent(t, "sparse")
@@ -71,7 +71,7 @@ func TestRemoveDependency_AbsentRefNoError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Remove a ref that was never added — should succeed silently.
+	// Remove a ref that was never added: should succeed silently.
 	if err := RemoveDependency("sparse", "spwn:never-existed"); err != nil {
 		t.Errorf("RemoveDependency of absent ref should not error, got: %v", err)
 	}
@@ -86,13 +86,13 @@ func TestRemoveDependency_AbsentRefNoError(t *testing.T) {
 func TestRemoveDependency_EmptyManifestNoError(t *testing.T) {
 	initAgent(t, "empty")
 
-	// No deps at all — remove should be a no-op.
+	// No deps at all: remove should be a no-op.
 	if err := RemoveDependency("empty", "spwn:anything"); err != nil {
 		t.Errorf("RemoveDependency on empty manifest should not error, got: %v", err)
 	}
 }
 
-// ── AddDependency twice with same ref → idempotent ────────────────────────────────
+// ── AddDependency twice with same ref: idempotent ────────────────────────────────
 
 func TestAddDependency_Idempotent(t *testing.T) {
 	initAgent(t, "idem")
@@ -130,7 +130,7 @@ dependencies: []
 	if err != nil {
 		t.Fatalf("LoadManifest: %v", err)
 	}
-	// YAML `deps: []` may unmarshal as a nil or as an empty slice —
+	// YAML `deps: []` may unmarshal as a nil or as an empty slice;
 	// either is acceptable, the length is what the contract fixes.
 	if len(m.Deps) != 0 {
 		t.Errorf("expected 0 deps, got %d: %v", len(m.Deps), m.Deps)
@@ -143,7 +143,7 @@ dependencies: []
 func TestLoadManifest_OmittedDeps(t *testing.T) {
 	dir := initAgent(t, "omit")
 
-	// deps key entirely absent — should still parse fine.
+	// deps key entirely absent: should still parse fine.
 	content := `name: omit
 role: worker
 `

@@ -6,7 +6,7 @@
 // hosted MCP server registers a fresh OAuth client per spwn install,
 // no per-user setup. Google explicitly does NOT support DCR; every
 // OAuth client must be pre-registered in a Google Cloud project. We
-// can't ship one shared client_id either — Google's "restricted
+// can't ship one shared client_id either: Google's "restricted
 // scopes" (Gmail) require a paid annual security audit (CASA) to be
 // usable beyond ~100 explicitly-allowlisted test users.
 //
@@ -22,7 +22,7 @@
 //
 // Once Google verifies an OAuth app for sensitive scopes (Calendar)
 // or restricted scopes (Gmail), we could ship a baked-in client_id
-// and skip the per-user GCP setup. That's a future move — for now,
+// and skip the per-user GCP setup. That's a future move; for now,
 // every other OSS Google MCP server (taylorwilsdon, aaronsb, gws
 // itself) uses the same BYO pattern, and the friction is small
 // enough that users don't seem to mind.

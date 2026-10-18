@@ -26,8 +26,8 @@ import (
 //
 // Coverage:
 //
-//   • Cron fire dispatches via real architect → mock backend
-//   • FS fire dispatches via real fsnotify (FakeFSSource) → mock backend
+//   • Cron fire dispatches via real architect to mock backend
+//   • FS fire dispatches via real fsnotify (FakeFSSource) to mock backend
 //   • Catch-up modes: collapse / skip / stack
 //   • FS replay-on-startup
 //   • Output capture (mock backend writes to ExecConfig.Stdout)
@@ -258,7 +258,7 @@ func TestE2E_CronFireDispatchesIntoBackend(t *testing.T) {
 	}
 }
 
-// ── FS path: handle event → fire ────────────────────────────────────
+// ── FS path: handle event, then fire ────────────────────────────────
 
 func TestE2E_FSFireDispatchesIntoBackend(t *testing.T) {
 	f := newE2EFixture(t)
@@ -514,7 +514,7 @@ func TestE2E_DispatcherCapturesRuntimeOutput(t *testing.T) {
 // ── Receipt log rotation ────────────────────────────────────────────
 
 func TestE2E_ReceiptLogRotates(t *testing.T) {
-	// Configure a tiny rotate threshold via direct construction —
+	// Configure a tiny rotate threshold via direct construction:
 	// the factory's defaults are 100MB which would take too long
 	// to hit in tests.
 	dir := t.TempDir()
@@ -556,7 +556,7 @@ func TestE2E_ReceiptLogRotates(t *testing.T) {
 
 func TestE2E_DispatcherErrorLogsAndReceipts(t *testing.T) {
 	f := newE2EFixture(t)
-	// Don't seed a world — dispatcher will fail with "no running
+	// Don't seed a world: dispatcher will fail with "no running
 	// world" and the engine should log + receipt.
 	f.startEngine(map[string]project.Automation{
 		"morning": {
@@ -676,7 +676,7 @@ func TestE2E_OutputTruncatedAtCap(t *testing.T) {
 	f := newE2EFixture(t)
 	f.seedRunningWorld("brain", "editor")
 
-	// Configure mock backend to write 50KB of output — well past
+	// Configure mock backend to write 50KB of output, well past
 	// the 32KB dispatcher cap and the 8KB receipt cap.
 	f.mb.execStdoutWrite = []byte(strings.Repeat("x", 50*1024))
 
@@ -701,7 +701,7 @@ func TestE2E_OutputTruncatedAtCap(t *testing.T) {
 
 	rec := f.readReceipts()[0]
 	out, _ := rec["output"].(string)
-	if len(out) > 9*1024 { // cap + tiny "…[truncated]" marker
+	if len(out) > 9*1024 { // cap + tiny "...[truncated]" marker
 		t.Errorf("output should be truncated near 8KB, got %d bytes", len(out))
 	}
 	if !strings.Contains(out, "truncated") {
