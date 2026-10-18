@@ -35,10 +35,10 @@ func TestGh_WrapperUsesGhAuthToken(t *testing.T) {
 	// Must NOT depend on the host env var being pre-set; the
 	// wrapper sets it from `gh auth token` itself.
 	if strings.Contains(all, `"$GITHUB_PERSONAL_ACCESS_TOKEN"`) {
-		t.Errorf("gh wrapper should not reference $GITHUB_PERSONAL_ACCESS_TOKEN as input — derive via `gh auth token`")
+		t.Errorf("gh wrapper should not reference $GITHUB_PERSONAL_ACCESS_TOKEN as input; derive via `gh auth token`")
 	}
 	if strings.Contains(all, "if [ -z \"$GITHUB_PERSONAL_ACCESS_TOKEN\"") {
-		t.Errorf("gh wrapper must not gate on env var presence — gate on `gh auth token` exit code instead")
+		t.Errorf("gh wrapper must not gate on env var presence; gate on `gh auth token` exit code instead")
 	}
 }
 

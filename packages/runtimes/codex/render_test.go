@@ -47,7 +47,7 @@ func TestRender_EmitsAgentsMDAndRoleMD(t *testing.T) {
 	// is inlined into AGENTS.md now so the side file must NOT exist.
 	for _, p := range paths {
 		if strings.Contains(p, "/worlds/") && strings.HasSuffix(p, "/role.md") {
-			t.Errorf("tree still emits role.md at %s — role is inlined into AGENTS.md now", p)
+			t.Errorf("tree still emits role.md at %s: role is inlined into AGENTS.md now", p)
 		}
 	}
 }
@@ -76,7 +76,7 @@ func TestRender_SkillsLandInAgentsSkillsTree(t *testing.T) {
 		"agents/neo/.agents/skills/greeter/scripts/run.sh",
 	} {
 		if !tree.Has(p) {
-			t.Errorf("tree missing %s — codex skills must live under .agents/skills/", p)
+			t.Errorf("tree missing %s: codex skills must live under .agents/skills/", p)
 		}
 	}
 	// Guard against accidentally emitting codex-flavoured paths.

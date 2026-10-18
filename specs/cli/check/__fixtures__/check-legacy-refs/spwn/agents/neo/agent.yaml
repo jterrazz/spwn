@@ -5,12 +5,12 @@
 # single-agent fixture: `spwn check` must flag every entry, and none
 # may reach the container build.
 name: neo
-description: Fixture agent for check-legacy-refs — encodes the three rejected dep shapes.
+description: Fixture agent for check-legacy-refs; encodes the three rejected dep shapes.
 
 runtime:
   backend: "spwn:claude-code"
 
 dependencies:
-  - "python"          # bare name — must error (scheme required)
-  - "local:foo"       # retired local: alias — must error
-  - "@acme/foo"       # legacy @owner/name — must error
+  - "python"          # bare name: must error (scheme required)
+  - "local:foo"       # retired local: alias, must error
+  - "@acme/foo"       # legacy @owner/name: must error

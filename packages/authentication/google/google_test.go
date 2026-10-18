@@ -28,7 +28,7 @@ func TestPKCE_VerifierMatchesChallenge(t *testing.T) {
 	// Google's token endpoint will validate against.
 	v2, c2, _ := newPKCE()
 	if v2 == verifier {
-		t.Errorf("two PKCE generations produced identical verifiers — RNG seed bug")
+		t.Errorf("two PKCE generations produced identical verifiers: RNG seed bug")
 	}
 	if c2 == challenge {
 		t.Errorf("two PKCE generations produced identical challenges")
@@ -120,7 +120,7 @@ func TestPromptClient_CapturesIDAndSecret(t *testing.T) {
 		t.Errorf("ClientSecret = %q", c.ClientSecret)
 	}
 	if len(c.Scopes) == 0 {
-		t.Errorf("Scopes empty — expected DefaultScopes")
+		t.Errorf("Scopes empty, expected DefaultScopes")
 	}
 }
 

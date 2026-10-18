@@ -81,7 +81,7 @@ dependencies:
 
 	// VerifiedTools should match Manifest.Deps.
 	if !equalStrings(in.VerifiedTools, in.Deps) {
-		t.Errorf("VerifiedTools = %v, Manifest.Deps = %v — should match", in.VerifiedTools, in.Deps)
+		t.Errorf("VerifiedTools = %v, Manifest.Deps = %v, should match", in.VerifiedTools, in.Deps)
 	}
 }
 

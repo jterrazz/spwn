@@ -56,7 +56,7 @@ func TestAdapterShipInstallRecipe(t *testing.T) {
 	for _, a := range runtimes.All() {
 		t.Run(a.Name, func(t *testing.T) {
 			if a.Tool == nil {
-				t.Fatalf("%s: Tool is nil — built-in runtimes ship an install recipe", a.Name)
+				t.Fatalf("%s: Tool is nil, but built-in runtimes ship an install recipe", a.Name)
 			}
 		})
 	}

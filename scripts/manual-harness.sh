@@ -123,7 +123,7 @@ s6() {
 }
 
 s7() {
-    scenario 7 "double spwn up (idempotent) — using matrix scaffold"
+    scenario 7 "double spwn up (idempotent), using matrix scaffold"
     run "s7.init" expect_zero "$SPWN" init spwn:matrix
     run "s7.up-1" expect_zero "$SPWN" up
     "$SPWN" up > /dev/null 2>&1

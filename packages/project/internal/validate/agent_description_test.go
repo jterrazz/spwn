@@ -62,7 +62,7 @@ runtime:
 func TestRuleAgentDescription_passes(t *testing.T) {
 	root := t.TempDir()
 	agentDir := writeAgentYAML(t, root, "neo", `name: neo
-description: The explorer — learns by doing.
+description: The explorer, who learns by doing.
 
 runtime:
   backend: "spwn:claude-code"

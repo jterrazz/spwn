@@ -116,12 +116,12 @@ func TestAdapter(t *testing.T) {
 		t.Errorf("Adapter.DefaultProvider = %q, want openai", Adapter.DefaultProvider)
 	}
 	if Adapter.Tool == nil {
-		t.Error("Adapter.Tool is nil — codex ships an install recipe")
+		t.Error("Adapter.Tool is nil, but codex ships an install recipe")
 	}
 	if Adapter.Spawn == nil {
-		t.Error("Adapter.Spawn is nil — codex ships prelaunch plumbing")
+		t.Error("Adapter.Spawn is nil, but codex ships prelaunch plumbing")
 	}
 	if Adapter.Render == nil {
-		t.Error("Adapter.Render is nil — codex ships a source→Tree renderer")
+		t.Error("Adapter.Render is nil, but codex ships a source-to-Tree renderer")
 	}
 }

@@ -53,7 +53,7 @@ func TestAdapter(t *testing.T) {
 		t.Error("Adapter.Tool is nil")
 	}
 	if Adapter.Render == nil {
-		t.Error("Adapter.Render is nil — claude-code is the only runtime with a renderer")
+		t.Error("Adapter.Render is nil, but claude-code is the only runtime with a renderer")
 	}
 	if Adapter.Spawn == nil {
 		t.Error("Adapter.Spawn is nil")

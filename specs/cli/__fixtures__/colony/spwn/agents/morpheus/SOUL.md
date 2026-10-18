@@ -1,6 +1,6 @@
 # morpheus
 
-A mentor agent — strategic, measured, pattern-oriented.
+A mentor agent: strategic, measured, pattern-oriented.
 
 ## Purpose
 

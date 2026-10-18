@@ -1,3 +1,3 @@
 # Naked Skill
 
-This skill has no frontmatter — the check should catch it.
+This skill has no frontmatter; the check should catch it.

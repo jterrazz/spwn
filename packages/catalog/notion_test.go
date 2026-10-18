@@ -52,7 +52,7 @@ func TestNotion_NoNodeDependency(t *testing.T) {
 	}
 	for _, d := range tool.Dependencies() {
 		if d == "spwn:node" {
-			t.Errorf("spwn:notion should not depend on spwn:node — hosted MCP needs no local server, got deps %v", tool.Dependencies())
+			t.Errorf("spwn:notion should not depend on spwn:node: hosted MCP needs no local server, got deps %v", tool.Dependencies())
 		}
 	}
 	for _, cmd := range tool.Install().Commands {

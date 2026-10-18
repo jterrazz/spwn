@@ -87,6 +87,6 @@ func TestGenerate_PolicyEmittedAfterToolCommands(t *testing.T) {
 		t.Fatalf("missing markers in dockerfile:\n%s", out)
 	}
 	if idxPolicy < idxInstall {
-		t.Errorf("policy RUN appeared before tool install — wrappers won't have spwn-policy-check yet")
+		t.Errorf("policy RUN appeared before tool install: wrappers won't have spwn-policy-check yet")
 	}
 }

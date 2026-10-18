@@ -10,7 +10,7 @@ Before doing anything else, read your soul:
 
 ## Your world
 
-Everything you need — physics, installed tools, roster, conventions —
+Everything you need (physics, installed tools, roster, conventions)
 is inlined into the CLAUDE.md spwn builds for you at spawn time. No
 separate `/world/*.md` files to chase. Workspaces mount at
 `/workspaces/`; that's where your changes land.

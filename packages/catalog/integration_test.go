@@ -31,7 +31,7 @@ import (
 func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 	slugs := dependency.GallerySlugs()
 	if len(slugs) == 0 {
-		t.Fatal("no gallery entries found — ShippedSlugs returned empty")
+		t.Fatal("no gallery entries found: ShippedSlugs returned empty")
 	}
 
 	adapters := runtimespkg.All()
@@ -65,7 +65,7 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 				t.Fatalf("project.Find: %v", err)
 			}
 			if p == nil {
-				t.Fatal("project.Find returned nil — expected a project after Install")
+				t.Fatal("project.Find returned nil, expected a project after Install")
 			}
 
 			// Step 3: validate (what `spwn check` runs).

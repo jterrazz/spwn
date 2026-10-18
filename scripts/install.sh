@@ -7,7 +7,7 @@ PATH_EXPORT='export PATH="$HOME/.local/bin:$PATH"'
 
 BIN=".artifacts/go/spwn"
 if [ ! -x "$BIN" ]; then
-    echo "error: $BIN not found — run 'make build' first" >&2
+    echo "error: $BIN not found; run 'make build' first" >&2
     exit 1
 fi
 

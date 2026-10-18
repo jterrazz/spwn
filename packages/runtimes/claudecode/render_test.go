@@ -43,7 +43,7 @@ func TestRender_BasePaths(t *testing.T) {
 	// Guard against the retired side file.
 	for _, p := range tree.Paths() {
 		if strings.Contains(p, "/worlds/") && strings.HasSuffix(p, "/role.md") {
-			t.Errorf("tree still emits role.md at %s — role is inlined into CLAUDE.md now", p)
+			t.Errorf("tree still emits role.md at %s: role is inlined into CLAUDE.md now", p)
 		}
 	}
 }
@@ -246,7 +246,7 @@ func TestRender_SkillsEmittedPerAgent(t *testing.T) {
 	for _, name := range []string{"alice", "bob"} {
 		p := "agents/" + name + "/.claude/skills/shared/SKILL.md"
 		if !tree.Has(p) {
-			t.Errorf("tree missing %s — skills must fan out per agent", p)
+			t.Errorf("tree missing %s: skills must fan out per agent", p)
 		}
 	}
 }

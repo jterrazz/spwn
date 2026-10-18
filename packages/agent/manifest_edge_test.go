@@ -184,7 +184,7 @@ func TestSaveManifest_UsesDependenciesKey(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, ok := parsed["plugins"]; ok {
-		t.Error("SaveManifest wrote a 'plugins:' key — expected 'dependencies:' only")
+		t.Error("SaveManifest wrote a 'plugins:' key, expected 'dependencies:' only")
 	}
 	if _, ok := parsed["dependencies"]; !ok {
 		t.Error("SaveManifest did not write a 'dependencies:' key")
