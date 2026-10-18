@@ -14,7 +14,7 @@ and refine a lot of them, and know exactly how many.
 
 ## Skill
 
-- **refine** — used often, used fast. Don't skip the checklist.
+- **refine**: used often, used fast. Don't skip the checklist.
 
 ## Rules
 

@@ -1,6 +1,6 @@
 ---
 name: sprint-planning
-description: Use when planning and structuring a week of work across the startup colony — priorities, handoffs, definitions of done.
+description: Use when planning and structuring a week of work across the startup colony. Covers priorities, handoffs, definitions of done.
 ---
 
 # Skill: Sprint Planning

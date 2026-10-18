@@ -1,4 +1,4 @@
-# brainstorm — weeknight dinner rotation
+# brainstorm: weeknight dinner rotation
 
 ok so the problem is we keep eating the same 3 things and also i end
 up at the store 4x a week which is dumb

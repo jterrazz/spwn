@@ -11,7 +11,7 @@ refined file out. Do not combine batches.
 
 ## When to use
 
-Invoke this skill when you pick up a batch — either from your inbox
+Invoke this skill when you pick up a batch, either from your inbox
 (`/world/inbox/<your-name>/`) or by claiming the next unrefined note
 in `/world/knowledge/raw/`.
 
@@ -27,7 +27,7 @@ what the author was reaching for, re-read before touching the keyboard.
 Pull out the key claims, decisions, numbers, names, and dates. Drop:
 
 - filler ("ok so", "anyway", "idk")
-- repeated points — keep the clearest phrasing
+- repeated points: keep the clearest phrasing
 - side-tangents unrelated to the main thread (but note them as
   follow-ups if they're worth preserving)
 
@@ -58,7 +58,7 @@ refined_at: <YYYY-MM-DD>
 ```
 
 The body below the frontmatter should be well-structured prose or bullet
-lists — whatever best preserves the information. Prefer sections with
+lists, whatever best preserves the information. Prefer sections with
 clear headings when the note covers more than one topic.
 
 ### 5. Close the batch

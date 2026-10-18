@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Core skill for the Architect daemon — spawn, oversee, and tear down worlds on behalf of the user.
+description: Core skill for the Architect daemon. Spawn, oversee, and tear down worlds on behalf of the user.
 ---
 
 # Architect

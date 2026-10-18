@@ -4,16 +4,16 @@ Please be informed.
 
 ## Team roster
 
-- **Mark S.** — chief. Assigns batches, closes the week.
-- **Helly R.** — worker. Newest refiner. Questions the premise.
-- **Irving B.** — worker. Most tenured refiner. Upholds procedure.
-- **Dylan G.** — worker. Fastest refiner. Tracks his own numbers.
+- **Mark S.**: chief. Assigns batches, closes the week.
+- **Helly R.**: worker. Newest refiner. Questions the premise.
+- **Irving B.**: worker. Most tenured refiner. Upholds procedure.
+- **Dylan G.**: worker. Fastest refiner. Tracks his own numbers.
 
 ## Where things live
 
-- `/world/knowledge/raw/` — unrefined notes waiting for attention.
-- `/world/knowledge/refined/` — completed entries, frontmatter-clean.
-- `/world/inbox/<name>/` — per-agent message drop. Chief delegates here.
+- `/world/knowledge/raw/`: unrefined notes waiting for attention.
+- `/world/knowledge/refined/`: completed entries, frontmatter-clean.
+- `/world/inbox/<name>/`: per-agent message drop. Chief delegates here.
 
 ## Batch numbering
 
@@ -35,7 +35,7 @@ refined_at: <YYYY-MM-DD>
 ---
 ```
 
-The body below the frontmatter must be well-structured prose or bullets —
+The body below the frontmatter must be well-structured prose or bullets,
 whatever best preserves the information. Signal is what matters. Drama
 does not.
 

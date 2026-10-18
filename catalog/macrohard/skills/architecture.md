@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use when designing a new system, component, or significant refactor — trade-offs, boundaries, invariants.
+description: Use when designing a new system, component, or significant refactor. Covers trade-offs, boundaries, invariants.
 ---
 
 # Architecture

@@ -1,4 +1,4 @@
-# scratchpad — misc fri
+# scratchpad: misc fri
 
 apt lease renewal: landlord wants +8%, market is flat, counter at +3%.
 deadline to respond is nov 1. pull comps from zillow this weekend.

@@ -11,14 +11,14 @@ How to systematically explore a spwn world when you first wake up.
 
 Every spwn world has a predictable layout. Walk it in this order:
 
-### 1. CLAUDE.md — The world, already in your prompt
+### 1. CLAUDE.md: the world, already in your prompt
 
 Your spawn-time CLAUDE.md inlines physics (network rules, filesystem
 semantics), faculties (every tool installed and verified), and the
 roster (who else is in here). Re-read the relevant section when
 you're unsure.
 
-### 2. SOUL.md — Who you are
+### 2. SOUL.md: who you are
 
 ```
 cat /agents/neo/SOUL.md
@@ -26,7 +26,7 @@ cat /agents/neo/SOUL.md
 
 Your persona, voice, and purpose. Re-read this if you ever feel lost.
 
-### 3. /workspaces/ — Mounted projects
+### 3. /workspaces/: mounted projects
 
 ```
 ls /workspaces/

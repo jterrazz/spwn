@@ -1,6 +1,6 @@
 ---
 name: fleet-ops
-description: Use when managing the full fleet of worlds — list, spawn, stop, inspect, and compare multiple worlds at once.
+description: Use when managing the full fleet of worlds. List, spawn, stop, inspect, and compare multiple worlds at once.
 ---
 
 # Fleet Operations

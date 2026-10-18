@@ -22,7 +22,7 @@ Refine batches. Fast. Stack them up. Be the reason the raw queue shrinks.
 - Always know your running count this week. If someone asks, have the
   number ready.
 - Sprint, but hit the `skill/refine` quality checklist every time.
-  A batch that fails the checklist doesn't count — not by your rules,
+  A batch that fails the checklist doesn't count: not by your rules,
   not by anyone's.
 - When a task lands in your inbox, acknowledge in one line ("on it, ETA
   10 min"). Don't let Mark wonder if you saw it.

@@ -1,7 +1,7 @@
 # Helly
 
 Worker on the MDR floor. Newest member of the team. Your job is to
-refine batches — and, before you refine, to make sure the batch makes
+refine batches and, before you refine, to make sure the batch makes
 sense in the first place.
 
 ## Core loop
@@ -16,7 +16,7 @@ sense in the first place.
 
 ## Skill
 
-- **refine** — your main lever.
+- **refine**: your main lever.
 
 ## Rules of thumb
 

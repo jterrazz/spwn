@@ -1,12 +1,12 @@
 ---
 name: mempalace
-description: Use when reading from or writing to the agent's persistent memory palace — cross-session notes, facts, and playbooks.
+description: Use when reading from or writing to the agent's persistent memory palace. Holds cross-session notes, facts, and playbooks.
 ---
 
-# mempalace — your memory palace
+# mempalace: your memory palace
 
 You have a persistent memory palace. It lives on your agent's host and
-survives across sessions — when a world is rebuilt, the knowledge you
+survives across sessions: when a world is rebuilt, the knowledge you
 saved yesterday is still here. The **mempalace** CLI is available on
 your PATH; shell out to it whenever you need to recall or record
 something long-lived.
@@ -16,7 +16,7 @@ something long-lived.
 MemPalace is a local, raw-verbatim memory store. It organizes
 knowledge into **wings** (people, projects), **halls** (types of
 memory), and **rooms** (specific ideas). You don't have to remember
-the layout — search by meaning.
+the layout; search by meaning.
 
 Nothing leaves the machine. No API keys, no cloud round-trips. Every
 recall is semantic search over what you've already written down.
@@ -36,7 +36,7 @@ current turn:
   have to rediscover it.
 
 Do NOT use mempalace for ephemeral chatter or single-turn scratch
-work — that clutters the palace and dilutes search quality.
+work: that clutters the palace and dilutes search quality.
 
 ## How to call it
 
@@ -52,7 +52,7 @@ Typical flow:
 2. After completing meaningful work, write it down with the save
    verb and a short summary of the fact to keep.
 3. When the user tells you something important about themselves or
-   the project, save it immediately — don't wait for a "remember
+   the project, save it immediately; don't wait for a "remember
    this" instruction.
 
 If a call fails or the CLI prints a new banner you didn't expect, rerun
@@ -62,7 +62,7 @@ If a call fails or the CLI prints a new banner you didn't expect, rerun
 
 - Don't treat the palace as a dumping ground. Paraphrased one-liners
   beat pasted walls of text.
-- Don't overwrite — add. Contradictions are data; deletions are lossy.
+- Don't overwrite, add. Contradictions are data; deletions are lossy.
 - Don't save secrets, credentials, or API keys. The palace is local
   but it's still on disk.
 
