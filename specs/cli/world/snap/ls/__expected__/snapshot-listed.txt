@@ -1,4 +1,4 @@
 
-  WORLD             NAME         SIZE    CREATED   
+  WORLD             NAME         SIZE{{string}}CREATED   
   world-neo-{{hex}}   round-trip   {{any}} ago    
 
