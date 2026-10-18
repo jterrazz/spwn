@@ -1,4 +1,4 @@
-import { http, intercept } from '@jterrazz/test';
+import { http, intercept } from '@jterrazz/test/stubs';
 import { originalOf } from '@jterrazz/typescript/rules';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';

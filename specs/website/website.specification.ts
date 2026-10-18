@@ -1,4 +1,5 @@
-import { process, specification } from '@jterrazz/test';
+import { specification } from '@jterrazz/test';
+import { process } from '@jterrazz/test/services';
 import { afterAll } from 'vitest';
 
 // outside: the sealed HOME hides the per-user socket of OrbStack, Colima or Docker Desktop, so the operator's docker endpoint is read before HOME is replaced and handed over as SPWN_DOCKER_HOST

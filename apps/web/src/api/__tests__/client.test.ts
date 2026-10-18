@@ -1,4 +1,4 @@
-import { http, intercept } from '@jterrazz/test';
+import { http, intercept } from '@jterrazz/test/stubs';
 import { describe, expect, test } from 'vitest';
 
 import type { World } from '../../domain/model';
