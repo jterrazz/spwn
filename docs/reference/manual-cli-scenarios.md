@@ -36,9 +36,9 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 
 ## Scenario catalog
 
-### Group A — First-run lifecycle (1–10)
+### Group A: First-run lifecycle (1 to 10)
 
-#### 1. Fresh user journey — init → check → JSON validation
+#### 1. Fresh user journey: init, check, JSON validation
 
 ```bash
 cd $TMP/s01
@@ -72,7 +72,7 @@ spwn check                                   # → exit 0
 
 **Asserts:** init zero · `spwn/agents/neo/` exists · check zero.
 
-#### 4. `spwn init spwn:startup` — multi-agent
+#### 4. `spwn init spwn:startup`, multi-agent
 
 ```bash
 cd $TMP/s04
@@ -93,7 +93,7 @@ spwn init spwn:does-not-exist-xyz-987        # → exit != 0
 
 #### 6. `spwn up` outside any spwn.yaml (global-mode fallback)
 
-Global mode is the legacy fallback. Should **not crash** — either falls back
+Global mode is the legacy fallback. Should **not crash**: either falls back
 to `~/.spwn/worlds/default.yaml` (rc 0) or errors cleanly (rc 1).
 
 ```bash
@@ -129,7 +129,7 @@ spwn down                                    # → rc ≤ 1, never a panic
 
 **Asserts:** rc ≤ 1.
 
-#### 9. Malformed `spwn.yaml` → `spwn check` errors precisely
+#### 9. Malformed `spwn.yaml`: `spwn check` errors precisely
 
 ```bash
 printf "invalid: [yaml broken" > spwn.yaml
@@ -138,7 +138,7 @@ spwn check                                   # → exit != 0
 
 **Asserts:** nonzero exit.
 
-#### 10. Invalid dep ref in agent.yaml → check catches it
+#### 10. Invalid dep ref in agent.yaml: check catches it
 
 ```bash
 spwn init
@@ -150,7 +150,7 @@ spwn check                                   # → exit != 0
 
 ---
 
-### Group B — Agent CRUD (11–20)
+### Group B: Agent CRUD (11 to 20)
 
 #### 11. `spwn agent new` scaffolds the home tree
 
@@ -238,9 +238,9 @@ spwn skill rm daily-standup                  # → exit 0; file gone
 
 ---
 
-### Group C — Dependencies + lockfile (21–30)
+### Group C: Dependencies + lockfile (21 to 30)
 
-#### 21. `spwn install python` — global install
+#### 21. `spwn install python`, global install
 
 ```bash
 spwn init && spwn install python
@@ -248,7 +248,7 @@ grep python spwn/agents/neo/agent.yaml       # → present
 grep python spwn.lock                        # → present
 ```
 
-#### 22. `spwn install node --agent bob` — scoped install
+#### 22. `spwn install node --agent bob`, scoped install
 
 ```bash
 spwn init && spwn agent new bob
@@ -273,7 +273,7 @@ grep does-not-exist-xyz spwn.lock            # → not present
 #### 25. **[Bug fix regression guard]** `spwn install skill:nonexistent --agent Y` is refused
 
 Before the fix: silently succeeded, added a broken ref. Now: fails fast with
-`skill:<name> not found at spwn/skills/<name>.md — create it first with
+`skill:<name> not found at spwn/skills/<name>.md; create it first with
 \`spwn skill new <name>\``.
 
 ```bash
@@ -322,9 +322,9 @@ spwn check                                   # → exit 0
 
 ---
 
-### Group D — Real Docker: spawn + destroy + mounts (31–40)
+### Group D: Real Docker, spawn + destroy + mounts (31 to 40)
 
-These need `SPWN_BASE_IMAGE=spwn-test:latest` — the mock-claude test image built
+These need `SPWN_BASE_IMAGE=spwn-test:latest`, the mock-claude test image built
 by `make test-image`. Without it, each `spwn up` burns ~5 minutes building
 a real production image.
 
@@ -419,9 +419,9 @@ spwn down
 
 ---
 
-### Group E — Errors + edge cases (41–50)
+### Group E: Errors + edge cases (41 to 50)
 
-#### 41. Malformed YAML → check gives helpful error
+#### 41. Malformed YAML: check gives helpful error
 
 ```bash
 printf "version: 1\nname: bad\nworlds:\n  mat: [ broken\n" > spwn.yaml
@@ -434,7 +434,7 @@ spwn check                                   # → exit != 0, mentions "yaml" or
 spwn init && spwn agent new 日本              # rc ≤ 1 (reject or slugify, no crash)
 ```
 
-#### 43. Very long agent name (>63 chars — slug boundary)
+#### 43. Very long agent name (>63 chars, slug boundary)
 
 ```bash
 spwn init && spwn agent new $(printf 'x%.0s' {1..80})   # rc ≤ 1
@@ -486,7 +486,7 @@ spwn --help                                  # → contains "Quick Start" + "Ent
 spwn help                                    # → same (alias)
 ```
 
-#### 50. Full three-verb sanity — init → up → exec-inside → down
+#### 50. Full three-verb sanity: init, up, exec-inside, down
 
 ```bash
 spwn init spwn:matrix                        # → exit 0
@@ -501,5 +501,5 @@ spwn down                                    # → exit 0
 ## Harness notes
 
 - The harness is plain bash with Python one-liners: `run` asserts an exit code, `checkstr` a substring, and a scenario adds its own checks inline.
-- The Docker group (31–40) takes about two minutes, the other forty about thirty seconds, with `SPWN_BASE_IMAGE` set.
+- The Docker group (31 to 40) takes about two minutes, the other forty about thirty seconds, with `SPWN_BASE_IMAGE` set.
 - A clean run ends on `RESULTS: 98 passed, 0 failed`; any failure is a regression against a scenario above.

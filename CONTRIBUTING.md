@@ -2,7 +2,7 @@
 
 Everything a contributor needs is a chapter of the corpus, mapped by [`docs/README.md`](docs/README.md). This page routes; it holds no manual of its own.
 
-| To…                                                           | Read                                          |
+| To...                                                         | Read                                          |
 | ------------------------------------------------------------- | --------------------------------------------- |
 | Set up a clone, run the loop, learn which file a change opens | [Develop](docs/guides/develop.md)             |
 | Know what proves a change, and how to run each suite          | [Test](docs/guides/test.md)                   |
@@ -16,4 +16,4 @@ make install
 make build && make test
 ```
 
-Run `make` with no arguments for the annotated target list. [`AGENTS.md`](AGENTS.md) — with `CLAUDE.md` symlinked to it — is the same routing for an agent.
+Run `make` with no arguments for the annotated target list. [`AGENTS.md`](AGENTS.md), with `CLAUDE.md` symlinked to it, is the same routing for an agent.

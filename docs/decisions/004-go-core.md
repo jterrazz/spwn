@@ -5,7 +5,7 @@
 
 ## Context
 
-Spwn needs a core implementation language for the business logic: lifecycle management, Mind management, physics generation, element bridging, and backend orchestration. The original design used TypeScript, then briefly Rust. With the pivot to Claude Code as the agent runtime (ADR-003), the primary workload is Docker orchestration + CLI — not performance-critical computation.
+Spwn needs a core implementation language for the business logic: lifecycle management, Mind management, physics generation, element bridging, and backend orchestration. The original design used TypeScript, then briefly Rust. With the pivot to Claude Code as the agent runtime (ADR-003), the primary workload is Docker orchestration + CLI, not performance-critical computation.
 
 This is infrastructure glue. The right language for Docker orchestration is the one the Docker ecosystem is built in.
 
@@ -31,15 +31,15 @@ Use Go for the core library and CLI. The architecture follows the `containerd` m
 
 ### Why Go
 
-| Factor                | Go                             | Rust                              | TypeScript              |
-| --------------------- | ------------------------------ | --------------------------------- | ----------------------- |
-| **Docker SDK**        | Official (docker/docker)       | bollard (third-party)             | dockerode (third-party) |
-| **Ecosystem fit**     | Docker, containerd, K8s—all Go | Third-party wrappers              | Third-party wrappers    |
-| **Compilation speed** | ~2s                            | ~30s+                             | N/A                     |
-| **Single binary**     | Yes                            | Yes                               | No (needs Node.js)      |
-| **Concurrency**       | Goroutines—simple, powerful    | tokio—powerful but ceremony-heavy | Event loop              |
-| **Contributor pool**  | Large                          | Small                             | Large                   |
-| **Distribution**      | `go install` or single binary  | `cargo install` or single binary  | `npm install`           |
+| Factor                | Go                              | Rust                               | TypeScript              |
+| --------------------- | ------------------------------- | ---------------------------------- | ----------------------- |
+| **Docker SDK**        | Official (docker/docker)        | bollard (third-party)              | dockerode (third-party) |
+| **Ecosystem fit**     | Docker, containerd, K8s: all Go | Third-party wrappers               | Third-party wrappers    |
+| **Compilation speed** | ~2s                             | ~30s+                              | N/A                     |
+| **Single binary**     | Yes                             | Yes                                | No (needs Node.js)      |
+| **Concurrency**       | Goroutines: simple, powerful    | tokio: powerful but ceremony-heavy | Event loop              |
+| **Contributor pool**  | Large                           | Small                              | Large                   |
+| **Distribution**      | `go install` or single binary   | `cargo install` or single binary   | `npm install`           |
 
 ### Key Go Dependencies
 
@@ -55,7 +55,7 @@ Use Go for the core library and CLI. The architecture follows the `containerd` m
 
 - **Docker integration.** Official SDK, first-party documentation, same language as Docker itself.
 - **Fast iteration.** 2-second builds vs 30+ seconds with Rust. Rapid prototyping.
-- **Single binary distribution.** `spwn` is one binary—no runtime.
+- **Single binary distribution.** `spwn` is one binary, no runtime.
 - **Contributors.** Go is widely known, lower barrier to entry.
 - **Concurrency.** Goroutines are natural for container lifecycle management.
 

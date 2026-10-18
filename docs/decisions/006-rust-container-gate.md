@@ -26,19 +26,19 @@ The container-side Gate lives at `platform/gate-runtime/` as a standalone Rust c
 
 ### Why Rust
 
-1. **Official ACP SDK.** The `agent-client-protocol` crate gives us the full ACP implementation—session management, streaming, authentication, JSON-RPC framing—without reimplementing it. Protocol changes upstream are absorbed via `cargo update`.
+1. **Official ACP SDK.** The `agent-client-protocol` crate gives us the full ACP implementation (session management, streaming, authentication, JSON-RPC framing) without reimplementing it. Protocol changes upstream are absorbed via `cargo update`.
 
 2. **ACP is still evolving.** New methods, session semantics, and streaming changes arrive regularly. With Go, we'd track and reimplement each change manually. With Rust, we update the crate.
 
 3. **Small static binary.** ~2-5 MB, zero runtime dependencies. Ideal for containers where image size matters.
 
-4. **Clean boundary.** The container-side Gate communicates with the host-side Gate over TCP. It doesn't share code, types, or state with the Go codebase. It's a self-contained binary with a well-defined interface—more like a dependency than a module.
+4. **Clean boundary.** The container-side Gate communicates with the host-side Gate over TCP. It doesn't share code, types, or state with the Go codebase. It's a self-contained binary with a well-defined interface, more like a dependency than a module.
 
 5. **Minimal surface area.** The container-side Gate does exactly three things: speak ACP to the agent CLI, supervise the agent process, and listen for commands from the host-side Gate. It's small enough that the second-language cost is negligible.
 
 ### Why Not Go
 
-Go would keep the project as a single language. But the container-side Gate is the one place where ACP protocol fidelity matters most—it's the component that spawns agents, manages sessions, handles streaming, and recovers from crashes. Reimplementing ACP's JSON-RPC protocol in Go (~200-300 lines) is achievable, but tracking upstream protocol changes manually introduces ongoing maintenance burden and risk of incompatibility.
+Go would keep the project as a single language. But the container-side Gate is the one place where ACP protocol fidelity matters most: it's the component that spawns agents, manages sessions, handles streaming, and recovers from crashes. Reimplementing ACP's JSON-RPC protocol in Go (~200-300 lines) is achievable, but tracking upstream protocol changes manually introduces ongoing maintenance burden and risk of incompatibility.
 
 ## Consequences
 
@@ -56,4 +56,4 @@ Go would keep the project as a single language. But the container-side Gate is t
 
 ### Mitigation
 
-The container-side Gate is intentionally small and isolated. The Rust surface area is one crate with one binary. The boundary is TCP with a simple HTTP wire format. Most development happens in the Go core—the Rust gate is built once and updated primarily when ACP evolves.
+The container-side Gate is intentionally small and isolated. The Rust surface area is one crate with one binary. The boundary is TCP with a simple HTTP wire format. Most development happens in the Go core; the Rust gate is built once and updated primarily when ACP evolves.

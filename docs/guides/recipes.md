@@ -33,13 +33,13 @@ What happened:
   staged to `/world/skills/paper-reading/SKILL.md` inside the image;
   at spawn time Claude Code picks it up through its native
   `.claude/skills/` discovery path (symlinked from the agent's home).
-- `spwn up` materialises every world in `spwn.yaml` — by default,
+- `spwn up` materialises every world in `spwn.yaml`: by default,
   `spwn init` gave you one single-agent world named `curie`.
 - `spwn agent talk` opens a session inside the running container with
   the workspace mounted.
 
 **Iteration knobs.** Edit `SOUL.md` to change the voice. Add more
-skills under `spwn/skills/` — each one is a plain markdown file. Swap
+skills under `spwn/skills/`, each one a plain markdown file. Swap
 the runtime in `agent.yaml#runtime.backend` when the Codex adapter
 lands.
 
@@ -48,7 +48,7 @@ lands.
 ## 2. Ship an agent with your repo
 
 Your teammates clone the repo, run `spwn up`, and get the same agent
-byte-for-byte — no setup docs, no onboarding slides.
+byte-for-byte: no setup docs, no onboarding slides.
 
 ```bash
 cd acme-api
@@ -69,11 +69,11 @@ What happened:
 - `spwn.lock` pins every dep's version so two clones of the repo
   produce the same image.
 - The next teammate runs `spwn up` and is talking to the same neo you
-  were — same tools, same `SOUL.md`, same playbooks.
+  were: same tools, same `SOUL.md`, same playbooks.
 
 **What's persistent, what's not.** `spwn/agents/<name>/` is the mind:
 commit it. `~/.spwn/` holds per-machine credentials and daemon
-state — never commit that. Sessions and journal entries written
+state; never commit that. Sessions and journal entries written
 inside a running container sync back out on graceful `spwn down`;
 destructive shutdowns lose them.
 
@@ -96,11 +96,11 @@ spwn agent rm neo-migration
 
 What happened:
 
-- `fork` copies `spwn/agents/neo/` → `spwn/agents/neo-migration/`
+- `fork` copies `spwn/agents/neo/` to `spwn/agents/neo-migration/`
   (manifest, `SOUL.md`, playbooks, journal) and adds a single-agent
   world for the clone.
 - `spwn up --agent neo-migration` boots the fork into its own
-  container — neo and neo-migration run in parallel without touching
+  container: neo and neo-migration run in parallel without touching
   each other's state.
 - `spwn agent rm neo-migration` deletes the directory and the world
   entry. If anything from the experiment is worth keeping, copy the
@@ -114,7 +114,7 @@ try, merge or bin."
 
 ## 4. Unleash untrusted code in a sealed room
 
-Clone a repo you don't trust, ask an agent what it does — inside a
+Clone a repo you don't trust, ask an agent what it does, inside a
 container with no network and hard resource caps.
 
 ```bash
@@ -127,7 +127,7 @@ spwn agent talk neo "run every test and benchmark, tell me what the code actuall
 What happened:
 
 - The spawned container inherits Docker host defaults for CPU,
-  memory, and disk — enough for real work, capped so a runaway
+  memory, and disk: enough for real work, capped so a runaway
   process can't melt the host.
 - No network interface means nothing in the container can phone home,
   fetch payloads, or exfiltrate data.
@@ -136,7 +136,7 @@ What happened:
 
 **Limits today.** Per-world hard limits (explicit `cpu:` / `mem:`
 knobs) are planned but not wired; you get the Docker defaults. Don't
-use this for code you actively believe is hostile — it's a brake,
+use this for code you actively believe is hostile: it's a brake,
 not a vault.
 
 ---
@@ -172,12 +172,12 @@ What happened:
   namespace and one workspace mount.
 - Inter-agent messages are plain markdown files written to
   `/world/inbox/<recipient>/<timestamp>-from-<sender>.md`. Each agent
-  polls its own inbox — no queue, no broker, just files.
+  polls its own inbox: no queue, no broker, just files.
 - Roles (chief, worker) are declared in each agent's `agent.yaml`
   under `role:`. The Architect tier can be wired to orchestrate
   larger colonies from the outside.
 
 **When to use.** Splitting work across specialized minds
 (reviewer + implementer, architect + worker). For a single lone
-agent, one world with one agent is simpler — don't force
+agent, one world with one agent is simpler; don't force
 multi-agent until the division of labour is real.

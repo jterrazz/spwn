@@ -60,13 +60,13 @@ What lands in your project, and the four ideas behind it, is [Getting started](d
 
 ## Features
 
-- **🧾 Agents as Code** — Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
-- **🛠️ Composable environment** — Stack `spwn:python`, `spwn:qmd`, `tool/ffmpeg`, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
-- **📦 Reproducible** — One `spwn build` produces a Docker image, or a runtime-native tree (claude-code, codex, …) if you skip Docker. Byte-identical on every machine.
-- **🪐 Worlds** — Bundle agents, workspaces, and knowledge into a world. `spwn up` deploys them together, `spwn down` tears it all down.
-- **🧠 Persistent** — Memory is a folder of markdown files. Readable, diffable, and alive across restarts.
-- **🧐 Checked** — `spwn check` walks your project and surfaces bad refs, missing files, or lockfile drift before spawn.
-- **⏰ Automations** — Wake an agent on a cron tick or a filesystem event. `worlds.<name>.automations` in spwn.yaml; receipts in `.spwn/runs.jsonl`; `spwn automation daemon` runs the engine. [Full guide](docs/guides/automations.md).
+- **Agents as Code.** Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
+- **Composable environment.** Stack `spwn:python`, `spwn:qmd`, `tool/ffmpeg`, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
+- **Reproducible.** One `spwn build` produces a Docker image, or a runtime-native tree (claude-code, codex and the others) if you skip Docker. Byte-identical on every machine.
+- **Worlds.** Bundle agents, workspaces, and knowledge into a world. `spwn up` deploys them together, `spwn down` tears it all down.
+- **Persistent.** Memory is a folder of markdown files. Readable, diffable, and alive across restarts.
+- **Checked.** `spwn check` walks your project and surfaces bad refs, missing files, or lockfile drift before spawn.
+- **Automations.** Wake an agent on a cron tick or a filesystem event. `worlds.<name>.automations` in spwn.yaml; receipts in `.spwn/runs.jsonl`; `spwn automation daemon` runs the engine. [Full guide](docs/guides/automations.md).
 
 > _"The next breakthrough isn't smarter models. It's richer worlds."_
 

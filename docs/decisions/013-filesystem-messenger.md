@@ -5,12 +5,12 @@
 
 The record was written at decision time; only these two lines are
 reconstructed, 2026-09-05, from the commit that carries it (`b824a17`,
-"docs: ADR-012 filesystem-based messenger", 2026-03-31) — the same day the
+"docs: ADR-012 filesystem-based messenger", 2026-03-31), the same day the
 message timestamps below were taken from.
 
 ## Context
 
-Agents living in the same world need to communicate — governors need to delegate tasks, citizens need to report progress, and peers need to collaborate. We needed a messaging system that works inside Docker containers without external infrastructure.
+Agents living in the same world need to communicate: governors need to delegate tasks, citizens need to report progress, and peers need to collaborate. We needed a messaging system that works inside Docker containers without external infrastructure.
 
 ## Decision
 
@@ -38,24 +38,24 @@ We implemented a **filesystem-based inbox system** at `/world/inbox/`. Each agen
 
 ## Alternatives Considered
 
-1. **Message broker (Redis/NATS)** — adds infrastructure dependency, heavier
-2. **Unix domain sockets** — complex, harder to debug, not persistent
-3. **HTTP API between agents** — needs a server per agent, networking overhead
-4. **Shared database (SQLite)** — single-writer lock contention
+1. **Message broker (Redis/NATS)**: adds infrastructure dependency, heavier
+2. **Unix domain sockets**: complex, harder to debug, not persistent
+3. **HTTP API between agents**: needs a server per agent, networking overhead
+4. **Shared database (SQLite)**: single-writer lock contention
 
 ## Consequences
 
 ### Positive
 
-- Zero infrastructure — just files
-- Human-readable — `cat /world/inbox/neo/*.json`
-- Naturally persistent — survives container restart
-- Agents use normal tools (Read, Write) — no special SDK
+- Zero infrastructure: just files
+- Human-readable: `cat /world/inbox/neo/*.json`
+- Naturally persistent: survives container restart
+- Agents use normal tools (Read, Write), no special SDK
 - Searchable with standard Unix tools (`grep`, `find`)
 
 ### Negative
 
-- Polling-based (not real-time) — 5-second latency
+- Polling-based (not real-time): 5-second latency
 - No delivery guarantees (file write can fail silently)
 - No message ordering guarantees beyond timestamp
 - Scales poorly to thousands of messages (filesystem limits)
@@ -63,5 +63,5 @@ We implemented a **filesystem-based inbox system** at `/world/inbox/`. Each agen
 ## Future
 
 - Upgrade to inotify/fswatch for real-time notification
-- Add message acknowledgment (delivered → read → processed)
+- Add message acknowledgment (delivered, then read, then processed)
 - Consider SQLite for high-volume worlds

@@ -13,7 +13,7 @@ The question: should Spwn build its own agent communication protocol, adopt ACP 
 
 ## Decision
 
-Run an ACP client **inside** the container, alongside the agent CLI. The Gate bridges between the container-side ACP client and the host-side Architect over TCP (`host.docker.internal`). Spwn only builds the Gate bridge protocol—not the agent communication protocol.
+Run an ACP client **inside** the container, alongside the agent CLI. The Gate bridges between the container-side ACP client and the host-side Architect over TCP (`host.docker.internal`). Spwn only builds the Gate bridge protocol, not the agent communication protocol.
 
 The architecture:
 
@@ -28,26 +28,26 @@ Architect                           │
                                     │         └── stdio → Agent CLI
 ```
 
-1. **ACP client** runs inside the container—speaks stdio to Claude Code CLI (or any ACP-compatible agent)
+1. **ACP client** runs inside the container and speaks stdio to Claude Code CLI (or any ACP-compatible agent)
 2. **Gate (container-side)** wraps the ACP client, handles local agent lifecycle
 3. **Gate (host-side)** runs on the Host, bridges requests from the Architect
-4. **TCP** connects the two Gate halves—the only thing that crosses the container boundary
-5. **Architect** speaks Spwn's own Gate protocol to the host-side Gate—never sees ACP directly
+4. **TCP** connects the two Gate halves, the only thing that crosses the container boundary
+5. **Architect** speaks Spwn's own Gate protocol to the host-side Gate and never sees ACP directly
 
 ### What ACP Gives Us for Free
 
-- **Session management**—`session/new`, `session/load`, `session/prompt`, resume across restarts
-- **Authentication**—`authenticate` flow handles API key setup
-- **Streaming**—`session/update` events for real-time agent output
-- **Tool permissions**—control what the agent can do programmatically
-- **Multi-agent support**—swap the agent CLI (Claude Code → Codex CLI → Gemini CLI) without changing the Gate protocol
+- **Session management**: `session/new`, `session/load`, `session/prompt`, resume across restarts
+- **Authentication**: `authenticate` flow handles API key setup
+- **Streaming**: `session/update` events for real-time agent output
+- **Tool permissions**: control what the agent can do programmatically
+- **Multi-agent support**: swap the agent CLI (Claude Code, Codex CLI, Gemini CLI) without changing the Gate protocol
 
 ### What Spwn Builds
 
-- **Gate bridge protocol**—the wire format over TCP between host and container
-- **Element bridging**—MCP servers on the Host exposed as CLI commands (unchanged)
-- **Mount management**—Mind, workspace mounts (unchanged)
-- **Lifecycle orchestration**—the Architect still creates/destroys universes (unchanged)
+- **Gate bridge protocol**: the wire format over TCP between host and container
+- **Element bridging**: MCP servers on the Host exposed as CLI commands (unchanged)
+- **Mount management**: Mind, workspace mounts (unchanged)
+- **Lifecycle orchestration**: the Architect still creates/destroys universes (unchanged)
 
 ### Container Image
 
@@ -56,7 +56,7 @@ A custom base image ships with:
 - Ubuntu 24.04 base
 - Claude Code CLI pre-installed
 - Container-side Gate binary (Rust, using the official `agent-client-protocol` crate)
-- Ready to communicate on container start—no setup delay
+- Ready to communicate on container start, no setup delay
 
 ## Consequences
 
@@ -71,7 +71,7 @@ A custom base image ships with:
 ### What Becomes Harder
 
 - **Additional dependency.** ACP client and protocol add complexity inside the container image.
-- **Protocol translation.** The Gate must translate between Spwn's protocol and ACP—two wire formats to maintain.
+- **Protocol translation.** The Gate must translate between Spwn's protocol and ACP: two wire formats to maintain.
 - **ACP evolution.** If ACP changes significantly, the container-side client must be updated.
 
 ## Alternatives Considered

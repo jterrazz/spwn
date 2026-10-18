@@ -1,6 +1,6 @@
 # CLI
 
-The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse flags → call a domain API → format output. This chapter is the grammar and a task-oriented map. The **per-command reference is generated** from Cobra into [`reference/`](./) — regenerate it with `make docs`; never hand-edit those pages.
+The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse flags, call a domain API, format output. This chapter is the grammar and a task-oriented map. The **per-command reference is generated** from Cobra into [`reference/`](./); regenerate it with `make docs`, never hand-edit those pages.
 
 ## Grammar
 
@@ -14,7 +14,7 @@ Design rules:
 - Names for creation, IDs for reference: creation takes a name, and a running instance is addressed by the ID it was given ([Concepts](../concepts/domain-model.md#ids)).
 - `--json` wherever output is worth consuming programmatically.
 
-Two invariants hold across the surface. Commands speak the domain's vocabulary — worlds, agents, souls, dreams — never the backend's. And the manifest is the input while the running world is the output: no command mutates a world image in place, so changing reality means changing `spwn.yaml` or a block file and rebuilding.
+Two invariants hold across the surface. Commands speak the domain's vocabulary (worlds, agents, souls, dreams), never the backend's. And the manifest is the input while the running world is the output: no command mutates a world image in place, so changing reality means changing `spwn.yaml` or a block file and rebuilding.
 
 ## Command map
 
@@ -38,8 +38,8 @@ spwn agent ls                 # list project agents
 spwn agent inspect neo        # inspect composition, memory, history
 spwn agent fork neo neo-v2    # clone memory + composition
 spwn agent rm neo             # delete an agent
-spwn agent talk  neo "…"      # interactive session (full form of `spwn talk`)
-spwn agent send  neo "…" --from morpheus   # async message to an agent's inbox
+spwn agent talk  neo "..."      # interactive session (full form of `spwn talk`)
+spwn agent send  neo "..." --from morpheus   # async message to an agent's inbox
 spwn agent inbox neo          # show neo's inbox
 spwn agent watch neo          # tail neo's inbox live
 spwn agent dream neo          # analyze experience, promote playbooks
@@ -83,7 +83,7 @@ spwn *       publish <name>             # push to registry         [planned]
 
 ## Related
 
-- [`reference/`](./) — the generated per-command reference (regenerate with `make docs`).
-- [Concepts](../concepts/domain-model.md) — what the nouns mean.
-- [Primitives](primitives.md) — the `install` targets (`spwn:`, `skill/`, `tool/`, `hook/`, `command/`).
-- [Automations](../guides/automations.md) — the automation subsystem in depth.
+- [`reference/`](./): the generated per-command reference (regenerate with `make docs`).
+- [Concepts](../concepts/domain-model.md): what the nouns mean.
+- [Primitives](primitives.md): the `install` targets (`spwn:`, `skill/`, `tool/`, `hook/`, `command/`).
+- [Automations](../guides/automations.md): the automation subsystem in depth.

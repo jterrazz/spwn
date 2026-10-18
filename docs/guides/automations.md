@@ -1,14 +1,14 @@
 # Automations
 
 Automations bind a **trigger** to one of your project's agents. A
-trigger fires (a cron tick, a new file in a watched directory) → the
-architect wakes the target agent → the rendered prompt is delivered.
+trigger fires (a cron tick, a new file in a watched directory), the
+architect wakes the target agent, and the rendered prompt is delivered.
 
 Two trigger kinds in v1:
 
-- **`cron:`** — fire at a wall-clock schedule. 5-field standard cron
+- **`cron:`**: fire at a wall-clock schedule. 5-field standard cron
   expression evaluated against the host clock.
-- **`fs:`** — fire on filesystem events under a watched directory.
+- **`fs:`**: fire on filesystem events under a watched directory.
   Backed by fsnotify; no polling.
 
 This page is the user guide. For the public Go API see
@@ -65,7 +65,7 @@ Then run the engine:
 
 ```text
 $ spwn automation daemon
-automation daemon — project my-project
+automation daemon for project my-project
 registered automations: 1
 receipts → /Users/jterrazz/my-project/.spwn/runs.jsonl
 ctrl-c to stop
@@ -78,7 +78,7 @@ running world.
 > **Heads up:** `spwn automation daemon` does NOT bring worlds up.
 > Run `spwn up <world>` first; otherwise fires record as failed
 > receipts ("no running world found"). The daemon is stateless
-> beyond its receipts — it loads the manifest at boot, so any edit
+> beyond its receipts: it loads the manifest at boot, so any edit
 > to `spwn.yaml` requires a daemon restart to take effect.
 
 ---
@@ -115,7 +115,7 @@ three ways: by the agent via `/morning-brief`, manually via
 **Trigger:** exactly one of `cron:` or `fs:`. `spwn check` rejects
 both-set / neither-set.
 
-**Agent:** must be one of the world's declared agents — the engine
+**Agent:** must be one of the world's declared agents; the engine
 talks to the agent inside the world's container.
 
 ---
@@ -144,7 +144,7 @@ prompt: |
 ### What a catch-up fire records
 
 The receipt for a catch-up fire records both the slot it covered
-(`scheduled`) and when it actually ran (`fired`) — the dashboard can
+(`scheduled`) and when it actually ran (`fired`), so the dashboard can
 render "ran 2h late" trivially.
 
 ### First boot, filesystem triggers
@@ -161,15 +161,15 @@ the inbox; daemon restart during a deploy.
 
 The reason for replay fires is `replay:<basename>` (vs `create:<basename>`
 for live fsnotify events). The full path list lands in the
-receipt's `event_paths` field — your prompt template can iterate
+receipt's `event_paths` field; your prompt template can iterate
 with `{{ range .Event.Paths }}…{{ end }}`.
 
 ### Clocks
 
 **DST gaps are silently dropped.** Cron expressions evaluate against
 the host's local time. On the spring-forward day in regions that
-observe DST, the wall-clock hour skipped (e.g. 02:00→03:00 in US
-Eastern) is missing entirely — `cron: "0 2 * * *"` will not fire on
+observe DST, the wall-clock hour skipped (e.g. 02:00 to 03:00 in US
+Eastern) is missing entirely: `cron: "0 2 * * *"` will not fire on
 the gap day, and no catch-up is recorded for the missing slot. If
 this matters, schedule the cron at a non-gap hour (`0 3 * * *`) or
 express it in UTC by running the daemon with `TZ=UTC`.
@@ -187,17 +187,17 @@ slots must be stable across moves.
 
 Bodies are Go `text/template` strings. Available variables:
 
-| Variable             | When set                                                        |
-| -------------------- | --------------------------------------------------------------- |
-| `{{ .Now }}`         | Always — wall time of the fire.                                 |
-| `{{ .Scheduled }}`   | Always — the slot this fire covers.                             |
-| `{{ .Reason }}`      | Always — `"on-time"`, `"catchup"`, or `"create:foo.md"` for fs. |
-| `{{ .Missed }}`      | Catch-up cron only. Count of collapsed slots.                   |
-| `{{ .LastFired }}`   | Catch-up cron only. Previous successful fire's scheduled time.  |
-| `{{ .Event.Path }}`  | FS only. First path of the burst.                               |
-| `{{ .Event.Name }}`  | FS only. Basename of `Path`.                                    |
-| `{{ .Event.Paths }}` | FS only. Full path list (debounce coalesces).                   |
-| `{{ .Event.Kind }}`  | FS only. `create` / `write` / `rename`.                         |
+| Variable             | When set                                                       |
+| -------------------- | -------------------------------------------------------------- |
+| `{{ .Now }}`         | Always: wall time of the fire.                                 |
+| `{{ .Scheduled }}`   | Always: the slot this fire covers.                             |
+| `{{ .Reason }}`      | Always: `"on-time"`, `"catchup"`, or `"create:foo.md"` for fs. |
+| `{{ .Missed }}`      | Catch-up cron only. Count of collapsed slots.                  |
+| `{{ .LastFired }}`   | Catch-up cron only. Previous successful fire's scheduled time. |
+| `{{ .Event.Path }}`  | FS only. First path of the burst.                              |
+| `{{ .Event.Name }}`  | FS only. Basename of `Path`.                                   |
+| `{{ .Event.Paths }}` | FS only. Full path list (debounce coalesces).                  |
+| `{{ .Event.Kind }}`  | FS only. `create` / `write` / `rename`.                        |
 
 A `date` helper formats times with Go's reference layout:
 
@@ -225,7 +225,7 @@ Two files per project:
 ### `runs.jsonl`
 
 One JSON line per fire. Rotates at 100MB to `runs.jsonl.1` (with
-`.1`→`.2`, etc., keeping 5 historical files). Total disk footprint
+`.1` to `.2`, etc., keeping 5 historical files). Total disk footprint
 per project is bounded at ~500MB.
 
 Schema (every field is timestamped UTC, sortable as plain text):
@@ -273,7 +273,7 @@ Schema (every field is timestamped UTC, sortable as plain text):
 ### `state.json`
 
 Per-`<world>/<name>` cursor of the last successful fire's
-**scheduled** time (not the wall-clock fired time — a catch-up that
+**scheduled** time (not the wall-clock fired time: a catch-up that
 runs 2h late advances the cursor to the slot it covered, preventing
 the next catch-up from re-detecting it).
 
@@ -284,15 +284,15 @@ Both files are gitignored by `spwn init`'s default `.gitignore`.
 ## CLI
 
 ```text
-spwn automation ls           — list every automation + last-fired
-spwn automation status       — per-automation rollup (fires/ok/fail)
-spwn automation logs [-n N]  — last N receipts
-spwn automation logs -f      — tail receipts as they arrive
-spwn automation daemon       — run the engine; ctrl-c to stop
+spwn automation ls           # list every automation + last-fired
+spwn automation status       # per-automation rollup (fires/ok/fail)
+spwn automation logs [-n N]  # last N receipts
+spwn automation logs -f      # tail receipts as they arrive
+spwn automation daemon       # run the engine; ctrl-c to stop
 ```
 
 `ls` / `status` / `logs` are read-only against `.spwn/`. They work
-whether or not the daemon is running — `logs -f` will wait for the
+whether or not the daemon is running; `logs -f` will wait for the
 file to appear if there's nothing yet.
 
 ---
@@ -419,7 +419,7 @@ every day". When in doubt, paste your expression into
 
 - Confirm the path exists: `spwn check` blocks on missing paths
   with an explicit error.
-- Check the events filter. Default is `[create]` — files modified
+- Check the events filter. Default is `[create]`: files modified
   in place but never created don't fire.
 - The engine watches directories, not files. Set `path:` to the
   parent directory and use `patterns:` to filter.
@@ -439,14 +439,14 @@ Most editors save atomically: write `foo.md.tmp`, then rename to
 temp file with patterns:
 
 ```yaml
-patterns: ['*.md', '!*.tmp', '!.*.swp'] # last two NOT supported — see below
+patterns: ['*.md', '!*.tmp', '!.*.swp'] # last two NOT supported, see below
 ```
 
 Negation isn't supported by `filepath.Match` either. The pragmatic
 workarounds:
 
 - Use a debounce window (default 1s) wide enough that both events
-  collapse into a single fire — the rendered prompt's `.Event.Paths`
+  collapse into a single fire; the rendered prompt's `.Event.Paths`
   lists every file touched in the burst.
 - Have the agent inspect `.Event.Paths` and skip swap/temp files
   itself.
@@ -522,5 +522,5 @@ they don't fall through the cracks:
    hasn't been wired yet.
 3. **Webhook + message triggers.** `on: webhook:` and
    `on: message:` are reserved in the schema for future
-   agent-to-agent fanout — once the message bus lands they slot
+   agent-to-agent fanout; once the message bus lands they slot
    into the same engine without API changes.

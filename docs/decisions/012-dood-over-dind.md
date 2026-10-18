@@ -49,9 +49,9 @@ The same code and same Backend port work in both modes:
 
 All containers (Architect, Worlds, Observatory) join the `spwn-net` Docker bridge network. This enables:
 
-- Architect → World communication (task routing, lifecycle management)
-- World → World communication (if needed for multi-world orchestration)
-- Observatory → Architect event streaming (via WebSocket)
+- Architect to World communication (task routing, lifecycle management)
+- World to World communication (if needed for multi-world orchestration)
+- Observatory to Architect event streaming (via WebSocket)
 
 ### Shared State
 
@@ -66,7 +66,7 @@ The `~/.spwn/` directory is mounted from the host into the Architect container. 
 ### Positive
 
 - **Performance**: No nested Docker daemon overhead. World containers run at native speed with direct access to host resources (cgroups, storage drivers).
-- **Simplicity**: One Docker daemon to manage. Standard Docker tooling (`docker ps`, `docker logs`) shows all containers—Architect, Worlds, Observatory—as peers.
+- **Simplicity**: One Docker daemon to manage. Standard Docker tooling (`docker ps`, `docker logs`) shows all containers (Architect, Worlds, Observatory) as peers.
 - **Storage efficiency**: No copy-on-copy layering. Image layers are shared between sibling containers on the same daemon.
 - **Industry standard**: DooD is the established pattern for CI/CD systems (Jenkins, GitLab CI) and container orchestrators. Well-documented, well-understood.
 - **Debuggability**: `docker ps` on the host shows everything. No need to exec into the Architect container to inspect World containers.
@@ -75,7 +75,7 @@ The `~/.spwn/` directory is mounted from the host into the Architect container. 
 ### Negative
 
 - **Socket access = root-equivalent**: The Architect container can create any container on the host. Mitigated by the fact that the user explicitly opts in by running `spwn architect start`, and the Architect is trusted code.
-- **No nested isolation**: World containers share the host's Docker daemon. A malicious World container with Docker socket access could affect siblings. Mitigated by never mounting `docker.sock` into World containers—only the Architect has socket access.
+- **No nested isolation**: World containers share the host's Docker daemon. A malicious World container with Docker socket access could affect siblings. Mitigated by never mounting `docker.sock` into World containers: only the Architect has socket access.
 
 ### Why Not DinD
 

@@ -1,10 +1,10 @@
 # Release
 
-spwn is not deployed — it is released. This chapter is everything needed to cut
+spwn is not deployed: it is released. This chapter is everything needed to cut
 one: the keys a clone signs with, the tag that starts the pipeline, how to
-verify what came out, and how to undo it. The machinery underneath — the
+verify what came out, and how to undo it. The machinery underneath (the
 GitHub-only distribution channel, the updater manifest, the checksum
-verification — is [Update system](../concepts/update-system.md).
+verification) is [Update system](../concepts/update-system.md).
 
 There is nothing to run and nothing to keep alive: the artifacts live in a
 GitHub Release, and a user's `spwn upgrade` or the Tauri updater does the rest.
@@ -231,7 +231,7 @@ to see the deleted version for up to a day.
 
 ## Related
 
-- [Update system](../concepts/update-system.md) — the pipeline, the artifacts, and how a
+- [Update system](../concepts/update-system.md): the pipeline, the artifacts, and how a
   running install discovers a new version.
-- [Develop](develop.md) — the loop and the gates a change passes before
+- [Develop](develop.md): the loop and the gates a change passes before
   it is ever in a tag.

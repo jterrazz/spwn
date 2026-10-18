@@ -8,8 +8,8 @@ A spwn project is per-repo: everything an agent is made of is committed beside t
 
 ```text
 my-project/
-├── spwn.yaml       # manifest — version, name, inline worlds map, project-wide deps
-├── spwn.lock       # lockfile — pinned catalog deps
+├── spwn.yaml       # manifest: version, name, inline worlds map, project-wide deps
+├── spwn.lock       # lockfile: pinned catalog deps
 ├── spwn/           # committed project assets, below
 └── .spwn/          # gitignored local state
     ├── state.json               # live world IDs bound to this project
@@ -42,7 +42,7 @@ spwn/
 └── state/                       # architect daemon state
 ```
 
-The two manifests compose. `spwn.yaml` declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map; `agent.yaml` declares one agent's `dependencies:` and its `runtime.backend`. An agent's deps are **unioned** with the project-wide pool — it can add to that pool, never remove from it — and the union is exactly what materializes inside that agent's container.
+The two manifests compose. `spwn.yaml` declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map; `agent.yaml` declares one agent's `dependencies:` and its `runtime.backend`. An agent's deps are **unioned** with the project-wide pool (it can add to that pool, never remove from it), and the union is exactly what materializes inside that agent's container.
 
 ## The dependency grammar
 
@@ -57,9 +57,9 @@ An agent's composition is one `dependencies:` list. The grammar splits **source*
 | `hook/<name>`           | local block | `spwn/hooks/<name>.yaml`                                           |
 | `command/<name>`        | local block | `spwn/commands/<name>.md`                                          |
 
-The four local schemes are iso: a path-style ref, selected per agent, resolving to one file or directory on disk. Each agent inherits only the blocks it explicitly subscribes to. Project-wide `dependencies:` in `spwn.yaml` are unioned into every agent — an agent can add but never remove them.
+The four local schemes are iso: a path-style ref, selected per agent, resolving to one file or directory on disk. Each agent inherits only the blocks it explicitly subscribes to. Project-wide `dependencies:` in `spwn.yaml` are unioned into every agent: an agent can add but never remove them.
 
-## `spwn.yaml` — the project manifest
+## `spwn.yaml`: the project manifest
 
 The single root file every project has. Declares which worlds exist, which agents they deploy, and the project-wide defaults every agent inherits.
 
@@ -81,9 +81,9 @@ worlds: # required: deployable worlds, keyed by name
         knowledge: ./spwn/knowledge #   optional: bind-mounted at /world/knowledge/
 ```
 
-Worlds are **inline** map entries — the world record (agents, workspaces, tool overrides, `automations:`) lives in YAML, not in separate files. A world optionally owns one filesystem artifact: the directory named by its `knowledge:` key, bind-mounted at `/world/knowledge/`. Omit the key and no mount happens — the agent is never told a knowledge base exists.
+Worlds are **inline** map entries: the world record (agents, workspaces, tool overrides, `automations:`) lives in YAML, not in separate files. A world optionally owns one filesystem artifact: the directory named by its `knowledge:` key, bind-mounted at `/world/knowledge/`. Omit the key and no mount happens; the agent is never told a knowledge base exists.
 
-## Agents — `spwn/agents/<name>/`
+## Agents: `spwn/agents/<name>/`
 
 An agent is a first-class entity with identity, a role in a world, declared dependencies, and a persistent mind on disk. Everything is optional except `agent.yaml`.
 
@@ -91,7 +91,7 @@ An agent is a first-class entity with identity, a role in a world, declared depe
 spwn/agents/<name>/
   agent.yaml         # required: declarative config
   AGENTS.md          # provider-neutral system-prompt body (compiled per runtime)
-  SOUL.md            # the agent's identity (who they are — purpose, voice, values)
+  SOUL.md            # the agent's identity (who they are: purpose, voice, values)
   playbooks/         # reusable procedures (name:/description: frontmatter = auto-indexed)
   journal/           # session history (auto-appended by the system)
 ```
@@ -106,16 +106,16 @@ team: platform # optional grouping
 runtime:
     backend: spwn:claude-code # which runtime drives this agent
     model: opus # pinned into .claude/settings.json#model
-    provider: anthropic # auth-path hint (anthropic / openai / …)
+    provider: anthropic # auth-path hint (anthropic / openai / ...)
 
 dependencies: # unioned with spwn.yaml's project-wide deps
     - spwn:unix
     - spwn:git
 ```
 
-At build time spwn renders each agent's entry file (`CLAUDE.md` for Claude Code, `AGENTS.md` for codex) with world-shared context (physics, faculties, roster) plus the agent's role inlined, so the runtime boots fully loaded — no `@-imports` to chase.
+At build time spwn renders each agent's entry file (`CLAUDE.md` for Claude Code, `AGENTS.md` for codex) with world-shared context (physics, faculties, roster) plus the agent's role inlined, so the runtime boots fully loaded, with no `@-imports` to chase.
 
-## Tools — `spwn/tools/<name>/tool.yaml`
+## Tools: `spwn/tools/<name>/tool.yaml`
 
 Runnable dependencies: a binary, an install recipe, sometimes a bundle of sidecar files. Every catalog entry and project-local tool uses the same `tool.yaml` shape.
 
@@ -136,20 +136,20 @@ install: # optional: how to install into the image
 verify: # optional: smoke-tests at image-build end (non-zero exit fails)
     - command -v bash
 
-gate: # 🚧 experimental — see 08-gate.md
+gate: # experimental, see 08-gate.md
     cookies: { domains: [x.com], cookies: [auth_token, ct0] }
     mcp: { entry: ['node', 'index.js', 'mcp-serve'] }
 ```
 
-The compiler unions all deps across a world's agents, topo-sorts, resolves each to a concrete tool, and bakes apt packages + install commands + env + file drops + skills into one world image. Built-in catalog: `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`, `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`, … — the full list is in [`15-dependency-catalog.md`](dependency-catalog.md). Tools with a `gate:` block additionally register with the host-side gate ([Gate](../concepts/gate.md)).
+The compiler unions all deps across a world's agents, topo-sorts, resolves each to a concrete tool, and bakes apt packages + install commands + env + file drops + skills into one world image. Built-in catalog: `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`, `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect` and more; the full list is in [`15-dependency-catalog.md`](dependency-catalog.md). Tools with a `gate:` block additionally register with the host-side gate ([Gate](../concepts/gate.md)).
 
-## Skills — `spwn/skills/<name>/SKILL.md`
+## Skills: `spwn/skills/<name>/SKILL.md`
 
 Reusable sub-prompts both runtimes auto-discover at startup. Source form is a directory per skill with an entry at `SKILL.md` and any sidecar files alongside; frontmatter needs at least `name:` and `description:`. The legacy bare form `spwn/skills/<name>.md` auto-wraps into `<name>/SKILL.md` on load.
 
-The compiler emits `.claude/skills/<skill>/` (Claude Code) or `.agents/skills/<skill>/` (codex — the cross-vendor `AGENTS.md` convention, **not** `.codex/skills/`). Tool-shipped skills merge into the same tree.
+The compiler emits `.claude/skills/<skill>/` (Claude Code) or `.agents/skills/<skill>/` (codex, following the cross-vendor `AGENTS.md` convention, **not** `.codex/skills/`). Tool-shipped skills merge into the same tree.
 
-## Hooks — `spwn/hooks/<name>.yaml` 🚧 experimental
+## Hooks: `spwn/hooks/<name>.yaml` (experimental)
 
 Fire on runtime events inside the container. One file = one hook; each agent inherits only the hooks it lists via `hook/<name>`.
 
@@ -160,9 +160,9 @@ matcher: Bash # optional: scope pattern (defaults to *)
 command: echo "[audit] $CLAUDE_TOOL_INPUT" # required: shell fragment
 ```
 
-Event support differs by runtime — `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `SessionStart`, `Stop` work on both Claude Code and codex; `Notification`, `SubagentStop`, `PreCompact`, `SessionEnd` are Claude-only. `spwn check` warns when a hook targets an event the selecting agent's runtime doesn't fire, and flags hook files no agent subscribes to. The runtime event registries live in [`../packages/runtimes/<runtime>/events.go`](../../packages/runtimes). YAML source (vs the JSON both runtimes store) buys comments and multi-line commands; the YAML→JSON translation is the point of `spwn build`.
+Event support differs by runtime: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `SessionStart`, `Stop` work on both Claude Code and codex; `Notification`, `SubagentStop`, `PreCompact`, `SessionEnd` are Claude-only. `spwn check` warns when a hook targets an event the selecting agent's runtime doesn't fire, and flags hook files no agent subscribes to. The runtime event registries live in [`../packages/runtimes/<runtime>/events.go`](../../packages/runtimes). YAML source (vs the JSON both runtimes store) buys comments and multi-line commands; the translation from YAML to JSON is the point of `spwn build`.
 
-## Commands — `spwn/commands/<name>.md`
+## Commands: `spwn/commands/<name>.md`
 
 Slash-invoked prompt shortcuts. Type `/<name>` and the runtime injects the file body as the next prompt. Iso with the other local blocks; selected per-agent via `command/<name>`.
 
@@ -174,14 +174,14 @@ Slash-invoked prompt shortcuts. Type `/<name>` and the runtime injects the file 
 description: Refactor the selected code while preserving behaviour.
 ---
 
-Refactor the code I've selected without changing observable behaviour…
+Refactor the code I've selected without changing observable behaviour...
 ```
 
-The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands/<name>.md`; frontmatter is interpreted by the runtime, not spwn. Use commands for short prompt shortcuts (5–20 lines); use skills for multi-phase capabilities with state and tool plumbing.
+The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands/<name>.md`; frontmatter is interpreted by the runtime, not spwn. Use commands for short prompt shortcuts (5 to 20 lines); use skills for multi-phase capabilities with state and tool plumbing.
 
 ## Invariants
 
-- **Input, not output.** The manifests declare what reality should be; what the agent reads at startup — physics, faculties, roster — is what it is after the build ([Physics](../concepts/physics.md)). Operators author YAML, agents read rendered markdown.
+- **Input, not output.** The manifests declare what reality should be; what the agent reads at startup (physics, faculties, roster) is what it is after the build ([Physics](../concepts/physics.md)). Operators author YAML, agents read rendered markdown.
 - **Declarative all the way down.** No manifest triggers behaviour by being edited; reality changes only through `spwn build` and `spwn up`.
 - **Composition, not restriction.** Security comes from what the world image lacks, never from a rule in YAML.
 - **Blocks are files.** Every skill, tool, hook, and command is one file or directory on disk, diffable and reviewable like code.
@@ -189,6 +189,6 @@ The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands
 
 ## Related
 
-- [CLI](cli.md) — `spwn install` / `uninstall` for these refs.
-- [`15-dependency-catalog.md`](dependency-catalog.md) — the built-in `spwn:*` catalog.
-- [Gate](../concepts/gate.md) — the `gate:` block and cookie-bearing tools.
+- [CLI](cli.md): `spwn install` / `uninstall` for these refs.
+- [`15-dependency-catalog.md`](dependency-catalog.md): the built-in `spwn:*` catalog.
+- [Gate](../concepts/gate.md): the `gate:` block and cookie-bearing tools.

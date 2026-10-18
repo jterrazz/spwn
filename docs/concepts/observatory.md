@@ -8,7 +8,7 @@ A Next.js application ([`apps/web`](../../apps/web)) backed by a Go API server (
 
 ## Design principles
 
-- **Read-write, not read-only.** Full CRUD over worlds and agents — spawn, snapshot, destroy, browse and edit a Mind — not a metrics viewer.
+- **Read-write, not read-only.** Full CRUD over worlds and agents (spawn, snapshot, destroy, browse and edit a Mind), not a metrics viewer.
 - **The filesystem is the truth.** Views are computed live from the same on-disk state the CLI uses: no shadow database, no background workers.
 - **CLI parity.** Every action available in the CLI is reachable from the dashboard; the CLI stays the primary surface for scripting and automation.
 - **Zero friction.** Dependencies that are not running are started when needed, and failures come with an actionable hint.
@@ -19,5 +19,5 @@ The long-term target is an isometric, real-time visualisation of worlds and the 
 
 ## Related
 
-- [CLI](../reference/cli.md) — the other operator surface.
-- [Architecture](architecture.md) — `apps/web` and `apps/api` in the monorepo layout.
+- [CLI](../reference/cli.md): the other operator surface.
+- [Architecture](architecture.md): `apps/web` and `apps/api` in the monorepo layout.

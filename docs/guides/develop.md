@@ -21,7 +21,7 @@ make build              # .artifacts/go/spwn
 
 ## The loop
 
-The `Makefile` is the single entry point for both toolchains, and CI calls its gestures directly — [`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml). Run `make` with no arguments for the annotated list; the loop is:
+The `Makefile` is the single entry point for both toolchains, and CI calls its gestures directly ([`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml)). Run `make` with no arguments for the annotated list; the loop is:
 
 ```bash
 make fix             # every fixer of the TypeScript toolchain
@@ -32,30 +32,30 @@ make check           # lint, test and mutation: what CI runs
 
 Adding a module to `go.work` is the only thing needed to bring it under lint and test coverage: Turborepo reads `go.work` itself and turns every module into a package of the same graph the pnpm workspace feeds, so the Makefile never lists a package.
 
-Every gate above delegates to `turbo run`, which hashes each package's inputs and replays a cached result when nothing changed — a second `make lint` over an untouched tree finishes in about a second. The cache is a directory, `.artifacts/turbo`, so `make clean` is also how it is thrown away. What the wiring relies on, and what it cost, are [ADR-016](../decisions/016-turborepo-over-both-toolchains.md)'s.
+Every gate above delegates to `turbo run`, which hashes each package's inputs and replays a cached result when nothing changed: a second `make lint` over an untouched tree finishes in about a second. The cache is a directory, `.artifacts/turbo`, so `make clean` is also how it is thrown away. What the wiring relies on, and what it cost, are [ADR-016](../decisions/016-turborepo-over-both-toolchains.md)'s.
 
 ## Which file a change opens
 
-| Change                            | Opens                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| Business logic of a domain        | `packages/<domain>/` — the root `.go` file is the public API, `internal/` is private |
-| A CLI command                     | `apps/cli/<domain>/<command>.go`, registered with `Cmd.AddCommand` in `init()`       |
-| A runtime (Claude Code, codex, …) | `packages/runtimes/<name>/` — see below                                              |
-| A shipped tool or template        | `catalog/<slug>/`, one directory per entry                                           |
-| The layer a package may import    | [`.golangci.yml`](../../.golangci.yml), the depguard deny rules                      |
-| A world's on-disk shape           | `packages/compile/` and `packages/transpile/`                                        |
+| Change                                    | Opens                                                                               |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| Business logic of a domain                | `packages/<domain>/`: the root `.go` file is the public API, `internal/` is private |
+| A CLI command                             | `apps/cli/<domain>/<command>.go`, registered with `Cmd.AddCommand` in `init()`      |
+| A runtime (Claude Code, codex and others) | `packages/runtimes/<name>/`, see below                                              |
+| A shipped tool or template                | `catalog/<slug>/`, one directory per entry                                          |
+| The layer a package may import            | [`.golangci.yml`](../../.golangci.yml), the depguard deny rules                     |
+| A world's on-disk shape                   | `packages/compile/` and `packages/transpile/`                                       |
 
-A CLI command carries no business logic: it parses flags, calls a domain API, and formats output through the `ui.New()` stepper (✓/✗/→). A new top-level command is also added to the custom help in `apps/cli/root.go`.
+A CLI command carries no business logic: it parses flags, calls a domain API, and formats output through the `ui.New()` stepper (`✓`/`✗`/`→`). A new top-level command is also added to the custom help in `apps/cli/root.go`.
 
 ### Adding a runtime adapter
 
 A runtime lives at `packages/runtimes/<name>/` and ships any subset of three facets:
 
-| Facet    | Interface           | Does                                                                                                         |
-| -------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `Tool`   | `tool.Tool`         | The install recipe (apt/curl/npm, user config) — runs at image-build time                                    |
-| `Render` | `transpile.Runtime` | Translates the provider-neutral source tree into runtime-specific output files                               |
-| `Spawn`  | `runtimes.Spawner`  | Host-side spawn behaviour — `BuildCommand`, credential sync, prelaunch shell, default config, container path |
+| Facet    | Interface           | Does                                                                                                        |
+| -------- | ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Tool`   | `tool.Tool`         | The install recipe (apt/curl/npm, user config), run at image-build time                                     |
+| `Render` | `transpile.Runtime` | Translates the provider-neutral source tree into runtime-specific output files                              |
+| `Spawn`  | `runtimes.Spawner`  | Host-side spawn behaviour: `BuildCommand`, credential sync, prelaunch shell, default config, container path |
 
 Create `tool.go`, `spawn.go` and optionally `render.go`; a `Render` facet reads its runtime-neutral prose from `packages/transpile/worldbook` rather than restating it. Bundle the facets in `adapter.go` and register them from `init()`:
 
@@ -80,8 +80,8 @@ Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is wh
 ## Conventions
 
 - **No cgo.**
-- **Errors read as two lines** — `error: lowercase message.\nActionable hint.`
-- **Types avoid stutter** — `world.World`, not `world.WorldInstance`; `agent.Info`, not `agent.AgentInfo`. The package name already carries the context.
+- **Errors read as two lines**: `error: lowercase message.\nActionable hint.`
+- **Types avoid stutter**: `world.World`, not `world.WorldInstance`; `agent.Info`, not `agent.AgentInfo`. The package name already carries the context.
 - **Domain modules own all business logic**; a surface is a wrapper.
 - **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world snapshot restore`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
 
@@ -89,18 +89,18 @@ Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is wh
 
 Three things land in the same commit as the change that makes them true:
 
-1. **The guard.** A discovery grows a test, a `spwn check` rule, or a runtime error in the same change — the suite is the specification ([Test](test.md)).
-2. **The regenerated projection.** [Commands](../reference/commands.md) is projected from Cobra by `make docs` and never hand-edited — a Go test refuses a stale page; the embedded catalog is projected by `make generate`, which `build`, `lint` and `test` already run.
+1. **The guard.** A discovery grows a test, a `spwn check` rule, or a runtime error in the same change: the suite is the specification ([Test](test.md)).
+2. **The regenerated projection.** [Commands](../reference/commands.md) is projected from Cobra by `make docs` and never hand-edited (a Go test refuses a stale page); the embedded catalog is projected by `make generate`, which `build`, `lint` and `test` already run.
 3. **The chapter the behaviour falsified.** A page of this corpus that a change makes untrue is repaired by that change, not by a follow-up.
 
 ## Decision records
 
-A decision this repository alone took is written to [`decisions/`](../decisions/) as `NNN-kebab.md`, cut from [`decisions/_template.md`](../decisions/_template.md). The status is `Proposed` until the owner writes `Accepted` — an agent never accepts its own record.
+A decision this repository alone took is written to [`decisions/`](../decisions/) as `NNN-kebab.md`, cut from [`decisions/_template.md`](../decisions/_template.md). The status is `Proposed` until the owner writes `Accepted`: an agent never accepts its own record.
 
-The sequence runs `001` to the latest with no gap: a record that moves or is removed shifts the ones after it down rather than leaving a hole. The record that once held 003 — _security as physics_, a decision about the product rather than about this codebase — was withdrawn to spwn's product knowledge outside this repository, and the sequence closed the gap on 2026-09-09.
+The sequence runs `001` to the latest with no gap: a record that moves or is removed shifts the ones after it down rather than leaving a hole. The record that once held 003 (_security as physics_, a decision about the product rather than about this codebase) was withdrawn to spwn's product knowledge outside this repository, and the sequence closed the gap on 2026-09-09.
 
 ## Related
 
-- [Architecture](../concepts/architecture.md) — the layers a change must not cross upward.
-- [Test](test.md) — what proves a change, and how to run it.
-- [Release](release.md) — cutting a release once the change has landed.
+- [Architecture](../concepts/architecture.md): the layers a change must not cross upward.
+- [Test](test.md): what proves a change, and how to run it.
+- [Release](release.md): cutting a release once the change has landed.

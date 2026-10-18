@@ -3,7 +3,7 @@
 > **Human-driven QA:** every scenario requires a real Anthropic-authenticated
 > Claude session running inside a spwn world. The scenarios probe whether the
 > host-side setup (CLAUDE.md, playbooks, skills, hooks, tools, knowledge,
-> roster, messaging) is **correctly injected** into the agent's perception —
+> roster, messaging) is **correctly injected** into the agent's perception:
 > i.e. the agent actually sees, reads, and acts on what spwn claims to have
 > configured.
 >
@@ -18,18 +18,18 @@
 - A scratch project dir per scenario under `$TMP/agentqa/sNN/` (commit it to
   a disposable git repo if you want diffs).
 - The agent runs claude-code natively; don't set `SPWN_BASE_IMAGE` unless a
-  scenario explicitly says so — we need the real runtime.
+  scenario explicitly says so: we need the real runtime.
 
 ## Conventions used in this document
 
-- **Setup** — host-side config before spawn.
-- **Spawn** — the `spwn up` line(s) used to boot the world.
-- **Prompt sequence** — exact strings to paste into the agent chat (via
+- **Setup**: host-side config before spawn.
+- **Spawn**: the `spwn up` line(s) used to boot the world.
+- **Prompt sequence**: exact strings to paste into the agent chat (via
   `spwn agent talk <name>` interactive mode, or `spwn agent send` for async).
-- **Expect** — agent behaviors / substrings that must be observable.
-- **PASS criteria** — binary: either all Expect items hold or the scenario
+- **Expect**: agent behaviors / substrings that must be observable.
+- **PASS criteria**: binary, either all Expect items hold or the scenario
   fails.
-- **Likely failure modes** — what a broken injection tends to look like, so
+- **Likely failure modes**: what a broken injection tends to look like, so
   the tester can diagnose fast.
 
 Keep a scorecard per scenario. A scenario is ✅ only when every PASS criterion
@@ -37,12 +37,12 @@ is satisfied; partial success is ❌ with notes.
 
 ---
 
-## Group A — Identity & self-perception (1-10)
+## Group A: Identity & self-perception (1-10)
 
 Goal: does the agent correctly perceive _who it is_ per SOUL.md, its `CLAUDE.md`,
 its role in the world, and the agent.yaml composition?
 
-### Scenario 1 — Agent reads its SOUL.md first
+### Scenario 1: Agent reads its SOUL.md first
 
 **Setup:**
 
@@ -50,7 +50,7 @@ its role in the world, and the agent.yaml composition?
 mkdir -p $TMP/agentqa/s01 && cd $TMP/agentqa/s01
 spwn init
 cat > spwn/agents/neo/SOUL.md <<'EOF'
-# Neo — Oracle of /workspaces/
+# Neo, Oracle of /workspaces/
 
 You are Neo. You speak in short, measured lines. You always prefix observations
 with "I observe:". You refuse to speculate.
@@ -72,21 +72,21 @@ EOF
 - Response style matches SOUL.md: short, starts with "I observe:".
 - Answer to #3 references "speculate" / "refuse to speculate".
 - #4: agent opens `/agents/neo/SOUL.md` (or `./SOUL.md` since cwd is the home)
-  and quotes `# Neo — Oracle of /workspaces/`.
+  and quotes `# Neo, Oracle of /workspaces/`.
 
 **PASS criteria:** all four observed.
 
 **Likely failure modes:**
 
-- Agent introduces itself as "Claude" instead of Neo → `@SOUL.md` import in
+- Agent introduces itself as "Claude" instead of Neo: the `@SOUL.md` import in
   CLAUDE.md didn't resolve.
-- Voice pattern absent → SOUL.md exists but agent never read it.
-- File-read attempt returns wrong path → CLAUDE.md's `@SOUL.md` relative-path
+- Voice pattern absent: SOUL.md exists but agent never read it.
+- File-read attempt returns wrong path: CLAUDE.md's `@SOUL.md` relative-path
   convention misinterpreted.
 
 ---
 
-#### Scenario 2 — Agent knows its role in this specific world
+#### Scenario 2: Agent knows its role in this specific world
 
 **Setup:**
 
@@ -119,18 +119,18 @@ operation on CLAUDE.md (observable in its tool use).
 **Likely failure modes:**
 
 - Agent guesses the world name from the container hostname rather than
-  reading CLAUDE.md → the "Role here" inlining broke or the world-id
+  reading CLAUDE.md, the "Role here" inlining broke or the world-id
   isn't landing in the rendered block.
 
 **Note (2026-04-22):** Earlier revisions of this scenario expected a
 `worlds/<id>/role.md` file; that was removed in commit `d06f1517`
-("inline role into CLAUDE.md/AGENTS.md; drop worlds/<id>/role.md") —
+("inline role into CLAUDE.md/AGENTS.md; drop worlds/<id>/role.md");
 the role now lives as a `## Role here` heading inside CLAUDE.md /
 AGENTS.md.
 
 ---
 
-#### Scenario 3 — Agent perceives its two-layer Mind (playbooks + journal only)
+#### Scenario 3: Agent perceives its two-layer Mind (playbooks + journal only)
 
 **Setup:**
 
@@ -150,7 +150,7 @@ cd $TMP/agentqa/s03 && spwn init
 - #1: agent names `SOUL.md`, `playbooks/`, `journal/` (possibly also
   `agent.yaml`, `AGENTS.md`, `worlds/`). No skills/ or knowledge/ under the
   agent home.
-- #2: agent says no — skills are build-time deps in `/world/skills/`,
+- #2: agent says no; skills are build-time deps in `/world/skills/`,
   knowledge is world-scoped at `/world/knowledge/`.
 - #3: `playbooks/`.
 - #4: `journal/`.
@@ -160,7 +160,7 @@ claim skills or knowledge are per-agent layers.
 
 ---
 
-#### Scenario 4 — Agent describes its declared dependencies
+#### Scenario 4: Agent describes its declared dependencies
 
 **Setup:**
 
@@ -178,7 +178,7 @@ spwn install python node
 **Expect:**
 
 - #1: `spwn:unix`, `spwn:git`, `spwn:python`, `spwn:node`, the claude-code
-  runtime — plus scaffold locals if the default scaffold was used (`skill:focus`,
+  runtime, plus scaffold locals if the default scaffold was used (`skill:focus`,
   `tool:greet`, `hook:pre-spawn`).
 - #2: `which python`, `which node`, `which git`, `which greet` all return
   paths inside the container; docker isn't in the list so `which docker`
@@ -187,7 +187,7 @@ spwn install python node
 
 ---
 
-#### Scenario 5 — Agent knows its physics (Laws + Topology + Communication)
+#### Scenario 5: Agent knows its physics (Laws + Topology + Communication)
 
 **Prompts:**
 
@@ -210,7 +210,7 @@ blocks of its CLAUDE.md.
 
 ---
 
-#### Scenario 6 — Agent knows the roster
+#### Scenario 6: Agent knows the roster
 
 **Setup:**
 
@@ -218,7 +218,7 @@ blocks of its CLAUDE.md.
 cd $TMP/agentqa/s06 && spwn init spwn:startup
 ```
 
-**Spawn:** `spwn up` — deploys ceo, devops, analyst.
+**Spawn:** `spwn up` deploys ceo, devops, analyst.
 
 **Prompt (to ceo):**
 
@@ -236,7 +236,7 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 
 ---
 
-#### Scenario 7 — Agent quotes its Conventions accurately
+#### Scenario 7: Agent quotes its Conventions accurately
 
 **Prompts:**
 
@@ -254,7 +254,7 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 
 ---
 
-#### Scenario 8 — Agent distinguishes its home from workspaces
+#### Scenario 8: Agent distinguishes its home from workspaces
 
 **Setup:**
 
@@ -280,7 +280,7 @@ mkdir -p host-project && echo "hello" > host-project/greeting.txt
 
 ---
 
-#### Scenario 9 — Agent voice matches SOUL across sessions
+#### Scenario 9: Agent voice matches SOUL across sessions
 
 **Setup:** scenario 1's Neo-Oracle SOUL.
 
@@ -296,12 +296,12 @@ being regenerated without the `@SOUL.md` import.
 
 ---
 
-#### Scenario 10 — Agent's CLAUDE.md never hallucinates a runtime
+#### Scenario 10: Agent's CLAUDE.md never hallucinates a runtime
 
 **Prompt:**
 
 > read your CLAUDE.md top to bottom. Does it anywhere mention "Claude Code"
-> by name? or "Anthropic"? It shouldn't — per spwn's runtime-neutral design,
+> by name? or "Anthropic"? It shouldn't: per spwn's runtime-neutral design,
 > the file should not advertise which runtime is rendering it.
 
 **Expect:** agent reports "no mention of 'Claude Code' or 'Anthropic' in
@@ -312,25 +312,25 @@ runtime binary, not the prompt.)
 
 ---
 
-## Group B — Filesystem perception (11-20)
+## Group B: Filesystem perception (11-20)
 
 Goal: does the agent see the paths spwn claims to have mounted? Does it see
 them with the correct permissions?
 
-### Scenario 11 — `/agents/<name>/` is readable + writable
+### Scenario 11: `/agents/<name>/` is readable + writable
 
 **Prompts:**
 
 1. `ls -la /agents/neo/`
 2. `create /agents/neo/journal/manual-entry.md with body "test", then ls the journal dir.`
-3. `ls -la /agents/other-agent/` (if colony) — what do you see?
+3. `ls -la /agents/other-agent/` (if colony): what do you see?
 
 **Expect:** full tree visible for self; no other-agent home in single-agent
 world.
 
 ---
 
-#### Scenario 12 — `/workspaces/<name>/` read-write by default
+#### Scenario 12: `/workspaces/<name>/` read-write by default
 
 **Prompts:**
 
@@ -342,7 +342,7 @@ world.
 
 ---
 
-#### Scenario 13 — Read-only workspace is actually read-only
+#### Scenario 13: Read-only workspace is actually read-only
 
 **Setup:**
 
@@ -363,7 +363,7 @@ worlds:
 
 ---
 
-#### Scenario 14 — `/world/knowledge/` mounted ⇒ visible
+#### Scenario 14: `/world/knowledge/` mounted, so visible
 
 **Setup:**
 
@@ -373,8 +373,8 @@ mkdir -p knowledge
 cat > knowledge/glossary.md <<'EOF'
 # Glossary
 
-- spwn — the OS for agent worlds
-- mind — an agent's persistent memory (playbooks + journal + SOUL)
+- spwn: the OS for agent worlds
+- mind: an agent's persistent memory (playbooks + journal + SOUL)
 EOF
 # edit spwn.yaml: add `knowledge: ./knowledge` under worlds.neo
 ```
@@ -388,7 +388,7 @@ EOF
 
 ---
 
-#### Scenario 15 — `/world/knowledge/` absent ⇒ NOT mentioned in CLAUDE.md
+#### Scenario 15: `/world/knowledge/` absent, so NOT mentioned in CLAUDE.md
 
 **Setup:** same as s14 but **don't** add the `knowledge:` key.
 
@@ -401,11 +401,11 @@ EOF
 paragraph when it wasn't mounted.
 
 **Likely failure:** CLAUDE.md still mentions `/world/knowledge/` despite no
-mount → the `knowledgeMounted` flag isn't propagating to the renderer.
+mount: the `knowledgeMounted` flag isn't propagating to the renderer.
 
 ---
 
-#### Scenario 16 — Agent can read `/world/skills/<tool>/SKILL.md`
+#### Scenario 16: Agent can read `/world/skills/<tool>/SKILL.md`
 
 **Setup:** use spwn:matrix which ships `skill:world-exploration` and
 `skill:self-reflection`.
@@ -426,16 +426,16 @@ mount → the `knowledgeMounted` flag isn't propagating to the renderer.
 
 ---
 
-#### Scenario 17 — `/home/spwn/.spwn/` is NOT present in worker container
+#### Scenario 17: `/home/spwn/.spwn/` is NOT present in worker container
 
-**Prompt:** `ls /home/spwn/.spwn 2>&1` — what happens?
+**Prompt:** `ls /home/spwn/.spwn 2>&1`: what happens?
 
 **Expect:** doesn't exist (only exists in the architect container, which
 mounts the host `~/.spwn`).
 
 ---
 
-#### Scenario 18 — `/credentials/` is read-only and present
+#### Scenario 18: `/credentials/` is read-only and present
 
 **Prompts:**
 
@@ -447,18 +447,18 @@ denied.
 
 ---
 
-#### Scenario 19 — Agent never has Docker socket
+#### Scenario 19: Agent never has Docker socket
 
 **Prompt:**
 
 > do you have access to the docker daemon? try docker ps and report.
 
 **Expect:** `docker: command not found` OR `permission denied` on
-`/var/run/docker.sock` — worker containers never get DooD.
+`/var/run/docker.sock`: worker containers never get DooD.
 
 ---
 
-#### Scenario 20 — Agent can `cd /tmp` and scratch files safely
+#### Scenario 20: Agent can `cd /tmp` and scratch files safely
 
 **Prompts:**
 
@@ -470,11 +470,11 @@ current session; after `spwn down && spwn up`, file is absent.
 
 ---
 
-## Group C — Tools & faculties (21-25)
+## Group C: Tools & faculties (21-25)
 
 Goal: every declared tool's binary is actually present, verified, and usable.
 
-### Scenario 21 — Every `spwn:*` tool passes a hand-verify
+### Scenario 21: Every `spwn:*` tool passes a hand-verify
 
 **Setup:** agent.yaml deps: `spwn:unix, spwn:git, spwn:python, spwn:node, spwn:qmd`.
 
@@ -488,7 +488,7 @@ Goal: every declared tool's binary is actually present, verified, and usable.
 
 ---
 
-#### Scenario 22 — Local `tool:greet` is installed + in $PATH
+#### Scenario 22: Local `tool:greet` is installed + in $PATH
 
 **Setup:** default scaffold has `tool:greet`.
 
@@ -498,11 +498,11 @@ Goal: every declared tool's binary is actually present, verified, and usable.
 2. `execute greet and tell me what it output.`
 
 **Expect:** `/usr/local/bin/greet` and a greeting line like "hello from spwn,
-spwn — it is HH:MM:SS".
+spwn, it is HH:MM:SS".
 
 ---
 
-#### Scenario 23 — Tool deps cascade (transitive resolution works)
+#### Scenario 23: Tool deps cascade (transitive resolution works)
 
 **Setup:** `agent.yaml: dependencies: - spwn:qmd` (only).
 `spwn:qmd` declares `spwn:node` + `spwn:unix` as deps.
@@ -516,7 +516,7 @@ spwn — it is HH:MM:SS".
 
 ---
 
-#### Scenario 24 — `spwn inspect <agent>` matches what the agent self-reports
+#### Scenario 24: `spwn inspect <agent>` matches what the agent self-reports
 
 **Before spawn:** run `spwn inspect neo` on host; note deps + skills.
 
@@ -529,10 +529,10 @@ compile-time resolution and the runtime perception drifted.
 
 ---
 
-#### Scenario 25 — Faculties section of CLAUDE.md matches probed tools
+#### Scenario 25: Faculties section of CLAUDE.md matches probed tools
 
 **Setup:** agent.yaml deps include one BROKEN tool (e.g. a fake catalog ref,
-reject at check time — so instead, add a local tool.yaml whose install
+reject at check time, so instead add a local tool.yaml whose install
 silently succeeds but whose binary doesn't install).
 
 **Spawn:** expect `spwn up` to FAIL at probe time with a clear error naming
@@ -544,9 +544,9 @@ the tool whose `verify` failed.
 
 ---
 
-## Group D — Skills & auto-discovery (26-30)
+## Group D: Skills & auto-discovery (26-30)
 
-### Scenario 26 — Claude Code auto-discovers `/world/skills/<name>/SKILL.md`
+### Scenario 26: Claude Code auto-discovers `/world/skills/<name>/SKILL.md`
 
 **Setup:** use `spwn:matrix` (ships `world-exploration`, `self-reflection`)
 or install `skill:myskill` after writing `spwn/skills/myskill.md` with proper
@@ -564,7 +564,7 @@ and when invoking it, reads the SKILL.md body as guidance.
 
 ---
 
-#### Scenario 27 — Skill frontmatter `name` + `description` are surfaced
+#### Scenario 27: Skill frontmatter `name` + `description` are surfaced
 
 **Prompt:**
 
@@ -576,7 +576,7 @@ skill's frontmatter.
 
 ---
 
-#### Scenario 28 — Skills without frontmatter don't get discovered
+#### Scenario 28: Skills without frontmatter don't get discovered
 
 **Setup:** author a skill WITHOUT frontmatter:
 
@@ -601,9 +601,9 @@ Document actual behavior here for the record.
 
 ---
 
-#### Scenario 29 — Nested skill hierarchies (fleet-ops / monitoring / task-planning)
+#### Scenario 29: Nested skill hierarchies (fleet-ops / monitoring / task-planning)
 
-**Setup:** architect agent with `spwn:architect` — ships 3 sub-skills under
+**Setup:** architect agent with `spwn:architect`, which ships 3 sub-skills under
 one bundle.
 
 **Prompt:**
@@ -615,7 +615,7 @@ one bundle.
 
 ---
 
-#### Scenario 30 — Skill file changes require a re-spawn
+#### Scenario 30: Skill file changes require a re-spawn
 
 **Setup:** spawn agent, confirm a skill works. Then edit the skill body on
 host. Ask the agent again without re-spawning.
@@ -627,16 +627,16 @@ host. Ask the agent again without re-spawning.
 **Expect:** agent quotes the PRE-EDIT body (because skills are baked into
 the image at build time; live container doesn't see host changes).
 
-**Then:** `spwn down && spwn up` → ask again → now sees edit (because image
+**Then:** `spwn down && spwn up`, ask again, and it now sees the edit (because image
 rebuild + new spawn).
 
 **PASS:** clear behavior difference between before/after spawn cycle.
 
 ---
 
-## Group E — Playbooks (31-35)
+## Group E: Playbooks (31-35)
 
-### Scenario 31 — Promoted playbook surfaces in CLAUDE.md index
+### Scenario 31: Promoted playbook surfaces in CLAUDE.md index
 
 **Setup:**
 
@@ -669,7 +669,7 @@ the frontmatter. #3+#4 exact quotes from the file.
 
 ---
 
-#### Scenario 32 — Playbook WITHOUT frontmatter is NOT indexed
+#### Scenario 32: Playbook WITHOUT frontmatter is NOT indexed
 
 **Setup:** create `playbooks/secret-sauce.md` with no frontmatter.
 
@@ -682,7 +682,7 @@ auto-indexed in the CLAUDE.md preamble.
 
 ---
 
-#### Scenario 33 — Playbook with only `name:` (no description) is dropped
+#### Scenario 33: Playbook with only `name:` (no description) is dropped
 
 **Setup:** create `playbooks/partial.md` with `---\nname: partial\n---\n`.
 
@@ -694,7 +694,7 @@ auto-indexed in the CLAUDE.md preamble.
 
 ---
 
-#### Scenario 34 — Playbooks persist across worlds (sync-out round trip)
+#### Scenario 34: Playbooks persist across worlds (sync-out round trip)
 
 **Scenario:**
 
@@ -714,28 +714,28 @@ with frontmatter name: today description: Today's plan. and body "test".`
 
 ---
 
-#### Scenario 35 — Playbook body is readable via `./playbooks/<name>.md`
+#### Scenario 35: Playbook body is readable via `./playbooks/<name>.md`
 
 **Prompts:**
 
 1. `the CLAUDE.md preamble advertises your playbooks index. How do you
 actually read one of them?`
 
-**Expect:** agent describes the convention — `cat ./playbooks/<name>.md`
-(cwd is the agent home) — and performs it.
+**Expect:** agent describes the convention (`cat ./playbooks/<name>.md`
+with the agent home as cwd) and performs it.
 
 ---
 
-## Group F — Hooks (36-38)
+## Group F: Hooks (36-38)
 
 > **Note (2026-04-22):** Host-side `hook:<name>` lifecycle hooks were
 > retired. Runtime hooks now live in `spwn/hooks.yaml` and are
 > translated by the transpile layer into each runtime's native hook
-> config (Claude Code → `.claude/settings.json`, Codex →
+> config (Claude Code writes `.claude/settings.json`, Codex
 > `.codex/hooks.json`). The scenarios below have been rewritten to
 > target the current generic-hook pipeline.
 
-### Scenario 36 — SessionStart hook fires when the agent session begins
+### Scenario 36: SessionStart hook fires when the agent session begins
 
 **Setup:** replace the scaffolded `spwn/hooks.yaml` sample with one
 that writes a side-effect file so we can observe firing:
@@ -760,13 +760,13 @@ session start, which happens on the first `spwn agent talk`).
 **Expect:** after prompt #1 the file exists; content matches
 `HOOK_FIRED=<recent ISO8601 UTC>`.
 
-**Likely failure:** file absent → either the hook didn't translate
+**Likely failure:** file absent, so either the hook didn't translate
 (check `cat /agents/neo/.claude/settings.json` for a `SessionStart`
 entry) or the runtime didn't fire it.
 
 ---
 
-#### Scenario 37 — PreToolUse hook scopes to a matcher
+#### Scenario 37: PreToolUse hook scopes to a matcher
 
 **Setup:**
 
@@ -786,12 +786,12 @@ hooks:
 2. `cat /tmp/bash-audit.log — how many lines?`
 
 **Expect:** at least 2 lines, one per Bash tool invocation. Reads
-(e.g. your Read file tool) should NOT appear — the matcher scopes
+(e.g. your Read file tool) should NOT appear: the matcher scopes
 this hook to the `Bash` tool.
 
 ---
 
-#### Scenario 38 — Multiple hooks run in declaration order
+#### Scenario 38: Multiple hooks run in declaration order
 
 **Setup:** declare two hooks for the same event:
 
@@ -807,15 +807,15 @@ hooks:
 
 **Spawn + prompt:**
 
-> cat /tmp/order.log — what's the order of the two lines?
+> cat /tmp/order.log: what's the order of the two lines?
 
 **Expect:** `first` line before `second`, timestamps non-decreasing.
 
 ---
 
-## Group G — Multi-agent coordination (39-42)
+## Group G: Multi-agent coordination (39-42)
 
-### Scenario 39 — Agent messages agent via `/world/inbox/`
+### Scenario 39: Agent messages agent via `/world/inbox/`
 
 **Setup:** spwn:startup (ceo + devops + analyst).
 
@@ -836,7 +836,7 @@ suffix; content includes the audit task.
 
 ---
 
-#### Scenario 40 — `spwn agent send` matches manual inbox writes
+#### Scenario 40: `spwn agent send` matches manual inbox writes
 
 **From host:**
 
@@ -854,7 +854,7 @@ inside-container convention.
 
 ---
 
-#### Scenario 41 — Agent's roster accurately reflects hot-deploy
+#### Scenario 41: Agent's roster accurately reflects hot-deploy
 
 **Setup:** spawn a world with ceo only. Then on host:
 
@@ -876,7 +876,7 @@ spwn agent deploy trinity   # or whatever the hot-deploy CLI is
 - #1: just ceo.
 - #3: ceo + trinity (known caveat: ceo's CLAUDE.md isn't re-rendered mid-
   session per the TODO in colony.go:121, so ceo may say "trinity isn't in
-  my CLAUDE.md" — that's a documented limitation).
+  my CLAUDE.md"; that's a documented limitation).
 - #4: `/world/inbox/trinity/<ts>-from-ceo.md`.
 
 **PASS criteria:** message path in #4 is correct even though the roster may
@@ -884,7 +884,7 @@ not be live; this is a known limitation of the current architecture.
 
 ---
 
-#### Scenario 42 — Dropped agent cleanup
+#### Scenario 42: Dropped agent cleanup
 
 **Setup:** spwn:startup world. Bring one down: `spwn agent stop analyst`
 (or equivalent).
@@ -899,9 +899,9 @@ agent.stop doesn't corrupt the world.
 
 ---
 
-## Group H — Knowledge (43-45)
+## Group H: Knowledge (43-45)
 
-### Scenario 43 — Agent writes to `/world/knowledge/` persists
+### Scenario 43: Agent writes to `/world/knowledge/` persists
 
 **Setup:**
 
@@ -922,7 +922,7 @@ mount to the host project dir immediately.
 
 ---
 
-#### Scenario 44 — Multiple agents share knowledge
+#### Scenario 44: Multiple agents share knowledge
 
 **Setup:** spwn:startup with a `knowledge:` mount.
 
@@ -936,7 +936,7 @@ other agent in the same world.
 
 ---
 
-#### Scenario 45 — Knowledge survives `spwn down` + `spwn up`
+#### Scenario 45: Knowledge survives `spwn down` + `spwn up`
 
 **Setup:** as #44, with a note written by devops.
 
@@ -944,14 +944,14 @@ other agent in the same world.
 
 **Prompt:** `read /world/knowledge/ci-status.md.`
 
-**Expect:** same content — because knowledge lives on the host, bind-mounted
+**Expect:** same content, because knowledge lives on the host, bind-mounted
 into each spawn.
 
 ---
 
-## Group I — Persistence (46-48)
+## Group I: Persistence (46-48)
 
-### Scenario 46 — Journal survives `spwn down` (SyncOut round-trip)
+### Scenario 46: Journal survives `spwn down` (SyncOut round-trip)
 
 **Setup:** fresh init, `spwn up`.
 
@@ -964,11 +964,11 @@ into each spawn.
 
 **Expect:** content synced to host tree.
 
-Then `spwn up`, and ask agent to read it — agent sees it (SyncIn).
+Then `spwn up`, and ask agent to read it: agent sees it (SyncIn).
 
 ---
 
-#### Scenario 47 — Container-side `/agents/<name>/` writes that AREN'T under
+#### Scenario 47: Container-side `/agents/<name>/` writes that AREN'T under
 
 `journal/` or `playbooks/` are DROPPED on destroy
 
@@ -991,7 +991,7 @@ writes stay container-side.
 
 ---
 
-#### Scenario 48 — SOUL.md edits by agent DO survive
+#### Scenario 48: SOUL.md edits by agent DO survive
 
 **Prompts:**
 
@@ -1003,10 +1003,10 @@ writes stay container-side.
 
 **Expect:** addendum visible.
 
-**Wait** — actually: SOUL.md is NOT in the sync-out allowlist (which is
+**Wait**, actually: SOUL.md is NOT in the sync-out allowlist (which is
 journal + playbooks only). So addendum would NOT survive.
 
-**Document actual behavior** — there's an architectural question here:
+**Document actual behavior**: there's an architectural question here:
 should agents be allowed to self-edit their SOUL? Currently: no, the SOUL
 is authored by the human and lives in the project dir. This scenario's
 purpose is to confirm that the in-container addendum is lost, with a note
@@ -1015,9 +1015,9 @@ the workspace mount (not /agents/).
 
 ---
 
-## Group J — Edge cases / misbehaviors (49-50)
+## Group J: Edge cases / misbehaviors (49-50)
 
-### Scenario 49 — Agent asked to escape sandbox
+### Scenario 49: Agent asked to escape sandbox
 
 **Prompt:**
 
@@ -1033,15 +1033,15 @@ the workspace mount (not /agents/).
 - #1: permission denied.
 - #2: `/agents` isn't a bind mount (it's docker-cp'd content), so no mount
   line.
-- #3: sudo IS nopasswd inside the container per the base Dockerfile — works.
+- #3: sudo IS nopasswd inside the container per the base Dockerfile, so it works.
   That's intentional (so agents can install things mid-session if needed).
 - #4: works (outbound network allowed by default).
 
-**Document these explicitly** — they're the spwn security posture.
+**Document these explicitly**: they're the spwn security posture.
 
 ---
 
-#### Scenario 50 — Agent handles a broken playbook gracefully
+#### Scenario 50: Agent handles a broken playbook gracefully
 
 **Setup:** put a malformed YAML frontmatter into one of the playbooks:
 
@@ -1075,7 +1075,7 @@ description: [not a string but a list
 1. Walk the 50 scenarios in order.
 2. Track pass/fail per sub-criterion (most scenarios have 2-4).
 3. After Group I (persistence), run the **same** agent session one more
-   time to verify nothing has drifted — persistence regressions tend to hide
+   time to verify nothing has drifted: persistence regressions tend to hide
    until a second cycle.
 4. Anything that fails: capture the exact prompt+response+container state
    so an engineer can reproduce. The `spwn world logs <id>` + host-side
@@ -1098,14 +1098,14 @@ description: [not a string but a list
 
 - **50/50 pass:** spwn's agent-integration surface is correctly injected.
 - **Any fail:** categorise by group; a failure in Group A (identity) or
-  Group D (skills) is CRITICAL — the agent literally doesn't know what
+  Group D (skills) is CRITICAL: the agent literally doesn't know what
   spwn says it knows. Failures in Group J are documentation items, not
   bugs.
 
 ### Typical session length
 
 Each scenario: 5-20 prompts. Allow ~10 minutes per scenario for a real QA
-agent running a real Claude session — total ~8 hours of focused work for the
+agent running a real Claude session, a total of ~8 hours of focused work for the
 full pass. Split across reviewers: by group, so Group A and Group D can run
 in parallel.
 
@@ -1115,5 +1115,5 @@ in parallel.
   surface: exit codes, file outputs, JSON shape. Zero agent integration.
 - **This** suite tests the **agent perception** surface: does the injected
   prompt actually land? Does the agent behave according to the configured
-  SOUL/skills/playbooks? This needs a human + live Claude — no mock can fake
+  SOUL/skills/playbooks? This needs a human + live Claude: no mock can fake
   "did the agent read this file and summarise it correctly".

@@ -14,7 +14,7 @@ During Mind framework design, we identified four types of agent memory:
 | Journal       | Episodic memory     | What happened                |
 | **Instincts** | **Implicit memory** | **Auto-discovered patterns** |
 
-Instincts are behavioral patterns that emerge from repeated experience — things the agent "just knows" without explicit instruction. For example, an agent that has debugged 50 Node.js projects might develop an instinct to always check `node_modules` freshness first.
+Instincts are behavioral patterns that emerge from repeated experience: things the agent "just knows" without explicit instruction. For example, an agent that has debugged 50 Node.js projects might develop an instinct to always check `node_modules` freshness first.
 
 The question: should we add a fourth agent profile directory (`instincts/`) in v1?
 
@@ -48,14 +48,14 @@ Three directories is the right starting point:
 
 ### Positive
 
-- Simpler v1 — three directories, three concepts, easy to explain.
+- Simpler v1: three directories, three concepts, easy to explain.
 - Auto-discovered patterns still have a home (playbooks with a tag).
 - We gather real data before designing the instincts structure.
 
 ### Negative
 
 - Playbooks directory may accumulate noise as auto-discovered entries mix with hand-written ones.
-- The `auto-discovered` tag is informal — no schema enforcement in v1.
+- The `auto-discovered` tag is informal: no schema enforcement in v1.
 
 ### Mitigations
 
@@ -66,7 +66,7 @@ Three directories is the right starting point:
 
 | Alternative                | Why Rejected                                                              |
 | -------------------------- | ------------------------------------------------------------------------- |
-| **Add `instincts/` now**   | Premature — we don't know the right structure yet                         |
+| **Add `instincts/` now**   | Premature: we don't know the right structure yet                          |
 | **Store in `journal/`**    | Journal is chronological; instincts are derived patterns, not events      |
-| **Store in `knowledge/`**  | Knowledge is factual; instincts are behavioral — different category       |
+| **Store in `knowledge/`**  | Knowledge is factual; instincts are behavioral, a different category      |
 | **Flat file in Mind root** | Unstructured, doesn't scale, breaks the directory-per-memory-type pattern |

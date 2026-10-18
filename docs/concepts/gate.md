@@ -1,16 +1,16 @@
 # Gate
 
-> 🚧 **Experimental.** The gate container, the `gate:` block, the Node SDK, and the cookie-sync extension are in active development — schema, CLI, and behaviour will change without notice. Don't depend on it in production.
+> **Experimental.** The gate container, the `gate:` block, the Node SDK, and the cookie-sync extension are in active development: schema, CLI, and behaviour will change without notice. Don't depend on it in production.
 
-The gate is the one sanctioned crossing between the host and a world. Everything else about a world is closed by construction; the gate is where declared, scoped capability enters — a host service surfaced inside the world as an ordinary command, so the agent sees an element that exists and never an endpoint ([Physics](physics.md)).
+The gate is the one sanctioned crossing between the host and a world. Everything else about a world is closed by construction; the gate is where declared, scoped capability enters: a host service surfaced inside the world as an ordinary command, so the agent sees an element that exists and never an endpoint ([Physics](physics.md)).
 
 Four concerns sit behind that: **capability bridging** (external services as plain CLI commands), **credential custody** (secrets and cookies stay host-side, never in a world's image or filesystem), **session relay** (operator traffic in, agent output back), and **supervision** (the bridged capability is spawned, health-checked, and respawned by the gate, not by the agent).
 
 The shipped implementation is a long-running Docker container on the host (`spwn gate start`). It owns three concerns no individual world should:
 
-1. **Cookie sync** — receives session cookies from the `spwn-cookie-sync` Chrome extension at `/sync/<provider>` and persists them under `~/.spwn/credentials/<provider>/cookies.json`.
-2. **MCP routing** — exposes `/mcp/<element>/*` for every registered element (Notion proxy, Gmail/Gcal via `gws`, every catalog tool loaded from `~/.spwn/gate/tools/`).
-3. **Browser primitive** — a Playwright Chromium sidecar (`apps/gate/browser/`, in-container `127.0.0.1:9001`) that catalog tools call to drive a cookie-loaded browser without shipping their own Chromium.
+1. **Cookie sync**: receives session cookies from the `spwn-cookie-sync` Chrome extension at `/sync/<provider>` and persists them under `~/.spwn/credentials/<provider>/cookies.json`.
+2. **MCP routing**: exposes `/mcp/<element>/*` for every registered element (Notion proxy, Gmail/Gcal via `gws`, every catalog tool loaded from `~/.spwn/gate/tools/`).
+3. **Browser primitive**: a Playwright Chromium sidecar (`apps/gate/browser/`, in-container `127.0.0.1:9001`) that catalog tools call to drive a cookie-loaded browser without shipping their own Chromium.
 
 ```text
 Host
@@ -45,20 +45,20 @@ install:
       WRAPPER
 ```
 
-At startup the gate scans `/gate/tools/`, auto-registers each tool's `CookieProvider` with cookie-sync (the extension picks it up next refresh), spawns its MCP subprocess on a port from `9100+`, and reverse-proxies `/mcp/<name>/*` into it. Adding a new site (LinkedIn, Reddit, …) is one new directory — no edits to `packages/gate/`.
+At startup the gate scans `/gate/tools/`, auto-registers each tool's `CookieProvider` with cookie-sync (the extension picks it up next refresh), spawns its MCP subprocess on a port from `9100+`, and reverse-proxies `/mcp/<name>/*` into it. Adding a new site (LinkedIn, Reddit and so on) is one new directory, with no edits to `packages/gate/`.
 
 ## The Node SDK
 
 Catalog tools `require('@spwn/gate-tool')` and use:
 
-- `new Tool({ name }).method(name, { description, schema, handler })` — register MCP methods. The same `handler` serves both MCP calls (HTTP) and direct CLI invocation (`node index.js <method> --flags`).
-- `openSession(provider)` — open a Playwright session in the sidecar with the provider's cookies pre-loaded. Returns a `Session` with `.goto / .click / .type / .scroll / .waitResponse / .eval / .end`.
+- `new Tool({ name }).method(name, { description, schema, handler })`: register MCP methods. The same `handler` serves both MCP calls (HTTP) and direct CLI invocation (`node index.js <method> --flags`).
+- `openSession(provider)`: open a Playwright session in the sidecar with the provider's cookies pre-loaded. Returns a `Session` with `.goto / .click / .type / .scroll / .waitResponse / .eval / .end`.
 
-Direct CLI mode is how host scripts (e.g. `publish.sh`) run writes without going through the agent's MCP wrapper — keeping human-in-the-loop methods out of agent reach by construction.
+Direct CLI mode is how host scripts (e.g. `publish.sh`) run writes without going through the agent's MCP wrapper, keeping human-in-the-loop methods out of agent reach by construction.
 
 ## Generic browser escape hatch
 
-Beyond per-site catalog tools, the gate exposes the sidecar directly as `/mcp/browser` — agents that need ad-hoc browsing call `browser-open / browser-goto / browser-click / browser-eval / …` for sites without a dedicated tool. Heavier on tokens; reserve it for exploration, not scheduled scrapes.
+Beyond per-site catalog tools, the gate exposes the sidecar directly as `/mcp/browser`: agents that need ad-hoc browsing call `browser-open / browser-goto / browser-click / browser-eval / ...` for sites without a dedicated tool. Heavier on tokens; reserve it for exploration, not scheduled scrapes.
 
 ## Per-agent allow/deny
 
@@ -86,11 +86,11 @@ These hold whatever the implementation looks like:
 
 ## Open question: communication between worlds
 
-Undecided — whether two worlds should be able to reach each other. No direct communication (where things stand today) keeps isolation strong but rules out collaborative patterns; a host relay through the gate keeps isolation clean at the cost of latency and a host bottleneck; direct networking breaks the isolation model outright. Leaning toward the host relay.
+Undecided: whether two worlds should be able to reach each other. No direct communication (where things stand today) keeps isolation strong but rules out collaborative patterns; a host relay through the gate keeps isolation clean at the cost of latency and a host bottleneck; direct networking breaks the isolation model outright. Leaning toward the host relay.
 
 ## Related
 
-- [Primitives](../reference/primitives.md) — the `gate:` block on a `tool.yaml`.
-- [Physics](physics.md) — why a bridged capability is modelled as an element.
-- [Architecture](architecture.md) — where the gate sits relative to worlds.
-- [ADR-001](../decisions/001-gate-over-socket.md) · [ADR-005](../decisions/005-acp-inside-container.md) · [ADR-006](../decisions/006-rust-container-gate.md) — the transport abstraction and the two-sided design that preceded the shipped host broker.
+- [Primitives](../reference/primitives.md): the `gate:` block on a `tool.yaml`.
+- [Physics](physics.md): why a bridged capability is modelled as an element.
+- [Architecture](architecture.md): where the gate sits relative to worlds.
+- [ADR-001](../decisions/001-gate-over-socket.md) · [ADR-005](../decisions/005-acp-inside-container.md) · [ADR-006](../decisions/006-rust-container-gate.md): the transport abstraction and the two-sided design that preceded the shipped host broker.

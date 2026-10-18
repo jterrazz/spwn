@@ -9,7 +9,7 @@ The SDK needs to communicate with processes running inside Universes. Docker pro
 
 ## Decision
 
-We introduce the **Gate**—an abstraction layer that sits between the SDK and the transport. The SDK always talks to a Gate. The Gate translates to the appropriate transport for the active backend.
+We introduce the **Gate**, an abstraction layer that sits between the SDK and the transport. The SDK always talks to a Gate. The Gate translates to the appropriate transport for the active backend.
 
 ```text
 ┌──────────┐       ┌──────────┐       ┌──────────────┐
@@ -23,18 +23,18 @@ We introduce the **Gate**—an abstraction layer that sits between the SDK and t
 
 The Gate defines a small set of **message types**:
 
-| Message Type | Direction       | Purpose                                       |
-| ------------ | --------------- | --------------------------------------------- |
-| `exec`       | Host → Universe | Run a command, return stdout/stderr/exit code |
-| `file_read`  | Host → Universe | Read a file from the Universe filesystem      |
-| `file_write` | Host → Universe | Write a file to the Universe filesystem       |
-| `signal`     | Host → Universe | Send a signal to a running process            |
-| `heartbeat`  | Bidirectional   | Keep-alive, health check                      |
-| `stream`     | Universe → Host | Real-time output from a running command       |
+| Message Type | Direction        | Purpose                                       |
+| ------------ | ---------------- | --------------------------------------------- |
+| `exec`       | Host to Universe | Run a command, return stdout/stderr/exit code |
+| `file_read`  | Host to Universe | Read a file from the Universe filesystem      |
+| `file_write` | Host to Universe | Write a file to the Universe filesystem       |
+| `signal`     | Host to Universe | Send a signal to a running process            |
+| `heartbeat`  | Bidirectional    | Keep-alive, health check                      |
+| `stream`     | Universe to Host | Real-time output from a running command       |
 
 ## Rationale
 
-The Gate is a thin layer—it adds minimal overhead but provides critical decoupling. This is the same pattern as database drivers (SQL is the gate, the driver handles transport) or HTTP (the protocol is the gate, TCP/TLS is the transport). The abstraction keeps the door open for future backends without changing agent code.
+The Gate is a thin layer: it adds minimal overhead but provides critical decoupling. This is the same pattern as database drivers (SQL is the gate, the driver handles transport) or HTTP (the protocol is the gate, TCP/TLS is the transport). The abstraction keeps the door open for future backends without changing agent code.
 
 ## Consequences
 
@@ -43,7 +43,7 @@ The Gate is a thin layer—it adds minimal overhead but provides critical decoup
 - **Backend portability.** Agent code doesn't depend on Docker directly.
 - **Testability.** Mock the Gate for unit testing agents without spinning up containers.
 - **Extensibility.** New backends only need a transport adapter, not SDK changes.
-- **Structured communication.** Message types enforce a contract—no more parsing raw shell output for control flow.
+- **Structured communication.** Message types enforce a contract: no more parsing raw shell output for control flow.
 
 ### Negative
 
@@ -52,7 +52,7 @@ The Gate is a thin layer—it adds minimal overhead but provides critical decoup
 
 ### Mitigations
 
-- Keep the Gate protocol minimal—only the operations agents actually need.
+- Keep the Gate protocol minimal: only the operations agents actually need.
 - Allow escape hatches for backend-specific features when needed.
 
 ## Alternatives Considered

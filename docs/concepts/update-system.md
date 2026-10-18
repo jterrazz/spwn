@@ -10,10 +10,10 @@ infrastructure. Every artifact lives in a GitHub Release.
 
 Two things are distributed:
 
-| Artifact          | Channel                   | Auto-update mechanism                     |
-| ----------------- | ------------------------- | ----------------------------------------- |
-| `spwn` CLI binary | GitHub Releases (tar.gz)  | `spwn upgrade` + background version check |
-| spwn spwn.app     | GitHub Releases (bundles) | Tauri updater plugin → `latest.json`      |
+| Artifact          | Channel                   | Auto-update mechanism                       |
+| ----------------- | ------------------------- | ------------------------------------------- |
+| `spwn` CLI binary | GitHub Releases (tar.gz)  | `spwn upgrade` + background version check   |
+| spwn spwn.app     | GitHub Releases (bundles) | Tauri updater plugin, reading `latest.json` |
 
 Both are built from the same git tag (`vX.Y.Z`). A single `git push --tags`
 triggers the entire pipeline.
@@ -37,7 +37,7 @@ triggers the entire pipeline.
 
 Implemented in `packages/upgrade/`. It runs in two steps. **CheckForUpdate** finds what to install:
 
-1. `GET api.github.com/repos/jterrazz/spwn/releases/latest` — or `?per_page=10` for `--channel beta`.
+1. `GET api.github.com/repos/jterrazz/spwn/releases/latest`, or `?per_page=10` for `--channel beta`.
 2. Parse the release and compare it with the embedded `Version`.
 3. Find the asset matching `GOOS_GOARCH`, and `checksums.txt` in the same release.
 
@@ -45,7 +45,7 @@ Implemented in `packages/upgrade/`. It runs in two steps. **CheckForUpdate** fin
 
 1. Stop the running worlds and the architect, best-effort.
 2. Download the asset into a temporary directory (three retries), then `checksums.txt`.
-3. Hash the archive with SHA-256 and match the digest in `checksums.txt` — a mismatch refuses the install.
+3. Hash the archive with SHA-256 and match the digest in `checksums.txt`; a mismatch refuses the install.
 4. Extract the binary from the tar.gz with Go's standard library.
 5. `os.Rename` the new binary onto the target path, atomically.
 
@@ -94,7 +94,7 @@ The desktop app uses the official
 [`tauri-plugin-updater`](https://v2.tauri.app/plugin/updater/) plugin,
 which:
 
-1. On app launch (wired in `components/app-shell.tsx` → `checkForUpdatesOnStartup()`)
+1. On app launch (wired in `components/app-shell.tsx`, calling `checkForUpdatesOnStartup()`)
 2. Fetches the manifest URL from `tauri.conf.json`:
    `https://github.com/jterrazz/spwn/releases/latest/download/latest.json`
 3. Compares against the running app's bundled version.

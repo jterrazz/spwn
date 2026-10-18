@@ -81,7 +81,7 @@ spwn/agents/neo/
 
 **Your agents and their composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
 
-`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do — see [the layout](#the-layout) it lays down. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
+`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do; see [the layout](#the-layout) it lays down. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
 **`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, export it (`spwn agent export`) and import the archive in the next repo (`spwn agent import`).
 

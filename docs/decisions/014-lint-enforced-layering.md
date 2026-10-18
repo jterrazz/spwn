@@ -23,16 +23,16 @@ honest afterwards?
 **Package imports flow downward only, and the rule is machine-enforced,
 never aspirational.** Three mechanisms, layered themselves:
 
-1. **Go `internal/`** — compiler-enforced visibility. Each module's
+1. **Go `internal/`**: compiler-enforced visibility. Each module's
    implementation hides under `internal/`; only the root API is importable.
-2. **depguard** (in `.golangci.yml`) — lint-time layer rules. Each layer
+2. **depguard** (in `.golangci.yml`): lint-time layer rules. Each layer
    carries deny rules for every package above it, so an upward import
    fails CI.
-3. **The layer diagram in the corpus** — the human-readable map
+3. **The layer diagram in the corpus**: the human-readable map
    ([Architecture](../concepts/architecture.md)), rewritten as the roster churns.
 
-At decision time the roster had five layers (foundation → domain →
-project → build → runtime, with the CLI free above); it has since grown.
+At decision time the roster had five layers (foundation, domain,
+project, build, runtime, with the CLI free above); it has since grown.
 The invariant is the **direction and the enforcement**, not the layer
 count: `.golangci.yml` and [Architecture](../concepts/architecture.md) own the
 current graph.
@@ -45,14 +45,14 @@ current graph.
   not a code-review hope.
 - **The map cannot lie silently.** When the lint config and the docs
   disagree, CI notices the config side.
-- **Refactors get cheaper**—`packages/pack/` could absorb three scattered
+- **Refactors get cheaper**: `packages/pack/` could absorb three scattered
   concerns because the deny rules pinned what may depend on what.
 
 ### Negative
 
 - **Two sources to keep aligned**: the depguard rules and the prose
   diagram. The lint rules are the mechanical truth; the doc follows.
-- **Layer churn has a cost**—every roster change edits deny lists across
+- **Layer churn has a cost**: every roster change edits deny lists across
   `.golangci.yml`.
 
 ## Alternatives Considered

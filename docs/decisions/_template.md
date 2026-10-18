@@ -11,7 +11,7 @@ carries nothing.
 
 ## Context
 
-The situation that forced a decision — the forces, not the answer.
+The situation that forced a decision: the forces, not the answer.
 
 ## Decision
 

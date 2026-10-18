@@ -1,4 +1,4 @@
-# spwn — the manual
+# spwn: the manual
 
 Everything this repository knows about itself, by what the reader came to do. What spwn is, why it exists, and its quickstart, is the README at the root of the repository; new here, [Getting started](start/getting-started.md) comes next.
 
@@ -15,7 +15,7 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | ------------------------------------------------ | -------------------------------------------------------------------------- |
 | [Develop](guides/develop.md)                     | The toolchain, the loop, which file a change opens, and what a change owes |
 | [Test](guides/test.md)                           | What proves a change, how to run each suite, and how to add a test         |
-| [Release](guides/release.md)                     | The release runbook — signing keys, the tag that ships, the rollback       |
+| [Release](guides/release.md)                     | The release runbook: signing keys, the tag that ships, the rollback        |
 | [Automations](guides/automations.md)             | Waking an agent on a cron tick or a filesystem event                       |
 | [Recipes](guides/recipes.md)                     | Worked examples, end to end                                                |
 | [Run a manual pass](guides/run-a-manual-pass.md) | The three scenario catalogs a person walks against a live runtime          |
@@ -48,4 +48,4 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 
 ## Decisions
 
-The records of what this repository decided, and why — the stack, the layering, the container model — are [decisions/](decisions/), one `NNN-subject.md` each.
+The records of what this repository decided, and why (the stack, the layering, the container model), are [decisions/](decisions/), one `NNN-subject.md` each.

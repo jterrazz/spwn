@@ -13,7 +13,7 @@ make mutation           # the mutation verdict over the change
 make check              # lint, test and mutation: everything CI runs
 ```
 
-`make test` is one Turborepo graph over both toolchains: the Go unit tests of every module in `go.work`, the module tests of `apps/web` and `apps/gate/sdk`, and the two specifications under `specs/` — `cli`, the compiled binary in Docker, and `website`, the web UI in a headless Chromium.
+`make test` is one Turborepo graph over both toolchains: the Go unit tests of every module in `go.work`, the module tests of `apps/web` and `apps/gate/sdk`, and the two specifications under `specs/`: `cli`, the compiled binary in Docker, and `website`, the web UI in a headless Chromium.
 
 Three suites stay outside it, because each costs minutes and a Docker daemon of its own:
 
@@ -37,7 +37,7 @@ make test-pkg PKG=agent # one Go module, verbose
 
 A `*_test.go` beside the code it proves, named `TestSubject_Scenario`, table-driven where a rule has several cases. Every filesystem state lives in `t.TempDir()`, with `t.Setenv("SPWN_HOME", …)`: no test reads the operator's `~/.spwn`. A Docker test goes under `packages/world/tests/e2e/` behind `//go:build e2e`, spawning through `setup.NewSpawnBuilder(t)`.
 
-A golden — the runtime renderers' output under `packages/runtimes/__tests__/__fixtures__/`, the catalog bundles under `packages/catalog/` — is rewritten with `UPDATE_GOLDEN=1 go test ./…` in its module, and read before it is committed.
+A golden (the runtime renderers' output under `packages/runtimes/__tests__/__fixtures__/`, the catalog bundles under `packages/catalog/`) is rewritten with `UPDATE_GOLDEN=1 go test ./...` in its module, and read before it is committed.
 
 ### A CLI specification
 
@@ -45,7 +45,7 @@ A `specs/cli/<domain>/<case>.spec.yaml` document by default: the ground it stand
 
 1. State the ground (`fixture:`, `env:`) and the `runs:`, each with a `command:` and a guessed `exit:`.
 2. `TEST_UPDATE=1 pnpm -C specs exec vitest --run --project cli <path>` writes the exit codes and the streams.
-3. Read what it wrote, and turn into a token whatever stayed literal and varies — a temporary path, a random name, a clock.
+3. Read what it wrote, and turn into a token whatever stayed literal and varies: a temporary path, a random name, a clock.
 4. Run it again without the flag; it passes twice in a row.
 
 A chain, `<aspect>.spec.ts`, is for what a document cannot state: a container read back, a session that starts one (the chain scopes it with `await using`), JSON judged by its structure, a command run inside a world, two runs compared, a long-running process. It opens, below its imports, with that reason, written as a `// hazard: a document cannot …` comment: what a document would lose. Everything else, an exit code, both streams, a file on disk whole, is a document.
@@ -54,7 +54,7 @@ A spec that starts the architect, in `cli/` or in `website/`, runs its chain ins
 
 ### A website specification
 
-A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline — the accessibility tree — whole. Each file starts its own `spwn web` on a fresh project and its own `next dev`, so the files run one at a time.
+A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline (the accessibility tree) whole. Each file starts its own `spwn web` on a fresh project and its own `next dev`, so the files run one at a time.
 
 ### A module test
 
@@ -66,5 +66,5 @@ Three scenario catalogs a person walks against a live runtime sit outside every 
 
 ## Related
 
-- [Develop](develop.md) — the loop these gates run in, and what a change owes.
-- [Test architecture](../reference/test-architecture.md) — the layers, the runners, the simulators.
+- [Develop](develop.md): the loop these gates run in, and what a change owes.
+- [Test architecture](../reference/test-architecture.md): the layers, the runners, the simulators.

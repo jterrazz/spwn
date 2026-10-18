@@ -3,22 +3,22 @@
 These are the **complicated** scenarios the prior two suites
 (CLI-harness + agent-behavior) miss by design. They probe:
 
-- **Concurrency** — two processes fighting over the same state.
-- **Partial failure** — spwn aborts mid-pipeline; what's left behind?
-- **State-machine holes** — world in unexpected / impossible states.
-- **Filesystem edges** — special chars, permissions, large files,
+- **Concurrency**: two processes fighting over the same state.
+- **Partial failure**: spwn aborts mid-pipeline; what's left behind?
+- **State-machine holes**: world in unexpected / impossible states.
+- **Filesystem edges**: special chars, permissions, large files,
   symlinks, binary content, case-insensitive FS.
-- **Tool install failures** — exits non-zero mid-build, network
+- **Tool install failures**: exits non-zero mid-build, network
   drops, produces wrong output, two tools colliding.
-- **Skill/playbook conflicts** — same name across sources, malformed
+- **Skill/playbook conflicts**: same name across sources, malformed
   frontmatter variants, @-import chains.
-- **Hook misbehavior** — hooks that hang, mutate state, exit
+- **Hook misbehavior**: hooks that hang, mutate state, exit
   non-zero, or try to do too much.
-- **Auth** — missing/expired/wrong-provider credentials.
-- **CLI UX** — TTY vs pipe, SIGINT, partial JSON, completion.
-- **Resource limits** — PidsLimit, disk, memory.
-- **Snapshot/restore** — cross-version, overlapping IDs, many snaps.
-- **Multi-agent** — name collision with system reserved, inbox
+- **Auth**: missing/expired/wrong-provider credentials.
+- **CLI UX**: TTY vs pipe, SIGINT, partial JSON, completion.
+- **Resource limits**: PidsLimit, disk, memory.
+- **Snapshot/restore**: cross-version, overlapping IDs, many snaps.
+- **Multi-agent**: name collision with system reserved, inbox
   overflow, circular messages.
 
 Each scenario: **Hypothesis** (expected behavior) · **Probe** (one-shot
@@ -43,7 +43,7 @@ containers + check `spwn ls` state, re-run `spwn check --json`.
 ### A2. `spwn down` mid-spawn
 
 **Hypothesis:** if down races ahead, spawn either completes or fails
-cleanly — no orphan container.
+cleanly, with no orphan container.
 **Probe:** `spwn up &` then `spwn down` ~1s later; after both return,
 `docker ps` should be clean.
 
@@ -62,7 +62,7 @@ serialises them), or one errors cleanly.
 
 ### A5. Two projects spawning concurrently with same world config name
 
-**Hypothesis:** isolated — each has its own container with unique
+**Hypothesis:** isolated; each has its own container with unique
 world-id.
 **Probe:** /tmp/p1 + /tmp/p2 both `spwn init && spwn up`.
 
@@ -149,7 +149,7 @@ message.
 **Hypothesis:** state.json has stale entry; `spwn ls` flags it;
 re-running `up` either resurrects or re-creates.
 
-### C19. Host reboot → `spwn ls` shows stale worlds
+### C19. Host reboot: `spwn ls` shows stale worlds
 
 **Hypothesis:** containers gone, state says running; hydrate-from-
 labels detects + marks stopped.
@@ -236,7 +236,7 @@ crash on giant input.
 **Hypothesis:** image build fails with "command returned exit 1",
 pointing at the tool name.
 
-### E36. Tool verify passes on an empty file (→ fixed in 3338f92c)
+### E36. Tool verify passes on an empty file (fixed in 3338f92c)
 
 **Status:** already tracked; verify is weak but not directly
 breakable today.
@@ -284,20 +284,20 @@ breakable today.
 **Probe:** local `skill:review` (Claude Code has a built-in
 `review`).
 **Hypothesis:** spwn's version takes precedence via the
-symlinked skills dir, or Claude Code prefers its own — either way
+symlinked skills dir, or Claude Code prefers its own; either way
 document.
 
 ### F45. Skill with 10 levels of `@-imports`
 
 **Hypothesis:** Claude Code's 5-hop limit kicks in; graceful stop.
 
-### F46. Skill with circular `@-import` (A→B→A)
+### F46. Skill with circular `@-import` (A imports B imports A)
 
 **Hypothesis:** cycle-break at first re-visit.
 
 ### F47. Playbook filename = `secret-sauce.md` with BOM prefix
 
-**Hypothesis:** parsed correctly — frontmatter still detected.
+**Hypothesis:** parsed correctly; frontmatter still detected.
 
 ### F48. Playbook frontmatter with embedded newlines in description
 
@@ -321,7 +321,7 @@ up in size.
 ### G51. Pre-spawn hook exits non-zero
 
 **Hypothesis:** spawn aborts; no container created; error surfaces
-with hook's stderr. ← **verified in the fix commit 73212cfa**.
+with hook's stderr. **Verified in the fix commit 73212cfa**.
 
 ### G52. Pre-spawn hook hangs forever
 
@@ -375,7 +375,7 @@ talk errors clear.
 
 ### I61. `spwn agent talk` piped input (no TTY)
 
-**Probe:** `echo "hi" | spwn agent talk neo` — sends?
+**Probe:** `echo "hi" | spwn agent talk neo`: does it send?
 **Hypothesis:** documented behavior.
 
 ### I62. SIGINT during `spwn agent talk`
@@ -413,7 +413,7 @@ kernel-block.
 **Probe:** `spwn up`, `spwn world snap save <id> s1`, verify image
 tagged.
 
-### J69. Restore snapshot → new world
+### J69. Restore snapshot into a new world
 
 **Probe:** `spwn world snap restore <snap-id>`; new world comes
 online with preserved state.
@@ -423,7 +423,7 @@ online with preserved state.
 **Hypothesis:** snapshot restore works even if project dir moved;
 new world has stale role.md but otherwise fine.
 
-### J71. Many snapshots (100+) — GC / cleanup
+### J71. Many snapshots (100+): GC / cleanup
 
 **Hypothesis:** no auto-GC today; document.
 
@@ -446,7 +446,7 @@ new world has stale role.md but otherwise fine.
 ## Out of scope (still)
 
 - DoS / adversarial workloads (testing against a malicious agent).
-- Cross-platform (Windows/Linux divergence — spwn is macOS-first
+- Cross-platform (Windows/Linux divergence: spwn is macOS-first
   today).
 - HTTP API auth edges (apps/api is same-machine only).
 - Web UI specifics (Playwright suite).

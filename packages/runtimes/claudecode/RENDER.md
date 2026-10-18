@@ -4,11 +4,11 @@ The **Claude Code** runtime adapter.
 
 Full three-facet adapter:
 
-| Facet  | File                           | What it does                                                                                            |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Tool   | `tool.go`                      | Image-build recipe — curl-based native installer for the `claude` binary.                               |
-| Render | `render.go`, `render_agent.go` | Turns a provider-neutral `transpile.Input` into a tree of files Claude Code can boot from.              |
-| Spawn  | `spawn.go`                     | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell, default config files. |
+| Facet  | File                           | What it does                                                                                           |
+| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Tool   | `tool.go`                      | Image-build recipe: curl-based native installer for the `claude` binary.                               |
+| Render | `render.go`, `render_agent.go` | Turns a provider-neutral `transpile.Input` into a tree of files Claude Code can boot from.             |
+| Spawn  | `spawn.go`                     | Host-side spawn-time behavior: `BuildCommand`, credential sync, prelaunch shell, default config files. |
 
 The `Adapter` value in `adapter.go` bundles all three and self-registers with `packages/runtimes` at init time.
 
@@ -22,30 +22,30 @@ This package is the only place in spwn that encodes those conventions. Everythin
 
 `render_agent.go`'s `GenerateAgentCLAUDEMD` builds a single CLAUDE.md that inlines **everything the agent needs at boot**:
 
-- `@SOUL.md` — identity import
-- Physics — world rules (inlined from `worldbook.GeneratePhysics`)
-- Faculties — installed tools (inlined from `worldbook.GenerateFaculties`)
-- Roster — who else is in this world (inlined from `worldbook.GenerateRoster`)
-- Role here — per-deployment role sentence
-- Your playbooks — auto-index of frontmatter-promoted playbooks (omitted when empty)
-- Conventions — memory, messaging, evolution rules folded in as bullets
+- `@SOUL.md`: identity import
+- Physics: world rules (inlined from `worldbook.GeneratePhysics`)
+- Faculties: installed tools (inlined from `worldbook.GenerateFaculties`)
+- Roster: who else is in this world (inlined from `worldbook.GenerateRoster`)
+- Role here: per-deployment role sentence
+- Your playbooks: auto-index of frontmatter-promoted playbooks (omitted when empty)
+- Conventions: memory, messaging, evolution rules folded in as bullets
 
 No separate `world/physics.md`, `world/faculties.md`, `world/AGENTS.md`, `world/roster.md`, or `world/skills/*.md` files are emitted. Any file outside the paths below is a renderer bug.
 
 ## Emitted paths
 
-| Path                                       | Source                                                            |
-| ------------------------------------------ | ----------------------------------------------------------------- |
-| `agents/<name>/CLAUDE.md`                  | `claudecode.GenerateAgentCLAUDEMD` — self-contained system prompt |
-| `agents/<name>/.claude/settings.json`      | Claude Code settings: permissions, hooks, model pin               |
-| `agents/<name>/.claude/skills/<skill>/...` | User-authored and tool-shipped skills                             |
+| Path                                       | Source                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `agents/<name>/CLAUDE.md`                  | `claudecode.GenerateAgentCLAUDEMD`: self-contained system prompt |
+| `agents/<name>/.claude/settings.json`      | Claude Code settings: permissions, hooks, model pin              |
+| `agents/<name>/.claude/skills/<skill>/...` | User-authored and tool-shipped skills                            |
 
 User-authored skills (`spwn/skills/...`) and tool-shipped skills (`SKILL.md` files from each resolved `tool.Tool`) are emitted by the renderer into each agent's `.claude/skills/<skill>/` tree. Claude Code discovers them through its native skill walker; no `/world/skills` directory or spawn-time symlink is involved.
 
 ## What this adapter does NOT touch
 
-- **Runtime state** — `inbox/`, `outbox/`, `notes/` are `mkdir`'d by `architect.Spawn`, not rendered. They're state, not content.
-- **Docker config** — base image, binds, env vars, labels. `packages/compile` and `packages/architect`.
+- **Runtime state**: `inbox/`, `outbox/`, `notes/` are `mkdir`'d by `architect.Spawn`, not rendered. They're state, not content.
+- **Docker config**: base image, binds, env vars, labels. `packages/compile` and `packages/architect`.
 
 ## Extending
 

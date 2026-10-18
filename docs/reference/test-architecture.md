@@ -22,11 +22,11 @@ Each layer refuses what the one above it does: a unit test never starts a contai
 
 ## The CLI specification
 
-`specs/cli/cli.specification.ts` declares the one runner, `cli`, bound to `.artifacts/go/spwn`. Under it, one folder per domain of the CLI (`agent/`, `check/`, `up/`, `world/` …) holds that domain's documents and chains, and the ground they stand on:
+`specs/cli/cli.specification.ts` declares the one runner, `cli`, bound to `.artifacts/go/spwn`. Under it, one folder per domain of the CLI (`agent/`, `check/`, `up/`, `world/` and the rest) holds that domain's documents and chains, and the ground they stand on:
 
-- `__fixtures__/` — the projects a spec spreads into its working directory; the pool at `specs/cli/__fixtures__/` is what several domains share, a domain's own is beside its specs.
-- `__expected__/` — a golden too long to write in place.
-- `__setup__/` — code a domain's chains share, such as `up/__setup__/world.ts`, which reads a world's labels back.
+- `__fixtures__/`: the projects a spec spreads into its working directory; the pool at `specs/cli/__fixtures__/` is what several domains share, a domain's own is beside its specs.
+- `__expected__/`: a golden too long to write in place.
+- `__setup__/`: code a domain's chains share, such as `up/__setup__/world.ts`, which reads a world's labels back.
 
 The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's working directory, the keychain and the providers' tokens are unset, and live credential validation is skipped. One environment is named for a document's `env:`, `sealed`, which also points `HOME` at an empty folder of the run, for a command that reads the user's home (`~/.codex`, `~/.claude`). Every container a run starts carries the run's label, `sh.spwn.test.run`, and the runner removes them at scope exit.
 
@@ -34,7 +34,7 @@ The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's wo
 
 `specs/website/website.specification.ts` starts two processes per file:
 
-- the API, `spwn web --no-open`, serving a fresh project that `__setup__/project.ts` writes to a temporary directory — the `matrix` and `startup` worlds, their agents copied from `catalog/`, a spwn home past the onboarding wizard;
+- the API, `spwn web --no-open`, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a spwn home past the onboarding wizard;
 - the UI, `next dev` in `apps/web`, handed that API's URL as `NEXT_PUBLIC_API_URL`.
 
 One folder per area of the UI (`worlds/`, `agents/`, `navigation/`), one file per page. A page is read whole through its accessibility tree, the Docker version a `{{semver}}` token. The page calls the API on a port of its own, so cross-origin requests are allowed.
@@ -53,7 +53,7 @@ A spec pins the image with `SPWN_BASE_IMAGE=spwn-test:latest`. The scripts are c
 `packages/world/tests/e2e/setup/` is their harness:
 
 - `NewTestContext(t)` gives each test a spwn home in `t.TempDir()`, a unique label, and a cleanup that destroys every world it spawned.
-- `NewSpawnBuilder(t)` spawns a world fluently and returns an assertion chain — `ExpectState`, `ExpectContainer`, `ExpectMock` — one assertion type per observable surface.
+- `NewSpawnBuilder(t)` spawns a world fluently and returns an assertion chain (`ExpectState`, `ExpectContainer`, `ExpectMock`), one assertion type per observable surface.
 - `WaitFor(t, timeout, interval, desc, condition)` polls a condition; no test sleeps.
 - `FixturesDir()` is the folder of seed projects beside the suite, `__tests__/__fixtures__/`.
 

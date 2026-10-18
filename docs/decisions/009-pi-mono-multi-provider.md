@@ -26,7 +26,7 @@ Pi-mono provides:
 
 - **Broad provider support**: 17+ providers out of the box, no per-provider integration work.
 - **Subscription auth**: users can use their existing Claude Pro or ChatGPT Plus subscriptions without managing API keys.
-- **Cost optimization**: Governors on expensive models (Opus), Citizens on cheaper models (Sonnet), NPCs on cheapest (Haiku)—all through the same runtime.
+- **Cost optimization**: Governors on expensive models (Opus), Citizens on cheaper models (Sonnet), NPCs on cheapest (Haiku), all through the same runtime.
 - **Local models**: Ollama support means fully offline operation for privacy-sensitive environments.
 
 ### Negative
