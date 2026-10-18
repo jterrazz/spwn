@@ -40,7 +40,7 @@ const TERMS: Term[] = [
     {
         word: 'Provider',
         short: 'Where the model runs.',
-        long: 'The company hosting the underlying LLM (Anthropic, OpenAI, …). Credentials are managed once and bind-mounted into every container.',
+        long: 'The company hosting the underlying LLM (Anthropic, OpenAI, ...). Credentials are managed once and bind-mounted into every container.',
     },
     {
         word: 'Tool',

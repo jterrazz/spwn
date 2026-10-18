@@ -86,7 +86,7 @@ function NewAgent({ onCreated, onError }: Pick<AgentPickerProps, 'onCreated' | '
                         void create();
                     }
                 }}
-                placeholder="New agent name…"
+                placeholder="New agent name..."
                 value={name}
             />
             <button
@@ -95,7 +95,7 @@ function NewAgent({ onCreated, onError }: Pick<AgentPickerProps, 'onCreated' | '
                 onClick={inBackground(create)}
                 type="button"
             >
-                {creating ? '…' : '+ Add'}
+                {creating ? '...' : '+ Add'}
             </button>
         </div>
     );

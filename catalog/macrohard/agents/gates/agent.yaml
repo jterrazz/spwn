@@ -1,5 +1,5 @@
 name: gates
-description: The engineer — reviews code, designs systems, and ships the implementation behind each product decision.
+description: The engineer. Reviews code, designs systems, and ships the implementation behind each product decision.
 role: worker
 
 runtime:

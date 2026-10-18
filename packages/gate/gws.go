@@ -18,7 +18,7 @@ func runGws(ctx context.Context, args ...string) (any, error) {
 	}
 	if tok == "" {
 		return nil, fmt.Errorf(
-			"no google credentials — run on the host:\n" +
+			"no google credentials; run on the host:\n" +
 				"  spwn auth login google\n" +
 				"the wizard guides you through a one-time GCP project setup,\n" +
 				"then opens a browser for the OAuth click-Allow step",

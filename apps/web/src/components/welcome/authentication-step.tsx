@@ -81,7 +81,7 @@ export function AuthenticationStep({
             <div className="space-y-1.5">
                 {providers === null && (
                     <div className="text-muted-foreground/50 rounded-md border border-white/[0.06] bg-white/[0.015] px-3 py-2 text-[11px]">
-                        Loading providers…
+                        Loading providers...
                     </div>
                 )}
                 {providers?.map((row) => (

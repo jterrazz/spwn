@@ -35,7 +35,7 @@ func Require() (*project.Project, error) {
 		return nil, err
 	}
 	if p == nil {
-		return nil, fmt.Errorf("no spwn.yaml found — run `spwn init` first")
+		return nil, fmt.Errorf("no spwn.yaml found: run `spwn init` first")
 	}
 	return p, nil
 }

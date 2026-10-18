@@ -44,7 +44,7 @@ func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 		}
 		dest := filepath.Join(gateToolsRoot, sub.Name())
 		if err := copyEmbedDir(toolDir, dest); err != nil {
-			return nil, fmt.Errorf("copy %s → %s: %w", toolDir, dest, err)
+			return nil, fmt.Errorf("copy %s to %s: %w", toolDir, dest, err)
 		}
 		copied = append(copied, sub.Name())
 	}

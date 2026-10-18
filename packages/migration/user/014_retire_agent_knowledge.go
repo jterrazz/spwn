@@ -62,7 +62,7 @@ var RetireAgentKnowledge = migration.Migration{
 				retired = fmt.Sprintf("%s.%d", retired, info.ModTime().Unix())
 			}
 			if err := os.Rename(knowledgeDir, retired); err != nil {
-				return fmt.Errorf("rename %s → %s: %w", knowledgeDir, retired, err)
+				return fmt.Errorf("rename %s to %s: %w", knowledgeDir, retired, err)
 			}
 		}
 		return nil

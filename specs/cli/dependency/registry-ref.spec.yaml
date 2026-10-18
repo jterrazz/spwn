@@ -5,5 +5,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: "github:acme/foo" targets github:acme/foo — remote registries are not yet supported. Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/
+            Error: "github:acme/foo" targets github:acme/foo but remote registries are not yet supported. Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/
 

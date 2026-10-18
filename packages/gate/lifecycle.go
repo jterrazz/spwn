@@ -70,7 +70,7 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 	if has, err := imageExists(ctx); err != nil {
 		return fmt.Errorf("check image: %w", err)
 	} else if !has {
-		fmt.Fprintln(w, "building spwn-gate image (one-time)…")
+		fmt.Fprintln(w, "building spwn-gate image (one-time)...")
 		if err := buildImage(ctx, w); err != nil {
 			return fmt.Errorf("build image: %w", err)
 		}

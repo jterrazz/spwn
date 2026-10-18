@@ -106,7 +106,7 @@ export default function AgentsPage() {
                     <>
                         <ExpandingSearch
                             onChange={setQuery}
-                            placeholder="Search agents…"
+                            placeholder="Search agents..."
                             value={query}
                         />
                         <ActionButton

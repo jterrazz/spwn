@@ -1,1 +1,1 @@
-yaml: line 1: did not find expected ',' or '}'
+load manifest /Users/jterrazz/Developer/jterrazz/jterrazz-os/home/spwn/work/repositories/spwn-v17/packages/runtimes/__tests__/__fixtures__/error-unparseable-spwn-yaml/input/spwn.yaml: parse /Users/jterrazz/Developer/jterrazz/jterrazz-os/home/spwn/work/repositories/spwn-v17/packages/runtimes/__tests__/__fixtures__/error-unparseable-spwn-yaml/input/spwn.yaml: yaml: line 1: did not find expected ',' or '}'

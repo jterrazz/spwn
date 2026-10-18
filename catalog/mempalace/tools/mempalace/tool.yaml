@@ -1,6 +1,6 @@
 name: "spwn:mempalace"
 version: "0.1.0"
-description: "Local memory palace CLI — persistent notes across sessions"
+description: "Local memory palace CLI: persistent notes across sessions"
 
 dependencies:
   - "spwn:python"

@@ -1,5 +1,5 @@
 name: devops
-description: The devops — owns deployments and container hygiene; reaches for the deployment + code-review skills.
+description: The devops. Owns deployments and container hygiene; reaches for the deployment + code-review skills.
 role: worker
 
 runtime:

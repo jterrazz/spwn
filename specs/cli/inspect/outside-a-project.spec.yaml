@@ -4,5 +4,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: no spwn.yaml found in {{workdir}} or any parent — run `spwn init` first
+            Error: no spwn.yaml found in {{workdir}} or any parent: run `spwn init` first
 

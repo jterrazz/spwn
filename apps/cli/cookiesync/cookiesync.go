@@ -28,14 +28,14 @@ var Cmd = &cobra.Command{
 The extension watches your normal browser sessions on sites the gate
 knows about (X today; LinkedIn etc. as elements are added) and pushes
 the relevant session cookies to a locally-running spwn-gate. No
-pairing, no secret — the gate listens on 127.0.0.1 only and accepts
+pairing, no secret: the gate listens on 127.0.0.1 only and accepts
 just the cookie names each element declared, so other local processes
 can't sneak unrelated cookies in.
 
 Setup is two steps:
 
   1. spwn gate start                     # if not already running
-  2. Open chrome://extensions/ → Developer mode → Load unpacked →
+  2. Open chrome://extensions/, turn on Developer mode, click Load unpacked and pick
      select apps/spwn-cookie-sync/ in this repo
 
 Then browse normally. The popup shows ● connected / ○ pending per
@@ -108,7 +108,7 @@ func runStatus(cmd *cobra.Command, _ []string) error {
 	fmt.Fprintln(out)
 	for _, p := range body.Providers {
 		state := "○ pending"
-		detail := "no sync yet — visit the site once in your browser"
+		detail := "no sync yet: visit the site once in your browser"
 		if p.HasCookies || p.LastSync != "" {
 			state = "● connected"
 			if p.LastSync != "" {
@@ -120,7 +120,7 @@ func runStatus(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintf(out, "    %-12s %s   %s\n", p.Name, state, detail)
 	}
 	fmt.Fprintln(out)
-	fmt.Fprintln(out, "  install the extension once: chrome://extensions/ → Developer mode → Load unpacked → apps/spwn-cookie-sync/")
+	fmt.Fprintln(out, "  install the extension once: in chrome://extensions/, turn on Developer mode, then Load unpacked apps/spwn-cookie-sync/")
 	fmt.Fprintln(out)
 	return nil
 }

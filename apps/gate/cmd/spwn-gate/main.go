@@ -69,7 +69,7 @@ func main() {
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		s := <-sigCh
-		logger.Printf("signal %s — shutting down", s)
+		logger.Printf("signal %s, shutting down", s)
 		cancel()
 	}()
 

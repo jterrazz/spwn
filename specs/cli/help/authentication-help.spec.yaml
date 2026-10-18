@@ -10,7 +10,7 @@ runs:
             spwn auth [command]
 
           Inspect:
-            (bare)                           Live credential dashboard — auto-validates against each provider API
+            (bare)                           Live credential dashboard, validated against each provider API
 
           Configure:
             use <provider> <method>          Pick oauth or api_key for a provider
@@ -23,6 +23,6 @@ runs:
             logout <provider>                Clear all credentials for a provider (keychain, files)
 
           Supported providers:
-            anthropic                        Claude — OAuth (subscription) or API key
-            openai                           Codex — OAuth (ChatGPT Plus) or API key (env-only today)
+            anthropic                        Claude: OAuth (subscription) or API key
+            openai                           Codex: OAuth (ChatGPT Plus) or API key (env-only today)
 

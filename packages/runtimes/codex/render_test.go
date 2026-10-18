@@ -266,7 +266,7 @@ func TestGenerateAgentAgentsMD_IncludesAllSections(t *testing.T) {
 		KnowledgeMounted: true,
 	})
 	for _, want := range []string{
-		"# neo — worker in world \"home\"",
+		"# neo, worker in world \"home\"",
 		"## Identity",
 		"You are relentless.",
 		"## Physics",
@@ -278,7 +278,7 @@ func TestGenerateAgentAgentsMD_IncludesAllSections(t *testing.T) {
 		"## Role here",
 		"deployed as a worker in home",
 		"## Your playbooks",
-		"**deploy** — Ship the change.",
+		"**deploy**: Ship the change.",
 		"## Conventions",
 		"World knowledge",
 		"## Task",

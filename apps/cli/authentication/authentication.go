@@ -30,7 +30,7 @@ import (
 // The real command list in help.
 var Cmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Manage credentials — dashboard, login, use, logout, disable",
+	Short: "Manage credentials: dashboard, login, use, logout, disable",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runStatus()
@@ -346,14 +346,14 @@ API key:
   spwn auth login anthropic --api-key sk-ant-...
 
 For OAuth-backed subscription access (Claude.ai / ChatGPT Plus via codex),
-run the upstream CLI login first, then re-run this command — spwn will
+run the upstream CLI login first, then re-run this command; spwn will
 detect the new credential and record it:
 
   claude login   # then: spwn auth login anthropic
   codex login    # then: spwn auth login openai
 
-For hosted MCP providers (Notion, …), the command runs the OAuth dance
-itself in a one-shot helper container — click the link it prints,
+For hosted MCP providers (Notion, ...), the command runs the OAuth dance
+itself in a one-shot helper container: click the link it prints,
 approve in your browser, the token persists for every world:
 
   spwn auth login notion`,
@@ -410,7 +410,7 @@ func runGitHubLogin(cmd *cobra.Command) error {
 	}
 	s.Blank()
 	s.Done("github tokens saved",
-		fmt.Sprintf("ready — `gh ...` and `gh-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgh.CacheDir())))
+		fmt.Sprintf("ready: `gh ...` and `gh-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgh.CacheDir())))
 	s.Blank()
 	return nil
 }
@@ -426,7 +426,7 @@ func runMCPLogin(cmd *cobra.Command, p authmcp.Provider) error {
 	}
 	s.Blank()
 	s.Done(fmt.Sprintf("%s tokens saved", p.Name),
-		fmt.Sprintf("ready — `notion-mcp ...` inside any world will use these tokens (cache: %s)", abbreviate(authmcp.CacheDir())))
+		fmt.Sprintf("ready: `notion-mcp ...` inside any world will use these tokens (cache: %s)", abbreviate(authmcp.CacheDir())))
 	s.Blank()
 	return nil
 }
@@ -473,7 +473,7 @@ func runGoogleLogin(cmd *cobra.Command) error {
 	}
 	s.Blank()
 	s.Done("google tokens saved",
-		fmt.Sprintf("ready — `gmail-mcp ...` and `gcal-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgoogle.CacheDir())))
+		fmt.Sprintf("ready: `gmail-mcp ...` and `gcal-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgoogle.CacheDir())))
 	s.Blank()
 	return nil
 }
@@ -483,7 +483,7 @@ var logoutMethod string
 var logoutCmd = &cobra.Command{
 	Use:   "logout <provider>",
 	Short: "Clear stored credentials for a provider",
-	Long: `Remove every stored credential for a provider — cache file,
+	Long: `Remove every stored credential for a provider: cache file,
 macOS keychain entry, runtime-CLI auth files. Does NOT unset env vars
 (the shell owns those); any active env vars are surfaced so you know
 to unset them manually.
@@ -572,7 +572,7 @@ to unset them manually.
 			s.Done("Removed", item)
 		}
 		for _, item := range res.Remaining {
-			s.Warn("Still set (shell env)", item+"  — run `unset "+strings.TrimPrefix(item, "env:")+"` to clear")
+			s.Warn("Still set (shell env)", item+"  (run `unset "+strings.TrimPrefix(item, "env:")+"` to clear)")
 		}
 		for _, err := range res.Errors {
 			s.Warn("Error", err.Error())
@@ -637,7 +637,7 @@ when you're logged into more than one and no runtime is pinned at the
 project or agent level.
 
 This is the durable answer to the "multiple providers authenticated
-and no runtime pinned" error — set it once and spwn will quietly
+and no runtime pinned" error. Set it once and spwn will quietly
 resolve ambiguity in that provider's favour. Does NOT disable the
 other provider or override agent.yaml / spwn.yaml pins.
 
@@ -704,7 +704,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ auth")+" "+ui.Faint("- manage credentials"),
 		[]ui.HelpGroup{
 			{Title: "Inspect", Commands: []ui.HelpEntry{
-				{Name: "(bare)", Desc: "Live credential dashboard — auto-validates against each provider API"},
+				{Name: "(bare)", Desc: "Live credential dashboard, validated against each provider API"},
 			}},
 			{Title: "Configure", Commands: []ui.HelpEntry{
 				{Name: "use <provider> <method>", Desc: "Pick oauth or api_key for a provider"},
@@ -717,8 +717,8 @@ func authHelp(cmd *cobra.Command, args []string) {
 				{Name: "logout <provider>", Desc: "Clear all credentials for a provider (keychain, files)"},
 			}},
 			{Title: "Supported providers", Commands: []ui.HelpEntry{
-				{Name: "anthropic", Desc: "Claude — OAuth (subscription) or API key"},
-				{Name: "openai", Desc: "Codex — OAuth (ChatGPT Plus) or API key (env-only today)"},
+				{Name: "anthropic", Desc: "Claude: OAuth (subscription) or API key"},
+				{Name: "openai", Desc: "Codex: OAuth (ChatGPT Plus) or API key (env-only today)"},
 			}},
 		},
 		"spwn auth [command]",

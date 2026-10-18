@@ -5,5 +5,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: "skill/paper-reading" is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new paper-reading` / `spwn/tools/paper-reading/` / `spwn/hooks/paper-reading.yaml` / `spwn/commands/paper-reading.md`
+            Error: "skill/paper-reading" is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new paper-reading` / `spwn/tools/paper-reading/` / `spwn/hooks/paper-reading.yaml` / `spwn/commands/paper-reading.md`
 

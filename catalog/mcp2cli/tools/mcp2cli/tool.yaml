@@ -1,6 +1,6 @@
 name: "spwn:mcp2cli"
 version: latest
-description: "MCP-to-CLI adapter — exposes any MCP server as agent CLI subcommands"
+description: "MCP-to-CLI adapter: exposes any MCP server as agent CLI subcommands"
 
 dependencies:
   - "spwn:python"
@@ -27,7 +27,7 @@ install:
       time by the spwn compile pipeline. Reads /etc/spwn/policy/<tool>.json
       written from agent.yaml's dependency entries. Wrapper convention:
           spwn-policy-check <tool> <method>  || exit 1
-      No file → no policy → exit 0 (allow). Empty method or list-style
+      No file means no policy, so exit 0 (allow). Empty method or list-style
       methods (list, tools/list) are always allowed."""
       import json, os, sys
       if len(sys.argv) < 3:

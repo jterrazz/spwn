@@ -28,7 +28,7 @@ var EnsureUserConfig = migration.Migration{
 			return nil
 		}
 
-		content := `# spwn user config — edit freely; spwn re-reads on every CLI invocation.
+		content := `# spwn user config: edit freely; spwn re-reads on every CLI invocation.
 # Docs: https://spwn.sh/docs/config
 apiVersion: ` + platform.CurrentConfigAPIVersion + `
 runtime:

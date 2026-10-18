@@ -42,7 +42,7 @@ runs:
           spwn/agents/neo/agent.yaml:
               equals: |
                   name: neo
-                  description: A blank-slate agent — replace this one-liner with what neo is for.
+                  description: A blank-slate agent; replace this one-liner with what neo is for.
                   dependencies:
                       - spwn:unix
                       - spwn:git

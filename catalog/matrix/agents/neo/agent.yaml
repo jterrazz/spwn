@@ -1,5 +1,5 @@
 name: neo
-description: A blank-slate explorer — wakes up in the matrix world, pokes at the system, and learns by doing. Your first-day agent.
+description: A blank-slate explorer that wakes up in the matrix world, pokes at the system, and learns by doing. Your first-day agent.
 role: worker
 
 runtime:

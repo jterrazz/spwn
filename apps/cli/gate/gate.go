@@ -22,7 +22,7 @@ var Cmd = &cobra.Command{
 
 The gate is a long-running container that holds OAuth credentials,
 hosts upstream MCP servers, and exposes them to world containers as
-authenticated MCP endpoints. World containers never see credentials —
+authenticated MCP endpoints. World containers never see credentials;
 they get tiny CLI wrappers that route through the gate.
 
 Auto-started on first ` + "`spwn up`" + `; explicit lifecycle commands let you

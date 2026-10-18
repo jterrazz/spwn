@@ -195,7 +195,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			if wanted != "" && existing.Runtime != "" && existing.Runtime != wanted {
 				s.Blank()
 				s.Warn("Runtime drift",
-					fmt.Sprintf("world %q was spawned with %q; now wants %q — rebuilding",
+					fmt.Sprintf("world %q was spawned with %q and now wants %q, rebuilding",
 						positionalName, existing.Runtime, wanted))
 				s.Blank()
 				if arc, derr := architect.NewFromEnv(); derr == nil {
@@ -285,7 +285,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	s.Phase("Environment")
-	s.SubStart("Connecting to Docker…")
+	s.SubStart("Connecting to Docker...")
 	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return s.SubFailHint("Docker", err,
@@ -301,7 +301,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if providerName := runtimeAuthProvider(runtimeName); providerName != "" {
-		s.SubStart("Checking credentials…")
+		s.SubStart("Checking credentials...")
 		ctxCred, cancelCred := context.WithTimeout(ctx, 4*time.Second)
 		p := authentication.Provider(providerName)
 		cred := authentication.Resolve(p)
@@ -399,7 +399,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 
 	if len(agents) > 0 {
 		enterSpawn()
-		s.SubStart("Spawning colony…")
+		s.SubStart("Spawning colony...")
 		if err := arc.SpawnAgents(ctx, u.ID, agents); err != nil {
 			return s.SubFailHint("Colony failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
 		}
@@ -412,7 +412,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 		enterSpawn()
-		s.SubStart("Spawning agent…")
+		s.SubStart("Spawning agent...")
 		if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {
 			return s.SubFailHint("Agent failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
 		}
@@ -480,7 +480,7 @@ func credentialDetail(cred *authentication.Credential) string {
 
 func dockerHint(err error) error {
 	if strings.Contains(err.Error(), "cannot connect to Docker") {
-		return fmt.Errorf("cannot reach Docker — is Docker Desktop or OrbStack running?")
+		return fmt.Errorf("cannot reach Docker: is Docker Desktop or OrbStack running?")
 	}
 	return err
 }

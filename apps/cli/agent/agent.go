@@ -95,7 +95,7 @@ An agent is backed by a Mind - a persistent directory holding its SOUL.md
 (purpose, voice, principles), playbooks/, and journal/. The agent survives
 after the world is destroyed. Skills are build-time dependencies injected
 into /world/skills/; knowledge lives at /world/knowledge/ inside each
-world when the manifest opts in via worlds.<name>.knowledge — the path
+world when the manifest opts in via worlds.<name>.knowledge; the path
 resolves relative to the project root and is shared across every agent
 in that world.`,
 	Args: cobra.ArbitraryArgs,

@@ -5,5 +5,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: unknown builtin "spwn:nonesuch" — see the catalog for available dependencies
+            Error: unknown builtin "spwn:nonesuch" (see the catalog for available dependencies)
 

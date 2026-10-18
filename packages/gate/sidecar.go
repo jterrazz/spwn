@@ -47,7 +47,7 @@ func (s *SidecarBrowser) Run(ctx context.Context) {
 			return
 		}
 		if err := s.runOnce(ctx); err != nil && ctx.Err() == nil {
-			s.logger.Printf("sidecar gate-browser exited: %v — restarting in %s", err, backoff)
+			s.logger.Printf("sidecar gate-browser exited: %v; restarting in %s", err, backoff)
 			select {
 			case <-ctx.Done():
 				return
@@ -75,7 +75,7 @@ func (s *SidecarBrowser) runOnce(ctx context.Context) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start sidecar: %w", err)
 	}
-	s.logger.Printf("sidecar gate-browser started (pid %d) — waiting for health", cmd.Process.Pid)
+	s.logger.Printf("sidecar gate-browser started (pid %d), waiting for health", cmd.Process.Pid)
 	if err := s.waitHealthy(ctx); err != nil {
 		s.logger.Printf("sidecar gate-browser health check failed: %v", err)
 	} else {

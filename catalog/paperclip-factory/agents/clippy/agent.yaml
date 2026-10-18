@@ -1,5 +1,5 @@
 name: clippy
-description: The paperclip maximizer — relentlessly optimizes throughput, removes waste, and monitors every resource it can reach.
+description: The paperclip maximizer. Relentlessly optimizes throughput, removes waste, and monitors every resource it can reach.
 role: worker
 
 runtime:

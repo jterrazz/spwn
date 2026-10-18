@@ -174,7 +174,7 @@ async function publish(url, text, button) {
 }
 
 tool.method('post-tweet', {
-  description: 'Publish a tweet from the authenticated account. NOT for direct agent use — call from publish.sh after human approval.',
+  description: 'Publish a tweet from the authenticated account. NOT for direct agent use: call it from publish.sh after human approval.',
   async handler({ args }) {
     return await publish('https://x.com/compose/post', tweetTextOf(args), '[data-testid="tweetButton"]');
   },

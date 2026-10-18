@@ -7,11 +7,11 @@ export default defineConfig({
         oxfmt: {
             ignore: {
                 'packages/**/__tests__/__fixtures__/**':
-                    'the Go tests’ input trees and expected outputs, compared byte for byte with what the product writes: a fixture reformatted or re-commented would no longer be the one the product reads or emits',
+                    'the input trees of the Go tests and expected outputs, compared byte for byte with what the product writes: a fixture reformatted or re-commented would no longer be the one the product reads or emits',
                 'catalog/**':
-                    'the built-in `spwn:*` catalog, embedded into the binary and copied verbatim into a user’s project: its YAML comments and Markdown are that user’s documentation, kept as authored',
+                    'the built-in `spwn:*` catalog, embedded into the binary and copied verbatim into the project of a user: its YAML comments and Markdown are the documentation that user reads, kept as authored',
                 'specs/cli/**/*.spec.yaml':
-                    'a document’s streams are byte-exact, and the document formatter writes the blank first line of a `|+` stream (cobra’s help opens with one) as its indentation, which oxfmt strips as trailing whitespace — the two would rewrite each other forever',
+                    'the streams of a document are byte-exact, and the document formatter writes the blank first line of a `|+` stream (the help of cobra opens with one) as its indentation, which oxfmt strips as trailing whitespace: the two would rewrite each other forever',
             },
         },
         knip: {
@@ -37,7 +37,7 @@ export default defineConfig({
         roots: {
             catalog:
                 'the built-in `spwn:*` catalog the binary embeds: worlds, agents, skills and tools a user installs by name',
-            docker: 'the test image’s build context: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
+            docker: 'the build context of the test image: `make test-image` builds spwn-test:latest, the mock Claude and Codex runtimes baked in, from docker/spwn-test',
             scripts: 'the installer `make install-binary` runs, and the manual-pass harness',
         },
     },

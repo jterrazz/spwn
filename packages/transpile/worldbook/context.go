@@ -50,7 +50,7 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted b
 	b.WriteString("- Inbox (this world): `/world/inbox/<name>/`\n")
 	b.WriteString("\n")
 	if knowledgeMounted {
-		b.WriteString("Shared world knowledge (facts about the domain, not about any one agent) lives at `/world/knowledge/` — read and write freely; it's committed to the project.\n")
+		b.WriteString("Shared world knowledge (facts about the domain, not about any one agent) lives at `/world/knowledge/`. Read and write freely; it's committed to the project.\n")
 		b.WriteString("\n")
 	}
 

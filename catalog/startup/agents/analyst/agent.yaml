@@ -1,5 +1,5 @@
 name: analyst
-description: The analyst — turns product decisions into sprint plans and reviews the colony's code before it ships.
+description: The analyst. Turns product decisions into sprint plans and reviews the colony's code before it ships.
 role: worker
 
 runtime:

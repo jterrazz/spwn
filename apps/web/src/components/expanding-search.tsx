@@ -98,7 +98,7 @@ function SearchInput({ value, shown, placeholder, inputRef, onChange, fold }: Se
 export function ExpandingSearch({
     value,
     onChange,
-    placeholder = 'Search…',
+    placeholder = 'Search...',
     expandedWidth = 240,
     className = '',
 }: ExpandingSearchProps) {

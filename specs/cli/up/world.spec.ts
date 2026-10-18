@@ -37,7 +37,7 @@ describe('world', () => {
         });
         const prompt = await neo.exec('cat /agents/neo/CLAUDE.md');
         expect(prompt.stdout).toMatch(`
-            # neo — worker in world "world-neo-{{hex#world}}"
+            # neo, worker in world "world-neo-{{hex#world}}"
 
             ## Identity
 
@@ -80,7 +80,7 @@ describe('world', () => {
             - Journal: \`/agents/<name>/journal/\`
             - Inbox (this world): \`/world/inbox/<name>/\`
 
-            Shared world knowledge (facts about the domain, not about any one agent) lives at \`/world/knowledge/\` — read and write freely; it's committed to the project.
+            Shared world knowledge (facts about the domain, not about any one agent) lives at \`/world/knowledge/\`. Read and write freely; it's committed to the project.
 
             ## Role here
 
@@ -90,12 +90,12 @@ describe('world', () => {
 
             1. **Read your soul first** every session. It shapes your voice, values, and priorities.
             2. **Mind lives at \`/agents/neo/\`**:
-               - \`SOUL.md\` — who you are (edit freely to grow).
-               - \`playbooks/\` — reusable procedures. Add a \`name:\`/\`description:\` header to any playbook to have it indexed in this prompt as a shortcut.
-               - \`journal/\` — session history; auto-appended by the system.
-            3. **Messaging** — send with \`/world/inbox/<their-name>/<timestamp>-from-neo.md\`; check yours at \`/world/inbox/neo/\`.
-            4. **World knowledge** — save durable facts about this project or its domain to \`/world/knowledge/\`. Committed to the project; every agent in this world sees it.
-            5. **Evolve** — when asked to dream, analyze the journal and promote recurring patterns to playbooks.
+               - \`SOUL.md\`: who you are (edit freely to grow).
+               - \`playbooks/\`: reusable procedures. Add a \`name:\`/\`description:\` header to any playbook to have it indexed in this prompt as a shortcut.
+               - \`journal/\`: session history, appended by the system.
+            3. **Messaging**: send with \`/world/inbox/<their-name>/<timestamp>-from-neo.md\`; check yours at \`/world/inbox/neo/\`.
+            4. **World knowledge**: save durable facts about this project or its domain to \`/world/knowledge/\`. Committed to the project; every agent in this world sees it.
+            5. **Evolve**: when asked to dream, analyze the journal and promote recurring patterns to playbooks.
 
         `);
     });
@@ -167,9 +167,9 @@ describe('world', () => {
               ⬡ Waking neo
 
               Environment
-                → Connecting to Docker…
+                → Connecting to Docker...
                 ✓ Docker                 connected
-                → Checking credentials…
+                → Checking credentials...
                 ✓ Credentials            none · not configured
                 ✗ Spawn failed           workspace /no/such/workspace not found.
             Check the path exists and is accessible

@@ -111,7 +111,7 @@ export function NewAgentDialog({ teams, onCreated, onClose }: NewAgentDialogProp
                         onClose();
                     }
                 }}
-                placeholder="e.g. atlas, morpheus, neo…"
+                placeholder="e.g. atlas, morpheus, neo..."
                 ref={focusOnMount}
                 value={name}
             />
@@ -119,7 +119,7 @@ export function NewAgentDialog({ teams, onCreated, onClose }: NewAgentDialogProp
             {error !== '' && <p className="mt-3 text-xs text-red-400/80">{error}</p>}
             <ModalActions
                 busy={creating}
-                busyLabel="Creating…"
+                busyLabel="Creating..."
                 label="Create"
                 onCancel={onClose}
                 onConfirm={submit}

@@ -30,9 +30,9 @@ var initCmd = &cobra.Command{
 	Short:   "Create a new agent (SOUL.md + 2-layer Mind)",
 	Long: `Create a new agent with a SOUL.md at the agent root and the
 two Mind layer directories (playbooks/journal). Skills aren't a Mind
-layer — they're build-time dependencies resolved via the skill/ form
+layer; they're build-time dependencies resolved via the skill/ form
 or shipped by tools, injected into /world/skills/ at image time.
-Knowledge is world-scoped, not agent-scoped — it lives at
+Knowledge is world-scoped, not agent-scoped: it lives at
 /world/knowledge/ when a world opts in via spwn.yaml's
 worlds.<name>.knowledge key, which resolves to a host path under the
 project root. If no name is provided, a random name is picked from a
@@ -56,7 +56,7 @@ already exists.`,
 			return fmt.Errorf("agent name is required")
 		}
 		if !project.IsValidAgentName(name) {
-			return fmt.Errorf("agent name %q is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most %d characters", name, project.MaxAgentNameLen)
+			return fmt.Errorf("agent name %q is invalid: it must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most %d characters", name, project.MaxAgentNameLen)
 		}
 
 		if project.IsReservedAgentName(name) {

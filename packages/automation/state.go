@@ -124,7 +124,7 @@ func (s *FileStateStore) RecordFire(world, name string, scheduled time.Time) err
 	defer s.mu.Unlock()
 	s.ensureLoadedLocked()
 	if s.tainted != nil {
-		return fmt.Errorf("state file is tainted (parse failed at load) — refusing to overwrite: %w", s.tainted)
+		return fmt.Errorf("state file is tainted (parse failed at load), refusing to overwrite: %w", s.tainted)
 	}
 	if s.entries == nil {
 		s.entries = map[string]time.Time{}

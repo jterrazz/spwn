@@ -87,7 +87,7 @@ func AtomicReplace(newFile, target string) error {
 	}
 
 	if err := os.Rename(newFile, target); err != nil {
-		return fmt.Errorf("rename %s → %s: %w", newFile, target, err)
+		return fmt.Errorf("rename %s to %s: %w", newFile, target, err)
 	}
 	return nil
 }

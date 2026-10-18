@@ -324,7 +324,7 @@ func (s *Stepper) TreeLine(text, detail string) {
 func (s *Stepper) TreeSpin(text string) {
 	s.stopSpinner()
 	if !s.isTTY {
-		s.TreeLine(text, "…")
+		s.TreeLine(text, "...")
 		return
 	}
 	s.mu.Lock()

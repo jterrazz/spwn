@@ -90,7 +90,7 @@ function DeletePrompt({
         <ConfirmDialog
             busy={deleting}
             confirm="Delete"
-            confirming="Deleting…"
+            confirming="Deleting..."
             onCancel={onCancel}
             onConfirm={onDelete}
             title="Delete Organization"

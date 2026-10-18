@@ -11,8 +11,8 @@ import (
 // no client.json exists yet. Kept here (vs the CLI package) so the
 // language stays consistent across callers — the same text gets
 // printed by the dashboard and by `spwn auth login google` itself.
-const WizardWalkthrough = `Google requires a one-time GCP project setup (Google policy — they don't allow
-shared OAuth clients for sensitive scopes). 5–10 minutes, free, no credit card.
+const WizardWalkthrough = `Google requires a one-time GCP project setup (Google policy: they don't allow
+shared OAuth clients for sensitive scopes). 5 to 10 minutes, free, no credit card.
 
   1. Open https://console.cloud.google.com/projectcreate
      → name the project "spwn" (or anything), Create.
@@ -27,12 +27,12 @@ shared OAuth clients for sensitive scopes). 5–10 minutes, free, no credit card
      → User type: External
      → App name: "spwn" (or anything), your email, Save & Continue
      → Scopes: skip (we'll request at runtime)
-     → Test users: add your own Google email — REQUIRED, otherwise login fails
+     → Test users: add your own Google email (REQUIRED, otherwise login fails)
      → Save & Continue
 
   4. Create the OAuth client:
        https://console.cloud.google.com/apis/credentials
-     → Create credentials → OAuth client ID
+     → Create credentials, then OAuth client ID
      → Application type: "Desktop app"
      → Name: "spwn"
      → Create

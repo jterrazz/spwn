@@ -2,9 +2,9 @@
   ⬡ Waking neo
 
   Environment
-    → Connecting to Docker…
+    → Connecting to Docker...
     ✓ Docker                 connected
-    → Checking credentials…
+    → Checking credentials...
     ✓ Credentials            none · not configured
     ✓ Agent                  neo
 
@@ -16,7 +16,7 @@
     ✓ Created container      world-neo-{{hex#world}}
     ✓ Tools verified         3 verified
     ✓ Prompt                 per-agent CLAUDE.md
-    → Spawning agent…
+    → Spawning agent...
     ✓ Agent spawned          detached
 
   ✓ Agent is alive.

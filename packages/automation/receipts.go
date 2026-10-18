@@ -102,7 +102,7 @@ func truncateOutput(s string) string {
 	if len(s) <= maxReceiptOutputBytes {
 		return s
 	}
-	const marker = "…[truncated]"
+	const marker = "...[truncated]"
 	cut := maxReceiptOutputBytes - len(marker)
 	if cut < 0 {
 		cut = 0

@@ -340,7 +340,7 @@ describe('landing', () => {
                   - checkbox "neo" [checked]
                   - text: neo
               - textbox "New agent name":
-                - /placeholder: New agent name…
+                - /placeholder: New agent name...
               - button "+ Add" [disabled]
               - text: Workspaces
               - button "+ Add"
@@ -348,7 +348,7 @@ describe('landing', () => {
                 - /placeholder: name
                 - text: default
               - textbox "Workspace path":
-                - /placeholder: /tmp/spwn-neo-…
+                - /placeholder: /tmp/spwn-neo-...
               - button "ro"
               - button "Remove the workspace":
                 - img
@@ -366,10 +366,10 @@ describe('landing', () => {
                 - option "Manager"
                 - option "Worker" [selected]
               - paragraph: Preview
-              - text: spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-…
+              - text: spwn up -a neo --role worker --config default -w default=/tmp/spwn-neo-...
               - paragraph: → Creates isolated Docker container
               - paragraph: "→ Deploys 1 agent: neo"
-              - paragraph: "→ default: /tmp/spwn-neo-…"
+              - paragraph: "→ default: /tmp/spwn-neo-..."
               - button "New World":
                 - img
                 - text: New World

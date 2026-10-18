@@ -23,7 +23,7 @@ describe('Sessions', () => {
             connected: false,
             refused: new RefusedError(
                 500,
-                'no cookies for provider "mail" — run the cookie-sync extension',
+                'no cookies for provider "mail": run the cookie-sync extension',
                 'NO_COOKIES',
             ),
             size: 0,

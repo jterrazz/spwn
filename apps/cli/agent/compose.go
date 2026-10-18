@@ -21,10 +21,10 @@ var publishCmd = &cobra.Command{
 	Args:   cobra.ExactArgs(1),
 	Long: `Publish an agent to the community registry for others to pull.
 
-Memory (journal, knowledge, sessions) is stripped before publishing —
+Memory (journal, knowledge, sessions) is stripped before publishing:
 only the composition (dependencies) and SOUL.md ship.
 
-Not yet implemented — tracks the registry (planned).`,
+Not yet implemented: it tracks the registry (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		return notImplemented(fmt.Sprintf("agent publish %q", name),
@@ -43,7 +43,7 @@ var getCmd = &cobra.Command{
 The installed agent starts with a fresh memory but inherits the
 full composition from its published form.
 
-Not yet implemented — tracks the registry port (planned).`,
+Not yet implemented: it tracks the registry port (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ref := args[0]
 		return notImplemented(fmt.Sprintf("agent get %q", ref),

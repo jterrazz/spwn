@@ -53,11 +53,11 @@ type AgentAgentsMDInput struct {
 func GenerateAgentAgentsMD(in AgentAgentsMDInput) string {
 	var sb strings.Builder
 
-	fmt.Fprintf(&sb, "# %s — %s in world %q\n\n", in.AgentName, in.Role, in.WorldID)
+	fmt.Fprintf(&sb, "# %s, %s in world %q\n\n", in.AgentName, in.Role, in.WorldID)
 
 	if len(bytesTrim(in.Soul)) > 0 {
 		sb.WriteString("## Identity\n\n")
-		sb.WriteString("Your soul — who you are. Re-read this when you feel lost.\n\n")
+		sb.WriteString("Your soul: who you are. Re-read this when you feel lost.\n\n")
 		sb.WriteString(strings.TrimSpace(transpile.DemoteHeadings(transpile.StripLeadingH1(string(in.Soul)))))
 		sb.WriteString("\n\n")
 	}
@@ -80,9 +80,9 @@ func GenerateAgentAgentsMD(in AgentAgentsMDInput) string {
 	if len(in.Playbooks) > 0 {
 		sb.WriteString("## Your playbooks\n\n")
 		for _, p := range in.Playbooks {
-			fmt.Fprintf(&sb, "- **%s** — %s\n", p.Name, p.Description)
+			fmt.Fprintf(&sb, "- **%s**: %s\n", p.Name, p.Description)
 		}
-		sb.WriteString("\n_Read the full procedure at `./playbooks/<name>.md`. Promote a procedure by adding a `name:` + `description:` YAML header — that's how it appears in this list._\n\n")
+		sb.WriteString("\n_Read the full procedure at `./playbooks/<name>.md`. Promote a procedure by adding a `name:` + `description:` YAML header; that's how it appears in this list._\n\n")
 	}
 
 	sb.WriteString("## Conventions\n\n")
@@ -101,15 +101,15 @@ func conventionsSection(in AgentAgentsMDInput) string {
 	var sb strings.Builder
 	sb.WriteString("1. **Read your identity first** every session. It shapes your voice, values, and priorities.\n")
 	sb.WriteString("2. **Mind lives at `/agents/" + in.AgentName + "/`**:\n")
-	sb.WriteString("   - `SOUL.md` — who you are (edit freely to grow).\n")
-	sb.WriteString("   - `playbooks/` — reusable procedures. Add a `name:`/`description:` header to any playbook to have it indexed in this prompt as a shortcut.\n")
-	sb.WriteString("   - `journal/` — session history; auto-appended by the system.\n")
-	sb.WriteString("3. **Messaging** — send with `/world/inbox/<their-name>/<timestamp>-from-" + in.AgentName + ".md`; check yours at `/world/inbox/" + in.AgentName + "/`.\n")
+	sb.WriteString("   - `SOUL.md`: who you are (edit freely to grow).\n")
+	sb.WriteString("   - `playbooks/`: reusable procedures. Add a `name:`/`description:` header to any playbook to have it indexed in this prompt as a shortcut.\n")
+	sb.WriteString("   - `journal/`: session history, appended by the system.\n")
+	sb.WriteString("3. **Messaging**: send with `/world/inbox/<their-name>/<timestamp>-from-" + in.AgentName + ".md`; check yours at `/world/inbox/" + in.AgentName + "/`.\n")
 	if in.KnowledgeMounted {
-		sb.WriteString("4. **World knowledge** — save durable facts about this project or its domain to `/world/knowledge/`. Committed to the project; every agent in this world sees it.\n")
-		sb.WriteString("5. **Evolve** — when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
+		sb.WriteString("4. **World knowledge**: save durable facts about this project or its domain to `/world/knowledge/`. Committed to the project; every agent in this world sees it.\n")
+		sb.WriteString("5. **Evolve**: when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
 	} else {
-		sb.WriteString("4. **Evolve** — when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
+		sb.WriteString("4. **Evolve**: when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
 	}
 	sb.WriteString("\n")
 	return sb.String()

@@ -17,7 +17,7 @@ function readingOf(status: DockerStatus | null | undefined, ready: boolean): Rea
         return {
             dot: 'bg-muted-foreground/40',
             label: 'checking',
-            title: 'Checking Docker daemon…',
+            title: 'Checking Docker daemon...',
         };
     }
     if (status === undefined) {

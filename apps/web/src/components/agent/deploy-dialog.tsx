@@ -118,7 +118,7 @@ function DeployButtons({
                 ) : (
                     <IconPlanet size={14} />
                 )}
-                {busy ? 'Deploying…' : 'Deploy'}
+                {busy ? 'Deploying...' : 'Deploy'}
             </button>
         </div>
     );

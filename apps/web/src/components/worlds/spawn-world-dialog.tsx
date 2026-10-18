@@ -65,7 +65,7 @@ function useSpawnForm() {
     const [config, setConfig] = useState('default');
     const [role, setRole] = useState('worker');
     const [first] = selected;
-    const defaultPath = `/tmp/spwn-${first ?? 'workspace'}-…`;
+    const defaultPath = `/tmp/spwn-${first ?? 'workspace'}-...`;
 
     const request = (suffix: string) => ({
         agents: [...selected].map((name) => ({ name, role })),

@@ -107,7 +107,7 @@ export function AgentChat({ agent, worldId }: { agent: string; worldId?: string 
             messages={messages}
             onSend={inBackground(send)}
             placeholder={`Message ${agent}...`}
-            typingText={`${agent} is thinking…`}
+            typingText={`${agent} is thinking...`}
         />
     );
 }

@@ -47,7 +47,7 @@ func NewBrowserElement() *MCPServer {
 
 	s.AddTool(&MCPTool{
 		Name:        "browser-close",
-		Description: "Close a session and free its browser context. Always call this when done — the auto-reaper is a safety net, not a substitute.",
+		Description: "Close a session and free its browser context. Always call this when done: the auto-reaper is a safety net, not a substitute.",
 		InputSchema: sessionSchema(""),
 		Handler: func(ctx context.Context, args map[string]any) (any, error) {
 			id, ok := args["session_id"].(string)

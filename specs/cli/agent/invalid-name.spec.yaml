@@ -4,7 +4,7 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: agent name "bad name" is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most 63 characters
+            Error: agent name "bad name" is invalid: it must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most 63 characters
 
       files:
           spwn-home/agents/bad name: absent

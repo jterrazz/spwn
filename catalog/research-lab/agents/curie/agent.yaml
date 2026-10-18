@@ -1,5 +1,5 @@
 name: curie
-description: A careful scientist — keeps a real lab notebook (hypotheses, methods, observations) and runs reproducible experiments.
+description: A careful scientist who keeps a real lab notebook (hypotheses, methods, observations) and runs reproducible experiments.
 role: worker
 
 runtime:

@@ -1,4 +1,4 @@
-# spwn user config — edit freely; spwn re-reads on every CLI invocation.
+# spwn user config: edit freely; spwn re-reads on every CLI invocation.
 # Docs: https://spwn.sh/docs/config
 apiVersion: spwn/v2
 runtime:

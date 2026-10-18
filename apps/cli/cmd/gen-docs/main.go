@@ -61,7 +61,7 @@ func writeCommand(page *bytes.Buffer, cmd *cobra.Command) {
 	if len(children) > 0 {
 		page.WriteString("\n")
 		for _, child := range children {
-			fmt.Fprintf(page, "- [%s](#%s) — %s\n", child.CommandPath(), anchor(child.CommandPath()), sentence(child.Short))
+			fmt.Fprintf(page, "- [%s](#%s): %s\n", child.CommandPath(), anchor(child.CommandPath()), sentence(child.Short))
 		}
 	}
 

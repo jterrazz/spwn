@@ -23,4 +23,4 @@ runs:
                       - spwn:git
           spwn.lock:
               equals: |
-                  # spwn.lock — DO NOT EDIT
+                  # spwn.lock: DO NOT EDIT

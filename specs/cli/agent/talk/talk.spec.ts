@@ -20,7 +20,7 @@ describe('talk', () => {
         const receipt = await result.container('neo').exec('cat /tmp/claude-mock.json');
         expect(JSON.parse(receipt.stdout.text)).toStrictEqual({
             claude_md_content: expect.stringMatching(
-                /^# neo — worker in world "world-neo-[0-9a-f]{5}"\n\n## Identity\n/u,
+                /^# neo, worker in world "world-neo-[0-9a-f]{5}"\n\n## Identity\n/u,
             ) as unknown,
             claude_md_exists: true,
             exit_code: 0,
@@ -48,7 +48,7 @@ describe('talk', () => {
         const receipt = await result.container('neo').exec('cat /tmp/codex-mock.json');
         expect(JSON.parse(receipt.stdout.text)).toStrictEqual({
             agents_md_content: expect.stringMatching(
-                /^# neo — worker in world "world-neo-[0-9a-f]{5}"\n\n## Identity\n\nYour soul — who you are\. Re-read this when you feel lost\.\n\nCodex pilot fixture agent\.\n/u,
+                /^# neo, worker in world "world-neo-[0-9a-f]{5}"\n\n## Identity\n\nYour soul: who you are\. Re-read this when you feel lost\.\n\nCodex pilot fixture agent\.\n/u,
             ) as unknown,
             agents_md_exists: true,
             exit_code: 0,
@@ -77,7 +77,7 @@ describe('talk', () => {
         const receipt = await result.container('neo').exec('cat /tmp/claude-mock.json');
         expect(JSON.parse(receipt.stdout.text)).toStrictEqual({
             claude_md_content: expect.stringMatching(
-                /^# neo — worker in world "world-neo-[0-9a-f]{5}"\n/u,
+                /^# neo, worker in world "world-neo-[0-9a-f]{5}"\n/u,
             ) as unknown,
             claude_md_exists: true,
             exit_code: 0,

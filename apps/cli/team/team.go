@@ -54,7 +54,7 @@ var newCmd = &cobra.Command{
 		}
 		slug := project.Slugify(name)
 		if slug == "" {
-			return fmt.Errorf("team name %q has no valid characters — use letters, digits, and dashes", args[0])
+			return fmt.Errorf("team name %q has no valid characters: use letters, digits, and dashes", args[0])
 		}
 
 		t := project.Team{

@@ -88,7 +88,7 @@ describe('providerCookies', () => {
         expect(refused).toStrictEqual(
             new RefusedError(
                 500,
-                'no cookies for provider "x" — run the cookie-sync extension',
+                'no cookies for provider "x": run the cookie-sync extension',
                 'NO_COOKIES',
             ),
         );

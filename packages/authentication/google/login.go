@@ -29,7 +29,7 @@ import (
 // streamed to w so the user sees what's happening live.
 func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 	if c == nil || c.ClientID == "" {
-		return fmt.Errorf("nil or empty ClientConfig — run the wizard first")
+		return fmt.Errorf("nil or empty ClientConfig: run the wizard first")
 	}
 	if w == nil {
 		w = io.Discard
@@ -91,7 +91,7 @@ func Login(ctx context.Context, c *ClientConfig, w io.Writer) error {
 			http.Error(rw, "no code", http.StatusBadRequest)
 			return
 		}
-		fmt.Fprintln(rw, "spwn auth login google: success — you can close this tab.")
+		fmt.Fprintln(rw, "spwn auth login google: success, you can close this tab.")
 		done <- result{code: code, state: got}
 	})
 	server := &http.Server{Addr: "127.0.0.1:" + strconv.Itoa(port), Handler: mux}

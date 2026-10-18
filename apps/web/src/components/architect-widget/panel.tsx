@@ -99,7 +99,7 @@ export function ArchitectPanel({
                 onInputChange={onInput}
                 onSend={onSend}
                 placeholder="Talk to the Architect..."
-                typingText="Thinking…"
+                typingText="Thinking..."
             />
         </div>
     );

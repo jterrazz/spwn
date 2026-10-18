@@ -5,7 +5,7 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: unknown world "doesnotexist" — not declared in spwn.yaml
+            Error: unknown world "doesnotexist": not declared in spwn.yaml
 
             Known worlds: neo
 

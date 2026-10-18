@@ -44,7 +44,7 @@ func Build(cwd string, opts Opts) (*Model, error) {
 		return nil, fmt.Errorf("load project: %w", err)
 	}
 	if proj == nil {
-		return nil, fmt.Errorf("no spwn.yaml found in %s or any parent — run `spwn init` first", cwd)
+		return nil, fmt.Errorf("no spwn.yaml found in %s or any parent: run `spwn init` first", cwd)
 	}
 
 	src, err := source.Load(proj.Root)

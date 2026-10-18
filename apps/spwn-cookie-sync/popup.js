@@ -31,7 +31,7 @@ function stateOf(provider, granted) {
     ) {
         return {
             connected: true,
-            meta: `synced ${relativeTime(provider.last_sync)} — ${domains.join(', ')}`,
+            meta: `synced ${relativeTime(provider.last_sync)}: ${domains.join(', ')}`,
             status: 'connected',
             tag: 'tag-connected',
         };
@@ -45,7 +45,7 @@ function stateOf(provider, granted) {
           }
         : {
               connected: false,
-              meta: 'click "Grant access" → confirm in Chrome → visit the site',
+              meta: 'click "Grant access", confirm in Chrome, then visit the site',
               status: 'needs access',
               tag: 'tag-needs',
           };
@@ -94,7 +94,7 @@ async function refresh() {
     const status = await gateStatus();
     if (status === null) {
         element('gate-status').innerHTML =
-            '<span class="gate-bad">●</span> gate not reachable on 127.0.0.1:9000 — run `spwn gate start`';
+            '<span class="gate-bad">●</span> gate not reachable on 127.0.0.1:9000: run `spwn gate start`';
         showEmpty('—');
         return;
     }
@@ -102,7 +102,7 @@ async function refresh() {
     const list = status.providers ?? [];
     if (list.length === 0) {
         showEmpty(
-            'no providers registered yet — install a gate tool that uses cookies (e.g. `spwn install spwn:x`)',
+            'no providers registered yet: install a gate tool that uses cookies (e.g. `spwn install spwn:x`)',
         );
         return;
     }

@@ -71,7 +71,7 @@ func runInitLocal(cmd *cobra.Command) error {
 	}
 
 	if initName != "" && !project.IsValidProjectName(initName) {
-		return fmt.Errorf("invalid --name %q — must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)", initName)
+		return fmt.Errorf("invalid --name %q: it must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)", initName)
 	}
 
 	backend, err := resolveInitBackend(initBackend)
@@ -129,7 +129,7 @@ func resolveInitBackend(raw string) (string, error) {
 			return "spwn:" + strings.TrimPrefix(candidate, "spwn:"), nil
 		}
 	}
-	return "", fmt.Errorf("unknown --backend %q — supported: %s", raw, strings.Join(supportedRuntimes(), ", "))
+	return "", fmt.Errorf("unknown --backend %q (supported: %s)", raw, strings.Join(supportedRuntimes(), ", "))
 }
 
 func parseExampleRef(ref string) (string, error) {

@@ -93,7 +93,7 @@ func formatReceiptLine(r receiptRow) string {
 	if r.Error != "" {
 		msg := strings.ReplaceAll(r.Error, "\n", " ")
 		if len(msg) > 120 {
-			msg = msg[:120] + "…"
+			msg = msg[:120] + "..."
 		}
 		line += "  err=" + msg
 	}

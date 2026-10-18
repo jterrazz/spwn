@@ -3,7 +3,7 @@
 //
 // Format is Go-style, line-oriented text — one entry per line:
 //
-//	# spwn.lock — DO NOT EDIT
+//	# spwn.lock: DO NOT EDIT
 //	spwn:unix v24.04 builtin
 //	spwn:git v2.43 builtin
 //	github:jterrazz/research-skills v0.3.0 sha256:b7e12...
@@ -119,7 +119,7 @@ func SaveLockfile(projectRoot string, l *Lockfile) error {
 		return fmt.Errorf("nil lockfile")
 	}
 	var b strings.Builder
-	b.WriteString("# spwn.lock — DO NOT EDIT\n")
+	b.WriteString("# spwn.lock: DO NOT EDIT\n")
 	keys := make([]string, 0, len(l.Deps))
 	for k := range l.Deps {
 		keys = append(keys, k)

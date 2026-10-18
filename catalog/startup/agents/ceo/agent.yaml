@@ -1,5 +1,5 @@
 name: ceo
-description: The CEO — sets direction for the colony, approves what the analyst plans, and unblocks devops when shipping stalls.
+description: The CEO. Sets direction for the colony, approves what the analyst plans, and unblocks devops when shipping stalls.
 role: chief
 
 runtime:

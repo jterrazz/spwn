@@ -158,7 +158,7 @@ func validateWorldFilter(name string) error {
 		names = append(names, k)
 	}
 	sort.Strings(names)
-	return fmt.Errorf("unknown world %q — not declared in spwn.yaml\n\n  Known worlds: %s",
+	return fmt.Errorf("unknown world %q: not declared in spwn.yaml\n\n  Known worlds: %s",
 		name, strings.Join(names, ", "))
 }
 

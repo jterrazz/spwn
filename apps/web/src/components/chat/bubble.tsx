@@ -29,7 +29,7 @@ function textOf(message: ChatBubble): string {
     if (message.content !== '') {
         return message.content;
     }
-    return message.role === 'assistant' ? '…' : '';
+    return message.role === 'assistant' ? '...' : '';
 }
 
 interface BubbleProps {

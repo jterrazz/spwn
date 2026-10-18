@@ -57,7 +57,7 @@ func ruleAutomations(in Input) []Issue {
 				out = append(out, Issue{
 					Level:   LevelError,
 					Path:    pathPrefix + ".on",
-					Message: "trigger missing — set `on.cron` or `on.fs`",
+					Message: "trigger missing: set `on.cron` or `on.fs`",
 					Hint:    "see docs/guides/automations.md for the supported triggers",
 				})
 			}
@@ -69,7 +69,7 @@ func ruleAutomations(in Input) []Issue {
 						Level:   LevelError,
 						Path:    pathPrefix + ".on.cron",
 						Message: fmt.Sprintf("invalid cron expression %q: %v", a.On.Cron, err),
-						Hint:    "use 5 fields (min hour dom month dow) — e.g. \"0 6 * * *\" for daily 6am",
+						Hint:    "use 5 fields (min hour dom month dow), e.g. \"0 6 * * *\" for daily 6am",
 					})
 				} else {
 					next := schedule.Next(time.Time{})
@@ -78,7 +78,7 @@ func ruleAutomations(in Input) []Issue {
 						out = append(out, Issue{
 							Level:   LevelWarning,
 							Path:    pathPrefix + ".on.cron",
-							Message: fmt.Sprintf("cron %q fires every minute — agents will be woken 1440×/day", a.On.Cron),
+							Message: fmt.Sprintf("cron %q fires every minute: agents will be woken 1440×/day", a.On.Cron),
 							Hint:    "if you meant \"once a day at midnight\", use \"0 0 * * *\". See https://crontab.guru",
 						})
 					}
@@ -97,13 +97,13 @@ func ruleAutomations(in Input) []Issue {
 					Level:   LevelError,
 					Path:    pathPrefix,
 					Message: "exactly one body required, got both `prompt` and `command`",
-					Hint:    "drop one — `prompt:` is for inline bodies, `command:` references spwn/commands/<name>.md",
+					Hint:    "drop one: `prompt:` is for inline bodies, `command:` references spwn/commands/<name>.md",
 				})
 			case !hasPrompt && !hasCommand:
 				out = append(out, Issue{
 					Level:   LevelError,
 					Path:    pathPrefix,
-					Message: "body missing — set `prompt` or `command`",
+					Message: "body missing: set `prompt` or `command`",
 					Hint:    "inline prose goes in `prompt:`, or use `command: command/<name>` to reuse a slash command",
 				})
 			}
@@ -183,7 +183,7 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 				Level:   LevelError,
 				Path:    pathPrefix + ".path",
 				Message: fmt.Sprintf("watch path %q is a file, not a directory", fs.Path),
-				Hint:    "fs triggers watch directories — use the parent directory and `patterns:` to filter",
+				Hint:    "fs triggers watch directories: use the parent directory and `patterns:` to filter",
 			})
 		}
 	}
@@ -210,7 +210,7 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 			Level:   LevelError,
 			Path:    pathPrefix + ".debounce",
 			Message: fmt.Sprintf("debounce %s is below the 100ms minimum", d),
-			Hint:    "set debounce ≥ 100ms — below that the engine coalesces every keystroke and never fires",
+			Hint:    "set debounce ≥ 100ms; below that the engine coalesces every keystroke and never fires",
 		})
 	}
 	if d > 1*time.Hour {
@@ -239,7 +239,7 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 				Level:   LevelError,
 				Path:    field,
 				Message: fmt.Sprintf("pattern %q uses brace expansion, which filepath.Match does not support", trimmed),
-				Hint:    "split into multiple patterns — e.g. [\"*.md\", \"*.txt\"] instead of \"*.{md,txt}\"",
+				Hint:    "split into multiple patterns, e.g. [\"*.md\", \"*.txt\"] instead of \"*.{md,txt}\"",
 			})
 			continue
 		}
@@ -273,7 +273,7 @@ func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 			Level:   LevelError,
 			Path:    pathPrefix,
 			Message: fmt.Sprintf("command ref %q must use the `command/<name>` form", ref),
-			Hint:    "match the slash-command scheme — e.g. `command/morning-brief` for spwn/commands/morning-brief.md",
+			Hint:    "match the slash-command scheme, e.g. `command/morning-brief` for spwn/commands/morning-brief.md",
 		})
 		return out
 	}
@@ -283,7 +283,7 @@ func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 			Level:   LevelError,
 			Path:    pathPrefix,
 			Message: fmt.Sprintf("command name %q must match %s", name, slugRe.String()),
-			Hint:    "use a kebab-case slug — `command/morning-brief`, not `command/MorningBrief`",
+			Hint:    "use a kebab-case slug: `command/morning-brief`, not `command/MorningBrief`",
 		})
 		return out
 	}
@@ -293,7 +293,7 @@ func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 			Level:   LevelError,
 			Path:    pathPrefix,
 			Message: fmt.Sprintf("command file not found at spwn/commands/%s.md", name),
-			Hint:    fmt.Sprintf("create the file or fix the ref — `spwn install command/%s --agent <name>` scaffolds one", name),
+			Hint:    fmt.Sprintf("create the file or fix the ref: `spwn install command/%s --agent <name>` scaffolds one", name),
 		})
 	}
 	return out

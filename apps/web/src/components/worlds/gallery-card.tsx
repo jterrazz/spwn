@@ -126,7 +126,7 @@ function InstallLabel({ busy }: { busy: boolean }) {
         return (
             <>
                 <IconLoader2 className="animate-spin" size={13} />
-                Spawning…
+                Spawning...
             </>
         );
     }

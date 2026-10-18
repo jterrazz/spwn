@@ -23,7 +23,7 @@ runs:
           spwn/agents/mark/agent.yaml:
               equals: |
                   name: mark
-                  description: Mark — team lead; reads the handbook first, delegates second, finishes the batch.
+                  description: Mark, the team lead, reads the handbook first, delegates second, finishes the batch.
                   role: chief
                   runtime:
                       backend: spwn:claude-code
@@ -33,7 +33,7 @@ runs:
           spwn/agents/helly/agent.yaml:
               equals: |
                   name: helly
-                  description: Helly — newest refiner; sharp, skeptical, surfaces the assumption everyone else skipped.
+                  description: Helly, the newest refiner. Sharp, skeptical, surfaces the assumption everyone else skipped.
                   role: worker
 
                   runtime:
@@ -46,7 +46,7 @@ runs:
           spwn/agents/irving/agent.yaml:
               equals: |
                   name: irving
-                  description: Irving — senior refiner by the book; cites the handbook, upholds procedure, escalates anything outside it.
+                  description: Irving, the senior refiner by the book, cites the handbook, upholds procedure, escalates anything outside it.
                   role: worker
 
                   runtime:
@@ -59,7 +59,7 @@ runs:
           spwn/agents/dylan/agent.yaml:
               equals: |
                   name: dylan
-                  description: Dylan — fastest refiner on the floor; results-hungry, metrics-first, always knows his batch count.
+                  description: Dylan, the fastest refiner on the floor. Results-hungry, metrics-first, always knows his batch count.
                   role: worker
 
                   runtime:
@@ -71,7 +71,7 @@ runs:
                     - "skill/refine"
           spwn.lock:
               equals: |
-                  # spwn.lock — DO NOT EDIT
+                  # spwn.lock: DO NOT EDIT
                   spwn:git latest builtin
                   spwn:qmd latest builtin
                   spwn:unix latest builtin

@@ -12,7 +12,7 @@ import (
 // 1. Empty lockfile (just the header comment)
 func TestLoad_emptyWithHeaderOnly(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\n"
+	content := "# spwn.lock: DO NOT EDIT\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func TestLoad_emptyWithHeaderOnly(t *testing.T) {
 // 2. Lockfile with only comments and blank lines
 func TestLoad_onlyCommentsAndBlanks(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\n\n# another comment\n\n# yet another\n\n"
+	content := "# spwn.lock: DO NOT EDIT\n\n# another comment\n\n# yet another\n\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestLoad_onlyCommentsAndBlanks(t *testing.T) {
 // 3. Entry with no version or source (just a ref name)
 func TestLoad_entryWithRefOnly(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\nspwn:solo\n"
+	content := "# spwn.lock: DO NOT EDIT\nspwn:solo\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestLoad_entryWithRefOnly(t *testing.T) {
 // 4. Entry with version but no source
 func TestLoad_entryWithVersionNoSource(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\nspwn:partial v1.0\n"
+	content := "# spwn.lock: DO NOT EDIT\nspwn:partial v1.0\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestLoad_entryWithVersionNoSource(t *testing.T) {
 // 5. Entry with github.com/ style refs
 func TestLoad_githubStyleRef(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\ngithub.com/jterrazz/research-skills v0.3.0 github\n"
+	content := "# spwn.lock: DO NOT EDIT\ngithub.com/jterrazz/research-skills v0.3.0 github\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func TestSave_nonExistentDirectory(t *testing.T) {
 // 14. File with mixed comments and entries
 func TestLoad_mixedCommentsAndEntries(t *testing.T) {
 	root := t.TempDir()
-	content := `# spwn.lock — DO NOT EDIT
+	content := `# spwn.lock: DO NOT EDIT
 # This is a comment
 spwn:unix 24.04 builtin
 

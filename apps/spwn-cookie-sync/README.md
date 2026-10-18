@@ -39,7 +39,7 @@ spwn cookie sync                     ● gate connected
 ● x          connected   synced 12s ago — x.com, twitter.com
 ○ linkedin   pending     visit linkedin.com or linkedin.fr to sync
 ─────────────────────────────────────────────────────
-gate at 127.0.0.1:9000 — visit a listed site to sync its cookies
+gate at 127.0.0.1:9000: visit a listed site to sync its cookies
 ```
 
 The provider list is driven by the gate — every gate element that

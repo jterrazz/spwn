@@ -35,5 +35,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: no agents declared in this project — add one with `spwn agent new`
+            Error: no agents declared in this project: add one with `spwn agent new`
 

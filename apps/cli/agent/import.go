@@ -27,7 +27,7 @@ var importCmd = &cobra.Command{
 	Short: "Import an agent from a tar.gz archive",
 	Long: `Import an agent's Mind from a previously exported tar.gz archive.
 
-The agent name is derived from the archive filename (e.g., neo.tar.gz → neo).
+The agent name is derived from the archive filename (e.g., neo.tar.gz gives neo).
 The archive must contain at least a SOUL.md at the agent root.`,
 	Example: `  spwn agent import neo.tar.gz
   spwn agent import /path/to/backup.tar.gz`,

@@ -86,37 +86,37 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	switch parsed.Kind {
 	case refs.KindLocalSkill, refs.KindLocalTool, refs.KindLocalHook, refs.KindLocalCommand:
 		if agentFilter == "" {
-			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
+			return fmt.Errorf("%q is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
 				ref, parsed.Name, parsed.Name, parsed.Name, parsed.Name)
 		}
 		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
 			switch parsed.Kind {
 			case refs.KindLocalSkill:
-				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md — create it first with `spwn skill new %s`",
+				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md; create it first with `spwn skill new %s`",
 					parsed.Name, parsed.Name, parsed.Name)
 			case refs.KindLocalTool:
-				return fmt.Errorf("tool/%s not found at spwn/tools/%s/ — scaffold a tool.yaml there first",
+				return fmt.Errorf("tool/%s not found at spwn/tools/%s/; scaffold a tool.yaml there first",
 					parsed.Name, parsed.Name)
 			case refs.KindLocalHook:
-				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.yaml — create the hook script first",
+				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.yaml; create the hook script first",
 					parsed.Name, parsed.Name)
 			case refs.KindLocalCommand:
-				return fmt.Errorf("command/%s not found at spwn/commands/%s.md — create the prompt file first",
+				return fmt.Errorf("command/%s not found at spwn/commands/%s.md; create the prompt file first",
 					parsed.Name, parsed.Name)
 			}
 		}
 	case refs.KindRegistry:
-		return fmt.Errorf("%q targets github:%s/%s — remote registries are not yet supported. "+
+		return fmt.Errorf("%q targets github:%s/%s but remote registries are not yet supported. "+
 			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
 			raw, parsed.Owner, parsed.Name)
 	case refs.KindInvalid:
-		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name> (for built-ins), "+
+		return fmt.Errorf("%q is not a valid dependency ref: use spwn:<name> (for built-ins), "+
 			"github:<owner>/<repo> (for remote deps), skill/<name>, tool/<name>, hook/<name>, or command/<name>",
 			raw)
 	}
 
 	if parsed.Kind == refs.KindSpwnBuiltin && !catalogHas(ref) {
-		return fmt.Errorf("unknown builtin %q — see the catalog for available dependencies", ref)
+		return fmt.Errorf("unknown builtin %q (see the catalog for available dependencies)", ref)
 	}
 
 	targets, terr := filterAgents(p.Agents, agentFilter)
@@ -186,7 +186,7 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
 	if parsed.Kind == refs.KindInvalid {
-		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill/<name>, tool/<name>, hook/<name>, or command/<name>", raw)
+		return fmt.Errorf("%q is not a valid dependency ref: use spwn:<name>, github:<owner>/<repo>, skill/<name>, tool/<name>, hook/<name>, or command/<name>", raw)
 	}
 
 	targets, terr := filterAgents(p.Agents, agentFilter)
@@ -226,7 +226,7 @@ func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, er
 		}
 	}
 	if len(available) == 0 {
-		return nil, fmt.Errorf("no agents declared in this project — add one with `spwn agent new`")
+		return nil, fmt.Errorf("no agents declared in this project: add one with `spwn agent new`")
 	}
 	if filter == "" {
 		return available, nil

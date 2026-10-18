@@ -123,7 +123,7 @@ function TeamFields({ form }: { form: ReturnType<typeof useTeamForm> }) {
                     </>
                 }
                 onChange={form.handleDescription}
-                placeholder="What this team does…"
+                placeholder="What this team does..."
                 value={form.description}
             />
         </div>
@@ -162,7 +162,7 @@ export function TeamDialog({ team, onSaved, onClose }: TeamDialogProps) {
             )}
             <ModalActions
                 busy={form.saving}
-                busyLabel="Saving…"
+                busyLabel="Saving..."
                 label={team === null ? 'Create' : 'Save'}
                 onCancel={onClose}
                 onConfirm={inBackground(form.save)}

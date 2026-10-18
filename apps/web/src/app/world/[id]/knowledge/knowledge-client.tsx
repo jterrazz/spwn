@@ -20,7 +20,7 @@ export default function KnowledgePage() {
                 actions={
                     <ExpandingSearch
                         onChange={setSearchQuery}
-                        placeholder="Search files…"
+                        placeholder="Search files..."
                         value={searchQuery}
                     />
                 }

@@ -58,7 +58,7 @@ export function RenameDialog({ world, onRenamed, onFailed, onClose }: RenameDial
             />
             <ModalActions
                 busy={renaming}
-                busyLabel="Saving…"
+                busyLabel="Saving..."
                 label="Save"
                 onCancel={onClose}
                 onConfirm={inBackground(rename)}

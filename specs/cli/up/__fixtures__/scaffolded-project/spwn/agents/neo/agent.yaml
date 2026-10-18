@@ -11,7 +11,7 @@
 #   command/<name>               local command (./spwn/commands/<name>.md)
 # Bare names are invalid — always use one of the forms above.
 #
-# Hooks fire on runtime events (PreToolUse, SessionStart, …) and are
+# Hooks fire on runtime events (PreToolUse, SessionStart, ...) and are
 # selected per-agent via the dependency list — same shape as skills
 # and tools. An agent inherits only the hooks it lists here.
 #
@@ -25,7 +25,7 @@
 # project-wide config and the backend you're authenticated with.
 
 name: neo
-description: A blank-slate agent — replace this one-liner with what neo is for.
+description: A blank-slate agent; replace this one-liner with what neo is for.
 dependencies:
   - "spwn:unix"
   - "spwn:git"

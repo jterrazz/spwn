@@ -226,8 +226,8 @@ func TestFormatReceiptLine_TruncatesLongError(t *testing.T) {
 		Fired: time.Now(), OK: false, Error: long,
 	}
 	got := formatReceiptLine(r)
-	if !strings.Contains(got, "…") {
-		t.Errorf("expected truncation marker '…' in %q", got)
+	if !strings.Contains(got, "...") {
+		t.Errorf("expected truncation marker '...' in %q", got)
 	}
 	// Sanity: trimmed length is bounded.
 	if len(got) > 350 {

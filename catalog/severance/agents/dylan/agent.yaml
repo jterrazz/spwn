@@ -1,5 +1,5 @@
 name: dylan
-description: Dylan — fastest refiner on the floor; results-hungry, metrics-first, always knows his batch count.
+description: Dylan, the fastest refiner on the floor. Results-hungry, metrics-first, always knows his batch count.
 role: worker
 
 runtime:

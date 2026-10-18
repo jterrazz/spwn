@@ -30,7 +30,7 @@ export function providerCookies(credentials: string, provider: string): Cookie[]
     if (!existsSync(file)) {
         throw new RefusedError(
             500,
-            `no cookies for provider "${provider}" — run the cookie-sync extension`,
+            `no cookies for provider "${provider}": run the cookie-sync extension`,
             'NO_COOKIES',
         );
     }

@@ -23,7 +23,7 @@ with the engine, and blocks. Triggers fire as configured (cron
 expressions evaluated against the host clock; filesystem watches via
 fsnotify). Each fire writes a receipt to .spwn/runs.jsonl.
 
-Stop with Ctrl-C — the engine drains in-flight dispatches before
+Stop with Ctrl-C: the engine drains in-flight dispatches before
 exiting.
 
 Catch-up: on startup, every cron automation that fired before is
@@ -39,7 +39,7 @@ resumes at the next scheduled time.`,
 		}
 
 		if countAutomations(p) == 0 {
-			fmt.Fprintln(cmd.OutOrStdout(), "no automations declared — nothing to run")
+			fmt.Fprintln(cmd.OutOrStdout(), "no automations declared, nothing to run")
 			return nil
 		}
 
@@ -76,9 +76,9 @@ resumes at the next scheduled time.`,
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 
-		fmt.Fprintf(cmd.OutOrStdout(), "automation daemon — project %s\n", p.Manifest.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "automation daemon for project %s\n", p.Manifest.Name)
 		fmt.Fprintf(cmd.OutOrStdout(), "registered automations: %d\n", countAutomations(p))
-		fmt.Fprintln(cmd.OutOrStdout(), "receipts → "+receiptsPath(p.Root))
+		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+receiptsPath(p.Root))
 		fmt.Fprintln(cmd.OutOrStdout(), "ctrl-c to stop")
 
 		if err := eng.Start(ctx); err != nil {
@@ -86,7 +86,7 @@ resumes at the next scheduled time.`,
 		}
 
 		<-ctx.Done()
-		fmt.Fprintln(cmd.OutOrStdout(), "\nstopping engine…")
+		fmt.Fprintln(cmd.OutOrStdout(), "\nstopping engine...")
 		eng.Stop()
 		fmt.Fprintln(cmd.OutOrStdout(), "stopped")
 		return nil

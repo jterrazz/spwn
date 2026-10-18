@@ -18,5 +18,5 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: "skill/refine" is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new refine` / `spwn/tools/refine/` / `spwn/hooks/refine.yaml` / `spwn/commands/refine.md`
+            Error: "skill/refine" is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new refine` / `spwn/tools/refine/` / `spwn/hooks/refine.yaml` / `spwn/commands/refine.md`
 

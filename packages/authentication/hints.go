@@ -35,16 +35,16 @@ func NotSetHint(p Provider, m HintMethod) string {
 	case ProviderAnthropic:
 		switch m {
 		case HintMethodOAuth:
-			return "run `claude login` on the host — spwn picks up credentials automatically"
+			return "run `claude login` on the host; spwn picks up credentials automatically"
 		case HintMethodAPIKey:
-			return "spwn auth login anthropic --api-key sk-ant-…"
+			return "spwn auth login anthropic --api-key sk-ant-..."
 		}
 	case ProviderOpenAI:
 		switch m {
 		case HintMethodOAuth:
-			return "run `codex login` on the host — spwn picks up credentials automatically"
+			return "run `codex login` on the host; spwn picks up credentials automatically"
 		case HintMethodAPIKey:
-			return "spwn auth login openai --api-key sk-… or export OPENAI_API_KEY=sk-…"
+			return "spwn auth login openai --api-key sk-... or export OPENAI_API_KEY=sk-..."
 		}
 	}
 	return ""
@@ -77,9 +77,9 @@ func RejectedHint(p Provider, cred *Credential) string {
 func NotConfiguredHint(p Provider) string {
 	switch p {
 	case ProviderAnthropic:
-		return "run `claude login` on the host (spwn picks up credentials automatically) or `spwn auth login anthropic --api-key sk-ant-…`"
+		return "run `claude login` on the host (spwn picks up credentials automatically) or `spwn auth login anthropic --api-key sk-ant-...`"
 	case ProviderOpenAI:
-		return "run `codex login` on the host (spwn picks up credentials automatically) or export OPENAI_API_KEY=sk-…"
+		return "run `codex login` on the host (spwn picks up credentials automatically) or export OPENAI_API_KEY=sk-..."
 	}
 	return "configure credentials for " + string(p)
 }

@@ -149,7 +149,7 @@ func (s *ToolSupervisor) superviseOne(ctx context.Context, t Tool, port int) {
 			return
 		}
 		if err := s.spawnOne(ctx, t, port); err != nil && ctx.Err() == nil {
-			s.logger.Printf("tool %q exited: %v — restarting in %s", t.Name, err, backoff)
+			s.logger.Printf("tool %q exited: %v; restarting in %s", t.Name, err, backoff)
 			select {
 			case <-ctx.Done():
 				return
@@ -182,7 +182,7 @@ func (s *ToolSupervisor) spawnOne(ctx context.Context, t Tool, port int) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start: %w", err)
 	}
-	s.logger.Printf("tool %q started (pid %d, port %d) — waiting for health", t.Name, cmd.Process.Pid, port)
+	s.logger.Printf("tool %q started (pid %d, port %d), waiting for health", t.Name, cmd.Process.Pid, port)
 	if err := waitToolHealthy(ctx, port); err != nil {
 		s.logger.Printf("tool %q health check failed: %v", t.Name, err)
 	} else {

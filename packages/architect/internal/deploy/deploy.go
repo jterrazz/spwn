@@ -81,7 +81,7 @@ func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHo
 			continue
 		}
 		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {
-			return fmt.Errorf("copy %s → %s: %w", hostDir, containerHome, err)
+			return fmt.Errorf("copy %s to %s: %w", hostDir, containerHome, err)
 		}
 	}
 	return nil

@@ -127,7 +127,7 @@ func SaveConfig(c Config) error {
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
 	}
-	header := []byte("# spwn user config — edit freely; spwn re-reads on every CLI invocation.\n" +
+	header := []byte("# spwn user config: edit freely; spwn re-reads on every CLI invocation.\n" +
 		"# Docs: https://spwn.sh/docs/config\n")
 	if err := os.WriteFile(path, append(header, data...), 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)

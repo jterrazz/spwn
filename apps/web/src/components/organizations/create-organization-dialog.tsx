@@ -164,7 +164,7 @@ export function CreateOrganizationDialog({
                 {error !== '' && <p className="text-xs text-red-400/80">{error}</p>}
                 <ModalActions
                     busy={creating}
-                    busyLabel="Creating…"
+                    busyLabel="Creating..."
                     label="Create"
                     onCancel={onClose}
                     onConfirm={() => {

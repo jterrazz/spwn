@@ -4,7 +4,7 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: invalid --name "Has Spaces" — must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)
+            Error: invalid --name "Has Spaces": it must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)
 
       files:
           spwn.yaml: absent

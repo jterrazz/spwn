@@ -1108,7 +1108,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 			out = append(out, Issue{
 				Level:   LevelInfo,
 				Path:    display,
-				Message: fmt.Sprintf("hook %q is not selected by any agent's `hook/%s` dep — it will never fire", hookName, hookName),
+				Message: fmt.Sprintf("hook %q is not selected by any agent's `hook/%s` dep, so it will never fire", hookName, hookName),
 				Hint:    fmt.Sprintf("add `- hook/%s` to the agent.yaml of every agent that should run it", hookName),
 			})
 			continue
@@ -1219,7 +1219,7 @@ func invalidRefHint(root, raw string) string {
 			return "did you mean " + matches[0] + "?"
 		}
 		if len(matches) > 1 {
-			return "this name matches multiple local blocks — use one of: " + strings.Join(matches, ", ")
+			return "this name matches multiple local blocks; use one of: " + strings.Join(matches, ", ")
 		}
 	}
 

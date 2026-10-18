@@ -4,7 +4,7 @@ runs:
       exit: 1
       stderr: |4+
           
-            Error: unknown --backend "does-not-exist" — supported: claude-code, spwn:claude-code, codex, spwn:codex
+            Error: unknown --backend "does-not-exist" (supported: claude-code, spwn:claude-code, codex, spwn:codex)
 
       files:
           spwn.yaml: absent
