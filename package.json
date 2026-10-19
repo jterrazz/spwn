@@ -12,8 +12,8 @@
         "lint:fix": "typescript fix"
     },
     "devDependencies": {
-        "@jterrazz/test": "file:.artifacts/packages/jterrazz-test-17.0.0.tgz",
-        "@jterrazz/typescript": "file:.artifacts/packages/jterrazz-typescript-11.0.0.tgz",
+        "@jterrazz/test": "^17.0.0",
+        "@jterrazz/typescript": "^11.0.0",
         "turbo": "2.11.1",
         "vitest": "^5.0.1"
     },
