@@ -75,6 +75,8 @@ func NewDockerClient(ctx context.Context) (*client.Client, error) {
 	)
 }
 
+var initProcess = true
+
 // Create provisions a new container with the given configuration and returns its ID.
 func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error) {
 	hostCfg := &containerTypes.HostConfig{
@@ -85,6 +87,7 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 		Binds:       cfg.Binds,
 		ExtraHosts:  cfg.ExtraHosts,
 		GroupAdd:    cfg.GroupAdd,
+		Init:        &initProcess,
 	}
 
 	containerCfg := &containerTypes.Config{
