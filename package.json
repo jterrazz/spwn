@@ -12,10 +12,10 @@
         "lint:fix": "typescript fix"
     },
     "devDependencies": {
-        "@jterrazz/test": "^17.0.0",
-        "@jterrazz/typescript": "^11.0.0",
+        "@jterrazz/test": "^18.0.0",
+        "@jterrazz/typescript": "^11.1.0",
         "turbo": "2.11.1",
-        "vitest": "^5.0.1"
+        "vitest": "^5.0.5"
     },
     "devEngines": {
         "packageManager": {

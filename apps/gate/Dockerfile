@@ -2,7 +2,7 @@
 # on :9000), the gate-browser sidecar it supervises (a Playwright Chromium pool on 127.0.0.1:9001), and the catalog
 # tools it spawns, which require @spwn/gate-tool. packages/gate/lifecycle.go stages the context: the linux binary at
 # ./spwn-gate, ./browser and ./sdk (each its package.json and src/), and this file.
-FROM mcr.microsoft.com/playwright:v1.59.1-jammy
+FROM mcr.microsoft.com/playwright:v1.64.1-jammy
 
 # outside: the base image ships Chromium but not the playwright npm module; jq inspects cookies, gws drives the
 # gmail/gcal elements, and the docker CLI lets spwn:dispatch run `spwn agent talk` over the bind-mounted socket.
