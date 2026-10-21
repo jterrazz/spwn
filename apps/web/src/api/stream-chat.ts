@@ -112,6 +112,7 @@ interface Stream {
     collector: StreamCollector;
     decoder: TextDecoder;
     reader: ReadableStreamDefaultReader<Uint8Array>;
+    received: boolean;
 }
 
 async function drain(stream: Stream, pending = ''): Promise<void> {
@@ -119,6 +120,7 @@ async function drain(stream: Stream, pending = ''): Promise<void> {
     if (done) {
         return;
     }
+    stream.received = true;
     // Stryker disable next-line ObjectLiteral,BooleanLiteral: only a chunk cut inside a character needs the decoder's carry, and the network double writes whole strings
     const lines = `${pending}${stream.decoder.decode(value, { stream: true })}`.split('\n');
     // Stryker disable next-line StringLiteral: split returns one piece at least, so pop always has one to give
@@ -139,7 +141,16 @@ async function consume(response: Response, collector: StreamCollector): Promise<
         collector.reply(await response.text());
         return;
     }
-    await drain({ collector, decoder: new TextDecoder(), reader: response.body.getReader() });
+    const stream: Stream = {
+        collector,
+        decoder: new TextDecoder(),
+        reader: response.body.getReader(),
+        received: false,
+    };
+    await drain(stream);
+    if (!stream.received) {
+        collector.reply('');
+    }
 }
 
 async function failureOf(response: Response): Promise<string> {

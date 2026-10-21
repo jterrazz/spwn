@@ -236,6 +236,19 @@ describe('streamChat', () => {
         });
     });
 
+    test('an answer with no body stream arrives as an empty text block', async () => {
+        // Given - a 204, which carries no body stream at all
+        await using _ = await intercept(http.post(TALK), http.empty(204));
+
+        // Then - one empty reply
+        await expect(talk()).resolves.toStrictEqual({
+            blocks: [[{ content: '', type: 'text' }]],
+            done: [{}],
+            errors: [],
+            texts: [],
+        });
+    });
+
     test('a refusal without a reason reports its status', async () => {
         // Given - a gateway error whose body names no error
         await using _ = await intercept(http.post(TALK), http.error(502, { message: 'upstream' }));
