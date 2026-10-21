@@ -96,10 +96,12 @@ That's it. The `Release` workflow runs automatically and takes ~8 min:
 
 ```text
 .github/workflows/release.yaml
-├─ release (GoReleaser)           builds CLI archives + checksums.txt
-└─ tauri-app (matrix)             builds .app / .dmg / .AppImage
-                                  signs bundles, attaches latest.json
+└─ cli (GoReleaser)               builds CLI archives + checksums.txt
 ```
+
+The workflow ships the CLI alone. The desktop app and its `latest.json` have no
+job until the signing and notarization secrets are in place: the shared
+`release-tauri.yaml` they called is deleted.
 
 ### 4. Verify
 
