@@ -32,10 +32,10 @@ The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's wo
 
 ## The website specification
 
-`specs/website/website.specification.ts` starts two processes per file:
+The UI is the run's, the API is each file's:
 
-- the API, `spwn web --no-open`, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a spwn home past the onboarding wizard;
-- the UI, `next dev` in `apps/web`, handed that API's URL as `NEXT_PUBLIC_API_URL`.
+- the UI, built once per run by the project's global setup (`__setup__/ui.global-setup.ts`): `next build` in `apps/web` with `NEXT_PUBLIC_API_URL` set to a free loopback port, then `next start`, the production server `spwn web` itself starts;
+- the API, `spwn web --no-open`, started by `specs/website/website.specification.ts` for each file on that port, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a spwn home past the onboarding wizard. The client reads its API address from the build, so the files take turns on it.
 
 One folder per area of the UI (`worlds/`, `agents/`, `navigation/`), one file per page. A page is read whole through its accessibility tree, the Docker version a `{{semver}}` token. The page calls the API on a port of its own, so cross-origin requests are allowed.
 
