@@ -6,15 +6,15 @@ Where every suite of spwn lives, what each one proves, and what it stands on. Ho
 
 Each layer refuses what the one above it does: a unit test never starts a container, and no Docker suite calls a provider's API.
 
-| Layer             | Where                                                                         | Proves                                                              | Runs in                                     |
-| ----------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
-| Static            | `.golangci.yml`, the TypeScript toolchain                                     | the layer map, the lint rulebook, the names, the docs               | `make lint`                                 |
-| Unit and golden   | `*_test.go` beside every Go file; `__tests__/` of `apps/web`, `apps/gate/sdk` | one module's contract, renderer output byte for byte                | `make test`                                 |
-| Local integration | `apps/api/*_test.go`, through the production `Handler()`                      | every API route, on the router the server itself mounts             | `make test`                                 |
-| CLI               | `specs/cli/`                                                                  | the compiled binary, a terminal session at a time, worlds in Docker | `make test`                                 |
-| Website           | `specs/website/`                                                              | the web UI, rendered in a headless Chromium against `spwn web`      | `make test`                                 |
-| Go Docker         | `packages/world/tests/e2e/`, `packages/compile/e2e/`                          | world lifecycles and image builds, through the Go API               | `make test-go-e2e`, `make test-compile-e2e` |
-| Smoke             | `specs/cli/up/real-build.spec.ts`, `specs/cli/up/upgrade-cycle.spec.ts`       | a real image build, with no simulator in place                      | `make test-smoke`                           |
+| Layer             | Where                                                                                                      | Proves                                                              | Runs in                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
+| Static            | `.golangci.yml`, the TypeScript toolchain                                                                  | the layer map, the lint rulebook, the names, the docs               | `make lint`                                 |
+| Unit and golden   | `*_test.go` beside every Go file; `__tests__/` of `apps/web`, `apps/gate/sdk`                              | one module's contract, renderer output byte for byte                | `make test`                                 |
+| Local integration | `apps/api/*_test.go`, through the production `Handler()`                                                   | every API route, on the router the server itself mounts             | `make test`                                 |
+| CLI               | `specs/cli/`                                                                                               | the compiled binary, a terminal session at a time, worlds in Docker | `make test`                                 |
+| Website           | `specs/website/`                                                                                           | the web UI, rendered in a headless Chromium against `spwn web`      | `make test`                                 |
+| Go Docker         | `packages/world/tests/e2e/`, `packages/compile/e2e/`, `packages/container/backend/`, `packages/architect/` | world lifecycles and image builds, through the Go API               | `make test-go-e2e`, `make test-compile-e2e` |
+| Smoke             | `specs/cli/up/real-build.spec.ts`, `specs/cli/up/upgrade-cycle.spec.ts`                                    | a real image build, with no simulator in place                      | `make test-smoke`                           |
 
 ## What both specifications share
 

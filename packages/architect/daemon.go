@@ -165,6 +165,7 @@ func StartDaemonWithOpts(ctx context.Context, opts StartDaemonOpts) (string, err
 			platform.CredentialsDir() + ":/credentials:ro",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
+		Init:          &initProcess,
 	}
 
 	opts.progress("container_creating", platform.ArchitectContainerName())
@@ -190,6 +191,8 @@ func StartDaemonWithOpts(ctx context.Context, opts StartDaemonOpts) (string, err
 	opts.progress("ready", id[:12])
 	return id, nil
 }
+
+var initProcess = true
 
 // StopDaemon stops and removes the spwn-architect container.
 func StopDaemon(ctx context.Context) error {

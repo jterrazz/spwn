@@ -8,6 +8,7 @@
 //	  input/                        -- spwn.yaml + spwn/**
 //	  output_<runtime>/             -- expected rendered Tree
 //	  output_<runtime>_error.txt    -- expected error substring
+//	                                   with the fixtures root written as {{fixtures}}
 //	                                   (used in place of output_<runtime>/
 //	                                   when the renderer should fail)
 //
@@ -63,6 +64,10 @@ func TestGoldenFixtures(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read __tests__/__fixtures__: %v", err)
 	}
+	fixturesRoot, err := filepath.Abs("__tests__/__fixtures__")
+	if err != nil {
+		t.Fatalf("resolve __tests__/__fixtures__: %v", err)
+	}
 
 	update := os.Getenv("UPDATE_GOLDEN")
 
@@ -113,15 +118,16 @@ func TestGoldenFixtures(t *testing.T) {
 						t.Fatalf("read %s: %v", tg.errorFile, err)
 					}
 					want := strings.TrimSpace(string(wantBytes))
+					gotMsg := strings.ReplaceAll(gotErr.Error(), fixturesRoot, "{{fixtures}}")
 					if shouldUpdate(update, tg.runtime) {
-						if err := os.WriteFile(tg.errorFile, []byte(gotErr.Error()+"\n"), 0o644); err != nil {
+						if err := os.WriteFile(tg.errorFile, []byte(gotMsg+"\n"), 0o644); err != nil {
 							t.Fatalf("update %s: %v", tg.errorFile, err)
 						}
 						return
 					}
-					if !strings.Contains(gotErr.Error(), want) {
+					if !strings.Contains(gotMsg, want) {
 						t.Fatalf("error mismatch:\n  want substring: %s\n  got:            %s",
-							want, gotErr.Error())
+							want, gotMsg)
 					}
 					return
 				}
