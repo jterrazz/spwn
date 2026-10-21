@@ -14,7 +14,7 @@
     "devDependencies": {
         "@jterrazz/test": "^18.0.0",
         "@jterrazz/typescript": "^11.1.0",
-        "turbo": "2.11.1",
+        "turbo": "2.11.7",
         "vitest": "^5.0.5"
     },
     "devEngines": {

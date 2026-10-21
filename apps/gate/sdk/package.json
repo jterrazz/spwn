@@ -11,6 +11,6 @@
         "test": "vitest --run"
     },
     "devDependencies": {
-        "@types/node": "^25.5.0"
+        "@types/node": "^26.6.5"
     }
 }
