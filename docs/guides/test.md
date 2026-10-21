@@ -54,7 +54,7 @@ A spec that starts the architect, in `cli/` or in `website/`, runs its chain ins
 
 ### A website specification
 
-A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline (the accessibility tree) whole. Each file starts its own `spwn web` on a fresh project and its own `next dev`, so the files run one at a time.
+A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline (the accessibility tree) whole. The run builds the UI once and serves it with `next start`, as `spwn web` does, and each file starts its own `spwn web` on a fresh project, on the one API address that build was given, so the files run one at a time.
 
 ### A module test
 

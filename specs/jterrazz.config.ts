@@ -37,9 +37,9 @@ export default defineConfig({
             },
             website: {
                 include: ['website/**/*.spec.ts'],
-                reason: 'this member IS the specs tree, so its specifications sit at its root, where the derived globs do not look; every file starts its own `spwn web` and `next dev`, and two dev servers of one app share its build folder, so the files run one at a time, and the first compile of a page outlasts the default budget',
+                reason: 'this member IS the specs tree, so its specifications sit at its root, where the derived globs do not look; the run builds and serves the UI once, with the one API address its client is built with, and every file starts its own `spwn web` on that address, so the files run one at a time',
                 serial: true,
-                timeout: 120_000,
+                setup: ['website/__setup__/ui.global-setup.ts'],
             },
         },
     },
