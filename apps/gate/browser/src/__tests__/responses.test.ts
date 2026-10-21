@@ -39,9 +39,9 @@ describe('responses', () => {
 
         // When - a tool awaits JSON, a text it allows, a GET by a pattern with a letter class, and JSON past a text and a typeless body
         const replies = [
-            await wait({ url_pattern: 'data\\.json$' }, '/data.json'),
+            await wait({ url_pattern: String.raw`data\.json$` }, '/data.json'),
             await wait({ allow_non_json: true, url_pattern: 'note' }, '/note.txt'),
-            await wait({ method: 'get', url_pattern: 'd\\p{Ll}ta' }, '/data.json'),
+            await wait({ method: 'get', url_pattern: String.raw`d\p{Ll}ta` }, '/data.json'),
         ];
         const [past] = await Promise.all([
             sidecar.call('POST', `${path}/wait-response`, { url_pattern: 'note|bare|data' }),
@@ -112,7 +112,7 @@ describe('responses', () => {
         const replies = [
             await read({}),
             await read({ since_ts: Date.parse('2026-10-09T08:00:00Z') }),
-            await read({ url_pattern: 'd\\p{Ll}ta' }),
+            await read({ url_pattern: String.raw`d\p{Ll}ta` }),
             await read({ since_ts: Date.parse('2026-10-09T08:00:00.001Z') }),
         ];
 
