@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@jterrazz/test':
-        specifier: ^18.0.0
-        version: 18.0.0(@jterrazz/typescript@11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        specifier: ^18.0.2
+        version: 18.0.2(@jterrazz/typescript@11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@jterrazz/typescript':
         specifier: ^11.1.1
         version: 11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
@@ -1035,8 +1035,8 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@jterrazz/test@18.0.0':
-    resolution: {integrity: sha512-sUPilUKNkyZH0HoWv0GNt22w+EOTSMCkCoO7vfJ7uc3GuSsBNI2rQYK74hB+f2phnugySxME9hvv/hrHoq3uiQ==}
+  '@jterrazz/test@18.0.2':
+    resolution: {integrity: sha512-UdCy/shrSjO2ZiYa+lnk2IE8khoD3QQE8dydhkNtwqwNRvK+ppfH2/wMZjaLDMqepY3gv+amUc1H5Rw9+OvUJA==}
     engines: {node: '>=24'}
     peerDependencies:
       '@jterrazz/typescript': ^11.0.0
@@ -1095,7 +1095,6 @@ packages:
 
   '@ls-lint/ls-lint@2.3.1':
     resolution: {integrity: sha512-vPe6IDByQnQRTxcAYjTxrmga/tSIui50VBFTB5KIJWY3OOFmxE2VtymjeSEfQfiMbhZV/ZPAqYy2lt8pZFQ0Rw==}
-    cpu: [x64, arm64, s390x, ppc64le]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -6723,7 +6722,7 @@ snapshots:
   '@js-sdsl/ordered-map@4.4.2':
     optional: true
 
-  '@jterrazz/test@18.0.0(@jterrazz/typescript@11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/test@18.0.2(@jterrazz/typescript@11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
       '@jterrazz/typescript': 11.1.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@oxlint/plugins': 1.89.0
