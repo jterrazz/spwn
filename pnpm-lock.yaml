@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@jterrazz/test':
         specifier: ^18.0.0
-        version: 18.0.0(@jterrazz/typescript@11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 18.0.0(@jterrazz/typescript@11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@jterrazz/typescript':
         specifier: ^11.1.0
         version: 11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
@@ -27,8 +27,8 @@ importers:
   apps/gate/browser:
     dependencies:
       playwright:
-        specifier: 1.64.1
-        version: 1.64.1
+        specifier: 1.63.0
+        version: 1.63.0
     devDependencies:
       '@types/node':
         specifier: ^26.6.5
@@ -113,8 +113,8 @@ importers:
         specifier: ^26.6.5
         version: 26.6.5
       playwright:
-        specifier: 1.64.1
-        version: 1.64.1
+        specifier: 1.63.0
+        version: 1.63.0
 
 packages:
 
@@ -4623,8 +4623,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright-core@1.64.1:
-    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -4633,8 +4633,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.64.1:
-    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
+  playwright@1.63.0:
+    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -6726,7 +6726,7 @@ snapshots:
   '@js-sdsl/ordered-map@4.4.2':
     optional: true
 
-  '@jterrazz/test@18.0.0(@jterrazz/typescript@11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/test@18.0.0(@jterrazz/typescript@11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(better-sqlite3@12.11.1)(graphql@16.13.2)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(pg@8.22.0)(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(redis@6.1.0)(testcontainers@12.0.4)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
       '@jterrazz/typescript': 11.1.0(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@26.6.5)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(graphql@16.13.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@oxlint/plugins': 1.89.0
@@ -6739,6 +6739,7 @@ snapshots:
       better-sqlite3: 12.11.1
       oxlint: 1.89.0(oxlint-tsgolint@7.0.2004)
       pg: 8.22.0
+      playwright: 1.63.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
       redis: 6.1.0
@@ -9894,7 +9895,7 @@ snapshots:
   playwright-core@1.59.1:
     optional: true
 
-  playwright-core@1.64.1: {}
+  playwright-core@1.63.0: {}
 
   playwright@1.59.1:
     dependencies:
@@ -9903,9 +9904,9 @@ snapshots:
       fsevents: 2.3.2
     optional: true
 
-  playwright@1.64.1:
+  playwright@1.63.0:
     dependencies:
-      playwright-core: 1.64.1
+      playwright-core: 1.63.0
 
   postcss-selector-parser@7.1.7:
     dependencies:
