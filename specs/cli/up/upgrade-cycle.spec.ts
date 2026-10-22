@@ -20,10 +20,17 @@ const imageVersionOf = (inspected: unknown): string | undefined =>
 
 describe('upgrade-cycle', () => {
     test('a project that gains a tool, a playbook, a soul and an agent rebuilds and carries every change', async () => {
-        // Given - the scaffold brought up on a real build, then the same project grown by the delta and brought up again
-        await using baseline = await real
-            .fixture(directory('./__fixtures__/scaffolded-project/'))
-            .exec('up');
+        // Given - the scaffold brought up on a real build and laid down, then the same project grown by the delta and brought up again
+        let baselineExit: number;
+        let baselineVersion: string | undefined;
+        {
+            // invariant: the baseline world is removed before the upgrade comes up, since both sessions share one test run and one world key, and `container('neo')` would read either
+            await using baseline = await real
+                .fixture(directory('./__fixtures__/scaffolded-project/'))
+                .exec('up');
+            baselineExit = baseline.exitCode;
+            baselineVersion = imageVersionOf(baseline.container('neo').inspect.value);
+        }
         await using upgraded = await real
             .fixture(directory('./__fixtures__/scaffolded-project/'))
             .fixture(directory('./__fixtures__/upgrade-delta/'))
@@ -32,11 +39,9 @@ describe('upgrade-cycle', () => {
         // Then - a new image version, and inside the world the new tool, playbook, soul and second home
         const inside = await upgraded.container('neo').exec(`sh -c '${INSIDE}'`);
         expect({
-            exitCodes: [baseline.exitCode, upgraded.exitCode],
+            exitCodes: [baselineExit, upgraded.exitCode],
             inside: inside.stdout.text,
-            rebuilt:
-                imageVersionOf(baseline.container('neo').inspect.value) !==
-                imageVersionOf(upgraded.container('neo').inspect.value),
+            rebuilt: baselineVersion !== imageVersionOf(upgraded.container('neo').inspect.value),
         }).toStrictEqual({
             exitCodes: [0, 0],
             inside: 'tools\n# Arithmetic\n\nReturn 2 + 2 when asked.\n# Upgraded identity\n\nI am the post-upgrade neo.\n# trinity\n\nOperator, partner, edge case specialist.\n',
