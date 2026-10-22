@@ -77,7 +77,19 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 	}
 
 	fmt.Fprintln(w, "creating + starting spwn-gate container")
-	return runContainer(ctx)
+	return createOrAdopt(func() error { return runContainer(ctx) }, func() (bool, error) { return containerExists(ctx) })
+}
+
+// invariant: the gate container's name is one per host, so of two concurrent creates one fails on the name; the loser adopts the winner's container
+func createOrAdopt(create func() error, exists func() (bool, error)) error {
+	err := create()
+	if err == nil {
+		return nil
+	}
+	if adopted, existsErr := exists(); existsErr == nil && adopted {
+		return nil
+	}
+	return err
 }
 
 func removeImage(ctx context.Context) error {
