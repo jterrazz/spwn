@@ -1,5 +1,6 @@
 {
     "$schema": "https://turborepo.dev/schema.json",
+    "agentGuidance": false,
     // outside: `experimentalGoWorkspaces` reads go.work and turns every module into a package beside the pnpm
     // workspace's own; `experimentalTaskCommand` lets `lint` be golangci-lint instead of the `go vet` default.
     "futureFlags": {
