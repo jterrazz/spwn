@@ -13,7 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
+	cerrdefs "github.com/containerd/errdefs"
+	"github.com/docker/docker/api/types/build"
 	containerTypes "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	imageTypes "github.com/docker/docker/api/types/image"
@@ -399,9 +400,9 @@ func (d *Docker) IsRunning(ctx context.Context, containerID string) (bool, error
 }
 
 func (d *Docker) ImageExists(ctx context.Context, image string) (bool, error) {
-	_, _, err := d.client.ImageInspectWithRaw(ctx, image)
+	_, err := d.client.ImageInspect(ctx, image)
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return false, nil
 		}
 		return false, err
@@ -410,9 +411,9 @@ func (d *Docker) ImageExists(ctx context.Context, image string) (bool, error) {
 }
 
 func (d *Docker) ImageVersion(ctx context.Context, image string, label string) (string, error) {
-	inspect, _, err := d.client.ImageInspectWithRaw(ctx, image)
+	inspect, err := d.client.ImageInspect(ctx, image)
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return "", nil
 		}
 		return "", err
@@ -493,7 +494,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		return false, fmt.Errorf("tar close: %w", err)
 	}
 
-	resp, err := d.client.ImageBuild(ctx, buf, types.ImageBuildOptions{
+	resp, err := d.client.ImageBuild(ctx, buf, build.ImageBuildOptions{
 		Tags:       []string{tag},
 		Dockerfile: "Dockerfile",
 		Remove:     true,
@@ -532,7 +533,6 @@ func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecC
 		AttachStdin:  false,
 		AttachStdout: false,
 		AttachStderr: false,
-		Detach:       true,
 	}
 
 	execID, err := d.client.ContainerExecCreate(ctx, containerID, execCfg)

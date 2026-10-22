@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	cerrdefs "github.com/containerd/errdefs"
 	containerTypes "github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/authentication"
@@ -203,7 +203,7 @@ func StopDaemon(ctx context.Context) error {
 
 	info, err := docker.Inspect(ctx, platform.ArchitectContainerName())
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return fmt.Errorf("architect is not running")
 		}
 		return fmt.Errorf("inspecting architect container: %w", err)
@@ -239,7 +239,7 @@ func GetDaemonStatus(ctx context.Context) (*DaemonInfo, error) {
 
 	info, err := docker.Inspect(ctx, platform.ArchitectContainerName())
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return &DaemonInfo{Running: false, Status: "not running"}, nil
 		}
 		return nil, fmt.Errorf("inspecting architect container: %w", err)

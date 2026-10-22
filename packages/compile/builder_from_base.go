@@ -12,7 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
+	cerrdefs "github.com/containerd/errdefs"
+	"github.com/docker/docker/api/types/build"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
 
@@ -70,8 +72,8 @@ type BuildFromBaseResult struct {
 // BuildFromBase. The docker client satisfies it out of the box; tests
 // can swap in a fake.
 type DockerImageBuilder interface {
-	ImageBuild(ctx context.Context, context io.Reader, options types.ImageBuildOptions) (types.ImageBuildResponse, error)
-	ImageInspectWithRaw(ctx context.Context, imageID string) (types.ImageInspect, []byte, error)
+	ImageBuild(ctx context.Context, context io.Reader, options build.ImageBuildOptions) (build.ImageBuildResponse, error)
+	ImageInspect(ctx context.Context, imageID string, opts ...client.ImageInspectOption) (image.InspectResponse, error)
 }
 
 // BuildFromBase derives a new Docker image from an existing base image
@@ -147,7 +149,7 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 
 	fmt.Fprintf(logw, "Building %s from %s...\n", req.Tag, req.BaseImage)
 
-	resp, err := cli.ImageBuild(ctx, &ctxTar, types.ImageBuildOptions{
+	resp, err := cli.ImageBuild(ctx, &ctxTar, build.ImageBuildOptions{
 		Tags:       []string{req.Tag},
 		Dockerfile: "Dockerfile",
 		Remove:     true,
@@ -177,9 +179,9 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 		}
 	}
 
-	info, _, err := cli.ImageInspectWithRaw(ctx, req.Tag)
+	info, err := cli.ImageInspect(ctx, req.Tag)
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return &BuildFromBaseResult{Tag: req.Tag}, nil
 		}
 		return nil, fmt.Errorf("inspect built image: %w", err)
