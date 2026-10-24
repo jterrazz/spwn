@@ -43,11 +43,11 @@ Use Go for the core library and CLI. The architecture follows the `containerd` m
 
 ### Key Go Dependencies
 
-| Package         | Purpose                             |
-| --------------- | ----------------------------------- |
-| `docker/docker` | Docker Engine API client (official) |
-| `spf13/cobra`   | CLI argument parsing                |
-| `google/uuid`   | UUID generation                     |
+| Package            | Purpose                             |
+| ------------------ | ----------------------------------- |
+| `moby/moby/client` | Docker Engine API client (official) |
+| `spf13/cobra`      | CLI argument parsing                |
+| `google/uuid`      | UUID generation                     |
 
 ## Consequences
 

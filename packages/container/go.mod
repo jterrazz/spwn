@@ -3,7 +3,8 @@ module spwn.sh/packages/container
 go 1.25.0
 
 require (
-	github.com/docker/docker v28.5.2+incompatible
+	github.com/moby/moby/api v1.56.1
+	github.com/moby/moby/client v0.6.2
 	golang.org/x/term v0.45.0
 )
 

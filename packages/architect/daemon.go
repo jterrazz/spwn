@@ -9,7 +9,7 @@ import (
 	"time"
 
 	cerrdefs "github.com/containerd/errdefs"
-	containerTypes "github.com/docker/docker/api/types/container"
+	containerTypes "github.com/moby/moby/api/types/container"
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/authentication"

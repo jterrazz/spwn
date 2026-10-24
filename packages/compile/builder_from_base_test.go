@@ -9,41 +9,40 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types/build"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/api/types/image"
+	"github.com/moby/moby/client"
 )
 
 type fakeImageBuilder struct {
 	buildErr   error
 	buildBody  string
 	contextTar []byte
-	options    build.ImageBuildOptions
+	options    client.ImageBuildOptions
 	inspectErr error
 }
 
-func (f *fakeImageBuilder) ImageBuild(ctx context.Context, context io.Reader, options build.ImageBuildOptions) (build.ImageBuildResponse, error) {
+func (f *fakeImageBuilder) ImageBuild(ctx context.Context, context io.Reader, options client.ImageBuildOptions) (client.ImageBuildResult, error) {
 	data, err := io.ReadAll(context)
 	if err != nil {
-		return build.ImageBuildResponse{}, err
+		return client.ImageBuildResult{}, err
 	}
 	f.contextTar = data
 	f.options = options
 	if f.buildErr != nil {
-		return build.ImageBuildResponse{}, f.buildErr
+		return client.ImageBuildResult{}, f.buildErr
 	}
 	body := f.buildBody
 	if body == "" {
 		body = `{"stream":"step ok\n"}`
 	}
-	return build.ImageBuildResponse{Body: io.NopCloser(strings.NewReader(body))}, nil
+	return client.ImageBuildResult{Body: io.NopCloser(strings.NewReader(body))}, nil
 }
 
-func (f *fakeImageBuilder) ImageInspect(ctx context.Context, imageID string, opts ...client.ImageInspectOption) (image.InspectResponse, error) {
+func (f *fakeImageBuilder) ImageInspect(ctx context.Context, imageID string, opts ...client.ImageInspectOption) (client.ImageInspectResult, error) {
 	if f.inspectErr != nil {
-		return image.InspectResponse{}, f.inspectErr
+		return client.ImageInspectResult{}, f.inspectErr
 	}
-	return image.InspectResponse{ID: "sha256:abc123"}, nil
+	return client.ImageInspectResult{InspectResponse: image.InspectResponse{ID: "sha256:abc123"}}, nil
 }
 
 type tarTree map[string]string

@@ -14,12 +14,9 @@ import (
 	"time"
 
 	cerrdefs "github.com/containerd/errdefs"
-	"github.com/docker/docker/api/types/build"
-	containerTypes "github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
-	imageTypes "github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	containerTypes "github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
 	"golang.org/x/term"
 
 	"spwn.sh/packages/container/probe"
@@ -41,7 +38,7 @@ func NewDocker() (*Docker, error) {
 }
 
 // NewDockerClient returns a ready-to-use Docker SDK client connected to
-// The first reachable daemon. Unlike client.NewClientWithOpts(FromEnv),
+// The first reachable daemon. Unlike client.New(client.FromEnv),
 // This helper walks the full probe fallback list so user-mode
 // Installs (OrbStack without admin rights, per-user Docker Desktop,
 // Rootless Podman, Colima, Rancher Desktop, Lima) "just work" without
@@ -70,10 +67,7 @@ func NewDockerClient(ctx context.Context) (*client.Client, error) {
 		}
 		return nil, fmt.Errorf("%s", msg)
 	}
-	return client.NewClientWithOpts(
-		client.WithHost(st.Host),
-		client.WithAPIVersionNegotiation(),
-	)
+	return client.New(client.WithHost(st.Host))
 }
 
 var initProcess = true
@@ -98,7 +92,11 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 		Labels:     cfg.Labels,
 	}
 
-	resp, err := d.client.ContainerCreate(ctx, containerCfg, hostCfg, nil, nil, cfg.Name)
+	resp, err := d.client.ContainerCreate(ctx, client.ContainerCreateOptions{
+		Config:     containerCfg,
+		HostConfig: hostCfg,
+		Name:       cfg.Name,
+	})
 	if err != nil {
 		return "", fmt.Errorf("create container: %w", err)
 	}
@@ -107,12 +105,14 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 
 // Start starts a previously created container.
 func (d *Docker) Start(ctx context.Context, containerID string) error {
-	return d.client.ContainerStart(ctx, containerID, containerTypes.StartOptions{})
+	_, err := d.client.ContainerStart(ctx, containerID, client.ContainerStartOptions{})
+	return err
 }
 
 // Stop gracefully stops a running container.
 func (d *Docker) Stop(ctx context.Context, containerID string) error {
-	return d.client.ContainerStop(ctx, containerID, containerTypes.StopOptions{})
+	_, err := d.client.ContainerStop(ctx, containerID, client.ContainerStopOptions{})
+	return err
 }
 
 // Remove forcibly removes a container along with any anonymous
@@ -121,29 +121,30 @@ func (d *Docker) Stop(ctx context.Context, containerID string) error {
 // volume becomes an unreachable dangling entry that `docker rm`
 // never reclaims.
 func (d *Docker) Remove(ctx context.Context, containerID string) error {
-	return d.client.ContainerRemove(ctx, containerID, containerTypes.RemoveOptions{
+	_, err := d.client.ContainerRemove(ctx, containerID, client.ContainerRemoveOptions{
 		Force:         true,
 		RemoveVolumes: true,
 	})
+	return err
 }
 
 // Exec runs a command inside a container and returns the exit code.
 func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (int, error) {
-	execCfg := containerTypes.ExecOptions{
+	execCfg := client.ExecCreateOptions{
 		Cmd:          cfg.Cmd,
 		Env:          cfg.Env,
-		Tty:          cfg.TTY,
+		TTY:          cfg.TTY,
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
 
-	execID, err := d.client.ContainerExecCreate(ctx, containerID, execCfg)
+	execID, err := d.client.ExecCreate(ctx, containerID, execCfg)
 	if err != nil {
 		return -1, fmt.Errorf("exec create: %w", err)
 	}
 
-	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, containerTypes.ExecAttachOptions{Tty: cfg.TTY})
+	resp, err := d.client.ExecAttach(ctx, execID.ID, client.ExecAttachOptions{TTY: cfg.TTY})
 	if err != nil {
 		return -1, fmt.Errorf("exec attach: %w", err)
 	}
@@ -170,7 +171,7 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 		_, _ = stdcopy.StdCopy(stdout, stderr, resp.Reader)
 	}
 
-	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)
+	inspect, err := d.client.ExecInspect(ctx, execID.ID, client.ExecInspectOptions{})
 	if err != nil {
 		return -1, fmt.Errorf("exec inspect: %w", err)
 	}
@@ -179,18 +180,18 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 
 // ExecOutput runs a command inside a container and returns its stdout as a string.
 func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []string) (string, error) {
-	execCfg := containerTypes.ExecOptions{
+	execCfg := client.ExecCreateOptions{
 		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
 
-	execID, err := d.client.ContainerExecCreate(ctx, containerID, execCfg)
+	execID, err := d.client.ExecCreate(ctx, containerID, execCfg)
 	if err != nil {
 		return "", fmt.Errorf("exec create: %w", err)
 	}
 
-	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, containerTypes.ExecAttachOptions{})
+	resp, err := d.client.ExecAttach(ctx, execID.ID, client.ExecAttachOptions{})
 	if err != nil {
 		return "", fmt.Errorf("exec attach: %w", err)
 	}
@@ -200,7 +201,7 @@ func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []strin
 	_, _ = stdcopy.StdCopy(&buf, io.Discard, resp.Reader)
 	output := strings.TrimSpace(buf.String())
 
-	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)
+	inspect, err := d.client.ExecInspect(ctx, execID.ID, client.ExecInspectOptions{})
 	if err != nil {
 		return output, fmt.Errorf("exec inspect: %w", err)
 	}
@@ -228,7 +229,11 @@ func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string
 	}
 	tw.Close()
 
-	return d.client.CopyToContainer(ctx, containerID, "/", &buf, containerTypes.CopyToContainerOptions{})
+	_, err := d.client.CopyToContainer(ctx, containerID, client.CopyToContainerOptions{
+		DestinationPath: "/",
+		Content:         &buf,
+	})
+	return err
 }
 
 // CopyDirTo tar-streams the contents of hostSrcDir into destDir
@@ -324,7 +329,11 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 		return fmt.Errorf("dependency %s: %w", hostSrcDir, walkErr)
 	}
 
-	return d.client.CopyToContainer(ctx, containerID, "/", &buf, containerTypes.CopyToContainerOptions{})
+	_, err = d.client.CopyToContainer(ctx, containerID, client.CopyToContainerOptions{
+		DestinationPath: "/",
+		Content:         &buf,
+	})
+	return err
 }
 
 // CopyDirFrom streams a directory out of the container into a host
@@ -336,10 +345,11 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 // files at the destination are overwritten so spwn down can refresh
 // the host copy from the container's latest state.
 func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir string, hostDestDir string) error {
-	rc, _, err := d.client.CopyFromContainer(ctx, containerID, srcDir)
+	copied, err := d.client.CopyFromContainer(ctx, containerID, client.CopyFromContainerOptions{SourcePath: srcDir})
 	if err != nil {
 		return fmt.Errorf("docker cp from %s: %w", srcDir, err)
 	}
+	rc := copied.Content
 	defer rc.Close()
 
 	if err := os.MkdirAll(hostDestDir, 0o755); err != nil {
@@ -392,11 +402,11 @@ func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir str
 }
 
 func (d *Docker) IsRunning(ctx context.Context, containerID string) (bool, error) {
-	info, err := d.client.ContainerInspect(ctx, containerID)
+	info, err := d.client.ContainerInspect(ctx, containerID, client.ContainerInspectOptions{})
 	if err != nil {
 		return false, err
 	}
-	return info.State.Running, nil
+	return info.Container.State.Running, nil
 }
 
 func (d *Docker) ImageExists(ctx context.Context, image string) (bool, error) {
@@ -494,7 +504,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		return false, fmt.Errorf("tar close: %w", err)
 	}
 
-	resp, err := d.client.ImageBuild(ctx, buf, build.ImageBuildOptions{
+	resp, err := d.client.ImageBuild(ctx, buf, client.ImageBuildOptions{
 		Tags:       []string{tag},
 		Dockerfile: "Dockerfile",
 		Remove:     true,
@@ -526,25 +536,26 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 }
 
 func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error {
-	execCfg := containerTypes.ExecOptions{
+	execCfg := client.ExecCreateOptions{
 		Cmd:          cfg.Cmd,
 		Env:          cfg.Env,
-		Tty:          cfg.TTY,
+		TTY:          cfg.TTY,
 		AttachStdin:  false,
 		AttachStdout: false,
 		AttachStderr: false,
 	}
 
-	execID, err := d.client.ContainerExecCreate(ctx, containerID, execCfg)
+	execID, err := d.client.ExecCreate(ctx, containerID, execCfg)
 	if err != nil {
 		return fmt.Errorf("exec create: %w", err)
 	}
 
-	return d.client.ContainerExecStart(ctx, execID.ID, containerTypes.ExecStartOptions{Detach: true})
+	_, err = d.client.ExecStart(ctx, execID.ID, client.ExecStartOptions{Detach: true})
+	return err
 }
 
 func (d *Docker) Commit(ctx context.Context, containerID string, imageTag string) error {
-	_, err := d.client.ContainerCommit(ctx, containerID, containerTypes.CommitOptions{
+	_, err := d.client.ContainerCommit(ctx, containerID, client.ContainerCommitOptions{
 		Reference: imageTag,
 		Comment:   "spwn world snapshot",
 	})
@@ -552,12 +563,12 @@ func (d *Docker) Commit(ctx context.Context, containerID string, imageTag string
 }
 
 func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, error) {
-	images, err := d.client.ImageList(ctx, imageTypes.ListOptions{})
+	images, err := d.client.ImageList(ctx, client.ImageListOptions{})
 	if err != nil {
 		return nil, err
 	}
 	var result []ImageInfo
-	for _, img := range images {
+	for _, img := range images.Items {
 		for _, tag := range img.RepoTags {
 			if strings.HasPrefix(tag, prefix) {
 				result = append(result, ImageInfo{
@@ -572,16 +583,17 @@ func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, err
 }
 
 func (d *Docker) ImageRemove(ctx context.Context, imageTag string) error {
-	_, err := d.client.ImageRemove(ctx, imageTag, imageTypes.RemoveOptions{Force: true})
+	_, err := d.client.ImageRemove(ctx, imageTag, client.ImageRemoveOptions{Force: true})
 	return err
 }
 
 // Inspect returns information about a container by name or ID.
 func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, error) {
-	info, err := d.client.ContainerInspect(ctx, nameOrID)
+	inspected, err := d.client.ContainerInspect(ctx, nameOrID, client.ContainerInspectOptions{})
 	if err != nil {
 		return nil, err
 	}
+	info := inspected.Container
 
 	var startedAt time.Time
 	if info.State != nil && info.State.StartedAt != "" {
@@ -597,7 +609,7 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 	status := ""
 	running := false
 	if info.State != nil {
-		status = info.State.Status
+		status = string(info.State.Status)
 		running = info.State.Running
 	}
 
@@ -623,14 +635,14 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 // list spwn worlds straight from the daemon - no JSON file involved,
 // no possibility of drift after `docker rm`.
 func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) ([]ContainerInfo, error) {
-	args := filters.NewArgs()
+	args := client.Filters{}
 	if value == "" {
 		args.Add("label", key)
 	} else {
 		args.Add("label", key+"="+value)
 	}
 
-	containers, err := d.client.ContainerList(ctx, containerTypes.ListOptions{
+	containers, err := d.client.ContainerList(ctx, client.ContainerListOptions{
 		All:     true,
 		Filters: args,
 	})
@@ -638,8 +650,8 @@ func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) (
 		return nil, fmt.Errorf("list containers: %w", err)
 	}
 
-	out := make([]ContainerInfo, 0, len(containers))
-	for _, c := range containers {
+	out := make([]ContainerInfo, 0, len(containers.Items))
+	for _, c := range containers.Items {
 		name := ""
 		if len(c.Names) > 0 {
 			name = c.Names[0]
@@ -652,7 +664,7 @@ func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) (
 			Name:      name,
 			Image:     c.Image,
 			Status:    c.Status,
-			Running:   c.State == "running",
+			Running:   c.State == containerTypes.StateRunning,
 			CreatedAt: time.Unix(c.Created, 0),
 			Labels:    c.Labels,
 		})
@@ -663,7 +675,11 @@ func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) (
 // CreateNamedContainer creates a container with explicit config and host config.
 // Unlike Create(), this allows full control (e.g., custom restart policy, entrypoint).
 func (d *Docker) CreateNamedContainer(ctx context.Context, name string, cfg *containerTypes.Config, hostCfg *containerTypes.HostConfig) (string, error) {
-	resp, err := d.client.ContainerCreate(ctx, cfg, hostCfg, nil, nil, name)
+	resp, err := d.client.ContainerCreate(ctx, client.ContainerCreateOptions{
+		Config:     cfg,
+		HostConfig: hostCfg,
+		Name:       name,
+	})
 	if err != nil {
 		return "", fmt.Errorf("create container: %w", err)
 	}

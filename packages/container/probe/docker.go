@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/client"
 )
 
 // DockerStatus describes the health of the local Docker daemon.
@@ -160,13 +160,11 @@ func (r probeResult) apply(base DockerStatus) DockerStatus {
 }
 
 func tryHost(ctx context.Context, host string, timeout time.Duration) probeResult {
-	opts := []client.Opt{client.WithAPIVersionNegotiation()}
-	if host == "" {
-		opts = append(opts, client.FromEnv)
-	} else {
-		opts = append(opts, client.WithHost(host))
+	opt := client.FromEnv
+	if host != "" {
+		opt = client.WithHost(host)
 	}
-	cli, err := client.NewClientWithOpts(opts...)
+	cli, err := client.New(opt)
 	if err != nil {
 		return probeResult{err: err}
 	}
@@ -175,13 +173,13 @@ func tryHost(ctx context.Context, host string, timeout time.Duration) probeResul
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	ping, err := cli.Ping(cctx)
+	ping, err := cli.Ping(cctx, client.PingOptions{})
 	if err != nil {
 		return probeResult{err: err, host: cli.DaemonHost()}
 	}
 
 	var version string
-	if v, err := cli.ServerVersion(cctx); err == nil {
+	if v, err := cli.ServerVersion(cctx, client.ServerVersionOptions{}); err == nil {
 		version = v.Version
 	}
 

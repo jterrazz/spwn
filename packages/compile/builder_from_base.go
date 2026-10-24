@@ -13,9 +13,7 @@ import (
 	"time"
 
 	cerrdefs "github.com/containerd/errdefs"
-	"github.com/docker/docker/api/types/build"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/client"
 )
 
 // TreeTarballer is anything that can serialise itself as a tar stream.
@@ -72,8 +70,8 @@ type BuildFromBaseResult struct {
 // BuildFromBase. The docker client satisfies it out of the box; tests
 // can swap in a fake.
 type DockerImageBuilder interface {
-	ImageBuild(ctx context.Context, context io.Reader, options build.ImageBuildOptions) (build.ImageBuildResponse, error)
-	ImageInspect(ctx context.Context, imageID string, opts ...client.ImageInspectOption) (image.InspectResponse, error)
+	ImageBuild(ctx context.Context, context io.Reader, options client.ImageBuildOptions) (client.ImageBuildResult, error)
+	ImageInspect(ctx context.Context, imageID string, opts ...client.ImageInspectOption) (client.ImageInspectResult, error)
 }
 
 // BuildFromBase derives a new Docker image from an existing base image
@@ -149,7 +147,7 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 
 	fmt.Fprintf(logw, "Building %s from %s...\n", req.Tag, req.BaseImage)
 
-	resp, err := cli.ImageBuild(ctx, &ctxTar, build.ImageBuildOptions{
+	resp, err := cli.ImageBuild(ctx, &ctxTar, client.ImageBuildOptions{
 		Tags:       []string{req.Tag},
 		Dockerfile: "Dockerfile",
 		Remove:     true,
