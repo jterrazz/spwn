@@ -16,4 +16,4 @@ make install
 make build && make test
 ```
 
-Run `make` with no arguments for the annotated target list. [`AGENTS.md`](AGENTS.md), with `CLAUDE.md` symlinked to it, is the same routing for an agent.
+Run `make` with no arguments for the annotated target list. [`CLAUDE.md`](CLAUDE.md) is the same routing for an agent.
