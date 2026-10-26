@@ -28,11 +28,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-lint-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-lint-${{ runner.os }}-
+                      turbo-lint-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-lint-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-lint-${{ runner.os }}-${{ runner.arch }}-
             - run: make lint
             - uses: actions/cache/save@v4
               if: always()
@@ -59,11 +59,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-test-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-test-${{ runner.os }}-
+                      turbo-test-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-test-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-test-${{ runner.os }}-${{ runner.arch }}-
             - run: make test
             - uses: actions/cache/save@v4
               if: always()
@@ -90,11 +90,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-mutation-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-mutation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-mutation-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-mutation-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-mutation-${{ runner.os }}-
+                      turbo-mutation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-mutation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-mutation-${{ runner.os }}-${{ runner.arch }}-
             - run: make mutation
             - uses: actions/cache/save@v4
               if: always()
@@ -121,11 +121,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-go-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-go-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-go-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-go-e2e-${{ runner.os }}-
+                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-
             - run: make test-go-e2e
             - run: make test-compile-e2e
             - uses: actions/cache/save@v4
@@ -155,11 +155,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-smoke-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-smoke-${{ runner.os }}-
+                      turbo-smoke-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-smoke-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-smoke-${{ runner.os }}-${{ runner.arch }}-
             - run: make test-smoke
             - uses: actions/cache/save@v4
               if: always()
@@ -185,11 +185,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-build-${{ runner.os }}-
+                      turbo-build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-build-${{ runner.os }}-${{ runner.arch }}-
             - run: make build
             - uses: actions/cache/save@v4
               if: always()
