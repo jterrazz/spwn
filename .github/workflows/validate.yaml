@@ -11,7 +11,7 @@ on:
 
 jobs:
     lint:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
@@ -41,7 +41,7 @@ jobs:
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
     test:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
@@ -73,7 +73,7 @@ jobs:
 
     mutation:
         if: github.event_name == 'pull_request'
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
@@ -104,7 +104,7 @@ jobs:
 
     go-e2e:
         timeout-minutes: 40
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
@@ -138,7 +138,7 @@ jobs:
     smoke:
         if: github.event_name == 'push'
         timeout-minutes: 30
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
@@ -168,7 +168,7 @@ jobs:
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
     build:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
