@@ -21,7 +21,7 @@
 //	              callback. Architect-side adapter handles world
 //	              auto-spawn + the actual exec into the runtime.
 //	Receipts    append-only log at <project>/.spwn/runs.jsonl,
-//	              one line per fire (matches jterrazz-os' prior art).
+//	              one line per fire (matches studio-os' prior art).
 //	State       last-fired timestamps, used at startup to compute
 //	              missed slots for catch-up.
 //

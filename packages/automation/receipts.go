@@ -22,7 +22,7 @@ const EngineVersion = "spwn-automation/1"
 // dashboard reads this format, and any addition should keep existing
 // fields where they are so old logs continue to parse.
 //
-// Mirrors jterrazz-os' occurrences.jsonl shape (the launchd
+// Mirrors studio-os' occurrences.jsonl shape (the launchd
 // run-with-receipt.sh prior art) so tooling there can read spwn's
 // log unchanged once the user migrates.
 type Receipt struct {

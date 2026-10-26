@@ -1,3 +1,97 @@
+---
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    configDependencies: {}
+    packageManagerDependencies:
+      '@pnpm/exe':
+        specifier: 9.15.9
+        version: 9.15.9
+      pnpm:
+        specifier: 9.15.9
+        version: 9.15.9
+
+packages:
+
+  '@pnpm/exe@9.15.9':
+    resolution: {integrity: sha512-4+XppTSe0ZdLOJRQmyh305m61zV4yq9dnMfqOS0lg9GKLdsybDFCa+H/Sja6bC3Gsf+UCA9778K6iQ7r+wXqpg==}
+    hasBin: true
+
+  '@pnpm/linux-arm64@9.15.9':
+    resolution: {integrity: sha512-uAEZX0DcKXe2s4VMOQCAZv4TII0GzrgngWxrYAI9pKBwL1Lw5vsk2+eHWC1lYN/b/WdFKkOM0ZSUgsHgDgIuqg==}
+    cpu: [arm64]
+    os: [linux]
+    hasBin: true
+
+  '@pnpm/linux-x64@9.15.9':
+    resolution: {integrity: sha512-blhEXXR6V92ruVDW3zvDd0AaZT7kETDBh4qfU8bmao0kVeLYP1PiDMu5kMdTmRpDbAk5K5V9Cm07k6o3exYw0w==}
+    cpu: [x64]
+    os: [linux]
+    hasBin: true
+
+  '@pnpm/macos-arm64@9.15.9':
+    resolution: {integrity: sha512-sGoyzvD2umn3v0vwYxFVHDvcELyIACIDxM31PdVADDR7vspVGFVoaemeDJKrCpVRPOZnEQCAbYdjv88Qo+cxVQ==}
+    cpu: [arm64]
+    os: [darwin]
+    hasBin: true
+
+  '@pnpm/macos-x64@9.15.9':
+    resolution: {integrity: sha512-UoLaEwYr+km3lQA76ODTeFahuvYYfF39yCy2QSLofDWHlhBmwd8EmO/rEZUowZIGwUmFRfrgnmpzlVh7f/UJfg==}
+    cpu: [x64]
+    os: [darwin]
+    hasBin: true
+
+  '@pnpm/win-arm64@9.15.9':
+    resolution: {integrity: sha512-QR8BUN8Nt3VlTDXeFT1ricryj3rAVoFO2XyxIr5+hPhzqfWyVUqQ7nGVV/xV5MMjRfm0WivEUIQ9uMiuHTtpoA==}
+    cpu: [arm64]
+    os: [win32]
+    hasBin: true
+
+  '@pnpm/win-x64@9.15.9':
+    resolution: {integrity: sha512-9QfhRjCbFxA6o/VWF61VxipSoIgrcmnqEhi4WTZy5bnmUGZi+VzDjbBZQTOp9FGg+iB3GR8cZeli4D9hZOZuoQ==}
+    cpu: [x64]
+    os: [win32]
+    hasBin: true
+
+  pnpm@9.15.9:
+    resolution: {integrity: sha512-aARhQYk8ZvrQHAeSMRKOmvuJ74fiaR1p5NQO7iKJiClf1GghgbrlW1hBjDolO95lpQXsfF+UA+zlzDzTfc8lMQ==}
+    engines: {node: '>=18.12'}
+    hasBin: true
+
+snapshots:
+
+  '@pnpm/exe@9.15.9':
+    optionalDependencies:
+      '@pnpm/linux-arm64': 9.15.9
+      '@pnpm/linux-x64': 9.15.9
+      '@pnpm/macos-arm64': 9.15.9
+      '@pnpm/macos-x64': 9.15.9
+      '@pnpm/win-arm64': 9.15.9
+      '@pnpm/win-x64': 9.15.9
+
+  '@pnpm/linux-arm64@9.15.9':
+    optional: true
+
+  '@pnpm/linux-x64@9.15.9':
+    optional: true
+
+  '@pnpm/macos-arm64@9.15.9':
+    optional: true
+
+  '@pnpm/macos-x64@9.15.9':
+    optional: true
+
+  '@pnpm/win-arm64@9.15.9':
+    optional: true
+
+  '@pnpm/win-x64@9.15.9':
+    optional: true
+
+  pnpm@9.15.9: {}
+
+---
 lockfileVersion: '9.0'
 
 settings:
@@ -9,11 +103,11 @@ importers:
   .:
     devDependencies:
       '@jterrazz/test':
-        specifier: ^18.1.0
-        version: 18.3.0(@jterrazz/typescript@11.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        specifier: ^19.0.0
+        version: 19.0.0(@jterrazz/typescript@12.0.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@jterrazz/typescript':
-        specifier: ^11.3.0
-        version: 11.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+        specifier: ^12.0.0
+        version: 12.0.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       turbo:
         specifier: 2.11.7
         version: 2.11.7
@@ -956,11 +1050,11 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jterrazz/test@18.3.0':
-    resolution: {integrity: sha512-IOUMg1SpQXevcmuOkkmvtcaggNEjdcPAGTmstB2TZD7aNW1181s5HBeGVWHcNOHMvGL88OcPYllBBvIrTYMVYQ==}
+  '@jterrazz/test@19.0.0':
+    resolution: {integrity: sha512-PgZk5lDkXx+xmvoFAy5o3kdPszaOiHx+wX7PfsOIkbqcw0yWMRjBWLKzSxGfPiqPW/yQ3XY9RWd2jfYPfkXzzQ==}
     engines: {node: '>=24'}
     peerDependencies:
-      '@jterrazz/typescript': ^11.0.0
+      '@jterrazz/typescript': ^12.0.0
       '@vitest/browser-playwright': '*'
       appium: ^3.0.0
       better-sqlite3: ^12.11.1 || ^13
@@ -1003,8 +1097,8 @@ packages:
       webdriverio:
         optional: true
 
-  '@jterrazz/typescript@11.3.0':
-    resolution: {integrity: sha512-oKudviHdj4Tl3MhKe8ve8+07ng2nYC5Q7vxXiFIDK9vm9bnX9KUOeaE8K/oHsSxY67DhdzHsfNZtSqJf9UdQxg==}
+  '@jterrazz/typescript@12.0.0':
+    resolution: {integrity: sha512-VClgzR46CiodYjprV1JTOETdnzgRdQ/8CuPVJGAHbjn8hJczipWlQeBzWHNtY+cexLnRi1yxhCbOwbSryT3JLQ==}
     engines: {node: '>=24.0.0'}
     hasBin: true
 
@@ -5832,9 +5926,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@jterrazz/test@18.3.0(@jterrazz/typescript@11.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/test@19.0.0(@jterrazz/typescript@12.0.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))))(@types/node@26.6.5)(oxlint@1.89.0(oxlint-tsgolint@7.0.2004))(playwright@1.63.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@jterrazz/typescript': 11.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
+      '@jterrazz/typescript': 12.0.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))
       '@oxlint/plugins': 1.89.0
       msw: 3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1))
       oxc-parser: 0.150.0
@@ -5853,7 +5947,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@jterrazz/typescript@11.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@jterrazz/typescript@12.0.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.5)(eslint@10.13.0(jiti@2.7.0))(oxc-resolver@11.24.2)(vitest@5.0.5(@types/node@26.6.5)(msw@3.0.3(@types/node@26.6.5)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
       '@arethetypeswrong/cli': 0.18.5
       '@ls-lint/ls-lint': 2.3.1

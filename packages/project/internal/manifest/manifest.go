@@ -144,7 +144,7 @@ type Automation struct {
 type Trigger struct {
 	// Cron is a 5-field cron expression in the host's local timezone
 	// (matches launchd's StartCalendarInterval, which is what the
-	// jterrazz-os prior art used). Standard "min hour dom month dow".
+	// studio-os prior art used). Standard "min hour dom month dow".
 	Cron string `yaml:"cron,omitempty"`
 
 	// FS is the filesystem watcher trigger.
