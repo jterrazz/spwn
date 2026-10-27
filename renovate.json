@@ -1,0 +1,36 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "description": [
+        "The estate's base-image rule, plus Playwright as one group: the gate's image ships the Chromium one playwright release drives, the image installs that release globally, the sidecar imports it, and CI provisions the browser specs/ resolves, so all four move in one PR or the gate launches no browser.",
+        "npm runs for playwright alone; every other dependency stays the owner's to move."
+    ],
+    "extends": ["github>jterrazz/studio-actions//renovate/apps"],
+    "enabledManagers": ["dockerfile", "npm", "custom.regex"],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "The playwright the gate image installs globally beside its base's Chromium.",
+            "managerFilePatterns": ["/^apps/gate/Dockerfile$/"],
+            "matchStrings": ["npm install -g playwright@(?<currentValue>[0-9][0-9.]*)"],
+            "depNameTemplate": "playwright",
+            "datasourceTemplate": "npm"
+        }
+    ],
+    "packageRules": [
+        {
+            "matchManagers": ["npm"],
+            "enabled": false
+        },
+        {
+            "matchPackageNames": ["playwright", "mcr.microsoft.com/playwright"],
+            "enabled": true,
+            "groupName": "playwright"
+        },
+        {
+            "matchPackageNames": ["playwright", "mcr.microsoft.com/playwright"],
+            "matchUpdateTypes": ["patch"],
+            "automerge": true,
+            "platformAutomerge": false
+        }
+    ]
+}
