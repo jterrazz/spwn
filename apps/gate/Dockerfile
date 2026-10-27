@@ -6,9 +6,11 @@ FROM mcr.microsoft.com/playwright:v1.63.0-jammy
 
 # outside: the base image ships Chromium but not the playwright npm module; jq inspects cookies, gws drives the
 # gmail/gcal elements, and the docker CLI lets spwn:dispatch run `spwn agent talk` over the bind-mounted socket.
+# invariant: the module is the image's version, the one apps/gate/browser/package.json pins: an unpinned install took
+# 1.64.1 onto the 1.63.0 image, which then had no Chromium for it to launch (2026-10-27).
 RUN apt-get update && apt-get install -y --no-install-recommends jq docker.io \
  && rm -rf /var/lib/apt/lists/* \
- && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g playwright @googleworkspace/cli
+ && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g playwright@1.63.0 @googleworkspace/cli
 
 ENV NODE_PATH=/usr/lib/node_modules
 
