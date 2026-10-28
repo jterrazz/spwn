@@ -1,4 +1,4 @@
-name: Validate
+name: Check
 
 on:
     pull_request:
@@ -11,6 +11,7 @@ on:
 
 jobs:
     lint:
+        name: Lint
         runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
@@ -41,6 +42,7 @@ jobs:
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
     test:
+        name: Test
         runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4
@@ -72,6 +74,7 @@ jobs:
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
     mutation:
+        name: Mutation
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-26.04-arm
         steps:
@@ -102,7 +105,8 @@ jobs:
                   path: .artifacts/turbo
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
-    go-e2e:
+    e2e:
+        name: E2E
         timeout-minutes: 40
         runs-on: ubuntu-26.04-arm
         steps:
@@ -121,11 +125,11 @@ jobs:
               id: turbo
               with:
                   path: .artifacts/turbo
-                  key: turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+                  key: turbo-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
                   restore-keys: |
-                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
-                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
-                      turbo-go-e2e-${{ runner.os }}-${{ runner.arch }}-
+                      turbo-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+                      turbo-e2e-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}-
+                      turbo-e2e-${{ runner.os }}-${{ runner.arch }}-
             - run: make test-go-e2e
             - run: make test-compile-e2e
             - uses: actions/cache/save@v4
@@ -136,6 +140,7 @@ jobs:
 
     # value: the smoke specs build world images from scratch, about ten minutes cold, so they run on main alone
     smoke:
+        name: Smoke
         if: github.event_name == 'push'
         timeout-minutes: 30
         runs-on: ubuntu-26.04-arm
@@ -168,6 +173,7 @@ jobs:
                   key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
     build:
+        name: Build
         runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4

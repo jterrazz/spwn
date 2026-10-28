@@ -1,4 +1,5 @@
-name: Release
+name: Publish
+run-name: Publish ${{ github.ref_name }}
 
 on:
     push:
@@ -10,8 +11,8 @@ permissions:
 
 jobs:
     # value: a release ships the CLI, built by goreleaser into the release this job opens (its cross-compiled matrix, checksums and archives); it alone serves `curl | bash` and `spwn upgrade`
-    cli:
-        name: CLI release
+    publish:
+        name: Publish
         runs-on: ubuntu-26.04-arm
         steps:
             - uses: actions/checkout@v4

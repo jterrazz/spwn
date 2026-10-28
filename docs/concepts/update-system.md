@@ -24,7 +24,7 @@ triggers the entire pipeline.
 
 ### Release flow (CI)
 
-`.github/workflows/release.yaml` triggers on any tag matching `v*`. It runs
+`.github/workflows/publish.yaml` triggers on any tag matching `v*`. It runs
 **GoReleaser** (`.goreleaser.yml`) which:
 
 1. Cross-compiles `spwn` for `darwin_{arm64,amd64}` and `linux_{arm64,amd64}`.
@@ -220,7 +220,7 @@ Verify the version, platform URLs, and that signatures are populated.
 ## File map
 
 ```text
-.github/workflows/release.yaml          # CI pipeline
+.github/workflows/publish.yaml          # CI pipeline
 .goreleaser.yml                         # CLI cross-build + checksums
 apps/cli/upgrade.go                     # spwn upgrade command
 apps/cli/version_check.go               # background version check

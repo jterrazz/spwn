@@ -92,11 +92,11 @@ git push origin main
 git push origin v1.2.3
 ```
 
-That's it. The `Release` workflow runs automatically and takes ~8 min:
+That's it. The `Publish` workflow runs automatically and takes ~8 min:
 
 ```text
-.github/workflows/release.yaml
-└─ cli (GoReleaser)               builds CLI archives + checksums.txt
+.github/workflows/publish.yaml
+└─ publish (GoReleaser)           builds CLI archives + checksums.txt
 ```
 
 The workflow ships the CLI alone. The desktop app and its `latest.json` have no

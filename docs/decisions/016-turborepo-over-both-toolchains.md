@@ -7,7 +7,7 @@
 
 This repository runs two toolchains and had no memory between runs. `go.work` lists twenty Go modules, `pnpm-workspace.yaml` lists three JavaScript packages, and the `Makefile` walked each list with a shell loop: `golangci-lint` once per module, then `pnpm -r lint`; `go test ./...` once per module. Every loop was sequential, and every run started from nothing the previous run had learned.
 
-CI made the same trip eleven times. Each job of [`validate.yaml`](../../.github/workflows/validate.yaml) checks out, provisions its toolchain and calls one Makefile target, so a pull request that touched only `apps/web` still re-linted and re-tested twenty Go modules.
+CI made the same trip eleven times. Each job of [`check.yaml`](../../.github/workflows/check.yaml) checks out, provisions its toolchain and calls one Makefile target, so a pull request that touched only `apps/web` still re-linted and re-tested twenty Go modules.
 
 Nothing in the shape of the repository was wrong; what was missing was a task graph that knows what changed.
 

@@ -21,7 +21,7 @@ make build              # .artifacts/go/spwn
 
 ## The loop
 
-The `Makefile` is the single entry point for both toolchains, and CI calls its gestures directly ([`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml)). Run `make` with no arguments for the annotated list; the loop is:
+The `Makefile` is the single entry point for both toolchains, and CI calls its gestures directly ([`.github/workflows/check.yaml`](../../.github/workflows/check.yaml)). Run `make` with no arguments for the annotated list; the loop is:
 
 ```bash
 make fix             # every fixer of the TypeScript toolchain

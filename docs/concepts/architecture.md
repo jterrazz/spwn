@@ -1,6 +1,6 @@
 # Architecture
 
-spwn is a polyglot monorepo (Go domain modules plus a Next.js/Tauri web UI) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml).
+spwn is a polyglot monorepo (Go domain modules plus a Next.js/Tauri web UI) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/check.yaml`](../../.github/workflows/check.yaml).
 
 ## Repository layout
 

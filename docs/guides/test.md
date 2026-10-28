@@ -4,7 +4,7 @@ What proves a change, and how to run each proof. The test suite is the specifica
 
 ## Running the suites
 
-The `Makefile` is the one entry point, and CI calls the same gestures ([`.github/workflows/validate.yaml`](../../.github/workflows/validate.yaml)):
+The `Makefile` is the one entry point, and CI calls the same gestures ([`.github/workflows/check.yaml`](../../.github/workflows/check.yaml)):
 
 ```bash
 make lint               # golangci-lint over go.work, then every gate of the TypeScript toolchain
