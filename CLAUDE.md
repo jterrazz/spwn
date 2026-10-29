@@ -24,5 +24,3 @@ Beside it, [`README.md`](README.md) is the vitrine: what spwn is, and the quicks
 - **The gestures:** `make fix` · `make lint` · `make test` · `make check`. The loop and every suite are [Develop](docs/guides/develop.md) and [Test](docs/guides/test.md).
 - **Layers flow downward**, enforced by depguard in [`.golangci.yml`](.golangci.yml) (the mechanical source of truth); read [Architecture](docs/concepts/architecture.md) before moving code between packages.
 - **Spec-first:** the test suite is the specification. A discovery grows a guard (test / check / runtime error) in the same change.
-
-`CLAUDE.md` is a symlink to this file.
