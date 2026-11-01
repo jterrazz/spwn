@@ -23,8 +23,8 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.45.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
-	google.golang.org/grpc v1.83.1 // indirect
+	golang.org/x/net v0.58.0 // indirect
+	google.golang.org/grpc v1.83.2 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
