@@ -228,7 +228,7 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares()}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
@@ -309,6 +309,7 @@ func infraDown(f *Scene) {
 
 func nothingNeedsYou(f *Scene) {
 	f.Home.Needs = nil
+	f.Accounts.Machines[1].Accounts[0].Shared.Until = storyNow.Add(4 * time.Hour)
 	f.Home.Lines[1].Parts = f.Home.Lines[1].Parts[:1]
 	f.Home.Lines[2].Parts[1] = overview.Part{State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}
 	f.Home.Lines[5].Parts = f.Home.Lines[5].Parts[:1]

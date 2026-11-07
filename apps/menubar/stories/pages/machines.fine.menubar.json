@@ -644,7 +644,8 @@
     }
   ],
   "badge": {
-    "needs": 0
+    "needs": 0,
+    "label": "all machines are fine"
   },
   "live": [
     "cpu:macbook-pro",

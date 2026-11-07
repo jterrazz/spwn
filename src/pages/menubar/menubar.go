@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -50,6 +51,8 @@ type Reading struct {
 	Macs []awake.Report
 	// value: every other Mac's Overview, as its engine reports it.
 	Away []overview.Summary
+	// value: every Mac's copies shared with its VMs, for the leases ending.
+	Accounts *accounts.AllMachines
 }
 
 func Page(r Reading, thisMac page.Context) page.Page {
@@ -60,30 +63,9 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	p.Sections = []page.Section{needs, tree, awakeTile(r), accountsTile(r.Home)}
 	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, awakeAction(r.Awake), openAccounts())
 	p.Actions = append(p.Actions, updateAll(needs, r.Home)...)
-	p.Badge = badge(r, needs)
+	p.Badge = badge(r)
 	p.Live = liveKeys(p)
 	return page.Seal(p)
-}
-
-// invariant: the icon aggregates and never judges: the count is Needs you's
-// own, and a server is down by the machines model's rule; nil while Needs
-// you is still read.
-func badge(r Reading, needs page.Section) *page.Badge {
-	if r.Home == nil {
-		return nil
-	}
-	b := page.Badge{}
-	for _, t := range needs.Counts {
-		if t.Mark != page.OK && t.Mark != page.Awaiting {
-			b.Needs += t.N
-		}
-	}
-	if r.All != nil {
-		for _, h := range r.All.Macs {
-			b.Down = b.Down || slices.ContainsFunc(h.VMs, model.Down)
-		}
-	}
-	return &b
 }
 
 func Stopped(thisMac page.Context, installed bool) page.Page {

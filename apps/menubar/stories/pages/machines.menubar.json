@@ -750,7 +750,8 @@
     }
   ],
   "badge": {
-    "needs": 4
+    "needs": 1,
+    "label": "station, 1 thing needs you"
   },
   "live": [
     "cpu:macbook-pro",

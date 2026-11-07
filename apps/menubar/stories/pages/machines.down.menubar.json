@@ -743,8 +743,9 @@
     }
   ],
   "badge": {
-    "needs": 4,
-    "down": true
+    "needs": 2,
+    "down": true,
+    "label": "station, infra down"
   },
   "live": [
     "cpu:macbook-pro",
