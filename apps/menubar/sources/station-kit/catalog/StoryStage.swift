@@ -10,8 +10,8 @@ public enum StoryAccent: String, CaseIterable, Sendable {
 }
 
 public struct StoryKnobs: Equatable, Sendable {
-    public static let widths: [CGFloat] = [Token.Space.width, 320, 380]
-    public static let scales: [CGFloat] = [1, 2]
+    public static let widths = Token.Stage.widths
+    public static let scales = Token.Stage.scales
 
     public var scheme: ColorScheme
     public var increaseContrast: Bool
@@ -60,7 +60,7 @@ public struct StoryDeskView: View {
             Rectangle().fill(Token.Glass.wallBase(scheme)[0])
         case .wallpaper:
             ZStack {
-                LinearGradient(colors: Token.Glass.wallBase(scheme), startPoint: UnitPoint(x: 0.3, y: 0), endPoint: UnitPoint(x: 0.7, y: 1))
+                LinearGradient(colors: Token.Glass.wallBase(scheme), startPoint: Token.Glass.wallStart, endPoint: Token.Glass.wallEnd)
                 ForEach(Array(Token.Glass.wallpaper(scheme).enumerated()), id: \.offset) { _, blob in
                     EllipticalGradient(colors: [blob.0, blob.0.opacity(0)], center: blob.1, startRadiusFraction: 0, endRadiusFraction: blob.2)
                 }
@@ -71,8 +71,8 @@ public struct StoryDeskView: View {
 }
 
 public struct StoryStage: View {
-    public static let strip = CGSize(width: 600, height: 28)
-    public static let room: CGFloat = 24
+    public static let strip = Token.Stage.strip
+    public static let room = Token.Stage.room
     public static let now = Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 7, hour: 10, minute: 30))!
 
     let story: Story

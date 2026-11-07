@@ -180,6 +180,16 @@ public enum Token {
         public static let graphHeight: CGFloat = 40
     }
 
+    // value: the stage the Catalog draws a story on: the panel widths its
+    // knob offers, the menu bar strip a status item sits in, and the desk
+    // left around a panel.
+    public enum Stage {
+        public static let widths: [CGFloat] = [Space.width, 320, 380]
+        public static let scales: [CGFloat] = [1, 2]
+        public static let strip = CGSize(width: 600, height: 28)
+        public static let room: CGFloat = 24
+    }
+
     // value: the panel an offscreen snapshot draws in place of the
     // MenuBarExtra's system glass, which the renderer cannot sample: a
     // translucent pane, its rim and its shadow over the vision's desk.
@@ -212,6 +222,8 @@ public enum Token {
         public static func wallBase(_ scheme: ColorScheme) -> [Color] {
             scheme == .dark ? [Token.hex(0x142A5C), Token.hex(0x1B2F55), Token.hex(0x4A2A26)] : [Token.hex(0x3B6FE0), Token.hex(0x7FB6F2), Token.hex(0xF2A477)]
         }
+        public static let wallStart = UnitPoint(x: 0.3, y: 0)
+        public static let wallEnd = UnitPoint(x: 0.7, y: 1)
     }
 
     public enum Symbol {
