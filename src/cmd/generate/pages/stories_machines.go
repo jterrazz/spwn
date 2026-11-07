@@ -69,16 +69,24 @@ func sceneMachines() model.AllMachines {
 	infra.Want, infra.Check, infra.Device = "running", "https://infra:6443/readyz", "infra"
 	infra.BootAt = storyNow.Add(-12 * 24 * time.Hour)
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing, At: storyNow.Add(-40 * time.Second), Answer: "200"}
+	linux1 := sceneVM("linux-1", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.5")
+	linux1.Agent = &model.AgentView{State: "working", Task: "fix the flaky e2e test"}
+	agent7f := sceneVM("agent-7f", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.6")
+	agent7f.Agent = &model.AgentView{State: model.AgentFinished, Task: "write the changelog", Ended: storyNow.Add(-12 * time.Minute), Reason: "tests pass"}
+	linux3 := sceneVM("linux-3", miniMac, model.Throwaway, model.Running, 4, 8, "192.168.64.8")
+	linux3.Agent = &model.AgentView{State: "working", Task: "refresh the auth token"}
+	bot := sceneVM("review-bot", miniMac, model.Permanent, model.Running, 2, 4, "192.168.64.9")
+	bot.Agent = &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: storyNow.Add(-6 * time.Minute)}
 	return model.AllMachines{Read: storyNow, Macs: []model.MacView{
 		{Name: proName, User: "jterrazz", StationVersion: stationVer, ThisMac: true, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{
-			sceneVM("linux-1", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.5"),
-			sceneVM("agent-7f", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.6"),
+			linux1,
+			agent7f,
 			sceneVM("api", proName, model.Permanent, model.Stopped, 4, 8, ""),
 		}},
 		{Name: miniMac, User: "jterrazz", StationVersion: stationVer, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{
 			infra,
-			sceneVM("linux-3", miniMac, model.Throwaway, model.Running, 4, 8, "192.168.64.8"),
-			sceneVM("review-bot", miniMac, model.Permanent, model.Running, 2, 4, "192.168.64.9"),
+			linux3,
+			bot,
 		}},
 		{Name: airName, User: "jterrazz", StationVersion: stationVer, Answered: storyNow.Add(-2 * time.Hour), Node: model.Node{IP: "100.98.133.31"}},
 	}}
@@ -247,6 +255,35 @@ func (f Scene) machine(name string) pagemenubar.Machine {
 	return m
 }
 
+// value: the scene's needs as the engine reads them: the fleet, its ports,
+// every Mac's accounts with the copies each shared, each Mac's Overview.
+func (f Scene) needs() pagemenubar.NeedsReading {
+	all := accounts.AllMachines{Now: storyNow}
+	for _, h := range f.All.Macs {
+		if !h.Reachable {
+			continue
+		}
+		m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
+		for _, read := range f.Accounts.Machines {
+			if read.Name == h.Name {
+				m.Accounts = read.Accounts
+			}
+			for _, vm := range h.VMs {
+				if read.Name != vm.Name {
+					continue
+				}
+				for _, a := range read.Accounts {
+					if a.Shared != nil {
+						m.Shares = append(m.Shares, accounts.Shared{Account: a.Provider, VM: vm.Name, At: a.Shared.At, Until: a.Shared.Until})
+					}
+				}
+			}
+		}
+		all.Macs = append(all.Macs, m)
+	}
+	return pagemenubar.NeedsReading{Now: storyNow, Zone: time.UTC, All: &f.All, Ports: &f.Ports, Accounts: &all, Overviews: append([]overview.Summary{f.Home}, f.Away...)}
+}
+
 func (f Scene) portsOf(mac string) ports.Listing {
 	l := ports.Listing{AllMachines: ports.AllMachines{Schema: ports.AllMachinesSchema}}
 	for _, h := range f.Ports.Macs {
@@ -271,10 +308,12 @@ func (f Scene) draw() []Fixture {
 		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{}, thisMac)},
 		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac)},
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
+		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
 	}
 	for _, h := range f.All.Macs {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})
 		if h.Reachable {
+			out = append(out, Fixture{Name: "needs." + h.Name, Page: pagemenubar.NeedsPage(f.needs(), h.Name, thisMac)})
 			of := pagemenubar.PortsOf{Machine: h.Name}
 			if h.ThisMac {
 				of.Machine = ""
@@ -308,6 +347,20 @@ func infraDown(f *Scene) {
 }
 
 func nothingNeedsYou(f *Scene) {
+	for i, h := range f.All.Macs {
+		for j, vm := range h.VMs {
+			if vm.Agent != nil && vm.Agent.State == "waiting" {
+				f.All.Macs[i].VMs[j].Agent = &model.AgentView{State: "working", Task: vm.Agent.Task}
+			}
+		}
+	}
+	for i, m := range f.Accounts.Machines {
+		for j, a := range m.Accounts {
+			if a.Shared != nil {
+				f.Accounts.Machines[i].Accounts[j] = loan(a.Provider, a.Shared.Name, 6*time.Hour)
+			}
+		}
+	}
 	f.Home.Needs = nil
 	f.Home.Lines[1].Parts = f.Home.Lines[1].Parts[:1]
 	f.Home.Lines[2].Parts[1] = overview.Part{State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}

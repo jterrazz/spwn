@@ -16,8 +16,8 @@ type World struct {
 func Worlds() []World {
 	return []World{
 		{Name: "machines"},
-		{Name: "machines.down", Edit: infraDown, Pages: []string{"menubar", "machine.infra"}},
-		{Name: "machines.fine", Edit: nothingNeedsYou, Pages: []string{"menubar"}},
+		{Name: "machines.down", Edit: infraDown, Pages: []string{"menubar", "machine.infra", "needs"}},
+		{Name: "machines.fine", Edit: nothingNeedsYou, Pages: []string{"menubar", "needs"}},
 		{Name: "machines.empty", Edit: thisMacAlone, Pages: []string{"menubar"}},
 		{Name: "machines.loading", Edit: miniStillAnswering, Pages: []string{"menubar"}},
 	}

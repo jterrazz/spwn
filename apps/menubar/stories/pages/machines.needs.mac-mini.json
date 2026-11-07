@@ -1,0 +1,84 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.needs",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Needs you",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "1 thing"
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "waiting:review-bot",
+            "mark": "attention",
+            "label": "review-bot",
+            "detail": {
+              "kind": "text",
+              "text": "PR #42 is ready"
+            },
+            "reason": "waiting",
+            "glyph": {
+              "kind": "symbol:text.bubble",
+              "signal": "waits"
+            },
+            "verb": "waiting:review-bot",
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    }
+  ],
+  "header": {
+    "back": "mac-mini"
+  }
+}

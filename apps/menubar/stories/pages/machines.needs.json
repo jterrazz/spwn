@@ -1,0 +1,299 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.needs",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Needs you",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All machines"
+        },
+        {
+          "kind": "text",
+          "text": "2 things, most urgent first"
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "waiting:review-bot",
+            "mark": "attention",
+            "label": "review-bot",
+            "detail": {
+              "kind": "text",
+              "text": "PR #42 is ready"
+            },
+            "reason": "waiting",
+            "glyph": {
+              "kind": "symbol:text.bubble",
+              "signal": "waits"
+            },
+            "verb": "waiting:review-bot",
+            "nav": "menubar.machine:review-bot"
+          }
+        },
+        {
+          "row": {
+            "id": "ending:macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "linux-1",
+            "detail": {
+              "kind": "text",
+              "text": "Claude ends in 24 min"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "symbol:clock",
+              "signal": "waits"
+            },
+            "verb": "ending:macbook-pro/linux-1/claude",
+            "nav": "menubar.machine:linux-1"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 2
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "upkeep",
+      "title": "Upkeep",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "4"
+        },
+        {
+          "kind": "text",
+          "text": "when you have a minute"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/settings/3",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "firewall off"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:shield",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/settings/3",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/background/1",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "1 login item failed"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:exclamationmark.triangle",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/background/1",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/accounts/0",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "npm needs sign-in"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/accounts/0",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "upkeep:macbook-pro/apps/2",
+            "mark": "attention",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "2 updates"
+            },
+            "reason": "degraded",
+            "glyph": {
+              "kind": "symbol:arrow.down.circle",
+              "signal": "waits"
+            },
+            "verb": "upkeep:macbook-pro/apps/2",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "ending:macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "ending:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "How to",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/settings/3"
+      ],
+      "id": "upkeep:macbook-pro/settings/3",
+      "sheet": "hint:firewall"
+    },
+    {
+      "label": "Copy fix",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/background/1"
+      ],
+      "id": "upkeep:macbook-pro/background/1",
+      "run": {
+        "copy": "station background"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied station background"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Sign in",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/accounts/0"
+      ],
+      "id": "upkeep:macbook-pro/accounts/0",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts"
+        ]
+      }
+    },
+    {
+      "label": "Update",
+      "on": "row",
+      "rows": [
+        "upkeep:macbook-pro/apps/2"
+      ],
+      "mutates": true,
+      "id": "upkeep:macbook-pro/apps/2",
+      "run": {
+        "call": "apps.update"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Everything is up to date"
+          }
+        ]
+      }
+    }
+  ],
+  "header": {
+    "back": "All machines"
+  }
+}
