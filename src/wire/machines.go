@@ -31,6 +31,7 @@ import (
 	machinesdelete "github.com/jterrazz/studio-station/src/surface/cli/machines/delete"
 	machinesedit "github.com/jterrazz/studio-station/src/surface/cli/machines/edit"
 	machinesforget "github.com/jterrazz/studio-station/src/surface/cli/machines/forget"
+	machineslog "github.com/jterrazz/studio-station/src/surface/cli/machines/log"
 	machinespipe "github.com/jterrazz/studio-station/src/surface/cli/machines/pipe"
 	machinesprobe "github.com/jterrazz/studio-station/src/surface/cli/machines/probe"
 	machinesrestart "github.com/jterrazz/studio-station/src/surface/cli/machines/restart"
@@ -153,6 +154,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinesedit.Command(machinesedit.Deps{Names: vms.Names, Resources: model.ParseResources, ThisMachine: m.where}, env),
 		machinesprobe.Alias(machinesprobe.Deps{Names: vms.Names, Overview: overview}, env),
 		machinescmd.SSHCommand(machinescmd.SSHDeps{Names: vms.Names, ThisMachine: m.where}, env),
+		machineslog.Command(machineslog.Deps{Names: vms.Names}, env),
 		machinesadd.Command(machinesadd.Deps{ThisMachine: m.where}, env),
 		machinesforget.Command(machinesforget.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesunlock.Command(machinesunlock.Deps{Names: vms.Names, ThisMachine: m.where}, env),

@@ -349,6 +349,13 @@
       "watch": true
     },
     {
+      "name": "machines.log",
+      "schema": "station.machines.log/v1",
+      "where": "at-target",
+      "in": "VMIn",
+      "out": "LogOut"
+    },
+    {
       "name": "machines.restart",
       "schema": "station.machines.restart/v1",
       "where": "at-target",

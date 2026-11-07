@@ -124,6 +124,20 @@ var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 	},
 }
 
+type LogOut struct {
+	// value: SPEC B5.5: every meaningful line the VM's runs wrote, its
+	// console's then its hypervisor's own.
+	Lines []string
+}
+
+var Log = call.Call[Deps, VMIn, LogOut]{
+	Name: "machines.log", Where: call.AtTarget, Applies: machine.Anywhere,
+	Run: func(ctx context.Context, d Deps, in VMIn, _ call.Progress) (LogOut, error) {
+		lines, err := d.Machines.Log(ctx, in.VM)
+		return LogOut{Lines: lines}, err
+	},
+}
+
 type EditIn struct {
 	VM string
 	// value: the sizes to change; a zero one is kept.
