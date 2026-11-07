@@ -1,0 +1,8 @@
+description: 'the guest reports the journal its agent hooks wrote, read through the journal, at its first look'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p vm/.local/state/station/agents && echo ''{"v":1,"agent":{"app":"claudecode","session":"s-1","state":"waiting","task":"Review the auth refresh","ask":{"title":"PR #42 is ready","at":"2026-11-04T10:00:00Z"}}}'' > vm/.local/state/station/agents/s-1.json; echo ''{"v":1,"type":"hello","host":"macbook","vm":"api","public_host":"macbook.tail1234.ts.net","keys":[],"env":{},"ignored":[22],"min_port":1024}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest | /usr/bin/jq -c ''select(.type == "agents") | [.agents[] | {session, state, ask: .ask.title}]'''
+      exit: 0
+      stdout: |
+          [{"session":"s-1","state":"waiting","ask":"PR #42 is ready"}]
