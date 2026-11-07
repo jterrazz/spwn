@@ -216,7 +216,7 @@ public struct Popover: View {
                         HomeContent(page: shown, state: state, handlers: handlers)
                     }
                 }
-                .opacity(state.connection == .connecting ? 0.5 : 1)
+                .opacity(state.connection == .connecting ? Token.Fade.connecting : 1)
                 .disabled(state.connection == .connecting)
             } else {
                 PendingDot(still: true)
@@ -250,7 +250,7 @@ public struct Popover: View {
         if let pushed = state.pushed, pushed.id == PageID.machine {
             EmptyView()
         } else {
-            HStack(alignment: .center, spacing: 8) {
+            HStack(alignment: .center, spacing: Token.Gap.pair) {
                 Button(action: state.pushed == nil ? handlers.openSwitcher : handlers.back) {
                     SwitcherPill(open: state.pushed != nil)
                 }
@@ -258,14 +258,14 @@ public struct Popover: View {
                 .focusEffectDisabled()
                 .keyboardShortcut("0", modifiers: .command)
                 if state.pushed == nil {
-                    Text(state.page?.context?.machine ?? "station").font(.system(size: Token.Size.sub)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                    Text(state.page?.context?.machine ?? "station").font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).lineLimit(1).truncationMode(.middle)
                 }
-                Spacer(minLength: 4)
+                Spacer(minLength: Token.Gap.small)
                 if state.pushed == nil {
                     PlainIcon(Token.Symbol.settings, picked: state.menu, round: true, tap: handlers.toggleMenu)
                 }
             }
-            .padding(.horizontal, 2).padding(.top, 2)
+            .padding(.horizontal, Token.Gap.tight).padding(.top, Token.Gap.tight)
         }
     }
 
@@ -332,7 +332,7 @@ struct EscapeKey: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        Color.clear.frame(width: 1, height: 1)
+        Color.clear.frame(width: Token.Detail.anchor, height: Token.Detail.anchor)
             .focusable()
             .focusEffectDisabled()
             .focused($focused)

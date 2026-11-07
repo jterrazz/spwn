@@ -32,10 +32,10 @@ public struct Graph: View {
         Chart(Array(points.enumerated()), id: \.offset) { i, p in
             AreaMark(x: .value("t", i), yStart: .value("floor", domain.lowerBound), yEnd: .value("v", min(max(p, 0), 100)))
                 .interpolationMethod(.catmullRom)
-                .foregroundStyle(LinearGradient(colors: [ink.opacity(0.4), ink.opacity(0.08)], startPoint: .top, endPoint: .bottom))
+                .foregroundStyle(LinearGradient(colors: [ink.opacity(Token.Fade.graphTop), ink.opacity(Token.Fade.graphFloor)], startPoint: .top, endPoint: .bottom))
             LineMark(x: .value("t", i), y: .value("v", min(max(p, 0), 100)))
                 .interpolationMethod(.catmullRom)
-                .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                .lineStyle(StrokeStyle(lineWidth: Token.Stroke.graph, lineCap: .round, lineJoin: .round))
                 .foregroundStyle(ink)
         }
         .chartXAxis(.hidden)
@@ -81,14 +81,14 @@ public struct Bars: View {
     // value: a bar's height, 0 to 1, over the band its points move in, so
     // a steady series still shows its swing; a level one, half.
     func level(_ p: Int) -> Double {
-        guard !waiting else { return 0.25 }
+        guard !waiting else { return Token.Bar.waiting }
         guard !full else { return 1 }
-        if let ceiling { return min(max(Double(p) / Double(max(ceiling, 1)), 0.06), 1) }
-        if chart, let hi = points.max() { return max(Double(p) / Double(max(hi, 1)), 0.06) }
-        guard let hi = points.max(), let low = points.min(), hi != low else { return 0.5 }
+        if let ceiling { return min(max(Double(p) / Double(max(ceiling, 1)), Token.Bar.least), 1) }
+        if chart, let hi = points.max() { return max(Double(p) / Double(max(hi, 1)), Token.Bar.least) }
+        guard let hi = points.max(), let low = points.min(), hi != low else { return Token.Bar.level }
         let top = Double(max(hi, 1)), lo = Double(low)
-        let floor = max(lo - max(top - lo, top / 10), 0)
-        return max((Double(p) - floor) / max(top - floor, 1), 0.1)
+        let floor = max(lo - max(top - lo, top * Token.Bar.swing), 0)
+        return max((Double(p) - floor) / max(top - floor, 1), Token.Bar.swing)
     }
 
     // value: a measure's bars against a share's scale, 0 to 100 brought
@@ -122,9 +122,9 @@ public struct Bars: View {
         let ink = tint ?? palette.accent
         let recent = points.count - accented
         Chart(Array(points.enumerated()), id: \.offset) { i, p in
-            BarMark(x: .value("t", "\(i)"), yStart: .value("floor", 0), yEnd: .value("v", level(p)), width: .ratio(chart ? 0.8 : 0.6))
-                .clipShape(RoundedRectangle(cornerRadius: chart ? 2 : 1, style: .continuous))
-                .foregroundStyle(i >= recent ? AnyShapeStyle(ink) : waiting ? AnyShapeStyle(.fill.tertiary) : AnyShapeStyle(.fill.secondary))
+            BarMark(x: .value("t", "\(i)"), yStart: .value("floor", 0), yEnd: .value("v", level(p)), width: .ratio(chart ? Token.Bar.chartShare : Token.Bar.sparkShare))
+                .clipShape(RoundedRectangle(cornerRadius: chart ? Token.Bar.chartCorner : Token.Bar.sparkCorner, style: .continuous))
+                .foregroundStyle(i >= recent ? AnyShapeStyle(ink) : waiting ? Token.Ink.track : Token.Ink.idle)
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)

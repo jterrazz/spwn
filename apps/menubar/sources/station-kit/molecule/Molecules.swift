@@ -1,9 +1,6 @@
 import SwiftUI
 
 public struct Layout {
-    static let charWidth: CGFloat = 6.6
-    static let markWidth: CGFloat = 12
-
     static func chars(_ v: Value?) -> Int { v.map { Format.show($0).count } ?? 0 }
 
     // invariant: a row that does not fit drops its cells by Keep, lowest
@@ -18,7 +15,7 @@ public struct Layout {
         // folders) is no cell of a line here either.
         let shown = cells.indices.filter { $0 + 1 >= columns.count || columns[$0 + 1].show != "detail" }
         var keep = shown
-        let room = Int((width - markWidth - Token.Space.gap) / charWidth)
+        let room = Int((width - Token.Measure.mark - Token.Space.gap) / Token.Measure.char)
         func need() -> Int {
             (row.short ?? row.label ?? "").count + keep.reduce(0) { $0 + chars(cells[$1]) + 2 } + min(chars(row.detail), detailMin) + 2
         }
@@ -57,7 +54,7 @@ public struct RowView: View {
 
     public var body: some View {
         let cells = row.cells ?? []
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap) {
                 HStack(spacing: Token.Space.gap / 2) {
                     MarkView(row.mark)
@@ -75,9 +72,9 @@ public struct RowView: View {
                     ValueText(detail, muted: true).layoutPriority(-1)
                 }
             }
-            .frame(minHeight: Token.Space.row - 4)
+            .frame(minHeight: Token.Space.row - Token.Gap.small)
             if hints, let hint = row.hint {
-                HintView(hint, asButton: hintAsButton).padding(.leading, Layout.markWidth + Token.Space.gap / 2)
+                HintView(hint, asButton: hintAsButton).padding(.leading, Token.Measure.mark + Token.Space.gap / 2)
             }
         }
     }
@@ -115,7 +112,7 @@ public struct HintView: View {
                 .foregroundStyle(palette.muted)
                 .lineLimit(2)
             if let text = hint.text {
-                Text(text).font(.system(size: Token.Space.small)).foregroundStyle(.tertiary)
+                Text(text).font(.system(size: Token.Space.small)).foregroundStyle(Token.Ink.tertiary)
             }
             if asButton {
                 Button {
@@ -139,7 +136,7 @@ public struct EmptyLine: View {
     public init(_ empty: Empty) { self.empty = empty }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             Text(empty.text ?? "no \(empty.noun ?? "")").font(.system(size: Token.Space.text)).foregroundStyle(palette.muted)
             if hints, let hint = empty.hint { HintView(hint) }
         }
@@ -153,7 +150,7 @@ public struct ErrorLine: View {
     public init(_ error: PageError) { self.error = error }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap / 2) {
                 Image(systemName: Token.Symbol.error).font(.system(size: Token.Space.text)).foregroundStyle(palette.bad)
                 Text(error.message ?? "").font(.system(size: Token.Space.text)).foregroundStyle(palette.text).fixedSize(horizontal: false, vertical: true)
@@ -174,7 +171,7 @@ public struct CountsView: View {
     public var body: some View {
         HStack(spacing: Token.Space.gap / 2) {
             ForEach(Array(counts.enumerated()), id: \.offset) { _, t in
-                HStack(spacing: 2) {
+                HStack(spacing: Token.Gap.tight) {
                     Text("\(t.n ?? 0)").font(.system(size: Token.Space.small)).monospacedDigit().foregroundStyle(palette.muted)
                     MarkView(t.mark)
                 }
@@ -194,7 +191,7 @@ public struct ConfirmPanel: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Token.Gap.small) {
             Text(confirm.question ?? "").font(.system(size: Token.Space.text, weight: .semibold)).foregroundStyle(palette.text)
             ForEach(Array((confirm.lines ?? []).enumerated()), id: \.offset) { _, line in
                 ValueText(line, muted: true)

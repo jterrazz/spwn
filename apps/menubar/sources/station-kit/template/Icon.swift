@@ -62,7 +62,8 @@ struct IconSpark: Shape {
         guard points.count > 1 else { return p }
         let step = rect.width / CGFloat(points.count - 1)
         for (i, v) in points.enumerated() {
-            let pt = CGPoint(x: CGFloat(i) * step, y: rect.height - rect.height * CGFloat(min(max(v, 0), 100)) / 100)
+            let share = CGFloat(min(max(v, 0), 100)) / 100
+            let pt = CGPoint(x: CGFloat(i) * step, y: rect.height - rect.height * share)
             if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
         }
         return p

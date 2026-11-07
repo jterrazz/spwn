@@ -17,9 +17,9 @@ struct PanelGlass: ViewModifier {
                     ZStack {
                         shape.fill(Token.Glass.pane(scheme))
                         shape.fill(LinearGradient(colors: Token.Glass.sheen(scheme), startPoint: .top, endPoint: .center))
-                        shape.strokeBorder(Token.Glass.edge(scheme), lineWidth: 0.6)
+                        shape.strokeBorder(Token.Glass.edge(scheme), lineWidth: Token.Stroke.rim)
                     }
-                    .shadow(color: Token.Glass.shade(scheme), radius: 18, y: 10)
+                    .shadow(color: Token.Glass.shade(scheme), radius: Token.Shadow.panelRadius, y: Token.Shadow.panelY)
                 }
         } else {
             content.containerShape(shape)
@@ -34,8 +34,7 @@ struct PanelGlass: ViewModifier {
 struct TileGround: ViewModifier {
     let padding: EdgeInsets
     let tint: Color?
-    @Environment(\.stationReduceTransparency) private var reduce
-    @Environment(\.stationContrast) private var contrast
+    @Environment(\.stationTokens) private var tokens
     @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
@@ -44,8 +43,8 @@ struct TileGround: ViewModifier {
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .background {
-                if reduce || contrast == .increased {
-                    shape.strokeBorder(.separator, lineWidth: 1)
+                if tokens.solid {
+                    shape.strokeBorder(Token.Ink.separator, lineWidth: Token.Stroke.rule)
                 } else {
                     ZStack {
                         shape.fill(Token.Fill.tile(scheme))
@@ -105,7 +104,7 @@ public struct RowSeparator: View {
 
     public init() {}
 
-    public var body: some View { Rectangle().fill(Token.Fill.faint(scheme)).frame(height: 0.5) }
+    public var body: some View { Rectangle().fill(Token.Fill.faint(scheme)).frame(height: Token.Stroke.hair) }
 }
 
 // value: the rows of a list, a hairline between each two.
@@ -151,8 +150,8 @@ public struct SectionHeader: View {
 
     public var body: some View {
         Wrap(Self.cased(title)).font(.system(size: Token.Size.label, weight: .semibold)).tracking(Token.Size.label * Token.Size.tracking)
-            .foregroundStyle(.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 4).padding(.top, 2)
+            .foregroundStyle(Token.Ink.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, Token.Gap.small).padding(.top, Token.Gap.tight)
     }
 }
 
@@ -165,8 +164,8 @@ public struct GroupCaption: View {
 
     public var body: some View {
         Text(title.uppercased()).font(.system(size: Token.Size.caption, weight: .semibold)).tracking(Token.Size.caption * Token.Size.tracking)
-            .foregroundStyle(.secondary)
-            .padding(.leading, Token.Tile.indent).padding(.top, 6).padding(.trailing, 12)
+            .foregroundStyle(Token.Ink.secondary)
+            .padding(.leading, Token.Tile.indent).padding(.top, Token.Gap.item).padding(.trailing, Token.Gap.edge)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -184,7 +183,7 @@ public struct IconTile: View {
     let pulse: Bool
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationStill) private var still
-    @Environment(\.stationContrast) private var contrast
+    @Environment(\.stationTokens) private var tokens
 
     public init(_ symbol: String, active: Bool = false, tint: Color? = nil, size: CGFloat = Token.Tile.icon, pulse: Bool = false) {
         self.symbol = symbol
@@ -217,7 +216,7 @@ public struct IconTile: View {
             .frame(width: size, height: size)
             .background {
                 shape.fill(Token.Fill.icon)
-                if contrast == .increased { shape.strokeBorder(.separator, lineWidth: 1) }
+                if tokens.increased { shape.strokeBorder(Token.Ink.separator, lineWidth: Token.Stroke.rule) }
             }
             .frame(width: size == Token.Tile.icon ? Token.Tile.slot : size)
     }
@@ -305,9 +304,9 @@ public struct RowText<Tag: View>: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(alignment: .center, spacing: 6) {
-                Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(.primary).lineLimit(titleLines)
+        VStack(alignment: .leading, spacing: Token.Gap.line) {
+            HStack(alignment: .center, spacing: Token.Gap.item) {
+                Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(Token.Ink.primary).lineLimit(titleLines)
                     .fixedSize(horizontal: title.count <= Self.whole, vertical: titleLines > 1)
                     .padding(.vertical, Token.Size.leading)
                 tag
@@ -336,7 +335,7 @@ public struct SubText: View {
     public init(_ text: String) { self.text = text }
 
     public var body: some View {
-        Wrap(text, spacing: Token.Size.leading * 2).font(.system(size: Token.Size.sub)).foregroundStyle(.secondary)
+        Wrap(text, spacing: Token.Size.leading * 2).font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary)
             .padding(.vertical, Token.Size.leading).fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -349,7 +348,7 @@ public struct TrailingValue: View {
     public init(_ text: String) { self.text = text }
 
     public var body: some View {
-        Text(text).font(.system(size: Token.Size.sub)).foregroundStyle(.secondary).monospacedDigit().lineLimit(1).truncationMode(.middle)
+        Text(text).font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).monospacedDigit().lineLimit(1).truncationMode(.middle)
             .contentTransition(.numericText())
     }
 }
@@ -388,7 +387,7 @@ public struct Chevron: View {
     public init(down: Bool = false) { self.down = down }
 
     public var body: some View {
-        Image(systemName: down ? Token.Symbol.down : Token.Symbol.forward).font(.system(size: 12, weight: .semibold)).foregroundStyle(palette.glyph)
+        Image(systemName: down ? Token.Symbol.down : Token.Symbol.forward).font(.system(size: Token.Detail.chevron, weight: .semibold)).foregroundStyle(palette.glyph)
             .frame(width: Token.Tile.chevron)
     }
 }
@@ -406,7 +405,7 @@ public struct StateDot: View {
             if mark == .pending {
                 PendingDot()
             } else if mark == .absent {
-                Circle().strokeBorder(.secondary, lineWidth: 1.5).frame(width: Token.Tile.dot, height: Token.Tile.dot)
+                Circle().strokeBorder(Token.Ink.secondary, lineWidth: Token.Stroke.graph).frame(width: Token.Tile.dot, height: Token.Tile.dot)
             } else {
                 Circle().fill(palette.of(mark)).frame(width: Token.Tile.dot, height: Token.Tile.dot)
             }
@@ -440,8 +439,8 @@ public struct StationButton: View {
         switch role {
         case .primary: AnyShapeStyle(palette.onTint)
         case .danger: AnyShapeStyle(palette.bad)
-        case .quiet: AnyShapeStyle(.secondary)
-        case .plain: AnyShapeStyle(.primary)
+        case .quiet: AnyShapeStyle(Token.Ink.secondary)
+        case .plain: AnyShapeStyle(Token.Ink.primary)
         }
     }
 
@@ -457,18 +456,18 @@ public struct StationButton: View {
                     Wrap(title, alignment: .center).font(.system(size: Token.Size.text, weight: role == .quiet ? .medium : .semibold))
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.vertical, Token.Size.leading)
-                        .padding(8).frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(Token.Gap.pair).frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(fill, in: RoundedRectangle(cornerRadius: Token.Tile.buttonCorner, style: .continuous))
-                        .opacity(role == .quiet ? 0.75 : 1)
+                        .opacity(role == .quiet ? Token.Fade.quiet : 1)
                 } else {
                     Text(title).font(.system(size: Token.Size.mini, weight: .semibold)).lineLimit(1).fixedSize()
                         .padding(.vertical, Token.Size.leading)
-                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .padding(.horizontal, Token.Gap.block).padding(.vertical, Token.Gap.flank)
                         .background(fill, in: Capsule())
                 }
             }
             .foregroundStyle(ink)
-            .opacity(enabled ? 1 : 0.45)
+            .opacity(enabled ? 1 : Token.Fade.off)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -493,8 +492,8 @@ public struct StationSwitch: View {
             ZStack(alignment: on ? .trailing : .leading) {
                 Capsule().fill(on ? AnyShapeStyle(palette.good) : AnyShapeStyle(Token.Fill.faint(scheme)))
                     .frame(width: Token.Tile.switchWidth, height: Token.Tile.switchHeight)
-                Circle().fill(palette.onTint).frame(width: Token.Tile.switchHeight - 4, height: Token.Tile.switchHeight - 4)
-                    .shadow(color: .black.opacity(0.3), radius: 1.5, y: 1).padding(.horizontal, 2)
+                Circle().fill(palette.onTint).frame(width: Token.Detail.knob, height: Token.Detail.knob)
+                    .shadow(color: Token.Shadow.toggle.color, radius: Token.Shadow.toggle.radius, y: Token.Shadow.toggle.y).padding(.horizontal, Token.Gap.tight)
             }
             .contentShape(Capsule())
         }
@@ -521,7 +520,7 @@ public struct TextAction: View {
 
     public var body: some View {
         Button(action: tap) {
-            HStack(spacing: 4) {
+            HStack(spacing: Token.Gap.small) {
                 if let symbol { Image(systemName: symbol).font(.system(size: Token.Size.sub, weight: .medium)) }
                 Text(label).font(.system(size: Token.Size.text)).lineLimit(1).fixedSize()
             }
@@ -552,7 +551,7 @@ public struct PlainIcon: View {
     public var body: some View {
         let side = round ? Token.Tile.roundButton : Token.Tile.squareButton
         Button(action: tap) {
-            Image(systemName: symbol).font(.system(size: round ? 13 : 11, weight: .medium))
+            Image(systemName: symbol).font(.system(size: round ? Token.Detail.roundGlyph : Token.Detail.squareGlyph, weight: .medium))
                 .foregroundStyle(picked ? palette.accent : palette.glyph)
                 .frame(width: side, height: side)
                 .background {
@@ -605,12 +604,12 @@ public struct BackButton: View {
 
     public var body: some View {
         Button(action: action) {
-            HStack(spacing: 2) {
-                Image(systemName: Token.Symbol.back).font(.system(size: 11, weight: .bold)).foregroundStyle(palette.glyph)
+            HStack(spacing: Token.Gap.tight) {
+                Image(systemName: Token.Symbol.back).font(.system(size: Token.Detail.back, weight: .bold)).foregroundStyle(palette.glyph)
                 Text(title).font(.system(size: Token.Size.text, weight: .medium)).padding(.vertical, Token.Size.leading)
             }
             .foregroundStyle(palette.accent)
-            .padding(2)
+            .padding(Token.Gap.tight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -644,16 +643,16 @@ public struct PageHeader<Trailing: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: Token.Tile.gap) {
             BackButton(back, action: action)
-            HStack(alignment: .center, spacing: 8) {
+            HStack(alignment: .center, spacing: Token.Gap.pair) {
                 if let symbol { IconTile(symbol, active: active, size: Token.Tile.headIcon) }
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .center, spacing: 4) {
-                        Text(title).font(.system(size: Token.Size.title, weight: .bold)).tracking(-0.015 * Token.Size.title).foregroundStyle(.primary)
+                    HStack(alignment: .center, spacing: Token.Gap.small) {
+                        Text(title).font(.system(size: Token.Size.title, weight: .bold)).tracking(Token.Detail.titleTracking * Token.Size.title).foregroundStyle(Token.Ink.primary)
                             .padding(.vertical, Token.Size.titleLeading)
                         if let badge { KindTag(badge) }
                     }
                     if let subtitle, !subtitle.isEmpty {
-                        Wrap(subtitle, spacing: Token.Size.headLeading * 2).font(.system(size: Token.Size.sub)).foregroundStyle(.secondary)
+                        Wrap(subtitle, spacing: Token.Size.headLeading * 2).font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary)
                             .padding(.vertical, Token.Size.headLeading).fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -661,7 +660,7 @@ public struct PageHeader<Trailing: View>: View {
                 .layoutPriority(1)
                 trailing
             }
-            .padding(EdgeInsets(top: 2, leading: 2, bottom: 0, trailing: 2))
+            .padding(EdgeInsets(top: Token.Gap.tight, leading: Token.Gap.tight, bottom: 0, trailing: Token.Gap.tight))
         }
     }
 }
@@ -689,8 +688,8 @@ public struct StateWord: View {
         let on = mark != .absent && mark != .pending
         let hue = palette.of(mark)
         Text(word).font(.system(size: Token.Size.label, weight: .semibold)).lineLimit(1).fixedSize()
-            .foregroundStyle(on ? AnyShapeStyle(hue) : AnyShapeStyle(.secondary))
-            .padding(.horizontal, 7).padding(.vertical, 3)
+            .foregroundStyle(on ? AnyShapeStyle(hue) : AnyShapeStyle(Token.Ink.secondary))
+            .padding(.horizontal, Token.Gap.row).padding(.vertical, Token.Gap.inner)
             .background(on ? AnyShapeStyle(hue.opacity(Token.Fill.chip)) : AnyShapeStyle(Token.Fill.faint(scheme)), in: Capsule())
     }
 }
@@ -706,8 +705,8 @@ public struct KindTag: View {
     public var body: some View {
         let server = kind == "Server"
         Text(kind).font(.system(size: Token.Size.tag, weight: .semibold)).lineLimit(1).fixedSize()
-            .foregroundStyle(server ? AnyShapeStyle(Token.Hue.teal(scheme)) : AnyShapeStyle(.secondary))
-            .padding(.horizontal, 6).padding(.vertical, 3)
+            .foregroundStyle(server ? AnyShapeStyle(Token.Hue.teal(scheme)) : AnyShapeStyle(Token.Ink.secondary))
+            .padding(.horizontal, Token.Gap.item).padding(.vertical, Token.Gap.inner)
             .background(server ? AnyShapeStyle(Token.Hue.teal(scheme).opacity(Token.Fill.tag)) : AnyShapeStyle(Token.Fill.faint(scheme)), in: Capsule())
     }
 }
@@ -726,7 +725,7 @@ public struct FootNote: View {
     public init(_ text: String) { self.text = text }
 
     public var body: some View {
-        SubText(text).padding(.horizontal, 4)
+        SubText(text).padding(.horizontal, Token.Gap.small)
     }
 }
 
@@ -739,16 +738,16 @@ struct SwitcherPill: View {
     @Environment(\.stationPalette) private var palette
 
     var body: some View {
-        HStack(spacing: 6) {
-            IconTile(Token.Symbol.mac, active: true, size: 22)
-            Text(Page.ThisMacWord).font(.system(size: Token.Size.pill, weight: .semibold)).foregroundStyle(.primary)
-            Image(systemName: Token.Symbol.down).font(.system(size: 10, weight: .bold)).foregroundStyle(palette.glyph)
+        HStack(spacing: Token.Gap.item) {
+            IconTile(Token.Symbol.mac, active: true, size: Token.Detail.pillIcon)
+            Text(Page.ThisMacWord).font(.system(size: Token.Size.pill, weight: .semibold)).foregroundStyle(Token.Ink.primary)
+            Image(systemName: Token.Symbol.down).font(.system(size: Token.Detail.caret, weight: .bold)).foregroundStyle(palette.glyph)
         }
-        .padding(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 10))
+        .padding(EdgeInsets(top: Token.Gap.flank, leading: Token.Gap.flank, bottom: Token.Gap.flank, trailing: Token.Gap.block))
         .background {
             Capsule().fill(open ? Token.Fill.raised(scheme) : Token.Fill.tile(scheme))
-            Capsule().strokeBorder(Token.Fill.edge(scheme), lineWidth: 0.5)
-            if open { Capsule().stroke(palette.accent.opacity(Token.Fill.ring), lineWidth: 3).padding(-1.5) }
+            Capsule().strokeBorder(Token.Fill.edge(scheme), lineWidth: Token.Stroke.hair)
+            if open { Capsule().stroke(palette.accent.opacity(Token.Fill.ring), lineWidth: Token.Stroke.open).padding(-Token.Stroke.open / 2) }
         }
         .contentShape(Capsule())
     }
@@ -771,6 +770,7 @@ struct PanelScroll: ViewModifier {
     static let sheetID = "station.sheet"
     @Environment(\.stationStill) private var still
     @Environment(\.stationPanelWidth) private var width
+    @Environment(\.stationTokens) private var tokens
     @State private var height: CGFloat = 0
     @State private var offset: CGFloat = 0
     @State private var position = ScrollPosition(edge: .top)
@@ -781,7 +781,7 @@ struct PanelScroll: ViewModifier {
 
     // value: the room the panel may take: the screen's visible height
     // under the menu bar, less the gap macOS leaves above the Dock.
-    static var room: CGFloat { max((NSScreen.main?.visibleFrame.height ?? 800) - 16, 320) }
+    static var room: CGFloat { max((NSScreen.main?.visibleFrame.height ?? Token.Metric.Panel.unknownScreen) - Token.Metric.Panel.dockGap, Token.Metric.Panel.leastRoom) }
 
     // value: the content is taller than the panel's room: it scrolls.
     var scrolled: Bool { height > Self.room - reserve }
@@ -806,12 +806,12 @@ struct PanelScroll: ViewModifier {
                 .onChange(of: sheet) { _, open in
                     opening = open != nil
                     guard open != nil else { return }
-                    DispatchQueue.main.async { withAnimation { proxy.scrollTo(Self.sheetID, anchor: .bottom) } }
+                    DispatchQueue.main.async { withAnimation(tokens.motion(Token.Motion.smooth)) { proxy.scrollTo(Self.sheetID, anchor: .bottom) } }
                 }
                 .onChange(of: height) {
                     guard opening else { return }
                     opening = false
-                    DispatchQueue.main.async { withAnimation { proxy.scrollTo(Self.sheetID, anchor: .bottom) } }
+                    DispatchQueue.main.async { withAnimation(tokens.motion(Token.Motion.smooth)) { proxy.scrollTo(Self.sheetID, anchor: .bottom) } }
                 }
                 .scrollPosition($position)
                 .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y } action: { _, y in offset = y }

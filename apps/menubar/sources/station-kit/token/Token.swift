@@ -326,16 +326,20 @@ public enum Token {
         Color(.sRGB, red: Double((value >> 16) & 0xFF) / 255, green: Double((value >> 8) & 0xFF) / 255, blue: Double(value & 0xFF) / 255, opacity: 1)
     }
 
-    public static func palette(_ scheme: ColorScheme) -> Palette {
+    static func rgba(_ red: Int, _ green: Int, _ blue: Int, _ alpha: Double) -> Color {
+        Color(.sRGB, red: Double(red) / 255, green: Double(green) / 255, blue: Double(blue) / 255, opacity: alpha)
+    }
+
+    public static func palette(_ scheme: ColorScheme, accent: Color) -> Palette {
         Palette(
             text: Color.primary, muted: Color.secondary,
-            accent: Color.accentColor, glyph: Hue.green(scheme), good: Color.green, warn: Color.orange, bad: Color.red,
+            accent: accent, glyph: Hue.green(scheme), good: Color.green, warn: Color.orange, bad: Color.red,
             onTint: Color.white, qrDark: hex(0x000000), qrLight: hex(0xFFFFFF))
     }
 }
 
-private struct PaletteKey: EnvironmentKey {
-    static let defaultValue = Token.palette(.dark)
+private struct AccentKey: EnvironmentKey {
+    static let defaultValue: Color? = nil
 }
 
 private struct HintsKey: EnvironmentKey {
@@ -351,10 +355,16 @@ private struct NowKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    public var stationPalette: Token.Palette {
-        get { self[PaletteKey.self] }
-        set { self[PaletteKey.self] = newValue }
+    public var stationAccent: Color? {
+        get { self[AccentKey.self] }
+        set { self[AccentKey.self] = newValue }
     }
+
+    public var stationTokens: Token.Resolved {
+        Token.resolved(scheme: colorScheme, contrast: stationContrast, reduceTransparency: stationReduceTransparency, reduceMotion: stationReduceMotion, accent: stationAccent)
+    }
+
+    public var stationPalette: Token.Palette { stationTokens.palette }
 
     public var stationHints: Bool {
         get { self[HintsKey.self] }
@@ -374,17 +384,558 @@ extension EnvironmentValues {
 
 extension View {
     public func stationTheme(_ scheme: ColorScheme) -> some View {
-        environment(\.colorScheme, scheme).environment(\.stationPalette, Token.palette(scheme))
+        environment(\.colorScheme, scheme)
     }
 
-    // value: the palette of the appearance macOS shows, light or dark.
-    public func stationSystemTheme() -> some View { modifier(SystemTheme()) }
+    // value: the appearance macOS shows, light or dark, and the owner's
+    // accent in place of the pinned one.
+    public func stationSystemTheme() -> some View { environment(\.stationAccent, Color.accentColor) }
 }
 
-struct SystemTheme: ViewModifier {
-    @Environment(\.colorScheme) private var scheme
+extension Token {
+    // value: the v4 colour table (SPEC A1), by scheme and contrast.
+    public struct Colors: Sendable {
+        public let panel, panelSolid, panelEdge, sheetSolid, menu: Color
+        public let card, hero, card2, hair: Color
+        public let t1, t2, t3, t4: Color
+        public let q, qq, key, track: Color
+        public let accent, accentText, green, greenText, orange, orangeText, red, redText, indigo: Color
+        public let scrim, scrimFind, ring, hud: Color
 
-    func body(content: Content) -> some View {
-        content.environment(\.stationPalette, Token.palette(scheme))
+        public func of(_ tone: Tone) -> Color {
+            switch tone {
+            case .t1: t1
+            case .t2: t2
+            case .t3: t3
+            case .t4: t4
+            case .section: t1.opacity(Role.sectionShare)
+            case .hud: Color.white
+            }
+        }
+    }
+
+    public static let accentDark = hex(0x0A84FF)
+    public static let accentLight = hex(0x007AFF)
+
+    public static func colors(_ scheme: ColorScheme, contrast: ColorSchemeContrast, accent: Color? = nil) -> Colors {
+        let dark = scheme == .dark
+        let ic = contrast == .increased
+        let panelSolid = dark ? hex(0x2A2A2C) : hex(0xF6F6F8)
+        let menu = dark ? rgba(44, 46, 56, ic ? 1 : 0.94) : rgba(246, 246, 248, ic ? 1 : 0.96)
+        let card: Color, hero: Color, card2: Color, hair: Color, t2: Color, t3: Color, q: Color, qq: Color
+        switch (dark, ic) {
+        case (true, false):
+            card = rgba(255, 255, 255, 0.085); hero = rgba(255, 255, 255, 0.115); card2 = rgba(255, 255, 255, 0.11)
+            hair = rgba(255, 255, 255, 0.09); t2 = rgba(235, 235, 245, 0.66); t3 = rgba(235, 235, 245, 0.40)
+            q = rgba(255, 255, 255, 0.075); qq = rgba(255, 255, 255, 0.13)
+        case (true, true):
+            card = hex(0x2C2D33); hero = hex(0x34353B); card2 = hex(0x3A3B41)
+            hair = rgba(255, 255, 255, 0.30); t2 = rgba(235, 235, 245, 0.80); t3 = rgba(235, 235, 245, 0.60)
+            q = rgba(255, 255, 255, 0.14); qq = rgba(255, 255, 255, 0.22)
+        case (false, false):
+            card = rgba(255, 255, 255, 0.62); hero = rgba(255, 255, 255, 0.86); card2 = rgba(255, 255, 255, 0.85)
+            hair = rgba(0, 0, 0, 0.08); t2 = rgba(60, 60, 67, 0.80); t3 = rgba(60, 60, 67, 0.52)
+            q = rgba(0, 0, 0, 0.05); qq = rgba(0, 0, 0, 0.085)
+        case (false, true):
+            card = hex(0xFFFFFF); hero = hex(0xFFFFFF); card2 = hex(0xF2F2F5)
+            hair = rgba(0, 0, 0, 0.28); t2 = rgba(40, 40, 45, 0.86); t3 = rgba(40, 40, 45, 0.66)
+            q = rgba(0, 0, 0, 0.08); qq = rgba(0, 0, 0, 0.14)
+        }
+        let pinned = dark ? accentDark : accentLight
+        return Colors(
+            panel: ic ? panelSolid : (dark ? rgba(30, 31, 38, 0.52) : rgba(236, 236, 242, 0.60)),
+            panelSolid: panelSolid,
+            panelEdge: dark ? rgba(255, 255, 255, 0.20) : rgba(255, 255, 255, 0.75),
+            sheetSolid: dark ? hex(0x272A35) : hex(0xF9F9FB),
+            menu: menu, card: card, hero: hero, card2: card2, hair: hair,
+            t1: dark ? rgba(255, 255, 255, 0.94) : hex(0x1D1D1F), t2: t2, t3: t3,
+            t4: dark ? rgba(235, 235, 245, 0.16) : rgba(60, 60, 67, 0.18),
+            q: q, qq: qq,
+            key: dark ? rgba(255, 255, 255, 0.10) : rgba(0, 0, 0, 0.07),
+            track: dark ? rgba(255, 255, 255, 0.08) : rgba(0, 0, 0, 0.07),
+            accent: accent ?? pinned, accentText: accent ?? (dark ? hex(0x409CFF) : hex(0x0063D1)),
+            green: dark ? hex(0x32D74B) : hex(0x28B14C), greenText: dark ? hex(0x32D74B) : hex(0x1A7F37),
+            orange: dark ? hex(0xFF9F0A) : hex(0xFF9500), orangeText: dark ? hex(0xFFB340) : hex(0xA85400),
+            red: dark ? hex(0xFF453A) : hex(0xFF3B30), redText: dark ? hex(0xFF6961) : hex(0xD70015),
+            indigo: dark ? hex(0x7D7AFF) : hex(0x5856D6),
+            scrim: dark ? rgba(0, 0, 0, 0.40) : rgba(20, 20, 30, 0.22),
+            scrimFind: dark ? rgba(0, 0, 0, 0.32) : rgba(20, 20, 30, 0.14),
+            ring: dark ? rgba(46, 48, 58, 1) : rgba(246, 247, 251, 1),
+            hud: Color.black)
+    }
+
+    // value: a brand's chip, its colour in every mode: one fill or a
+    // gradient's two, and its mark.
+    public struct Chip: Sendable {
+        public let fill: [Color]
+        public let mark: Color
+    }
+
+    public enum Brand: String, CaseIterable, Sendable {
+        case github, claude, npm, tailscale, cloudflare, docker, vite, astro, postgres, traefik, kubernetes, node, storybook
+
+        public func chip(_ scheme: ColorScheme) -> Chip {
+            let dark = scheme == .dark
+            let white = Color.white
+            return switch self {
+            case .github: dark ? Chip(fill: [hex(0xF0F3F6)], mark: hex(0x1F2328)) : Chip(fill: [hex(0x24292F)], mark: white)
+            case .claude: Chip(fill: [hex(0xD97757)], mark: white)
+            case .npm: Chip(fill: [hex(0xCB3837)], mark: white)
+            case .tailscale: Chip(fill: [hex(dark ? 0x3A3A3C : 0x242424)], mark: white)
+            case .cloudflare: Chip(fill: [hex(0xF38020)], mark: white)
+            case .docker: Chip(fill: [hex(0x1D63ED)], mark: white)
+            case .vite: Chip(fill: [hex(0x41A8FF), hex(0xA245FC)], mark: hex(0xFFD62E))
+            case .astro: Chip(fill: [hex(0x17191E)], mark: white)
+            case .postgres: Chip(fill: [hex(0x336791)], mark: white)
+            case .traefik: Chip(fill: [hex(0x24A1C1)], mark: white)
+            case .kubernetes: Chip(fill: [hex(0x326CE5)], mark: white)
+            case .node: Chip(fill: [hex(0x3F873F)], mark: white)
+            case .storybook: Chip(fill: [hex(0xFF4785)], mark: white)
+            }
+        }
+    }
+
+    // value: the four text tones, the section label's t1 at 82 %, and the
+    // HUD's white.
+    public enum Tone: Sendable { case t1, t2, t3, t4, section, hud }
+
+    // value: a type role of SPEC A1: SF Pro, Rounded or Mono at a size and
+    // a weight, its tracking in points, its tone; every value tabular.
+    public struct Role: Sendable {
+        public let size: CGFloat
+        public let weight: Font.Weight
+        public let design: Font.Design
+        public let tracking: CGFloat
+        public let tone: Tone
+
+        init(_ size: CGFloat, _ weight: Font.Weight, _ tone: Tone, design: Font.Design = .default, tracking: CGFloat = 0) {
+            self.size = size
+            self.weight = weight
+            self.design = design
+            self.tracking = tracking
+            self.tone = tone
+        }
+
+        public var font: Font { .system(size: size, weight: weight, design: design).monospacedDigit() }
+
+        static let sectionShare = 0.82
+
+        public static let heroTitle = Role(17, .bold, .t1, tracking: -0.17)
+        public static let pageTitle = Role(17, .bold, .t1)
+        public static let homeTitle = Role(13, .bold, .t1)
+        public static let sectionLabel = Role(12, .semibold, .section)
+        public static let sectionValue = Role(12, .medium, .t3)
+        public static let rowName = Role(13, .medium, .t1)
+        public static let rowSuffix = Role(11, .regular, .t3)
+        public static let rowSub = Role(11, .regular, .t2)
+        public static let rowValue = Role(12, .regular, .t2)
+        public static let facts = Role(12, .regular, .t2)
+        public static let tileCaption = Role(11, .medium, .t2)
+        public static let tileNumber = Role(17, .semibold, .t1, design: .rounded)
+        public static let tileUnit = Role(11, .regular, .t2)
+        public static let gaugeTitle = Role(11, .medium, .t2)
+        public static let gaugeValue = Role(15, .semibold, .t1, design: .rounded)
+        public static let gaugeUnit = Role(11, .medium, .t2)
+        public static let button = Role(12, .semibold, .t1)
+        public static let verb = Role(11, .semibold, .t1)
+        public static let address = Role(11, .regular, .t1, design: .monospaced)
+        public static let findGroup = Role(11, .semibold, .t3)
+        public static let findResult = Role(13, .regular, .t1)
+        public static let sheetTitle = Role(15, .semibold, .t1)
+        public static let sheetBody = Role(12, .regular, .t2)
+        public static let alertTitle = Role(13, .bold, .t1)
+        public static let alertBody = Role(11, .regular, .t2)
+        public static let keyCap = Role(11, .medium, .t2)
+        public static let hud = Role(12, .medium, .hud)
+        public static let tooltip = Role(11, .regular, .t1)
+
+        public static let all: [(String, Role)] = [
+            ("hero title", heroTitle), ("page title", pageTitle), ("home title", homeTitle), ("section label", sectionLabel),
+            ("section value", sectionValue), ("row name", rowName), ("row suffix", rowSuffix), ("row sub", rowSub),
+            ("row value", rowValue), ("facts", facts), ("tile caption", tileCaption), ("tile number", tileNumber),
+            ("tile unit", tileUnit), ("gauge title", gaugeTitle), ("gauge value", gaugeValue), ("gauge unit", gaugeUnit),
+            ("button", button), ("verb", verb), ("address", address), ("find group", findGroup), ("find result", findResult),
+            ("sheet title", sheetTitle), ("sheet body", sheetBody), ("alert title", alertTitle), ("alert body", alertBody),
+            ("key cap", keyCap), ("hud", hud), ("tooltip", tooltip),
+        ]
+    }
+
+    // value: the v4 metrics (SPEC A1), in points.
+    public enum Metric {
+        public enum Panel {
+            public static let width: CGFloat = 340
+            public static let radius: CGFloat = 18
+            public static let header = EdgeInsets(top: 10, leading: 14, bottom: 8, trailing: 14)
+            public static let body = EdgeInsets(top: 2, leading: 12, bottom: 12, trailing: 12)
+            public static let blocks: CGFloat = 8
+            public static let label: CGFloat = 4
+            public static let footer = EdgeInsets(top: 6, leading: 12, bottom: 12, trailing: 12)
+            public static let cap: CGFloat = 700
+            public static let screenRoom: CGFloat = 48
+            public static let fade: CGFloat = 14
+            public static let rim: CGFloat = 1
+            public static let unknownScreen: CGFloat = 800
+            public static let dockGap: CGFloat = 16
+            public static let leastRoom: CGFloat = 320
+        }
+
+        public enum Card {
+            public static let radius: CGFloat = 12
+            public static let padding = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
+            public static let flush: CGFloat = 4
+            public static let highlight: CGFloat = 0.5
+            public static let contrastStroke: CGFloat = 1
+        }
+
+        public enum Row {
+            public static let height: CGFloat = 34
+            public static let twoLines: CGFloat = 38
+            public static let padding: CGFloat = 8
+            public static let gap: CGFloat = 8
+            public static let radius: CGFloat = 8
+            public static let accessory: CGFloat = 24
+            public static let hairline: CGFloat = 0.5
+            public static let inset: CGFloat = 36
+            public static let insetGlyph: CGFloat = 40
+            public static let insetRing: CGFloat = 44
+            public static let insetEnd: CGFloat = 8
+        }
+
+        public enum Hero {
+            public static let radius: CGFloat = 12
+            public static let padding = EdgeInsets(top: 9, leading: 12, bottom: 8, trailing: 12)
+            public static let top: CGFloat = 44
+            public static let topTitleOnly: CGFloat = 28
+            public static let glyph: CGFloat = 26
+            public static let slot = CGSize(width: 24, height: 28)
+            public static let row: CGFloat = 32
+            public static let more: CGFloat = 28
+        }
+
+        public enum Tiles {
+            public static let columns = 3
+            public static let gap: CGFloat = 6
+            public static let height: CGFloat = 56
+            public static let padding = EdgeInsets(top: 7, leading: 10, bottom: 8, trailing: 10)
+            public static let radius: CGFloat = 12
+        }
+
+        public enum Gauges {
+            public static let columns = 3
+            public static let gap: CGFloat = 6
+            public static let height: CGFloat = 62
+            public static let padding = EdgeInsets(top: 7, leading: 9, bottom: 7, trailing: 9)
+            public static let visual: CGFloat = 14
+        }
+
+        public struct Control: Sendable {
+            public let height: CGFloat
+            public let radius: CGFloat
+            public let padding: CGFloat
+
+            public static let button = Control(height: 24, radius: 12, padding: 10)
+            public static let big = Control(height: 28, radius: 14, padding: 14)
+            public static let verb = Control(height: 22, radius: 11, padding: 0)
+            public static let verbMinWidth: CGFloat = 64
+            public static let round: CGFloat = 24
+            public static let roundSmall: CGFloat = 20
+            public static let roundTopBar: CGFloat = 26
+            public static let icon: CGFloat = 24
+            public static let switchSize = CGSize(width: 30, height: 18)
+            public static let knob: CGFloat = 14
+            public static let segmented = Control(height: 24, radius: 7, padding: 2)
+            public static let thumbRadius: CGFloat = 5
+            public static let windowPicker: CGFloat = 18
+            public static let pill = Control(height: 18, radius: 9, padding: 0)
+            public static let keyCap: CGFloat = 16
+            public static let keyCapRadius: CGFloat = 4
+            public static let keyCapPadding = EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5)
+            public static let contrastRim: CGFloat = 1
+            public static let contrastRimShare = 0.35
+        }
+
+        public enum Marks {
+            public static let dot: CGFloat = 7
+            public static let ringStroke: CGFloat = 1.3
+            public static let glyph: CGFloat = 14
+            public static let glyphSlot: CGFloat = 24
+            public static let macRing: CGFloat = 28
+            public static let macRingStroke: CGFloat = 2.6
+            public static let macRingRadius: CGFloat = 11.2
+            public static let progress: CGFloat = 14
+            public static let progressStroke: CGFloat = 2.2
+            public static let spinner: CGFloat = 13
+            public static let spinnerSmall: CGFloat = 10
+            public static let spinnerStroke: CGFloat = 1.6
+            public static let logoChip: CGFloat = 22
+            public static let logoRadius: CGFloat = 6
+            public static let logoMark: CGFloat = 13
+            public static let check: CGFloat = 16
+        }
+
+        public enum Chart {
+            public static let cpu: CGFloat = 80
+            public static let chips: CGFloat = 18
+            public static let network: CGFloat = 64
+            public static let spark = CGSize(width: 60, height: 14)
+            public static let uptimeCells = 30
+            public static let uptimeHeight: CGFloat = 16
+            public static let uptimeGap: CGFloat = 2
+            public static let uptimeRadius: CGFloat = 2
+        }
+
+        public enum Find {
+            public static let field: CGFloat = 30
+            public static let fieldRadius: CGFloat = 15
+            public static let margin = EdgeInsets(top: 12, leading: 12, bottom: 4, trailing: 12)
+            public static let focusShare = 0.55
+            public static let result: CGFloat = 30
+            public static let resultRadius: CGFloat = 8
+            public static let results: CGFloat = 440
+            public static let footer: CGFloat = 30
+        }
+
+        public enum Sheet {
+            public static let inset: CGFloat = 8
+            public static let radius: CGFloat = 14
+            public static let header = EdgeInsets(top: 12, leading: 16, bottom: 4, trailing: 16)
+            public static let body = EdgeInsets(top: 8, leading: 16, bottom: 10, trailing: 16)
+            public static let footer = EdgeInsets(top: 10, leading: 12, bottom: 12, trailing: 12)
+            public static let labelColumn: CGFloat = 58
+            public static let formGap: CGFloat = 10
+        }
+
+        public enum Alert {
+            public static let width: CGFloat = 268
+            public static let padding = EdgeInsets(top: 18, leading: 16, bottom: 14, trailing: 16)
+            public static let radius: CGFloat = 16
+            public static let icon: CGFloat = 34
+            public static let buttonsAbove: CGFloat = 14
+        }
+
+        public enum Menu {
+            public static let minWidth: CGFloat = 200
+            public static let padding: CGFloat = 5
+            public static let radius: CGFloat = 11
+            public static let item: CGFloat = 24
+            public static let itemRadius: CGFloat = 6
+            public static let icon: CGFloat = 16
+        }
+
+        public enum Popover {
+            public static let width: CGFloat = 236
+            public static let widthQR: CGFloat = 304
+            public static let padding: CGFloat = 12
+            public static let paddingQR: CGFloat = 10
+            public static let radius: CGFloat = 14
+            public static let qr: CGFloat = 112
+            public static let qrAlone: CGFloat = 132
+        }
+
+        public enum HUD {
+            public static let height: CGFloat = 34
+            public static let corner: CGFloat = 18
+            public static let padding = EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 16)
+            public static let icon: CGFloat = 16
+        }
+
+        public enum Tooltip {
+            public static let maxWidth: CGFloat = 280
+            public static let padding = EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
+            public static let radius: CGFloat = 6
+            public static let size: CGFloat = 11
+            public static let wait: Double = 1
+        }
+    }
+
+    // value: the prototype's three curves, its tint, and what each becomes
+    // under Reduce Motion.
+    public enum Motion {
+        public static let snappy = Animation.timingCurve(snappyCurve, duration: 0.20)
+        public static let smooth = Animation.timingCurve(smoothCurve, duration: 0.34)
+        public static let bouncy = Animation.spring(bouncySpring)
+        public static let tint = Animation.easeOut(duration: 0.12)
+        public static let sample = Animation.linear(duration: 0.2)
+
+        public static let snappyCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: 0.30, y: 0.90), endControlPoint: UnitPoint(x: 0.30, y: 1))
+        public static let smoothCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: 0.32, y: 0.72), endControlPoint: UnitPoint(x: 0, y: 1))
+        public static let bouncySpring = Spring(duration: 0.225, bounce: 0.42)
+        public static let bouncyDuration = 0.46
+        public static let bouncyStops: [(at: Double, value: Double)] = [
+            (0, 0), (0.05, 0.157), (0.11, 0.53), (0.18, 0.896), (0.25, 1.077), (0.30, 1.115),
+            (0.36, 1.093), (0.46, 1.019), (0.56, 0.991), (0.70, 0.995), (1, 1),
+        ]
+
+        public static func bouncy(at progress: Double) -> Double {
+            bouncySpring.value(target: 1.0, time: min(max(progress, 0), 1) * bouncyDuration)
+        }
+
+        public static func resolved(_ animation: Animation, reduce: Bool) -> Animation { reduce ? .easeInOut(duration: 0.15) : animation }
+        public static let reducedHeight = Animation.easeInOut(duration: 0.20)
+        public static let reducedPage = Animation.easeInOut(duration: 0.24)
+        public static let reducedPageGone = 0.45
+
+        // value: when the panel opened is made key, in seconds.
+        public static let keyTries: [Double] = [0, 0.05, 0.15, 0.4, 0.8]
+    }
+
+    // value: the tokens a view reads, resolved once from the scheme, the
+    // kit's contrast, transparency and motion switches, and the accent:
+    // the pinned blue unless the app hands it the owner's.
+    public struct Resolved: Sendable {
+        public let scheme: ColorScheme
+        public let increased: Bool
+        public let solid: Bool
+        public let reduceMotion: Bool
+        public let color: Colors
+        public let palette: Palette
+
+        public var panel: Color { solid ? color.panelSolid : color.panel }
+
+        public func tone(_ tone: Tone) -> Color { color.of(tone) }
+
+        public func chip(_ id: String?) -> Chip {
+            Brand(rawValue: id ?? "")?.chip(scheme) ?? Chip(fill: [color.q], mark: color.t2)
+        }
+
+        public func motion(_ animation: Animation) -> Animation { Motion.resolved(animation, reduce: reduceMotion) }
+    }
+
+    public static func resolved(scheme: ColorScheme, contrast: ColorSchemeContrast = .standard, reduceTransparency: Bool = false, reduceMotion: Bool = false, accent: Color? = nil) -> Resolved {
+        let color = colors(scheme, contrast: contrast, accent: accent)
+        return Resolved(
+            scheme: scheme, increased: contrast == .increased, solid: contrast == .increased || reduceTransparency, reduceMotion: reduceMotion,
+            color: color, palette: palette(scheme, accent: color.accent))
+    }
+}
+
+extension Token {
+    // value: the steps today's views stack and inset by.
+    public enum Gap {
+        public static let line: CGFloat = 1
+        public static let tight: CGFloat = 2
+        public static let inner: CGFloat = 3
+        public static let small: CGFloat = 4
+        public static let flank: CGFloat = 5
+        public static let item: CGFloat = 6
+        public static let row: CGFloat = 7
+        public static let pair: CGFloat = 8
+        public static let block: CGFloat = 10
+        public static let edge: CGFloat = 12
+        public static let section: CGFloat = 14
+    }
+
+    // value: the line widths today's views stroke with.
+    public enum Stroke {
+        public static let hair: CGFloat = 0.5
+        public static let rim: CGFloat = 0.6
+        public static let base: CGFloat = 0.75
+        public static let ringed: CGFloat = 0.8
+        public static let rule: CGFloat = 1
+        public static let spark: CGFloat = 1.3
+        public static let graph: CGFloat = 1.5
+        public static let caret: CGFloat = 1.5
+        public static let focus: CGFloat = 2
+        public static let open: CGFloat = 3
+    }
+
+    // value: the shares a dimmed or fading thing keeps.
+    public enum Fade {
+        public static let connecting = 0.5
+        public static let disabled = 0.4
+        public static let off = 0.45
+        public static let quiet = 0.75
+        public static let graphTop = 0.4
+        public static let graphFloor = 0.08
+        public static let sparkTop = 0.35
+    }
+
+    // value: a knob's or a raised segment's drop shadow.
+    public struct Shadow: Sendable {
+        public let color: Color
+        public let radius: CGFloat
+        public let y: CGFloat
+
+        public static let knob = Shadow(color: Color.black.opacity(0.25), radius: 1.5, y: 1)
+        public static let toggle = Shadow(color: Color.black.opacity(0.3), radius: 1.5, y: 1)
+        public static let thumb = Shadow(color: Color.black.opacity(0.12), radius: 1.5, y: 1)
+        public static let panelRadius: CGFloat = 18
+        public static let panelY: CGFloat = 10
+    }
+
+    // value: the system's own label and fill styles today's views ink with.
+    public enum Ink {
+        public static let primary = HierarchicalShapeStyle.primary
+        public static let secondary = HierarchicalShapeStyle.secondary
+        public static let tertiary = HierarchicalShapeStyle.tertiary
+        public static let separator = SeparatorShapeStyle()
+        public static let track = AnyShapeStyle(.fill.tertiary)
+        public static let idle = AnyShapeStyle(.fill.secondary)
+    }
+
+    // value: today's glyph sizes beside their text, and the tracking a
+    // big number or a page title is drawn with.
+    public enum Detail {
+        public static let chevron: CGFloat = 12
+        public static let back: CGFloat = 11
+        public static let caret: CGFloat = 10
+        public static let menu: CGFloat = 13
+        public static let menuStroke: CGFloat = 14
+        public static let check: CGFloat = 12
+        public static let knob: CGFloat = 18
+        public static let sparkDot: CGFloat = 4.4
+        public static let pillIcon: CGFloat = 22
+        public static let caretHeight: CGFloat = 14
+        public static let anchor: CGFloat = 1
+        public static let figureTracking: CGFloat = -0.01
+        public static let titleTracking: CGFloat = -0.015
+        public static let codeCorner: CGFloat = 5
+        public static let thumbCorner: CGFloat = 8
+        public static let stroke16Box: CGFloat = 11.6
+        public static let stroke16Corner: CGFloat = 3.2
+        public static let stroke16Inset: CGFloat = 2.2
+        public static let roundGlyph: CGFloat = 13
+        public static let squareGlyph: CGFloat = 11
+        public static let figureShrink = 0.8
+    }
+
+    // value: a bar's share of its slot and its corner, in a chart and in
+    // a sparkline.
+    public enum Bar {
+        public static let chartShare = 0.8
+        public static let sparkShare = 0.6
+        public static let chartCorner: CGFloat = 2
+        public static let sparkCorner: CGFloat = 1
+        public static let waiting = 0.25
+        public static let least = 0.06
+        public static let level = 0.5
+        public static let swing = 0.1
+    }
+
+    // value: the vision's sparkline frame: a share p sits at 24 - 0.22 p
+    // of a 26 high box, the line runs from 2 to 92 of its 96 wide.
+    public enum Spark {
+        public static let floor = -24.0 / 0.22 * (2.0 / 24)
+        public static let top = 24.0 / 0.22
+        public static let base = (24.0 - 25.5) / 0.22
+    }
+
+    // value: what a line of text is measured by: a character's width and
+    // a row's mark in a laid out row, the Activity page's CPU and Memory
+    // columns, and what the pixel grid may take off a width it is given.
+    public enum Measure {
+        public static let char: CGFloat = 6.6
+        public static let mark: CGFloat = 12
+        public static let column: CGFloat = 56
+        public static let grid: CGFloat = 0.5
+    }
+
+    // value: the least height a line of today's pages takes.
+    public enum Line {
+        public static let activity: CGFloat = 36
+        public static let machine: CGFloat = 24
+        public static let card: CGFloat = 26
+        public static let leadChart: CGFloat = 56
+        public static let chart: CGFloat = 30
     }
 }

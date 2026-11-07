@@ -14,7 +14,7 @@ public enum PanelWindow {
     // value: when the panel opened is made key, in seconds: it appears
     // before macOS shows its window, so the first tries find no window
     // shown yet, and Home, which nothing pushes, would never take a key.
-    public static let tries: [Double] = [0, 0.05, 0.15, 0.4, 0.8]
+    public static let tries = Token.Motion.keyTries
 
     public static func key(_ windows: [NSWindow]) {
         guard let panel = panel(windows), !panel.isKeyWindow else { return }

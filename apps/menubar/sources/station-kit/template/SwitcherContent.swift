@@ -118,7 +118,7 @@ struct SwitcherContent: View {
             }
             SheetFor(page: page, state: state, handlers: handlers)
             VStack(alignment: .leading, spacing: 0) {
-                SectionDivider().padding(.bottom, 2)
+                SectionDivider().padding(.bottom, Token.Gap.tight)
                 Button(action: handlers.back) {
                     MenuText(symbol: Token.Symbol.list, title: "Show all machines", key: Token.Key.shown("cmd+0"), danger: false)
                 }

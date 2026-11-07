@@ -17,6 +17,63 @@ final class KitBoundaryTests: XCTestCase {
     static let surfaceOnly = [".quinary", "Token.Fill.tile", ".glassProminent", ".buttonStyle(.bordered", ".toggleStyle(.switch)"]
     static let glyphs: [Character] = ["→", "·", "…", "⏻", "⚡", "●", "◐", "○", "✗", "◌"]
 
+    static let views = ["atom/", "molecule/", "organism/", "template/", "catalog/"]
+    static let sizeKey = try! NSRegularExpression(pattern: #"\b(spacing|width|height|minWidth|minHeight|maxWidth|maxHeight|idealWidth|idealHeight|minLength|cornerRadius|lineWidth|radius|size|top|leading|bottom|trailing|x|y|duration|dash|bounce|response): "#)
+    static let sizeCall = try! NSRegularExpression(pattern: #"\.(padding|offset|opacity|tracking|kerning|blur|scaleEffect|ratio|brightness|saturation|cornerRadius|lineSpacing|minimumScaleFactor|rotationEffect|shadow|timingCurve|easeOut|easeIn|easeInOut|linear|spring)\("#)
+    static let sizeDeclared = try! NSRegularExpression(pattern: #"\b(?:let|var) \w+: \[?CGFloat\]?"#)
+    static let number = try! NSRegularExpression(pattern: #"(?<![\w.\\])(\d+\.\d+|\.\d+|\d+)(?![\w.])"#)
+    static let doubled = try! NSRegularExpression(pattern: #"[*/] ?2(?![\w.])|(?<![\w.])2 ?\*"#)
+    static let style = try! NSRegularExpression(pattern: #"Color\.(?!clear\b)[a-z]|color: \.|\(\.(primary|secondary|tertiary|quaternary|separator|fill|tint|black|white)\b"#)
+    static let motion = try! NSRegularExpression(pattern: #"withAnimation \{|withAnimation\(\.|\.animation\(\.|Animation\."#)
+
+    // invariant: a view draws with the tokens only: a size, a share, a
+    // style or an animation of its own is a literal Token does not name;
+    // zero, a token doubled or halved, an opacity of one and a chart's
+    // plotted value are not, nor a glyph's drawn points, which are its
+    // geometry on its own grid.
+    static func literals(_ line: String) -> [String] {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.hasPrefix("//") else { return [] }
+        let text = doubled.stringByReplacingMatches(in: line, range: NSRange(line.startIndex..., in: line), withTemplate: "")
+        let chars = Array(text)
+        func argument(from start: Int, comma: Bool) -> String {
+            var depth = 0, i = start
+            while i < chars.count {
+                let c = chars[i]
+                if "([{".contains(c) { depth += 1 }
+                if ")]}".contains(c) { if depth == 0 { break }; depth -= 1 }
+                if comma && c == "," && depth == 0 { break }
+                i += 1
+            }
+            return String(chars[start..<i])
+        }
+        func opened(_ re: NSRegularExpression, comma: Bool) -> [(String, String)] {
+            re.matches(in: text, range: NSRange(text.startIndex..., in: text)).map {
+                let end = text.distance(from: text.startIndex, to: Range($0.range, in: text)!.upperBound)
+                return (String(text[Range($0.range(at: 1), in: text)!]), argument(from: end, comma: comma))
+            }
+        }
+        func numbers(_ arg: String) -> [Double] {
+            number.matches(in: arg, range: NSRange(arg.startIndex..., in: arg)).compactMap { Double(String(arg[Range($0.range, in: arg)!])) }
+        }
+        let neutral: Set<String> = ["opacity", "ratio", "scaleEffect", "minimumScaleFactor"]
+        var out: [String] = []
+        for (key, arg) in opened(sizeKey, comma: true) where !arg.hasPrefix(".value(") && numbers(arg).contains(where: { $0 != 0 }) { out.append("a size literal (\(key))") }
+        for (call, arg) in opened(sizeCall, comma: false) {
+            let kept = numbers(arg).filter { $0 != 0 && !($0 == 1 && neutral.contains(call)) }
+            if !kept.isEmpty { out.append("a size literal (\(call))") }
+        }
+        let range = NSRange(text.startIndex..., in: text)
+        if let declared = sizeDeclared.firstMatch(in: text, range: range) {
+            let rest = String(text[Range(declared.range, in: text)!.upperBound...])
+            if numbers(rest).contains(where: { $0 != 0 && $0 != 1 }) { out.append("a size defined outside Token") }
+        }
+        if numbers(text).contains(where: { $0 > 0 && $0 < 1 }) { out.append("a share literal") }
+        if style.firstMatch(in: text, range: range) != nil { out.append("a style outside Token") }
+        if motion.firstMatch(in: text, range: range) != nil { out.append("an animation outside Token") }
+        return out
+    }
+
     // invariant: the Swift side of the kit's boundary: colours, symbol names
     // and glyphs live in Token only, no AppKit-backed control the offscreen
     // renderer cannot draw, every Mac drawn with one symbol (DECISIONS E1/E2:
@@ -34,6 +91,11 @@ final class KitBoundaryTests: XCTestCase {
                 }
                 if text.contains(where: { glyphs.contains($0) }) {
                     out.append(Finding(file: path, rule: "a glyph outside Token"))
+                }
+            }
+            if views.contains(where: path.hasPrefix) {
+                for line in text.components(separatedBy: "\n") {
+                    for rule in literals(line) where !out.contains(Finding(file: path, rule: rule)) { out.append(Finding(file: path, rule: rule)) }
                 }
             }
             for model in models where text.contains(model) {
@@ -130,6 +192,11 @@ final class KitBoundaryTests: XCTestCase {
             ("molecule/Field.swift", "x.background(.quinary).background(.ultraThinMaterial)"),
             ("template/Many.swift", "a.background(Token.Fill.tile(scheme))\nStationButton(role: .primary)\nStationButton(role: x ? .primary : .plain)"),
             ("molecule/Surface.swift", "Toggle().toggleStyle(.switch); x.background(.quinary)"),
+            ("atom/Ring.swift", "VStack(spacing: 6) { x.frame(width: Token.Tile.dot + 2).opacity(on ? 1 : 0.4).foregroundStyle(.secondary) }\n// spacing: 4\n.padding(Token.Gap.small * 2).animation(.snappy, value: on)"),
+            ("engine/Clock.swift", "x.frame(width: 4)"),
+            ("template/Awake.swift", "Spacer(minLength: 6).cornerRadius(7).lineSpacing(3).opacity(max(0, 1) > 0 ? 1 : 0.3)\nx.padding(Token.Gap.small * 3).frame(width: max(w, 4))"),
+            ("molecule/Layout.swift", "static let charWidth: CGFloat = 6.6\nstatic var room: CGFloat { max(h ?? 800, Token.Panel.least) }\nguard !waiting else { return 0.25 }"),
+            ("atom/Glyph.swift", "path.move(to: p(3, 4.5)); x.padding(Token.Gap.small * 2).padding(-Token.Stroke.open / 2)\nLineMark(x: .value(\"t\", i), y: .value(\"v\", min(p, 100))); zip(a.map(\\.0), b.map(\\.1))\nlet slack: CGFloat = 1"),
         ]).map(\.rule)
         XCTAssertEqual(caught, [
             "a colour outside Token", "ProgressView is not drawn offscreen",
@@ -139,6 +206,9 @@ final class KitBoundaryTests: XCTestCase {
             "glassEffect in the content", "a painted background",
             "Material in the content", ".quinary outside the kit's surface",
             "Token.Fill.tile outside the kit's surface", "2 primary actions on one page",
+            "a size literal (spacing)", "a size literal (width)", "a size literal (opacity)", "a share literal", "a style outside Token", "an animation outside Token",
+            "a size literal (minLength)", "a size literal (cornerRadius)", "a size literal (lineSpacing)", "a size literal (opacity)", "a share literal", "a size literal (width)", "a size literal (padding)",
+            "a size defined outside Token", "a share literal",
         ])
     }
 }

@@ -35,7 +35,7 @@ public struct ActivityPage: View {
             PageHeader(back: state.back ?? Page.ThisMacWord, title: "Activity", subtitle: Format.show(banner?.cells?.first ?? Value()), action: handlers.back)
             Segments(options: Self.picker(page, handlers: handlers).map { ($0.words, $0.picked, $0.tap) })
             if let graphs = page.section("graphs") {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: Token.Gap.section) {
                     ForEach(Array(graphs.rows.enumerated()), id: \.offset) { i, r in measure(r, lead: i == 0) }
                 }
                 .stationTile()
@@ -51,7 +51,7 @@ public struct ActivityPage: View {
                         Spacer(minLength: 0)
                         ForEach(["CPU", "Memory"], id: \.self) { key in
                             Text(key.uppercased()).font(.system(size: Token.Size.caption, weight: .semibold)).tracking(Token.Size.caption * Token.Size.tracking)
-                                .foregroundStyle(.secondary).frame(width: Self.column, alignment: .trailing)
+                                .foregroundStyle(Token.Ink.secondary).frame(width: Token.Measure.column, alignment: .trailing)
                         }
                     }
                     .padding(.trailing, Token.Tile.rowPadding.trailing)
@@ -99,12 +99,12 @@ public struct ActivityPage: View {
     // Now under it.
     func measure(_ r: Row, lead: Bool) -> some View {
         let words = r.cells?.first.map { Format.show($0) } ?? ""
-        let height: CGFloat = lead ? 56 : 30
-        return VStack(alignment: .leading, spacing: 4) {
+        let height = lead ? Token.Line.leadChart : Token.Line.chart
+        return VStack(alignment: .leading, spacing: Token.Gap.small) {
             HStack(alignment: .firstTextBaseline) {
-                Text(r.label ?? "").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                Text(r.label ?? "").font(.subheadline.weight(.semibold)).foregroundStyle(Token.Ink.primary)
                 Spacer(minLength: Token.Space.gap)
-                Text(words).font(.subheadline.weight(.medium)).foregroundStyle(.primary).lineLimit(1).monospacedDigit()
+                Text(words).font(.subheadline.weight(.medium)).foregroundStyle(Token.Ink.primary).lineLimit(1).monospacedDigit()
                     .contentTransition(.numericText())
             }
             switch Self.chart(r) {
@@ -112,16 +112,17 @@ public struct ActivityPage: View {
                 Graph(Self.buckets(points, 90), height: height, tint: tint(r.id))
             case .meter(let ratio):
                 GeometryReader { geo in
+                    let share = CGFloat(ratio.n ?? 0) / CGFloat(max(ratio.of ?? 1, 1))
                     ZStack(alignment: .leading) {
-                        Capsule().fill(.fill.tertiary)
-                        Capsule().fill(palette.accent).frame(width: geo.size.width * CGFloat(ratio.n ?? 0) / CGFloat(max(ratio.of ?? 1, 1)))
+                        Capsule().fill(Token.Ink.track)
+                        Capsule().fill(palette.accent).frame(width: geo.size.width * share)
                     }
                 }
                 .frame(height: Token.Space.meterHeight)
             case .waiting:
                 ZStack(alignment: .bottom) {
                     Color.clear
-                    Rectangle().fill(.fill.tertiary).frame(height: 1)
+                    Rectangle().fill(Token.Ink.track).frame(height: Token.Stroke.rule)
                 }
                 .frame(height: height)
                 .accessibilityLabel("Not sampled yet")
@@ -132,7 +133,7 @@ public struct ActivityPage: View {
                     Spacer()
                     Text("Now")
                 }
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Token.Ink.secondary)
             }
         }
     }
@@ -150,10 +151,6 @@ public struct ActivityPage: View {
         "Not among the busiest by \(key == "cpu" ? "CPU" : key)"
     }
 
-    // value: the width of the CPU and Memory columns, their header's and
-    // their figures'.
-    static let column: CGFloat = 56
-
     // value: the memory column's figures by process, each in the unit of
     // the largest.
     public static func memory(_ s: Section) -> [String: String] {
@@ -163,19 +160,19 @@ public struct ActivityPage: View {
 
     func process(_ s: Section, _ r: Row, memory: [String: String]) -> some View {
         HStack(spacing: Token.Space.gap) {
-            Text(r.label ?? "").font(.system(size: Token.Size.text)).foregroundStyle(.primary).lineLimit(1)
-            if let what = s.cell(r, "what") { Text(Format.show(what)).font(.subheadline).foregroundStyle(.secondary).lineLimit(1) }
+            Text(r.label ?? "").font(.system(size: Token.Size.text)).foregroundStyle(Token.Ink.primary).lineLimit(1)
+            if let what = s.cell(r, "what") { Text(Format.show(what)).font(.subheadline).foregroundStyle(Token.Ink.secondary).lineLimit(1) }
             Spacer(minLength: 0)
             ForEach(["cpu", "memory"], id: \.self) { key in
                 if let v = key == "memory" ? memory[r.id ?? ""] : s.cell(r, key).map({ Format.show($0) }) {
-                    Text(v).font(.subheadline).foregroundStyle(.secondary).monospacedDigit().lineLimit(1).frame(width: Self.column, alignment: .trailing)
+                    Text(v).font(.subheadline).foregroundStyle(Token.Ink.secondary).monospacedDigit().lineLimit(1).frame(width: Token.Measure.column, alignment: .trailing)
                 } else {
-                    Text(Token.Glyph.missing).font(.system(size: Token.Space.small)).foregroundStyle(.tertiary).frame(width: Self.column, alignment: .trailing)
+                    Text(Token.Glyph.missing).font(.system(size: Token.Space.small)).foregroundStyle(Token.Ink.tertiary).frame(width: Token.Measure.column, alignment: .trailing)
                         .help(Self.missing(key))
                 }
             }
         }
         .padding(Token.Tile.rowPadding)
-        .frame(minHeight: 36)
+        .frame(minHeight: Token.Line.activity)
     }
 }

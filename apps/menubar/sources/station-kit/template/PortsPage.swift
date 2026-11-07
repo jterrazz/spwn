@@ -67,7 +67,7 @@ public struct PortsPage: View {
         let words = why.dropFirst().map(\.capitalizedFirst) + [ports.joined(separator: ", ")] + (s.caption ?? []).map { Format.show($0) }
         return HStack(alignment: .center, spacing: Token.Tile.gap) {
             IconTile(Token.Symbol.warn, active: true, tint: palette.bad)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: Token.Gap.line) {
                 Wrap(title).font(.system(size: Token.Size.text, weight: .semibold)).lineLimit(2)
                 SubText(words.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep))
             }
@@ -96,9 +96,9 @@ public struct PortsPage: View {
     func needsLook(_ rows: [(title: String, words: String)]) -> some View {
         HStack(alignment: .center, spacing: Token.Tile.gap) {
             IconTile(Token.Symbol.warn, active: true, tint: palette.bad)
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Token.Gap.item) {
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, r in
-                    VStack(alignment: .leading, spacing: 1) {
+                    VStack(alignment: .leading, spacing: Token.Gap.line) {
                         Wrap(r.title).font(.system(size: Token.Size.text, weight: .semibold)).lineLimit(2)
                         SubText(r.words)
                     }
@@ -253,9 +253,9 @@ struct SharedPortCard: View {
         let links = PortsPage.link(url, handlers: handlers)
         VStack(alignment: .center, spacing: Token.Tile.gap) {
             QRView(url.absoluteString)
-                .padding(12)
+                .padding(Token.Gap.edge)
                 .background(RoundedRectangle(cornerRadius: Token.Tile.qrCorner, style: .continuous).fill(palette.qrLight))
-                .padding(.top, 4)
+                .padding(.top, Token.Gap.small)
             LinkText(url.absoluteString, center: true)
             SubText("Scan with your phone. Works on your tailnet.").multilineTextAlignment(.center)
             HStack(spacing: Token.Tile.pair) {
@@ -273,7 +273,7 @@ struct SharedPortCard: View {
             if let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
         }
         .frame(maxWidth: .infinity)
-        .padding(EdgeInsets(top: 0, leading: 12, bottom: 12, trailing: 12))
+        .padding(EdgeInsets(top: 0, leading: Token.Gap.edge, bottom: Token.Gap.edge, trailing: Token.Gap.edge))
     }
 
     func flash() {

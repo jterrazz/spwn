@@ -66,8 +66,8 @@ struct HomeContent: View {
         let words = row?.hint?.command.map { "Run \($0) in a terminal to set it up." } ?? "Start it to see your machines and what needs you."
         return HStack(alignment: .center, spacing: Token.Tile.gap) {
             IconTile(Token.Symbol.warn, tint: palette.warn)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: Token.Gap.line) {
+                Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(Token.Ink.primary)
                     .padding(.vertical, Token.Size.leading).fixedSize(horizontal: false, vertical: true)
                 SubText(words)
             }
@@ -115,12 +115,12 @@ struct HomeContent: View {
         let title = s.caption?.first.map { Format.show($0) } ?? s.title ?? ""
         let worst = TodoBadge.todo(page)
         let tint = (worst?.n ?? 0) == 0 ? nil : worst?.mark == .broken && rows.allSatisfy { $0.mark == .broken } ? palette.bad : palette.warn
-        return VStack(alignment: .leading, spacing: 6) {
+        return VStack(alignment: .leading, spacing: Token.Gap.item) {
             Button { unfolded.toggle() } label: {
                 HStack(alignment: .center, spacing: Token.Tile.gap) {
                     IconTile(Token.Symbol.warn, tint: tint)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(.primary).lineLimit(1)
+                    VStack(alignment: .leading, spacing: Token.Gap.line) {
+                        Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(Token.Ink.primary).lineLimit(1)
                             .padding(.vertical, Token.Size.leading)
                         if !unfolded {
                             SubText(Self.folded(s)).lineLimit(2)
@@ -138,7 +138,7 @@ struct HomeContent: View {
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                     HStack(spacing: Token.Tile.gap) {
                         StateDot(mark: row.mark).frame(width: Token.Tile.icon)
-                        VStack(alignment: .leading, spacing: 1) {
+                        VStack(alignment: .leading, spacing: Token.Gap.line) {
                             Wrap(row.label ?? "").font(.system(size: Token.Size.text)).lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let detail = row.detail, !detail.isNone {
@@ -154,7 +154,7 @@ struct HomeContent: View {
                             }
                         }
                     }
-                    .frame(minHeight: 24)
+                    .frame(minHeight: Token.Line.machine)
                 }
             }
         }
@@ -206,17 +206,17 @@ struct HomeContent: View {
         let button = { (label: AnyView) in
             Button { tap?() } label: { label.contentShape(Rectangle()) }.buttonStyle(.plain).allowsHitTesting(tap != nil)
         }
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: Token.Gap.small) {
             HStack(spacing: Token.Tile.gap) {
                 button(AnyView(HStack(spacing: Token.Tile.gap) {
                     IconTile(symbol, active: active)
-                    Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(.primary).lineLimit(1).fixedSize()
+                    Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(Token.Ink.primary).lineLimit(1).fixedSize()
                     if tap != nil, T.self == EmptyView.self { Chevron() }
                     Spacer(minLength: 0)
                 }))
                 trailing().fixedSize()
             }
-            .frame(minHeight: 26)
+            .frame(minHeight: Token.Line.card)
             if let words, !words.isEmpty {
                 button(AnyView(SubText(words.replacingOccurrences(of: Token.Glyph.dash, with: Token.Glyph.unbroken)).lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)))
@@ -247,15 +247,15 @@ struct HomeContent: View {
 
     var menu: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionDivider().padding(.bottom, 2)
+            SectionDivider().padding(.bottom, Token.Gap.tight)
             ForEach(Array(Self.footer(page.pageActions, stopped: stopped).enumerated()), id: \.offset) { _, a in
                 if state.running == a.id || (state.settling == a.id && Self.doing(a) != nil) {
                     HStack(spacing: Token.Tile.gap) {
                         PendingDot()
                         SubText(a.id == StopAll.id ? StopAll.progress(state.stopping, page) : Self.doing(a) ?? "\(a.label ?? "")\(Token.Glyph.ellipsis)")
                     }
-                    .frame(minHeight: Token.Tile.row - 8)
-                    .padding(.horizontal, 4)
+                    .frame(minHeight: Token.Tile.row - Token.Gap.pair)
+                    .padding(.horizontal, Token.Gap.small)
                     .accessibilityElement(children: .combine)
                 } else {
                     let line = MenuLine(action: a, symbol: Symbols.of(a), danger: a.id == "stop-all") { perform(a, handlers) }.disabled(state.running != nil)
@@ -360,7 +360,7 @@ struct ArrowKeys: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        Color.clear.frame(width: 1, height: 1)
+        Color.clear.frame(width: Token.Detail.anchor, height: Token.Detail.anchor)
             .focusable()
             .focusEffectDisabled()
             .focused($focused)

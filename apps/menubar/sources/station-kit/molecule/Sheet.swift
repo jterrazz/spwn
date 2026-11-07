@@ -30,15 +30,15 @@ public struct TypedField: View {
     }
 
     public var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Token.Gap.pair) {
             if let symbol { Image(systemName: symbol).font(.system(size: Token.Size.text, weight: .medium)).foregroundStyle(palette.glyph) }
             field
             if let key {
-                Text(key).font(.system(size: Token.Size.key)).foregroundStyle(.secondary)
+                Text(key).font(.system(size: Token.Size.key)).foregroundStyle(Token.Ink.secondary)
             }
         }
         .font(.system(size: Token.Size.text))
-        .padding(.horizontal, 10).padding(.vertical, 7)
+        .padding(.horizontal, Token.Gap.block).padding(.vertical, Token.Gap.row)
         .stationField()
     }
 
@@ -46,10 +46,10 @@ public struct TypedField: View {
     var field: some View {
         SwiftUI.Group {
             if still {
-                HStack(spacing: 2) {
-                    if text.isEmpty { Rectangle().fill(palette.accent).frame(width: 1.5, height: 14) }
-                    Text(text.isEmpty ? placeholder : text).foregroundStyle(text.isEmpty ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
-                    if !text.isEmpty { Rectangle().fill(palette.accent).frame(width: 1.5, height: 14) }
+                HStack(spacing: Token.Gap.tight) {
+                    if text.isEmpty { Rectangle().fill(palette.accent).frame(width: Token.Stroke.caret, height: Token.Detail.caretHeight) }
+                    Text(text.isEmpty ? placeholder : text).foregroundStyle(text.isEmpty ? AnyShapeStyle(Token.Ink.secondary) : AnyShapeStyle(Token.Ink.primary))
+                    if !text.isEmpty { Rectangle().fill(palette.accent).frame(width: Token.Stroke.caret, height: Token.Detail.caretHeight) }
                     Spacer(minLength: 0)
                 }
             } else {
@@ -80,7 +80,7 @@ public struct TypedField: View {
 // margin under its buttons.
 struct SheetGround: ViewModifier {
     func body(content: Content) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Token.Gap.block) {
             SectionDivider()
             content
         }
@@ -105,7 +105,7 @@ public struct Choice: View {
 
     public var body: some View {
         let all = (field.options ?? []).map { ($0.label ?? $0.value ?? "", ($0.value ?? "") == value, { [o = $0] in value = o.value ?? "" }) }
-        VStack(spacing: 4) {
+        VStack(spacing: Token.Gap.small) {
             ForEach(Array(stride(from: 0, to: all.count, by: Self.perRow)), id: \.self) { i in
                 Segments(options: Array(all[i..<min(i + Self.perRow, all.count)]))
             }
@@ -140,15 +140,15 @@ public struct ConfirmSheet: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(confirm.question ?? "").font(.body.weight(.semibold)).foregroundStyle(.primary)
+        VStack(alignment: .leading, spacing: Token.Gap.item) {
+            Text(confirm.question ?? "").font(.body.weight(.semibold)).foregroundStyle(Token.Ink.primary)
             ForEach(Array((confirm.lines ?? []).enumerated()), id: \.offset) { _, v in
                 let line = Self.line(v)
                 if line.code {
-                    Text(line.words).font(.system(size: Token.Size.sub, design: .monospaced)).foregroundStyle(.primary)
+                    Text(line.words).font(.system(size: Token.Size.sub, design: .monospaced)).foregroundStyle(Token.Ink.primary)
                         .textSelection(.enabled)
-                        .padding(.horizontal, 6).padding(.vertical, 3)
-                        .background(RoundedRectangle(cornerRadius: 5, style: .continuous).fill(.fill.tertiary))
+                        .padding(.horizontal, Token.Gap.item).padding(.vertical, Token.Gap.inner)
+                        .background(RoundedRectangle(cornerRadius: Token.Detail.codeCorner, style: .continuous).fill(Token.Ink.track))
                 } else {
                     SubText(line.words)
                 }
@@ -161,7 +161,7 @@ public struct ConfirmSheet: View {
                 SheetButton(confirm.no ?? "Cancel", role: .plain) { onAnswer(false) }.keyboardShortcut(.cancelAction)
                 SheetButton(confirm.yes ?? "Yes", role: confirm.danger == true ? .danger : .accent) { onAnswer(true) }
                     .disabled(!Self.allows(confirm, typed: typed))
-                    .opacity(Self.allows(confirm, typed: typed) ? 1 : 0.4)
+                    .opacity(Self.allows(confirm, typed: typed) ? 1 : Token.Fade.disabled)
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -229,10 +229,10 @@ public struct FormSheet: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(form.title ?? "").font(.body.weight(.semibold)).foregroundStyle(.primary)
+        VStack(alignment: .leading, spacing: Token.Gap.pair) {
+            Text(form.title ?? "").font(.body.weight(.semibold)).foregroundStyle(Token.Ink.primary)
             ForEach(Array((form.fields ?? []).enumerated()), id: \.offset) { _, f in
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: Token.Gap.inner) {
                     Text(f.label ?? "").font(.system(size: Token.Space.small)).foregroundStyle(palette.muted)
                     if f.kind == "select" {
                         Choice(f, value: binding(f))
@@ -250,7 +250,7 @@ public struct FormSheet: View {
             HStack {
                 Spacer()
                 SheetButton("Cancel", role: .plain) { onAnswer(false) }.keyboardShortcut(.cancelAction)
-                SheetButton(Self.verb(run, form, answers), role: .accent) { onAnswer(true) }.disabled(!complete).opacity(complete ? 1 : 0.4).keyboardShortcut(.defaultAction)
+                SheetButton(Self.verb(run, form, answers), role: .accent) { onAnswer(true) }.disabled(!complete).opacity(complete ? 1 : Token.Fade.disabled).keyboardShortcut(.defaultAction)
             }
         }
         .modifier(SheetGround())
@@ -284,18 +284,18 @@ public struct Segments: View {
     public init(options: [(label: String, on: Bool, tap: () -> Void)]) { self.options = options }
 
     public var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: Token.Gap.tight) {
             ForEach(Array(options.enumerated()), id: \.offset) { _, o in
                 Button(action: o.tap) {
                     Text(o.label)
                         .font(.system(size: Token.Size.segment, weight: o.on ? .semibold : .medium))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Token.Ink.primary)
                         .lineLimit(1)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 5)
+                        .padding(.vertical, Token.Gap.flank)
                         .background {
                             if o.on {
-                                RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Token.Fill.picked(scheme)).shadow(color: .black.opacity(0.12), radius: 1.5, y: 1)
+                                RoundedRectangle(cornerRadius: Token.Detail.thumbCorner, style: .continuous).fill(Token.Fill.picked(scheme)).shadow(color: Token.Shadow.thumb.color, radius: Token.Shadow.thumb.radius, y: Token.Shadow.thumb.y)
                             }
                         }
                         .contentShape(Rectangle())
@@ -303,7 +303,7 @@ public struct Segments: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(2)
+        .padding(Token.Gap.tight)
         .background(Token.Fill.faint(scheme), in: RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous))
     }
 }
