@@ -27,6 +27,8 @@ Each Mac says what it is, read by sysctl and never by a subprocess: its model id
 
 A VM being created is on the list from its create's first frame, `Creating`, its memory reserved at once: its record carries the step its create runs (`cloning the image`, `reserving its ports`, `booting`, `waiting for an address`, `waiting for SSH`) and how far it is, per mille, until the create ends, made or kept failing. A create that has not moved for 30 minutes died with what ran it: its VM reads stopped, `was left half made`, to start or delete. Once made, its engine tells `vm_ready` (`linux-4 is ready on mac-mini`) and the VM is `fresh` for 8 s. `machines --json` carries `birth` (`progress`, `step`) while it is being made, and `fresh`.
 
+A Mac that falls silent is shown as it last answered: for 30 s since its last answer it is fresh, then `stale`, as is a Mac never heard from. A laptop that last answered on battery with its lid closed is `asleep` when it falls silent, told apart from one that is `unreachable` for a reason station cannot tell. `machines --json` carries each Mac's `reach` (`answers`, `asleep`, `unreachable`) and `stale`.
+
 ```text
 5 machines · 4 running · 1 stopped · nothing needs you
  MACHINE KIND STATE CPU MEMORY

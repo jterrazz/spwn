@@ -1,0 +1,7 @@
+description: 'a Mac never heard from is stale, with no last answer to show'
+env: mini-never-answered
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reach, stale, last_answer, hardware}'''
+      exit: 0
+      stdout: |
+          {"reach":"unreachable","stale":true,"last_answer":null,"hardware":null}

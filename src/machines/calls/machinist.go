@@ -34,6 +34,9 @@ type Options struct {
 	Hardware func(ctx context.Context) coremachine.Hardware
 	// value: this Mac has a lid: a laptop.
 	Laptop bool
+	// value: this Mac runs on battery with its lid closed now: it is going
+	// to sleep; nil when it cannot say.
+	Asleep func(ctx context.Context) bool
 	// value: this Mac's address on your LAN; empty when it cannot say.
 	LAN func(ctx context.Context) string
 	// value: its servers' uptime records; nil keeps none.

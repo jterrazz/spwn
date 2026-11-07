@@ -217,7 +217,7 @@ func (s *Machinist) Remember(_ context.Context, f model.AllMachines) error {
 			seen = append(seen, model.SeenVM{Name: vm.Name, Lifetime: vm.Lifetime, CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes})
 		}
 		known.Answered, known.VMs = s.h.Now().UTC().Truncate(time.Second), seen
-		known.Laptop, known.Hardware = h.Laptop, nil
+		known.Laptop, known.Asleep, known.Hardware = h.Laptop, h.Asleep, nil
 		if h.Hardware != (coremachine.Hardware{}) {
 			hw := h.Hardware
 			known.Hardware = &hw

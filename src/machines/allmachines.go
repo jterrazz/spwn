@@ -110,6 +110,9 @@ type MacView struct {
 	// and whether it has a lid (a laptop) or not (a desktop).
 	Hardware machine.Hardware
 	Laptop   bool
+	// value: SPEC B5.15: at its last answer it was on battery with its lid
+	// closed, so its silence since is sleep.
+	Asleep bool
 }
 
 type AllMachines struct {

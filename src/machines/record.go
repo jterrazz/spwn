@@ -38,6 +38,7 @@ type MacRecord struct {
 	// value: what that Mac is, as it last answered: shown while it is silent.
 	Hardware *machine.Hardware `json:"hardware,omitempty"`
 	Laptop   bool              `json:"laptop,omitempty"`
+	Asleep   bool              `json:"asleep,omitempty"`
 }
 
 type SeenVM struct {

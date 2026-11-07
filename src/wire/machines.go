@@ -61,6 +61,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		SSHConfig: m.sshConfig(knownHosts),
 		Hardware:  m.hardware,
 		Laptop:    m.profile.Caps.Lid,
+		Asleep:    m.asleep,
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
 	})
@@ -80,6 +81,16 @@ func (m machine) lanAddress(ctx context.Context) string {
 		return ""
 	}
 	return got.Value
+}
+
+// value: this Mac runs on battery with its lid closed, as its power reads
+// (its world's in the spec build).
+func (m machine) asleep(context.Context) bool {
+	if m.powerPort == nil || !m.profile.Caps.Lid {
+		return false
+	}
+	r, err := m.powerPort.Read()
+	return err == nil && r.LidClosedOnBattery()
 }
 
 // value: what this Mac is, as it reads itself (its world's in the spec

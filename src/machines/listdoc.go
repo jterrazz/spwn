@@ -20,15 +20,19 @@ type ListDoc struct {
 }
 
 type ListMac struct {
-	Name      string     `json:"name"`
-	Label     string     `json:"label"`
-	ThisMac   bool       `json:"this_mac"`
-	Reachable bool       `json:"reachable"`
-	Answered  time.Time  `json:"last_answer,omitzero"`
-	IP        string     `json:"ip"`
-	User      string     `json:"user"`
-	Engine    ListEngine `json:"engine"`
-	Station   string     `json:"station_version"`
+	Name      string    `json:"name"`
+	Label     string    `json:"label"`
+	ThisMac   bool      `json:"this_mac"`
+	Reachable bool      `json:"reachable"`
+	Answered  time.Time `json:"last_answer,omitzero"`
+	// value: SPEC B5.15: answers, asleep or unreachable; and whether what
+	// is shown of it is its last answer's, more than 30 s old.
+	Reach   string     `json:"reach"`
+	Stale   bool       `json:"stale"`
+	IP      string     `json:"ip"`
+	User    string     `json:"user"`
+	Engine  ListEngine `json:"engine"`
+	Station string     `json:"station_version"`
 	// value: SPEC B5.12: what the Mac is; absent while it never said.
 	Hardware *ListHardware `json:"hardware,omitempty"`
 	// value: SPEC B5.12: its memory and who holds it; absent while the
@@ -243,7 +247,7 @@ func ToList(f AllMachines) ListDoc {
 	out := ListDoc{Schema: ListSchema, Macs: make([]ListMac, 0, len(f.Macs)), Findings: finding.AllMachinesDoc(Findings(f)), Roomiest: Roomiest(f)}
 	for _, h := range f.Macs {
 		m := ListMac{
-			Name: h.Name, Label: Label(f, h), ThisMac: h.ThisMac, Reachable: h.Reachable, Answered: h.Answered, IP: h.Node.IP, User: h.User,
+			Name: h.Name, Label: Label(f, h), ThisMac: h.ThisMac, Reachable: h.Reachable, Answered: h.Answered, Reach: Reach(h), Stale: Unheard(h, f.Read), IP: h.Node.IP, User: h.User,
 			Engine: ListEngine{State: engineState(h), Version: h.Engine.Version}, Station: h.StationVersion, Hardware: hardwareOf(h), Capacity: capacityOf(h), VMs: []ListVM{},
 		}
 		for _, vm := range Ordered(h.VMs) {

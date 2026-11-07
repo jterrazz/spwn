@@ -46,6 +46,7 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	}
 	if s.o.ThisMachine == catalog.Mac {
 		thisMac.Hardware, thisMac.Laptop = s.hardware(ctx), s.o.Laptop
+		thisMac.Asleep = s.o.Asleep != nil && s.o.Asleep(ctx)
 	}
 	if thisMacOnly || s.o.ThisMachine != catalog.Mac {
 		return model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now()}, nil
@@ -117,7 +118,7 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answers map[string]model.MacView) model.MacView {
 	far, ok := answers[name]
 	if !ok {
-		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN, Laptop: h.Laptop}
+		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN, Laptop: h.Laptop, Asleep: h.Asleep}
 		if h.Hardware != nil {
 			silent.Hardware = *h.Hardware
 		}
@@ -131,7 +132,7 @@ func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answer
 	}
 	view := model.MacView{
 		Name: name, User: h.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine,
-		Hardware: far.Hardware, Laptop: far.Laptop,
+		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep,
 	}
 	for _, vm := range far.VMs {
 		vm.Mac = name
