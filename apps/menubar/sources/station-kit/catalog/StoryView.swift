@@ -24,6 +24,7 @@ extension Story {
         state.qr = ui.popover
         state.menu = ui.menu?.id == "station"
         state.search = ui.find?.query ?? ""
+        state.scrub = ui.scrub
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }

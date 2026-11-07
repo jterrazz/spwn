@@ -86,52 +86,6 @@ public struct Meter: View {
     }
 }
 
-// value: a measure's sparkline as the vision's: its points 0 to 100 as
-// a straight line in its hue over an area fading to nothing, a hairline
-// under it, a dot ringed in white where it ends; Swift Charts, axes
-// hidden, as wide as it is given.
-public struct Spark: View {
-    let points: [Int]
-    let h: CGFloat
-    let tint: Color?
-    @Environment(\.stationPalette) private var palette
-    @Environment(\.colorScheme) private var scheme
-
-    public init(_ points: [Int], height: CGFloat = Token.Space.sparkHeight, tint: Color? = nil) {
-        self.points = points
-        h = height
-        self.tint = tint
-    }
-
-    public var body: some View {
-        let ink = tint ?? palette.accent
-        let last = max(points.count - 1, 1)
-        let step = Double(last) / 90
-        let shown = points.enumerated().map { (i: $0.offset, v: Double(min(max($0.element, 0), 100))) }
-        Chart {
-            RuleMark(y: .value("base", Token.Spark.base)).foregroundStyle(Token.Fill.faint(scheme)).lineStyle(StrokeStyle(lineWidth: Token.Stroke.base))
-            ForEach(shown, id: \.i) { p in
-                AreaMark(x: .value("t", Double(p.i)), yStart: .value("floor", Token.Spark.base), yEnd: .value("v", p.v))
-                    .foregroundStyle(LinearGradient(colors: [ink.opacity(Token.Fade.sparkTop), ink.opacity(0)], startPoint: .top, endPoint: .bottom))
-                LineMark(x: .value("t", Double(p.i)), y: .value("v", p.v))
-                    .lineStyle(StrokeStyle(lineWidth: Token.Stroke.spark, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(ink)
-            }
-            if let end = shown.last {
-                PointMark(x: .value("t", Double(end.i)), y: .value("v", end.v))
-                    .symbol { Circle().fill(ink).frame(width: Token.Detail.sparkDot, height: Token.Detail.sparkDot).overlay(Circle().stroke(palette.onTint, lineWidth: Token.Stroke.ringed)) }
-            }
-        }
-        .chartXAxis(.hidden)
-        .chartYAxis(.hidden)
-        .chartLegend(.hidden)
-        .chartYScale(domain: Token.Spark.floor...Token.Spark.top)
-        .chartXScale(domain: (-2 * step)...(Double(last) + 4 * step))
-        .chartPlotStyle { $0.frame(maxWidth: .infinity) }
-        .frame(height: h)
-    }
-}
-
 public enum QR {
     public static func modules(_ text: String) -> CGImage? {
         let filter = CIFilter.qrCodeGenerator()

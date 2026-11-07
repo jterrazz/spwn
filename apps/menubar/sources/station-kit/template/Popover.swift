@@ -52,6 +52,7 @@ public struct PanelState: Equatable, Sendable {
     // value: the VMs Stop everything stops, as Home listed them when it
     // was asked: each says Stopping until its line says it stopped.
     public var stopping: [String] = []
+    public var scrub: Int?
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -103,6 +104,7 @@ public struct PopoverHandlers {
     // value: what the panel does once an action hands the owner to another
     // app (a link opened, a terminal): it closes, as a menu does.
     public var close: () -> Void
+    public var scrub: (Int?) -> Void = { _ in }
 
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },

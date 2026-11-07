@@ -31,7 +31,7 @@ final class Live: ObservableObject {
     }
 
     var handlers: PopoverHandlers {
-        PopoverHandlers(
+        var h = PopoverHandlers(
             run: { [weak self] action, answers in self?.log(Self.describe(action, answers: answers)) },
             confirm: { [weak self] action in self?.state.confirming = action?.id },
             answer: { [weak self] id, key, value in self?.state.answers[id, default: [:]][key] = value },
@@ -56,6 +56,7 @@ final class Live: ObservableObject {
                 log("back")
             },
             close: { [weak self] in self?.log("close") })
-            .deferred(Self.later)
+        h.scrub = { [weak self] index in self?.state.scrub = index }
+        return h.deferred(Self.later)
     }
 }

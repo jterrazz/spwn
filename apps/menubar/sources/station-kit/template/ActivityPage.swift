@@ -8,7 +8,6 @@ public struct ActivityPage: View {
     let state: PanelState
     let handlers: PopoverHandlers
     @Environment(\.stationPalette) private var palette
-    @Environment(\.colorScheme) private var scheme
 
     // value: SPEC §6.4's picker: the window's word on the page, and the
     // word the call's window takes.
@@ -83,6 +82,18 @@ public struct ActivityPage: View {
         return .waiting
     }
 
+    static let shares: Set<String> = ["cpu", "memory", "swap"]
+
+    static func line(_ points: [Int], unit: String?) -> PageChart {
+        var series = Series()
+        series.points = points.map(Double.init)
+        series.unit = unit
+        var chart = PageChart()
+        chart.kind = ActivityCharts.Kind.line.rawValue
+        chart.series = [series]
+        return chart
+    }
+
     // value: a series cut into `n` buckets, each its mean, oldest first.
     static func buckets(_ points: [Int], _ n: Int) -> [Int] {
         guard points.count > n else { return points }
@@ -94,9 +105,8 @@ public struct ActivityPage: View {
     }
 
     // invariant: a measure as the vision draws one: its name and its
-    // words now, then its graph over the window, a line over an area
-    // (Swift Charts), the first one taller, with the window's start and
-    // Now under it.
+    // words now, then its line over the window, the first one with the
+    // window's start and Now under it.
     func measure(_ r: Row, lead: Bool) -> some View {
         let words = r.cells?.first.map { Format.show($0) } ?? ""
         let height = lead ? Token.Line.leadChart : Token.Line.chart
@@ -109,7 +119,7 @@ public struct ActivityPage: View {
             }
             switch Self.chart(r) {
             case .graph(let points):
-                Graph(Self.buckets(points, 90), height: height, tint: tint(r.id))
+                ActivityCharts(Self.line(Self.buckets(points, 90), unit: Self.shares.contains(r.id ?? "") ? "%" : nil), scrub: state.scrub, onScrub: handlers.scrub)
             case .meter(let ratio):
                 GeometryReader { geo in
                     let share = CGFloat(ratio.n ?? 0) / CGFloat(max(ratio.of ?? 1, 1))
@@ -136,12 +146,6 @@ public struct ActivityPage: View {
                 .font(.caption).foregroundStyle(Token.Ink.secondary)
             }
         }
-    }
-
-    // value: each measure in its own ink, as Home's tiles: CPU blue,
-    // memory indigo, the rest teal.
-    func tint(_ id: String?) -> Color {
-        Token.Hue.measure(id == "cpu" ? "CPU" : id == "memory" || id == "swap" ? "Memory" : "", scheme)
     }
 
     // value: why a process has no figure in a column: the engine ranks

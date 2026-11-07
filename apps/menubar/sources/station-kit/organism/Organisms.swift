@@ -243,7 +243,7 @@ public struct StripView: View {
     func measure<V: View>(_ label: String, _ spark: [Int]?, @ViewBuilder value: () -> V) -> some View {
         VStack(alignment: .leading, spacing: Token.Gap.tight) {
             Text(label).font(.system(size: Token.Space.small - Token.Gap.line, weight: .semibold)).foregroundStyle(palette.muted)
-            if let spark, spark.count > 1 { Spark(spark) }
+            if let spark, spark.count > 1 { Spark(spark, height: Token.Space.sparkHeight) }
             HStack(spacing: Token.Gap.small) { value() }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
