@@ -12,6 +12,10 @@ import (
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/src/activity/contract"
+	"github.com/jterrazz/studio-station/src/agents/adapter/claudecode"
+	"github.com/jterrazz/studio-station/src/agents/adapter/codex"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
+	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/src/background/calls"
@@ -49,6 +53,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 	registry, err := call.NewRegistry(
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
+		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal()}),
 		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), Kind: kind}),
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Kind: kind}),
 		awakecalls.All(m.awakeDeps()),

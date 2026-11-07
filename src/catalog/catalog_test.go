@@ -70,6 +70,13 @@ func TestEveryRequirementAndThenNamesACatalogueEntry(t *testing.T) {
 			}
 		}
 	}
+	for _, item := range catalog.Settings {
+		for _, r := range item.Needs() {
+			if !apps[r] {
+				t.Errorf("setting %s requires the unknown tool %q", item.Name, r)
+			}
+		}
+	}
 }
 
 type row struct {

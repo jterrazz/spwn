@@ -1,0 +1,12 @@
+description: 'inside a server, a hook event is dropped and the hook still exits 0: agents work in a workspace'
+env: in-server
+runs:
+    - command: 'agents record --app claudecode'
+      stdin: |
+          {"kind":"prompted","session":"s-1","prompt":"Build the landing page"}
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[].vms[]?.agents | select(.)]'' world.json'
+      exit: 0
+      stdout: |
+          []

@@ -1,0 +1,16 @@
+description: 'off takes the agent hook out of the workspace: station then sees only that Claude Code runs'
+fixture: ../__fixtures__/claude/
+env: in-workspace
+runs:
+    - command: 'settings apply agent-hooks'
+      exit: 0
+      stdout: |
+          ●	agent-hooks	claude: hook installed in ~/.claude/settings.json
+    - command: 'settings off agent-hooks --yes'
+      exit: 0
+      stdout: |
+          ●	agent-hooks	claude: hook removed from ~/.claude/settings.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.hooks'' world.json'
+      exit: 0
+      stdout: |
+          null

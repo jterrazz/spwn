@@ -4,12 +4,13 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	6 ○
+          # Set by station	7 ○
           ○	hushlogin	not applied	station settings apply hushlogin
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	github-login	not applied · needs gh	station apps install gh
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	agent-hooks	not applied · needs claude or codex	station apps install claude
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           # Checked
           –	9 checked	not for this machine · Mac only

@@ -3,6 +3,7 @@ package architecture_test
 import (
 	"bytes"
 	"encoding/json"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"os"
 	"path/filepath"
 	"testing"
@@ -30,7 +31,7 @@ func allCalls(t *testing.T) *call.Registry {
 		accountscalls.All(accountscalls.Deps{}), appscalls.All(appscalls.Deps{}), awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}),
 		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
-		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
+		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}), agentscalls.All(agentscalls.Deps{}),
 	)
 	if err != nil {
 		t.Fatal(err)

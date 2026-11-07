@@ -30,6 +30,7 @@ import (
 	accountscontract "github.com/jterrazz/studio-station/src/accounts/contract"
 	activityfake "github.com/jterrazz/studio-station/src/activity/adapter/fake"
 	activitycontract "github.com/jterrazz/studio-station/src/activity/contract"
+	"github.com/jterrazz/studio-station/src/agents"
 	agentsfake "github.com/jterrazz/studio-station/src/agents/adapter/fake"
 	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
 	appsfake "github.com/jterrazz/studio-station/src/apps/adapter/fake"
@@ -309,6 +310,9 @@ func (m *worldMac) funnel() funnel.Funnel           { return portsfake.TailnetOf
 func (m *worldMac) bundler() appscontract.Bundler   { return appsfake.BundlerOf(m.run.w, m.name) }
 func (m *worldMac) vault() accountscontract.Vault   { return accountsfake.NewVault(m.run.w, m.name) }
 func (m *worldMac) journal() agentscontract.Journal { return agentsfake.JournalOf(m.run.w, m.name) }
+func (m *worldMac) hooks(app agents.App) agentscontract.Hooks {
+	return agentsfake.HooksOf(m.run.w, m.name, app)
+}
 func (m *worldMac) listeners() portscontract.Listeners {
 	return portsfake.ListenersOf(m.run.w, m.name)
 }

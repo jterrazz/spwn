@@ -90,4 +90,10 @@ const (
 	AgentKeptFor    = 7 * 24 * time.Hour // value: how long a session's journal outlives its end.
 	AgentCodeSaid   = "replied with code"
 	AgentWatchEvery = time.Second // value: how often the guest looks at a VM's journal for a change.
+	// value: a hook's run of station ends within AgentHookBudget, the
+	// binary's start included: its event waits AgentRecordBudget at most,
+	// then is dropped. AgentPayloadCap is the most of a payload it reads.
+	AgentHookBudget   = 200 * time.Millisecond
+	AgentRecordBudget = 150 * time.Millisecond
+	AgentPayloadCap   = 1 << 20
 )

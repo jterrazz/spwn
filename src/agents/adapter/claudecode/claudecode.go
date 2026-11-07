@@ -17,6 +17,11 @@ import (
 
 const ID agents.App = "claudecode"
 
+const (
+	Program = "claude"                  // value: the app's name in the catalogue, the program its agent runs as.
+	File    = "~/.claude/settings.json" // value: where its hook lives, as the owner reads it.
+)
+
 const CheckedAgainst = "Claude Code 2.0" // value: the version whose hook payloads the recorded ones are.
 
 type Files interface {

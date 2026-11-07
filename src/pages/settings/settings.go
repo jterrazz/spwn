@@ -59,7 +59,7 @@ func Row(r settings.Row, now time.Time) page.Row {
 		row.Hint = page.KeyHint("station settings apply "+name, KeyApply)
 		if r.Needs != "" {
 			row.Reason = page.Missing
-			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Needs)}
+			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Item().NeedsSaid())}
 			row.Hint = page.Cmd("station apps install " + r.Needs)
 		}
 	case settings.StateOffThisMac:

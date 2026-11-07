@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "31 settings on 4 machines",
+            "label": "32 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -123,7 +123,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/docker-shortcuts",
+            "id": "jterrazz-macbook-pro/agent-hooks",
             "mark": "pending",
             "label": "jterrazz-macbook-pro",
             "short": "This Mac",
@@ -237,7 +237,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/docker-shortcuts",
+            "id": "jterrazz-mac-mini/agent-hooks",
             "mark": "pending",
             "label": "jterrazz-mac-mini",
             "short": "mac-mini",
@@ -351,7 +351,7 @@
         },
         {
           "row": {
-            "id": "linux-1/docker-shortcuts",
+            "id": "linux-1/agent-hooks",
             "mark": "pending",
             "label": "linux-1",
             "short": "linux-1",
@@ -427,7 +427,7 @@
         },
         {
           "row": {
-            "id": "api/docker-shortcuts",
+            "id": "api/agent-hooks",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -701,9 +701,9 @@
         },
         {
           "row": {
-            "id": "docker-shortcuts",
+            "id": "agent-hooks",
             "mark": "pending",
-            "label": "docker-shortcuts",
+            "label": "agent-hooks",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "13 more",
+            "label": "14 more",
             "cells": [
               {
                 "kind": "pending"
@@ -1004,6 +1004,7 @@
         "backup-exclusions",
         "tart-launcher",
         "git-shortcuts",
+        "agent-hooks",
         "docker-shortcuts"
       ],
       "priority": 1,
@@ -1035,6 +1036,7 @@
         "backup-exclusions",
         "tart-launcher",
         "git-shortcuts",
+        "agent-hooks",
         "docker-shortcuts",
         "filevault",
         "firewall",

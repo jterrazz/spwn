@@ -61,6 +61,13 @@
       "out": "Reading"
     },
     {
+      "name": "agents.record",
+      "schema": "station.agents.record/v1",
+      "where": "at-target",
+      "in": "RecordIn",
+      "out": "Recorded"
+    },
+    {
       "name": "apps.install",
       "schema": "station.apps.install/v1",
       "section": "apps",

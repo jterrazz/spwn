@@ -17,6 +17,11 @@ import (
 
 const ID agents.App = "codex"
 
+const (
+	Program = "codex"                // value: the app's name in the catalogue, the program its agent runs as.
+	File    = "~/.codex/config.toml" // value: where its hook lives, as the owner reads it.
+)
+
 const CheckedAgainst = "codex-cli 0.46" // value: the version whose notify payload the recorded one is.
 
 type Files interface {

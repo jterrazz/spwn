@@ -154,6 +154,9 @@ func entries() map[string]entry {
 		}},
 		"activity.read":   {item: func(t, _ Target) Item { return open(t, section.Activity, "Open Activity") }},
 		"activity.sample": {key: keyed("w"), item: func(t, _ Target) Item { return open(t, section.Activity, "Sample Activity, every 2 s while shown") }},
+		"agents.record": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
+			return run("Hook the agents of "+t.Label+", so station records what they do", words(t, "settings", "apply", catalog.AgentHooksSetting), gesture.V("Apply", "Applying", "Applied"), catalog.AgentHooksSetting)
+		}},
 		"apps.install": {key: keyed("i"), item: func(t, _ Target) Item {
 			return asked("Install an app"+ellipsis, field("App"), one(gesture.V("Install", "Installing", "Installed"), func(a string) []string { return words(t, "apps", "install", a) }))
 		}},

@@ -1,5 +1,5 @@
  Summary
-   ● 31 settings on 4 machines  20 need a look · infra is a server: not checked
+   ● 32 settings on 4 machines  20 need a look · infra is a server: not checked
 
  Needs a look  20 ◐
    ◐ This Mac  ghostty-dotfiles  changed since 2 d ago
@@ -8,8 +8,8 @@
      → station settings diff github-login
    ◐ This Mac  dock-reset        changed since 2 d ago
      → station settings diff dock-reset
-   ◐ This Mac  docker-shortcuts  changed since 2 d ago
-     → station settings diff docker-shortcuts
+   ◐ This Mac  agent-hooks       changed since 2 d ago
+     → station settings diff agent-hooks
    ◐ This Mac  firewall          off
      → System Settings > Network > Firewall
    ◐ This Mac  screen-lock       locks after 10 min · expected 5 min
@@ -20,8 +20,8 @@
      → station settings diff github-login --on jterrazz-mac-mini
    ◐ mac-mini  dock-reset        changed since 2 d ago
      → station settings diff dock-reset --on jterrazz-mac-mini
-   ◐ mac-mini  docker-shortcuts  changed since 2 d ago
-     → station settings diff docker-shortcuts --on jterrazz-mac-mini
+   ◐ mac-mini  agent-hooks       changed since 2 d ago
+     → station settings diff agent-hooks --on jterrazz-mac-mini
    ◐ mac-mini  firewall          off
      → System Settings > Network > Firewall
    ◐ mac-mini  screen-lock       locks after 10 min · expected 5 min
@@ -32,15 +32,15 @@
      → station settings diff github-login --on linux-1
    ◐ linux-1   dock-reset        changed since 2 d ago
      → station settings diff dock-reset --on linux-1
-   ◐ linux-1   docker-shortcuts  changed since 2 d ago
-     → station settings diff docker-shortcuts --on linux-1
+   ◐ linux-1   agent-hooks       changed since 2 d ago
+     → station settings diff agent-hooks --on linux-1
    ◐ api       ghostty-dotfiles  changed since 2 d ago
      → station machines start api
    ◐ api       github-login      changed since 2 d ago
      → station machines start api
    ◐ api       dock-reset        changed since 2 d ago
      → station machines start api
-   ◐ api       docker-shortcuts  changed since 2 d ago
+   ◐ api       agent-hooks       changed since 2 d ago
      → station machines start api
 
  Machines  3 ●  1 ○  1 –
@@ -55,8 +55,8 @@
    ◐ ghostty-dotfiles  ◐         ◐         ◐        ◐       0/4
    ◐ github-login      ◐         ◐         ◐        ◐       0/4
    ◐ dock-reset        ◐         ◐         ◐        ◐       0/4
-   ◐ docker-shortcuts  ◐         ◐         ◐        ◐       0/4
-   ○ 13 more           ○ 4/10    ○ 4/10    ○ 4/10   ○ 4/10  16/40
+   ◐ agent-hooks       ◐         ◐         ◐        ◐       0/4
+   ○ 14 more           ○ 4/11    ○ 4/11    ○ 4/11   ○ 4/11  16/44
 
  Always-on Mac
                  This Mac  mac-mini  linux-1  api  OK

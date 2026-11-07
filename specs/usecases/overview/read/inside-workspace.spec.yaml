@@ -14,7 +14,7 @@ runs:
 
           Activity  ? not measured
           Apps      ● 1 ok · ○ 63 not installed
-          Settings  set by station · ○ 0 of 6
+          Settings  set by station · ○ 0 of 7
           Disk      ● 0 B free · 0 B can rebuild
           Ports     Public 0 · Private 2
           Accounts  ● 0
@@ -23,7 +23,7 @@ runs:
       stdout: |
           	Activity	? not measured
           	Apps	● 1 ok · ○ 63 not installed
-          	Settings	set by station · ○ 0 of 6
+          	Settings	set by station · ○ 0 of 7
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 2
           	Accounts	● 0

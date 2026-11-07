@@ -1,0 +1,12 @@
+description: 'a hook event sent --on linux-1 from its Mac folds into linux-1''s journal'
+env: two-macs
+runs:
+    - command: 'agents record --app claudecode --on linux-1'
+      stdin: |
+          {"kind":"prompted","session":"s-1","folder":"/home/admin/app","prompt":"Build the landing page"}
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[].vms["linux-1"]?.agents.journal["s-1"] | select(.) | {state, task}'' world.json'
+      exit: 0
+      stdout: |
+          {"state":"working","task":"Build the landing page"}

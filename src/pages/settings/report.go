@@ -45,7 +45,7 @@ func ReportRow(r settingsmodel.Report) page.Row {
 		row.Detail = page.Pending()
 		return row
 	case r.State == catalog.StateAbsent && detail == "" && !r.Applies:
-		row.Reason, detail, row.Hint = page.Missing, "needs "+r.Item.Requires, page.Cmd("station apps install "+r.Item.Requires)
+		row.Reason, detail, row.Hint = page.Missing, "needs "+r.Item.NeedsSaid(), page.Cmd("station apps install "+r.Item.Requires)
 	case r.State == catalog.StateAbsent:
 		row.Hint = install
 	case strings.HasPrefix(detail, differs):

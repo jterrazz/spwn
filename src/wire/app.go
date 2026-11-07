@@ -122,6 +122,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		secretsAlias(kenv, thisMac),
 		retiredEngineCommand(kenv, thisMac),
 		guestCommand(kenv, thisMac),
+		agentsCommand(kenv),
 		runCommand(kenv, thisMac),
 		shellcmd.Command(kenv),
 	)

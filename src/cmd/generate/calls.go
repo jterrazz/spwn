@@ -3,6 +3,7 @@ package main
 import (
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/src/background/calls"
@@ -23,7 +24,7 @@ const callsPath = "src/remote/api/calls.json"
 func calls() []byte {
 	registry, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
-		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}),
+		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), agentscalls.All(agentscalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
 	)
