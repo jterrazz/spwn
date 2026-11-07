@@ -22,9 +22,10 @@ type Input struct {
 func Command(env kit.Env) *cobra.Command {
 	// invariant: run by an app's hook on each of its agent's events: it prints
 	// nothing and exits 0 within catalog.AgentRecordBudget whatever happens, so
-	// a hook never blocks nor fails the agent. The event is the last argument
-	// when the app passes one, else stdin.
-	return kit.Command(kit.Leaf[Input]{
+	// a hook never blocks nor fails the agent, a flag it does not know or
+	// cannot read included (exit 2 is the app's blocking code). The event is
+	// the last argument when the app passes one, else stdin.
+	cmd := kit.Command(kit.Leaf[Input]{
 		Use:      "record",
 		Short:    "Hand one event of an agent's hook to its journal",
 		Plumbing: true,
@@ -57,6 +58,20 @@ func Command(env kit.Env) *cobra.Command {
 			return nil
 		},
 	}, env)
+	cmd.FParseErrWhitelist.UnknownFlags = true
+	cmd.SetFlagErrorFunc(func(*cobra.Command, error) error { return nil })
+	cmd.PersistentPreRunE = func(c *cobra.Command, args []string) error {
+		if pre := c.Root().PersistentPreRunE; pre != nil {
+			_ = pre(c, args)
+		}
+		return nil
+	}
+	run := cmd.RunE
+	cmd.RunE = func(c *cobra.Command, args []string) error {
+		_ = run(c, args)
+		return nil
+	}
+	return cmd
 }
 
 func payloadOf(args []string, stdin io.Reader) (string, bool) {
