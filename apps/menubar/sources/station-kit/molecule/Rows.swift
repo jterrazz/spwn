@@ -31,9 +31,10 @@ struct QuickSlot: View {
         if let action {
             RoundButton(action.icon ?? Token.Symbol.copy, size: size, quiet: true) { run(action) }
                 .opacity(lit ? 1 : 0)
+                .animation(tokens.motion(Token.Motion.tint), value: lit)
                 .offset(x: lit ? 0 : Token.Metric.Row.quickSlide)
-                .allowsHitTesting(lit)
                 .animation(tokens.motion(Token.Motion.snappy), value: lit)
+                .allowsHitTesting(lit)
         }
     }
 }

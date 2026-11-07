@@ -98,9 +98,10 @@ public struct RowView: View {
             if let quick = Self.action(row.quick, in: actions) {
                 RoundButton(quick.icon ?? Token.Symbol.terminal, size: Self.accessory(row) == .ring ? .small : .regular) { run(quick) }
                     .opacity(lit ? 1 : 0)
-                    .offset(x: lit ? 0 : m.quickSlide)
-                    .allowsHitTesting(lit)
                     .animation(tokens.motion(Token.Motion.tint), value: lit)
+                    .offset(x: lit ? 0 : m.quickSlide)
+                    .animation(tokens.motion(Token.Motion.snappy), value: lit)
+                    .allowsHitTesting(lit)
                     .rowPart(.quick)
             }
             trailing.opacity(stale ? m.staleShare : 1)
