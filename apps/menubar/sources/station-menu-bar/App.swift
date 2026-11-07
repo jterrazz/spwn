@@ -26,6 +26,7 @@ struct StationMenuBarApp: App {
     var body: some Scene {
         MenuBarExtra {
             Popover(model.state, handlers: handlers)
+                .environment(\.stationLive, model.live)
                 .stationSystemTheme()
                 .stationSystemAccessibility()
                 .onAppear { model.opened() }

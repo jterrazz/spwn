@@ -127,17 +127,20 @@ final class ClientTests: XCTestCase {
         let clock = TestClock(), recorder = Recorder()
         let sub = Subscription(path: engine.path, clock: clock) { recorder.add($0) }
         let task = Task { await sub.run() }
-        await until { recorder.events.count >= 5 }
-        let kinds = recorder.events.prefix(5).map { e -> String in
+        await until { recorder.events.count >= 7 }
+        let kinds = recorder.events.prefix(7).map { e -> String in
             switch e {
             case .connected: "connected"
             case .page(let p): "page \(p.state ?? "")"
             case .tick: "tick"
-            case .notice(let kind, let text): "notice \(kind): \(text)"
+            case .sample(let s): "sample \(s.at) \(s.values.keys.sorted().joined(separator: " "))\(s.stale.isEmpty ? "" : " stale")"
+            case .notice(let kind, let icon, let text): "notice \(kind) \(icon): \(text)"
             case .down: "down"
             }
         }
-        XCTAssertEqual(kinds, ["connected", "page loading", "page ready", "tick", "notice awake_ended: Awake stopped on This Mac: battery 20 %"])
+        let keys = "cpu:jterrazz-macbook-pro memory:jterrazz-macbook-pro net:jterrazz-macbook-pro"
+        XCTAssertEqual(kinds, ["connected", "page loading", "page ready", "sample 2026-11-03T10:30:02Z \(keys)", "sample 2026-11-03T10:30:04Z \(keys) stale", "tick",
+                               "notice awake_ended moon: Awake stopped on This Mac: battery 20 %"])
         XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar"]},"v":2,"watch":"page"}"#])
         for _ in 0..<200 where clock.backoffs.isEmpty {
             clock.releaseSilence()
@@ -145,6 +148,34 @@ final class ClientTests: XCTestCase {
         }
         await task.value
         XCTAssertEqual(clock.backoffs, [1, 2, 4])
+    }
+
+    func testARecordedStreamsSamplesReplayThroughTheKitOneValueByKeyTheLateOnesStale() async throws {
+        let engine = try FakeEngine("mb-live")
+        defer { engine.stop() }
+        engine.serveOnce(try Data(contentsOf: Tree.stream), thenClose: true)
+        let recorder = Recorder()
+        let sub = Subscription(path: engine.path, clock: TestClock()) { recorder.add($0) }
+        let task = Task { await sub.run() }
+        await until { recorder.events.count >= 7 }
+        task.cancel()
+        let store = LiveStore()
+        var page: Page?
+        for event in recorder.events {
+            if case .page(let p) = event { page = p }
+            if case .sample(let s) = event {
+                store.take(s)
+                if s.stale.isEmpty {
+                    let strip = try XCTUnwrap(page?.strip)
+                    XCTAssertEqual([store.now(strip.cpu)?.kind, store.now(strip.cpu)?.n.map(String.init)], ["percent", "450"], "the tick's CPU is not what This Mac's CPU shows")
+                    XCTAssertEqual(store.points(strip.cpu, else: strip.spark), [15, 45], "the CPU line is not the tick's series")
+                    XCTAssertNotEqual(store.now(strip.cpu), strip.cpu, "the strip shows the page's CPU, not the tick's")
+                }
+            }
+        }
+        let strip = try XCTUnwrap(page?.strip)
+        XCTAssertEqual(store.now(strip.memory)?.stale, true, "a key told late is not marked stale")
+        XCTAssertEqual(store.now(Value(kind: "text", text: "not live")), Value(kind: "text", text: "not live"), "a value without a live key is not shown as the page sent it")
     }
 
     func testThePopoversWatchIsHeldOpenUntilThePopoverCloses() async throws {

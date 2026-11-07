@@ -12,7 +12,7 @@ public enum Notifications {
     // engine's words, once per event, or a failed call (failedCall); a
     // notice of the page watch draws the status line and is never posted.
     public static func posted(_ event: StreamEvent, from watch: String) -> String? {
-        guard watch == Self.watch, case .notice(let kind, let text) = event, !kind.isEmpty, !text.isEmpty else { return nil }
+        guard watch == Self.watch, case .notice(let kind, _, let text) = event, !kind.isEmpty, !text.isEmpty else { return nil }
         return text
     }
 

@@ -196,13 +196,18 @@ public struct StripView: View {
     // sparkline over its value; the battery and a held Awake on a line
     // below.
     public var body: some View {
+        LiveRead { store in drawn(store) }
+    }
+
+    func drawn(_ store: LiveStore) -> some View {
         let size = Token.Space.small
-        VStack(alignment: .leading, spacing: Token.Gap.small) {
+        let memorySpark = store.points(strip.memory, else: strip.memory_spark)
+        return VStack(alignment: .leading, spacing: Token.Gap.small) {
             HStack(alignment: .top, spacing: Token.Space.gap) {
-                measure("CPU", strip.spark) { ValueText(strip.cpu, size: size) }
-                if let memory = strip.memory {
-                    measure("Memory", strip.memory_spark) {
-                        if strip.memory_spark?.count ?? 0 < 2, memory.kind == "ratio", let of = memory.of, of > 0 {
+                measure("CPU", store.points(strip.cpu, else: strip.spark)) { ValueText(store.now(strip.cpu), size: size) }
+                if let memory = store.now(strip.memory) {
+                    measure("Memory", memorySpark) {
+                        if memorySpark?.count ?? 0 < 2, memory.kind == "ratio", let of = memory.of, of > 0 {
                             Meter(Double(memory.n ?? 0) / Double(of))
                         }
                         ValueText(memory, size: size)

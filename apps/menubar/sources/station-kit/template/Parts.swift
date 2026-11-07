@@ -85,7 +85,7 @@ struct Metrics: View {
     var body: some View {
         HStack(alignment: .top, spacing: Token.Tile.pair) {
             ForEach(Array(measures.enumerated()), id: \.offset) { _, m in
-                Metric(label: m.label, value: m.value, spark: m.spark)
+                LiveRead { store in Metric(label: m.label, value: store.now(m.value), spark: store.points(m.value, else: m.spark)) }
             }
         }
     }

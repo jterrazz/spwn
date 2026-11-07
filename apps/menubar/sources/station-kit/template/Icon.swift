@@ -20,13 +20,14 @@ public struct MenuBarIcon: Equatable, Sendable {
     // Orbit alone; the engine stopped dims the slashed Orbit, so its silence
     // is never mistaken for all good. The CPU line is the owner's option,
     // drawn only while the engine streams.
-    public static func of(connection: Connection, page: Page?, sparkline: Bool = false) -> MenuBarIcon {
+    public static func of(connection: Connection, page: Page?, sparkline: Bool = false, live: LiveStore? = nil) -> MenuBarIcon {
         switch connection {
         case .connecting: return MenuBarIcon(.connecting)
         case .stopped, .notInstalled: return MenuBarIcon(.stopped)
         case .live: break
         }
-        let spark = sparkline ? page?.strip?.spark.flatMap { $0.isEmpty ? nil : $0 } : nil
+        let cpu = page?.strip.flatMap { live?.points($0.cpu, else: $0.spark) ?? $0.spark }
+        let spark = sparkline ? cpu.flatMap { $0.isEmpty ? nil : $0 } : nil
         guard let badge = page?.badge else { return MenuBarIcon(.plain, spark: spark) }
         if badge.down == true { return MenuBarIcon(.down, spark: spark) }
         if let n = badge.needs, n > 0 { return MenuBarIcon(.needs(n), spark: spark) }
