@@ -81,7 +81,25 @@ type VM struct {
 	// console kept then; empty while it is up.
 	Cause     string
 	LastLines []string
+	// value: the agent a workspace is said by, as its guest last reported
+	// it; nil while none is known.
+	Agent *AgentView
 }
+
+type AgentView struct {
+	State string
+	Task  string
+	// value: what it waits on the owner for, and since when.
+	Ask   string
+	Since time.Time
+	// value: when it finished, and how, in its app's words.
+	Ended  time.Time
+	Reason string
+}
+
+const AgentFinished = "finished"
+
+func (vm VM) Finished() bool { return vm.Agent != nil && vm.Agent.State == AgentFinished }
 
 type EngineView struct {
 	Known, Running bool

@@ -54,6 +54,7 @@ type EngineVM struct {
 	// value: why a server is down, and its console's last lines then.
 	Cause     string
 	LastLines []string
+	Agent     *model.AgentView
 }
 
 type Engine interface {
