@@ -1,4 +1,4 @@
-# ADR-021: HTTPS links are a Mac's choice, through Serve
+# ADR-022: HTTPS links are a Mac's choice, through Serve
 
 **Status:** Proposed
 **Date:** 2026-11-07
