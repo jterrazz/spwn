@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/ports"
@@ -59,6 +60,11 @@ func events() []event {
 		{"reads", []string{"<mac>", "<fact>", "<value>"}, reads},
 		{"certificate", []string{"<mac>", "pending|issued"}, certificate},
 		{"admin", []string{"on|off"}, admin},
+		{"agent-prompt", []string{"<vm>", "<session>", "<prompt>", "[<folder>]"}, agentEvent(agents.Prompted, agentPrompt)},
+		{"agent-step", []string{"<vm>", "<session>", "edit|read|run|web|delegate", "<path-or-command>", "[<output>]"}, agentUse},
+		{"agent-notify", []string{"<vm>", "<session>", "<message>"}, agentEvent(agents.Notified, agentMessage)},
+		{"agent-stop", []string{"<vm>", "<session>", "<message>"}, agentEvent(agents.Stopped, agentMessage)},
+		{"agent-end", []string{"<vm>", "<session>", "[<reason>]"}, agentEvent(agents.Ended, agentEnd)},
 	}
 }
 
