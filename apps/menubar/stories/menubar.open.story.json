@@ -1,0 +1,11 @@
+{
+    "group": "shell",
+    "id": "menubar.open",
+    "note": "The status item while its panel is open: the system's pressed highlight.",
+    "pages": ["pages/machines.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "pressed": true,
+        "statusItem": true
+    }
+}

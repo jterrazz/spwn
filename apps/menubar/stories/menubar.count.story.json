@@ -1,10 +1,9 @@
 {
     "group": "shell",
     "id": "menubar.count",
-    "note": "The status item on all machines: its count of what needs you.",
+    "note": "The status item on all machines: its count of what needs you, the upkeep never counted.",
     "pages": ["pages/machines.menubar.json"],
     "schema": "station.story/v1",
-    "status": "today",
     "ui": {
         "statusItem": true
     }

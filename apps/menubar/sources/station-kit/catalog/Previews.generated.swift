@@ -28,6 +28,10 @@ import SwiftUI
 
 #Preview("menubar.fine") { StoryStage(Stories["menubar.fine"]) }
 
+#Preview("menubar.open") { StoryStage(Stories["menubar.open"]) }
+
+#Preview("menubar.restarting") { StoryStage(Stories["menubar.restarting"]) }
+
 #Preview("ports.all") { StoryStage(Stories["ports.all"]) }
 
 #Preview("server.down") { StoryStage(Stories["server.down"]) }

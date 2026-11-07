@@ -1,10 +1,9 @@
 {
     "group": "shell",
     "id": "menubar.down",
-    "note": "The status item while infra is down: the red need.",
+    "note": "The status item while infra is down: the Orbit red beside its count.",
     "pages": ["pages/machines.down.menubar.json"],
     "schema": "station.story/v1",
-    "status": "today",
     "ui": {
         "statusItem": true
     }
