@@ -33,7 +33,7 @@ public struct ActivityPage: View {
         let banner = page.section("machine")?.rows.first
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             PageHeader(back: state.back ?? Page.ThisMacWord, title: "Activity", subtitle: Format.show(banner?.cells?.first ?? Value()), action: handlers.back)
-            Segments(options: Self.picker(page, handlers: handlers).map { ($0.words, $0.picked, $0.tap) })
+            Segmented(options: Self.picker(page, handlers: handlers).map { ($0.words, $0.picked, $0.tap) })
             if let graphs = page.section("graphs") {
                 VStack(alignment: .leading, spacing: Token.Gap.section) {
                     ForEach(Array(graphs.rows.enumerated()), id: \.offset) { i, r in measure(r, lead: i == 0) }

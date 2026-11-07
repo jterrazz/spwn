@@ -132,24 +132,6 @@ public struct Spark: View {
     }
 }
 
-// invariant: a switch as macOS draws it: green when on, its knob white.
-public struct Switch: View {
-    let on: Bool
-    @Environment(\.stationPalette) private var palette
-    @Environment(\.stationTokens) private var tokens
-
-    public init(on: Bool) { self.on = on }
-
-    public var body: some View {
-        ZStack(alignment: on ? .trailing : .leading) {
-            Capsule().fill(on ? AnyShapeStyle(palette.good) : Token.Ink.track).frame(width: Token.Tile.switchWidth, height: Token.Tile.switchHeight)
-            Circle().fill(palette.onTint).frame(width: Token.Detail.knob, height: Token.Detail.knob)
-                .shadow(color: Token.Shadow.knob.color, radius: Token.Shadow.knob.radius, y: Token.Shadow.knob.y).padding(.horizontal, Token.Gap.tight)
-        }
-        .animation(tokens.motion(Token.Motion.snappy), value: on)
-    }
-}
-
 public enum QR {
     public static func modules(_ text: String) -> CGImage? {
         let filter = CIFilter.qrCodeGenerator()

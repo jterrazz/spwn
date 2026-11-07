@@ -79,7 +79,7 @@ menubar-check: ## The menu bar's swift test, then its bundle; one line of skip w
 		fi; \
 		printf "menubar: skipped, no macOS SDK (install Xcode to build apps/menubar)\n"; exit 0; \
 	fi; \
-	swift apps/menubar/scripts/orbit-symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets && \
+	swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets && \
 	swift test --package-path apps/menubar --scratch-path .artifacts/menubar/build && apps/menubar/scripts/build.sh
 
 menubar: ## Build the menu bar's bundle, signed ad hoc, into $(MENUBAR_APP)
@@ -97,7 +97,7 @@ menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Stat
 	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
 
 catalog: ## Build the Station Catalog, the dev-only window over every story, never bundled into Station.app
-	@swift apps/menubar/scripts/orbit-symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
+	@swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
 	@swift build --package-path apps/menubar --scratch-path .artifacts/menubar/build --product StationCatalog
 	@printf "$(GREEN)●$(RESET) Built $(CATALOG_BIN)\n"
 

@@ -71,7 +71,7 @@ public struct AwakePage: View {
                         SubText(act.label(running))
                     }
                 } else {
-                    Segments(options: keeps.map { k in
+                    Segmented(options: keeps.map { k in
                         let chosen = (on || state.held[Self.keepKey] != nil) && Self.picked(k, among: keeps, held: state.held)
                         return (Self.held(k) && chosen ? k.label ?? "" : Self.offered(k), chosen, { k.form == nil ? run(k) : act.tap(k) })
                     }).disabled(busy)

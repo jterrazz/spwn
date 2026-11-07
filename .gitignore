@@ -23,5 +23,5 @@ dist/
 # SwiftPM, when it runs bare in the menu bar app
 apps/menubar/.build/
 
-# The menu bar's symbols, drawn by apps/menubar/scripts/orbit-symbols.swift before every build
+# The menu bar's symbols, drawn by apps/menubar/scripts/symbols.swift before every build
 apps/menubar/sources/station-kit/token/symbols.xcassets/

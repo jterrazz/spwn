@@ -94,6 +94,14 @@ public enum Format {
         return out
     }
 
+    public static func left(_ seconds: Int64) -> String {
+        let minutes = Int64((Double(max(seconds, 0)) / 60).rounded())
+        if minutes < 1 { return "<1\(glued)min left" }
+        if minutes < 60 { return "\(minutes)\(glued)min left" }
+        let hours = minutes / 60, rest = minutes % 60
+        return rest == 0 ? "\(hours)\(glued)hr left" : "\(hours)\(glued)hr \(rest)\(glued)min left"
+    }
+
     static func until(_ v: Value, now: Date?) -> String {
         var left = v.n ?? 0
         if let now, let at = v.at, let end = ISO8601DateFormatter().date(from: at) {

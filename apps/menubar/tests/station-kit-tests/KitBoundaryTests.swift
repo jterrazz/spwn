@@ -76,8 +76,9 @@ final class KitBoundaryTests: XCTestCase {
 
     // invariant: the Swift side of the kit's boundary: colours, symbol names
     // and glyphs live in Token only, no AppKit-backed control the offscreen
-    // renderer cannot draw, every Mac drawn with one symbol (DECISIONS E1/E2:
-    // the page reports no model), and Page and Engine stay Foundation.
+    // renderer cannot draw, a Mac's symbol named only by Token and keyed by
+    // its lid (DECISIONS E1/E2: a capability, never the model), and Page and
+    // Engine stay Foundation.
     static func scan(_ files: [(path: String, text: String)]) -> [Finding] {
         var out: [Finding] = []
         for (path, text) in files {
@@ -98,7 +99,7 @@ final class KitBoundaryTests: XCTestCase {
                     for rule in literals(line) where !out.contains(Finding(file: path, rule: rule)) { out.append(Finding(file: path, rule: rule)) }
                 }
             }
-            for model in models where text.contains(model) {
+            for model in models where text.components(separatedBy: "\n").contains(where: { $0.contains(model) && !(token && $0.contains("lid")) }) {
                 out.append(Finding(file: path, rule: "\(model.dropFirst()) draws a Mac's model, which no capability reports"))
             }
             for word in forbidden where text.contains(word) {
@@ -188,6 +189,7 @@ final class KitBoundaryTests: XCTestCase {
             ("molecule/Row.swift", "Image(systemName: \"circle\"); Text(\"→\")"),
             ("page/Page.swift", "import SwiftUI"),
             ("token/Token.swift", "static let mini = \"macmini\""),
+            ("token/AtomTokens.swift", "static func mac(lid: Bool) -> String { lid ? \"laptopcomputer\" : \"macmini\" }"),
             ("template/Panel.swift", "x.background(palette.surface).glassEffect(.regular)"),
             ("molecule/Field.swift", "x.background(.quinary).background(.ultraThinMaterial)"),
             ("template/Many.swift", "a.background(Token.Fill.tile(scheme))\nStationButton(role: .primary)\nStationButton(role: x ? .primary : .plain)"),
