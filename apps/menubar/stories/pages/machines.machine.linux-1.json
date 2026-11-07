@@ -84,7 +84,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 340
+                "n": 340,
+                "live": "cpu:linux-1"
               },
               {
                 "kind": "spark",
@@ -169,7 +170,8 @@
               {
                 "kind": "ratio",
                 "n": 7462505676,
-                "of": 8589934592
+                "of": 8589934592,
+                "live": "memory:linux-1"
               },
               {
                 "kind": "spark",
@@ -257,7 +259,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 155
+                "n": 155,
+                "live": "disk:linux-1"
               },
               {
                 "kind": "spark",
@@ -795,5 +798,10 @@
         ]
       }
     }
+  ],
+  "live": [
+    "cpu:linux-1",
+    "memory:linux-1",
+    "disk:linux-1"
   ]
 }

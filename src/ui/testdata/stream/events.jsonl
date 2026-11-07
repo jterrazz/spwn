@@ -1,8 +1,8 @@
 {"v":2,"id":"1","out":{"stream":"engine.events"}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_restarting","text":"infra stopped and is restarting (↺ 3)"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_loop","text":"infra is in a loop: 5 restarts in 10 min · waiting 60 s"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_powered_off","text":"infra powered off from inside · it stays stopped"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_back","text":"infra is back · all 4 health steps pass"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"awake_ended","text":"Awake stopped on This Mac: battery 20 %"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"port_exposed","text":"mac-mini: port 5000 is reachable outside Tailscale"}}}
-{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"disk_low","text":"This Mac: 3 % of its disk is free"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_restarting","icon":"arrow.clockwise","text":"infra stopped and is restarting (↺ 3)"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_loop","icon":"arrow.clockwise","text":"infra is in a loop: 5 restarts in 10 min · waiting 60 s"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_powered_off","icon":"xmark.octagon.fill","text":"infra powered off from inside · it stays stopped"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"server_back","icon":"checkmark.circle.fill","text":"infra is back · all 4 health steps pass"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"awake_ended","icon":"moon","text":"Awake stopped on This Mac: battery 20 %"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"port_exposed","icon":"exclamationmark.shield","text":"mac-mini: port 5000 is reachable outside Tailscale"}}}
+{"v":2,"id":"1","out":{"event":"notice","notice":{"kind":"disk_low","icon":"exclamationmark.circle.fill","text":"This Mac: 3 % of its disk is free"}}}

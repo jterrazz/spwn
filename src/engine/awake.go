@@ -25,6 +25,7 @@ type StopAll struct {
 
 type Notice struct {
 	Kind string `json:"kind"`
+	Icon string `json:"icon,omitempty"`
 	Text string `json:"text"`
 }
 
@@ -33,6 +34,8 @@ type Event struct {
 	Page   json.RawMessage `json:"page,omitempty"`
 	At     string          `json:"at,omitempty"`
 	Notice *Notice         `json:"notice,omitempty"`
+	Values map[string]any  `json:"values,omitempty"`
+	Stale  []string        `json:"stale,omitempty"`
 }
 
 func AwakeStopped(detail string) string {

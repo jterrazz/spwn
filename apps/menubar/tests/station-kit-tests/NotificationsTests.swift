@@ -75,9 +75,9 @@ final class NotificationsTests: XCTestCase {
     }
 
     func testAPageWatchNoticeIsNeverPosted() throws {
-        let page = StreamEvent.notice(kind: "awake_ended", text: "Awake stopped on This Mac: battery 20 %")
+        let page = StreamEvent.notice(kind: "awake_ended", icon: "moon", text: "Awake stopped on This Mac: battery 20 %")
         XCTAssertNil(Notifications.posted(page, from: Subscription.pageWatch))
-        XCTAssertNil(Notifications.posted(.notice(kind: "", text: "free text"), from: Notifications.watch))
+        XCTAssertNil(Notifications.posted(.notice(kind: "", icon: "", text: "free text"), from: Notifications.watch))
         XCTAssertNil(Notifications.posted(.tick, from: Notifications.watch))
     }
 }

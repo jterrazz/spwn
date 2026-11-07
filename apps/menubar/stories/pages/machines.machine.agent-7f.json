@@ -84,7 +84,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 340
+                "n": 340,
+                "live": "cpu:agent-7f"
               },
               {
                 "kind": "spark",
@@ -169,7 +170,8 @@
               {
                 "kind": "ratio",
                 "n": 7462505676,
-                "of": 8589934592
+                "of": 8589934592,
+                "live": "memory:agent-7f"
               },
               {
                 "kind": "spark",
@@ -257,7 +259,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 125
+                "n": 125,
+                "live": "disk:agent-7f"
               },
               {
                 "kind": "spark",
@@ -578,5 +581,10 @@
         ]
       }
     }
+  ],
+  "live": [
+    "cpu:agent-7f",
+    "memory:agent-7f",
+    "disk:agent-7f"
   ]
 }

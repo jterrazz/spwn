@@ -34,6 +34,7 @@ struct StationMenuBarApp: App {
                     .onDisappear { trial.closed() }
             } else {
                 Popover(model.state, handlers: handlers)
+                    .environment(\.stationLive, model.live)
                     .stationSystemTheme()
                     .stationSystemAccessibility()
                     .onAppear { model.opened() }

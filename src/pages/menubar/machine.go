@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/src/engine"
 
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -111,7 +112,7 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 		samples = nil
 	}
 	if kind == machine.Server {
-		sections = append(sections, upSection(m, vm), healthSection(vm, m.Now), activitySection(samples, vm.State == model.Running, "Activity"), serverSection(m))
+		sections = append(sections, upSection(m, vm), healthSection(vm, m.Now), activitySection(samples, vm.State == model.Running, "Activity", vm.Name), serverSection(m))
 		restart := page.Action{ID: ActionRestart, Label: "Restart", On: page.OnPage, Priority: 1, Mutates: true, Confirm: ask(m.Asks, "restart", kind, vm.Name, "Restart "+vm.Name+"?", "restart"),
 			Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}}
 		restart.Run.In = answered(restart.Confirm, restart.Run.In)
@@ -121,7 +122,7 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 		stop.Run.In = answered(stop.Confirm, stop.Run.In)
 		p.Actions = []page.Action{restart, stop}
 	} else {
-		sections = append(sections, activitySection(samples, vm.State == model.Running, "Activity"), insideSection(m.Summary), portsSection(m, h, vm), sharedSection(m, h, vm))
+		sections = append(sections, activitySection(samples, vm.State == model.Running, "Activity", vm.Name), insideSection(m.Summary), portsSection(m, h, vm), sharedSection(m, h, vm))
 		stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
 			Confirm: ask(m.Asks, "stop", kind, vm.Name, "Stop "+vm.Name+"?", "stop", "Its disk is kept."),
 			Run:     &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
@@ -148,6 +149,7 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	}
 	p.Actions = append(p.Actions, openIn("--on", vm.Name))
 	p.Sections = sections
+	p.Live = liveKeys(p)
 	return page.Seal(p)
 }
 
@@ -156,35 +158,27 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 // f), each led into its series over the readings kept (0 to 100: CPU's
 // share, memory's and disk's use of their total), so a tile draws its bar
 // meter; pending until they are read, none while the machine does not run.
-func activitySection(readings []activity.Reading, running bool, title string) page.Section {
+func activitySection(readings []activity.Reading, running bool, title, name string) page.Section {
 	cpu, memory, disk := page.Pending(), page.Pending(), page.Pending()
 	if !running {
 		cpu, memory, disk = page.None(), page.None(), page.None()
 	}
-	var cpus, memories, disks []int
-	for i, r := range readings {
-		if i > 0 {
-			cpus = append(cpus, int(activity.Between(readings[i-1].Sample, r.Sample).CPU))
+	m := measured(readings)
+	cpus, memories, disks := m.cpus, m.memories, m.disks
+	if len(readings) > 0 {
+		memory, disk = page.None(), page.None()
+		if m.cpu.Kind != "" {
+			cpu = m.cpu
 		}
-		if s := r.Sample; s.MemTotal > 0 {
-			memories = append(memories, int(min(s.MemUsed, s.MemTotal)*100/s.MemTotal))
+		if m.memory.Kind != "" {
+			memory = m.memory
 		}
-		if s := r.Sample; s.DiskTotal > 0 {
-			disks = append(disks, int((s.DiskTotal-s.DiskFree)*100/s.DiskTotal))
+		if m.disk.Kind != "" {
+			disk = m.disk
 		}
 	}
-	if n := len(readings); n > 0 {
-		last := readings[n-1].Sample
-		if n > 1 {
-			cpu = page.Percent(int64(activity.Between(readings[n-2].Sample, last).CPU * 10))
-		}
-		memory, disk = page.None(), page.None()
-		if last.MemTotal > 0 {
-			memory = page.Ratio(min(last.MemUsed, last.MemTotal), last.MemTotal)
-		}
-		if last.DiskTotal > 0 {
-			disk = page.Percent((last.DiskTotal - last.DiskFree) * 1000 / last.DiskTotal)
-		}
+	if running {
+		cpu, memory, disk = live(cpu, engine.LiveKey(engine.LiveCPU, name)), live(memory, engine.LiveKey(engine.LiveMemory, name)), live(disk, engine.LiveKey(engine.LiveDisk, name))
 	}
 	measure := func(id, label string, now page.Value, series []int) page.Row {
 		row := page.Row{ID: id, Label: label, Cells: []page.Value{now}}

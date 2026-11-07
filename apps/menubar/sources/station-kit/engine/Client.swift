@@ -39,7 +39,8 @@ public enum StreamEvent: Sendable {
     case connected
     case page(Page)
     case tick
-    case notice(kind: String, text: String)
+    case sample(LiveSample)
+    case notice(kind: String, icon: String, text: String)
     case down
 }
 
@@ -258,9 +259,11 @@ public final class Subscription: @unchecked Sendable {
                         }
                     case "tick":
                         emit(.tick)
+                    case "sample":
+                        if let sample = LiveSample.decode(obj) { emit(.sample(sample)) }
                     case "notice":
                         let n = obj["notice"] as? [String: Any]
-                        emit(.notice(kind: n?["kind"] as? String ?? "", text: n?["text"] as? String ?? ""))
+                        emit(.notice(kind: n?["kind"] as? String ?? "", icon: n?["icon"] as? String ?? "", text: n?["text"] as? String ?? ""))
                     default:
                         break
                     }

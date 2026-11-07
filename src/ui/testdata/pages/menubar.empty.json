@@ -10,7 +10,8 @@
   "strip": {
     "cpu": {
       "kind": "percent",
-      "n": 340
+      "n": 340,
+      "live": "cpu:jterrazz-macbook-pro"
     },
     "spark": [
       12,
@@ -33,7 +34,8 @@
     "memory": {
       "kind": "ratio",
       "n": 14119704985,
-      "of": 17179869184
+      "of": 17179869184,
+      "live": "memory:jterrazz-macbook-pro"
     },
     "memory_spark": [
       77,
@@ -75,7 +77,8 @@
       {
         "kind": "size",
         "n": 1780000,
-        "unit": "/s"
+        "unit": "/s",
+        "live": "net:jterrazz-macbook-pro"
       }
     ]
   },
@@ -395,5 +398,10 @@
   ],
   "badge": {
     "needs": 0
-  }
+  },
+  "live": [
+    "cpu:jterrazz-macbook-pro",
+    "memory:jterrazz-macbook-pro",
+    "net:jterrazz-macbook-pro"
+  ]
 }

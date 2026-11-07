@@ -53,7 +53,7 @@ type Reading struct {
 }
 
 func Page(r Reading, thisMac page.Context) page.Page {
-	p := page.Page{ID: ID, Command: "menubar", Context: thisMac, Strip: strip(r.Samples)}
+	p := page.Page{ID: ID, Command: "menubar", Context: thisMac, Strip: strip(r.Samples, thisMac.Machine)}
 	needs := needsYou(r)
 	tree := Tree(r.All, r.Ports, homeLine(r))
 	markMacs(&tree, r)
@@ -61,6 +61,7 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, awakeAction(r.Awake), openAccounts())
 	p.Actions = append(p.Actions, updateAll(needs, r.Home)...)
 	p.Badge = badge(r, needs)
+	p.Live = liveKeys(p)
 	return page.Seal(p)
 }
 
@@ -113,31 +114,55 @@ func columns() []page.Column {
 	return []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 60}}
 }
 
-// value: the three measures of This Mac, CPU, Memory and Network, each with
-// its sparkline over the readings kept.
-func strip(readings []activity.Reading) *page.Strip {
+// value: the three measures of This Mac, CPU, Memory and Network, each
+// with its sparkline over the readings kept, each read live under its key.
+func strip(readings []activity.Reading, thisMac string) *page.Strip {
+	cpu, memory, net := engine.LiveKey(engine.LiveCPU, thisMac), engine.LiveKey(engine.LiveMemory, thisMac), engine.LiveKey(engine.LiveNet, thisMac)
 	if len(readings) < 2 {
-		return &page.Strip{CPU: page.Pending(), Memory: page.Pending()}
+		return &page.Strip{CPU: live(page.Pending(), cpu), Memory: live(page.Pending(), memory)}
 	}
-	var s page.Strip
-	for i := 1; i < len(readings); i++ {
-		rates := activity.Between(readings[i-1].Sample, readings[i].Sample)
-		s.Spark = append(s.Spark, int(rates.CPU))
-		s.NetSpark = append(s.NetSpark, int((rates.NetIn+rates.NetOut)/1e3))
-		if m := readings[i].Sample; m.MemTotal > 0 {
-			s.MemorySpark = append(s.MemorySpark, int(m.MemUsed*100/m.MemTotal))
+	m := measured(readings)
+	memories := m.memories
+	if readings[0].Sample.MemTotal > 0 {
+		memories = memories[1:]
+	}
+	s := page.Strip{CPU: live(m.cpu, cpu), Spark: m.cpus, MemorySpark: memories, NetSpark: m.nets, Net: []page.Value{live(m.net, net)}}
+	if m.memory.Kind != "" {
+		s.Memory = live(m.memory, memory)
+	}
+	return &s
+}
+
+func live(v page.Value, key string) page.Value {
+	v.Live = key
+	return v
+}
+
+// value: the live keys the values of a page follow, each once, in order.
+func liveKeys(p page.Page) []string {
+	var keys []string
+	add := func(v page.Value) {
+		if v.Live != "" && !slices.Contains(keys, v.Live) {
+			keys = append(keys, v.Live)
 		}
 	}
-	last := readings[len(readings)-1].Sample
-	rates := activity.Between(readings[len(readings)-2].Sample, last)
-	s.CPU = page.Percent(int64(rates.CPU * 10))
-	if last.MemTotal > 0 {
-		s.Memory = page.Ratio(min(last.MemUsed, last.MemTotal), last.MemTotal)
+	if s := p.Strip; s != nil {
+		add(s.CPU)
+		add(s.Memory)
+		for _, v := range s.Net {
+			add(v)
+		}
 	}
-	net := page.Size(int64(rates.NetIn + rates.NetOut))
-	net.Unit = "/s"
-	s.Net = []page.Value{net}
-	return &s
+	for _, sec := range p.Sections {
+		for _, it := range sec.Items {
+			if it.Row != nil {
+				for _, v := range it.Row.Cells {
+					add(v)
+				}
+			}
+		}
+	}
+	return keys
 }
 
 // invariant: Needs you holds every finding, the line vision panel a draws

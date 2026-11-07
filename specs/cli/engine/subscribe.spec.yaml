@@ -14,5 +14,5 @@ runs:
           off
           on
           off
-          {"kind":"awake_ended","text":"Awake stopped on This Mac: battery 20 %"}
+          {"kind":"awake_ended","icon":"moon","text":"Awake stopped on This Mac: battery 20 %"}
           [true,"unknown_page"]

@@ -32,6 +32,7 @@ final class Model: ObservableObject {
     private var asked = false
     private var outdated = false
     private(set) var navigation: Navigation!
+    let live = LiveStore()
 
     private var settled: Task<Void, Never>?
 
@@ -40,6 +41,7 @@ final class Model: ObservableObject {
             Task { @MainActor in self?.show(page, shown) }
         }
         navigation.remember = { flag in UserDefaults.standard.set(flag, forKey: Model.windowKey) }
+        navigation.sampled = { [weak self] sample in Task { @MainActor in self?.live.take(sample) } }
     }
 
     // invariant: a pushed page is shown only while its watch is the one held;
@@ -62,7 +64,7 @@ final class Model: ObservableObject {
         }
     }
 
-    var icon: MenuBarIcon { MenuBarIcon.of(connection: state.connection, page: state.page, sparkline: sparkline) }
+    var icon: MenuBarIcon { MenuBarIcon.of(connection: state.connection, page: state.page, sparkline: sparkline, live: live) }
 
     func iconImage(dark: Bool) -> NSImage {
         icon.nsImage(scheme: dark ? .dark : .light)
@@ -119,7 +121,10 @@ final class Model: ObservableObject {
             if navigation.watched == nil { state.settling = nil }
         case .tick:
             break
-        case .notice(_, let text):
+        case .sample(let sample):
+            live.take(sample)
+            if sparkline { objectWillChange.send() }
+        case .notice(_, _, let text):
             state.say(Status(text, failed: false), on: navigation.watched)
             clearLater()
         case .down:

@@ -247,7 +247,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 340
+                "n": 340,
+                "live": "cpu:infra"
               },
               {
                 "kind": "spark",
@@ -332,7 +333,8 @@
               {
                 "kind": "ratio",
                 "n": 20776904294,
-                "of": 25769803776
+                "of": 25769803776,
+                "live": "memory:infra"
               },
               {
                 "kind": "spark",
@@ -420,7 +422,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 450
+                "n": 450,
+                "live": "disk:infra"
               },
               {
                 "kind": "spark",
@@ -624,5 +627,10 @@
         ]
       }
     }
+  ],
+  "live": [
+    "cpu:infra",
+    "memory:infra",
+    "disk:infra"
   ]
 }

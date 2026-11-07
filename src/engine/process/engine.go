@@ -72,6 +72,9 @@ type Options struct {
 	KeepAwakePage func(awake.View) any
 	// value: the other pages a subscription streams (the menu bar's), by id.
 	Feeds map[string]engine.Feed
+	// value: the reading of the live keys the streamed pages list; nil sends
+	// no sample.
+	Sample engine.Sampler
 	// value: the station binary hello names, the one a terminal opens.
 	Executable string
 	// value: this engine as a client sees it: a second engine asks it first.

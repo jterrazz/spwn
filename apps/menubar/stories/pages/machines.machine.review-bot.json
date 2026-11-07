@@ -84,7 +84,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 340
+                "n": 340,
+                "live": "cpu:review-bot"
               },
               {
                 "kind": "spark",
@@ -169,7 +170,8 @@
               {
                 "kind": "ratio",
                 "n": 4133906022,
-                "of": 4294967296
+                "of": 4294967296,
+                "live": "memory:review-bot"
               },
               {
                 "kind": "spark",
@@ -257,7 +259,8 @@
             "cells": [
               {
                 "kind": "percent",
-                "n": 100
+                "n": 100,
+                "live": "disk:review-bot"
               },
               {
                 "kind": "spark",
@@ -634,5 +637,10 @@
         ]
       }
     }
+  ],
+  "live": [
+    "cpu:review-bot",
+    "memory:review-bot",
+    "disk:review-bot"
   ]
 }

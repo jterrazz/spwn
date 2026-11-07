@@ -242,8 +242,10 @@ func MenubarStream() []byte {
 		engine.Opened{Stream: page.Schema, Pages: []string{engine.PageMenubar}},
 		engine.Event{Event: "page", Page: frame},
 		engine.Event{Event: "page", Page: ready},
+		sampled(byName["menubar.full"].Live, "2026-11-03T10:30:02Z", 3, false),
+		sampled(byName["menubar.full"].Live, "2026-11-03T10:30:04Z", 4, true),
 		engine.Event{Event: "tick", At: "2026-11-03T10:30:15Z"},
-		engine.Event{Event: "notice", Notice: &engine.Notice{Kind: engine.NoticeAwakeEnded, Text: engine.AwakeStopped("battery 20 %")}},
+		engine.Event{Event: "notice", Notice: &engine.Notice{Kind: engine.NoticeAwakeEnded, Icon: engine.NoticeIcon(engine.NoticeAwakeEnded), Text: engine.AwakeStopped("battery 20 %")}},
 	}
 	type answer struct {
 		V   int    `json:"v"`
@@ -263,6 +265,30 @@ func MenubarStream() []byte {
 		out = append(append(out, data...), '\n')
 	}
 	return out
+}
+
+// value: one tick of the live keys a page lists, read over n readings of
+// This Mac 2 s apart; stale, every key is told late.
+func sampled(keys []string, at string, n int, stale bool) engine.Event {
+	readings := make([]activity.Reading, 0, n)
+	for i := range n {
+		busy := uint64(i*i) * 150
+		readings = append(readings, activity.Reading{Sample: activity.Sample{At: time.Date(2026, 11, 3, 10, 30, 2*i, 0, time.UTC), CPUBusy: busy, CPUTotal: uint64(i) * 1000,
+			MemUsed: 9 << 30, MemTotal: 16 << 30, NetIn: uint64(i) * 2_400_000, NetOut: uint64(i) * 600_000}})
+	}
+	e := engine.Event{Event: engine.EventSample, At: at, Values: map[string]any{}}
+	for _, k := range keys {
+		v := pagemenubar.LiveValue(k, readings)
+		if v.Kind == "" {
+			continue
+		}
+		if stale {
+			v.Stale = true
+			e.Stale = append(e.Stale, k)
+		}
+		e.Values[k] = v
+	}
+	return e
 }
 
 func EventsStream() []byte {
@@ -285,7 +311,7 @@ func EventsStream() []byte {
 	outs := make([]any, 0, 1+len(events))
 	outs = append(outs, engine.Opened{Stream: engine.EventsStream})
 	for _, e := range events {
-		outs = append(outs, engine.Event{Event: "notice", Notice: &engine.Notice{Kind: e.Kind, Text: strings.Join(e.Parts, token.Sep)}})
+		outs = append(outs, engine.Event{Event: "notice", Notice: &engine.Notice{Kind: e.Kind, Icon: engine.NoticeIcon(e.Kind), Text: strings.Join(e.Parts, token.Sep)}})
 	}
 	var out []byte
 	for _, o := range outs {

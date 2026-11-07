@@ -26,6 +26,8 @@ public final class Navigation: @unchecked Sendable {
     // value: called with Activity's window each time the owner picks one,
     // so the app keeps it for the next visit.
     public var remember: (@Sendable (String) -> Void)?
+    // value: called with each tick of the live keys the watched page lists.
+    public var sampled: (@Sendable (LiveSample) -> Void)?
 
     public init(socket: String, clock: StreamClock = SystemClock(), window: String? = nil, shown: @escaping @Sendable (String, Page?) -> Void) {
         self.socket = socket
@@ -91,6 +93,10 @@ public final class Navigation: @unchecked Sendable {
 
     func watch(_ page: String) {
         let sub = Subscription(path: socket, pages: [page], clock: clock) { [weak self] event in
+            if case .sample(let s) = event, let self, self.watched == page {
+                self.sampled?(s)
+                return
+            }
             guard case .page(let p) = event, let self, self.watched == page else { return }
             self.lock.withLock { self.seen[page] = p }
             self.shown(page, p)

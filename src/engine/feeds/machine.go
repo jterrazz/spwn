@@ -6,7 +6,6 @@ import (
 	"time"
 
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
-	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
 	"github.com/jterrazz/studio-station/src/core/machine"
@@ -20,25 +19,17 @@ import (
 
 func (o Menubar) Machine() engine.Feed {
 	// invariant: SPEC §10.3: a machine's page is read only while it is open:
-	// its activity every 2 s, the rest every 30 s and again as soon as the
-	// engine's state moves or a refresh names the page, each through the
-	// router, so another Mac's page is that Mac's engine's answer; the channel
-	// closes when the watch ends.
+	// every 30 s and again as soon as the engine's state moves or a refresh
+	// names the page, each through the router, so another Mac's page is that
+	// Mac's engine's answer; its activity is its live keys, never a rebuild;
+	// the channel closes when the watch ends.
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
 		out := make(chan any, 1)
 		m := &one{o: o, out: out, m: pagemenubar.Machine{Name: in.Subject, Asks: levels}}
 		go func() {
 			defer close(out)
 			m.send(ctx, func(*pagemenubar.Machine) {})
-			var wg sync.WaitGroup
-			for _, loop := range []func(context.Context, engine.FeedInput){m.sample, m.reads} {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					loop(ctx, in)
-				}()
-			}
-			wg.Wait()
+			m.reads(ctx, in)
 		}()
 		return out
 	}
@@ -120,26 +111,10 @@ func (f *one) send(ctx context.Context, change func(*pagemenubar.Machine)) {
 	f.mu.Lock()
 	change(&f.m)
 	f.m.Now = f.o.Clock.Now()
+	f.m.Samples = f.o.Live.Readings(f.m.Name)
 	p := page.Document{Schema: page.Schema, Page: pagemenubar.MachinePage(f.m)}
 	f.mu.Unlock()
 	latest(ctx, f.out, p)
-}
-
-func (f *one) sample(ctx context.Context, _ engine.FeedInput) {
-	at := machine.Ref{Name: f.m.Name}
-	for {
-		if s, err := call.Invoke(ctx, f.o.Calls, at, activitycalls.Sample, activitycalls.SampleIn{}, nil); err == nil {
-			f.send(ctx, func(m *pagemenubar.Machine) {
-				m.Samples = append(m.Samples, s)
-				if len(m.Samples) > sampleKept {
-					m.Samples = m.Samples[len(m.Samples)-sampleKept:]
-				}
-			})
-		}
-		if f.o.Clock.Sleep(ctx, sampleEvery) != nil {
-			return
-		}
-	}
 }
 
 func (f *one) reads(ctx context.Context, in engine.FeedInput) {
