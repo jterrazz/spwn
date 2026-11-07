@@ -99,14 +99,14 @@ func Sections(f ports.AllMachines, thisMac page.Context, all bool) []page.Sectio
 				row := named(RedRow(p), thisMac)
 				red = append(red, page.Item{Row: &row})
 			case p.Declared != nil:
-				row := named(PublicRow(p), thisMac)
+				row := named(Answering(PublicRow(p), p), thisMac)
 				public = append(public, page.Item{Row: &row})
 			case shared[p.Key()]:
 			case p.Reach == ports.ThisMachine:
-				row := named(LocalRow(p), thisMac)
+				row := named(Answering(LocalRow(p), p), thisMac)
 				local = append(local, page.Item{Row: &row})
 			default:
-				row := named(PrivateRow(p), thisMac)
+				row := named(Answering(PrivateRow(p), p), thisMac)
 				private = append(private, page.Item{Row: &row})
 			}
 		}
@@ -234,6 +234,19 @@ func PublicRow(p ports.Port) page.Row {
 		row.Cells[4] = page.Texts(r.Label, r.Seen)
 	}
 	return row
+}
+
+func Answering(r page.Row, p ports.Port) page.Row {
+	// invariant: SPEC B5.17: a port follows its VM's state: greyed
+	// unreachable while it is down, starting while it boots again.
+	switch p.Answer {
+	case ports.Unreachable:
+		r.Mark, r.Reason, r.Detail = page.Attention, page.Unreachable, page.Text(catalog.UnreachableDetail(p.Machine.Name))
+	case ports.Starting:
+		r.Mark, r.Reason, r.Detail = page.Attention, page.Waiting, page.Text(catalog.StartingDetail(p.Machine.Name))
+	case ports.Answers:
+	}
+	return r
 }
 
 func LocalRow(p ports.Port) page.Row {
@@ -397,4 +410,16 @@ func firstLine(sections []page.Section, label string) page.Section {
 	}
 	row := page.Row{ID: "summary/ports", Label: label, Mark: page.OK, Cells: []page.Value{page.Texts(words...)}}
 	return page.Section{ID: "summary", Title: "Summary", Role: page.Summary, Fold: page.Open, Uncounted: true, Columns: []page.Column{{Key: "area", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 60}}, Items: []page.Item{{Row: &row}}}
+}
+
+func Links(mode string, thisMac page.Context) page.Page {
+	// value: the outcome of HTTPS links turned on or off: the link the
+	// shares of this Mac now get.
+	detail := "shared ports get an https:// link"
+	if !ports.HTTPSLinks(mode) {
+		detail = "shared ports get an http:// link"
+	}
+	row := pages.Done("https", catalog.StateOK, detail)
+	row.Label = "HTTPS links " + map[bool]string{true: "on", false: "off"}[ports.HTTPSLinks(mode)]
+	return pages.Outcome("ports https", thisMac, nil, []page.Row{row}, "HTTPS links")
 }

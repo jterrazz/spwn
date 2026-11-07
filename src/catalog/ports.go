@@ -1,6 +1,9 @@
 package catalog
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type PortDefaults struct {
 	RangeLow, RangeHigh, MaxPerVM, MinPort int
@@ -40,6 +43,16 @@ func StoppedDetail(vm string) string {
 	return "not shared while " + vm + " is stopped"
 }
 
+func UnreachableDetail(vm string) string {
+	// value: why a port its VM was heard listening on does not answer.
+	return "unreachable while " + vm + " is down"
+}
+
+func StartingDetail(vm string) string {
+	// value: a port of a VM booting again, before its guest reports.
+	return "starting: unreachable until " + vm + " is ready"
+}
+
 const IssuingDetail = "issuing certificate" // value: a share whose host certificate the tailnet has not issued yet.
 
 const ServeOffDetail = "Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"
@@ -69,17 +82,65 @@ type KnownPort struct {
 	Process string
 	What    string
 	// value: where the owner turns it off, a System Settings path.
-	Off string
+	Off  string
+	Logo string
 }
 
 const airPlayOff = "System Settings > General > AirDrop & Handoff > AirPlay Receiver"
 
+const airPlayReceiver = "AirPlay Receiver"
+
 var KnownPorts = []KnownPort{ // value: the ports whose name the owner knows better than its process's; one with no process is known on any.
-	{Port: 5000, Process: "ControlCenter", What: "AirPlay Receiver", Off: airPlayOff},
-	{Port: 7000, Process: "ControlCenter", What: "AirPlay Receiver", Off: airPlayOff},
+	{Port: 5000, Process: "ControlCenter", What: airPlayReceiver, Off: airPlayOff},
+	{Port: 7000, Process: "ControlCenter", What: airPlayReceiver, Off: airPlayOff},
 	{Port: 22, What: "SSH"},
 	{Port: 5900, What: "Screen Sharing"},
-	{Port: 6443, What: "Kubernetes API"},
+	{Port: 6443, What: "Kubernetes API", Logo: "kubernetes"},
+}
+
+type PortName struct {
+	Port int
+	Name string
+	// value: the logo a row of this port wears in the menu bar; none wears
+	// a quiet chip.
+	Logo string
+}
+
+var PortNames = []PortName{ // value: the software a developer knows a listener by (SPEC B5.17), whatever process runs it; a port KnownPorts names is not repeated here.
+	{Port: 5173, Name: "Vite", Logo: "vite"},
+	{Port: 4321, Name: "Astro", Logo: "astro"},
+	{Port: 5432, Name: "Postgres", Logo: "postgres"},
+	{Port: 443, Name: "Traefik", Logo: "traefik"},
+	{Port: 9229, Name: "Node inspector", Logo: "node"},
+	{Port: 6006, Name: "Storybook", Logo: "storybook"},
+	{Port: 8081, Name: "Expo", Logo: "expo"},
+}
+
+func PortNameOf(port int, process string) PortName {
+	// invariant: a listener is known by the name KnownPorts gives it, else
+	// by the software of its port, else by its number ("Port 8080").
+	if k, ok := KnownPortOf(port, process); ok {
+		return PortName{Port: port, Name: k.What, Logo: k.Logo}
+	}
+	for _, s := range PortNames {
+		if s.Port == port {
+			return s
+		}
+	}
+	return PortName{Port: port, Name: "Port " + strconv.Itoa(port)}
+}
+
+var AppNames = map[string]string{ // value: the app the owner knows a system process by, as System Settings names it.
+	"ControlCenter": airPlayReceiver,
+}
+
+func AppOf(process string) string {
+	// value: the app a process is, as the owner reads it; the process's own
+	// name when the catalogue knows no better.
+	if name, ok := AppNames[process]; ok {
+		return name
+	}
+	return process
 }
 
 func KnownPortOf(port int, process string) (KnownPort, bool) {

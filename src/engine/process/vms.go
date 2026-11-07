@@ -78,6 +78,9 @@ func (d *Engine) adopt(ctx context.Context) {
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
 		d.mu.Lock()
 		d.vms[r.Name] = v
+		if len(known.LastHeard) > 0 {
+			d.lastHeard[r.Name] = known.LastHeard
+		}
 		d.mu.Unlock()
 		run, live := d.hv.Adopt(ctx, r.Name)
 		switch {
@@ -256,6 +259,7 @@ func (d *Engine) forget(name string) {
 		v.cancel()
 	}
 	delete(d.vms, name)
+	delete(d.lastHeard, name)
 	d.mu.Unlock()
 }
 

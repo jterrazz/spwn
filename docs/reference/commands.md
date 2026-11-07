@@ -117,6 +117,7 @@ station ports share <vm> <port> [--json]      # reserve the port now and share i
 station ports stop-sharing <vm> <port> [--yes] # release it, and do not share it again until a share; inside a VM: <port>
 station ports declare [<machine>] <port> --via <route> # declare it public: cloudflare-tunnel, tailscale-funnel or lan
 station ports undeclare [<machine>] <port> [--yes]     # take the declaration back
+station ports https on|off [--on <mac>]               # HTTPS links on a Mac: https:// with a certificate, or http://
 ```
 
 `--all-machines` asks every Mac through its engine; `--all` lists the ports that listen on their machine only, otherwise counted on one line. `share` prints the URL before anything listens, piped the URL alone; a port is refused on a VM that shares 20 already (exit 1, `Hint: station ports stop-sharing <vm> <port>`) and while This Mac is signed out of Tailscale (exit 1, the reservation kept). `stop-sharing` asks yes or no and is remembered in `preferences.json` (`ports.not_shared`). `declare` and `undeclare` are kept by the machine's Mac and refused inside a VM; the route is verified on every list (see [Ports](ports.md)). `--json` is `station.ports.list/v1`. The v2 nouns of this family and `tailnet` are hidden aliases for one release. See [Ports](ports.md).

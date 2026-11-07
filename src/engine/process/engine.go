@@ -118,23 +118,29 @@ type Engine struct {
 	// value: every address each running VM listens on, as its guest
 	// reported it, shared or not.
 	heard map[string][]ports.Listener
+	// value: what each VM that stopped was last heard listening on, until
+	// its guest reports again or the VM is forgotten.
+	lastHeard map[string][]ports.Listener
 	// value: when the exposure job last read, what each VM listened on
 	// then, and the red ports it told.
 	exposedAt    time.Time
 	scanned      map[string][]ports.Listener
 	red          []string
 	reservations []ports.Reservation
-	self         ports.SharingState
-	read         bool
-	issuing      bool
-	started      time.Time
-	note         func(line string)
-	awakeJob     *awakecalls.Keeper
-	awake        *awake.Kept
-	hub          hub
-	history      *activity.History
-	watchers     watchers
-	settings     engine.SettingsKept
+	// value: the HTTPS mode this engine's shares were served in, as its
+	// last tick read it.
+	servedMode string
+	self       ports.SharingState
+	read       bool
+	issuing    bool
+	started    time.Time
+	note       func(line string)
+	awakeJob   *awakecalls.Keeper
+	awake      *awake.Kept
+	hub        hub
+	history    *activity.History
+	watchers   watchers
+	settings   engine.SettingsKept
 
 	notifier Notifier
 	serve    func(ctx context.Context, conn Stream)
@@ -173,7 +179,7 @@ func New(h Mac, hv Hypervisor, guests Guests, m Machines, tn Tailnet, st Stores,
 	if o.GuestPort == 0 {
 		o.GuestPort = 22
 	}
-	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, takeBackFailed: map[string]time.Time{}}
+	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, takeBackFailed: map[string]time.Time{}}
 	d.awakeJob = d.newAwake()
 	if o.Notifier != nil {
 		d.notifier = o.Notifier(d.logf)
@@ -303,9 +309,13 @@ func (d *Engine) Memory() engine.Memory {
 	defer d.mu.Unlock()
 	out := engine.Memory{}
 	for name, v := range d.vms {
+		heard, ok := d.heard[name]
+		if !ok {
+			heard = d.lastHeard[name]
+		}
 		out[name] = engine.Remembered{
 			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
-			Latency: v.latency, Restart: v.walk, Down: v.down,
+			Latency: v.latency, Restart: v.walk, Down: v.down, LastHeard: heard,
 		}
 	}
 	return out

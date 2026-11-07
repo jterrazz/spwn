@@ -22,6 +22,7 @@ import (
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 	portscmd "github.com/jterrazz/studio-station/src/surface/cli/ports"
 	portsdeclare "github.com/jterrazz/studio-station/src/surface/cli/ports/declare"
+	portshttps "github.com/jterrazz/studio-station/src/surface/cli/ports/https"
 	portsshare "github.com/jterrazz/studio-station/src/surface/cli/ports/share"
 	portsstopsharing "github.com/jterrazz/studio-station/src/surface/cli/ports/stopsharing"
 	portsundeclare "github.com/jterrazz/studio-station/src/surface/cli/ports/undeclare"
@@ -84,8 +85,9 @@ func portsCommands(env kit.Env, m machine) []*cobra.Command {
 	}
 	declare := portsdeclare.Command(portsdeclare.Deps{ThisMachine: m.where}, env)
 	undeclare := portsundeclare.Command(portsundeclare.Deps{ThisMachine: m.where}, env)
+	https := portshttps.Command(portshttps.Deps{ThisMachine: m.where}, env)
 	return []*cobra.Command{
-		list(share(), stop(), declare, undeclare),
+		list(share(), stop(), declare, undeclare, https),
 		kit.Alias("services", list(kit.Alias("url", share(), "share"), kit.Alias("release", stop(), "stop-sharing")), "ports"),
 		kit.Alias("tailnet", list(), "ports"),
 	}

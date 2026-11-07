@@ -289,6 +289,13 @@ func (f Scene) draw() []Fixture {
 }
 
 func infraDown(f *Scene) {
+	for i, h := range f.Ports.Macs {
+		for j, p := range h.Ports {
+			if p.Machine.Name == "infra" {
+				f.Ports.Macs[i].Ports[j].Answer = ports.Unreachable
+			}
+		}
+	}
 	vms := f.All.Macs[1].VMs
 	vms[0].State, vms[0].Detail, vms[0].BootAt = model.Stopped, "out of memory", time.Time{}
 	vms[0].CheckStatus = model.CheckStatus{State: model.CheckFailing, Since: storyNow.Add(-4 * time.Minute), At: storyNow.Add(-20 * time.Second)}

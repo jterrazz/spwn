@@ -5,6 +5,7 @@ import (
 	"time"
 
 	model "github.com/jterrazz/studio-station/src/machines"
+	"github.com/jterrazz/studio-station/src/ports"
 )
 
 type Memory map[string]Remembered
@@ -28,6 +29,9 @@ type Remembered struct {
 	Latency []model.LatencyPoint `json:"latency,omitempty"`
 	Restart *model.RestartWalk   `json:"restart,omitempty"`
 	Down    bool                 `json:"down,omitempty"`
+	// value: what it was last heard listening on, so a successor lists
+	// the ports of a VM down or booting again.
+	LastHeard []ports.Listener `json:"last_heard,omitempty"`
 }
 
 type VMAccounts struct {

@@ -1,0 +1,27 @@
+description: 'a port is known by its software and logo, else by its number; an exposed one names its app'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:4321" astro'
+      exit: 0
+    - command: 'world listen linux-1 "*:9229" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:6006" storybook'
+      exit: 0
+    - command: 'world listen linux-1 "*:8080" python'
+      exit: 0
+    - command: 'world listen jterrazz-macbook-pro "*:5000" ControlCenter'
+      exit: 0
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''.ports[] | [.machine, .port, .name, .logo]'''
+      exit: 0
+      stdout: |
+          ["jterrazz-macbook-pro",5000,"AirPlay Receiver",null]
+          ["linux-1",4321,"Astro","astro"]
+          ["linux-1",5173,"Vite","vite"]
+          ["linux-1",6006,"Storybook","storybook"]
+          ["linux-1",7000,"Port 7000",null]
+          ["linux-1",8080,"Port 8080",null]
+          ["linux-1",9229,"Node inspector","node"]
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''.ports[] | select(.class == "public") | [.port, .process, .pid, .app]'''
+      exit: 0
+      stdout: |
+          [5000,"ControlCenter",2000,"AirPlay Receiver"]

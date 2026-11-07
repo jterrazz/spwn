@@ -16,16 +16,14 @@ import (
 )
 
 func (o Menubar) Ports() engine.Feed {
-	// invariant: SPEC §10.2 Ports: the ports of the Mac the page is of, asked
-	// through its engine, or of every Mac when it names none; read when it
-	// opens, every 30 s and on a change of this engine's state.
+	// invariant: SPEC §10.2 Ports: the ports of the machine the page is of,
+	// a Mac or a VM, read through the Mac it is on, so a server down still
+	// lists its ports unreachable; of every Mac when it names none; read when
+	// it opens, every 30 s and on a change of this engine's state.
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
 		read := func(ctx context.Context) page.Page {
-			target, of, list := machine.Ref{}, pagemenubar.PortsOf{Machine: in.Subject}, portscalls.ListIn{AllMachines: true}
-			if in.Subject != "" {
-				target, list = machine.Ref{Name: in.Subject}, portscalls.ListIn{}
-			}
-			l, err := call.Invoke(ctx, o.Calls, target, portscalls.List, list, nil)
+			of, list := pagemenubar.PortsOf{Machine: in.Subject}, portscalls.ListIn{AllMachines: true, Of: in.Subject}
+			l, err := call.Invoke(ctx, o.Calls, machine.Ref{}, portscalls.List, list, nil)
 			if err != nil {
 				return pagemenubar.Unread(pagemenubar.PortsID, o.ThisMachine, err)
 			}

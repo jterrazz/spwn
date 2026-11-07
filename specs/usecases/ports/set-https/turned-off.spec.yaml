@@ -1,0 +1,28 @@
+description: 'HTTPS links off serve every share raw under an http:// link; on again, https://'
+env: two-macs
+runs:
+    - command: 'ports https off'
+      exit: 0
+      stdout: |
+          ●	HTTPS links off	shared ports get an http:// link
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | [.port, .url]]'''
+      exit: 0
+      stdout: |
+          [[5173,"http://jterrazz-macbook-pro.tail1234.ts.net:40001"],[7000,"jterrazz-macbook-pro.tail1234.ts.net:40002"]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].tailnet.shares[] | [.Port, .Scheme]], .macs["jterrazz-macbook-pro"].preferences.ports.https'' world.json'
+      exit: 0
+      stdout: |
+          [[40001,"tcp"],[40002,"tcp"]]
+          "off"
+    - command: 'ports https on'
+      exit: 0
+      stdout: |
+          ●	HTTPS links on	shared ports get an https:// link
+    - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | [.port, .url]]'''
+      exit: 0
+      stdout: |
+          [[5173,"https://jterrazz-macbook-pro.tail1234.ts.net:40001"],[7000,"jterrazz-macbook-pro.tail1234.ts.net:40002"]]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].tailnet.shares[] | [.Port, .Scheme]]'' world.json'
+      exit: 0
+      stdout: |
+          [[40001,"https"],[40002,"tcp"]]

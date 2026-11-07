@@ -149,8 +149,10 @@ func (d *Engine) tickShares(ctx context.Context) {
 	// invariant: every reserved port ticks, listened on in this engine's
 	// life or not, so one idle past its days is released, and one served
 	// that its VM says nothing listens on is unshared.
+	mode := d.policy().HTTPS
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	d.serveInModeLocked(ctx, mode)
 	now := d.h.Now()
 	for _, l := range slices.Clone(d.reservations) {
 		d.svcOf(l.VM, l.GuestPort)
@@ -169,9 +171,32 @@ func (d *Engine) tickShares(ctx context.Context) {
 	}
 }
 
+// invariant: HTTPS links turned on or off on this Mac serve every served
+// port again in the new mode at the next tick, each unshared first in the
+// mode it was served in; the caller holds d.mu.
+func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
+	was := d.servedMode
+	d.servedMode = mode
+	if was == "" || was == mode || !d.self.On {
+		return
+	}
+	for _, s := range d.svcs {
+		i := d.reservationIndex(s.vm, s.port)
+		if i < 0 || !s.served {
+			continue
+		}
+		_ = d.tn.Unshare(ctx, ports.ShareOf(d.reservations[i], was))
+		s.served = false
+		d.expose(ctx, s, d.reservations[i], mode)
+	}
+}
+
 func (d *Engine) vmStopped(ctx context.Context, vm string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	if ls := d.heard[vm]; len(ls) > 0 {
+		d.lastHeard[vm] = ls
+	}
 	delete(d.heard, vm)
 	for _, s := range d.svcs {
 		if s.vm == vm {
@@ -414,7 +439,7 @@ func (d *Engine) view(l ports.Reservation, s *svc, httpsMode string) ports.Share
 		}
 		v.Process, v.Bind = s.process, s.ip
 		v.Detail = ports.JoinDetail(ports.JoinDetail(s.detail, s.serveNote), v.Detail)
-		if d.issuing && s.served && l.HTTP != nil && *l.HTTP {
+		if d.issuing && s.served && l.HTTP != nil && *l.HTTP && ports.HTTPSLinks(httpsMode) {
 			v.Detail = ports.JoinDetail(v.Detail, catalog.IssuingDetail)
 		}
 		if s.refused {
@@ -518,8 +543,8 @@ func (d *Engine) release(ctx context.Context, vm string, port int) (ports.Reserv
 
 // invariant: station owns only the serve entries of its range (port mode and
 // raw TCP) or of a path /<vm>/ of this host (path mode), and removes those no
-// reservation justifies, both kinds; it never touches another entry, and waits for
-// Serve to be on.
+// reservation justifies in the HTTPS mode of this Mac, both kinds; it never
+// touches another entry, and waits for Serve to be on.
 func (d *Engine) reconcileServe(ctx context.Context) {
 	d.mu.Lock()
 	on := d.self.On
@@ -544,7 +569,7 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 		case p.InRange(e.Port):
 			justified := false
 			for _, l := range reservations {
-				justified = justified || l.MacPort == e.Port
+				justified = justified || l.MacPort == e.Port && ports.ShareOf(l, p.HTTPS).Scheme == e.Scheme
 			}
 			if !justified {
 				e.Path = ""
@@ -556,7 +581,7 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 			parts := strings.Split(strings.Trim(e.Path, "/"), "/")
 			justified := false
 			for _, l := range reservations {
-				justified = justified || (l.VM == parts[0] && strconv.Itoa(l.GuestPort) == parts[len(parts)-1])
+				justified = justified || (p.HTTPS == ports.HTTPSPath && l.VM == parts[0] && strconv.Itoa(l.GuestPort) == parts[len(parts)-1])
 			}
 			if vms[parts[0]] && !justified {
 				_ = d.tn.Unshare(ctx, e)

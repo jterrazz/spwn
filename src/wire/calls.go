@@ -63,7 +63,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, Laptop: m.profile.Caps.Battery}),
 		portscalls.All(portscalls.Deps{Ports: m.portsOf(env), Tailnet: m.tailnetStatus(), Kind: kind,
-			Declarations: m.stores.declarations, Routes: m.routes(), Far: farPorts{m}}),
+			Declarations: m.stores.declarations, Routes: m.routes(), Far: farPorts{m}, Prefs: m.stores.ports()}),
 		setupcalls.All(setupcalls.Deps{Setup: setupRun{setupOf}, Ask: named}),
 		settingscalls.All(settingscalls.Deps{
 			Settings: settings, Appliers: settings.Appliers(), Applied: m.stores.applied, OffThisMac: settingscontract.OffHere(m.stores.prefs),

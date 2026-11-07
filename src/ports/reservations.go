@@ -191,6 +191,8 @@ func URLs(l Reservation, publicName, httpsMode string, serveOn bool) URLSet {
 	switch {
 	case !isHTTP(l):
 		u.Public = publicName + ":" + port
+	case httpsMode == HTTPSOff:
+		u.Public = "http://" + publicName + ":" + port
 	case httpsMode == HTTPSPath:
 		u.Public = "https://" + publicName + "/" + l.VM + "/" + strconv.Itoa(l.GuestPort) + "/"
 	default:
@@ -202,7 +204,7 @@ func URLs(l Reservation, publicName, httpsMode string, serveOn bool) URLSet {
 func ShareOf(l Reservation, httpsMode string) Share {
 	s := Share{Port: l.MacPort, Reserved: l.MacPort, Scheme: SchemeHTTPS}
 	switch {
-	case !isHTTP(l):
+	case !isHTTP(l), httpsMode == HTTPSOff:
 		s.Scheme = SchemeTCP
 	case httpsMode == HTTPSPath:
 		s.Port, s.Path = 443, "/"+l.VM+"/"+strconv.Itoa(l.GuestPort)

@@ -67,12 +67,17 @@ type Machine struct {
 	Ref       machine.Ref
 	At        Placement
 	Listening []Listener
+	// value: whether it answers on what it was last heard listening on.
+	Answer Answer
 }
 
 type Port struct {
 	Machine machine.Ref
 	Port    int
 	Process string
+	// value: the process that listens, as the system reported it; 0 when
+	// it was heard through a guest, which reports none.
+	PID int
 	// value: every address it listens on, in the order the system reported them.
 	Binds []string
 	Reach Reach
@@ -81,6 +86,7 @@ type Port struct {
 	Declared *Declaration
 	// value: what its route showed of it, once a declared port is verified.
 	Verified *Verified
+	Answer   Answer
 }
 
 func MacOf(name string, ls []Listener) Machine {
@@ -97,7 +103,7 @@ func VMOf(name, mac string, bridged bool, ls []Listener) Machine {
 
 func (p Port) Key() string { return p.Machine.Name + ":" + strconv.Itoa(p.Port) }
 
-func (p Port) Red() bool { return p.Reach == Outside && p.Declared == nil }
+func (p Port) Red() bool { return p.Reach == Outside && p.Declared == nil && p.Answer == Answers }
 
 func (p Port) Class() Class {
 	// invariant: two classes: a port reachable outside the tailnet is public,
@@ -128,7 +134,7 @@ func Classify(m Machine, decl []Declaration) []Port {
 		}
 		i := slices.IndexFunc(out, func(p Port) bool { return p.Port == l.Port })
 		if i < 0 {
-			out = append(out, Port{Machine: m.Ref, Port: l.Port, Process: l.Process, Reach: ThisMachine})
+			out = append(out, Port{Machine: m.Ref, Port: l.Port, Process: l.Process, PID: l.PID, Reach: ThisMachine, Answer: m.Answer})
 			i = len(out) - 1
 		}
 		p := &out[i]

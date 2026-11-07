@@ -1,0 +1,8 @@
+description: 'inside a workspace, HTTPS links are refused: its Mac serves its shares'
+env: in-workspace
+runs:
+    - command: 'ports https off'
+      exit: 2
+      stderr: |
+          Error: linux-1's HTTPS links are set on its Mac
+          Hint: run it on its Mac

@@ -11,7 +11,12 @@ import (
 const (
 	HTTPSPort = "port"
 	HTTPSPath = "path"
+	// value: HTTPS links turned off on this Mac: every share is carried raw,
+	// an HTTP server's link http://.
+	HTTPSOff = "off"
 )
+
+func HTTPSLinks(mode string) bool { return mode != HTTPSOff }
 
 type Policy struct {
 	Low, High, MaxPerVM, MinPort int
@@ -44,8 +49,8 @@ func PolicyOf(s *PortsGroup) Policy {
 	if s.IgnoredPorts != nil {
 		p.Ignored = s.IgnoredPorts
 	}
-	if s.HTTPS == HTTPSPath {
-		p.HTTPS = HTTPSPath
+	if s.HTTPS == HTTPSPath || s.HTTPS == HTTPSOff {
+		p.HTTPS = s.HTTPS
 	}
 	p.NotShared = s.NotShared
 	return p

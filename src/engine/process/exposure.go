@@ -33,6 +33,7 @@ func (d *Engine) hear(vm string, ls []ports.Listener) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.heard[vm] = ls
+	delete(d.lastHeard, vm)
 }
 
 // value: whether a guest reported listeners other than the job last read;
@@ -52,18 +53,54 @@ func (d *Engine) heardOf(vm string) []ports.Listener {
 	return slices.Clone(d.heard[vm])
 }
 
+const restartingDetail = "restarting"
+
+// value: why a VM last heard listening does not run its ports now; the
+// caller holds d.mu.
+func (d *Engine) haltLocked(v *vmState) ports.Halt {
+	if v == nil {
+		return ports.StoppedOnPurpose
+	}
+	vm := model.VM{Lifetime: v.rec.Lifetime, State: model.VMState(v.state), Want: v.rec.Want, Detail: v.detail, Restarts: v.restarts}
+	switch {
+	case v.restarts.Looping:
+		return ports.Down
+	case v.state == engine.StateRunning, v.detail == restartingDetail:
+		return ports.Restarting
+	case model.Down(vm):
+		return ports.Down
+	}
+	return ports.StoppedOnPurpose
+}
+
 // value: what listens in each running VM, placed behind its Mac or bridged
-// onto its network; the caller holds d.mu.
+// onto its network, and what a VM down or booting again was last heard
+// listening on, told it does not answer; the caller holds d.mu.
 func (d *Engine) listeningLocked() []ports.Machine {
-	names := make([]string, 0, len(d.heard))
+	names := make([]string, 0, len(d.heard)+len(d.lastHeard))
 	for vm := range d.heard {
 		names = append(names, vm)
+	}
+	for vm := range d.lastHeard {
+		if _, heard := d.heard[vm]; !heard {
+			names = append(names, vm)
+		}
 	}
 	sort.Strings(names)
 	out := make([]ports.Machine, 0, len(names))
 	for _, vm := range names {
 		v := d.vms[vm]
-		out = append(out, ports.VMOf(vm, d.m.ThisMacName(), v != nil && v.rec.Network == model.Bridged, slices.Clone(d.heard[vm])))
+		ls, answer := d.heard[vm], ports.Answers
+		if _, heard := d.heard[vm]; !heard {
+			var listed bool
+			if answer, listed = ports.AnswerOf(d.haltLocked(v)); !listed {
+				continue
+			}
+			ls = d.lastHeard[vm]
+		}
+		m := ports.VMOf(vm, d.m.ThisMacName(), v != nil && v.rec.Network == model.Bridged, slices.Clone(ls))
+		m.Answer = answer
+		out = append(out, m)
 	}
 	return out
 }
