@@ -49,6 +49,9 @@ type Report struct {
 	// value: the points of the window a screen's graphs draw, when the read
 	// asked for one.
 	Graph []Sample `json:"graph,omitempty"`
+	// value: the window's CPU as its chart draws it (SPEC B5.3), when the
+	// read asked for a window.
+	Chart *Chart `json:"chart,omitempty"`
 	// invariant: never nil: SPEC §6.5's findings over the series read.
 	Findings []finding.Finding `json:"findings"`
 }

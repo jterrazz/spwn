@@ -94,6 +94,8 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 func graphed(r activity.Report, s *activity.Series, in ReadIn, now time.Time) activity.Report {
 	if in.Graph > 0 {
 		r.Graph = s.Graph(in.Graph, now)
+		chart := activity.Fold(r.Graph, in.Graph, now)
+		r.Chart = &chart
 	}
 	return r
 }
