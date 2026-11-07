@@ -56,6 +56,13 @@ type vmState struct {
 	check    model.CheckStatus
 	checking bool
 	ssh      bool
+	// value: a server's last check runs; the restart it walks, nil when
+	// none; its uptime record holds it down; it was marked since this
+	// engine began.
+	latency []model.LatencyPoint
+	walk    *model.RestartWalk
+	down    bool
+	marked  bool
 }
 
 // invariant: at start, a live run is ADOPTED (never touched); a dead one or none
@@ -68,6 +75,7 @@ func (d *Engine) adopt(ctx context.Context) {
 		v := &vmState{rec: r, state: engine.StateStopped, guest: engine.GuestAbsent}
 		known, remembered := d.memory[r.Name]
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
+		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
 		d.mu.Lock()
 		d.vms[r.Name] = v
 		d.mu.Unlock()
@@ -139,6 +147,9 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	d.mu.Lock()
 	v.run, v.end, v.state, v.detail, v.stopping = run, nil, engine.StateRunning, "", false
 	v.bootAt, v.check = d.h.Now(), model.CheckStatus{}
+	if v.rec.Lifetime == model.AlwaysOn && v.down && v.walk == nil {
+		v.walk = &model.RestartWalk{Step: 1, At: v.bootAt}
+	}
 	d.mu.Unlock()
 	d.connect(ctx, v)
 	return nil
@@ -165,6 +176,7 @@ func (d *Engine) tick(ctx context.Context) {
 			_ = d.start(ctx, v)
 		}
 		d.keep(ctx, v)
+		d.walk(ctx, v)
 		d.rehello(v)
 	}
 	d.mu.Lock()
@@ -194,6 +206,13 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 	d.mu.Unlock()
 	d.disconnect(v)
 	d.vmStopped(ctx, name)
+	switch act {
+	case model.ActRestart, model.ActRerun:
+		d.wentDown(ctx, v, model.DownCause(end), true, now)
+	case model.ActPoweredOff, model.ActBroken, model.ActStale:
+		d.wentDown(ctx, v, model.DownCause(end), false, now)
+	case model.ActDelete, model.ActStopped:
+	}
 	switch act {
 	case model.ActRestart:
 		d.restartLater(ctx, v, up, now)
@@ -245,7 +264,10 @@ func (d *Engine) vmViews() []engine.VMView {
 	defer d.mu.Unlock()
 	out := make([]engine.VMView, 0, len(d.vms))
 	for name, v := range d.vms {
-		view := engine.VMView{Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check}
+		view := engine.VMView{
+			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
+			Latency: v.latency, Restart: v.walk,
+		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
 		}

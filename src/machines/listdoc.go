@@ -48,6 +48,89 @@ type ListVM struct {
 	Image   ListImage `json:"image"`
 	Detail  string    `json:"detail,omitempty"`
 	Created time.Time `json:"created_at"`
+	// value: a server's last 30 days (SPEC B5.2), its check's latency
+	// (B5.4) and the step its restart runs (B5.11), each absent until known.
+	Uptime  *ListUptime  `json:"uptime,omitempty"`
+	Latency *ListLatency `json:"latency,omitempty"`
+	Restart *ListRestart `json:"restart,omitempty"`
+}
+
+type ListUptime struct {
+	Since time.Time `json:"since"`
+	// value: percent, two decimals.
+	Availability float64         `json:"availability"`
+	Days         []ListUptimeDay `json:"days"`
+}
+
+type ListUptimeDay struct {
+	Date     string         `json:"date"`
+	Mark     string         `json:"mark"`
+	Down     []ListIncident `json:"down,omitempty"`
+	Restarts int            `json:"restarts,omitempty"`
+}
+
+type ListIncident struct {
+	From time.Time `json:"from"`
+	// value: absent while it is still down.
+	To    *time.Time `json:"to,omitempty"`
+	Cause string     `json:"cause,omitempty"`
+}
+
+type ListLatency struct {
+	NowMS    int64     `json:"now_ms"`
+	P50MS    int64     `json:"p50_ms"`
+	PeakMS   int64     `json:"peak_ms"`
+	PeakAt   time.Time `json:"peak_at"`
+	PointsMS []int64   `json:"points_ms"`
+}
+
+type ListRestart struct {
+	Step    int       `json:"step"`
+	Of      int       `json:"of"`
+	Name    string    `json:"name"`
+	Counted string    `json:"counted"`
+	Since   time.Time `json:"since"`
+}
+
+func uptimeOf(vm VM, now time.Time) *ListUptime {
+	view, ok := vm.Uptime.View(now)
+	if !ok {
+		return nil
+	}
+	out := &ListUptime{Since: view.Since.UTC(), Availability: view.Availability, Days: make([]ListUptimeDay, 0, len(view.Cells))}
+	for _, c := range view.Cells {
+		day := ListUptimeDay{Date: c.Date, Mark: string(c.Mark), Restarts: c.Restarts}
+		for _, in := range c.Down {
+			incident := ListIncident{From: in.From.UTC(), Cause: in.Cause}
+			if !in.To.IsZero() {
+				to := in.To.UTC()
+				incident.To = &to
+			}
+			day.Down = append(day.Down, incident)
+		}
+		out.Days = append(out.Days, day)
+	}
+	return out
+}
+
+func latencyOf(vm VM) *ListLatency {
+	l, ok := LatencyOf(vm.Latency)
+	if !ok {
+		return nil
+	}
+	out := &ListLatency{NowMS: l.Now.Milliseconds(), P50MS: l.P50.Milliseconds(), PeakMS: l.Peak.Milliseconds(), PeakAt: l.PeakAt.UTC(), PointsMS: make([]int64, 0, len(vm.Latency))}
+	for _, p := range vm.Latency {
+		out.PointsMS = append(out.PointsMS, p.Took.Milliseconds())
+	}
+	return out
+}
+
+func restartOf(vm VM) *ListRestart {
+	if vm.Restart == nil {
+		return nil
+	}
+	w := *vm.Restart
+	return &ListRestart{Step: w.Step, Of: RestartSteps, Name: w.Name(), Counted: w.Counted(), Since: w.At.UTC()}
 }
 
 type ListHealth struct {
@@ -96,6 +179,7 @@ func ToList(f AllMachines) ListDoc {
 				Wanted: Wanted(vm), Health: HealthOf(vm), Restarts: restartsOf(vm.Restarts), IP: vm.IP, Bridged: vm.Network == "bridged",
 				Size:  ListSize{CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes, DiskBytes: vm.Resources.DiskBytes},
 				Image: ListImage{Name: vm.Image, Version: vm.Version}, Detail: vm.Detail, Created: vm.CreatedAt,
+				Uptime: uptimeOf(vm, f.Read), Latency: latencyOf(vm), Restart: restartOf(vm),
 			})
 		}
 		out.Macs = append(out.Macs, m)

@@ -1,0 +1,29 @@
+description: 'availability is the time up over the time recorded, two decimals, never rounded up'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 48h'
+      exit: 0
+    - command: 'world poweroff-inside infra'
+      exit: 0
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 7m'
+      exit: 0
+    - command: 'machines start infra --on mac-mini >/dev/null'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].uptime | [.availability, .days[-1].down[0].cause]'''
+      exit: 0
+      stdout: |
+          [99.73,"powered off from inside"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.uptime.infra | [.days, (.incidents[] | [.from[0:16], .to[0:16]])]'' world.json'
+      exit: 0
+      stdout: |
+          [[{"date":"2026-11-06","down_s":455,"restarts":1}],["2026-11-06T10:00","2026-11-06T10:08"]]
+    - command: 'world advance 480h'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].uptime.availability'''
+      exit: 0
+      stdout: |
+          99.97

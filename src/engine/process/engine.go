@@ -42,6 +42,9 @@ type Machines interface {
 	PowerOff(ctx context.Context, name string) error
 	EngineRunning(ctx context.Context, name string) bool
 	ThisMacName() string
+	// value: the engine-only machines.uptime-mark: what the keep job marks
+	// on a server's record.
+	MarkUptime(ctx context.Context, m model.UptimeMark) error
 }
 
 type Tailnet interface {
@@ -297,7 +300,10 @@ func (d *Engine) Memory() engine.Memory {
 	defer d.mu.Unlock()
 	out := engine.Memory{}
 	for name, v := range d.vms {
-		out[name] = engine.Remembered{State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check}
+		out[name] = engine.Remembered{
+			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
+			Latency: v.latency, Restart: v.walk, Down: v.down,
+		}
 	}
 	return out
 }

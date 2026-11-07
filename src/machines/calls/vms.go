@@ -150,6 +150,11 @@ func (s *Machinist) Remove(ctx context.Context, name string) (model.DeleteReport
 		}
 	}
 	s.removeFiles(name, true)
+	if s.o.Uptime != nil {
+		if err := s.o.Uptime.Delete(ctx, name); err != nil {
+			report.Warnings = append(report.Warnings, err.Error())
+		}
+	}
 	if err := blocksFailure(s.o.SSHConfig.Remove(ctx, name), false); err != nil {
 		report.Warnings = append(report.Warnings, err.Error())
 	}

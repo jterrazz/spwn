@@ -69,6 +69,11 @@ type VM struct {
 	// value: when its engine last booted it, while it runs; zero when not
 	// known.
 	BootAt time.Time
+	// value: a server's record of the last 30 days, its check's last runs,
+	// and the step its restart runs now (nil when none runs).
+	Uptime  Uptime
+	Latency []LatencyPoint
+	Restart *RestartWalk
 }
 
 type EngineView struct {

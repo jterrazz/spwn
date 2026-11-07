@@ -100,6 +100,13 @@ func joinAddress(name, port string) string {
 	return name + ":" + port
 }
 
+type CheckAnswer struct {
+	// value: what it answered: a URL's status (`200`), empty for a
+	// connection; and how long the answer took.
+	Status string
+	Took   time.Duration
+}
+
 type CheckState string
 
 const (
