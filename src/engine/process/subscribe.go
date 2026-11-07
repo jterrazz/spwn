@@ -148,7 +148,7 @@ func (d *Engine) known(id string) bool {
 }
 
 func (d *Engine) CheckPages(pages []string) error {
-	hint := "watch page with the pages menubar, menubar.switcher, menubar.machine:<name>, menubar.ports[:<mac>], menubar.awake, menubar.activity[:<window>] or keep-awake"
+	hint := "watch page with the pages menubar, menubar.switcher, menubar.machine:<name>, menubar.ports[:<mac>], menubar.awake, menubar.activity[:<window>], menubar.accounts[:<machine>] or keep-awake"
 	if len(pages) == 0 {
 		return fault("unknown_page", "the watch names no page", hint)
 	}

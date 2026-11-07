@@ -50,7 +50,7 @@ func ownRecords(m model.Machine) []page.Item {
 		rec := page.Row{ID: model.RowID(m.Name, a.Provider), Label: a.Provider, Mark: mark(a)}
 		rec.Cells = []page.Value{page.Text(stateWord(a)), page.Text(who(a)), page.Texts(a.Scopes...), page.Text(a.Detail), page.Text(a.Hint)}
 		if rec.Mark == page.Attention || rec.Mark == page.Broken {
-			rec.Reason = reason(a.Reason)
+			rec.Reason = Reason(a.Reason)
 		}
 		items = append(items, page.Item{Row: &rec})
 	}

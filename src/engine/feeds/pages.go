@@ -2,12 +2,17 @@ package feeds
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/accounts"
+	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine"
+	"github.com/jterrazz/studio-station/src/machines"
+	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/page"
 	pageactivity "github.com/jterrazz/studio-station/src/pages/activity"
 	pageawake "github.com/jterrazz/studio-station/src/pages/awake"
@@ -31,6 +36,68 @@ func (o Menubar) Ports() engine.Feed {
 		}
 		return o.reread(ctx, in, pagemenubar.PortsID, remoteEvery, read)
 	}
+}
+
+func (o Menubar) Accounts() engine.Feed {
+	// invariant: SPEC B5.8: the accounts of every answering Mac and the
+	// copies each shared, each read through its own engine; of one Mac, or
+	// of the Mac a VM is on, when the page names one; read when it opens,
+	// every 30 s, on a refresh and on a change of this engine's state.
+	return func(ctx context.Context, in engine.FeedInput) <-chan any {
+		read := func(ctx context.Context) page.Page {
+			listed, err := call.Read(ctx, o.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
+			if err != nil {
+				return pagemenubar.Unread(pagemenubar.AccountsID, o.ThisMachine, err)
+			}
+			of := accountsOf(listed.All, in.Subject)
+			all := accounts.AllMachines{Now: o.Clock.Now()}
+			for _, h := range listed.All.Macs {
+				if of.Mac != "" && h.Name != of.Mac {
+					continue
+				}
+				m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
+				if !h.ThisMac && !h.Reachable {
+					m.Silent = page.MacName(h.Name, o.ThisMachine.Machine) + " does not answer"
+					all.Macs = append(all.Macs, m)
+					continue
+				}
+				ref := machine.Ref{Name: h.Name}
+				if h.ThisMac {
+					ref = machine.Ref{}
+				}
+				r, err := call.Read(ctx, o.Calls, ref, accountscalls.List, accountscalls.ListIn{}, nil)
+				if err != nil {
+					m.Silent = err.Error()
+				} else if len(r.Machines) > 0 {
+					m.Accounts, m.Shares = r.Machines[0].Accounts, r.Shares
+				}
+				all.Macs = append(all.Macs, m)
+			}
+			return pagemenubar.Accounts(all, of, o.ThisMachine)
+		}
+		return o.reread(ctx, in, pagemenubar.AccountsID, remoteEvery, read)
+	}
+}
+
+// value: what an accounts page is of: a Mac named in full or as the
+// interface names it, or a VM by the Mac it is on; empty is every Mac.
+func accountsOf(all machines.AllMachines, subject string) pagemenubar.AccountsOf {
+	if subject == "" {
+		return pagemenubar.AccountsOf{}
+	}
+	for _, h := range all.Macs {
+		if h.Name == subject || strings.HasSuffix(h.Name, "-"+subject) {
+			return pagemenubar.AccountsOf{Mac: h.Name}
+		}
+	}
+	for _, h := range all.Macs {
+		for _, vm := range h.VMs {
+			if vm.Name == subject {
+				return pagemenubar.AccountsOf{Mac: h.Name, VM: vm.Name}
+			}
+		}
+	}
+	return pagemenubar.AccountsOf{Mac: subject}
 }
 
 func (o Menubar) Awake() engine.Feed {
