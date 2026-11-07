@@ -51,6 +51,9 @@ type EngineVM struct {
 	// value: a server's last check runs, and the step its restart runs.
 	Latency []model.LatencyPoint
 	Restart *model.RestartWalk
+	// value: why a server is down, and its console's last lines then.
+	Cause     string
+	LastLines []string
 }
 
 type Engine interface {

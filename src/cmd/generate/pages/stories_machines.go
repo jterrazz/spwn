@@ -298,6 +298,11 @@ func infraDown(f *Scene) {
 	}
 	vms := f.All.Macs[1].VMs
 	vms[0].State, vms[0].Detail, vms[0].BootAt = model.Stopped, "out of memory", time.Time{}
+	vms[0].Cause, vms[0].LastLines = "out of memory", []string{
+		"[ 4126.903117] k3s[812]: etcd: slow fdatasync, took 1.9 s",
+		"[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB",
+		"[ 4127.611008] oom_reaper: reaped process 812 (k3s-server), now anon-rss:0kB",
+	}
 	vms[0].CheckStatus = model.CheckStatus{State: model.CheckFailing, Since: storyNow.Add(-4 * time.Minute), At: storyNow.Add(-20 * time.Second)}
 	vms[0].Restarts = model.Restarts{Count: 5, Streak: 5, Looping: true, Wait: time.Minute, Last: storyNow.Add(-time.Minute)}
 }

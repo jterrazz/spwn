@@ -315,7 +315,7 @@ func (d *Engine) Memory() engine.Memory {
 		}
 		out[name] = engine.Remembered{
 			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
-			Latency: v.latency, Restart: v.walk, Down: v.down, LastHeard: heard,
+			Latency: v.latency, Restart: v.walk, Down: v.down, Cause: v.cause, LastLines: v.lastLines, LastHeard: heard,
 		}
 	}
 	return out

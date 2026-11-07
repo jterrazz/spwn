@@ -15,6 +15,7 @@ type Hypervisor interface {
 	Adopt(ctx context.Context, vm string) (Run, bool)
 	Shutdown(ctx context.Context, vm string, grace time.Duration) error
 	Address(ctx context.Context, vm string, wait time.Duration) (netip.Addr, error)
+	Console(ctx context.Context, vm string, n int) ([]string, error)
 }
 
 type Run interface {

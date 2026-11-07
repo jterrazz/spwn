@@ -74,6 +74,10 @@ type VM struct {
 	Uptime  Uptime
 	Latency []LatencyPoint
 	Restart *RestartWalk
+	// value: SPEC B5.5: why a server is down, and the last lines its
+	// console kept then; empty while it is up.
+	Cause     string
+	LastLines []string
 }
 
 type EngineView struct {

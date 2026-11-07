@@ -63,6 +63,10 @@ type vmState struct {
 	walk    *model.RestartWalk
 	down    bool
 	marked  bool
+	// value: SPEC B5.5: why its record holds it down, and the last lines
+	// its console kept then; empty once it is back.
+	cause     string
+	lastLines []string
 }
 
 // invariant: at start, a live run is ADOPTED (never touched); a dead one or none
@@ -76,6 +80,7 @@ func (d *Engine) adopt(ctx context.Context) {
 		known, remembered := d.memory[r.Name]
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
+		v.cause, v.lastLines = known.Cause, known.LastLines
 		d.mu.Lock()
 		d.vms[r.Name] = v
 		if len(known.LastHeard) > 0 {
@@ -211,9 +216,9 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 	d.vmStopped(ctx, name)
 	switch act {
 	case model.ActRestart, model.ActRerun:
-		d.wentDown(ctx, v, model.DownCause(end), true, now)
+		d.wentDown(ctx, v, model.DownCause(end), end.LastLines, true, now)
 	case model.ActPoweredOff, model.ActBroken, model.ActStale:
-		d.wentDown(ctx, v, model.DownCause(end), false, now)
+		d.wentDown(ctx, v, model.DownCause(end), end.LastLines, false, now)
 	case model.ActDelete, model.ActStopped:
 	}
 	switch act {
@@ -270,7 +275,7 @@ func (d *Engine) vmViews() []engine.VMView {
 	for name, v := range d.vms {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
-			Latency: v.latency, Restart: v.walk,
+			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines,
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
