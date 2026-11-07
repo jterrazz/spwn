@@ -1,0 +1,22 @@
+description: 'a workspace with Claude Code misses its agent hook until applied; Codex, not installed, gets none'
+fixture: ../__fixtures__/claude/
+env: in-workspace
+runs:
+    - command: 'settings | /usr/bin/grep "	agent-hooks	"'
+      exit: 0
+      stdout: |
+          ○	agent-hooks	not applied	station settings apply agent-hooks
+    - command: 'settings apply agent-hooks'
+      exit: 0
+      stdout: |
+          ●	agent-hooks	claude: hook installed in ~/.claude/settings.json
+    - command: 'settings agent-hooks | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	agent-hooks	applied · ~/.claude/settings.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.hooks'' world.json'
+      exit: 0
+      stdout: |
+          {"claudecode":true}
+      files:
+          .calls: absent

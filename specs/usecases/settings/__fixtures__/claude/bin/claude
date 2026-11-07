@@ -1,0 +1,5 @@
+#!/bin/sh
+# claude as the agent hook specs need it: installed, and never run by station.
+printf 'claude %s\n' "$*" >> "$HOME/.calls"
+echo "stub claude: station runs no agent: $*" >&2
+exit 97

@@ -1,21 +1,23 @@
  Summary
-   ◐ This Mac  14 set by station here · 9 checked · 6 need a look
+   ◐ This Mac  15 set by station here · 9 checked · 6 need a look
 
- Set by station  4 ●  4 ◐  3 ○  3 ⊘
+ Set by station  4 ●  4 ◐  4 ○  3 ⊘
    ◐ ghostty-dotfiles   changed since 2 d ago
      → station settings diff ghostty-dotfiles
    ◐ github-login       changed since 2 d ago
      → station settings diff github-login
    ◐ dock-reset         changed since 2 d ago
      → station settings diff dock-reset
-   ◐ docker-shortcuts   changed since 2 d ago
-     → station settings diff docker-shortcuts
+   ◐ agent-hooks        changed since 2 d ago
+     → station settings diff agent-hooks
    ○ tmux-dotfiles      not applied
      → station settings apply tmux-dotfiles
    ○ spotlight-exclude  not applied
      → station settings apply spotlight-exclude
    ○ dock-spacer        not applied
      → station settings apply dock-spacer
+   ○ docker-shortcuts   not applied
+     → station settings apply docker-shortcuts
    ● hushlogin          applied · ~/.hushlogin
    ● ssh-key            applied · ~/.ssh-key
    ● zed-dotfiles       applied · ~/.zed-dotfiles

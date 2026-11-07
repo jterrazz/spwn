@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "14 set by station here"
+                    "text": "15 set by station here"
                   },
                   {
                     "kind": "text",
@@ -128,9 +128,9 @@
         },
         {
           "row": {
-            "id": "docker-shortcuts",
+            "id": "agent-hooks",
             "mark": "attention",
-            "label": "docker-shortcuts",
+            "label": "agent-hooks",
             "cells": [
               {
                 "kind": "text",
@@ -139,7 +139,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff docker-shortcuts",
+              "command": "station settings diff agent-hooks",
               "key": "d"
             }
           }
@@ -275,9 +275,9 @@
         },
         {
           "row": {
-            "id": "docker-shortcuts",
+            "id": "agent-hooks",
             "mark": "attention",
-            "label": "docker-shortcuts",
+            "label": "agent-hooks",
             "cells": [
               {
                 "kind": "text",
@@ -286,7 +286,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff docker-shortcuts",
+              "command": "station settings diff agent-hooks",
               "key": "d"
             }
           }
@@ -338,6 +338,23 @@
             ],
             "hint": {
               "command": "station settings apply dock-spacer",
+              "key": "a"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "docker-shortcuts",
+            "mark": "absent",
+            "label": "docker-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply docker-shortcuts",
               "key": "a"
             }
           }
@@ -481,7 +498,7 @@
         },
         {
           "mark": "absent",
-          "n": 3
+          "n": 4
         },
         {
           "mark": "off-here",
@@ -815,7 +832,7 @@
   "hints": [
     {
       "command": "station settings apply",
-      "text": "apply the 7"
+      "text": "apply the 8"
     },
     {
       "command": "station settings --all",

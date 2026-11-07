@@ -34,5 +34,5 @@ runs:
     - command: '--version >/dev/null; "$STATION" settings --json | /usr/bin/jq -r ''[.settings[] | select(.group == "set")] | "● \(map(select(.state == "applied")) | length) of \(length)"''; "$STATION" overview | /usr/bin/grep "	Settings	" | /usr/bin/cut -f3'
       exit: 0
       stdout: |
-          ● 1 of 17
+          ● 1 of 18
           set by station · ● 1 of 17 · checked · ● 8 of 9

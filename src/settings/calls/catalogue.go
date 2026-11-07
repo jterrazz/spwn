@@ -266,10 +266,11 @@ func (s *Catalogue) apply(name, verb string, interactive bool, run func(handler,
 }
 
 func (s *Catalogue) applies(it catalog.Setting) bool {
-	if it.Requires == "" {
+	needs := it.Needs()
+	if len(needs) == 0 {
 		return true
 	}
-	return s.o.Has != nil && s.o.Has(it.Requires)
+	return s.o.Has != nil && slices.ContainsFunc(needs, s.o.Has)
 }
 
 func clone(in map[string]string) map[string]string {

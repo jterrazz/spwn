@@ -1,6 +1,9 @@
 package catalog
 
-import "io/fs"
+import (
+	"io/fs"
+	"strings"
+)
 
 type SettingCategory string
 
@@ -12,6 +15,7 @@ const (
 	CategorySystem   SettingCategory = "System"
 	CategoryHeadless SettingCategory = "Headless"
 	CategoryNetwork  SettingCategory = "Network"
+	CategoryAgents   SettingCategory = "Agents"
 )
 
 type InputKind int
@@ -40,6 +44,7 @@ const (
 	EffectDotfile      EffectKind = "dotfile"
 	EffectGitAliases   EffectKind = "git-aliases"
 	EffectZshFunctions EffectKind = "zsh-functions"
+	EffectAgentHooks   EffectKind = "agent-hooks"
 )
 
 type Touch struct{ Path string }
@@ -68,6 +73,12 @@ type ZshFunctions struct {
 	Functions []string
 }
 
+type AgentHooks struct {
+	// value: the apps whose agents station hooks, by catalogue name; each
+	// installed one gets its hook, the others are left alone.
+	Apps []string
+}
+
 type Procedure string
 
 const (
@@ -91,6 +102,7 @@ func (Touch) Kind() EffectKind        { return EffectTouch }
 func (Dotfiles) Kind() EffectKind     { return EffectDotfile }
 func (GitAliases) Kind() EffectKind   { return EffectGitAliases }
 func (ZshFunctions) Kind() EffectKind { return EffectZshFunctions }
+func (AgentHooks) Kind() EffectKind   { return EffectAgentHooks }
 
 func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p)) }
 
@@ -112,7 +124,9 @@ type Setting struct {
 	Category SettingCategory
 	Kinds    []MachineKind
 	Requires string
-	Inputs   []Input
+	// value: the apps any one of which serves instead of Requires.
+	OrRequires []string `json:",omitempty"`
+	Inputs     []Input
 	// value: how this machine applies it; never on the wire, so a far
 	// Mac's report of the item decodes here (it holds an interface).
 	Effect      Effect `json:"-"`
@@ -134,6 +148,20 @@ func (it Setting) AlwaysOn() bool {
 	return it.Category == CategoryHeadless
 }
 
+func (it Setting) Needs() []string {
+	// value: the apps of which one must be installed for the setting to
+	// apply, Requires first; none for a setting that needs no app.
+	if it.Requires == "" {
+		return nil
+	}
+	return append([]string{it.Requires}, it.OrRequires...)
+}
+
+func (it Setting) NeedsSaid() string {
+	// value: the owner's words for what it needs: "claude or codex".
+	return strings.Join(it.Needs(), " or ")
+}
+
 func (it Setting) NeedsOwner() bool {
 	// invariant: a value, admin rights, the owner at System Settings, or no
 	// trace to tell it was applied: setup lists it as a next step.
@@ -146,6 +174,9 @@ var (
 	everyKind = []MachineKind{Mac, Linux, MacOS}
 	macKinds  = []MachineKind{Mac, MacOS}
 	macKind   = []MachineKind{Mac}
+	// value: the kinds a VM is: inside one, station manages only a
+	// workspace's settings.
+	vmKinds = []MachineKind{Linux, MacOS}
 )
 
 var Settings = []Setting{
@@ -187,10 +218,16 @@ var Settings = []Setting{
 	}},
 	{Name: "tart-launcher", Description: "The tart launcher: Tart's home is station's VMs folder", Category: CategorySystem, Kinds: macKind, Effect: Dotfiles{Files: []Copy{{From: "tart/tart", To: "~/.local/bin/tart", Mode: 0o755}}}},
 	{Name: GitShortcutsSetting, Description: "Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup", Category: CategoryShell, Kinds: everyKind, Effect: GitShortcuts, Reversible: true, Writes: []Stored{noted(conf("~/.gitconfig"), "station's `[alias]` block")}},
+	{Name: AgentHooksSetting, Description: "The agent hook: station sees what Claude Code and Codex do, and what they wait for", Category: CategoryAgents, Kinds: vmKinds, Requires: "claude", OrRequires: []string{"codex"}, Effect: AgentHooks{Apps: []string{"claude", "codex"}}, Reversible: true, Writes: []Stored{
+		noted(conf("~/.claude/settings.json"), "station's hook under `hooks`, every other key the owner's"),
+		noted(conf("~/.codex/config.toml"), "`notify`, unless the owner set it to another program"),
+	}},
 	{Name: "docker-shortcuts", Description: "Docker shortcuts: dclean, dclean-images, dreset, each asks first", Category: CategoryShell, Kinds: everyKind, Effect: DockerShortcuts, Reversible: true, Writes: []Stored{noted(conf("{config}/station/zsh/docker-shortcuts.zsh"), "the functions station's zsh block defines")}},
 }
 
 const GitShortcutsSetting = "git-shortcuts"
+
+const AgentHooksSetting = "agent-hooks"
 
 const GitShortcutsGroup = "git" // value: the group of v2's run shortcuts, now git's own aliases, and the program each alias is said with.
 

@@ -8,6 +8,11 @@ import (
 
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 
+	"github.com/jterrazz/studio-station/src/agents"
+	"github.com/jterrazz/studio-station/src/agents/adapter/claudecode"
+	"github.com/jterrazz/studio-station/src/agents/adapter/codex"
+	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
+	"github.com/jterrazz/studio-station/src/settings/adapter/agenthooks"
 	"github.com/jterrazz/studio-station/src/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/src/settings/adapter/zshblock"
 
@@ -75,12 +80,9 @@ func settingsOf(m machine) *settingscalls.Catalogue {
 	return settingscalls.NewCatalogue(catalog.Settings, settingscalls.CatalogueOptions{
 		ThisMachine: m.kind,
 		Admin:       m.sys.Env.Euid() == 0,
-		Has: func(app string) bool {
-			_, ok := m.sys.Run.LookPath(app)
-			return ok
-		},
-		Defaults: settingsDefaults(m),
-		Appliers: settingAppliers(m),
+		Has:         m.has,
+		Defaults:    settingsDefaults(m),
+		Appliers:    settingAppliers(m),
 	})
 }
 
@@ -96,6 +98,10 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		zshblock.New(m.sys.FS, zshblock.Options{Dir: m.zshDir(), Ours: files}),
 		dotfile.New(m.sys.FS, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files}),
 		neversleeps.New(m.stores.neverSleeps()),
+		agenthooks.New(m.has,
+			agenthooks.Hook{App: claudecode.Program, File: claudecode.File, Hooks: m.agentHooks(claudecode.ID)},
+			agenthooks.Hook{App: codex.Program, File: codex.File, Hooks: m.agentHooks(codex.ID)},
+		),
 	}
 	if m.world != nil {
 		return append(appliers, m.world.procedureAppliers()...)
@@ -114,6 +120,24 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		git.NewSigning(m.sys.Run, m.stores.identity()),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
 	)
+}
+
+// value: the app is installed here: its program is on the PATH.
+func (m machine) has(app string) bool {
+	_, ok := m.sys.Run.LookPath(app)
+	return ok
+}
+
+// value: the hook of one app's agents in this VM's own settings file; a
+// world's is the fake over its VM.
+func (m machine) agentHooks(app agents.App) agentscontract.Hooks {
+	if m.world != nil {
+		return m.world.hooks(app)
+	}
+	if app == codex.ID {
+		return codex.New(m.sys.FS, m.sys.Env.Home(), m.sys.Clock.Now)
+	}
+	return claudecode.New(m.sys.FS, m.sys.Env.Home(), m.sys.Clock.Now)
 }
 
 // value: a read run once per run of the shared pool, whoever asks it.

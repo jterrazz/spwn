@@ -2,23 +2,23 @@
 ◐	jterrazz-macbook-pro	ghostty-dotfiles	changed since 2 d ago	station settings diff ghostty-dotfiles
 ◐	jterrazz-macbook-pro	github-login	changed since 2 d ago	station settings diff github-login
 ◐	jterrazz-macbook-pro	dock-reset	changed since 2 d ago	station settings diff dock-reset
-◐	jterrazz-macbook-pro	docker-shortcuts	changed since 2 d ago	station settings diff docker-shortcuts
+◐	jterrazz-macbook-pro	agent-hooks	changed since 2 d ago	station settings diff agent-hooks
 ◐	jterrazz-macbook-pro	firewall	off	System Settings > Network > Firewall
 ◐	jterrazz-macbook-pro	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	jterrazz-mac-mini	ghostty-dotfiles	changed since 2 d ago	station settings diff ghostty-dotfiles --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	github-login	changed since 2 d ago	station settings diff github-login --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	dock-reset	changed since 2 d ago	station settings diff dock-reset --on jterrazz-mac-mini
-◐	jterrazz-mac-mini	docker-shortcuts	changed since 2 d ago	station settings diff docker-shortcuts --on jterrazz-mac-mini
+◐	jterrazz-mac-mini	agent-hooks	changed since 2 d ago	station settings diff agent-hooks --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	firewall	off	System Settings > Network > Firewall
 ◐	jterrazz-mac-mini	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	linux-1	ghostty-dotfiles	changed since 2 d ago	station settings diff ghostty-dotfiles --on linux-1
 ◐	linux-1	github-login	changed since 2 d ago	station settings diff github-login --on linux-1
 ◐	linux-1	dock-reset	changed since 2 d ago	station settings diff dock-reset --on linux-1
-◐	linux-1	docker-shortcuts	changed since 2 d ago	station settings diff docker-shortcuts --on linux-1
+◐	linux-1	agent-hooks	changed since 2 d ago	station settings diff agent-hooks --on linux-1
 ◐	api	ghostty-dotfiles	changed since 2 d ago	station machines start api
 ◐	api	github-login	changed since 2 d ago	station machines start api
 ◐	api	dock-reset	changed since 2 d ago	station machines start api
-◐	api	docker-shortcuts	changed since 2 d ago	station machines start api
+◐	api	agent-hooks	changed since 2 d ago	station machines start api
 # Machines
 ●	jterrazz-macbook-pro	Mac	read
 ●	jterrazz-mac-mini	Mac	read
@@ -29,8 +29,8 @@
 ◐	ghostty-dotfiles	◐	◐	◐	◐	0/4
 ◐	github-login	◐	◐	◐	◐	0/4
 ◐	dock-reset	◐	◐	◐	◐	0/4
-◐	docker-shortcuts	◐	◐	◐	◐	0/4
-○	13 more	○ 4/10	○ 4/10	○ 4/10	○ 4/10	16/40
+◐	agent-hooks	◐	◐	◐	◐	0/4
+○	14 more	○ 4/11	○ 4/11	○ 4/11	○ 4/11	16/44
 # Always-on Mac
 ○	5 settings	○	○	–	–	–
 # Checked

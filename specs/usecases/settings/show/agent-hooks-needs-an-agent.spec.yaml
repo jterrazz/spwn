@@ -1,0 +1,7 @@
+description: 'with neither Claude Code nor Codex installed, the agent hook says the app it needs'
+env: in-workspace
+runs:
+    - command: 'settings agent-hooks | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ○	agent-hooks	not applied · needs claude or codex	station apps install claude

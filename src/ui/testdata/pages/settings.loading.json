@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "17 set by station here"
+                    "text": "18 set by station here"
                   },
                   {
                     "kind": "text",
@@ -233,6 +233,16 @@
         },
         {
           "row": {
+            "id": "agent-hooks",
+            "mark": "pending",
+            "label": "agent-hooks",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "docker-shortcuts",
             "mark": "pending",
             "label": "docker-shortcuts",
@@ -245,7 +255,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 17
+          "n": 18
         }
       ],
       "pipe_counts": true

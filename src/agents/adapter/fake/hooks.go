@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/agents/contract"
+	"github.com/jterrazz/studio-station/src/world"
 )
 
 type Hooks struct {
@@ -18,6 +19,10 @@ type Hooks struct {
 var _ contract.Hooks = (*Hooks)(nil)
 
 func NewHooks(app agents.App) *Hooks { return &Hooks{inVM: alone(), app: app} }
+
+func HooksOf(w *world.World, vm string, app agents.App) *Hooks {
+	return &Hooks{inVM: inVM{w: w, vm: vm}, app: app}
+}
 
 func (h *Hooks) App() agents.App { return h.app }
 

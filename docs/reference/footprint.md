@@ -634,6 +634,8 @@ Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (not
 | backup-exclusions       | `~/.local/share/station/vms`                                                    | never touched | a sticky Time Machine exclusion (`tmutil addexclusion`)                  |
 | tart-launcher           | `~/.local/bin/tart`                                                             | never touched | the embedded `tart/tart`                                                 |
 | git-shortcuts           | `~/.gitconfig`                                                                  | never touched | station's `[alias]` block                                                |
+| agent-hooks             | `~/.claude/settings.json`                                                       | never touched | station's hook under `hooks`, every other key the owner's                |
+| agent-hooks             | `~/.codex/config.toml`                                                          | never touched | `notify`, unless the owner set it to another program                     |
 | docker-shortcuts        | `~/.config/station/zsh/docker-shortcuts.zsh`                                    | never touched | the functions station's zsh block defines                                |
 
 ## Home-root exceptions

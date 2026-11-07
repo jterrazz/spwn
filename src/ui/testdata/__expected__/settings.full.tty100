@@ -1,16 +1,16 @@
-This Mac · 14 set by station here · 9 checked · 6 need a look
+This Mac · 15 set by station here · 9 checked · 6 need a look
 
 Needs a look
   ◐ ghostty-dotfiles  changed since 2 d ago                → station settings diff ghostty-dotfiles
   ◐ github-login      changed since 2 d ago                → station settings diff github-login
   ◐ dock-reset        changed since 2 d ago                → station settings diff dock-reset
-  ◐ docker-shortcuts  changed since 2 d ago                → station settings diff docker-shortcuts
+  ◐ agent-hooks       changed since 2 d ago                → station settings diff agent-hooks
   ◐ firewall          off                                  → System Settings > Network > Firewall
   ◐ screen-lock       locks after 10 min · expected 5 min  → System Settings > Lock Screen
-Set by station  ● 4  ◐ 4  ○ 3  ⊘ 3 · ghostty-dotfiles, github-login, dock-reset, …
+Set by station  ● 4  ◐ 4  ○ 4  ⊘ 3 · ghostty-dotfiles, github-login, dock-reset, agent-hooks, …
 Always-on Mac   ○ 5 · for a Mac that hosts servers
 Checked         ● 5  ◐ 2  ⊘ 1  ? 1 · firewall, screen-lock, time-machine, filevault, sip, …
 – 3 not for this machine · VMs only
 
-→ station settings apply  apply the 7
+→ station settings apply  apply the 8
 → station settings --all  for every row
