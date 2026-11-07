@@ -42,11 +42,11 @@ type watched struct {
 	asking   chan struct{}
 }
 
-// invariant: a tick asks each machine its keys name for one reading, all
-// at once, through its engine, and waits on them for its budget alone: a
-// machine still late keeps its last value, stale once it has not answered
-// for 30 s, and is asked again only once its answer came.
 func (l *Live) Sample(ctx context.Context, keys []string) engine.Sample {
+	// invariant: a tick asks each machine its keys name for one reading, all
+	// at once, through its engine, and waits on them for its budget alone: a
+	// machine still late keeps its last value, stale once it has not answered
+	// for 30 s, and is asked again only once its answer came.
 	var machines []string
 	for _, k := range keys {
 		if m := pagemenubar.LiveMachine(k); m != "" && !slices.Contains(machines, m) {
@@ -84,7 +84,7 @@ func (l *Live) ask(ctx context.Context, machines []string) []chan struct{} {
 			delete(l.of, m)
 		}
 	}
-	var waits []chan struct{}
+	waits := make([]chan struct{}, 0, len(machines))
 	for _, m := range machines {
 		w := l.of[m]
 		if w == nil {
@@ -146,9 +146,9 @@ func (l *Live) compose(keys []string) engine.Sample {
 	return out
 }
 
-// value: the readings of a machine the ticks kept, oldest first, so a page
-// rebuilt for its content starts from the values on screen.
 func (l *Live) Readings(name string) []activity.Reading {
+	// value: the readings of a machine the ticks kept, oldest first, so a page
+	// rebuilt for its content starts from the values on screen.
 	if l == nil {
 		return nil
 	}

@@ -157,7 +157,7 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 // f), each led into its series over the readings kept (0 to 100: CPU's
 // share, memory's and disk's use of their total), so a tile draws its bar
 // meter; pending until they are read, none while the machine does not run.
-func activitySection(readings []activity.Reading, running bool, title, machine string) page.Section {
+func activitySection(readings []activity.Reading, running bool, title, name string) page.Section {
 	cpu, memory, disk := page.Pending(), page.Pending(), page.Pending()
 	if !running {
 		cpu, memory, disk = page.None(), page.None(), page.None()
@@ -177,7 +177,7 @@ func activitySection(readings []activity.Reading, running bool, title, machine s
 		}
 	}
 	if running {
-		cpu, memory, disk = live(cpu, LiveKey(LiveCPU, machine)), live(memory, LiveKey(LiveMemory, machine)), live(disk, LiveKey(LiveDisk, machine))
+		cpu, memory, disk = live(cpu, LiveKey(LiveCPU, name)), live(memory, LiveKey(LiveMemory, name)), live(disk, LiveKey(LiveDisk, name))
 	}
 	measure := func(id, label string, now page.Value, series []int) page.Row {
 		row := page.Row{ID: id, Label: label, Cells: []page.Value{now}}

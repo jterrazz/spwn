@@ -20,8 +20,8 @@ const (
 
 func LiveKey(measure, machine string) string { return measure + ":" + machine }
 
-// value: the machine a live key reads; empty for a key of no machine.
 func LiveMachine(key string) string {
+	// value: the machine a live key reads; empty for a key of no machine.
 	_, machine, _ := strings.Cut(key, ":")
 	return machine
 }
@@ -71,10 +71,10 @@ func measured(readings []activity.Reading) measures {
 	return m
 }
 
-// value: each live key's value from its machine's readings, as the page
-// that lists the key draws it: the measure now led into its series, the
-// free memory alone; a key whose measure is not read yet is left out.
 func LiveValues(keys []string, readings func(machine string) []activity.Reading) map[string]page.Value {
+	// value: each live key's value from its machine's readings, as the page
+	// that lists the key draws it: the measure now led into its series, the
+	// free memory alone; a key whose measure is not read yet is left out.
 	out := map[string]page.Value{}
 	of := map[string]measures{}
 	for _, k := range keys {

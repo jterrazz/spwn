@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
-// value: the stream's frame of the moving numbers, one every 2 s while a
-// watch of pages lists live keys.
-const EventSample = "sample"
+const (
+	// value: the stream's frame of the moving numbers, one every 2 s while
+	// a watch of pages lists live keys.
+	EventSample = "sample"
+)
 
 const SampleEvery = 2 * time.Second
 
@@ -19,6 +21,4 @@ type Sample struct {
 	Stale []string `json:"stale,omitempty"`
 }
 
-// value: one tick's reading of the live keys the open pages list; it never
-// waits on a machine that is late, whose last value it keeps.
-type Sampler func(ctx context.Context, keys []string) Sample
+type Sampler func(ctx context.Context, keys []string) Sample // value: one tick's reading of the live keys the open pages list; it never waits on a late machine, whose last value it keeps.

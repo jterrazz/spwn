@@ -2,6 +2,7 @@ package feeds_test
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"sync"
 	"testing"
@@ -45,7 +46,8 @@ func (m *moving) pass(d time.Duration) {
 type fleet struct {
 	mu    sync.Mutex
 	late  chan struct{}
-	asked map[string]int
+	asked map[string]uint64
+	at    map[string]time.Time
 }
 
 func (f *fleet) Invoke(ctx context.Context, target machine.Ref, name string, _, out any, _ call.Progress) error {
@@ -55,7 +57,8 @@ func (f *fleet) Invoke(ctx context.Context, target machine.Ref, name string, _, 
 		at = thisMac
 	}
 	f.asked[at]++
-	n, late := int64(f.asked[at]), f.late
+	f.at[at] = f.at[at].Add(2 * time.Second)
+	busy, when, late := f.asked[at], f.at[at], f.late
 	f.mu.Unlock()
 	if at == mini && late != nil {
 		select {
@@ -68,7 +71,11 @@ func (f *fleet) Invoke(ctx context.Context, target machine.Ref, name string, _, 
 		return nil
 	}
 	memory := map[string]int64{thisMac: 16 * gb, mini: 64 * gb}[at]
-	*out.(*activity.Reading) = activity.Reading{Sample: activity.Sample{At: time.Unix(n*2, 0), CPUBusy: uint64(n) * 300, CPUTotal: uint64(n) * 1000, MemUsed: memory / 4, MemTotal: memory}}
+	r, ok := out.(*activity.Reading)
+	if !ok {
+		return errors.New("a sample answers a reading")
+	}
+	*r = activity.Reading{Sample: activity.Sample{At: when, CPUBusy: busy * 300, CPUTotal: busy * 1000, MemUsed: memory / 4, MemTotal: memory}}
 	return nil
 }
 
@@ -103,7 +110,7 @@ func lead(s engine.Sample, key string) page.Value {
 }
 
 func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testing.T) {
-	f, clock := &fleet{asked: map[string]int{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
+	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
 	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 100 * time.Millisecond}
 	keys := []string{"cpu:" + thisMac, "memory:" + mini, "free:" + mini}
 	live.Sample(t.Context(), keys)
