@@ -411,3 +411,15 @@ func firstLine(sections []page.Section, label string) page.Section {
 	row := page.Row{ID: "summary/ports", Label: label, Mark: page.OK, Cells: []page.Value{page.Texts(words...)}}
 	return page.Section{ID: "summary", Title: "Summary", Role: page.Summary, Fold: page.Open, Uncounted: true, Columns: []page.Column{{Key: "area", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 60}}, Items: []page.Item{{Row: &row}}}
 }
+
+func Links(mode string, thisMac page.Context) page.Page {
+	// value: the outcome of HTTPS links turned on or off: the link the
+	// shares of this Mac now get.
+	detail := "shared ports get an https:// link"
+	if !ports.HTTPSLinks(mode) {
+		detail = "shared ports get an http:// link"
+	}
+	row := pages.Done("https", catalog.StateOK, detail)
+	row.Label = "HTTPS links " + map[bool]string{true: "on", false: "off"}[ports.HTTPSLinks(mode)]
+	return pages.Outcome("ports https", thisMac, nil, []page.Row{row}, "HTTPS links")
+}

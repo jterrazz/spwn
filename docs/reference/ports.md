@@ -2,13 +2,13 @@
 
 `station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. A workspace is not on the tailnet, so its Mac shares what it listens on: the Mac's engine reserves a port of its own for it, listens there on 127.0.0.1 only, and carries each connection into the VM over its one ssh connection. The tailnet reaches that port through the Tailscale app alone: `tailscale serve` shares it, https for an HTTP server and raw TCP for any other, so nothing of station listens on the tailnet. Nothing is set per port: a dev server that starts listening in a workspace is shared within seconds. A server's ports are never shared by themselves: its own tooling chooses its routes (its own Tailscale device, a tunnel), and `station ports share infra 8080` shares one on demand.
 
-| Section               | Answers                                                      |
-| --------------------- | ------------------------------------------------------------ |
-| How a port gets a URL | The guest, the reserved port, the sharing                    |
-| The commands          | `ports`, `ports share`, `ports stop-sharing`                 |
-| The policy            | The `ports` group of `preferences.json`                      |
-| Serve and HTTPS       | Serve on or off, the `port` and `path` modes, the admin step |
-| Profiles              | How Expo and Vite learn their public URL                     |
+| Section               | Answers                                                     |
+| --------------------- | ----------------------------------------------------------- |
+| How a port gets a URL | The guest, the reserved port, the sharing                   |
+| The commands          | `ports`, `ports share`, `ports stop-sharing`, `ports https` |
+| The policy            | The `ports` group of `preferences.json`                     |
+| Serve and HTTPS       | Serve on or off, HTTPS links, the `port` and `path` modes   |
+| Profiles              | How Expo and Vite learn their public URL                    |
 
 ## How a port gets a URL
 
@@ -75,7 +75,7 @@ The engine's exposure job reads what listens on its Mac and its VMs at its start
 
 ## The policy
 
-The Mac owns it, in `preferences.json`; every key is optional and no command edits them:
+The Mac owns it, in `preferences.json`; every key is optional and only `https` has a command, [`ports https`](#serve-and-https):
 
 ```json
 "ports": { "range": "40000-40999", "max_per_vm": 20, "ignored_ports": [22], "min_port": 1024, "https": "port" }
@@ -97,7 +97,9 @@ With Serve on, an HTTP server (detected once per reserved port: a server that sp
 | HTTP, `https` `path` | `tailscale serve --bg --https=443 --set-path=/<vm>/<port> http://127.0.0.1:<host port>` | `https://macbook.tail1234.ts.net/api/8081/` |
 | raw TCP              | `tailscale serve --bg --tcp=<host port> tcp://127.0.0.1:<host port>`                    | `macbook.tail1234.ts.net:40002`             |
 
-Unsharing runs the same line ending `off`. `https` `off`, and any other word, is read as `port`. A serve refused while Serve is on leaves the port shared locally: its row `◐` with `serve:` and tailscale's own line (never the CLI's `Warning:` lines), its public URL unchanged, the serve retried at its next share. In `path` mode a server that builds absolute URLs needs its base path set to `/<vm>/<port>/`.
+**HTTPS links** are the Mac's choice, `station ports https on|off [--on <mac>]` (the call `ports.set-https`, refused inside a VM: its Mac serves its shares), kept as `https` in its `ports` group. Off (`"https": "off"`), every share is served raw, `tailscale serve --bg --tcp=<host port> tcp://127.0.0.1:<host port>`, an HTTP server under `http://macbook.tail1234.ts.net:40000` and no certificate asked for; on keeps a `path` mode, else `port`. The engine serves its shares again in the new mode at its next tick, each unshared first in the mode it was served in, and at its start removes an entry served in the other one.
+
+Unsharing runs the same line ending `off`. Any other word of `https` is read as `port`. A serve refused while Serve is on leaves the port shared locally: its row `◐` with `serve:` and tailscale's own line (never the CLI's `Warning:` lines), its public URL unchanged, the serve retried at its next share. In `path` mode a server that builds absolute URLs needs its base path set to `/<vm>/<port>/`.
 
 tailscaled issues the Mac's certificate at the first https request, 34.5 s measured, so the engine warms it: at its start with Serve on, and when Serve turns on, it runs `tailscale cert --cert-file=- --key-file=- <host>` in the background, its output thrown away (`/dev/null` is refused as not a regular file), one at a time, within 120 s, never holding a share. Meanwhile every row served `--https` says `issuing certificate` (`◐`, its URL unchanged); `engine.log` then says `certificate for <host> ready in <d>` or `not issued:` with tailscale's line.
 

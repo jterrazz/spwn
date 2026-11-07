@@ -265,6 +265,9 @@ func entries() map[string]entry {
 			})
 		}},
 		"ports.list": {item: func(t, _ Target) Item { return open(t, section.Ports, "Open Ports") }},
+		"ports.set-https": {kinds: mac(), key: keyed("h"), item: func(t, _ Target) Item {
+			return asked("Turn HTTPS links on or off"+ellipsis, []Field{{Label: "HTTPS links", Value: "off", Note: "on or off"}}, one(gesture.V("Turn", "Turning", "Turned"), func(a string) []string { return words(t, "ports", "https", a) }))
+		}},
 		"ports.share": {subject: vm, key: keyed("s"), item: func(_, v Target) Item {
 			return asked("Share a port of "+named(v)+ellipsis, field("Port"), one(gesture.V("Share", "Sharing", "Shared"), func(a string) []string { return vmWords(v, "ports", "share", v.Name, a) }))
 		}},

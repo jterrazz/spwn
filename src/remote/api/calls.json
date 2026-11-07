@@ -423,6 +423,14 @@
       "out": "Listing"
     },
     {
+      "name": "ports.set-https",
+      "schema": "station.ports.set-https/v1",
+      "section": "ports",
+      "where": "at-target",
+      "in": "SetHTTPSIn",
+      "out": "SetHTTPSOut"
+    },
+    {
       "name": "ports.share",
       "schema": "station.ports.share/v1",
       "section": "ports",

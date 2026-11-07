@@ -121,17 +121,20 @@ type Engine struct {
 	scanned      map[string][]ports.Listener
 	red          []string
 	reservations []ports.Reservation
-	self         ports.SharingState
-	read         bool
-	issuing      bool
-	started      time.Time
-	note         func(line string)
-	awakeJob     *awakecalls.Keeper
-	awake        *awake.Kept
-	hub          hub
-	history      *activity.History
-	watchers     watchers
-	settings     engine.SettingsKept
+	// value: the HTTPS mode this engine's shares were served in, as its
+	// last tick read it.
+	servedMode string
+	self       ports.SharingState
+	read       bool
+	issuing    bool
+	started    time.Time
+	note       func(line string)
+	awakeJob   *awakecalls.Keeper
+	awake      *awake.Kept
+	hub        hub
+	history    *activity.History
+	watchers   watchers
+	settings   engine.SettingsKept
 
 	notifier Notifier
 	serve    func(ctx context.Context, conn Stream)

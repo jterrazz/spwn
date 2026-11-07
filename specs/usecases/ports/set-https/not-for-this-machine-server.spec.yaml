@@ -1,0 +1,8 @@
+description: 'inside a server, HTTPS links are refused: its Mac serves its shares'
+env: in-server
+runs:
+    - command: 'ports https off'
+      exit: 2
+      stderr: |
+          Error: infra's HTTPS links are set on its Mac
+          Hint: run it on its Mac

@@ -17,6 +17,8 @@ type Deps struct {
 	Declarations contract.DeclarationStore
 	Routes       contract.PublicRoutes
 	Far          Far
+	// value: this Mac's ports group, where its HTTPS links are kept.
+	Prefs contract.PortsPrefs
 }
 
 type Far interface {
@@ -51,5 +53,5 @@ type Ports interface {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(List, d), call.Bind(Share, d), call.Bind(StopSharing, d), call.Bind(Declare, d), call.Bind(Undeclare, d)}
+	return []call.Handler{call.Bind(List, d), call.Bind(Share, d), call.Bind(StopSharing, d), call.Bind(Declare, d), call.Bind(Undeclare, d), call.Bind(SetHTTPS, d)}
 }
