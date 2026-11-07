@@ -5,6 +5,7 @@ import SwiftUI
 @main
 struct StationMenuBarApp: App {
     @StateObject private var model = Model()
+    @StateObject private var trial = Trial()
 
     init() {
         let args = CommandLine.arguments
@@ -25,15 +26,28 @@ struct StationMenuBarApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            Popover(model.state, handlers: handlers)
-                .stationSystemTheme()
-                .stationSystemAccessibility()
-                .onAppear { model.opened() }
-                .onDisappear { model.closed() }
+            if Trial.on {
+                TrialPanel(cycle: Trial.cycle) { line in trial.log(line) }
+                    .stationSystemTheme()
+                    .stationSystemAccessibility()
+                    .onAppear { trial.opened() }
+                    .onDisappear { trial.closed() }
+            } else {
+                Popover(model.state, handlers: handlers)
+                    .stationSystemTheme()
+                    .stationSystemAccessibility()
+                    .onAppear { model.opened() }
+                    .onDisappear { model.closed() }
+            }
         } label: {
-            Image(nsImage: model.iconImage(dark: NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua))
-                .accessibilityLabel(model.icon.label)
-                .task { model.start() }
+            if Trial.on {
+                Image(nsImage: trial.label)
+                    .task { trial.start() }
+            } else {
+                Image(nsImage: model.iconImage(dark: NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua))
+                    .accessibilityLabel(model.icon.label)
+                    .task { model.start() }
+            }
         }
         .menuBarExtraStyle(.window)
     }
