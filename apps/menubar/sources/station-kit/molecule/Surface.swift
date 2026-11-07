@@ -34,8 +34,7 @@ struct PanelGlass: ViewModifier {
 struct TileGround: ViewModifier {
     let padding: EdgeInsets
     let tint: Color?
-    @Environment(\.stationReduceTransparency) private var reduce
-    @Environment(\.stationContrast) private var contrast
+    @Environment(\.stationTokens) private var tokens
     @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
@@ -44,7 +43,7 @@ struct TileGround: ViewModifier {
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .background {
-                if reduce || contrast == .increased {
+                if tokens.solid {
                     shape.strokeBorder(Token.Ink.separator, lineWidth: Token.Stroke.rule)
                 } else {
                     ZStack {
@@ -184,7 +183,7 @@ public struct IconTile: View {
     let pulse: Bool
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationStill) private var still
-    @Environment(\.stationContrast) private var contrast
+    @Environment(\.stationTokens) private var tokens
 
     public init(_ symbol: String, active: Bool = false, tint: Color? = nil, size: CGFloat = Token.Tile.icon, pulse: Bool = false) {
         self.symbol = symbol
@@ -217,7 +216,7 @@ public struct IconTile: View {
             .frame(width: size, height: size)
             .background {
                 shape.fill(Token.Fill.icon)
-                if contrast == .increased { shape.strokeBorder(Token.Ink.separator, lineWidth: Token.Stroke.rule) }
+                if tokens.increased { shape.strokeBorder(Token.Ink.separator, lineWidth: Token.Stroke.rule) }
             }
             .frame(width: size == Token.Tile.icon ? Token.Tile.slot : size)
     }
