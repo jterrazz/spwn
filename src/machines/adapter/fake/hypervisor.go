@@ -259,6 +259,30 @@ func (h *Hypervisor) Address(_ context.Context, vm string, _ time.Duration) (net
 	return netip.MustParseAddr("192.168.64.5"), nil
 }
 
+func (h *Hypervisor) Console(_ context.Context, vm string, n int) ([]string, error) {
+	h.w.Lock()
+	defer h.w.Unlock()
+	if v, ok := h.disk(vm); ok {
+		return console(v, n), nil
+	}
+	return nil, nil
+}
+
+// value: the lines the world scripted on the VM's console, as the
+// hypervisor's adapter keeps them.
+func console(v *world.VM, n int) []string {
+	var kept []string
+	for _, line := range v.Console {
+		if machines.Meaningful(line) {
+			kept = append(kept, line)
+		}
+	}
+	if n > 0 && len(kept) > n {
+		kept = kept[len(kept)-n:]
+	}
+	return kept
+}
+
 // invariant: a run is over once its VM no longer runs under its pid; how it
 // ended is read from the world, once, then kept.
 type run struct {
@@ -285,7 +309,9 @@ func (r *run) Ended() <-chan machines.RunEnd {
 		case ok && v.Ended != nil && r.h.w.Fails("Hypervisor.Ended"):
 			r.end, v.Ended = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}, nil
 		case ok && v.Ended != nil:
-			r.end, v.Ended = v.Ended, nil
+			end := *v.Ended
+			end.LastLines = machines.LastLines(console(v, machines.ConsoleWindow))
+			r.end, v.Ended = &end, nil
 		default:
 			r.end = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}
 		}

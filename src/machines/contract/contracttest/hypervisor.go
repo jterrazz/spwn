@@ -40,6 +40,9 @@ func Hypervisor(t *testing.T, subject func(t *testing.T) Subject) {
 		if got := state(t, s.Hypervisor, VM); got != contract.DiskStopped {
 			t.Errorf("the cloned VM reads %q, want stopped", got)
 		}
+		if lines, err := s.Hypervisor.Console(t.Context(), VM, 40); err != nil || len(lines) != 0 {
+			t.Errorf("a VM that never ran has the console %q (%v), want none", lines, err)
+		}
 	})
 	for _, c := range []struct {
 		how  machines.EndReason

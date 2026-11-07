@@ -279,3 +279,74 @@ func TestAVMIsMeasuredByTheServiceThatHoldsItsGuestNotByItsWrapper(t *testing.T)
 	m.end(r, machines.GuestPoweroff)
 	<-r.Ended()
 }
+
+func (m *machine) crash(r contract.Run, console, log string) {
+	_ = m.fs.WriteFile(state+"/consoles/"+r.VM(), []byte(console), 0o600)
+	_ = m.fs.WriteFile(state+"/logs/"+r.VM()+".log", []byte(log), 0o600)
+	_ = m.fs.WriteFile(state+"/runs/"+r.VM()+".exit", []byte("1\n"), 0o600)
+	m.disks[r.VM()] = "stopped"
+	m.run.Exit(r.PID())
+}
+
+func TestARunThatCrashedEndsWithTheLinesThatTellWhy(t *testing.T) {
+	cases := []struct {
+		name, console string
+		lines         []string
+		cause         string
+	}{
+		{"out of memory", "console-oom.txt", []string{
+			"[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB, anon-rss:1987312kB, file-rss:0kB, shmem-rss:0kB, UID:0 pgtables:4312kB oom_score_adj:0",
+			"[ 4127.602331] systemd[1]: k3s.service: A process of this unit has been killed by the OOM killer.",
+			"[ 4127.611008] systemd[1]: k3s.service: Main process exited, code=killed, status=9/KILL",
+		}, "out of memory"},
+		{"kernel panic", "console-panic.txt", []string{
+			"[   92.004402]  dump_backtrace+0xa0/0x128",
+			"[   92.004517] ---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009 ]---",
+			"Error: The virtual machine stopped unexpectedly.",
+		}, "kernel panic"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			m := newMachine(t)
+			m.boot("dev")
+			r, err := m.hypervisor().Boot(t.Context(), "dev", contract.BootOptions{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			m.crash(r, recorded(t, c.console), recorded(t, "tart-run.log"))
+			end := <-r.Ended()
+			if end.Reason != machines.Crashed || !slices.Equal(end.LastLines, c.lines) {
+				t.Fatalf("the run ended as %q with %q, want a crash with %q", end.Reason, end.LastLines, c.lines)
+			}
+			if got := machines.DownCause(end); got != c.cause {
+				t.Errorf("its cause reads %q, want %q", got, c.cause)
+			}
+		})
+	}
+}
+
+func TestTheConsoleIsItsLastMeaningfulLinesThenTheHypervisorsOwn(t *testing.T) {
+	m := newMachine(t)
+	h := m.hypervisor()
+	if lines, err := h.Console(t.Context(), "dev", 40); err != nil || len(lines) != 0 {
+		t.Fatalf("a VM that never ran has %q (%v), want none", lines, err)
+	}
+	_ = m.fs.WriteFile(state+"/consoles/dev", []byte(recorded(t, "console-oom.txt")+"station-intent=poweroff\n"), 0o600)
+	_ = m.fs.WriteFile(state+"/logs/dev.log", []byte(recorded(t, "tart-run.log")), 0o600)
+	lines, err := h.Console(t.Context(), "dev", 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"[ 4127.611008] systemd[1]: k3s.service: Main process exited, code=killed, status=9/KILL",
+		"[ 4131.002116] systemd[1]: Reached target Power-Off.",
+		"Error: The virtual machine stopped unexpectedly.",
+	}
+	if !slices.Equal(lines, want) {
+		t.Errorf("the last 2 of each output: %q, want %q", lines, want)
+	}
+	all, _ := h.Console(t.Context(), "dev", 0)
+	if len(all) != 10 || all[0] != "[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x610f0000]" {
+		t.Errorf("the whole log holds %d lines from %q, want 10 from the boot", len(all), all[0])
+	}
+}

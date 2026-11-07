@@ -34,23 +34,10 @@ type UptimeMark struct {
 }
 
 const (
-	// value: why a server went down, in the words its end says (SPEC B5.5
-	// refines a crash by the lines its console kept).
+	// value: why a server went down when its check failed and its
+	// console told nothing more.
 	CheckFailed = "its check failed"
 )
-
-func DownCause(end RunEnd) string {
-	switch end.Reason {
-	case GuestPoweroff:
-		return PoweredOffInside
-	case GuestReboot:
-		return "rebooted from inside"
-	case Crashed:
-		return "the hypervisor stopped it"
-	case Unknown:
-	}
-	return "it stopped"
-}
 
 type UptimeDay struct {
 	Date     string `json:"date"`

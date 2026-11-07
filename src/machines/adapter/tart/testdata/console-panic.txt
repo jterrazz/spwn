@@ -1,0 +1,7 @@
+[    1.902331] Run /sbin/init as init process
+[   92.004012] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009
+[   92.004177] CPU: 0 PID: 1 Comm: systemd Not tainted 6.8.0-48-generic #48-Ubuntu
+[   92.004288] Hardware name: Apple Inc. Apple Virtualization Generic Platform, BIOS 2020.41.1.0.0 08/20/2024
+[   92.004391] Call trace:
+[   92.004402]  dump_backtrace+0xa0/0x128
+[   92.004517] ---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009 ]---
