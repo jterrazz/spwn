@@ -1,0 +1,5 @@
+#!/bin/sh
+# codex as the agent hook specs need it: installed, and never run by station.
+printf 'codex %s\n' "$*" >> "$HOME/.calls"
+echo "stub codex: station runs no agent: $*" >&2
+exit 97
