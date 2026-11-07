@@ -37,7 +37,11 @@ type Deps struct {
 type Input struct {
 	Image, Name, Memory, Disk, Network, Check string
 	Permanent, Server                         bool
-	CPUs                                      int
+	// value: the workspace's task, and whether an agent starts on it once
+	// the workspace answers.
+	Task  string
+	Agent bool
+	CPUs  int
 	// value: v2's --always-on, kept hidden for one release (SPEC §4.3).
 	AlwaysOn bool
 	// value: v2's --lifetime, kept hidden for one release (SPEC §4.3).
@@ -70,6 +74,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
 			f.StringVar(&in.Network, "network", "", "bridged: its own address on your LAN (macOS images only); default behind its Mac")
+			f.StringVar(&in.Task, "task", "", "the workspace's task, kept on its record")
+			f.BoolVar(&in.Agent, "agent", false, "start an agent once it answers, --task as its first prompt")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
 			f.StringVar(&in.Lifetime, "lifetime", "", "throwaway or permanent (--permanent)")
 			_ = f.MarkHidden("name")
@@ -108,7 +114,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					env.Out.Now(nowWords(in))
 				}
 			}
-			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server}
+			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server, Task: in.Task, Start: in.Agent}
 			return nil
 		},
 		Validate: func(ctx context.Context, in *Input) error {

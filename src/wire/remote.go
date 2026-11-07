@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"encoding/json"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"io"
 	"slices"
 	"strconv"
@@ -176,6 +177,15 @@ func (f farPorts) Declare(ctx context.Context, mac string, in portscalls.Declare
 
 func (f farPorts) Undeclare(ctx context.Context, mac string, in portscalls.UndeclareIn) (portscalls.UndeclareOut, error) {
 	return call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: mac}, portscalls.Undeclare, in, nil)
+}
+
+// invariant: an agent is started inside the workspace, at its own station,
+// as any call for a VM of this Mac.
+type farAgents struct{ m machine }
+
+func (f farAgents) StartAgent(ctx context.Context, vm, task string) error {
+	_, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Start, agentscalls.StartIn{Task: task}, nil)
+	return err
 }
 
 func orNone(err error) error {

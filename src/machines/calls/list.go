@@ -77,7 +77,21 @@ var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 				return machines.Created{}, err
 			}
 		}
-		return create(ctx, d, r, p)
+		created, err := create(ctx, d, r, p)
+		if err != nil || !r.Start || d.Agents == nil {
+			return created, err
+		}
+		// invariant: SPEC B5.1: Create and Start runs the agent once the
+		// workspace answers, its task already on the record, so the agent's
+		// row has it from the first frame.
+		p.Step(machines.StepAgent, "")
+		err = d.Agents.StartAgent(ctx, created.VM.Name, r.Task)
+		p.Done(machines.StepAgent, err)
+		if err != nil {
+			return created, &machines.AgentNotStartedError{Name: created.VM.Name, Cause: err}
+		}
+		created.Agent = true
+		return created, nil
 	},
 }
 

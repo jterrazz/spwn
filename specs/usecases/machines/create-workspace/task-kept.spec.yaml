@@ -1,0 +1,11 @@
+description: 'a task alone is kept on the workspace record, and no agent starts'
+env: two-macs
+runs:
+    - command: 'machines create --task "Build the landing page" --json | /usr/bin/jq -c ''{task, agent}'''
+      exit: 0
+      stdout: |
+          {"task":"Build the landing page","agent":null}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-2"] | {task: .kept.task, agents}'' world.json'
+      exit: 0
+      stdout: |
+          {"task":"Build the landing page","agents":null}

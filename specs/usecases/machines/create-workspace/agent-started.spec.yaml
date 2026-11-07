@@ -1,0 +1,19 @@
+description: 'create and start: the task is on the record, and an agent starts on it once the workspace answers'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-2"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create --task "Build the landing page" --agent'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	expo	8081	https://jterrazz-macbook-pro.tail1234.ts.net:40000
+          ●	vite	5173	https://jterrazz-macbook-pro.tail1234.ts.net:40003
+          ●	Agent started	Build the landing page
+          ●	linux-2	Created	Throwaway · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-2"] | {task: .kept.task, opened: .agents.opened, typed: .agents.typed}'' world.json'
+      exit: 0
+      stdout: |
+          {"task":"Build the landing page","opened":["claudecode"],"typed":["Build the landing page"]}

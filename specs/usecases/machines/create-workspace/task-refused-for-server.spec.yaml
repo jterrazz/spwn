@@ -1,0 +1,8 @@
+description: 'a server is given no task: it runs no agent'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --task "Build the landing page"'
+      exit: 2
+      stderr: |
+          Error: a task is for a workspace's agent: a server runs none
+          Hint: station machines create --task <task> --agent
