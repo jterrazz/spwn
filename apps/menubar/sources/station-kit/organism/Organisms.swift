@@ -103,7 +103,7 @@ struct ItemView: View {
 
     var body: some View {
         if let row = item.row {
-            RowView(row, columns: columns, width: width, hintAsButton: hintButtons)
+            CellsRow(row, columns: columns, width: width, hintAsButton: hintButtons)
         } else if let fact = item.fact {
             FactView(fact)
         } else if let group = item.group {
@@ -133,7 +133,7 @@ struct GroupView: View {
     }
 
     var body: some View {
-        let head = RowView(group.head ?? Row(), columns: columns, width: width, hintAsButton: hintButtons)
+        let head = CellsRow(group.head ?? Row(), columns: columns, width: width, hintAsButton: hintButtons)
         if group.fold == nil || group.fold == "open" {
             VStack(alignment: .leading, spacing: Token.Gap.tight) {
                 head

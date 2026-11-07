@@ -37,7 +37,7 @@ public struct Layout {
     }
 }
 
-public struct RowView: View {
+public struct CellsRow: View {
     let row: Row
     let columns: [Column]
     let width: CGFloat
