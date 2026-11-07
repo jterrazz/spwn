@@ -82,7 +82,12 @@ struct Canvas: View {
 
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
-            if let story = catalog.current {
+            if catalog.trial {
+                TrialPanel { line in FileHandle.standardError.write(Data("trial \(line)\n".utf8)) }
+                    .stationAccessibility(reduceMotion: catalog.knobs.reduceMotion)
+                    .padding(40)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let story = catalog.current {
                 VStack(spacing: 8) {
                     stage(story)
                     Ruler(width: story.ui.statusItem == true ? StoryStage.strip.width : catalog.knobs.width)

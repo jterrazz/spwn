@@ -16,6 +16,7 @@ final class Catalog: ObservableObject {
     @Published var speed = 1.0
     @Published var progress = 0.0
     @Published private(set) var session: Live?
+    let trial = CommandLine.arguments.contains("--trial")
 
     init() {
         reload()
