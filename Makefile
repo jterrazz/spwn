@@ -136,9 +136,9 @@ generate: ## Regenerate the catalogue's projections
 		mkdir -p .artifacts/menubar; \
 		STATION_UPDATE_INDEX=1 swift test --package-path apps/menubar --scratch-path .artifacts/menubar/build --filter StoryCoverageTests > .artifacts/menubar/index.log 2>&1 \
 			|| { tail -30 .artifacts/menubar/index.log; exit 1; }; \
-		printf "$(GREEN)●$(RESET) Regenerated apps/menubar/stories/INDEX.md\n"; \
+		printf "$(GREEN)●$(RESET) Regenerated apps/menubar/stories/INDEX.md and the stories' previews\n"; \
 	else \
-		printf "menubar: apps/menubar/stories/INDEX.md not regenerated, no macOS SDK\n"; \
+		printf "menubar: apps/menubar/stories/INDEX.md and the previews not regenerated, no macOS SDK\n"; \
 	fi
 
 clean: ## Remove build artifacts
