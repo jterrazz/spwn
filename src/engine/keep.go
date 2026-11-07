@@ -19,9 +19,10 @@ const (
 const EventsStream = "engine.events"
 
 func Notifies(kind string) bool {
-	// value: the closed list of SPEC §10.4: the events the engine's events
+	// value: the closed list of SPEC §10.4 and §B3: the events the engine's events
 	// watch streams, which the menu bar posts as its notifications.
-	return slices.Contains([]string{EventRestarting, EventLoop, EventPoweredOff, EventBack, NoticeAwakeEnded, EventExposed, EventDiskLow}, kind)
+	return slices.Contains([]string{EventRestarting, EventLoop, EventPoweredOff, EventBack, NoticeAwakeEnded, EventExposed, EventDiskLow,
+		NoticeAgentWaiting, NoticeAgentFinished, NoticeVMReady, NoticeMacBack, NoticeShareEnded}, kind)
 }
 
 type Told struct {

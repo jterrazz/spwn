@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -39,6 +38,9 @@ type Menubar struct {
 	// value: every Mac's Awake, This Mac's first, as the CLI's station awake
 	// reads it, for the Awake page.
 	EveryMac EveryMac
+	// value: the readings the live ticks keep, which a page rebuilt for its
+	// content starts from; nil starts each page pending.
+	Live *Live
 }
 
 type Clock interface {
@@ -67,7 +69,7 @@ func (o Menubar) Feed() engine.Feed {
 func (f *menubar) run(ctx context.Context, in engine.FeedInput) {
 	defer close(f.out)
 	f.update(ctx, func(r *pagemenubar.Reading) { r.Awake = f.o.Report(in.Awake()) })
-	loops := []func(context.Context, engine.FeedInput){f.sample, f.todo, f.remote, f.local}
+	loops := []func(context.Context, engine.FeedInput){f.todo, f.remote, f.local}
 	each := make([]chan struct{}, len(loops))
 	for i := range each {
 		each[i] = make(chan struct{}, 1)
@@ -104,9 +106,13 @@ func fanOut(ctx context.Context, from <-chan struct{}, to []chan struct{}) {
 	}
 }
 
+// invariant: Home is rebuilt when one of its reads answers, never on a
+// tick: its moving numbers are the live keys it lists, and a rebuild starts
+// from the readings the ticks kept.
 func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading)) {
 	f.mu.Lock()
 	change(&f.r)
+	f.r.Samples = f.o.Live.Readings(f.o.ThisMachine.Machine)
 	p := page.Document{Schema: page.Schema, Page: pagemenubar.Page(f.r, f.o.ThisMachine)}
 	f.mu.Unlock()
 	select {
@@ -116,22 +122,6 @@ func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading))
 	select {
 	case f.out <- p:
 	case <-ctx.Done():
-	}
-}
-
-func (f *menubar) sample(ctx context.Context, _ engine.FeedInput) {
-	for {
-		if s, err := call.Invoke(ctx, f.o.Calls, machine.Ref{}, activitycalls.Sample, activitycalls.SampleIn{}, nil); err == nil {
-			f.update(ctx, func(r *pagemenubar.Reading) {
-				r.Samples = append(r.Samples, s)
-				if len(r.Samples) > sampleKept {
-					r.Samples = r.Samples[len(r.Samples)-sampleKept:]
-				}
-			})
-		}
-		if f.o.Clock.Sleep(ctx, sampleEvery) != nil {
-			return
-		}
 	}
 }
 

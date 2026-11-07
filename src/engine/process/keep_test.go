@@ -39,9 +39,9 @@ func TestTheEventsWatchStreamsEachEventOfTheClosedListOnceAndNoOtherWord(t *test
 	d.Tell("jterrazz-macbook-pro", activity.SubjectDisk, "This Mac: 3 % of its disk is free")
 	d.tell(ctx, "infra", engine.PoweredOff("infra"))
 	for _, want := range []engine.Notice{
-		{Kind: engine.EventBack, Text: "infra is back / all 4 health steps pass"},
-		{Kind: engine.EventDiskLow, Text: "This Mac: 3 % of its disk is free"},
-		{Kind: engine.EventPoweredOff, Text: "infra powered off from inside / it stays stopped"},
+		{Kind: engine.EventBack, Icon: "checkmark.circle.fill", Text: "infra is back / all 4 health steps pass"},
+		{Kind: engine.EventDiskLow, Icon: "exclamationmark.circle.fill", Text: "This Mac: 3 % of its disk is free"},
+		{Kind: engine.EventPoweredOff, Icon: "xmark.octagon.fill", Text: "infra powered off from inside / it stays stopped"},
 	} {
 		if ev := <-got; ev.Event != "notice" || *ev.Notice != want {
 			t.Errorf("streamed %+v, want the notice %+v", ev, want)

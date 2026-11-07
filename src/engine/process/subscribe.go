@@ -27,6 +27,10 @@ type subscriber struct {
 	change chan struct{}
 	notice chan engine.Notice
 	inlets map[string]inlet
+	// value: the live keys each of its pages lists, and the latest tick of
+	// their values not yet written.
+	live   map[string][]string
+	sample chan engine.Event
 }
 
 // value: what wakes one watched page's feed: the engine's state moving, and
@@ -40,10 +44,11 @@ type hub struct {
 	mu   sync.Mutex
 	subs map[*subscriber]bool
 	seen string
+	live liveRun
 }
 
 func (h *hub) add(pages ...string) *subscriber {
-	s := &subscriber{change: make(chan struct{}, 1), notice: make(chan engine.Notice, 8), inlets: map[string]inlet{}}
+	s := &subscriber{change: make(chan struct{}, 1), notice: make(chan engine.Notice, 8), inlets: map[string]inlet{}, live: map[string][]string{}, sample: make(chan engine.Event, 1)}
 	for _, id := range pages {
 		s.inlets[id] = inlet{state: make(chan struct{}, 1), refresh: make(chan struct{}, 1)}
 	}
@@ -95,6 +100,9 @@ func (h *hub) refreshed(pages []string) {
 }
 
 func (h *hub) tell(n engine.Notice) {
+	if n.Icon == "" {
+		n.Icon = engine.NoticeIcon(n.Kind)
+	}
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for s := range h.subs {
@@ -186,6 +194,7 @@ func (d *Engine) feed(ctx context.Context, id string, sub *subscriber, into *lat
 		if err != nil {
 			continue
 		}
+		d.hub.listLive(sub, id, liveOf(data))
 		if !framed {
 			framed = true
 			first <- data
@@ -202,13 +211,15 @@ func (d *Engine) feed(ctx context.Context, id string, sub *subscriber, into *lat
 func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) error) error {
 	// invariant: after its opening, a watch of pages only streams: a full page
 	// per change, coalesced over 250 ms (so at most 4 a second) and never resent
-	// unchanged, a tick every 15 s, and the notices.
+	// unchanged, the values of its pages' live keys every 2 s, a tick every
+	// 15 s, and the notices.
 	if err := d.CheckPages(pages); err != nil {
 		return err
 	}
 	pages = slices.Compact(slices.Sorted(slices.Values(pages)))
 	sub := d.hub.add(pages...)
 	defer d.hub.remove(sub)
+	defer d.joinLive()()
 	if err := write(engine.Opened{Stream: streamSchema, Pages: pages}); err != nil {
 		return err
 	}
@@ -298,6 +309,10 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 			}
 		case n := <-sub.notice:
 			if write(engine.Event{Event: "notice", Notice: &n}) != nil {
+				return nil
+			}
+		case e := <-sub.sample:
+			if write(e) != nil {
 				return nil
 			}
 		case <-ticks:

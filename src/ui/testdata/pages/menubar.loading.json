@@ -9,10 +9,12 @@
   "state": "loading",
   "strip": {
     "cpu": {
-      "kind": "pending"
+      "kind": "pending",
+      "live": "cpu:jterrazz-macbook-pro"
     },
     "memory": {
-      "kind": "pending"
+      "kind": "pending",
+      "live": "memory:jterrazz-macbook-pro"
     }
   },
   "sections": [
@@ -318,5 +320,9 @@
         ]
       }
     }
+  ],
+  "live": [
+    "cpu:jterrazz-macbook-pro",
+    "memory:jterrazz-macbook-pro"
   ]
 }

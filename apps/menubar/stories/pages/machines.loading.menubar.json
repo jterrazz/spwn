@@ -10,7 +10,8 @@
   "strip": {
     "cpu": {
       "kind": "percent",
-      "n": 340
+      "n": 340,
+      "live": "cpu:macbook-pro"
     },
     "spark": [
       12,
@@ -33,9 +34,11 @@
     "memory": {
       "kind": "ratio",
       "n": 40748502220,
-      "of": 51539607552
+      "of": 51539607552,
+      "live": "memory:macbook-pro"
     },
     "memory_spark": [
+      77,
       77,
       78,
       78,
@@ -75,7 +78,8 @@
       {
         "kind": "size",
         "n": 1780000,
-        "unit": "/s"
+        "unit": "/s",
+        "live": "net:macbook-pro"
       }
     ]
   },
@@ -733,5 +737,10 @@
   ],
   "badge": {
     "needs": 4
-  }
+  },
+  "live": [
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "net:macbook-pro"
+  ]
 }

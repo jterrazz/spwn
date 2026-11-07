@@ -56,7 +56,8 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	if calls == nil {
 		calls = remote.NewRouter(registry, m.profile, remote.Reach{})
 	}
-	menubar := feeds.Menubar{Calls: calls, Clock: m.sys.Clock, ThisMachine: m.where, Report: func(v awake.View) *awake.Report {
+	live := &feeds.Live{Calls: calls, Clock: m.sys.Clock, ThisMac: m.where.Machine}
+	menubar := feeds.Menubar{Calls: calls, Clock: m.sys.Clock, ThisMachine: m.where, Live: live, Report: func(v awake.View) *awake.Report {
 		return &awake.Report{Now: m.sys.Clock.Now(), Zone: time.Local, Engine: awake.EngineRunning, Reading: v.Reading, Session: v.Session, LastEnd: v.LastEnd, Guards: v.Guards}
 	}, EveryMac: func(ctx context.Context) (pageawake.AllMachines, error) {
 		inside := env
@@ -100,6 +101,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		AccountShares: shares, Peer: m.engineAPI(),
 		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageSwitcher: menubar.Switcher(), engine.PageMachine: menubar.Machine(),
 			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity()},
+		Sample:   live.Sample,
 		Notifier: notifier, Checks: checks, Join: func(parts ...string) string { return strings.Join(parts, token.Sep) },
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs: []process.Tick{sample.Run},
