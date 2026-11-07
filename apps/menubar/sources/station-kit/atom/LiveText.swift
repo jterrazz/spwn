@@ -1,30 +1,5 @@
 import SwiftUI
 
-// value: one tick of the engine's `sample` frame: each live key's value,
-// as the page that lists the key draws it, and the keys told late.
-public struct LiveSample: Equatable, Sendable {
-    public var at: String
-    public var values: [String: Value]
-    public var stale: [String]
-
-    public init(at: String, values: [String: Value], stale: [String] = []) {
-        self.at = at
-        self.values = values
-        self.stale = stale
-    }
-
-    static func decode(_ obj: [String: Any]) -> LiveSample? {
-        guard let raw = obj["values"] as? [String: Any] else { return nil }
-        var values: [String: Value] = [:]
-        for (key, v) in raw {
-            if let data = try? JSONSerialization.data(withJSONObject: v), let value = try? JSONDecoder().decode(Value.self, from: data) {
-                values[key] = value
-            }
-        }
-        return LiveSample(at: obj["at"] as? String ?? "", values: values, stale: obj["stale"] as? [String] ?? [])
-    }
-}
-
 // invariant: the live values the app holds: by key, the last tick's, a key
 // told late kept at its last value and marked stale; a page's value with a
 // live key shows the store's, never one the app computed.
