@@ -19,7 +19,7 @@ type liveRun struct {
 // all watches' at once, and hands each watch the values of its own pages'
 // keys, so two pages that show one key show one value in one tick; once the
 // last watch ends nothing is read.
-func (d *Engine) joinLive() func() {
+func (d *Engine) joinLive(ctx context.Context) func() {
 	if d.o.Sample == nil {
 		return func() {}
 	}
@@ -27,9 +27,9 @@ func (d *Engine) joinLive() func() {
 	defer d.hub.mu.Unlock()
 	d.hub.live.n++
 	if d.hub.live.n == 1 {
-		ctx, stop := context.WithCancel(context.Background())
+		live, stop := context.WithCancel(context.WithoutCancel(ctx))
 		d.hub.live.stop = stop
-		go d.sampleLive(ctx)
+		go d.sampleLive(live)
 	}
 	return func() {
 		d.hub.mu.Lock()

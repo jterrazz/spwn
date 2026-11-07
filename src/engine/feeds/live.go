@@ -58,12 +58,8 @@ func (l *Live) Sample(ctx context.Context, keys []string) engine.Sample {
 	if budget == 0 {
 		budget = tickBudget
 	}
-	spent, cancel := context.WithCancel(ctx)
+	spent, cancel := context.WithTimeout(ctx, budget)
 	defer cancel()
-	go func() {
-		_ = l.Clock.Sleep(spent, budget)
-		cancel()
-	}()
 wait:
 	for _, done := range waits {
 		select {

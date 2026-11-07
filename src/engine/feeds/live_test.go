@@ -20,19 +20,13 @@ import (
 )
 
 type moving struct {
-	mu   sync.Mutex
-	now  time.Time
-	wake chan struct{}
+	mu  sync.Mutex
+	now time.Time
 }
 
-// value: a tick's budget is spent only when the test says so.
 func (m *moving) Sleep(ctx context.Context, _ time.Duration) error {
-	select {
-	case <-m.wake:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
+	<-ctx.Done()
+	return ctx.Err()
 }
 
 func (m *moving) Now() time.Time {
@@ -116,8 +110,8 @@ func lead(s engine.Sample, key string) page.Value {
 }
 
 func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testing.T) {
-	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC), wake: make(chan struct{})}
-	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac}
+	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
+	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond}
 	keys := []string{"cpu:" + thisMac, "memory:" + mini, "free:" + mini}
 	live.Sample(t.Context(), keys)
 	before := live.Sample(t.Context(), keys)
@@ -127,12 +121,7 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 	answer := f.lateFromNow()
 	defer answer()
 	clock.pass(10 * time.Second)
-	late := func() engine.Sample {
-		out := make(chan engine.Sample, 1)
-		go func() { out <- live.Sample(t.Context(), keys) }()
-		clock.wake <- struct{}{}
-		return <-out
-	}
+	late := func() engine.Sample { return live.Sample(t.Context(), keys) }
 	during := late()
 	if got, was := lead(during, "memory:"+mini), lead(before, "memory:"+mini); got.N != was.N || got.Of != was.Of || got.Stale {
 		t.Errorf("the mini late 10 s gives its memory %+v, want its last value %+v, not yet stale", got, lead(before, "memory:"+mini))

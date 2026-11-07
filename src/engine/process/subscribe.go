@@ -219,7 +219,7 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 	pages = slices.Compact(slices.Sorted(slices.Values(pages)))
 	sub := d.hub.add(pages...)
 	defer d.hub.remove(sub)
-	defer d.joinLive()()
+	defer d.joinLive(ctx)()
 	if err := write(engine.Opened{Stream: streamSchema, Pages: pages}); err != nil {
 		return err
 	}
