@@ -243,6 +243,8 @@
             "self": {
                 "system": {},
                 "hardware": {
+                    "Model": "Mac16,8",
+                    "Chip": "Apple M4 Pro",
                     "Memory": 17179869184,
                     "CPUs": 12
                 }
@@ -596,6 +598,15 @@
             },
             "power": {
                 "Source": "ac"
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Model": "Mac16,11",
+                    "Chip": "Apple M4 Pro",
+                    "Memory": 68719476736,
+                    "CPUs": 14
+                }
             },
             "preferences": {
                 "here": "jterrazz-mac-mini",

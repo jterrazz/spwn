@@ -1,0 +1,7 @@
+description: 'each Mac says what it is: its model''s name, its chip, memory and cores, and if it is a laptop'
+env: two-macs
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[] | {name, hardware}]'''
+      exit: 0
+      stdout: |
+          [{"name":"jterrazz-macbook-pro","hardware":{"name":"MacBook Pro","model":"Mac16,8","chip":"Apple M4 Pro","memory_bytes":17179869184,"cpus":12,"laptop":true}},{"name":"jterrazz-mac-mini","hardware":{"name":"Mac mini","model":"Mac16,11","chip":"Apple M4 Pro","memory_bytes":68719476736,"cpus":14,"laptop":false}}]

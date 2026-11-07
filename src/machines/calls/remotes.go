@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -216,6 +217,11 @@ func (s *Machinist) Remember(_ context.Context, f model.AllMachines) error {
 			seen = append(seen, model.SeenVM{Name: vm.Name, Lifetime: vm.Lifetime, CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes})
 		}
 		known.Answered, known.VMs = s.h.Now().UTC().Truncate(time.Second), seen
+		known.Laptop, known.Hardware = h.Laptop, nil
+		if h.Hardware != (coremachine.Hardware{}) {
+			hw := h.Hardware
+			known.Hardware = &hw
+		}
 		if h.LAN != "" {
 			known.LAN = h.LAN
 		}

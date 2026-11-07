@@ -184,10 +184,7 @@ func (s *Machinist) claims(ctx context.Context) (held map[string]claim, on map[s
 // macOS keeps and what its running VMs hold; unknown when the Mac does not
 // say what it has.
 func (s *Machinist) memoryLeft(ctx context.Context) (int64, bool) {
-	total := int64(0)
-	if s.o.Memory != nil {
-		total = s.o.Memory(ctx)
-	}
+	total := s.hardware(ctx).Memory
 	if total <= 0 {
 		return 0, false
 	}

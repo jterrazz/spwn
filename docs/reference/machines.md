@@ -23,6 +23,8 @@ A machine has one name, used for `preferences.json`, the `~/.ssh/config` block, 
 
 `station machines` is All machines: a first line that counts the machines, the running, the stopped and what needs you; each Mac with its VMs under it, in the columns MACHINE, KIND, STATE, CPU and MEMORY; then Needs you. A Mac that does not answer in 5 seconds keeps its row, `✗ Unreachable`, and is a finding, never a failure; a Mac that runs another station says which and where to update it. Piped, each machine is one record (glyph, name, kind, its Mac, state, CPU, memory); `--json` is `station.machines.list/v1`.
 
+Each Mac says what it is, read by sysctl and never by a subprocess: its model identifier (`hw.model`), the name that model is shown by (from the catalogue's table, `Mac` for one it does not hold), its chip (`machdep.cpu.brand_string`), its memory and cores, and whether it has a lid (a laptop). A Mac that falls silent keeps what it last said it was. `machines --json` carries it as each Mac's `hardware`.
+
 ```text
 5 machines · 4 running · 1 stopped · nothing needs you
  MACHINE KIND STATE CPU MEMORY

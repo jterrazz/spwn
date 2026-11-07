@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 const SuperviseRetired = "supervise is retired: the engine supervises VMs (station setup)"
@@ -101,6 +102,10 @@ type MacView struct {
 	Node   Node
 	Engine EngineView
 	VMs    []VM
+	// value: SPEC B5.12: what it is, as it read itself at its last answer,
+	// and whether it has a lid (a laptop) or not (a desktop).
+	Hardware machine.Hardware
+	Laptop   bool
 }
 
 type AllMachines struct {

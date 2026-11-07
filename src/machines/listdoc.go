@@ -3,7 +3,9 @@ package machines
 import (
 	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
+	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 const ListSchema = "station.machines.list/v1"
@@ -24,7 +26,28 @@ type ListMac struct {
 	User      string     `json:"user"`
 	Engine    ListEngine `json:"engine"`
 	Station   string     `json:"station_version"`
-	VMs       []ListVM   `json:"vms"`
+	// value: SPEC B5.12: what the Mac is; absent while it never said.
+	Hardware *ListHardware `json:"hardware,omitempty"`
+	VMs      []ListVM      `json:"vms"`
+}
+
+type ListHardware struct {
+	// value: the name the Mac is shown by ("Mac mini"), its model
+	// identifier and its chip, as it reported them.
+	Name        string `json:"name"`
+	Model       string `json:"model,omitempty"`
+	Chip        string `json:"chip,omitempty"`
+	MemoryBytes int64  `json:"memory_bytes"`
+	CPUs        int    `json:"cpus"`
+	Laptop      bool   `json:"laptop"`
+}
+
+func hardwareOf(h MacView) *ListHardware {
+	hw := h.Hardware
+	if hw == (machine.Hardware{}) {
+		return nil
+	}
+	return &ListHardware{Name: catalog.MacModelName(hw.Model), Model: hw.Model, Chip: hw.Chip, MemoryBytes: hw.Memory, CPUs: hw.CPUs, Laptop: h.Laptop}
 }
 
 type ListEngine struct {
@@ -175,7 +198,7 @@ func ToList(f AllMachines) ListDoc {
 	for _, h := range f.Macs {
 		m := ListMac{
 			Name: h.Name, Label: Label(f, h), ThisMac: h.ThisMac, Reachable: h.Reachable, Answered: h.Answered, IP: h.Node.IP, User: h.User,
-			Engine: ListEngine{State: engineState(h), Version: h.Engine.Version}, Station: h.StationVersion, VMs: []ListVM{},
+			Engine: ListEngine{State: engineState(h), Version: h.Engine.Version}, Station: h.StationVersion, Hardware: hardwareOf(h), VMs: []ListVM{},
 		}
 		for _, vm := range Ordered(h.VMs) {
 			m.VMs = append(m.VMs, ListVM{

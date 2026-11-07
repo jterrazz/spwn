@@ -1,0 +1,11 @@
+description: 'a Mac that falls silent is still shown as what it last said it was'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world power-cut jterrazz-mac-mini'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reachable, hardware}'''
+      exit: 0
+      stdout: |
+          {"reachable":false,"hardware":{"name":"Mac mini","model":"Mac16,11","chip":"Apple M4 Pro","memory_bytes":68719476736,"cpus":14,"laptop":false}}
