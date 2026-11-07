@@ -145,6 +145,13 @@ public enum StoryError: Error, Equatable, CustomStringConvertible {
 
 public enum Stories {
     public static let suffix = ".story.json"
+    public static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("stories")
+
+    public static subscript(id: String) -> Story {
+        guard let story = try? load(root: root).first(where: { $0.id == id }) else { preconditionFailure("\(id): no story file loads under \(root.path)") }
+        return story
+    }
 
     public static func files(root: URL) throws -> [URL] {
         try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)

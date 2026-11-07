@@ -23,7 +23,7 @@ final class Catalog: ObservableObject {
 
     func reload() {
         do {
-            let order = Dictionary(Paths.order().enumerated().map { ($1, $0) }) { first, _ in first }
+            let order = Dictionary(Paths.order().enumerated().map { ($1.id, $0) }) { first, _ in first }
             stories = try Stories.load(root: Paths.stories).sorted { (order[$0.id] ?? .max, $0.id) < (order[$1.id] ?? .max, $1.id) }
             failure = nil
         } catch {
