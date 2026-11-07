@@ -1,0 +1,16 @@
+description: 'a throwaway stopped by its owner goes in a cleanup; a permanent one stopped is kept'
+env: two-macs
+runs:
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'machines cleanup --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted · with its disk, its ports and its shared accounts
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · permanent	4 CPU	8 GB

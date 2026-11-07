@@ -1,0 +1,23 @@
+description: 'a throwaway whose agent still works stays and is named; naming it is refused'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'machines cleanup --yes'
+      exit: 0
+      stdout: |
+          	none
+          	linux-1 is still running, so it stays.
+    - command: 'machines cleanup linux-1 --yes'
+      exit: 2
+      stderr: |
+          Error: linux-1 stays: only a throwaway that is stopped, or whose agent finished, is deleted by a cleanup
+          Hint: station machines cleanup
+    - command: 'machines | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	8 GB

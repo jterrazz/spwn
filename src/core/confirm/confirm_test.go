@@ -30,6 +30,7 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 		{"delete an image", confirm.DeleteImage, machine.Mac, confirm.YesNo},
 		{"erase an app's data", confirm.Erase, machine.Mac, confirm.TypeName},
 		{"build the image a create needs", confirm.BuildImage, machine.Workspace, confirm.YesNo},
+		{"delete the throwaways whose agent finished", confirm.Cleanup, machine.Mac, confirm.YesNo},
 	} {
 		if got := confirm.For(c.action, c.kind); got != c.want {
 			t.Errorf("%s asks %s, want %s", c.gesture, got, c.want)

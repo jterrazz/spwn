@@ -1,0 +1,16 @@
+description: 'a cleanup off a terminal without --yes is refused before anything is deleted'
+env: two-macs
+runs:
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'machines cleanup'
+      exit: 2
+      stderr: |
+          Error: refusing to delete the finished throwaways without --yes
+          Hint: re-run with --yes
+    - command: 'machines | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · throwaway	4 CPU	8 GB

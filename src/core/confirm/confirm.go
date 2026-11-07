@@ -30,6 +30,8 @@ const (
 	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
+	// value: delete the throwaways whose agent finished, in one question.
+	Cleanup Action = "cleanup"
 )
 
 type Level string

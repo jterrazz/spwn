@@ -1,0 +1,21 @@
+description: 'a throwaway whose agent finished goes in one yes, with its disk, its ports and its shared accounts'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 "tests pass"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'machines cleanup --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted · with its disk, its ports and its shared accounts
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {disk: .vms["linux-1"].disk, ports: [.stores.reservations[]? | select(.vm == "linux-1") | .host_port], accounts: [.stores.shares["linux-1"][]?.name]}'' world.json'
+      exit: 0
+      stdout: |
+          {"disk":null,"ports":[],"accounts":[]}
