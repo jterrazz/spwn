@@ -109,7 +109,7 @@ struct ItemView: View {
         } else if let group = item.group {
             GroupView(group: group, columns: columns, width: width, links: links, hintButtons: hintButtons)
         } else if let empty = item.empty {
-            EmptyLine(empty)
+            EmptyState(empty)
         } else if let error = item.error {
             ErrorLine(error)
         } else if let note = item.note {

@@ -197,7 +197,7 @@ struct MachineTree: View {
                 }
             }
             ForEach(Array((section.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
-                EmptyLine(empty).padding(Token.Tile.rowPadding)
+                EmptyState(empty).padding(Token.Tile.rowPadding)
             }
         }
         .stationRows()

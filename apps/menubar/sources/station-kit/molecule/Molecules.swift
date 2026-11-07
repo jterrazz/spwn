@@ -128,21 +128,6 @@ public struct HintView: View {
     }
 }
 
-public struct EmptyLine: View {
-    let empty: Empty
-    @Environment(\.stationPalette) private var palette
-    @Environment(\.stationHints) private var hints
-
-    public init(_ empty: Empty) { self.empty = empty }
-
-    public var body: some View {
-        VStack(alignment: .leading, spacing: Token.Gap.tight) {
-            Text(empty.text ?? "no \(empty.noun ?? "")").font(.system(size: Token.Space.text)).foregroundStyle(palette.muted)
-            if hints, let hint = empty.hint { HintView(hint) }
-        }
-    }
-}
-
 public struct ErrorLine: View {
     let error: PageError
     @Environment(\.stationPalette) private var palette
