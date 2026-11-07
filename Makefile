@@ -1,4 +1,4 @@
-.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall catalog catalog-open catalog-export e2e-machine provision deprovision generate clean
+.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall catalog catalog-open catalog-export catalog-gallery e2e-machine provision deprovision generate clean
 
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
@@ -106,6 +106,10 @@ catalog-open: catalog ## Open the Catalog's window (STATION_DESIGN=<design folde
 
 catalog-export: catalog ## Draw every story headless, dark and light, into $(CATALOG_OUT); FILTER=<regex> narrows it
 	@$(CATALOG_BIN) --export $(CATALOG_OUT) $(if $(FILTER),--filter '$(FILTER)')
+
+catalog-gallery: catalog ## Draw every story and write $(CATALOG_OUT)/index.html, the gallery to browse offline or on the phone (STATION_DESIGN=<design folder> adds the prototype's captures)
+	@$(CATALOG_BIN) --export $(CATALOG_OUT) --gallery $(if $(FILTER),--filter '$(FILTER)') >/dev/null
+	@printf "$(GREEN)●$(RESET) Wrote $(CATALOG_OUT)/index.html\n"
 
 e2e-machine: build build-linux ## The machine specs on a real VM of this host: KIND=linux (tier 2) or KIND=macos (tier 3); never in check
 	@specs/machine/run.sh $(KIND) $(LABEL)

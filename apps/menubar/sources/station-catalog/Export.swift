@@ -7,6 +7,8 @@ enum Export {
         var folder: URL
         var filter: String?
         var stories = Paths.stories
+        var gallery = false
+        var goldens = Paths.goldens
     }
 
     enum Failure: Error, CustomStringConvertible {
@@ -17,7 +19,7 @@ enum Export {
 
         var description: String {
             switch self {
-            case .usage: "usage: StationCatalog --export <dir> [--filter <regex>] [--stories <dir>]"
+            case .usage: "usage: StationCatalog --export <dir> [--filter <regex>] [--stories <dir>] [--gallery [--goldens <dir>]]"
             case let .filter(pattern): "--filter \(pattern) is not a regular expression"
             case let .none(pattern): pattern.map { "no story matches \($0)" } ?? "no story to export"
             case let .render(file): "\(file): nothing rendered"
@@ -34,6 +36,8 @@ enum Export {
         guard let folder = try value("--export") else { throw Failure.usage }
         var request = Request(folder: URL(fileURLWithPath: folder), filter: try value("--filter"))
         if let stories = try value("--stories") { request.stories = URL(fileURLWithPath: stories) }
+        if let goldens = try value("--goldens") { request.goldens = URL(fileURLWithPath: goldens) }
+        request.gallery = arguments.contains("--gallery")
         return request
     }
 
@@ -57,6 +61,9 @@ enum Export {
                     try png.write(to: request.folder.appendingPathComponent(file))
                     print(request.folder.appendingPathComponent(file).path)
                 }
+            }
+            if request.gallery {
+                print(try Gallery.write(stories, to: request.folder, root: request.stories, goldens: request.goldens, design: Paths.design).path)
             }
             return 0
         } catch {
