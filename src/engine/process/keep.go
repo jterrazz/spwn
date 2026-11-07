@@ -12,8 +12,9 @@ import (
 
 type CheckRunner interface {
 	// invariant: what the engine needs to run a server's check from its
-	// Mac: nil once it answered within its budget, with what it answered.
-	Run(ctx context.Context, t model.CheckTarget) (string, error)
+	// Mac: nil once it answered within its budget, with what it answered
+	// and how long it took.
+	Run(ctx context.Context, t model.CheckTarget) (model.CheckAnswer, error)
 }
 
 // invariant: what the engine tells goes to the Notifier and to every open
@@ -73,18 +74,78 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 		var change model.CheckChange
 		v.check, change = model.Health(v.check, passed, now)
 		if passed {
-			v.check.Answer = answer
+			v.check.Answer = answer.Status
+			v.latency = model.KeepLatency(v.latency, model.LatencyPoint{At: now, Took: answer.Took})
 		}
 		v.checking = false
 		d.mu.Unlock()
 		switch change {
 		case model.CheckFails:
 			d.logf(v.rec.Name, "its check fails: "+v.rec.Check)
+			d.wentDown(ctx, v, model.CheckFailed, false, now)
 		case model.CheckBack:
 			d.tell(ctx, v.rec.Name, engine.Back(v.rec.Name))
 		case model.CheckSame:
 		}
 	}()
+}
+
+// invariant: SPEC B5.2: a server goes down on its record once, when its
+// run ends unexpectedly or its check fails since it passed; a restart that
+// follows walks the four health steps from the first.
+func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, restarts bool, now time.Time) {
+	d.mu.Lock()
+	if v.rec.Lifetime != model.AlwaysOn {
+		d.mu.Unlock()
+		return
+	}
+	was := v.down
+	v.down = true
+	if restarts {
+		v.walk = &model.RestartWalk{Step: 1, At: now}
+	}
+	d.mu.Unlock()
+	if !was {
+		d.markUptime(ctx, model.UptimeMark{Server: v.rec.Name, Change: model.WentDown, At: now, Cause: cause})
+	}
+}
+
+// invariant: SPEC B5.11: a server's restart shows the step it runs and
+// when that step began, until all four pass; a server healthy again is back
+// on its record, through a restart when it walked one. The first time this
+// engine sees it healthy it marks it too, which starts its record and closes
+// an incident an earlier engine left open.
+func (d *Engine) walk(ctx context.Context, v *vmState) {
+	d.mu.Lock()
+	if v.rec.Lifetime != model.AlwaysOn {
+		d.mu.Unlock()
+		return
+	}
+	now := d.h.Now()
+	running := v.state == engine.StateRunning
+	_, hasCheck := model.ParseCheck(v.rec.Check)
+	step := model.WalkStep(running, running && v.ip != "", running && (v.guest == engine.GuestConnected || v.ssh), !hasCheck || v.check.State == model.CheckPassing)
+	if step != 0 {
+		if v.walk != nil && v.walk.Step != step {
+			v.walk = &model.RestartWalk{Step: step, At: now}
+		}
+		d.mu.Unlock()
+		return
+	}
+	walked := v.walk != nil
+	if !walked && !v.down && v.marked {
+		d.mu.Unlock()
+		return
+	}
+	v.walk, v.down, v.marked = nil, false, true
+	d.mu.Unlock()
+	d.markUptime(ctx, model.UptimeMark{Server: v.rec.Name, Change: model.CameBack, At: now, Restarted: walked})
+}
+
+func (d *Engine) markUptime(ctx context.Context, m model.UptimeMark) {
+	if err := d.m.MarkUptime(ctx, m); err != nil {
+		d.logf(m.Server, "its uptime was not marked: "+err.Error())
+	}
 }
 
 func (d *Engine) Events(ctx context.Context, send func(any) error) error {

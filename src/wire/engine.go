@@ -190,7 +190,10 @@ func (d macEngine) VMs(ctx context.Context) (map[string]machinescalls.EngineVM, 
 	}
 	out := make(map[string]machinescalls.EngineVM, len(views))
 	for _, v := range views {
-		out[v.Name] = machinescalls.EngineVM{State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt}
+		out[v.Name] = machinescalls.EngineVM{
+			State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt,
+			Latency: v.Latency, Restart: v.Restart,
+		}
 	}
 	return out, nil
 }

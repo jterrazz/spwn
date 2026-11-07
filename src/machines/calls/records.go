@@ -82,6 +82,10 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 			}
 			vm.Guest, vm.IP, vm.Detail = d.Guest, d.IP, d.Detail
 			vm.SSH, vm.Restarts, vm.CheckStatus, vm.BootAt = d.SSH, d.Restarts, d.Check, d.BootAt
+			vm.Latency, vm.Restart = d.Latency, d.Restart
+		}
+		if r.Lifetime == model.AlwaysOn && s.o.Uptime != nil {
+			vm.Uptime, _ = s.o.Uptime.Get(ctx, r.Name)
 		}
 		out = append(out, vm)
 	}

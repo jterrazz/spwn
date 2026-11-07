@@ -1,0 +1,23 @@
+description: 'a server that crashed and came back marks today restart; the next day is ok again'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 4h'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, .restart] + (.uptime.days[-1] | [.mark, .restarts, (.down[] | [.from[11:16], .cause])])'''
+      exit: 0
+      stdout: |
+          ["running",null,"restart",1,["14:00","the hypervisor stopped it"]]
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].uptime | [.days[-2:][] | .mark]'''
+      exit: 0
+      stdout: |
+          ["restart","ok"]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.uptime.infra.days'' world.json'
+      exit: 0
+      stdout: |
+          [{"date":"2026-11-04","down_s":6,"restarts":1}]

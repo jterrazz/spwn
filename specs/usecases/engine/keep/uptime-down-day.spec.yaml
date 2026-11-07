@@ -1,0 +1,29 @@
+description: 'a server down past midnight is down each day, its seconds split there; back, it turns restart'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 4h'
+      exit: 0
+    - command: 'world poweroff-inside infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state] + (.uptime.days[-1] | [.date, .mark, (.down[] | [.from[11:16], .to, .cause])])'''
+      exit: 0
+      stdout: |
+          ["stopped","2026-11-04","down",["14:00",null,"powered off from inside"]]
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[1].vms[0].uptime.days[-2:][] | [.date, .mark]]'''
+      exit: 0
+      stdout: |
+          [["2026-11-04","down"],["2026-11-05","down"]]
+    - command: 'machines start infra --on mac-mini >/dev/null'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, [.uptime.days[-2:][] | [.date, .mark]], (.uptime.days[-1].down[0].to != null)]'''
+      exit: 0
+      stdout: |
+          ["running",[["2026-11-04","down"],["2026-11-05","restart"]],true]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-mac-mini"].stores.uptime.infra.days[] | [.date, .down_s]]'' world.json'
+      exit: 0
+      stdout: |
+          [["2026-11-04",35967],["2026-11-05",50480]]

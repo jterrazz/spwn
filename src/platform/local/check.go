@@ -27,6 +27,13 @@ func Answers(ctx context.Context, c Check) error {
 	return err
 }
 
+func Timed(ctx context.Context, c Check) (int, time.Duration, error) {
+	// invariant: Answer, with how long it waited for the answer.
+	start := time.Now()
+	status, err := Answer(ctx, c)
+	return status, time.Since(start), err
+}
+
 func Answer(ctx context.Context, c Check) (int, error) {
 	// invariant: a URL answers with 2xx or 3xx, its status said, a host:port
 	// by accepting a connection (status 0), each within its budget;

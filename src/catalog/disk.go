@@ -151,6 +151,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/engine.sock"), "the engine's socket, live while it runs"),
 		noted(data("{state}/station/children/*"), "the engine's `tailscale` calls in flight, `<pid>` holding its start: the next engine start kills what a killed one left"),
 		noted(data("{state}/station/runs/*"), "each running VM's `<vm>.pid` and `<vm>.exit`"),
+		noted(data("{state}/station/uptime.json"), "each server's last 30 days, written by its Mac's engine: deleting it starts every record again"),
 		noted(data("{state}/station/use/*"), "each terminal's machine (`station use`), forgotten after 7 days unused"),
 		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.engine.plist", Mac), "the one engine's launchd agent"),
 		noted(conf("{config}/station/preferences.json"), "here, hosts, vm_user, the share list, the ports policy"),

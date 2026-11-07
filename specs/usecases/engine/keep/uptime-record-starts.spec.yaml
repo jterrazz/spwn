@@ -1,0 +1,13 @@
+description: 'a server''s record starts once its engine sees it healthy: earlier days none, today ok'
+env: two-macs
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | {name, uptime: (.uptime | {since: .since[11:16], availability, today: .days[-1], before: ([.days[] | select(.mark == "none")] | length)})}'''
+      exit: 0
+      stdout: |
+          {"name":"infra","uptime":{"since":"10:00","availability":100,"today":{"date":"2026-11-04","mark":"ok"},"before":29}}
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0].uptime | {availability, days: [.days[-3:][] | .mark]}'''
+      exit: 0
+      stdout: |
+          {"availability":100,"days":["none","ok","ok"]}

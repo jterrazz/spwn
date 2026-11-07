@@ -1,0 +1,23 @@
+description: 'a restarting server whose check still waits shows "4 of 4"; it is back once the check passes'
+env: two-macs
+runs:
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, (.restart | [.step, .of, .name, .counted])]'''
+      exit: 0
+      stdout: |
+          ["running",[4,4,"Check passes","4 of 4"]]
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, .restart, .uptime.days[-1].mark]'''
+      exit: 0
+      stdout: |
+          ["running",null,"restart"]

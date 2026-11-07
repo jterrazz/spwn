@@ -33,6 +33,8 @@ type Options struct {
 	Memory func(ctx context.Context) int64
 	// value: this Mac's address on your LAN; empty when it cannot say.
 	LAN func(ctx context.Context) string
+	// value: its servers' uptime records; nil keeps none.
+	Uptime contract.UptimeStore
 }
 
 type Nodes interface {
@@ -46,6 +48,9 @@ type EngineVM struct {
 	Restarts model.Restarts
 	Check    model.CheckStatus
 	BootAt   time.Time
+	// value: a server's last check runs, and the step its restart runs.
+	Latency []model.LatencyPoint
+	Restart *model.RestartWalk
 }
 
 type Engine interface {

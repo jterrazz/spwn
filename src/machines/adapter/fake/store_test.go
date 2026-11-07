@@ -10,3 +10,7 @@ import (
 func TestTheFakeMachineStoreKeepsTheContract(t *testing.T) {
 	contracttest.MachineStore(t, func(*testing.T) contract.MachineStore { return NewStore() })
 }
+
+func TestTheFakeUptimeStoreKeepsTheContract(t *testing.T) {
+	contracttest.UptimeStore(t, func(*testing.T) contract.UptimeStore { return NewUptime() })
+}

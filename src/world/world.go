@@ -198,6 +198,8 @@ type Stores struct {
 	Reservations []ports.Reservation         `json:"reservations,omitempty"`
 	Declarations []ports.Declaration         `json:"declarations,omitempty"`
 	Applied      map[string]settings.Applied `json:"applied,omitempty"`
+	// value: each server's uptime record, by name.
+	Uptime map[string]machines.Uptime `json:"uptime,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {
@@ -262,6 +264,8 @@ type VM struct {
 	// its Mac shared into it (SC-06: station never shares one).
 	Booted  *Boot  `json:"booted,omitempty"`
 	Address string `json:"address,omitempty"`
+	// value: how long its health check takes to answer; zero is the world's usual.
+	CheckTakes time.Duration `json:"check_takes,omitempty"`
 	// value: its guest, answering over the one way into a VM; nil when no
 	// guest answers.
 	Guest *Guest `json:"guest,omitempty"`

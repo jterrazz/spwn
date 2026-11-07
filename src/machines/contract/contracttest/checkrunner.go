@@ -24,8 +24,11 @@ func CheckRunner(t *testing.T, subject func(t *testing.T) CheckRunnerSubject) {
 		if err != nil {
 			t.Fatalf("a health check that answers failed: %v", err)
 		}
-		if s.Answer != "" && answer != s.Answer {
-			t.Fatalf("a health check that answers said %q, want %q", answer, s.Answer)
+		if s.Answer != "" && answer.Status != s.Answer {
+			t.Fatalf("a health check that answers said %q, want %q", answer.Status, s.Answer)
+		}
+		if answer.Took <= 0 {
+			t.Fatalf("a health check that answers took %v; want how long it waited", answer.Took)
 		}
 	})
 	t.Run("a health check that no longer answers fails", func(t *testing.T) {

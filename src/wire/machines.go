@@ -60,6 +60,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		SSHConfig: m.sshConfig(knownHosts),
 		Memory:    m.memory,
 		LAN:       m.lanAddress,
+		Uptime:    m.stores.uptime,
 	})
 }
 

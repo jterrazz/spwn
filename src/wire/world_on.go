@@ -288,6 +288,7 @@ func (m *worldMac) stores(st *stores) {
 	st.reservations = portsfake.ReservationsOf(w, m.name)
 	st.declarations = portsfake.DeclarationsOf(w, m.name)
 	st.applied = settingsfake.AppliedOf(w, m.name)
+	st.uptime = machinesfake.UptimeOf(w, m.name)
 }
 
 func (m *worldMac) self() corecontract.Self    { return corefake.SelfOf(m.run.w, m.name) }

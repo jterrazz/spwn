@@ -68,6 +68,11 @@ type declarationStore interface {
 	store.Migrator
 }
 
+type uptimeStore interface {
+	machinescontract.UptimeStore
+	store.Migrator
+}
+
 type appliedStore interface {
 	settingscontract.AppliedStore
 	store.Migrator
@@ -83,6 +88,7 @@ type stores struct {
 	reservations reservationStore
 	declarations declarationStore
 	applied      appliedStore
+	uptime       uptimeStore
 }
 
 func newStores(files local.FS, p setup.Paths) *stores {
@@ -95,11 +101,12 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		reservations: portsjsonfile.NewReservations(files, filepath.Join(p.State, "leases.json")),
 		declarations: portsjsonfile.NewDeclarations(files, filepath.Join(p.Prefs, "public.json")),
 		applied:      settingsjsonfile.NewApplied(files, filepath.Join(p.State, "applied")),
+		uptime:       machinesjsonfile.NewUptime(files, filepath.Join(p.State, "uptime.json")),
 	}
 }
 
 func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied}
+	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }

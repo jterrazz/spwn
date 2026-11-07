@@ -1,0 +1,19 @@
+description: 'machines --json carries a server''s uptime, latency and restart step; a workspace none'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | {name, days: (.uptime.days | length?), availability: .uptime.availability, latency: .latency.now_ms, restart}]'''
+      exit: 0
+      stdout: |
+          [{"name":"api","days":0,"availability":null,"latency":null,"restart":null},{"name":"linux-1","days":0,"availability":null,"latency":null,"restart":null},{"name":"infra","days":30,"availability":100,"latency":41,"restart":null}]
+    - command: 'world fault Hypervisor.Address'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.uptime.days[-1].mark, .latency.points_ms, .restart.counted]'''
+      exit: 0
+      stdout: |
+          ["down",[41,41],"2 of 4"]

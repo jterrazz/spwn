@@ -36,6 +36,10 @@ type VMView struct {
 	Check    model.CheckStatus `json:"check,omitzero"`
 	// value: when its run began, while it runs.
 	BootAt time.Time `json:"boot_at,omitzero"`
+	// value: a server's last check runs (SPEC B5.4), and the health step its
+	// restart runs now, nil when none runs (B5.11).
+	Latency []model.LatencyPoint `json:"latency,omitempty"`
+	Restart *model.RestartWalk   `json:"restart,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

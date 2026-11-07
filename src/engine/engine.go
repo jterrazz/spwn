@@ -23,6 +23,11 @@ type Remembered struct {
 	Restarts model.Restarts    `json:"restarts,omitzero"`
 	BootAt   time.Time         `json:"boot_at,omitzero"`
 	Check    model.CheckStatus `json:"check,omitzero"`
+	// value: its last check runs, the restart it walks, and whether its
+	// uptime record holds it down.
+	Latency []model.LatencyPoint `json:"latency,omitempty"`
+	Restart *model.RestartWalk   `json:"restart,omitempty"`
+	Down    bool                 `json:"down,omitempty"`
 }
 
 type VMAccounts struct {
