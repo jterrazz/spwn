@@ -1,0 +1,17 @@
+description: 'an agent that stops to wait on the owner is told once, with what it waits on'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world agent-stop linux-1 s-1 "PR #42 is ready"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind | startswith("agent_")) | {Kind, Subject, Text}]'' world.json'
+      exit: 0
+      stdout: |
+          [{"Kind":"agent_waiting","Subject":"linux-1","Text":"linux-1 is waiting · PR #42 is ready"}]
