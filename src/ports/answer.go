@@ -28,6 +28,7 @@ func AnswerOf(h Halt) (Answer, bool) {
 		return Starting, true
 	case StoppedOnPurpose:
 		return Answers, false
+	case Runs:
 	}
 	return Answers, true
 }
