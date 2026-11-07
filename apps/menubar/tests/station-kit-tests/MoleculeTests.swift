@@ -67,6 +67,16 @@ final class MoleculeTests: XCTestCase {
         XCTAssertLessThan(Self.frames(nav, highlighted: false)[.control]?.width ?? .infinity, Token.Metric.Row.accessory)
     }
 
+    @MainActor
+    func testAFinishedAgentThatAlsoPushesShowsItsVerbAndNoChevron() throws {
+        var finished = try XCTUnwrap(Sheet.agents.last)
+        XCTAssertEqual(finished.verb, "delete")
+        finished.nav = "menubar.machine:agent-7f"
+        let alone = Self.frames(finished, highlighted: false)
+        finished.nav = nil
+        XCTAssertEqual(alone[.control], Self.frames(finished, highlighted: false)[.control])
+    }
+
     func testTheAccessorySetsWhereTheHairlineStarts() {
         let insets = Sheet.accessories.map { RowView.inset(RowView.accessory($0)) }
         let m = Token.Metric.Row.self
