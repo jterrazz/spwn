@@ -1,8 +1,11 @@
 package menubar
 
 import (
+	"slices"
+	"strconv"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/page"
 	pageactivity "github.com/jterrazz/studio-station/src/pages/activity"
 )
@@ -39,6 +42,7 @@ func Activity(v pageactivity.View, thisMac page.Context) page.Page {
 			listed(&s)
 		case pageactivity.Processes:
 			listed(&s)
+			linked(&s, v.Report.Last.Top)
 		case "values", "top":
 			continue
 		}
@@ -46,6 +50,25 @@ func Activity(v pageactivity.View, thisMac page.Context) page.Page {
 	}
 	p.Sections = kept
 	return page.Seal(p)
+}
+
+// invariant: SPEC B5.3: a VM's Virtualization process, which the page
+// already names after its VM, opens the VM's page.
+func linked(s *page.Section, top activity.Busiest) {
+	vms := map[string]string{}
+	for _, p := range append(slices.Clone(top.CPU), top.Memory...) {
+		if p.VM != "" {
+			vms[strconv.Itoa(p.PID)] = p.VM
+		}
+	}
+	for _, it := range s.Items {
+		if it.Row == nil {
+			continue
+		}
+		if vm, ok := vms[it.Row.ID]; ok {
+			it.Row.Nav = page.ID(string(MachineID) + ":" + vm)
+		}
+	}
 }
 
 func windowWords(d time.Duration) string {
