@@ -198,6 +198,8 @@ type Stores struct {
 	Reservations []ports.Reservation         `json:"reservations,omitempty"`
 	Declarations []ports.Declaration         `json:"declarations,omitempty"`
 	Applied      map[string]settings.Applied `json:"applied,omitempty"`
+	// value: each server's uptime record, by name.
+	Uptime map[string]machines.Uptime `json:"uptime,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

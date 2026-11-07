@@ -225,6 +225,7 @@ The binary holds the catalogue; the machine holds its own state, in the XDG fold
 | `ShareStore`       | `accounts` | `~/.local/state/station/shares.json`                                              |
 | `ReservationStore` | `ports`    | `~/.local/state/station/leases.json`                                              |
 | `AppliedStore`     | `settings` | `~/.local/state/station/applied/`                                                 |
+| `UptimeStore`      | `machines` | `~/.local/state/station/uptime.json`, written by the engine's keep job alone      |
 | `Journal`          | `agents`   | `~/.local/state/station/agents/`, inside a VM, one file per session               |
 
 Each store carries its version; `station setup` runs every store's `Migrator`, and a store written by a newer station is refused rather than read. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
