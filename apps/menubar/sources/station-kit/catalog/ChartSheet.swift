@@ -141,6 +141,12 @@ public struct ChartSheet: View {
     var small: some View {
         VStack(spacing: Token.Metric.Panel.blocks) {
             card {
+                HStack(spacing: Token.Metric.Row.gap) {
+                    Spark(Array(Self.hour.suffix(30))).frame(width: Token.Metric.Chart.spark.width)
+                    Spark(Self.quiet).frame(width: Token.Metric.Chart.spark.width)
+                    Spark(Array(Self.day.suffix(30)), hot: true).frame(width: Token.Metric.Chart.spark.width)
+                    Spark([12.0, 12, 12, 12]).frame(width: Token.Metric.Chart.spark.width)
+                }
                 Bar(.plain(37 / 100))
                 Bar(.memory(60 / 100))
                 Bar(.memory(90 / 100))

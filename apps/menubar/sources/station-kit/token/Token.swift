@@ -54,7 +54,6 @@ public enum Token {
         public static let spark: CGFloat = 26
         public static let chart: CGFloat = 54
         public static let measure: CGFloat = 22
-        public static let meter: CGFloat = 14
         public static let dot: CGFloat = 7
         public static let chevron: CGFloat = 14
         public static let switchWidth: CGFloat = 38
@@ -177,7 +176,6 @@ public enum Token {
         public static let small: CGFloat = 11
         public static let title: CGFloat = 19
         public static let head: CGFloat = 15
-        public static let graphHeight: CGFloat = 40
     }
 
     // value: the stage the Catalog draws a story on: the panel widths its
@@ -841,10 +839,8 @@ extension Token {
     public enum Stroke {
         public static let hair: CGFloat = 0.5
         public static let rim: CGFloat = 0.6
-        public static let base: CGFloat = 0.75
         public static let ringed: CGFloat = 0.8
         public static let rule: CGFloat = 1
-        public static let spark: CGFloat = 1.3
         public static let graph: CGFloat = 1.5
         public static let caret: CGFloat = 1.5
         public static let focus: CGFloat = 2
@@ -857,9 +853,6 @@ extension Token {
         public static let disabled = 0.4
         public static let off = 0.45
         public static let quiet = 0.75
-        public static let graphTop = 0.4
-        public static let graphFloor = 0.08
-        public static let sparkTop = 0.35
     }
 
     // value: a knob's or a raised segment's drop shadow.
@@ -895,7 +888,6 @@ extension Token {
         public static let menuStroke: CGFloat = 14
         public static let check: CGFloat = 12
         public static let knob: CGFloat = 18
-        public static let sparkDot: CGFloat = 4.4
         public static let pillIcon: CGFloat = 22
         public static let caretHeight: CGFloat = 14
         public static let anchor: CGFloat = 1
@@ -909,27 +901,6 @@ extension Token {
         public static let roundGlyph: CGFloat = 13
         public static let squareGlyph: CGFloat = 11
         public static let figureShrink = 0.8
-    }
-
-    // value: a bar's share of its slot and its corner, in a chart and in
-    // a sparkline.
-    public enum Bar {
-        public static let chartShare = 0.8
-        public static let sparkShare = 0.6
-        public static let chartCorner: CGFloat = 2
-        public static let sparkCorner: CGFloat = 1
-        public static let waiting = 0.25
-        public static let least = 0.06
-        public static let level = 0.5
-        public static let swing = 0.1
-    }
-
-    // value: the vision's sparkline frame: a share p sits at 24 - 0.22 p
-    // of a 26 high box, the line runs from 2 to 92 of its 96 wide.
-    public enum Spark {
-        public static let floor = -24.0 / 0.22 * (2.0 / 24)
-        public static let top = 24.0 / 0.22
-        public static let base = (24.0 - 25.5) / 0.22
     }
 
     // value: what a line of text is measured by: a character's width and
