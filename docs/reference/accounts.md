@@ -67,6 +67,8 @@ The alternative is a bound login: run `claude /login` inside a permanent workspa
 
 `station accounts` (a machine's Accounts section in the TUI) shows who has access to what: each provider's identity on this Mac, then on each of its VMs, and where the right comes from: `own` (a login done on that machine), `lent` (a shared copy, with its `until`), or both; then `# Shared with VMs`, each share with its VM and its time left. A share in its last hour is `◐ expiring` with the `accounts share` command that renews it; an ended one the engine could not take back is `✗ failing` with the `accounts take-back` command. A VM is read by its own guest over the engine's session, so no provider's output ever leaves the VM: only the parsed identities and scopes do. Each provider's read is an allowlist of named fields (`src/accounts/adapter/cli/parse.go`), and every kept value that looks like a token (`gh*_`, `github_pat_`, `sk-ant-`, `npm_`, `xox*-`, a JWT, 32 and more characters of base64 or hex) is replaced by `?`.
 
+The menu bar's Accounts page (`menubar.accounts`, [API](api.md)) reads every Mac that answers through its own engine. It lists what needs you first: each sign-in a Mac is out of, This Mac's first, and each copy with less than 30 min left. Then what each Mac is signed in to, under its name, and every copy shared with a VM with its time left and its total, the one ending first first. git's identity and ssh's keys are no sign-in, so the page leaves them out. Beside an account are the words its provider's read printed, as `src/catalog/accounts.go` orders them: GitHub's login and scopes (`jterrazz · repo, workflow`), Claude's plan (`Max plan`). A part the read did not print is left out, never guessed.
+
 ## Related
 
 - [Machines](machines.md): `delete`.

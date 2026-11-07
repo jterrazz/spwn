@@ -81,12 +81,14 @@ func (s *steps) pass(t *testing.T, d time.Duration) {
 }
 
 type world struct {
-	mu       sync.Mutex
-	infra    []machines.VM
-	beside   []machines.VM
-	here     []machines.VM
-	added    []machines.MacView
-	lent     accounts.Report
+	mu     sync.Mutex
+	infra  []machines.VM
+	beside []machines.VM
+	here   []machines.VM
+	added  []machines.MacView
+	lent   accounts.Report
+	// value: each Mac's own accounts reading, by name; nil answers lent.
+	signedIn map[string]accounts.Report
 	updates  bool
 	asked    map[string][]string
 	activity map[string]uint64
@@ -125,6 +127,9 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 	case accountscalls.List.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
+		if r, ok := w.signedIn[at]; ok {
+			return r
+		}
 		return w.lent
 	case overviewcalls.Read.Name:
 		need := map[string]string{thisMac: "a sign-in expired", mini: "port 5000 is reachable from outside", "infra": "a container exited"}[at]

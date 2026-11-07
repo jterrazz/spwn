@@ -38,7 +38,7 @@ func label(provider string) string {
 
 func mark(a accounts.Account) page.Mark { return pages.MarkOf(a.State) }
 
-func reason(r string) page.Reason {
+func Reason(r string) page.Reason {
 	switch r {
 	case accounts.ReasonUnset:
 		return page.Unset
@@ -122,7 +122,7 @@ func row(m accounts.Machine, a accounts.Account, now time.Time) page.Row {
 	}
 	r.Cells = []page.Value{id, origin(a), scope, last}
 	if r.Mark == page.Attention || r.Mark == page.Broken || r.Mark == page.Absent {
-		r.Reason = reason(a.Reason)
+		r.Reason = Reason(a.Reason)
 	}
 	if a.Hint != "" {
 		r.Hint = page.Cmd(a.Hint)
