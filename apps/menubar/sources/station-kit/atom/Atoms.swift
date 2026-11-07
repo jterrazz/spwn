@@ -16,7 +16,7 @@ public struct MarkView: View {
                 Image(systemName: Token.Symbol.of(mark))
                     .font(.system(size: Token.Space.mark))
                     .foregroundStyle(palette.of(mark))
-                    .frame(width: Token.Space.mark + 2)
+                    .frame(width: Token.Space.mark + Token.Gap.tight)
             }
         }
     }
@@ -37,7 +37,7 @@ public struct PendingDot: View {
             .foregroundStyle(palette.muted)
             .symbolEffect(.rotate, isActive: !still)
             .symbolEffect(.pulse, isActive: !still)
-            .frame(width: Token.Space.mark + 2)
+            .frame(width: Token.Space.mark + Token.Gap.tight)
     }
 }
 
@@ -79,7 +79,7 @@ public struct Meter: View {
 
     public var body: some View {
         ZStack(alignment: .leading) {
-            Capsule().fill(.fill.tertiary)
+            Capsule().fill(Token.Ink.track)
             Capsule().fill(palette.accent).frame(width: Token.Space.meterWidth * fraction)
         }
         .frame(width: Token.Space.meterWidth, height: Token.Space.meterHeight)
@@ -115,17 +115,17 @@ public struct Spark: View {
         let step = Double(last) / 90
         let shown = points.enumerated().map { (i: $0.offset, v: Double(min(max($0.element, 0), 100))) }
         Chart {
-            RuleMark(y: .value("base", Self.base)).foregroundStyle(Token.Fill.faint(scheme)).lineStyle(StrokeStyle(lineWidth: 0.75))
+            RuleMark(y: .value("base", Self.base)).foregroundStyle(Token.Fill.faint(scheme)).lineStyle(StrokeStyle(lineWidth: Token.Stroke.base))
             ForEach(shown, id: \.i) { p in
                 AreaMark(x: .value("t", Double(p.i)), yStart: .value("floor", Self.base), yEnd: .value("v", p.v))
-                    .foregroundStyle(LinearGradient(colors: [ink.opacity(0.35), ink.opacity(0)], startPoint: .top, endPoint: .bottom))
+                    .foregroundStyle(LinearGradient(colors: [ink.opacity(Token.Fade.sparkTop), ink.opacity(0)], startPoint: .top, endPoint: .bottom))
                 LineMark(x: .value("t", Double(p.i)), y: .value("v", p.v))
-                    .lineStyle(StrokeStyle(lineWidth: 1.3, lineCap: .round, lineJoin: .round))
+                    .lineStyle(StrokeStyle(lineWidth: Token.Stroke.spark, lineCap: .round, lineJoin: .round))
                     .foregroundStyle(ink)
             }
             if let end = shown.last {
                 PointMark(x: .value("t", Double(end.i)), y: .value("v", end.v))
-                    .symbol { Circle().fill(ink).frame(width: 4.4, height: 4.4).overlay(Circle().stroke(palette.onTint, lineWidth: 0.8)) }
+                    .symbol { Circle().fill(ink).frame(width: Token.Detail.sparkDot, height: Token.Detail.sparkDot).overlay(Circle().stroke(palette.onTint, lineWidth: Token.Stroke.ringed)) }
             }
         }
         .chartXAxis(.hidden)
@@ -142,15 +142,17 @@ public struct Spark: View {
 public struct Switch: View {
     let on: Bool
     @Environment(\.stationPalette) private var palette
+    @Environment(\.stationTokens) private var tokens
 
     public init(on: Bool) { self.on = on }
 
     public var body: some View {
         ZStack(alignment: on ? .trailing : .leading) {
-            Capsule().fill(on ? AnyShapeStyle(palette.good) : AnyShapeStyle(.fill.tertiary)).frame(width: 38, height: 22)
-            Circle().fill(palette.onTint).frame(width: 18, height: 18).shadow(color: .black.opacity(0.25), radius: 1.5, y: 1).padding(.horizontal, 2)
+            Capsule().fill(on ? AnyShapeStyle(palette.good) : Token.Ink.track).frame(width: Token.Tile.switchWidth, height: Token.Tile.switchHeight)
+            Circle().fill(palette.onTint).frame(width: Token.Detail.knob, height: Token.Detail.knob)
+                .shadow(color: Token.Shadow.knob.color, radius: Token.Shadow.knob.radius, y: Token.Shadow.knob.y).padding(.horizontal, Token.Gap.tight)
         }
-        .animation(.snappy, value: on)
+        .animation(tokens.motion(Token.Motion.snappy), value: on)
     }
 }
 
@@ -193,10 +195,10 @@ public struct MenuGlyph: View {
         switch symbol {
         case Token.Symbol.prompt, Token.Symbol.list:
             Stroke16(symbol: symbol)
-                .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-                .frame(width: 14, height: 14)
+                .stroke(style: StrokeStyle(lineWidth: Token.Stroke.graph, lineCap: .round, lineJoin: .round))
+                .frame(width: Token.Detail.menuStroke, height: Token.Detail.menuStroke)
         default:
-            Image(systemName: symbol).font(.system(size: 13, weight: .medium))
+            Image(systemName: symbol).font(.system(size: Token.Detail.menu, weight: .medium))
         }
     }
 }
@@ -215,7 +217,8 @@ struct Stroke16: Shape {
             path.move(to: p(8.5, 12))
             path.addLine(to: p(13, 12))
         } else {
-            path.addRoundedRect(in: CGRect(origin: p(2.2, 2.2), size: CGSize(width: 11.6 * k, height: 11.6 * k)), cornerSize: CGSize(width: 3.2 * k, height: 3.2 * k))
+            let inset = Token.Detail.stroke16Inset, box = Token.Detail.stroke16Box * k, corner = Token.Detail.stroke16Corner * k
+            path.addRoundedRect(in: CGRect(origin: p(inset, inset), size: CGSize(width: box, height: box)), cornerSize: CGSize(width: corner, height: corner))
             path.move(to: p(5, 6.3))
             path.addLine(to: p(11, 6.3))
             path.move(to: p(5, 9.7))

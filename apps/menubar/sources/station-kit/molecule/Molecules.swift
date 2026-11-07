@@ -57,7 +57,7 @@ public struct RowView: View {
 
     public var body: some View {
         let cells = row.cells ?? []
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap) {
                 HStack(spacing: Token.Space.gap / 2) {
                     MarkView(row.mark)
@@ -75,7 +75,7 @@ public struct RowView: View {
                     ValueText(detail, muted: true).layoutPriority(-1)
                 }
             }
-            .frame(minHeight: Token.Space.row - 4)
+            .frame(minHeight: Token.Space.row - Token.Gap.small)
             if hints, let hint = row.hint {
                 HintView(hint, asButton: hintAsButton).padding(.leading, Layout.markWidth + Token.Space.gap / 2)
             }
@@ -115,7 +115,7 @@ public struct HintView: View {
                 .foregroundStyle(palette.muted)
                 .lineLimit(2)
             if let text = hint.text {
-                Text(text).font(.system(size: Token.Space.small)).foregroundStyle(.tertiary)
+                Text(text).font(.system(size: Token.Space.small)).foregroundStyle(Token.Ink.tertiary)
             }
             if asButton {
                 Button {
@@ -139,7 +139,7 @@ public struct EmptyLine: View {
     public init(_ empty: Empty) { self.empty = empty }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             Text(empty.text ?? "no \(empty.noun ?? "")").font(.system(size: Token.Space.text)).foregroundStyle(palette.muted)
             if hints, let hint = empty.hint { HintView(hint) }
         }
@@ -153,7 +153,7 @@ public struct ErrorLine: View {
     public init(_ error: PageError) { self.error = error }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap / 2) {
                 Image(systemName: Token.Symbol.error).font(.system(size: Token.Space.text)).foregroundStyle(palette.bad)
                 Text(error.message ?? "").font(.system(size: Token.Space.text)).foregroundStyle(palette.text).fixedSize(horizontal: false, vertical: true)
@@ -174,7 +174,7 @@ public struct CountsView: View {
     public var body: some View {
         HStack(spacing: Token.Space.gap / 2) {
             ForEach(Array(counts.enumerated()), id: \.offset) { _, t in
-                HStack(spacing: 2) {
+                HStack(spacing: Token.Gap.tight) {
                     Text("\(t.n ?? 0)").font(.system(size: Token.Space.small)).monospacedDigit().foregroundStyle(palette.muted)
                     MarkView(t.mark)
                 }
@@ -194,7 +194,7 @@ public struct ConfirmPanel: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Token.Gap.small) {
             Text(confirm.question ?? "").font(.system(size: Token.Space.text, weight: .semibold)).foregroundStyle(palette.text)
             ForEach(Array((confirm.lines ?? []).enumerated()), id: \.offset) { _, line in
                 ValueText(line, muted: true)

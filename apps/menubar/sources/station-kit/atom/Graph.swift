@@ -32,10 +32,10 @@ public struct Graph: View {
         Chart(Array(points.enumerated()), id: \.offset) { i, p in
             AreaMark(x: .value("t", i), yStart: .value("floor", domain.lowerBound), yEnd: .value("v", min(max(p, 0), 100)))
                 .interpolationMethod(.catmullRom)
-                .foregroundStyle(LinearGradient(colors: [ink.opacity(0.4), ink.opacity(0.08)], startPoint: .top, endPoint: .bottom))
+                .foregroundStyle(LinearGradient(colors: [ink.opacity(Token.Fade.graphTop), ink.opacity(Token.Fade.graphFloor)], startPoint: .top, endPoint: .bottom))
             LineMark(x: .value("t", i), y: .value("v", min(max(p, 0), 100)))
                 .interpolationMethod(.catmullRom)
-                .lineStyle(StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                .lineStyle(StrokeStyle(lineWidth: Token.Stroke.graph, lineCap: .round, lineJoin: .round))
                 .foregroundStyle(ink)
         }
         .chartXAxis(.hidden)
@@ -122,9 +122,9 @@ public struct Bars: View {
         let ink = tint ?? palette.accent
         let recent = points.count - accented
         Chart(Array(points.enumerated()), id: \.offset) { i, p in
-            BarMark(x: .value("t", "\(i)"), yStart: .value("floor", 0), yEnd: .value("v", level(p)), width: .ratio(chart ? 0.8 : 0.6))
-                .clipShape(RoundedRectangle(cornerRadius: chart ? 2 : 1, style: .continuous))
-                .foregroundStyle(i >= recent ? AnyShapeStyle(ink) : waiting ? AnyShapeStyle(.fill.tertiary) : AnyShapeStyle(.fill.secondary))
+            BarMark(x: .value("t", "\(i)"), yStart: .value("floor", 0), yEnd: .value("v", level(p)), width: .ratio(chart ? Token.Bar.chartShare : Token.Bar.sparkShare))
+                .clipShape(RoundedRectangle(cornerRadius: chart ? Token.Bar.chartCorner : Token.Bar.sparkCorner, style: .continuous))
+                .foregroundStyle(i >= recent ? AnyShapeStyle(ink) : waiting ? Token.Ink.track : Token.Ink.idle)
         }
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)

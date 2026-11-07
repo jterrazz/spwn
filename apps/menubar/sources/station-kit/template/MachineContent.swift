@@ -255,7 +255,7 @@ struct MachineContent: View {
             shown = items.first.flatMap { Self.span($0) }.map { Format.show($0) }.flatMap { $0.isEmpty ? nil : $0 } ?? Token.Glyph.missing
         }
         let rest = items.dropFirst().map { Format.show($0) }.joined(separator: Token.Glyph.sep)
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: Token.Gap.small) {
             SubText(r.label ?? "")
             Text(shown).font(.system(size: Token.Size.text, weight: .bold)).monospacedDigit()
             if !rest.isEmpty { SubText(rest) }
@@ -283,7 +283,7 @@ struct MachineContent: View {
         return MenuRow(r.label ?? "", subtitle: address, link: true, top: true) {
             Image(systemName: r.mark == .ok ? Token.Symbol.health : Token.Symbol.of(r.mark ?? .notKnown))
                 .font(.system(size: Token.Size.check, weight: .medium)).foregroundStyle(palette.of(r.mark ?? .notKnown))
-                .frame(width: Token.Tile.chevron, height: Token.Size.text + 2 * Token.Size.leading + 2)
+                .frame(width: Token.Tile.chevron, height: Token.Size.text + 2 * Token.Size.leading + Token.Gap.tight)
         } trailing: {
             if !rest.isEmpty { TrailingValue(rest) }
         }
@@ -353,7 +353,7 @@ struct MachineContent: View {
             MenuRow(lead, subtitle: address, link: true) {
                 EmptyView()
             } trailing: {
-                HStack(spacing: 10) {
+                HStack(spacing: Token.Gap.block) {
                     CopyIcon { handlers.copy(address) }
                     if let url {
                         PlainIcon(Token.Symbol.qr, picked: open) { handlers.toggleQR(url.absoluteString) }

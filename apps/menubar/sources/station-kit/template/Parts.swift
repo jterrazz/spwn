@@ -14,12 +14,12 @@ struct Metric: View {
 
     var body: some View {
         let (number, unit, of) = Self.parts(value.map { Format.show($0, now: now) } ?? "")
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label).font(.system(size: Token.Size.label, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1)
+        VStack(alignment: .leading, spacing: Token.Gap.small) {
+            Text(label).font(.system(size: Token.Size.label, weight: .semibold)).foregroundStyle(Token.Ink.secondary).lineLimit(1)
                 .padding(.vertical, Token.Size.labelLeading)
             Self.figure(Token.Glyph.missing, nil).hidden().padding(.vertical, Token.Size.figureLeading).overlay(alignment: .leading) {
                 if waiting || number.isEmpty {
-                    Self.figure(Token.Glyph.missing, nil).foregroundStyle(.tertiary)
+                    Self.figure(Token.Glyph.missing, nil).foregroundStyle(Token.Ink.tertiary)
                 } else {
                     Self.figure(of == nil && !unit.isEmpty && unit.count <= 1 ? "\(number) \(unit)" : number, of ?? (unit.count > 1 ? unit : nil))
                         .fixedSize()
@@ -40,10 +40,10 @@ struct Metric: View {
     // value: a figure: the number in a 17 pt semibold, what follows it
     // (its unit, what it is out of) in 11 pt secondary.
     static func figure(_ number: String, _ small: String?) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(number).font(.system(size: Token.Tile.figure, weight: .semibold)).tracking(-0.01 * Token.Tile.figure).monospacedDigit().contentTransition(.numericText())
+        HStack(alignment: .firstTextBaseline, spacing: Token.Gap.small) {
+            Text(number).font(.system(size: Token.Tile.figure, weight: .semibold)).tracking(Token.Detail.figureTracking * Token.Tile.figure).monospacedDigit().contentTransition(.numericText())
             if let small, !small.isEmpty {
-                Text(small).font(.system(size: Token.Size.label, weight: .medium)).foregroundStyle(.secondary)
+                Text(small).font(.system(size: Token.Size.label, weight: .medium)).foregroundStyle(Token.Ink.secondary)
             }
         }
         .lineLimit(1)
@@ -131,24 +131,24 @@ struct MachineRow: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if picked {
-                    Image(systemName: Token.Symbol.check).font(.system(size: 12, weight: .semibold)).foregroundStyle(palette.onTint)
+                    Image(systemName: Token.Symbol.check).font(.system(size: Token.Detail.check, weight: .semibold)).foregroundStyle(palette.onTint)
                 } else {
                     StateDot(mark: row.mark)
                 }
             }
-            .padding(EdgeInsets(top: 7, leading: nested ? Token.Tile.indent : (picked ? 8 : 12), bottom: 7, trailing: picked ? 8 : 12))
+            .padding(EdgeInsets(top: Token.Gap.row, leading: nested ? Token.Tile.indent : (picked ? Token.Gap.pair : Token.Gap.edge), bottom: Token.Gap.row, trailing: picked ? Token.Gap.pair : Token.Gap.edge))
             .frame(minHeight: Token.Tile.row)
-            .foregroundStyle(picked ? AnyShapeStyle(palette.onTint) : AnyShapeStyle(.primary), picked ? AnyShapeStyle(palette.onTint.opacity(Token.Fill.onTintSub)) : AnyShapeStyle(.secondary))
+            .foregroundStyle(picked ? AnyShapeStyle(palette.onTint) : AnyShapeStyle(Token.Ink.primary), picked ? AnyShapeStyle(palette.onTint.opacity(Token.Fill.onTintSub)) : AnyShapeStyle(Token.Ink.secondary))
             .environment(\.colorScheme, picked ? .dark : envScheme)
             .background {
                 if picked {
                     RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous).fill(palette.accent.opacity(Token.Fill.selected))
                 }
                 if lit {
-                    RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous).strokeBorder(palette.accent, lineWidth: 2)
+                    RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous).strokeBorder(palette.accent, lineWidth: Token.Stroke.focus)
                 }
             }
-            .padding(.horizontal, picked || lit ? 4 : 0)
+            .padding(.horizontal, picked || lit ? Token.Gap.small : 0)
             .stationHover()
         }
         .buttonStyle(.plain)
@@ -277,15 +277,15 @@ struct MenuText: View {
 
     var body: some View {
         HStack(spacing: Token.Tile.gap) {
-            MenuGlyph(symbol).frame(width: 14)
+            MenuGlyph(symbol).frame(width: Token.Detail.menuStroke)
                 .foregroundStyle(palette.glyph)
-            Text(title).font(.system(size: Token.Size.text)).foregroundStyle(danger ? AnyShapeStyle(palette.bad) : AnyShapeStyle(.primary))
+            Text(title).font(.system(size: Token.Size.text)).foregroundStyle(danger ? AnyShapeStyle(palette.bad) : AnyShapeStyle(Token.Ink.primary))
             Spacer()
             if let key {
-                Text(key).font(.system(size: Token.Size.key)).foregroundStyle(.secondary)
+                Text(key).font(.system(size: Token.Size.key)).foregroundStyle(Token.Ink.secondary)
             }
         }
-        .padding(6)
+        .padding(Token.Gap.item)
         .stationHover()
     }
 }

@@ -25,9 +25,9 @@ public struct LinkView: View {
     var key: String { link.label ?? Format.show(link.lead ?? Value()) }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Token.Gap.item) {
             HStack(spacing: Token.Space.gap) {
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: Token.Gap.line) {
                     if let lead = link.lead, !lead.isNone {
                         ValueText(lead).fontWeight(.medium)
                     } else {
@@ -43,9 +43,9 @@ public struct LinkView: View {
                     LinkButton(symbol: Token.Symbol.open, picked: false) { actions.open(url) }
                 }
             }
-            .padding(.vertical, 3)
+            .padding(.vertical, Token.Gap.inner)
             if let actions, let url = link.value.flatMap(Format.url), actions.qr == url.absoluteString {
-                QRView(url.absoluteString).padding(12).background(RoundedRectangle(cornerRadius: Token.Tile.qrCorner, style: .continuous).fill(palette.qrLight)).frame(maxWidth: .infinity)
+                QRView(url.absoluteString).padding(Token.Gap.edge).background(RoundedRectangle(cornerRadius: Token.Tile.qrCorner, style: .continuous).fill(palette.qrLight)).frame(maxWidth: .infinity)
             }
         }
     }
@@ -60,10 +60,10 @@ struct LinkButton: View {
 
     var body: some View {
         Button(action: tap) {
-            Image(systemName: symbol).font(.system(size: Token.Space.small + 1, weight: .medium))
+            Image(systemName: symbol).font(.system(size: Token.Space.small + Token.Gap.line, weight: .medium))
                 .foregroundStyle(picked ? palette.onTint : palette.text)
                 .frame(width: Token.Tile.icon, height: Token.Tile.icon)
-                .background(RoundedRectangle(cornerRadius: Token.Tile.hover, style: .continuous).fill(picked ? AnyShapeStyle(palette.accent) : AnyShapeStyle(.fill.tertiary)))
+                .background(RoundedRectangle(cornerRadius: Token.Tile.hover, style: .continuous).fill(picked ? AnyShapeStyle(palette.accent) : Token.Ink.track))
         }
         .buttonStyle(.plain)
     }
@@ -85,7 +85,7 @@ public struct ItemsView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 ItemView(item: item, columns: columns, width: width, links: links, hintButtons: hintButtons)
             }
@@ -135,7 +135,7 @@ struct GroupView: View {
     var body: some View {
         let head = RowView(group.head ?? Row(), columns: columns, width: width, hintAsButton: hintButtons)
         if group.fold == nil || group.fold == "open" {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Token.Gap.tight) {
                 head
                 children
             }
@@ -178,7 +178,7 @@ public struct SectionView: View {
         if section.fold == "folded" {
             DisclosureGroup { items } label: { head }
         } else {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Token.Gap.small) {
                 head
                 items
             }
@@ -197,7 +197,7 @@ public struct StripView: View {
     // below.
     public var body: some View {
         let size = Token.Space.small
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Token.Gap.small) {
             HStack(alignment: .top, spacing: Token.Space.gap) {
                 measure("CPU", strip.spark) { ValueText(strip.cpu, size: size) }
                 if let memory = strip.memory {
@@ -218,7 +218,7 @@ public struct StripView: View {
             if strip.battery != nil || strip.awake.map({ !$0.isNone }) == true {
                 HStack(spacing: Token.Space.gap) {
                     if let battery = strip.battery {
-                        HStack(spacing: 2) {
+                        HStack(spacing: Token.Gap.tight) {
                             Text(Token.Glyph.charging).font(.system(size: size)).foregroundStyle(palette.muted)
                             ValueText(battery, size: size)
                         }
@@ -236,10 +236,10 @@ public struct StripView: View {
     }
 
     func measure<V: View>(_ label: String, _ spark: [Int]?, @ViewBuilder value: () -> V) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(.system(size: Token.Space.small - 1, weight: .semibold)).foregroundStyle(palette.muted)
+        VStack(alignment: .leading, spacing: Token.Gap.tight) {
+            Text(label).font(.system(size: Token.Space.small - Token.Gap.line, weight: .semibold)).foregroundStyle(palette.muted)
             if let spark, spark.count > 1 { Spark(spark) }
-            HStack(spacing: 4) { value() }
+            HStack(spacing: Token.Gap.small) { value() }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

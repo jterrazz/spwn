@@ -63,10 +63,10 @@ public struct AwakePage: View {
         .fixedSize(horizontal: false, vertical: true)
         .stationTile()
         if !keeps.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Token.Gap.pair) {
                 SubText("Keep awake for\(Token.Glyph.ellipsis)")
                 if let running = keeps.first(where: { waiting($0) }) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: Token.Gap.item) {
                         PendingDot()
                         SubText(act.label(running))
                     }
@@ -231,7 +231,7 @@ public struct AwakePage: View {
 
     func other(_ r: Row) -> some View {
         let change = page.actions(for: r.id ?? "").first { $0.id?.hasPrefix("change:") == true }
-        return VStack(alignment: .leading, spacing: 6) {
+        return VStack(alignment: .leading, spacing: Token.Gap.item) {
             HStack(spacing: Token.Tile.gap) {
                 IconTile(Token.Symbol.mac)
                 RowText(title: r.short ?? r.label ?? "", subtitle: words(r.cells?.first))
@@ -243,7 +243,7 @@ public struct AwakePage: View {
             if let detail = r.detail { SubText(words(detail).capitalizedFirst) }
             if let change { act.sheet(change) }
         }
-        .padding(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+        .padding(Token.Tile.groupPadding)
     }
 }
 
