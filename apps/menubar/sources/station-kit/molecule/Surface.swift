@@ -781,7 +781,7 @@ struct PanelScroll: ViewModifier {
 
     // value: the room the panel may take: the screen's visible height
     // under the menu bar, less the gap macOS leaves above the Dock.
-    static var room: CGFloat { max((NSScreen.main?.visibleFrame.height ?? 800) - 16, 320) }
+    static var room: CGFloat { max((NSScreen.main?.visibleFrame.height ?? Token.Metric.Panel.unknownScreen) - Token.Metric.Panel.dockGap, Token.Metric.Panel.leastRoom) }
 
     // value: the content is taller than the panel's room: it scrolls.
     var scrolled: Bool { height > Self.room - reserve }

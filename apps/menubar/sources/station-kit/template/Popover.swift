@@ -260,7 +260,7 @@ public struct Popover: View {
                 if state.pushed == nil {
                     Text(state.page?.context?.machine ?? "station").font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).lineLimit(1).truncationMode(.middle)
                 }
-                Spacer(minLength: 4)
+                Spacer(minLength: Token.Gap.small)
                 if state.pushed == nil {
                     PlainIcon(Token.Symbol.settings, picked: state.menu, round: true, tap: handlers.toggleMenu)
                 }

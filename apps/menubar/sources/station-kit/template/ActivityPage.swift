@@ -51,7 +51,7 @@ public struct ActivityPage: View {
                         Spacer(minLength: 0)
                         ForEach(["CPU", "Memory"], id: \.self) { key in
                             Text(key.uppercased()).font(.system(size: Token.Size.caption, weight: .semibold)).tracking(Token.Size.caption * Token.Size.tracking)
-                                .foregroundStyle(Token.Ink.secondary).frame(width: Self.column, alignment: .trailing)
+                                .foregroundStyle(Token.Ink.secondary).frame(width: Token.Measure.column, alignment: .trailing)
                         }
                     }
                     .padding(.trailing, Token.Tile.rowPadding.trailing)
@@ -112,9 +112,10 @@ public struct ActivityPage: View {
                 Graph(Self.buckets(points, 90), height: height, tint: tint(r.id))
             case .meter(let ratio):
                 GeometryReader { geo in
+                    let share = CGFloat(ratio.n ?? 0) / CGFloat(max(ratio.of ?? 1, 1))
                     ZStack(alignment: .leading) {
                         Capsule().fill(Token.Ink.track)
-                        Capsule().fill(palette.accent).frame(width: geo.size.width * CGFloat(ratio.n ?? 0) / CGFloat(max(ratio.of ?? 1, 1)))
+                        Capsule().fill(palette.accent).frame(width: geo.size.width * share)
                     }
                 }
                 .frame(height: Token.Space.meterHeight)
@@ -150,10 +151,6 @@ public struct ActivityPage: View {
         "Not among the busiest by \(key == "cpu" ? "CPU" : key)"
     }
 
-    // value: the width of the CPU and Memory columns, their header's and
-    // their figures'.
-    static let column: CGFloat = 56
-
     // value: the memory column's figures by process, each in the unit of
     // the largest.
     public static func memory(_ s: Section) -> [String: String] {
@@ -168,9 +165,9 @@ public struct ActivityPage: View {
             Spacer(minLength: 0)
             ForEach(["cpu", "memory"], id: \.self) { key in
                 if let v = key == "memory" ? memory[r.id ?? ""] : s.cell(r, key).map({ Format.show($0) }) {
-                    Text(v).font(.subheadline).foregroundStyle(Token.Ink.secondary).monospacedDigit().lineLimit(1).frame(width: Self.column, alignment: .trailing)
+                    Text(v).font(.subheadline).foregroundStyle(Token.Ink.secondary).monospacedDigit().lineLimit(1).frame(width: Token.Measure.column, alignment: .trailing)
                 } else {
-                    Text(Token.Glyph.missing).font(.system(size: Token.Space.small)).foregroundStyle(Token.Ink.tertiary).frame(width: Self.column, alignment: .trailing)
+                    Text(Token.Glyph.missing).font(.system(size: Token.Space.small)).foregroundStyle(Token.Ink.tertiary).frame(width: Token.Measure.column, alignment: .trailing)
                         .help(Self.missing(key))
                 }
             }

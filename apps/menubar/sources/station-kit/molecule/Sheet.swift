@@ -161,7 +161,7 @@ public struct ConfirmSheet: View {
                 SheetButton(confirm.no ?? "Cancel", role: .plain) { onAnswer(false) }.keyboardShortcut(.cancelAction)
                 SheetButton(confirm.yes ?? "Yes", role: confirm.danger == true ? .danger : .accent) { onAnswer(true) }
                     .disabled(!Self.allows(confirm, typed: typed))
-                    .opacity(Self.allows(confirm, typed: typed) ? 1 : 0.4)
+                    .opacity(Self.allows(confirm, typed: typed) ? 1 : Token.Fade.disabled)
                     .keyboardShortcut(.defaultAction)
             }
         }

@@ -103,21 +103,15 @@ public struct Spark: View {
         self.tint = tint
     }
 
-    // value: the vision's frame: a share p sits at 24 - 0.22 p of a 26
-    // high box, the line runs from 2 to 92 of its 96 wide.
-    static let floor = -24.0 / 0.22 * (2.0 / 24)
-    static let top = 24.0 / 0.22
-    static let base = (24.0 - 25.5) / 0.22
-
     public var body: some View {
         let ink = tint ?? palette.accent
         let last = max(points.count - 1, 1)
         let step = Double(last) / 90
         let shown = points.enumerated().map { (i: $0.offset, v: Double(min(max($0.element, 0), 100))) }
         Chart {
-            RuleMark(y: .value("base", Self.base)).foregroundStyle(Token.Fill.faint(scheme)).lineStyle(StrokeStyle(lineWidth: Token.Stroke.base))
+            RuleMark(y: .value("base", Token.Spark.base)).foregroundStyle(Token.Fill.faint(scheme)).lineStyle(StrokeStyle(lineWidth: Token.Stroke.base))
             ForEach(shown, id: \.i) { p in
-                AreaMark(x: .value("t", Double(p.i)), yStart: .value("floor", Self.base), yEnd: .value("v", p.v))
+                AreaMark(x: .value("t", Double(p.i)), yStart: .value("floor", Token.Spark.base), yEnd: .value("v", p.v))
                     .foregroundStyle(LinearGradient(colors: [ink.opacity(Token.Fade.sparkTop), ink.opacity(0)], startPoint: .top, endPoint: .bottom))
                 LineMark(x: .value("t", Double(p.i)), y: .value("v", p.v))
                     .lineStyle(StrokeStyle(lineWidth: Token.Stroke.spark, lineCap: .round, lineJoin: .round))
@@ -131,7 +125,7 @@ public struct Spark: View {
         .chartXAxis(.hidden)
         .chartYAxis(.hidden)
         .chartLegend(.hidden)
-        .chartYScale(domain: Self.floor...Self.top)
+        .chartYScale(domain: Token.Spark.floor...Token.Spark.top)
         .chartXScale(domain: (-2 * step)...(Double(last) + 4 * step))
         .chartPlotStyle { $0.frame(maxWidth: .infinity) }
         .frame(height: h)

@@ -1,9 +1,6 @@
 import SwiftUI
 
 public struct Layout {
-    static let charWidth: CGFloat = 6.6
-    static let markWidth: CGFloat = 12
-
     static func chars(_ v: Value?) -> Int { v.map { Format.show($0).count } ?? 0 }
 
     // invariant: a row that does not fit drops its cells by Keep, lowest
@@ -18,7 +15,7 @@ public struct Layout {
         // folders) is no cell of a line here either.
         let shown = cells.indices.filter { $0 + 1 >= columns.count || columns[$0 + 1].show != "detail" }
         var keep = shown
-        let room = Int((width - markWidth - Token.Space.gap) / charWidth)
+        let room = Int((width - Token.Measure.mark - Token.Space.gap) / Token.Measure.char)
         func need() -> Int {
             (row.short ?? row.label ?? "").count + keep.reduce(0) { $0 + chars(cells[$1]) + 2 } + min(chars(row.detail), detailMin) + 2
         }
@@ -77,7 +74,7 @@ public struct RowView: View {
             }
             .frame(minHeight: Token.Space.row - Token.Gap.small)
             if hints, let hint = row.hint {
-                HintView(hint, asButton: hintAsButton).padding(.leading, Layout.markWidth + Token.Space.gap / 2)
+                HintView(hint, asButton: hintAsButton).padding(.leading, Token.Measure.mark + Token.Space.gap / 2)
             }
         }
     }

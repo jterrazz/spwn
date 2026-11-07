@@ -45,8 +45,6 @@ struct WordFlow: SwiftUI.Layout {
     // the flow's own width counts it, so a line placed in the width it
     // asked for breaks where it was measured.
     static let slack: CGFloat = 1
-    // value: what the pixel grid may take off the width it is given.
-    static let grid: CGFloat = 0.5
 
     struct Line {
         var words: [Int] = []
@@ -92,7 +90,7 @@ struct WordFlow: SwiftUI.Layout {
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let f = flow(proposal.width, subviews)
-        let widest = (f.lines.map(\.width).max() ?? 0) + Self.slack + Self.grid
+        let widest = (f.lines.map(\.width).max() ?? 0) + Self.slack + Token.Measure.grid
         let height = f.lines.map(\.height).reduce(0, +) + spacing * CGFloat(f.lines.count - 1)
         let width = alignment == .leading ? widest : (proposal.width.map { $0.isFinite ? $0 : widest } ?? widest)
         return CGSize(width: width, height: height)

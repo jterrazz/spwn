@@ -574,6 +574,9 @@ extension Token {
             public static let screenRoom: CGFloat = 48
             public static let fade: CGFloat = 14
             public static let rim: CGFloat = 1
+            public static let unknownScreen: CGFloat = 800
+            public static let dockGap: CGFloat = 16
+            public static let leastRoom: CGFloat = 320
         }
 
         public enum Card {
@@ -771,6 +774,9 @@ extension Token {
         public static let reducedHeight = Animation.easeInOut(duration: 0.20)
         public static let reducedPage = Animation.easeInOut(duration: 0.24)
         public static let reducedPageGone = 0.45
+
+        // value: when the panel opened is made key, in seconds.
+        public static let keyTries: [Double] = [0, 0.05, 0.15, 0.4, 0.8]
     }
 
     // value: the tokens a view reads, resolved once from the scheme, the
@@ -890,6 +896,7 @@ extension Token {
         public static let stroke16Inset: CGFloat = 2.2
         public static let roundGlyph: CGFloat = 13
         public static let squareGlyph: CGFloat = 11
+        public static let figureShrink = 0.8
     }
 
     // value: a bar's share of its slot and its corner, in a chart and in
@@ -899,6 +906,28 @@ extension Token {
         public static let sparkShare = 0.6
         public static let chartCorner: CGFloat = 2
         public static let sparkCorner: CGFloat = 1
+        public static let waiting = 0.25
+        public static let least = 0.06
+        public static let level = 0.5
+        public static let swing = 0.1
+    }
+
+    // value: the vision's sparkline frame: a share p sits at 24 - 0.22 p
+    // of a 26 high box, the line runs from 2 to 92 of its 96 wide.
+    public enum Spark {
+        public static let floor = -24.0 / 0.22 * (2.0 / 24)
+        public static let top = 24.0 / 0.22
+        public static let base = (24.0 - 25.5) / 0.22
+    }
+
+    // value: what a line of text is measured by: a character's width and
+    // a row's mark in a laid out row, the Activity page's CPU and Memory
+    // columns, and what the pixel grid may take off a width it is given.
+    public enum Measure {
+        public static let char: CGFloat = 6.6
+        public static let mark: CGFloat = 12
+        public static let column: CGFloat = 56
+        public static let grid: CGFloat = 0.5
     }
 
     // value: the least height a line of today's pages takes.

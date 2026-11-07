@@ -81,14 +81,14 @@ public struct Bars: View {
     // value: a bar's height, 0 to 1, over the band its points move in, so
     // a steady series still shows its swing; a level one, half.
     func level(_ p: Int) -> Double {
-        guard !waiting else { return 0.25 }
+        guard !waiting else { return Token.Bar.waiting }
         guard !full else { return 1 }
-        if let ceiling { return min(max(Double(p) / Double(max(ceiling, 1)), 0.06), 1) }
-        if chart, let hi = points.max() { return max(Double(p) / Double(max(hi, 1)), 0.06) }
-        guard let hi = points.max(), let low = points.min(), hi != low else { return 0.5 }
+        if let ceiling { return min(max(Double(p) / Double(max(ceiling, 1)), Token.Bar.least), 1) }
+        if chart, let hi = points.max() { return max(Double(p) / Double(max(hi, 1)), Token.Bar.least) }
+        guard let hi = points.max(), let low = points.min(), hi != low else { return Token.Bar.level }
         let top = Double(max(hi, 1)), lo = Double(low)
-        let floor = max(lo - max(top - lo, top / 10), 0)
-        return max((Double(p) - floor) / max(top - floor, 1), 0.1)
+        let floor = max(lo - max(top - lo, top * Token.Bar.swing), 0)
+        return max((Double(p) - floor) / max(top - floor, 1), Token.Bar.swing)
     }
 
     // value: a measure's bars against a share's scale, 0 to 100 brought

@@ -211,7 +211,7 @@ public struct StripView: View {
                 if let net = strip.net, net.count == 2 {
                     measure("Network", strip.net_spark) {
                         Text("\(Token.Glyph.received)\(Format.show(net[0])) \(Token.Glyph.sent)\(Format.show(net[1]))")
-                            .font(.system(size: size)).foregroundStyle(palette.text).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+                            .font(.system(size: size)).foregroundStyle(palette.text).monospacedDigit().lineLimit(1).minimumScaleFactor(Token.Detail.figureShrink)
                     }
                 }
             }
