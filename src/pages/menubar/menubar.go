@@ -122,7 +122,11 @@ func strip(readings []activity.Reading, thisMac string) *page.Strip {
 		return &page.Strip{CPU: live(page.Pending(), cpu), Memory: live(page.Pending(), memory)}
 	}
 	m := measured(readings)
-	s := page.Strip{CPU: live(m.cpu, cpu), Spark: m.cpus, MemorySpark: m.memories, NetSpark: m.nets, Net: []page.Value{live(m.net, net)}}
+	memories := m.memories
+	if readings[0].Sample.MemTotal > 0 {
+		memories = memories[1:]
+	}
+	s := page.Strip{CPU: live(m.cpu, cpu), Spark: m.cpus, MemorySpark: memories, NetSpark: m.nets, Net: []page.Value{live(m.net, net)}}
 	if m.memory.Kind != "" {
 		s.Memory = live(m.memory, memory)
 	}
