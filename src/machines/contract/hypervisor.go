@@ -28,6 +28,10 @@ type Hypervisor interface {
 	Delete(ctx context.Context, vm string) error
 	Discard(ctx context.Context, img imagescontract.ImageLocation) error
 	Address(ctx context.Context, vm string, wait time.Duration) (netip.Addr, error)
+	// invariant: Console is the last n meaningful lines of each of the VM's
+	// two outputs, its serial console then the hypervisor's own, all of them
+	// for n 0 or less; a VM that never ran has none.
+	Console(ctx context.Context, vm string, n int) ([]string, error)
 }
 
 type DiskState string

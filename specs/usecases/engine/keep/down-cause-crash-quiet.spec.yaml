@@ -1,0 +1,13 @@
+description: 'a server crashed with a quiet console: the hypervisor stopped it, no line invented'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world fault Hypervisor.Address'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.cause, .last_lines]'''
+      exit: 0
+      stdout: |
+          ["the hypervisor stopped it",null]

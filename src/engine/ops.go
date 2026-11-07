@@ -40,6 +40,10 @@ type VMView struct {
 	// restart runs now, nil when none runs (B5.11).
 	Latency []model.LatencyPoint `json:"latency,omitempty"`
 	Restart *model.RestartWalk   `json:"restart,omitempty"`
+	// value: why a server is down, and the last lines its console kept
+	// then (SPEC B5.5); empty while it is up.
+	Cause     string   `json:"cause,omitempty"`
+	LastLines []string `json:"last_lines,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

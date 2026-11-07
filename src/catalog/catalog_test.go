@@ -203,3 +203,19 @@ func TestSystemAppsAreExactlyTheFleetsAndPlacedOnAMac(t *testing.T) {
 		t.Errorf("system tools = %v", system)
 	}
 }
+
+func TestTheLinuxImageKernelWritesItsConsoleWhereTheHostReadsIt(t *testing.T) {
+	recipe, err := catalog.Recipes.ReadFile("images/linux.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, step := range []string{
+		`GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT console=hvc0"`,
+		"update-grub",
+		"grep -q 'console=hvc0' /boot/grub/grub.cfg || {",
+	} {
+		if !strings.Contains(string(recipe), step) {
+			t.Errorf("the linux recipe lacks %q: no kernel line would reach the console a cause is read from", step)
+		}
+	}
+}

@@ -1,0 +1,29 @@
+description: 'a server crashed after an out-of-memory kill is down for it, with the three lines that tell it'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world console infra ''[ 4126.903117] k3s[812]: etcd: slow fdatasync, took 1.9 s'''
+      exit: 0
+    - command: 'world console infra ''[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB'''
+      exit: 0
+    - command: 'world console infra ''[ 4127.550981]'''
+      exit: 0
+    - command: 'world console infra ''[ 4127.611008] systemd[1]: k3s.service: Main process exited, code=killed, status=9/KILL'''
+      exit: 0
+    - command: 'world console infra ''[ 4131.002116] systemd[1]: Reached target Power-Off.'''
+      exit: 0
+    - command: 'world fault Hypervisor.Address'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.cause, .uptime.days[-1].down[0].cause]'''
+      exit: 0
+      stdout: |
+          ["out of memory","out of memory"]
+    - command: 'machines --json | /usr/bin/jq -r ''.macs[1].vms[0].last_lines[]'''
+      exit: 0
+      stdout: |
+          [ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB
+          [ 4127.611008] systemd[1]: k3s.service: Main process exited, code=killed, status=9/KILL
+          [ 4131.002116] systemd[1]: Reached target Power-Off.

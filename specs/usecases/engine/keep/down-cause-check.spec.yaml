@@ -1,0 +1,15 @@
+description: 'a server whose check fails while its run lives is down for the cause its console tells'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world console infra ''[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB'''
+      exit: 0
+    - command: 'world fault CheckRunner.Run 2 times'
+      exit: 0
+    - command: 'world advance 60s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | [.state, .cause, .last_lines, .uptime.days[-1].down[0].cause]'''
+      exit: 0
+      stdout: |
+          ["running","out of memory",["[ 4127.551204] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB"],"out of memory"]

@@ -2,6 +2,8 @@ package tart
 
 import (
 	"context"
+	"errors"
+	iofs "io/fs"
 	"path"
 	"strconv"
 	"strings"
@@ -170,6 +172,14 @@ func (h *hypervisor) watch(ctx context.Context, vm string, pid int) *run {
 // the exit code; a clean exit without it is a reboot; an exit code nobody wrote
 // is an end station cannot read, which never deletes a VM.
 func (h *hypervisor) endOf(vm string) machines.RunEnd {
+	end := h.reasonOf(vm)
+	if lines, err := h.Console(context.Background(), vm, machines.ConsoleWindow); err == nil {
+		end.LastLines = machines.LastLines(lines)
+	}
+	return end
+}
+
+func (h *hypervisor) reasonOf(vm string) machines.RunEnd {
 	code, ok := h.files.number(h.fs, h.files.exit(vm))
 	if !ok {
 		code = -1
@@ -184,6 +194,30 @@ func (h *hypervisor) endOf(vm string) machines.RunEnd {
 		return machines.RunEnd{Reason: machines.GuestReboot}
 	}
 	return machines.RunEnd{Reason: machines.Crashed, ExitCode: code}
+}
+
+func (h *hypervisor) Console(_ context.Context, vm string, n int) ([]string, error) {
+	var out []string
+	for _, file := range []string{h.files.console(vm), h.files.log(vm)} {
+		data, err := h.fs.ReadFile(file)
+		if errors.Is(err, iofs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		var kept []string
+		for _, line := range strings.Split(string(data), "\n") {
+			if line = strings.TrimRight(line, "\r"); machines.Meaningful(line) && strings.TrimSpace(line) != poweroffIntent {
+				kept = append(kept, line)
+			}
+		}
+		if n > 0 && len(kept) > n {
+			kept = kept[len(kept)-n:]
+		}
+		out = append(out, kept...)
+	}
+	return out, nil
 }
 
 func (h *hypervisor) declaredPoweroff(vm string) bool {

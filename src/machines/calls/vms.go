@@ -32,6 +32,13 @@ func (s *Machinist) VM(name, verb string) (model.VMRecord, error) {
 	return model.VMRecord{}, &model.UnknownMachineError{Name: name}
 }
 
+func (s *Machinist) Log(ctx context.Context, name string) ([]string, error) {
+	if _, err := s.VM(name, "read the log of"); err != nil {
+		return nil, err
+	}
+	return s.engine.Console(ctx, name, 0)
+}
+
 func (s *Machinist) LifetimeOf(name string) model.Lifetime {
 	rec, err := s.VM(name, "")
 	if err != nil {

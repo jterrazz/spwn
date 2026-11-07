@@ -53,6 +53,10 @@ type ListVM struct {
 	Uptime  *ListUptime  `json:"uptime,omitempty"`
 	Latency *ListLatency `json:"latency,omitempty"`
 	Restart *ListRestart `json:"restart,omitempty"`
+	// value: why a server is down, and its console's last lines then
+	// (SPEC B5.5); absent while it is up.
+	Cause     string   `json:"cause,omitempty"`
+	LastLines []string `json:"last_lines,omitempty"`
 }
 
 type ListUptime struct {
@@ -180,6 +184,7 @@ func ToList(f AllMachines) ListDoc {
 				Size:  ListSize{CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes, DiskBytes: vm.Resources.DiskBytes},
 				Image: ListImage{Name: vm.Image, Version: vm.Version}, Detail: vm.Detail, Created: vm.CreatedAt,
 				Uptime: uptimeOf(vm, f.Read), Latency: latencyOf(vm), Restart: restartOf(vm),
+				Cause: vm.Cause, LastLines: vm.LastLines,
 			})
 		}
 		out.Macs = append(out.Macs, m)

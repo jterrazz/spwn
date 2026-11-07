@@ -107,6 +107,8 @@ func (h *fakeHypervisor) started() int {
 
 func (*fakeHypervisor) Shutdown(context.Context, string, time.Duration) error { return nil }
 
+func (*fakeHypervisor) Console(context.Context, string, int) ([]string, error) { return nil, nil }
+
 func (*fakeHypervisor) Address(context.Context, string, time.Duration) (netip.Addr, error) {
 	return netip.Addr{}, errors.New("no ip in a module test")
 }

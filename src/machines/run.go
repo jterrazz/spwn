@@ -70,6 +70,8 @@ type RunEnd struct {
 	Reason   EndReason
 	ExitCode int
 	Detail   string
+	// value: SPEC B5.5: the last lines its run wrote, as LastLines keeps them.
+	LastLines []string
 }
 
 const (

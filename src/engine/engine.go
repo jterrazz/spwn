@@ -29,6 +29,9 @@ type Remembered struct {
 	Latency []model.LatencyPoint `json:"latency,omitempty"`
 	Restart *model.RestartWalk   `json:"restart,omitempty"`
 	Down    bool                 `json:"down,omitempty"`
+	// value: why it is down, and its console's last lines then (SPEC B5.5).
+	Cause     string   `json:"cause,omitempty"`
+	LastLines []string `json:"last_lines,omitempty"`
 	// value: what it was last heard listening on, so a successor lists
 	// the ports of a VM down or booting again.
 	LastHeard []ports.Listener `json:"last_heard,omitempty"`

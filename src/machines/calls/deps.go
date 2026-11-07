@@ -55,6 +55,8 @@ type Machines interface {
 	// value: refuses a name that is no VM of this host, worded for verb.
 	CheckVM(name, verb string) error
 	Delete(ctx context.Context, name string) (machines.DeleteReport, error)
+	// value: the lines a VM of this Mac's runs wrote, as its hypervisor keeps them.
+	Log(ctx context.Context, name string) ([]string, error)
 	// value: whether name is a VM rather than a Mac.
 	CheckRestart(name string) (vm bool, err error)
 	Restart(ctx context.Context, name string) (machines.RestartReport, error)
@@ -89,5 +91,6 @@ func All(d Deps) []call.Handler {
 	return []call.Handler{
 		call.BindWatch(List, d), call.Bind(CreateWorkspace, d), call.Bind(CreateServer, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(Delete, d),
 		call.Bind(Restart, d), call.Bind(RestartMac, d), call.Bind(Add, d), call.Bind(Forget, d), call.Bind(Unlock, d), call.Bind(SSH, d), call.Bind(Edit, d),
+		call.Bind(Log, d),
 	}
 }

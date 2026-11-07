@@ -1,0 +1,8 @@
+description: 'a Mac has no console log: the log is refused, and nothing is read'
+env: two-macs
+runs:
+    - command: 'machines log mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini is a Mac
+          Hint: run station machines for the VMs

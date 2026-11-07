@@ -82,7 +82,9 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 		switch change {
 		case model.CheckFails:
 			d.logf(v.rec.Name, "its check fails: "+v.rec.Check)
-			d.wentDown(ctx, v, model.CheckFailed, false, now)
+			lines, _ := d.hv.Console(ctx, v.rec.Name, model.ConsoleWindow)
+			kept := model.LastLines(lines)
+			d.wentDown(ctx, v, model.CheckCause(kept), kept, false, now)
 		case model.CheckBack:
 			d.tell(ctx, v.rec.Name, engine.Back(v.rec.Name))
 		case model.CheckSame:
@@ -93,7 +95,7 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 // invariant: SPEC B5.2: a server goes down on its record once, when its
 // run ends unexpectedly or its check fails since it passed; a restart that
 // follows walks the four health steps from the first.
-func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, restarts bool, now time.Time) {
+func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines []string, restarts bool, now time.Time) {
 	d.mu.Lock()
 	if v.rec.Lifetime != model.AlwaysOn {
 		d.mu.Unlock()
@@ -101,6 +103,9 @@ func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, restart
 	}
 	was := v.down
 	v.down = true
+	if !was {
+		v.cause, v.lastLines = cause, lines
+	}
 	if restarts {
 		v.walk = &model.RestartWalk{Step: 1, At: now}
 	}
@@ -138,6 +143,7 @@ func (d *Engine) walk(ctx context.Context, v *vmState) {
 		return
 	}
 	v.walk, v.down, v.marked = nil, false, true
+	v.cause, v.lastLines = "", nil
 	d.mu.Unlock()
 	d.markUptime(ctx, model.UptimeMark{Server: v.rec.Name, Change: model.CameBack, At: now, Restarted: walked})
 }

@@ -40,6 +40,7 @@ func events() []event {
 		{"crash", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.Crashed, ExitCode: 1})},
 		{"poweroff-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestPoweroff})},
 		{"reboot-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestReboot})},
+		{"console", []string{"<vm>", "<line>"}, writeConsole},
 		{"listen", []string{"<machine>", "<bind>:<port>", "<process>"}, listen},
 		{"unlisten", []string{"<machine>", "<port>"}, unlisten},
 		{"container-run", []string{"<vm>", "<port>:<port>", "<container>", "[no-proxy]"}, containerRun},
@@ -198,6 +199,15 @@ func ended(end machines.RunEnd) func(w *World, args []string) error {
 		v.Down(w.Now, &end)
 		return nil
 	}
+}
+
+func writeConsole(w *World, args []string) error {
+	v, err := w.vm(args[0])
+	if err != nil {
+		return err
+	}
+	v.Console = append(v.Console, args[1])
+	return nil
 }
 
 // invariant: a file the owner edits by hand is the text the story gives it,
