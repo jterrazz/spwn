@@ -75,7 +75,8 @@ func (f *fleet) Invoke(ctx context.Context, target machine.Ref, name string, _, 
 	if !ok {
 		return errors.New("a sample answers a reading")
 	}
-	*r = activity.Reading{Sample: activity.Sample{At: when, CPUBusy: busy * 300, CPUTotal: busy * 1000, MemUsed: memory / 4, MemTotal: memory}}
+	vms := map[string][]activity.VMUsage{thisMac: {{VM: "linux-1", Usage: activity.Usage{CPU: 9}}}, mini: {{VM: "infra", Usage: activity.Usage{CPU: 20}}}}[at]
+	*r = activity.Reading{Sample: activity.Sample{At: when, CPUBusy: busy * 300, CPUTotal: busy * 1000, MemUsed: memory / 4, MemTotal: memory}, VMs: vms}
 	return nil
 }
 
@@ -150,6 +151,35 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 		}
 	}
 	t.Errorf("the mini answering again stays stale, want it fresh")
+}
+
+func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
+	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
+	macs := map[string]string{"linux-1": thisMac, "infra": mini}
+	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
+		mac, ok := macs[vm]
+		return mac, ok
+	}}
+	keys := []string{"cpu:linux-1", "cpuh:infra", "cpuh:linux-1", "cpuh:" + mini}
+	live.Sample(t.Context(), keys)
+	tick := live.Sample(t.Context(), keys)
+	if got := lead(tick, "cpuh:linux-1"); got.Kind != page.KindPercent || got.N != 90 {
+		t.Errorf("linux-1's share of This Mac is %+v; want 9 %%, as This Mac reads its process", got)
+	}
+	if got := lead(tick, "cpuh:infra"); got.Kind != page.KindPercent || got.N != 200 {
+		t.Errorf("infra's share of the mini is %+v; want 20 %%, as the mini reads it", got)
+	}
+	if got := lead(tick, "cpu:linux-1"); got.Kind != page.KindPercent || got.N != 300 {
+		t.Errorf("linux-1's own CPU is %+v; want its guest's 30 %% of its own cores", got)
+	}
+	if _, ok := tick.Values["cpuh:"+mini]; ok {
+		t.Errorf("a Mac's share of a Mac is %+v; want none: the key names a VM", tick.Values["cpuh:"+mini])
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.asked["linux-1"] != 2 || f.asked[thisMac] != 2 || f.asked[mini] != 2 {
+		t.Errorf("the ticks asked %v; want each machine once a tick: linux-1 for its own cores, each Mac for its VMs", f.asked)
+	}
 }
 
 func TestHomeAndAVMPageListTheKeysTheirMovingNumbersFollow(t *testing.T) {

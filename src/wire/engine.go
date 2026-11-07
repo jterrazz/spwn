@@ -56,7 +56,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	if calls == nil {
 		calls = remote.NewRouter(registry, m.profile, remote.Reach{})
 	}
-	live := &feeds.Live{Calls: calls, Clock: m.sys.Clock, ThisMac: m.where.Machine}
+	live := &feeds.Live{Calls: calls, Clock: m.sys.Clock, ThisMac: m.where.Machine, MacOf: m.macOf}
 	menubar := feeds.Menubar{Calls: calls, Clock: m.sys.Clock, ThisMachine: m.where, Live: live, Report: func(v awake.View) *awake.Report {
 		return &awake.Report{Now: m.sys.Clock.Now(), Zone: time.Local, Engine: awake.EngineRunning, Reading: v.Reading, Session: v.Session, LastEnd: v.LastEnd, Guards: v.Guards}
 	}, EveryMac: func(ctx context.Context) (pageawake.AllMachines, error) {
