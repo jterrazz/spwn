@@ -77,6 +77,22 @@ final class MoleculeTests: XCTestCase {
         XCTAssertEqual(alone[.control], Self.frames(finished, highlighted: false)[.control])
     }
 
+    func testOnlyATintedRowHidesTheHairlinesAroundIt() throws {
+        let rows = Sheet.accessories
+        let mac = try XCTUnwrap(rows.firstIndex { $0.id == "This Mac" })
+        let vite = try XCTUnwrap(rows.firstIndex { $0.id == "Vite" })
+        XCTAssertNotNil(rows[mac].nav)
+        XCTAssertNil(rows[vite].nav)
+        let shown = { (hovered: Int?, highlighted: String?) in
+            rows.indices.filter { RowStack.hairline($0, of: rows, hovered: hovered, highlighted: highlighted) }
+        }
+        let all = Array(1 ..< rows.count)
+        XCTAssertEqual(shown(nil, nil), all)
+        XCTAssertEqual(shown(mac, nil), all.filter { $0 != mac && $0 != mac + 1 })
+        XCTAssertEqual(shown(nil, "This Mac"), shown(mac, nil))
+        XCTAssertEqual(shown(vite, nil), all)
+    }
+
     func testTheAccessorySetsWhereTheHairlineStarts() {
         let insets = Sheet.accessories.map { RowView.inset(RowView.accessory($0)) }
         let m = Token.Metric.Row.self

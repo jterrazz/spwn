@@ -173,7 +173,7 @@ public struct RowView: View {
 }
 
 // invariant: rows in a card: each row after the first has its inset
-// hairline, and a lit row hides its own and the next one's.
+// hairline, and a tinted row hides its own and the next one's.
 public struct RowStack: View {
     let rows: [Row]
     let columns: [Column]
@@ -191,9 +191,14 @@ public struct RowStack: View {
         self.run = run
     }
 
-    func lit(_ i: Int) -> Bool {
-        guard rows.indices.contains(i) else { return false }
-        return hovered == i || (highlighted != nil && rows[i].id == highlighted)
+    // value: whether the hairline above row i shows: hidden when that row
+    // or the one before it is tinted, and only a navigable row tints.
+    public static func hairline(_ i: Int, of rows: [Row], hovered: Int?, highlighted: String?) -> Bool {
+        func tinted(_ j: Int) -> Bool {
+            guard rows.indices.contains(j), rows[j].nav != nil else { return false }
+            return hovered == j || (highlighted != nil && rows[j].id == highlighted)
+        }
+        return i > 0 && !tinted(i) && !tinted(i - 1)
     }
 
     public var body: some View {
@@ -209,7 +214,7 @@ public struct RowStack: View {
                             .frame(height: m.hairline)
                             .padding(.leading, RowView.inset(RowView.accessory(row)))
                             .padding(.trailing, m.insetEnd)
-                            .opacity(lit(i) || lit(i - 1) ? 0 : 1)
+                            .opacity(Self.hairline(i, of: rows, hovered: hovered, highlighted: highlighted) ? 1 : 0)
                     }
                 }
             }
