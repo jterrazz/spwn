@@ -20,13 +20,19 @@ import (
 )
 
 type moving struct {
-	mu  sync.Mutex
-	now time.Time
+	mu   sync.Mutex
+	now  time.Time
+	wake chan struct{}
 }
 
+// value: a tick's budget is spent only when the test says so.
 func (m *moving) Sleep(ctx context.Context, _ time.Duration) error {
-	<-ctx.Done()
-	return ctx.Err()
+	select {
+	case <-m.wake:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 func (m *moving) Now() time.Time {
@@ -110,8 +116,8 @@ func lead(s engine.Sample, key string) page.Value {
 }
 
 func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testing.T) {
-	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
-	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 100 * time.Millisecond}
+	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC), wake: make(chan struct{})}
+	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac}
 	keys := []string{"cpu:" + thisMac, "memory:" + mini, "free:" + mini}
 	live.Sample(t.Context(), keys)
 	before := live.Sample(t.Context(), keys)
@@ -121,11 +127,13 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 	answer := f.lateFromNow()
 	defer answer()
 	clock.pass(10 * time.Second)
-	started := time.Now()
-	during := live.Sample(t.Context(), keys)
-	if took := time.Since(started); took > time.Second {
-		t.Errorf("a tick with the mini late took %s, want it out within its budget", took)
+	late := func() engine.Sample {
+		out := make(chan engine.Sample, 1)
+		go func() { out <- live.Sample(t.Context(), keys) }()
+		clock.wake <- struct{}{}
+		return <-out
 	}
+	during := late()
 	if got, was := lead(during, "memory:"+mini), lead(before, "memory:"+mini); got.N != was.N || got.Of != was.Of || got.Stale {
 		t.Errorf("the mini late 10 s gives its memory %+v, want its last value %+v, not yet stale", got, lead(before, "memory:"+mini))
 	}
@@ -133,7 +141,7 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 		t.Errorf("This Mac's CPU is %+v while the mini is late, want This Mac read as ever", got)
 	}
 	clock.pass(25 * time.Second)
-	stale := live.Sample(t.Context(), keys)
+	stale := late()
 	if got := lead(stale, "free:"+mini); !got.Stale || got.N != 48*gb {
 		t.Errorf("the mini unheard for 35 s shows its free memory %+v, want its last 48 GB, stale", got)
 	}

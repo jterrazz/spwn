@@ -276,11 +276,10 @@ func sampled(keys []string, at string, n int, stale bool) engine.Event {
 		readings = append(readings, activity.Reading{Sample: activity.Sample{At: time.Date(2026, 11, 3, 10, 30, 2*i, 0, time.UTC), CPUBusy: busy, CPUTotal: uint64(i) * 1000,
 			MemUsed: 9 << 30, MemTotal: 16 << 30, NetIn: uint64(i) * 2_400_000, NetOut: uint64(i) * 600_000}})
 	}
-	values := pagemenubar.LiveValues(keys, func(string) []activity.Reading { return readings })
 	e := engine.Event{Event: engine.EventSample, At: at, Values: map[string]any{}}
 	for _, k := range keys {
-		v, ok := values[k]
-		if !ok {
+		v := pagemenubar.LiveValue(k, readings)
+		if v.Kind == "" {
 			continue
 		}
 		if stale {

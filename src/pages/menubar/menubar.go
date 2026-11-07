@@ -117,7 +117,7 @@ func columns() []page.Column {
 // value: the three measures of This Mac, CPU, Memory and Network, each
 // with its sparkline over the readings kept, each read live under its key.
 func strip(readings []activity.Reading, thisMac string) *page.Strip {
-	cpu, memory, net := LiveKey(LiveCPU, thisMac), LiveKey(LiveMemory, thisMac), LiveKey(LiveNet, thisMac)
+	cpu, memory, net := engine.LiveKey(engine.LiveCPU, thisMac), engine.LiveKey(engine.LiveMemory, thisMac), engine.LiveKey(engine.LiveNet, thisMac)
 	if len(readings) < 2 {
 		return &page.Strip{CPU: live(page.Pending(), cpu), Memory: live(page.Pending(), memory)}
 	}

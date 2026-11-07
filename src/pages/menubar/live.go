@@ -1,30 +1,10 @@
 package menubar
 
 import (
-	"strings"
-
 	"github.com/jterrazz/studio-station/src/activity"
+	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/page"
 )
-
-// value: the measures a page reads live (SPEC §B3), each keyed
-// `<measure>:<machine>`: CPU's share, the memory used and free, the disk
-// used and the network's rate, in and out together.
-const (
-	LiveCPU    = "cpu"
-	LiveMemory = "memory"
-	LiveFree   = "free"
-	LiveDisk   = "disk"
-	LiveNet    = "net"
-)
-
-func LiveKey(measure, machine string) string { return measure + ":" + machine }
-
-func LiveMachine(key string) string {
-	// value: the machine a live key reads; empty for a key of no machine.
-	_, machine, _ := strings.Cut(key, ":")
-	return machine
-}
 
 type measures struct {
 	// value: each measure now, as its last two readings give it (one for
@@ -71,37 +51,25 @@ func measured(readings []activity.Reading) measures {
 	return m
 }
 
-func LiveValues(keys []string, readings func(machine string) []activity.Reading) map[string]page.Value {
-	// value: each live key's value from its machine's readings, as the page
+func LiveValue(key string, readings []activity.Reading) page.Value {
+	// value: a live key's value from its machine's readings, as the page
 	// that lists the key draws it: the measure now led into its series, the
-	// free memory alone; a key whose measure is not read yet is left out.
-	out := map[string]page.Value{}
-	of := map[string]measures{}
-	for _, k := range keys {
-		machine := LiveMachine(k)
-		m, ok := of[machine]
-		if !ok {
-			m = measured(readings(machine))
-			of[machine] = m
-		}
-		var v page.Value
-		switch strings.TrimSuffix(k, ":"+machine) {
-		case LiveCPU:
-			v = led(m.cpu, m.cpus)
-		case LiveMemory:
-			v = led(m.memory, m.memories)
-		case LiveFree:
-			v = m.free
-		case LiveDisk:
-			v = led(m.disk, m.disks)
-		case LiveNet:
-			v = led(m.net, m.nets)
-		}
-		if v.Kind != "" {
-			out[k] = v
-		}
+	// free memory alone; the zero Value while the measure is not read yet.
+	m := measured(readings)
+	measure, _ := engine.LiveOf(key)
+	switch measure {
+	case engine.LiveCPU:
+		return led(m.cpu, m.cpus)
+	case engine.LiveMemory:
+		return led(m.memory, m.memories)
+	case engine.LiveFree:
+		return m.free
+	case engine.LiveDisk:
+		return led(m.disk, m.disks)
+	case engine.LiveNet:
+		return led(m.net, m.nets)
 	}
-	return out
+	return page.Value{}
 }
 
 func led(now page.Value, series []int) page.Value {

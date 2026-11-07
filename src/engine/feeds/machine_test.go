@@ -57,10 +57,12 @@ func (s *steps) Sleep(ctx context.Context, d time.Duration) error {
 
 // value: something of the page waits d, as the clock sees it within 200 ms.
 func (s *steps) asleep(d time.Duration) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
 	select {
 	case s.wakes[d] <- struct{}{}:
 		return true
-	case <-time.After(200 * time.Millisecond):
+	case <-ctx.Done():
 		return false
 	}
 }

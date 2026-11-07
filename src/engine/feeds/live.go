@@ -49,7 +49,7 @@ func (l *Live) Sample(ctx context.Context, keys []string) engine.Sample {
 	// for 30 s, and is asked again only once its answer came.
 	var machines []string
 	for _, k := range keys {
-		if m := pagemenubar.LiveMachine(k); m != "" && !slices.Contains(machines, m) {
+		if _, m := engine.LiveOf(k); m != "" && !slices.Contains(machines, m) {
 			machines = append(machines, m)
 		}
 	}
@@ -58,17 +58,22 @@ func (l *Live) Sample(ctx context.Context, keys []string) engine.Sample {
 	if budget == 0 {
 		budget = tickBudget
 	}
-	timer := time.NewTimer(budget)
-	defer timer.Stop()
+	spent, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go func() {
+		_ = l.Clock.Sleep(spent, budget)
+		cancel()
+	}()
 wait:
 	for _, done := range waits {
 		select {
 		case <-done:
-		case <-timer.C:
+		case <-spent.Done():
 			break wait
-		case <-ctx.Done():
-			return engine.Sample{}
 		}
+	}
+	if ctx.Err() != nil {
+		return engine.Sample{}
 	}
 	return l.compose(keys)
 }
@@ -125,19 +130,18 @@ func (l *Live) compose(keys []string) engine.Sample {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	now := l.Clock.Now()
-	values := pagemenubar.LiveValues(keys, func(m string) []activity.Reading {
-		if w := l.of[m]; w != nil {
-			return w.readings
-		}
-		return nil
-	})
 	out := engine.Sample{Values: map[string]any{}}
 	for _, k := range keys {
-		v, ok := values[k]
-		if !ok {
+		_, m := engine.LiveOf(k)
+		w := l.of[m]
+		if w == nil {
 			continue
 		}
-		if w := l.of[pagemenubar.LiveMachine(k)]; w != nil && now.Sub(w.answered) > freshFor {
+		v := pagemenubar.LiveValue(k, w.readings)
+		if v.Kind == "" {
+			continue
+		}
+		if now.Sub(w.answered) > freshFor {
 			v.Stale = true
 			out.Stale = append(out.Stale, k)
 		}

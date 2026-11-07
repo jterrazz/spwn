@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/src/engine"
 
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -177,7 +178,7 @@ func activitySection(readings []activity.Reading, running bool, title, name stri
 		}
 	}
 	if running {
-		cpu, memory, disk = live(cpu, LiveKey(LiveCPU, name)), live(memory, LiveKey(LiveMemory, name)), live(disk, LiveKey(LiveDisk, name))
+		cpu, memory, disk = live(cpu, engine.LiveKey(engine.LiveCPU, name)), live(memory, engine.LiveKey(engine.LiveMemory, name)), live(disk, engine.LiveKey(engine.LiveDisk, name))
 	}
 	measure := func(id, label string, now page.Value, series []int) page.Row {
 		row := page.Row{ID: id, Label: label, Cells: []page.Value{now}}
