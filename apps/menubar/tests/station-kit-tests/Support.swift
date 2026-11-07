@@ -52,10 +52,10 @@ struct Bitmap {
         self.init(image)
     }
 
-    func differing(_ other: Bitmap) -> Int {
+    func differing(_ other: Bitmap, tolerance: Int = 16) -> Int {
         var n = 0
         for i in stride(from: 0, to: pixels.count, by: 4) {
-            for c in 0..<4 where abs(Int(pixels[i + c]) - Int(other.pixels[i + c])) > 16 {
+            for c in 0..<4 where abs(Int(pixels[i + c]) - Int(other.pixels[i + c])) > tolerance {
                 n += 1
                 break
             }
@@ -117,7 +117,7 @@ enum Golden {
     // invariant: a view is proved by its golden PNG, drawn offscreen: nil
     // when it matches within 0.1 % of its pixels, else what differs.
     @MainActor
-    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true) throws -> String? {
+    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, tolerance: Int = 16) throws -> String? {
         let file = "\(name).\(scheme == .dark ? "dark" : "light")"
         let golden = Tree.goldens.appendingPathComponent(file + ".png")
         guard let (png, bitmap) = Snapshot.render(view, scheme: scheme, desk: desk) else { return "\(file): no image rendered" }
@@ -132,7 +132,7 @@ enum Golden {
             try png.write(to: actual)
             return "\(file): \(bitmap.width)x\(bitmap.height), golden \(want.width)x\(want.height)"
         }
-        let differing = bitmap.differing(want)
+        let differing = bitmap.differing(want, tolerance: tolerance)
         if Double(differing) > Double(bitmap.width * bitmap.height) * 0.001 {
             try png.write(to: actual)
             return "\(file): \(differing) pixels differ"

@@ -75,11 +75,13 @@ final class TokenTests: XCTestCase {
         XCTAssertEqual(tokens.chip(nil).mark, tokens.color.t2)
     }
 
+    // invariant: the token sheet draws the colour table itself, so a
+    // channel off by more than 2 of 255 is a value changed, not a render.
     @MainActor
     func testTheTokenSheet() throws {
         let failures = try [ColorSchemeContrast.standard, .increased].flatMap { contrast in
             try [ColorScheme.dark, .light].compactMap { scheme in
-                try Golden.check(contrast == .increased ? "kit/tokens.ic" : "kit/tokens", AnyView(TokenSheet().stationAccessibility(contrast: contrast)), scheme: scheme, desk: false)
+                try Golden.check(contrast == .increased ? "kit/tokens.ic" : "kit/tokens", AnyView(TokenSheet().stationAccessibility(contrast: contrast)), scheme: scheme, desk: false, tolerance: 2)
             }
         }
         XCTAssertEqual(failures, [])
