@@ -751,9 +751,9 @@ extension Token {
     // value: the prototype's three curves, its tint, and what each becomes
     // under Reduce Motion.
     public enum Motion {
-        public static let snappy = Animation.timingCurve(0.30, 0.90, 0.30, 1.00, duration: 0.20)
-        public static let smooth = Animation.timingCurve(0.32, 0.72, 0.00, 1.00, duration: 0.34)
-        public static let bouncy = Animation.spring(Spring(duration: 0.225, bounce: 0.42))
+        public static let snappy = Animation.timingCurve(snappyCurve, duration: 0.20)
+        public static let smooth = Animation.timingCurve(smoothCurve, duration: 0.34)
+        public static let bouncy = Animation.spring(bouncySpring)
         public static let tint = Animation.easeOut(duration: 0.12)
         public static let sample = Animation.linear(duration: 0.2)
 
