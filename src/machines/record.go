@@ -21,6 +21,8 @@ type Record struct {
 	MemoryBytes int64
 	DiskBytes   int64
 	CreatedAt   time.Time
+	// value: SPEC B5.10: its create's progress while it runs; nil after.
+	Birth *Birth
 }
 
 type MacRecord struct {

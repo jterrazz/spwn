@@ -214,16 +214,35 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check, Task: r.Task,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second),
 	}
+	want := ""
 	if r.Lifetime == model.Permanent || server {
-		rec.Want = model.WantRunning
+		want = model.WantRunning
 	}
 	made := &made{}
 	fail := func(step string, cause error) (model.Created, error) {
 		s.undoCreate(ctx, r.Name, made)
 		return model.Created{}, &model.CreateFailedError{Name: r.Name, Step: step, Cause: cause}
 	}
+	// invariant: SPEC B5.10: the record exists from the create's first
+	// frame, its memory reserved, wanting nothing until its disk is made;
+	// each step moves its birth on, and the create's end, made or kept
+	// failing, takes it off.
+	born := func(step string) error {
+		rec.Birth = model.BirthAt(step, s.h.Now())
+		return s.writeRecord(rec)
+	}
+	defer func() {
+		if made.record && !made.undone {
+			rec.Birth = nil
+			_ = s.writeRecord(rec)
+		}
+	}()
 
 	say("cloning " + disk)
+	if err = born(model.BornCloning); err != nil {
+		return fail("the record", err)
+	}
+	made.record = true
 	if err = s.engine.Clone(ctx, imagescontract.ImageLocation{Hypervisor: s.engine.Name(), Ref: disk}, r.Name); err != nil {
 		return fail("the clone", err)
 	}
@@ -231,14 +250,15 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if err = s.engine.Resize(ctx, r.Name, r.Size.Size()); err != nil {
 		return fail("the resize", err)
 	}
+	rec.Want = want
 	if err = s.writeRecord(rec); err != nil {
 		return fail("the record", err)
 	}
-	made.record = true
 	var reserved []model.Reserved
 	var env map[string]string
 	if !server {
 		say("reserving its ports")
+		_ = born(model.BornPorts)
 		made.reservations = true
 		if reserved, env, err = s.reserveProfiles(ctx, r.Name); err != nil {
 			return fail("the reservations", err)
@@ -249,22 +269,26 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		}
 	}
 	say(model.StepRunning)
+	_ = born(model.BornBooting)
 	if err = s.engineAPI.Do(ctx, "run", r.Name); err != nil {
 		return model.Created{}, s.unhealthy(ctx, r.Name, err)
 	}
 	say(model.StepAddress)
+	_ = born(model.BornAddress)
 	addr, err := s.engine.Address(ctx, r.Name, ipWait)
 	if err != nil {
 		return model.Created{}, &model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"}
 	}
 	ip := addr.String()
 	say(model.StepSSH)
+	_ = born(model.BornSSH)
 	if err := s.setUp(ctx, img, r); err != nil {
 		return model.Created{}, &model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
 	}
 	if allMachines, err := s.AllMachines(ctx, false); err == nil {
 		_ = s.SSHBlocks(ctx, allMachines)
 	}
+	_ = s.engineAPI.Do(ctx, "ready", r.Name)
 	return model.Created{
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
@@ -317,11 +341,12 @@ func (s *Machinist) reserveProfiles(ctx context.Context, name string) (reserved 
 	return reserved, model.ProfileEnv(reserved), nil
 }
 
-type made struct{ vm, record, reservations bool }
+type made struct{ vm, record, reservations, undone bool }
 
 // invariant: the rollback is best effort and runs every step whatever fails, so a
 // half-made VM leaves as little as it can; what it reports is the create's failure.
 func (s *Machinist) undoCreate(ctx context.Context, name string, m *made) {
+	m.undone = true
 	if m.reservations && s.rel != nil {
 		_ = s.rel.ReleaseVM(ctx, name)
 	}
@@ -343,7 +368,12 @@ func (s *Machinist) removeFiles(name string, record bool) {
 	}
 }
 
-func (s *Machinist) Save(r model.VMRecord) error { return s.writeRecord(r) }
+func (s *Machinist) Save(r model.VMRecord) error {
+	// invariant: a birth is the create's alone to write: a record saved by
+	// anyone else never carries one, so none outlives its create.
+	r.Birth = nil
+	return s.writeRecord(r)
+}
 
 func (s *Machinist) writeRecord(r model.VMRecord) error {
 	return s.recs.Put(context.Background(), storedOf(r))

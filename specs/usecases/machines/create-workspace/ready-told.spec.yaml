@@ -1,0 +1,15 @@
+description: 'a created workspace is told ready on its Mac, and its create''s progress leaves its record'
+env: two-macs
+runs:
+    - command: 'machines create >/dev/null'
+      exit: 0
+    - command: 'machines create linux-4 --on mac-mini >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind == "vm_ready") | {Subject, Text}]'' world.json'
+      exit: 0
+      stdout: |
+          [{"Subject":"linux-2","Text":"linux-2 is ready on macbook-pro"},{"Subject":"linux-4","Text":"linux-4 is ready on mac-mini"}]
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | select(.created_at > "2026-11-04T10") | {name, state, birth}]'''
+      exit: 0
+      stdout: |
+          [{"name":"linux-2","state":"running","birth":null},{"name":"linux-4","state":"running","birth":null}]

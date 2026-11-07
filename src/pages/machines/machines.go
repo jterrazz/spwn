@@ -144,6 +144,11 @@ func vmRow(vm model.VM) page.Row {
 		row.Mark, row.Reason, detail = page.Broken, page.Failing, page.Text(vm.Detail)
 	case model.UnknownState:
 		row.Mark, row.Reason = page.NotKnown, page.Unreachable
+	case model.Creating:
+		row.Mark = page.Unjudged
+		if vm.Birth != nil {
+			detail = page.Text(vm.Birth.Step)
+		}
 	}
 	row.Cells = []page.Value{page.Text(string(vm.Lifetime.Kind())), page.Text(vm.Mac), page.Text(string(vm.Lifetime)), page.Text(string(vm.Lifetime)), page.Text(""), page.Text(string(vm.State)), orDash(vm.IP), record(resources, detail), resources, detail}
 	return row

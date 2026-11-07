@@ -42,6 +42,7 @@ type Machines interface {
 	PowerOff(ctx context.Context, name string) error
 	EngineRunning(ctx context.Context, name string) bool
 	ThisMacName() string
+	ThisMacLabel() string
 	// value: the engine-only machines.uptime-mark: what the keep job marks
 	// on a server's record.
 	MarkUptime(ctx context.Context, m model.UptimeMark) error
@@ -316,6 +317,7 @@ func (d *Engine) Memory() engine.Memory {
 		out[name] = engine.Remembered{
 			State: v.state, Detail: v.detail, Reruns: v.reruns, RerunAt: v.rerunAt, Restarts: v.restarts, BootAt: v.bootAt, Check: v.check,
 			Latency: v.latency, Restart: v.walk, Down: v.down, Cause: v.cause, LastLines: v.lastLines, LastHeard: heard, Agents: keptReport(v.agents), Reported: v.reported,
+			ReadyAt: v.readyAt,
 		}
 	}
 	return out

@@ -326,6 +326,7 @@ type Kept struct {
 	Task      string            `json:"task,omitempty"`
 	Env       map[string]string `json:"env,omitempty"`
 	CreatedAt time.Time         `json:"created_at,omitzero"`
+	Birth     *machines.Birth   `json:"birth,omitempty"`
 	// value: the shares station v2 kept in the VM's record, by name, until
 	// the accounts' store moves them out once.
 	Shared []string `json:"lent,omitempty"`

@@ -82,6 +82,10 @@ type VM struct {
 	// console kept then; empty while it is up.
 	Cause     string
 	LastLines []string
+	// value: SPEC B5.10: how far its create is while it runs, and when its
+	// create made it ready.
+	Birth   *Birth
+	ReadyAt time.Time
 }
 
 type EngineView struct {

@@ -44,6 +44,8 @@ type VMView struct {
 	// then (SPEC B5.5); empty while it is up.
 	Cause     string   `json:"cause,omitempty"`
 	LastLines []string `json:"last_lines,omitempty"`
+	// value: when the create that made it made it ready (SPEC B5.10).
+	ReadyAt time.Time `json:"ready_at,omitzero"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

@@ -34,9 +34,9 @@ var MacModels = []MacModel{
 	{Prefix: "MacPro", Name: "Mac Pro"},
 }
 
-// value: the name a Mac is shown by, from its hw.model: "Mac" for an
-// identifier the table does not hold. It is shown, never read by a rule.
 func MacModelName(id string) string {
+	// value: the name a Mac is shown by, from its hw.model: "Mac" for an
+	// identifier the table does not hold. It is shown, never read by a rule.
 	for _, m := range MacModels {
 		if m.ID != "" && m.ID == id {
 			return m.Name

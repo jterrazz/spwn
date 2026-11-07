@@ -56,13 +56,14 @@ type file struct {
 	DiskBytes   int64             `json:"disk_bytes"`
 	Shared      json.RawMessage   `json:"lent,omitempty"`
 	CreatedAt   time.Time         `json:"created_at"`
+	Birth       *machines.Birth   `json:"birth,omitempty"`
 	V           int               `json:"v,omitempty"`
 }
 
 func (f file) record() machines.Record {
 	return machines.Record{
 		Name: f.Name, Image: f.Image, Version: f.Version, Lifetime: f.Lifetime, Want: f.Want, Network: f.Network, Check: f.Check, Task: f.Task, Env: f.Env,
-		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt,
+		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth,
 	}
 }
 
@@ -109,6 +110,7 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
 		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
+		Birth: r.Birth,
 	}, "", "  ")
 	if err != nil {
 		return err

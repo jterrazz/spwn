@@ -220,6 +220,8 @@ func stateWord(s model.VMState) string {
 		return "Ended unexpectedly"
 	case model.Broken:
 		return "In a loop"
+	case model.Creating:
+		return "Creating"
 	case model.UnknownState:
 	}
 	return "Unknown"

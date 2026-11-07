@@ -48,7 +48,7 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 		thisMac.Hardware, thisMac.Laptop = s.hardware(ctx), s.o.Laptop
 	}
 	if thisMacOnly || s.o.ThisMachine != catalog.Mac {
-		return model.AllMachines{Macs: []model.MacView{thisMac}}, nil
+		return model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now()}, nil
 	}
 	others := s.OtherMacs()
 	answers := map[string]model.MacView{}

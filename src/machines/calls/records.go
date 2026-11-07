@@ -15,7 +15,7 @@ func recordOf(r model.Record) model.VMRecord {
 	return model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
-		CreatedAt: r.CreatedAt,
+		CreatedAt: r.CreatedAt, Birth: r.Birth,
 	}
 }
 
@@ -23,6 +23,7 @@ func storedOf(r model.VMRecord) model.Record {
 	return model.Record{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
+		Birth: r.Birth,
 	}
 }
 
@@ -83,8 +84,9 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 			vm.Guest, vm.IP, vm.Detail = d.Guest, d.IP, d.Detail
 			vm.SSH, vm.Restarts, vm.CheckStatus, vm.BootAt = d.SSH, d.Restarts, d.Check, d.BootAt
 			vm.Latency, vm.Restart = d.Latency, d.Restart
-			vm.Cause, vm.LastLines = d.Cause, d.LastLines
+			vm.Cause, vm.LastLines, vm.ReadyAt = d.Cause, d.LastLines, d.ReadyAt
 		}
+		vm = model.Born(vm, r.Birth, s.h.Now())
 		if r.Lifetime == model.AlwaysOn && s.o.Uptime != nil {
 			vm.Uptime, _ = s.o.Uptime.Get(ctx, r.Name)
 		}

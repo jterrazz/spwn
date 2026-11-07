@@ -57,6 +57,8 @@ type EngineVM struct {
 	// value: why a server is down, and its console's last lines then.
 	Cause     string
 	LastLines []string
+	// value: when the create it was made by made it ready.
+	ReadyAt time.Time
 }
 
 type Engine interface {

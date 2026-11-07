@@ -36,7 +36,7 @@ func record(name string, v *world.VM) machines.Record {
 	k := v.Kept
 	return machines.Record{
 		Name: name, Image: k.Image, Version: k.Version, Lifetime: k.Lifetime, Want: k.Want, Network: k.Network, Check: k.Check, Task: k.Task,
-		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt,
+		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt, Birth: k.Birth,
 	}
 }
 
@@ -60,7 +60,7 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 	}
 	v.Kept = &world.Kept{
 		Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
-		CreatedAt: r.CreatedAt,
+		CreatedAt: r.CreatedAt, Birth: r.Birth,
 	}
 	v.Size = machines.Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}
 	return nil

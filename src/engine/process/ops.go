@@ -68,9 +68,12 @@ const (
 	VMRestart = "restart"
 	VMDelete  = "delete"
 	VMForget  = "forget"
+	VMReady   = "ready"
 )
 
-func VMVerbs() []string { return []string{VMRun, VMStart, VMStop, VMRestart, VMDelete, VMForget} }
+func VMVerbs() []string {
+	return []string{VMRun, VMStart, VMStop, VMRestart, VMDelete, VMForget, VMReady}
+}
 
 func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 	switch verb {
@@ -99,6 +102,8 @@ func (d *Engine) VM(ctx context.Context, verb, vm string) error {
 	case VMForget:
 		d.forget(vm)
 		return nil
+	case VMReady:
+		return d.ready(ctx, vm)
 	}
 	return fault("unknown_op", "unknown verb \""+verb+"\" for a VM", "station machines")
 }

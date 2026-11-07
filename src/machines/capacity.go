@@ -2,7 +2,6 @@ package machines
 
 import "slices"
 
-// value: what macOS keeps of a Mac's memory, never given to a VM (SPEC §7.1).
 const KeptForMacOS = 4 << 30
 
 type Capacity struct {
@@ -39,7 +38,7 @@ func CapacityOf(h MacView) (Capacity, bool) {
 
 func reserves(vm VM) bool {
 	switch {
-	case vm.State == Running:
+	case vm.State == Running, vm.State == Creating:
 		return true
 	case vm.Lifetime == AlwaysOn:
 		return vm.Want == WantRunning || vm.State == UnknownState

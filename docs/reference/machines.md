@@ -25,6 +25,8 @@ A machine has one name, used for `preferences.json`, the `~/.ssh/config` block, 
 
 Each Mac says what it is, read by sysctl and never by a subprocess: its model identifier (`hw.model`), the name that model is shown by (from the catalogue's table, `Mac` for one it does not hold), its chip (`machdep.cpu.brand_string`), its memory and cores, and whether it has a lid (a laptop). A Mac that falls silent keeps what it last said it was. `machines --json` carries it as each Mac's `hardware`. Its capacity is its memory, the 4 GB macOS keeps, what each VM reserves and what is left free for a new VM: a VM reserves its memory while it runs, and a server its record wants running keeps its share while it is down, so the free figure never jumps when it falls and comes back; a create asking more than is free is refused. `machines --json` carries it as each Mac's `capacity`, and names as `roomiest` the Mac that answers with the most free memory (This Mac on a tie), where a new VM goes when none is named.
 
+A VM being created is on the list from its create's first frame, `Creating`, its memory reserved at once: its record carries the step its create runs (`cloning the image`, `reserving its ports`, `booting`, `waiting for an address`, `waiting for SSH`) and how far it is, per mille, until the create ends, made or kept failing. A create that has not moved for 30 minutes died with what ran it: its VM reads stopped, `was left half made`, to start or delete. Once made, its engine tells `vm_ready` (`linux-4 is ready on mac-mini`) and the VM is `fresh` for 8 s. `machines --json` carries `birth` (`progress`, `step`) while it is being made, and `fresh`.
+
 ```text
 5 machines · 4 running · 1 stopped · nothing needs you
  MACHINE KIND STATE CPU MEMORY

@@ -110,6 +110,22 @@ type ListVM struct {
 	// (SPEC B5.5); absent while it is up.
 	Cause     string   `json:"cause,omitempty"`
 	LastLines []string `json:"last_lines,omitempty"`
+	// value: SPEC B5.10: how far its create is, while it is being made;
+	// fresh for 8 s once its create made it ready.
+	Birth *ListBirth `json:"birth,omitempty"`
+	Fresh bool       `json:"fresh,omitempty"`
+}
+
+type ListBirth struct {
+	Progress int    `json:"progress"`
+	Step     string `json:"step"`
+}
+
+func birthOf(vm VM) *ListBirth {
+	if vm.Birth == nil {
+		return nil
+	}
+	return &ListBirth{Progress: vm.Birth.Progress, Step: vm.Birth.Step}
 }
 
 type ListUptime struct {
@@ -237,7 +253,7 @@ func ToList(f AllMachines) ListDoc {
 				Size:  ListSize{CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes, DiskBytes: vm.Resources.DiskBytes},
 				Image: ListImage{Name: vm.Image, Version: vm.Version}, Detail: vm.Detail, Created: vm.CreatedAt,
 				Uptime: uptimeOf(vm, f.Read), Latency: latencyOf(vm), Restart: restartOf(vm),
-				Cause: vm.Cause, LastLines: vm.LastLines,
+				Cause: vm.Cause, LastLines: vm.LastLines, Birth: birthOf(vm), Fresh: Fresh(vm, f.Read),
 			})
 		}
 		out.Macs = append(out.Macs, m)
