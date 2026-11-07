@@ -1,0 +1,12 @@
+description: 'a hook event sent to a desktop Mac is dropped there, and the hook still exits 0'
+env: two-macs
+runs:
+    - command: 'agents record --app claudecode --on jterrazz-mac-mini'
+      stdin: |
+          {"kind":"prompted","session":"s-1","prompt":"Build the landing page"}
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[].vms[]?.agents | select(.)]'' world.json'
+      exit: 0
+      stdout: |
+          []

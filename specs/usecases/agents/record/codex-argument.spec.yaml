@@ -1,0 +1,10 @@
+description: 'a Codex event comes as the last argument: the agent done with its turn waits on its last message'
+env: in-workspace
+runs:
+    - command: 'agents record --app codex ''{"kind":"turn-done","session":"t-1","folder":"/home/admin/api","message":"PR #42 is ready"}'''
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["t-1"] | {app, state, ask: .ask.title}'' world.json'
+      exit: 0
+      stdout: |
+          {"app":"codex","state":"waiting","ask":"PR #42 is ready"}

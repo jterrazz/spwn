@@ -39,6 +39,8 @@ A setting that does not live on this machine's kind reads Not for this machine, 
 
 The settings are Set by station; `autologin`, `restart-after-power-cut`, `never-sleeps`, `lock-after-login` and `sshd` are its Always-on Mac group, for a Mac that hosts servers: opt-in, applied by name only, one folded line until one of it is applied. An admin setting (all of the group but `never-sleeps`) applies only when you run station with admin rights on that Mac's own terminal: without them it is refused, exit 2, with the line that does it, `sudo station settings apply <setting>`, or through `--on`, `ssh -t <mac> sudo station settings apply <setting>`. station never calls sudo itself.
 
+`agent-hooks` is how station knows what an agent does in a workspace: each event of Claude Code's hooks, and each turn Codex completes, runs `station agents record --app <app>` inside the VM, which folds it into the VM's journal of agents (`~/.local/state/station/agents/`) and exits 0 within 200 ms whatever happens, so a hook never blocks or fails the agent. Without it, station sees only that the agent runs.
+
 ## Checked
 
 The Checked group is what station reads from macOS and never applies, on a Mac only (a VM reads each Not for this machine). Each is As expected (`●`) or needs a look (`◐`), its fix the System Settings pane or the command for you to run: station never runs sudo. They are read by `settings/contract.Inspector` (`macos`), each within its budget.

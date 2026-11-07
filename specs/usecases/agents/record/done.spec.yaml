@@ -1,0 +1,17 @@
+description: 'each hook event folds into the journal, printing nothing: the agent works, then waits on its ask'
+env: in-workspace
+runs:
+    - command: 'agents record --app claudecode'
+      stdin: |
+          {"kind":"prompted","session":"s-1","folder":"/home/admin/app","prompt":"Build the landing page"}
+      exit: 0
+      stdout: ''
+    - command: 'agents record --app claudecode'
+      stdin: |
+          {"kind":"notified","session":"s-1","message":"Claude needs your permission to use Bash"}
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["s-1"] | {state, task, ask: .ask.title}'' world.json'
+      exit: 0
+      stdout: |
+          {"state":"waiting","task":"Build the landing page","ask":"Claude needs your permission to use Bash"}
