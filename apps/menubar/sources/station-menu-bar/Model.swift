@@ -6,7 +6,7 @@ import UserNotifications
 @MainActor
 final class Model: ObservableObject {
     @Published var state = PanelState(page: nil, connection: .connecting) {
-        didSet { if (state.running != nil) != (turner != nil) { turning() } }
+        didSet { if icon.turning != (turner != nil) { turning() } }
     }
     @Published private(set) var turn = 0.0
     @Published var loginItemOn = LoginItem.on
@@ -80,7 +80,7 @@ final class Model: ObservableObject {
     }
 
     func turning() {
-        guard state.running != nil else {
+        guard icon.turning else {
             turner?.invalidate()
             turner = nil
             frame = 0
