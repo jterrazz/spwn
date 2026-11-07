@@ -1,4 +1,4 @@
-description: 'each port is known by its software and wears its logo, else by its number; an exposed one names its app and its process'
+description: 'a port is known by its software and logo, else by its number; an exposed one names its app'
 env: two-macs
 runs:
     - command: 'world listen linux-1 "*:4321" astro'

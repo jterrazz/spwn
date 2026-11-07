@@ -1,4 +1,4 @@
-description: 'a server powered off from inside keeps the ports it listened on listed, each unreachable while it is down'
+description: 'a server powered off from inside keeps its ports listed, each unreachable while it is down'
 env: two-macs
 runs:
     - command: 'world listen infra "*:443" traefik'

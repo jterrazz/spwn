@@ -1,4 +1,4 @@
-description: 'a server booting again after it ended unexpectedly lists its ports starting until its guest reports them'
+description: 'a server booting again lists its ports starting until its guest reports them'
 env: two-macs
 runs:
     - command: 'world listen infra "*:443" traefik'

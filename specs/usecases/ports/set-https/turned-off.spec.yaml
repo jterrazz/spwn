@@ -1,4 +1,4 @@
-description: 'HTTPS links turned off serve every share raw on the tailnet, an HTTP server under an http:// link; on again, https:// with its certificate'
+description: 'HTTPS links off serve every share raw under an http:// link; on again, https://'
 env: two-macs
 runs:
     - command: 'ports https off'
