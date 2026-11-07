@@ -1,0 +1,110 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "machine": "review-bot",
+    "kind": "workspace"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "session",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "app",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "task",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "pending",
+            "label": "review-bot",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "s-2",
+            "mark": "pending",
+            "label": "s-2",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "t-1",
+            "mark": "pending",
+            "label": "t-1",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ],
+      "pipe_counts": true
+    }
+  ]
+}

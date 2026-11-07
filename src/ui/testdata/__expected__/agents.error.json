@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "kind": "mac"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the agents' journal could not be read",
+    "hint": "station agents"
+  }
+}

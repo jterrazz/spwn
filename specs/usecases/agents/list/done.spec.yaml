@@ -1,0 +1,19 @@
+description: 'a workspace''s agents as their hooks said them: the waiting one first, then the one at work'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Build the landing page"'
+      exit: 0
+    - command: 'world agent-step linux-1 s-1 edit src/pages/index.astro'
+      exit: 0
+    - command: 'world agent-prompt linux-1 s-2 "Review the auth refresh"'
+      exit: 0
+    - command: 'world agent-step linux-1 s-2 run "gh pr create --fill" "https://github.com/jterrazz/app/pull/42"'
+      exit: 0
+    - command: 'world agent-stop linux-1 s-2 "PR #42 is ready. I moved the refresh into its own commit."'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ●	1 ◐
+          ◐	s-2	claudecode	waiting · PR #42 is ready. I moved the refresh into its own commit.	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42 · station agents merge-pr s-2
+          ●	s-1	claudecode	working · editing src/pages/index.astro	Build the landing page

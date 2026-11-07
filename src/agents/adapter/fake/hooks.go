@@ -26,6 +26,8 @@ func HooksOf(w *world.World, vm string, app agents.App) *Hooks {
 
 func (h *Hooks) App() agents.App { return h.app }
 
+func (h *Hooks) Launch() []string { return []string{string(h.app)} }
+
 func (h *Hooks) set(on bool) {
 	h.w.Lock()
 	defer h.w.Unlock()

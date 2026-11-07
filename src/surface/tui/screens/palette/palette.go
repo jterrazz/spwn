@@ -157,6 +157,21 @@ func entries() map[string]entry {
 		"agents.record": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
 			return run("Hook the agents of "+t.Label+", so station records what they do", words(t, "settings", "apply", catalog.AgentHooksSetting), gesture.V("Apply", "Applying", "Applied"), catalog.AgentHooksSetting)
 		}},
+		"agents.list": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
+			return Item{Label: "Read the agents of " + t.Label, Gesture: gesture.Gesture{Read: words(t, "agents")}}
+		}},
+		"agents.merge-pr": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
+			return asked("Merge the PR an agent opened"+ellipsis, field("Session"), one(gesture.V("Merge", "Merging", "Merged"), func(a string) []string { return words(t, "agents", "merge-pr", a) }))
+		}},
+		"agents.reply": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
+			return asked("Reply to an agent"+ellipsis, []Field{{Label: "Session"}, {Label: "Reply"}}, func(a []string) gesture.Gesture {
+				session := strings.TrimSpace(a[0])
+				return gesture.Gesture{Steps: []gesture.Step{gesture.V("Send", "Sending", "Sent").Step(session, words(t, "agents", "reply", session, strings.TrimSpace(a[1])))}}
+			})
+		}},
+		"agents.start": {kinds: []machine.Kind{machine.Workspace}, item: func(t, _ Target) Item {
+			return asked("Start an agent on a task"+ellipsis, field("Task"), one(gesture.V("Start", "Starting", "Started"), func(a string) []string { return words(t, "agents", "start", "--task", a) }))
+		}},
 		"apps.install": {key: keyed("i"), item: func(t, _ Target) Item {
 			return asked("Install an app"+ellipsis, field("App"), one(gesture.V("Install", "Installing", "Installed"), func(a string) []string { return words(t, "apps", "install", a) }))
 		}},

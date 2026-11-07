@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/agents/contract"
@@ -9,13 +10,26 @@ import (
 )
 
 type Deps struct {
-	// value: the hook of each app station reads, one strategy per app.
+	// value: the hook of each app station reads, one strategy per app; the
+	// first is the app an agent starts with when none is named.
 	Hooks   []contract.Hooks
 	Journal contract.Journal
+	Session contract.Session
+	Forge   contract.Forge
+	Now     func() time.Time
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Record, d)}
+	return []call.Handler{call.Bind(Record, d), call.Bind(List, d), call.Bind(Reply, d), call.Bind(Start, d), call.Bind(MergePR, d)}
+}
+
+func (d Deps) hooksOf(app agents.App) contract.Hooks {
+	for _, h := range d.Hooks {
+		if h.App() == app {
+			return h
+		}
+	}
+	return nil
 }
 
 type RecordIn struct {
@@ -36,12 +50,7 @@ var Record = call.Call[Deps, RecordIn, Recorded]{
 	Run: func(ctx context.Context, d Deps, in RecordIn, _ call.Progress) (Recorded, error) {
 		// invariant: the journal's one writer: an event read by its app's
 		// hook folds into its session, and anything else changes nothing.
-		var hooks contract.Hooks
-		for _, h := range d.Hooks {
-			if h.App() == in.App {
-				hooks = h
-			}
-		}
+		hooks := d.hooksOf(in.App)
 		if hooks == nil {
 			return Recorded{}, nil
 		}

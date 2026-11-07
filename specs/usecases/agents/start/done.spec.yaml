@@ -1,0 +1,11 @@
+description: 'an agent starts in the terminal session, in its folder, its task typed as its first prompt'
+env: in-workspace
+runs:
+    - command: 'agents start /home/admin/app --task "Build the landing page"'
+      exit: 0
+      stdout: |
+          ●	claudecode	started in /home/admin/app · Build the landing page
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
+      exit: 0
+      stdout: |
+          {"opened":["/home/admin/app claudecode"],"typed":["Build the landing page"]}

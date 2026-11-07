@@ -1,0 +1,17 @@
+description: 'an agent seen at work that ends is told finished once, with how it ended'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 "merged PR #42"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind | startswith("agent_")) | {Kind, Subject, Text}]'' world.json'
+      exit: 0
+      stdout: |
+          [{"Kind":"agent_finished","Subject":"linux-1","Text":"linux-1 is finished · merged PR #42"}]

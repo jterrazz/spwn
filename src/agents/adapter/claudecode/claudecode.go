@@ -48,6 +48,8 @@ func New(files Files, home string, now func() time.Time) *Hooks {
 
 func (*Hooks) App() agents.App { return ID }
 
+func (*Hooks) Launch() []string { return []string{Program} }
+
 func command() string {
 	return strings.Join(append(slices.Clone(catalog.AgentRecord), string(ID)), " ")
 }

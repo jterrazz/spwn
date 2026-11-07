@@ -1,0 +1,5 @@
+ Agents  1 ●  1 ◐  1 ○
+   ◐ review-bot  claudecode  waiting · PR #42 is ready             Review the auth refresh  PR #42…
+     → station agents merge-pr review-bot
+   ● s-2         claudecode  working · running tests · 41/58 pass  Build the landing page
+   ○ t-1         codex       finished · merged PR #40              Write the changelog

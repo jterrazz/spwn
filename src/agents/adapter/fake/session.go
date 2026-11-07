@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/agents/contract"
+	"github.com/jterrazz/studio-station/src/world"
 )
 
 type Session struct {
@@ -18,11 +19,13 @@ var _ contract.Session = (*Session)(nil)
 
 func NewSession() *Session { return &Session{alone()} }
 
+func SessionOf(w *world.World, vm string) *Session { return &Session{inVM{w: w, vm: vm}} }
+
 func (s *Session) Open(_ context.Context, folder string, argv []string) error {
 	s.w.Lock()
 	defer s.w.Unlock()
 	held := s.agents()
-	held.Opened = append(held.Opened, folder+" "+strings.Join(argv, " "))
+	held.Opened = append(held.Opened, strings.TrimSpace(folder+" "+strings.Join(argv, " ")))
 	return nil
 }
 

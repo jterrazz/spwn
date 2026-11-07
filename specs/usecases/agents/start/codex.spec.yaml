@@ -1,0 +1,11 @@
+description: 'an agent of another app starts the same way, by its adapter, in the session''s own folder'
+env: in-workspace
+runs:
+    - command: 'agents start --app codex'
+      exit: 0
+      stdout: |
+          ●	codex	started
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
+      exit: 0
+      stdout: |
+          {"opened":["codex"],"typed":null}

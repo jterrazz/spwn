@@ -1,4 +1,4 @@
-description: 'the guest reports what listens, minus the ignored ports, then ends with its stdin'
+description: 'the guest reports what listens, minus the ignored ports, then its agents, and ends with its stdin'
 fixture: ./__fixtures__/vm/
 env: engine
 runs:
@@ -7,4 +7,5 @@ runs:
       stdout: |
           ["ready",[]]
           ["snapshot",[[3000,"::"],[5432,"127.0.0.1"],[8081,"0.0.0.0"]]]
+          ["agents",[]]
           guest.json

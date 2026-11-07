@@ -1,0 +1,8 @@
+description: 'on a desktop Mac, station agents merge-pr is refused: agents work inside a workspace'
+env: two-macs
+runs:
+    - command: 'agents merge-pr s-1 --on jterrazz-mac-mini'
+      exit: 2
+      stderr: |
+          Error: jterrazz-mac-mini is a mac: agents are recorded inside the workspace they work in
+          Hint: run station overview for what jterrazz-mac-mini has

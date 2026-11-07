@@ -162,6 +162,7 @@ func (g *session) handle(ctx context.Context, m message) {
 			g.last = g.s.scan(ctx, g.hello, &g.held, true)
 			g.send(map[string]any{"v": 1, "type": "snapshot", "ports": g.last})
 			go g.watch(ctx)
+			g.report(ctx)
 		}
 	case "ping":
 		g.send(map[string]any{"v": 1, "type": "pong"})
@@ -191,6 +192,28 @@ func (g *session) answer(ctx context.Context, m message) {
 	keys := g.hello.Keys
 	g.mu.Unlock()
 	g.send(map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": true, "result": g.s.o.Accounts(ctx, keys)})
+}
+
+// invariant: SPEC B5.1: the guest reports its VM's journal with its first
+// snapshot, then again on each change, whole; it never reads the
+// journal's folder itself.
+func (g *session) report(ctx context.Context) {
+	if g.s.o.Journal == nil {
+		return
+	}
+	changes, err := g.s.o.Journal.Watch(ctx)
+	if err != nil {
+		return
+	}
+	send := func(kept any) { g.send(map[string]any{"v": 1, "type": "agents", "agents": kept}) }
+	if first, ok := <-changes; ok {
+		send(first)
+	}
+	go func() {
+		for kept := range changes {
+			send(kept)
+		}
+	}()
 }
 
 func (g *session) watch(ctx context.Context) {

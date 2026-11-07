@@ -1,0 +1,8 @@
+description: 'merging the PR of a session the journal does not hold is refused'
+env: in-workspace
+runs:
+    - command: 'agents merge-pr s-9'
+      exit: 2
+      stderr: |
+          Error: no agent session "s-9" here
+          Hint: station agents

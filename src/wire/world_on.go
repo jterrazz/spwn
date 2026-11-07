@@ -311,6 +311,10 @@ func (m *worldMac) funnel() funnel.Funnel           { return portsfake.TailnetOf
 func (m *worldMac) bundler() appscontract.Bundler   { return appsfake.BundlerOf(m.run.w, m.name) }
 func (m *worldMac) vault() accountscontract.Vault   { return accountsfake.NewVault(m.run.w, m.name) }
 func (m *worldMac) journal() agentscontract.Journal { return agentsfake.JournalOf(m.run.w, m.name) }
+func (m *worldMac) agentSession() agentscontract.Session {
+	return agentsfake.SessionOf(m.run.w, m.name)
+}
+func (m *worldMac) forge() agentscontract.Forge { return agentsfake.ForgeOf(m.run.w, m.name) }
 func (m *worldMac) hooks(app agents.App) agentscontract.Hooks {
 	return agentsfake.HooksOf(m.run.w, m.name, app)
 }

@@ -17,6 +17,14 @@ type Deps struct {
 	// value: this Mac reports a battery: a server made here stops whenever
 	// it sleeps.
 	Laptop bool
+	// value: what starts an agent in a workspace just made.
+	Agents AgentStarter
+}
+
+type AgentStarter interface {
+	// value: starts an agent in vm's terminal session once it answers, task
+	// typed as its first prompt.
+	StartAgent(ctx context.Context, vm, task string) error
 }
 
 type ImageBuilds interface {

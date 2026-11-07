@@ -36,6 +36,14 @@ func Hooks(t *testing.T, open func(t *testing.T) HooksSubject) {
 		return ok
 	}
 
+	t.Run("the app's agent is started by a program of its own", func(t *testing.T) {
+		s := open(t)
+		argv := s.Hooks.Launch()
+		if len(argv) == 0 || argv[0] == "" {
+			t.Fatalf("Launch() = %q, want the program its agent runs as", argv)
+		}
+	})
+
 	t.Run("a hook installed is seen, once however often it is installed, and keeps the owner's keys", func(t *testing.T) {
 		s := open(t)
 		if installed(t, s) {

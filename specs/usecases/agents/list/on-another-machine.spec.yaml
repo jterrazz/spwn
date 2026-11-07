@@ -1,0 +1,11 @@
+description: 'the agents of a workspace read from its Mac with --on, from the journal inside it'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Build the landing page"'
+      exit: 0
+    - command: 'agents --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Agents	1 ●
+          ●	s-1	claudecode	working	Build the landing page

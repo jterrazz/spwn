@@ -1,0 +1,166 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "machine": "review-bot",
+    "kind": "workspace"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "session",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "app",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "task",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "attention",
+            "label": "review-bot",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "claudecode"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "waiting"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "PR #42 is ready"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "Review the auth refresh"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "PR #42"
+                },
+                {
+                  "kind": "text",
+                  "text": "https://github.com/jterrazz/app/pull/42"
+                }
+              ]
+            },
+            "reason": "partial",
+            "hint": {
+              "command": "station agents merge-pr review-bot"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "s-2",
+            "mark": "ok",
+            "label": "s-2",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "claudecode"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "working"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "running tests"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "41/58 pass"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "Build the landing page"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "t-1",
+            "mark": "absent",
+            "label": "t-1",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "codex"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "finished"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "merged PR #40"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "Write the changelog"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    }
+  ]
+}

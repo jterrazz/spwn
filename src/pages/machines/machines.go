@@ -273,6 +273,8 @@ type CreatedJSON struct {
 	Mac         string            `json:"mac"`
 	Lifetime    string            `json:"lifetime"`
 	Check       string            `json:"check,omitempty"`
+	Task        string            `json:"task,omitempty"`
+	Agent       bool              `json:"agent,omitempty"`
 	Image       string            `json:"image"`
 	Version     string            `json:"version"`
 	CPUs        int               `json:"cpus"`
@@ -303,7 +305,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	// ssh: the three steps its page passes.
 	vm, r := c.VM, c.VM.Resources
 	body := CreatedJSON{
-		Schema: schema, Health: CreatedHealth{Running: true, Address: vm.IP != "", SSH: true}, Name: vm.Name, Kind: string(vm.Lifetime.Kind()), Mac: vm.Mac, Lifetime: string(vm.Lifetime), Check: vm.Check, Image: vm.Image,
+		Schema: schema, Health: CreatedHealth{Running: true, Address: vm.IP != "", SSH: true}, Name: vm.Name, Kind: string(vm.Lifetime.Kind()), Mac: vm.Mac, Lifetime: string(vm.Lifetime), Check: vm.Check, Task: vm.Task, Agent: c.Agent, Image: vm.Image,
 		Version: vm.Version, CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, IP: vm.IP,
 		Network: vm.Network, Ports: []CreatedPort{}, Env: c.Env,
 	}
@@ -335,6 +337,9 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 	if off != "" {
 		row := page.Row{ID: "ports", Label: "ports", Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(off)}}
 		rows = append(rows, row)
+	}
+	if c.Agent {
+		rows = append(rows, passed(model.StepAgent, vm.Task))
 	}
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("Created"), page.List(page.Text(titled(string(vm.Lifetime))), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}

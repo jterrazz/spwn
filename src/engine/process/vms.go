@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/jterrazz/studio-station/src/agents"
 	"maps"
 	"net/netip"
 	"slices"
@@ -63,6 +64,9 @@ type vmState struct {
 	walk    *model.RestartWalk
 	down    bool
 	marked  bool
+	// value: the last report of its agents, and whether one came.
+	agents   []agents.Agent
+	reported bool
 }
 
 // invariant: at start, a live run is ADOPTED (never touched); a dead one or none
@@ -76,6 +80,7 @@ func (d *Engine) adopt(ctx context.Context) {
 		known, remembered := d.memory[r.Name]
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
+		v.agents, v.reported = readReport(known.Agents), known.Reported
 		d.mu.Lock()
 		d.vms[r.Name] = v
 		if len(known.LastHeard) > 0 {
@@ -609,6 +614,7 @@ type guestMessage struct {
 		IP      string `json:"ip"`
 		Process string `json:"process"`
 	} `json:"ports"`
+	Agents []agents.Agent `json:"agents"`
 }
 
 func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
@@ -639,6 +645,8 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 	case "unlisten":
 		d.hear(name, slices.DeleteFunc(d.heardOf(name), func(l ports.Listener) bool { return l.Port == m.Port }))
 		d.unlisten(name, m.Port)
+	case "agents":
+		d.heardAgents(ctx, v, m.Agents)
 	case "reply":
 		d.mu.Lock()
 		ch := v.asked[m.ID]
