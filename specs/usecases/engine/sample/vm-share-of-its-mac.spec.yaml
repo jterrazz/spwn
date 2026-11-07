@@ -1,0 +1,9 @@
+description: 'a Mac''s sample carries each VM it runs as its guest''s process, named after the VM'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].meter.processes = {"1001": {"cpu": 18, "memory": 4402341478}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" world advance 1m; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].engine.activity["jterrazz-macbook-pro"].last | {vms, busiest: (.top.cpu[0] | {pid, vm})}'' world.json'
+      exit: 0
+      stdout: |
+          {"vms":[{"vm":"linux-1","cpu":18,"memory":4402341478}],"busiest":{"pid":1001,"vm":"linux-1"}}

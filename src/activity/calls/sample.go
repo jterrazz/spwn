@@ -91,11 +91,11 @@ func (d Deps) measureVMs(ctx context.Context, r *activity.Reading) {
 		if run.Holder == 0 {
 			continue
 		}
+		of[run.Holder] = run.VM
 		u, err := d.Meter.Process(ctx, run.Holder)
 		if err != nil {
 			continue
 		}
-		of[run.Holder] = run.VM
 		r.VMs = append(r.VMs, activity.VMUsage{VM: run.VM, Usage: u})
 	}
 	for _, list := range [][]activity.Process{r.Top.CPU, r.Top.Memory} {
