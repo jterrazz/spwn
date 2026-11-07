@@ -5,7 +5,10 @@ import UserNotifications
 
 @MainActor
 final class Model: ObservableObject {
-    @Published var state = PanelState(page: nil, connection: .connecting)
+    @Published var state = PanelState(page: nil, connection: .connecting) {
+        didSet { if (state.running != nil) != (turner != nil) { turning() } }
+    }
+    @Published private(set) var turn = 0.0
     @Published var loginItemOn = LoginItem.on
     @Published var sparkline = UserDefaults.standard.bool(forKey: Model.sparklineKey)
 
@@ -35,6 +38,8 @@ final class Model: ObservableObject {
     let live = LiveStore()
 
     private var settled: Task<Void, Never>?
+    private var turner: Timer?
+    private var frame = 0
 
     init() {
         navigation = Navigation(socket: socket, window: UserDefaults.standard.string(forKey: Self.windowKey)) { [weak self] page, shown in
@@ -64,10 +69,32 @@ final class Model: ObservableObject {
         }
     }
 
-    var icon: MenuBarIcon { MenuBarIcon.of(connection: state.connection, page: state.page, sparkline: sparkline, live: live) }
+    var icon: MenuBarIcon {
+        var icon = MenuBarIcon.of(connection: state.connection, page: state.page, sparkline: sparkline, live: live)
+        icon.busy = state.running != nil
+        return icon
+    }
 
     func iconImage(dark: Bool) -> NSImage {
-        icon.nsImage(scheme: dark ? .dark : .light)
+        icon.nsImage(scheme: dark ? .dark : .light, turn: turn)
+    }
+
+    func turning() {
+        guard state.running != nil else {
+            turner?.invalidate()
+            turner = nil
+            frame = 0
+            turn = 0
+            return
+        }
+        guard turner == nil else { return }
+        turner = Timer.scheduledTimer(withTimeInterval: 1 / Token.Busy.fps, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.frame += 1
+                self.turn = Token.Busy.turn(frame: self.frame)
+            }
+        }
     }
 
     func start() {

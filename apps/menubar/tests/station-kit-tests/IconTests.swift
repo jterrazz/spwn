@@ -10,7 +10,7 @@ final class IconTests: XCTestCase {
 
     func drawn(_ name: String, _ icon: MenuBarIcon) throws {
         for scheme in [ColorScheme.dark, .light] {
-            XCTAssertNil(try Golden.check("icon." + name, AnyView(MenuBarIconView(icon, scheme: scheme)), scheme: scheme, desk: false))
+            XCTAssertNil(try Golden.check("icon." + name, AnyView(StatusItem(icon, scheme: scheme)), scheme: scheme, desk: false))
         }
     }
 
@@ -156,12 +156,27 @@ final class IconTests: XCTestCase {
                 ForEach(["magnifyingglass", "wifi", "switch.2"], id: \.self) { name in
                     Image(systemName: name).font(.system(size: Token.Icon.size, weight: Token.Icon.weight)).foregroundStyle(ink)
                 }
-                ForEach(marks.indices, id: \.self) { i in MenuBarIconView(MenuBarIcon(marks[i]), scheme: scheme) }
+                ForEach(marks.indices, id: \.self) { i in StatusItem(MenuBarIcon(marks[i]), scheme: scheme) }
             }
             .padding(.horizontal, 10)
             .frame(height: 24)
             .background(scheme == .dark ? Color(white: 0.12) : Color(white: 0.94))
             XCTAssertNil(try Golden.check("icon.beside-native", AnyView(row), scheme: scheme, desk: false))
+        }
+    }
+
+    func testABusyItemTurnsItsMarkOneFrameAtATime() throws {
+        let busy = MenuBarIcon(.plain, busy: true)
+        func bitmap(_ turn: Double) throws -> Bitmap { try XCTUnwrap(busy.image(scheme: .dark, turn: turn).flatMap(Bitmap.init)) }
+        XCTAssertEqual(try bitmap(0.25).pixels, try bitmap(0.25).pixels)
+        XCTAssertNotEqual(try bitmap(0).pixels, try bitmap(0.25).pixels)
+        XCTAssertNotEqual(try XCTUnwrap(MenuBarIcon(.plain).image(scheme: .dark)).width, try bitmap(0).width)
+        XCTAssertEqual(busy.nsImage(scheme: .dark, turn: 0.5).representations.count, 3)
+        XCTAssertEqual(Token.Busy.frames, 8)
+        XCTAssertEqual(Token.Busy.turn(frame: 2), 0.25)
+        XCTAssertEqual(Token.Busy.turn(frame: 8), 0)
+        for scheme in [ColorScheme.dark, .light] {
+            XCTAssertNil(try Golden.check("icon.busy", AnyView(StatusItem(busy, scheme: scheme, turn: 0.25)), scheme: scheme, desk: false))
         }
     }
 }
@@ -198,4 +213,5 @@ struct Ink {
         while y < bitmap.height && alpha(x, y) >= 0.03 { sum += alpha(x, y); y += 1 }
         return sum
     }
+
 }

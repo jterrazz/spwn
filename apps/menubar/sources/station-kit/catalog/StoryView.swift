@@ -45,7 +45,7 @@ public struct StoryView: View {
 
     public var body: some View {
         if story.ui.statusItem == true {
-            MenuBarIconView(MenuBarIcon.of(connection: state.connection, page: state.page), scheme: scheme)
+            StatusItem(MenuBarIcon.of(connection: state.connection, page: state.page), scheme: scheme)
         } else if state.pushed != nil || state.page.map(Self.panel) == true {
             Popover(state, handlers: handlers, scrolls: false)
         } else if let own = MenuPage.view(state, handlers: handlers, scrolls: false) {
