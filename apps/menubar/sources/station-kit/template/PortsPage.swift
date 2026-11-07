@@ -141,10 +141,10 @@ public struct PortsPage: View {
         }
         return VStack(alignment: .leading, spacing: 0) {
             ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
-                EmptyLine(empty).padding(Token.Tile.rowPadding)
+                EmptyState(empty).padding(Token.Tile.rowPadding)
             }
             if rows.isEmpty, (s.items ?? []).allSatisfy({ $0.empty == nil }) {
-                EmptyLine(Empty(noun: nil, text: "No private port", hint: nil)).padding(Token.Tile.rowPadding)
+                EmptyState(Empty(noun: nil, text: "No private port", hint: nil)).padding(Token.Tile.rowPadding)
             }
             ForEach(Array(reserved.enumerated()), id: \.offset) { i, r in
                 if i > 0, !unfoldedRow(s, reserved[i - 1]) { RowSeparator() }

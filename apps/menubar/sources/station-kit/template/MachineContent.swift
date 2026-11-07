@@ -189,7 +189,7 @@ struct MachineContent: View {
             SectionHeader("\(s.header)\(Token.Glyph.sep)\((s.items ?? []).compactMap(\.link).count)")
             Rows {
                 ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
-                    EmptyLine(empty).padding(Token.Tile.rowPadding)
+                    EmptyState(empty).padding(Token.Tile.rowPadding)
                 }
                 ForEach(Array((s.items ?? []).compactMap(\.link).enumerated()), id: \.offset) { _, l in link(l) }
                 if let port = Self.sharing(page, state) {
@@ -207,7 +207,7 @@ struct MachineContent: View {
             SectionHeader(s.header)
             Rows {
                 ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
-                    EmptyLine(empty).padding(Token.Tile.rowPadding)
+                    EmptyState(empty).padding(Token.Tile.rowPadding)
                 }
                 ForEach(Array(s.rows.enumerated()), id: \.offset) { _, r in
                     MenuRow(r.label ?? "", subtitle: words(r.cells?.first)) {
