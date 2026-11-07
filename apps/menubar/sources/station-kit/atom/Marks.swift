@@ -159,15 +159,15 @@ public struct LogoChip: View {
     public enum Kind: Sendable { case account, port }
 
     let kind: Kind
-    let service: String
+    let brand: String
     @Environment(\.stationTokens) private var tokens
 
-    public init(_ kind: Kind, _ service: String) {
+    public init(_ kind: Kind, _ brand: String) {
         self.kind = kind
-        self.service = service
+        self.brand = brand
     }
 
-    var known: String? { Token.Object.service(service, among: kind == .account ? Token.Object.accounts : Token.Object.ports) }
+    var known: String? { Token.Object.brand(brand, among: kind == .account ? Token.Object.accounts : Token.Object.ports) }
 
     public var body: some View {
         let m = Token.Metric.Marks.self
@@ -206,8 +206,8 @@ public struct GlyphView: View {
     public static func drawn(_ glyph: Glyph) -> Drawn {
         let kind = glyph.kind ?? ""
         func after(_ prefix: String) -> String? { kind.hasPrefix(prefix) ? String(kind.dropFirst(prefix.count)) : nil }
-        if let service = after("port:") { return .chip(.port, service) }
-        if let service = after("account:") { return .chip(.account, service) }
+        if let brand = after("port:") { return .chip(.port, brand) }
+        if let brand = after("account:") { return .chip(.account, brand) }
         if let name = after("symbol:") { return .symbol(name) }
         switch kind {
         case "laptop", "desktop": return glyph.ring != nil ? .mac(lid: kind == "laptop") : .symbol(Token.Object.mac(lid: kind == "laptop"))
@@ -220,7 +220,7 @@ public struct GlyphView: View {
 
     public var body: some View {
         switch Self.drawn(glyph) {
-        case let .chip(kind, service): LogoChip(kind, service)
+        case let .chip(kind, brand): LogoChip(kind, brand)
         case let .mac(lid):
             MacRing(lid: lid, share: (samples[glyph.ring ?? ""] ?? 0) / Token.Metric.Marks.percent, asleep: glyph.signal == "asleep")
         case let .symbol(name): slot(Image(systemName: name))

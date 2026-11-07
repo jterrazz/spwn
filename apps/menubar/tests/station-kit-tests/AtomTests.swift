@@ -73,14 +73,14 @@ final class AtomTests: XCTestCase {
         XCTAssertNotEqual(Token.Object.mac(lid: true), Token.Object.mac(lid: false))
     }
 
-    func testAServiceWearsItsMarkAndAnUnknownOneTheQuietChip() {
+    func testABrandWearsItsMarkAndAnUnknownOneTheQuietChip() {
         var g = Glyph()
         g.kind = "port:Vite dev server"
         XCTAssertEqual(GlyphView.drawn(g), .chip(.port, "Vite dev server"))
-        XCTAssertEqual(Token.Object.service("Vite dev server", among: Token.Object.ports), "vite")
-        XCTAssertNil(Token.Object.service("gitlab", among: Token.Object.accounts))
+        XCTAssertEqual(Token.Object.brand("Vite dev server", among: Token.Object.ports), "vite")
+        XCTAssertNil(Token.Object.brand("gitlab", among: Token.Object.accounts))
         let tokens = Token.resolved(scheme: .dark)
-        XCTAssertEqual(tokens.chip(Token.Object.service("gitlab", among: Token.Object.accounts)).fill, [tokens.color.q])
+        XCTAssertEqual(tokens.chip(Token.Object.brand("gitlab", among: Token.Object.accounts)).fill, [tokens.color.q])
     }
 
     func testALiveValueSaysTheLatestSampleInThePagesUnit() {

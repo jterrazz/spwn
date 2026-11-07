@@ -13,9 +13,9 @@ extension Token {
         public static let accounts = ["github", "claude", "npm", "tailscale", "cloudflare", "docker"]
         public static let ports = ["vite", "astro", "postgres", "traefik", "kubernetes", "node", "storybook", "api", "web"]
 
-        public static func mark(_ service: String) -> String { "station.mark.\(service)" }
+        public static func mark(_ brand: String) -> String { "station.mark.\(brand)" }
 
-        public static func service(_ id: String, among known: [String]) -> String? {
+        public static func brand(_ id: String, among known: [String]) -> String? {
             let key = id.lowercased()
             return known.first { key.contains($0) }
         }

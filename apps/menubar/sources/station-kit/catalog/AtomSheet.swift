@@ -37,7 +37,7 @@ public struct AtomSheet: View {
         return v
     }()
 
-    static let lease: Value = {
+    static let holding: Value = {
         var v = Value(kind: "duration")
         v.n = 13920
         v.of = 14400
@@ -138,7 +138,7 @@ public struct AtomSheet: View {
                 LiveText(Self.free)
             }
             line {
-                TimeLeft(Self.lease)
+                TimeLeft(Self.holding)
                 TimeLeft(Self.ending)
             }
             FactsLine(Self.facts)
@@ -167,7 +167,7 @@ public struct AtomSheet: View {
             }
             line {
                 VerbButton("Review")
-                VerbButton("Clean up")
+                VerbButton("Share")
                 VerbButton("Waiting", busy: true)
             }
             line {
