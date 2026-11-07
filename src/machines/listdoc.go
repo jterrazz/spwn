@@ -11,8 +11,11 @@ import (
 const ListSchema = "station.machines.list/v1"
 
 type ListDoc struct {
-	Schema   string         `json:"schema"`
-	Macs     []ListMac      `json:"macs"`
+	Schema string    `json:"schema"`
+	Macs   []ListMac `json:"macs"`
+	// value: the awake Mac with the most free memory, where a new VM goes
+	// when none is named; absent when no Mac says.
+	Roomiest string         `json:"roomiest,omitempty"`
 	Findings []finding.JSON `json:"findings"`
 }
 
@@ -28,7 +31,34 @@ type ListMac struct {
 	Station   string     `json:"station_version"`
 	// value: SPEC B5.12: what the Mac is; absent while it never said.
 	Hardware *ListHardware `json:"hardware,omitempty"`
+	// value: SPEC B5.12: its memory and who holds it; absent while the
+	// Mac never said what it has.
+	Capacity *ListCapacity `json:"capacity,omitempty"`
 	VMs      []ListVM      `json:"vms"`
+}
+
+type ListCapacity struct {
+	TotalBytes int64       `json:"total_bytes"`
+	MacOSBytes int64       `json:"macos_bytes"`
+	FreeBytes  int64       `json:"free_bytes"`
+	VMs        []ListShare `json:"vms"`
+}
+
+type ListShare struct {
+	Name        string `json:"name"`
+	MemoryBytes int64  `json:"memory_bytes"`
+}
+
+func capacityOf(h MacView) *ListCapacity {
+	c, ok := CapacityOf(h)
+	if !ok {
+		return nil
+	}
+	out := &ListCapacity{TotalBytes: c.Total, MacOSBytes: c.MacOS, FreeBytes: c.Free, VMs: []ListShare{}}
+	for _, s := range c.VMs {
+		out.VMs = append(out.VMs, ListShare{Name: s.Name, MemoryBytes: s.Bytes})
+	}
+	return out
 }
 
 type ListHardware struct {
@@ -194,11 +224,11 @@ func restartsOf(r Restarts) ListRestarts {
 }
 
 func ToList(f AllMachines) ListDoc {
-	out := ListDoc{Schema: ListSchema, Macs: make([]ListMac, 0, len(f.Macs)), Findings: finding.AllMachinesDoc(Findings(f))}
+	out := ListDoc{Schema: ListSchema, Macs: make([]ListMac, 0, len(f.Macs)), Findings: finding.AllMachinesDoc(Findings(f)), Roomiest: Roomiest(f)}
 	for _, h := range f.Macs {
 		m := ListMac{
 			Name: h.Name, Label: Label(f, h), ThisMac: h.ThisMac, Reachable: h.Reachable, Answered: h.Answered, IP: h.Node.IP, User: h.User,
-			Engine: ListEngine{State: engineState(h), Version: h.Engine.Version}, Station: h.StationVersion, Hardware: hardwareOf(h), VMs: []ListVM{},
+			Engine: ListEngine{State: engineState(h), Version: h.Engine.Version}, Station: h.StationVersion, Hardware: hardwareOf(h), Capacity: capacityOf(h), VMs: []ListVM{},
 		}
 		for _, vm := range Ordered(h.VMs) {
 			m.VMs = append(m.VMs, ListVM{

@@ -15,9 +15,6 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 )
 
-// value: what macOS keeps of a Mac's memory, never given to a VM (SPEC §7.1).
-const keptForMacOS = 4 << 30
-
 var (
 	errServerNeedsName   = &model.KindRuleError{Why: "a server needs a name", Fix: "station machines create <name> --server"}
 	errCheckForServers   = &model.KindRuleError{Why: "a health check is for servers", Fix: "station machines create <name> --server --check <url>"}
@@ -180,24 +177,13 @@ func (s *Machinist) claims(ctx context.Context) (held map[string]claim, on map[s
 	return held, on, nil
 }
 
-// value: the memory a new VM may take on this Mac: what it has, less what
-// macOS keeps and what its running VMs hold; unknown when the Mac does not
-// say what it has.
+// value: the memory a new VM may take on this Mac, its capacity's free
+// figure; unknown when the Mac does not say what it has.
 func (s *Machinist) memoryLeft(ctx context.Context) (int64, bool) {
-	total := s.hardware(ctx).Memory
-	if total <= 0 {
-		return 0, false
-	}
-	left := total - keptForMacOS
 	_, live := s.engineView(ctx)
-	if vms, err := s.vms(ctx, "", live); err == nil {
-		for _, vm := range vms {
-			if vm.State == model.Running {
-				left -= vm.Resources.MemoryBytes
-			}
-		}
-	}
-	return left, true
+	vms, _ := s.vms(ctx, "", live)
+	c, ok := model.CapacityOf(model.MacView{Hardware: s.hardware(ctx), VMs: vms})
+	return c.Free, ok
 }
 
 func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress func(model.Step)) (model.Created, error) {

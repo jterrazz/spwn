@@ -1,0 +1,9 @@
+description: 'a server its owner stops gives its share of its Mac back'
+env: two-macs
+runs:
+    - command: 'machines stop infra --on mac-mini --confirm=infra >/dev/null'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | [(.vms[0] | .state, .wanted), .capacity.free_bytes, .capacity.vms]'''
+      exit: 0
+      stdout: |
+          ["stopped","stopped",64424509440,[]]
