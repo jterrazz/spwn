@@ -17,7 +17,7 @@ final class KitBoundaryTests: XCTestCase {
     static let surfaceOnly = [".quinary", "Token.Fill.tile", ".glassProminent", ".buttonStyle(.bordered", ".toggleStyle(.switch)"]
     static let glyphs: [Character] = ["→", "·", "…", "⏻", "⚡", "●", "◐", "○", "✗", "◌"]
 
-    static let views = ["atom/", "molecule/", "organism/", "template/", "catalog/"]
+    static let views = ["atom/", "molecule/", "organism/", "template/", "catalog/", "motion/"]
     static let sizeKey = try! NSRegularExpression(pattern: #"\b(spacing|width|height|minWidth|minHeight|maxWidth|maxHeight|idealWidth|idealHeight|minLength|cornerRadius|lineWidth|radius|size|top|leading|bottom|trailing|x|y|duration|dash|bounce|response): "#)
     static let sizeCall = try! NSRegularExpression(pattern: #"\.(padding|offset|opacity|tracking|kerning|blur|scaleEffect|ratio|brightness|saturation|cornerRadius|lineSpacing|minimumScaleFactor|rotationEffect|shadow|timingCurve|easeOut|easeIn|easeInOut|linear|spring)\("#)
     static let sizeDeclared = try! NSRegularExpression(pattern: #"\b(?:let|var) \w+: \[?CGFloat\]?"#)
