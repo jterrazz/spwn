@@ -19,6 +19,7 @@ const (
 	PageAwake    = "menubar.awake"
 	PageActivity = "menubar.activity"
 	PageAccounts = "menubar.accounts"
+	PageNeeds    = "menubar.needs"
 )
 
 type FeedInput struct {
