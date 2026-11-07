@@ -12,7 +12,8 @@ const (
 	// value: the menu bar's pages of SPEC §10.2, each watched by its name
 	// and, after a colon, its subject: `menubar.machine:infra`, that
 	// machine's page; `menubar.ports:jterrazz-mac-mini`, the ports of that
-	// Mac; `menubar.activity:6m`, This Mac over 6 min.
+	// Mac; `menubar.activity:6m`, This Mac over 6 min, and
+	// `menubar.activity:infra:24h`, infra over 24 h.
 	PageSwitcher = "menubar.switcher"
 	PageMachine  = "menubar.machine"
 	PagePorts    = "menubar.ports"

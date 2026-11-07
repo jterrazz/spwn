@@ -117,17 +117,16 @@ func (o Menubar) Awake() engine.Feed {
 }
 
 func (o Menubar) Activity() engine.Feed {
-	// invariant: SPEC §10.2 Activity, §6.3: This Mac's measures over the
-	// window the page names after its colon (1 h unless named), read from the
-	// activity watch every 2 s while the page is open.
+	// invariant: SPEC §10.2 Activity, §6.3, B5.16: a machine's measures over
+	// the window the page names after its colon (1 h unless named), This
+	// Mac's unless a machine is named before the window
+	// (`menubar.activity:infra:6m`), read every 2 s while the page is open.
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
-		window, err := time.ParseDuration(in.Subject)
-		if err != nil || window <= 0 {
-			window = time.Hour
-		}
+		name, window := activitySubject(in.Subject)
 		read := func(ctx context.Context) page.Page {
-			v := pageactivity.View{Name: o.ThisMachine.Machine, Label: "This Mac", Kind: string(machine.Mac), ThisMac: true, Graph: window}
-			snaps, err := call.Follow(ctx, o.Calls, machine.Ref{}, activitycalls.Read, activitycalls.ReadIn{Graph: window}, nil)
+			at, v, ask := o.activityOf(ctx, name)
+			v.Graph, ask.Graph = window, window
+			snaps, err := call.Follow(ctx, o.Calls, at, activitycalls.Read, ask, nil)
 			if err != nil {
 				return pagemenubar.Unread(pagemenubar.ActivityID, o.ThisMachine, err)
 			}
@@ -141,6 +140,47 @@ func (o Menubar) Activity() engine.Feed {
 		}
 		return o.reread(ctx, in, pagemenubar.ActivityID, sampleEvery, read)
 	}
+}
+
+// value: the machine and the window an Activity page names: a window alone
+// is This Mac's, a machine alone is its last hour.
+func activitySubject(subject string) (name string, window time.Duration) {
+	name, words, named := strings.Cut(subject, ":")
+	if !named {
+		words = subject
+	}
+	if d, err := time.ParseDuration(words); err == nil {
+		window = d
+		if !named {
+			name = ""
+		}
+	}
+	if window <= 0 {
+		window = time.Hour
+	}
+	return name, window
+}
+
+// value: SPEC B5.16: where a machine's activity is read, through its
+// engine: a Mac on itself, a VM on the Mac that runs it, whose engine keeps
+// its guest's history.
+func (o Menubar) activityOf(ctx context.Context, name string) (machine.Ref, pageactivity.View, activitycalls.ReadIn) {
+	if name == "" || name == o.ThisMachine.Machine {
+		return machine.Ref{}, pageactivity.View{Name: o.ThisMachine.Machine, Label: "This Mac", Kind: string(machine.Mac), ThisMac: true}, activitycalls.ReadIn{}
+	}
+	mac, isVM := "", false
+	if o.Live != nil {
+		mac, isVM = o.Live.macOf(ctx, name)
+	}
+	if !isVM {
+		return machine.Ref{Name: name}, pageactivity.View{Name: name, Label: name, Kind: string(machine.Mac)}, activitycalls.ReadIn{}
+	}
+	at := machine.Ref{Name: mac}
+	if mac == o.ThisMachine.Machine {
+		at = machine.Ref{}
+	}
+	v := pageactivity.View{Name: name, Label: name, Mac: mac, On: mac}
+	return at, v, activitycalls.ReadIn{Of: name, Machine: machine.Ref{Name: name, On: mac}}
 }
 
 // invariant: a page of the menu bar's own goes out at once as its frame,

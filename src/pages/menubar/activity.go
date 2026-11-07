@@ -33,6 +33,9 @@ func Activity(v pageactivity.View, thisMac page.Context) page.Page {
 	}
 	p := pageactivity.Page(v, thisMac)
 	p.ID = ActivityID
+	if !v.ThisMac {
+		p.Context = page.Context{Machine: v.Name, Kind: v.Kind, On: v.Mac}
+	}
 	kept := p.Sections[:0]
 	for _, s := range p.Sections {
 		switch s.ID {
