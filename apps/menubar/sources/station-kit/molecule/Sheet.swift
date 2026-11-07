@@ -107,7 +107,7 @@ public struct Choice: View {
         let all = (field.options ?? []).map { ($0.label ?? $0.value ?? "", ($0.value ?? "") == value, { [o = $0] in value = o.value ?? "" }) }
         VStack(spacing: Token.Gap.small) {
             ForEach(Array(stride(from: 0, to: all.count, by: Self.perRow)), id: \.self) { i in
-                Segments(options: Array(all[i..<min(i + Self.perRow, all.count)]))
+                Segmented(options: Array(all[i..<min(i + Self.perRow, all.count)]))
             }
         }
     }
@@ -275,35 +275,3 @@ public struct SheetButton: View {
     }
 }
 
-// value: a picker as macOS's segmented control: its options side by side
-// on a tertiary track, the chosen one raised.
-public struct Segments: View {
-    let options: [(label: String, on: Bool, tap: () -> Void)]
-    @Environment(\.colorScheme) private var scheme
-
-    public init(options: [(label: String, on: Bool, tap: () -> Void)]) { self.options = options }
-
-    public var body: some View {
-        HStack(spacing: Token.Gap.tight) {
-            ForEach(Array(options.enumerated()), id: \.offset) { _, o in
-                Button(action: o.tap) {
-                    Text(o.label)
-                        .font(.system(size: Token.Size.segment, weight: o.on ? .semibold : .medium))
-                        .foregroundStyle(Token.Ink.primary)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Token.Gap.flank)
-                        .background {
-                            if o.on {
-                                RoundedRectangle(cornerRadius: Token.Detail.thumbCorner, style: .continuous).fill(Token.Fill.picked(scheme)).shadow(color: Token.Shadow.thumb.color, radius: Token.Shadow.thumb.radius, y: Token.Shadow.thumb.y)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(Token.Gap.tight)
-        .background(Token.Fill.faint(scheme), in: RoundedRectangle(cornerRadius: Token.Tile.fieldCorner, style: .continuous))
-    }
-}
