@@ -115,7 +115,8 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, _ map[string]st
 
 func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	// invariant: off takes station's hook out of every app's file, the app
-	// installed or not, and leaves the owner's own hooks.
+	// installed or not, what is left of a hook the owner cut down included,
+	// and leaves the owner's own hooks.
 	hooks, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
@@ -126,11 +127,11 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 		if err != nil {
 			return c, err
 		}
-		if !installed {
-			continue
-		}
 		if err := h.Hooks.Remove(ctx); err != nil {
 			return c, err
+		}
+		if !installed {
+			continue
 		}
 		c.Steps = append(c.Steps, settings.ChangeStep{Label: h.App, State: catalog.StateOK, Detail: "hook removed from " + h.File})
 	}
