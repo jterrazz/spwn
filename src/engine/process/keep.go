@@ -35,7 +35,7 @@ func (d *Engine) restartLater(ctx context.Context, v *vmState, up time.Duration,
 	v.restarts = v.restarts.After(up, now)
 	r := v.restarts
 	v.rerunAt = now.Add(r.Wait)
-	v.state, v.detail = engine.StateStopped, "restarting"
+	v.state, v.detail = engine.StateStopped, restartingDetail
 	d.mu.Unlock()
 	switch {
 	case r.Looping && !was:

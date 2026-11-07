@@ -172,6 +172,9 @@ func (d *Engine) tickShares(ctx context.Context) {
 func (d *Engine) vmStopped(ctx context.Context, vm string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	if ls := d.heard[vm]; len(ls) > 0 {
+		d.lastHeard[vm] = ls
+	}
 	delete(d.heard, vm)
 	for _, s := range d.svcs {
 		if s.vm == vm {

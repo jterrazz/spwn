@@ -28,6 +28,9 @@ type PortJSON struct {
 	Reserved int           `json:"reserved,omitempty"`
 	URL      string        `json:"url,omitempty"`
 	Detail   string        `json:"detail,omitempty"`
+	// value: unreachable while its VM is down, starting while it boots
+	// again; absent while it answers.
+	Answer string `json:"answer,omitempty"`
 }
 
 type DeclaredJSON struct {
@@ -99,7 +102,7 @@ func PortObject(s ports.SharedPort) PortJSON {
 
 func ListenerObject(p ports.Port) PortJSON {
 	known := p.Named()
-	o := PortJSON{Machine: p.Machine.Name, Port: p.Port, Proto: "tcp", Process: p.Process, Name: known.Name, Logo: known.Logo, PID: p.PID, Bind: p.Binds, Class: string(p.Class())}
+	o := PortJSON{Machine: p.Machine.Name, Port: p.Port, Proto: "tcp", Process: p.Process, Name: known.Name, Logo: known.Logo, PID: p.PID, Bind: p.Binds, Class: string(p.Class()), Answer: string(p.Answer)}
 	if app := p.App(); app != p.Process {
 		o.App = app
 	}
@@ -133,7 +136,7 @@ func ListContract(l ports.Listing) ListJSON {
 			shared[key] = true
 			if p, ok := heard[key]; ok {
 				l := ListenerObject(p)
-				o.Bind, o.Class, o.Declared, o.What, o.PID = l.Bind, l.Class, l.Declared, l.What, l.PID
+				o.Bind, o.Class, o.Declared, o.What, o.PID, o.Answer = l.Bind, l.Class, l.Declared, l.What, l.PID, l.Answer
 			}
 			private = append(private, o)
 		}

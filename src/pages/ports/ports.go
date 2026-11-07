@@ -99,14 +99,14 @@ func Sections(f ports.AllMachines, thisMac page.Context, all bool) []page.Sectio
 				row := named(RedRow(p), thisMac)
 				red = append(red, page.Item{Row: &row})
 			case p.Declared != nil:
-				row := named(PublicRow(p), thisMac)
+				row := named(Answering(PublicRow(p), p), thisMac)
 				public = append(public, page.Item{Row: &row})
 			case shared[p.Key()]:
 			case p.Reach == ports.ThisMachine:
-				row := named(LocalRow(p), thisMac)
+				row := named(Answering(LocalRow(p), p), thisMac)
 				local = append(local, page.Item{Row: &row})
 			default:
-				row := named(PrivateRow(p), thisMac)
+				row := named(Answering(PrivateRow(p), p), thisMac)
 				private = append(private, page.Item{Row: &row})
 			}
 		}
@@ -234,6 +234,19 @@ func PublicRow(p ports.Port) page.Row {
 		row.Cells[4] = page.Texts(r.Label, r.Seen)
 	}
 	return row
+}
+
+func Answering(r page.Row, p ports.Port) page.Row {
+	// invariant: SPEC B5.17: a port follows its VM's state: greyed
+	// unreachable while it is down, starting while it boots again.
+	switch p.Answer {
+	case ports.Unreachable:
+		r.Mark, r.Reason, r.Detail = page.Attention, page.Unreachable, page.Text(catalog.UnreachableDetail(p.Machine.Name))
+	case ports.Starting:
+		r.Mark, r.Reason, r.Detail = page.Attention, page.Waiting, page.Text(catalog.StartingDetail(p.Machine.Name))
+	case ports.Answers:
+	}
+	return r
 }
 
 func LocalRow(p ports.Port) page.Row {

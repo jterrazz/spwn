@@ -5,6 +5,7 @@ import (
 	"time"
 
 	model "github.com/jterrazz/studio-station/src/machines"
+	"github.com/jterrazz/studio-station/src/ports"
 )
 
 type Memory map[string]Remembered
@@ -23,6 +24,9 @@ type Remembered struct {
 	Restarts model.Restarts    `json:"restarts,omitzero"`
 	BootAt   time.Time         `json:"boot_at,omitzero"`
 	Check    model.CheckStatus `json:"check,omitzero"`
+	// value: what it was last heard listening on, so a successor lists
+	// the ports of a VM down or booting again.
+	LastHeard []ports.Listener `json:"last_heard,omitempty"`
 }
 
 type VMAccounts struct {

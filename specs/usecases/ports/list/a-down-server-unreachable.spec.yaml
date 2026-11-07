@@ -1,0 +1,22 @@
+description: 'a server powered off from inside keeps the ports it listened on listed, each unreachable while it is down'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:443" traefik'
+      exit: 0
+    - command: 'world listen infra "*:9100" node_exporter'
+      exit: 0
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | [.port, .name, .answer]]'''
+      exit: 0
+      stdout: |
+          [[443,"Traefik",null],[9100,"Port 9100",null]]
+    - command: 'world poweroff-inside infra'
+      exit: 0
+    - command: 'ports --all-machines --json | /usr/bin/jq -c ''[.ports[] | select(.machine == "infra") | [.port, .name, .answer]]'''
+      exit: 0
+      stdout: |
+          [[443,"Traefik","unreachable"],[9100,"Port 9100","unreachable"]]
+    - command: 'ports --all-machines | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ◐	infra	443	public	traefik	*:443 all interfaces	declared, but no tunnel seen on infra	unreachable while infra is down
+          ◐	infra	9100	private		own Tailscale device: infra	node_exporter	unreachable while infra is down

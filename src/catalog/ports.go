@@ -43,6 +43,16 @@ func StoppedDetail(vm string) string {
 	return "not shared while " + vm + " is stopped"
 }
 
+func UnreachableDetail(vm string) string {
+	// value: why a port its VM was heard listening on does not answer.
+	return "unreachable while " + vm + " is down"
+}
+
+func StartingDetail(vm string) string {
+	// value: a port of a VM booting again, before its guest reports.
+	return "starting: unreachable until " + vm + " is ready"
+}
+
 const IssuingDetail = "issuing certificate" // value: a share whose host certificate the tailnet has not issued yet.
 
 const ServeOffDetail = "Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"

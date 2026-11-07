@@ -16,18 +16,20 @@ Inside each running VM, `station guest` (hidden, run by the Mac's [engine](machi
 
 For each reported port the engine takes a **reserved port**: the lowest free port of the range (default 40000-40999), sticky on (VM, guest port), so the same dev server gets the same URL next week. It then **shares** it: one listener of the Mac on `127.0.0.1:<host port>` (never the tailnet ip, `0.0.0.0` or `::`: station refuses to bind every interface), each connection carried by ssh `direct-tcpip` to the address the VM reported, and, while [Serve](#serve-and-https) is on, a `tailscale serve` entry that exposes that port on the tailnet. A server bound to 127.0.0.1 in the VM needs no `--host`. tailscaled carries the tailnet's bytes, so a Mac's application firewall, which drops an unsigned binary's bytes on the tailnet ip with no prompt, never stands in the way, and who may reach a shared port is the tailnet policy's, never station's.
 
-| Event                                   | What happens                                                       |
-| --------------------------------------- | ------------------------------------------------------------------ |
-| the port starts listening               | reserved and shared                                                |
-| it listens in a server                  | listed, never shared by itself                                     |
-| it stops listening                      | unshared after 5 s (a restart inside them keeps it); reserved kept |
-| a VM stops, then runs again             | unshared, then shared again on the same port of its Mac            |
-| `machines delete`, a throwaway poweroff | released, its serve entry removed                                  |
-| `station ports stop-sharing`            | released and remembered: not shared again until a share            |
-| 7 days without listening                | released, unless pinned by a [profile](#profiles)                  |
-| the range is full, or the VM holds 20   | waiting, `◐` with the cause and the fix                            |
-| the port of the Mac is busy             | the next free port (a pinned one waits, retried every 10 s)        |
-| the Mac reboots                         | the engine shares every reserved port again as the guests report   |
+| Event                                   | What happens                                                        |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| the port starts listening               | reserved and shared                                                 |
+| it listens in a server                  | listed, never shared by itself                                      |
+| it stops listening                      | unshared after 5 s (a restart inside them keeps it); reserved kept  |
+| a VM stops, then runs again             | unshared, then shared again on the same port of its Mac             |
+| `machines delete`, a throwaway poweroff | released, its serve entry removed                                   |
+| `station ports stop-sharing`            | released and remembered: not shared again until a share             |
+| 7 days without listening                | released, unless pinned by a [profile](#profiles)                   |
+| the range is full, or the VM holds 20   | waiting, `◐` with the cause and the fix                             |
+| the port of the Mac is busy             | the next free port (a pinned one waits, retried every 10 s)         |
+| the Mac reboots                         | the engine shares every reserved port again as the guests report    |
+| a server goes down                      | its ports stay listed, `unreachable while infra is down`, never red |
+| a server boots again                    | its ports listed `starting` until its guest reports them            |
 
 The reserved ports live in `~/.local/state/station/leases.json`, a kept file: deleting it changes every URL. Each has two URLs, one shape each: `local` `http://127.0.0.1:<port>` (no scheme for a raw TCP server) and `public`, the one `ports share` prints and a profile exports. With Serve on, `public` is `https://<public host>:<port>` for an HTTP server or one not yet detected (per [mode](#serve-and-https)) and `<public host>:<port>` for a raw TCP one; with Serve off it is the local URL, the only one there is. `<public host>` is the Mac's MagicDNS name.
 
