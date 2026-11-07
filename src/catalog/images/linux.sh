@@ -62,5 +62,13 @@ WantedBy=poweroff.target halt.target
 UNIT
 
 systemctl enable station-hostkeys.service station-intent.service
+
+# outside: a guest kernel line reaches the host's console file only when hvc0 is the kernel's console.
+install -d /etc/default/grub.d
+cat > /etc/default/grub.d/60-station-console.cfg <<'CFG'
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT console=hvc0"
+CFG
+update-grub
+grep -q 'console=hvc0' /boot/grub/grub.cfg || { echo "the kernel's console is not hvc0" >&2; exit 1; }
 # outside: the console is a host file tart reads back as input, so a getty on it answers its own prompts.
 systemctl mask --now serial-getty@hvc0.service
