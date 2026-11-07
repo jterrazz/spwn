@@ -204,7 +204,7 @@ public struct StripView: View {
         let memorySpark = store.points(strip.memory, else: strip.memory_spark)
         return VStack(alignment: .leading, spacing: Token.Gap.small) {
             HStack(alignment: .top, spacing: Token.Space.gap) {
-                measure("CPU", store.points(strip.cpu, else: strip.spark)) { LiveText(strip.cpu, size: size) }
+                measure("CPU", store.points(strip.cpu, else: strip.spark)) { ValueText(store.now(strip.cpu), size: size) }
                 if let memory = store.now(strip.memory) {
                     measure("Memory", memorySpark) {
                         if memorySpark?.count ?? 0 < 2, memory.kind == "ratio", let of = memory.of, of > 0 {

@@ -62,20 +62,3 @@ public struct LiveRead<Content: View>: View {
         var body: some View { content(store) }
     }
 }
-
-// value: a value's words as its live key reads them now.
-public struct LiveText: View {
-    let value: Value?
-    let muted: Bool
-    let size: CGFloat
-
-    public init(_ value: Value?, muted: Bool = false, size: CGFloat = Token.Space.text) {
-        self.value = value
-        self.muted = muted
-        self.size = size
-    }
-
-    public var body: some View {
-        LiveRead { store in ValueText(store.now(value), muted: muted, size: size) }
-    }
-}

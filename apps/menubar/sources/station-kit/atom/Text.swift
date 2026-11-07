@@ -109,8 +109,12 @@ public struct LiveText: View {
     }
 
     public var body: some View {
+        LiveRead { store in drawn(store.now(value) ?? value) }
+    }
+
+    func drawn(_ value: Value) -> some View {
         let shown = Live.value(value, samples: samples)
-        Text(Format.show(shown, now: now))
+        return Text(Format.show(shown, now: now))
             .font(role.font)
             .foregroundStyle(value.stale == true ? tokens.color.t3 : value.signal != nil ? tokens.signalText(value.signal) : tokens.tone(role.tone))
             .contentTransition(.numericText(value: Double(shown.n ?? 0)))
