@@ -42,11 +42,14 @@ func (s *Session) Open(ctx context.Context, folder string, argv []string) error 
 	if err != nil {
 		return err
 	}
+	args := []string{"new-session", "-d", "-s", session}
 	if running.ExitCode == 0 {
-		_, err = s.tmux(ctx, "", append([]string{"new-window", "-t", session, "-c", folder}, argv...)...)
-		return err
+		args = []string{"new-window", "-t", session}
 	}
-	_, err = s.tmux(ctx, "", append([]string{"new-session", "-d", "-s", session, "-c", folder}, argv...)...)
+	if folder != "" {
+		args = append(args, "-c", folder)
+	}
+	_, err = s.tmux(ctx, "", append(args, argv...)...)
 	return err
 }
 

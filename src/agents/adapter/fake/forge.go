@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/jterrazz/studio-station/src/agents/contract"
+	"github.com/jterrazz/studio-station/src/world"
 )
 
 const (
@@ -27,6 +28,8 @@ func NewForge(open int) *Forge {
 	f.agents().PRs = map[int]string{open: prOpen}
 	return f
 }
+
+func ForgeOf(w *world.World, vm string) *Forge { return &Forge{inVM{w: w, vm: vm}} }
 
 func (f *Forge) Merge(_ context.Context, _ string, number int) error {
 	f.w.Lock()

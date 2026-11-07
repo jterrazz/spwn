@@ -9,7 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
+	"github.com/jterrazz/studio-station/src/agents/adapter/gh"
 	agentsjsonfile "github.com/jterrazz/studio-station/src/agents/adapter/jsonfile"
+	"github.com/jterrazz/studio-station/src/agents/adapter/tmux"
 	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -68,6 +70,23 @@ func (m machine) journal() agentscontract.Journal {
 		return m.world.journal()
 	}
 	return agentsjsonfile.New(m.sys.FS, path.Join(m.paths.State, "agents"), m.sys.Clock, catalog.AgentWatchEvery)
+}
+
+// value: the terminal session this VM's agents run in.
+func (m machine) agentSession() agentscontract.Session {
+	if m.world != nil {
+		return m.world.agentSession()
+	}
+	return tmux.New(m.sys.Run)
+}
+
+// value: the forge this VM's agents open their PRs on, signed in with the
+// account lent to the VM.
+func (m machine) forge() agentscontract.Forge {
+	if m.world != nil {
+		return m.world.forge()
+	}
+	return gh.New(m.sys.Run)
 }
 
 // value: what listens here, read the way this system can: a Linux kernel's

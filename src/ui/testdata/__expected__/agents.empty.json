@@ -1,0 +1,46 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "machine": "review-bot",
+    "kind": "workspace"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "session",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "app",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "kind": "list",
+          "keep": 90
+        },
+        {
+          "key": "task",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "agents"
+          }
+        }
+      ],
+      "pipe_counts": true
+    }
+  ]
+}

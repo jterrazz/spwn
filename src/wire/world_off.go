@@ -64,6 +64,8 @@ func (*worldMac) disk() diskcontract.DiskUsage                          { return
 func (*worldMac) listeners() portscontract.Listeners                    { return nil }
 func (*worldMac) journal() agentscontract.Journal                       { return nil }
 func (*worldMac) hooks(agents.App) agentscontract.Hooks                 { return nil }
+func (*worldMac) agentSession() agentscontract.Session                  { return nil }
+func (*worldMac) forge() agentscontract.Forge                           { return nil }
 func (*worldMac) placement() (ports.VMLivesOn, bool)                    { return ports.VMLivesOn{}, false }
 func (*worldMac) tailnet() portscontract.Tailnet                        { return nil }
 func (*worldMac) funnel() funnel.Funnel                                 { return nil }

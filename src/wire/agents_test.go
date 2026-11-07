@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
@@ -33,7 +34,7 @@ func record(t *testing.T, calls call.Router, stdin io.Reader, args ...string) (t
 	t.Helper()
 	var out bytes.Buffer
 	env := kit.Env{Calls: calls, Stdin: stdin, Stdout: &out}
-	cmd := agentsCommand(env)
+	cmd := agentsCommand(env, page.Context{})
 	cmd.SetArgs(append([]string{"record", "--app", "claudecode"}, args...))
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)

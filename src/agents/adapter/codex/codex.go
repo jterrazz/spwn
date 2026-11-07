@@ -49,6 +49,8 @@ func New(files Files, home string, now func() time.Time) *Hooks {
 
 func (*Hooks) App() agents.App { return ID }
 
+func (*Hooks) Launch() []string { return []string{Program} }
+
 func notify() []string { return append(append([]string{}, catalog.AgentRecord...), string(ID)) }
 
 func line() string {

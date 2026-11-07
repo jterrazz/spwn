@@ -61,11 +61,50 @@
       "out": "Reading"
     },
     {
+      "name": "agents.list",
+      "schema": "station.agents.list/v1",
+      "where": "at-target"
+    },
+    {
+      "name": "agents.merge-pr",
+      "schema": "station.agents.merge-pr/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.ended",
+        "agents.no-pr",
+        "agents.unknown-session"
+      ],
+      "in": "MergeIn",
+      "out": "Agent"
+    },
+    {
       "name": "agents.record",
       "schema": "station.agents.record/v1",
       "where": "at-target",
       "in": "RecordIn",
       "out": "Recorded"
+    },
+    {
+      "name": "agents.reply",
+      "schema": "station.agents.reply/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.ended",
+        "agents.no-text",
+        "agents.unknown-session"
+      ],
+      "in": "ReplyIn",
+      "out": "Agent"
+    },
+    {
+      "name": "agents.start",
+      "schema": "station.agents.start/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.unknown-app"
+      ],
+      "in": "StartIn",
+      "out": "Started"
     },
     {
       "name": "apps.install",

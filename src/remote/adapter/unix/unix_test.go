@@ -3,6 +3,7 @@ package unix_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
@@ -22,10 +23,11 @@ type engine struct {
 	vm    serve.Calls
 	down  bool
 	lines []string
+	stdin []string
 }
 
 func (e *engine) GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error) {
-	e.lines = append(e.lines, line)
+	e.lines, e.stdin = append(e.lines, line), append(e.stdin, stdin)
 	if e.down {
 		return "", 0, fail.New(fail.Unreachable, call.Unreachable, vm, nil)
 	}
@@ -61,5 +63,20 @@ func TestAVMIsAskedForItsOwnCallsOnlyThroughTheGuestServer(t *testing.T) {
 	}
 	if len(e.lines) != 1 || e.lines[0] != unix.Guest {
 		t.Errorf("the engine ran %q inside the VM, want only %q", e.lines, unix.Guest)
+	}
+}
+
+func TestAReplyToAnAgentTravelsOnTheGuestsStdinNeverOnItsCommandLine(t *testing.T) {
+	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, "v3.0.0")}
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{} }).Dial(t.Context(), "jterrazz-macbook-pro")
+	text := "yes, merge it; then `rm -rf build` && say $HOME"
+	in, _ := json.Marshal(map[string]string{"Session": "s-1", "Text": text})
+	_, _ = ep.Invoke(t.Context(), machine.Ref{Name: "linux-1"}, "agents.reply", in, nil)
+	if len(e.lines) != 1 || e.lines[0] != unix.Guest {
+		t.Fatalf("the engine ran %q inside the VM, want only %q", e.lines, unix.Guest)
+	}
+	sent, _ := json.Marshal(text)
+	if !strings.Contains(e.stdin[0], strings.Trim(string(sent), `"`)) {
+		t.Errorf("the reply is not in the guest's stdin %q", e.stdin[0])
 	}
 }

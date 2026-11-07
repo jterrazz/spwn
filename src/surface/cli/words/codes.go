@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/src/background/calls"
@@ -157,6 +158,25 @@ func Codes() map[fail.Code]Wording {
 		},
 		accountscalls.ToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
+		},
+		agentscalls.UnknownSession: func(e *fail.Error) (string, string) {
+			return "no agent session \"" + e.Subject + "\" here", "station agents"
+		},
+		agentscalls.Ended: func(e *fail.Error) (string, string) {
+			said := "the agent of " + e.Subject + " has finished"
+			if r := e.Detail["reason"]; r != "" {
+				said += ": " + r
+			}
+			return said, "station agents start --task <task>"
+		},
+		agentscalls.NoPR: func(e *fail.Error) (string, string) {
+			return "the agent of " + e.Subject + " has opened no PR", "station agents"
+		},
+		agentscalls.NoText: func(e *fail.Error) (string, string) {
+			return "nothing to send to " + e.Subject, "station agents reply " + e.Subject + " <text>"
+		},
+		agentscalls.UnknownApp: func(e *fail.Error) (string, string) {
+			return "no agent app \"" + e.Subject + "\": claudecode or codex", "station agents start --app claudecode"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

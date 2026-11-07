@@ -1,0 +1,20 @@
+description: 'a reply to a waiting agent is typed into its session once, and it is at work again'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world agent-stop linux-1 s-1 "PR #42 is ready"'
+      exit: 0
+    - command: 'agents reply s-1 yes, merge it'
+      exit: 0
+      stdout: |
+          ●	s-1	sent · it works on it
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ●
+          ●	s-1	claudecode	working	Review the auth refresh
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.typed'' world.json'
+      exit: 0
+      stdout: |
+          ["yes, merge it"]

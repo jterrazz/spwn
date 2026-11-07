@@ -1,0 +1,16 @@
+description: 'a reply to an agent that finished is refused with how it ended: nothing is typed'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 "merged PR #42"'
+      exit: 0
+    - command: 'agents reply s-1 thanks'
+      exit: 2
+      stderr: |
+          Error: the agent of s-1 has finished: merged PR #42
+          Hint: station agents start --task <task>
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.typed'' world.json'
+      exit: 0
+      stdout: |
+          null

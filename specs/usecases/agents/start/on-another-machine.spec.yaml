@@ -1,0 +1,12 @@
+description: 'an agent started from the Mac with --on starts inside the workspace'
+env: two-macs
+runs:
+    - command: 'agents start /home/admin/app --task "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	claudecode	started in /home/admin/app · Build the landing page
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
+      exit: 0
+      stdout: |
+          {"opened":["/home/admin/app claudecode"],"typed":["Build the landing page"]}

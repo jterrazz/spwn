@@ -10,6 +10,9 @@ type Hooks interface {
 	// value: a strategy, one adapter per app: the hook that tells station
 	// what the app's agent does, in the app's own settings file inside the VM.
 	App() agents.App
+	// invariant: the program that starts the app's agent in a folder, its
+	// first prompt typed after it starts, never on its command line.
+	Launch() []string
 	// invariant: installing adds station's hook and keeps every other key of
 	// the app's settings file as the owner left it; a second install changes
 	// nothing.

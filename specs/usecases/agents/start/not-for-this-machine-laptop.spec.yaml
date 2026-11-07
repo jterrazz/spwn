@@ -1,0 +1,8 @@
+description: 'on a laptop, station agents start is refused: agents work inside a workspace'
+env: two-macs
+runs:
+    - command: 'agents start --task "Build the landing page"'
+      exit: 2
+      stderr: |
+          Error: jterrazz-macbook-pro is a mac: agents are recorded inside the workspace they work in
+          Hint: run station overview for what jterrazz-macbook-pro has

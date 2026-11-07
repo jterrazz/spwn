@@ -1,0 +1,8 @@
+description: 'an app station has no adapter for is refused, with the ones it has'
+env: in-workspace
+runs:
+    - command: 'agents start --app cursor --task "Build the landing page"'
+      exit: 2
+      stderr: |
+          Error: no agent app "cursor": claudecode or codex
+          Hint: station agents start --app claudecode
