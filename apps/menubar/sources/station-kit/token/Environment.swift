@@ -16,6 +16,10 @@ private struct PanelWidthKey: EnvironmentKey {
     static let defaultValue = Token.Space.width
 }
 
+private struct PanelRoomKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
 extension EnvironmentValues {
     public var stationContrast: ColorSchemeContrast {
         get { self[ContrastKey.self] }
@@ -35,6 +39,11 @@ extension EnvironmentValues {
     public var stationPanelWidth: CGFloat {
         get { self[PanelWidthKey.self] }
         set { self[PanelWidthKey.self] = newValue }
+    }
+
+    public var stationPanelRoom: CGFloat? {
+        get { self[PanelRoomKey.self] }
+        set { self[PanelRoomKey.self] = newValue }
     }
 }
 

@@ -56,19 +56,6 @@ final class GlassTests: XCTestCase {
         XCTAssertGreaterThan(checked, 20)
     }
 
-    // invariant: live, the panel paints nothing of its own: the
-    // MenuBarExtra's window is the system's glass, and only the still
-    // drawing of a snapshot stands in for it.
-    func testTheLivePanelPaintsNothing() throws {
-        let pane = Color.clear.frame(width: 120, height: 80).stationPanel()
-        let renderer = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, false))
-        let live = try XCTUnwrap(renderer.cgImage.flatMap(Bitmap.init))
-        XCTAssertEqual(stride(from: 3, to: live.pixels.count, by: 4).filter { live.pixels[$0] != 0 }.count, 0)
-        let still = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, true))
-        let drawn = try XCTUnwrap(still.cgImage.flatMap(Bitmap.init))
-        XCTAssertGreaterThan(stride(from: 3, to: drawn.pixels.count, by: 4).filter { drawn.pixels[$0] != 0 }.count, 0)
-    }
-
     func testAPaintedPanelIsCaught() throws {
         let painted = AnyView(Rectangle().fill(Color.gray).frame(width: 100, height: 100))
         XCTAssertGreaterThan(try XCTUnwrap(Self.opaque(painted, scheme: .dark)), 0.9)

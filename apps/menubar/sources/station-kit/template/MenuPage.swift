@@ -8,7 +8,7 @@ public enum MenuPage {
     public static let activity = Navigation.activity
 
     @MainActor
-    public static func view(_ state: PanelState, handlers: PopoverHandlers = PopoverHandlers()) -> AnyView? {
+    public static func view(_ state: PanelState, handlers: PopoverHandlers = PopoverHandlers(), scrolls: Bool = true) -> AnyView? {
         guard let page = state.page else { return nil }
         let body: AnyView
         switch page.id {
@@ -17,35 +17,35 @@ public enum MenuPage {
         case activity: body = AnyView(ActivityPage(state, handlers: handlers))
         default: return nil
         }
-        return AnyView(MenuPageFrame(state: state, handlers: handlers) { body })
+        return AnyView(MenuPageFrame(state: state, handlers: handlers, scrolls: scrolls) { body })
     }
 }
 
 struct MenuPageFrame<Content: View>: View {
     let state: PanelState
     let handlers: PopoverHandlers
+    let scrolls: Bool
     let content: Content
 
-    init(state: PanelState, handlers: PopoverHandlers, @ViewBuilder content: () -> Content) {
+    init(state: PanelState, handlers: PopoverHandlers, scrolls: Bool, @ViewBuilder content: () -> Content) {
         self.state = state
         self.handlers = handlers
+        self.scrolls = scrolls
         self.content = content()
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Token.Tile.section) {
-            content
-        }
-        .padding(Token.Space.margin)
-        .stationWidth()
-        .stationScroll(true, key: "\(state.openings)/\(state.page?.id ?? "")", sheet: state.confirming, status: state.status != nil || state.connection == .connecting)
-        .stationStatus {
+        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.page?.id ?? "")", sheet: state.confirming) {
+            VStack(alignment: .leading, spacing: Token.Tile.section) {
+                content
+            }
+            .padding(Token.Space.margin)
+        } footer: {
             if let status = state.status {
                 StatusBar(status.line, failed: status.failed).padding(EdgeInsets(top: 0, leading: Token.Space.margin, bottom: Token.Space.margin, trailing: Token.Space.margin))
             }
         }
         .background { BackKey(state: state, handlers: handlers) }
-        .stationPanel()
         .environment(\.stationHints, false)
     }
 }

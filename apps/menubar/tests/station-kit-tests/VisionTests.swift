@@ -14,7 +14,7 @@ final class VisionTests: XCTestCase {
     }
 
     func drawn(_ name: String, _ state: PanelState) throws {
-        let view = MenuPage.view(state) ?? AnyView(Popover(state, scrolls: false))
+        let view = MenuPage.view(state, scrolls: false) ?? AnyView(Popover(state, scrolls: false))
         XCTAssertNil(try Golden.check("vision." + name, view))
     }
 

@@ -39,6 +39,6 @@ final class AwakeTests: XCTestCase {
 
         var state = Snapshot.state("menubar.awake.two-macs", page)
         state.confirming = change.id
-        XCTAssertNil(try Golden.check("sheet.awake-change", try XCTUnwrap(MenuPage.view(state))))
+        XCTAssertNil(try Golden.check("sheet.awake-change", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
 }

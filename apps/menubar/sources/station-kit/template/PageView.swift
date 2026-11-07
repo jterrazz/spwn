@@ -30,6 +30,6 @@ public struct PageView: View {
         }
         .padding(Token.Space.margin)
         .frame(width: width, alignment: .topLeading)
-        .stationPanel()
+        .stationPageGlass()
     }
 }

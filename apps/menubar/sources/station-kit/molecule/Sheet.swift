@@ -84,7 +84,7 @@ struct SheetGround: ViewModifier {
             SectionDivider()
             content
         }
-        .background { Color.clear.id(PanelScroll.sheetID).padding(.bottom, -Token.Space.margin) }
+        .background { Color.clear.id(PanelHeight.sheetAnchor).padding(.bottom, -Token.Space.margin) }
     }
 }
 

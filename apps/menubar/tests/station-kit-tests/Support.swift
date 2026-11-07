@@ -99,7 +99,7 @@ enum Snapshot {
     @MainActor
     static func view(_ name: String, _ page: Page) -> AnyView {
         if popover(page) { return AnyView(Popover(state(name, page), scrolls: false)) }
-        if let own = MenuPage.view(state(name, page)) { return own }
+        if let own = MenuPage.view(state(name, page), scrolls: false) { return own }
         return AnyView(PageView(page))
     }
 

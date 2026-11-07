@@ -160,8 +160,6 @@ public enum Token {
     public enum Space {
         // value: the vision's panel padding, 12 pt inside its 0.5 pt rim.
         public static let margin: CGFloat = 12.5
-        // value: the room the status line takes under the panel's scroll.
-        public static let statusRoom: CGFloat = 40
         public static let indent: CGFloat = 12
         public static let gap: CGFloat = 8
         public static let row: CGFloat = 22
@@ -586,9 +584,6 @@ extension Token {
             public static let screenRoom: CGFloat = 48
             public static let fade: CGFloat = 14
             public static let rim: CGFloat = 1
-            public static let unknownScreen: CGFloat = 800
-            public static let dockGap: CGFloat = 16
-            public static let leastRoom: CGFloat = 320
         }
 
         public enum Card {
