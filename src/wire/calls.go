@@ -121,18 +121,19 @@ func engineKept(api engineAPI) func(ctx context.Context, name string) (activity.
 }
 
 // invariant: the process that holds a VM's guest, as this Mac's engine names it.
-func engineHolder(api engineAPI) func(ctx context.Context, vm string) (int, error) {
-	return func(ctx context.Context, vm string) (int, error) {
+func engineRuns(api engineAPI) func(ctx context.Context) ([]activity.VMRun, error) {
+	return func(ctx context.Context) ([]activity.VMRun, error) {
 		views, err := api.VMs(ctx)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
+		runs := make([]activity.VMRun, 0, len(views))
 		for _, v := range views {
-			if v.Name == vm {
-				return v.Holder, nil
+			if v.Holder != 0 {
+				runs = append(runs, activity.VMRun{VM: v.Name, Holder: v.Holder})
 			}
 		}
-		return 0, nil
+		return runs, nil
 	}
 }
 
@@ -155,7 +156,7 @@ func (m machine) activityDeps(meter activitycontract.Meter) activitycalls.Deps {
 	d := activitycalls.Deps{Meter: meter, Volume: m.disk(), Name: m.profile.Ref.Name, Kind: m.profile.Kind, Sleep: m.sys.Clock.Sleep, Now: m.sys.Clock.Now}
 	if m.profile.Kind == coremachine.Mac {
 		d.Kept = engineKept(m.engineAPI())
-		d.Holder = engineHolder(m.engineAPI())
+		d.Runs = engineRuns(m.engineAPI())
 	}
 	if m.powerPort != nil && (m.profile.Caps.Thermal || m.profile.Caps.Battery) {
 		d.Power = m.powerPort

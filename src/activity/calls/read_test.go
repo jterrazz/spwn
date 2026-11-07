@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -13,7 +14,13 @@ import (
 type processes map[int]activity.Usage
 
 func (processes) Sample(context.Context) (activity.Sample, error) { return activity.Sample{}, nil }
-func (processes) Top(context.Context) (activity.Busiest, error)   { return activity.Busiest{}, nil }
+func (p processes) Top(context.Context) (activity.Busiest, error) {
+	b := activity.Busiest{CPU: []activity.Process{}, Memory: []activity.Process{}}
+	for pid, u := range p {
+		b.CPU = append(b.CPU, activity.Process{PID: pid, Name: "com.apple.Virtualization.Virtual", Value: u.CPU})
+	}
+	return b, nil
+}
 func (p processes) Process(_ context.Context, pid int) (activity.Usage, error) {
 	if u, ok := p[pid]; ok {
 		return u, nil
@@ -26,11 +33,8 @@ func TestAVMsRunIsMeasuredOnItsMacByTheProcessThatHoldsItsGuest(t *testing.T) {
 	d := Deps{
 		Meter: processes{4100: {CPU: 0, Memory: 1 << 20}, 4242: {CPU: 18, Memory: 15 << 30}},
 		Name:  "jterrazz-mac-mini", Kind: machine.Mac, Now: func() time.Time { return now },
-		Holder: func(_ context.Context, vm string) (int, error) {
-			if vm == "infra" {
-				return 4242, nil
-			}
-			return 0, nil
+		Runs: func(context.Context) ([]activity.VMRun, error) {
+			return []activity.VMRun{{VM: "infra", Holder: 4242}}, nil
 		},
 	}
 	r := d.read(t.Context(), ReadIn{Of: "infra", Machine: machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}, Kind: machine.Server, Run: true})
@@ -39,5 +43,25 @@ func TestAVMsRunIsMeasuredOnItsMacByTheProcessThatHoldsItsGuest(t *testing.T) {
 	}
 	if r = d.read(t.Context(), ReadIn{Of: "stopped", Run: true}); r.Last.Run != nil {
 		t.Errorf("a VM no process holds read %+v; want no run", r.Last.Run)
+	}
+}
+
+func TestAMacsSampleCarriesEachVMItRunsAsTheProcessOfItsGuest(t *testing.T) {
+	d := Deps{
+		Meter: processes{4242: {CPU: 18, Memory: 15 << 30}},
+		Name:  "jterrazz-mac-mini", Kind: machine.Mac,
+		Runs: func(context.Context) ([]activity.VMRun, error) {
+			return []activity.VMRun{{VM: "infra", Holder: 4242}, {VM: "booting"}, {VM: "gone", Holder: 9}}, nil
+		},
+	}
+	r, err := compose(t.Context(), d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []activity.VMUsage{{VM: "infra", Usage: activity.Usage{CPU: 18, Memory: 15 << 30}}}; !slices.Equal(r.VMs, want) {
+		t.Errorf("the Mac's reading carries VMs %+v; want only infra's, 18 %% of the Mac", r.VMs)
+	}
+	if len(r.Top.CPU) != 1 || r.Top.CPU[0].VM != "infra" {
+		t.Errorf("the busiest by CPU are %+v; want infra's process named after it", r.Top.CPU)
 	}
 }

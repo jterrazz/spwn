@@ -145,11 +145,20 @@ func (d Deps) direct(ctx context.Context, ref machine.Ref, kind machine.Kind, qu
 
 func (d Deps) run(ctx context.Context, vm string) activity.Report {
 	r := activity.Report{Source: activity.NotKept, Findings: []finding.Finding{}}
-	if d.Holder == nil || d.Now == nil {
+	if d.Runs == nil || d.Now == nil {
 		return r
 	}
-	pid, err := d.Holder(ctx, vm)
-	if err != nil || pid == 0 {
+	runs, err := d.Runs(ctx)
+	if err != nil {
+		return r
+	}
+	pid := 0
+	for _, run := range runs {
+		if run.VM == vm {
+			pid = run.Holder
+		}
+	}
+	if pid == 0 {
 		return r
 	}
 	ctx, cancel := context.WithTimeout(ctx, activity.Budget)

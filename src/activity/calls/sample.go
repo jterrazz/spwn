@@ -27,9 +27,9 @@ type Deps struct {
 	// value: the clock a kept history's freshness is judged by; set with
 	// Kept.
 	Now func() time.Time
-	// value: the process that holds a VM's guest on this Mac, by the VM's
-	// name, from its engine: 0 when none does; nil on a VM.
-	Holder func(ctx context.Context, vm string) (pid int, err error)
+	// value: the VMs this Mac runs, each with the process that holds its
+	// guest, from its engine; nil on a VM.
+	Runs func(ctx context.Context) ([]activity.VMRun, error)
 	// value: the owners of the facts a sample composes in: free space is
 	// the Disk family's, thermal and battery Awake's Power; nil leaves the
 	// fact out (a VM's thermal and battery are its Mac's).
@@ -55,6 +55,7 @@ func compose(ctx context.Context, d Deps) (activity.Reading, error) {
 	if err != nil {
 		return r, err
 	}
+	d.measureVMs(ctx, &r)
 	if d.Volume != nil {
 		if total, free, err := d.Volume.Volume(ctx); err == nil {
 			r.Sample.DiskTotal, r.Sample.DiskFree = total, free
@@ -71,6 +72,39 @@ func compose(ctx context.Context, d Deps) (activity.Reading, error) {
 		}
 	}
 	return r, nil
+}
+
+// invariant: SPEC B5.3: a Mac's reading carries each VM it runs as the
+// process its guest runs in, its CPU a share of the whole Mac, and names
+// that process after its VM among the busiest; a VM whose process is not
+// read is left out, never zero.
+func (d Deps) measureVMs(ctx context.Context, r *activity.Reading) {
+	if d.Runs == nil {
+		return
+	}
+	runs, err := d.Runs(ctx)
+	if err != nil {
+		return
+	}
+	of := map[int]string{}
+	for _, run := range runs {
+		if run.Holder == 0 {
+			continue
+		}
+		u, err := d.Meter.Process(ctx, run.Holder)
+		if err != nil {
+			continue
+		}
+		of[run.Holder] = run.VM
+		r.VMs = append(r.VMs, activity.VMUsage{VM: run.VM, Usage: u})
+	}
+	for _, list := range [][]activity.Process{r.Top.CPU, r.Top.Memory} {
+		for i, p := range list {
+			if vm, ok := of[p.PID]; ok {
+				list[i].VM = vm
+			}
+		}
+	}
 }
 
 func Measure(ctx context.Context, m contract.Meter) (activity.Reading, error) {
