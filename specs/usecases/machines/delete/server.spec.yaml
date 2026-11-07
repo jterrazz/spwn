@@ -1,19 +1,21 @@
-description: 'a server deleted with its name typed leaves nothing of it on its Mac: disk, record, declared ports'
+description: 'a server deleted with its name typed leaves nothing on its Mac: disk, records, declared ports'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["jterrazz-mac-mini"].stores.uptime.infra != null), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
       exit: 0
       stdout: |
-          {"vm":"always-on","disk":true,"declared":[443],"ssh":"jterrazz-mac-mini"}
+          {"vm":"always-on","uptime":true,"disk":true,"declared":[443],"ssh":"jterrazz-mac-mini"}
     - command: 'machines delete infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |
           	On mac-mini:
           ●	infra	deleted
-    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{vm: (.macs["jterrazz-mac-mini"].vms.infra.kept.lifetime), uptime: (.macs["jterrazz-mac-mini"].stores.uptime.infra != null), disk: .macs["jterrazz-mac-mini"].vms.infra.disk, declared: [.macs["jterrazz-mac-mini"].stores.declarations[]? | select(.machine == "infra") | .port], ssh: .macs["jterrazz-macbook-pro"].ssh.blocks.infra.behind}'' world.json'
       exit: 0
       stdout: |
-          {"vm":null,"disk":null,"declared":[],"ssh":null}
+          {"vm":null,"uptime":false,"disk":null,"declared":[],"ssh":null}
     - command: 'machines --on jterrazz-mac-mini'
       exit: 0
       stdout: |
