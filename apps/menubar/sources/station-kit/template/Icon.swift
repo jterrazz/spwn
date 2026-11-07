@@ -8,10 +8,12 @@ public struct MenuBarIcon: Equatable, Sendable {
 
     public var mark: Mark
     public var spark: [Int]?
+    public var busy: Bool
 
-    public init(_ mark: Mark, spark: [Int]? = nil) {
+    public init(_ mark: Mark, spark: [Int]? = nil, busy: Bool = false) {
         self.mark = mark
         self.spark = spark
+        self.busy = busy
     }
 
     // invariant: SPEC §10.1: the icon draws the page's badge and never
@@ -75,13 +77,15 @@ struct IconSpark: Shape {
 // status bar's symbol size and weight, so macOS paints it white on a dark
 // bar, black on a light one, and tints it while the panel is open; a
 // connection being made dims the Mac and its ring, the machines stay lit.
-public struct MenuBarIconView: View {
+public struct StatusItem: View {
     let icon: MenuBarIcon
     let scheme: ColorScheme
+    let turn: Double
 
-    public init(_ icon: MenuBarIcon, scheme: ColorScheme) {
+    public init(_ icon: MenuBarIcon, scheme: ColorScheme, turn: Double = 0) {
         self.icon = icon
         self.scheme = scheme
+        self.turn = turn
     }
 
     var ink: Color { Token.Icon.ink(scheme) }
@@ -94,6 +98,9 @@ public struct MenuBarIconView: View {
                 .symbolRenderingMode(icon.mark == .connecting ? .hierarchical : .monochrome)
                 .foregroundStyle(ink)
                 .opacity(icon.mark == .stopped ? Token.Icon.dimmed : 1)
+            if icon.busy {
+                BusyMark(turn: turn, ink: ink)
+            }
             if let spark = icon.spark {
                 IconSpark(points: spark)
                     .stroke(ink, style: StrokeStyle(lineWidth: Token.Icon.line, lineCap: .round, lineJoin: .round))
@@ -103,12 +110,25 @@ public struct MenuBarIconView: View {
     }
 }
 
+struct BusyMark: View {
+    let turn: Double
+    let ink: Color
+
+    var body: some View {
+        Circle()
+            .trim(from: Token.Busy.open, to: 1)
+            .stroke(ink, style: StrokeStyle(lineWidth: Token.Busy.stroke, lineCap: .round))
+            .rotationEffect(Token.Busy.start + .radians(turn * .pi * 2))
+            .frame(width: Token.Busy.size, height: Token.Busy.size)
+    }
+}
+
 extension MenuBarIcon {
     // value: the icon as the menu bar's label draws it: rendered offscreen,
     // at the screen's scale, for the menu bar's appearance.
     @MainActor
-    public func image(scheme: ColorScheme, scale: CGFloat = 2) -> CGImage? {
-        let renderer = ImageRenderer(content: MenuBarIconView(self, scheme: scheme))
+    public func image(scheme: ColorScheme, scale: CGFloat = 2, turn: Double = 0) -> CGImage? {
+        let renderer = ImageRenderer(content: StatusItem(self, scheme: scheme, turn: turn))
         renderer.scale = scale
         return renderer.cgImage
     }
@@ -116,10 +136,10 @@ extension MenuBarIcon {
     // value: the label's image with a bitmap per screen scale, so the mark
     // lands on whole pixels at 1x, 2x and 3x alike.
     @MainActor
-    public func nsImage(scheme: ColorScheme) -> NSImage {
+    public func nsImage(scheme: ColorScheme, turn: Double = 0) -> NSImage {
         let image = NSImage()
         for scale in [1, 2, 3] as [CGFloat] {
-            guard let cg = self.image(scheme: scheme, scale: scale) else { continue }
+            guard let cg = self.image(scheme: scheme, scale: scale, turn: turn) else { continue }
             let rep = NSBitmapImageRep(cgImage: cg)
             rep.size = NSSize(width: CGFloat(cg.width) / scale, height: CGFloat(cg.height) / scale)
             image.addRepresentation(rep)

@@ -199,10 +199,20 @@ public struct Popover: View {
         guard let pushed = state.pushed else { return nil }
         var shown = state
         shown.page = pushed
-        return MenuPage.view(shown, handlers: handlers)
+        return MenuPage.view(shown, handlers: handlers, scrolls: scrolls)
     }
 
     var panel: some View {
+        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")", sheet: state.confirming) {
+            page
+        } footer: {
+            statusLine
+        }
+        .background { BackKey(state: state, handlers: handlers) }
+        .environment(\.stationHints, false)
+    }
+
+    var page: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             header
             if state.menu { menu }
@@ -223,12 +233,6 @@ public struct Popover: View {
             }
         }
         .padding(Token.Space.margin)
-        .stationWidth(scrolls)
-        .stationScroll(scrolls, key: "\(state.openings)/\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")", sheet: state.confirming, status: state.status != nil || state.connection == .connecting)
-        .stationStatus { statusLine }
-        .background { BackKey(state: state, handlers: handlers) }
-        .stationPanel()
-        .environment(\.stationHints, false)
     }
 
     // invariant: the status line stays in sight under the panel's scroll,
@@ -342,16 +346,5 @@ struct EscapeKey: View {
             }
             .onAppear { DispatchQueue.main.async { focused = true } }
             .accessibilityHidden(true)
-    }
-}
-
-extension View {
-    // invariant: the status line sits under the panel's content, in its own
-    // room: the panel grows by its height, nothing of the page is under it.
-    func stationStatus<S: View>(@ViewBuilder _ status: () -> S) -> some View {
-        VStack(spacing: 0) {
-            self
-            status()
-        }
     }
 }
