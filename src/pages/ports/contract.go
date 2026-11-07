@@ -9,11 +9,18 @@ import (
 )
 
 type PortJSON struct {
-	Machine  string        `json:"machine"`
-	Port     int           `json:"port"`
-	Proto    string        `json:"proto"`
-	Process  string        `json:"process"`
-	What     string        `json:"what,omitempty"`
+	Machine string `json:"machine"`
+	Port    int    `json:"port"`
+	Proto   string `json:"proto"`
+	Process string `json:"process"`
+	What    string `json:"what,omitempty"`
+	// value: the name it is known by, and the logo the menu bar draws.
+	Name string `json:"name"`
+	Logo string `json:"logo,omitempty"`
+	// value: the app its process is, and its pid, for a port this machine
+	// lists itself.
+	App      string        `json:"app,omitempty"`
+	PID      int           `json:"pid,omitempty"`
 	Bind     []string      `json:"bind"`
 	Class    string        `json:"class"`
 	Declared *DeclaredJSON `json:"declared"`
@@ -85,12 +92,17 @@ func PortObject(s ports.SharedPort) PortJSON {
 	if s.HTTP {
 		proto = "http"
 	}
-	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Bind: bind, Class: "private",
+	known := s.Named()
+	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: "private",
 		State: stateWord(s), Reserved: s.Reserved, URL: s.URLs.Public, Detail: s.Detail}
 }
 
 func ListenerObject(p ports.Port) PortJSON {
-	o := PortJSON{Machine: p.Machine.Name, Port: p.Port, Proto: "tcp", Process: p.Process, Bind: p.Binds, Class: string(p.Class())}
+	known := p.Named()
+	o := PortJSON{Machine: p.Machine.Name, Port: p.Port, Proto: "tcp", Process: p.Process, Name: known.Name, Logo: known.Logo, PID: p.PID, Bind: p.Binds, Class: string(p.Class())}
+	if app := p.App(); app != p.Process {
+		o.App = app
+	}
 	if w := p.What(); w != p.Process {
 		o.What = w
 	}
@@ -121,7 +133,7 @@ func ListContract(l ports.Listing) ListJSON {
 			shared[key] = true
 			if p, ok := heard[key]; ok {
 				l := ListenerObject(p)
-				o.Bind, o.Class, o.Declared, o.What = l.Bind, l.Class, l.Declared, l.What
+				o.Bind, o.Class, o.Declared, o.What, o.PID = l.Bind, l.Class, l.Declared, l.What, l.PID
 			}
 			private = append(private, o)
 		}

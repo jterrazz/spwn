@@ -73,6 +73,9 @@ type Port struct {
 	Machine machine.Ref
 	Port    int
 	Process string
+	// value: the process that listens, as the system reported it; 0 when
+	// it was heard through a guest, which reports none.
+	PID int
 	// value: every address it listens on, in the order the system reported them.
 	Binds []string
 	Reach Reach
@@ -128,7 +131,7 @@ func Classify(m Machine, decl []Declaration) []Port {
 		}
 		i := slices.IndexFunc(out, func(p Port) bool { return p.Port == l.Port })
 		if i < 0 {
-			out = append(out, Port{Machine: m.Ref, Port: l.Port, Process: l.Process, Reach: ThisMachine})
+			out = append(out, Port{Machine: m.Ref, Port: l.Port, Process: l.Process, PID: l.PID, Reach: ThisMachine})
 			i = len(out) - 1
 		}
 		p := &out[i]
