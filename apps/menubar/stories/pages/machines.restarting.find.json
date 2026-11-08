@@ -1166,15 +1166,11 @@
         {
           "row": {
             "id": "cleanup:macbook-pro",
-            "label": "Clean up throwaways on This Mac…",
+            "label": "Clean up throwaways on This Mac",
             "cells": [
               {
                 "kind": "list",
                 "items": [
-                  {
-                    "kind": "text",
-                    "text": "clean"
-                  },
                   {
                     "kind": "text",
                     "text": "delete"
@@ -2410,7 +2406,7 @@
       }
     },
     {
-      "label": "Lend",
+      "label": "Run",
       "on": "row",
       "rows": [
         "share-account:agent-7f"
@@ -2501,7 +2497,7 @@
       }
     },
     {
-      "label": "Lend",
+      "label": "Run",
       "on": "row",
       "rows": [
         "share-account:linux-1"

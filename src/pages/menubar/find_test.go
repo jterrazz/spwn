@@ -176,8 +176,8 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
-			{"Restart infra…", "asks first", "Restart", "", ""},
-			{"Clean up throwaways on This Mac…", "", "Clean up", "", ""},
+			{"Restart infra", "asks first", "Restart", "", ""},
+			{"Clean up throwaways on This Mac", "", "Clean up", "", ""},
 		}},
 	}
 	for _, c := range cases {
@@ -188,10 +188,10 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	if got, want := entries(t, p, FindVerbs), []said{
 		{"Open agent-7f in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of agent-7f", "", "Share", "", ""},
-		{"Lend an account to agent-7f", "", "Lend", "", ""},
+		{"Lend an account to agent-7f", "", "Run", "", ""},
 		{"Open linux-1 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of linux-1", "", "Share", "", ""},
-		{"Lend an account to linux-1", "", "Lend", "", ""},
+		{"Lend an account to linux-1", "", "Run", "", ""},
 		{"Share a port of infra", "", "Share", "", ""},
 		{"Restart infra", "", "Restart", "", ""},
 		{"Open linux-3 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
@@ -300,6 +300,27 @@ func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
 		t.Errorf("the asleep macbook-air offers %+v, want no clean-up", row)
 	}
 	if row := findRow(p, FindActions, "cleanup:"+findPro); row == nil {
-		t.Errorf("This Mac lost its clean-up, want Clean up throwaways on This Mac…")
+		t.Errorf("This Mac lost its clean-up, want Clean up throwaways on This Mac")
+	}
+}
+
+// invariant: an action that asks first carries its question, which the app
+// draws as the label's ellipsis: "Restart infra…" and "Clean up throwaways
+// on This Mac…" in the prototype.
+func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
+	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"})
+	actions := map[string]page.Action{}
+	for _, a := range p.Actions {
+		actions[a.ID] = a
+	}
+	for _, id := range []string{"restart:infra", "cleanup:" + findPro} {
+		row := findRow(p, FindActions, id)
+		if row == nil {
+			t.Errorf("Find has no %s, want it among the actions", id)
+			continue
+		}
+		if a := actions[row.Verb]; a.Confirm == nil {
+			t.Errorf("%q runs without asking, want its question so the app draws its ellipsis", row.Label)
+		}
 	}
 }

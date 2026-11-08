@@ -36,7 +36,7 @@ const (
 	VerbOpen    = "Open"
 	VerbCopy    = "Copy"
 	VerbShare   = "Share"
-	VerbLend    = "Lend"
+	VerbRun     = "Run"
 	VerbCleanUp = "Clean up"
 
 	CallCleanup = "machines.cleanup"
@@ -464,7 +464,6 @@ func (f finder) restart(h model.MacView, vm model.VM) entry {
 		verb.Confirm = ask(f.r.Asks, "restart", machine.Server, vm.Name, "Restart "+vm.Name+"?", "restart")
 		verb.Run.In = answered(verb.Confirm, verb.Run.In)
 		if verb.Confirm != nil {
-			row.Label += "…"
 			row.Detail = page.Text("asks first")
 		}
 	}
@@ -483,8 +482,8 @@ func (f finder) cleanup(h model.MacView) (entry, bool) {
 	c := pagemachines.CleanupConfirm(cands)
 	verb := page.Action{ID: "cleanup:" + h.Name, Label: VerbCleanUp, Mutates: true, Confirm: &c,
 		Run: &page.Run{Call: CallCleanup, In: map[string]string{"Confirm": yes}, Target: macTarget(h.Name, f.self)}}
-	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up throwaways on " + f.mac(h.Name) + "…", Glyph: symbol("trash", "")}
-	return entry{row: row, tags: []string{"clean", "delete", "throwaway", "finished"}, verb: verb}, true
+	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up throwaways on " + f.mac(h.Name), Glyph: symbol("trash", "")}
+	return entry{row: row, tags: []string{"delete", "throwaway", "finished"}, verb: verb}, true
 }
 
 func (f finder) verbs(p *page.Page) page.Section {
@@ -550,7 +549,7 @@ func (f finder) shareAccount(h model.MacView, vm model.VM) (page.Action, bool) {
 	if len(opts) == 0 {
 		return page.Action{}, false
 	}
-	return page.Action{ID: "verb-share-account:" + vm.Name, Label: VerbLend, Mutates: true,
+	return page.Action{ID: "verb-share-account:" + vm.Name, Label: VerbRun, Mutates: true,
 		Run: &page.Run{Call: CallShareAccount, In: map[string]string{"With": vm.Name, "For": nanos(extendBy)}, Target: macTarget(h.Name, f.self)},
 		Form: &page.Form{Title: "Lend an account to " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
 			{Key: "Account", Label: "Account", Kind: page.FieldSelect, Required: true, Default: opts[0].Value, Options: opts},
