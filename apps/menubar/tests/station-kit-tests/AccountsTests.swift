@@ -82,4 +82,27 @@ final class AccountsTests: XCTestCase {
             XCTAssertNil(try Golden.check("accounts.signing-in.row", waiting, scheme: scheme, desk: false))
         }
     }
+
+    // invariant: accounts.signing-in drawn as its story draws it, from
+    // ui.pending through the page to the row: the Accounts page and a
+    // Mac's Accounts segment each draw something else once the press is
+    // forgotten, so a page that drops the busy set fails here.
+    @MainActor
+    func testThePagesThatOfferSignInDrawItWaitingWhileItIsPending() throws {
+        let id = "sign-in:macbook-pro/npm"
+        for name in ["accounts.signing-in", "mac.this.accounts"] {
+            let story = Stories[name]
+            var pending = story.state
+            pending.pending = [id]
+            var idle = story.state
+            idle.pending = []
+            for scheme in [ColorScheme.dark, .light] {
+                let waiting = try XCTUnwrap(Snapshot.render(AnyView(StoryView(story, state: pending)), scheme: scheme, desk: false))
+                let signIn = try XCTUnwrap(Snapshot.render(AnyView(StoryView(story, state: idle)), scheme: scheme, desk: false))
+                XCTAssertEqual([waiting.bitmap.width, waiting.bitmap.height], [signIn.bitmap.width, signIn.bitmap.height])
+                guard waiting.bitmap.height == signIn.bitmap.height else { continue }
+                XCTAssertGreaterThan(waiting.bitmap.differing(signIn.bitmap), 100, "\(name) \(scheme): Sign in draws the same pending or not")
+            }
+        }
+    }
 }
