@@ -179,6 +179,9 @@ func Codes() map[fail.Code]Wording {
 		agentscalls.NoText: func(e *fail.Error) (string, string) {
 			return "nothing to send to " + e.Subject, "station agents reply " + e.Subject + " <text>"
 		},
+		agentscalls.NoTerminal: func(e *fail.Error) (string, string) {
+			return "the agent of " + e.Subject + " runs in no terminal station opened", "station agents"
+		},
 		agentscalls.UnknownApp: func(e *fail.Error) (string, string) {
 			return "no agent app \"" + e.Subject + "\": claudecode or codex", "station agents start --app claudecode"
 		},

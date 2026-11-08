@@ -90,6 +90,7 @@
       "where": "at-target",
       "errors": [
         "agents.ended",
+        "agents.no-terminal",
         "agents.no-text",
         "agents.unknown-session"
       ],

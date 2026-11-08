@@ -45,6 +45,7 @@ const (
 	EffectGitAliases   EffectKind = "git-aliases"
 	EffectZshFunctions EffectKind = "zsh-functions"
 	EffectAgentHooks   EffectKind = "agent-hooks"
+	EffectMuxMachines  EffectKind = "mux-machines"
 )
 
 type Touch struct{ Path string }
@@ -72,6 +73,8 @@ type ZshFunctions struct {
 	From      string
 	Functions []string
 }
+
+type MuxMachines struct{}
 
 type AgentHooks struct {
 	// value: the apps whose agents station hooks, by catalogue name; each
@@ -103,6 +106,7 @@ func (Dotfiles) Kind() EffectKind     { return EffectDotfile }
 func (GitAliases) Kind() EffectKind   { return EffectGitAliases }
 func (ZshFunctions) Kind() EffectKind { return EffectZshFunctions }
 func (AgentHooks) Kind() EffectKind   { return EffectAgentHooks }
+func (MuxMachines) Kind() EffectKind  { return EffectMuxMachines }
 
 func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p)) }
 
@@ -222,12 +226,15 @@ var Settings = []Setting{
 		noted(conf("~/.claude/settings.json"), "station's hook under `hooks`, every other key the owner's"),
 		noted(conf("~/.codex/config.toml"), "`notify`, unless the owner set it to another program"),
 	}},
+	{Name: MuxMachinesSetting, Description: "Herdr reaches every workspace of this Mac: its agents show in Herdr", Category: CategoryAgents, Kinds: macKind, Requires: "herdr-app", Effect: MuxMachines{}, Reversible: true, Sets: []Value{{"herdr-core", "every workspace a machine, by its name"}}},
 	{Name: "docker-shortcuts", Description: "Docker shortcuts: dclean, dclean-images, dreset, each asks first", Category: CategoryShell, Kinds: everyKind, Effect: DockerShortcuts, Reversible: true, Writes: []Stored{noted(conf("{config}/station/zsh/docker-shortcuts.zsh"), "the functions station's zsh block defines")}},
 }
 
 const GitShortcutsSetting = "git-shortcuts"
 
 const AgentHooksSetting = "agent-hooks"
+
+const MuxMachinesSetting = "herdr-machine"
 
 const GitShortcutsGroup = "git" // value: the group of v2's run shortcuts, now git's own aliases, and the program each alias is said with.
 

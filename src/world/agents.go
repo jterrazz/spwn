@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/jterrazz/studio-station/src/agents"
 )
@@ -34,19 +35,38 @@ func agentEvent(kind agents.Kind, build func(e *agents.Event, h *Agents, args []
 				return err
 			}
 		}
+		if a.Terminal == "" {
+			e.Terminal = freeTerminal(held)
+		}
 		held.Journal[args[1]] = agents.Judge(a, e)
 		return nil
 	}
 }
 
+// value: the first terminal of the multiplexer no kept agent runs in: the one a
+// hook of a new session reports from.
+func freeTerminal(h *Agents) string {
+	for _, t := range h.Terminals {
+		taken := false
+		for _, a := range h.Journal {
+			taken = taken || a.Terminal == t.Address
+		}
+		if !taken {
+			return t.Address
+		}
+	}
+	return ""
+}
+
 func agentPrompt(e *agents.Event, h *Agents, args []string) error {
-	// invariant: an agent prompted runs in the VM's terminal session.
+	// invariant: an agent prompted runs in a terminal of the VM's multiplexer.
 	e.Prompt = args[0]
 	if len(args) > 1 {
 		e.Folder = args[1]
 	}
-	if len(h.Opened) == 0 {
+	if freeTerminal(h) == "" {
 		h.Opened = append(h.Opened, e.Folder+" "+string(e.App))
+		h.Terminals = append(h.Terminals, Terminal{Terminal: agents.Terminal{Address: "t" + strconv.Itoa(len(h.Terminals)+1), App: e.App, Folder: e.Folder}})
 	}
 	return nil
 }
@@ -101,5 +121,27 @@ func agentEnd(e *agents.Event, _ *Agents, args []string) error {
 	if len(args) > 0 {
 		e.Reason = args[0]
 	}
+	return nil
+}
+
+// invariant: an agent no hook reports runs in a terminal of the VM's
+// multiplexer, which says of it what its program said, "-" for nothing.
+func agentTerminal(w *World, args []string) error {
+	v, err := w.vm(args[0])
+	if err != nil {
+		return err
+	}
+	seen := agents.Seen(args[1])
+	if args[1] == "-" {
+		seen = ""
+	}
+	t := Terminal{Terminal: agents.Terminal{App: agentApp, Folder: agentFolder, Seen: seen}}
+	if len(args) > 2 {
+		t.Message = args[2]
+	}
+	h := v.Agentic()
+	t.Address = "t" + strconv.Itoa(len(h.Terminals)+1)
+	h.Opened = append(h.Opened, agentFolder+" "+string(agentApp))
+	h.Terminals = append(h.Terminals, t)
 	return nil
 }

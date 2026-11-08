@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "15 set by station here"
+                    "text": "16 set by station here"
                   },
                   {
                     "kind": "text",
@@ -344,9 +344,9 @@
         },
         {
           "row": {
-            "id": "docker-shortcuts",
+            "id": "herdr-machine",
             "mark": "absent",
-            "label": "docker-shortcuts",
+            "label": "herdr-machine",
             "cells": [
               {
                 "kind": "text",
@@ -354,7 +354,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply docker-shortcuts",
+              "command": "station settings apply herdr-machine",
               "key": "a"
             }
           }
@@ -485,6 +485,19 @@
               }
             ]
           }
+        },
+        {
+          "row": {
+            "id": "docker-shortcuts",
+            "mark": "off-here",
+            "label": "docker-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off here"
+              }
+            ]
+          }
         }
       ],
       "counts": [
@@ -502,7 +515,7 @@
         },
         {
           "mark": "off-here",
-          "n": 3
+          "n": 4
         }
       ],
       "pipe_counts": true

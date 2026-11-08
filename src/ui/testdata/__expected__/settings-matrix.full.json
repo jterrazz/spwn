@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "32 settings on 4 machines",
+            "label": "33 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -869,31 +869,31 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "14 more",
+            "label": "15 more",
             "cells": [
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "16/44"
+                "text": "16/48"
               }
             ]
           }
@@ -1144,6 +1144,7 @@
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",
+        "herdr-machine",
         "docker-shortcuts"
       ],
       "priority": 1,
@@ -1176,6 +1177,7 @@
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",
+        "herdr-machine",
         "docker-shortcuts",
         "filevault",
         "firewall",

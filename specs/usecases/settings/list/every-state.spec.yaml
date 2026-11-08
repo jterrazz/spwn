@@ -18,7 +18,7 @@ runs:
     - command: 'settings | /usr/bin/grep -E ''tart-launcher|hushlogin|dns|dock-reset|^#'''
       exit: 0
       stdout: |
-          # Set by station	1 ●	1 ◐	14 ○	1 ⊘
+          # Set by station	1 ●	1 ◐	15 ○	1 ⊘
           ◐	tart-launcher	changed since 2 d ago	station settings diff tart-launcher
           ○	dock-reset	not applied	station settings apply dock-reset
           ●	hushlogin	applied · ~/.hushlogin

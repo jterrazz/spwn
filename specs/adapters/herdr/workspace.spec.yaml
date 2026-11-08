@@ -1,0 +1,20 @@
+description: 'a workspace made is a machine of the Mac''s Herdr, and its delete forgets it'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ./__fixtures__/hc/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42900-42919"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --permanent --name linux-1 > /dev/null; /bin/cat .hc-machines; "$STATION" machines delete linux-1 --confirm=linux-1; c=$?; kill $d; wait $d; /usr/bin/grep "^hc machine" .calls; exit $c'
+      exit: 0
+      stdout: |
+          linux-1
+          ●	linux-1	deleted
+          hc machine ls --json
+          hc machine add --install --json --name linux-1 linux-1
+          hc machine ls --json
+          hc machine rm --json linux-1
+      files:
+          .hc-machines:
+              equals: ''

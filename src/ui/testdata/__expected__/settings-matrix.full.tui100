@@ -1,5 +1,5 @@
  Summary
-   ● 32 settings on 4 machines  20 need a look · infra is a server: not checked
+   ● 33 settings on 4 machines  20 need a look · infra is a server: not checked
 
  Needs a look  20 ◐
    ◐ This Mac  ghostty-dotfiles  changed since 2 d ago
@@ -52,7 +52,7 @@
    ◐ github-login      ◐         ◐         ◐        ◐       0/4
    ◐ dock-reset        ◐         ◐         ◐        ◐       0/4
    ◐ agent-hooks       ◐         ◐         ◐        ◐       0/4
-   ○ 14 more           ○ 4/11    ○ 4/11    ○ 4/11   ○ 4/11  16/44
+   ○ 15 more           ○ 4/12    ○ 4/12    ○ 4/12   ○ 4/12  16/48
 
  Always-on Mac
                  This Mac  mac-mini  linux-1  api  OK

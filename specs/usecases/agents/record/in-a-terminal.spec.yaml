@@ -1,0 +1,15 @@
+description: 'a hook run in a terminal of Herdr records that terminal with its agent, so a reply reaches it'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - in-workspace
+    - terminal
+runs:
+    - command: '--version >/dev/null; HC_TERMINAL_ID=t4 "$STATION" agents record --app claudecode'
+      stdin: |
+          {"kind":"prompted","session":"s-1","folder":"/home/admin/app","prompt":"Build the landing page"}
+      exit: 0
+      stdout: ''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["s-1"] | {state, terminal}'' world.json'
+      exit: 0
+      stdout: |
+          {"state":"working","terminal":"t4"}

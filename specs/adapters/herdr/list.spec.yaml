@@ -1,0 +1,10 @@
+description: 'the agents Herdr runs for station are listed as it sees them, the other terminals left out'
+fixture: ./__fixtures__/hc/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ◐
+          ◐	t7	claudecode	waiting · Claude needs your permission to use Bash		station agents reply t7 <text>

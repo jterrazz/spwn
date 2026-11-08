@@ -1,0 +1,14 @@
+description: 'an agent starts in a Herdr terminal of its own, its task typed on stdin once it is ready'
+fixture: ./__fixtures__/hc/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'agents start /home/admin/app --task "Build the landing page"'
+      exit: 0
+      stdout: |
+          ●	claudecode	started in /home/admin/app · Build the landing page
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.run","params":{"argv":["claude"],"cwd":"/home/admin/app","labels":{"station":"agent","station.app":"claudecode"},"no_parent":true,"outlive_parent":true,"keep":true,"wait":true,"timeout":60}}
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.send","params":{"terminal":"t7","text":"Build the landing page"}}

@@ -1,7 +1,7 @@
  Summary
-   ◐ This Mac  15 set by station here · 9 checked · 6 need a look
+   ◐ This Mac  16 set by station here · 9 checked · 6 need a look
 
- Set by station  4 ●  4 ◐  4 ○  3 ⊘
+ Set by station  4 ●  4 ◐  4 ○  4 ⊘
    ◐ ghostty-dotfiles   changed since 2 d ago
      → station settings diff ghostty-dotfiles
    ◐ github-login       changed since 2 d ago
@@ -16,8 +16,8 @@
      → station settings apply spotlight-exclude
    ○ dock-spacer        not applied
      → station settings apply dock-spacer
-   ○ docker-shortcuts   not applied
-     → station settings apply docker-shortcuts
+   ○ herdr-machine      not applied
+     → station settings apply herdr-machine
    ● hushlogin          applied · ~/.hushlogin
    ● ssh-key            applied · ~/.ssh-key
    ● zed-dotfiles       applied · ~/.zed-dotfiles
@@ -25,6 +25,7 @@
    ⊘ starship-dotfiles  off here
    ⊘ dns                off here
    ⊘ backup-exclusions  off here
+   ⊘ docker-shortcuts   off here
 
  Always-on Mac
    ○ Always-on Mac  5 · for a Mac that hosts servers

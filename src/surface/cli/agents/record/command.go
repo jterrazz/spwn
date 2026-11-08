@@ -14,12 +14,17 @@ import (
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
 
+type Deps struct {
+	// value: the terminal of the VM's multiplexer the hook runs in, empty outside one.
+	Terminal string
+}
+
 type Input struct {
 	App  string
 	Args []string
 }
 
-func Command(env kit.Env) *cobra.Command {
+func Command(d Deps, env kit.Env) *cobra.Command {
 	// invariant: run by an app's hook on each of its agent's events: it prints
 	// nothing and exits 0 within catalog.AgentRecordBudget whatever happens, so
 	// a hook never blocks nor fails the agent, a flag it does not know or
@@ -49,7 +54,7 @@ func Command(env kit.Env) *cobra.Command {
 				if !ok {
 					return
 				}
-				_, _ = call.Invoke(ctx, env.Calls, env.Target(), agentscalls.Record, agentscalls.RecordIn{App: agents.App(in.App), Payload: payload}, nil)
+				_, _ = call.Invoke(ctx, env.Calls, env.Target(), agentscalls.Record, agentscalls.RecordIn{App: agents.App(in.App), Terminal: d.Terminal, Payload: payload}, nil)
 			}()
 			select {
 			case <-done:

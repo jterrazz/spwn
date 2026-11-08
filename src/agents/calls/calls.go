@@ -34,6 +34,8 @@ func (d Deps) hooksOf(app agents.App) contract.Hooks {
 
 type RecordIn struct {
 	App agents.App
+	// value: the terminal of the VM's multiplexer the hook ran in, empty outside one.
+	Terminal string `json:",omitempty"`
 	// value: the event as the app's hook hands it over.
 	Payload string
 }
@@ -57,6 +59,9 @@ var Record = call.Call[Deps, RecordIn, Recorded]{
 		e, ok := hooks.Event(ctx, []byte(in.Payload))
 		if !ok {
 			return Recorded{}, nil
+		}
+		if e.Terminal == "" {
+			e.Terminal = in.Terminal
 		}
 		kept, err := d.Journal.Read(ctx)
 		if err != nil {

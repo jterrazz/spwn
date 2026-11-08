@@ -1,0 +1,3 @@
+#!/bin/sh
+# hc inside the VM: the document's own stub, its calls recorded with the Mac's.
+exec /usr/bin/env HOME="$TEST_WORKDIR" "$TEST_WORKDIR/bin/hc" "$@"

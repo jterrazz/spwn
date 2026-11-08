@@ -1,0 +1,11 @@
+description: 'attach from the Mac puts its terminal on the agent''s own terminal in the workspace, through Herdr'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'agents attach s-1 --on linux-1'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].attached'' world.json'
+      exit: 0
+      stdout: |
+          ["linux-1/t1"]

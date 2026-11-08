@@ -133,7 +133,7 @@ Host api # a VM of mac-mini, seen from macbook: one hop
  ProxyCommand ssh mac-mini -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe api"
 ```
 
-`station machines pipe <vm>` (hidden plumbing) carries ssh's bytes to the VM's current ip behind its own Mac; it never needs the engine. A VM trusts its Mac's key and every line of the Mac's own `~/.ssh/authorized_keys` through a managed block of its `~/.ssh/authorized_keys` (`# >>> station hosts >>>`), written by the guest, so whoever may log into a Mac may reach its VMs. Herdr drives that same ssh: `hc machine add api` (add `--temp` for a throwaway workspace). `station machines ssh <machine>` prints the command, never runs it, so `$(station machines ssh api)` does.
+`station machines pipe <vm>` (hidden plumbing) carries ssh's bytes to the VM's current ip behind its own Mac; it never needs the engine. A VM trusts its Mac's key and every line of the Mac's own `~/.ssh/authorized_keys` through a managed block of its `~/.ssh/authorized_keys` (`# >>> station hosts >>>`), written by the guest, so whoever may log into a Mac may reach its VMs. Herdr drives that same ssh: a workspace made on a Mac is a machine of that Mac's Herdr at once (`hc machine add --install --name <vm> <vm>`, which copies `hc` into it when it has none), and is forgotten when it is deleted (`hc machine rm <vm>`), its terminals left running; the setting `herdr-machine` checks that every workspace of the Mac is reached, and applies what is missing. Agents run in Herdr terminals of their workspace ([Settings](settings.md#the-items)). `station machines ssh <machine>` prints the command, never runs it, so `$(station machines ssh api)` does.
 
 ## Files and editors
 

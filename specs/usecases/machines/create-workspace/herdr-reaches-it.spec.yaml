@@ -1,0 +1,9 @@
+description: 'a workspace made is a machine Herdr reaches on this Mac, by its name'
+env: two-macs
+runs:
+    - command: 'machines create >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].reached'' world.json'
+      exit: 0
+      stdout: |
+          ["linux-2"]

@@ -34,7 +34,7 @@ func record(t *testing.T, calls call.Router, stdin io.Reader, args ...string) (t
 	t.Helper()
 	var out bytes.Buffer
 	env := kit.Env{Calls: calls, Stdin: stdin, Stdout: &out}
-	cmd := agentsCommand(env, page.Context{})
+	cmd := agentsCommand(env, page.Context{}, agentsDeps{})
 	cmd.SetArgs(append([]string{"record", "--app", "claudecode"}, args...))
 	cmd.SetOut(&out)
 	cmd.SetErr(&out)

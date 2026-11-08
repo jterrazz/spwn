@@ -73,5 +73,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [021 The menu bar keeps its system window, its own focus walk, and a still status item](decisions/021-the-menu-bar-keeps-its-system-window.md)
 - [022 HTTPS links are a Mac's choice, through Serve](decisions/022-https-links-are-a-macs-choice.md)
 - [023 A VM's CPU on its Mac is the process that holds its guest's disk](decisions/023-a-vms-cpu-is-its-guests-process.md)
+- [024 Agents run in Herdr, and tmux is no adapter](decisions/024-agents-run-in-herdr.md)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

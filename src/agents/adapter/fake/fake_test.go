@@ -33,7 +33,16 @@ func TestHooks(t *testing.T) {
 func TestSession(t *testing.T) {
 	contracttest.Session(t, func(*testing.T) contracttest.SessionSubject {
 		s := fake.NewSession()
-		return contracttest.SessionSubject{Session: s, Opened: s.Opened, Typed: s.Typed, Lines: func() []string { return nil }}
+		typed := func() []contracttest.Typed {
+			var out []contracttest.Typed
+			for _, t := range s.Held() {
+				for _, text := range t.Typed {
+					out = append(out, contracttest.Typed{Terminal: t.Address, Text: text})
+				}
+			}
+			return out
+		}
+		return contracttest.SessionSubject{Session: s, Opened: s.Opened, Typed: typed, Lines: func() []string { return nil }, Says: s.Says}
 	})
 }
 
@@ -48,5 +57,12 @@ func TestRepo(t *testing.T) {
 	contracttest.Repo(t, func(*testing.T) contracttest.RepoSubject {
 		want := agents.Change{Files: 3, Plus: 86, Minus: 12}
 		return contracttest.RepoSubject{Repo: fake.NewRepo("/Users/admin/app", want), Folder: "/Users/admin/app", Unchanged: "/Users/admin/api", Base: "main", Want: want}
+	})
+}
+
+func TestMultiplexer(t *testing.T) {
+	contracttest.Multiplexer(t, func(*testing.T) contracttest.MultiplexerSubject {
+		h := fake.NewMultiplexer()
+		return contracttest.MultiplexerSubject{Multiplexer: h, Reached: h.Reached, Attached: h.Attached}
 	})
 }

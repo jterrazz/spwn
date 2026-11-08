@@ -332,6 +332,9 @@ func (m *worldMac) agentSession() agentscontract.Session {
 	return agentsfake.SessionOf(m.run.w, m.name)
 }
 func (m *worldMac) forge() agentscontract.Forge { return agentsfake.ForgeOf(m.run.w, m.name) }
+func (m *worldMac) multiplexer() agentscontract.Multiplexer {
+	return agentsfake.MultiplexerOf(m.run.w, m.name)
+}
 func (m *worldMac) hooks(app agents.App) agentscontract.Hooks {
 	return agentsfake.HooksOf(m.run.w, m.name, app)
 }

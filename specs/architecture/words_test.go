@@ -38,7 +38,7 @@ func technologies() map[string][]string {
 		"neversleeps": {"pmset"},
 		"macos":       {"pmset", "sysctl", "security", "fdesetup", "ssh"},
 		"linux":       {},
-		"tmux":        {"tmux"},
+		"herdr":       {"herdr", "hc"},
 		"gh":          {"gh"},
 		"claudecode":  {"claude"},
 		"codex":       {"codex"},

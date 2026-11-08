@@ -17,20 +17,36 @@ const (
 	NoPR           fail.Code = "agents.no-pr"
 	Ended          fail.Code = "agents.ended"
 	NoText         fail.Code = "agents.no-text"
+	NoTerminal     fail.Code = "agents.no-terminal"
 )
 
 var List = call.Call[Deps, struct{}, []agents.Agent]{
 	Name: "agents.list", Where: call.AtTarget, Applies: agents.Applies,
 	Run: func(ctx context.Context, d Deps, _ struct{}, _ call.Progress) ([]agents.Agent, error) {
-		// invariant: the VM's agents as its journal holds them, by session.
-		return d.Journal.Read(ctx)
+		// invariant: the VM's agents as its journal holds them, by session,
+		// then those its multiplexer alone sees.
+		return d.agents(ctx)
 	},
+}
+
+// value: the journal's agents, then those of the multiplexer's live terminals no
+// hook reports; a multiplexer that cannot be read adds none.
+func (d Deps) agents(ctx context.Context) ([]agents.Agent, error) {
+	kept, err := d.Journal.Read(ctx)
+	if err != nil || d.Session == nil {
+		return kept, err
+	}
+	live, err := d.Session.Terminals(ctx)
+	if err != nil {
+		return kept, nil //nolint:nilerr // outside: a multiplexer that cannot be read leaves the journal's agents.
+	}
+	return agents.Detected(kept, live), nil
 }
 
 // value: the agent of a session the journal keeps, refused when it holds
 // none, or when it ended, for a gesture that needs it running.
 func (d Deps) running(ctx context.Context, session string) (agents.Agent, error) {
-	kept, err := d.Journal.Read(ctx)
+	kept, err := d.agents(ctx)
 	if err != nil {
 		return agents.Agent{}, err
 	}
@@ -53,7 +69,7 @@ type ReplyIn struct {
 
 var Reply = call.Call[Deps, ReplyIn, agents.Agent]{
 	Name: "agents.reply", Where: call.AtTarget, Applies: agents.Applies,
-	Errors: []fail.Code{NoText, UnknownSession, Ended},
+	Errors: []fail.Code{NoText, UnknownSession, Ended, NoTerminal},
 	Run: func(ctx context.Context, d Deps, in ReplyIn, _ call.Progress) (agents.Agent, error) {
 		// invariant: a reply is typed into the agent's session, then the agent
 		// works on it: its ask is answered before its hook says so.
@@ -64,7 +80,10 @@ var Reply = call.Call[Deps, ReplyIn, agents.Agent]{
 		if err != nil {
 			return a, err
 		}
-		if err := d.Session.Send(ctx, in.Text); err != nil {
+		if a.Terminal == "" {
+			return a, fail.New(fail.Refused, NoTerminal, a.Session, nil)
+		}
+		if err := d.Session.Send(ctx, a.Terminal, in.Text); err != nil {
 			return a, err
 		}
 		a = agents.Judge(a, agents.Event{Kind: agents.Prompted, Session: a.Session, At: d.Now()})
@@ -84,17 +103,20 @@ type StartIn struct {
 }
 
 type Started struct {
-	App    agents.App
-	Folder string `json:",omitempty"`
-	Task   string `json:",omitempty"`
+	App agents.App
+	// value: the terminal of the VM's multiplexer it runs in.
+	Terminal string `json:",omitempty"`
+	Folder   string `json:",omitempty"`
+	Task     string `json:",omitempty"`
 }
 
 var Start = call.Call[Deps, StartIn, Started]{
 	Name: "agents.start", Where: call.AtTarget, Applies: agents.Applies,
 	Errors: []fail.Code{UnknownApp},
 	Run: func(ctx context.Context, d Deps, in StartIn, _ call.Progress) (Started, error) {
-		// invariant: an agent starts in the VM's terminal session, the one
-		// the owner attaches to, its task typed as its first prompt.
+		// invariant: an agent starts in a terminal of its own on the VM's
+		// multiplexer, the one the owner attaches to, its task typed as its
+		// first prompt once it is ready.
 		app := in.App
 		if app == "" && len(d.Hooks) > 0 {
 			app = d.Hooks[0].App()
@@ -103,15 +125,16 @@ var Start = call.Call[Deps, StartIn, Started]{
 		if hooks == nil {
 			return Started{}, fail.New(fail.NotFound, UnknownApp, string(in.App), nil)
 		}
-		if err := d.Session.Open(ctx, in.Folder, hooks.Launch()); err != nil {
+		terminal, err := d.Session.Open(ctx, app, in.Folder, hooks.Launch())
+		if err != nil {
 			return Started{}, err
 		}
 		if strings.TrimSpace(in.Task) != "" {
-			if err := d.Session.Send(ctx, in.Task); err != nil {
+			if err := d.Session.Send(ctx, terminal, in.Task); err != nil {
 				return Started{}, err
 			}
 		}
-		return Started{App: app, Folder: in.Folder, Task: in.Task}, nil
+		return Started{App: app, Terminal: terminal, Folder: in.Folder, Task: in.Task}, nil
 	},
 }
 

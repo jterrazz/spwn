@@ -1,0 +1,13 @@
+description: 'a workspace deleted is forgotten by Herdr, the owner''s other machines left alone'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].reached = ["linux-1", "vps"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].reached'' world.json'
+      exit: 0
+      stdout: |
+          ["vps"]

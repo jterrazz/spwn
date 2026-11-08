@@ -1,0 +1,16 @@
+description: 'an agent no hook reports is said as Herdr sees it: waiting on its own words, at work, or running'
+env: in-workspace
+runs:
+    - command: 'world agent-terminal linux-1 blocked "Claude needs your permission to use Bash"'
+      exit: 0
+    - command: 'world agent-terminal linux-1 working'
+      exit: 0
+    - command: 'world agent-terminal linux-1 -'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●	1 ◐
+          ◐	t1	claudecode	waiting · Claude needs your permission to use Bash		station agents reply t1 <text>
+          ●	t2	claudecode	working
+          ●	t3	claudecode	running

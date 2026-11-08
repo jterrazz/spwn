@@ -73,6 +73,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
 		Waker:     m.waker(),
+		Terminals: m.multiplexer(),
 	})
 }
 

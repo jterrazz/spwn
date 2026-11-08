@@ -43,6 +43,15 @@ type Options struct {
 	Uptime contract.UptimeStore
 	// value: what sends a Wake-on-LAN packet from this Mac; nil sends none.
 	Waker contract.Waker
+	// value: this Mac's multiplexer; nil reaches no workspace.
+	Terminals Multiplexer
+}
+
+type Multiplexer interface {
+	// value: makes this Mac's multiplexer reach a workspace by its name,
+	// and forget it.
+	Add(ctx context.Context, machine string) error
+	Remove(ctx context.Context, machine string) error
 }
 
 type Nodes interface {
