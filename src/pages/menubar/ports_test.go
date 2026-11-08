@@ -204,6 +204,11 @@ func TestAMacsPortsEndOnItsHTTPSLinksSwitch(t *testing.T) {
 		turn.Run.Target == nil || turn.Run.Target.Name != miniMac {
 		t.Fatalf("the switch reads %+v and runs %+v", sw, turn.Run)
 	}
+	p = macPageOf(t, proMac, func(m *Machine) { m.Ports = &f })
+	sw = rowsOf(p, SectionHTTPS)[0]
+	if turn := action(p, sw.Verb); sw.Cells[0].Kind == page.KindOn || turn.Run.In["On"] != "true" || turn.Run.Target != nil {
+		t.Fatalf("This Mac's switch reads %+v and runs %+v", sw, turn.Run)
+	}
 }
 
 // invariant: a workspace's Ports hides Public when it has none, and lists
