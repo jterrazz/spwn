@@ -183,6 +183,16 @@ func (s *Machinist) OtherMacs() []string {
 	return others
 }
 
+func (s *Machinist) Seen(name string) (model.MacRecord, bool) {
+	// value: another Mac as this one last had its answer, kept on its record.
+	cfg, err := s.prefs()
+	if err != nil {
+		return model.MacRecord{}, false
+	}
+	h, ok := cfg.Macs[name]
+	return h, ok
+}
+
 func (s *Machinist) Names() []string {
 	cfg, err := s.prefs()
 	if err != nil {

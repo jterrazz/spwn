@@ -18,6 +18,12 @@ const Schema = "station.awake.read/v1"
 type Silent struct {
 	// value: a Mac Awake could not read: its name and why.
 	Mac, Why string
+	// value: SPEC B5.14, B5.15: as it last answered: asleep (it told it
+	// went to sleep, or was last on battery with its lid closed), when,
+	// and the servers it then hosted, which pause while it sleeps.
+	Asleep   bool
+	Answered time.Time
+	Servers  []string
 }
 
 type AllMachines struct {
@@ -261,8 +267,11 @@ type MacJSON struct {
 }
 
 type SilentJSON struct {
-	Name  string `json:"name"`
-	Error string `json:"error"`
+	Name     string     `json:"name"`
+	Error    string     `json:"error"`
+	Asleep   bool       `json:"asleep"`
+	Answered *time.Time `json:"last_answer,omitempty"`
+	Servers  []string   `json:"hosts_servers"`
 }
 
 type JSON struct {
@@ -323,7 +332,15 @@ func Contract(f AllMachines) JSON {
 	}
 	out.Findings = finding.AllMachinesDoc(fs)
 	for _, s := range f.Silent {
-		out.Silent = append(out.Silent, SilentJSON{Name: s.Mac, Error: s.Why})
+		j := SilentJSON{Name: s.Mac, Error: s.Why, Asleep: s.Asleep, Servers: s.Servers}
+		if j.Servers == nil {
+			j.Servers = []string{}
+		}
+		if !s.Answered.IsZero() {
+			at := s.Answered.UTC()
+			j.Answered = &at
+		}
+		out.Silent = append(out.Silent, j)
 	}
 	return out
 }

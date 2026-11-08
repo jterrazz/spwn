@@ -16,6 +16,7 @@ import (
 	"github.com/jterrazz/studio-station/src/engine"
 
 	model "github.com/jterrazz/studio-station/src/machines"
+	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	pageawake "github.com/jterrazz/studio-station/src/pages/awake"
 	"github.com/jterrazz/studio-station/src/remote/each"
 	awakecmd "github.com/jterrazz/studio-station/src/surface/cli/awake"
@@ -98,19 +99,37 @@ func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllM
 	}
 	thisMac.ThisMac = true
 	f.Reports = append(f.Reports, thisMac)
-	others := m.machines(false).OtherMacs()
+	known := m.machines(false)
+	others := known.OtherMacs()
 	slices.Sort(others)
 	got := each.All(ctx, others, func(ctx context.Context, mac string) (awake.Report, error) {
 		return call.Read(ctx, env.Calls, coremachine.Ref{Name: mac}, awakecalls.Read, awakecalls.ReadIn{}, nil)
 	})
 	for _, mac := range others {
 		if err := got[mac].Err; err != nil {
-			f.Silent = append(f.Silent, pageawake.Silent{Mac: mac, Why: kit.Translate(err, "awake").Message})
+			f.Silent = append(f.Silent, silentAwake(known, mac, kit.Translate(err, "awake").Message))
 			continue
 		}
 		f.Reports = append(f.Reports, got[mac].Value)
 	}
 	return f, nil
+}
+
+// value: a Mac that did not answer, as it last did: asleep or not, when,
+// and the servers it then hosted.
+func silentAwake(known *machinescalls.Machinist, mac, why string) pageawake.Silent {
+	s := pageawake.Silent{Mac: mac, Why: why}
+	h, ok := known.Seen(mac)
+	if !ok {
+		return s
+	}
+	s.Asleep, s.Answered = h.Asleep, h.Answered
+	for _, vm := range h.VMs {
+		if vm.Lifetime == model.AlwaysOn {
+			s.Servers = append(s.Servers, vm.Name)
+		}
+	}
+	return s
 }
 
 // value: the servers that pause once Never sleeps is off on the target Mac,
