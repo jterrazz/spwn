@@ -14,7 +14,7 @@ runs:
       stdout: |
           # Agents	1 ○
           ○	linux-1	claudecode	finished · stopped	Build the landing page
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"] | {closed: .agents.closed, terminals: .agents.terminals, run: (.run != null)}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"] | {closed: .agents.closed, terminals: .agents.terminals, running: (.pid != null)}'' world.json'
       exit: 0
       stdout: |
-          {"closed":["t1"],"terminals":null,"run":false}
+          {"closed":["t1"],"terminals":null,"running":true}
