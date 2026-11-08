@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "18 set by station here"
+                    "text": "19 set by station here"
                   },
                   {
                     "kind": "text",
@@ -243,6 +243,16 @@
         },
         {
           "row": {
+            "id": "herdr-machine",
+            "mark": "pending",
+            "label": "herdr-machine",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "docker-shortcuts",
             "mark": "pending",
             "label": "docker-shortcuts",
@@ -255,7 +265,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 18
+          "n": 19
         }
       ],
       "pipe_counts": true

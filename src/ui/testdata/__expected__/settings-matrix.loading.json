@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "32 settings on 4 machines",
+            "label": "33 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "14 more",
+            "label": "15 more",
             "cells": [
               {
                 "kind": "pending"
@@ -1005,6 +1005,7 @@
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",
+        "herdr-machine",
         "docker-shortcuts"
       ],
       "priority": 1,
@@ -1037,6 +1038,7 @@
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",
+        "herdr-machine",
         "docker-shortcuts",
         "filevault",
         "firewall",

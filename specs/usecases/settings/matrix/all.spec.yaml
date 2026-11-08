@@ -4,7 +4,7 @@ runs:
     - command: 'settings --all-machines | /usr/bin/grep -e "settings	" -e "more	"'
       exit: 0
       stdout: |
-          ○	18 settings	○ 0/17	○ 0/17	○ 0/7	?	0/41
+          ○	19 settings	○ 0/18	○ 1/18	○ 0/7	?	1/43
           ○	5 settings	○	○ 3/5	–	?	3/5
           ●	8 more	● 8/8	● 8/8	–	?	16/16
     - command: 'settings --all-machines --all | /usr/bin/grep -c -e "settings	" -e "more	"'
@@ -24,4 +24,4 @@ runs:
     - command: 'settings --all-machines --all | /usr/bin/grep -c "^[^#].*	[0-9]*/[0-9]*$"'
       exit: 0
       stdout: |
-          32
+          33

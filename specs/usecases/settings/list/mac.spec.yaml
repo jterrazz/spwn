@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	17 ○
+          # Set by station	18 ○
           ○	hushlogin	not applied	station settings apply hushlogin
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
@@ -21,6 +21,7 @@ runs:
           ○	backup-exclusions	not applied	station settings apply backup-exclusions
           ○	tart-launcher	not applied	station settings apply tart-launcher
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	herdr-machine	not applied · needs herdr-app	station apps install herdr-app
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers

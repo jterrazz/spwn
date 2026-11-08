@@ -1,4 +1,4 @@
-# Set by station	4 ●	4 ◐	4 ○	3 ⊘
+# Set by station	4 ●	4 ◐	4 ○	4 ⊘
 ◐	ghostty-dotfiles	changed since 2 d ago	station settings diff ghostty-dotfiles
 ◐	github-login	changed since 2 d ago	station settings diff github-login
 ◐	dock-reset	changed since 2 d ago	station settings diff dock-reset
@@ -6,7 +6,7 @@
 ○	tmux-dotfiles	not applied	station settings apply tmux-dotfiles
 ○	spotlight-exclude	not applied	station settings apply spotlight-exclude
 ○	dock-spacer	not applied	station settings apply dock-spacer
-○	docker-shortcuts	not applied	station settings apply docker-shortcuts
+○	herdr-machine	not applied	station settings apply herdr-machine
 ●	hushlogin	applied · ~/.hushlogin
 ●	ssh-key	applied · ~/.ssh-key
 ●	zed-dotfiles	applied · ~/.zed-dotfiles
@@ -14,6 +14,7 @@
 ⊘	starship-dotfiles	off here
 ⊘	dns	off here
 ⊘	backup-exclusions	off here
+⊘	docker-shortcuts	off here
 # Always-on Mac
 ○	Always-on Mac	5 · for a Mac that hosts servers
 # Checked	5 ●	2 ◐	1 ⊘	1 ?

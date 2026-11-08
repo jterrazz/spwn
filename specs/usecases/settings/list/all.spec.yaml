@@ -12,7 +12,7 @@ runs:
     - command: 'settings --all | /usr/bin/grep -e "^#" -e "	dock-spacer	" -e "	hushlogin	"'
       exit: 0
       stdout: |
-          # Set by station	1 ●	15 ○	1 ⊘
+          # Set by station	1 ●	16 ○	1 ⊘
           ●	dock-spacer	applied
           ⊘	hushlogin	off here
           # Always-on Mac	5 ○

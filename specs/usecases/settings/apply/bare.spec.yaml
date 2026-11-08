@@ -16,7 +16,7 @@ runs:
     - command: 'settings | /usr/bin/grep -E ''^#|○'''
       exit: 0
       stdout: |
-          # Set by station	9 ●	8 ○
+          # Set by station	9 ●	9 ○
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
@@ -25,6 +25,7 @@ runs:
           ○	github-login	not applied · needs gh	station apps install gh
           ○	claude-token	not applied	station settings apply claude-token
           ○	zed-dotfiles	not applied · needs zed	station apps install zed
+          ○	herdr-machine	not applied · needs herdr-app	station apps install herdr-app
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐

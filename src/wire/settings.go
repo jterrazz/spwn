@@ -14,12 +14,14 @@ import (
 	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
 	"github.com/jterrazz/studio-station/src/settings/adapter/agenthooks"
 	"github.com/jterrazz/studio-station/src/settings/adapter/gitaliases"
+	"github.com/jterrazz/studio-station/src/settings/adapter/muxmachines"
 	"github.com/jterrazz/studio-station/src/settings/adapter/zshblock"
 
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call/lanes"
+	model "github.com/jterrazz/studio-station/src/machines"
 	pagesettings "github.com/jterrazz/studio-station/src/pages/settings"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	settingsdefaults "github.com/jterrazz/studio-station/src/settings/adapter/defaults"
@@ -86,6 +88,21 @@ func settingsOf(m machine) *settingscalls.Catalogue {
 	})
 }
 
+// value: the names of this Mac's workspaces, as its records hold them.
+func (m machine) workspaces(context.Context) ([]string, error) {
+	records, err := m.machines(false).Records()
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, r := range records {
+		if r.Lifetime != model.AlwaysOn {
+			names = append(names, r.Name)
+		}
+	}
+	return names, nil
+}
+
 // value: the Applier of every effect of the catalogue on this machine; in
 // a world, every procedure is a fake over the Mac's slice: no world runs a
 // procedure of the real machine.
@@ -102,6 +119,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 			agenthooks.Hook{App: claudecode.Program, File: claudecode.File, Hooks: m.agentHooks(claudecode.ID)},
 			agenthooks.Hook{App: codex.Program, File: codex.File, Hooks: m.agentHooks(codex.ID)},
 		),
+		muxmachines.New(m.multiplexer(), m.workspaces),
 	}
 	if m.world != nil {
 		return append(appliers, m.world.procedureAppliers()...)
