@@ -47,7 +47,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.down](stories/menubar.down.png) ![menubar.down light](stories/menubar.down.light.png)
 
 - **Capture**: [dark](stories/menubar.down.png), [light](stories/menubar.down.light.png)
-- **Shows**: A red need: the status item glyph turns red beside its count; aria-label "station, infra down".
+- **Shows**: A server down: the status item glyph is slashed beside its count, in the bar's one ink, never red; aria-label "station, infra down".
 - **Data**: a server in state down
 - **Enters**: #hud: CSS hud 2600 ms linear
 

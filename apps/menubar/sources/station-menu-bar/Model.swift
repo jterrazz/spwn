@@ -74,9 +74,7 @@ final class Model: ObservableObject {
         return icon
     }
 
-    func iconImage(dark: Bool) -> NSImage {
-        icon.nsImage(scheme: dark ? .dark : .light, turn: turn)
-    }
+    var iconImage: NSImage { icon.nsImage(turn: turn) }
 
     func start() {
         guard subscription == nil else { return }

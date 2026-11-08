@@ -3,7 +3,7 @@ import SwiftUI
 
 public struct MenuBarIcon: Equatable, Sendable {
     public enum Mark: Equatable, Sendable {
-        case plain, red, restarting, stopped, connecting
+        case plain, down, restarting, stopped, connecting
     }
 
     public var mark: Mark
@@ -21,13 +21,14 @@ public struct MenuBarIcon: Equatable, Sendable {
     }
 
     // invariant: SPEC A3: the item draws the page's badge and never judges
-    // it: the count of what needs you beside the Orbit, the Orbit red while a
-    // server is down or a port exposed, a turning mark in place of the red
-    // while a server restarts, and the words VoiceOver reads are the
-    // badge's own; while it turns, the machines stand a third of a turn
-    // along the ring. The engine stopped dims the slashed Orbit, so its silence
-    // is never mistaken for all good. The CPU line is the owner's option,
-    // drawn only while the engine streams.
+    // it: the count of what needs you beside the Orbit with its badge cut
+    // out, the Orbit slashed while a server is down or a port exposed, a
+    // turning mark in place of the slash while a server restarts, and the
+    // words VoiceOver reads are the badge's own; while it turns, the
+    // machines stand a third of a turn along the ring. The engine stopped
+    // dims the slashed Orbit, so its silence is never mistaken for all good.
+    // The CPU line is the owner's option, drawn only while the engine
+    // streams.
     public static func of(connection: Connection, page: Page?, sparkline: Bool = false, live: LiveStore? = nil) -> MenuBarIcon {
         switch connection {
         case .connecting: return MenuBarIcon(.connecting)
@@ -37,7 +38,7 @@ public struct MenuBarIcon: Equatable, Sendable {
         let cpu = page?.strip.flatMap { live?.points($0.cpu, else: $0.spark) ?? $0.spark }
         let spark = sparkline ? cpu.flatMap { $0.isEmpty ? nil : $0 } : nil
         guard let badge = page?.badge else { return MenuBarIcon(.plain, spark: spark) }
-        let mark: Mark = badge.down == true ? .red : badge.restarting == true ? .restarting : .plain
+        let mark: Mark = badge.down == true ? .down : badge.restarting == true ? .restarting : .plain
         return MenuBarIcon(mark, count: max(badge.needs ?? 0, 0), spark: spark, said: badge.label)
     }
 
@@ -46,17 +47,16 @@ public struct MenuBarIcon: Equatable, Sendable {
         switch mark {
         case .stopped: return "station: engine stopped"
         case .connecting: return "station: connecting"
-        case .plain, .red, .restarting: return "station"
+        case .plain, .down, .restarting: return "station"
         }
     }
 
     public var turning: Bool { busy || mark == .restarting }
 
-    public var template: Bool { mark != .red }
-
     public var symbol: String {
-        if mark == .stopped { return Token.Icon.slashed }
-        return turning ? Token.Icon.working : Token.Icon.orbit
+        if mark == .stopped || mark == .down { return Token.Icon.slashed }
+        if turning { return Token.Icon.working }
+        return count > 0 ? Token.Icon.badged : Token.Icon.orbit
     }
 }
 
@@ -76,11 +76,10 @@ struct IconSpark: Shape {
     }
 }
 
-// invariant: the item has no colour of its own but the red of a server
-// down: drawn at the status bar's symbol size and weight, macOS paints it
-// white on a dark bar, black on a light one; red, it is drawn in the bar's
-// ink for the appearance it is drawn for. A connection being made dims the
-// Mac and its ring, the machines stay lit.
+// invariant: the item has no colour of its own, in any state: drawn at the
+// status bar's symbol size and weight, macOS paints it white on a dark bar,
+// black on a light one, and its states are told by shape alone. A
+// connection being made dims the Mac and its ring, the machines stay lit.
 public struct StatusItem: View {
     let icon: MenuBarIcon
     let scheme: ColorScheme
@@ -98,10 +97,10 @@ public struct StatusItem: View {
         HStack(spacing: Token.Icon.gap) {
             HStack(spacing: Token.Item.countGap) {
                 Image(icon.symbol, bundle: .module)
-                    .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
+                    .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
                     .imageScale(.medium)
                     .symbolRenderingMode(icon.mark == .connecting ? .hierarchical : .monochrome)
-                    .foregroundStyle(icon.mark == .red ? Token.Item.red(scheme) : ink)
+                    .foregroundStyle(ink)
                     .opacity(icon.mark == .stopped ? Token.Icon.dimmed : 1)
                 if icon.turning {
                     BusyMark(turn: turn, ink: ink)
@@ -147,19 +146,18 @@ extension MenuBarIcon {
 
     // value: the label's image with a bitmap per screen scale, so the mark
     // lands on whole pixels at 1x, 2x and 3x alike; a template in the one
-    // ink whose alpha macOS repaints, the red in the bar's own.
+    // ink whose alpha macOS repaints.
     @MainActor
-    public func nsImage(scheme: ColorScheme, turn: Double = 0) -> NSImage {
+    public func nsImage(turn: Double = 0) -> NSImage {
         let image = NSImage()
-        let drawn = template ? ColorScheme.light : scheme
         for scale in [1, 2, 3] as [CGFloat] {
-            guard let cg = self.image(scheme: drawn, scale: scale, turn: turn) else { continue }
+            guard let cg = self.image(scheme: .light, scale: scale, turn: turn) else { continue }
             let rep = NSBitmapImageRep(cgImage: cg)
             rep.size = NSSize(width: CGFloat(cg.width) / scale, height: CGFloat(cg.height) / scale)
             image.addRepresentation(rep)
             image.size = rep.size
         }
-        image.isTemplate = template
+        image.isTemplate = true
         image.accessibilityDescription = label
         return image
     }
