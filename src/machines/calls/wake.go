@@ -24,10 +24,25 @@ func (s *Machinist) Wake(ctx context.Context, name string, tell bool) error {
 	if err := s.o.Waker.Wake(ctx, known.Hardware.Ether); err != nil {
 		return err
 	}
-	if !tell || known.TellBack {
+	if !tell {
+		return nil
+	}
+	return s.Remind(ctx, name)
+}
+
+func (s *Machinist) Remind(_ context.Context, name string) error {
+	cfg, err := s.prefs()
+	if err != nil {
+		return err
+	}
+	known := cfg.Macs[name]
+	if known.TellBack {
 		return nil
 	}
 	known.TellBack = true
+	if cfg.Macs == nil {
+		cfg.Macs = map[string]model.MacRecord{}
+	}
 	cfg.Macs[name] = known
 	return s.p.Macs.Set(cfg.Macs)
 }

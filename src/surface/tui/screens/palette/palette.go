@@ -258,6 +258,9 @@ func entries() map[string]entry {
 		"machines.log": {subject: vm, item: func(_, v Target) Item {
 			return Item{Label: "Show the log of " + named(v), Gesture: gesture.Gesture{Read: vmWords(v, "machines", "log", v.Name)}}
 		}},
+		"machines.remind": {kinds: mac(), subject: otherMac, item: func(_, m Target) Item {
+			return run("Tell me when "+m.Label+" wakes", []string{"machines", "remind", m.Label}, gesture.V("Arm", "Arming", "Armed"), m.Name)
+		}},
 		"machines.restart": {subject: vm, key: keyed("r"), item: func(_, v Target) Item {
 			return run("Restart "+named(v)+onMac(v), vmWords(v, "machines", "restart", v.Name), gesture.V("Restart", "Restarting", "Restarted"), v.Name)
 		}},

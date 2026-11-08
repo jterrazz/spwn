@@ -407,6 +407,13 @@
       "out": "LogOut"
     },
     {
+      "name": "machines.remind",
+      "schema": "station.machines.remind/v1",
+      "where": "in-process",
+      "in": "RemindIn",
+      "out": "Reminded"
+    },
+    {
       "name": "machines.restart",
       "schema": "station.machines.restart/v1",
       "where": "at-target",

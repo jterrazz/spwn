@@ -40,6 +40,7 @@ import (
 	machineslog "github.com/jterrazz/studio-station/src/surface/cli/machines/log"
 	machinespipe "github.com/jterrazz/studio-station/src/surface/cli/machines/pipe"
 	machinesprobe "github.com/jterrazz/studio-station/src/surface/cli/machines/probe"
+	machinesremind "github.com/jterrazz/studio-station/src/surface/cli/machines/remind"
 	machinesrestart "github.com/jterrazz/studio-station/src/surface/cli/machines/restart"
 	machinesstart "github.com/jterrazz/studio-station/src/surface/cli/machines/start"
 	machinesstop "github.com/jterrazz/studio-station/src/surface/cli/machines/stop"
@@ -196,6 +197,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinesforget.Command(machinesforget.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesunlock.Command(machinesunlock.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machineswake.Command(machineswake.Deps{Names: vms.Names, ThisMachine: m.where}, env),
+		machinesremind.Command(machinesremind.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinessupervise.Command(env),
 		machinespipe.Command(machinespipe.Deps{Machines: vmPipe{vms, m.sys.Sockets}}, env),
 	)

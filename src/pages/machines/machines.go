@@ -262,6 +262,14 @@ func Woken(w model.Woken, thisMac page.Context) page.Page {
 	return pages.Outcome("machines wake", thisMac, nil, []page.Row{row}, "machines")
 }
 
+func Reminded(r model.Reminded, thisMac page.Context) page.Page {
+	row := done(r.Name, catalog.StateOK, "you are told once it answers")
+	if r.Already {
+		row = done(r.Name, catalog.StateOK, "already awake: it answers")
+	}
+	return pages.Outcome("machines remind", thisMac, nil, []page.Row{row}, "machines")
+}
+
 func Back(b model.Back, thisMac page.Context) page.Page {
 	// value: the Mac back, and each VM it paused as it is now.
 	said := make([]string, 0, 1+len(b.VMs))

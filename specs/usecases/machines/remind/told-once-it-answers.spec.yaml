@@ -1,0 +1,35 @@
+description: 'tell me when it wakes sends nothing, then tells mac_back once, the moment the Mac answers'
+env: air-asleep
+runs:
+    - command: 'machines --json >/dev/null'
+      exit: 0
+    - command: 'world offline jterrazz-macbook-air'
+      exit: 0
+    - command: 'machines remind macbook-air'
+      exit: 0
+      stdout: |
+          ●	macbook-air	you are told once it answers
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+      exit: 0
+      stdout: |
+          null
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].reachable'''
+      exit: 0
+      stdout: |
+          false
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back")]'' world.json'
+      exit: 0
+      stdout: |
+          []
+    - command: 'world online jterrazz-macbook-air'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back") | [.Subject, .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [["jterrazz-macbook-air","macbook-air is back"]]

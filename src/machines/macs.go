@@ -34,3 +34,9 @@ type Woken struct {
 	// owner is told once, the moment it answers again.
 	Sent, Tell bool
 }
+
+type Reminded struct {
+	Name string
+	// value: the Mac answered already: nothing was armed.
+	Already bool
+}
