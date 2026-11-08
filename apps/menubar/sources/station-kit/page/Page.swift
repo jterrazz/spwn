@@ -123,7 +123,6 @@ public struct Section: Codable, Equatable, Sendable {
     public var about: About?
 }
 
-// value: an info button's name and the words it opens.
 public struct About: Codable, Equatable, Sendable {
     public var label: String?
     public var text: String?

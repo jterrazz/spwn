@@ -177,7 +177,6 @@ type Section struct {
 	About *About `json:"about,omitempty"`
 }
 
-// value: an info button's name and the words it opens.
 type About struct {
 	Label string `json:"label,omitempty"`
 	Text  string `json:"text,omitempty"`
