@@ -1,0 +1,16 @@
+{
+    "group": "home",
+    "id": "home.hover",
+    "note": "Hovering an agent row: it tints, Open in Terminal fades in beside its CPU.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "hover": "linux-1"
+    }
+}

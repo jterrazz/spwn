@@ -1,0 +1,13 @@
+{
+    "group": "home",
+    "id": "home.agents-folded",
+    "note": "Four live agents: two stay, then the finished one, the rest behind the fold that names them.",
+    "pages": ["pages/machines.home.four-agents.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

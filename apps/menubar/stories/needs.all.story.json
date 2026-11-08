@@ -1,0 +1,8 @@
+{
+    "group": "needs",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's",
+    "id": "needs.all",
+    "note": "Needs you over every machine: five things, most urgent first, each with its verb; the upkeep apart.",
+    "pages": ["pages/machines.needs.five.needs.json"],
+    "schema": "station.story/v1"
+}

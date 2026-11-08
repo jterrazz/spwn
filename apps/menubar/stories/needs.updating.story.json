@@ -1,0 +1,11 @@
+{
+    "group": "needs",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's",
+    "id": "needs.updating",
+    "note": "Update pressed on the updates row: the verb says Updating while they install.",
+    "pages": ["pages/machines.needs.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "pending": ["upkeep:macbook-pro/apps/2"]
+    }
+}

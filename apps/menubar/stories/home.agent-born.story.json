@@ -1,0 +1,14 @@
+{
+    "group": "home",
+    "id": "home.agent-born",
+    "note": "The agent is ready: its row reads its first step, and the live agents fold past three.",
+    "pages": ["pages/machines.home.born.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60,
+        "cpuh:linux-4": 12
+    },
+    "schema": "station.story/v1"
+}

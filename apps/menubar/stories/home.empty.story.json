@@ -1,6 +1,6 @@
 {
     "group": "home",
-    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
+    "heightNote": "the empty hero's card is 6 pt taller than the prototype's",
     "id": "home.empty",
     "note": "First run: This Mac alone, no VM: the empty state with New VM.",
     "pages": ["pages/machines.home.empty.menubar.json"],

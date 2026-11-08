@@ -1,8 +1,13 @@
 {
     "group": "home",
-    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.exposed",
     "note": "Port 5000 is exposed: the red hero with Review, the other needs folded.",
     "pages": ["pages/machines.home.exposed.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
     "schema": "station.story/v1"
 }

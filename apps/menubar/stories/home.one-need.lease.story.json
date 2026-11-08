@@ -1,8 +1,13 @@
 {
     "group": "home",
-    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.one-need.lease",
     "note": "One copy shared ends soon: Claude on linux-1, its facts and Extend.",
     "pages": ["pages/machines.home.share-ending.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
     "schema": "station.story/v1"
 }
