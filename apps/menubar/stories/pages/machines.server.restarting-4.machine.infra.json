@@ -1,0 +1,830 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "infra",
+    "kind": "server",
+    "on": "mac-mini"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "infra",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "server"
+        },
+        {
+          "kind": "text",
+          "text": "on mac-mini",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "restarting…"
+        },
+        {
+          "kind": "text",
+          "text": "restarts after a power cut",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "health",
+              "mark": "ok",
+              "label": "Restarting · step 4 of 4",
+              "detail": {
+                "kind": "text",
+                "text": "started 3 s ago"
+              },
+              "glyph": {
+                "signal": "active",
+                "spin": true
+              }
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "running",
+                  "mark": "ok",
+                  "label": "Running",
+                  "detail": {
+                    "kind": "text",
+                    "text": "running"
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "address",
+                  "mark": "ok",
+                  "label": "Has an address",
+                  "detail": {
+                    "kind": "text",
+                    "text": "192.168.64.7"
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "ssh",
+                  "mark": "ok",
+                  "label": "SSH answers",
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "check",
+                  "mark": "ok",
+                  "label": "Check passes",
+                  "detail": {
+                    "kind": "text",
+                    "text": "checking…"
+                  },
+                  "signal": "active"
+                }
+              }
+            ],
+            "fold": "open"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "health"
+    },
+    {
+      "id": "uptime",
+      "title": "Last 30 days",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "99.97% available"
+        }
+      ],
+      "items": [
+        {
+          "uptime": {
+            "days": [
+              {
+                "date": "2026-10-09",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-10",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-11",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-12",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-13",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-14",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-15",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-16",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-17",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-18",
+                "mark": "restart",
+                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+              },
+              {
+                "date": "2026-10-19",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-20",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-21",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-22",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-23",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-24",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-25",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-26",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-27",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-28",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-29",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-30",
+                "mark": "restart",
+                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+              },
+              {
+                "date": "2026-10-31",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-01",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-02",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-03",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-04",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-05",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-06",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-07",
+                "mark": "down",
+                "tip": "Down 10:26–now · out of memory"
+              }
+            ],
+            "availability": {
+              "kind": "text",
+              "text": "99.97% available"
+            }
+          }
+        },
+        {
+          "note": {
+            "text": "30 days ago"
+          }
+        },
+        {
+          "note": {
+            "text": "today"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "uptime"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "pending"
+            }
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "unreachable until ready"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra:443",
+            "mark": "ok",
+            "label": "Traefik",
+            "detail": {
+              "kind": "text",
+              "text": "443 public · Cloudflare Tunnel"
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "signal": "faint"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "signal": "faint"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "tooling",
+      "title": "Tooling",
+      "items": [
+        {
+          "note": {
+            "text": "Apps, settings and accounts: your own tooling (Ansible)."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 20776904294,
+                "of": 25769803776,
+                "live": "memory:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 450,
+                "live": "disk:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "activity"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Restart",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "destructive": true
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal",
+      "disabled": "Opens once SSH answers"
+    },
+    {
+      "label": "More options for infra",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "restart",
+        "stop",
+        "delete"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "server"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "note": "Opens once SSH answers",
+    "buttons": [
+      "open-station"
+    ]
+  },
+  "live": [
+    "cpu:infra",
+    "memory:infra",
+    "disk:infra"
+  ]
+}

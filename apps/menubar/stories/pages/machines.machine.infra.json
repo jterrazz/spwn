@@ -10,134 +10,33 @@
   "state": "ready",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "infra",
       "role": "summary",
       "caption": [
         {
           "kind": "text",
-          "text": "Server VM"
+          "text": "server"
         },
         {
           "kind": "text",
-          "text": "Always on"
+          "text": "on mac-mini",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "on mac-mini"
+          "text": "up 12 days"
         },
         {
           "kind": "text",
-          "text": "8 CPU"
-        },
-        {
-          "kind": "text",
-          "text": "24 GB"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "state",
-            "mark": "ok",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Running"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "up",
-      "title": "Overview",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "up",
-            "label": "Up",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "12 d"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "since boot"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "restarts",
-            "label": "Restarts",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "count",
-                    "unit": "restarts"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "none since boot"
-                  }
-                ]
-              }
-            ]
-          }
+          "text": "restarts after a power cut",
+          "pri": 3
         }
       ]
     },
     {
       "id": "health",
       "title": "Health",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "after every boot"
-        },
-        {
-          "kind": "age",
-          "n": 40,
-          "at": "2026-11-07T10:29:20Z"
-        }
-      ],
       "columns": [
         {
           "key": "name",
@@ -152,71 +51,224 @@
       ],
       "items": [
         {
-          "row": {
-            "id": "running",
-            "mark": "ok",
-            "label": "Running",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "address",
-            "mark": "ok",
-            "label": "Has an address",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "192.168.64.7"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "ssh",
-            "mark": "ok",
-            "label": "SSH answers",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "check",
-            "mark": "ok",
-            "label": "Check passes",
-            "cells": [
-              {
+          "group": {
+            "head": {
+              "id": "health",
+              "mark": "ok",
+              "label": "Healthy · 4 of 4",
+              "detail": {
                 "kind": "list",
                 "items": [
                   {
                     "kind": "text",
-                    "text": "https://infra:6443/readyz"
+                    "text": "checked after every boot"
                   },
                   {
                     "kind": "text",
-                    "text": "200"
+                    "text": "40 s ago"
                   }
                 ]
+              },
+              "glyph": {
+                "kind": "symbol:checkmark.circle.fill",
+                "signal": "well"
+              },
+              "menu": [
+                "restart",
+                "stop"
+              ]
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "running",
+                  "mark": "ok",
+                  "label": "Running",
+                  "detail": {
+                    "kind": "text",
+                    "text": "running"
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "address",
+                  "mark": "ok",
+                  "label": "Has an address",
+                  "detail": {
+                    "kind": "text",
+                    "text": "192.168.64.7"
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "ssh",
+                  "mark": "ok",
+                  "label": "SSH answers",
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "check",
+                  "mark": "ok",
+                  "label": "Check passes",
+                  "detail": {
+                    "kind": "text",
+                    "text": "200"
+                  },
+                  "signal": "well"
+                }
               }
+            ],
+            "fold": "folded"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "health"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU · 8 cores",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:infra"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "5 GB free",
+              "live": "free:infra"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 20776904294,
+              "of": 25769803776
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:infra"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
             ]
           }
         }
       ],
-      "counts": [
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
         {
-          "mark": "ok",
-          "n": 4
+          "kind": "text",
+          "text": "2 shared"
         }
-      ]
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra:443",
+            "mark": "ok",
+            "label": "Traefik",
+            "detail": {
+              "kind": "text",
+              "text": "443 public · Cloudflare Tunnel"
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "quick": "copy:infra:443"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "quick": "copy:infra:6443"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "tooling",
+      "title": "Tooling",
+      "items": [
+        {
+          "note": {
+            "text": "Apps, settings and accounts: your own tooling (Ansible)."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
     },
     {
       "id": "activity",
@@ -504,64 +556,8 @@
             ]
           }
         }
-      ]
-    },
-    {
-      "id": "server",
-      "title": "Ports and shell",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
       ],
-      "items": [
-        {
-          "row": {
-            "id": "ports",
-            "label": "Ports",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "Public 1"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "Private 1"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "ssh",
-            "label": "SSH",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ssh admin@infra"
-              }
-            ]
-          }
-        },
-        {
-          "note": {
-            "text": "Apps, settings, accounts: not managed by station"
-          }
-        }
-      ]
+      "segment": "activity"
     }
   ],
   "actions": [
@@ -614,6 +610,102 @@
       }
     },
     {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "destructive": true
+    },
+    {
+      "label": "Copy ssh admin@infra",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh admin@infra"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh admin@infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy 443 public · Cloudflare Tunnel",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "priority": 4,
+      "id": "copy:infra:443",
+      "run": {
+        "copy": "443 public · Cloudflare Tunnel"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied 443 public · Cloudflare Tunnel"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy infra:6443",
+      "on": "row",
+      "rows": [
+        "infra:6443"
+      ],
+      "priority": 4,
+      "id": "copy:infra:6443",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
+        ]
+      }
+    },
+    {
       "key": "cmd+t",
       "label": "Open in Terminal",
       "on": "page",
@@ -625,12 +717,58 @@
           "--on",
           "infra"
         ]
-      }
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "More options for infra",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "restart",
+        "stop",
+        "delete"
+      ]
     }
   ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "server"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh admin@infra"
+    },
+    "buttons": [
+      "copy-ssh",
+      "open-station"
+    ]
+  },
   "live": [
     "cpu:infra",
     "memory:infra",
-    "disk:infra"
+    "disk:infra",
+    "free:infra",
+    "net:infra"
   ]
 }
