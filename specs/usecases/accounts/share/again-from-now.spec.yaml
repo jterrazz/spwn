@@ -1,0 +1,22 @@
+description: 'sharing an account already shared shares it again for its term from now, not on top of what was left: Extend reads 4 h left'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["linux-1"].secrets) | del(.macs["jterrazz-macbook-pro"].stores.shares)'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'accounts share github --with linux-1 --for 12h'
+      exit: 0
+      stdout: |
+          ●	github	shared with linux-1	12 h
+    - command: 'accounts share github --with linux-1 --for 4h'
+      exit: 0
+      stdout: |
+          ●	github	shared with linux-1	4 h
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares["linux-1"] | map([.name, (((.until|fromdate) - (.at|fromdate)) / 3600)])'' world.json'
+      exit: 0
+      stdout: |
+          [["session:github",4]]
+    - command: 'accounts | /usr/bin/grep -A3 "^# Shared"'
+      exit: 0
+      stdout: |
+          # Shared with VMs
+          ●	github	linux-1	4 h left
