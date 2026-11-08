@@ -695,7 +695,7 @@
     },
     {
       "key": "shift+cmd+n",
-      "label": "New agent on linux-1",
+      "label": "New agent",
       "on": "page",
       "priority": 2,
       "mutates": true,
@@ -890,7 +890,7 @@
   "header": {
     "back": "All machines",
     "glyph": {
-      "kind": "symbol:shippingbox",
+      "kind": "workspace",
       "signal": "quiet"
     },
     "buttons": [

@@ -215,7 +215,7 @@ func agentRow(a agents.Agent) page.Row {
 }
 
 func agentActions(h model.MacView, vm model.VM, mine []agents.Agent) []page.Action {
-	start := page.Action{ID: ActionNewAgent, Label: "New agent on " + vm.Name, Icon: "plus", Key: "shift+cmd+n", On: page.OnPage, Priority: 2, Mutates: true,
+	start := page.Action{ID: ActionNewAgent, Label: "New agent", Icon: "plus", Key: "shift+cmd+n", On: page.OnPage, Priority: 2, Mutates: true,
 		Run:  &page.Run{Call: CallAgentsStart, In: map[string]string{"On": vm.Name}, Target: target(h)},
 		Form: &page.Form{Title: "New agent on " + vm.Name, Fields: []page.Field{{Key: "Task", Label: "Task", Kind: page.FieldText, Note: "empty, it waits for a prompt"}}}}
 	out := []page.Action{start}
@@ -278,7 +278,7 @@ func portLinks(m Machine, vm model.VM) page.Section {
 		if n == 0 {
 			s.Items = nil
 		}
-		row := page.Row{ID: RowListening, Label: cmpWord(titled(l.Process), "Port "+strconv.Itoa(l.Port)), Mark: page.OK,
+		row := page.Row{ID: RowListening, Label: cmpWord(titled(l.Process), "Port "+strconv.Itoa(l.Port)), Mark: page.OK, Glyph: page.Glyph{Kind: "port:" + l.Process},
 			Detail: page.Text(vm.Name + ":" + strconv.Itoa(l.Port)), Verb: ActionShareOne + strconv.Itoa(l.Port)}
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
@@ -321,7 +321,7 @@ func stoppedCard(vm model.VM) page.Section {
 	if b := vm.Resources.MemoryBytes; b > 0 {
 		sub = append(sub, "starts with "+pagemachines.Memory(b).Text)
 	}
-	empty := page.Empty{Glyph: symbol("shippingbox", page.SignalQuiet), Text: vm.Name + " is stopped", Sub: strings.Join(sub, ", "), Actions: []string{ActionStartVM}}
+	empty := page.Empty{Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}, Text: vm.Name + " is stopped", Sub: strings.Join(sub, ", "), Actions: []string{ActionStartVM}}
 	return page.Section{ID: SectionStopped, Title: vm.Name + " is stopped", Card: page.CardEmpty, Items: []page.Item{{Empty: &empty}}}
 }
 

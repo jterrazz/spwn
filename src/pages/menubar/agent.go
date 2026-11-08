@@ -258,7 +258,7 @@ func workspaceGlyph(vm model.VM, all []agents.Agent) page.Glyph {
 	if vm.Agent != nil && vm.Agent.State != model.AgentFinished {
 		return page.Glyph{Kind: "agent", Signal: page.SignalActive}
 	}
-	return page.Glyph{Kind: "symbol:shippingbox", Signal: page.SignalQuiet}
+	return page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}
 }
 
 // value: where an agent's call runs: inside its workspace, reached
