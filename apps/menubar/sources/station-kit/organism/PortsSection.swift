@@ -10,13 +10,32 @@ public struct PortsSection: View {
     let actions: [Action]
     let run: (Action) -> Void
     let qr: (String) -> Void
+    let shown: String?
+    let unfolded: (Row, URL) -> AnyView
     @Environment(\.stationTokens) private var tokens
 
-    public init(_ section: Section, actions: [Action] = [], run: @escaping (Action) -> Void = { _ in }, qr: @escaping (String) -> Void = { _ in }) {
+    public init(_ section: Section, actions: [Action] = [], run: @escaping (Action) -> Void = { _ in }, qr: @escaping (String) -> Void = { _ in },
+                shown: String? = nil, unfolded: @escaping (Row, URL) -> AnyView = { _, _ in AnyView(EmptyView()) }) {
         self.section = section
         self.actions = actions
         self.run = run
         self.qr = qr
+        self.shown = shown
+        self.unfolded = unfolded
+    }
+
+    // value: the link a row unfolds under it: the one its QR shows, while
+    // the panel shows that QR.
+    public static func unfolds(_ row: Row, shown: String?, in actions: [Action]) -> URL? {
+        guard let shown, let quick = RowView.action(row.quick, in: actions), qr(quick, of: row, in: actions) == shown else { return nil }
+        return URL(string: shown)
+    }
+
+    func port(_ row: Row) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            PortRow(row, actions: actions, run: tap(row))
+            if let url = Self.unfolds(row, shown: shown, in: actions) { unfolded(row, url) }
+        }
     }
 
     // value: what a row's tap does: its verb's run, or, for the QR beside
@@ -116,7 +135,7 @@ public struct PortsSection: View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.offset) { i, item in
                 if let row = item.row {
-                    PortRow(row, actions: actions, run: tap(row)).overlay(alignment: .top) { if i > 0, items[i - 1].row != nil { hairline } }
+                    port(row).overlay(alignment: .top) { if i > 0, items[i - 1].row != nil { hairline } }
                 } else if let group = item.group {
                     if i > 0 { hairline }
                     Text(group.head?.label ?? "").font(Token.Role.portsSubhead.font).foregroundStyle(tokens.tone(Token.Role.portsSubhead.tone))
@@ -133,7 +152,7 @@ public struct PortsSection: View {
         let rows = items.compactMap(\.row)
         return VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
-                PortRow(row, actions: actions, run: tap(row)).overlay(alignment: .top) { if i > 0 { hairline } }
+                port(row).overlay(alignment: .top) { if i > 0 { hairline } }
             }
         }
     }

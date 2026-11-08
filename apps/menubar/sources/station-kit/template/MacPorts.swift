@@ -1,11 +1,15 @@
 import SwiftUI
 
-// invariant: SPEC A4: a machine's Ports segment, each section by its card.
+// invariant: SPEC A4: a machine's Ports segment, each section by its card;
+// a share whose QR is shown unfolds it under its row.
 struct MacPorts: View {
     let section: Section
     let page: Page
+    let state: PanelState
+    let handlers: PopoverHandlers
     let run: (Action) -> Void
-    let qr: (String) -> Void
 
-    var body: some View { PortsSection(section, actions: page.actions ?? [], run: run, qr: qr) }
+    var body: some View {
+        PortsSection(section, actions: page.actions ?? [], run: run, qr: handlers.toggleQR, shown: state.qr, unfolded: SharedPortCard.unfolded(page, state, handlers))
+    }
 }

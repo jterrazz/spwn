@@ -7,22 +7,44 @@ import XCTest
 final class PortsTests: XCTestCase {
     func texts(_ values: [Value]?) -> [String] { (values ?? []).compactMap(\.text) }
 
-    // invariant: PO-33: a web share's row opens its link in a click, its
-    // QR beside shows the QR of that link, and Stop sharing is a y/n whose
-    // yes is the ports.stop-sharing call of that port.
+    // invariant: PO-33: a web share's row opens its link in a click; its QR
+    // beside unfolds under it the QR of that link, Copy link, which copies
+    // it, Open, which opens it, and Stop sharing, a y/n whose yes is the
+    // ports.stop-sharing call of that port. Its menu holds the same verbs,
+    // and a raw share's holds Copy and Stop sharing.
     func testAWebShareOpensItsLinkAndShowsItsQR() async throws {
         let page = try Tree.page("menubar.ports.linux-1")
         let actions = page.actions ?? []
-        let row = try XCTUnwrap(page.section("private")?.rows.first)
+        let rows = try XCTUnwrap(page.section("private")?.rows)
+        let row = try XCTUnwrap(rows.first)
         let url = "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
         XCTAssertEqual(PortRow.link(row, in: actions)?.run?.open, url)
         let qr = try XCTUnwrap(page.action(row.quick ?? ""))
         XCTAssertEqual(PortsSection.qr(qr, of: row, in: actions), url)
-        let stop = try XCTUnwrap(page.actions(for: row.id ?? "").first { $0.label == "Stop sharing" })
+        XCTAssertNil(PortsSection.unfolds(row, shown: nil, in: actions))
+        XCTAssertEqual(PortsSection.unfolds(row, shown: url, in: actions)?.absoluteString, url)
+        XCTAssertNil(PortsSection.unfolds(rows[1], shown: url, in: actions))
+        XCTAssertEqual(PortRow.menu(row, in: actions).map { $0?.label }, ["Open Vite", "Copy link to Vite", "Show QR for Vite", nil, "Stop sharing"])
+        XCTAssertEqual(PortRow.menu(rows[1], in: actions).map { $0?.label }, ["Copy link to Port 7000", nil, "Stop sharing"])
+        let stop = try XCTUnwrap(PortRow.menu(row, in: actions).last ?? nil)
         XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1's port 5173?")
         XCTAssertEqual(stop.run?.call, "ports.stop-sharing")
         XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "jterrazz-macbook-pro", "Confirm": "yes"] as NSDictionary)
-        var state = PanelState(page: page, connection: .live)
+        var copied: [String] = []
+        var opened: [URL] = []
+        var asked: [String?] = []
+        let handlers = PopoverHandlers(confirm: { asked.append($0?.id) }, open: { opened.append($0) }, copy: { copied.append($0) })
+        var state = PanelState(page: page, connection: .live, qr: url)
+        XCTAssertNil(try Golden.check("menubar.ports.linux-1.qr", try XCTUnwrap(MenuPage.view(state, handlers: handlers, scrolls: false))))
+        XCTAssertEqual(copied + opened.map(\.absoluteString) + asked.compactMap { $0 }, [])
+        let link = PortsPage.link(try XCTUnwrap(URL(string: url)), handlers: handlers)
+        XCTAssertEqual(link.map(\.label), ["Copy link", "Open"])
+        link[0].tap()
+        XCTAssertEqual(copied, [url])
+        XCTAssertEqual(opened, [])
+        link[1].tap()
+        XCTAssertEqual(opened.map(\.absoluteString), [url])
+        state.qr = nil
         state.confirming = stop.id
         XCTAssertNil(try Golden.check("sheet.stop-sharing", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }

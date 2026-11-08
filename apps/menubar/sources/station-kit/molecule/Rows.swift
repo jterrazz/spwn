@@ -137,13 +137,25 @@ public struct PortRow: View {
         return Text("\(label)\(Text(verbatim: Token.Glyph.sep + on).font(Token.Role.rowName.font).foregroundStyle(off ? tokens.color.t3 : tokens.color.t2))")
     }
 
+    // value: a row's menu, in order: each of its verbs, nil a separator.
+    public static func menu(_ row: Row, in actions: [Action]) -> [Action?] {
+        (row.menu ?? []).compactMap { id in id == "-" ? .some(nil) : RowView.action(id, in: actions).map { .some($0) } }
+    }
+
     public var body: some View {
-        if let link {
-            Button { run(link) } label: { line }
-                .buttonStyle(.plain)
-                .accessibilityLabel(link.label ?? row.label ?? "")
-        } else {
-            line
+        SwiftUI.Group {
+            if let link {
+                Button { run(link) } label: { line }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(link.label ?? row.label ?? "")
+            } else {
+                line
+            }
+        }
+        .contextMenu {
+            ForEach(Array(Self.menu(row, in: actions).enumerated()), id: \.offset) { _, a in
+                if let a { Button(a.label ?? "") { run(a) } } else { Divider() }
+            }
         }
     }
 
