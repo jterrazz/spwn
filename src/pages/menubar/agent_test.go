@@ -14,7 +14,7 @@ func fleetAgents() []agents.Agent {
 	return []agents.Agent{
 		{Name: "review-bot", VM: "review-bot", Mac: miniMac, App: "claudecode", State: agents.Waiting,
 			Ask: &agents.Ask{Title: "PR #42 is ready", At: macNow.Add(-6 * time.Minute)}, PR: &agents.PR{Number: 42, URL: "https://github.com/jterrazz/app/pull/42"}},
-		{Name: "review-bot"+agents.Nth+"2", VM: "review-bot", Mac: miniMac, App: "claudecode", State: agents.Finished, Reason: "tests pass", Ended: macNow.Add(-time.Minute)},
+		{Name: "review-bot" + agents.Nth + "2", VM: "review-bot", Mac: miniMac, App: "claudecode", State: agents.Finished, Reason: "tests pass", Ended: macNow.Add(-time.Minute)},
 		{Name: "linux-3", VM: "linux-3", Mac: miniMac, App: "claudecode", State: agents.Running},
 	}
 }
