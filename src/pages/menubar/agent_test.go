@@ -77,8 +77,9 @@ func TestAWorkspaceListsTheWaitingAgentBeforeTheWorkingOnes(t *testing.T) {
 	working := agents.Agent{Name: "review-bot" + agents.Nth + "3", VM: "review-bot", Mac: miniMac, App: "claudecode", State: agents.Working, Task: "fixes the docs"}
 	fleet = append([]agents.Agent{fleet[1], working}, append(fleet[:1:1], fleet[2:]...)...)
 	p := macPageOf(t, "review-bot", func(m *Machine) { m.Agents = fleet })
-	var got []string
-	for _, it := range sectionOf(p, SectionAgents).Items {
+	card := sectionOf(p, SectionAgents)
+	got := make([]string, 0, len(card.Items))
+	for _, it := range card.Items {
 		got = append(got, it.Row.ID)
 	}
 	want := []string{"review-bot", working.Name, "review-bot" + agents.Nth + "2"}
