@@ -7,10 +7,13 @@ import (
 )
 
 // value: the measures a page reads live (SPEC §B3), each keyed
-// `<measure>:<machine>`: CPU's share, the memory used and free, the disk
-// used and the network's rate, in and out together.
+// `<measure>:<machine>`: CPU's share (of a VM, of its own cores), a VM's
+// CPU as a share of the whole Mac that runs it (SPEC B5.3, read on that
+// Mac), the memory used and free, the disk used and the network's rate, in
+// and out together.
 const (
 	LiveCPU    = "cpu"
+	LiveCPUMac = "cpuh"
 	LiveMemory = "memory"
 	LiveFree   = "free"
 	LiveDisk   = "disk"

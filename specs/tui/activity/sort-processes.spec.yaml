@@ -20,6 +20,6 @@ runs:
           send q
       exit: 0
       stdout: |
-          by CPU: tart 18% 4.4 Zed 9% 2.0 WindowServer 4% 644 Ghostty – 6.4
-          by memory: Ghostty – 6.4 tart 18% 4.4 Zed 9% 2.0 WindowServer 4% 644
-          by CPU: tart 18% 4.4 Zed 9% 2.0 WindowServer 4% 644 Ghostty – 6.4
+          by CPU: tart VM linux-1 Zed 9% 2.0 WindowServer 4% 644 Ghostty – 6.4
+          by memory: Ghostty – 6.4 tart VM linux-1 Zed 9% 2.0 WindowServer 4% 644
+          by CPU: tart VM linux-1 Zed 9% 2.0 WindowServer 4% 644 Ghostty – 6.4

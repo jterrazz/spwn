@@ -114,6 +114,20 @@ func (m machine) holder(ctx context.Context, vm string) (string, error) {
 	return "", &model.UnknownMachineError{Name: vm}
 }
 
+// value: the Mac that runs a VM: this Mac for one it holds the record of,
+// else the other Mac whose list names it; ok false for a Mac's name or a
+// name no Mac holds.
+func (m machine) macOf(ctx context.Context, name string) (string, bool) {
+	if ref, known := m.locate(name); known {
+		return ref.On, ref.On != ""
+	}
+	if m.far.router == nil {
+		return "", false
+	}
+	mac, err := m.holder(ctx, name)
+	return mac, err == nil && mac != ""
+}
+
 type guestRelay struct{ d macEngine }
 
 func (g guestRelay) GuestExec(ctx context.Context, vm, line, stdin string) (stdout string, code int, err error) {

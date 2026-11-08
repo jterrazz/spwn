@@ -65,7 +65,7 @@ type Process struct {
 	// value: a CPU share of the whole machine (0 to 100) in a list by CPU,
 	// resident bytes in a list by memory.
 	Value float64 `json:"value"`
-	// value: the VM whose hypervisor process this is, on its Mac.
+	// value: the VM whose Virtualization process this is, on its Mac.
 	VM string `json:"vm,omitempty"`
 }
 
@@ -105,4 +105,19 @@ type Reading struct {
 	// value: a VM read from its Mac while its guest does not answer: its
 	// process's usage there, and nothing of the VM's own counters.
 	Run *Usage `json:"run,omitempty"`
+	// value: on a Mac, each VM it runs as this Mac measures it, from its
+	// Virtualization process: its CPU a share of the whole Mac (SPEC B5.3).
+	VMs []VMUsage `json:"vms,omitempty"`
+}
+
+type VMUsage struct {
+	VM string `json:"vm"`
+	Usage
+}
+
+type VMRun struct {
+	// value: a VM this Mac runs, and the process its guest runs in there
+	// (Virtualization's, not its run's): 0 while none holds it yet.
+	VM     string `json:"vm"`
+	Holder int    `json:"holder"`
 }

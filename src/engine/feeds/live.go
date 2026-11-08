@@ -26,14 +26,18 @@ const (
 type Live struct {
 	// value: the router each machine's sample rides: This Mac's in the
 	// engine's process, a VM's and another Mac's through their engine.
-	Calls   call.Router
+	Calls call.Router
+	// value: the Mac that runs a VM, by the VM's name; ok false for a name
+	// that is no VM, or that no Mac answers for yet.
+	MacOf   func(ctx context.Context, vm string) (mac string, ok bool)
 	Clock   Clock
 	ThisMac string
 	// value: how long a tick waits on a late machine; zero is a second.
 	Budget time.Duration
 
-	mu sync.Mutex
-	of map[string]*watched
+	mu   sync.Mutex
+	of   map[string]*watched
+	macs map[string]string
 }
 
 type watched struct {
@@ -47,19 +51,20 @@ func (l *Live) Sample(ctx context.Context, keys []string) engine.Sample {
 	// at once, through its engine, and waits on them for its budget alone: a
 	// machine still late keeps its last value, stale once it has not answered
 	// for 30 s, and is asked again only once its answer came.
-	var machines []string
-	for _, k := range keys {
-		if _, m := engine.LiveOf(k); m != "" && !slices.Contains(machines, m) {
-			machines = append(machines, m)
-		}
-	}
-	waits := l.ask(ctx, machines)
 	budget := l.Budget
 	if budget == 0 {
 		budget = tickBudget
 	}
 	spent, cancel := context.WithTimeout(ctx, budget)
 	defer cancel()
+	of := l.machinesOf(spent, keys)
+	var machines []string
+	for _, m := range of {
+		if !slices.Contains(machines, m) {
+			machines = append(machines, m)
+		}
+	}
+	waits := l.ask(ctx, machines)
 wait:
 	for _, done := range waits {
 		select {
@@ -71,7 +76,48 @@ wait:
 	if ctx.Err() != nil {
 		return engine.Sample{}
 	}
-	return l.compose(keys)
+	return l.compose(keys, of)
+}
+
+// value: the machine each key is read on: its own, but a VM's share of its
+// Mac (SPEC B5.3) on the Mac that runs it, which the tick finds once per VM;
+// a key whose machine is not known yet is left out of the tick.
+func (l *Live) machinesOf(ctx context.Context, keys []string) map[string]string {
+	of := map[string]string{}
+	for _, k := range keys {
+		measure, m := engine.LiveOf(k)
+		if m == "" {
+			continue
+		}
+		if measure == engine.LiveCPUMac {
+			mac, ok := l.macOf(ctx, m)
+			if !ok {
+				continue
+			}
+			m = mac
+		}
+		of[k] = m
+	}
+	return of
+}
+
+func (l *Live) macOf(ctx context.Context, vm string) (string, bool) {
+	l.mu.Lock()
+	mac, ok := l.macs[vm]
+	l.mu.Unlock()
+	if ok || l.MacOf == nil {
+		return mac, ok
+	}
+	if mac, ok = l.MacOf(ctx, vm); !ok {
+		return "", false
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.macs == nil {
+		l.macs = map[string]string{}
+	}
+	l.macs[vm] = mac
+	return mac, true
 }
 
 func (l *Live) ask(ctx context.Context, machines []string) []chan struct{} {
@@ -122,14 +168,13 @@ func (l *Live) read(ctx context.Context, name string, w *watched) {
 	w.asking = nil
 }
 
-func (l *Live) compose(keys []string) engine.Sample {
+func (l *Live) compose(keys []string, of map[string]string) engine.Sample {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	now := l.Clock.Now()
 	out := engine.Sample{Values: map[string]any{}}
 	for _, k := range keys {
-		_, m := engine.LiveOf(k)
-		w := l.of[m]
+		w := l.of[of[k]]
 		if w == nil {
 			continue
 		}

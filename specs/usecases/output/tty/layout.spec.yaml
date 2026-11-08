@@ -210,8 +210,8 @@ runs:
             ● Thermal        Nominal
               Battery        96 % · charging · health 98 % · 112 cycles
           Top processes
-              Top by CPU     tart 18 % · Zed 9 % · WindowServer 4 %
-              Top by memory  tart 4.1 GB · Zed 1.9 GB · WindowServer 0.6 GB
+              Top by CPU     tart (linux-1) 18 % · Zed 9 % · WindowServer 4 %
+              Top by memory  tart (linux-1) 4.1 GB · Zed 1.9 GB · WindowServer 0.6 GB
 
           → station activity --all-machines  every machine
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" ports'

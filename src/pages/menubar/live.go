@@ -56,8 +56,10 @@ func LiveValue(key string, readings []activity.Reading) page.Value {
 	// that lists the key draws it: the measure now led into its series, the
 	// free memory alone; the zero Value while the measure is not read yet.
 	m := measured(readings)
-	measure, _ := engine.LiveOf(key)
+	measure, subject := engine.LiveOf(key)
 	switch measure {
+	case engine.LiveCPUMac:
+		return ofTheMac(subject, readings)
 	case engine.LiveCPU:
 		return led(m.cpu, m.cpus)
 	case engine.LiveMemory:
@@ -70,6 +72,24 @@ func LiveValue(key string, readings []activity.Reading) page.Value {
 		return led(m.net, m.nets)
 	}
 	return page.Value{}
+}
+
+// value: SPEC B5.3: a VM's CPU as a share of the whole Mac, from that
+// Mac's readings, led into its series; the zero Value while the Mac's last
+// reading does not carry the VM.
+func ofTheMac(vm string, readings []activity.Reading) page.Value {
+	var series []int
+	now := page.Value{}
+	for _, r := range readings {
+		now = page.Value{}
+		for _, u := range r.VMs {
+			if u.VM == vm {
+				series = append(series, int(u.CPU))
+				now = page.Percent(int64(u.CPU * 10))
+			}
+		}
+	}
+	return led(now, series)
 }
 
 func led(now page.Value, series []int) page.Value {

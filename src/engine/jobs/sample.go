@@ -84,12 +84,6 @@ func (s *Sample) Run(ctx context.Context) {
 	}
 	now := s.Clock.Now()
 	seen := s.Seen()
-	vms := map[int]string{}
-	for _, m := range seen {
-		if m.PID != 0 {
-			vms[m.PID] = m.Ref.Name
-		}
-	}
 	type read struct {
 		r  activity.Reading
 		ok bool
@@ -112,10 +106,6 @@ func (s *Sample) Run(ctx context.Context) {
 		r, ok := reads[i].r, reads[i].ok
 		if !ok {
 			continue
-		}
-		if m.Ref.On == "" {
-			named(r.Top.CPU, vms)
-			named(r.Top.Memory, vms)
 		}
 		h.Add(m.Ref.Name, r)
 		kept, _ := h.Of(m.Ref.Name)
@@ -148,16 +138,6 @@ func (s *Sample) guest(ctx context.Context, ref machine.Ref) (activity.Reading, 
 	ctx, cancel := context.WithTimeout(ctx, budget)
 	defer cancel()
 	return call.Invoke(ctx, s.Calls, ref, activitycalls.Sample, activitycalls.SampleIn{}, nil)
-}
-
-// invariant: a hypervisor process on this Mac is named by the VM it runs,
-// so the owner sees which VM costs what.
-func named(ps []activity.Process, vms map[int]string) {
-	for i, p := range ps {
-		if vm, ok := vms[p.PID]; ok {
-			ps[i].VM = vm
-		}
-	}
 }
 
 func (s *Sample) judge(h *activity.History, m Seen, found []finding.Finding, last activity.Sample) {

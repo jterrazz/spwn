@@ -16,6 +16,7 @@ import (
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
+	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/engine/feeds"
@@ -92,6 +93,8 @@ type world struct {
 	updates  bool
 	asked    map[string][]string
 	activity map[string]uint64
+	// value: the activity reads asked, by the machine they ran on.
+	reads map[string][]activitycalls.ReadIn
 }
 
 func (w *world) machines(here bool) machines.AllMachines {
@@ -140,6 +143,15 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 		}
 		w.mu.Unlock()
 		return overviewcalls.ReadOut{Summary: overview.Summary{Head: overview.Head{Name: at}, Needs: needs}}
+	case activitycalls.Read.Name:
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		if w.reads == nil {
+			w.reads = map[string][]activitycalls.ReadIn{}
+		}
+		read, _ := in.(activitycalls.ReadIn)
+		w.reads[at] = append(w.reads[at], read)
+		return activity.Report{Source: activity.FromEngine, Findings: []finding.Finding{}}
 	case activitycalls.Sample.Name:
 		memory := map[string]int64{thisMac: 16 * gb, mini: 64 * gb, "infra": 24 * gb}[at]
 		w.mu.Lock()

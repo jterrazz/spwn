@@ -16,5 +16,5 @@ runs:
           	Network total	received 120 GB · sent 210 GB since boot
           ●	Thermal	Nominal
           # Top processes
-          	Top by CPU	tart 18 % · AirPlayXPCHelper 1 %
-          	Top by memory	tart 15 GB · AirPlayXPCHelper 50 MB
+          	Top by CPU	tart (infra) 18 % · AirPlayXPCHelper 1 %
+          	Top by memory	tart (infra) 15 GB · AirPlayXPCHelper 50 MB
