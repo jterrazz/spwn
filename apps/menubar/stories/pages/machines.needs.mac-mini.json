@@ -79,6 +79,10 @@
     }
   ],
   "header": {
-    "back": "mac-mini"
+    "back": "mac-mini",
+    "glyph": {
+      "kind": "symbol:exclamationmark.circle.fill",
+      "signal": "waits"
+    }
   }
 }

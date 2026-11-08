@@ -1,0 +1,17 @@
+{
+    "group": "home",
+    "heightNote": "drawn whole: the panel caps it at 700 and scrolls its body (HomeCardsTests)",
+    "id": "home.agent-creating",
+    "note": "An agent starting on a new throwaway, the agents unfolded: its ring and its task; mac-mini's memory reserved at once.",
+    "pages": ["pages/machines.home.creating.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "unfolded": ["agents"]
+    }
+}

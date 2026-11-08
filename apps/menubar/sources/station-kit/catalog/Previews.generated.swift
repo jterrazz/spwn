@@ -6,6 +6,16 @@ import SwiftUI
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
 
+#Preview("home.agent-born") { StoryStage(Stories["home.agent-born"]) }
+
+#Preview("home.agent-creating") { StoryStage(Stories["home.agent-creating"]) }
+
+#Preview("home.agents-folded") { StoryStage(Stories["home.agents-folded"]) }
+
+#Preview("home.agents-unfolded") { StoryStage(Stories["home.agents-unfolded"]) }
+
+#Preview("home.awake-off") { StoryStage(Stories["home.awake-off"]) }
+
 #Preview("home.down-and-exposed") { StoryStage(Stories["home.down-and-exposed"]) }
 
 #Preview("home.down") { StoryStage(Stories["home.down"]) }
@@ -15,6 +25,8 @@ import SwiftUI
 #Preview("home.exposed") { StoryStage(Stories["home.exposed"]) }
 
 #Preview("home.fine") { StoryStage(Stories["home.fine"]) }
+
+#Preview("home.hover") { StoryStage(Stories["home.hover"]) }
 
 #Preview("home.loaded") { StoryStage(Stories["home.loaded"]) }
 
@@ -69,6 +81,14 @@ import SwiftUI
 #Preview("menubar.open") { StoryStage(Stories["menubar.open"]) }
 
 #Preview("menubar.restarting") { StoryStage(Stories["menubar.restarting"]) }
+
+#Preview("needs.all") { StoryStage(Stories["needs.all"]) }
+
+#Preview("needs.empty") { StoryStage(Stories["needs.empty"]) }
+
+#Preview("needs.updated") { StoryStage(Stories["needs.updated"]) }
+
+#Preview("needs.updating") { StoryStage(Stories["needs.updating"]) }
 
 #Preview("ports.all") { StoryStage(Stories["ports.all"]) }
 

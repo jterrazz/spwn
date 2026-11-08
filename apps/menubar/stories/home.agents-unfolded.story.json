@@ -1,0 +1,17 @@
+{
+    "group": "home",
+    "heightNote": "drawn whole: the panel caps it at 700 and scrolls its body (HomeCardsTests)",
+    "id": "home.agents-unfolded",
+    "note": "The agents fold opened in place: every live agent, then Show less.",
+    "pages": ["pages/machines.home.four-agents.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "unfolded": ["agents"]
+    }
+}

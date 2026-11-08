@@ -13,7 +13,7 @@ runs:
           ["1",["menubar"]]
           loading
           ready
-          ["menubar",["hero","needs-you","machines","awake","accounts"]]
+          ["menubar",["hero","macs","needs-you","machines"]]
           [["new-vm","machines.create-workspace"],["open-station","terminal"],["stop-all","engine.stop"]]
-          [["awake-keep","awake.keep",["awake"]],["open-accounts",null,["accounts"]]]
+          [["new-vm:x","machines.create-workspace",["x"]],["add-mac",null,["add-mac"]]]
           1

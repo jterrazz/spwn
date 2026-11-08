@@ -105,11 +105,11 @@ final class PlayFixesTests: XCTestCase {
         XCTAssertNotEqual(icon.symbol, Token.Icon.orbit)
     }
 
-    // invariant: the Accounts tile and a workspace's Apps, Settings and Disk
-    // each open something: a terminal on that family.
+    // invariant: Home's tiles open their fleet page, and a workspace's
+    // Apps, Settings and Disk each a terminal on that family.
     func testTilesAndInsideRowsOpenTheirFamily() throws {
         let home = try Tree.page("menubar.full")
-        XCTAssertEqual(home.rowActions("accounts").first?.run?.argv, ["accounts"])
+        XCTAssertEqual(home.section("tiles")?.items?.compactMap(\.tile?.nav), ["menubar.ports", "menubar.accounts", "menubar.awake"])
         let linux = try Tree.page("menubar.vm.linux-1")
         for id in ["apps", "settings", "disk"] {
             XCTAssertEqual(linux.rowActions(id).first?.run?.argv, [id, "--on", "linux-1"], id)

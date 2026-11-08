@@ -80,7 +80,7 @@ func agentView(kept []agents.Agent) *model.AgentView {
 	if !ok {
 		return nil
 	}
-	v := model.AgentView{State: string(a.State), Task: a.Task, Ended: a.Ended, Reason: a.Reason}
+	v := model.AgentView{State: string(a.State), Task: a.Task, Ended: a.Ended, Reason: a.Reason, Step: agents.Words(a)}
 	if a.Ask != nil {
 		v.Ask, v.Since = a.Ask.Title, a.Ask.At
 	}

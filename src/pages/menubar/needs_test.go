@@ -182,7 +182,7 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 	if got := rows(pro, SectionUpkeep); len(got) == 0 || got[0] != "Firewall off | station never changes it for you [upkeep:"+needsPro+"/settings/4]" {
 		t.Errorf("This Mac's upkeep %q: its own rows say what, then the detail", got)
 	}
-	if got, want := rows(none, SectionNeeds), []string{"Nothing needs you | nothing blocks an agent or a server"}; !slices.Equal(got, want) {
+	if got, want := rows(none, SectionNeeds), []string{"Nothing needs you | "}; !slices.Equal(got, want) {
 		t.Errorf("a calm fleet's needs %q, want %q", got, want)
 	}
 	if NeedsPage(NeedsReading{}, "", here).State != page.Loading {

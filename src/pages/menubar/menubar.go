@@ -25,18 +25,16 @@ import (
 const ID page.ID = "menubar"
 
 const (
-	ActionNewVM        = "new-vm"
-	ActionOpenStation  = "open-station"
-	ActionStopAll      = "stop-all"
-	ActionStart        = "start"
-	ActionKeepAwake    = "awake-keep"
-	ActionAwakeOff     = "awake-off"
-	ActionUpdateAll    = "update-all"
-	ActionOpenAccounts = "open-accounts"
+	ActionNewVM       = "new-vm"
+	ActionOpenStation = "open-station"
+	ActionStopAll     = "stop-all"
+	ActionStart       = "start"
+	ActionKeepAwake   = "awake-keep"
+	ActionAwakeOff    = "awake-off"
+	ActionUpdateAll   = "update-all"
 
 	SectionNeeds    = "needs-you"
 	SectionMachines = "machines"
-	SectionAwake    = "awake"
 	SectionAccounts = "accounts"
 )
 
@@ -64,17 +62,18 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	needs := needsYou(r)
 	tree := Tree(r.All, r.Ports, homeLine(r))
 	markMacs(&tree, r)
-	p.Sections = []page.Section{needs, tree, awakeTile(r), accountsTile(r.Home)}
-	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, awakeAction(r.Awake), openAccounts())
-	p.Actions = append(p.Actions, updateAll(needs, r.Home)...)
-	ranked, _ := needsOf(r.needsReading(), thisMac.Machine)
+	p.Sections = []page.Section{needs, tree}
+	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, updateAll(needs, r.Home)...)
+	ranked, upkeep := needsOf(r.needsReading(), thisMac.Machine)
 	if top, stale, ok := hero(r, thisMac.Machine, ranked); ok {
-		p.Sections = append([]page.Section{top}, p.Sections...)
+		sections, actions := homeSections(r, thisMac.Machine, upkeep)
+		p.Sections = append(append([]page.Section{top}, sections...), p.Sections...)
 		p.Header = &page.Header{Stale: stale}
 		if top.Card != page.CardEmpty {
 			p.Header.Buttons = []string{ActionNewVM}
 		}
 		p.Actions = append(p.Actions, verbs(ranked)...)
+		p.Actions = append(p.Actions, actions...)
 	}
 	p.Badge = badge(r)
 	p.Live = liveKeys(p)
@@ -153,6 +152,9 @@ func liveKeys(p page.Page) []string {
 			if it.Row != nil {
 				for _, v := range it.Row.Cells {
 					add(v)
+				}
+				if ring := it.Row.Glyph.Ring; ring != "" && !slices.Contains(keys, ring) {
+					keys = append(keys, ring)
 				}
 			}
 		}
@@ -447,83 +449,11 @@ func awakeWords(r awake.Report) string {
 	return ""
 }
 
-// value: the Awake tile: This Mac's keep-awake first, then each other Mac's
-// mode; its switch is This Mac's.
-func awakeTile(r Reading) page.Section {
-	var parts []page.Value
-	self := ""
-	if r.Awake != nil {
-		self = r.Awake.Mac
-		parts = append(parts, page.Text(page.ThisMac+" "+cmpWord(awakeWords(*r.Awake), "sleeps")))
-	}
-	for _, m := range r.Macs {
-		if !m.ThisMac {
-			parts = append(parts, page.Text(macLabel(r, m.Mac, self)+" "+cmpWord(awakeWords(m), "sleeps")))
-		}
-	}
-	value := page.Pending()
-	if r.Awake != nil {
-		value = page.List(parts...)
-	}
-	row := page.Row{ID: pagekeepawake.RowAwake, Label: "Awake", Cells: []page.Value{value}}
-	return page.Section{ID: SectionAwake, Title: "Awake", Role: page.Summary, Columns: columns(), Items: []page.Item{{Row: &row}}}
-}
-
-// value: a Mac as the Machines list names it (`mac-mini`), else by the
-// interface's rule for a Mac's name.
-func macLabel(r Reading, mac, self string) string {
-	if r.All != nil {
-		for _, h := range r.All.Macs {
-			if h.Name == mac {
-				return model.Label(*r.All, h)
-			}
-		}
-	}
-	return page.MacName(mac, self)
-}
-
 func cmpWord(s, otherwise string) string {
 	if s == "" {
 		return otherwise
 	}
 	return s
-}
-
-// value: the Accounts tile: This Mac's Accounts line of its Overview.
-func accountsTile(home *overview.Summary) page.Section {
-	row := page.Row{ID: "accounts", Label: "Accounts", Cells: []page.Value{page.Pending()}}
-	if home != nil {
-		for _, body := range pagehome.Body(*home, true) {
-			for _, it := range body.Items {
-				if body.ID == "sections" && it.Row != nil && it.Row.ID == "accounts" {
-					row.Cells = []page.Value{signIns(it.Row.Cells[0])}
-				}
-			}
-		}
-	}
-	return page.Section{ID: SectionAccounts, Title: "Accounts", Role: page.Summary, Columns: columns(), Items: []page.Item{{Row: &row}}}
-}
-
-// value: the Accounts tile's words: how many are signed in, then each
-// account whose sign-in failed said so (`npm needs sign-in`).
-func signIns(v page.Value) page.Value {
-	if v.Kind != page.KindList {
-		return v
-	}
-	out := make([]page.Value, 0, len(v.Items))
-	for _, it := range v.Items {
-		if it.Kind == page.KindText && (it.Label == string(page.Broken) || it.Label == string(page.Attention)) {
-			it.Text += " needs sign-in"
-		}
-		out = append(out, it)
-	}
-	v.Items = out
-	return v
-}
-
-// value: Accounts opens a terminal on the accounts of This Mac.
-func openAccounts() page.Action {
-	return page.Action{ID: ActionOpenAccounts, Label: "Accounts", On: page.OnRow, Rows: []string{SectionAccounts}, Priority: 6, Run: &page.Run{Terminal: true, Argv: []string{"accounts"}}}
 }
 
 // value: the calls the menu bar's actions make, by their calls.json names.

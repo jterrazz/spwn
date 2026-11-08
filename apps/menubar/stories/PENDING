@@ -1,14 +1,4 @@
-home.hover
 home.keyboard
-home.awake-off
-home.agent-creating
-home.agent-born
-home.agents-folded
-home.agents-unfolded
-needs.all
-needs.empty
-needs.updating
-needs.updated
 mac.this.activity
 mac.this.ports
 mac.this.accounts

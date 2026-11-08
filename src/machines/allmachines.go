@@ -100,6 +100,9 @@ type AgentView struct {
 	// value: when it finished, and how, in its app's words.
 	Ended  time.Time
 	Reason string
+	// value: its current step in parts ("running tests", "41/58 pass");
+	// empty before its first.
+	Step []string `json:",omitempty"`
 }
 
 const AgentFinished = "finished"

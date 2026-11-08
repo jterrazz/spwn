@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/activity"
-	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -91,16 +90,6 @@ func TestStopEverythingSetsItsCommandOffAsACommand(t *testing.T) {
 		if l.Kind == page.KindText && strings.Contains(l.Text, "station engine start") {
 			t.Fatalf("a sentence holds the command: %q", l.Text)
 		}
-	}
-}
-
-// invariant: the Awake tile says a Mac that sleeps in one word, so its
-// two parts fit the tile's two lines (vision panel a).
-func TestAwakeTileSaysAMacSleepsInOneWord(t *testing.T) {
-	s := awakeTile(Reading{Awake: &awake.Report{Mac: "jterrazz-macbook-pro"}})
-	items := s.Items[0].Row.Cells[0].Items
-	if len(items) == 0 || items[0].Text != "This Mac sleeps" {
-		t.Fatalf("tile %+v", items)
 	}
 }
 

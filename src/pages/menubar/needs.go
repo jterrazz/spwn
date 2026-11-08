@@ -274,7 +274,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 				updates += leading(n.Text)
 				if update == nil {
 					item.Glyph = symbol("arrow.down.circle", page.SignalWaits)
-					item.Verb = page.Action{ID: key, Label: VerbUpdate, On: page.OnRow, Rows: []string{key}, Mutates: true,
+					item.Verb = page.Action{ID: key, Label: VerbUpdate, Busy: "Updating", On: page.OnRow, Rows: []string{key}, Mutates: true,
 						Run: &page.Run{Call: CallUpdate, Target: macTarget(mac, w.self)}, Hud: hud("Everything is up to date")}
 					update = &item
 				} else {
@@ -358,18 +358,18 @@ func NeedsPage(r NeedsReading, of string, thisMac page.Context) page.Page {
 			}
 		}
 	}
-	p := page.Page{ID: NeedsID, Command: "menubar", Context: thisMac, Header: &page.Header{Back: "All machines"}}
+	p := page.Page{ID: NeedsID, Command: "menubar", Context: thisMac, Header: &page.Header{Back: "All machines", Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits)}}
 	if of != "" {
 		p.Header.Back = where
 	}
-	facts := []page.Value{page.Text(where)}
+	facts := []page.Value{page.Text(where), page.Text("nothing blocks an agent or a server")}
 	if len(needs) > 0 {
-		facts = append(facts, page.Text(thingsFirst(len(needs))))
+		facts[1] = page.Text(thingsFirst(len(needs)))
 	}
 	p.Sections = append(p.Sections, page.Section{ID: "summary", Title: "Needs you", Role: page.Summary, Caption: facts})
 	list := page.Section{ID: SectionNeeds, Title: "Needs you", Card: page.CardFlush, Columns: columns(), Items: needRows(needs, of, thisMac.Machine)}
 	if len(needs) == 0 {
-		list.Items = []page.Item{{Empty: &page.Empty{Text: "Nothing needs you", Sub: "nothing blocks an agent or a server"}}}
+		list.Items = []page.Item{{Empty: &page.Empty{Text: "Nothing needs you"}}}
 	}
 	p.Sections = append(p.Sections, list)
 	if len(upkeep) > 0 {

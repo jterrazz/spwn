@@ -57,6 +57,9 @@ public struct PanelState: Equatable, Sendable {
     // on a machine page, and what is unfolded there.
     public var segment: String?
     public var unfolded: [String] = []
+    // value: the row the pointer or the keyboard lights when the panel is
+    // drawn, by its id.
+    public var lit: String?
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -231,10 +234,13 @@ public struct Popover: View {
                         .disabled(state.connection == .connecting)
                 }
             } footer: {
-                if state.connection == .connecting {
-                    StatusBar("connecting\(Token.Glyph.ellipsis)", failed: false)
-                } else if let status = state.status {
-                    StatusBar(status.line, failed: status.failed)
+                if home.section(HomeCards.macs) != nil {
+                    VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                        statusBar
+                        FindCapsule(open: handlers.openSwitcher)
+                    }
+                } else {
+                    statusBar
                 }
             }
             .background { BackKey(state: state, handlers: handlers) }
@@ -247,6 +253,15 @@ public struct Popover: View {
             }
             .background { BackKey(state: state, handlers: handlers) }
             .environment(\.stationHints, false)
+        }
+    }
+
+    @ViewBuilder
+    var statusBar: some View {
+        if state.connection == .connecting {
+            StatusBar("connecting\(Token.Glyph.ellipsis)", failed: false)
+        } else if let status = state.status {
+            StatusBar(status.line, failed: status.failed)
         }
     }
 

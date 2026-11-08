@@ -6,10 +6,12 @@ public enum MenuPage {
     public static let ports = Navigation.ports
     public static let awake = Navigation.awake
     public static let activity = Navigation.activity
+    public static let needs = "menubar.needs"
 
     @MainActor
     public static func view(_ state: PanelState, handlers: PopoverHandlers = PopoverHandlers(), scrolls: Bool = true) -> AnyView? {
         guard let page = state.page else { return nil }
+        if page.id == needs { return AnyView(NeedsPage(page: page, state: state, handlers: handlers, scrolls: scrolls)) }
         let body: AnyView
         switch page.id {
         case ports: body = AnyView(PortsPage(state, handlers: handlers))

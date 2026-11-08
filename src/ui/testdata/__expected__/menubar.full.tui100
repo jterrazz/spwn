@@ -3,6 +3,15 @@
  Needs you
    ● All machines are fine  infra healthy · up 12 days · all 2 Macs answer
 
+ Tiles
+
+ Servers
+   ● infra  healthy · up 12 days
+
+ Macs
+   ● This Mac  5 upkeep
+   ● mac-mini  1 VM
+
  Needs you  5 things need you  3 ◐  2 ✗
    ◐ 2 app updates                 station apps update
    ✗ npm sign-in expired           npm login
@@ -18,9 +27,3 @@
    ✗ mac-mini       Mac        never sleeps · 1 needs you
    └─   Servers
       └─ ● infra    Server     Always on · healthy · up 12 d · 0 restarts
-
- Awake
-     Awake  This Mac until 18:00 · mac-mini never sleeps
-
- Accounts
-     Accounts  ● 8 · ✗ npm needs sign-in
