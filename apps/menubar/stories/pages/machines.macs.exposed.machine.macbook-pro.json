@@ -68,11 +68,8 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "This Mac"
-                },
-                {
-                  "kind": "text",
-                  "text": "AirPlay Receiver"
+                  "text": "AirPlay Receiver",
+                  "pri": 2
                 }
               ]
             },

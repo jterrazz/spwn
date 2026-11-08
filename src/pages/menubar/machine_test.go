@@ -130,7 +130,7 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 }
 
 // invariant: SPEC A4: an exposed port on This Mac leads its card, in its
-// own words.
+// own words; its app is the one fact after them, and the first to go.
 func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
 	p := macPageOf(t, proMac, func(m *Machine) {
 		m.Ports = &ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Ports: []ports.Port{
@@ -140,6 +140,9 @@ func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
 	needs := sectionOf(p, SectionNeeds)
 	if needs == nil || needs.Items[0].Row.Label != "Port 5000 exposed" || needs.Items[0].Row.Glyph.Kind != "symbol:exclamationmark.shield" {
 		t.Fatalf("This Mac's needs %+v, want Port 5000 exposed first", needs)
+	}
+	if d := needs.Items[0].Row.Detail.Items; len(d) != 1 || d[0].Text != "AirPlay Receiver" || d[0].Pri == 0 {
+		t.Fatalf("the exposed row's facts %+v, want only AirPlay Receiver, dropped first when the row is narrow: the page is This Mac", d)
 	}
 }
 

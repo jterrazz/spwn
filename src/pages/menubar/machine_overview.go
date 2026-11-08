@@ -106,6 +106,11 @@ func attach(h model.MacView, vm model.VM) page.Action {
 
 func (o macOverview) needsCard() page.Section {
 	rows := needRows(o.needs, o.h.Name, o.self)
+	for i, n := range o.needs {
+		if ownWords(n, o.h.Name, o.self) && len(n.Detail) == 0 && len(n.Facts) > 0 {
+			rows[i].Row.Detail = page.List(droppable(n.Facts, page.MacName(o.h.Name, o.self))...)
+		}
+	}
 	count := page.Text(strconv.Itoa(len(o.needs)))
 	count.Signal = page.SignalWaits
 	if slices.ContainsFunc(o.needs, func(n Need) bool { return n.Finding.Urgency == finding.Red }) {
@@ -118,6 +123,20 @@ func (o macOverview) needsCard() page.Section {
 		s.Rest = &page.Item{Row: &page.Row{ID: RowMoreNeeds, Label: strconv.Itoa(len(rows)-needsShown) + " more", Detail: page.Text("Show less")}}
 	}
 	return s
+}
+
+// value: a need's facts on its own Mac's card yield to its words: the
+// Mac's own name goes, the rest drop first when the row is narrow.
+func droppable(facts []page.Value, mac string) []page.Value {
+	out := make([]page.Value, 0, len(facts))
+	for _, f := range facts {
+		if f.Text == mac {
+			continue
+		}
+		f.Pri = len(facts) - len(out)
+		out = append(out, f)
+	}
+	return out
 }
 
 // value: the Mac's three gauges: CPU and the network with their sparks,
