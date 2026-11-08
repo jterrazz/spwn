@@ -37,7 +37,7 @@ The engine's `sample` job keeps it, in memory only, for This Mac and every VM it
 
 ## Graphs
 
-The TUI's Activity screen and the menu bar draw a sparkline (`▁▂▃▄▅▆▇█`) per measure from the history (CPU, memory, swap, disk read and write, network in and out, each point 0 to 100 of its own scale) and a bar for the disk's free space; a measure with no points has no graph, never a flat line of zeros. The window is the TUI's own (`--graph 6m`, a flag no help shows). The CLI prints values only. How they are drawn is the [Design system](../concepts/design-system.md#graphs)'s.
+The TUI's Activity screen draws a sparkline (`▁▂▃▄▅▆▇█`) per measure from the history (CPU, memory, swap, disk read and write, network in and out, each point 0 to 100 of its own scale) and a bar for the disk's free space; a measure with no points has no graph, never a flat line of zeros. Its window is its own (`--graph 6m`, a flag no help shows). The menu bar's machine page draws a machine's Activity over 6 min, an hour or a day: the CPU as a line over 6 min and as bars over the hour and the day, the network as sent over received mirrored, the memory now as a bar; a pointer over a chart reads the value of that point and when it was. The window picked is remembered per machine, an hour until one is picked. What its page carries is the [API](api.md)'s. The CLI prints values only. How they are drawn is the [Design system](../concepts/design-system.md#graphs)'s.
 
 ## Related
 
