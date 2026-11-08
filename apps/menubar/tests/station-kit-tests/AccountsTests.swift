@@ -1,5 +1,6 @@
 import Foundation
 import StationKit
+import SwiftUI
 import XCTest
 
 final class AccountsTests: XCTestCase {
@@ -67,5 +68,18 @@ final class AccountsTests: XCTestCase {
         let extend = try XCTUnwrap(page.action("ending:macbook-pro/linux-1/claude"))
         XCTAssertNil(SignInWatch.start(extend, pending: &pending))
         XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
+    }
+
+    // invariant: accounts.signing-in: while Terminal runs the login, the
+    // row's verb reads its busy words, Waiting…, greyed, not Sign in. The
+    // row alone is its golden, so a verb that kept its label fails it.
+    @MainActor
+    func testASignInRowReadsWaitingWhileTerminalRunsTheLogin() throws {
+        let page = try story("machines.accounts.accounts")
+        let row = try XCTUnwrap(page.sections?.flatMap { $0.items ?? [] }.compactMap(\.row).first { $0.verb == "sign-in:macbook-pro/npm" })
+        let waiting = AnyView(NeedRow(row, actions: page.actions ?? [], busy: ["sign-in:macbook-pro/npm"]).frame(width: Token.Space.width))
+        for scheme in [ColorScheme.dark, .light] {
+            XCTAssertNil(try Golden.check("accounts.signing-in.row", waiting, scheme: scheme, desk: false))
+        }
     }
 }
