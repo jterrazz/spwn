@@ -66,6 +66,7 @@ func (*worldMac) journal() agentscontract.Journal                       { return
 func (*worldMac) hooks(agents.App) agentscontract.Hooks                 { return nil }
 func (*worldMac) agentSession() agentscontract.Session                  { return nil }
 func (*worldMac) forge() agentscontract.Forge                           { return nil }
+func (*worldMac) multiplexer() agentscontract.Multiplexer               { return nil }
 func (*worldMac) placement() (ports.VMLivesOn, bool)                    { return ports.VMLivesOn{}, false }
 func (*worldMac) tailnet() portscontract.Tailnet                        { return nil }
 func (*worldMac) funnel() funnel.Funnel                                 { return nil }

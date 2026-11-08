@@ -31,6 +31,9 @@ func fold(a Agent, e Event) Agent {
 	if a.Folder == "" {
 		a.Folder = e.Folder
 	}
+	if e.Terminal != "" {
+		a.Terminal = e.Terminal
+	}
 	if !e.At.IsZero() {
 		a.Updated = e.At
 		if a.Since.IsZero() {

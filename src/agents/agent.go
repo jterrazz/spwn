@@ -26,6 +26,9 @@ type Agent struct {
 	App     App    `json:"app"`
 	Session string `json:"session"`
 	State   State  `json:"state"`
+	// value: the terminal it runs in on the VM's terminal host, "t7"; empty
+	// for an agent no terminal of the host is known to hold.
+	Terminal string `json:"terminal,omitempty"`
 	// value: the folder the agent works in, inside the VM; a step's path is
 	// said relative to it.
 	Folder string `json:"folder,omitempty"`

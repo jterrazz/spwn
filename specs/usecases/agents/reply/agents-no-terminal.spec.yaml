@@ -1,0 +1,14 @@
+description: 'a reply to an agent no terminal of Herdr holds is refused: nothing is typed'
+env: in-workspace
+runs:
+    - command: 'world agent-stop linux-1 s-1 "PR #42 is ready"'
+      exit: 0
+    - command: 'agents reply s-1 yes, merge it'
+      exit: 2
+      stderr: |
+          Error: the agent of s-1 runs in no terminal station opened
+          Hint: station agents
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.typed'' world.json'
+      exit: 0
+      stdout: |
+          null

@@ -1,0 +1,14 @@
+description: 'attach to an agent no terminal of Herdr holds is refused, and nothing is attached'
+env: two-macs
+runs:
+    - command: 'world agent-stop linux-1 s-1 "PR #42 is ready"'
+      exit: 0
+    - command: 'agents attach s-1 --on linux-1'
+      exit: 2
+      stderr: |
+          Error: the agent of s-1 runs in no terminal station opened
+          Hint: station agents
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].attached'' world.json'
+      exit: 0
+      stdout: |
+          null

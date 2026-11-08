@@ -33,15 +33,17 @@ type Event struct {
 	// into words no app owns. Prompt, Command, Output and Message are
 	// read, then dropped: Judge keeps only what Scrub lets through, a
 	// command's class and counts.
-	Kind    Kind      `json:"kind"`
-	App     App       `json:"app"`
-	Session string    `json:"session"`
-	Folder  string    `json:"folder,omitempty"`
-	At      time.Time `json:"at"`
-	Act     Act       `json:"act,omitempty"`
-	Path    string    `json:"path,omitempty"`
-	Command string    `json:"command,omitempty"`
-	Output  string    `json:"output,omitempty"`
+	Kind    Kind   `json:"kind"`
+	App     App    `json:"app"`
+	Session string `json:"session"`
+	// value: the terminal of the VM's terminal host the hook ran in.
+	Terminal string    `json:"terminal,omitempty"`
+	Folder   string    `json:"folder,omitempty"`
+	At       time.Time `json:"at"`
+	Act      Act       `json:"act,omitempty"`
+	Path     string    `json:"path,omitempty"`
+	Command  string    `json:"command,omitempty"`
+	Output   string    `json:"output,omitempty"`
 	// value: an edit's lines, those it adds and those it takes out.
 	Added   int    `json:"added,omitempty"`
 	Removed int    `json:"removed,omitempty"`

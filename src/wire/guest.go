@@ -10,8 +10,8 @@ import (
 
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	"github.com/jterrazz/studio-station/src/agents/adapter/gh"
+	"github.com/jterrazz/studio-station/src/agents/adapter/herdr"
 	agentsjsonfile "github.com/jterrazz/studio-station/src/agents/adapter/jsonfile"
-	"github.com/jterrazz/studio-station/src/agents/adapter/tmux"
 	agentscontract "github.com/jterrazz/studio-station/src/agents/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -72,12 +72,20 @@ func (m machine) journal() agentscontract.Journal {
 	return agentsjsonfile.New(m.sys.FS, path.Join(m.paths.State, "agents"), m.sys.Clock, catalog.AgentWatchEvery)
 }
 
-// value: the terminal session this VM's agents run in.
+// value: the multiplexer this VM's agents run in.
 func (m machine) agentSession() agentscontract.Session {
 	if m.world != nil {
 		return m.world.agentSession()
 	}
-	return tmux.New(m.sys.Run)
+	return herdr.NewSession(m.sys.Run)
+}
+
+// value: the multiplexer of this machine, the one the owner's Herdr is.
+func (m machine) multiplexer() agentscontract.Multiplexer {
+	if m.world != nil {
+		return m.world.multiplexer()
+	}
+	return herdr.NewMultiplexer(m.sys.Run)
 }
 
 // value: the forge this VM's agents open their PRs on, signed in with the

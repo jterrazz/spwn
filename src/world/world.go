@@ -66,6 +66,10 @@ type Mac struct {
 	Root bool `json:"root,omitempty"`
 	// value: a Mac that restarts does not answer until then.
 	Back time.Time `json:"back,omitzero"`
+	// value: the machines this Mac's multiplexer reaches, by name, and the
+	// terminals the owner's terminal was put on, each "<machine>/<terminal>".
+	Reached  []string `json:"reached,omitempty"`
+	Attached []string `json:"attached,omitempty"`
 	// value: the hypervisor this Mac has: empty, the one station is built
 	// with; none, no hypervisor installed; another name, a second fake that
 	// stands for another adapter (vz).
@@ -286,14 +290,22 @@ type Agents struct {
 	Journal map[string]agents.Agent `json:"journal,omitempty"`
 	// value: the apps whose settings file runs station's hook, by adapter id.
 	Hooks map[agents.App]bool `json:"hooks,omitempty"`
-	// value: the programs the agents' terminal session runs, each
-	// "<folder> <argv>", and the texts typed into it.
+	// value: the programs the VM's multiplexer runs, each
+	// "<folder> <argv>", and the texts typed into them.
 	Opened []string `json:"opened,omitempty"`
 	Typed  []string `json:"typed,omitempty"`
+	// value: the multiplexer's terminals, in the order opened.
+	Terminals []Terminal `json:"terminals,omitempty"`
 	// value: the PRs of the VM's repositories, by number: open or merged.
 	PRs map[int]string `json:"prs,omitempty"`
 	// value: each folder's change since its base.
 	Changes map[string]agents.Change `json:"changes,omitempty"`
+}
+
+type Terminal struct {
+	agents.Terminal
+	Screen string   `json:"screen,omitempty"`
+	Typed  []string `json:"typed,omitempty"`
 }
 
 func (v *VM) Agentic() *Agents {

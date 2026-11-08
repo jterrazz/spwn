@@ -66,6 +66,7 @@ func events() []event {
 		{"agent-notify", []string{"<vm>", "<session>", "<message>"}, agentEvent(agents.Notified, agentMessage)},
 		{"agent-stop", []string{"<vm>", "<session>", "<message>"}, agentEvent(agents.Stopped, agentMessage)},
 		{"agent-end", []string{"<vm>", "<session>", "[<reason>]"}, agentEvent(agents.Ended, agentEnd)},
+		{"agent-terminal", []string{"<vm>", "working|blocked|idle|done|-", "[<message>]"}, agentTerminal},
 	}
 }
 
