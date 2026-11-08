@@ -21,6 +21,7 @@ const (
 	PageActivity = "menubar.activity"
 	PageAccounts = "menubar.accounts"
 	PageNeeds    = "menubar.needs"
+	PageFind     = "menubar.find"
 )
 
 type FeedInput struct {
