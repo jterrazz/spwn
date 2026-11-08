@@ -7,49 +7,38 @@ import XCTest
 final class PortsTests: XCTestCase {
     func texts(_ values: [Value]?) -> [String] { (values ?? []).compactMap(\.text) }
 
-    // invariant: PO-33: a shared port's row unfolds its link, its QR, Copy
-    // link, which copies the link, Open, which opens it, and Stop sharing, a
-    // y/n whose yes is the ports.stop-sharing call of that port.
-    func testPortRowQR() async throws {
+    // invariant: PO-33: a web share's row opens its link in a click, its
+    // QR beside shows the QR of that link, and Stop sharing is a y/n whose
+    // yes is the ports.stop-sharing call of that port.
+    func testAWebShareOpensItsLinkAndShowsItsQR() async throws {
         let page = try Tree.page("menubar.ports.linux-1")
+        let actions = page.actions ?? []
         let row = try XCTUnwrap(page.section("private")?.rows.first)
         let url = "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"
-        XCTAssertEqual(page.section("private")?.cell(row, "url")?.text, url)
-        let stop = try XCTUnwrap(page.actions(for: row.id ?? "").first)
-        XCTAssertEqual(stop.label, "Stop sharing")
+        XCTAssertEqual(PortRow.link(row, in: actions)?.run?.open, url)
+        let qr = try XCTUnwrap(page.action(row.quick ?? ""))
+        XCTAssertEqual(PortsSection.qr(qr, of: row, in: actions), url)
+        let stop = try XCTUnwrap(page.actions(for: row.id ?? "").first { $0.label == "Stop sharing" })
         XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1's port 5173?")
         XCTAssertEqual(stop.run?.call, "ports.stop-sharing")
         XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "jterrazz-macbook-pro", "Confirm": "yes"] as NSDictionary)
-        var copied: [String] = []
-        var opened: [URL] = []
-        var asked: [String?] = []
-        let handlers = PopoverHandlers(confirm: { asked.append($0?.id) }, open: { opened.append($0) }, copy: { copied.append($0) })
-        var state = PanelState(page: page, connection: .live, qr: url)
-        XCTAssertNil(try Golden.check("menubar.ports.linux-1.qr", try XCTUnwrap(MenuPage.view(state, handlers: handlers, scrolls: false))))
+        var state = PanelState(page: page, connection: .live)
         state.confirming = stop.id
-        XCTAssertNil(try Golden.check("sheet.stop-sharing", try XCTUnwrap(MenuPage.view(state, handlers: handlers, scrolls: false))))
-        XCTAssertEqual(copied + opened.map(\.absoluteString) + asked.compactMap { $0 }, [])
-        let link = PortsPage.link(try XCTUnwrap(URL(string: url)), handlers: handlers)
-        XCTAssertEqual(link.map(\.label), ["Copy link", "Open"])
-        link[0].tap()
-        XCTAssertEqual(copied, [url])
-        XCTAssertEqual(opened, [])
-        link[1].tap()
-        XCTAssertEqual(opened.map(\.absoluteString), [url])
+        XCTAssertNil(try Golden.check("sheet.stop-sharing", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
 
-    // invariant: PO-34: mac-mini's Ports: red on top, then Public, then
-    // Private, each row's class in words, never in colour alone.
-    func testPortsTwoClasses() throws {
+    // invariant: PO-34: mac-mini's Ports: what is exposed first, then
+    // Public, then Private, each under its words; its facts count them, the
+    // exposed in red.
+    func testAMacsPortsSayTheirReachInWords() throws {
         let page = try Tree.page("menubar.ports.mini")
-        XCTAssertEqual(page.sections?.compactMap(\.id).filter { ["needs-you", "public", "private"].contains($0) }, ["needs-you", "public", "private"])
-        for (id, word) in [("needs-you", "needs you"), ("public", "public"), ("private", "private")] {
-            let s = try XCTUnwrap(page.section(id))
-            XCTAssertEqual(Set(s.rows.compactMap { s.cell($0, "class")?.text }), [word], id)
-        }
-        XCTAssertEqual(page.section("needs-you")?.rows.map(\.mark), [.broken, .broken])
-        XCTAssertEqual(page.summary()?.label, "mac-mini")
-        XCTAssertEqual(page.summary()?.cells?.first.map { Format.show($0) }, "5 ports · 2 need you")
+        XCTAssertEqual(page.sections?.compactMap(\.id), ["summary", "exposed", "public", "private"])
+        XCTAssertEqual(page.section("exposed")?.rows.map(PortsSection.exposedTitle), ["5000 · AirPlay Receiver", "10250 · kubelet"])
+        XCTAssertEqual(page.section("public").map(PortsSection.label), "Public · from outside")
+        XCTAssertEqual(page.section("private").map(PortsSection.label), "Private · on your tailnet")
+        XCTAssertEqual(texts(page.section("summary")?.caption), ["mac-mini", "1 public", "2 on your tailnet", "2 exposed"])
+        XCTAssertEqual(page.section("summary")?.caption?.last?.signal, "failing")
+        XCTAssertEqual(PortRow.addressRole.design, .monospaced)
     }
 
     // invariant: PO-45: Declare public… on mac-mini's Ports asks the port
@@ -70,15 +59,16 @@ final class PortsTests: XCTestCase {
         state.confirming = declare.id
         XCTAssertNil(try Golden.check("sheet.declare-public", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
-    // invariant: MB-17: Review on a red row of mac-mini's Ports opens a new
-    // terminal on station ports --on mac-mini, and starts nothing else.
-    func testPortsReviewOpensTerminal() async throws {
+    // invariant: MB-17: Show process on a red row of mac-mini's Ports opens
+    // a new terminal on station ports --on mac-mini, and starts nothing else.
+    func testShowProcessOpensTerminal() async throws {
         let page = try Tree.page("menubar.ports.mini")
-        let red = try XCTUnwrap(page.section("needs-you")?.rows.first)
-        let review = try XCTUnwrap(page.actions(for: red.id ?? "").first)
-        XCTAssertEqual(review.label, "Review")
+        let red = try XCTUnwrap(page.section("exposed")?.rows.first)
+        let show = try XCTUnwrap(page.action(red.menu?.last ?? ""))
+        XCTAssertEqual(red.menu?.first, "declare-public")
+        XCTAssertEqual(show.label, "Show process")
         let calls = Recorded()
-        let status = await ActionRunner(executable: "/u/bin/station", socket: "/nonexistent", launcher: RecordingLauncher(calls: calls)).run(review)
+        let status = await ActionRunner(executable: "/u/bin/station", socket: "/nonexistent", launcher: RecordingLauncher(calls: calls)).run(show)
         XCTAssertNil(status)
         XCTAssertEqual(calls.all, [
             ["/usr/bin/osascript", "-e", #"tell application "Terminal" to do script "'/u/bin/station' 'ports' '--on' 'mac-mini'""#, "-e", #"tell application "Terminal" to activate"#],

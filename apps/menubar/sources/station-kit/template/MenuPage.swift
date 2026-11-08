@@ -12,7 +12,9 @@ public enum MenuPage {
         guard let page = state.page else { return nil }
         let body: AnyView
         switch page.id {
-        case ports: body = AnyView(PortsPage(state, handlers: handlers))
+        case ports:
+            if page.header != nil { return AnyView(PortsPage(state, handlers: handlers, scrolls: scrolls)) }
+            body = AnyView(PortsPage(state, handlers: handlers))
         case awake: body = AnyView(AwakePage(state, handlers: handlers))
         case activity: body = AnyView(ActivityPage(state, handlers: handlers))
         default: return nil

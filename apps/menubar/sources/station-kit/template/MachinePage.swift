@@ -1,7 +1,8 @@
 import SwiftUI
 
-// invariant: SPEC A4: a machine's page by its kind: a Mac's on its own
-// page frame, a workspace's and a server's on theirs.
+// invariant: SPEC A4: a machine's page by its kind: one with a header (a
+// Mac's, a workspace's) on the page frame of its segments, a server's on
+// its own.
 struct MachinePage: View {
     let page: Page
     let state: PanelState
@@ -9,7 +10,7 @@ struct MachinePage: View {
 
     @MainActor
     static func view(_ state: PanelState, handlers: PopoverHandlers, scrolls: Bool) -> AnyView? {
-        guard let page = state.shown, page.id == PageID.machine, page.context?.kind == "mac", page.header != nil else { return nil }
+        guard let page = state.shown, page.id == PageID.machine, page.header != nil else { return nil }
         return AnyView(MacPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(page.context?.machine ?? ""))
     }
 

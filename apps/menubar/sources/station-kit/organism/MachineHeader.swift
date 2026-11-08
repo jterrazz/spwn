@@ -50,10 +50,18 @@ public struct MachineHeader: View {
                 .padding(.bottom, m.backBottom)
             }
             HStack(spacing: m.titleGap) {
-                if let glyph = page.header?.glyph, case let .symbol(name) = GlyphView.drawn(glyph) {
-                    Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
-                        .foregroundStyle(tokens.color.t2)
-                        .frame(width: m.glyphSlot)
+                if let glyph = page.header?.glyph {
+                    switch GlyphView.drawn(glyph) {
+                    case let .symbol(name):
+                        Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
+                            .foregroundStyle(tokens.color.t2)
+                            .frame(width: m.glyphSlot)
+                    case let .custom(name):
+                        Image(name, bundle: .module).font(.system(size: m.glyph, weight: .regular))
+                            .foregroundStyle(tokens.color.t2)
+                            .frame(width: m.glyphSlot)
+                    default: EmptyView()
+                    }
                 }
                 Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
                 Spacer(minLength: 0)
