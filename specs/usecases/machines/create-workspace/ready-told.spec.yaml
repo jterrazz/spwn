@@ -1,4 +1,4 @@
-description: 'a created workspace is told ready on its Mac, and its create''s progress leaves its record'
+description: 'a created workspace is told ready, its engine keeps when, and its birth leaves its record'
 env: two-macs
 runs:
     - command: 'machines create >/dev/null'
@@ -13,3 +13,7 @@ runs:
       exit: 0
       stdout: |
           [{"name":"linux-2","state":"running","birth":null},{"name":"linux-4","state":"running","birth":null}]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[].engine.memory // {} | to_entries[] | select(.value.ready_at) | .key]'' world.json'
+      exit: 0
+      stdout: |
+          ["linux-4","linux-2"]
