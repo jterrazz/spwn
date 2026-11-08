@@ -8,7 +8,7 @@ runs:
       stdout: |
           "station.ports.list/v1"
           ["x","y"]
-          [["bind","class","declared","logo","machine","name","port","process","proto","reserved","state","url"],["bind","class","declared","machine","name","port","process","proto","reserved","state","url"]]
+          [["bind","class","declared","logo","machine","name","port","process","proto","reserved","shared_at","state","url"],["bind","class","declared","machine","name","port","process","proto","reserved","shared_at","state","url"],["bind","class","declared","machine","name","port","process","proto","reserved","state","url"]]
     - command: 'ports --all-machines --json | /usr/bin/jq -c ''.range'''
       exit: 0
       stdout: |
