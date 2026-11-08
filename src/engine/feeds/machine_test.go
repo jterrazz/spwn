@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/activity"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	"github.com/jterrazz/studio-station/src/awake"
+	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/finding"
@@ -95,6 +96,8 @@ type world struct {
 	activity map[string]uint64
 	// value: the activity reads asked, by the machine they ran on.
 	reads map[string][]activitycalls.ReadIn
+	// value: each Mac's Awake, by name; a Mac absent does not answer.
+	awake map[string]awake.Report
 }
 
 func (w *world) machines(here bool) machines.AllMachines {
@@ -147,6 +150,13 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 			head.Up = 21 * 24 * time.Hour
 		}
 		return overviewcalls.ReadOut{Summary: overview.Summary{Head: head, Needs: needs}}
+	case awakecalls.Read.Name:
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		if r, ok := w.awake[at]; ok {
+			return r
+		}
+		return nil
 	case activitycalls.Read.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
@@ -516,3 +526,43 @@ func TestUpdateAllLeavesHomesNeedsYouOnceTheCallReturns(t *testing.T) {
 }
 
 func nothing[T any](func() T) func() T { return func() T { var zero T; return zero } }
+
+// invariant: SPEC A4, B5.7: a Mac's page reads that Mac's Awake through
+// its engine and the copies every Mac shared, so its care card says it
+// never sleeps and its Needs you holds the copy it shared that ends soon,
+// not another Mac's; its times
+// are in the owner's own clock.
+func TestTheMacMinisPageSaysItsAwakeTheCopiesEndingAndItsTimesInTheOwnersClock(t *testing.T) {
+	zone := time.Local
+	time.Local = time.FixedZone("CET", 3600)
+	t.Cleanup(func() { time.Local = zone })
+	clock := newSteps()
+	soon := accounts.Report{Machines: []accounts.Machine{{Name: mini}},
+		Shares: []accounts.Shared{{Account: catalog.ProviderGitHub, VM: "review-bot", At: clock.Now().Add(-time.Hour), Until: clock.Now().Add(20 * time.Minute)}}}
+	here := accounts.Report{Machines: []accounts.Machine{{Name: thisMac}},
+		Shares: []accounts.Shared{{Account: catalog.ProviderClaude, VM: "linux-1", At: clock.Now().Add(-time.Hour), Until: clock.Now().Add(10 * time.Minute)}}}
+	down := infraAt(machines.Stopped, 0)
+	down.CheckStatus.Since = clock.Now().Add(-25 * time.Minute)
+	w := &world{infra: []machines.VM{down}, asked: map[string][]string{}, activity: map[string]uint64{},
+		signedIn: map[string]accounts.Report{mini: soon, thisMac: here},
+		awake:    map[string]awake.Report{mini: {Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}}}
+	ending := "ending:" + mini + "/review-bot/" + catalog.ProviderGitHub
+	p := until(t, watch(t, w, clock, mini), "mac-mini's Awake and the copy ending", func(p page.Page) bool {
+		return row(p, "care", "awake") != nil && row(p, "needs-you", ending) != nil
+	})
+	if r := row(p, "care", "awake"); r.Label != "Never sleeps" || r.Detail.Text != "hosts infra, which pauses if it sleeps" {
+		t.Errorf("mac-mini's Awake reads %q, %q", r.Label, r.Detail.Text)
+	}
+	if got := w.askedOf(awakecalls.Read.Name); !slices.Contains(got, mini) || slices.Contains(got, thisMac) {
+		t.Errorf("Awake was read on %q, want on mac-mini", got)
+	}
+	if r := row(p, "needs-you", ending); r.Detail.Text != "GitHub ends in 20 min" {
+		t.Errorf("the copy ending reads %q", r.Detail.Text)
+	}
+	if r := row(p, "needs-you", "ending:"+thisMac+"/linux-1/"+catalog.ProviderClaude); r != nil {
+		t.Errorf("mac-mini's Needs you holds This Mac's copy %q", r.Detail.Text)
+	}
+	if r := row(p, "vms", "infra"); r == nil || len(r.Detail.Items) == 0 || r.Detail.Items[0].Text != "down since 11:05" {
+		t.Errorf("infra reads %+v, want down since 11:05 in the owner's clock", r)
+	}
+}
