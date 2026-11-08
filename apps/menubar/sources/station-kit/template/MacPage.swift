@@ -33,7 +33,7 @@ struct MacPage: View {
 
     var body: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming) {
-            MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap)
+            header
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
@@ -49,6 +49,10 @@ struct MacPage: View {
             if !still, BackKey.gesture(state) == .back { EscapeKey(back: handlers.back) }
         }
         .environment(\.stationHints, false)
+    }
+
+    var header: MachineHeader {
+        MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap)
     }
 
     func tap(_ action: Action) { perform(action, handlers) }

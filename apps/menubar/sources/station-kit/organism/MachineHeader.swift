@@ -24,7 +24,7 @@ public struct MachineHeader: View {
     // value: the facts, then the stale marking, each part dimmed with it.
     public static func facts(_ page: Page) -> Value {
         var parts = page.section("summary")?.caption ?? []
-        for part in page.header?.stale?.items ?? page.header?.stale.map { [$0] } ?? [] {
+        for part in (page.header?.stale?.items ?? page.header?.stale.map { [$0] } ?? []) {
             var p = part
             p.signal = "stale"
             parts.append(p)
@@ -70,11 +70,13 @@ public struct MachineHeader: View {
             .frame(height: m.title)
             FactsLine(Self.facts(page)).padding(.top, m.factsTop)
             if let segments = page.segments, !segments.isEmpty {
-                Segmented(options: segments.map { s in
-                    (label: s.label ?? "", on: s.id == segment, tap: { pick(s.id ?? "") })
-                })
+                Segmented(options: segmented(segments))
                 .padding(.top, m.segmentsTop)
             }
         }
+    }
+
+    func segmented(_ segments: [Segment]) -> [(label: String, on: Bool, tap: () -> Void)] {
+        segments.map { s in (label: s.label ?? "", on: s.id == segment, tap: { pick(s.id ?? "") }) }
     }
 }

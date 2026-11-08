@@ -37,6 +37,10 @@ final class MacPageTests: XCTestCase {
             drawn.append(try XCTUnwrap(Snapshot.render(AnyView(view), scheme: .dark)?.png))
         }
         XCTAssertEqual(Set(drawn).count, segments.count, "two segments draw the same page")
+        let view = MacPage(page: page, state: story.state, handlers: handlers(calls), scrolls: false)
+        let picker = view.header.segmented(page.segments ?? [])
+        XCTAssertEqual(picker.map(\.label), ["Overview", "Activity", "Ports", "Accounts"])
+        for option in picker { option.tap() }
         XCTAssertEqual(calls.made, [])
     }
 
