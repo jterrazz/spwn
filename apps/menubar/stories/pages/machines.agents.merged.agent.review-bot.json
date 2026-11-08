@@ -107,8 +107,8 @@
               ]
             },
             "glyph": {
-              "kind": "agent",
-              "signal": "active"
+              "kind": "workspace",
+              "signal": "quiet"
             },
             "nav": "menubar.machine:review-bot"
           }

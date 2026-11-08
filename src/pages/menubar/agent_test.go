@@ -87,6 +87,20 @@ func TestAWorkspaceListsTheWaitingAgentBeforeTheWorkingOnes(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4: once a workspace's only agent has finished, its
+// Runs on row wears the box, whatever its guest last reported.
+func TestAWorkspaceWhoseAgentFinishedWearsTheBox(t *testing.T) {
+	done := fleetAgents()[1]
+	done.Name = "review-bot"
+	page.Strict(true)
+	defer page.Strict(false)
+	p := AgentPage(Agent{Name: "review-bot", All: macFleet(), Agents: []agents.Agent{done}, Now: macNow, Asks: func(string, coremachine.Kind) string { return LevelYesNo }})
+	runs := sectionOf(p, SectionRunsOn)
+	if runs == nil || runs.Items[0].Row.Glyph.Kind != "workspace" {
+		t.Fatalf("Runs on %+v", runs)
+	}
+}
+
 // invariant: SPEC B5.1: an agent no hook reports says only that its app
 // runs, and its workspace offers to install the hook.
 func TestAnAgentNoHookReportsOffersTheHook(t *testing.T) {

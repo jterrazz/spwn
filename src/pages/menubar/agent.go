@@ -256,9 +256,6 @@ func workspaceGlyph(vm model.VM, all []agents.Agent) page.Glyph {
 			return page.Glyph{Kind: "agent", Signal: agentSignal(a)}
 		}
 	}
-	if vm.Agent != nil && vm.Agent.State != model.AgentFinished {
-		return page.Glyph{Kind: "agent", Signal: page.SignalActive}
-	}
 	return page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}
 }
 
