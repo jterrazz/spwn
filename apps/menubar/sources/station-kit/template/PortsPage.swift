@@ -257,7 +257,7 @@ struct SharedPortCard: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
-    var inPlace = true
+    var ownSheet = true
     @Environment(\.stationPalette) private var palette
     @State private var copied = false
 
@@ -283,7 +283,7 @@ struct SharedPortCard: View {
             if let stop, !act.open(stop) {
                 StationButton(stop.label ?? "", role: .danger, wide: true) { act.tap(stop) }.fixedSize(horizontal: false, vertical: true)
             }
-            if inPlace, let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
+            if ownSheet, let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
         }
         .frame(maxWidth: .infinity)
         .padding(EdgeInsets(top: 0, leading: Token.Gap.edge, bottom: Token.Gap.edge, trailing: Token.Gap.edge))
@@ -294,7 +294,7 @@ struct SharedPortCard: View {
     static func unfolded(_ page: Page, _ state: PanelState, _ handlers: PopoverHandlers) -> (Row, URL) -> AnyView {
         { row, url in
             let stop = page.actions(for: row.id ?? "").first { $0.id?.hasPrefix("stop-sharing:") == true }
-            return AnyView(SharedPortCard(url: url, stop: stop, page: page, state: state, handlers: handlers, inPlace: false))
+            return AnyView(SharedPortCard(url: url, stop: stop, page: page, state: state, handlers: handlers, ownSheet: false))
         }
     }
 
