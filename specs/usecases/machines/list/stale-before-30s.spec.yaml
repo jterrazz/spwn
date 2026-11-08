@@ -1,0 +1,13 @@
+description: 'a Mac silent for 29 s keeps its last answer and is not stale yet'
+env: two-macs
+runs:
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world power-cut jterrazz-mac-mini'
+      exit: 0
+    - command: 'world advance 6s'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reach, stale, last_answer}'''
+      exit: 0
+      stdout: |
+          {"reach":"unreachable","stale":false,"last_answer":"{{iso8601}}"}
