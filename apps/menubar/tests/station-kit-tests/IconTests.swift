@@ -110,11 +110,11 @@ final class IconTests: XCTestCase {
         }
     }
 
-    // invariant: the mark is the Orbit, a Mac inside a ring, never a
-    // bubble again: across its middle row and its middle column, at 1x and
-    // at 2x, the ink crosses the ring, the Mac, the hole inside it, the Mac
-    // and the ring, four strokes with its centre left empty.
-    func testTheMarkIsAMacInsideARing() throws {
+    // invariant: the mark is the Orbit filled, a solid Mac inside a ring,
+    // never a bubble again: down its middle column, at 1x and at 2x, the
+    // ink crosses the ring, the Mac and the ring, three strokes with its
+    // centre inked.
+    func testTheMarkIsASolidMacInsideARing() throws {
         for scale in [1, 2] as [CGFloat] {
             let image = try XCTUnwrap(MenuBarIcon(.plain).image(scheme: .light, scale: scale))
             let ink = try XCTUnwrap(Ink(image))
@@ -128,27 +128,27 @@ final class IconTests: XCTestCase {
                 return count
             }
             let box = ink.box, cx = box.midX, cy = box.midY
-            XCTAssertEqual(strokes({ ink.inked(box.minX + $0, cy) }, box.width), 4, "middle row at \(scale)x")
-            XCTAssertEqual(strokes({ ink.inked(cx, box.minY + $0) }, box.height), 4, "middle column at \(scale)x")
-            XCTAssertFalse(ink.inked(cx, cy), "the Mac's hole at \(scale)x")
+            XCTAssertEqual(strokes({ ink.inked(cx, box.minY + $0) }, box.height), 3, "middle column at \(scale)x")
+            XCTAssertTrue(ink.inked(cx, cy), "the solid Mac at \(scale)x")
         }
     }
 
-    // invariant: the Orbit has the strokes of the bar's own symbols: drawn
-    // as the status bar draws Spotlight's magnifying glass and a circle,
-    // 13 pt medium, its ring is as thick within half a pixel at 2x and as
-    // tall within one, and Wi-Fi's shorter fan stays shorter.
-    func testTheOrbitHasTheStrokesOfTheBarsSymbols() throws {
+    // invariant: the Orbit has the weight of the bar's filled symbols:
+    // drawn as the status bar draws them, 13 pt medium, it is as tall as a
+    // circle within one pixel at 2x, its ring as thick as Wi-Fi's arcs
+    // within 0.75 of a pixel and heavier than an outlined circle, and its
+    // ink as dense as Wi-Fi's, the battery's and Control Center's span.
+    func testTheOrbitHasTheWeightOfTheBarsFilledSymbols() throws {
         let orbit = try XCTUnwrap(Ink(MenuBarIcon(.plain).image(scheme: .light)))
-        for name in ["magnifyingglass", "circle"] {
-            let native = try XCTUnwrap(Ink(Self.native(name)))
-            XCTAssertEqual(orbit.stroke, native.stroke, accuracy: 0.5, name)
-            XCTAssertEqual(Double(orbit.box.height), Double(native.box.height), accuracy: 1, name)
-        }
+        let circle = try XCTUnwrap(Ink(Self.native("circle")))
+        XCTAssertEqual(Double(orbit.box.height), Double(circle.box.height), accuracy: 1)
+        XCTAssertGreaterThan(orbit.stroke, circle.stroke + 0.75)
         let wifi = try XCTUnwrap(Ink(Self.native("wifi")))
-        XCTAssertLessThan(wifi.box.height, orbit.box.height)
-        XCTAssertGreaterThan(orbit.stroke, 2)
-        XCTAssertLessThan(orbit.stroke, 3.2)
+        XCTAssertEqual(orbit.stroke, wifi.stroke, accuracy: 0.75)
+        let filled = try ["wifi", "battery.100", "switch.2"].map { try XCTUnwrap(Ink(Self.native($0)), $0).density }
+        XCTAssertGreaterThanOrEqual(orbit.density, try XCTUnwrap(filled.min()))
+        XCTAssertLessThanOrEqual(orbit.density, try XCTUnwrap(filled.max()))
+        XCTAssertGreaterThan(orbit.density, circle.density * 1.5)
     }
 
     static func native(_ name: String) -> CGImage? {
@@ -160,14 +160,15 @@ final class IconTests: XCTestCase {
         return renderer.cgImage
     }
 
-    // invariant: beside the bar's own symbols, on a light bar and on a dark
-    // one, the Orbit in each of its states reads as one of them.
+    // invariant: beside the bar's own filled symbols, on a light bar and on
+    // a dark one, the Orbit in each of its states reads as one of them.
     func testTheOrbitBesideTheBarsSymbols() throws {
         for scheme in [ColorScheme.dark, .light] {
             let ink = Token.Icon.ink(scheme)
-            let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.red, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting)]
+            let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.red, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting),
+                         MenuBarIcon(.plain, busy: true)]
             let row = HStack(spacing: 10) {
-                ForEach(["magnifyingglass", "wifi", "switch.2"], id: \.self) { name in
+                ForEach(["wifi", "battery.100", "switch.2"], id: \.self) { name in
                     Image(systemName: name).font(.system(size: Token.Icon.size, weight: Token.Icon.weight)).foregroundStyle(ink)
                 }
                 ForEach(icons.indices, id: \.self) { i in StatusItem(icons[i], scheme: scheme) }
@@ -201,8 +202,13 @@ final class IconTests: XCTestCase {
         XCTAssertFalse(turner.running)
     }
 
+    // invariant: a turning item draws the Orbit working, its machines a
+    // third of a turn along the ring, and the Orbit at rest once it stops.
     func testABusyItemTurnsItsMarkOneFrameAtATime() throws {
         let busy = MenuBarIcon(.plain, busy: true)
+        XCTAssertEqual(busy.symbol, Token.Icon.working)
+        XCTAssertEqual(MenuBarIcon(.restarting).symbol, Token.Icon.working)
+        XCTAssertEqual(MenuBarIcon(.stopped, busy: true).symbol, Token.Icon.slashed)
         func bitmap(_ turn: Double) throws -> Bitmap { try XCTUnwrap(busy.image(scheme: .dark, turn: turn).flatMap(Bitmap.init)) }
         XCTAssertEqual(try bitmap(0.25).pixels, try bitmap(0.25).pixels)
         XCTAssertNotEqual(try bitmap(0).pixels, try bitmap(0.25).pixels)
@@ -239,6 +245,14 @@ struct Ink {
     func alpha(_ x: Int, _ y: Int) -> Double { Double(bitmap.pixels[(y * bitmap.width + x) * 4 + 3]) / 255 }
 
     func inked(_ x: Int, _ y: Int) -> Bool { alpha(x, y) > 110 / 255 }
+
+    var density: Double {
+        var sum = 0.0
+        for y in box.minY..<(box.minY + box.height) {
+            for x in box.minX..<(box.minX + box.width) { sum += alpha(x, y) }
+        }
+        return sum / Double(box.width * box.height)
+    }
 
     var stroke: Double {
         let top = (0..<bitmap.width).filter { inked($0, box.minY) }

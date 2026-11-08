@@ -135,14 +135,15 @@ public enum Token {
         }
     }
 
-    // value: the menu bar icon: the Orbit, a custom SF Symbol drawn as the
-    // status bar draws its own symbols, 13 pt medium (measured against
-    // Spotlight's and a bare status item's on macOS 26), one symbol per
-    // state, and the CPU line beside it at the symbol's stroke.
+    // value: the menu bar icon: the Orbit filled, a custom SF Symbol drawn
+    // as the status bar draws its own symbols, 13 pt medium (measured
+    // against Spotlight's and a bare status item's on macOS 26), one symbol
+    // per state, and the CPU line beside it.
     public enum Icon {
         public static let orbit = "station.orbit"
         public static let badged = "station.orbit.badge"
         public static let slashed = "station.orbit.slash"
+        public static let working = "station.orbit.working"
         public static let size: CGFloat = 13
         public static let weight = Font.Weight.medium
         public static let line: CGFloat = 1.25

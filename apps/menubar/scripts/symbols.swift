@@ -3,25 +3,28 @@ import Foundation
 
 // usage: swift scripts/symbols.swift <symbols.xcassets>, run by
 // build.sh, `make menubar-check` and `make catalog` before they build
-// value: the Orbit as SF Symbols templates, one per state, drawn on the
-// template's 100 pt grid against the system's `circle`: its ring has the
-// circle's outer edge and stroke in each master, so a weight and a point
-// size draw the Orbit as they draw a system symbol.
+// value: the Orbit filled as SF Symbols templates, one per state, drawn on
+// the template's 100 pt grid against the system's `circle`: its ring has
+// the circle's outer edge and a stroke each master takes heavier than the
+// circle's, so a weight and a point size draw the Orbit as they draw a
+// filled system symbol.
 
 struct Master {
     let name: String
     let stroke: CGFloat
     let outer: CGFloat
+    let share: CGFloat
     let bearing: CGFloat
     let column: CGFloat
     let baseline: CGFloat
 
-    var ring: CGFloat { outer - stroke / 2 }
-    var unit: CGFloat { ring / 7.15 }
-    var bolder: CGFloat { (stroke - 1.296 * unit) / 2 }
+    var thick: CGFloat { share * outer }
+    var ring: CGFloat { outer - thick / 2 }
+    var unit: CGFloat { ring / 7 }
+    var bolder: CGFloat { (thick - 2.1 * unit) / 2 }
 }
 
-let weights: [(name: String, column: CGFloat)] = [("Ultralight", 560), ("Regular", 1460), ("Black", 2400)]
+let weights: [(name: String, column: CGFloat, share: CGFloat)] = [("Ultralight", 560, 0.1), ("Regular", 1460, 0.29), ("Black", 2400, 0.39)]
 let sizes: [(name: String, baseline: CGFloat, bearing: CGFloat, stroke: [CGFloat], outer: [CGFloat])] = [
     ("S", 696, 7, [2.2, 7.48, 14.17], [37, 39.5, 42]),
     ("M", 1126, 9, [2.32, 8.23, 17.24], [47, 49.5, 53]),
@@ -29,7 +32,7 @@ let sizes: [(name: String, baseline: CGFloat, bearing: CGFloat, stroke: [CGFloat
 ]
 let masters = sizes.flatMap { size in
     weights.enumerated().map { i, w in
-        Master(name: "\(w.name)-\(size.name)", stroke: size.stroke[i], outer: size.outer[i], bearing: size.bearing, column: w.column, baseline: size.baseline)
+        Master(name: "\(w.name)-\(size.name)", stroke: size.stroke[i], outer: size.outer[i], share: w.share, bearing: size.bearing, column: w.column, baseline: size.baseline)
     }
 }
 
@@ -39,13 +42,14 @@ enum State: String, CaseIterable {
     case plain = "station.orbit"
     case badge = "station.orbit.badge"
     case slash = "station.orbit.slash"
+    case working = "station.orbit.working"
 }
 
 // invariant: every master of a state is drawn by the same commands in the
 // same order, never by a boolean of shapes, so the weights interpolate.
 
-func polar(_ degrees: CGFloat, _ r: CGFloat) -> CGPoint {
-    CGPoint(x: r * cos(degrees * .pi / 180), y: r * sin(degrees * .pi / 180))
+func polar(_ degrees: CGFloat, _ r: CGFloat, centre: CGPoint = .zero) -> CGPoint {
+    CGPoint(x: centre.x + r * cos(degrees * .pi / 180), y: centre.y + r * sin(degrees * .pi / 180))
 }
 
 func degrees(_ p: CGPoint) -> CGFloat { atan2(p.y, p.x) * 180 / .pi }
@@ -67,112 +71,144 @@ func circle(_ p: CGMutablePath, _ c: CGPoint, _ r: CGFloat) {
     p.closeSubpath()
 }
 
-// value: a piece of the ring between two ends, each end its outer and
-// inner angles: equal for a radial end, apart for one cut along a slash.
-func ringPiece(_ p: CGMutablePath, _ m: Master, outer: (CGFloat, CGFloat), inner: (CGFloat, CGFloat)) {
-    let ro = m.ring + m.stroke / 2, ri = m.ring - m.stroke / 2
-    p.move(to: polar(outer.0, ro))
-    arc(p, ro, outer.0, outer.1)
-    p.addLine(to: polar(inner.1, ri))
-    arc(p, ri, inner.1, inner.0)
-    p.closeSubpath()
-}
-
-func roundedSquare(_ p: CGMutablePath, half: CGFloat, radius: CGFloat, reversed: Bool) {
+func roundedSquare(_ p: CGMutablePath, half: CGFloat, radius: CGFloat) {
     let c = half - radius
-    let corners: [(CGPoint, CGFloat)] = [(CGPoint(x: c, y: c), 0), (CGPoint(x: -c, y: c), 90), (CGPoint(x: -c, y: -c), 180), (CGPoint(x: c, y: -c), 270)]
-    let order = reversed ? Array(corners.reversed()) : corners
-    p.move(to: CGPoint(x: half, y: reversed ? c : -c))
-    for (centre, a) in order {
-        let (from, to) = reversed ? (a + 90, a) : (a, a + 90)
-        p.addLine(to: CGPoint(x: centre.x + radius * cos(from * .pi / 180), y: centre.y + radius * sin(from * .pi / 180)))
-        arc(p, radius, from, to, centre: centre, pieces: 1)
+    p.move(to: CGPoint(x: half, y: -c))
+    for (centre, a) in [(CGPoint(x: c, y: c), 0), (CGPoint(x: -c, y: c), 90), (CGPoint(x: -c, y: -c), 180), (CGPoint(x: c, y: -c), 270)] as [(CGPoint, CGFloat)] {
+        p.addLine(to: polar(a, radius, centre: centre))
+        arc(p, radius, a, a + 90, centre: centre, pieces: 1)
     }
     p.closeSubpath()
 }
 
+// value: where a piece of the ring ends: against a disc cut out around a
+// point of the ring's plane, or against one edge of the slash's gap.
+enum End {
+    case disc(CGPoint, CGFloat)
+    case band(CGFloat)
+}
+
+// value: the drawing of concept A on its 18-unit grid, a unit being a
+// seventh of the ring's radius: the ring cut around two machines, the
+// solid Mac inside it, the two machines on it; needs you cuts a badge out
+// at the top right, down cuts a slash across, working moves the machines
+// a third of a turn along the ring.
 struct Geometry {
     let m: Master
     var u: CGFloat { m.unit }
-    var s: CGFloat { m.stroke }
-    var satellite: CGFloat { 1.85 * u + m.bolder }
-    var gap: CGFloat { 2 * asin((satellite + 1.25 * u) / (2 * m.ring)) * 180 / .pi }
-    var coreHalf: CGFloat { 3 * u }
-    var coreRadius: CGFloat { 1.75 * u }
-    let satellites: [CGFloat] = [150, -30]
-    var dotAt: CGPoint { CGPoint(x: 6 * u + 1.5 * m.bolder, y: 6 * u + 1.5 * m.bolder) }
-    var dot: CGFloat { 2.6 * u + m.bolder }
-    var notch: CGFloat { dot + 1.5 * u }
-    var band: CGFloat { s / 2 + 1.375 * u }
-    let slash = CGPoint(x: -sqrt(0.5), y: sqrt(0.5))
-    let side = CGPoint(x: sqrt(0.5), y: sqrt(0.5))
+    var b: CGFloat { m.bolder }
+    var ro: CGFloat { m.ring + m.thick / 2 }
+    var ri: CGFloat { m.ring - m.thick / 2 }
+    var satellite: CGFloat { 2.3 * u + b }
+    var clearance: CGFloat { satellite + 1.55 * u }
+    var coreHalf: CGFloat { 3.6 * u + b }
+    var coreRadius: CGFloat { 2.1 * u + b }
+    var coreReach: CGFloat { (coreHalf - coreRadius) * 2.squareRoot() + coreRadius }
+    var dotAt: CGPoint { CGPoint(x: 5.6 * u, y: 5.6 * u) }
+    var dot: CGFloat { 2.75 * u + b }
+    var notch: CGFloat { min(dot + 1.45 * u, hypot(dotAt.x, dotAt.y) - coreReach - 0.15 * u) }
+    let slash = CGPoint(x: -6.4 / hypot(6.4, 7.4), y: 7.4 / hypot(6.4, 7.4))
+    var normal: CGPoint { CGPoint(x: slash.y, y: -slash.x) }
+    var length: CGFloat { hypot(6.4, 7.4) * u }
+    var band: CGFloat { m.thick / 2 + 1.6 * u }
 
-    func core(_ p: CGMutablePath) {
-        roundedSquare(p, half: coreHalf + s / 2, radius: coreRadius + s / 2, reversed: false)
-        roundedSquare(p, half: coreHalf - s / 2, radius: max(coreRadius - s / 2, 0.5), reversed: true)
+    // value: the angle on a circle of radius r around the centre where a
+    // piece of the ring meets its end, the piece lying past it on the side
+    // the sign gives: +1 counterclockwise, -1 clockwise.
+    func angle(_ end: End, _ r: CGFloat, _ sign: CGFloat) -> CGFloat {
+        switch end {
+        case let .disc(c, radius):
+            let d = hypot(c.x, c.y)
+            return degrees(c) + sign * acos((r * r + d * d - radius * radius) / (2 * r * d)) * 180 / .pi
+        case let .band(side):
+            return degrees(CGPoint(x: side * normal.x, y: side * normal.y)) - sign * acos(band / r) * 180 / .pi
+        }
     }
 
-    // value: where the edge of the slash's gap, on the given side of it,
-    // meets a circle around the centre.
-    func cut(_ r: CGFloat, _ sign: CGFloat) -> CGFloat {
-        let t = sqrt(r * r - band * band)
-        return degrees(CGPoint(x: sign * (band * side.x + t * slash.x), y: sign * (band * side.y + t * slash.y)))
+    func edge(_ p: CGMutablePath, _ end: End, to: CGPoint) {
+        guard case let .disc(c, radius) = end else { return p.addLine(to: to) }
+        let from = degrees(CGPoint(x: p.currentPoint.x - c.x, y: p.currentPoint.y - c.y))
+        var delta = degrees(CGPoint(x: to.x - c.x, y: to.y - c.y)) - from
+        while delta > 180 { delta -= 360 }
+        while delta <= -180 { delta += 360 }
+        arc(p, radius, from, from + delta, centre: c, pieces: 1)
+    }
+
+    func piece(_ p: CGMutablePath, from start: End, to end: End) {
+        let os = angle(start, ro, 1), isn = angle(start, ri, 1)
+        var oe = angle(end, ro, -1), ie = angle(end, ri, -1)
+        while oe <= os { oe += 360 }
+        while ie <= isn { ie += 360 }
+        p.move(to: polar(os, ro))
+        arc(p, ro, os, oe)
+        edge(p, end, to: polar(ie, ri))
+        arc(p, ri, ie, isn)
+        edge(p, start, to: polar(os, ro))
+        p.closeSubpath()
     }
 
     // value: the Mac cut by the slash's gap into its two corners away from
-    // the slash, each drawn from the cut on its top edge round to the cut
-    // on its side edge.
+    // the slash, each from the gap's edge along its top round to its side.
     func slashedCore(_ p: CGMutablePath) {
-        let c = coreHalf - coreRadius
-        let ho = coreHalf + s / 2, hi = coreHalf - s / 2
-        let ro = coreRadius + s / 2, ri = max(coreRadius - s / 2, 0.5)
-        let d = band * 2.squareRoot()
-        let ao = min(max(d - ho, -c + 0.5), c - 0.5), ai = min(max(d - hi, -c + 0.5), c - 0.5)
+        let h = coreHalf, c = coreHalf - coreRadius
+        let top = (band - normal.y * h) / normal.x, side = (band - normal.x * h) / normal.y
         for sign in [1, -1] as [CGFloat] {
             func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: sign * x, y: sign * y) }
             let turn: CGFloat = sign > 0 ? 0 : 180
-            p.move(to: pt(ao, ho))
-            p.addLine(to: pt(c, ho))
-            arc(p, ro, 90 + turn, turn, centre: pt(c, c), pieces: 1)
-            p.addLine(to: pt(ho, ao))
-            p.addLine(to: pt(hi, ai))
-            p.addLine(to: pt(hi, c))
-            arc(p, ri, turn, 90 + turn, centre: pt(c, c), pieces: 1)
-            p.addLine(to: pt(ai, hi))
+            p.move(to: pt(top, h))
+            p.addLine(to: pt(c, h))
+            arc(p, coreRadius, 90 + turn, turn, centre: pt(c, c), pieces: 1)
+            p.addLine(to: pt(h, side))
             p.closeSubpath()
         }
     }
 
+    // value: a machine with the slash's gap cut off it: the arc of it past
+    // the gap's edge, closed along that edge.
+    func cutSatellite(_ p: CGMutablePath, _ c: CGPoint) {
+        let side: CGFloat = c.x * normal.x + c.y * normal.y > 0 ? 1 : -1
+        let away = CGPoint(x: side * normal.x, y: side * normal.y)
+        let beyond = side * (c.x * normal.x + c.y * normal.y) - band
+        let spread = acos(-beyond / satellite) * 180 / .pi
+        let centre = degrees(away)
+        p.move(to: polar(centre - spread, satellite, centre: c))
+        arc(p, satellite, centre - spread, centre + spread, centre: c, pieces: 3)
+        p.closeSubpath()
+    }
+
     func layers(_ state: State) -> (body: CGPath, satellites: CGPath) {
         let body = CGMutablePath(), moons = CGMutablePath()
-        let ro = m.ring + s / 2, ri = m.ring - s / 2
+        let angles: [CGFloat] = state == .working ? [60, 240] : [150, 330]
+        let at = angles.map { polar($0, m.ring) }
+        let mask = at.map { End.disc($0, clearance) }
         switch state {
-        case .plain:
-            ringPiece(body, m, outer: (-30 + gap, 150 - gap), inner: (-30 + gap, 150 - gap))
-            ringPiece(body, m, outer: (150 + gap, 330 - gap), inner: (150 + gap, 330 - gap))
-            core(body)
-            for a in satellites { circle(moons, polar(a, m.ring), satellite) }
+        case .plain, .working:
+            piece(body, from: mask[1], to: mask[0])
+            piece(body, from: mask[0], to: mask[1])
+            roundedSquare(body, half: coreHalf, radius: coreRadius)
+            for c in at { circle(moons, c, satellite) }
         case .badge:
-            let n = (dotAt.x * dotAt.x + dotAt.y * dotAt.y).squareRoot()
-            let clear = acos((ro * ro + n * n - notch * notch) / (2 * ro * n)) * 180 / .pi
-            ringPiece(body, m, outer: (45 + clear, 150 - gap), inner: (45 + clear, 150 - gap))
-            ringPiece(body, m, outer: (150 + gap, 330 - gap), inner: (150 + gap, 330 - gap))
-            core(body)
-            for a in satellites { circle(moons, polar(a, m.ring), satellite) }
+            let cut = End.disc(dotAt, notch)
+            piece(body, from: mask[1], to: cut)
+            piece(body, from: cut, to: mask[0])
+            piece(body, from: mask[0], to: mask[1])
+            roundedSquare(body, half: coreHalf, radius: coreRadius)
+            for c in at { circle(moons, c, satellite) }
             circle(moons, dotAt, dot)
         case .slash:
-            ringPiece(body, m, outer: (-30 + gap, cut(ro, 1)), inner: (-30 + gap, cut(ri, 1)))
-            ringPiece(body, m, outer: (150 + gap, 360 + cut(ro, -1)), inner: (150 + gap, 360 + cut(ri, -1)))
+            piece(body, from: mask[1], to: .band(1))
+            piece(body, from: mask[0], to: .band(-1))
             slashedCore(body)
-            let l = 10.25 * u, r = s / 2
-            let a = CGPoint(x: -l * slash.x, y: -l * slash.y), b = CGPoint(x: l * slash.x, y: l * slash.y)
+            let l = length, r = m.thick / 2
+            let a = CGPoint(x: -l * slash.x, y: -l * slash.y), e = CGPoint(x: l * slash.x, y: l * slash.y)
             let along = degrees(slash)
-            body.move(to: CGPoint(x: a.x + r * side.x, y: a.y + r * side.y))
-            body.addLine(to: CGPoint(x: b.x + r * side.x, y: b.y + r * side.y))
-            arc(body, r, along - 90, along + 90, centre: b, pieces: 2)
-            body.addLine(to: CGPoint(x: a.x - r * side.x, y: a.y - r * side.y))
+            body.move(to: CGPoint(x: a.x + r * normal.x, y: a.y + r * normal.y))
+            body.addLine(to: CGPoint(x: e.x + r * normal.x, y: e.y + r * normal.y))
+            arc(body, r, along - 90, along + 90, centre: e, pieces: 2)
+            body.addLine(to: CGPoint(x: a.x - r * normal.x, y: a.y - r * normal.y))
             arc(body, r, along + 90, along + 270, centre: a, pieces: 2)
             body.closeSubpath()
+            for c in at { cutSatellite(moons, c) }
         }
         return (body, moons)
     }

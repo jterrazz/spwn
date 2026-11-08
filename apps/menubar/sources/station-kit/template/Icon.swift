@@ -24,7 +24,8 @@ public struct MenuBarIcon: Equatable, Sendable {
     // it: the count of what needs you beside the Orbit, the Orbit red while a
     // server is down or a port exposed, a turning mark in place of the red
     // while a server restarts, and the words VoiceOver reads are the
-    // badge's own. The engine stopped dims the slashed Orbit, so its silence
+    // badge's own; while it turns, the machines stand a third of a turn
+    // along the ring. The engine stopped dims the slashed Orbit, so its silence
     // is never mistaken for all good. The CPU line is the owner's option,
     // drawn only while the engine streams.
     public static func of(connection: Connection, page: Page?, sparkline: Bool = false, live: LiveStore? = nil) -> MenuBarIcon {
@@ -53,7 +54,10 @@ public struct MenuBarIcon: Equatable, Sendable {
 
     public var template: Bool { mark != .red }
 
-    public var symbol: String { mark == .stopped ? Token.Icon.slashed : Token.Icon.orbit }
+    public var symbol: String {
+        if mark == .stopped { return Token.Icon.slashed }
+        return turning ? Token.Icon.working : Token.Icon.orbit
+    }
 }
 
 struct IconSpark: Shape {
