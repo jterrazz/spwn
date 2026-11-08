@@ -8,7 +8,7 @@ runs:
     - command: 'machines cleanup'
       exit: 2
       stderr: |
-          Error: refusing to delete the finished throwaways without --yes
+          Error: refusing to delete linux-1 without --yes: it goes with its disk (50 GB), 2 shared ports and 2 shared accounts
           Hint: re-run with --yes
     - command: 'machines | /usr/bin/grep linux-1'
       exit: 0

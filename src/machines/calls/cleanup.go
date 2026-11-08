@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
@@ -24,7 +25,8 @@ type CleanupIn struct {
 var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 	// invariant: SPEC B5.9: one yes or no deletes every throwaway asked for,
 	// each one the VM delete it would be alone, with its disk, its ports and
-	// its shared accounts; a VM that may not go is refused before any goes.
+	// its shared accounts; a VM that may not go is refused before any goes,
+	// and the question comes back with every candidate and what it loses.
 	Name: "machines.cleanup", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Cleanup,
 	Errors: []fail.Code{confirm.YesNeeded, NotFinished},
 	Run: func(ctx context.Context, d Deps, in CleanupIn, _ call.Progress) (machines.Cleaned, error) {
@@ -55,6 +57,9 @@ var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 		if len(in.VMs) > 0 {
 			pick = in.VMs
 		}
+		if out.Candidates, err = candidates(ctx, d, gone, pick); err != nil {
+			return out, err
+		}
 		if len(pick) == 0 {
 			return out, nil
 		}
@@ -69,6 +74,29 @@ var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 		}
 		return out, nil
 	},
+}
+
+func candidates(ctx context.Context, d Deps, gone []machines.VM, pick []string) ([]machines.Candidate, error) {
+	var now time.Time
+	if d.Now != nil {
+		now = d.Now()
+	}
+	var out []machines.Candidate
+	for _, vm := range gone {
+		if !slices.Contains(pick, vm.Name) {
+			continue
+		}
+		c := machines.CandidateOf(vm, now)
+		if d.Holdings != nil {
+			ports, accounts, err := d.Holdings.Held(ctx, vm.Name)
+			if err != nil {
+				return nil, err
+			}
+			c.Ports, c.Accounts = ports, accounts
+		}
+		out = append(out, c)
+	}
+	return out, nil
 }
 
 func names(vms []machines.VM) []string {

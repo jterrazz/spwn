@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/src/core/call"
+	"github.com/jterrazz/studio-station/src/core/confirm"
 	model "github.com/jterrazz/studio-station/src/machines"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/page"
@@ -19,7 +20,11 @@ type Deps struct {
 	ThisMachine page.Context
 }
 
-type Input struct{ VMs []string }
+type Input struct {
+	VMs []string
+	// value: what the call said would go, when it asked.
+	asked model.Cleaned
+}
 
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
@@ -32,19 +37,21 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return nil
 		},
 		Asks: true,
-		Confirm: func(in *Input) string {
-			if len(in.VMs) == 1 {
-				return "Delete " + in.VMs[0] + "? It goes with its disk, its ports and its shared accounts"
-			}
-			return "Delete the throwaways whose agent finished? " + pagemachines.CleanupGoes
+		Ask: func(in *Input) (bool, error) {
+			return env.Prompt.Confirm(pagemachines.CleanupConfirm(in.asked.Candidates))
 		},
-		Verb:     func(*Input) string { return "delete the finished throwaways" },
+		Refuse: func(in *Input) error {
+			return kit.Refuse(pagemachines.CleanupRefused(in.asked.Candidates).Text, "re-run with --yes")
+		},
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			var out model.Cleaned
 			err := io.Confirmed(func(answer string) error {
 				var err error
 				out, err = call.Invoke(ctx, env.Calls, env.Target(), machinescalls.Cleanup, machinescalls.CleanupIn{VMs: in.VMs, Confirm: answer}, nil)
+				if _, asks := confirm.Answer(err); asks {
+					in.asked = out
+				}
 				return err
 			})
 			if err != nil {

@@ -5,9 +5,11 @@ import (
 	"errors"
 	"io"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/images"
 	"github.com/jterrazz/studio-station/src/platform/local"
 
@@ -310,4 +312,30 @@ func createAsker(env kit.Env) kit.Asker {
 		return nil
 	}
 	return env.Prompt
+}
+
+// value: what a VM of this Mac holds beyond its disk, as this Mac's stores
+// keep it: its reserved ports and the accounts shared with it, by their label.
+type holdings struct{ m machine }
+
+func (h holdings) Held(ctx context.Context, vm string) (ports []int, shared []string, err error) {
+	reserved, err := h.m.stores.reservations.List(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, r := range reserved {
+		if r.VM == vm {
+			ports = append(ports, r.GuestPort)
+		}
+	}
+	shares, err := h.m.stores.shares.Get(ctx, vm)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, s := range shares {
+		if account := accounts.Label(accounts.AccountOf(s.Name)); !slices.Contains(shared, account) {
+			shared = append(shared, account)
+		}
+	}
+	return ports, shared, nil
 }
