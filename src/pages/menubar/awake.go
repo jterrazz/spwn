@@ -139,7 +139,6 @@ func thisMac(r awake.Report) page.Section {
 	}
 	s.Items = append(s.Items, page.Item{Row: &keep})
 	if held && r.Session.Run != "" {
-		keep.Detail = page.Text("Lets it sleep once the run is done")
 		s.Items = append(s.Items, page.Item{Note: &page.Note{Text: "Until " + r.Session.Run + " is done"}})
 	}
 	lid, battery := held && r.Session.Lid, held && r.Session.Battery
