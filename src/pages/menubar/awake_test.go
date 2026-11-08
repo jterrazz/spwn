@@ -64,6 +64,11 @@ func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 	if got := picked(&awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}); len(got) != 0 {
 		t.Fatalf("a keep-awake that follows a run picks %q, want none", got)
 	}
+	for _, d := range []time.Duration{time.Hour, 4 * time.Hour} {
+		if got := picked(&awake.Session{StartedAt: now, Until: now.Add(d), Run: "linux-1"}); len(got) != 0 {
+			t.Fatalf("a run held for %s picks %q, want none", d, got)
+		}
+	}
 }
 
 // invariant: Until's hours are sent as the hour itself, and a switch
@@ -173,6 +178,10 @@ func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
 	}
 	if p.Footer != nil {
 		t.Fatalf("Awake has a footer: %+v", p.Footer)
+	}
+	two := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Pauses: []string{"agent-7f", "linux-1"}}})
+	if got := notes(sectionOf(two, SectionPauses)); !slices.Equal(got, []string{"agent-7f and linux-1 pause while This Mac sleeps."}) {
+		t.Fatalf("two running workspaces say %q", got)
 	}
 	if s := sectionOf(awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true}}), SectionPauses); s != nil {
 		t.Fatalf("nothing running still says %q", notes(s))
