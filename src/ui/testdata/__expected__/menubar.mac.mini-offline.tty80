@@ -3,7 +3,8 @@ mac-mini
 Gauges
 VMs  ● infra · healthy · up 12 days
 Care
-  ● Upkeep  all fine
+  ● Upkeep                    5 of 6 ready
+  └─ ◐ Ready to host servers    5 of 6 ready · disk unlock after a power cut
 Activity
     CPU                                    Disk
     Memory

@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/awake"
+	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -242,5 +243,43 @@ func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 	}
 	if g := sectionOf(p, SectionGauges).Items[1].Gauge; g.Value.Text != "19 GB free" || g.Bar == nil {
 		t.Fatalf("memory gauge %+v, want 19 GB free over its bar", g)
+	}
+}
+
+// invariant: SPEC A4: a Mac that never sleeps unfolds its upkeep to its
+// readiness too, "6 of 6" when every item holds; one that does not is an
+// open item the upkeep's head counts, and names itself.
+func TestAMacThatNeverSleepsUnfoldsItsUpkeepToItsReadiness(t *testing.T) {
+	ready := func(m *Machine) {
+		m.Summary.Readiness = []overview.Check{
+			{Name: model.ItemRestartsAfterPowerCut, State: catalog.StateOK}, {Name: model.ItemNeverSleeps, State: catalog.StateOK},
+			{Name: model.ItemLogsIn, State: catalog.StateOK}, {Name: model.ItemDiskUnlock, State: catalog.StateOK},
+			{Name: model.ItemPlannedRestarts, State: catalog.StateOK}, {Name: model.ItemEngineAtLogin, State: catalog.StateOK},
+		}
+	}
+	upkeep := func(p page.Page) *page.Group {
+		for _, it := range sectionOf(p, SectionCare).Items {
+			if it.Group != nil && it.Group.Head.ID == RowUpkeep {
+				return it.Group
+			}
+		}
+		t.Fatal("no upkeep row")
+		return nil
+	}
+	g := upkeep(macPageOf(t, miniMac, ready))
+	last := g.Items[len(g.Items)-1].Row
+	if words(g.Head.Cells[0]) != "all fine" || last.Label != "Ready to host servers" || words(last.Detail) != "6 of 6" || last.Mark != page.OK {
+		t.Fatalf("upkeep %q unfolds to %q %q", words(g.Head.Cells[0]), last.Label, words(last.Detail))
+	}
+	g = upkeep(macPageOf(t, miniMac, func(m *Machine) {
+		ready(m)
+		m.Summary.Readiness[3].State = catalog.StateDegraded
+	}))
+	last = g.Items[len(g.Items)-1].Row
+	if words(g.Head.Cells[0]) != "5 of 6 ready" || words(last.Detail) != "5 of 6 ready | disk unlock after a power cut" || last.Mark != page.Attention {
+		t.Fatalf("upkeep %q unfolds to %q", words(g.Head.Cells[0]), words(last.Detail))
+	}
+	if g := upkeep(macPageOf(t, proMac, nil)); slices.ContainsFunc(g.Items, func(it page.Item) bool { return it.Row.ID == RowReady }) {
+		t.Fatal("a Mac with no readiness unfolds to none")
 	}
 }

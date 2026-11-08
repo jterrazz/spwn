@@ -130,8 +130,14 @@
               "label": "Upkeep",
               "cells": [
                 {
-                  "kind": "text",
-                  "text": "all fine"
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "text",
+                      "text": "5 of 6 ready"
+                    }
+                  ],
+                  "signal": "waits"
                 }
               ],
               "glyph": {
@@ -140,6 +146,35 @@
               },
               "trail": "value"
             },
+            "items": [
+              {
+                "row": {
+                  "id": "ready",
+                  "mark": "attention",
+                  "label": "Ready to host servers",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "5 of 6 ready",
+                        "signal": "waits"
+                      },
+                      {
+                        "kind": "text",
+                        "text": "disk unlock after a power cut",
+                        "pri": 1
+                      }
+                    ]
+                  },
+                  "reason": "degraded",
+                  "glyph": {
+                    "kind": "symbol:lock",
+                    "signal": "quiet"
+                  }
+                }
+              }
+            ],
             "fold": "folded"
           }
         }

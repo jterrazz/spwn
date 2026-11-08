@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/src/activity"
 	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
@@ -308,13 +309,21 @@ func (o macOverview) care() page.Section {
 	}
 	head := page.Row{ID: RowUpkeep, Label: "Upkeep", Glyph: symbol("wrench.adjustable", page.SignalQuiet), Mark: page.OK, Trail: "value"}
 	children := o.upkeepRows()
+	ready := o.ready()
+	open := len(o.upkeep)
+	if ready.gap() {
+		open++
+	}
 	switch {
 	case o.m.Summary == nil:
 		head.Cells = []page.Value{page.Text("checking")}
-	case len(o.upkeep) > 0:
-		worst := page.Text(strings.ToLower(o.upkeep[0].What))
+	case open > 0:
+		worst := page.Text(ready.words())
+		if len(o.upkeep) > 0 {
+			worst = page.Text(strings.ToLower(o.upkeep[0].What))
+		}
 		words := []page.Value{worst}
-		if n := len(o.upkeep) - 1; n > 0 {
+		if n := open - 1; n > 0 {
 			words = append(words, page.Text(strconv.Itoa(n)+" more"))
 		}
 		v := page.List(words...)
@@ -433,7 +442,56 @@ func (o macOverview) upkeepRows() []page.Item {
 		row := page.Row{ID: "line:" + string(id), Label: sectionWord(id), Glyph: symbol(sectionSymbol(id), page.SignalQuiet), Mark: page.OK, Detail: v}
 		out = append(out, page.Item{Row: &row})
 	}
+	if ready := o.ready(); ready.of > 0 {
+		out = append(out, page.Item{Row: ready.row()})
+	}
 	return out
+}
+
+const RowReady = "ready"
+
+// value: SPEC A4, §7.6: a Mac that hosts a server or never sleeps reads
+// its readiness, so its upkeep counts the items ready and names the first
+// that is not.
+type readiness struct {
+	ok, of int
+	first  string
+}
+
+func (o macOverview) ready() readiness {
+	var r readiness
+	if o.m.Summary == nil {
+		return r
+	}
+	for _, c := range o.m.Summary.Readiness {
+		r.of++
+		switch {
+		case c.State == catalog.StateOK:
+			r.ok++
+		case r.first == "":
+			r.first = strings.ReplaceAll(c.Name, "-", " ")
+		}
+	}
+	return r
+}
+
+func (r readiness) gap() bool { return r.ok < r.of }
+
+func (r readiness) words() string {
+	return strconv.Itoa(r.ok) + " of " + strconv.Itoa(r.of) + " ready"
+}
+
+func (r readiness) row() *page.Row {
+	row := &page.Row{ID: RowReady, Label: "Ready to host servers", Glyph: symbol("lock", page.SignalQuiet), Mark: page.OK,
+		Detail: page.Text(strconv.Itoa(r.ok) + " of " + strconv.Itoa(r.of))}
+	if r.gap() {
+		count := page.Text(r.words())
+		count.Signal = page.SignalWaits
+		first := page.Text(r.first)
+		first.Pri = 1
+		row.Mark, row.Reason, row.Detail = page.Attention, page.Degraded, page.List(count, first)
+	}
+	return row
 }
 
 func sectionWord(id section.ID) string {

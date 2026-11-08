@@ -64,4 +64,14 @@ final class MacPageTests: XCTestCase {
         XCTAssertEqual(facts.suffix(2).map(\.signal), ["stale", "stale"])
         XCTAssertNil(MachineHeader.facts(try XCTUnwrap(Stories["mac.mini.overview"].state.pushed)).items?.first { $0.signal == "stale" })
     }
+
+    // invariant: SPEC A4: mac-mini never sleeps, so its upkeep unfolds to
+    // its readiness after Settings, Background, Apps and Disk.
+    func testAMacThatNeverSleepsUnfoldsItsUpkeepToItsReadiness() throws {
+        let page = try XCTUnwrap(Stories["mac.mini.overview"].state.pushed)
+        let upkeep = try XCTUnwrap(page.section("care")?.items?.compactMap(\.group).first { $0.head?.id == "upkeep" })
+        XCTAssertEqual(upkeep.head?.cells?.first?.text, "all fine")
+        XCTAssertEqual((upkeep.items ?? []).compactMap(\.row?.label), ["Settings", "Background", "Apps", "Disk", "Ready to host servers"])
+        XCTAssertEqual(upkeep.items?.last?.row?.detail?.text, "6 of 6")
+    }
 }

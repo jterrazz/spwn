@@ -296,6 +296,112 @@
               },
               "trail": "value"
             },
+            "items": [
+              {
+                "row": {
+                  "id": "line:settings",
+                  "mark": "ok",
+                  "label": "Settings",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "set by station"
+                      },
+                      {
+                        "kind": "text",
+                        "text": "12 of 12",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:slider.horizontal.3",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:background",
+                  "mark": "ok",
+                  "label": "Background",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "9",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:list.bullet.rectangle",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:apps",
+                  "mark": "ok",
+                  "label": "Apps",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "count",
+                        "n": 38,
+                        "unit": "ok",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:square.grid.2x2",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:disk",
+                  "mark": "ok",
+                  "label": "Disk",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "size",
+                        "n": 731000000000,
+                        "unit": "free"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:internaldrive",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "ready",
+                  "mark": "ok",
+                  "label": "Ready to host servers",
+                  "detail": {
+                    "kind": "text",
+                    "text": "6 of 6"
+                  },
+                  "glyph": {
+                    "kind": "symbol:lock",
+                    "signal": "quiet"
+                  }
+                }
+              }
+            ],
             "fold": "folded"
           }
         }

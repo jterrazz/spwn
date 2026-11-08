@@ -136,6 +136,23 @@
               },
               "trail": "value"
             },
+            "items": [
+              {
+                "row": {
+                  "id": "ready",
+                  "mark": "ok",
+                  "label": "Ready to host servers",
+                  "detail": {
+                    "kind": "text",
+                    "text": "6 of 6"
+                  },
+                  "glyph": {
+                    "kind": "symbol:lock",
+                    "signal": "quiet"
+                  }
+                }
+              }
+            ],
             "fold": "folded"
           }
         }
