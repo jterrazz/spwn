@@ -35,3 +35,40 @@ public enum SignInWatch {
         return asked
     }
 }
+
+// invariant: a sign-in waits on the page it was pressed on, read on its
+// own watch, never on the page the panel shows: closing the panel, as
+// Terminal takes the focus, or going to another page leaves it waiting,
+// and a reopened Accounts still reads its busy words until the read says
+// signed in.
+public final class SignInWait: @unchecked Sendable {
+    public let id: String
+    public let watch: String
+    private let lock = NSLock()
+    private var page: Page?
+
+    public init(id: String, watch: String, on page: Page?) {
+        self.id = id
+        self.watch = watch
+        self.page = page
+    }
+
+    public func seen(_ page: Page) { lock.withLock { self.page = page } }
+
+    public var open: Bool { lock.withLock { SignInWatch.open(id, on: page) } }
+
+    // value: the engine's watch of the page waited on, each page it streams
+    // taken as the wait's own; cancelled once the wait ends.
+    public func follow(socket: String, clock: StreamClock = SystemClock()) -> Task<Void, Never> {
+        let feed = Subscription(path: socket, pages: [watch], clock: clock) { [weak self] event in
+            if case .page(let page) = event { self?.seen(page) }
+        }
+        return Task.detached { await feed.run() }
+    }
+
+    @discardableResult
+    public func run(since start: Date, now: @Sendable () -> Date, sleep: @Sendable (TimeInterval) async -> Void,
+                    refresh: @Sendable () async -> Void) async -> Int {
+        await SignInWatch.run(since: start, now: now, sleep: sleep, open: { self.open }, refresh: refresh)
+    }
+}

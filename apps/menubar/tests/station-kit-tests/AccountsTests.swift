@@ -53,6 +53,48 @@ final class AccountsTests: XCTestCase {
         XCTAssertEqual(clock.asked, 0)
     }
 
+    // invariant: accounts.signing-in survives the press: Sign in opens
+    // Terminal, the panel closes and Home is drawn next, yet the wait reads
+    // the Accounts page again every 2 s until that page says signed in.
+    func testASignInKeepsWaitingOnceThePanelClosesForTerminal() async throws {
+        let id = "sign-in:macbook-pro/npm"
+        let accounts = try story("machines.accounts.accounts")
+        let signedIn = try story("machines.accounts.signed-in.accounts")
+        var state = PanelState(page: try Tree.page("menubar.home.two-macs"), connection: .live, pushed: accounts)
+        let signIn = try XCTUnwrap(state.shown?.action(id))
+        XCTAssertEqual(SignInWatch.start(signIn, pending: &state.pending), id)
+        let wait = SignInWait(id: id, watch: Navigation.accounts, on: state.shown)
+        state.pushed = nil
+        XCTAssertFalse(SignInWatch.open(id, on: state.shown), "Home offers no Sign in: a wait that read the panel ended here")
+        let clock = Clock()
+        let asked = await wait.run(since: clock.now(), now: { clock.now() }, sleep: { clock.advance($0) }, refresh: {
+            let n = clock.lock.withLock { clock.asked += 1; return clock.asked }
+            wait.seen(n < 3 ? accounts : signedIn)
+        })
+        XCTAssertEqual(asked, 3)
+        XCTAssertEqual(clock.now().timeIntervalSinceReferenceDate, 3 * SignInWatch.every)
+    }
+
+    // invariant: the wait holds its own watch of the page it was pressed on
+    // and takes each page the engine streams for it: the signed-in read
+    // ends it with no panel open.
+    func testASignInWaitsOnItsOwnWatchOfThePageItWasPressedOn() async throws {
+        let id = "sign-in:macbook-pro/npm"
+        let engine = try FakeEngine("mb-signin")
+        defer { engine.stop() }
+        let page = try JSONSerialization.jsonObject(with: Data(contentsOf: Tree.stories.appendingPathComponent("pages/machines.accounts.signed-in.accounts.json")))
+        let opened = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["stream": "page", "pages": [Navigation.accounts]]], options: [.sortedKeys])
+        let event = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": page]], options: [.sortedKeys])
+        engine.serveOnce(opened + [0x0A] + event + [0x0A], thenClose: false)
+        let wait = SignInWait(id: id, watch: Navigation.accounts, on: try story("machines.accounts.accounts"))
+        XCTAssertTrue(wait.open)
+        let following = wait.follow(socket: engine.path, clock: TestClock())
+        for _ in 0..<500 where wait.open { try? await Task.sleep(nanoseconds: 10_000_000) }
+        following.cancel()
+        XCTAssertFalse(wait.open)
+        XCTAssertEqual(engine.received, [Streamed.watch(Navigation.accounts)])
+    }
+
     // invariant: only a verb that opens Terminal and names its busy words
     // waits, its verb pending from the press, once however often it is
     // pressed: Extend calls the engine and is done when it returns.

@@ -253,10 +253,10 @@ final class Model: ObservableObject {
         state.sent = answers
         state.stopping = action.id == StopAll.id ? StopAll.vms(state.page) : []
         let on = navigation.watched
-        if action.run?.terminal == true { closePanel() }
         let socket = self.socket
-        let reread = [PageID.shown(navigation.watched)]
-        if let id = SignInWatch.start(action, pending: &state.pending) { wait(on: id, reread: reread) }
+        let reread = [PageID.shown(on)]
+        if let id = SignInWatch.start(action, pending: &state.pending) { wait(SignInWait(id: id, watch: reread[0], on: state.shown)) }
+        if action.run?.terminal == true { closePanel() }
         Task {
             let executable = await Client.executable(path: socket) ?? Self.fallbackExecutable
             let status = await ActionRunner(executable: executable, socket: socket, reread: reread).run(action, answers: answers)
@@ -282,13 +282,15 @@ final class Model: ObservableObject {
         }
     }
 
-    func wait(on id: String, reread: [String]) {
+    func wait(_ wait: SignInWait) {
         let socket = self.socket
+        let reread = [wait.watch]
+        let following = wait.follow(socket: socket)
         Task { @MainActor in
-            await SignInWatch.run(since: Date(), now: { Date() }, sleep: { try? await Task.sleep(nanoseconds: UInt64($0 * 1_000_000_000)) },
-                                  open: { @MainActor [weak self] in self.map { SignInWatch.open(id, on: $0.state.shown) } ?? false },
-                                  refresh: { _ = await Client.call(path: socket, name: ActionRunner.refresh, input: ["pages": reread]) })
-            state.pending.removeAll { $0 == id }
+            await wait.run(since: Date(), now: { Date() }, sleep: { try? await Task.sleep(nanoseconds: UInt64($0 * 1_000_000_000)) },
+                           refresh: { _ = await Client.call(path: socket, name: ActionRunner.refresh, input: ["pages": reread]) })
+            following.cancel()
+            state.pending.removeAll { $0 == wait.id }
         }
     }
 
