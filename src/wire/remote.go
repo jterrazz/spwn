@@ -195,19 +195,21 @@ func (f farAgents) Held(ctx context.Context, vm string) []string {
 	}
 	ctx, cancel := context.WithTimeout(ctx, heldBudget)
 	defer cancel()
-	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, struct{}{}, nil)
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, agentscalls.ListIn{AsGiven: true}, nil)
 	if err != nil {
 		return nil
 	}
-	names := make([]string, len(kept))
-	for i, a := range kept {
-		names[i] = a.Name
+	names := make([]string, 0, len(kept))
+	for _, a := range kept {
+		if a.Name != "" {
+			names = append(names, a.Name)
+		}
 	}
 	return names
 }
 
 func (f farAgents) Live(ctx context.Context, vm string) []string {
-	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, struct{}{}, nil)
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, agentscalls.ListIn{}, nil)
 	if err != nil {
 		return nil
 	}

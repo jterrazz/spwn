@@ -64,6 +64,29 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		}
 	})
 
+	t.Run("a stopped workspace's agents stay through a put that names none, and an empty list clears them", func(t *testing.T) {
+		s := open(t)
+		stopped := vmRecord("api")
+		stopped.Agents = []string{"docs-bot"}
+		if err := s.Put(ctx, stopped); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		if err := s.Put(ctx, vmRecord("api")); err != nil {
+			t.Fatalf("Put again: %v", err)
+		}
+		if got, err := s.Get(ctx, "api"); err != nil || !reflect.DeepEqual(got.Agents, []string{"docs-bot"}) {
+			t.Fatalf("Get = %v, %v; want docs-bot kept", got.Agents, err)
+		}
+		cleared := vmRecord("api")
+		cleared.Agents = []string{}
+		if err := s.Put(ctx, cleared); err != nil {
+			t.Fatalf("Put cleared: %v", err)
+		}
+		if got, err := s.Get(ctx, "api"); err != nil || len(got.Agents) != 0 {
+			t.Errorf("Get = %v, %v; want none", got.Agents, err)
+		}
+	})
+
 	t.Run("a deleted VM is gone, and deleting it again changes nothing", func(t *testing.T) {
 		s := open(t)
 		if err := s.Put(ctx, vmRecord("api")); err != nil {

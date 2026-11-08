@@ -1,0 +1,13 @@
+description: 'an agent run by hand takes the next name no machine holds, another Mac''s included'
+env: mini-workspace
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal["s-9"] = {name: "linux-1", vm: "ci-1", app: "claudecode", session: "s-9", state: "working", task: "Write the changelog", since: "2026-11-04T09:58:00Z", updated: "2026-11-04T09:58:00Z"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	linux-1·2	claudecode	working	Review the auth refresh	linux-1	jterrazz-macbook-pro	12s ago
+          ●	linux-1	claudecode	working	Write the changelog	ci-1	jterrazz-mac-mini	2m ago

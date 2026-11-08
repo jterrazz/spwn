@@ -152,7 +152,8 @@ func (s *Machinist) EngineUp(ctx context.Context) error {
 
 // value: every name All machines holds, for a VM's name the Mac it is on,
 // worded as the owner reads it: This Mac, or that Mac's short name; and
-// every agent's of a running workspace of a Mac that answers.
+// every agent's of a running workspace of a Mac that answers, and those a
+// workspace held when it last stopped, of one stopped or of a silent Mac.
 func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	allMachines, err := s.AllMachines(ctx, false)
 	if err != nil {
@@ -167,10 +168,17 @@ func (s *Machinist) claims(ctx context.Context) (claims, error) {
 		}
 		for _, vm := range h.VMs {
 			c.held[vm.Name], c.on[vm.Name] = claimVM, mac
-			if s.o.AgentsOf == nil || !h.ThisMac && !h.Reachable || vm.State != model.Running || vm.Lifetime.Kind() != machine.Workspace {
+			if vm.Lifetime.Kind() != machine.Workspace {
 				continue
 			}
-			for _, name := range s.o.AgentsOf(ctx, vm.Name) {
+			names := vm.Agents
+			if (h.ThisMac || h.Reachable) && vm.State == model.Running {
+				names = nil
+				if s.o.AgentsOf != nil {
+					names = s.o.AgentsOf(ctx, vm.Name)
+				}
+			}
+			for _, name := range names {
 				c.agents = append(c.agents, heldAgent{Name: name, VM: vm.Name})
 			}
 		}

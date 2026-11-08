@@ -78,6 +78,9 @@ type VM struct {
 	// console kept then; empty while it is up.
 	Cause     string
 	LastLines []string
+	// value: the agents a workspace held when it last stopped, which a
+	// stopped one or one of a silent Mac still holds.
+	Agents []string `json:",omitempty"`
 }
 
 type EngineView struct {

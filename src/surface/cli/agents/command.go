@@ -33,7 +33,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			// invariant: SPEC B5.22: on a Mac, every machine's agents; with --on, or
 			// inside a workspace, that workspace's own.
 			if env.Far() || env.Kind != machine.Mac {
-				kept, err := call.Invoke(ctx, env.Calls, env.Target(), agentscalls.List, struct{}{}, nil)
+				kept, err := call.Invoke(ctx, env.Calls, env.Target(), agentscalls.List, agentscalls.ListIn{}, nil)
 				if err != nil {
 					return err
 				}

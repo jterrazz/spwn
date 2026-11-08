@@ -29,6 +29,9 @@ type Agents interface {
 	// for that reason, and answers the names it stopped; one it could not
 	// stop is a warning, never a refusal: the VM goes on.
 	Stop(ctx context.Context, vm, reason string) (stopped, warnings []string)
+	// value: the name of every agent of vm, finished ones too; nil when it
+	// does not answer.
+	Held(ctx context.Context, vm string) []string
 }
 
 type ImageBuilds interface {
@@ -56,6 +59,9 @@ type Machines interface {
 	// value: whether the VM of this Mac runs now.
 	Running(ctx context.Context, name string) (bool, error)
 	Stop(ctx context.Context, name string) error
+	// value: keeps on a stopped workspace's record the agents it held,
+	// which name no other agent or VM while no one reads its journal.
+	KeepAgents(name string, agents []string) error
 	// value: refuses a name that is no VM of this host, worded for verb.
 	CheckVM(name, verb string) error
 	Delete(ctx context.Context, name string) (machines.DeleteReport, error)

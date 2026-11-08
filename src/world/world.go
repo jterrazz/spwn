@@ -341,6 +341,8 @@ type Kept struct {
 	// value: the shares station v2 kept in the VM's record, by name, until
 	// the accounts' store moves them out once.
 	Shared []string `json:"lent,omitempty"`
+	// value: the agents a workspace held when it last stopped.
+	Agents []string `json:"agents,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

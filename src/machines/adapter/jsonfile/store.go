@@ -55,13 +55,14 @@ type file struct {
 	DiskBytes   int64             `json:"disk_bytes"`
 	Shared      json.RawMessage   `json:"lent,omitempty"`
 	CreatedAt   time.Time         `json:"created_at"`
+	Agents      []string          `json:"agents,omitempty"`
 	V           int               `json:"v,omitempty"`
 }
 
 func (f file) record() machines.Record {
 	return machines.Record{
 		Name: f.Name, Image: f.Image, Version: f.Version, Lifetime: f.Lifetime, Want: f.Want, Network: f.Network, Check: f.Check, Env: f.Env,
-		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt,
+		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Agents: f.Agents,
 	}
 }
 
@@ -101,13 +102,18 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 	}
 	// invariant: a put keeps the shares on disk as they are: the accounts'
 	// store writes them, and a record held in memory may predate a share.
+	// A put without agents keeps those on disk too: a stop writes them, and
+	// the engine's record of a run that ends predates them.
 	var held file
 	if current, err := s.files.ReadFile(s.recordFile(r.Name)); err == nil {
 		_ = json.Unmarshal(current, &held)
 	}
+	if r.Agents == nil {
+		r.Agents = held.Agents
+	}
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
-		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
+		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt, Agents: r.Agents,
 	}, "", "  ")
 	if err != nil {
 		return err

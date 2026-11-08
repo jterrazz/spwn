@@ -81,4 +81,6 @@ type VMRecord struct {
 	Env                  map[string]string
 	Resources            Resources
 	CreatedAt            time.Time
+	// value: the agents a workspace held when it last stopped.
+	Agents []string
 }

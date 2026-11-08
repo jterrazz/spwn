@@ -32,12 +32,12 @@ func NameFor(vm string, taken []string) string {
 	}
 }
 
-func Named(kept []Agent, vm string) []Agent {
+func Named(kept []Agent, vm string, elsewhere []string) []Agent {
 	// invariant: every agent of a VM has a name and its VM: one no start
 	// named, an agent the owner ran by hand, is given the next free name of
-	// the VM in the order it began.
+	// the VM in the order it began, past every name any machine holds.
 	out := slices.Clone(kept)
-	var taken []string
+	taken := slices.Clone(elsewhere)
 	for _, a := range out {
 		if a.Name != "" {
 			taken = append(taken, a.Name)

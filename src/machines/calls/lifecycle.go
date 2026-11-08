@@ -77,7 +77,15 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 			return StopOut{Kind: kind}, err
 		}
 		stopped, warned := stopAgents(ctx, d, in.VM, "its workspace stopped")
-		return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, d.Machines.Stop(ctx, in.VM)
+		held := heldBy(ctx, d, in.VM)
+		if err := d.Machines.Stop(ctx, in.VM); err != nil {
+			return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, err
+		}
+		var kept error
+		if held != nil {
+			kept = d.Machines.KeepAgents(in.VM, held)
+		}
+		return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, kept
 	},
 }
 
@@ -120,6 +128,15 @@ func live(ctx context.Context, d Deps, vm string) []string {
 		return nil
 	}
 	return d.Agents.Live(ctx, vm)
+}
+
+// value: the name of every agent of a workspace of this Mac, finished ones
+// too; nil when it does not answer, or for a server.
+func heldBy(ctx context.Context, d Deps, vm string) []string {
+	if d.Agents == nil || d.Machines.LifetimeOf(vm).Kind() != machine.Workspace {
+		return nil
+	}
+	return d.Agents.Held(ctx, vm)
 }
 
 func stopAgents(ctx context.Context, d Deps, vm, reason string) (stopped, warnings []string) {

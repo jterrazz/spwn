@@ -21,6 +21,9 @@ type Deps struct {
 	// value: the workspace these agents run in, by its name: the name its
 	// first agent takes.
 	Machine string
+	// value: the names every machine holds, as this workspace's Mac reads
+	// them; nil reads none.
+	Held func(ctx context.Context) (agents.Held, error)
 }
 
 func All(d Deps) []call.Handler {

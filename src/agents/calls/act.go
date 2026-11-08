@@ -35,18 +35,29 @@ const (
 	NotStopped fail.Code = "agents.not-stopped"
 )
 
-var List = call.Call[Deps, struct{}, []agents.Agent]{
+type ListIn struct {
+	// value: each agent with the name its start gave it, one run by hand
+	// with none: the read every machine's names are made of, which never
+	// asks every machine in turn.
+	AsGiven bool `json:",omitempty"`
+}
+
+var List = call.Call[Deps, ListIn, []agents.Agent]{
 	Name: "agents.list", Where: call.AtTarget, Applies: agents.Applies,
-	Run: func(ctx context.Context, d Deps, _ struct{}, _ call.Progress) ([]agents.Agent, error) {
+	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) ([]agents.Agent, error) {
 		// invariant: the VM's agents as its journal holds them, by session,
 		// then those its multiplexer alone sees, each named.
+		if in.AsGiven {
+			return d.given(ctx)
+		}
 		return d.agents(ctx)
 	},
 }
 
 // value: the journal's agents, then those of the multiplexer's live terminals no
-// hook reports, each with its name; a multiplexer that cannot be read adds none.
-func (d Deps) agents(ctx context.Context) ([]agents.Agent, error) {
+// hook reports, each with its VM and the name its start gave, none for one
+// run by hand; a multiplexer that cannot be read adds none.
+func (d Deps) given(ctx context.Context) ([]agents.Agent, error) {
 	kept, err := d.Journal.Read(ctx)
 	if err != nil {
 		return nil, err
@@ -56,7 +67,27 @@ func (d Deps) agents(ctx context.Context) ([]agents.Agent, error) {
 			kept = agents.Detected(kept, live)
 		}
 	}
-	return agents.Named(kept, d.Machine), nil
+	for i := range kept {
+		kept[i].VM = cmp.Or(kept[i].VM, d.Machine)
+	}
+	return kept, nil
+}
+
+// invariant: SPEC B5.22: an agent run by hand takes a name no machine
+// holds, as the workspace's Mac reads them; a Mac that does not answer
+// leaves the workspace's own names alone.
+func (d Deps) agents(ctx context.Context) ([]agents.Agent, error) {
+	kept, err := d.given(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var elsewhere []string
+	if d.Held != nil && slices.ContainsFunc(kept, func(a agents.Agent) bool { return a.Name == "" }) {
+		if held, err := d.Held(ctx); err == nil {
+			elsewhere = held.Agents
+		}
+	}
+	return agents.Named(kept, d.Machine, elsewhere), nil
 }
 
 // value: the agent of that name, refused when the VM holds none.

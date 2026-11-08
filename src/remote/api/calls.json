@@ -74,7 +74,8 @@
     {
       "name": "agents.list",
       "schema": "station.agents.list/v1",
-      "where": "at-target"
+      "where": "at-target",
+      "in": "ListIn"
     },
     {
       "name": "agents.merge",

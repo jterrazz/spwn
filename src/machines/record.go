@@ -14,6 +14,9 @@ type Record struct {
 	MemoryBytes int64
 	DiskBytes   int64
 	CreatedAt   time.Time
+	// value: the name of every agent a workspace held when it last stopped,
+	// finished ones too: what it holds while no one reads its journal.
+	Agents []string
 }
 
 type MacRecord struct {
@@ -33,4 +36,6 @@ type SeenVM struct {
 	Lifetime    Lifetime `json:"lifetime"`
 	CPUs        int      `json:"cpus"`
 	MemoryBytes int64    `json:"memory_bytes"`
+	// value: the agents a stopped workspace of it held, as that Mac last said.
+	Agents []string `json:"agents,omitempty"`
 }

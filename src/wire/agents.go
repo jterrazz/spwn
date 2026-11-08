@@ -59,32 +59,32 @@ type agentsEverywhere struct {
 func (f agentsEverywhere) all(ctx context.Context) ([]agents.Agent, error) {
 	// value: the agents of every running workspace of every Mac that
 	// answers, each with its Mac; a workspace that does not answer adds none.
-	out, _, err := f.everyMachine(ctx)
+	out, _, err := f.everyMachine(ctx, agentscalls.ListIn{})
 	return out, err
 }
 
 // value: the agents of every running workspace of every Mac that answers,
-// and the name of every workspace of those Macs, running or not.
-func (f agentsEverywhere) everyMachine(ctx context.Context) ([]agents.Agent, []string, error) {
+// read as in asks; and the names no agent read holds: every workspace's of
+// every Mac, a silent one's too, and the agents a workspace held when it
+// last stopped, of one stopped or of a silent Mac.
+func (f agentsEverywhere) everyMachine(ctx context.Context, in agentscalls.ListIn) ([]agents.Agent, agents.Held, error) {
 	read, err := call.Read(ctx, f.env.Calls, f.env.Self, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, agents.Held{}, err
 	}
 	var out []agents.Agent
-	var workspaces []string
+	var held agents.Held
 	for _, mac := range read.All.Macs {
-		if !mac.Reachable {
-			continue
-		}
 		for _, vm := range mac.VMs {
 			if vm.Lifetime.Kind() != coremachine.Workspace {
 				continue
 			}
-			workspaces = append(workspaces, vm.Name)
-			if vm.State != model.Running {
+			held.Workspaces = append(held.Workspaces, vm.Name)
+			if !mac.Reachable || vm.State != model.Running {
+				held.Agents = append(held.Agents, vm.Agents...)
 				continue
 			}
-			kept, err := call.Invoke(ctx, f.env.Calls, coremachine.Ref{Name: vm.Name}, agentscalls.List, struct{}{}, nil)
+			kept, err := call.Invoke(ctx, f.env.Calls, coremachine.Ref{Name: vm.Name}, agentscalls.List, in, nil)
 			if err != nil {
 				continue
 			}
@@ -94,7 +94,7 @@ func (f agentsEverywhere) everyMachine(ctx context.Context) ([]agents.Agent, []s
 			}
 		}
 	}
-	return out, workspaces, nil
+	return out, held, nil
 }
 
 // invariant: SPEC B5.22: a new agent's name is checked against every
@@ -117,13 +117,14 @@ func (f agentsEverywhere) held(ctx context.Context) (agents.Held, error) {
 }
 
 func (f agentsEverywhere) heldEverywhere(ctx context.Context) (agents.Held, error) {
-	all, workspaces, err := f.everyMachine(ctx)
+	all, h, err := f.everyMachine(ctx, agentscalls.ListIn{AsGiven: true})
 	if err != nil {
 		return agents.Held{}, err
 	}
-	h := agents.Held{Workspaces: workspaces}
 	for _, a := range all {
-		h.Agents = append(h.Agents, a.Name)
+		if a.Name != "" {
+			h.Agents = append(h.Agents, a.Name)
+		}
 	}
 	return h, nil
 }
@@ -167,7 +168,7 @@ func (f agentsEverywhere) among(ctx context.Context) ([]agents.Agent, error) {
 	if f.onThisMac() {
 		return f.all(ctx)
 	}
-	return call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, struct{}{}, nil)
+	return call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, agentscalls.ListIn{}, nil)
 }
 
 func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.Ref, error) {
@@ -178,4 +179,17 @@ func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.R
 	}
 	_, at, err := f.find(ctx, name)
 	return at, err
+}
+
+// value: the names every machine holds, which a workspace asks its Mac's
+// engine within heldBudget; nil on a Mac, whose read of every machine names its own.
+func (m machine) heldOnEveryMachine(kind coremachine.Kind) func(ctx context.Context) (agents.Held, error) {
+	if kind != coremachine.Workspace {
+		return nil
+	}
+	return func(ctx context.Context) (agents.Held, error) {
+		ctx, cancel := context.WithTimeout(ctx, heldBudget)
+		defer cancel()
+		return m.engineAPI().AgentsHeld(ctx)
+	}
 }
