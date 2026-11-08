@@ -17,5 +17,5 @@ The agents' `Session` contract had one adapter, `tmux`: every agent of a workspa
 
 ## Consequences
 
-- No agent runs in tmux any more; the tmux app, its dotfiles and the `jj`/`jc` shortcuts are the owner's shell, untouched.
+- No agent station starts runs in tmux any more. The owner's shell is untouched: the tmux app, its dotfiles, and the `jj`, `jc`, `jo` and `jg` shortcuts, which still open Claude, Codex and Gemini in tmux by hand ([dotfiles](../reference/dotfiles.md)).
 - A workspace of another Mac is reached by that Mac's Herdr, not by the owner's: attaching to it from the owner's Mac is not built.
