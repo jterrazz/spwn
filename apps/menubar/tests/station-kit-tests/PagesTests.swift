@@ -49,22 +49,22 @@ final class PagesTests: XCTestCase {
     }
 
     // invariant: MB-07: a workspace's, a server's and a Mac's page each draw
-    // their sections and show only actions that name a call or open a
-    // terminal, and each draws offscreen.
+    // their sections and show only actions that name a call, open a
+    // terminal or copy what the page gave them, and each draws offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["machine", "activity", "inside", "ports", "shared"])
         XCTAssertEqual(linux.section("machine")?.caption.map { $0.compactMap(\.text) }, ["Workspace VM", "Throwaway", "on This Mac"])
         XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "Share a port", "Open in Terminal"])
         let infra = try Tree.page("menubar.vm.infra")
-        XCTAssertEqual(infra.sections?.compactMap(\.id), ["machine", "up", "health", "activity", "server"])
-        XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
-        XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
+        XCTAssertEqual(infra.sections?.compactMap(\.id), ["summary", "health", "gauges", "ports", "tooling", "activity"])
+        XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
+        XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Delete", "Copy ssh admin@infra", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
         XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "activity", "ports", "accounts"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
-                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
+                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.run?.copy != nil || action.submenu != nil, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
             }
         }
         for name in ["menubar.vm.linux-1", "menubar.vm.infra", "menubar.mac.mini"] {

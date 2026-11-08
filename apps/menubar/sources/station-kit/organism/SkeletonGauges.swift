@@ -11,7 +11,7 @@ public struct SkeletonGauges: View {
 
     public init(_ section: Section) { self.section = section }
 
-    public static let stillProgress = 0.5
+    public static let stillProgress = Token.Motion.skeletonStill
 
     public var body: some View {
         if still {

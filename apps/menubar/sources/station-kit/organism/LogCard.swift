@@ -22,7 +22,7 @@ public struct LogCard: View {
             Text(section.title ?? "").font(Token.Role.cardTitle.font).foregroundStyle(tokens.tone(Token.Role.cardTitle.tone))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, Token.Metric.Latency.subTop * 3)
+                .padding(.bottom, Token.Metric.Health.logTitle)
             if let log { LogLines(log, more: RowView.action(log.more, in: actions), run: run) }
         }
     }

@@ -11,6 +11,7 @@ extension Token.Metric {
         public static let buttonsGap: CGFloat = 12
         public static let banner: CGFloat = 52
         public static let lit: CGFloat = 4
+        public static let logTitle: CGFloat = 6
     }
 
     public enum Latency {
@@ -30,6 +31,10 @@ extension Token.Metric {
         public static let copyGlyph: CGFloat = 11
         public static let disabledShare = 0.45
     }
+}
+
+extension Token.Motion {
+    public static let skeletonStill = 0.5
 }
 
 extension Token.Role {

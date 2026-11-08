@@ -74,8 +74,8 @@ public struct HealthCard: View {
         .frame(width: m.mark, height: m.mark)
     }
 
-    // value: the head's words: its label, then its count ("Healthy · 4 of
-    // 4", "Restarting · step 2 of 4").
+    // value: the head's words: its label, then its count (Healthy, then 4
+    // of 4; Restarting, then step 2 of 4), joined by the kit's separator.
     public static func title(_ head: Row) -> String {
         ([head.label ?? ""] + (head.cells ?? []).map { Format.show($0) }).filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
     }
