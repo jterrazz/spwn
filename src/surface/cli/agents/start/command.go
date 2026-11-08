@@ -2,7 +2,6 @@ package agentsstart
 
 import (
 	"context"
-	"slices"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -66,10 +65,13 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.New == !onMac {
 				return fail.New(fail.Refused, agentscalls.NoWhere, "station agents start", map[string]string{"both": boolWord(in.New)})
 			}
-			if in.Name != "" && env.Kind == machine.Mac {
-				if err := free(ctx, d, in.Name); err != nil {
+			var taken []string
+			if env.Kind == machine.Mac {
+				names, err := held(ctx, d, in.Name)
+				if err != nil {
 					return err
 				}
+				taken = names
 			}
 			at := env.Target()
 			if in.New {
@@ -78,9 +80,14 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					return err
 				}
 				at = machine.Ref{Name: vm}
+			}
+			if in.Name == "" && env.Kind == machine.Mac {
+				in.Name = agents.NameFor(at.Name, taken)
+			}
+			if in.New {
 				a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Start, agentscalls.StartIn{App: agents.App(in.App), Name: in.Name, Folder: in.Folder, Task: in.Task}, nil)
 				if err != nil {
-					return &machines.AgentNotStartedError{Name: vm, Cause: err}
+					return &machines.AgentNotStartedError{Name: at.Name, Cause: err}
 				}
 				return o.Page(pageagents.Started(a, true, d.ThisMachine), a)
 			}
@@ -100,16 +107,21 @@ func boolWord(both bool) string {
 	return "neither"
 }
 
-// value: refuses a name another agent of any machine holds, in its key.
-func free(ctx context.Context, d Deps, name string) error {
+// value: the names every agent of every machine holds; a name asked that
+// one of them holds in its key is refused.
+func held(ctx context.Context, d Deps, name string) ([]string, error) {
 	all, err := d.Everywhere(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if slices.ContainsFunc(all, func(a agents.Agent) bool { return agents.Clashes([]string{a.Name}, name) }) {
-		return fail.New(fail.Refused, agentscalls.NameTaken, name, nil)
+	names := make([]string, 0, len(all))
+	for _, a := range all {
+		names = append(names, a.Name)
 	}
-	return nil
+	if name != "" && agents.Clashes(names, name) {
+		return nil, fail.New(fail.Refused, agentscalls.NameTaken, name, nil)
+	}
+	return names, nil
 }
 
 // value: the throwaway workspace made for the agent, by its name, on the

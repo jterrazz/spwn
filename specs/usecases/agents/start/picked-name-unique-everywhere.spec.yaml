@@ -1,0 +1,19 @@
+description: 'the name station picks is unique everywhere: ci-1·2 on ci-1 once linux-1 holds ci-1'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on linux-1 --name ci-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	ci-1	starts · claudecode · Write the changelog
+    - command: 'agents start "Write the release notes" --on ci-1'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	ci-1·2	starts · claudecode · Write the release notes
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	ci-1	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
+          ●	ci-1·2	claudecode	working	Write the release notes	ci-1	jterrazz-mac-mini	12s ago

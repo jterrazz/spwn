@@ -21,4 +21,4 @@ runs:
           # Agents	2 ●	1 ◐
           ◐	linux-1	claudecode	waiting · PR #42 is ready	Review the auth refresh	linux-1	jterrazz-macbook-pro	48s ago	station agents reply linux-1 <text>
           ●	docs-bot	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
-          ●	ci-1	claudecode	working	Fix the flaky e2e test	ci-1	jterrazz-mac-mini	15s ago
+          ●	ci-1	claudecode	working	Fix the flaky e2e test	ci-1	jterrazz-mac-mini	12s ago

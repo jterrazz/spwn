@@ -14,7 +14,7 @@ runs:
       exit: 0
       stdout: |
           # Agents	1 ○
-          ○	linux-1	claudecode	finished · stopped	Build the landing page	linux-1	jterrazz-macbook-pro	28s ago
+          ○	linux-1	claudecode	finished · stopped	Build the landing page	linux-1	jterrazz-macbook-pro	24s ago
     - command: 'machines --this-mac | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
