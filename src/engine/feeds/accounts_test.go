@@ -179,3 +179,20 @@ func TestTheStatusItemCountsACopySharedForLessThan30MinMore(t *testing.T) {
 		t.Errorf("badge %+v, want %+v: Claude shared with linux-1 ends in 22 min", *p.Badge, want)
 	}
 }
+
+// invariant: Home is read at the engine's clock: the hero counts down a
+// copy's last minutes from now, not from when the machines answered.
+func TestHomeSaysACopysLastMinutesAtTheEnginesClock(t *testing.T) {
+	w := twoMacsSignedIn()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}, Report: func(awake.View) *awake.Report { return nil }}
+	in := engine.FeedInput{}
+	in.Awake = nothing(in.Awake)
+	p := until(t, o.Feed()(ctx, in), "the hero", func(p page.Page) bool { return p.Badge != nil })
+	head := p.Sections[0].Items[0].Row
+	ends := newSteps().Now().Add(22 * time.Minute).In(time.Local).Format("15:04")
+	if head.Label != "Claude on linux-1 ends in 22 min" || len(head.Detail.Items) != 2 || head.Detail.Items[1].Text != "ends "+ends {
+		t.Errorf("hero %q %+v, want Claude on linux-1 ending in 22 min, at %s", head.Label, head.Detail.Items, ends)
+	}
+}
