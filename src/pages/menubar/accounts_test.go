@@ -1,13 +1,39 @@
 package menubar
 
 import (
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
+	"github.com/jterrazz/studio-station/src/page"
 )
+
+// invariant: SPEC A4 Accounts: the fleet's Signed in lists the account the
+// most Macs hold first, each with the Macs that hold it, This Mac's first.
+func TestTheAccountMostMacsHoldIsSignedInFirst(t *testing.T) {
+	signed := func(provider string) accounts.Account {
+		return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginOwn, Identity: []string{"jterrazz"}}
+	}
+	all := accounts.AllMachines{Now: macNow, Macs: []accounts.MacAccounts{
+		{Name: proMac, ThisMac: true, Accounts: []accounts.Account{signed(catalog.ProviderDocker), signed(catalog.ProviderClaude)}},
+		{Name: miniMac, Accounts: []accounts.Account{signed(catalog.ProviderClaude)}},
+	}}
+	p := Accounts(all, AccountsOf{}, page.Context{Machine: proMac})
+	s := sectionOf(p, SectionSignedInAll)
+	if s == nil {
+		t.Fatal("no Signed in section")
+	}
+	got := make([]string, 0, len(s.Items))
+	for _, it := range s.Items {
+		got = append(got, it.Row.ID+": "+words(it.Row.Detail))
+	}
+	if want := []string{catalog.ProviderClaude + ": This Mac | mac-mini", catalog.ProviderDocker + ": This Mac"}; !slices.Equal(got, want) {
+		t.Errorf("signed in %v, want %v", got, want)
+	}
+}
 
 // invariant: SPEC A4 A workspace: a running workspace's page carries its
 // header and four segments, its loans under Accounts alone; a stopped one
