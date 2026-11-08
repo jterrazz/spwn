@@ -115,7 +115,7 @@ func TestUpkeepListsTheFirewallThenTheFailingItemThenTheSignInThenTheUpdatesAsOn
 	}
 	want := []said{
 		{"Firewall off on This Mac", "This Mac", "firewall off", "How to", "station never changes it for you"},
-		{"A login item failed on This Mac", "This Mac", "1 login item failed", "Copy fix", "com.example.socket is failing, last exit 78"},
+		{"A login item failed on This Mac", "This Mac", "1 login item failed", "Show", "com.example.socket is failing, last exit 78"},
 		{"Cloudflare needs sign-in on This Mac", "This Mac", "Cloudflare needs sign-in", "Sign in", "it cannot be shared until you sign in"},
 		{"4 updates to install", "This Mac", "4 updates", "Update", "2 tool-a updates waiting | 2 tool-b updates waiting"},
 	}
@@ -125,8 +125,8 @@ func TestUpkeepListsTheFirewallThenTheFailingItemThenTheSignInThenTheUpdatesAsOn
 	if upkeep[0].Verb.Sheet != page.SheetHint+"firewall" {
 		t.Errorf("How to opens %q, want the firewall's hint", upkeep[0].Verb.Sheet)
 	}
-	if upkeep[1].Verb.Run == nil || upkeep[1].Verb.Run.Copy != "station background" {
-		t.Errorf("Copy fix copies %+v", upkeep[1].Verb.Run)
+	if upkeep[1].Verb.Run != nil || upkeep[1].Nav != machinePage(needsPro) {
+		t.Errorf("Show runs %+v and opens %q, want no call and This Mac's page", upkeep[1].Verb.Run, upkeep[1].Nav)
 	}
 	if hud := upkeep[3].Verb.Hud; hud == nil || !slices.Equal(texts(hud.Items), []string{"Everything is up to date"}) {
 		t.Errorf("Update says %+v once it ran", hud)
@@ -187,6 +187,32 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 	}
 	if NeedsPage(NeedsReading{}, "", here).State != page.Loading {
 		t.Error("a needs page read from nothing is not its frame")
+	}
+}
+
+// invariant: SPEC B5.7, B5.18: a failing login item is shown from the
+// fleet's list, which opens its Mac; only the Mac's own page copies its fix.
+func TestAFailingLoginItemIsShownFromTheFleetAndItsFixCopiedOnItsMac(t *testing.T) {
+	here := page.Context{Machine: needsPro, Kind: "mac"}
+	verb := func(p page.Page) page.Action {
+		for _, a := range p.Actions {
+			if strings.Contains(a.ID, "/background/") {
+				return a
+			}
+		}
+		t.Fatalf("%s carries no verb for the login item", p.ID)
+		return page.Action{}
+	}
+	all := verb(NeedsPage(needsFleet(), "", here))
+	if all.Label != VerbShow || all.Run != nil {
+		t.Errorf("menubar.needs says %q and runs %+v, want Show and no call", all.Label, all.Run)
+	}
+	own := verb(NeedsPage(needsFleet(), needsPro, here))
+	if own.Label != VerbCopyFix || own.Run == nil || own.Run.Copy != "station background" {
+		t.Errorf("This Mac's page says %q and runs %+v, want Copy fix of station background", own.Label, own.Run)
+	}
+	if own.Hud == nil || !slices.Equal(texts(own.Hud.Items), []string{"Copied station background"}) {
+		t.Errorf("Copy fix says %+v once it ran", own.Hud)
 	}
 }
 

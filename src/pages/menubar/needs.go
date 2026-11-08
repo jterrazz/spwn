@@ -62,6 +62,8 @@ type Need struct {
 	Facts  []page.Value
 	Detail []string
 	Verb   page.Action
+	// value: the verb on its Mac's own page, when it differs there.
+	Own *page.Action
 	// value: the page the row opens, and the one a verb with no call
 	// opens: a verb that runs nothing is the row's own Nav.
 	Nav page.ID
@@ -261,8 +263,9 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 			row(title, what, VerbShow)
 			item.Glyph = symbol("exclamationmark.triangle", page.SignalWaits)
 			if n.Command != "" {
-				item.Verb.Label, item.Verb.Run = VerbCopyFix, &page.Run{Copy: n.Command}
-				item.Verb.Hud = hud("Copied " + n.Command)
+				own := item.Verb
+				own.Label, own.Run, own.Hud = VerbCopyFix, &page.Run{Copy: n.Command}, hud("Copied "+n.Command)
+				item.Own = &own
 			}
 		case section.Apps:
 			if !n.Broken && n.Call == CallUpdate {
@@ -347,6 +350,11 @@ func NeedsPage(r NeedsReading, of string, thisMac page.Context) page.Page {
 	if of != "" {
 		needs, upkeep = scoped(needs, of), scoped(upkeep, of)
 		where = page.MacName(of, thisMac.Machine)
+		for i, n := range upkeep {
+			if n.Own != nil && ownWords(n, of, thisMac.Machine) {
+				upkeep[i].Verb = *n.Own
+			}
+		}
 	}
 	p := page.Page{ID: NeedsID, Command: "menubar", Context: thisMac, Header: &page.Header{Back: "All machines"}}
 	if of != "" {
@@ -389,7 +397,7 @@ func needRows(ns []Need, of, self string) []page.Item {
 		if n.Finding.Urgency == finding.Red {
 			row.Mark = page.Broken
 		}
-		if of != "" && (n.Subject == of || n.Subject == page.MacName(of, self)) {
+		if ownWords(n, of, self) {
 			row.Label, row.Detail = n.What, page.None()
 			if n.Finding.Section != section.Accounts {
 				row.Label = titled(n.What)
@@ -404,6 +412,10 @@ func needRows(ns []Need, of, self string) []page.Item {
 		out = append(out, page.Item{Row: &row})
 	}
 	return out
+}
+
+func ownWords(n Need, of, self string) bool {
+	return of != "" && (n.Subject == of || n.Subject == page.MacName(of, self))
 }
 
 func reasonOf(f finding.Finding) page.Reason {

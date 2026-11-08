@@ -238,24 +238,12 @@
       "sheet": "hint:firewall"
     },
     {
-      "label": "Copy fix",
+      "label": "Show",
       "on": "row",
       "rows": [
         "upkeep:macbook-pro/background/1"
       ],
-      "id": "upkeep:macbook-pro/background/1",
-      "run": {
-        "copy": "station background"
-      },
-      "hud": {
-        "kind": "list",
-        "items": [
-          {
-            "kind": "text",
-            "text": "Copied station background"
-          }
-        ]
-      }
+      "id": "upkeep:macbook-pro/background/1"
     },
     {
       "label": "Sign in",
