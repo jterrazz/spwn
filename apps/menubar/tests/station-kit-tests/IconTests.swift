@@ -31,13 +31,22 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(try icon("menubar.home.two-macs"), MenuBarIcon(.plain, said: "all machines are fine"))
     }
 
-    // invariant: MB-03: infra in a loop on the mini: the Orbit red beside
-    // the count, and the label names the server.
-    func testIconRedServerDown() throws {
+    // invariant: MB-03: infra in a loop on the mini: the Orbit slashed
+    // beside the count, never red, and the label names the server.
+    func testIconServerDownIsSlashed() throws {
         let icon = try icon("menubar.home.infra-down")
-        XCTAssertEqual(icon, MenuBarIcon(.red, count: 1, said: "station, infra down"))
-        XCTAssertEqual(icon.symbol, Token.Icon.orbit)
-        XCTAssertFalse(icon.template)
+        XCTAssertEqual(icon, MenuBarIcon(.down, count: 1, said: "station, infra down"))
+        XCTAssertEqual(icon.symbol, Token.Icon.slashed)
+        XCTAssertTrue(icon.nsImage().isTemplate)
+    }
+
+    // invariant: what needs you cuts the badge out of the Orbit beside its
+    // count; a turning mark or a slash takes its place.
+    func testNeedsYouCutsTheBadgeOut() {
+        XCTAssertEqual(MenuBarIcon(.plain, count: 2).symbol, Token.Icon.badged)
+        XCTAssertEqual(MenuBarIcon(.plain).symbol, Token.Icon.orbit)
+        XCTAssertEqual(MenuBarIcon(.down, count: 2).symbol, Token.Icon.slashed)
+        XCTAssertEqual(MenuBarIcon(.restarting, count: 2).symbol, Token.Icon.working)
     }
 
     // invariant: the image the menu bar shows and the words VoiceOver reads
@@ -48,11 +57,11 @@ final class IconTests: XCTestCase {
             let icon = MenuBarIcon.of(connection: story.state.connection, page: story.state.page)
             XCTAssertEqual(icon.label, badge.label, story.id)
             XCTAssertEqual(icon.count, badge.needs, story.id)
-            XCTAssertEqual(icon.mark == .red, badge.down == true, story.id)
+            XCTAssertEqual(icon.mark == .down, badge.down == true, story.id)
             XCTAssertEqual(icon.mark == .restarting, badge.restarting == true && badge.down != true, story.id)
-            let image = icon.nsImage(scheme: .dark)
+            let image = icon.nsImage()
             XCTAssertEqual(image.accessibilityDescription, badge.label, story.id)
-            XCTAssertEqual(image.isTemplate, badge.down != true, story.id)
+            XCTAssertTrue(image.isTemplate, story.id)
         }
     }
 
@@ -89,25 +98,53 @@ final class IconTests: XCTestCase {
         try drawn("connecting", icon)
     }
 
-    // invariant: every state but the red is a template image with no
-    // colour of its own: macOS paints it for the bar's appearance and tints
-    // it while the panel is open, so whichever scheme the app asks for it
-    // draws the same alpha; the red is drawn in the bar's own ink.
-    func testEveryStateButTheRedIsATemplate() throws {
-        func alpha(_ image: NSImage) throws -> [UInt8] {
-            let rep = try XCTUnwrap(image.representations.compactMap { $0 as? NSBitmapImageRep }.first { $0.pixelsWide > Int(image.size.width) })
-            let bitmap = try XCTUnwrap(rep.cgImage.flatMap(Bitmap.init))
-            return stride(from: 3, to: bitmap.pixels.count, by: 4).map { bitmap.pixels[$0] }
-        }
-        let red = MenuBarIcon(.red, count: 2)
-        XCTAssertFalse(red.nsImage(scheme: .dark).isTemplate)
-        let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.plain, count: 120), MenuBarIcon(.restarting, count: 2),
-                     MenuBarIcon(.stopped), MenuBarIcon(.connecting)]
+    // invariant: the image the app hands the status item, as AppKit draws
+    // it into the bar at its point size, is a template in every state with
+    // no colour baked in, and its Orbit fills the optical box of the bar's
+    // own round symbol: on the owner's real bar at 2x Wi-Fi drew 33 by 24
+    // pixels and the Display circle 30 by 30, the Orbit drawn at 13 pt only
+    // 26, and red while a server was down.
+    func testTheItemDrawsAsLargeAsTheBarsSymbolsAndInNoColour() throws {
+        let wifi = try XCTUnwrap(Ink(Self.native("wifi")))
+        XCTAssertEqual(wifi.box.width, 33)
+        XCTAssertEqual(wifi.box.height, 24)
+        let circle = try XCTUnwrap(Ink(Self.native("circle")))
+        XCTAssertEqual(circle.box.height, 30)
+        let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.plain, count: 120), MenuBarIcon(.down, count: 2),
+                     MenuBarIcon(.restarting, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting), MenuBarIcon(.plain, busy: true)]
         for var icon in icons {
             icon.spark = [10, 60, 30]
-            XCTAssertTrue(icon.nsImage(scheme: .dark).isTemplate, "\(icon.mark)")
-            XCTAssertEqual(try alpha(icon.nsImage(scheme: .dark)), try alpha(icon.nsImage(scheme: .light)), "\(icon.mark)")
+            let image = icon.nsImage()
+            XCTAssertTrue(image.isTemplate, "\(icon.mark)")
+            let bar = try XCTUnwrap(Self.drawnInTheBar(image).flatMap(Bitmap.init), "\(icon.mark)")
+            XCTAssertFalse(Self.tinted(bar), "\(icon.mark) is tinted")
         }
+        for icon in [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 3)] {
+            let orbit = try XCTUnwrap(Ink(Self.drawnInTheBar(icon.nsImage())), "\(icon.mark)")
+            XCTAssertEqual(Double(orbit.box.height), Double(circle.box.height), accuracy: 1, "\(icon.mark)")
+        }
+    }
+
+    static func tinted(_ bitmap: Bitmap) -> Bool {
+        let p = bitmap.pixels
+        for i in stride(from: 0, to: p.count, by: 4) where p[i + 3] > 0 {
+            if p[i] != p[i + 1] || p[i + 1] != p[i + 2] { return true }
+        }
+        return false
+    }
+
+    // value: an NSImage drawn as the status bar draws its button's image:
+    // by AppKit, at its point size, into a 2x bar picking its 2x bitmap.
+    static func drawnInTheBar(_ image: NSImage) -> CGImage? {
+        let width = Int(image.size.width * 2), height = Int(image.size.height * 2)
+        guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                         isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0) else { return nil }
+        rep.size = image.size
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        image.draw(in: NSRect(origin: .zero, size: image.size))
+        NSGraphicsContext.restoreGraphicsState()
+        return rep.cgImage
     }
 
     // invariant: the mark is the Orbit filled, a solid Mac inside a ring,
@@ -134,7 +171,7 @@ final class IconTests: XCTestCase {
     }
 
     // invariant: the Orbit has the weight of the bar's filled symbols:
-    // drawn as the status bar draws them, 13 pt medium, it is as tall as a
+    // drawn as the status bar draws them, 15 pt medium, it is as tall as a
     // circle within one pixel at 2x, its ring as thick as Wi-Fi's arcs
     // within 0.75 of a pixel and heavier than an outlined circle, and its
     // ink as dense as Wi-Fi's, the battery's and Control Center's span.
@@ -153,7 +190,7 @@ final class IconTests: XCTestCase {
 
     static func native(_ name: String) -> CGImage? {
         let renderer = ImageRenderer(content: Image(systemName: name)
-            .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
+            .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
             .imageScale(.medium)
             .foregroundStyle(Token.Icon.ink(.light)))
         renderer.scale = 2
@@ -165,11 +202,11 @@ final class IconTests: XCTestCase {
     func testTheOrbitBesideTheBarsSymbols() throws {
         for scheme in [ColorScheme.dark, .light] {
             let ink = Token.Icon.ink(scheme)
-            let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.red, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting),
+            let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.down, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting),
                          MenuBarIcon(.plain, busy: true)]
             let row = HStack(spacing: 10) {
                 ForEach(["wifi", "battery.100", "switch.2"], id: \.self) { name in
-                    Image(systemName: name).font(.system(size: Token.Icon.size, weight: Token.Icon.weight)).foregroundStyle(ink)
+                    Image(systemName: name).font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight)).foregroundStyle(ink)
                 }
                 ForEach(icons.indices, id: \.self) { i in StatusItem(icons[i], scheme: scheme) }
             }
@@ -198,7 +235,7 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(turns.last, 0)
         turner.follow(MenuBarIcon(.plain, busy: true))
         XCTAssertTrue(turner.running)
-        turner.follow(MenuBarIcon(.red))
+        turner.follow(MenuBarIcon(.down))
         XCTAssertFalse(turner.running)
     }
 
@@ -213,7 +250,7 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(try bitmap(0.25).pixels, try bitmap(0.25).pixels)
         XCTAssertNotEqual(try bitmap(0).pixels, try bitmap(0.25).pixels)
         XCTAssertNotEqual(try XCTUnwrap(MenuBarIcon(.plain).image(scheme: .dark)).width, try bitmap(0).width)
-        XCTAssertEqual(busy.nsImage(scheme: .dark, turn: 0.5).representations.count, 3)
+        XCTAssertEqual(busy.nsImage(turn: 0.5).representations.count, 3)
         XCTAssertEqual(Token.Busy.frames, 8)
         XCTAssertEqual(Token.Busy.turn(frame: 2), 0.25)
         XCTAssertEqual(Token.Busy.turn(frame: 8), 0)

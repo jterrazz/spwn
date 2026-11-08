@@ -81,7 +81,7 @@ public struct MenuBarStrip: View {
                 .accessibilityLabel(icon.label)
             ForEach(Token.Item.strip, id: \.self) { name in
                 Image(systemName: name)
-                    .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
+                    .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
                     .foregroundStyle(Token.Icon.ink(scheme))
             }
         }

@@ -45,7 +45,7 @@ struct StationMenuBarApp: App {
                 Image(nsImage: trial.label)
                     .task { trial.start() }
             } else {
-                Image(nsImage: model.iconImage(dark: NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua))
+                Image(nsImage: model.iconImage)
                     .accessibilityLabel(model.icon.label)
                     .task { model.start() }
             }

@@ -145,6 +145,7 @@ public enum Token {
         public static let slashed = "station.orbit.slash"
         public static let working = "station.orbit.working"
         public static let size: CGFloat = 13
+        public static let glyph: CGFloat = 15
         public static let weight = Font.Weight.medium
         public static let line: CGFloat = 1.25
         public static let sparkWidth: CGFloat = 22

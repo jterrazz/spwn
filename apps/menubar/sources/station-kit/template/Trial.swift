@@ -151,7 +151,7 @@ public struct TrialItemView: View {
     public var body: some View {
         HStack(spacing: Token.Icon.gap) {
             Image(Token.Icon.orbit, bundle: .module)
-                .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
+                .font(.system(size: Token.Icon.glyph, weight: Token.Icon.weight))
                 .imageScale(.medium)
                 .foregroundStyle(Token.Icon.ink(scheme))
                 .rotationEffect(.radians(turn * .pi * 2))
