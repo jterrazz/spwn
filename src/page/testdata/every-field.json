@@ -60,7 +60,8 @@
           "kind": "text",
           "text": "on mac-mini",
           "pri": 2,
-          "short": "mini"
+          "short": "mini",
+          "nav": "menubar.machine:mac-mini"
         }
       ]
     },
@@ -115,7 +116,8 @@
                   "kind": "text",
                   "text": "on mac-mini",
                   "pri": 2,
-                  "short": "mini"
+                  "short": "mini",
+                  "nav": "menubar.machine:mac-mini"
                 },
                 {
                   "kind": "age",
