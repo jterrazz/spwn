@@ -1,4 +1,4 @@
-description: 'sharing an account already shared shares it again for its term from now, not on top of what was left: Extend reads 4 h left'
+description: 'sharing a shared account again shares it for its term from now, not on top of what was left'
 env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["linux-1"].secrets) | del(.macs["jterrazz-macbook-pro"].stores.shares)'' world.json > w.json && /bin/mv w.json world.json'
