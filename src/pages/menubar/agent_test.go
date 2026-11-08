@@ -69,6 +69,24 @@ func TestAWorkspaceListsItsAgentsAndCleansUpAFinishedOneAlone(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4: a workspace's Agents card says the agent that waits
+// on the owner first, then the ones at work, then the finished, whatever
+// order the fleet reads them in.
+func TestAWorkspaceListsTheWaitingAgentBeforeTheWorkingOnes(t *testing.T) {
+	fleet := fleetAgents()
+	working := agents.Agent{Name: "review-bot" + agents.Nth + "3", VM: "review-bot", Mac: miniMac, App: "claudecode", State: agents.Working, Task: "fixes the docs"}
+	fleet = append([]agents.Agent{fleet[1], working}, append(fleet[:1:1], fleet[2:]...)...)
+	p := macPageOf(t, "review-bot", func(m *Machine) { m.Agents = fleet })
+	var got []string
+	for _, it := range sectionOf(p, SectionAgents).Items {
+		got = append(got, it.Row.ID)
+	}
+	want := []string{"review-bot", working.Name, "review-bot" + agents.Nth + "2"}
+	if !slices.Equal(got, want) {
+		t.Fatalf("agents card lists %v, want %v", got, want)
+	}
+}
+
 // invariant: SPEC B5.1: an agent no hook reports says only that its app
 // runs, and its workspace offers to install the hook.
 func TestAnAgentNoHookReportsOffersTheHook(t *testing.T) {
