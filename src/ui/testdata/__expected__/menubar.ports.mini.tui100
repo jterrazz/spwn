@@ -5,7 +5,7 @@
    ✗ 10250  kubelet           infra · on your network, not declared
 
  Public  1  1 ●
-   ● Traefik  infra:443 · Cloudflare Tunnel
+   ● Traefik  jterrazz.com · Cloudflare Tunnel
 
  Private  2  2 ●
    ● Kubernetes API  infra:6443

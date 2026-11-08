@@ -237,16 +237,23 @@ func (b *portsBody) linkVerbs(row *page.Row, name, key, link string, web bool) [
 	return []string{open.ID, copyIt.ID, qr.ID}
 }
 
+// value: a public port's row: the link its declaration names, its host in
+// the address pill, opened in a click with its QR beside; without one, its
+// address, copied.
 func (b *portsBody) publicRow(p ports.Port, sc portsScope) page.Item {
 	named := p.Named()
 	key := p.Key()
 	route, _ := catalog.RouteNamed(p.Declared.Via)
-	row := page.Row{ID: key, Mark: page.OK, Label: named.Name, Detail: page.Texts(key, route.Label), Glyph: chip(named)}
+	link, at, web := key, key, false
+	if domain, isWeb := p.Declared.Domain(); domain != "" {
+		link, at, web = p.Declared.URL, domain, isWeb
+	}
+	row := page.Row{ID: key, Mark: page.OK, Label: named.Name, Detail: page.Texts(at, route.Label), Glyph: chip(named)}
 	if sc.VM == "" && p.Machine.On != "" {
 		row.Mac = p.Machine.Name
 	}
 	if !unanswered(&row, p.Answer) {
-		b.linkVerbs(&row, named.Name, key, key, false)
+		b.linkVerbs(&row, named.Name, key, link, web)
 	}
 	return page.Item{Row: &row}
 }

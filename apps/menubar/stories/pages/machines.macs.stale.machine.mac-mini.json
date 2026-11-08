@@ -760,7 +760,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "infra:443"
+                  "text": "jterrazz.com"
                 },
                 {
                   "kind": "text",
@@ -772,7 +772,8 @@
               "kind": "port:traefik"
             },
             "mac": "infra",
-            "verb": "copy-port:infra:443"
+            "verb": "open-port:infra:443",
+            "quick": "qr:infra:443"
           }
         }
       ],
@@ -1296,6 +1297,17 @@
       }
     },
     {
+      "label": "Open Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "open-port:infra:443",
+      "run": {
+        "open": "https://jterrazz.com"
+      }
+    },
+    {
       "label": "Copy link to Traefik",
       "on": "row",
       "rows": [
@@ -1303,17 +1315,26 @@
       ],
       "id": "copy-port:infra:443",
       "run": {
-        "copy": "infra:443"
+        "copy": "https://jterrazz.com"
       },
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Copied infra:443"
+            "text": "Copied https://jterrazz.com"
           }
         ]
       }
+    },
+    {
+      "label": "Show QR for Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "qr:infra:443",
+      "icon": "qrcode"
     },
     {
       "label": "Copy link to Kubernetes API",
