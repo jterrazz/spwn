@@ -447,11 +447,6 @@
                         "kind": "text",
                         "text": "2 updates",
                         "signal": "waits"
-                      },
-                      {
-                        "kind": "text",
-                        "text": "2 app updates",
-                        "pri": 1
                       }
                     ]
                   },

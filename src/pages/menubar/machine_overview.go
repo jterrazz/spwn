@@ -417,7 +417,11 @@ func (o macOverview) upkeepRows() []page.Item {
 		what := page.Text(strings.ToLower(n.What))
 		what.Signal = page.SignalWaits
 		parts := []page.Value{what}
-		for _, d := range n.Detail {
+		details := n.Detail
+		if n.Verb.Label == VerbUpdate && len(details) == 1 {
+			details = nil
+		}
+		for _, d := range details {
 			if !strings.EqualFold(d, n.What) && !strings.EqualFold(d, n.Finding.Text) {
 				detail := page.Text(d)
 				detail.Pri = 1

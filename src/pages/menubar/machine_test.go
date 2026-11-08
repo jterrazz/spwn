@@ -241,6 +241,11 @@ func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 	if words(head.Cells[0]) != "firewall off | 1 more" || care[1].Group.Fold != page.Folded || len(care[1].Group.Items) != 2 {
 		t.Fatalf("upkeep %q folded %s over %d rows", words(head.Cells[0]), care[1].Group.Fold, len(care[1].Group.Items))
 	}
+	for _, it := range care[1].Group.Items {
+		if it.Row.Label == "Apps" && words(it.Row.Detail) != "2 updates" {
+			t.Fatalf("the Apps item reads %q, want its updates said once", words(it.Row.Detail))
+		}
+	}
 	if g := sectionOf(p, SectionGauges).Items[1].Gauge; g.Value.Text != "19 GB free" || g.Bar == nil {
 		t.Fatalf("memory gauge %+v, want 19 GB free over its bar", g)
 	}
