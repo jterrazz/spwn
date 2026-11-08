@@ -463,6 +463,13 @@
       "out": "Unlocked"
     },
     {
+      "name": "machines.wake",
+      "schema": "station.machines.wake/v1",
+      "where": "in-process",
+      "in": "WakeIn",
+      "out": "Woken"
+    },
+    {
       "name": "overview.read",
       "schema": "station.overview.read/v1",
       "section": "overview",

@@ -41,6 +41,8 @@ type Options struct {
 	LAN func(ctx context.Context) string
 	// value: its servers' uptime records; nil keeps none.
 	Uptime contract.UptimeStore
+	// value: what sends a Wake-on-LAN packet from this Mac; nil sends none.
+	Waker contract.Waker
 }
 
 type Nodes interface {

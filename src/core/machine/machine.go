@@ -55,6 +55,9 @@ type Hardware struct {
 	Chip   string `json:",omitempty"`
 	Memory int64
 	CPUs   int
+	// value: the hardware address of the interface it answers on your LAN
+	// with, what a Wake-on-LAN packet names; empty when it does not say.
+	Ether string `json:",omitempty"`
 }
 
 type Profile struct {

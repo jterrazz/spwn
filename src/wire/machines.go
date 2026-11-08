@@ -24,6 +24,7 @@ import (
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/src/machines/adapter/openssh"
+	"github.com/jterrazz/studio-station/src/machines/adapter/udp"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	settingsmacos "github.com/jterrazz/studio-station/src/settings/adapter/macos"
@@ -44,6 +45,7 @@ import (
 	machinesstop "github.com/jterrazz/studio-station/src/surface/cli/machines/stop"
 	machinessupervise "github.com/jterrazz/studio-station/src/surface/cli/machines/supervise"
 	machinesunlock "github.com/jterrazz/studio-station/src/surface/cli/machines/unlock"
+	machineswake "github.com/jterrazz/studio-station/src/surface/cli/machines/wake"
 	overviewcmd "github.com/jterrazz/studio-station/src/surface/cli/overview"
 )
 
@@ -69,7 +71,15 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Asleep:    m.asleep,
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
+		Waker:     m.waker(),
 	})
+}
+
+func (m machine) waker() contract.Waker {
+	if m.world != nil {
+		return m.world.waker()
+	}
+	return udp.New(m.sys.Net)
 }
 
 // value: this Mac's address on your LAN, as it reads it (its world's in
@@ -112,6 +122,9 @@ func (m machine) hardware(ctx context.Context) coremachine.Hardware {
 		self = m.world.self()
 	}
 	_, _, _, hw, _ := self.Read(ctx)
+	if hw.Ether == "" {
+		hw.Ether = m.sys.Net.HardwareAddress(m.lanAddress(ctx))
+	}
 	return hw
 }
 
@@ -182,6 +195,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinesadd.Command(machinesadd.Deps{ThisMachine: m.where}, env),
 		machinesforget.Command(machinesforget.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesunlock.Command(machinesunlock.Deps{Names: vms.Names, ThisMachine: m.where}, env),
+		machineswake.Command(machineswake.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinessupervise.Command(env),
 		machinespipe.Command(machinespipe.Deps{Machines: vmPipe{vms, m.sys.Sockets}}, env),
 	)

@@ -251,6 +251,17 @@ func Unlocked(u model.Unlocked, thisMac page.Context) page.Page {
 	return pages.Outcome("machines unlock", thisMac, nil, []page.Row{row}, "machines")
 }
 
+func Woken(w model.Woken, thisMac page.Context) page.Page {
+	row := done(w.Name, catalog.StateOK, "wake sent", "it answers in a minute or so")
+	switch {
+	case w.Already:
+		row = done(w.Name, catalog.StateOK, "already awake: it answers")
+	case w.Tell:
+		row = done(w.Name, catalog.StateOK, "wake sent", "you are told once it answers")
+	}
+	return pages.Outcome("machines wake", thisMac, nil, []page.Row{row}, "machines")
+}
+
 func Back(b model.Back, thisMac page.Context) page.Page {
 	// value: the Mac back, and each VM it paused as it is now.
 	said := make([]string, 0, 1+len(b.VMs))

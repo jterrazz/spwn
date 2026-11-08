@@ -281,6 +281,9 @@ func entries() map[string]entry {
 		"machines.unlock": {kinds: mac(), subject: otherMac, key: keyed("u"), item: func(_, m Target) Item {
 			return terminal("Unlock "+m.Label+ellipsis+" (asks its password)", "machines", "unlock", m.Label)
 		}},
+		"machines.wake": {kinds: mac(), subject: otherMac, key: keyed("w"), item: func(_, m Target) Item {
+			return run("Wake "+m.Label, []string{"machines", "wake", m.Label}, gesture.V("Wake", "Waking", "Woke"), m.Name)
+		}},
 		"overview.read": {item: func(t, _ Target) Item { return open(t, section.Overview, "Open Overview") }},
 		"ports.declare": {kinds: mac(), key: keyed("d"), item: func(t, _ Target) Item {
 			return asked("Declare a port public"+ellipsis, []Field{{Label: "Port"}, {Label: "Route", Value: catalog.RouteLAN, Note: routes()}}, func(a []string) gesture.Gesture {

@@ -1,0 +1,8 @@
+description: 'this Mac is awake already: wake names another Mac'
+env: air-asleep
+runs:
+    - command: 'machines wake jterrazz-macbook-pro'
+      exit: 2
+      stderr: |
+          Error: "jterrazz-macbook-pro" is this machine
+          Hint: pick another machine: station machines lists them all

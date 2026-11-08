@@ -1,0 +1,11 @@
+description: 'a Mac that answers is already awake: nothing is sent'
+env: air-asleep
+runs:
+    - command: 'machines wake macbook-air'
+      exit: 0
+      stdout: |
+          ●	macbook-air	already awake: it answers
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+      exit: 0
+      stdout: |
+          null

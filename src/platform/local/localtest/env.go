@@ -37,9 +37,24 @@ type Net struct {
 	Open      map[string]bool
 	Responses map[string]Response
 	Requests  []Request
+	// value: each datagram broadcast, and the hardware address of each IP.
+	Broadcasts []Datagram
+	Hardware   map[string]string
+}
+
+type Datagram struct {
+	Port    int
+	Payload []byte
 }
 
 func NewNet() *Net { return &Net{Open: map[string]bool{}, Responses: map[string]Response{}} }
+
+func (n *Net) Broadcast(_ context.Context, port int, payload []byte) error {
+	n.Broadcasts = append(n.Broadcasts, Datagram{Port: port, Payload: append([]byte(nil), payload...)})
+	return nil
+}
+
+func (n *Net) HardwareAddress(ip string) string { return n.Hardware[ip] }
 
 func (n *Net) Dial(_ context.Context, mac string, port int, _ time.Duration) bool {
 	return n.Open[fmt.Sprintf("%s:%d", mac, port)]

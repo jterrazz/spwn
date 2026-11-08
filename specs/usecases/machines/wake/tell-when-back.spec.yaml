@@ -1,0 +1,29 @@
+description: 'wake --tell tells the owner once, mac_back, the moment it answers again, and no more'
+env: air-asleep
+runs:
+    - command: 'machines --json >/dev/null'
+      exit: 0
+    - command: 'world offline jterrazz-macbook-air'
+      exit: 0
+    - command: 'world hold Waker.Wake'
+      exit: 0
+    - command: 'machines wake macbook-air --tell'
+      exit: 0
+      stdout: |
+          ●	macbook-air	wake sent · you are told once it answers
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back")]'' world.json'
+      exit: 0
+      stdout: |
+          []
+    - command: 'world online jterrazz-macbook-air'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.told[]? | select(.Kind == "mac_back") | [.Subject, .Text]]'' world.json'
+      exit: 0
+      stdout: |
+          [["jterrazz-macbook-air","macbook-air is back"]]
