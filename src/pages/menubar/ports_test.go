@@ -132,6 +132,19 @@ func TestAPublicPortOpensItsLink(t *testing.T) {
 	}
 }
 
+// invariant: a share also declared public is listed once, as public.
+func TestAShareDeclaredPublicIsListedOnce(t *testing.T) {
+	f := portFleet()
+	f.Macs[1].Shared = []ports.SharedPort{{VM: "infra", GuestPort: 443, Reserved: 40003, State: ports.PhaseShared, HTTP: true, URLs: ports.URLSet{Public: "http://mini.ts.net:40003"}}}
+	p := fleetPorts(t, f, PortsOf{})
+	if got := ids(rowsOf(p, SectionPrivate)); slices.Contains(got, "infra:443") {
+		t.Fatalf("Private lists %q, the public infra:443 among them", got)
+	}
+	if got := ids(rowsOf(p, SectionPublic)); !slices.Equal(got, []string{"infra:443"}) {
+		t.Fatalf("Public lists %q", got)
+	}
+}
+
 // invariant: SPEC B5.17: a port follows its VM: while infra is down its
 // ports are greyed and said unreachable, with no verb to run.
 func TestAPortOfADownServerIsUnreachableAndRunsNothing(t *testing.T) {
