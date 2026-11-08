@@ -108,7 +108,7 @@ func (s *Session) Open(ctx context.Context, app agents.App, name, folder string,
 		labels[nameKey] = name
 	}
 	err := s.call(ctx, budget+ready*time.Second, "terminal.run", runParams{
-		Argv: argv, Name: strings.ReplaceAll(name, agents.Nth, "-"), Cwd: folder, Labels: labels,
+		Argv: argv, Name: agents.Key(name), Cwd: folder, Labels: labels,
 		NoParent: true, OutliveParent: true, Keep: true, Wait: true, Timeout: ready,
 	}, &ran)
 	if err == nil && ran.Address == "" {

@@ -152,7 +152,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 			name = agents.NameFor(d.Machine, taken)
 		case !agents.ValidName(name):
 			return agents.Agent{}, fail.New(fail.Refused, BadName, name, nil)
-		case slices.Contains(taken, name):
+		case agents.Clashes(taken, name):
 			return agents.Agent{}, fail.New(fail.Refused, NameTaken, name, nil)
 		}
 		terminal, err := d.Session.Open(ctx, app, name, in.Folder, hooks.Launch())

@@ -21,12 +21,12 @@ func ValidName(name string) bool {
 
 func NameFor(vm string, taken []string) string {
 	// invariant: a VM's first agent takes the VM's name, the next ones
-	// <vm>·<n> from 2, the first of them no agent holds.
-	if !slices.Contains(taken, vm) {
+	// <vm>·<n> from 2, the first of them whose key no agent holds.
+	if !Clashes(taken, vm) {
 		return vm
 	}
 	for n := 2; ; n++ {
-		if name := vm + Nth + strconv.Itoa(n); !slices.Contains(taken, name) {
+		if name := vm + Nth + strconv.Itoa(n); !Clashes(taken, name) {
 			return name
 		}
 	}
@@ -78,5 +78,17 @@ func Live(a Agent) bool {
 func SessionOf(name string) string {
 	// value: the journal's session of an agent station started, until its
 	// app's hook names its own: its name in a session's letters.
-	return "station-" + strings.ReplaceAll(name, Nth, "-")
+	return "station-" + Key(name)
+}
+
+func Key(name string) string {
+	// value: the name in a session's and a Herdr terminal's letters, where ·
+	// is -.
+	return strings.ReplaceAll(name, Nth, "-")
+}
+
+func Clashes(taken []string, name string) bool {
+	// invariant: SPEC B5.22: a name is taken when another's key is its own,
+	// so linux-1·2 and linux-1-2 never share a journal entry or a terminal.
+	return slices.ContainsFunc(taken, func(t string) bool { return Key(t) == Key(name) })
 }

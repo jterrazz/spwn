@@ -100,13 +100,13 @@ func boolWord(both bool) string {
 	return "neither"
 }
 
-// value: refuses a name another agent of any machine holds.
+// value: refuses a name another agent of any machine holds, in its key.
 func free(ctx context.Context, d Deps, name string) error {
 	all, err := d.Everywhere(ctx)
 	if err != nil {
 		return err
 	}
-	if slices.ContainsFunc(all, func(a agents.Agent) bool { return a.Name == name }) {
+	if slices.ContainsFunc(all, func(a agents.Agent) bool { return agents.Clashes([]string{a.Name}, name) }) {
 		return fail.New(fail.Refused, agentscalls.NameTaken, name, nil)
 	}
 	return nil
