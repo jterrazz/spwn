@@ -177,6 +177,20 @@ func TestAServerRestartingCarriesTheHeroWithItsStep(t *testing.T) {
 	equal(t, got, heroSaid{title: "Restarting infra", facts: "on mac-mini^2 | has an address | 2 of 4", link: "2 more need you | review-bot, linux-1"})
 }
 
+// invariant: a restart begins while the server is still down: from its
+// first step it is the restart, never a need folded under it nor counted.
+func TestAServerRestartingFromDownIsNeitherANeedNorCounted(t *testing.T) {
+	w := newHeroWorld().down().waiting("review-bot", "PR #42 is ready", 6*time.Minute).lease("linux-1", 23*time.Minute)
+	w.mini().VMs[0].Restart = &model.RestartWalk{Step: 1, At: heroNow}
+	got, p := said(t, w)
+	if got.title != "Restarting infra" || got.link != "2 more need you | review-bot, linux-1" {
+		t.Fatalf("hero %+v", got)
+	}
+	if b := p.Badge; b == nil || b.Needs != 2 || !b.Restarting || b.Down {
+		t.Fatalf("badge %+v", p.Badge)
+	}
+}
+
 // invariant: nothing needs you: the fleet's facts, the server's uptime
 // dropped first, then the agents at work, then whether every Mac is awake.
 func TestAFineFleetSaysItsFactsInOrderOfWhatGoesFirst(t *testing.T) {
