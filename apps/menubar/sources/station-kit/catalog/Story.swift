@@ -3,7 +3,7 @@ import Foundation
 public let storySchema = "station.story/v1"
 
 public enum StoryGroup: String, Codable, CaseIterable, Sendable {
-    case shell, home, needs, mac, workspace, server, ports, accounts, awake, sheet, alert, menu, pop, find, transition
+    case shell, home, needs, mac, workspace, agent, server, ports, accounts, awake, sheet, alert, menu, pop, find, transition
 
     public static func of(_ id: String) -> StoryGroup? {
         let head = String(id.prefix { $0 != "." })
@@ -57,6 +57,7 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var scrub: Int?
     public var pending: [String]?
     public var prOpened: [String]?
+    public var reply: String?
     public var hud: String?
     public var statusItem: Bool?
     public var pressed: Bool?

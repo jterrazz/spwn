@@ -8,6 +8,7 @@ public enum PageID {
     public static let home = "menubar"
     public static let switcher = "menubar.switcher"
     public static let machine = "menubar.machine"
+    public static let agent = "menubar.agent"
 
     // value: the watch name of one machine's page (SPEC §10.3).
     public static func of(_ machine: String) -> String { "\(Self.machine):\(machine)" }
@@ -57,6 +58,10 @@ public struct PanelState: Equatable, Sendable {
     // on a machine page, and what is unfolded there.
     public var segment: String?
     public var unfolded: [String] = []
+    // value: the agents whose PR was opened from their page, and the reply
+    // being typed: the client's own until it is sent.
+    public var prOpened: [String] = []
+    public var reply = ""
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -289,7 +294,7 @@ public struct Popover: View {
     // with the way back (its own header).
     @ViewBuilder
     var header: some View {
-        if let pushed = state.pushed, pushed.id == PageID.machine {
+        if let pushed = state.pushed, pushed.id == PageID.machine || pushed.id == PageID.agent {
             EmptyView()
         } else {
             HStack(alignment: .center, spacing: Token.Gap.pair) {

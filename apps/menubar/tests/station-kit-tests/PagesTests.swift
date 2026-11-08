@@ -53,9 +53,9 @@ final class PagesTests: XCTestCase {
     // terminal, and each draws offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
-        XCTAssertEqual(linux.sections?.compactMap(\.id), ["machine", "activity", "inside", "ports", "shared"])
-        XCTAssertEqual(linux.section("machine")?.caption.map { $0.compactMap(\.text) }, ["Workspace VM", "Throwaway", "on This Mac"])
-        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "Share a port", "Open in Terminal"])
+        XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "port-links", "footnote", "activity", "ports", "shared"])
+        XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["throwaway", "on This Mac", "no agent running"])
+        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Share a port", "Open in Terminal"])
         let infra = try Tree.page("menubar.vm.infra")
         XCTAssertEqual(infra.sections?.compactMap(\.id), ["machine", "up", "health", "activity", "server"])
         XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
@@ -172,11 +172,11 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(frames.last?.input, ["pages": ["menubar.machine:linux-1"]])
     }
 
-    // invariant: MB-15: Open in Terminal on linux-1's page runs station on
-    // linux-1 in a new terminal, and no call.
+    // invariant: MB-15: Open in Terminal on linux-1's page (⌘↩, SPEC A4)
+    // runs station on linux-1 in a new terminal, and no call.
     func testOpenInTerminalTargetsMachine() async throws {
         let open = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("open-station"))
-        XCTAssertEqual(open.key, "cmd+t")
+        XCTAssertEqual(open.key, "cmd+enter")
         let calls = Recorded()
         let status = await ActionRunner(executable: "/u/bin/station", socket: "/nonexistent", launcher: RecordingLauncher(calls: calls)).run(open)
         XCTAssertNil(status)

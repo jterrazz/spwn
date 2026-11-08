@@ -34,6 +34,15 @@ public struct MachineHeader: View {
         return line
     }
 
+    // value: the page's mark: a symbol, or the agent's own.
+    static func image(_ glyph: Glyph) -> Image? {
+        switch GlyphView.drawn(glyph) {
+        case let .symbol(name): Image(systemName: name)
+        case let .custom(name): Image(name, bundle: .module)
+        default: nil
+        }
+    }
+
     public var body: some View {
         let m = Token.Metric.PageHeader.self
         VStack(alignment: .leading, spacing: 0) {
@@ -50,9 +59,9 @@ public struct MachineHeader: View {
                 .padding(.bottom, m.backBottom)
             }
             HStack(spacing: m.titleGap) {
-                if let glyph = page.header?.glyph, case let .symbol(name) = GlyphView.drawn(glyph) {
-                    Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
-                        .foregroundStyle(tokens.color.t2)
+                if let glyph = page.header?.glyph, let image = Self.image(glyph) {
+                    image.font(.system(size: m.glyph, weight: .regular))
+                        .foregroundStyle(glyph.signal == "waits" || glyph.signal == "done" ? tokens.signal(glyph.signal) : tokens.color.t2)
                         .frame(width: m.glyphSlot)
                 }
                 Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
