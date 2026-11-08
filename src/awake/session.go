@@ -19,6 +19,9 @@ type Request struct {
 	// value: the term as the owner said it (4h, until 18:00), for the words
 	// of its refusal.
 	Words string
+	// value: the VM whose agent the keep-awake follows: it ends when that
+	// agent leaves working, at the latest after Longest.
+	Run string
 }
 
 type Session struct {
@@ -30,6 +33,8 @@ type Session struct {
 	// value: the term the owner asked for last (1 h, 4 h, or the time
 	// left until the hour picked): what Keep awake for… shows chosen.
 	For time.Duration `json:"for,omitempty"`
+	// value: the VM whose agent it follows (until linux-1 is done).
+	Run string `json:"run,omitempty"`
 }
 
 type End struct {
@@ -54,6 +59,9 @@ type View struct {
 	// value: the policy's assertion is held now; false while the battery
 	// guard lets it go.
 	NeverHeld bool `json:"never_held"`
+	// value: SPEC B5.15: macOS told this Mac it is going to sleep, and it
+	// has not woken since.
+	Sleeping bool `json:"sleeping,omitempty"`
 }
 
 type Slept struct {
@@ -89,6 +97,9 @@ type Report struct {
 	NeverSince  time.Time
 	NeverHeld   bool
 	Servers     []string
+	// value: SPEC B5.14: the workspaces running on it now, which pause
+	// while it sleeps; a stopped one is not listed.
+	Pauses []string
 }
 
 func (r Report) Mode() Mode { return ModeOf(r.Now, r.NeverSleeps, r.Session, r.LastEnd) }

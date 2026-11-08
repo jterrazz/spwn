@@ -118,6 +118,8 @@ func macRow(label string, h model.MacView, thisVersion string, now time.Time) pa
 	row := page.Row{ID: h.Name, Label: h.Name, Short: label, Mark: page.OK}
 	state, detail := page.Text("Online"), page.None()
 	switch {
+	case model.Reach(h) == model.ReachAsleep && !h.Answered.IsZero():
+		row.Mark, row.Reason, state = page.Absent, page.Stopped, page.List(page.Text("Asleep"), page.Text("last answer "+page.LastAnswer(h.Answered, now)))
 	case !h.Reachable && !h.Answered.IsZero():
 		row.Mark, row.Reason, state = page.Broken, page.Unreachable, page.List(page.Text("Unreachable"), page.Text("last answer "+page.LastAnswer(h.Answered, now)))
 	case !h.Reachable:

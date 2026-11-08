@@ -82,6 +82,11 @@ type Machines interface {
 	Unlock(ctx context.Context, name string, interactive bool) error
 	// value: whether the Mac's station answers now.
 	Answers(ctx context.Context, name string) bool
+	// value: sends that Mac's Wake-on-LAN packet; with tell, arms the one
+	// notice of its answer.
+	Wake(ctx context.Context, name string, tell bool) error
+	// value: arms the one notice of that Mac's answer, nothing sent.
+	Remind(ctx context.Context, name string) error
 	// value: waits, in the budget of a Mac's boot, for its station to answer.
 	AwaitAnswer(ctx context.Context, name string) bool
 	// value: the VMs of that Mac, as it lists them now.
@@ -100,6 +105,6 @@ func All(d Deps) []call.Handler {
 	return []call.Handler{
 		call.BindWatch(List, d), call.Bind(CreateWorkspace, d), call.Bind(CreateServer, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(Delete, d),
 		call.Bind(Restart, d), call.Bind(RestartMac, d), call.Bind(Add, d), call.Bind(Forget, d), call.Bind(Unlock, d), call.Bind(SSH, d), call.Bind(Edit, d),
-		call.Bind(Log, d), call.Bind(Cleanup, d),
+		call.Bind(Log, d), call.Bind(Cleanup, d), call.Bind(Wake, d), call.Bind(Remind, d),
 	}
 }

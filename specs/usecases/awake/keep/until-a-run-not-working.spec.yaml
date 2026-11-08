@@ -1,0 +1,12 @@
+description: 'awake --until-done is refused for a VM no agent works in, and nothing is held'
+env: two-macs
+runs:
+    - command: 'awake --until-done api'
+      exit: 1
+      stderr: |
+          Error: no agent is working in api
+          Hint: station awake 4h
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null

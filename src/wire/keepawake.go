@@ -30,7 +30,7 @@ func (m machine) awakeWaker() *awakecalls.Waker {
 		},
 		Awake: func(ctx context.Context, r awake.Request) (awake.Awoken, error) {
 			var a awake.Awoken
-			in := engine.AwakeIn{Lid: r.Lid, Battery: r.Battery, For: int(r.For / time.Second), By: r.By}
+			in := engine.AwakeIn{Lid: r.Lid, Battery: r.Battery, For: int(r.For / time.Second), By: r.By, Run: r.Run}
 			if !r.Until.IsZero() {
 				in.Until = &r.Until
 			}

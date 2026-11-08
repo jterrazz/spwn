@@ -44,7 +44,8 @@
                     "Model": "Mac16,12",
                     "Chip": "Apple M4",
                     "Memory": 17179869184,
-                    "CPUs": 10
+                    "CPUs": 10,
+                    "Ether": "a4:83:e7:1c:20:9f"
                 }
             }
         }

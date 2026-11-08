@@ -83,3 +83,19 @@ func readReport(raw json.RawMessage) []agents.Agent {
 	_ = json.Unmarshal(raw, &r)
 	return r
 }
+
+// value: an agent of that VM is at work now, as the engine last heard its
+// report: what a keep-awake that follows a run holds for.
+func (d *Engine) working(vm string) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	for _, v := range d.vms {
+		if v.rec.Name != vm {
+			continue
+		}
+		return slices.ContainsFunc(v.agents, func(a agents.Agent) bool {
+			return a.State == agents.Working || a.State == agents.Starting
+		})
+	}
+	return false
+}

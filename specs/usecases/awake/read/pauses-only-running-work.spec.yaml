@@ -1,0 +1,17 @@
+description: 'each Mac names what pauses while it sleeps: its servers, and only the workspaces running now'
+env: two-macs
+runs:
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[] | {name, hosts_servers, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-pro","hosts_servers":[],"pauses":["linux-1"]}
+          {"name":"jterrazz-mac-mini","hosts_servers":["infra"],"pauses":[]}
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[] | {name, hosts_servers, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-pro","hosts_servers":[],"pauses":[]}
+          {"name":"jterrazz-mac-mini","hosts_servers":["infra"],"pauses":[]}

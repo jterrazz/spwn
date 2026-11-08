@@ -19,6 +19,7 @@ const (
 	ReasonLowPower = LowPower
 	ReasonLid      = Lid
 	ReasonUntil    = "until"
+	ReasonRun      = "run"
 	ReasonSleep    = "sleep"
 	ReasonStop     = "stop"
 	ReasonQuit     = "quit"
@@ -44,6 +45,10 @@ type GuardError struct {
 }
 
 func (e *GuardError) Error() string { return "Awake stays off: " + e.Words }
+
+type RunError struct{ VM string }
+
+func (e *RunError) Error() string { return "no agent is working in " + e.VM }
 
 type UnsupportedError struct{}
 

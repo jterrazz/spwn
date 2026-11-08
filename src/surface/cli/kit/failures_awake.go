@@ -15,7 +15,10 @@ func awakeFailure(err error) (*fail.Error, bool) {
 	var none *awake.UnsupportedError
 	var guard *awake.GuardError
 	var down *awake.EngineDownError
+	var run *awake.RunError
 	switch {
+	case errors.As(err, &run):
+		return failed(run.Error(), "station awake 4h", err), true
 	case errors.As(err, &rng):
 		if rng.Long {
 			return usage(rng.Error(), "station awake 24h"), true

@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/src/engine"
 
 	model "github.com/jterrazz/studio-station/src/machines"
 	pageawake "github.com/jterrazz/studio-station/src/pages/awake"
@@ -26,6 +27,7 @@ func (m machine) awakeDeps() awakecalls.Deps {
 	return awakecalls.Deps{
 		Holder: awakeKeeper{m.awakeWaker()}, Mac: m.profile.Ref.Name, Label: m.label(m.profile.Ref.Name), Caps: m.profile.Caps,
 		Servers:     func(context.Context) []string { return m.servers() },
+		Running:     m.runningWorkspaces,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 	}
 }
@@ -39,6 +41,27 @@ func (m machine) servers() []string {
 	var out []string
 	for _, r := range records {
 		if r.Lifetime == model.AlwaysOn {
+			out = append(out, r.Name)
+		}
+	}
+	slices.Sort(out)
+	return out
+}
+
+// value: the workspaces this Mac runs now, as its engine says: what
+// pauses while it sleeps.
+func (m machine) runningWorkspaces(ctx context.Context) []string {
+	records, err := m.machines(false).Records()
+	if err != nil {
+		return nil
+	}
+	live, err := m.macEngine().VMs(ctx)
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, r := range records {
+		if r.Lifetime != model.AlwaysOn && live[r.Name].State == engine.StateRunning {
 			out = append(out, r.Name)
 		}
 	}

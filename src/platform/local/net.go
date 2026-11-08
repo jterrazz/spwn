@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -42,4 +43,46 @@ func (network) do(ctx context.Context, method, url string, header map[string]str
 	defer func() { _ = resp.Body.Close() }()
 	body, err = io.ReadAll(resp.Body)
 	return resp.StatusCode, body, err
+}
+
+func (network) Broadcast(ctx context.Context, port int, payload []byte) error {
+	lc := net.ListenConfig{Control: func(_, _ string, c syscall.RawConn) error {
+		var err error
+		if cerr := c.Control(func(fd uintptr) {
+			err = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1)
+		}); cerr != nil {
+			return cerr
+		}
+		return err
+	}}
+	conn, err := lc.ListenPacket(ctx, "udp4", ":0")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+	_, err = conn.WriteTo(payload, &net.UDPAddr{IP: net.IPv4bcast, Port: port})
+	return err
+}
+
+func (network) HardwareAddress(ip string) string {
+	want := net.ParseIP(ip)
+	if want == nil {
+		return ""
+	}
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return ""
+	}
+	for _, i := range ifaces {
+		addrs, err := i.Addrs()
+		if err != nil || len(i.HardwareAddr) == 0 {
+			continue
+		}
+		for _, a := range addrs {
+			if n, ok := a.(*net.IPNet); ok && n.IP.Equal(want) {
+				return i.HardwareAddr.String()
+			}
+		}
+	}
+	return ""
 }

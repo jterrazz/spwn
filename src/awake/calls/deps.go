@@ -19,6 +19,8 @@ type Deps struct {
 	Caps  machine.Capabilities
 	// value: the servers this Mac hosts, by name.
 	Servers func(ctx context.Context) []string
+	// value: the workspaces running on this Mac now, by name.
+	Running func(ctx context.Context) []string
 	// value: the never_sleeps preference of this Mac.
 	NeverSleeps func() bool
 }
@@ -57,6 +59,13 @@ func (d Deps) servers(ctx context.Context) []string {
 		return nil
 	}
 	return d.Servers(ctx)
+}
+
+func (d Deps) running(ctx context.Context) []string {
+	if d.Running == nil {
+		return nil
+	}
+	return d.Running(ctx)
 }
 
 func All(d Deps) []call.Handler {

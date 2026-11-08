@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
+	"github.com/jterrazz/studio-station/src/awake"
+	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/images"
 	"github.com/jterrazz/studio-station/src/platform/local"
 
@@ -22,6 +24,7 @@ import (
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/src/machines/adapter/openssh"
+	"github.com/jterrazz/studio-station/src/machines/adapter/udp"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	settingsmacos "github.com/jterrazz/studio-station/src/settings/adapter/macos"
@@ -37,11 +40,13 @@ import (
 	machineslog "github.com/jterrazz/studio-station/src/surface/cli/machines/log"
 	machinespipe "github.com/jterrazz/studio-station/src/surface/cli/machines/pipe"
 	machinesprobe "github.com/jterrazz/studio-station/src/surface/cli/machines/probe"
+	machinesremind "github.com/jterrazz/studio-station/src/surface/cli/machines/remind"
 	machinesrestart "github.com/jterrazz/studio-station/src/surface/cli/machines/restart"
 	machinesstart "github.com/jterrazz/studio-station/src/surface/cli/machines/start"
 	machinesstop "github.com/jterrazz/studio-station/src/surface/cli/machines/stop"
 	machinessupervise "github.com/jterrazz/studio-station/src/surface/cli/machines/supervise"
 	machinesunlock "github.com/jterrazz/studio-station/src/surface/cli/machines/unlock"
+	machineswake "github.com/jterrazz/studio-station/src/surface/cli/machines/wake"
 	overviewcmd "github.com/jterrazz/studio-station/src/surface/cli/overview"
 )
 
@@ -67,7 +72,15 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Asleep:    m.asleep,
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
+		Waker:     m.waker(),
 	})
+}
+
+func (m machine) waker() contract.Waker {
+	if m.world != nil {
+		return m.world.waker()
+	}
+	return udp.New(m.sys.Net)
 }
 
 // value: this Mac's address on your LAN, as it reads it (its world's in
@@ -87,13 +100,19 @@ func (m machine) lanAddress(ctx context.Context) string {
 }
 
 // value: this Mac runs on battery with its lid closed, as its power reads
-// (its world's in the spec build).
-func (m machine) asleep(context.Context) bool {
-	if m.powerPort == nil || !m.profile.Caps.Lid {
+// (its world's in the spec build), or its engine heard macOS say it is
+// going to sleep.
+func (m machine) asleep(ctx context.Context) bool {
+	if m.powerPort == nil {
 		return false
 	}
-	r, err := m.powerPort.Read()
-	return err == nil && r.LidClosedOnBattery()
+	if r, err := m.powerPort.Read(); err == nil && m.profile.Caps.Lid && r.LidClosedOnBattery() {
+		return true
+	}
+	ctx, cancel := context.WithTimeout(ctx, lanBudget)
+	defer cancel()
+	var v awake.View
+	return m.engineAPI().do(ctx, engine.CallAwakeView, nil, &v) == nil && v.Sleeping
 }
 
 // value: what this Mac is, as it reads itself (its world's in the spec
@@ -104,6 +123,9 @@ func (m machine) hardware(ctx context.Context) coremachine.Hardware {
 		self = m.world.self()
 	}
 	_, _, _, hw, _ := self.Read(ctx)
+	if hw.Ether == "" {
+		hw.Ether = m.sys.Net.HardwareAddress(m.lanAddress(ctx))
+	}
 	return hw
 }
 
@@ -174,6 +196,8 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		machinesadd.Command(machinesadd.Deps{ThisMachine: m.where}, env),
 		machinesforget.Command(machinesforget.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesunlock.Command(machinesunlock.Deps{Names: vms.Names, ThisMachine: m.where}, env),
+		machineswake.Command(machineswake.Deps{Names: vms.Names, ThisMachine: m.where}, env),
+		machinesremind.Command(machinesremind.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinessupervise.Command(env),
 		machinespipe.Command(machinespipe.Deps{Machines: vmPipe{vms, m.sys.Sockets}}, env),
 	)

@@ -39,6 +39,9 @@ type MacRecord struct {
 	Hardware *machine.Hardware `json:"hardware,omitempty"`
 	Laptop   bool              `json:"laptop,omitempty"`
 	Asleep   bool              `json:"asleep,omitempty"`
+	// value: SPEC B5.14: the owner asked to be told when it answers again;
+	// the engine tells once and clears it.
+	TellBack bool `json:"tell_back,omitempty"`
 }
 
 type SeenVM struct {

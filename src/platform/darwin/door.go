@@ -24,6 +24,9 @@ type Door interface {
 	// reading may have moved, until ctx ends; nil where there is no power
 	// management.
 	Ticks(ctx context.Context) <-chan struct{}
+	// value: macOS told this Mac it is going to sleep, and it has not woken
+	// since.
+	Sleeping() bool
 }
 
 func ticks(ctx context.Context, every time.Duration, wake <-chan struct{}) <-chan struct{} {
@@ -76,6 +79,8 @@ func (p *macPower) SetClamshellSleep(disabled bool) error {
 
 func (p *macPower) Read() (Reading, error) { return p.iokit.Read(), nil }
 
+func (p *macPower) Sleeping() bool { return SleepAnnounced() }
+
 func (p *macPower) Ticks(ctx context.Context) <-chan struct{} {
 	return ticks(ctx, watchEvery, PowerSourcesChanged(ctx))
 }
@@ -89,6 +94,8 @@ func (noPower) SetClamshellSleep(bool) error { return ErrPowerUnsupported }
 func (noPower) Read() (Reading, error) { return Reading{}, ErrPowerUnsupported }
 
 func (noPower) Ticks(context.Context) <-chan struct{} { return nil }
+
+func (noPower) Sleeping() bool { return false }
 
 func home(vars map[string]string) string {
 	if h := vars["HOME"]; h != "" {

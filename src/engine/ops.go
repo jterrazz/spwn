@@ -64,4 +64,6 @@ type AwakeIn struct {
 	By  string `json:"by,omitempty"`
 	// value: the end asked (until 17:00), which wins over For.
 	Until *time.Time `json:"until,omitempty"`
+	// value: the VM whose agent the keep-awake follows.
+	Run string `json:"run,omitempty"`
 }

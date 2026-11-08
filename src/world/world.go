@@ -128,6 +128,9 @@ type Mac struct {
 	SSH *SSH `json:"ssh,omitempty"`
 	// value: station's own records kept beside the preferences, by store.
 	Stores *Stores `json:"stores,omitempty"`
+	// value: the hardware address each Wake-on-LAN packet this Mac sent
+	// named, in order.
+	WakeSent []string `json:"wake_sent,omitempty"`
 }
 
 type Self struct {
@@ -143,6 +146,8 @@ type Power struct {
 	Clamshell bool     `json:"clamshell,omitempty"`
 	// value: how many times the display was put to sleep.
 	DisplaySleeps int `json:"display_sleeps,omitempty"`
+	// value: macOS told this Mac it is going to sleep, and it has not woken.
+	Sleeping bool `json:"sleeping,omitempty"`
 }
 
 type Node struct {

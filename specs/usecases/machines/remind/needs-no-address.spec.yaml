@@ -1,0 +1,11 @@
+description: 'a Mac never heard has no hardware address, yet its answer can still be told: nothing is sent'
+env: mini-never-answered
+runs:
+    - command: 'machines remind mac-mini'
+      exit: 0
+      stdout: |
+          ●	mac-mini	you are told once it answers
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+      exit: 0
+      stdout: |
+          null

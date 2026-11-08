@@ -102,6 +102,13 @@ type Options struct {
 	// value: the jobs of engine/jobs, each run at every tick: each decides
 	// by its own schedule whether it is due.
 	Jobs []Tick
+	// value: SPEC B5.14: the Macs the owner asked to be told of once they
+	// answer again, whether one answers now, and the ask cleared once told;
+	// nil tells of none.
+	TellBack func() map[string]bool
+	Answers  func(ctx context.Context, mac string) bool
+	ToldBack func(mac string) error
+	Label    func(mac string) string
 }
 
 type Engine struct {
@@ -113,9 +120,11 @@ type Engine struct {
 	st     Stores
 	o      Options
 
-	mu   sync.Mutex
-	vms  map[string]*vmState
-	svcs map[string]*svc
+	mu  sync.Mutex
+	vms map[string]*vmState
+	// value: when the Macs the owner waits on were last asked.
+	askedBack time.Time
+	svcs      map[string]*svc
 	// value: every address each running VM listens on, as its guest
 	// reported it, shared or not.
 	heard map[string][]ports.Listener
@@ -350,6 +359,7 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	d.sweepShares(ctx)
 	d.watchExposure(ctx)
 	d.awakeJob.Tick()
+	d.tellBack(ctx)
 	d.watchState()
 	for _, job := range d.o.Jobs {
 		job(ctx)

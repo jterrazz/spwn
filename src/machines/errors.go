@@ -188,6 +188,12 @@ type BadNameError struct{ Name string }
 
 func (e *BadNameError) Error() string { return "\"" + e.Name + "\" is not a valid name" }
 
+type NoHardwareAddressError struct{ Name string }
+
+func (e *NoHardwareAddressError) Error() string {
+	return e.Name + " never said its hardware address: it answers once first"
+}
+
 type UnreachableError struct{ Name string }
 
 func (e *UnreachableError) Error() string { return e.Name + " does not answer" }

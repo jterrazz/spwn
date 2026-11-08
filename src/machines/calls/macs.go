@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jterrazz/studio-station/src/machines/contract"
 
@@ -81,6 +82,64 @@ var Unlock = call.Call[Deps, UnlockIn, machines.Unlocked]{
 			return machines.Unlocked{}, err
 		}
 		return machines.Unlocked{Name: in.Name, Answers: d.Machines.AwaitAnswer(ctx, mac)}, nil
+	},
+}
+
+type WakeIn struct {
+	Name string
+	// value: tell the owner once, when it answers again.
+	Tell bool
+}
+
+var Wake = call.Call[Deps, WakeIn, machines.Woken]{
+	Name: "machines.wake", Where: call.InProcess, Applies: machine.Anywhere,
+	Run: func(ctx context.Context, d Deps, in WakeIn, _ call.Progress) (machines.Woken, error) {
+		// invariant: SPEC B5.14: a Mac is woken by a Wake-on-LAN packet sent
+		// from this Mac to the hardware address its last answer said; one that
+		// answers already is left as it is, and one never heard has no
+		// address to send to.
+		if err := d.Machines.CheckMac(); err != nil {
+			return machines.Woken{}, err
+		}
+		mac, err := d.Machines.CheckRemoteMac(in.Name, "wake")
+		if err != nil {
+			return machines.Woken{}, err
+		}
+		if d.Machines.Answers(ctx, mac) {
+			return machines.Woken{Name: in.Name, Already: true}, nil
+		}
+		var none *machines.NoHardwareAddressError
+		if err := d.Machines.Wake(ctx, mac, in.Tell); errors.As(err, &none) {
+			return machines.Woken{}, &machines.NoHardwareAddressError{Name: in.Name}
+		} else if err != nil {
+			return machines.Woken{}, err
+		}
+		return machines.Woken{Name: in.Name, Sent: true, Tell: in.Tell}, nil
+	},
+}
+
+type RemindIn struct{ Name string }
+
+var Remind = call.Call[Deps, RemindIn, machines.Reminded]{
+	Name: "machines.remind", Where: call.InProcess, Applies: machine.Anywhere,
+	Run: func(ctx context.Context, d Deps, in RemindIn, _ call.Progress) (machines.Reminded, error) {
+		// invariant: SPEC B5.14: "Tell me when it wakes" arms the one mac_back
+		// notice and sends nothing, so it needs no hardware address; a Mac
+		// that answers already is awake, and nothing is armed.
+		if err := d.Machines.CheckMac(); err != nil {
+			return machines.Reminded{}, err
+		}
+		mac, err := d.Machines.CheckRemoteMac(in.Name, "remind")
+		if err != nil {
+			return machines.Reminded{}, err
+		}
+		if d.Machines.Answers(ctx, mac) {
+			return machines.Reminded{Name: in.Name, Already: true}, nil
+		}
+		if err := d.Machines.Remind(ctx, mac); err != nil {
+			return machines.Reminded{}, err
+		}
+		return machines.Reminded{Name: in.Name}, nil
 	},
 }
 

@@ -1,0 +1,21 @@
+description: 'an asleep Mac is woken by one Wake-on-LAN packet to the address it last said, and answers'
+env: air-asleep
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].reach'''
+      exit: 0
+      stdout: |
+          "answers"
+    - command: 'world offline jterrazz-macbook-air'
+      exit: 0
+    - command: 'machines wake macbook-air'
+      exit: 0
+      stdout: |
+          ●	macbook-air	wake sent · it answers in a minute or so
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].wake_sent'' world.json'
+      exit: 0
+      stdout: |
+          ["a4:83:e7:1c:20:9f"]
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reachable, reach}'''
+      exit: 0
+      stdout: |
+          {"reachable":true,"reach":"answers"}

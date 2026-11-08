@@ -11,3 +11,8 @@ runs:
       exit: 0
       stdout: |
           {"reachable":false,"reach":"asleep","hardware":"MacBook Air"}
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ○	jterrazz-macbook-air	Mac	jterrazz-macbook-air	Asleep · last answer 10:00

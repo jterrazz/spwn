@@ -85,6 +85,10 @@ type github map[string]string
 
 func (g github) Dial(context.Context, string, int, time.Duration) bool { return false }
 
+func (g github) Broadcast(context.Context, int, []byte) error { return nil }
+
+func (g github) HardwareAddress(string) string { return "" }
+
 func (g github) Get(_ context.Context, url string, _ map[string]string) (status int, body []byte, err error) {
 	if g == nil {
 		return 0, nil, errors.New("connection refused")

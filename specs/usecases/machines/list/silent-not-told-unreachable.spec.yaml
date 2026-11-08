@@ -1,0 +1,15 @@
+description: 'a desktop Mac that goes silent with no will-sleep heard is unreachable, a look it needs'
+env: two-macs
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[] | select(.name == "jterrazz-mac-mini") | {reach}'''
+      exit: 0
+      stdout: |
+          {"reach":"answers"}
+    - command: 'world offline jterrazz-mac-mini'
+      exit: 0
+    - command: 'world advance 2m'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[] | select(.name == "jterrazz-mac-mini") | {reachable, reach}'''
+      exit: 0
+      stdout: |
+          {"reachable":false,"reach":"unreachable"}

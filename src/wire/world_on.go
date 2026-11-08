@@ -317,6 +317,7 @@ func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 }
 func (m *worldMac) sshConfig() contract.SSHConfig { return machinesfake.SSHConfigOf(m.run.w, m.name) }
 func (m *worldMac) unlocker() contract.Unlocker   { return machinesfake.MacsOf(m.run.w) }
+func (m *worldMac) waker() contract.Waker         { return machinesfake.WakerOf(m.run.w, m.name) }
 func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.run.w, m.name) }
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }

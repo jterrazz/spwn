@@ -407,6 +407,13 @@
       "out": "LogOut"
     },
     {
+      "name": "machines.remind",
+      "schema": "station.machines.remind/v1",
+      "where": "in-process",
+      "in": "RemindIn",
+      "out": "Reminded"
+    },
+    {
       "name": "machines.restart",
       "schema": "station.machines.restart/v1",
       "where": "at-target",
@@ -461,6 +468,13 @@
       "where": "in-process",
       "in": "UnlockIn",
       "out": "Unlocked"
+    },
+    {
+      "name": "machines.wake",
+      "schema": "station.machines.wake/v1",
+      "where": "in-process",
+      "in": "WakeIn",
+      "out": "Woken"
     },
     {
       "name": "overview.read",

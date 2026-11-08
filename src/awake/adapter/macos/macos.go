@@ -65,6 +65,8 @@ func (p *Power) Hold(name string) (func(), error) {
 	return release, unsupported(err)
 }
 
+func (p *Power) Sleeping() bool { return p.door.Sleeping() }
+
 func (p *Power) Clamshell(held bool) error { return unsupported(p.door.SetClamshellSleep(held)) }
 
 func (p *Power) DisplaySleepNow(ctx context.Context) error {
@@ -85,8 +87,10 @@ func (p *Power) Watch(ctx context.Context) <-chan awake.Event {
 	// is closed at once; else each tick compares a reading with the last one and
 	// sends one Event per field that moved, so a falling percent ends a session
 	// within the second it is posted; Low Power Mode is read by the guard loop's
-	// own poll.
+	// own poll. A watch also starts hearing macOS's will-sleep, so the engine
+	// that watches knows from its start when its Mac goes to sleep.
 	out := make(chan awake.Event, 8)
+	p.door.Sleeping()
 	ticks := p.door.Ticks(ctx)
 	if ticks == nil {
 		close(out)

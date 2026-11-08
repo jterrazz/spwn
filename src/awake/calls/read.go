@@ -15,12 +15,12 @@ var Read = call.Watch[Deps, ReadIn, awake.Report]{
 		if err := d.Holder.Check(); err != nil {
 			return nil, err
 		}
-		servers := d.servers(ctx)
+		servers, pauses := d.servers(ctx), d.running(ctx)
 		out := make(chan awake.Report)
 		go func() {
 			defer close(out)
 			for r := range d.Holder.Read(ctx) {
-				r.Mac, r.Caps, r.Servers = d.Mac, d.Caps, servers
+				r.Mac, r.Caps, r.Servers, r.Pauses = d.Mac, d.Caps, servers, pauses
 				select {
 				case out <- r:
 				case <-ctx.Done():
