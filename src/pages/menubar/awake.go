@@ -238,7 +238,8 @@ func flags(lid, battery bool) map[string]string {
 // invariant: a keep-awake keeps the switches as they are; a switch keeps
 // the end the keep-awake holds until, or starts the one Until offers. The
 // term in force is the one picked; one that follows a run picks none.
-// Until says the time it holds until, else the one it offers first.
+// Until says the time it holds until when it is the term in force, else
+// the one its form offers first.
 func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	if zone == nil {
 		zone = time.UTC
@@ -262,10 +263,11 @@ func keeps(r awake.Report, now time.Time, zone *time.Location) []page.Action {
 	field := untilField(now, zone)
 	end := field.Default
 	until := "Until " + optionLabel(field, end)
-	if held && !follows {
+	untilPicked := held && !follows && !picked
+	if untilPicked {
 		until = "Until " + r.Session.Until.In(zone).Format("15:04")
 	}
-	out = append(out, page.Action{ID: ActionUntil, Label: until, On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: held && !follows && !picked,
+	out = append(out, page.Action{ID: ActionUntil, Label: until, On: page.OnRow, Rows: rows, Priority: 1, Mutates: true, Picked: untilPicked,
 		Form: &page.Form{Title: "Keep awake until", Fields: []page.Field{field}}, Run: &page.Run{Call: CallKeepAwake, In: flags(lid, battery)}})
 	term := func(in map[string]string) map[string]string {
 		if held {

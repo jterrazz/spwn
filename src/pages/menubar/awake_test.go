@@ -131,6 +131,37 @@ func TestAwakeUntilARunSaysTheRunItFollows(t *testing.T) {
 	}
 }
 
+func pickerOf(p page.Page) (labels, picked []string) {
+	for _, a := range p.Actions {
+		if strings.HasPrefix(a.ID, "keep") && a.ID != ActionKeepOn {
+			labels = append(labels, a.Label)
+			if a.Picked {
+				picked = append(picked, a.Label)
+			}
+		}
+	}
+	return labels, picked
+}
+
+// invariant: SPEC A9 2-11: while a 4 hr term holds, the picker still
+// reads 1 hr, 4 hr and Until 18:00, with 4 hr picked: Until offers the
+// hour its form opens on, not the end of the term in force. Only an
+// Until in force says the hour it holds until.
+func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	held := func(s *awake.Session) page.Page {
+		return awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Caps: machine.Capabilities{Engine: true}, Session: s}})
+	}
+	labels, picked := pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(4 * time.Hour), For: 4 * time.Hour}))
+	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"4 hr"}) {
+		t.Fatalf("a held 4 hr term offers %q with %q picked, want %q with 4 hr", labels, picked, want)
+	}
+	labels, picked = pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(150 * time.Minute)}))
+	if want := []string{"1 hr", "4 hr", "Until 13:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"Until 13:00"}) {
+		t.Fatalf("an Until 13:00 in force offers %q with %q picked, want %q", labels, picked, want)
+	}
+}
+
 // invariant: SPEC A9 1-11: the pause line names only the running work,
 // and the page has no footer.
 func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
@@ -159,6 +190,9 @@ func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
 	row := sectionOf(p, "mac-mini").Items[0].Row
 	if row.Label != "Never sleeps" || row.Detail.Text != "hosts infra, which pauses if it sleeps" || row.Verb != ActionChange+"mac-mini" {
 		t.Fatalf("mac-mini reads %q, %q, verb %q", row.Label, row.Detail.Text, row.Verb)
+	}
+	if len(row.Cells) != 1 || row.Cells[0].Kind != page.KindOn {
+		t.Fatalf("mac-mini's Never sleeps switch reads %+v, want on", row.Cells)
 	}
 	air := sectionOf(p, "macbook-air").Items[0].Row
 	words := make([]string, 0, len(air.Detail.Items))
