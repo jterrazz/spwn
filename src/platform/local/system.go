@@ -96,8 +96,8 @@ type Env interface {
 type Net interface {
 	Dial(ctx context.Context, mac string, port int, timeout time.Duration) bool
 	Get(ctx context.Context, url string, header map[string]string) (status int, body []byte, err error)
-	// value: one UDP datagram broadcast on every LAN this Mac is on
-	// (255.255.255.255), to port.
+	// value: one UDP datagram broadcast to 255.255.255.255, port: macOS sends
+	// it out of the interface of the default route only.
 	Broadcast(ctx context.Context, port int, payload []byte) error
 	// value: the hardware address of the interface that holds ip, as
 	// aa:bb:cc:dd:ee:ff; empty when none does.
