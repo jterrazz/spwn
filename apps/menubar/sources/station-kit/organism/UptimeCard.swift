@@ -17,11 +17,11 @@ public struct UptimeCard: View {
         let ends = section.notes
         Card(flush: false) {
             HStack(alignment: .firstTextBaseline) {
-                Text(section.title ?? "").font(Token.Role.serviceTitle.font).foregroundStyle(tokens.tone(Token.Role.serviceTitle.tone))
+                Text(section.title ?? "").font(Token.Role.cardTitle.font).foregroundStyle(tokens.tone(Token.Role.cardTitle.tone))
                 Spacer(minLength: 0)
                 Text(FactsLine.words(section.caption ?? [], now: now))
-                    .font(Token.Role.serviceValue.font)
-                    .foregroundStyle(tokens.tone(Token.Role.serviceValue.tone))
+                    .font(Token.Role.cardValue.font)
+                    .foregroundStyle(tokens.tone(Token.Role.cardValue.tone))
             }
             .lineLimit(1)
             UptimeCells(uptime?.days ?? []).padding(.top, m.cellsTop)
@@ -31,7 +31,7 @@ public struct UptimeCard: View {
                     Spacer(minLength: 0)
                     Text(ends[1])
                 }
-                .font(Token.Role.serviceSub.font)
+                .font(Token.Role.cardSub.font)
                 .foregroundStyle(tokens.color.t3)
                 .lineLimit(1)
                 .padding(.top, m.endsTop)

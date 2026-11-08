@@ -19,10 +19,10 @@ public struct LogCard: View {
 
     public var body: some View {
         Card(flush: false) {
-            Text(section.title ?? "").font(Token.Role.serviceTitle.font).foregroundStyle(tokens.tone(Token.Role.serviceTitle.tone))
+            Text(section.title ?? "").font(Token.Role.cardTitle.font).foregroundStyle(tokens.tone(Token.Role.cardTitle.tone))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, Token.Metric.Service.subTop * 3)
+                .padding(.bottom, Token.Metric.Latency.subTop * 3)
             if let log { LogLines(log, more: RowView.action(log.more, in: actions), run: run) }
         }
     }

@@ -25,7 +25,7 @@
         },
         {
           "kind": "text",
-          "text": "restarting…"
+          "text": "restarting"
         },
         {
           "kind": "text",
@@ -55,7 +55,13 @@
             "head": {
               "id": "health",
               "mark": "ok",
-              "label": "Restarting · step 4 of 4",
+              "label": "Restarting",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "step 4 of 4"
+                }
+              ],
               "detail": {
                 "kind": "text",
                 "text": "started 3 s ago"
@@ -105,7 +111,7 @@
                   "label": "Check passes",
                   "detail": {
                     "kind": "text",
-                    "text": "checking…"
+                    "text": "checking"
                   },
                   "signal": "active"
                 }
@@ -180,7 +186,7 @@
               {
                 "date": "2026-10-18",
                 "mark": "restart",
-                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
               },
               {
                 "date": "2026-10-19",
@@ -240,7 +246,7 @@
               {
                 "date": "2026-10-30",
                 "mark": "restart",
-                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
               },
               {
                 "date": "2026-10-31",
@@ -280,7 +286,7 @@
               {
                 "date": "2026-11-07",
                 "mark": "down",
-                "tip": "Down 10:26–now · out of memory"
+                "tip": "Down from 10:26 to now, out of memory"
               }
             ],
             "availability": {
@@ -352,8 +358,17 @@
             "mark": "ok",
             "label": "Traefik",
             "detail": {
-              "kind": "text",
-              "text": "443 public · Cloudflare Tunnel"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "443 public"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
             },
             "glyph": {
               "kind": "port:traefik"

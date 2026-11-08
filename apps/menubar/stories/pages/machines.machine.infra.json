@@ -55,7 +55,13 @@
             "head": {
               "id": "health",
               "mark": "ok",
-              "label": "Healthy · 4 of 4",
+              "label": "Healthy",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "4 of 4"
+                }
+              ],
               "detail": {
                 "kind": "list",
                 "items": [
@@ -85,8 +91,13 @@
                   "mark": "ok",
                   "label": "Running",
                   "detail": {
-                    "kind": "text",
-                    "text": "running"
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "running"
+                      }
+                    ]
                   },
                   "signal": "well"
                 }
@@ -97,8 +108,13 @@
                   "mark": "ok",
                   "label": "Has an address",
                   "detail": {
-                    "kind": "text",
-                    "text": "192.168.64.7"
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "192.168.64.7"
+                      }
+                    ]
                   },
                   "signal": "well"
                 }
@@ -117,8 +133,13 @@
                   "mark": "ok",
                   "label": "Check passes",
                   "detail": {
-                    "kind": "text",
-                    "text": "200"
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "200"
+                      }
+                    ]
                   },
                   "signal": "well"
                 }
@@ -138,7 +159,7 @@
       "items": [
         {
           "gauge": {
-            "title": "CPU · 8 cores",
+            "title": "CPU",
             "value": {
               "kind": "percent",
               "n": 340,
@@ -228,8 +249,17 @@
             "mark": "ok",
             "label": "Traefik",
             "detail": {
-              "kind": "text",
-              "text": "443 public · Cloudflare Tunnel"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "443 public"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
             },
             "glyph": {
               "kind": "port:traefik"
@@ -662,23 +692,21 @@
       }
     },
     {
-      "label": "Copy 443 public · Cloudflare Tunnel",
+      "label": "Copy ",
       "on": "row",
       "rows": [
         "infra:443"
       ],
       "priority": 4,
       "id": "copy:infra:443",
-      "run": {
-        "copy": "443 public · Cloudflare Tunnel"
-      },
+      "run": {},
       "icon": "doc.on.doc",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Copied 443 public · Cloudflare Tunnel"
+            "text": "Copied "
           }
         ]
       }

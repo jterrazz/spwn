@@ -1,7 +1,6 @@
 package menubar
 
 import (
-	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/machine"
+	coresection "github.com/jterrazz/studio-station/src/core/section"
 	"github.com/jterrazz/studio-station/src/engine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	SectionService  = "service"
+	SectionLatency  = "latency"
 	SectionUptime   = "uptime"
 	SectionLog      = "log"
 	SectionTooling  = "tooling"
@@ -62,7 +62,7 @@ func serverPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	// menu), its facts, Overview and Activity; Overview says its health
 	// first (folded while healthy, unfolded by itself while it restarts,
 	// the red banner with Restart while down, Start once its owner stopped
-	// it), then what it serves, its last 30 days, why it went down, its
+	// it), then its check's latency, its last 30 days, why it went down, its
 	// gauges, its ports and the tooling that manages its inside; the
 	// footer is its ssh and Open in Terminal, which waits while it cannot
 	// answer.
@@ -71,8 +71,8 @@ func serverPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: string(machine.Server)}, Buttons: []string{ActionMenu}}
 	p.Segments = []page.Segment{{ID: SegmentOverview, Label: "Overview", Picked: true}, {ID: SegmentActivity, Label: "Activity", Key: "cmd+i"}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: s.facts()}, s.health()}
-	if svc, ok := s.service(); ok {
-		p.Sections = append(p.Sections, svc)
+	if card, ok := s.latency(); ok {
+		p.Sections = append(p.Sections, card)
 	}
 	if log, ok := s.log(); ok {
 		p.Sections = append(p.Sections, log)
@@ -110,7 +110,7 @@ func (s serverView) facts() []page.Value {
 		down.Signal = page.SignalFailing
 		out = append(out, down)
 	case serverRestarting:
-		out = append(out, page.Text("restarting…"))
+		out = append(out, page.Text("restarting"))
 	case serverStopped:
 		out = append(out, page.Text("stopped"))
 	default:
@@ -167,7 +167,7 @@ func (s serverView) health() page.Section {
 		group.Fold = ""
 	case serverRestarting:
 		w := *s.vm.Restart
-		head.Label = "Restarting · step " + w.Counted()
+		head.Label, head.Cells = "Restarting", []page.Value{page.Text("step " + w.Counted())}
 		head.Glyph = page.Glyph{Spin: true, Signal: page.SignalActive}
 		head.Detail = page.Text("started " + ago(s.m.Now.Sub(w.At)) + " ago")
 		group.Fold = page.Open
@@ -181,9 +181,9 @@ func (s serverView) health() page.Section {
 			}
 		}
 		of := strconv.Itoa(passed) + " of " + strconv.Itoa(len(checks))
-		head.Label, head.Glyph = "Healthy · "+of, symbol("checkmark.circle.fill", page.SignalWell)
+		head.Label, head.Cells, head.Glyph = "Healthy", []page.Value{page.Text(of)}, symbol("checkmark.circle.fill", page.SignalWell)
 		if passed < len(checks) {
-			head.Label, head.Mark, head.Reason = "Check failing · "+of, page.Attention, page.Failing
+			head.Label, head.Mark, head.Reason = "Check failing", page.Attention, page.Failing
 			head.Glyph = symbol("exclamationmark.triangle.fill", page.SignalWaits)
 		}
 		words := []page.Value{page.Text("checked after every boot")}
@@ -215,16 +215,16 @@ func (s serverView) checks() []page.Item {
 	rows := []page.Row{
 		checkRow("running", model.StepRunning, health.Running, "running"),
 		checkRow("address", model.StepAddress, health.Address, s.vm.IP),
-		checkRow("ssh", model.StepSSH, health.SSH, ""),
-		checkRow("check", model.StepCheck, passes, strings.Join(answer, " · ")),
+		checkRow(string(coresection.SSH), model.StepSSH, health.SSH),
+		checkRow("check", model.StepCheck, passes, answer...),
 	}
 	return items(rows)
 }
 
-func checkRow(id, label string, passed bool, result string) page.Row {
+func checkRow(id, label string, passed bool, result ...string) page.Row {
 	row := page.Row{ID: id, Label: label, Mark: page.OK, Signal: page.SignalWell}
-	if result != "" {
-		row.Detail = page.Text(result)
+	if said := slices.DeleteFunc(result, func(r string) bool { return r == "" }); len(said) > 0 {
+		row.Detail = page.Texts(said...)
 	}
 	if !passed {
 		row.Mark, row.Reason, row.Signal, row.Detail = page.Broken, page.Failing, page.SignalFailing, page.Text("failing")
@@ -233,10 +233,10 @@ func checkRow(id, label string, passed bool, result string) page.Row {
 }
 
 // value: a restart's four steps: those passed, the one running
-// ("checking…"), those next.
+// (checking), those next.
 func (s serverView) walk(step int) []page.Item {
 	labels := []string{model.StepRunning, model.StepAddress, model.StepSSH, model.StepCheck}
-	ids := []string{"running", "address", "ssh", "check"}
+	ids := []string{"running", "address", string(coresection.SSH), "check"}
 	rows := make([]page.Row, 0, len(labels))
 	for i, label := range labels {
 		row := page.Row{ID: ids[i], Label: label, Mark: page.OK}
@@ -250,7 +250,7 @@ func (s serverView) walk(step int) []page.Item {
 				row.Detail = page.Text(s.vm.IP)
 			}
 		case i+1 == step:
-			row.Signal, row.Detail = page.SignalActive, page.Text("checking…")
+			row.Signal, row.Detail = page.SignalActive, page.Text("checking")
 		default:
 			row.Mark, row.Reason, row.Signal, row.Detail = page.Absent, page.Waiting, page.SignalQuiet, page.Text("next")
 		}
@@ -259,19 +259,19 @@ func (s serverView) walk(step int) []page.Item {
 	return items(rows)
 }
 
-// value: SPEC B5.4's service card: the check's host, its latency now,
+// value: SPEC B5.4's latency card: the site its check asks, its latency now,
 // its p50 and its peak with when, over the last hour's runs; latency
 // only, as decision D1 leaves requests per minute.
-func (s serverView) service() (page.Section, bool) {
+func (s serverView) latency() (page.Section, bool) {
 	l, ok := model.LatencyOf(s.vm.Latency)
 	if !ok || s.state != serverUp {
 		return page.Section{}, false
 	}
-	host := s.vm.Check
-	if u, err := url.Parse(s.vm.Check); err == nil && u.Hostname() != "" {
-		host = u.Hostname()
-	} else if name, _, found := strings.Cut(host, ":"); found {
-		host = name
+	site := s.vm.Check
+	if c, ok := model.ParseCheck(s.vm.Check); ok && c.URL != nil {
+		site = c.URL.Hostname()
+	} else if name, _, found := strings.Cut(site, ":"); found {
+		site = name
 	}
 	ms := func(d time.Duration) string { return strconv.FormatInt(d.Milliseconds(), 10) + " ms" }
 	points := make([]float64, 0, len(s.vm.Latency))
@@ -285,9 +285,9 @@ func (s serverView) service() (page.Section, bool) {
 	peakAt := ago(s.m.Now.Sub(l.PeakAt)) + " ago"
 	chart := page.Chart{Kind: page.ChartLine, Series: []page.Series{{Key: "latency", Points: points, Unit: "ms"}},
 		Peak: &page.Peak{Index: peak, Value: page.Text(ms(l.Peak)), At: peakAt}, Ends: []string{"1 hr ago", "now"}}
-	note := page.Note{Text: strings.Join([]string{"health check", "p50 " + ms(l.P50), "peak " + ms(l.Peak) + ", " + peakAt}, " · ")}
-	return page.Section{ID: SectionService, Title: host, Segment: SegmentOverview, Card: page.CardChart, Uncounted: true,
-		Caption: []page.Value{page.Text(ms(l.Now))}, Items: []page.Item{{Note: &note}, {Chart: &chart}}}, true
+	runs := page.Fact{Key: "health check", Value: page.Texts("p50 "+ms(l.P50), "peak "+ms(l.Peak)+", "+peakAt)}
+	return page.Section{ID: SectionLatency, Title: site, Segment: SegmentOverview, Card: page.CardChart, Uncounted: true,
+		Caption: []page.Value{page.Text(ms(l.Now))}, Items: []page.Item{{Fact: &runs}, {Chart: &chart}}}, true
 }
 
 // value: SPEC B5.2's last 30 days: a cell a day, oldest first, today
@@ -310,14 +310,14 @@ func (s serverView) uptime() (page.Section, bool) {
 func (s serverView) tip(c model.UptimeCell) string {
 	var parts []string
 	for _, in := range c.Down {
-		words := "Down " + s.clock(in.From) + "–"
+		words := "Down from " + s.clock(in.From) + " to "
 		if in.To.IsZero() {
 			words += "now"
 		} else {
 			words += s.clock(in.To)
 		}
 		if in.Cause != "" {
-			words += " · " + in.Cause
+			words += ", " + in.Cause
 		}
 		parts = append(parts, words)
 	}
@@ -327,7 +327,7 @@ func (s serverView) tip(c model.UptimeCell) string {
 	if len(parts) == 0 && c.Mark == model.DayOK {
 		return "Up all day"
 	}
-	return strings.Join(parts, " · ")
+	return strings.Join(parts, "; ")
 }
 
 // value: SPEC B5.5's Last lines card: the lines its console kept before
@@ -407,11 +407,7 @@ func logLines(raw []string, end time.Time, zone *time.Location) []string {
 func (s serverView) gauges() page.Section {
 	name := s.vm.Name
 	m := measured(s.m.Samples)
-	cores := "CPU"
-	if n := s.vm.Resources.CPUs; n > 0 {
-		cores = "CPU · " + strconv.Itoa(n) + " cores"
-	}
-	cpu := page.Gauge{Title: cores, Value: live(pendingOr(m.cpu), engine.LiveKey(engine.LiveCPU, name)), Spark: m.cpus}
+	cpu := page.Gauge{Title: "CPU", Value: live(pendingOr(m.cpu), engine.LiveKey(engine.LiveCPU, name)), Spark: m.cpus}
 	memory := page.Gauge{Title: "Memory", Value: live(pendingOr(freeWords(s.m.Samples)), engine.LiveKey(engine.LiveFree, name))}
 	if n := len(s.m.Samples); n > 0 {
 		if last := s.m.Samples[n-1].Sample; last.MemTotal > 0 {
@@ -426,13 +422,14 @@ func (s serverView) gauges() page.Section {
 		memory = page.Gauge{Title: "Memory", Value: page.Pending()}
 		net = page.Gauge{Title: "Network", Value: page.Pending()}
 	case serverDown, serverStopped:
-		cpu = page.Gauge{Title: "CPU · last", Value: pendingOr(m.cpu), Stale: true}
-		memory = page.Gauge{Title: "Memory · last", Value: pendingOr(freeWords(s.m.Samples)), Stale: true}
+		cpu = page.Gauge{Title: "Last CPU", Value: pendingOr(m.cpu), Stale: true}
+		memory = page.Gauge{Title: "Last memory", Value: pendingOr(freeWords(s.m.Samples)), Stale: true}
 		seen := page.None()
 		if n := len(s.m.Samples); n > 0 {
 			seen = page.Text(s.clock(s.m.Samples[n-1].Sample.At))
 		}
 		net = page.Gauge{Title: "Last seen", Value: seen, Stale: true}
+	case serverUp:
 	}
 	return page.Section{ID: SectionGauges, Title: "Gauges", Segment: SegmentOverview, Card: page.CardGauges,
 		Items: []page.Item{{Gauge: &cpu}, {Gauge: &memory}, {Gauge: &net}}}
@@ -464,7 +461,7 @@ func (s serverView) ports() page.Section {
 			if sv.URLs.Public != "" {
 				addr = strings.TrimPrefix(sv.URLs.Public, "https://")
 			}
-			sec.Items = append(sec.Items, s.portRow(sv.Named(), sv.GuestPort, addr))
+			sec.Items = append(sec.Items, s.portRow(sv.Named(), sv.GuestPort, page.Text(addr)))
 		}
 	}
 	switch {
@@ -482,19 +479,19 @@ func (s serverView) ports() page.Section {
 	return sec
 }
 
-func (s serverView) address(p ports.Port) string {
+func (s serverView) address(p ports.Port) page.Value {
 	if p.Declared != nil {
 		via := p.Declared.Via
 		if r, ok := catalog.RouteNamed(via); ok {
 			via = r.Label
 		}
-		return strconv.Itoa(p.Port) + " public · " + via
+		return page.Texts(strconv.Itoa(p.Port)+" public", via)
 	}
-	return s.vm.Name + ":" + strconv.Itoa(p.Port)
+	return page.Text(s.vm.Name + ":" + strconv.Itoa(p.Port))
 }
 
-func (s serverView) portRow(named catalog.PortName, port int, addr string) page.Item {
-	row := page.Row{ID: s.vm.Name + ":" + strconv.Itoa(port), Label: named.Name, Glyph: portGlyph(named), Mark: page.OK, Detail: page.Text(addr)}
+func (s serverView) portRow(named catalog.PortName, port int, addr page.Value) page.Item {
+	row := page.Row{ID: s.vm.Name + ":" + strconv.Itoa(port), Label: named.Name, Glyph: portGlyph(named), Mark: page.OK, Detail: addr}
 	if s.state != serverUp {
 		row.Signal = page.SignalFaint
 	} else {
@@ -515,8 +512,11 @@ func (s serverView) tooling() page.Section {
 func (s serverView) ssh() string {
 	if s.m.Summary != nil {
 		for _, l := range s.m.Summary.Lines {
-			if l.Section == "ssh" && len(l.Parts) > 0 && l.Parts[0].Word != "" {
-				return "ssh " + l.Parts[0].Word
+			if l.Section == coresection.SSH && len(l.Parts) > 0 && l.Parts[0].Word != "" {
+				if user, at, found := strings.Cut(l.Parts[0].Word, "@"); found {
+					return catalog.SSHCommand(user, at)
+				}
+				return catalog.SSHCommand("", l.Parts[0].Word)
 			}
 		}
 	}
@@ -558,13 +558,15 @@ func (s serverView) actions() []page.Action {
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage, Submenu: []string{ActionRestart, ActionStop, ActionDelete}}
 	switch s.state {
 	case serverDown:
-		out = append(out, page.Action{ID: ActionRestartUp, Label: "Restart", On: page.OnRow, Rows: []string{"down"}, Priority: 1, Mutates: true, Default: true,
-			Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}, Hud: hud("Restarting " + vm.Name)})
-		out = append(out, page.Action{ID: ActionLog, Label: "Show full log", On: page.OnPage, Priority: 4, Run: &page.Run{Terminal: true, Argv: []string{"machines", "log", vm.Name}, Target: target(h)}})
+		out = append(out,
+			page.Action{ID: ActionRestartUp, Label: "Restart", On: page.OnRow, Rows: []string{"down"}, Priority: 1, Mutates: true, Default: true,
+				Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}, Hud: hud("Restarting " + vm.Name)},
+			page.Action{ID: ActionLog, Label: "Show full log", On: page.OnPage, Priority: 4, Run: &page.Run{Terminal: true, Argv: []string{"machines", "log", vm.Name}, Target: target(h)}})
 	case serverStopped:
 		out = append(out, page.Action{ID: ActionStartVM, Label: "Start", On: page.OnRow, Rows: []string{"stopped"}, Priority: 1, Mutates: true, Default: true,
 			Run: &page.Run{Call: CallStartVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}, Hud: hud("Starting " + vm.Name)})
 		menu.Submenu = []string{ActionStartVM, ActionDelete}
+	case serverUp, serverRestarting:
 	}
 	if s.state == serverUp {
 		ssh := s.ssh()

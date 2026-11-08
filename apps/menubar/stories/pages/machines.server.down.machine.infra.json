@@ -156,7 +156,7 @@
               {
                 "date": "2026-10-18",
                 "mark": "restart",
-                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
               },
               {
                 "date": "2026-10-19",
@@ -216,7 +216,7 @@
               {
                 "date": "2026-10-30",
                 "mark": "restart",
-                "tip": "Down 04:30–04:34 · out of memory · restarted 1 time"
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
               },
               {
                 "date": "2026-10-31",
@@ -256,7 +256,7 @@
               {
                 "date": "2026-11-07",
                 "mark": "down",
-                "tip": "Down 10:26–now · out of memory"
+                "tip": "Down from 10:26 to now, out of memory"
               }
             ],
             "availability": {
@@ -286,7 +286,7 @@
       "items": [
         {
           "gauge": {
-            "title": "CPU · last",
+            "title": "Last CPU",
             "value": {
               "kind": "percent",
               "n": 340
@@ -296,7 +296,7 @@
         },
         {
           "gauge": {
-            "title": "Memory · last",
+            "title": "Last memory",
             "value": {
               "kind": "text",
               "text": "5 GB free"
@@ -334,8 +334,17 @@
             "mark": "ok",
             "label": "Traefik",
             "detail": {
-              "kind": "text",
-              "text": "443 public · Cloudflare Tunnel"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "443 public"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
             },
             "glyph": {
               "kind": "port:traefik"

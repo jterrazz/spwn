@@ -311,14 +311,16 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	live := &feeds.Live{Calls: w, Clock: clock, ThisMac: thisMac}
 	pages := watchWith(t, w, clock, engine.FeedInput{Subject: "infra"}, live)
 	state := func(p page.Page) page.Mark {
-		if r := row(p, "machine", "state"); r != nil {
-			return r.Mark
+		for _, s := range p.Sections {
+			if s.ID == "health" && len(s.Items) > 0 && s.Items[0].Group != nil {
+				return s.Items[0].Group.Head.Mark
+			}
 		}
 		return ""
 	}
 	p := until(t, pages, "infra running", func(p page.Page) bool { return state(p) == page.OK })
-	if !slices.Equal(p.Live, []string{"cpu:infra", "memory:infra", "disk:infra"}) {
-		t.Errorf("infra's page reads the live keys %q, want its CPU, memory and disk", p.Live)
+	if !slices.Equal(p.Live, []string{"cpu:infra", "memory:infra", "disk:infra", "free:infra", "net:infra"}) {
+		t.Errorf("infra's page reads the live keys %q, want its CPU, memory, disk, free memory and network", p.Live)
 	}
 	if got := needs(p); len(got) != 0 {
 		t.Errorf("infra's page draws Needs you %q", got)
@@ -351,8 +353,16 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 		r := row(p, "activity", "memory")
 		return state(p) == page.OK && r != nil && r.Cells[0].Kind == page.KindRatio
 	})
-	if r := row(p, "up", "restarts"); r == nil || r.Cells[0].Items[0].N != 1 {
-		t.Errorf("infra back counts %+v restarts, want 1", r)
+	var facts []string
+	for _, s := range p.Sections {
+		if s.ID == "summary" {
+			for _, v := range s.Caption {
+				facts = append(facts, v.Text)
+			}
+		}
+	}
+	if !slices.Contains(facts, "restarted 1 time") {
+		t.Errorf("infra back says %q, want it restarted 1 time", facts)
 	}
 	for _, name := range []string{activitycalls.Sample.Name, overviewcalls.Read.Name} {
 		for _, at := range w.askedOf(name) {

@@ -91,6 +91,8 @@ func TestPaletteCoversCalls(t *testing.T) {
 				Run *struct {
 					Call     string `json:"call"`
 					Terminal bool   `json:"terminal"`
+					Copy     string `json:"copy"`
+					Open     string `json:"open"`
 				} `json:"run"`
 			} `json:"actions"`
 		}
@@ -99,7 +101,7 @@ func TestPaletteCoversCalls(t *testing.T) {
 		}
 		for _, a := range p.Actions {
 			switch {
-			case a.Run == nil, a.Run.Terminal && a.Run.Call == "":
+			case a.Run == nil, a.Run.Call == "" && (a.Run.Terminal || a.Run.Copy != "" || a.Run.Open != ""):
 			case !known[a.Run.Call]:
 				t.Errorf("%s: the action %s names %q, no call of calls.json", e.Name(), a.ID, a.Run.Call)
 			default:

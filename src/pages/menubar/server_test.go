@@ -40,19 +40,19 @@ func healthHead(t *testing.T, p page.Page) page.Group {
 	return *s.Items[0].Group
 }
 
-// invariant: SPEC A4: a healthy server's Health is folded behind "Healthy ·
-// 4 of 4", unfolding to its four checks, each with what it answered, then
+// invariant: SPEC A4: a healthy server's Health is folded behind Healthy,
+// 4 of 4, unfolding to its four checks, each with what it answered, then
 // Restart and Stop.
 func TestAHealthyServerFoldsItsFourChecksBehindItsCount(t *testing.T) {
 	g := healthHead(t, serverOn(nil))
-	if g.Head.Label != "Healthy · 4 of 4" || g.Fold != page.Folded {
-		t.Fatalf("head %q fold %q, want Healthy · 4 of 4 folded", g.Head.Label, g.Fold)
+	if g.Head.Label != "Healthy" || words(g.Head.Cells[0]) != "4 of 4" || g.Fold != page.Folded {
+		t.Fatalf("head %q %+v fold %q, want Healthy, 4 of 4, folded", g.Head.Label, g.Head.Cells, g.Fold)
 	}
-	var said []string
+	said := make([]string, 0, len(g.Items))
 	for _, it := range g.Items {
-		said = append(said, it.Row.Label+"="+it.Row.Detail.Text)
+		said = append(said, it.Row.Label+"="+words(it.Row.Detail))
 	}
-	if want := []string{"Running=running", "Has an address=192.168.64.7", "SSH answers=", "Check passes=200 · 50 ms"}; !slices.Equal(said, want) {
+	if want := []string{"Running=running", "Has an address=192.168.64.7", "SSH answers=", "Check passes=200 | 50 ms"}; !slices.Equal(said, want) {
 		t.Fatalf("checks %q, want %q", said, want)
 	}
 	if !slices.Equal(g.Head.Menu, []string{ActionRestart, ActionStop}) {
@@ -66,10 +66,10 @@ func TestAHealthyServerFoldsItsFourChecksBehindItsCount(t *testing.T) {
 func TestARestartCountsTheStepRunningAndTheRestWait(t *testing.T) {
 	p := serverOn(func(vm *model.VM) { vm.Restart = &model.RestartWalk{Step: 2, At: serverNow.Add(-time.Second)} })
 	g := healthHead(t, p)
-	if g.Head.Label != "Restarting · step 2 of 4" || g.Fold != page.Open || g.Head.Detail.Text != "started 1 s ago" {
+	if g.Head.Label != "Restarting" || words(g.Head.Cells[0]) != "step 2 of 4" || g.Fold != page.Open || g.Head.Detail.Text != "started 1 s ago" {
 		t.Fatalf("head %q %q fold %q", g.Head.Label, g.Head.Detail.Text, g.Fold)
 	}
-	var signals []page.Signal
+	signals := make([]page.Signal, 0, len(g.Items))
 	for _, it := range g.Items {
 		signals = append(signals, it.Row.Signal)
 	}
@@ -118,7 +118,7 @@ func TestADownServerSaysWhyWithItsLastLines(t *testing.T) {
 	if !slices.Equal(l.Lines, want) || l.Cause != 2 || l.More != ActionLog {
 		t.Fatalf("log %+v, want %q with the cause line second", l, want)
 	}
-	if sectionOf(p, SectionService) != nil {
+	if sectionOf(p, SectionLatency) != nil {
 		t.Fatal("a down server shows its service's latency")
 	}
 	if p.Footer.Note != "Needs infra running" {
@@ -139,14 +139,14 @@ func TestAServerItsOwnerStoppedOffersStart(t *testing.T) {
 	}
 }
 
-// invariant: SPEC B5.4, D1: the service card is the check's host, its
+// invariant: SPEC B5.4, D1: the latency card is the site its check asks, its
 // latency now, its p50 and its peak with when; no request rate.
-func TestTheServiceCardSaysLatencyOnly(t *testing.T) {
-	s := sectionOf(serverOn(nil), SectionService)
+func TestTheLatencyCardSaysLatencyOnly(t *testing.T) {
+	s := sectionOf(serverOn(nil), SectionLatency)
 	if s == nil || s.Title != "jterrazz.com" || s.Caption[0].Text != "50 ms" {
 		t.Fatalf("service %+v", s)
 	}
-	if got := s.Items[0].Note.Text; got != "health check · p50 40 ms · peak 50 ms, 1 s ago" {
+	if got := s.Items[0].Fact.Key + ": " + words(s.Items[0].Fact.Value); got != "health check: p50 40 ms | peak 50 ms, 1 s ago" {
 		t.Fatalf("service words %q", got)
 	}
 }

@@ -61,7 +61,7 @@ struct ServerPage: View {
         } else {
             switch s.card {
             case "health": HealthCard(s, actions: actions, open: unfolded.contains(s.id ?? ""), fold: { fold(s.id ?? "") }, run: tap)
-            case "chart": ServiceCard(s)
+            case "chart": LatencyCard(s)
             case "uptime": UptimeCard(s)
             case "log": LogCard(s, actions: actions, run: tap)
             case "gauges":

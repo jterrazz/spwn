@@ -74,9 +74,15 @@ public struct HealthCard: View {
         .frame(width: m.mark, height: m.mark)
     }
 
+    // value: the head's words: its label, then its count ("Healthy · 4 of
+    // 4", "Restarting · step 2 of 4").
+    public static func title(_ head: Row) -> String {
+        ([head.label ?? ""] + (head.cells ?? []).map { Format.show($0) }).filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+    }
+
     var words: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Health.headLines) {
-            Text(head.label ?? "").font(Token.Role.healthTitle.font).foregroundStyle(tokens.tone(Token.Role.healthTitle.tone)).lineLimit(1)
+            Text(Self.title(head)).font(Token.Role.healthTitle.font).foregroundStyle(tokens.tone(Token.Role.healthTitle.tone)).lineLimit(1)
             if let sub = head.detail, !sub.isNone { FactsLine(sub, role: .healthSub) }
         }
     }
