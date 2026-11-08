@@ -417,7 +417,7 @@ func go(_ nav: String, _ handlers: PopoverHandlers) {
 }
 
 // invariant: SPEC A4: Home's header: "All machines", then the round +
-// (New VM, when the page offers it there) and the round … of the station
+// (New VM, when the page offers it there) and the round more button of the station
 // menu.
 struct HomeHeaderBar: View {
     let page: Page
