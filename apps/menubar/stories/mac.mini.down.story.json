@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.mini.down",
+    "note": "mac-mini while infra is down: the red need first, infra's row red with Restart.",
+    "pages": ["pages/machines.macs.down.machine.mac-mini.json"],
+    "schema": "station.story/v1"
+}

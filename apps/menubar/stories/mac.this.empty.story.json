@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.this.empty",
+    "note": "This Mac with no VM: its VMs card offers the first, with the memory free for it.",
+    "pages": ["pages/machines.macs.empty.machine.macbook-pro.json"],
+    "schema": "station.story/v1"
+}

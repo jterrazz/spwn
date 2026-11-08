@@ -1,0 +1,7 @@
+{
+    "group": "mac",
+    "id": "mac.air.asleep",
+    "note": "macbook-air asleep: no segment, Wake and Tell me when it wakes.",
+    "pages": ["pages/machines.macs.machine.macbook-air.json"],
+    "schema": "station.story/v1"
+}

@@ -15,7 +15,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Menu bar and panel shell** (5): `menubar.count`, `menubar.down`, `menubar.restarting`, `menubar.fine`, `menubar.open`
 - **All machines (home)** (20): `home.needs`, `home.hover`, `home.keyboard`, `home.one-need.wait`, `home.one-need.lease`, `home.many-needs`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.agent-creating`, `home.agent-born`, `home.agents-folded`, `home.agents-unfolded`
 - **Needs you (fleet list)** (4): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`
-- **A Mac** (21): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.needs-unfolded`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
+- **A Mac** (22): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.needs-unfolded`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
 - **A workspace** (15): `workspace.working`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting`, `workspace.waiting.pr-opened`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.waiting.reply`, `workspace.waiting.replied`, `workspace.waiting.merged`, `workspace.finished`, `workspace.stopped`, `workspace.started`, `workspace.remote`
 - **A server** (8): `server.healthy`, `server.health-unfolded`, `server.activity`, `server.down`, `server.restarting`, `server.restarting.late`, `server.recovered`, `server.stopped`
 - **Ports (fleet and scoped)** (4): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`
@@ -532,6 +532,15 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "All machines" → back; "New VM" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "More options for mac-mini" → pageMenu(mac:mac-mini); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Review" → push(vm:review-bot); "CPU 46%" → seg(activity); "Memory 19 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "infra healthy · up 12 days" → push(vm:infra); "linux-3 working" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "review-bot fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "Keep mac-mini awake" → awakeChange(mac-mini); "Upkeep all fine" → unfold(upkeep:mac-mini)
 - **Enters**: #panel: height 689px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth; .spin.sm: CSS spin 800 ms linear; .dot.ring: CSS ping 600 ms linear; .dot.ping: CSS ping 600 ms linear
 - **Leaves**: #panel: height 506px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .spin.sm: CSS spin 800 ms linear; .dot.ring: CSS ping 600 ms linear; .fwrap.morph: CSS morph 340 ms linear (esc)
+
+### `mac.mini.stale`
+
+- **Capture**: none (a gap state SPEC A4 rules, after `mac.mini.loading`: the prototype does not draw it)
+- **Shows**: mac-mini not heard from for 3 min while its page is open: the last known values stay, the facts end "seen 3 min ago · checking" in t3, the gauges say their last values in t3 with no spark, and every VM row is dimmed to .45.
+- **Data**: last answer 3 min ago; the Mac's last page parts
+- **Interactions**: as `mac.mini.loading`
+- **Enters**: no animation (the marking turns on in place once the Mac is 30 s late)
+- **Leaves**: the marking turns off in place when mac-mini answers again
 
 ### `mac.mini.creating`
 

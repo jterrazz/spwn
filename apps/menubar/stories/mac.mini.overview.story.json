@@ -1,8 +1,7 @@
 {
     "group": "mac",
     "id": "mac.mini.overview",
-    "note": "mac-mini's page, read from its engine.",
-    "pages": ["pages/machines.machine.mac-mini.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "mac-mini's page: it never sleeps and hosts infra; its upkeep is all fine.",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "schema": "station.story/v1"
 }

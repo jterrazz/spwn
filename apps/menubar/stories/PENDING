@@ -22,14 +22,9 @@ needs.all
 needs.empty
 needs.updating
 needs.updated
-mac.this.overview
-mac.this.upkeep
 mac.this.activity
 mac.this.ports
 mac.this.accounts
-mac.this.needs-unfolded
-mac.this.exposed
-mac.mini.overview
 mac.mini.activity
 mac.mini.activity.6m
 mac.mini.activity.24h
@@ -37,12 +32,6 @@ mac.mini.activity.scrub
 mac.mini.ports
 mac.mini.ports.https
 mac.mini.accounts
-mac.mini.down
-mac.mini.loading
-mac.mini.creating
-mac.mini.created
-mac.air.asleep
-mac.this.empty
 workspace.working
 workspace.working.activity
 workspace.working.ports
