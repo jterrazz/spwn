@@ -1,12 +1,9 @@
+ Awake  All Macs · which may sleep, and what pauses
+
  This Mac
-   ● This Mac  until 18:00 · lid closed · 6h 30m left
+   ● Keep This Mac awake           on   Stays on after agents finish
+   ● Stay awake with the lid clo…  on
+   ● Stay awake on battery         off
 
- Guards
-   Temperature  normal
-   Battery      80 %
-   The screen   always turns off · protects the display
-   Awake stops by itself if the Mac gets too hot.
-
- Other Macs
-   ● mac-mini  Never sleeps · always-on Mac policy  last slept: never in 12d …
-   VMs are not listed: they follow their Mac.
+ mac-mini
+   ● Never sleeps  on  hosts infra, which pauses if it sleeps

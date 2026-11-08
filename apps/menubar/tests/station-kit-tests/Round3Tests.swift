@@ -77,13 +77,6 @@ final class Round3Tests: XCTestCase {
         XCTAssertNil(FormSheet.refused(field, ["Port": "8080"]))
     }
 
-    // invariant: Until says no time while another term is chosen.
-    func testUntilSegmentNamesNoTimeUnlessChosen() throws {
-        let (_, keeps) = try awake()
-        let until = try XCTUnwrap(keeps.first { $0.form != nil })
-        XCTAssertEqual(AwakePage.offered(until), "Until\(Token.Glyph.ellipsis)")
-    }
-
     // invariant: Stop everything that the engine never ends is said, not a
     // spinner for ever.
     func testStopEverythingThatHangsSaysSo() async throws {

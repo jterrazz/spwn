@@ -7,15 +7,15 @@ import XCTest
 final class AwakeTests: XCTestCase {
     func texts(_ values: [Value]?) -> [String] { (values ?? []).compactMap(\.text) }
 
-    // invariant: AW-21: Keep awake for 4 h and Lid closed on This Mac are
+    // invariant: AW-21: Keep awake for 4 hr and Lid closed on This Mac are
     // awake.keep calls; Change… on mac-mini, which never sleeps, asks y/n
     // naming infra, and its yes is settings.off never-sleeps run on mac-mini.
     func testAwakeTogglesAndChange() async throws {
         let page = try Tree.page("menubar.awake.two-macs")
         let mac = try XCTUnwrap(page.section("this-mac")?.rows.first?.id)
         let actions = page.actions(for: mac)
-        XCTAssertEqual(actions.map(\.label), ["1 h", "4 h", "Until 18:00", "Lid closed", "On battery", "Let it sleep"])
-        let four = try XCTUnwrap(actions.first { $0.label == "4 h" })
+        XCTAssertEqual(actions.map(\.label), ["1 hr", "4 hr", "Until 18:00", "Lid closed", "On battery", "Let it sleep"])
+        let four = try XCTUnwrap(actions.first { $0.label == "4 hr" })
         XCTAssertEqual(four.run?.call, "awake.keep")
         XCTAssertEqual(Client.input([:], fixed: four.run?.in) as NSDictionary,
                        ["For": 14_400_000_000_000, "Lid": true, "Battery": false, "By": "the menu bar"] as NSDictionary)
