@@ -6,6 +6,7 @@ import (
 	"github.com/jterrazz/studio-station/src/page"
 	pagehome "github.com/jterrazz/studio-station/src/pages/home"
 	pagemachines "github.com/jterrazz/studio-station/src/pages/machines"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -21,6 +22,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 		}
 		shares = workspacePorts(m, vm)
 		p.Segments = segments()
+		p.Sections = append(p.Sections, workspacePortsCard(shares))
 		p.Sections = append(p.Sections, shares.Sections...)
 	}
 	p.Sections = append([]page.Section{workspaceSummary(m, vm)}, p.Sections...)
@@ -48,7 +50,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 		p.Actions = append(p.Actions, insideActions(vm.Name)...)
 	}
 	p.Actions = append(p.Actions, shares.Actions...)
-	p.Actions = append(p.Actions, openIn("--on", vm.Name), page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage, Submenu: []string{stop.ID, ActionDelete, ActionOpenStation}})
+	p.Actions = append(p.Actions, openIn("--on", vm.Name), page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage, Submenu: workspaceMenu(vm, stop.ID)})
 	p.Live = liveKeys(p)
 	return page.Seal(p)
 }
@@ -169,4 +171,27 @@ func workspaceGlyph(vm model.VM) string {
 		return "agent"
 	}
 	return "workspace"
+}
+
+// value: a workspace's menu: Share a port… while it runs, then Stop (or
+// Start), Delete and Open station.
+func workspaceMenu(vm model.VM, stop string) []string {
+	if vm.State != model.Running {
+		return []string{stop, ActionDelete, ActionOpenStation}
+	}
+	return []string{ActionShare, stop, ActionDelete, ActionOpenStation}
+}
+
+// value: a workspace's Overview Ports card: its shares, each opening its
+// link with Copy and QR beside, then its first listener offered with
+// Share; nothing shared nor listening, the one line Nothing shared yet.
+func workspacePortsCard(b portsBody) page.Section {
+	items := slices.Clone(b.Shares)
+	if len(b.Listeners) > 0 {
+		items = append(items, b.Listeners[0])
+	}
+	if len(items) == 0 {
+		items = []page.Item{{Empty: &page.Empty{Text: "Nothing shared yet"}}}
+	}
+	return page.Section{ID: SectionPorts, Title: TitlePorts, Segment: SegmentOverview, Caption: []page.Value{count(len(b.Shares))}, Columns: columns(), Items: items}
 }

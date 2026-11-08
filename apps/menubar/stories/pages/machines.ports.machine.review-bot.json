@@ -461,6 +461,36 @@
       "segment": "overview"
     },
     {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing shared yet"
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "private",
       "title": "Private",
       "caption": [
@@ -688,6 +718,7 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
+        "share-port",
         "stop",
         "delete",
         "open-station"

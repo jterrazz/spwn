@@ -465,6 +465,75 @@
       "segment": "overview"
     },
     {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-3:8080",
+            "mark": "ok",
+            "label": "Port 8080",
+            "detail": {
+              "kind": "text",
+              "text": "linux-3:8080"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-3:8080",
+            "quick": "qr:linux-3:8080",
+            "menu": [
+              "open-port:linux-3:8080",
+              "copy-port:linux-3:8080",
+              "qr:linux-3:8080",
+              "-",
+              "stop-sharing:linux-3:8080"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-3:5432",
+            "mark": "ok",
+            "label": "Postgres",
+            "detail": {
+              "kind": "text",
+              "text": "linux-3:5432"
+            },
+            "glyph": {
+              "kind": "port:postgres"
+            },
+            "verb": "share:linux-3:5432"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "private",
       "title": "Private",
       "caption": [
@@ -840,6 +909,7 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
+        "share-port",
         "stop",
         "delete",
         "open-station"

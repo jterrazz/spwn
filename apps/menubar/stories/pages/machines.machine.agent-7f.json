@@ -442,6 +442,52 @@
       "segment": "overview"
     },
     {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "agent-7f:6006",
+            "mark": "ok",
+            "label": "Storybook",
+            "detail": {
+              "kind": "text",
+              "text": "agent-7f:6006"
+            },
+            "glyph": {
+              "kind": "port:storybook"
+            },
+            "verb": "share:agent-7f:6006"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "private",
       "title": "Private",
       "caption": [
@@ -673,6 +719,7 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
+        "share-port",
         "stop",
         "delete",
         "open-station"

@@ -461,6 +461,52 @@
       "segment": "overview"
     },
     {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot:8000",
+            "mark": "ok",
+            "label": "Port 8000",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot:8000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "share:review-bot:8000"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "private",
       "title": "Private",
       "caption": [
@@ -732,6 +778,7 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
+        "share-port",
         "stop",
         "delete",
         "open-station"

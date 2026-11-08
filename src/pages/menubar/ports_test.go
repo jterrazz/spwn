@@ -268,3 +268,34 @@ func action(p page.Page, id string) *page.Action {
 	return nil
 }
 
+// invariant: SPEC A4: a running workspace's Overview has its Ports card,
+// its shares then its first listener offered with Share, and its menu
+// holds Share a port…, Stop and Delete.
+func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
+	f := portFleet()
+	f.Macs[0].Ports = append(f.Macs[0].Ports, ports.Port{Machine: coremachine.Ref{Name: "linux-1", On: proMac}, Port: 9229, Process: "node", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet})
+	fleet := macFleet()
+	fleet.Macs[0].VMs = append(fleet.Macs[0].VMs, macFleet().Macs[1].VMs[0])
+	fleet.Macs[0].VMs[0].Name = "linux-1"
+	p := macPageOf(t, "linux-1", func(m *Machine) { m.All, m.Ports = fleet, &f })
+	card := sectionOf(p, SectionPorts)
+	if card == nil || card.Segment != SegmentOverview || card.Title != TitlePorts {
+		t.Fatalf("card %+v", card)
+	}
+	rows := rowsOf(p, SectionPorts)
+	if got := ids(rows); !slices.Equal(got, []string{"linux-1:5173", "linux-1:4321"}) {
+		t.Fatalf("card rows %q", got)
+	}
+	if rows[0].Verb != ActionOpenPort+"linux-1:5173" || rows[1].Verb != ActionSharePortOf+"linux-1:4321" {
+		t.Fatalf("verbs %q %q", rows[0].Verb, rows[1].Verb)
+	}
+	menu := action(p, ActionMenu)
+	if menu == nil || !slices.Equal(menu.Submenu, []string{ActionShare, ActionStop, ActionDelete, ActionOpenStation}) {
+		t.Fatalf("menu %+v", menu)
+	}
+	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil
+	p = macPageOf(t, "linux-1", func(m *Machine) { m.All, m.Ports = fleet, &f })
+	if items := sectionOf(p, SectionPorts).Items; len(items) != 1 || items[0].Empty == nil || items[0].Empty.Text != "Nothing shared yet" {
+		t.Fatalf("an empty card %+v", items)
+	}
+}

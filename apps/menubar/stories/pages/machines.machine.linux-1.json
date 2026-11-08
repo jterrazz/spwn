@@ -500,6 +500,98 @@
       "segment": "overview"
     },
     {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "Vite",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:5173"
+            },
+            "glyph": {
+              "kind": "port:vite"
+            },
+            "verb": "open-port:linux-1:5173",
+            "quick": "qr:linux-1:5173",
+            "menu": [
+              "open-port:linux-1:5173",
+              "copy-port:linux-1:5173",
+              "qr:linux-1:5173",
+              "-",
+              "stop-sharing:linux-1:5173"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:3000",
+            "mark": "ok",
+            "label": "Port 3000",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:3000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-1:3000",
+            "quick": "qr:linux-1:3000",
+            "menu": [
+              "open-port:linux-1:3000",
+              "copy-port:linux-1:3000",
+              "qr:linux-1:3000",
+              "-",
+              "stop-sharing:linux-1:3000"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:4321",
+            "mark": "ok",
+            "label": "Astro",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:4321"
+            },
+            "glyph": {
+              "kind": "port:astro"
+            },
+            "verb": "share:linux-1:4321"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "private",
       "title": "Private",
       "caption": [
@@ -1025,6 +1117,7 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
+        "share-port",
         "stop",
         "delete",
         "open-station"
