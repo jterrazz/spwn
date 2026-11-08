@@ -1,0 +1,31 @@
+description: 'a name two workspaces'' agents hold is refused naming both: a stop never reaches the other'
+env: mini-workspace
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1" | .macs["linux-1"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the changelog" --name docs-bot'
+      exit: 0
+      stdout: |
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "ci-1" | .macs["ci-1"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the release notes" --name docs-bot'
+      exit: 0
+      stdout: |
+          ●	docs-bot	starts · claudecode · Write the release notes
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents stop docs-bot --yes'
+      exit: 2
+      stderr: |
+          Error: more than one agent is named docs-bot: docs-bot on linux-1 and docs-bot on ci-1
+          Hint: name its workspace: --on linux-1 or --on ci-1
+    - command: 'agents stop docs-bot --yes --on ci-1'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	docs-bot	stopped · its workspace keeps running
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal, .macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
+      exit: 0
+      stdout: |
+          [{"station-docs-bot":"working"},{"station-docs-bot":"finished"}]

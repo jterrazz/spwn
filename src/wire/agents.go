@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"slices"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -50,12 +51,32 @@ type agentsEverywhere struct{ env kit.Env }
 
 func (f agentsEverywhere) all(ctx context.Context) ([]agents.Agent, error) {
 	// value: the agents of every running workspace of every Mac that
-	// answers, each with its Mac; a workspace that does not answer adds none.
+	// answers, each with its Mac and its name across every machine; a workspace that
+	// does not answer adds none.
+	placed, err := f.placed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]agents.Agent, len(placed))
+	for i, p := range placed {
+		out[i] = p.Agent
+	}
+	return out, nil
+}
+
+// value: an agent, by its name across every machine, and the name its
+// own workspace knows it by.
+type placed struct {
+	agents.Agent
+	local string
+}
+
+func (f agentsEverywhere) placed(ctx context.Context) ([]placed, error) {
 	read, err := call.Read(ctx, f.env.Calls, f.env.Self, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
 	if err != nil {
 		return nil, err
 	}
-	var out []agents.Agent
+	var held []agents.Agent
 	for _, mac := range read.All.Macs {
 		if !mac.Reachable {
 			continue
@@ -70,40 +91,70 @@ func (f agentsEverywhere) all(ctx context.Context) ([]agents.Agent, error) {
 			}
 			for _, a := range kept {
 				a.VM, a.Mac = vm.Name, mac.Name
-				out = append(out, a)
+				held = append(held, a)
 			}
 		}
+	}
+	named := agents.Unique(held)
+	out := make([]placed, len(named))
+	for i, a := range named {
+		out[i] = placed{Agent: a, local: held[i].Name}
 	}
 	return out, nil
 }
 
+func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind == coremachine.Mac }
+
 func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, coremachine.Ref, error) {
-	var kept []agents.Agent
-	var err error
-	if f.env.Far() || f.env.Kind != coremachine.Mac {
-		kept, err = call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, struct{}{}, nil)
-	} else {
-		kept, err = f.all(ctx)
-	}
-	if err != nil {
-		return agents.Agent{}, coremachine.Ref{}, err
-	}
-	i := slices.IndexFunc(kept, func(a agents.Agent) bool { return a.Name == name })
-	if i < 0 {
-		return agents.Agent{}, coremachine.Ref{}, fail.New(fail.NotFound, agentscalls.UnknownAgent, name, nil)
-	}
-	if f.env.Far() || f.env.Kind != coremachine.Mac {
-		return kept[i], f.env.Target(), nil
-	}
-	return kept[i], coremachine.Ref{Name: kept[i].VM}, nil
+	a, at, _, err := f.located(ctx, name)
+	return a, at, err
 }
 
-func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.Ref, error) {
+// invariant: SPEC B5.22: on a Mac an agent is found among every machine's by
+// its name there, and its workspace's calls are sent the name it knows it
+// by; a name two agents hold is refused, both named with their workspace,
+// so a gesture never reaches the other one.
+func (f agentsEverywhere) located(ctx context.Context, name string) (agents.Agent, coremachine.Ref, string, error) {
+	if !f.onThisMac() {
+		kept, err := call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, struct{}{}, nil)
+		if err != nil {
+			return agents.Agent{}, coremachine.Ref{}, "", err
+		}
+		i := slices.IndexFunc(kept, func(a agents.Agent) bool { return a.Name == name })
+		if i < 0 {
+			return agents.Agent{}, coremachine.Ref{}, "", fail.New(fail.NotFound, agentscalls.UnknownAgent, name, nil)
+		}
+		return kept[i], f.env.Target(), name, nil
+	}
+	all, err := f.placed(ctx)
+	if err != nil {
+		return agents.Agent{}, coremachine.Ref{}, "", err
+	}
+	var found []placed
+	for _, p := range all {
+		if p.Name == name {
+			found = append(found, p)
+		}
+	}
+	switch len(found) {
+	case 0:
+		return agents.Agent{}, coremachine.Ref{}, "", fail.New(fail.NotFound, agentscalls.UnknownAgent, name, nil)
+	case 1:
+		return found[0].Agent, coremachine.Ref{Name: found[0].VM}, found[0].local, nil
+	}
+	on := make([]string, len(found))
+	for i, p := range found {
+		on[i] = p.VM
+	}
+	return agents.Agent{}, coremachine.Ref{}, "", fail.New(fail.Refused, agentscalls.Ambiguous, name, map[string]string{"on": strings.Join(on, ", ")})
+}
+
+func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.Ref, string, error) {
 	// value: with --on, or inside a workspace, the target itself, which says
 	// whether it holds the agent.
-	if f.env.Far() || f.env.Kind != coremachine.Mac {
-		return f.env.Target(), nil
+	if !f.onThisMac() {
+		return f.env.Target(), name, nil
 	}
-	_, at, err := f.find(ctx, name)
-	return at, err
+	_, at, local, err := f.located(ctx, name)
+	return at, local, err
 }

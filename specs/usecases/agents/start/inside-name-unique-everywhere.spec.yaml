@@ -1,0 +1,22 @@
+description: 'an agent started inside a workspace unnamed reads a name no other machine''s agent holds'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on linux-1 --name ci-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	ci-1	starts · claudecode · Write the changelog
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "ci-1" | .macs["ci-1"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the release notes"'
+      exit: 0
+      stdout: |
+          ●	ci-1	starts · claudecode · Write the release notes
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	ci-1	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	48s ago
+          ●	ci-1·2	claudecode	working	Write the release notes	ci-1	jterrazz-mac-mini	30s ago

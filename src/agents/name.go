@@ -54,7 +54,31 @@ func Named(kept []Agent, vm string) []Agent {
 		return cmp.Or(compareTime(out[i].Since, out[j].Since), strings.Compare(out[i].Session, out[j].Session))
 	})
 	for _, i := range order {
-		out[i].Name = NameFor(vm, taken)
+		out[i].Name, out[i].Given = NameFor(vm, taken), true
+		taken = append(taken, out[i].Name)
+	}
+	return out
+}
+
+func Unique(everywhere []Agent) []Agent {
+	// invariant: SPEC B5.22: across every machine a name asked is kept, and
+	// a given one another agent holds is given again, the next free name of
+	// its VM, in the order read; so every name is unique but for two asked
+	// inside two workspaces, which neither could see.
+	out := slices.Clone(everywhere)
+	var taken []string
+	for _, a := range out {
+		if !a.Given {
+			taken = append(taken, a.Name)
+		}
+	}
+	for i, a := range out {
+		if !a.Given {
+			continue
+		}
+		if Clashes(taken, a.Name) {
+			out[i].Name = NameFor(a.VM, taken)
+		}
 		taken = append(taken, out[i].Name)
 	}
 	return out

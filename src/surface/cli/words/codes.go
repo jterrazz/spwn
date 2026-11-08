@@ -208,6 +208,14 @@ func Codes() map[fail.Code]Wording {
 			}
 			return "an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)", "station agents start \"<task>\" --on <workspace>"
 		},
+		agentscalls.Ambiguous: func(e *fail.Error) (string, string) {
+			on := strings.Split(e.Detail["on"], ", ")
+			named := make([]string, len(on))
+			for i, vm := range on {
+				named[i] = e.Subject + " on " + vm
+			}
+			return "more than one agent is named " + e.Subject + ": " + strings.Join(named, " and "), "name its workspace: --on " + strings.Join(on, " or --on ")
+		},
 		agentscalls.NotStopped: func(e *fail.Error) (string, string) {
 			return e.Subject + " did not stop: " + e.Detail["cause"], "station agents stop " + e.Subject
 		},

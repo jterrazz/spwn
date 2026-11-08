@@ -27,6 +27,9 @@ const (
 	// value: a start that names neither a workspace nor a new one, or both,
 	// or a new one from inside a workspace.
 	NoWhere fail.Code = "agents.no-where"
+	// value: a name two agents of two machines hold, each started inside its
+	// own workspace.
+	Ambiguous fail.Code = "agents.ambiguous"
 	// value: an agent its workspace's stop or delete could not stop first;
 	// the VM goes on.
 	NotStopped fail.Code = "agents.not-stopped"
@@ -163,7 +166,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 		if err != nil {
 			return agents.Agent{}, err
 		}
-		a := agents.Judge(agents.Agent{VM: d.Machine}, agents.Event{Kind: agents.Began, App: app, Name: name, Session: agents.SessionOf(name), Terminal: terminal, Folder: in.Folder, Prompt: in.Task, At: d.Now()})
+		a := agents.Judge(agents.Agent{VM: d.Machine, Given: in.Name == ""}, agents.Event{Kind: agents.Began, App: app, Name: name, Session: agents.SessionOf(name), Terminal: terminal, Folder: in.Folder, Prompt: in.Task, At: d.Now()})
 		if err := d.Journal.Write(ctx, a); err != nil {
 			return a, err
 		}

@@ -1,0 +1,24 @@
+description: 'an agent run by hand is given a name no other machine''s agent holds; a stop reaches it alone'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on linux-1 --name ci-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	ci-1	starts · claudecode · Write the changelog
+    - command: 'world agent-prompt ci-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	ci-1	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
+          ●	ci-1·2	claudecode	working	Review the auth refresh	ci-1	jterrazz-mac-mini	12s ago
+    - command: 'agents stop ci-1·2 --yes'
+      exit: 0
+      stdout: |
+          ●	ci-1·2	stopped · its workspace keeps running
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal, .macs["jterrazz-mac-mini"].vms["ci-1"].agents.journal] | map(map_values(.state))'' world.json'
+      exit: 0
+      stdout: |
+          [{"station-ci-1":"working"},{"s-1":"finished"}]
