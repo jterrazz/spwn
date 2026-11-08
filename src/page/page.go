@@ -172,6 +172,15 @@ type Section struct {
 	Segment string   `json:"segment,omitempty"`
 	Card    CardKind `json:"card,omitempty"`
 	Picker  []Action `json:"picker,omitempty"`
+	// value: what the section's title leaves unsaid, behind the info
+	// button beside it (Private · on your tailnet, SPEC A4 pop.info).
+	About *About `json:"about,omitempty"`
+}
+
+// value: an info button's name and the words it opens.
+type About struct {
+	Label string `json:"label,omitempty"`
+	Text  string `json:"text,omitempty"`
 }
 
 type Role string

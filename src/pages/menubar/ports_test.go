@@ -211,6 +211,24 @@ func TestAMacsPortsEndOnItsHTTPSLinksSwitch(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4: Private · on your tailnet carries its info button,
+// "About private links", on every page that lists it: all machines, a
+// Mac's, a workspace's with nothing shared yet.
+func TestThePrivateCardSaysWhatAPrivateLinkIs(t *testing.T) {
+	f := portFleet()
+	for name, p := range map[string]page.Page{
+		"all machines": fleetPorts(t, f, PortsOf{}),
+		miniMac:        macPageOf(t, miniMac, func(m *Machine) { m.Ports = &f }),
+		"review-bot":   macPageOf(t, "review-bot", func(m *Machine) { m.Ports = &f }),
+	} {
+		about := sectionOf(p, SectionPrivate).About
+		if about == nil || about.Label != "About private links" ||
+			about.Text != "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared." {
+			t.Errorf("%s's Private card explains %+v", name, about)
+		}
+	}
+}
+
 // invariant: a workspace's Ports hides Public when it has none, and lists
 // its listeners in its Private card, under their own words once it shares
 // something; one with nothing at all says "Nothing shared yet".

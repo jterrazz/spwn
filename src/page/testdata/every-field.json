@@ -224,7 +224,11 @@
           },
           "picked": true
         }
-      ]
+      ],
+      "about": {
+        "label": "About agents",
+        "text": "An agent is Claude at work in its own VM."
+      }
     },
     {
       "id": "cards",

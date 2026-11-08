@@ -77,6 +77,12 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(texts(page.section("summary")?.caption), ["mac-mini", "1 public", "2 on your tailnet", "2 exposed"])
         XCTAssertEqual(page.section("summary")?.caption?.last?.signal, "failing")
         XCTAssertEqual(PortRow.addressRole.design, .monospaced)
+        let about = try XCTUnwrap(page.section("private")?.about)
+        XCTAssertEqual(about.label, "About private links")
+        XCTAssertEqual(about.text, "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared.")
+        XCTAssertNil(page.section("public")?.about)
+        let label = PortsSection(try XCTUnwrap(page.section("private"))).header.frame(width: 360)
+        XCTAssertNil(try Golden.check("ports.private-label", AnyView(label), scheme: .dark, desk: false))
     }
 
     // invariant: PO-45: Declare public… on mac-mini's Ports asks the port

@@ -230,7 +230,11 @@
           "kind": "text",
           "text": "on your tailnet"
         }
-      ]
+      ],
+      "about": {
+        "label": "About private links",
+        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+      }
     },
     {
       "id": "listening",

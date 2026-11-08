@@ -2,24 +2,26 @@ import SwiftUI
 
 // invariant: SPEC A4 Ports: one section of ports by its kind: the
 // exposed card in red with its verbs, the HTTPS links switch, or a list
-// under its label and count (Public, Private, Listening, not shared), its
-// rows the port rows, a group's head its grey words, nothing at all one
-// line.
+// under its label, its info button and its count (Public, Private,
+// Listening, not shared), its rows the port rows, a group's head its grey
+// words, nothing at all one line.
 public struct PortsSection: View {
     let section: Section
     let actions: [Action]
     let run: (Action) -> Void
     let qr: (String) -> Void
+    let about: (About) -> Void
     let shown: String?
     let unfolded: (Row, URL) -> AnyView
     @Environment(\.stationTokens) private var tokens
 
     public init(_ section: Section, actions: [Action] = [], run: @escaping (Action) -> Void = { _ in }, qr: @escaping (String) -> Void = { _ in },
-                shown: String? = nil, unfolded: @escaping (Row, URL) -> AnyView = { _, _ in AnyView(EmptyView()) }) {
+                about: @escaping (About) -> Void = { _ in }, shown: String? = nil, unfolded: @escaping (Row, URL) -> AnyView = { _, _ in AnyView(EmptyView()) }) {
         self.section = section
         self.actions = actions
         self.run = run
         self.qr = qr
+        self.about = about
         self.shown = shown
         self.unfolded = unfolded
     }
@@ -63,11 +65,14 @@ public struct PortsSection: View {
             }
         } else {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
-                CardLabel(Self.label(section), value: section.caption ?? [])
+                header
                 Card { list(section.items ?? []) }
             }
         }
     }
+
+    // value: a list's label line: its words, its info button, its count.
+    public var header: CardLabel { CardLabel(Self.label(section), value: section.caption ?? [], about: section.about, tap: about) }
 
     // value: a list's label: its words, joined, or its title.
     public static func label(_ section: Section) -> String {

@@ -143,7 +143,8 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		}
 		b.Sections = append(b.Sections, page.Section{ID: SectionPublic, Title: TitlePublic, Glance: page.Texts(TitlePublic, "from outside").Items, Caption: []page.Value{count(b.Public)}, Columns: columns(), Items: public})
 	}
-	priv := page.Section{ID: SectionPrivate, Title: TitlePrivate, Glance: page.Texts(TitlePrivate, "on your tailnet").Items, Caption: []page.Value{count(b.Private)}, Columns: columns(), Items: private}
+	priv := page.Section{ID: SectionPrivate, Title: TitlePrivate, Glance: page.Texts(TitlePrivate, "on your tailnet").Items, Caption: []page.Value{count(b.Private)}, Columns: columns(), Items: private,
+		About: &page.About{Label: catalog.AboutPrivateLinks, Text: catalog.PrivateLinksAre}}
 	switch {
 	case sc.VM != "" && len(private) > 0 && len(listening) > 0:
 		priv.Items = append(priv.Items, page.Item{Group: &page.Group{Head: page.Row{ID: SectionListening, Label: TitleListening}, Items: listening}})
