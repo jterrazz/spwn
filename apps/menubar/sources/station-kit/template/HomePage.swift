@@ -1,25 +1,40 @@
 import SwiftUI
 
 // invariant: SPEC A4's Home: the hero the engine decides first; below it,
-// until the tiles and the cards land, the machines' list, the Awake and
-// Accounts tiles side by side, then the menu. A page from an engine that
-// sends no hero keeps today's look: the three measures, what needs you.
+// the tiles and the agents', servers' and Macs' cards, the menu's lines
+// only while the station menu is open. A page from an engine that sends
+// no cards keeps the machines' list, the Awake and Accounts tiles and the
+// menu; one that sends no hero, the three measures and what needs you.
 struct HomePage: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
     @State private var unfolded = false
     @State private var lit: Int?
+    @State private var folds: Set<String>
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationStill) private var still
 
-    // value: the machines' lines the arrows move through, as drawn.
+    init(page: Page, state: PanelState, handlers: PopoverHandlers) {
+        self.page = page
+        self.state = state
+        self.handlers = handlers
+        _folds = State(initialValue: Set(state.unfolded))
+    }
+
+    // value: SPEC A4's Home below the hero: its tiles and its cards, once
+    // the engine sends them.
+    var cards: Bool { page.section(HomeCards.macs) != nil }
+
+    // value: the lines the arrows move through, as drawn: the cards'
+    // navigable rows, else the machines' lines.
     var lines: [Row] {
+        if cards { return HomeCards.navigable(page, unfolded: folds) }
         guard let machines = page.section("machines") else { return [] }
         return HomeKeys.rows(MachineTree(section: machines, kinds: false, only: nil, open: { _ in }).lines())
     }
 
-    var litID: String? { lit.flatMap { i in lines.indices.contains(i) ? lines[i].id : nil } }
+    var litID: String? { lit.flatMap { i in lines.indices.contains(i) ? lines[i].id : nil } ?? state.lit }
 
     var hero: Section? { page.section(Self.hero) }
     static let hero = "hero"
@@ -29,12 +44,15 @@ struct HomePage: View {
     var carried: [String] { (page.header?.buttons ?? []) + (hero?.items?.first?.empty?.actions ?? []) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Token.Tile.section) {
+        VStack(alignment: .leading, spacing: cards ? Token.Metric.Panel.blocks : Token.Tile.section) {
             if let hero {
                 Hero(hero, actions: page.actions ?? [], stale: page.header?.stale, run: { verb(page, $0, handlers) }, open: { go($0, handlers) })
                     .onChange(of: Hero.announcement(hero)) { _, said in
                         if let said, !still { AccessibilityNotification.Announcement(said).post() }
                     }
+            }
+            if cards {
+                sections
             }
             if hero == nil, let strip = page.strip {
                 Button { handlers.push(Navigation.activity) } label: {
@@ -48,13 +66,13 @@ struct HomePage: View {
             } else if hero == nil, let needs = page.section(TodoBadge.section), needs.items?.contains(where: { $0.row != nil }) == true {
                 needsYou(needs)
             }
-            if let machines = page.section("machines") {
+            if !cards, let machines = page.section("machines") {
                 SectionHeader(machines.title ?? "")
                 MachineTree(section: machines, kinds: false, only: nil, lit: litID, stopping: StopAll.stopping(state, page), open: handlers.openMachine)
             }
-            tiles
+            if !cards { tiles }
             SheetFor(page: page, state: state, handlers: handlers)
-            if state.confirming == nil || page.action(state.confirming ?? "")?.on == "row" {
+            if (!cards || state.menu), state.confirming == nil || page.action(state.confirming ?? "")?.on == "row" {
                 menu
             }
         }
@@ -62,10 +80,38 @@ struct HomePage: View {
             if !still, state.confirming == nil {
                 ArrowKeys(move: { lit = HomeKeys.moved(lit, by: $0, count: lines.count) },
                           submit: { guard let id = litID else { return false }
-                              handlers.openMachine(id)
+                              if cards, let nav = lines.first(where: { $0.id == id })?.nav {
+                                  go(nav, handlers)
+                              } else {
+                                  handlers.openMachine(id)
+                              }
                               return true })
             }
         }
+    }
+
+    // value: SPEC A4 Home 2-5: the tiles, then the agents, the servers and
+    // the Macs, each its card.
+    @ViewBuilder
+    var sections: some View {
+        let actions = page.actions ?? []
+        if let tiles = page.section(HomeCards.tiles) {
+            TileStrip(tiles, actions: actions, run: { perform($0, handlers) }, open: { go($0, handlers) })
+        }
+        if let agents = page.section(HomeCards.agents) {
+            AgentsCard(agents, actions: actions, open: folds.contains(HomeCards.agents), lit: litID, fold: { fold(HomeCards.agents) },
+                       run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
+        }
+        if let servers = page.section(HomeCards.servers) {
+            ServersCard(servers, lit: litID, go: { go($0, handlers) })
+        }
+        if let macs = page.section(HomeCards.macs) {
+            MacsCard(macs, actions: actions, lit: litID, run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
+        }
+    }
+
+    func fold(_ id: String) {
+        if folds.contains(id) { folds.remove(id) } else { folds.insert(id) }
     }
 
     // value: the engine does not answer: what is wrong in a sentence and

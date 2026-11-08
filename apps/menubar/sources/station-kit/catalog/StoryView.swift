@@ -27,6 +27,8 @@ extension Story {
         state.scrub = ui.scrub
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
+        state.lit = ui.hover ?? ui.highlight
+        state.running = ui.pending?.first
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }
@@ -36,17 +38,46 @@ public struct StoryView: View {
     let story: Story
     let state: PanelState
     let handlers: PopoverHandlers
+    let live: LiveStore?
     @Environment(\.colorScheme) private var scheme
 
     public init(_ story: Story, state: PanelState? = nil, handlers: PopoverHandlers = PopoverHandlers()) {
         self.story = story
         self.state = state ?? story.state
         self.handlers = handlers
+        live = story.samples.isEmpty ? nil : Self.live(story.samples)
     }
 
     static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.switcher || page.id == PageID.machine }
 
     public var body: some View {
+        if let live {
+            drawn.environment(\.stationSamples, story.samples).environment(\.stationLive, live)
+        } else {
+            drawn
+        }
+    }
+
+    // value: the measure a CPU's live key starts with (`cpu:`, `cpuh:`).
+    static let cpu = "cpu"
+
+    // value: a story's samples as the engine's live frame would carry
+    // them: a CPU's share in tenths of a percent, any other as its count.
+    public static func live(_ samples: [String: Double]) -> LiveStore {
+        let store = LiveStore()
+        var values: [String: Value] = [:]
+        for (key, sample) in samples {
+            let cpu = key.hasPrefix(Self.cpu)
+            var v = Value(kind: cpu ? "percent" : "count")
+            v.n = Int64((cpu ? sample * Token.Live.tenths : sample).rounded())
+            values[key] = v
+        }
+        store.take(LiveSample(at: "", values: values))
+        return store
+    }
+
+    @ViewBuilder
+    var drawn: some View {
         if story.ui.statusItem == true {
             MenuBarStrip(MenuBarIcon.of(connection: state.connection, page: state.page), pressed: story.ui.pressed == true, turn: story.freeze ?? 0)
         } else if state.pushed != nil || state.page.map(Self.panel) == true {

@@ -138,7 +138,7 @@ final class ClientTests: XCTestCase {
             case .down: "down"
             }
         }
-        let keys = "cpu:jterrazz-macbook-pro memory:jterrazz-macbook-pro net:jterrazz-macbook-pro"
+        let keys = "cpu:jterrazz-mac-mini cpu:jterrazz-macbook-pro memory:jterrazz-macbook-pro net:jterrazz-macbook-pro"
         XCTAssertEqual(kinds, ["connected", "page loading", "page ready", "sample 2026-11-03T10:30:02Z \(keys)", "sample 2026-11-03T10:30:04Z \(keys) stale", "tick",
                                "notice awake_ended moon: Awake stopped on This Mac: battery 20 %"])
         XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar"]},"v":2,"watch":"page"}"#])
@@ -235,9 +235,9 @@ final class ClientTests: XCTestCase {
     func testAFailingCallsMessageAndHintMakeTheStatusLine() async throws {
         let engine = try answered("mb-fail", #"{"v":2,"id":"1","error":{"type":"failed","code":"internal","message":"api did not stop","hint":"station machines"}}"#)
         defer { engine.stop() }
-        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(try fixtureAction("awake-keep"), answers: ["Lid": "Lid=true Battery=true"])
-        XCTAssertEqual(engine.received, [#"{"call":"awake.keep","id":"1","in":{"Battery":true,"For":14400000000000,"Lid":true},"v":2}"#])
-        XCTAssertEqual(status, Status("api did not stop  → station machines", failed: true, posted: "awake failed: api did not stop"))
+        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(try fixtureAction("awake-off"))
+        XCTAssertEqual(engine.received, [#"{"call":"awake.off","id":"1","v":2}"#])
+        XCTAssertEqual(status, Status("api did not stop  → station machines", failed: true, posted: "Keep This Mac awake failed: api did not stop"))
     }
 
     func testStopEverythingIsDoneWhenTheEngineItStoppedHangsUp() async throws {

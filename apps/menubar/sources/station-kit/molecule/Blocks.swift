@@ -214,13 +214,16 @@ public struct EmptyState: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationHints) private var hints
 
-    public init(_ empty: Empty, actions: [Action] = [], run: @escaping (Action) -> Void = { _ in }) {
+    let centred: Bool
+
+    public init(_ empty: Empty, actions: [Action] = [], centred: Bool = false, run: @escaping (Action) -> Void = { _ in }) {
         self.empty = empty
         self.actions = actions
+        self.centred = centred
         self.run = run
     }
 
-    var full: Bool { empty.glyph != nil || empty.sub != nil || !(empty.actions ?? []).isEmpty }
+    var full: Bool { centred || empty.glyph != nil || empty.sub != nil || !(empty.actions ?? []).isEmpty }
 
     var symbol: String? {
         guard let glyph = empty.glyph, case let .symbol(name) = GlyphView.drawn(glyph) else { return nil }

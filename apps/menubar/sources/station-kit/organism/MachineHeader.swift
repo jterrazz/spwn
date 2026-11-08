@@ -52,7 +52,7 @@ public struct MachineHeader: View {
             HStack(spacing: m.titleGap) {
                 if let glyph = page.header?.glyph, case let .symbol(name) = GlyphView.drawn(glyph) {
                     Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
-                        .foregroundStyle(tokens.color.t2)
+                        .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
                         .frame(width: m.glyphSlot)
                 }
                 Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)

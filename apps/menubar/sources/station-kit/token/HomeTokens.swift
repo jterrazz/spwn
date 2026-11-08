@@ -26,4 +26,18 @@ extension Token {
         public static let menu = Symbol.gear
         public static let menuLabel = "More options for station"
     }
+
+    // value: the Find capsule of Home's footer.
+    public enum FindCapsule {
+        public static let words = "Find a machine, a port, an action\u{2026}"
+        public static let key = "cmd+k"
+        public static let gap: CGFloat = 7
+        public static let glyph: CGFloat = 12
+        public static let padding: CGFloat = 11
+    }
+
+    // value: a line of Home's cards that is no row: a fold, Add a Mac.
+    public enum HomeCard {
+        public static let line: CGFloat = 32
+    }
 }

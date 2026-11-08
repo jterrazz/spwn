@@ -204,15 +204,18 @@ public struct RowStack: View {
     let columns: [Column]
     let actions: [Action]
     let highlighted: String?
+    let open: ((Row) -> Void)?
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @State private var hovered: Int?
 
-    public init(_ rows: [Row], columns: [Column] = [], actions: [Action] = [], highlighted: String? = nil, run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ rows: [Row], columns: [Column] = [], actions: [Action] = [], highlighted: String? = nil, open: ((Row) -> Void)? = nil,
+                run: @escaping (Action) -> Void = { _ in }) {
         self.rows = rows
         self.columns = columns
         self.actions = actions
         self.highlighted = highlighted
+        self.open = open
         self.run = run
     }
 
@@ -233,6 +236,7 @@ public struct RowStack: View {
                 RowView(row, columns: columns, actions: actions, highlighted: highlighted != nil && row.id == highlighted, run: run) { on in
                     if on { hovered = i } else if hovered == i { hovered = nil }
                 }
+                .onTapGesture { if row.nav != nil { open?(row) } }
                 .overlay(alignment: .top) {
                     if i > 0 {
                         Rectangle().fill(tokens.color.hair)
