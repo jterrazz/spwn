@@ -2,6 +2,12 @@
 #if DEBUG
 import SwiftUI
 
+#Preview("accounts.all") { StoryStage(Stories["accounts.all"]) }
+
+#Preview("accounts.signed-in") { StoryStage(Stories["accounts.signed-in"]) }
+
+#Preview("accounts.signing-in") { StoryStage(Stories["accounts.signing-in"]) }
+
 #Preview("awake.all") { StoryStage(Stories["awake.all"]) }
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
@@ -34,6 +40,8 @@ import SwiftUI
 
 #Preview("mac.air.asleep") { StoryStage(Stories["mac.air.asleep"]) }
 
+#Preview("mac.mini.accounts") { StoryStage(Stories["mac.mini.accounts"]) }
+
 #Preview("mac.mini.created") { StoryStage(Stories["mac.mini.created"]) }
 
 #Preview("mac.mini.creating") { StoryStage(Stories["mac.mini.creating"]) }
@@ -45,6 +53,8 @@ import SwiftUI
 #Preview("mac.mini.overview") { StoryStage(Stories["mac.mini.overview"]) }
 
 #Preview("mac.mini.stale") { StoryStage(Stories["mac.mini.stale"]) }
+
+#Preview("mac.this.accounts") { StoryStage(Stories["mac.this.accounts"]) }
 
 #Preview("mac.this.activity") { StoryStage(Stories["mac.this.activity"]) }
 

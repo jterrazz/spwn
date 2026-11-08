@@ -27,6 +27,7 @@ extension Story {
         state.scrub = ui.scrub
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
+        state.pending = ui.pending ?? []
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }

@@ -1,0 +1,10 @@
+{
+    "group": "mac",
+    "id": "mac.this.accounts",
+    "note": "This Mac's Accounts: what needs you (a copy ending, npm signed out), the copies lent to its VMs with their time left and Lend an account…, then what it is signed in to.",
+    "pages": ["pages/machines.accounts.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "accounts"
+    }
+}

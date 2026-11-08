@@ -11,14 +11,12 @@ needs.updating
 needs.updated
 mac.this.activity
 mac.this.ports
-mac.this.accounts
 mac.mini.activity
 mac.mini.activity.6m
 mac.mini.activity.24h
 mac.mini.activity.scrub
 mac.mini.ports
 mac.mini.ports.https
-mac.mini.accounts
 workspace.agents
 workspace.agents.finished
 workspace.working.activity
@@ -50,9 +48,6 @@ ports.all
 ports.all.exposed
 ports.all.down
 ports.shared-new
-accounts.all
-accounts.signing-in
-accounts.signed-in
 accounts.extended
 awake.all
 awake.off

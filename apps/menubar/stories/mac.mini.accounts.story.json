@@ -1,0 +1,10 @@
+{
+    "group": "mac",
+    "id": "mac.mini.accounts",
+    "note": "mac-mini's Accounts: the copies it lent to linux-3 and review-bot, then GitHub, Claude and Tailscale signed in there.",
+    "pages": ["pages/machines.accounts.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "accounts"
+    }
+}
