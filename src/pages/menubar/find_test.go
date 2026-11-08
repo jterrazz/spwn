@@ -85,15 +85,15 @@ func findFleetDown() FindReading {
 	return r
 }
 
-type said struct{ title, where, verb, key, alt string }
+type findSaid struct{ title, where, verb, key, alt string }
 
-func entries(t *testing.T, p page.Page, section string) []said {
+func entries(t *testing.T, p page.Page, section string) []findSaid {
 	t.Helper()
 	actions := map[string]page.Action{}
 	for _, a := range p.Actions {
 		actions[a.ID] = a
 	}
-	var out []said
+	var out []findSaid
 	var walk func([]page.Item)
 	walk = func(items []page.Item) {
 		for _, it := range items {
@@ -102,7 +102,7 @@ func entries(t *testing.T, p page.Page, section string) []said {
 				continue
 			}
 			r := it.Row
-			s := said{title: r.Label, where: words(r.Detail), verb: actions[r.Verb].Label, key: actions[r.Verb].Key}
+			s := findSaid{title: r.Label, where: words(r.Detail), verb: actions[r.Verb].Label, key: actions[r.Verb].Key}
 			if r.Quick != "" {
 				s.alt = actions[r.Quick].Label
 			}
@@ -143,13 +143,13 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 
 	cases := []struct {
 		section string
-		want    []said
+		want    []findSaid
 	}{
-		{FindNeeds, []said{
+		{FindNeeds, []findSaid{
 			{"Review review-bot", "PR #42 is ready", "Review", "", ""},
 			{"Extend Claude on linux-1", "Claude ends in 24 min", "Extend", "", ""},
 		}},
-		{FindMachines, []said{
+		{FindMachines, []findSaid{
 			{"This Mac", "2 VMs | 28 GB free", "Open", "cmd+1", ""},
 			{"mac-mini", "3 VMs | 24 GB free", "Open", "cmd+2", ""},
 			{"macbook-air", "asleep | seen 2 hr ago", "Open", "cmd+3", ""},
@@ -159,11 +159,11 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"linux-3", "working | mac-mini", "Open", "", "Open in Terminal"},
 			{"review-bot", "waiting | mac-mini", "Open", "", "Open in Terminal"},
 		}},
-		{FindPorts, []said{
+		{FindPorts, []findSaid{
 			{"Vite", "linux-1:5173", "Open", "", "Copy link"},
 			{"Postgres", "linux-3:5432", "Share", "", ""},
 		}},
-		{FindSections, []said{
+		{FindSections, []findSaid{
 			{"Ports of This Mac", "", "Open", "", ""},
 			{"Activity of This Mac", "", "Open", "", ""},
 			{"Ports of mac-mini", "", "Open", "", ""},
@@ -172,7 +172,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"Accounts", "All machines", "Open", "cmd+u", ""},
 			{"Awake", "All Macs", "Open", "cmd+e", ""},
 		}},
-		{FindActions, []said{
+		{FindActions, []findSaid{
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
@@ -185,7 +185,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			t.Errorf("%s:\n got %+v\nwant %+v", c.section, got, c.want)
 		}
 	}
-	if got, want := entries(t, p, FindVerbs), []said{
+	if got, want := entries(t, p, FindVerbs), []findSaid{
 		{"Open agent-7f in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of agent-7f", "", "Share", "", ""},
 		{"Lend an account to agent-7f", "", "Run", "", ""},
@@ -217,7 +217,7 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Fatalf("the Find index fails its checks: %v", err)
 	}
 	needs := entries(t, p, FindNeeds)
-	if len(needs) != 3 || needs[0] != (said{"Restart infra", "down since 15:10", "Restart", "", ""}) || needs[1].title != "Review review-bot" {
+	if len(needs) != 3 || needs[0] != (findSaid{"Restart infra", "down since 15:10", "Restart", "", ""}) || needs[1].title != "Review review-bot" {
 		t.Errorf("Find's needs %+v, want Restart infra first, then Review review-bot", needs)
 	}
 	restart := findRow(p, FindNeeds, "down:infra")
@@ -239,7 +239,7 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Errorf("mac-mini's entry %+v, want it red while its server is down", r)
 	}
 	for _, e := range entries(t, p, FindActions) {
-		if strings.HasPrefix(e.title, "Restart infra") && e != (said{"Restart infra", "down", "Restart", "", ""}) {
+		if strings.HasPrefix(e.title, "Restart infra") && e != (findSaid{"Restart infra", "down", "Restart", "", ""}) {
 			t.Errorf("the restart action reads %+v, want Restart infra, down", e)
 		}
 	}
@@ -279,7 +279,7 @@ func TestFindGivesNewVMToTheRoomiestMac(t *testing.T) {
 	r := findFleet()
 	r.All.Macs[0].Hardware.Memory = 24 * gib
 	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
-	var got []said
+	var got []findSaid
 	for _, e := range entries(t, p, FindActions) {
 		if strings.HasPrefix(e.title, "New VM") {
 			got = append(got, e)
