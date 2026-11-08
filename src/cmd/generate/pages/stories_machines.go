@@ -307,9 +307,32 @@ func (f Scene) portsOf(mac string) ports.Listing {
 	return l
 }
 
+// value: Awake as the engine reads it: each Mac that answers by its own
+// report, one that does not as its record last had it.
 func (f Scene) awakeAll() pageawake.AllMachines {
-	reports := append([]awake.Report{f.Awake}, f.Macs...)
-	return pageawake.AllMachines{Now: storyNow, Zone: time.UTC, Reports: reports, Label: func(mac string) string { return page.MacName(mac, proName) }}
+	all := pageawake.AllMachines{Now: storyNow, Zone: time.UTC, Label: func(mac string) string {
+		if h, ok := f.mac(mac); ok {
+			return model.Label(f.All, h)
+		}
+		return mac
+	}}
+	for _, r := range append([]awake.Report{f.Awake}, f.Macs...) {
+		if h, ok := f.mac(r.Mac); ok && !h.ThisMac && !h.Reachable {
+			all.Silent = append(all.Silent, pageawake.Silent{Mac: r.Mac, Why: "no answer", Asleep: h.Asleep, Answered: h.Answered})
+			continue
+		}
+		all.Reports = append(all.Reports, r)
+	}
+	return all
+}
+
+func (f Scene) mac(name string) (model.MacView, bool) {
+	for _, h := range f.All.Macs {
+		if h.Name == name {
+			return h, true
+		}
+	}
+	return model.MacView{}, false
 }
 
 func (f Scene) draw() []Fixture {

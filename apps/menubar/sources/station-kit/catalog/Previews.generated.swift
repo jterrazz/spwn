@@ -2,7 +2,13 @@
 #if DEBUG
 import SwiftUI
 
+#Preview("awake.4h") { StoryStage(Stories["awake.4h"]) }
+
 #Preview("awake.all") { StoryStage(Stories["awake.all"]) }
+
+#Preview("awake.off") { StoryStage(Stories["awake.off"]) }
+
+#Preview("awake.until-run") { StoryStage(Stories["awake.until-run"]) }
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
 

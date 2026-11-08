@@ -1,0 +1,7 @@
+{
+    "group": "awake",
+    "id": "awake.off",
+    "note": "This Mac may sleep: its switch off, the moon, no term picked.",
+    "pages": ["pages/machines.keep.off.awake.json"],
+    "schema": "station.story/v1"
+}

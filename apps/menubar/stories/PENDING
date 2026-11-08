@@ -54,10 +54,6 @@ accounts.all
 accounts.signing-in
 accounts.signed-in
 accounts.extended
-awake.all
-awake.off
-awake.4h
-awake.until-run
 sheet.new-vm
 sheet.new-vm.options
 sheet.new-vm.lend

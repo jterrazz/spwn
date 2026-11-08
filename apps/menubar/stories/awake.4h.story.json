@@ -1,0 +1,7 @@
+{
+    "group": "awake",
+    "id": "awake.4h",
+    "note": "This Mac kept awake for 4 hr: the 4 hr term picked.",
+    "pages": ["pages/machines.keep.4h.awake.json"],
+    "schema": "station.story/v1"
+}
