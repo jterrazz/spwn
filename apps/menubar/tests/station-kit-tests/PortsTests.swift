@@ -85,6 +85,19 @@ final class PortsTests: XCTestCase {
         XCTAssertNil(try Golden.check("ports.private-label", AnyView(label), scheme: .dark, desk: false))
     }
 
+    // invariant: SPEC A4: a public row's address is set in mono and the
+    // route it is reached by follows in words, so the whole line reads
+    // "jterrazz.com · Cloudflare Tunnel"; a private row's is its address.
+    func testAPublicRowSaysItsAddressThenItsRoute() throws {
+        let page = try Tree.page("menubar.ports.mini")
+        let traefik = try XCTUnwrap(page.section("public")?.rows.first?.detail)
+        XCTAssertEqual(PortRow.address(traefik).address, "jterrazz.com")
+        XCTAssertEqual(PortRow.address(traefik).route, "Cloudflare Tunnel")
+        let kube = try XCTUnwrap(page.section("private")?.rows.first?.detail)
+        XCTAssertEqual(PortRow.address(kube).address, "infra:6443")
+        XCTAssertNil(PortRow.address(kube).route)
+    }
+
     // invariant: PO-45: Declare public… on mac-mini's Ports asks the port
     // and its route, red ones offered first, and sends ports.declare with
     // the port's machine and number as text.

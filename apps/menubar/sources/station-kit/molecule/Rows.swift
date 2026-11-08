@@ -117,6 +117,14 @@ public struct PortRow: View {
     // a port or a domain alike.
     public static let addressRole = Token.Role.address
 
+    // value: a row's address line split where the address ends: the
+    // address, set in mono, and the route a public port is reached by
+    // after it, in words (a domain, then Cloudflare Tunnel).
+    public static func address(_ detail: Value) -> (address: String, route: String?) {
+        guard detail.kind == "list", let items = detail.items, let first = items.first, items.count > 1 else { return (Format.show(detail), nil) }
+        return (Format.show(first), items.dropFirst().map { Format.show($0) }.joined(separator: Token.Glyph.sep))
+    }
+
     // value: the row's own verb when it opens or copies its link.
     public static func link(_ row: Row, in actions: [Action]) -> Action? {
         guard let verb = RowView.action(row.verb, in: actions), verb.run?.open != nil || verb.run?.copy != nil else { return nil }
@@ -167,9 +175,10 @@ public struct PortRow: View {
                 .opacity(off ? m.dimShare : 1)
             VStack(alignment: .leading, spacing: m.subGap) {
                 name.lineLimit(1)
-                if let address = row.detail, !address.isNone {
-                    Text(verbatim: Format.show(address))
-                        .font(Self.addressRole.font)
+                if let detail = row.detail, !detail.isNone {
+                    let (address, route) = Self.address(detail)
+                    (Text(verbatim: address).font(Self.addressRole.font)
+                        + Text(verbatim: route.map { Token.Glyph.sep + $0 } ?? "").font(Token.Role.rowSub.font))
                         .foregroundStyle(off ? tokens.color.t3 : tokens.color.t2)
                         .lineLimit(1)
                         .truncationMode(.middle)
