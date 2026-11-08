@@ -354,7 +354,12 @@
               "from": 1,
               "to": 2,
               "sentence": "CPU stayed high for 2 min"
-            }
+            },
+            "at": [
+              "15 s ago",
+              "10 s ago",
+              "5 s ago"
+            ]
           }
         },
         {

@@ -9,10 +9,21 @@
    ● Upkeep                    5 of 6 ready
    └─ ◐ Ready to host servers    5 of 6 ready · disk unlock after a power cut
 
- Activity
-     CPU
-     Memory
-     Disk
+ Last 6 minutes
+     CPU      now
+     Network
+
+ Last hour
+     CPU      now
+     Network
+
+ Last 24 hours
+     CPU      now
+     Network
+
+ Memory  now
+
+ Top processes  CPU, of mac-mini
 
  Ports
    No port shared yet

@@ -277,6 +277,9 @@ type Chart struct {
 	Peak    *Peak     `json:"peak,omitempty"`
 	Ends    []string  `json:"ends,omitempty"`
 	Anomaly *Anomaly  `json:"anomaly,omitempty"`
+	// value: when each point was, in the words a scrub's callout says it
+	// ("24 min ago", "14:00"), one per point of the series.
+	At []string `json:"at,omitempty"`
 }
 
 type Series struct {

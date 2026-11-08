@@ -56,6 +56,7 @@ func everyField() page.Page {
 				Peak:    &page.Peak{Index: 1, Value: page.Percent(340), At: "10:28"},
 				Ends:    []string{"6 min ago", "now"},
 				Anomaly: &page.Anomaly{From: 1, To: 2, Sentence: "CPU stayed high for 2 min"},
+				At:      []string{"15 s ago", "10 s ago", "5 s ago"},
 			}},
 			{Message: &page.Message{Title: "Claude waits", Body: "Should I merge?", Since: since, Reply: true,
 				PR: &page.PR{Number: 42, URL: "https://github.com/jterrazz/x/pull/42", Files: 3, Plus: 120, Minus: 8, Opened: since}}},

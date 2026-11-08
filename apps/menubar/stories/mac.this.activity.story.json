@@ -1,8 +1,11 @@
 {
     "group": "mac",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
     "id": "mac.this.activity",
-    "note": "This Mac's activity.",
-    "pages": ["pages/machines.activity.json"],
+    "note": "This Mac's activity over the last hour: its CPU bars with the peak, the network sent above and received below, the memory macOS and the VMs hold, its busiest processes with its VMs.",
+    "pages": ["pages/machines.history.machine.macbook-pro.json"],
     "schema": "station.story/v1",
-    "status": "today"
+    "ui": {
+        "segment": "activity"
+    }
 }

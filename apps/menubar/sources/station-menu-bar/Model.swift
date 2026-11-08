@@ -21,6 +21,8 @@ final class Model: ObservableObject {
     static let recentKept = 3
     // value: Activity's window last picked, the menu bar's own.
     nonisolated static let windowKey = "activityWindow"
+    // value: the window last picked on each machine's Activity.
+    static let windowsKey = "activityWindows"
     // value: how long a control stays pending once its call returned, at
     // most, for the page that says its outcome.
     static let settle: UInt64 = 2_500_000_000
@@ -45,6 +47,7 @@ final class Model: ObservableObject {
             Task { @MainActor in self?.show(page, shown) }
         }
         navigation.remember = { flag in UserDefaults.standard.set(flag, forKey: Model.windowKey) }
+        state.windows = UserDefaults.standard.dictionary(forKey: Self.windowsKey) as? [String: String] ?? [:]
         navigation.sampled = { [weak self] sample in Task { @MainActor in self?.live.take(sample) } }
     }
 
@@ -102,6 +105,11 @@ final class Model: ObservableObject {
         state.recent = Array(([name] + state.recent.filter { $0 != name }).prefix(Self.recentKept))
         UserDefaults.standard.set(state.recent, forKey: Self.recentKey)
         push(PageID.of(name))
+    }
+
+    func remember(_ machine: String, window: String) {
+        state.windows[machine] = window
+        UserDefaults.standard.set(state.windows, forKey: Self.windowsKey)
     }
 
     func openSwitcher() {

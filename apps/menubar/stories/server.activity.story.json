@@ -1,0 +1,11 @@
+{
+    "group": "server",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
+    "id": "server.activity",
+    "note": "infra's activity over the hour, measured inside the guest, and what that means if it stops answering.",
+    "pages": ["pages/machines.history.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "activity"
+    }
+}

@@ -18,3 +18,26 @@
  Accounts shared from This Mac  2 ●
    ● GitHub  read only · 4 h left
    ● Claude  12 h left
+
+ linux-1  throwaway
+
+ Last 6 minutes
+     CPU      34%             now
+     Network  1.7 · 0.1 MB/s
+
+ Last hour
+     CPU      34%             now
+     Network  1.7 · 0.1 MB/s
+
+ Last 24 hours
+     CPU      34%             now
+     Network  1.7 · 0.1 MB/s
+
+ Memory  now
+
+ Top processes  CPU, of linux-1
+     station  34%
+
+ Measured
+   Measured inside the guest. If linux-1 stops answering, this shows what This
+   Mac sees of it.

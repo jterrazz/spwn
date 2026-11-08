@@ -9,6 +9,7 @@ struct MacPage: View {
     let handlers: PopoverHandlers
     let scrolls: Bool
     @State private var segment: String
+    @State private var window: String
     @State private var unfolded: Set<String>
     @Environment(\.stationStill) private var still
 
@@ -18,6 +19,7 @@ struct MacPage: View {
         self.handlers = handlers
         self.scrolls = scrolls
         _segment = State(initialValue: state.segment ?? Self.picked(page))
+        _window = State(initialValue: ActivityWindow.remembered(state, page))
         _unfolded = State(initialValue: Set(state.unfolded))
     }
 
@@ -36,8 +38,13 @@ struct MacPage: View {
             header
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-                ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
-                    section(s)
+                if segment == ActivityWindow.segment {
+                    MachineActivity(page: page, sections: Self.sections(page, segment: segment), window: window, pick: pickWindow,
+                                    scrub: state.scrub, onScrub: handlers.scrub, run: run, open: handlers.push)
+                } else {
+                    ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
+                        section(s)
+                    }
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
@@ -57,6 +64,11 @@ struct MacPage: View {
 
     func tap(_ action: Action) { perform(action, handlers) }
 
+    func pickWindow(_ flag: String) {
+        window = flag
+        handlers.remember(page.context?.machine ?? "", flag)
+    }
+
     // value: a row's verb: its call, or the page its row opens when the
     // verb runs nothing.
     func run(_ action: Action, _ row: Row?) {
@@ -74,7 +86,6 @@ struct MacPage: View {
     @ViewBuilder
     func section(_ s: Section) -> some View {
         switch s.segment {
-        case "activity": MacActivity(section: s)
         case "ports": MacPorts(section: s)
         case "accounts": MacAccounts(section: s)
         default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })

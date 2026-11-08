@@ -144,8 +144,8 @@
       "card": "care"
     },
     {
-      "id": "activity",
-      "title": "Activity",
+      "id": "window-6m",
+      "title": "Last 6 minutes",
       "role": "summary",
       "columns": [
         {
@@ -157,11 +157,6 @@
           "key": "value",
           "kind": "list",
           "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
         }
       ],
       "items": [
@@ -174,34 +169,241 @@
                 "kind": "pending",
                 "live": "cpu:macbook-air"
               }
-            ]
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
           }
         },
         {
           "row": {
-            "id": "memory",
-            "label": "Memory",
+            "id": "network",
+            "label": "Network",
             "cells": [
               {
-                "kind": "pending",
-                "live": "memory:macbook-air"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending",
-                "live": "disk:macbook-air"
+                "kind": "pending"
               }
             ]
           }
         }
       ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-1h",
+      "title": "Last hour",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "cpu:macbook-air"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-24h",
+      "title": "Last 24 hours",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "cpu:macbook-air"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Memory",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "now"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "pending",
+              "live": "free:macbook-air"
+            }
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart"
+    },
+    {
+      "id": "processes",
+      "title": "Top processes",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "CPU, of macbook-air"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "uncounted": true,
       "segment": "activity"
     },
     {
@@ -402,8 +604,6 @@
   ],
   "live": [
     "cpu:macbook-air",
-    "memory:macbook-air",
-    "disk:macbook-air",
     "free:macbook-air",
     "net:macbook-air"
   ]

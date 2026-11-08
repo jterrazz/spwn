@@ -122,6 +122,9 @@ public struct ActivityCharts: View {
             bar(i, to: top, ink: tokens.color.track, shown: 1)
             bar(i, to: max(v, least), ink: barInk(i), shown: picked == nil || picked == i ? 1 : c.dimShare)
         }
+        if let i = picked {
+            scrubRule(i)
+        }
     }
 
     @ChartContentBuilder var line: some ChartContent {
@@ -254,17 +257,22 @@ public struct ActivityCharts: View {
         }
     }
 
-    func callout(_ i: Int) -> some View {
-        let c = Token.Metric.Chart.self
+    func said(_ i: Int) -> (value: String, when: String?) {
         let words = series.enumerated().compactMap { k, points -> String? in
             guard i < points.count else { return nil }
             let said = ChartScale.say(points[i], unit: chart.series?[k].unit)
             guard kind == .mirror else { return said }
             return "\(k == 0 ? Token.Glyph.sent : Token.Glyph.received)\(said)"
         }
-        return Text(words.joined(separator: Token.Glyph.sep))
+        return (words.joined(separator: Token.Glyph.sep), chart.at.flatMap { i < $0.count ? $0[i] : nil })
+    }
+
+    func callout(_ i: Int) -> some View {
+        let c = Token.Metric.Chart.self
+        let (value, when) = said(i)
+        let time = Text(when.map { Token.Glyph.sep + $0 } ?? "").font(.system(size: c.ends).monospacedDigit()).foregroundStyle(tokens.color.t2)
+        return Text("\(Text(value).foregroundStyle(tokens.color.t1))\(time)")
             .font(.system(size: c.ends, weight: .semibold).monospacedDigit())
-            .foregroundStyle(tokens.color.t1)
             .padding(c.calloutPadding)
             .background(
                 RoundedRectangle(cornerRadius: c.calloutRadius, style: .continuous).fill(tokens.color.panelSolid)

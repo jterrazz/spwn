@@ -9,10 +9,21 @@
    ● Upkeep                    all fine
    └─ ● Ready to host servers            6 of 6
 
- Activity
-     CPU
-     Memory
-     Disk
+ Last 6 minutes
+     CPU      now
+     Network
+
+ Last hour
+     CPU      now
+     Network
+
+ Last 24 hours
+     CPU      now
+     Network
+
+ Memory  now
+
+ Top processes  CPU, of mac-mini
 
  Ports
    No port shared yet

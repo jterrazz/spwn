@@ -76,6 +76,7 @@ struct StationMenuBarApp: App {
             close: { model.closePanel() }))
         h.push = { page in model.push(page) }
         h.scrub = { index in model.state.scrub = index }
+        h.remember = { machine, window in model.remember(machine, window: window) }
         return h.deferred { DispatchQueue.main.async(execute: $0) }
     }
 }

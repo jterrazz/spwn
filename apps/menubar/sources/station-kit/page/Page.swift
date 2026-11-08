@@ -176,6 +176,7 @@ public struct PageChart: Codable, Equatable, Sendable {
     public var peak: Peak?
     public var ends: [String]?
     public var anomaly: Anomaly?
+    public var at: [String]?
 }
 
 public struct Series: Codable, Equatable, Sendable {
