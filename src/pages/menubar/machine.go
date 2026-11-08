@@ -144,7 +144,42 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.Lifetime.Kind() == machine.Server {
 		return serverPage(m, h, vm)
 	}
-	return workspacePage(m, h, vm)
+	return vmFrame(m, h, vm, workspacePage(m, h, vm))
+}
+
+// invariant: SPEC A4: a running workspace's page carries its header (the
+// way back to its Mac, its glyph) and its four segments, its loans under
+// Accounts and every other section of its page under Overview; a
+// workspace that does not run has none.
+func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
+	if vm.State != model.Running {
+		return p
+	}
+	glyph := page.Glyph{Kind: "workspace"}
+	if vm.Agent != nil && !vm.Finished() {
+		glyph.Kind = "agent"
+	}
+	p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
+	p.Segments = segments()
+	for i := range p.Sections {
+		switch {
+		case p.Sections[i].ID == SectionShared:
+			p.Sections[i].Segment = SegmentAccounts
+		case p.Sections[i].Segment == "" && p.Sections[i].ID != SectionMachine:
+			p.Sections[i].Segment = SegmentOverview
+		}
+	}
+	p.Sections = append([]page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: vmFacts(m, vm)}}, p.Sections...)
+	return page.Seal(p)
+}
+
+// value: a VM's facts in its header: its lifetime, how long it has run.
+func vmFacts(m Machine, vm model.VM) []page.Value {
+	out := []page.Value{page.Text(lifeWord(vm))}
+	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
+		out = append(out, page.Text("up "+days(m.Now.Sub(vm.BootAt))))
+	}
+	return out
 }
 
 func items(rows []page.Row) []page.Item {

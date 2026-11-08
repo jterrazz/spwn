@@ -10,6 +10,21 @@
   "state": "loading",
   "sections": [
     {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "permanent"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        }
+      ]
+    },
+    {
       "id": "machine",
       "title": "review-bot",
       "role": "summary",
@@ -341,7 +356,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "inside",
@@ -393,7 +409,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "ports",
@@ -411,7 +428,8 @@
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "segment": "overview"
     },
     {
       "id": "shared",
@@ -496,6 +514,7 @@
           "n": 2
         }
       ],
+      "segment": "accounts",
       "card": "flush"
     }
   ],
@@ -612,6 +631,9 @@
           "Account": "claude",
           "Confirm": "yes",
           "From": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
         }
       }
     },
@@ -770,6 +792,34 @@
           "review-bot"
         ]
       }
+    }
+  ],
+  "header": {
+    "back": "mac-mini",
+    "glyph": {
+      "kind": "agent"
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
     }
   ],
   "live": [

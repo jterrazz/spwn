@@ -10,6 +10,17 @@
   "state": "ready",
   "sections": [
     {
+      "id": "summary",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "throwaway"
+        }
+      ]
+    },
+    {
       "id": "machine",
       "title": "linux-1",
       "role": "summary",
@@ -341,7 +352,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "inside",
@@ -412,7 +424,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "ports",
@@ -471,7 +484,8 @@
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "segment": "overview"
     },
     {
       "id": "shared",
@@ -591,6 +605,7 @@
           "n": 3
         }
       ],
+      "segment": "accounts",
       "card": "flush"
     }
   ],
@@ -970,6 +985,34 @@
           "linux-1"
         ]
       }
+    }
+  ],
+  "header": {
+    "back": "This Mac",
+    "glyph": {
+      "kind": "workspace"
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
     }
   ],
   "live": [

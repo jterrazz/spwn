@@ -40,7 +40,7 @@ struct MachineContent: View {
                 skeleton
             } else {
                 ForEach(Array((page.sections ?? []).enumerated()), id: \.offset) { _, s in
-                    if s.id != "machine" { section(s) }
+                    if s.id != "machine", s.id != "summary", s.segment == nil || s.segment == "overview" || s.segment == "accounts" { section(s) }
                 }
                 if mac { portsRow }
             }

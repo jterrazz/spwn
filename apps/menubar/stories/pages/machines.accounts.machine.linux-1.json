@@ -1,0 +1,1035 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "linux-1",
+    "kind": "workspace",
+    "on": "This Mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "throwaway"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        }
+      ]
+    },
+    {
+      "id": "machine",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "Workspace VM"
+        },
+        {
+          "kind": "text",
+          "text": "Throwaway"
+        },
+        {
+          "kind": "text",
+          "text": "on This Mac"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "state",
+            "mark": "ok",
+            "label": "State",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Running"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:linux-1"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 7462505676,
+                "of": 8589934592,
+                "live": "memory:linux-1"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 86
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 86
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 86
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 86
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 155,
+                "live": "disk:linux-1"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "inside",
+      "title": "Inside",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "apps",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "n": 38,
+                    "unit": "installed"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "2 need a look"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "settings",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "6.2 of 40 GB"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "ports",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "shared on Tailscale"
+        }
+      ],
+      "items": [
+        {
+          "link": {
+            "label": "Vite",
+            "lead": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Vite"
+                },
+                {
+                  "kind": "port",
+                  "n": 5173
+                }
+              ]
+            },
+            "value": {
+              "kind": "url",
+              "text": "https://macbook-pro.tail77a797.ts.net:40001"
+            },
+            "row": "5173"
+          }
+        },
+        {
+          "link": {
+            "label": "Web",
+            "lead": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Web"
+                },
+                {
+                  "kind": "port",
+                  "n": 3000
+                }
+              ]
+            },
+            "value": {
+              "kind": "url",
+              "text": "https://macbook-pro.tail77a797.ts.net:40002"
+            },
+            "row": "3000"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
+    },
+    {
+      "id": "shared",
+      "title": "Lent to linux-1",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Max plan"
+                }
+              ]
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/claude",
+              "take-back/claude"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 1440,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/github",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "read only"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/github",
+              "take-back/github"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 14400,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
+          }
+        },
+        {
+          "note": {
+            "text": "These are This Mac's accounts. Every loan ends by itself."
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "segment": "accounts",
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "linux-1"
+        }
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type linux-1 to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "linux-1",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "linux-1"
+        }
+      }
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "linux-1"
+        }
+      },
+      "form": {
+        "title": "Share a port of linux-1",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/claude"
+      ],
+      "confirm": {
+        "question": "Take back Claude from linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on linux-1 is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "take-back/claude",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "claude",
+          "Confirm": "yes",
+          "From": "linux-1"
+        }
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/github"
+      ],
+      "confirm": {
+        "question": "Take back GitHub from linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on linux-1 is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "take-back/github",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "github",
+          "Confirm": "yes",
+          "From": "linux-1"
+        }
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/github"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/github",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "8 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "linux-1",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "sheet": "share-account",
+      "prefill": {
+        "With": "linux-1"
+      }
+    },
+    {
+      "label": "Open apps",
+      "on": "row",
+      "rows": [
+        "apps"
+      ],
+      "priority": 5,
+      "id": "open:apps",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "apps",
+          "--on",
+          "linux-1"
+        ]
+      }
+    },
+    {
+      "label": "Open settings",
+      "on": "row",
+      "rows": [
+        "settings"
+      ],
+      "priority": 5,
+      "id": "open:settings",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "settings",
+          "--on",
+          "linux-1"
+        ]
+      }
+    },
+    {
+      "label": "Open disk",
+      "on": "row",
+      "rows": [
+        "disk"
+      ],
+      "priority": 5,
+      "id": "open:disk",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "disk",
+          "--on",
+          "linux-1"
+        ]
+      }
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "5173"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 5173?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1/5173",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"5173\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "3000"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 3000?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1/3000",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"3000\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "linux-1"
+        ]
+      }
+    }
+  ],
+  "header": {
+    "back": "This Mac",
+    "glyph": {
+      "kind": "agent"
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpu:linux-1",
+    "memory:linux-1",
+    "disk:linux-1"
+  ]
+}

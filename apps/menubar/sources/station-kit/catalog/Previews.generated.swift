@@ -4,6 +4,8 @@ import SwiftUI
 
 #Preview("accounts.all") { StoryStage(Stories["accounts.all"]) }
 
+#Preview("accounts.extended") { StoryStage(Stories["accounts.extended"]) }
+
 #Preview("accounts.signed-in") { StoryStage(Stories["accounts.signed-in"]) }
 
 #Preview("accounts.signing-in") { StoryStage(Stories["accounts.signing-in"]) }
@@ -87,5 +89,9 @@ import SwiftUI
 #Preview("server.healthy") { StoryStage(Stories["server.healthy"]) }
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
+
+#Preview("workspace.waiting.accounts") { StoryStage(Stories["workspace.waiting.accounts"]) }
+
+#Preview("workspace.working.accounts") { StoryStage(Stories["workspace.working.accounts"]) }
 
 #endif

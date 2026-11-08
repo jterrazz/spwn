@@ -1,0 +1,742 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "review-bot",
+    "kind": "workspace",
+    "on": "mac-mini"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "permanent"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        }
+      ]
+    },
+    {
+      "id": "machine",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "Workspace VM"
+        },
+        {
+          "kind": "text",
+          "text": "Permanent"
+        },
+        {
+          "kind": "text",
+          "text": "on mac-mini"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "state",
+            "mark": "ok",
+            "label": "State",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Running"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:review-bot"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 4133906022,
+                "of": 4294967296,
+                "live": "memory:review-bot"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 89
+                  },
+                  {
+                    "kind": "count",
+                    "n": 96
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 89
+                  },
+                  {
+                    "kind": "count",
+                    "n": 96
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 89
+                  },
+                  {
+                    "kind": "count",
+                    "n": 96
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 83
+                  },
+                  {
+                    "kind": "count",
+                    "n": 89
+                  },
+                  {
+                    "kind": "count",
+                    "n": 96
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 100,
+                "live": "disk:review-bot"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  },
+                  {
+                    "kind": "count",
+                    "n": 10
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "inside",
+      "title": "Inside",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "apps",
+            "label": "Apps",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "settings",
+            "label": "Settings",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "ports",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "shared on Tailscale"
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No port shared yet"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
+    },
+    {
+      "id": "shared",
+      "title": "Lent to review-bot",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "noun": "accounts",
+            "text": "No account lent to review-bot"
+          }
+        },
+        {
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
+          }
+        },
+        {
+          "note": {
+            "text": "These are mac-mini's accounts. Every loan ends by itself."
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "accounts",
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type review-bot to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "review-bot",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Share a port of review-bot",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share",
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "review-bot",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From mac-mini. It ends by itself."
+      },
+      "sheet": "share-account",
+      "prefill": {
+        "With": "review-bot"
+      }
+    },
+    {
+      "label": "Open apps",
+      "on": "row",
+      "rows": [
+        "apps"
+      ],
+      "priority": 5,
+      "id": "open:apps",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "apps",
+          "--on",
+          "review-bot"
+        ]
+      }
+    },
+    {
+      "label": "Open settings",
+      "on": "row",
+      "rows": [
+        "settings"
+      ],
+      "priority": 5,
+      "id": "open:settings",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "settings",
+          "--on",
+          "review-bot"
+        ]
+      }
+    },
+    {
+      "label": "Open disk",
+      "on": "row",
+      "rows": [
+        "disk"
+      ],
+      "priority": 5,
+      "id": "open:disk",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "disk",
+          "--on",
+          "review-bot"
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "review-bot"
+        ]
+      }
+    }
+  ],
+  "header": {
+    "back": "mac-mini",
+    "glyph": {
+      "kind": "agent"
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpu:review-bot",
+    "memory:review-bot",
+    "disk:review-bot"
+  ]
+}

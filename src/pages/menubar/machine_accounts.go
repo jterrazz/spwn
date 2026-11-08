@@ -95,21 +95,16 @@ func sharedAccounts(m Machine, vm string) []accounts.Account {
 	return out
 }
 
-func takeBacks(m Machine, vm model.VM) []page.Action {
+func takeBacks(m Machine, h model.MacView, vm model.VM) []page.Action {
 	shared := sharedAccounts(m, vm.Name)
 	out := make([]page.Action, 0, len(shared))
 	for _, a := range shared {
 		label := accounts.Label(a.Provider)
 		c := ask(m.Asks, "take-back", machine.Workspace, label, "Take back "+label+" from "+vm.Name+"?", "take back", "Its copy on "+vm.Name+" is deleted.")
-		out = append(out, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow, Rows: []string{vm.Mac + "/" + vm.Name + "/" + a.Provider}, Priority: 4, Mutates: true, Confirm: c,
-			Run: &page.Run{Call: CallTakeBack, In: answered(c, map[string]string{"Account": a.Provider, "From": vm.Name})}})
+		out = append(out, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow, Rows: []string{h.Name + "/" + vm.Name + "/" + a.Provider}, Priority: 4, Mutates: true, Confirm: c,
+			Run: &page.Run{Call: CallTakeBack, In: answered(c, map[string]string{"Account": a.Provider, "From": vm.Name}), Target: target(h)}})
 	}
-	for _, h := range m.All.Macs {
-		if h.Name == vm.Mac {
-			out = append(out, vmAccountActions(m, h, vm)...)
-		}
-	}
-	return out
+	return append(out, vmAccountActions(m, h, vm)...)
 }
 
 func thisMacOf(all model.AllMachines) string {

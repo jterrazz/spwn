@@ -1,0 +1,11 @@
+{
+    "group": "accounts",
+    "heightNote": "the workspace page's footer (ssh linux-1 and Open in Terminal) is the workspace page's own lot, P9; the page above it matches the prototype's",
+    "id": "accounts.extended",
+    "note": "Extend pressed on Claude's copy to linux-1: 4 hr more, its bar refilled and its time no longer orange.",
+    "pages": ["pages/machines.accounts.extended.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "accounts"
+    }
+}

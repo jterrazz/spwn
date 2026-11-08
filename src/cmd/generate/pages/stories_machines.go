@@ -191,8 +191,8 @@ func sceneSamples() map[string][]activity.Reading {
 	}
 }
 
-func loan(provider, name string, left time.Duration) accounts.Account {
-	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginShared, Identity: []string{"admin@jterrazz.com"}, Scopes: []string{name},
+func loan(provider, name string, left time.Duration, may ...string) accounts.Account {
+	return accounts.Account{Provider: provider, State: catalog.StateOK, Origin: accounts.OriginShared, Identity: []string{"admin@jterrazz.com"}, Scopes: append([]string{name}, may...),
 		Shared: &accounts.Loan{Name: name, At: storyNow.Add(left - 12*time.Hour), Until: storyNow.Add(left)}}
 }
 
@@ -206,7 +206,7 @@ func sceneAccounts() accounts.Report {
 			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
 			own(catalog.ProviderClaude, []string{"admin@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
 		}},
-		vm("linux-1", "throwaway", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute), loan(catalog.ProviderGitHub, "github", 4*time.Hour)),
+		vm("linux-1", "throwaway", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute, "Max plan"), loan(catalog.ProviderGitHub, "session:github", 4*time.Hour, "read only")),
 		vm("linux-3", "throwaway", loan(catalog.ProviderGitHub, "github", 6*time.Hour)),
 		vm("review-bot", "permanent", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 9*time.Hour)),
 	}}
