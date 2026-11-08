@@ -29,11 +29,13 @@
         },
         {
           "kind": "text",
-          "text": "Claude"
+          "text": "Claude",
+          "pri": 2
         },
         {
           "kind": "text",
-          "text": "on agent-7f"
+          "text": "on agent-7f",
+          "pri": 1
         }
       ]
     },

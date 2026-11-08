@@ -138,7 +138,8 @@ func appWord(app agents.App) string { return catalog.AgentAppName(string(app)) }
 
 // value: SPEC A4's facts of an agent: its state and for how long, how it
 // ended once finished, its app, the workspace it runs on, then its Mac when
-// it is not This Mac.
+// it is not This Mac. On a narrow line the Mac goes first, then the app,
+// then the workspace: the state stays.
 func agentFacts(r Agent, a agents.Agent, h model.MacView) []page.Value {
 	state := page.Text(string(a.State))
 	switch {
@@ -152,9 +153,9 @@ func agentFacts(r Agent, a agents.Agent, h model.MacView) []page.Value {
 	if a.State == agents.Waiting {
 		state.Signal = page.SignalWaits
 	}
-	out := []page.Value{state, page.Text(appWord(a.App)), page.Text("on " + a.VM)}
+	out := []page.Value{state, dropFirst(page.Text(appWord(a.App)), 2), dropFirst(page.Text("on "+a.VM), 1)}
 	if !h.ThisMac && h.Name != "" {
-		out = append(out, page.Text(model.Label(*r.All, h)))
+		out = append(out, dropFirst(page.Text(model.Label(*r.All, h)), 3))
 	}
 	return out
 }

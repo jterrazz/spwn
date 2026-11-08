@@ -30,15 +30,18 @@
         },
         {
           "kind": "text",
-          "text": "Claude"
+          "text": "Claude",
+          "pri": 2
         },
         {
           "kind": "text",
-          "text": "on review-bot"
+          "text": "on review-bot",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "mac-mini"
+          "text": "mac-mini",
+          "pri": 3
         }
       ]
     },

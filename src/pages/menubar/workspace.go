@@ -127,14 +127,16 @@ func agentRank(a agents.Agent) int {
 }
 
 // value: SPEC A4's facts of a workspace: its life, its Mac, how long it
-// has run and how many agents it hosts; a stopped one says it stopped.
+// has run and how many agents it hosts; a stopped one says it stopped. On
+// a narrow line its uptime goes first, then its Mac, then its life: what
+// it runs stays.
 func workspaceFacts(m Machine, vm model.VM, label string, mine []agents.Agent) []page.Value {
-	out := []page.Value{page.Text(lifeWord(vm)), page.Text("on " + label)}
+	out := []page.Value{dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Text("on "+label), 2)}
 	if vm.State != model.Running {
 		return append(out, page.Text("stopped"))
 	}
 	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
-		out = append(out, page.Text("up "+days(m.Now.Sub(vm.BootAt))))
+		out = append(out, dropFirst(page.Text("up "+days(m.Now.Sub(vm.BootAt))), 3))
 	}
 	live := 0
 	for _, a := range mine {

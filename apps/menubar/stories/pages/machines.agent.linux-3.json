@@ -20,15 +20,18 @@
         },
         {
           "kind": "text",
-          "text": "Claude"
+          "text": "Claude",
+          "pri": 2
         },
         {
           "kind": "text",
-          "text": "on linux-3"
+          "text": "on linux-3",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "mac-mini"
+          "text": "mac-mini",
+          "pri": 3
         }
       ]
     },

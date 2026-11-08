@@ -16,11 +16,13 @@
       "caption": [
         {
           "kind": "text",
-          "text": "throwaway"
+          "text": "throwaway",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "on This Mac"
+          "text": "on This Mac",
+          "pri": 2
         },
         {
           "kind": "text",

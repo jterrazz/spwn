@@ -29,11 +29,13 @@
         },
         {
           "kind": "text",
-          "text": "Claude"
+          "text": "Claude",
+          "pri": 2
         },
         {
           "kind": "text",
-          "text": "on linux-1"
+          "text": "on linux-1",
+          "pri": 1
         }
       ]
     },

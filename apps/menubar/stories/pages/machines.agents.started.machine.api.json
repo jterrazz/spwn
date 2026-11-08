@@ -16,15 +16,18 @@
       "caption": [
         {
           "kind": "text",
-          "text": "permanent"
+          "text": "permanent",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "on This Mac"
+          "text": "on This Mac",
+          "pri": 2
         },
         {
           "kind": "text",
-          "text": "up 1 min"
+          "text": "up 1 min",
+          "pri": 3
         },
         {
           "kind": "text",
