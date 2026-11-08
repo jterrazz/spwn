@@ -1,0 +1,10 @@
+{
+    "group": "mac",
+    "id": "mac.this.needs-unfolded",
+    "note": "A Mac with four needs, infra down first, unfolded past its three rows.",
+    "pages": ["pages/machines.macs.four-needs.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "unfolded": ["needs-you"]
+    }
+}

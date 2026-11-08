@@ -153,6 +153,12 @@ func miniOverview() overview.Summary {
 			ready(model.ItemRestartsAfterPowerCut, "applied"), ready(model.ItemNeverSleeps, "applied"), ready(model.ItemLogsIn, "applied"),
 			ready(model.ItemDiskUnlock, "no password at boot"), ready(model.ItemPlannedRestarts, "supported"), ready(model.ItemEngineAtLogin, "installed"),
 		},
+		Lines: []overview.Line{
+			{Section: "apps", Parts: []overview.Part{overview.Count(catalog.StateOK, 38, "ok", "ok")}},
+			{Section: "settings", Parts: []overview.Part{{Word: "set by station"}, {State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}}},
+			{Section: "disk", Parts: []overview.Part{{Bytes: 731_000_000_000, Word: "free"}}},
+			{Section: "background", Parts: []overview.Part{overview.Count(catalog.StateOK, 9, "", "ok")}},
+		},
 		VMs: []overview.VM{{Name: "infra", Running: true}, {Name: "linux-3", Running: true}, {Name: "review-bot", Running: true}},
 	}
 }
@@ -240,7 +246,14 @@ func (f Scene) reading() pagemenubar.Reading {
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
-	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow}
+	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC}
+	m.Shares = f.needs().Accounts
+	reports := append([]awake.Report{f.Awake}, f.Macs...)
+	for i := range reports {
+		if reports[i].Mac == name {
+			m.Awake = &reports[i]
+		}
+	}
 	if name == proName {
 		m.Summary = &f.Home
 	}

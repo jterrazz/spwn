@@ -442,12 +442,12 @@ func TestVocabularyBites(t *testing.T) {
 }
 
 func TestVocabularyKeepsItsPhrases(t *testing.T) {
-	for _, text := range []string{"a URL or host:port", "after a power cut", "the Tailnet contract", "a file's path", "Off here", "git config --global", "dclean", "Low Power Mode is on", "deleted when it powers off", "waiting for the VM to power off", "no power management here", "Lend an account to linux-1", "Clean up throwaways on This Mac"} {
+	for _, text := range []string{"a URL or host:port", "after a power cut", "the Tailnet contract", "a file's path", "Off here", "git config --global", "dclean", "Low Power Mode is on", "deleted when it powers off", "waiting for the VM to power off", "no power management here", "Lend an account to linux-1", "Clean up throwaways on This Mac", "Clean up", "It works when it is on power", "Ready to host servers"} {
 		if got := saysBanned(codeBanned(), []string{text}); len(got) > 0 {
 			t.Errorf("%q says %v, a phrase SPEC §2.2 keeps", text, got)
 		}
 	}
-	for _, text := range []string{"lend list", "the daemon", "a probe", "Storage", "temporary VM", "Power session held", "PowerEnded", "power-awake"} {
+	for _, text := range []string{"lend list", "the daemon", "a probe", "Storage", "temporary VM", "Power session held", "PowerEnded", "power-awake", "disk clean"} {
 		if got := saysBanned(codeBanned(), []string{splitText(text)}); len(got) != 1 {
 			t.Errorf("%q says %v, want one retired word", text, got)
 		}

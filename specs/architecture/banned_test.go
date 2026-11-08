@@ -34,7 +34,7 @@ type banned struct {
 // contract keeps two gestures by name, "Lend an account" and "Clean up".
 func bannedWords() []banned {
 	return []banned{
-		{word: "host", allowed: []string{"host:port", "host key", "known host"}},
+		{word: "host", allowed: []string{"host:port", "host key", "known host", "host servers"}},
 		{word: "fleet", forms: []string{"fleets"}},
 		{word: "here", only: `^here$|\bhere v\d`},
 		{word: "daemon", forms: []string{"daemons"}},
@@ -54,7 +54,7 @@ func bannedWords() []banned {
 		{word: "stray", forms: []string{"strays"}},
 		{word: "clean", allowed: []string{"dclean", "clean up"}},
 		{word: "reset", allowed: []string{"dock-reset", "dock reset", "dreset", "counter reset"}},
-		{word: "power", allowed: []string{"power cut", "power-cut", "power source", "low power", "low-power", "power off", "power management"}},
+		{word: "power", allowed: []string{"power cut", "power-cut", "power source", "low power", "low-power", "power off", "power management", "on power"}},
 		{word: "place", forms: []string{"places"}},
 		{word: "Resources", exact: true},
 		{word: "Tasks", exact: true},

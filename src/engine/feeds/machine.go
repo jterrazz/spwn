@@ -5,11 +5,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/accounts"
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
+	"github.com/jterrazz/studio-station/src/awake"
+	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine"
+	"github.com/jterrazz/studio-station/src/machines"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	"github.com/jterrazz/studio-station/src/page"
@@ -117,6 +121,16 @@ func (f *one) send(ctx context.Context, change func(*pagemenubar.Machine)) {
 	latest(ctx, f.out, p)
 }
 
+// value: the Mac a page is of, when it is a Mac's.
+func macNamed(all machines.AllMachines, name string) (machines.MacView, bool) {
+	for _, h := range all.Macs {
+		if h.Name == name {
+			return h, true
+		}
+	}
+	return machines.MacView{}, false
+}
+
 func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 	at := machine.Ref{Name: f.m.Name}
 	for {
@@ -124,7 +138,18 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 		shared, serr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil)
 		shares, aerr := call.Read(ctx, f.o.Calls, machine.Ref{}, accountscalls.List, accountscalls.ListIn{VMs: true}, nil)
 		read, oerr := call.Read(ctx, f.o.Calls, at, overviewcalls.Read, overviewcalls.ReadIn{}, nil)
+		var copies *accounts.AllMachines
+		var held *awake.Report
+		if h, ok := macNamed(listed.All, f.m.Name); ferr == nil && ok {
+			all := f.o.everyMacAccounts(ctx, listed.All, "")
+			copies = &all
+			if r, err := call.Read(ctx, f.o.Calls, macRef(h), awakecalls.Read, awakecalls.ReadIn{}, nil); err == nil {
+				r.Mac = h.Name
+				held = &r
+			}
+		}
 		f.send(ctx, func(m *pagemenubar.Machine) {
+			m.Zone, m.Shares, m.Awake = time.Local, copies, held
 			if ferr == nil {
 				m.All = &listed.All
 			}

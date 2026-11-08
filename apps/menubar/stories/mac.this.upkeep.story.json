@@ -1,0 +1,11 @@
+{
+    "group": "mac",
+    "heightNote": "its upkeep unfolded fits under the 700 cap: each item's words keep to one line",
+    "id": "mac.this.upkeep",
+    "note": "This Mac's upkeep unfolded in place, each item with its verb.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "unfolded": ["upkeep"]
+    }
+}

@@ -20,7 +20,7 @@ func Worlds() []World {
 		{Name: "machines.fine", Edit: nothingNeedsYou, Pages: []string{"menubar", "needs", "find"}},
 		{Name: "machines.empty", Edit: thisMacAlone, Pages: []string{"menubar", "find"}},
 		{Name: "machines.loading", Edit: miniStillAnswering, Pages: []string{"menubar", "find"}},
-	}, append(shellWorlds(), homeWorlds()...)...)
+	}, append(append(shellWorlds(), homeWorlds()...), macWorlds()...)...)
 }
 
 func StoryPages() []Fixture {

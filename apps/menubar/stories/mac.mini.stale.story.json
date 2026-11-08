@@ -1,0 +1,8 @@
+{
+    "group": "mac",
+    "heightNote": "a gap state the prototype does not draw: as tall as mac.mini.loading",
+    "id": "mac.mini.stale",
+    "note": "mac-mini silent for 3 min: its last values dimmed, its gauges and rows stale.",
+    "pages": ["pages/machines.macs.stale.machine.mac-mini.json"],
+    "schema": "station.story/v1"
+}

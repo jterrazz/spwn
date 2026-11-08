@@ -32,13 +32,33 @@ import SwiftUI
 
 #Preview("home.restarting") { StoryStage(Stories["home.restarting"]) }
 
+#Preview("mac.air.asleep") { StoryStage(Stories["mac.air.asleep"]) }
+
+#Preview("mac.mini.created") { StoryStage(Stories["mac.mini.created"]) }
+
+#Preview("mac.mini.creating") { StoryStage(Stories["mac.mini.creating"]) }
+
+#Preview("mac.mini.down") { StoryStage(Stories["mac.mini.down"]) }
+
+#Preview("mac.mini.loading") { StoryStage(Stories["mac.mini.loading"]) }
+
 #Preview("mac.mini.overview") { StoryStage(Stories["mac.mini.overview"]) }
 
+#Preview("mac.mini.stale") { StoryStage(Stories["mac.mini.stale"]) }
+
 #Preview("mac.this.activity") { StoryStage(Stories["mac.this.activity"]) }
+
+#Preview("mac.this.empty") { StoryStage(Stories["mac.this.empty"]) }
+
+#Preview("mac.this.exposed") { StoryStage(Stories["mac.this.exposed"]) }
+
+#Preview("mac.this.needs-unfolded") { StoryStage(Stories["mac.this.needs-unfolded"]) }
 
 #Preview("mac.this.overview") { StoryStage(Stories["mac.this.overview"]) }
 
 #Preview("mac.this.ports") { StoryStage(Stories["mac.this.ports"]) }
+
+#Preview("mac.this.upkeep") { StoryStage(Stories["mac.this.upkeep"]) }
 
 #Preview("menubar.count") { StoryStage(Stories["menubar.count"]) }
 

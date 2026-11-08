@@ -6,178 +6,50 @@
     "machine": "jterrazz-mac-mini",
     "kind": "mac"
   },
-  "state": "ready",
+  "state": "loading",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "mac-mini",
-      "role": "summary",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "Mac"
-        },
-        {
-          "kind": "text",
-          "text": "jterrazz-mac-mini"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "state",
-            "mark": "broken",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Unreachable"
-              }
-            ],
-            "reason": "unreachable"
-          }
-        }
-      ]
+      "role": "summary"
     },
     {
-      "id": "readiness",
-      "title": "Mac readiness",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
+      "id": "gauges",
+      "title": "Gauges",
       "items": [
         {
-          "row": {
-            "id": "restarts-after-a-power-cut",
-            "mark": "ok",
-            "label": "restarts after a power cut",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "applied"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "never-sleeps",
-            "mark": "ok",
-            "label": "never sleeps",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "applied"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "logs-in-by-itself",
-            "mark": "ok",
-            "label": "logs in by itself",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "applied"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "disk-unlock-after-a-power-cut",
-            "mark": "attention",
-            "label": "disk unlock after a power cut",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "waits at pre-boot"
-              }
-            ],
-            "detail": {
-              "kind": "none"
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "pending",
+              "live": "cpu:jterrazz-mac-mini"
             },
-            "reason": "degraded",
-            "hint": {
-              "command": "station machines unlock mac-mini (from the same network)"
-            }
+            "stale": true
           }
         },
         {
-          "row": {
-            "id": "planned-restarts-unlock-themselves",
-            "mark": "ok",
-            "label": "planned restarts unlock themselves",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "supported"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "pending",
+              "live": "free:jterrazz-mac-mini"
+            },
+            "stale": true
           }
         },
         {
-          "row": {
-            "id": "engine-starts-at-login",
-            "mark": "ok",
-            "label": "engine starts at login",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "installed"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "pending",
+              "live": "net:jterrazz-mac-mini"
+            },
+            "stale": true
           }
         }
       ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 5
-        },
-        {
-          "mark": "attention",
-          "n": 1
-        }
-      ]
+      "segment": "overview",
+      "card": "gauges"
     },
     {
       "id": "vms",
@@ -189,63 +61,307 @@
           "keep": 100
         },
         {
-          "key": "kind",
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra",
+            "mark": "ok",
+            "label": "infra",
+            "cells": [
+              {
+                "kind": "none",
+                "live": "cpuh:infra"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "healthy"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 12 days"
+                }
+              ]
+            },
+            "glyph": {
+              "signal": "well",
+              "dot": "fill"
+            },
+            "trail": "cpu",
+            "quick": "attach:infra",
+            "nav": "menubar.machine:infra",
+            "signal": "stale"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "care",
+      "title": "Care",
+      "columns": [
+        {
+          "key": "name",
           "kind": "text",
-          "keep": 40
+          "keep": 100
         },
         {
-          "key": "detail",
+          "key": "value",
           "kind": "list",
-          "keep": 80
+          "keep": 60
         }
       ],
       "items": [
         {
           "group": {
             "head": {
-              "id": "jterrazz-mac-mini/servers",
-              "label": "Servers"
+              "id": "upkeep",
+              "mark": "ok",
+              "label": "Upkeep",
+              "cells": [
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "text",
+                      "text": "5 of 6 ready"
+                    }
+                  ],
+                  "signal": "waits"
+                }
+              ],
+              "glyph": {
+                "kind": "symbol:wrench.adjustable",
+                "signal": "quiet"
+              },
+              "trail": "value"
             },
             "items": [
               {
                 "row": {
-                  "id": "infra",
-                  "mark": "unknown",
-                  "label": "infra",
-                  "cells": [
-                    {
-                      "kind": "text",
-                      "text": "Server"
-                    },
-                    {
-                      "kind": "list",
-                      "items": [
-                        {
-                          "kind": "text",
-                          "text": "Always on"
-                        },
-                        {
-                          "kind": "text",
-                          "text": "not known while mac-mini does not answer"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "ready",
+                  "mark": "attention",
+                  "label": "Ready to host servers",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "5 of 6 ready",
+                        "signal": "waits"
+                      },
+                      {
+                        "kind": "text",
+                        "text": "disk unlock after a power cut",
+                        "pri": 1
+                      }
+                    ]
+                  },
+                  "reason": "degraded",
+                  "glyph": {
+                    "kind": "symbol:lock",
+                    "signal": "quiet"
+                  }
                 }
+              }
+            ],
+            "fold": "folded"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "care"
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "cpu:jterrazz-mac-mini"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "memory:jterrazz-mac-mini"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "disk:jterrazz-mac-mini"
               }
             ]
           }
         }
       ],
-      "counts": [
+      "segment": "activity"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "items": [
         {
-          "mark": "unknown",
-          "n": 1
+          "empty": {
+            "text": "No port shared yet"
+          }
         }
-      ]
+      ],
+      "uncounted": true,
+      "segment": "ports"
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No account shared"
+          }
+        }
+      ],
+      "segment": "accounts"
     }
   ],
   "actions": [
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open infra in Terminal",
+      "on": "row",
+      "rows": [
+        "infra"
+      ],
+      "priority": 2,
+      "id": "attach:infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ],
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
     {
       "label": "Unlock the disk",
       "on": "page",
@@ -274,6 +390,65 @@
           "mac-mini"
         ]
       }
+    },
+    {
+      "label": "More options for mac-mini",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "unlock",
+        "open-station"
+      ]
     }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "desktop"
+    },
+    "buttons": [
+      "new-vm",
+      "menu"
+    ],
+    "stale": {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "text",
+          "text": "checking"
+        }
+      ]
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpuh:infra",
+    "cpu:jterrazz-mac-mini",
+    "memory:jterrazz-mac-mini",
+    "disk:jterrazz-mac-mini",
+    "free:jterrazz-mac-mini",
+    "net:jterrazz-mac-mini"
   ]
 }

@@ -25,6 +25,8 @@ extension Story {
         state.menu = ui.menu?.id == "station"
         state.search = ui.find?.query ?? ""
         state.scrub = ui.scrub
+        state.segment = ui.segment
+        state.unfolded = ui.unfolded ?? []
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }
