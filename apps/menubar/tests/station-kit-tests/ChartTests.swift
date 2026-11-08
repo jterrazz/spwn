@@ -74,6 +74,14 @@ final class ChartTests: XCTestCase {
         XCTAssertNil(ActivityCharts(chart, scrub: 3).picked)
     }
 
+    func testAScrubbedPointSaysItsValueAndWhenItWas() {
+        var chart = ChartSheet.chart(.bars, [[30, 42, 35]], unit: "%", ends: ChartSheet.hourEnds)
+        chart.at = ["3 min ago", "2 min ago", "1 min ago"]
+        let said = ActivityCharts(chart, scrub: 1).said(1)
+        XCTAssertEqual(said.value, "42\u{00A0}%")
+        XCTAssertEqual(said.when, "2 min ago")
+    }
+
     func testAStorysScrubIsThePanelsScrub() {
         var ui = StoryUI()
         ui.scrub = 36

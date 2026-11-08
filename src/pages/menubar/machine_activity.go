@@ -159,8 +159,8 @@ func (a activityOf) window(w activityWindow) page.Section {
 		return s
 	}
 	chart := activity.Fold(points, w.For, a.m.Now)
-	ends := a.ends(w)
-	cpuChart := page.Chart{Kind: w.Kind, Window: w.Flag, Ends: ends, Series: []page.Series{{Key: RowCPU, Unit: "%", Points: means(chart)}}}
+	ends, at := a.ends(w), a.times(w, chart)
+	cpuChart := page.Chart{Kind: w.Kind, Window: w.Flag, Ends: ends, At: at, Series: []page.Series{{Key: RowCPU, Unit: "%", Points: means(chart)}}}
 	if i := peakOf(chart); i >= 0 {
 		b := chart.Buckets[i]
 		cpuChart.Peak = &page.Peak{Index: i, Value: page.Percent(int64(math.Round(b.Mean)) * 10), At: a.when(w, b)}
@@ -169,7 +169,7 @@ func (a activityOf) window(w activityWindow) page.Section {
 		}
 	}
 	sent, received := netFold(points, w.For, a.m.Now, chart.Every)
-	netChart := page.Chart{Kind: page.ChartMirror, Window: w.Flag, Ends: ends, Series: []page.Series{{Key: "sent", Unit: "MB/s", Points: sent}, {Key: "received", Unit: "MB/s", Points: received}}}
+	netChart := page.Chart{Kind: page.ChartMirror, Window: w.Flag, Ends: ends, At: at, Series: []page.Series{{Key: "sent", Unit: "MB/s", Points: sent}, {Key: "received", Unit: "MB/s", Points: received}}}
 	s.Items = []page.Item{{Row: &cpu}, {Chart: &cpuChart}, {Row: &net}, {Chart: &netChart}}
 	return s
 }
@@ -241,6 +241,25 @@ func (a activityOf) when(w activityWindow, b activity.Bucket) string {
 		return a.clock(b.MaxAt)
 	}
 	return ago(a.m.Now.Sub(b.MaxAt)) + " ago"
+}
+
+// value: when each bucket of the window starts, as the scrub's callout
+// says it: how long ago, to the second over 6 min ("2 min 35 s ago"), to
+// the minute over the hour, the time of day over the day.
+func (a activityOf) times(w activityWindow, c activity.Chart) []string {
+	out := make([]string, len(c.Buckets))
+	for i, b := range c.Buckets {
+		d := a.m.Now.Sub(b.At)
+		switch {
+		case w.For > time.Hour:
+			out[i] = a.clock(b.At)
+		case c.Every < time.Minute && d >= time.Minute && d%time.Minute != 0:
+			out[i] = strconv.Itoa(int(d/time.Minute)) + " min " + strconv.Itoa(int(d%time.Minute/time.Second)) + " s ago"
+		default:
+			out[i] = ago(d) + " ago"
+		}
+	}
+	return out
 }
 
 func (a activityOf) clock(t time.Time) string {

@@ -78,6 +78,26 @@ func TestActivityCarriesItsThreeWindowsSoPickingOneAsksNothing(t *testing.T) {
 		if net.Kind != page.ChartMirror || len(net.Series) != 2 || net.Series[0].Key != "sent" || net.Series[1].Points[w.n-1] != 0.4 {
 			t.Fatalf("window %s network %+v, want sent over received, 0.4 MB/s received now", w.flag, net)
 		}
+		if len(cpu.At) != w.n || !slices.Equal(net.At, cpu.At) {
+			t.Fatalf("window %s says %d times, the network %d, want one per point of both", w.flag, len(cpu.At), len(net.At))
+		}
+	}
+}
+
+// invariant: SPEC A4.1: a scrubbed point says when it was, as its window
+// says time: how long ago within the hour, the time of day over the day.
+func TestAScrubbedPointSaysWhenItWas(t *testing.T) {
+	p := macPageOf(t, miniMac, func(m *Machine) { m.Activity = kept(40, func(time.Time) (float64, bool) { return 0, false }) })
+	want := []struct {
+		flag  string
+		index int
+		at    string
+	}{{"6m", 71, "5 s ago"}, {"6m", 41, "2 min 35 s ago"}, {"6m", 60, "1 min ago"}, {"1h", 36, "24 min ago"}, {"24h", 0, "10:30"}, {"24h", 47, "10:00"}}
+	for _, w := range want {
+		cpu, _ := chartsOf(t, sectionOf(p, SectionWindow+w.flag))
+		if got := cpu.At[w.index]; got != w.at {
+			t.Errorf("window %s point %d says %q, want %q", w.flag, w.index, got, w.at)
+		}
 	}
 }
 
