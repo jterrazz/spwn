@@ -73,6 +73,14 @@ struct MachineActivity: View {
         }
     }
 
+    // value: a rate received and sent, each after its arrow.
+    static func directed(_ v: Value) -> String {
+        (v.items ?? []).map { part in
+            let arrow = part.label == "received" ? Token.Glyph.received : part.label == "sent" ? Token.Glyph.sent : ""
+            return [arrow, Format.show(part)].filter { !$0.isEmpty }.joined(separator: Token.Glyph.space)
+        }.joined(separator: Token.Glyph.sep)
+    }
+
     // value: a window's cards: each row titles the chart under it.
     static func cards(_ items: [Item]) -> [(row: Row, chart: PageChart?)] {
         var out: [(row: Row, chart: PageChart?)] = []
@@ -92,7 +100,11 @@ struct MachineActivity: View {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     Text(row.label ?? "").font(Token.Role.chartTitle.font).foregroundStyle(tokens.tone(Token.Role.chartTitle.tone))
                     Spacer(minLength: Token.Metric.Row.gap)
-                    if let now = row.cells?.first { LiveText(now, role: .chartValue) }
+                    if let now = row.cells?.first, now.kind == "list" {
+                        Text(Self.directed(now)).font(Token.Role.chartValue.font).foregroundStyle(tokens.tone(Token.Role.chartValue.tone))
+                    } else if let now = row.cells?.first {
+                        LiveText(now, role: .chartValue)
+                    }
                     if let word = row.detail, !Format.show(word).isEmpty {
                         Text(Token.Glyph.space + Format.show(word)).font(Token.Role.chartValue.font).foregroundStyle(tokens.tone(Token.Role.chartValue.tone))
                     }

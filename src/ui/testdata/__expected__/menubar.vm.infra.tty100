@@ -15,11 +15,11 @@ Ports and shell
     SSH    ssh admin@infra
 infra  server · up 12 days
 Last 6 minutes
-    CPU  34%  now                          Network  ↓ 1.7 · ↑ 0.1 MB/s
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
 Last hour
-    CPU  34%  now                          Network  ↓ 1.7 · ↑ 0.1 MB/s
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
 Last 24 hours
-    CPU  34%  now                          Network  ↓ 1.7 · ↑ 0.1 MB/s
+    CPU  34%  now                          Network  1.7 · 0.1 MB/s
 Memory  now
 Top processes  CPU, of infra
     station  34%

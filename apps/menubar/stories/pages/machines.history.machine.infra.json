@@ -724,11 +724,13 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "↓ 0.6"
+                    "text": "0.6",
+                    "label": "received"
                   },
                   {
                     "kind": "text",
-                    "text": "↑ 0.2 MB/s"
+                    "text": "0.2 MB/s",
+                    "label": "sent"
                   }
                 ]
               }
@@ -1056,11 +1058,13 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "↓ 0.6"
+                    "text": "0.6",
+                    "label": "received"
                   },
                   {
                     "kind": "text",
-                    "text": "↑ 0.2 MB/s"
+                    "text": "0.2 MB/s",
+                    "label": "sent"
                   }
                 ]
               }
@@ -1352,11 +1356,13 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "↓ 0.6"
+                    "text": "0.6",
+                    "label": "received"
                   },
                   {
                     "kind": "text",
-                    "text": "↑ 0.2 MB/s"
+                    "text": "0.2 MB/s",
+                    "label": "sent"
                   }
                 ]
               }

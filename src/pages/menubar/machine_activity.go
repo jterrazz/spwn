@@ -287,8 +287,8 @@ func netFold(points []activity.Sample, window time.Duration, now time.Time, ever
 	return sent, received
 }
 
-// value: the network now, received then sent ("↓ 0.5 · ↑ 0.5 MB/s"), from
-// the last two readings; pending until there are two.
+// value: the network now, received then sent, each labeled ("0.5", "0.5
+// MB/s"), from the last two readings; pending until there are two.
 func netNow(readings []activity.Reading) page.Value {
 	n := len(readings)
 	if n < 2 {
@@ -296,7 +296,7 @@ func netNow(readings []activity.Reading) page.Value {
 	}
 	r := activity.Between(readings[n-2].Sample, readings[n-1].Sample)
 	say := func(v float64) string { return strconv.FormatFloat(v/MB, 'f', 1, 64) }
-	return page.Texts("↓ "+say(r.NetIn), "↑ "+say(r.NetOut)+" MB/s")
+	return page.List(page.Labeled("received", page.Text(say(r.NetIn))), page.Labeled("sent", page.Text(say(r.NetOut)+" MB/s")))
 }
 
 // value: the memory now: what is free, then what holds the rest (macOS
