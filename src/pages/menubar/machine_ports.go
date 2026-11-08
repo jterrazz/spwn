@@ -213,7 +213,7 @@ func (b *portsBody) sharedRow(s ports.SharedPort, a ports.Answer, h ports.MacPor
 	stop := stopSharing(s, h.Name)
 	stop.ID, stop.Rows = ActionStopSharing+key, []string{key}
 	b.act(stop)
-	row.Menu = append(verbs, "-", stop.ID)
+	row.Menu = slices.Concat(verbs, []string{"-", stop.ID})
 	b.Shares = append(b.Shares, page.Item{Row: &row})
 	return page.Item{Row: &row}
 }
