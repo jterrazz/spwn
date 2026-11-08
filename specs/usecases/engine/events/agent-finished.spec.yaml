@@ -14,4 +14,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind | startswith("agent_")) | {Kind, Subject, Text}]'' world.json'
       exit: 0
       stdout: |
-          [{"Kind":"agent_finished","Subject":"linux-1","Text":"linux-1 is finished · merged PR #42"}]
+          [{"Kind":"agent_started","Subject":"linux-1","Text":"linux-1 starts on linux-1"},{"Kind":"agent_finished","Subject":"linux-1","Text":"linux-1 is finished · merged PR #42"}]

@@ -10,10 +10,10 @@ import (
 	"github.com/jterrazz/studio-station/src/engine"
 )
 
-// invariant: SPEC B5.1: the engine keeps the last report of each VM's
-// agents in its memory alone, and tells once of an agent that turns to
-// wait on the owner, or that finishes; the first report it hears of a VM
-// is what its agents were, told of nothing.
+// invariant: SPEC B5.1, B5.22: the engine keeps the last report of each
+// VM's agents in its memory alone, and tells once of an agent that starts,
+// that turns to wait on the owner, or that finishes; the first report it
+// hears of a VM is what its agents were, told of nothing.
 func (d *Engine) heardAgents(ctx context.Context, v *vmState, now []agents.Agent) {
 	d.mu.Lock()
 	was, first := v.agents, !v.reported
@@ -29,6 +29,8 @@ func (d *Engine) heardAgents(ctx context.Context, v *vmState, now []agents.Agent
 			before = was[i]
 		}
 		switch {
+		case i < 0 && agents.Live(a) && a.State != agents.Waiting:
+			d.tell(ctx, v.rec.Name, started(v.rec.Name, a))
 		case a.State == agents.Waiting && (before.State != agents.Waiting || !sameAsk(before.Ask, a.Ask)):
 			d.tell(ctx, v.rec.Name, waiting(v.rec.Name, a))
 		case a.State == agents.Finished && i >= 0 && before.State != agents.Finished:
@@ -58,6 +60,10 @@ func waiting(vm string, a agents.Agent) engine.Told {
 		t.Parts = append(t.Parts, a.Ask.Title)
 	}
 	return t
+}
+
+func started(vm string, a agents.Agent) engine.Told {
+	return engine.Told{Kind: engine.NoticeAgentStarted, Parts: []string{cmp.Or(a.Name, vm) + " starts on " + vm}}
 }
 
 func finished(vm string, a agents.Agent) engine.Told {
