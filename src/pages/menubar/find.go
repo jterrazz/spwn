@@ -33,9 +33,11 @@ const (
 
 	ColumnTags = "tags"
 
-	VerbOpen  = "Open"
-	VerbCopy  = "Copy"
-	VerbShare = "Share"
+	VerbOpen    = "Open"
+	VerbCopy    = "Copy"
+	VerbShare   = "Share"
+	VerbLend    = "Lend"
+	VerbCleanUp = "Clean up"
 
 	CallCleanup = "machines.cleanup"
 	awakeFor    = 4 * time.Hour
@@ -462,6 +464,7 @@ func (f finder) restart(h model.MacView, vm model.VM) entry {
 		verb.Confirm = ask(f.r.Asks, "restart", machine.Server, vm.Name, "Restart "+vm.Name+"?", "restart")
 		verb.Run.In = answered(verb.Confirm, verb.Run.In)
 		if verb.Confirm != nil {
+			row.Label += "…"
 			row.Detail = page.Text("asks first")
 		}
 	}
@@ -478,16 +481,16 @@ func (f finder) cleanup(h model.MacView) (entry, bool) {
 		cands = append(cands, model.CandidateOf(vm, f.r.Now))
 	}
 	c := pagemachines.CleanupConfirm(cands)
-	verb := page.Action{ID: "cleanup:" + h.Name, Label: "Delete", Mutates: true, Confirm: &c,
+	verb := page.Action{ID: "cleanup:" + h.Name, Label: VerbCleanUp, Mutates: true, Confirm: &c,
 		Run: &page.Run{Call: CallCleanup, In: map[string]string{"Confirm": yes}, Target: macTarget(h.Name, f.self)}}
-	row := page.Row{ID: "cleanup:" + h.Name, Label: "Delete finished throwaways on " + f.mac(h.Name), Glyph: symbol("trash", "")}
-	return entry{row: row, tags: []string{"delete", "throwaway", "finished"}, verb: verb}, true
+	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up throwaways on " + f.mac(h.Name) + "…", Glyph: symbol("trash", "")}
+	return entry{row: row, tags: []string{"clean", "delete", "throwaway", "finished"}, verb: verb}, true
 }
 
 func (f finder) verbs(p *page.Page) page.Section {
 	// value: SPEC A6: a VM's verbs, which the app offers once two letters
 	// begin its name: Open in Terminal for a running workspace, Share a port
-	// of it, Share an account with a workspace, Restart for a server.
+	// of it, Lend an account to a workspace, Restart for a server.
 	s := page.Section{ID: FindVerbs, Title: "Verbs", Columns: findColumns(), Uncounted: true}
 	for _, h := range f.r.All.Macs {
 		for _, vm := range model.Ordered(h.VMs) {
@@ -506,7 +509,7 @@ func (f finder) verbs(p *page.Page) page.Section {
 				es = append(es, entry{row: page.Row{ID: "share:" + vm.Name, Label: "Share a port of " + vm.Name, Glyph: symbol("network", "")}, verb: share})
 			}
 			if shareAccount, ok := f.shareAccount(h, vm); !server && running && ok {
-				es = append(es, entry{row: page.Row{ID: "share-account:" + vm.Name, Label: "Share an account with " + vm.Name, Glyph: symbol("key", "")}, verb: shareAccount})
+				es = append(es, entry{row: page.Row{ID: "share-account:" + vm.Name, Label: "Lend an account to " + vm.Name, Glyph: symbol("key", "")}, verb: shareAccount})
 			}
 			if server {
 				restart := f.restart(h, vm).verb
@@ -528,7 +531,7 @@ func (f finder) verbs(p *page.Page) page.Section {
 }
 
 func (f finder) shareAccount(h model.MacView, vm model.VM) (page.Action, bool) {
-	// value: Share an account: one of the accounts the VM's Mac is signed in
+	// value: Lend an account: one of the accounts the VM's Mac is signed in
 	// to, for 4 hr; none to share is no verb.
 	if f.r.Accounts == nil {
 		return page.Action{}, false
@@ -547,9 +550,9 @@ func (f finder) shareAccount(h model.MacView, vm model.VM) (page.Action, bool) {
 	if len(opts) == 0 {
 		return page.Action{}, false
 	}
-	return page.Action{ID: "verb-share-account:" + vm.Name, Label: VerbShare, Mutates: true,
+	return page.Action{ID: "verb-share-account:" + vm.Name, Label: VerbLend, Mutates: true,
 		Run: &page.Run{Call: CallShareAccount, In: map[string]string{"With": vm.Name, "For": nanos(extendBy)}, Target: macTarget(h.Name, f.self)},
-		Form: &page.Form{Title: "Share an account with " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
+		Form: &page.Form{Title: "Lend an account to " + vm.Name, Subtitle: "From " + f.mac(h.Name), Fields: []page.Field{
 			{Key: "Account", Label: "Account", Kind: page.FieldSelect, Required: true, Default: opts[0].Value, Options: opts},
 		}}}, true
 }

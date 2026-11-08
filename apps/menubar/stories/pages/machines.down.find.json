@@ -1188,11 +1188,15 @@
         {
           "row": {
             "id": "cleanup:macbook-pro",
-            "label": "Delete finished throwaways on This Mac",
+            "label": "Clean up throwaways on This Mac…",
             "cells": [
               {
                 "kind": "list",
                 "items": [
+                  {
+                    "kind": "text",
+                    "text": "clean"
+                  },
                   {
                     "kind": "text",
                     "text": "delete"
@@ -1509,7 +1513,7 @@
               {
                 "row": {
                   "id": "share-account:agent-7f",
-                  "label": "Share an account with agent-7f",
+                  "label": "Lend an account to agent-7f",
                   "glyph": {
                     "kind": "symbol:key"
                   },
@@ -1549,7 +1553,7 @@
               {
                 "row": {
                   "id": "share-account:linux-1",
-                  "label": "Share an account with linux-1",
+                  "label": "Lend an account to linux-1",
                   "glyph": {
                     "kind": "symbol:key"
                   },
@@ -2283,7 +2287,7 @@
       }
     },
     {
-      "label": "Delete",
+      "label": "Clean up",
       "on": "row",
       "rows": [
         "cleanup:macbook-pro"
@@ -2437,7 +2441,7 @@
       }
     },
     {
-      "label": "Share",
+      "label": "Lend",
       "on": "row",
       "rows": [
         "share-account:agent-7f"
@@ -2452,7 +2456,7 @@
         }
       },
       "form": {
-        "title": "Share an account with agent-7f",
+        "title": "Lend an account to agent-7f",
         "fields": [
           {
             "key": "Account",
@@ -2528,7 +2532,7 @@
       }
     },
     {
-      "label": "Share",
+      "label": "Lend",
       "on": "row",
       "rows": [
         "share-account:linux-1"
@@ -2543,7 +2547,7 @@
         }
       },
       "form": {
-        "title": "Share an account with linux-1",
+        "title": "Lend an account to linux-1",
         "fields": [
           {
             "key": "Account",

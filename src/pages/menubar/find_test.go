@@ -176,8 +176,8 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
-			{"Restart infra", "asks first", "Restart", "", ""},
-			{"Delete finished throwaways on This Mac", "", "Delete", "", ""},
+			{"Restart infra…", "asks first", "Restart", "", ""},
+			{"Clean up throwaways on This Mac…", "", "Clean up", "", ""},
 		}},
 	}
 	for _, c := range cases {
@@ -188,10 +188,10 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	if got, want := entries(t, p, FindVerbs), []said{
 		{"Open agent-7f in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of agent-7f", "", "Share", "", ""},
-		{"Share an account with agent-7f", "", "Share", "", ""},
+		{"Lend an account to agent-7f", "", "Lend", "", ""},
 		{"Open linux-1 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
 		{"Share a port of linux-1", "", "Share", "", ""},
-		{"Share an account with linux-1", "", "Share", "", ""},
+		{"Lend an account to linux-1", "", "Lend", "", ""},
 		{"Share a port of infra", "", "Share", "", ""},
 		{"Restart infra", "", "Restart", "", ""},
 		{"Open linux-3 in Terminal", "", "Open in Terminal", "cmd+enter", ""},
@@ -233,7 +233,7 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Errorf("mac-mini's entry %+v, want it red while its server is down", r)
 	}
 	for _, e := range entries(t, p, FindActions) {
-		if e.title == "Restart infra" && e != (said{"Restart infra", "down", "Restart", "", ""}) {
+		if strings.HasPrefix(e.title, "Restart infra") && e != (said{"Restart infra", "down", "Restart", "", ""}) {
 			t.Errorf("the restart action reads %+v, want Restart infra, down, asking nothing", e)
 		}
 	}
