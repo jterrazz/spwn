@@ -1,6 +1,7 @@
 import SwiftUI
 
-// invariant: SPEC §10.2 Ports and A port, vision panels d and g: what is
+// invariant: SPEC A4's Ports of all machines when the engine sends its
+// header; else SPEC §10.2 Ports and A port, vision panels d and g: what is
 // reachable outside Tailscale undeclared first, in red with Review; then
 // Public; then Private; each row says its class in words. A workspace's
 // page (vision d) says instead whether its shares get an https:// link,
@@ -9,17 +10,28 @@ import SwiftUI
 public struct PortsPage: View {
     let state: PanelState
     let handlers: PopoverHandlers
+    let scrolls: Bool
     @Environment(\.stationPalette) private var palette
 
-    public init(_ state: PanelState, handlers: PopoverHandlers = PopoverHandlers()) {
+    public init(_ state: PanelState, handlers: PopoverHandlers = PopoverHandlers(), scrolls: Bool = true) {
         self.state = state
         self.handlers = handlers
+        self.scrolls = scrolls
     }
 
     var page: Page { state.page ?? Page() }
     var act: Act { Act(state: state, handlers: handlers) }
 
     public var body: some View {
+        if page.header != nil {
+            AllPorts(page: page, state: state, handlers: handlers, scrolls: scrolls)
+        } else {
+            legacy
+        }
+    }
+
+    @ViewBuilder
+    var legacy: some View {
         let summary = page.summary()
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             PageHeader(back: state.back ?? Page.ThisMacWord, title: "Ports", subtitle: Format.show(summary?.cells?.first ?? Value()), action: handlers.back)
@@ -245,6 +257,7 @@ struct SharedPortCard: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
+    var ownSheet = true
     @Environment(\.stationPalette) private var palette
     @State private var copied = false
 
@@ -270,10 +283,19 @@ struct SharedPortCard: View {
             if let stop, !act.open(stop) {
                 StationButton(stop.label ?? "", role: .danger, wide: true) { act.tap(stop) }.fixedSize(horizontal: false, vertical: true)
             }
-            if let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
+            if ownSheet, let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
         }
         .frame(maxWidth: .infinity)
         .padding(EdgeInsets(top: 0, leading: Token.Gap.edge, bottom: Token.Gap.edge, trailing: Token.Gap.edge))
+    }
+
+    // value: a share's link unfolded on a page that draws its own sheet:
+    // its QR, Copy link, Open and Stop sharing, until the QR pops over it.
+    static func unfolded(_ page: Page, _ state: PanelState, _ handlers: PopoverHandlers) -> (Row, URL) -> AnyView {
+        { row, url in
+            let stop = page.actions(for: row.id ?? "").first { $0.id?.hasPrefix("stop-sharing:") == true }
+            return AnyView(SharedPortCard(url: url, stop: stop, page: page, state: state, handlers: handlers, ownSheet: false))
+        }
     }
 
     func flash() {
@@ -281,6 +303,59 @@ struct SharedPortCard: View {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             copied = false
+        }
+    }
+}
+
+// invariant: SPEC A4's Ports of all machines: the header (the way back, the
+// network glyph, Ports, its menu, its facts), each section by its card,
+// then the footer: the full list in Terminal, and Share a port.
+struct AllPorts: View {
+    let page: Page
+    let state: PanelState
+    let handlers: PopoverHandlers
+    let scrolls: Bool
+    @Environment(\.stationTokens) private var tokens
+
+    func tap(_ action: Action) { perform(action, handlers) }
+
+    var body: some View {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")/\(page.context?.machine ?? "")", sheet: state.confirming) {
+            MachineHeader(page, segment: nil, back: handlers.back, run: tap)
+        } content: {
+            VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                ForEach(Array((page.sections ?? []).filter { $0.id != "summary" }.enumerated()), id: \.offset) { _, s in
+                    PortsSection(s, actions: page.actions ?? [], run: tap, qr: handlers.toggleQR, shown: state.qr, unfolded: SharedPortCard.unfolded(page, state, handlers))
+                }
+                if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
+            }
+        } footer: {
+            VStack(spacing: Token.Metric.Ports.footerGap) {
+                if let status = state.status { StatusBar(status.line, failed: status.failed) }
+                footer
+            }
+        }
+        .background { BackKey(state: state, handlers: handlers) }
+        .environment(\.stationHints, false)
+    }
+
+    @ViewBuilder
+    var footer: some View {
+        let buttons = (page.footer?.buttons ?? []).compactMap { page.action($0) }
+        if !buttons.isEmpty {
+            HStack(spacing: Token.Metric.Row.gap) {
+                ForEach(Array(buttons.enumerated()), id: \.offset) { i, a in
+                    if i == 0 && a.run?.terminal == true {
+                        Button { tap(a) } label: {
+                            Text((a.label ?? "") + " " + Token.Glyph.outward).font(Token.Role.footerLink.font).foregroundStyle(tokens.tone(Token.Role.footerLink.tone))
+                        }
+                        .buttonStyle(.plain)
+                        Spacer(minLength: 0)
+                    } else {
+                        PanelButton((a.label ?? "") + (a.form != nil ? Token.Glyph.ellipsis : ""), symbol: Token.Symbol.plus, big: true) { tap(a) }
+                    }
+                }
+            }
         }
     }
 }

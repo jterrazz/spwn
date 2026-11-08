@@ -1,14 +1,9 @@
-mac-mini · 5 ports · 2 need you
+Ports  mac-mini · 1 public · 2 on your tailnet · 2 exposed
 
-Needs you: reachable outside Tailscale, not declared public
-               port  class      what              listens on              declared
-  ✗ mac-mini   5000  needs you  AirPlay Receiver  *:5000 all interfaces   declared no
-    → System Settings > General > AirDrop & Handoff > AirPlay Receiver
-  ✗ infra     10250  needs you  kubelet           *:10250 all interfaces  declared no
-Public: reachable from anywhere else, internet or LAN, declared
-           port  class   what   listens on            declared
-  ● infra   443  public  nginx  *:443 all interfaces  Cloudflare Tunnel · tunnel seen
-Private: shared with you on Tailscale
-              port  class    state                        process
-  ● mac-mini  5900  private  on Tailscale                 Screen Sharing
-  ● infra     6443  private  own Tailscale device: infra  Kubernetes API
+Exposed  reachable outside Tailscale
+  ✗ 5000   AirPlay Receiver  mac-mini · on your network, not declared
+  ✗ 10250  kubelet           infra · on your network, not declared
+Public  ● Traefik · jterrazz.com · Cloudflare Tunnel
+Private  2
+  ● Kubernetes API  infra:6443
+  ● Screen Sharing  mac-mini:5900

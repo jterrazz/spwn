@@ -1,3 +1,5 @@
+ linux-1  throwaway · no agent
+
  linux-1  Workspace VM · Throwaway · on This Mac
    ● State  Running
 
@@ -11,15 +13,17 @@
      Settings  2 need a look
      Disk      2.4 of 20 GB
 
- Private  shared on Tailscale
-   Vite · 5173  https://jterrazz-macbook-pro.tail77a797.ts.net:40001
-   TCP · 7000  jterrazz-macbook-pro.tail77a797.ts.net:40002
-
  Accounts shared from This Mac  2 ●
    ● GitHub  read only · 4 h left
    ● Claude  12 h left
 
- linux-1  throwaway
+ Ports  2  2 ●
+   ● Vite       linux-1:5173
+   ● Port 7000  linux-1:7000
+
+ Private  2  2 ●
+   ● Vite       linux-1:5173
+   ● Port 7000  linux-1:7000
 
  Last 6 minutes
      CPU      34%             now

@@ -75,6 +75,12 @@ const (
 
 var TailscaleCLIs = []string{TailscaleStandaloneCLI, TailscaleBundleCLI}
 
+// value: the info button of the Private card and what it says (SPEC A4 pop.info).
+const (
+	AboutPrivateLinks = "About private links"
+	PrivateLinksAre   = "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+)
+
 const ReachableOutside = "reachable outside " + TailnetProduct // value: the words of a port anything outside the tailnet reaches.
 
 type KnownPort struct {

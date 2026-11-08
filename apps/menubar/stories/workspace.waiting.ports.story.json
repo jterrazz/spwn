@@ -1,0 +1,11 @@
+{
+    "group": "workspace",
+    "heightNote": "no prototype height; the ssh footer is the workspace page's own lot (P9)",
+    "id": "workspace.waiting.ports",
+    "note": "review-bot's Ports: nothing shared and nothing listening, so no Public and one line.",
+    "pages": ["pages/machines.ports.machine.review-bot.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports"
+    }
+}

@@ -120,6 +120,12 @@ public struct Section: Codable, Equatable, Sendable {
     public var segment: String?
     public var card: String?
     public var picker: [Action]?
+    public var about: About?
+}
+
+public struct About: Codable, Equatable, Sendable {
+    public var label: String?
+    public var text: String?
 }
 
 public struct Column: Codable, Equatable, Sendable {

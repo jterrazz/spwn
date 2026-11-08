@@ -35,6 +35,8 @@ struct MacOverview: View {
         default:
             if id == TodoBadge.section {
                 NeedsCard(section, actions: page.actions ?? [], open: unfolded.contains(id), fold: { fold(id) }, run: { run($0, $1) })
+            } else if section.notes.isEmpty {
+                SegmentSection(section: section)
             } else {
                 ForEach(Array(section.notes.enumerated()), id: \.offset) { _, note in
                     Text(note).font(Token.Role.footnote.font).foregroundStyle(tokens.tone(Token.Role.footnote.tone))

@@ -1,10 +1,5 @@
- Summary
-   ● linux-1  On linux-1 · reserved ports on This Mac
+ Ports  linux-1 · 0 public · 2 on your tailnet
 
- HTTPS links
-   ● HTTPS links  Shared ports get an https:// link
-
- Private: shared with you on Tailscale  2 ●
-                      port  class    url                                                   state
-   ● linux-1  5173 → 40001  private  https://jterrazz-macbook-pro.tail77a797.ts.net:40001  shared
-   ● linux-1  7000 → 40002  private                                                        shared
+ Private  2  2 ●
+   ● Vite       linux-1:5173
+   ● Port 7000  linux-1:7000

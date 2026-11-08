@@ -1,0 +1,15 @@
+description: 'a share says when the owner shared it, the hour the panel marks it fresh against'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'ports share linux-1 3000'
+      exit: 0
+      stdout: |
+          https://jterrazz-macbook-pro.tail1234.ts.net:40000
+    - command: 'ports --json > listed.json'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c --slurpfile l listed.json ''[.macs["jterrazz-macbook-pro"].stores.reservations[] | . as $r | [.guest_port, ([$l[0].ports[] | select(.machine == $r.vm and .port == $r.guest_port) | .shared_at] == [$r.reserved_at]), ($r.reserved_at >= "2026-11-04T10:00:00Z")]]'' world.json'
+      exit: 0
+      stdout: |
+          [[5173,true,false],[7000,true,false],[3000,true,true]]

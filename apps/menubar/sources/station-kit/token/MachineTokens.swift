@@ -18,6 +18,10 @@ extension Token.Metric {
     public enum CardLabel {
         public static let height: CGFloat = 16
         public static let inset: CGFloat = 4
+        public static let aboutGap: CGFloat = 6
+        public static let about: CGFloat = 14
+        public static let aboutGlyph: CGFloat = 12
+        public static let aboutRise: CGFloat = 4
     }
 
     public enum Care {

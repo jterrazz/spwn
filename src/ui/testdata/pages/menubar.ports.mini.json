@@ -1,7 +1,7 @@
 {
   "schema": "station.page/v1",
   "id": "menubar.ports",
-  "command": "ports",
+  "command": "menubar",
   "context": {
     "machine": "jterrazz-macbook-pro",
     "kind": "mac"
@@ -10,12 +10,41 @@
   "sections": [
     {
       "id": "summary",
-      "title": "Summary",
+      "title": "Ports",
       "role": "summary",
-      "fold": "open",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "1 public"
+        },
+        {
+          "kind": "text",
+          "text": "2 on your tailnet"
+        },
+        {
+          "kind": "text",
+          "text": "2 exposed",
+          "signal": "failing"
+        }
+      ]
+    },
+    {
+      "id": "exposed",
+      "title": "Exposed",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "reachable outside Tailscale",
+          "signal": "failing"
+        }
+      ],
       "columns": [
         {
-          "key": "area",
+          "key": "name",
           "kind": "text",
           "keep": 100
         },
@@ -28,142 +57,72 @@
       "items": [
         {
           "row": {
-            "id": "summary/ports",
-            "mark": "ok",
-            "label": "mac-mini",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "5 ports"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "2 need you"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ],
-      "uncounted": true
-    },
-    {
-      "id": "needs-you",
-      "title": "Needs you: reachable outside Tailscale, not declared public",
-      "columns": [
-        {
-          "key": "machine",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "port",
-          "label": "port",
-          "kind": "port",
-          "keep": 90
-        },
-        {
-          "key": "class",
-          "label": "class",
-          "kind": "text",
-          "keep": 85
-        },
-        {
-          "key": "what",
-          "label": "what",
-          "kind": "text",
-          "keep": 60
-        },
-        {
-          "key": "listens",
-          "label": "listens on",
-          "kind": "text",
-          "keep": 50
-        },
-        {
-          "key": "declared",
-          "label": "declared",
-          "kind": "text",
-          "keep": 70
-        }
-      ],
-      "items": [
-        {
-          "row": {
             "id": "mac-mini:5000",
             "mark": "broken",
-            "label": "mac-mini",
+            "label": "5000",
             "cells": [
-              {
-                "kind": "port",
-                "n": 5000
-              },
-              {
-                "kind": "text",
-                "text": "needs you"
-              },
               {
                 "kind": "text",
                 "text": "AirPlay Receiver"
-              },
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "*:5000 all interfaces"
-                  }
-                ]
-              },
-              {
-                "kind": "text",
-                "text": "declared no"
               }
             ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "on your network, not declared"
+                }
+              ]
+            },
             "reason": "exposed",
-            "hint": {
-              "command": "System Settings > General > AirDrop & Handoff > AirPlay Receiver",
-              "external": true
-            }
+            "glyph": {
+              "kind": "symbol:exclamationmark.shield",
+              "signal": "failing"
+            },
+            "menu": [
+              "declare-public",
+              "show-process:mac-mini:5000"
+            ]
           }
         },
         {
           "row": {
             "id": "infra:10250",
             "mark": "broken",
-            "label": "infra",
+            "label": "10250",
             "cells": [
-              {
-                "kind": "port",
-                "n": 10250
-              },
-              {
-                "kind": "text",
-                "text": "needs you"
-              },
               {
                 "kind": "text",
                 "text": "kubelet"
-              },
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "*:10250 all interfaces"
-                  }
-                ]
-              },
-              {
-                "kind": "text",
-                "text": "declared no"
               }
             ],
-            "reason": "exposed"
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "infra"
+                },
+                {
+                  "kind": "text",
+                  "text": "on your network, not declared"
+                }
+              ]
+            },
+            "reason": "exposed",
+            "glyph": {
+              "kind": "symbol:exclamationmark.shield",
+              "signal": "failing"
+            },
+            "menu": [
+              "declare-public",
+              "show-process:infra:10250"
+            ]
           }
         }
       ],
@@ -173,46 +132,27 @@
           "n": 2
         }
       ],
-      "pipe_counts": true
+      "card": "exposed"
     },
     {
       "id": "public",
-      "title": "Public: reachable from anywhere else, internet or LAN, declared",
+      "title": "Public",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1"
+        }
+      ],
       "columns": [
         {
-          "key": "machine",
+          "key": "name",
           "kind": "text",
           "keep": 100
         },
         {
-          "key": "port",
-          "label": "port",
-          "kind": "port",
-          "keep": 90
-        },
-        {
-          "key": "class",
-          "label": "class",
-          "kind": "text",
-          "keep": 85
-        },
-        {
-          "key": "what",
-          "label": "what",
-          "kind": "text",
+          "key": "value",
+          "kind": "list",
           "keep": 60
-        },
-        {
-          "key": "listens",
-          "label": "listens on",
-          "kind": "text",
-          "keep": 50
-        },
-        {
-          "key": "declared",
-          "label": "declared",
-          "kind": "text",
-          "keep": 70
         }
       ],
       "items": [
@@ -220,43 +160,26 @@
           "row": {
             "id": "infra:443",
             "mark": "ok",
-            "label": "infra",
-            "cells": [
-              {
-                "kind": "port",
-                "n": 443
-              },
-              {
-                "kind": "text",
-                "text": "public"
-              },
-              {
-                "kind": "text",
-                "text": "nginx"
-              },
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "*:443 all interfaces"
-                  }
-                ]
-              },
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "Cloudflare Tunnel"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "tunnel seen"
-                  }
-                ]
-              }
-            ]
+            "label": "Traefik",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "jterrazz.com"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "mac": "infra",
+            "verb": "open-port:infra:443",
+            "quick": "qr:infra:443"
           }
         }
       ],
@@ -266,104 +189,67 @@
           "n": 1
         }
       ],
-      "pipe_counts": true
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Public"
+        },
+        {
+          "kind": "text",
+          "text": "from outside"
+        }
+      ]
     },
     {
       "id": "private",
-      "title": "Private: shared with you on Tailscale",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
       "columns": [
         {
-          "key": "vm",
+          "key": "name",
           "kind": "text",
           "keep": 100
         },
         {
-          "key": "port",
-          "label": "port",
-          "kind": "portmap",
-          "keep": 80
-        },
-        {
-          "key": "class",
-          "label": "class",
-          "kind": "text",
-          "keep": 85
-        },
-        {
-          "key": "url",
-          "label": "url",
-          "kind": "url",
-          "keep": 40
-        },
-        {
-          "key": "state",
-          "label": "state",
-          "kind": "text",
-          "keep": 70
-        },
-        {
-          "key": "process",
-          "label": "process",
-          "kind": "text",
-          "keep": 20,
-          "whole": true
+          "key": "value",
+          "kind": "list",
+          "keep": 60
         }
       ],
       "items": [
         {
           "row": {
-            "id": "mac-mini:5900",
+            "id": "infra:6443",
             "mark": "ok",
-            "label": "mac-mini",
-            "cells": [
-              {
-                "kind": "port",
-                "n": 5900
-              },
-              {
-                "kind": "text",
-                "text": "private"
-              },
-              {
-                "kind": "none"
-              },
-              {
-                "kind": "text",
-                "text": "on Tailscale"
-              },
-              {
-                "kind": "text",
-                "text": "Screen Sharing"
-              }
-            ]
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "verb": "copy-port:infra:6443"
           }
         },
         {
           "row": {
-            "id": "infra:6443",
+            "id": "mac-mini:5900",
             "mark": "ok",
-            "label": "infra",
-            "cells": [
-              {
-                "kind": "port",
-                "n": 6443
-              },
-              {
-                "kind": "text",
-                "text": "private"
-              },
-              {
-                "kind": "none"
-              },
-              {
-                "kind": "text",
-                "text": "own Tailscale device: infra"
-              },
-              {
-                "kind": "text",
-                "text": "Kubernetes API"
-              }
-            ]
+            "label": "Screen Sharing",
+            "detail": {
+              "kind": "text",
+              "text": "mac-mini:5900"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "copy-port:mac-mini:5900"
           }
         }
       ],
@@ -373,25 +259,134 @@
           "n": 2
         }
       ],
-      "pipe_counts": true
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "about": {
+        "label": "About private links",
+        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+      }
     }
   ],
   "actions": [
     {
-      "label": "Review",
+      "label": "Show process",
       "on": "row",
       "rows": [
-        "mac-mini:5000",
-        "infra:10250"
+        "mac-mini:5000"
       ],
       "priority": 1,
-      "id": "review",
+      "id": "show-process:mac-mini:5000",
       "run": {
         "terminal": true,
         "argv": [
           "ports",
           "--on",
           "mac-mini"
+        ]
+      }
+    },
+    {
+      "label": "Show process",
+      "on": "row",
+      "rows": [
+        "infra:10250"
+      ],
+      "priority": 1,
+      "id": "show-process:infra:10250",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "ports",
+          "--on",
+          "mac-mini"
+        ]
+      }
+    },
+    {
+      "label": "Open Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "open-port:infra:443",
+      "run": {
+        "open": "https://jterrazz.com"
+      }
+    },
+    {
+      "label": "Copy link to Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "copy-port:infra:443",
+      "run": {
+        "copy": "https://jterrazz.com"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://jterrazz.com"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "qr:infra:443",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Copy link to Screen Sharing",
+      "on": "row",
+      "rows": [
+        "mac-mini:5900"
+      ],
+      "id": "copy-port:mac-mini:5900",
+      "run": {
+        "copy": "mac-mini:5900"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied mac-mini:5900"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy link to Kubernetes API",
+      "on": "row",
+      "rows": [
+        "infra:6443"
+      ],
+      "id": "copy-port:infra:6443",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
         ]
       }
     },
@@ -455,6 +450,82 @@
           }
         ]
       }
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "run": {
+        "call": "ports.share"
+      },
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "VM",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "infra",
+                "label": "infra"
+              }
+            ],
+            "default": "infra",
+            "required": true
+          },
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ],
+        "subtitle": "Private on your tailnet."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Full list in Terminal",
+      "on": "page",
+      "id": "full-list",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "ports",
+          "--on",
+          "mac-mini"
+        ]
+      }
+    },
+    {
+      "label": "More options for Ports",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "share-port",
+        "declare-public"
+      ]
     }
-  ]
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:network"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "terminal-list",
+    "buttons": [
+      "full-list",
+      "share-port"
+    ]
+  }
 }

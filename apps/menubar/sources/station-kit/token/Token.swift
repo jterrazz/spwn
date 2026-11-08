@@ -263,6 +263,7 @@ public enum Token {
         public static let health = "checkmark"
         public static let open = "arrow.up.right.square"
         public static let qr = "qrcode"
+        public static let about = "info.circle"
         public static let globe = "globe"
         public static let tailnet = "point.3.connected.trianglepath.dotted"
         public static let lid = "rectangle.compress.vertical"

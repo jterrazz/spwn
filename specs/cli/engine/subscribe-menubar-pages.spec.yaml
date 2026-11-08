@@ -9,7 +9,7 @@ runs:
       stdout: |
           ["menubar.ports"]
           loading ready
-          ["menubar.ports",["summary","tailnet","private","ranges"],null]
+          ["menubar.ports",["summary","public","private"],null]
           ["menubar.awake"]
           loading ready
           ["menubar.awake",["this-mac","guards"],null]
@@ -30,5 +30,5 @@ runs:
           ["menubar.find",["machines","actions","sections"],null]
           Over the last 6 min
           Over the last 24 h
-          [["declare-public","ports.declare"]]
+          [["declare-public","ports.declare"],["share-port","ports.share"],["full-list",null],["menu",null]]
           "unknown_page"

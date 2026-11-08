@@ -64,6 +64,10 @@ import SwiftUI
 
 #Preview("mac.mini.overview") { StoryStage(Stories["mac.mini.overview"]) }
 
+#Preview("mac.mini.ports.https") { StoryStage(Stories["mac.mini.ports.https"]) }
+
+#Preview("mac.mini.ports") { StoryStage(Stories["mac.mini.ports"]) }
+
 #Preview("mac.mini.stale") { StoryStage(Stories["mac.mini.stale"]) }
 
 #Preview("mac.this.activity") { StoryStage(Stories["mac.this.activity"]) }
@@ -98,7 +102,13 @@ import SwiftUI
 
 #Preview("needs.updating") { StoryStage(Stories["needs.updating"]) }
 
+#Preview("ports.all.down") { StoryStage(Stories["ports.all.down"]) }
+
+#Preview("ports.all.exposed") { StoryStage(Stories["ports.all.exposed"]) }
+
 #Preview("ports.all") { StoryStage(Stories["ports.all"]) }
+
+#Preview("ports.shared-new") { StoryStage(Stories["ports.shared-new"]) }
 
 #Preview("server.activity") { StoryStage(Stories["server.activity"]) }
 
@@ -108,6 +118,10 @@ import SwiftUI
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
 
+#Preview("workspace.waiting.ports") { StoryStage(Stories["workspace.waiting.ports"]) }
+
 #Preview("workspace.working.activity") { StoryStage(Stories["workspace.working.activity"]) }
+
+#Preview("workspace.working.ports") { StoryStage(Stories["workspace.working.ports"]) }
 
 #endif

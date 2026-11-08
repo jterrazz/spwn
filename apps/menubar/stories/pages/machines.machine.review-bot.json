@@ -10,6 +10,26 @@
   "state": "loading",
   "sections": [
     {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "permanent"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        },
+        {
+          "kind": "text",
+          "text": "1 agent"
+        }
+      ],
+      "segment": "overview"
+    },
+    {
       "id": "machine",
       "title": "review-bot",
       "role": "summary",
@@ -53,7 +73,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "activity",
@@ -398,25 +419,6 @@
       "segment": "overview"
     },
     {
-      "id": "ports",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "shared on Tailscale"
-        }
-      ],
-      "items": [
-        {
-          "empty": {
-            "text": "No port shared yet"
-          }
-        }
-      ],
-      "uncounted": true,
-      "segment": "overview"
-    },
-    {
       "id": "shared",
       "title": "Accounts shared from mac-mini",
       "columns": [
@@ -460,19 +462,110 @@
       "segment": "overview"
     },
     {
-      "id": "summary",
-      "title": "review-bot",
-      "role": "summary",
+      "id": "ports",
+      "title": "Ports",
       "caption": [
         {
           "kind": "text",
-          "text": "permanent"
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot:8000",
+            "mark": "ok",
+            "label": "Port 8000",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot:8000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "share:review-bot:8000"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot:8000",
+            "mark": "ok",
+            "label": "Port 8000",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot:8000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "share:review-bot:8000"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
         },
         {
           "kind": "text",
-          "text": "up 2 hr"
+          "text": "on your tailnet"
         }
-      ]
+      ],
+      "segment": "ports",
+      "about": {
+        "label": "About private links",
+        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+      }
     },
     {
       "id": "window-6m",
@@ -2062,6 +2155,34 @@
       }
     },
     {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "review-bot:8000"
+      ],
+      "mutates": true,
+      "id": "share:review-bot:8000",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "8000",
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Port 8000 of review-bot"
+          }
+        ]
+      }
+    },
+    {
       "key": "cmd+t",
       "label": "Open in Terminal",
       "on": "page",
@@ -2074,13 +2195,28 @@
           "review-bot"
         ]
       }
+    },
+    {
+      "label": "More options for review-bot",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "share-port",
+        "stop",
+        "delete",
+        "open-station"
+      ]
     }
   ],
   "header": {
     "back": "mac-mini",
     "glyph": {
       "kind": "agent"
-    }
+    },
+    "buttons": [
+      "menu"
+    ]
   },
   "segments": [
     {

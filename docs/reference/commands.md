@@ -137,7 +137,7 @@ station disk move <folder> # move a misplaced folder where its app expects it
 station ports [--all-machines] [--all] [--json] # every listening port in its class: Needs you, Public, Private
 station ports share <vm> <port> [--json]      # reserve the port now and share it; inside a VM: station ports share <port>
 station ports stop-sharing <vm> <port> [--yes] # release it, and do not share it again until a share; inside a VM: <port>
-station ports declare [<machine>] <port> --via <route> # declare it public: cloudflare-tunnel, tailscale-funnel or lan
+station ports declare [<machine>] <port> --via <route> [--url <link>] # declare it public: cloudflare-tunnel, tailscale-funnel or lan
 station ports undeclare [<machine>] <port> [--yes]     # take the declaration back
 station ports https on|off [--on <mac>]               # HTTPS links on a Mac: https:// with a certificate, or http://
 ```

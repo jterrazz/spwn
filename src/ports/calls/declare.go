@@ -18,6 +18,8 @@ type DeclareIn struct {
 	Machine string
 	Port    string
 	Via     string
+	// value: the link it is reached by from outside; empty when it has none.
+	URL string
 	// value: the setting that declares it; empty when the owner does.
 	By string
 }
@@ -49,7 +51,7 @@ var Declare = call.Call[Deps, DeclareIn, DeclareOut]{
 			in.Machine = name
 			return d.Far.Declare(ctx, mac, in)
 		}
-		decl := ports.Declaration{Machine: name, Port: port, Via: in.Via, By: in.By}
+		decl := ports.Declaration{Machine: name, Port: port, Via: in.Via, URL: in.URL, By: in.By}
 		return DeclareOut{Declaration: decl}, d.Declarations.Put(ctx, decl)
 	},
 }

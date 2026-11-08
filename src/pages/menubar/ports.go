@@ -1,7 +1,9 @@
 package menubar
 
 import (
+	"slices"
 	"strconv"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/page"
@@ -13,6 +15,7 @@ const (
 	PortsID page.ID = "menubar.ports"
 
 	ActionReview        = "review"
+	ActionFullList      = "full-list"
 	ActionDeclarePublic = "declare-public"
 	ActionStopSharing   = "stop-sharing:"
 
@@ -24,117 +27,75 @@ type PortsOf struct {
 	// value: the machine whose ports the page lists, as the owner names it
 	// (`mac-mini`, `linux-1`); empty is This Mac.
 	Machine string
+	// value: the hour the page is read at: a share of the last few
+	// seconds is fresh against it.
+	Now time.Time
 }
 
 func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
-	// invariant: SPEC §10.2 Ports and A port: the ports page of §5.6, red on
-	// top, then Public, then Private, each row's class in words; every action
-	// it shows is a call, but Review, which opens a terminal on the same list.
-	return portsPage(PortsID, l, of, thisMac, declarePublic(l))
-}
-
-func portsPage(id page.ID, l ports.Listing, of PortsOf, thisMac page.Context, offer page.Action) page.Page {
-	p := pageports.Listed(l, thisMac, false)
-	p.ID = id
-	p.Actions = nil
-	if of.Machine != "" && len(p.Sections) > 0 && p.Sections[0].ID == "summary" {
-		p.Sections[0].Items[0].Row.Label = of.Machine
-	}
-	p.Actions = append(p.Actions, reviews(p, l, of)...)
-	if h, ok := holder(l, of.Machine); ok {
-		workspace(&p, h, of.Machine)
-	} else {
-		p.Actions = append(p.Actions, offer)
-	}
-	for _, h := range l.AllMachines.Macs {
-		for _, s := range h.Shared {
-			p.Actions = append(p.Actions, stopSharing(s, h.Name))
+	// invariant: SPEC A4's Ports of all machines: the way back, Ports, its
+	// facts (how many public, how many on the tailnet, red how many
+	// exposed), then the ports body every page of ports shares; its footer
+	// is Full list in Terminal and Share a port…. Scoped to a machine it
+	// lists that machine's ports alone.
+	sc := portsScope{Self: thisMac.Machine, Now: of.Now}
+	where := "All machines"
+	if of.Machine != "" {
+		where = of.Machine
+		sc.VM = of.Machine
+		for _, h := range l.AllMachines.Macs {
+			if h.Name == of.Machine {
+				sc.VM, sc.Mac = "", h.Name
+				where = macWord(h, sc.Self)
+			}
 		}
 	}
+	b := portsOf(l.AllMachines, sc)
+	facts := []page.Value{page.Text(where), page.Text(strconv.Itoa(b.Public) + " public"), page.Text(strconv.Itoa(b.Private) + " on your tailnet")}
+	if b.Exposed > 0 {
+		facts = append(facts, signaled(page.Text(strconv.Itoa(b.Exposed)+" exposed"), page.SignalFailing))
+	}
+	p := page.Page{ID: PortsID, Command: "menubar", Context: thisMac,
+		Header: &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: "symbol:network"}, Buttons: []string{ActionMenu}},
+		Footer: &page.Footer{Kind: page.FooterTerminals, Buttons: []string{ActionFullList, ActionShare}}}
+	p.Sections = append([]page.Section{{ID: SectionSummary, Title: "Ports", Role: page.Summary, Caption: facts}}, b.Sections...)
+	full := []string{"ports"}
+	if of.Machine == "" {
+		full = append(full, "--all-machines")
+	} else if sc.Mac == "" || sc.Mac != thisMac.Machine {
+		full = append(full, "--on", of.Machine)
+	}
+	for _, a := range []page.Action{declarePublic(l), shareAPort(l, sc),
+		{ID: ActionFullList, Label: "Full list in Terminal", On: page.OnPage, Run: &page.Run{Terminal: true, Argv: full}},
+		{ID: ActionMenu, Label: "More options for Ports", Icon: "ellipsis", On: page.OnPage, Submenu: []string{ActionShare, ActionDeclarePublic}}} {
+		b.act(a)
+	}
+	p.Actions = b.Actions
 	return page.Seal(p)
 }
 
-// value: the Mac that shares a workspace's ports, by the workspace's name.
-func holder(l ports.Listing, vm string) (ports.MacPorts, bool) {
+// value: Share a port…: the workspaces whose listeners are not shared, and
+// the port to share; ports.share on the Mac of the workspace picked.
+func shareAPort(l ports.Listing, sc portsScope) page.Action {
+	var opts []page.Option
 	for _, h := range l.AllMachines.Macs {
-		for _, s := range h.Shared {
-			if vm != "" && s.VM == vm {
-				return h, true
+		for _, p := range h.Ports {
+			if p.Machine.On == "" || p.Device || !sc.holds(h, p.Machine.Name) {
+				continue
+			}
+			if !slices.ContainsFunc(opts, func(o page.Option) bool { return o.Value == p.Machine.Name }) {
+				opts = append(opts, page.Option{Value: p.Machine.Name, Label: p.Machine.Name})
 			}
 		}
 	}
-	return ports.MacPorts{}, false
-}
-
-// invariant: a workspace's Ports, vision panel d: under its title the Mac
-// that reserves its ports, then whether its shares get an https:// link,
-// then its shared ports; the reserved ports' note and Declare public are
-// its Mac's page's, not its own.
-func workspace(p *page.Page, h ports.MacPorts, vm string) {
-	on := h.Name
-	if h.ThisMac {
-		on = page.ThisMac
+	form := &page.Form{Title: "Share a port", Subtitle: "Private on your tailnet.", Fields: []page.Field{
+		{Key: "VM", Label: "Of", Kind: page.FieldSelect, Options: opts, Required: true},
+		{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"},
+	}}
+	if len(opts) > 0 {
+		form.Fields[0].Default = opts[0].Value
 	}
-	links := page.Row{ID: "https", Label: "HTTPS links", Mark: page.OK, Cells: []page.Value{page.Text("Shared ports get an https:// link")}}
-	if h.Serve != "on" {
-		links.Mark, links.Reason, links.Cells = page.Absent, page.Unset, []page.Value{page.Text(catalog.ServeOffDetail)}
-	}
-	https := page.Section{ID: "https", Title: "HTTPS links", Role: page.Summary, Columns: columns(), Items: []page.Item{{Row: &links}}}
-	var kept []page.Section
-	for _, s := range p.Sections {
-		switch s.ID {
-		case "summary":
-			s.Items[0].Row.Cells = []page.Value{page.Texts("On "+vm, "reserved ports on "+on)}
-			kept = append(kept, s, https)
-		case "ranges", "tailnet":
-		default:
-			kept = append(kept, s)
-		}
-	}
-	p.Sections = kept
-}
-
-// invariant: Review opens a terminal on the ports of the Mac its red rows
-// are on: the page's Mac, or each Mac of a page of every Mac, This Mac's
-// without --on.
-func reviews(p page.Page, l ports.Listing, of PortsOf) []page.Action {
-	red := map[string]bool{}
-	for _, s := range p.Sections {
-		for _, it := range s.Items {
-			if it.Row != nil && s.ID == "needs-you" {
-				red[it.Row.ID] = true
-			}
-		}
-	}
-	var out []page.Action
-	var hosts []string
-	for _, h := range l.AllMachines.Macs {
-		var rows []string
-		for _, port := range h.Ports {
-			if red[port.Key()] {
-				rows = append(rows, port.Key())
-			}
-		}
-		if len(rows) == 0 {
-			continue
-		}
-		machine := of.Machine
-		if machine == "" && !h.ThisMac {
-			machine = h.Name
-		}
-		if of.Machine != "" && len(out) > 0 {
-			out[0].Rows = append(out[0].Rows, rows...)
-			continue
-		}
-		out = append(out, review(machine, rows))
-		hosts = append(hosts, h.Name)
-	}
-	if len(out) > 1 {
-		for i := range out {
-			out[i].ID = ActionReview + ":" + hosts[i]
-		}
-	}
-	return out
+	return page.Action{ID: ActionShare, Label: "Share a port", On: page.OnPage, Priority: 3, Mutates: true, Sheet: page.SheetSharePort, Form: form, Run: &page.Run{Call: CallSharePort}}
 }
 
 func review(machine string, rows []string) page.Action {

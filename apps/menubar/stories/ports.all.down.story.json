@@ -1,0 +1,8 @@
+{
+    "group": "ports",
+    "heightNote": "5 pt under the prototype's 556: the page header's top inset is the panel frame's, higher than the prototype's on every page",
+    "id": "ports.all.down",
+    "note": "Ports while infra is down: its two ports greyed, unreachable, with nothing to run.",
+    "pages": ["pages/machines.ports.down.ports.json"],
+    "schema": "station.story/v1"
+}

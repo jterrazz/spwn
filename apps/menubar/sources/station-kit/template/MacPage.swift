@@ -86,7 +86,8 @@ struct MacPage: View {
     @ViewBuilder
     func section(_ s: Section) -> some View {
         switch s.segment {
-        case "ports": MacPorts(section: s)
+        case _ where s.id == "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
+        case "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "accounts": MacAccounts(section: s)
         default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })
         }

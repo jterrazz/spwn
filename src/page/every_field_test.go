@@ -40,6 +40,7 @@ func everyField() page.Page {
 		Glance:  []page.Value{page.Text("1 waits")},
 		Segment: "overview", Card: page.CardNow,
 		Picker: []page.Action{{ID: "window-6m", Label: "6 min", Picked: true, Run: &page.Run{Call: "activity.window", In: map[string]string{"Window": "6m"}}}},
+		About:  &page.About{Label: "About agents", Text: "An agent is Claude at work in its own VM."},
 	}
 	cards := page.Section{
 		ID: "cards", Title: "Cards", Uncounted: true, Counts: []page.Tally{{Mark: page.OK, N: 3}}, Segment: "activity", Card: page.CardHealth,

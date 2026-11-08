@@ -1,14 +1,9 @@
 home.keyboard
-mac.this.ports
 mac.this.accounts
-mac.mini.ports
-mac.mini.ports.https
 mac.mini.accounts
 workspace.agents
 workspace.agents.finished
-workspace.working.ports
 workspace.working.accounts
-workspace.waiting.ports
 workspace.waiting.accounts
 workspace.stopped
 workspace.started
@@ -29,10 +24,6 @@ server.recovered
 server.stopped
 agents.list
 agents.empty
-ports.all
-ports.all.exposed
-ports.all.down
-ports.shared-new
 accounts.all
 accounts.signing-in
 accounts.signed-in

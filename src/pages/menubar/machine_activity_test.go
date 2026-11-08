@@ -224,7 +224,7 @@ func TestAVMsActivityIsMeasuredInsideItAndUpdatesItsGuest(t *testing.T) {
 	}
 
 	stopped := macPageOf(t, "linux-3", func(m *Machine) { m.All.Macs[1].VMs[0].State = model.Stopped })
-	if stopped.Header != nil || len(stopped.Segments) != 0 {
-		t.Fatalf("a stopped VM's header %+v segments %+v, want none", stopped.Header, stopped.Segments)
+	if len(stopped.Segments) != 0 || sectionOf(stopped, "window-1h") != nil {
+		t.Fatalf("a stopped VM's segments %+v, want none and no Activity", stopped.Segments)
 	}
 }

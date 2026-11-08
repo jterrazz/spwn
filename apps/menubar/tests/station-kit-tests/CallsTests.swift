@@ -10,7 +10,8 @@ final class CallsTests: XCTestCase {
     }
 
     // invariant: MB-08: every action the menu bar can show names a call of
-    // the generated calls.json, or opens a terminal.
+    // the generated calls.json, opens a terminal, or copies or opens a link
+    // the app itself handles.
     func testActionsAreCalls() throws {
         let known = try names()
         var called = 0
@@ -20,7 +21,7 @@ final class CallsTests: XCTestCase {
                 if let call = run.call {
                     XCTAssertTrue(known.contains(call), "\(name): \(action.id ?? "") names \(call), no call of calls.json")
                     called += 1
-                } else {
+                } else if run.copy == nil && run.open == nil {
                     XCTAssertEqual(run.terminal, true, "\(name): \(action.id ?? "") neither calls nor opens a terminal")
                 }
             }

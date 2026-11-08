@@ -1,0 +1,11 @@
+{
+    "group": "workspace",
+    "heightNote": "the ssh footer is the workspace page's own lot (P9)",
+    "id": "workspace.working.ports",
+    "note": "linux-1's Ports: its two shares, then its two listeners under Listening, not shared.",
+    "pages": ["pages/machines.ports.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "ports"
+    }
+}

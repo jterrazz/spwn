@@ -152,20 +152,23 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 
 // invariant: SPEC A4: a running VM's page carries its header and its
 // segments (a server's Overview and Activity, a workspace's four), each
-// section of its kind's page under Overview, then its Activity's; a VM
-// that does not run has none.
+// section of its kind's page under Overview, then its Activity's; a
+// header or a summary its kind's page drew is kept; a VM that does not
+// run has none of these.
 func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 	if vm.State != model.Running {
 		return p
 	}
-	glyph := page.Glyph{Kind: "workspace"}
-	switch {
-	case vm.Lifetime.Kind() == machine.Server:
-		glyph.Kind = "server"
-	case vm.Agent != nil && !vm.Finished():
-		glyph.Kind = "agent"
+	if p.Header == nil {
+		glyph := page.Glyph{Kind: "workspace"}
+		switch {
+		case vm.Lifetime.Kind() == machine.Server:
+			glyph.Kind = "server"
+		case vm.Agent != nil && !vm.Finished():
+			glyph.Kind = "agent"
+		}
+		p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
 	}
-	p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
 	p.Segments = segments()
 	if vm.Lifetime.Kind() == machine.Server {
 		p.Segments = p.Segments[:2]
@@ -175,7 +178,9 @@ func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 			p.Sections[i].Segment = SegmentOverview
 		}
 	}
-	p.Sections = append(p.Sections, page.Section{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: vmFacts(m, vm)})
+	if !sectionHas(p, SectionSummary) {
+		p.Sections = append(p.Sections, page.Section{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: vmFacts(m, vm)})
+	}
 	p.Sections = append(p.Sections, vmActivity(m, h, vm)...)
 	if sectionHas(p, SectionGuestUpkeep) {
 		p.Actions = append(p.Actions, updateGuest(h, vm))
@@ -235,9 +240,12 @@ func macPage(m Machine, h model.MacView) page.Page {
 		}
 		p.Segments = segments()
 		p.Sections = append(p.Sections, macOverviewSections(m, h, label, stale)...)
+		shares := macPorts(m, h)
 		p.Sections = append(p.Sections, macActivity(m, h)...)
-		p.Sections = append(p.Sections, macPorts(m, h), macAccounts(m, h))
+		p.Sections = append(p.Sections, shares.Sections...)
+		p.Sections = append(p.Sections, macAccounts(m, h))
 		p.Actions = append(p.Actions, overviewActions(m, h, label)...)
+		p.Actions = append(p.Actions, shares.Actions...)
 	}
 	if slices.ContainsFunc(p.Actions, func(a page.Action) bool { return a.ID == ActionNewVM }) && len(h.VMs) > 0 {
 		p.Header.Buttons = append(p.Header.Buttons, ActionNewVM)

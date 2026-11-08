@@ -24,7 +24,7 @@ func miniPorts() ports.Listing {
 			{Machine: mini, Port: 5000, Process: "ControlCenter", Binds: []string{"*"}, Reach: ports.Outside},
 			{Machine: infra, Port: 10250, Process: "kubelet", Binds: []string{"0.0.0.0"}, Reach: ports.Outside},
 			{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside,
-				Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel}, Verified: &ports.Verified{Seen: true}},
+				Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://jterrazz.com"}, Verified: &ports.Verified{Seen: true}},
 			{Machine: mini, Port: 5900, Process: "screensharingd", Binds: []string{"100.98.133.20"}, Reach: ports.Tailnet},
 			{Machine: infra, Port: 6443, Process: "kube-apiserver", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet, Device: true},
 		}}

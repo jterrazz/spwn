@@ -5,18 +5,26 @@ import SwiftUI
 public struct CardLabel: View {
     let title: String
     let value: [Value]
+    let about: About?
+    let tap: (About) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
 
-    public init(_ title: String, value: [Value] = []) {
+    public init(_ title: String, value: [Value] = [], about: About? = nil, tap: @escaping (About) -> Void = { _ in }) {
         self.title = title
         self.value = value
+        self.about = about
+        self.tap = tap
     }
 
     public var body: some View {
         let m = Token.Metric.CardLabel.self
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(Token.Role.sectionLabel.font).foregroundStyle(tokens.tone(Token.Role.sectionLabel.tone))
+            if let about {
+                HStack(alignment: .firstTextBaseline, spacing: m.aboutGap) { name; aboutButton(about) }
+            } else {
+                name
+            }
             Spacer(minLength: 0)
             if !value.isEmpty {
                 Text(FactsLine.words(value, now: now))
@@ -27,6 +35,25 @@ public struct CardLabel: View {
         .lineLimit(1)
         .frame(height: m.height)
         .padding(.horizontal, m.inset)
+    }
+
+    var name: some View {
+        Text(title).font(Token.Role.sectionLabel.font).foregroundStyle(tokens.tone(Token.Role.sectionLabel.tone))
+    }
+
+    func aboutButton(_ about: About) -> some View {
+        let m = Token.Metric.CardLabel.self
+        return Button { tap(about) } label: {
+            Image(systemName: Token.Symbol.about).font(.system(size: m.aboutGlyph))
+                .foregroundStyle(tokens.tone(Token.Role.sectionValue.tone))
+                .frame(width: m.about, height: m.about)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .focusEffectDisabled()
+        .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + m.aboutRise }
+        .help(about.label ?? "")
+        .accessibilityLabel(about.label ?? "")
     }
 }
 

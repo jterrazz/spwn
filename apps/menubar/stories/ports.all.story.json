@@ -1,8 +1,8 @@
 {
     "group": "ports",
+    "heightNote": "5 pt under the prototype's 556: the page header's top inset is the panel frame's, higher than the prototype's on every page",
     "id": "ports.all",
-    "note": "Ports on all machines.",
-    "pages": ["pages/machines.ports.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "Ports on all machines: one public, four on the tailnet, three listening, not shared.",
+    "pages": ["pages/machines.ports.ports.json"],
+    "schema": "station.story/v1"
 }

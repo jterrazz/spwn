@@ -87,6 +87,7 @@ struct MachineContent: View {
     public static func sharing(_ page: Page, _ state: PanelState) -> String? {
         guard (state.running ?? state.settling) == "share-port", let port = state.sent["Port"], !port.isEmpty else { return nil }
         let listed = (page.section("ports")?.items ?? []).compactMap(\.link).contains { $0.row == port }
+            || (page.section("private")?.rows ?? []).contains { $0.id?.hasSuffix(":" + port) == true }
         return listed ? nil : "Port \(port)"
     }
 

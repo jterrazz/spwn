@@ -2,6 +2,7 @@ package ports
 
 import (
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,11 +26,29 @@ type Declaration struct {
 	Machine string `json:"machine"`
 	Port    int    `json:"port"`
 	Via     string `json:"via"`
+	// value: the link it is reached by from outside (`https://jterrazz.com`);
+	// empty when only its address is known.
+	URL string `json:"url,omitempty"`
 	// value: the setting that declared it; empty when the owner did.
 	By string `json:"by,omitempty"`
 }
 
 func (d Declaration) Key() string { return d.Machine + ":" + strconv.Itoa(d.Port) }
+
+func (d Declaration) Domain() (domain string, web bool) {
+	// value: where its link reaches, as an address pill says it
+	// (`jterrazz.com`), and whether a browser opens it; empty when it has
+	// no link.
+	rest, web := strings.CutPrefix(d.URL, "https://")
+	if !web {
+		rest, web = strings.CutPrefix(d.URL, "http://")
+	}
+	if !web {
+		_, rest, _ = strings.Cut(d.URL, "://")
+	}
+	domain, _, _ = strings.Cut(rest, "/")
+	return domain, web
+}
 
 type PortsGroup struct {
 	Range        string `json:"range,omitempty"`

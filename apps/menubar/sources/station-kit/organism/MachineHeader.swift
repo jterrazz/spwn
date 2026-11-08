@@ -10,6 +10,7 @@ public struct MachineHeader: View {
     let back: () -> Void
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
+    @Environment(\.stationStill) private var still
 
     public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }) {
         self.page = page
@@ -50,17 +51,25 @@ public struct MachineHeader: View {
                 .padding(.bottom, m.backBottom)
             }
             HStack(spacing: m.titleGap) {
-                if let glyph = page.header?.glyph, case let .symbol(name) = GlyphView.drawn(glyph) {
-                    Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
-                        .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
-                        .frame(width: m.glyphSlot)
+                if let glyph = page.header?.glyph {
+                    switch GlyphView.drawn(glyph) {
+                    case let .symbol(name):
+                        Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
+                            .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
+                            .frame(width: m.glyphSlot)
+                    case let .custom(name):
+                        Image(name, bundle: .module).font(.system(size: m.glyph, weight: .regular))
+                            .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
+                            .frame(width: m.glyphSlot)
+                    default: EmptyView()
+                    }
                 }
                 Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
                 Spacer(minLength: 0)
                 HStack(spacing: m.buttonsGap) {
                     ForEach(Array((page.header?.buttons ?? []).compactMap { page.action($0) }.enumerated()), id: \.offset) { _, a in
                         if a.icon == Token.Symbol.menu {
-                            IconButton(Token.Symbol.menu) { run(a) }.accessibilityLabel(a.label ?? "")
+                            menu(a)
                         } else {
                             PanelButton(a.label ?? "", symbol: a.icon) { run(a) }
                         }
@@ -73,6 +82,38 @@ public struct MachineHeader: View {
                 Segmented(options: segmented(segments))
                 .padding(.top, m.segmentsTop)
             }
+        }
+    }
+
+    // value: what a page's menu lists: each action of its submenu the page
+    // carries, in order.
+    public static func menu(_ page: Page, _ action: Action) -> [Action] {
+        (action.submenu ?? []).compactMap { page.action($0) }
+    }
+
+    // value: the page's menu: its submenu's verbs on a click, each run as
+    // its own; drawn still as the round button it opens from.
+    @ViewBuilder
+    func menu(_ a: Action) -> some View {
+        let items = Self.menu(page, a)
+        if still || items.isEmpty {
+            IconButton(Token.Symbol.menu) { run(a) }.accessibilityLabel(a.label ?? "")
+        } else {
+            Menu {
+                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                    Button((item.label ?? "") + (item.form != nil || item.confirm != nil ? Token.Glyph.ellipsis : "")) { run(item) }
+                }
+            } label: {
+                Image(systemName: Token.Symbol.menu).font(.system(size: Token.Metric.Control.iconGlyph, weight: .regular))
+                    .foregroundStyle(tokens.color.t2)
+                    .frame(width: Token.Metric.Control.icon, height: Token.Metric.Control.icon)
+                    .contentShape(Circle())
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .accessibilityLabel(a.label ?? "")
         }
     }
 

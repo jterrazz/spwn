@@ -114,7 +114,7 @@ func scenePorts() ports.AllMachines {
 			},
 			Ports: []ports.Port{
 				{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside,
-					Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel}, Verified: &ports.Verified{Seen: true}},
+					Declared: &ports.Declaration{Machine: infra.Name, Port: 443, Via: catalog.RouteCloudflareTunnel, URL: "https://jterrazz.com"}, Verified: &ports.Verified{Seen: true}},
 				{Machine: infra, Port: 6443, Process: "kube-apiserver", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet, Device: true},
 				listen(linux3, 5432, "postgres"), listen(bot, 8000, "uvicorn"), listen(coremachine.Ref{Name: miniMac}, 5900, "screensharingd"),
 			}},
