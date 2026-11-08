@@ -14,6 +14,7 @@
 ```sh
 station awake [--json]                    # every Mac, this one first
 station awake <for> [--lid] [--battery]   # 30m, 1h, 4h, until 18:00 (1 min to 24 h)
+station awake --until-done <vm>           # until the agent working in that VM is done
 station awake off                         # end the keep-awake now; Never sleeps stays
 ```
 
@@ -21,7 +22,7 @@ Every Mac is listed, This Mac first, the others asked through their engines, so 
 
 ## Keep awake
 
-The engine that already runs holds the session, in memory only: a `PreventUserIdleSystemSleep` assertion, and with `--lid` the clamshell sleep disabled (no root, no `pmset -a`, no file). Every end sets the clamshell back to normal, and so does every engine start and quit. A guard ends the session first: thermal pressure at trapping (or heavy for 5 minutes lid closed on battery), the battery at 20 % on battery, Low Power Mode, or the lid closed on battery without `--battery`; each end is logged in `engine.log` and kept on the page for 24 hours. With `--lid`, a lid close sleeps the display with `pmset displaysleepnow`, never a display assertion. A guard already past its threshold refuses the start (exit 1). Piped, one record per row: the session (`on`, its flags, until in RFC 3339, who asked), the guards, then the reading as `key<TAB>value`. Unrelated to the `restart-after-power-cut` setting, the admin pmset policy of an always-on Mac.
+The engine that already runs holds the session, in memory only: a `PreventUserIdleSystemSleep` assertion, and with `--lid` the clamshell sleep disabled (no root, no `pmset -a`, no file). Every end sets the clamshell back to normal, and so does every engine start and quit. A guard ends the session first: thermal pressure at trapping (or heavy for 5 minutes lid closed on battery), the battery at 20 % on battery, Low Power Mode, or the lid closed on battery without `--battery`; each end is logged in `engine.log` and kept on the page for 24 hours. With `--lid`, a lid close sleeps the display with `pmset displaysleepnow`, never a display assertion. A guard already past its threshold refuses the start (exit 1). With `--until-done <vm>` the session follows a run: the engine's `awake` job reads the agents report it keeps of that VM, and the session ends (`awake_ended`, "linux-1 is done") the second its agents leave `working`, or after 24 h at the latest; a VM no agent works in is refused. A switch flipped later keeps the run it follows. Piped, one record per row: the session (`on`, its flags, until in RFC 3339, who asked), the guards, then the reading as `key<TAB>value`. Unrelated to the `restart-after-power-cut` setting, the admin pmset policy of an always-on Mac.
 
 ## The guards
 

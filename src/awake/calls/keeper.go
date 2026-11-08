@@ -45,6 +45,9 @@ type KeeperOptions struct {
 	// the battery guard letting it go.
 	Told   func(text string)
 	Change func()
+	// value: an agent is working in that VM now, as this engine last heard
+	// its report; nil hears of none.
+	Working func(vm string) bool
 }
 
 type Keeper struct {
@@ -178,11 +181,17 @@ func (m *Keeper) Awake(req awake.Request) (held awake.Session, refreshed bool, e
 			return awake.Session{}, false, &awake.RangeError{}
 		}
 	}
+	if req.For == 0 && req.Run != "" {
+		req.For = awake.Longest
+	}
 	if req.For == 0 {
 		req.For = awake.DefaultFor
 	}
 	if bad := awake.CheckFor(req.For); bad != nil {
 		return awake.Session{}, false, bad
+	}
+	if req.Run != "" && !m.working(req.Run) {
+		return awake.Session{}, false, &awake.RunError{VM: req.Run}
 	}
 	r, err := m.port.Read()
 	if unsupported(err) {
@@ -191,7 +200,7 @@ func (m *Keeper) Awake(req awake.Request) (held awake.Session, refreshed bool, e
 	if err != nil {
 		return awake.Session{}, false, err
 	}
-	want := awake.Session{Lid: req.Lid, Battery: req.Battery, By: req.By}
+	want := awake.Session{Lid: req.Lid, Battery: req.Battery, By: req.By, Run: req.Run}
 	if reason, _, words := trip(m.caps(), r, &want, 0); reason != "" {
 		return awake.Session{}, false, &awake.GuardError{Guard: reason, Words: words}
 	}
@@ -201,6 +210,9 @@ func (m *Keeper) Awake(req awake.Request) (held awake.Session, refreshed bool, e
 	m.reading = r
 	now := m.clock.Now().UTC().Truncate(time.Second)
 	want.StartedAt, want.Until, want.For = now, now.Add(req.For), req.For
+	if req.Run != "" {
+		want.For = 0
+	}
 	if !req.Until.IsZero() {
 		want.Until = req.Until.UTC()
 	}
@@ -209,7 +221,12 @@ func (m *Keeper) Awake(req awake.Request) (held awake.Session, refreshed bool, e
 		was := m.session.Lid
 		want.StartedAt = m.session.StartedAt
 		if !req.Until.IsZero() && req.Until.Equal(m.session.Until) {
+			// invariant: a switch flipped keeps the end the session holds,
+			// and the run it follows.
 			want.For = m.session.For
+			if want.Run == "" {
+				want.Run = m.session.Run
+			}
 		}
 		m.session = &want
 		if want.Lid != was {
@@ -364,12 +381,22 @@ func (m *Keeper) sleepDisplay(ctx context.Context) {
 	}
 }
 
+func (m *Keeper) working(vm string) bool { return m.o.Working != nil && m.o.Working(vm) }
+
 func (m *Keeper) Tick() {
-	// value: called every second by the daemon: the term is checked each time;
-	// the guards, Low Power Mode's poll, the heartbeat and a pending reset every
-	// 30 s.
+	// value: called every second by the daemon: the term and the run it
+	// follows are checked each time; the guards, Low Power Mode's poll, the
+	// heartbeat and a pending reset every 30 s.
 	now := m.clock.Now()
 	m.mu.Lock()
+	if run := m.followed(); run != "" {
+		m.mu.Unlock()
+		if !m.working(run) {
+			m.finish(awake.ReasonRun, run+" is done")
+			return
+		}
+		m.mu.Lock()
+	}
 	if m.session != nil && !now.Before(m.session.Until) {
 		detail := "its " + term(m.session.Until.Sub(m.session.StartedAt)) + " ended"
 		m.mu.Unlock()
@@ -418,6 +445,13 @@ func (m *Keeper) Tick() {
 		m.log("held " + heartbeat(r))
 		m.changed()
 	}
+}
+
+func (m *Keeper) followed() string {
+	if m.session == nil {
+		return ""
+	}
+	return m.session.Run
 }
 
 func heartbeat(r awake.Reading) string {

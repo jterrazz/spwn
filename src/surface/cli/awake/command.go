@@ -29,6 +29,8 @@ type Deps struct {
 type Input struct {
 	Words        string
 	Lid, Battery bool
+	// value: the VM whose agent the keep-awake follows.
+	Run string
 }
 
 func by(in *Input) string {
@@ -39,6 +41,9 @@ func by(in *Input) string {
 	if in.Battery {
 		words += " --battery"
 	}
+	if in.Run != "" {
+		words += " --until-done " + in.Run
+	}
 	return strings.TrimSpace(words)
 }
 
@@ -46,18 +51,19 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 	cmd := kit.Command(kit.Leaf[Input]{
 		Use:     "awake [<for>]",
 		Short:   "Keep a Mac from sleeping: every Mac's mode, a keep-awake for a while, or off",
-		Example: "  station awake\n  station awake 4h --lid\n  station awake until 18:00\n  station awake off",
+		Example: "  station awake\n  station awake 4h --lid\n  station awake until 18:00\n  station awake --until-done linux-1\n  station awake off",
 		Group:   kit.OnAMachine,
 		Args:    cobra.MaximumNArgs(2),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.Lid, "lid", false, "stay awake with the lid closed too (the screen still turns off)")
 			f.BoolVar(&in.Battery, "battery", false, "stay awake when unplugged")
+			f.StringVar(&in.Run, "until-done", "", "stay awake until the agent working in this VM is done (24h at most)")
 		},
 		Bind:  func(in *Input, args []string) error { in.Words = strings.Join(args, " "); return nil },
-		Read:  func(in *Input) bool { return in.Words == "" && !in.Lid && !in.Battery },
+		Read:  func(in *Input) bool { return in.Words == "" && !in.Lid && !in.Battery && in.Run == "" },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			if in.Words == "" && !in.Lid && !in.Battery {
+			if in.Words == "" && !in.Lid && !in.Battery && in.Run == "" {
 				return read(ctx, d, env, io)
 			}
 			return keep(ctx, d, env, in, io)
@@ -88,13 +94,16 @@ func read(ctx context.Context, d Deps, env kit.Env, io kit.IO) error {
 
 func keep(ctx context.Context, d Deps, env kit.Env, in *Input, io kit.IO) error {
 	words := in.Words
-	if words == "" {
+	if words == "" && in.Run == "" {
 		words = "4h"
 	}
-	term, err := awake.For(words, d.Now(), d.Zone)
-	req := awake.Request{Lid: in.Lid, Battery: in.Battery, For: term, By: by(in), Words: words}
-	if err != nil {
-		req.For = awake.Longest + time.Minute
+	req := awake.Request{Lid: in.Lid, Battery: in.Battery, By: by(in), Words: words, Run: in.Run}
+	if words != "" {
+		term, err := awake.For(words, d.Now(), d.Zone)
+		req.For = term
+		if err != nil {
+			req.For = awake.Longest + time.Minute
+		}
 	}
 	a, err := call.Invoke(ctx, env.Calls, env.Target(), awakecalls.Keep, req, nil)
 	if err != nil {

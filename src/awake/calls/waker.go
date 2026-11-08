@@ -90,10 +90,10 @@ func (s *Waker) Read(ctx context.Context) <-chan awake.Report {
 }
 
 func (s *Waker) Awake(ctx context.Context, r awake.Request) (awake.Awoken, error) {
-	if r.For == 0 {
+	if r.For == 0 && r.Run == "" {
 		r.For = awake.DefaultFor
 	}
-	if err := awake.CheckFor(r.For); err != nil {
+	if err := awake.CheckFor(r.For); err != nil && r.For != 0 {
 		return awake.Awoken{}, err
 	}
 	a, err := s.p.Awake(ctx, r)

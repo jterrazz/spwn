@@ -64,13 +64,24 @@ func stopped(r awake.Report) bool {
 	return r.Engine != "" && r.Engine != awake.EngineRunning && r.Engine != awake.EngineReading
 }
 
+// value: what a keep-awake holds until: the run it follows, else its end.
+func end(s awake.Session, now time.Time, zone *time.Location) string {
+	if s.Run != "" {
+		return s.Run + " is done"
+	}
+	return clock(s.Until, now, zone)
+}
+
 func until(s awake.Session, now time.Time, zone *time.Location) []string {
-	words := []string{"Awake until " + clock(s.Until, now, zone)}
+	words := []string{"Awake until " + end(s, now, zone)}
 	if s.Lid {
 		words = append(words, "lid closed")
 	}
 	if s.Battery {
 		words = append(words, "on battery allowed")
+	}
+	if s.Run != "" {
+		return words
 	}
 	return append(words, pages.Term(s.Until.Sub(now))+" left")
 }
@@ -240,6 +251,7 @@ type MacJSON struct {
 	Until        *time.Time   `json:"until_at,omitempty"`
 	Lid          bool         `json:"lid,omitempty"`
 	Battery      bool         `json:"battery,omitempty"`
+	Run          string       `json:"until_done,omitempty"`
 	StoppedBy    string       `json:"stopped_by,omitempty"`
 	NeverSince   *time.Time   `json:"never_since,omitempty"`
 	Servers      []string     `json:"hosts_servers"`
@@ -270,7 +282,7 @@ func macJSON(r awake.Report) MacJSON {
 	}
 	if s := r.Session; s != nil && m.Mode == awake.AwakeUntil {
 		u := s.Until.UTC()
-		m.Until, m.Lid, m.Battery = &u, s.Lid, s.Battery
+		m.Until, m.Lid, m.Battery, m.Run = &u, s.Lid, s.Battery, s.Run
 	}
 	if m.Mode == awake.StoppedByGuard {
 		m.StoppedBy = r.LastEnd.Reason
@@ -320,7 +332,7 @@ func Kept(a awake.Awoken, label string, now time.Time, zone *time.Location, this
 	}
 	r := pages.Done(a.Mac, catalog.StateOK, "")
 	r.Short, r.Sentence = named(a.Mac, label, thisMac), true
-	words := []string{"stays awake until " + clock(a.Until, now, zone)}
+	words := []string{"stays awake until " + end(a.Session, now, zone)}
 	if a.Refreshed {
 		words[0] = "now " + words[0]
 	}

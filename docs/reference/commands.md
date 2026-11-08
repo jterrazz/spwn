@@ -152,6 +152,7 @@ An orphan is a task whose program is missing or whose app is gone. `remove` asks
 ```sh
 station awake [--json] # every Mac, this one first: its mode, its guards, its reading
 station awake <for> [--lid] [--battery] # keep this Mac awake: 30m, 1h, 4h, until 18:00 (1 min to 24 h); held by the engine
+station awake --until-done <vm> # keep this Mac awake until the agent working in that VM is done (24 h at most)
 station awake off # end the keep-awake now; Never sleeps stays
 ```
 

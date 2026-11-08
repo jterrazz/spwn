@@ -12,10 +12,10 @@ var Keep = call.Call[Deps, awake.Request, awake.Awoken]{
 	Run: func(ctx context.Context, d Deps, in awake.Request, _ call.Progress) (awake.Awoken, error) {
 		// invariant: a keep-awake adds nothing to a Mac that never sleeps;
 		// its options are the ones the Mac reports it can take.
-		if in.For == 0 {
+		if in.For == 0 && in.Run == "" {
 			in.For = awake.DefaultFor
 		}
-		if _, err := awake.Bounded(in.For); err != nil {
+		if _, err := awake.Bounded(in.For); err != nil && in.For != 0 {
 			return awake.Awoken{}, d.refused(err, in)
 		}
 		if err := awake.Options(d.Caps, in.Lid, in.Battery); err != nil {

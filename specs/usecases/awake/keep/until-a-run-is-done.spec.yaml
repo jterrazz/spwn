@@ -1,0 +1,29 @@
+description: 'awake --until-done linux-1 holds while its agent works, and ends once it leaves working'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake --until-done linux-1'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	stays awake until linux-1 is done
+    - command: 'awake | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Awake until linux-1 is done
+    - command: 'world agent-end linux-1 s-1 "tests pass"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ○	jterrazz-macbook-pro	Sleeps normally
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].power.holds'' world.json'
+      exit: 0
+      stdout: |
+          null
