@@ -14,9 +14,9 @@ import (
 
 func (d *Engine) newAwake() *awakecalls.Keeper {
 	return awakecalls.NewKeeper(d.o.Power, d.h, awakecalls.KeeperOptions{
-		Log:    func(m string) { d.logf("awake", m) },
-		Notice: func(e awake.End) { d.told(engine.NoticeAwakeEnded, engine.AwakeStopped(e.Detail)) },
-		Told:   func(text string) { d.told(engine.NoticeNeverSleeps, text) },
+		Log:     func(m string) { d.logf("awake", m) },
+		Notice:  func(e awake.End) { d.told(engine.NoticeAwakeEnded, engine.AwakeStopped(e.Detail)) },
+		Told:    func(text string) { d.told(engine.NoticeNeverSleeps, text) },
 		Change:  d.hub.changed,
 		Working: d.working,
 	})

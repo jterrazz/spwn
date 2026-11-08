@@ -94,6 +94,9 @@ type Report struct {
 	NeverSince  time.Time
 	NeverHeld   bool
 	Servers     []string
+	// value: SPEC B5.14: the workspaces running on it now, which pause
+	// while it sleeps; a stopped one is not listed.
+	Pauses []string
 }
 
 func (r Report) Mode() Mode { return ModeOf(r.Now, r.NeverSleeps, r.Session, r.LastEnd) }

@@ -255,6 +255,7 @@ type MacJSON struct {
 	StoppedBy    string       `json:"stopped_by,omitempty"`
 	NeverSince   *time.Time   `json:"never_since,omitempty"`
 	Servers      []string     `json:"hosts_servers"`
+	Pauses       []string     `json:"pauses"`
 	Capabilities CapsJSON     `json:"capabilities"`
 	Reading      *ReadingJSON `json:"reading,omitempty"`
 }
@@ -276,6 +277,10 @@ func macJSON(r awake.Report) MacJSON {
 		Capabilities: CapsJSON{Battery: r.Caps.Battery, Lid: r.Caps.Lid, Thermal: r.Caps.Thermal}}
 	if m.Servers == nil {
 		m.Servers = []string{}
+	}
+	m.Pauses = r.Pauses
+	if m.Pauses == nil {
+		m.Pauses = []string{}
 	}
 	if stopped(r) {
 		m.Mode = awake.SleepsNormally
