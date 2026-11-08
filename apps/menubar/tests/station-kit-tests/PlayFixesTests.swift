@@ -88,11 +88,13 @@ final class PlayFixesTests: XCTestCase {
         XCTAssertNil(SwitcherKeys.picked(0, lit: nil, searching: true))
     }
 
-    // invariant: a count of any size draws the one dot, its number said by
-    // the label, never a digit cut to `…`.
-    func testACountOfAnySizeDrawsTheOneDot() throws {
-        XCTAssertEqual(MenuBarIcon(.needs(10)).image(scheme: .dark).flatMap(Bitmap.init)?.pixels, MenuBarIcon(.needs(1)).image(scheme: .dark).flatMap(Bitmap.init)?.pixels)
-        XCTAssertEqual(MenuBarIcon(.needs(10)).label, "station: 10 things need you")
+    // invariant: M29: a count of any size draws all its digits, never cut
+    // to `…`: the item snaps to the width they take.
+    func testACountOfAnySizeDrawsAllItsDigits() throws {
+        let width = { (n: Int) in MenuBarIcon(.plain, count: n).image(scheme: .dark)?.width ?? 0 }
+        XCTAssertGreaterThan(width(1), MenuBarIcon(.plain).image(scheme: .dark)?.width ?? 0)
+        XCTAssertGreaterThan(width(10), width(1))
+        XCTAssertGreaterThan(width(120), width(10))
     }
 
     // invariant: the engine stopped keeps a badge: the icon never says

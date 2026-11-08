@@ -91,8 +91,6 @@ public struct StoryStage: View {
         SwiftUI.Group {
             if story.ui.statusItem == true {
                 StoryView(story, state: state, handlers: handlers)
-                    .padding(.trailing, Self.room)
-                    .frame(width: Self.strip.width, height: Self.strip.height, alignment: .trailing)
                     .background(StoryDeskView(knobs.desk, scheme: knobs.scheme))
             } else {
                 StoryView(story, state: state, handlers: handlers)

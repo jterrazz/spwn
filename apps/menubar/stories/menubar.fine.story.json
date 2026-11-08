@@ -4,7 +4,6 @@
     "note": "The status item when nothing needs you: the bare glyph.",
     "pages": ["pages/machines.fine.menubar.json"],
     "schema": "station.story/v1",
-    "status": "today",
     "ui": {
         "statusItem": true
     }

@@ -18,32 +18,42 @@ final class IconTests: XCTestCase {
     // alone.
     func testIconPlain() throws {
         let icon = try icon("menubar.home.one-mac")
-        XCTAssertEqual(icon, MenuBarIcon(.plain))
-        XCTAssertEqual(icon.label, "station: nothing needs you")
+        XCTAssertEqual(icon, MenuBarIcon(.plain, said: "all machines are fine"))
+        XCTAssertEqual(icon.label, "all machines are fine")
         XCTAssertEqual(icon.symbol, Token.Icon.orbit)
         try drawn("plain", icon)
     }
 
-    // invariant: MB-02: five findings and no server down: the dot cut into
-    // the Orbit's corner, the count said by its label.
-    func testIconNeedsYouDot() throws {
-        let icon = try icon("menubar.home.two-macs")
-        XCTAssertEqual(icon, MenuBarIcon(.needs(5)))
-        XCTAssertEqual(icon.label, "station: 5 things need you")
-        XCTAssertEqual(icon.symbol, Token.Icon.badged)
-        try drawn("needs", icon)
+    // invariant: MB-02: five findings of upkeep and no server down: the
+    // Orbit alone, since upkeep never counts.
+    func testUpkeepNeverCounts() throws {
+        XCTAssertEqual(try Tree.page("menubar.home.two-macs").badge?.needs, 0)
+        XCTAssertEqual(try icon("menubar.home.two-macs"), MenuBarIcon(.plain, said: "all machines are fine"))
     }
 
-    // invariant: MB-03: infra in a loop on the mini: the Orbit slashed,
-    // whatever the count beside it.
+    // invariant: MB-03: infra in a loop on the mini: the Orbit red beside
+    // the count, and the label names the server.
     func testIconRedServerDown() throws {
-        let page = try Tree.page("menubar.home.infra-down")
-        XCTAssertEqual(page.badge?.needs, 5)
         let icon = try icon("menubar.home.infra-down")
-        XCTAssertEqual(icon, MenuBarIcon(.down))
-        XCTAssertEqual(icon.label, "station: a server is down")
-        XCTAssertEqual(icon.symbol, Token.Icon.slashed)
-        try drawn("down", icon)
+        XCTAssertEqual(icon, MenuBarIcon(.red, count: 1, said: "station, infra down"))
+        XCTAssertEqual(icon.symbol, Token.Icon.orbit)
+        XCTAssertFalse(icon.template)
+    }
+
+    // invariant: the image the menu bar shows and the words VoiceOver reads
+    // of it come from the one badge of the page, for every shell story.
+    func testTheOneBadgeDrivesTheImageAndTheLabel() throws {
+        for story in try Stories.load(root: Tree.stories) where story.ui.statusItem == true {
+            let badge = try XCTUnwrap(story.state.page?.badge, story.id)
+            let icon = MenuBarIcon.of(connection: story.state.connection, page: story.state.page)
+            XCTAssertEqual(icon.label, badge.label, story.id)
+            XCTAssertEqual(icon.count, badge.needs, story.id)
+            XCTAssertEqual(icon.mark == .red, badge.down == true, story.id)
+            XCTAssertEqual(icon.mark == .restarting, badge.restarting == true && badge.down != true, story.id)
+            let image = icon.nsImage(scheme: .dark)
+            XCTAssertEqual(image.accessibilityDescription, badge.label, story.id)
+            XCTAssertEqual(image.isTemplate, badge.down != true, story.id)
+        }
     }
 
     // invariant: MB-04: the CPU line is the owner's option, This Mac's CPU
@@ -52,7 +62,7 @@ final class IconTests: XCTestCase {
         let spark = try XCTUnwrap(Tree.page("menubar.home.two-macs").strip?.spark)
         XCTAssertFalse(spark.isEmpty)
         let icon = try icon("menubar.home.two-macs", sparkline: true)
-        XCTAssertEqual(icon, MenuBarIcon(.needs(5), spark: spark))
+        XCTAssertEqual(icon, MenuBarIcon(.plain, spark: spark, said: "all machines are fine"))
         try drawn("spark", icon)
         XCTAssertEqual(try self.icon("menubar.home.engine-stopped", .stopped, sparkline: true).spark, nil)
     }
@@ -79,20 +89,24 @@ final class IconTests: XCTestCase {
         try drawn("connecting", icon)
     }
 
-    // invariant: every state is a template image with no colour of its
-    // own: macOS paints it for the bar's appearance and tints it while the
-    // panel is open, and both schemes draw the same alpha.
-    func testEveryStateIsATemplate() throws {
-        let marks: [MenuBarIcon.Mark] = [.plain, .needs(5), .needs(120), .down, .stopped, .connecting]
-        for mark in marks {
-            let icon = MenuBarIcon(mark, spark: [10, 60, 30])
-            XCTAssertTrue(icon.nsImage(scheme: .dark).isTemplate, "\(mark)")
-            let dark = try XCTUnwrap(icon.image(scheme: .dark).flatMap(Bitmap.init))
-            let light = try XCTUnwrap(icon.image(scheme: .light).flatMap(Bitmap.init))
-            XCTAssertEqual(dark.width, light.width)
-            XCTAssertEqual(dark.pixels.count, light.pixels.count, "\(mark)")
-            let apart = stride(from: 3, to: min(dark.pixels.count, light.pixels.count), by: 4).map { abs(Int(dark.pixels[$0]) - Int(light.pixels[$0])) }.max() ?? 0
-            XCTAssertLessThanOrEqual(apart, 2, "\(mark)")
+    // invariant: every state but the red is a template image with no
+    // colour of its own: macOS paints it for the bar's appearance and tints
+    // it while the panel is open, so whichever scheme the app asks for it
+    // draws the same alpha; the red is drawn in the bar's own ink.
+    func testEveryStateButTheRedIsATemplate() throws {
+        func alpha(_ image: NSImage) throws -> [UInt8] {
+            let rep = try XCTUnwrap(image.representations.compactMap { $0 as? NSBitmapImageRep }.first { $0.pixelsWide > Int(image.size.width) })
+            let bitmap = try XCTUnwrap(rep.cgImage.flatMap(Bitmap.init))
+            return stride(from: 3, to: bitmap.pixels.count, by: 4).map { bitmap.pixels[$0] }
+        }
+        let red = MenuBarIcon(.red, count: 2)
+        XCTAssertFalse(red.nsImage(scheme: .dark).isTemplate)
+        let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.plain, count: 120), MenuBarIcon(.restarting, count: 2),
+                     MenuBarIcon(.stopped), MenuBarIcon(.connecting)]
+        for var icon in icons {
+            icon.spark = [10, 60, 30]
+            XCTAssertTrue(icon.nsImage(scheme: .dark).isTemplate, "\(icon.mark)")
+            XCTAssertEqual(try alpha(icon.nsImage(scheme: .dark)), try alpha(icon.nsImage(scheme: .light)), "\(icon.mark)")
         }
     }
 
@@ -151,18 +165,40 @@ final class IconTests: XCTestCase {
     func testTheOrbitBesideTheBarsSymbols() throws {
         for scheme in [ColorScheme.dark, .light] {
             let ink = Token.Icon.ink(scheme)
-            let marks: [MenuBarIcon.Mark] = [.plain, .needs(5), .down, .stopped, .connecting]
+            let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.red, count: 2), MenuBarIcon(.stopped), MenuBarIcon(.connecting)]
             let row = HStack(spacing: 10) {
                 ForEach(["magnifyingglass", "wifi", "switch.2"], id: \.self) { name in
                     Image(systemName: name).font(.system(size: Token.Icon.size, weight: Token.Icon.weight)).foregroundStyle(ink)
                 }
-                ForEach(marks.indices, id: \.self) { i in StatusItem(MenuBarIcon(marks[i]), scheme: scheme) }
+                ForEach(icons.indices, id: \.self) { i in StatusItem(icons[i], scheme: scheme) }
             }
             .padding(.horizontal, 10)
             .frame(height: 24)
             .background(scheme == .dark ? Color(white: 0.12) : Color(white: 0.94))
             XCTAssertNil(try Golden.check("icon.beside-native", AnyView(row), scheme: scheme, desk: false))
         }
+    }
+
+    // invariant: SPEC A3: the mark turns while a server restarts, as while
+    // a call runs, and stops turning once nothing does.
+    @MainActor
+    func testTheMarkTurnsWhileAServerRestartsAndStopsAfter() throws {
+        let story = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menubar.restarting" })
+        let restarting = MenuBarIcon.of(connection: story.state.connection, page: story.state.page)
+        var turns: [Double] = []
+        let turner = Turner { turns.append($0) }
+        turner.follow(restarting)
+        XCTAssertTrue(turner.running)
+        RunLoop.main.run(until: Date().addingTimeInterval(3 / Token.Busy.fps))
+        XCTAssertGreaterThan(turner.turn, 0)
+        turner.follow(MenuBarIcon(.plain, count: restarting.count))
+        XCTAssertFalse(turner.running)
+        XCTAssertEqual(turner.turn, 0)
+        XCTAssertEqual(turns.last, 0)
+        turner.follow(MenuBarIcon(.plain, busy: true))
+        XCTAssertTrue(turner.running)
+        turner.follow(MenuBarIcon(.red))
+        XCTAssertFalse(turner.running)
     }
 
     func testABusyItemTurnsItsMarkOneFrameAtATime() throws {

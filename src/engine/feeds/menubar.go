@@ -156,11 +156,13 @@ func (f *menubar) remote(ctx context.Context, in engine.FeedInput) {
 	for {
 		fl, sv, ferr, serr := f.read(ctx, false)
 		macs, away := f.awake(ctx, fl), f.away(ctx, fl)
+		shared := f.o.everyMacAccounts(ctx, fl, "")
 		f.update(ctx, func(r *pagemenubar.Reading) {
 			if ferr == nil {
 				r.All = &fl
 				r.Macs = macs
 				r.Away = away
+				r.Accounts = &shared
 			}
 			if serr == nil {
 				r.Ports = &sv

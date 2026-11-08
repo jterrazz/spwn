@@ -14,13 +14,13 @@ type World struct {
 }
 
 func Worlds() []World {
-	return []World{
+	return append([]World{
 		{Name: "machines"},
 		{Name: "machines.down", Edit: infraDown, Pages: []string{"menubar", "machine.infra", "needs"}},
 		{Name: "machines.fine", Edit: nothingNeedsYou, Pages: []string{"menubar", "needs"}},
 		{Name: "machines.empty", Edit: thisMacAlone, Pages: []string{"menubar"}},
 		{Name: "machines.loading", Edit: miniStillAnswering, Pages: []string{"menubar"}},
-	}
+	}, shellWorlds()...)
 }
 
 func StoryPages() []Fixture {

@@ -36,16 +36,18 @@ func TestStopEverythingOnThisMacSaysItsServerIsSkipped(t *testing.T) {
 }
 
 // invariant: AP-23: once Update all has run, the line of the app updates
-// leaves Needs you, Update all goes with it, and the badge drops by one.
-func TestUpdateAllLeavesNeedsYouAndTheBadgeDropsByOne(t *testing.T) {
+// leaves Needs you and Update all goes with it; the badge, which never
+// counts upkeep, says nothing of either.
+func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
 	needs := []overview.Need{
 		{Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate},
 		{Section: "disk", Subject: "misplaced", Text: "a folder is misplaced", Call: "disk.move"},
 	}
 	before, after := overview.Summary{Needs: needs}, overview.Summary{Needs: needs[1:]}
-	was, is := Page(Reading{Home: &before}, page.Context{}), Page(Reading{Home: &after}, page.Context{})
-	if was.Badge.Needs != 2 || is.Badge.Needs != 1 {
-		t.Fatalf("badge %d then %d, want 2 then 1", was.Badge.Needs, is.Badge.Needs)
+	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true}}}
+	was, is := Page(Reading{Home: &before, All: fleet}, page.Context{}), Page(Reading{Home: &after, All: fleet}, page.Context{})
+	if was.Badge.Needs != 0 || is.Badge.Needs != 0 {
+		t.Fatalf("badge %d then %d, want 0 then 0", was.Badge.Needs, is.Badge.Needs)
 	}
 	has := func(p page.Page) bool {
 		return slices.ContainsFunc(p.Actions, func(a page.Action) bool { return strings.HasPrefix(a.ID, ActionUpdateAll) && a.Run.Call == CallUpdate })

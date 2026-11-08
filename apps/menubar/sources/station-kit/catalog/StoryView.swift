@@ -46,7 +46,7 @@ public struct StoryView: View {
 
     public var body: some View {
         if story.ui.statusItem == true {
-            StatusItem(MenuBarIcon.of(connection: state.connection, page: state.page), scheme: scheme)
+            MenuBarStrip(MenuBarIcon.of(connection: state.connection, page: state.page), pressed: story.ui.pressed == true, turn: story.freeze ?? 0)
         } else if state.pushed != nil || state.page.map(Self.panel) == true {
             Popover(state, handlers: handlers, scrolls: false)
         } else if let own = MenuPage.view(state, handlers: handlers, scrolls: false) {
@@ -54,5 +54,37 @@ public struct StoryView: View {
         } else if let page = state.page {
             PageView(page)
         }
+    }
+}
+
+public struct MenuBarStrip: View {
+    let icon: MenuBarIcon
+    let pressed: Bool
+    let turn: Double
+    @Environment(\.colorScheme) private var scheme
+
+    public init(_ icon: MenuBarIcon, pressed: Bool = false, turn: Double = 0) {
+        self.icon = icon
+        self.pressed = pressed
+        self.turn = turn
+    }
+
+    public var body: some View {
+        HStack(spacing: Token.Item.stripGap) {
+            StatusItem(icon, scheme: scheme, turn: turn)
+                .padding(.horizontal, Token.Item.pressedPad.width)
+                .padding(.vertical, Token.Item.pressedPad.height)
+                .background(pressed ? Token.Item.pressed(scheme) : .clear, in: RoundedRectangle(cornerRadius: Token.Item.pressedRadius))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(icon.label)
+            ForEach(Token.Item.strip, id: \.self) { name in
+                Image(systemName: name)
+                    .font(.system(size: Token.Icon.size, weight: Token.Icon.weight))
+                    .foregroundStyle(Token.Icon.ink(scheme))
+            }
+        }
+        .padding(.trailing, Token.Stage.room)
+        .frame(width: Token.Stage.strip.width, height: Token.Stage.strip.height, alignment: .trailing)
+        .background(Token.Item.bar(scheme))
     }
 }

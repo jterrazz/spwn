@@ -492,15 +492,12 @@ func TestUpdateAllLeavesHomesNeedsYouOnceTheCallReturns(t *testing.T) {
 	in := engine.FeedInput{Refresh: refresh}
 	in.Awake = nothing(in.Awake)
 	pages := o.Feed()(ctx, in)
-	was := until(t, pages, "2 app updates in Needs you", func(p page.Page) bool { return slices.Contains(needs(p), "2 app updates") })
+	until(t, pages, "2 app updates in Needs you", func(p page.Page) bool { return slices.Contains(needs(p), "2 app updates") })
 	w.mu.Lock()
 	w.updates = false
 	w.mu.Unlock()
 	refresh <- struct{}{}
-	is := until(t, pages, "2 app updates gone from Needs you", func(p page.Page) bool { return len(needs(p)) > 0 && !slices.Contains(needs(p), "2 app updates") })
-	if is.Badge.Needs != was.Badge.Needs-1 {
-		t.Errorf("the badge went from %d to %d, want it down by one", was.Badge.Needs, is.Badge.Needs)
-	}
+	until(t, pages, "2 app updates gone from Needs you", func(p page.Page) bool { return len(needs(p)) > 0 && !slices.Contains(needs(p), "2 app updates") })
 }
 
 func nothing[T any](func() T) func() T { return func() T { var zero T; return zero } }

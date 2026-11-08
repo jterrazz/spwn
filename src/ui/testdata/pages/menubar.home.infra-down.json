@@ -649,8 +649,9 @@
     }
   ],
   "badge": {
-    "needs": 5,
-    "down": true
+    "needs": 1,
+    "down": true,
+    "label": "station, infra down"
   },
   "live": [
     "cpu:jterrazz-macbook-pro",
