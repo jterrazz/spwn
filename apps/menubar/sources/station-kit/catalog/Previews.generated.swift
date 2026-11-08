@@ -34,6 +34,6 @@ import SwiftUI
 
 #Preview("server.healthy") { StoryStage(Stories["server.healthy"]) }
 
-#Preview("workspace.working") { StoryStage(Stories["workspace.working"]) }
+#Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
 
 #endif
