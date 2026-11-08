@@ -7,24 +7,43 @@
     "kind": "workspace",
     "on": "mac-mini"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "linux-3",
       "role": "summary",
       "caption": [
         {
           "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Throwaway"
+          "text": "throwaway"
         },
         {
           "kind": "text",
           "text": "on mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        },
+        {
+          "kind": "text",
+          "text": "1 agent"
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "title": "Agents",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "1 working"
+            }
+          ]
         }
       ],
       "columns": [
@@ -42,18 +61,189 @@
       "items": [
         {
           "row": {
-            "id": "state",
+            "id": "linux-3",
             "mark": "ok",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Running"
-              }
+            "label": "linux-3",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "editing src/auth/refresh.ts"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "quick": "attach:linux-3",
+            "nav": "menubar.agent:linux-3"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:linux-3"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "1 GB free",
+              "live": "free:linux-3"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 7462505676,
+              "of": 8589934592
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:linux-3"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "port-links",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1 shared"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "link": {
+            "label": "Web",
+            "lead": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Web"
+                },
+                {
+                  "kind": "port",
+                  "n": 8080
+                }
+              ]
+            },
+            "value": {
+              "kind": "url",
+              "text": "https://mac-mini.tail77a797.ts.net:40001"
+            },
+            "row": "8080"
+          }
+        },
+        {
+          "row": {
+            "id": "listening",
+            "mark": "ok",
+            "label": "Postgres",
+            "detail": {
+              "kind": "text",
+              "text": "linux-3:5432"
+            },
+            "glyph": {
+              "kind": "port:postgres"
+            },
+            "verb": "share:5432"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "footnote",
+      "title": "Life",
+      "role": "banner",
+      "items": [
+        {
+          "note": {
+            "text": "Throwaway: deleted when it powers off from inside; never paused."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
     },
     {
       "id": "activity",
@@ -341,59 +531,8 @@
             ]
           }
         }
-      ]
-    },
-    {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
       ],
-      "items": [
-        {
-          "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        }
-      ]
+      "segment": "activity"
     },
     {
       "id": "ports",
@@ -429,7 +568,8 @@
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "segment": "ports"
     },
     {
       "id": "shared",
@@ -475,7 +615,8 @@
           "mark": "ok",
           "n": 1
         }
-      ]
+      ],
+      "segment": "accounts"
     }
   ],
   "actions": [
@@ -539,6 +680,54 @@
       }
     },
     {
+      "key": "shift+cmd+n",
+      "label": "New agent",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-agent",
+      "run": {
+        "call": "agents.start",
+        "in": {
+          "On": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New agent on linux-3",
+        "fields": [
+          {
+            "key": "Task",
+            "label": "Task",
+            "kind": "text",
+            "note": "empty, it waits for a prompt"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open linux-3 in Terminal",
+      "on": "row",
+      "rows": [
+        "linux-3"
+      ],
+      "priority": 2,
+      "id": "attach:linux-3",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-3"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -567,6 +756,26 @@
       }
     },
     {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "listening"
+      ],
+      "priority": 3,
+      "mutates": true,
+      "id": "share:5432",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "5432",
+          "VM": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
       "label": "Take back",
       "on": "row",
       "rows": [
@@ -592,57 +801,6 @@
           "Confirm": "yes",
           "From": "linux-3"
         }
-      }
-    },
-    {
-      "label": "Open apps",
-      "on": "row",
-      "rows": [
-        "apps"
-      ],
-      "priority": 5,
-      "id": "open:apps",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "apps",
-          "--on",
-          "linux-3"
-        ]
-      }
-    },
-    {
-      "label": "Open settings",
-      "on": "row",
-      "rows": [
-        "settings"
-      ],
-      "priority": 5,
-      "id": "open:settings",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "settings",
-          "--on",
-          "linux-3"
-        ]
-      }
-    },
-    {
-      "label": "Open disk",
-      "on": "row",
-      "rows": [
-        "disk"
-      ],
-      "priority": 5,
-      "id": "open:disk",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "disk",
-          "--on",
-          "linux-3"
-        ]
       }
     },
     {
@@ -677,7 +835,7 @@
       }
     },
     {
-      "key": "cmd+t",
+      "key": "cmd+enter",
       "label": "Open in Terminal",
       "on": "page",
       "priority": 2,
@@ -689,11 +847,65 @@
           "linux-3"
         ]
       }
+    },
+    {
+      "label": "More options for linux-3",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop",
+        "delete"
+      ]
     }
   ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "active"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh linux-3"
+    },
+    "buttons": [
+      "open-station"
+    ]
+  },
   "live": [
     "cpu:linux-3",
     "memory:linux-3",
-    "disk:linux-3"
+    "disk:linux-3",
+    "free:linux-3",
+    "net:linux-3"
   ]
 }

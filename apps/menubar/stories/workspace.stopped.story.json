@@ -1,0 +1,10 @@
+{
+    "group": "workspace",
+    "heightNote": "the facts name its Mac on their own line; the prototype's back said it",
+    "id": "workspace.stopped",
+    "note": "api, a stopped permanent workspace: no segment and no footer, what it keeps and the memory it takes again, with Start.",
+    "pages": [
+        "pages/machines.machine.api.json"
+    ],
+    "schema": "station.story/v1"
+}

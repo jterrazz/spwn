@@ -1,0 +1,10 @@
+{
+    "group": "workspace",
+    "heightNote": "a gap story: designed after the prototype",
+    "id": "workspace.hook-missing",
+    "note": "linux-1's agent runs with no hook: station only sees that Claude runs, and the Agents card offers to install the hook.",
+    "pages": [
+        "pages/machines.agents.unhooked.machine.linux-1.json"
+    ],
+    "schema": "station.story/v1"
+}

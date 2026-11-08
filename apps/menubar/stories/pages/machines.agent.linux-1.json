@@ -1,0 +1,230 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "linux-1",
+    "kind": "agent",
+    "on": "linux-1"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "working"
+            },
+            {
+              "kind": "text",
+              "text": "40 min"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Claude"
+        },
+        {
+          "kind": "text",
+          "text": "on linux-1"
+        }
+      ]
+    },
+    {
+      "id": "now",
+      "title": "Now",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "builds the landing page"
+        }
+      ],
+      "items": [
+        {
+          "steps": [
+            {
+              "at": {
+                "kind": "text",
+                "text": "now"
+              },
+              "text": "running tests",
+              "diff": "41/58 pass",
+              "current": true
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "3 min ago"
+              },
+              "text": "edited src/pages/index.astro",
+              "diff": "+86 −12"
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "7 min ago"
+              },
+              "text": "edited the pricing section"
+            }
+          ]
+        }
+      ],
+      "card": "now"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1",
+            "mark": "ok",
+            "label": "linux-1",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "throwaway"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 2 hr"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "nav": "menubar.machine:linux-1"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "attach",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-1"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Full log",
+      "on": "page",
+      "priority": 2,
+      "id": "full-log",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-1"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop linux-1",
+      "on": "page",
+      "confirm": {
+        "question": "Stop linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its terminal closes; linux-1 keeps running."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "stop-agent",
+      "run": {
+        "call": "agents.stop",
+        "in": {
+          "Agent": "linux-1",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 stopped"
+          }
+        ]
+      },
+      "destructive": true
+    },
+    {
+      "label": "More options for linux-1",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop-agent"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "active"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "station agents attach linux-1"
+    },
+    "buttons": [
+      "attach"
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "review-bot",
+    "kind": "agent",
+    "on": "review-bot"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "finished"
+            },
+            {
+              "kind": "text",
+              "text": "merged PR #42"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Claude"
+        },
+        {
+          "kind": "text",
+          "text": "on review-bot"
+        },
+        {
+          "kind": "text",
+          "text": "mac-mini"
+        }
+      ]
+    },
+    {
+      "id": "now",
+      "title": "Last steps",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "fixes the token refresh"
+        }
+      ],
+      "items": [
+        {
+          "steps": [
+            {
+              "at": {
+                "kind": "text",
+                "text": "7 min ago"
+              },
+              "text": "opened a PR"
+            }
+          ]
+        }
+      ],
+      "card": "now"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "permanent"
+                },
+                {
+                  "kind": "text",
+                  "text": "idle 1 min"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Clean up",
+      "on": "row",
+      "rows": [
+        "now"
+      ],
+      "priority": 3,
+      "mutates": true,
+      "id": "forget:review-bot",
+      "run": {
+        "call": "agents.forget",
+        "in": {
+          "Agent": "review-bot"
+        },
+        "target": {
+          "name": "review-bot",
+          "on": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot cleaned up"
+          }
+        ]
+      }
+    },
+    {
+      "label": "More options for review-bot",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "forget:review-bot"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "done"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
+}

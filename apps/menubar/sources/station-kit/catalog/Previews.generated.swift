@@ -2,6 +2,22 @@
 #if DEBUG
 import SwiftUI
 
+#Preview("agent.finished") { StoryStage(Stories["agent.finished"]) }
+
+#Preview("agent.remote") { StoryStage(Stories["agent.remote"]) }
+
+#Preview("agent.waiting.merged") { StoryStage(Stories["agent.waiting.merged"]) }
+
+#Preview("agent.waiting.pr-opened") { StoryStage(Stories["agent.waiting.pr-opened"]) }
+
+#Preview("agent.waiting.replied") { StoryStage(Stories["agent.waiting.replied"]) }
+
+#Preview("agent.waiting.reply") { StoryStage(Stories["agent.waiting.reply"]) }
+
+#Preview("agent.waiting") { StoryStage(Stories["agent.waiting"]) }
+
+#Preview("agent.working") { StoryStage(Stories["agent.working"]) }
+
 #Preview("awake.all") { StoryStage(Stories["awake.all"]) }
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
@@ -76,6 +92,14 @@ import SwiftUI
 
 #Preview("server.healthy") { StoryStage(Stories["server.healthy"]) }
 
+#Preview("workspace.agents.finished") { StoryStage(Stories["workspace.agents.finished"]) }
+
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
+
+#Preview("workspace.hook-missing") { StoryStage(Stories["workspace.hook-missing"]) }
+
+#Preview("workspace.started") { StoryStage(Stories["workspace.started"]) }
+
+#Preview("workspace.stopped") { StoryStage(Stories["workspace.stopped"]) }
 
 #endif

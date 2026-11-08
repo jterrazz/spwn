@@ -7,209 +7,51 @@
     "kind": "workspace",
     "on": "This Mac"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "api",
       "role": "summary",
       "caption": [
         {
           "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Permanent"
+          "text": "permanent"
         },
         {
           "kind": "text",
           "text": "on This Mac"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
         },
         {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "state",
-            "mark": "absent",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Stopped"
-              }
-            ],
-            "reason": "stopped"
-          }
+          "kind": "text",
+          "text": "stopped"
         }
       ]
     },
     {
-      "id": "activity",
-      "title": "Activity",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "cpu",
-            "label": "CPU",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "memory",
-            "label": "Memory",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "ports",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "shared on Tailscale"
-        }
-      ],
+      "id": "stopped",
+      "title": "api is stopped",
       "items": [
         {
           "empty": {
-            "text": "No port shared yet"
+            "text": "api is stopped",
+            "glyph": {
+              "kind": "workspace",
+              "signal": "quiet"
+            },
+            "sub": "Disk kept, starts with 8 GB",
+            "actions": [
+              "start-vm"
+            ]
           }
         }
       ],
-      "uncounted": true
-    },
-    {
-      "id": "shared",
-      "title": "Accounts shared from This Mac",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "empty": {
-            "text": "No account shared"
-          }
-        }
-      ]
+      "card": "empty"
     }
   ],
   "actions": [
     {
-      "label": "Start",
+      "label": "Start api",
       "on": "page",
       "priority": 1,
       "mutates": true,
@@ -219,6 +61,15 @@
         "in": {
           "VM": "api"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
       }
     },
     {
@@ -251,18 +102,24 @@
       }
     },
     {
-      "key": "cmd+t",
-      "label": "Open in Terminal",
+      "label": "More options for api",
       "on": "page",
-      "priority": 2,
-      "id": "open-station",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "--on",
-          "api"
-        ]
-      }
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "start-vm",
+        "delete"
+      ]
     }
-  ]
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "workspace",
+      "signal": "quiet"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
 }

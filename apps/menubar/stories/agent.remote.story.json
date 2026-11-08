@@ -1,0 +1,10 @@
+{
+    "group": "agent",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "agent.remote",
+    "note": "linux-3 at work on mac-mini: its facts name the Mac, its steps come from that Mac's engine.",
+    "pages": [
+        "pages/machines.agent.linux-3.json"
+    ],
+    "schema": "station.story/v1"
+}

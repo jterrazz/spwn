@@ -5,6 +5,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/activity"
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
@@ -36,6 +37,7 @@ type Scene struct {
 	Awake    awake.Report
 	Macs     []awake.Report
 	Activity pageactivity.View
+	Agents   []agents.Agent
 }
 
 func everyMachine() Scene {
@@ -50,6 +52,7 @@ func everyMachine() Scene {
 		Awake:    proAwake(),
 		Macs:     []awake.Report{miniAwakeReport(), airAwake()},
 		Activity: proActivity(),
+		Agents:   sceneAgents(),
 	}
 }
 
@@ -246,11 +249,11 @@ func (f Scene) reading() pagemenubar.Reading {
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
-	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC}
+	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC, Agents: f.Agents}
 	m.Shares = f.needs().Accounts
 	reports := append([]awake.Report{f.Awake}, f.Macs...)
 	for i := range reports {
-		if reports[i].Mac == name {
+		if reports[i].Mac == name || reports[i].Mac == f.macOf(name) {
 			m.Awake = &reports[i]
 		}
 	}
@@ -338,7 +341,22 @@ func (f Scene) draw() []Fixture {
 			out = append(out, Fixture{Name: "machine." + vm.Name, Page: pagemenubar.MachinePage(f.machine(vm.Name))})
 		}
 	}
+	for _, a := range f.Agents {
+		out = append(out, Fixture{Name: "agent." + a.Name, Page: pagemenubar.AgentPage(f.agent(a.Name))})
+	}
 	return out
+}
+
+// value: the Mac a VM of the scene runs on; empty for a Mac.
+func (f Scene) macOf(vm string) string {
+	for _, h := range f.All.Macs {
+		for _, v := range h.VMs {
+			if v.Name == vm {
+				return h.Name
+			}
+		}
+	}
+	return ""
 }
 
 func infraDown(f *Scene) {

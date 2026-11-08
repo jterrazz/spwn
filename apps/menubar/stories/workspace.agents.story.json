@@ -1,8 +1,10 @@
 {
     "group": "workspace",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
     "id": "workspace.agents",
-    "note": "linux-1's page in today's look, its one agent at work; the A2 Agents card redraws it.",
-    "pages": ["pages/machines.machine.linux-1.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "linux-1 hosting two agents: its Agents card first, each agent's row opening its own page, then what needs you there, its gauges and ports.",
+    "pages": [
+        "pages/machines.agents.two.machine.linux-1.json"
+    ],
+    "schema": "station.story/v1"
 }

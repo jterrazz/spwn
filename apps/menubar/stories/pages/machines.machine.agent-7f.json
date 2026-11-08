@@ -7,24 +7,43 @@
     "kind": "workspace",
     "on": "This Mac"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "agent-7f",
       "role": "summary",
       "caption": [
         {
           "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Throwaway"
+          "text": "throwaway"
         },
         {
           "kind": "text",
           "text": "on This Mac"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        },
+        {
+          "kind": "text",
+          "text": "no agent running"
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "title": "Agents",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "1 finished"
+            }
+          ]
         }
       ],
       "columns": [
@@ -42,18 +61,171 @@
       "items": [
         {
           "row": {
-            "id": "state",
+            "id": "agent-7f",
             "mark": "ok",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Running"
-              }
+            "label": "agent-7f",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "finished"
+                },
+                {
+                  "kind": "text",
+                  "text": "tests pass"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "done"
+            },
+            "verb": "forget:agent-7f",
+            "nav": "menubar.agent:agent-7f",
+            "signal": "done"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:agent-7f"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "1 GB free",
+              "live": "free:agent-7f"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 7462505676,
+              "of": 8589934592
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:agent-7f"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "port-links",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0 shared"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "listening",
+            "mark": "ok",
+            "label": "Storybook",
+            "detail": {
+              "kind": "text",
+              "text": "agent-7f:6006"
+            },
+            "glyph": {
+              "kind": "port:storybook"
+            },
+            "verb": "share:6006"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "footnote",
+      "title": "Life",
+      "role": "banner",
+      "items": [
+        {
+          "note": {
+            "text": "Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
     },
     {
       "id": "activity",
@@ -341,59 +513,8 @@
             ]
           }
         }
-      ]
-    },
-    {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
       ],
-      "items": [
-        {
-          "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        }
-      ]
+      "segment": "activity"
     },
     {
       "id": "ports",
@@ -411,7 +532,8 @@
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "segment": "ports"
     },
     {
       "id": "shared",
@@ -434,7 +556,8 @@
             "text": "No account shared"
           }
         }
-      ]
+      ],
+      "segment": "accounts"
     }
   ],
   "actions": [
@@ -492,6 +615,60 @@
       }
     },
     {
+      "key": "shift+cmd+n",
+      "label": "New agent",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-agent",
+      "run": {
+        "call": "agents.start",
+        "in": {
+          "On": "agent-7f"
+        }
+      },
+      "form": {
+        "title": "New agent on agent-7f",
+        "fields": [
+          {
+            "key": "Task",
+            "label": "Task",
+            "kind": "text",
+            "note": "empty, it waits for a prompt"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "Clean up",
+      "on": "row",
+      "rows": [
+        "agent-7f"
+      ],
+      "priority": 3,
+      "mutates": true,
+      "id": "forget:agent-7f",
+      "run": {
+        "call": "agents.forget",
+        "in": {
+          "Agent": "agent-7f"
+        },
+        "target": {
+          "name": "agent-7f"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f cleaned up"
+          }
+        ]
+      }
+    },
+    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -517,58 +694,24 @@
       }
     },
     {
-      "label": "Open apps",
+      "label": "Share",
       "on": "row",
       "rows": [
-        "apps"
+        "listening"
       ],
-      "priority": 5,
-      "id": "open:apps",
+      "priority": 3,
+      "mutates": true,
+      "id": "share:6006",
       "run": {
-        "terminal": true,
-        "argv": [
-          "apps",
-          "--on",
-          "agent-7f"
-        ]
+        "call": "ports.share",
+        "in": {
+          "Port": "6006",
+          "VM": "agent-7f"
+        }
       }
     },
     {
-      "label": "Open settings",
-      "on": "row",
-      "rows": [
-        "settings"
-      ],
-      "priority": 5,
-      "id": "open:settings",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "settings",
-          "--on",
-          "agent-7f"
-        ]
-      }
-    },
-    {
-      "label": "Open disk",
-      "on": "row",
-      "rows": [
-        "disk"
-      ],
-      "priority": 5,
-      "id": "open:disk",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "disk",
-          "--on",
-          "agent-7f"
-        ]
-      }
-    },
-    {
-      "key": "cmd+t",
+      "key": "cmd+enter",
       "label": "Open in Terminal",
       "on": "page",
       "priority": 2,
@@ -580,11 +723,65 @@
           "agent-7f"
         ]
       }
+    },
+    {
+      "label": "More options for agent-7f",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop",
+        "delete"
+      ]
     }
   ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "workspace",
+      "signal": "quiet"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh agent-7f"
+    },
+    "buttons": [
+      "open-station"
+    ]
+  },
   "live": [
     "cpu:agent-7f",
     "memory:agent-7f",
-    "disk:agent-7f"
+    "disk:agent-7f",
+    "free:agent-7f",
+    "net:agent-7f"
   ]
 }
