@@ -1,4 +1,8 @@
 #!/bin/sh
+# hc as the herdr specs need it: every call is recorded in $HOME/.calls, a connect with
+# its request line. Herdr holds t7, a station agent waiting on the owner, and t8, a
+# shell; its machines are the lines of $HOME/.hc-machines. Anything else exits 97.
+machines="$HOME/.hc-machines"
 case "$1" in
     connect)
         read -r line
@@ -6,17 +10,29 @@ case "$1" in
         case "$line" in
             *'"terminal.run"'*) echo '{"jsonrpc":"2.0","id":1,"result":{"address":"t7"}}' ;;
             *'"terminal.send"'*) echo '{"jsonrpc":"2.0","id":1,"result":{"turn":1}}' ;;
+            *'"terminal.read"'*) echo '{"jsonrpc":"2.0","id":1,"result":{"text":"Claude needs your permission to use Bash\n> "}}' ;;
             *'"terminal.list"'*) echo '{"jsonrpc":"2.0","id":1,"result":{"hidden_finished":0,"machines":[],"terminals":[{"address":"t7","cwd":"/home/admin/app","state":"live","labels":{"station":"agent","station.app":"claudecode"},"status":{"app":"claude-code","state":"blocked","msg":"Claude needs your permission to use Bash"}},{"address":"t8","cwd":"/","state":"live","labels":{}}]}}' ;;
             *) echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"method_not_found"}}' ;;
         esac
         ;;
     machine)
         printf 'hc %s\n' "$*" >> "$HOME/.calls"
+        name=$(eval "echo \${$#}")
         case "$2" in
-            ls) echo '{"machines":[]}' ;;
-            add|rm) echo '{}' ;;
+            ls)
+                list=''
+                if [ -f "$machines" ]; then
+                    while IFS= read -r m; do list="$list{\"name\":\"$m\"},"; done < "$machines"
+                fi
+                echo "{\"machines\":[${list%,}]}"
+                ;;
+            add) echo "$name" >> "$machines"; echo '{}' ;;
+            rm) /usr/bin/grep -vx "$name" "$machines" > "$machines.next"; /bin/mv "$machines.next" "$machines"; echo '{}' ;;
             *) echo "stub hc: unexpected invocation: $*" >&2; exit 97 ;;
         esac
+        ;;
+    attach)
+        printf 'hc %s\n' "$*" >> "$HOME/.calls"
         ;;
     *)
         echo "stub hc: unexpected invocation: $*" >&2

@@ -1,0 +1,14 @@
+description: 'a reply to an agent waiting in Herdr is typed into its terminal, the text on stdin'
+fixture: ./__fixtures__/hc/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'agents reply t7 yes, merge it'
+      exit: 0
+      stdout: |
+          ●	t7	sent · it works on it
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.list","params":{"labels":{"station":"agent"}}}
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.send","params":{"terminal":"t7","text":"yes, merge it"}}
