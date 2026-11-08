@@ -1,0 +1,842 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.ports",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Ports",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All machines"
+        },
+        {
+          "kind": "text",
+          "text": "1 public"
+        },
+        {
+          "kind": "text",
+          "text": "4 on your tailnet"
+        },
+        {
+          "kind": "text",
+          "text": "1 exposed",
+          "signal": "failing"
+        }
+      ]
+    },
+    {
+      "id": "exposed",
+      "title": "Exposed",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "reachable outside Tailscale",
+          "signal": "failing"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro:5000",
+            "mark": "broken",
+            "label": "5000",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "AirPlay Receiver"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "on your network, not declared"
+                }
+              ]
+            },
+            "reason": "exposed",
+            "glyph": {
+              "kind": "symbol:exclamationmark.shield",
+              "signal": "failing"
+            },
+            "menu": [
+              "declare-public",
+              "show-process:macbook-pro:5000"
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ],
+      "card": "exposed"
+    },
+    {
+      "id": "public",
+      "title": "Public",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra:443",
+            "mark": "ok",
+            "label": "Traefik",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "infra:443"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "mac": "infra",
+            "verb": "copy-port:infra:443"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Public"
+        },
+        {
+          "kind": "text",
+          "text": "from outside"
+        }
+      ]
+    },
+    {
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "4"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "Vite",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:5173"
+            },
+            "glyph": {
+              "kind": "port:vite"
+            },
+            "verb": "open-port:linux-1:5173",
+            "quick": "qr:linux-1:5173"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:3000",
+            "mark": "ok",
+            "label": "Port 3000",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:3000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-1:3000",
+            "quick": "qr:linux-1:3000"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "verb": "copy-port:infra:6443"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-3:8080",
+            "mark": "ok",
+            "label": "Port 8080",
+            "detail": {
+              "kind": "text",
+              "text": "linux-3:8080"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-3:8080",
+            "quick": "qr:linux-3:8080"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ]
+    },
+    {
+      "id": "listening",
+      "title": "Listening, not shared",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "3"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:4321",
+            "mark": "ok",
+            "label": "Astro",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:4321"
+            },
+            "glyph": {
+              "kind": "port:astro"
+            },
+            "verb": "share:linux-1:4321"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:9229",
+            "mark": "ok",
+            "label": "Node inspector",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:9229"
+            },
+            "glyph": {
+              "kind": "port:node"
+            },
+            "verb": "share:linux-1:9229"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-3:5432",
+            "mark": "ok",
+            "label": "Postgres",
+            "detail": {
+              "kind": "text",
+              "text": "linux-3:5432"
+            },
+            "glyph": {
+              "kind": "port:postgres"
+            },
+            "verb": "share:linux-3:5432"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "label": "Open Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "open-port:linux-1:5173",
+      "run": {
+        "open": "http://macbook-pro.tail77a797.ts.net:40001"
+      }
+    },
+    {
+      "label": "Copy link to Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "copy-port:linux-1:5173",
+      "run": {
+        "copy": "http://macbook-pro.tail77a797.ts.net:40001"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied http://macbook-pro.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "qr:linux-1:5173",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 5173?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1:5173",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"5173\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "label": "Open Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "open-port:linux-1:3000",
+      "run": {
+        "open": "http://macbook-pro.tail77a797.ts.net:40002"
+      }
+    },
+    {
+      "label": "Copy link to Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "copy-port:linux-1:3000",
+      "run": {
+        "copy": "http://macbook-pro.tail77a797.ts.net:40002"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied http://macbook-pro.tail77a797.ts.net:40002"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "qr:linux-1:3000",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 3000?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1:3000",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"3000\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:4321"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:4321",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "4321",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Astro of linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:9229"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:9229",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "9229",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Node inspector of linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show process",
+      "on": "row",
+      "rows": [
+        "macbook-pro:5000"
+      ],
+      "priority": 1,
+      "id": "show-process:macbook-pro:5000",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "ports"
+        ]
+      }
+    },
+    {
+      "label": "Open Port 8080",
+      "on": "row",
+      "rows": [
+        "linux-3:8080"
+      ],
+      "id": "open-port:linux-3:8080",
+      "run": {
+        "open": "http://mac-mini.tail77a797.ts.net:40001"
+      }
+    },
+    {
+      "label": "Copy link to Port 8080",
+      "on": "row",
+      "rows": [
+        "linux-3:8080"
+      ],
+      "id": "copy-port:linux-3:8080",
+      "run": {
+        "copy": "http://mac-mini.tail77a797.ts.net:40001"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied http://mac-mini.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Port 8080",
+      "on": "row",
+      "rows": [
+        "linux-3:8080"
+      ],
+      "id": "qr:linux-3:8080",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-3:8080"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-3's port 8080?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-3:8080",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"mac-mini\"",
+          "Port": "\"8080\"",
+          "VM": "\"linux-3\""
+        }
+      }
+    },
+    {
+      "label": "Copy link to Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "copy-port:infra:443",
+      "run": {
+        "copy": "infra:443"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy link to Kubernetes API",
+      "on": "row",
+      "rows": [
+        "infra:6443"
+      ],
+      "id": "copy-port:infra:6443",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-3:5432"
+      ],
+      "mutates": true,
+      "id": "share:linux-3:5432",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "5432",
+          "VM": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Postgres of linux-3"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Declare public",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "declare-public",
+      "run": {
+        "call": "ports.declare"
+      },
+      "form": {
+        "title": "Declare a port public",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "select",
+            "options": [
+              {
+                "value": "Machine=\"macbook-pro\" Port=\"5000\"",
+                "label": "macbook-pro:5000"
+              },
+              {
+                "value": "Machine=\"linux-1\" Port=\"4321\"",
+                "label": "linux-1:4321"
+              },
+              {
+                "value": "Machine=\"linux-1\" Port=\"9229\"",
+                "label": "linux-1:9229"
+              },
+              {
+                "value": "Machine=\"infra\" Port=\"6443\"",
+                "label": "infra:6443"
+              },
+              {
+                "value": "Machine=\"linux-3\" Port=\"5432\"",
+                "label": "linux-3:5432"
+              }
+            ],
+            "default": "Machine=\"macbook-pro\" Port=\"5000\"",
+            "required": true
+          },
+          {
+            "key": "Via",
+            "label": "Via",
+            "kind": "select",
+            "options": [
+              {
+                "value": "cloudflare-tunnel",
+                "label": "Cloudflare Tunnel"
+              },
+              {
+                "value": "tailscale-funnel",
+                "label": "Tailscale Funnel"
+              },
+              {
+                "value": "lan",
+                "label": "your LAN"
+              }
+            ],
+            "default": "cloudflare-tunnel",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "run": {
+        "call": "ports.share"
+      },
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "VM",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "linux-1",
+                "label": "linux-1"
+              },
+              {
+                "value": "infra",
+                "label": "infra"
+              },
+              {
+                "value": "linux-3",
+                "label": "linux-3"
+              }
+            ],
+            "default": "linux-1",
+            "required": true
+          },
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ],
+        "subtitle": "Private on your tailnet."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Full list in Terminal",
+      "on": "page",
+      "id": "full-list",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "ports",
+          "--all-machines"
+        ]
+      }
+    },
+    {
+      "label": "More options for Ports",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "share-port",
+        "declare-public"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:network"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "terminal-list",
+    "buttons": [
+      "full-list",
+      "share-port"
+    ]
+  }
+}

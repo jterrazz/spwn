@@ -1,8 +1,10 @@
 {
     "group": "mac",
     "id": "mac.this.ports",
-    "note": "The ports of This Mac and its VMs.",
-    "pages": ["pages/machines.ports.macbook-pro.json"],
+    "note": "This Mac's Ports: linux-1's two shares, its two listeners to share, and This Mac's HTTPS links switch, off.",
+    "pages": ["pages/machines.ports.machine.macbook-pro.json"],
     "schema": "station.story/v1",
-    "status": "today"
+    "ui": {
+        "segment": "ports"
+    }
 }
