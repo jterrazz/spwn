@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/machines/contract"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 // value: what macOS keeps of a Mac's memory, never given to a VM (SPEC §7.1).
@@ -102,15 +103,15 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if _, _, err = s.img.Latest(ctx, r.Image); err != nil {
 		return r, err
 	}
-	held, on, err := s.claims(ctx)
+	held, err := s.claims(ctx)
 	if err != nil {
 		return r, err
 	}
 	switch {
 	case r.Name == "":
 		r.Name = allocateName(r.Image, held)
-	case !nameFree(r.Name, held):
-		return r, &model.NameTakenError{Name: r.Name, VM: held[r.Name] == claimVM, Mac: held[r.Name] == claimMac, On: on[r.Name]}
+	case !held.free(r.Name):
+		return r, held.taken(r.Name)
 	}
 	size := model.Resources{CPUs: img.Defaults.CPUs, MemoryBytes: img.Defaults.MemoryBytes, DiskBytes: img.Defaults.DiskBytes}
 	if server {
@@ -149,32 +150,39 @@ func (s *Machinist) EngineUp(ctx context.Context) error {
 	return nil
 }
 
-// value: every name All machines holds, and for a VM's name the Mac it is
-// on, worded as the owner reads it: This Mac, or that Mac's short name.
-func (s *Machinist) claims(ctx context.Context) (held map[string]claim, on map[string]string, err error) {
+// value: every name All machines holds, for a VM's name the Mac it is on,
+// worded as the owner reads it: This Mac, or that Mac's short name; and
+// every agent's of a running workspace of a Mac that answers.
+func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	allMachines, err := s.AllMachines(ctx, false)
 	if err != nil {
-		return nil, nil, err
+		return claims{}, err
 	}
-	held, on = map[string]claim{}, map[string]string{}
+	c := claims{held: map[string]claim{}, on: map[string]string{}}
 	for _, h := range allMachines.Macs {
-		held[h.Name] = claimMac
+		c.held[h.Name] = claimMac
 		mac := "This Mac"
 		if !h.ThisMac {
 			mac = strings.TrimPrefix(h.Name, s.o.User+"-")
 		}
 		for _, vm := range h.VMs {
-			held[vm.Name], on[vm.Name] = claimVM, mac
+			c.held[vm.Name], c.on[vm.Name] = claimVM, mac
+			if s.o.AgentsOf == nil || !h.ThisMac && !h.Reachable || vm.State != model.Running || vm.Lifetime.Kind() != machine.Workspace {
+				continue
+			}
+			for _, name := range s.o.AgentsOf(ctx, vm.Name) {
+				c.agents = append(c.agents, heldAgent{Name: name, VM: vm.Name})
+			}
 		}
 	}
 	cfg, err := s.prefs()
 	if err != nil {
-		return nil, nil, err
+		return claims{}, err
 	}
 	for name := range cfg.Macs {
-		held[name] = claimMac
+		c.held[name] = claimMac
 	}
-	return held, on, nil
+	return c, nil
 }
 
 // value: the memory a new VM may take on this Mac: what it has, less what

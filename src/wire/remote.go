@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/ports"
 
@@ -183,6 +184,27 @@ func (f farPorts) Undeclare(ctx context.Context, mac string, in portscalls.Undec
 // invariant: a workspace's agents are reached inside it, at its own
 // station, as any call for a VM of this Mac.
 type farAgents struct{ m machine }
+
+// value: how long a create waits for one workspace to say its agents' names;
+// one silent past it holds none.
+const heldBudget = 2 * time.Second
+
+func (f farAgents) Held(ctx context.Context, vm string) []string {
+	if f.m.far == nil || f.m.far.router == nil {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, heldBudget)
+	defer cancel()
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, struct{}{}, nil)
+	if err != nil {
+		return nil
+	}
+	names := make([]string, len(kept))
+	for i, a := range kept {
+		names[i] = a.Name
+	}
+	return names
+}
 
 func (f farAgents) Live(ctx context.Context, vm string) []string {
 	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, struct{}{}, nil)

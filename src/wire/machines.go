@@ -63,6 +63,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
 		Terminals: m.multiplexer(),
+		AgentsOf:  farAgents{m}.Held,
 	})
 }
 

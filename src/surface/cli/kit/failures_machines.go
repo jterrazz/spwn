@@ -65,7 +65,7 @@ func notAMacHint(e *model.NotAMacError) string {
 }
 
 func takenHint(e *model.NameTakenError) string {
-	if e.VM || e.Mac {
+	if e.VM || e.Mac || e.Agent != "" {
 		return "pick another name"
 	}
 	return "station machines forget " + e.Name + " first, to change it"

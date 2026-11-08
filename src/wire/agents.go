@@ -3,7 +3,6 @@ package wire
 import (
 	"context"
 	"errors"
-	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -132,21 +131,11 @@ func (f agentsEverywhere) heldEverywhere(ctx context.Context) (agents.Held, erro
 func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind == coremachine.Mac }
 
 // invariant: SPEC B5.22: on a Mac an agent is found among every machine's by
-// its name; a name two agents hold is refused, both named with their
-// workspace, so a gesture never reaches the other one.
+// its name, with --on or inside a workspace among that workspace's; a name
+// two agents hold is refused, both named with their workspace, so a gesture
+// never reaches the other one.
 func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, coremachine.Ref, error) {
-	if !f.onThisMac() {
-		kept, err := call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, struct{}{}, nil)
-		if err != nil {
-			return agents.Agent{}, coremachine.Ref{}, err
-		}
-		i := slices.IndexFunc(kept, func(a agents.Agent) bool { return a.Name == name })
-		if i < 0 {
-			return agents.Agent{}, coremachine.Ref{}, fail.New(fail.NotFound, agentscalls.UnknownAgent, name, nil)
-		}
-		return kept[i], f.env.Target(), nil
-	}
-	all, err := f.all(ctx)
+	all, err := f.among(ctx)
 	if err != nil {
 		return agents.Agent{}, coremachine.Ref{}, err
 	}
@@ -160,6 +149,9 @@ func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, 
 	case 0:
 		return agents.Agent{}, coremachine.Ref{}, fail.New(fail.NotFound, agentscalls.UnknownAgent, name, nil)
 	case 1:
+		if !f.onThisMac() {
+			return found[0], f.env.Target(), nil
+		}
 		return found[0], coremachine.Ref{Name: found[0].VM}, nil
 	}
 	on := make([]string, len(found))
@@ -167,6 +159,15 @@ func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, 
 		on[i] = a.VM
 	}
 	return agents.Agent{}, coremachine.Ref{}, fail.New(fail.Refused, agentscalls.Ambiguous, name, map[string]string{"on": strings.Join(on, ", ")})
+}
+
+// value: the agents a find looks among: every machine's on a Mac, the
+// target's with --on or inside a workspace.
+func (f agentsEverywhere) among(ctx context.Context) ([]agents.Agent, error) {
+	if f.onThisMac() {
+		return f.all(ctx)
+	}
+	return call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, struct{}{}, nil)
 }
 
 func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.Ref, error) {
