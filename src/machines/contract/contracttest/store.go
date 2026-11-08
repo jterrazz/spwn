@@ -39,6 +39,24 @@ func MachineStore(t *testing.T, open func(t *testing.T) contract.MachineStore) {
 		}
 	})
 
+	t.Run("a VM being created keeps its create's progress, and loses it once put without", func(t *testing.T) {
+		s := open(t)
+		creating := vmRecord("linux-4")
+		creating.Birth = &machines.Birth{Progress: 400, Step: machines.BornBooting, At: time.Date(2026, 11, 1, 9, 0, 5, 0, time.UTC)}
+		if err := s.Put(ctx, creating); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		if got, err := s.Get(ctx, "linux-4"); err != nil || !reflect.DeepEqual(got, creating) {
+			t.Fatalf("Get = %+v, %v; want %+v", got, err, creating)
+		}
+		if err := s.Put(ctx, vmRecord("linux-4")); err != nil {
+			t.Fatalf("Put: %v", err)
+		}
+		if got, _ := s.Get(ctx, "linux-4"); got.Birth != nil {
+			t.Errorf("Birth = %+v once made; want none", got.Birth)
+		}
+	})
+
 	t.Run("the VMs are listed by name, and putting one again replaces it", func(t *testing.T) {
 		s := open(t)
 		for _, name := range []string{"linux-2", "api", "linux-1"} {

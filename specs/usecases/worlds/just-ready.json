@@ -1,0 +1,1035 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "jterrazz-macbook-pro",
+    "macs": {
+        "jterrazz-macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z",
+                "memory": {
+                    "linux-1": {
+                        "state": "running",
+                        "ready_at": "2026-11-04T10:00:00Z"
+                    }
+                }
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true,
+                "Health": 98,
+                "Cycles": 112
+            },
+            "facts": {
+                "filevault": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "firewall": {
+                    "State": "absent",
+                    "Value": "off"
+                },
+                "sip": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "gatekeeper": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "automatic-updates": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "screen-lock": {
+                    "State": "ok",
+                    "Value": "0"
+                },
+                "display-sleep": {
+                    "State": "ok",
+                    "Value": "2"
+                },
+                "remote-login": {
+                    "State": "absent",
+                    "Value": "off"
+                },
+                "time-machine": {
+                    "State": "ok",
+                    "Value": "2026-11-02T09:00:00Z"
+                },
+                "system-updates": {
+                    "State": "ok",
+                    "Value": "up to date"
+                }
+            },
+            "preferences": {
+                "here": "jterrazz-macbook-pro",
+                "macs": {
+                    "jterrazz-mac-mini": {
+                        "user": "jterrazz.agent"
+                    }
+                },
+                "vm_user": "admin"
+            },
+            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "vms": {
+                "linux-1": {
+                    "kept": {
+                        "image": "linux",
+                        "version": "2026.11.01",
+                        "lifetime": "throwaway",
+                        "want": "running",
+                        "created_at": "2026-11-04T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "pid": 1001,
+                    "guest": {},
+                    "listening": [
+                        {
+                            "Port": 5173,
+                            "Bind": "0.0.0.0",
+                            "Process": "node",
+                            "PID": 3001
+                        },
+                        {
+                            "Port": 7000,
+                            "Bind": "0.0.0.0",
+                            "Process": "server",
+                            "PID": 3002
+                        }
+                    ]
+                },
+                "api": {
+                    "kept": {
+                        "image": "linux",
+                        "version": "2026.11.01",
+                        "lifetime": "permanent",
+                        "want": "stopped",
+                        "created_at": "2026-10-20T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "guest": {}
+                },
+                "station-image-linux-2026.11.01": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                },
+                "station-image-linux-2026.10.20": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 3000000000
+                    }
+                }
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "linux",
+                        "version": "2026.10.20",
+                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-10-20T08:00:00Z",
+                        "size_gb": 3
+                    },
+                    {
+                        "name": "linux",
+                        "version": "2026.11.01",
+                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T08:00:00Z",
+                        "size_gb": 4
+                    }
+                ],
+                "reservations": [
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 5173,
+                        "host_port": 40001,
+                        "profile": "vite",
+                        "pinned": true,
+                        "http": true,
+                        "reserved_at": "2026-11-04T09:00:00Z"
+                    },
+                    {
+                        "vm": "linux-1",
+                        "guest_port": 7000,
+                        "host_port": 40002,
+                        "http": false,
+                        "reserved_at": "2026-11-04T09:05:00Z"
+                    }
+                ],
+                "shares": {
+                    "linux-1": [
+                        {
+                            "name": "session:github",
+                            "at": "2026-11-04T09:10:00Z",
+                            "until": "2026-11-04T21:10:00Z"
+                        },
+                        {
+                            "name": "operator:claude:oauth-token",
+                            "at": "2026-11-04T09:10:00Z",
+                            "until": "2026-11-04T21:10:00Z"
+                        }
+                    ]
+                }
+            },
+            "apps": {
+                "brew": {
+                    "installed": {
+                        "jq": "1.8.1",
+                        "gh": "2.97.0",
+                        "lazygit": "0.55.1",
+                        "bat": "0.25.0",
+                        "mise": "2026.10.1"
+                    },
+                    "behind": {
+                        "gh": "2.98.0"
+                    },
+                    "offers": {
+                        "fd": "10.3.0",
+                        "eza": "0.23.4",
+                        "yazi": "25.5.31"
+                    }
+                },
+                "cask": {
+                    "installed": {
+                        "ghostty": "1.2.0"
+                    },
+                    "behind": {
+                        "ghostty": "1.2.1"
+                    }
+                },
+                "mise": {
+                    "installed": {
+                        "node": "22.11.0",
+                        "go": "1.25.3"
+                    },
+                    "behind": {
+                        "node": "24.11.0"
+                    }
+                },
+                "mas": {
+                    "absent": true
+                }
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Model": "Mac16,8",
+                    "Chip": "Apple M4 Pro",
+                    "Memory": 17179869184,
+                    "CPUs": 12
+                }
+            },
+            "tailnet": {
+                "self": {
+                    "ID": "n1",
+                    "Name": "jterrazz-macbook-pro",
+                    "DNSName": "jterrazz-macbook-pro.tail1234.ts.net",
+                    "IP": "100.64.0.1",
+                    "Online": true,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "jterrazz-macbook-pro.tail1234.ts.net"
+                    },
+                    "Client": {
+                        "Path": "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+                        "Variant": "app-store"
+                    }
+                },
+                "shares": [
+                    {
+                        "Port": 40001,
+                        "Reserved": 40001,
+                        "Scheme": "https",
+                        "Target": "http://127.0.0.1:40001"
+                    },
+                    {
+                        "Port": 40002,
+                        "Reserved": 40002,
+                        "Scheme": "tcp",
+                        "Target": "tcp://127.0.0.1:40002"
+                    }
+                ]
+            },
+            "ssh": {
+                "blocks": {
+                    "api": {
+                        "user": "admin",
+                        "behind": "jterrazz-macbook-pro",
+                        "this_mac": true
+                    },
+                    "infra": {
+                        "user": "admin",
+                        "behind": "jterrazz-mac-mini"
+                    },
+                    "jterrazz-mac-mini": {
+                        "user": "jterrazz.agent"
+                    },
+                    "linux-1": {
+                        "user": "admin",
+                        "behind": "jterrazz-macbook-pro",
+                        "this_mac": true
+                    }
+                }
+            },
+            "disk": {
+                "total": 994000000000,
+                "free": 388000000000,
+                "files": {
+                    "~/.tart/vms/linux-dev/disk.img": 73300000000,
+                    "~/Library/Caches/go-build/00/a": 19400000000,
+                    "~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x": 5800000000,
+                    "~/Library/pnpm/store/v10/index": 1800000000,
+                    "~/Library/Caches/Homebrew/downloads/x": 2100000000,
+                    "~/Library/Caches/mise/node/x": 1200000000,
+                    "~/Library/Caches/bun/x": 600000000,
+                    "~/.cache/npm/_cacache/x": 800000000,
+                    "~/.cargo/registry/cache/x": 900000000,
+                    "~/.cache/ghostty/x": 400000000,
+                    "~/.cache/starship/x": 100000000,
+                    "~/.cache/gh/x": 100000000,
+                    "~/Library/Logs/Zed/x": 300000000,
+                    "~/Library/Application Support/Cursor/logs/x": 200000000,
+                    "~/.claude/cache/x": 300000000,
+                    "~/.codex/cache/x": 100000000,
+                    "~/Library/Caches/helm/x": 100000000,
+                    "~/Library/Application Support/discord/Cache/x": 400000000,
+                    "~/Library/Application Support/Notion/Partitions/notion/Cache/x": 200000000,
+                    "~/Library/Developer/CoreSimulator/Devices/A/data": 19100000000,
+                    "~/Library/Group Containers/HUAQ24HBR6.dev.orbstack/data.img": 15800000000,
+                    "~/.claude/projects/x": 3600000000,
+                    "~/Library/Application Support/Zed/db/x": 1200000000,
+                    "~/.ollama/models/x": 1900000000,
+                    "~/.ssh/known_hosts": 100000,
+                    "~/.gnupg/pubring.kbx": 200000
+                }
+            },
+            "identities": {
+                "github": {
+                    "State": "ok",
+                    "Who": ["jterrazz"],
+                    "Scopes": ["read:org", "repo"]
+                },
+                "npm": {
+                    "State": "broken",
+                    "Reason": "refused",
+                    "Who": ["?"],
+                    "Detail": "token refused"
+                },
+                "claude": {
+                    "State": "ok",
+                    "Who": ["admin@jterrazz.com"],
+                    "Scopes": ["max"]
+                },
+                "tailscale": {
+                    "State": "ok"
+                },
+                "cloudflare": {
+                    "State": "ok",
+                    "Who": ["admin@jterrazz.com"],
+                    "Source": "wrangler"
+                },
+                "git": {
+                    "State": "ok",
+                    "Who": ["Jean-Baptiste Terrazzoni", "admin@jterrazz.com"]
+                },
+                "ssh": {
+                    "State": "ok",
+                    "Who": ["1 key"],
+                    "Scopes": ["admin@jterrazz.com"]
+                },
+                "docker": {
+                    "State": "absent",
+                    "Reason": "unset",
+                    "Detail": "not signed in"
+                }
+            },
+            "secrets": {
+                "session:github": "fake-session-github-of-this-mac",
+                "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
+            },
+            "jobs": {
+                "com.jterrazz.brain.x-snapshot": {
+                    "Label": "com.jterrazz.brain.x-snapshot",
+                    "Program": "~/.local/bin/x-snapshot",
+                    "File": "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "LastExit": 2,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.jterrazz.brain.x-snapshot && rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist"
+                },
+                "com.docker.socket": {
+                    "Label": "com.docker.socket",
+                    "Program": "/Library/PrivilegedHelperTools/com.docker.socket",
+                    "File": "/Library/LaunchDaemons/com.docker.socket.plist",
+                    "Scope": "root",
+                    "Loaded": true,
+                    "OwnerExists": false,
+                    "ProgramExists": true,
+                    "Removal": "sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist"
+                },
+                "com.docker.vmnetd": {
+                    "Label": "com.docker.vmnetd",
+                    "Program": "/Library/PrivilegedHelperTools/com.docker.vmnetd",
+                    "File": "/Library/LaunchDaemons/com.docker.vmnetd.plist",
+                    "Scope": "root",
+                    "Loaded": true,
+                    "OwnerExists": false,
+                    "ProgramExists": true,
+                    "Removal": "sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist"
+                },
+                "com.bjango.istatmenus.installer": {
+                    "Label": "com.bjango.istatmenus.installer",
+                    "Program": "/Library/PrivilegedHelperTools/com.bjango.istatmenus.installer",
+                    "File": "/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist",
+                    "Scope": "root",
+                    "OwnerExists": false,
+                    "ProgramExists": true,
+                    "Removal": "sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist"
+                },
+                "io.tailscale.ipn.macsys.login-item-helper": {
+                    "Label": "io.tailscale.ipn.macsys.login-item-helper",
+                    "Program": "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+                    "File": "~/Library/LaunchAgents/io.tailscale.ipn.macsys.login-item-helper.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 611,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/io.tailscale.ipn.macsys.login-item-helper && rm ~/Library/LaunchAgents/io.tailscale.ipn.macsys.login-item-helper.plist"
+                },
+                "com.github.facebook.watchman": {
+                    "Label": "com.github.facebook.watchman",
+                    "Program": "/opt/homebrew/bin/watchman",
+                    "File": "~/Library/LaunchAgents/com.github.facebook.watchman.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 3464,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.github.facebook.watchman && rm ~/Library/LaunchAgents/com.github.facebook.watchman.plist"
+                },
+                "com.adguard.mac.adguard.loginhelper": {
+                    "Label": "com.adguard.mac.adguard.loginhelper",
+                    "Program": "/Applications/AdGuard.app/Contents/Library/LoginItems/AdGuard Login Helper.app",
+                    "File": "~/Library/LaunchAgents/com.adguard.mac.adguard.loginhelper.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 702,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.adguard.mac.adguard.loginhelper && rm ~/Library/LaunchAgents/com.adguard.mac.adguard.loginhelper.plist"
+                },
+                "dev.orbstack.OrbStack.privhelper": {
+                    "Label": "dev.orbstack.OrbStack.privhelper",
+                    "Program": "/Library/PrivilegedHelperTools/dev.orbstack.OrbStack.privhelper",
+                    "File": "/Library/LaunchDaemons/dev.orbstack.OrbStack.privhelper.plist",
+                    "Scope": "root",
+                    "Loaded": true,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "sudo launchctl bootout system/dev.orbstack.OrbStack.privhelper && sudo rm /Library/LaunchDaemons/dev.orbstack.OrbStack.privhelper.plist"
+                },
+                "com.google.keystone.agent": {
+                    "Label": "com.google.keystone.agent",
+                    "Program": "~/Library/Google/GoogleSoftwareUpdate/GoogleSoftwareUpdate.bundle/Contents/Resources/GoogleSoftwareUpdateAgent.app",
+                    "File": "~/Library/LaunchAgents/com.google.keystone.agent.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.google.keystone.agent && rm ~/Library/LaunchAgents/com.google.keystone.agent.plist"
+                },
+                "com.microsoft.update.agent": {
+                    "Label": "com.microsoft.update.agent",
+                    "Program": "/Library/Application Support/Microsoft/MAU2.0/Microsoft AutoUpdate.app",
+                    "File": "~/Library/LaunchAgents/com.microsoft.update.agent.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.microsoft.update.agent && rm ~/Library/LaunchAgents/com.microsoft.update.agent.plist"
+                },
+                "com.discord.helper": {
+                    "Label": "com.discord.helper",
+                    "Program": "/Applications/Discord.app/Contents/MacOS/Discord Helper",
+                    "File": "~/Library/LaunchAgents/com.discord.helper.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.discord.helper && rm ~/Library/LaunchAgents/com.discord.helper.plist"
+                },
+                "com.jterrazz.brain.sync": {
+                    "Label": "com.jterrazz.brain.sync",
+                    "Program": "~/.local/bin/brain-sync",
+                    "File": "~/Library/LaunchAgents/com.jterrazz.brain.sync.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 4120,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/com.jterrazz.brain.sync && rm ~/Library/LaunchAgents/com.jterrazz.brain.sync.plist"
+                },
+                "homebrew.mxcl.postgresql@16": {
+                    "Label": "homebrew.mxcl.postgresql@16",
+                    "Program": "/opt/homebrew/opt/postgresql@16/bin/postgres",
+                    "File": "~/Library/LaunchAgents/homebrew.mxcl.postgresql@16.plist",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 901,
+                    "ProgramExists": true,
+                    "OwnerExists": true,
+                    "Removal": "launchctl bootout gui/501/homebrew.mxcl.postgresql@16 && rm ~/Library/LaunchAgents/homebrew.mxcl.postgresql@16.plist"
+                }
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-04T10:00:00Z",
+                    "cpu_busy": 3400000,
+                    "cpu_total": 10000000,
+                    "cpus": 10,
+                    "load": [2.8, 3.1, 2.9],
+                    "mem_used": 13314398618,
+                    "mem_total": 17179869184,
+                    "pressure": "normal",
+                    "swap_used": 1288490188,
+                    "disk_read": 182000000000,
+                    "disk_written": 96000000000,
+                    "net_in": 38000000000,
+                    "net_out": 4600000000,
+                    "thermal": 0,
+                    "boot": "2026-11-01T06:00:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 340,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [0, 0, 0],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 4100000,
+                    "disk_written": 1300000,
+                    "net_in": 2100000,
+                    "net_out": 210000,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "top": {
+                    "cpu": [
+                        {
+                            "pid": 1001,
+                            "name": "tart",
+                            "value": 18
+                        },
+                        {
+                            "pid": 4100,
+                            "name": "Zed",
+                            "value": 9
+                        },
+                        {
+                            "pid": 310,
+                            "name": "WindowServer",
+                            "value": 4
+                        }
+                    ],
+                    "memory": [
+                        {
+                            "pid": 1001,
+                            "name": "tart",
+                            "value": 4402341478
+                        },
+                        {
+                            "pid": 4100,
+                            "name": "Zed",
+                            "value": 2040109465
+                        },
+                        {
+                            "pid": 310,
+                            "name": "WindowServer",
+                            "value": 644245094
+                        }
+                    ]
+                }
+            }
+        },
+        "jterrazz-mac-mini": {
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "self": {
+                "system": {},
+                "hardware": {
+                    "Model": "Mac16,11",
+                    "Chip": "Apple M4 Pro",
+                    "Memory": 68719476736,
+                    "CPUs": 14
+                }
+            },
+            "preferences": {
+                "here": "jterrazz-mac-mini",
+                "never_sleeps": true,
+                "vm_user": "admin"
+            },
+            "facts": {
+                "filevault": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "authrestart": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "local-ip": {
+                    "State": "ok",
+                    "Value": "192.168.1.20"
+                },
+                "firewall": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "sip": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "gatekeeper": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "automatic-updates": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "screen-lock": {
+                    "State": "ok",
+                    "Value": "300"
+                },
+                "display-sleep": {
+                    "State": "ok",
+                    "Value": "10"
+                },
+                "remote-login": {
+                    "State": "ok",
+                    "Value": "on"
+                },
+                "time-machine": {
+                    "State": "ok",
+                    "Value": "2026-11-03T03:00:00Z"
+                },
+                "system-updates": {
+                    "State": "ok",
+                    "Value": "up to date"
+                }
+            },
+            "settings": {
+                "restart-after-power-cut": "autorestart=1\nwomp=1",
+                "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
+            },
+            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "vms": {
+                "infra": {
+                    "kept": {
+                        "image": "linux",
+                        "version": "2026.11.01",
+                        "lifetime": "always-on",
+                        "want": "running",
+                        "check": "https://infra:6443/readyz",
+                        "created_at": "2026-10-23T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 8,
+                        "Memory": 25769803776,
+                        "Disk": 80000000000
+                    },
+                    "pid": 2001,
+                    "guest": {}
+                },
+                "station-image-linux-2026.11.01": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                }
+            },
+            "stores": {
+                "declarations": [
+                    {
+                        "machine": "infra",
+                        "port": 443,
+                        "via": "cloudflare-tunnel"
+                    }
+                ],
+                "images": [
+                    {
+                        "name": "linux",
+                        "version": "2026.11.01",
+                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T08:00:00Z",
+                        "size_gb": 4
+                    }
+                ]
+            },
+            "disk": {
+                "total": 1995000000000,
+                "free": 1620000000000,
+                "files": {
+                    "~/Library/Caches/Homebrew/downloads/x": 1100000000,
+                    "~/.claude/projects/x": 2000000000,
+                    "~/go/pkg/mod/cache/x": 2300000000
+                }
+            },
+            "identities": {
+                "github": {
+                    "State": "ok",
+                    "Who": ["jterrazz-agent"],
+                    "Scopes": ["repo"]
+                }
+            },
+            "secrets": {
+                "session:github": "fake-session-github-of-the-mini"
+            },
+            "tailnet": {
+                "self": {
+                    "Peers": [
+                        {
+                            "ID": "n3",
+                            "Name": "infra",
+                            "DNSName": "infra.tail1234.ts.net",
+                            "IP": "100.64.0.3",
+                            "Online": true
+                        }
+                    ],
+                    "ID": "n2",
+                    "Name": "jterrazz-mac-mini",
+                    "DNSName": "jterrazz-mac-mini.tail1234.ts.net",
+                    "IP": "100.64.0.2",
+                    "Online": true,
+                    "Sharing": {
+                        "Backend": "Running",
+                        "On": true,
+                        "DNSName": "jterrazz-mac-mini.tail1234.ts.net"
+                    },
+                    "Client": {
+                        "Path": "/usr/local/bin/tailscale",
+                        "Variant": "standalone"
+                    }
+                }
+            },
+            "meter": {
+                "sample": {
+                    "at": "2026-11-04T10:00:00Z",
+                    "cpu_busy": 2100000,
+                    "cpu_total": 10000000,
+                    "cpus": 10,
+                    "load": [1.9, 2.0, 2.1],
+                    "mem_used": 27917287424,
+                    "mem_total": 68719476736,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 900000000000,
+                    "disk_written": 1400000000000,
+                    "net_in": 120000000000,
+                    "net_out": 210000000000,
+                    "thermal": 0,
+                    "boot": "2026-10-23T10:00:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 210,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [0, 0, 0],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 1800000,
+                    "disk_written": 6200000,
+                    "net_in": 900000,
+                    "net_out": 1400000,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "top": {
+                    "cpu": [
+                        {
+                            "pid": 2001,
+                            "name": "tart",
+                            "value": 18
+                        },
+                        {
+                            "pid": 512,
+                            "name": "AirPlayXPCHelper",
+                            "value": 1
+                        }
+                    ],
+                    "memory": [
+                        {
+                            "pid": 2001,
+                            "name": "tart",
+                            "value": 16106127360
+                        },
+                        {
+                            "pid": 512,
+                            "name": "AirPlayXPCHelper",
+                            "value": 52428800
+                        }
+                    ]
+                }
+            }
+        },
+        "linux-1": {
+            "meter": {
+                "sample": {
+                    "at": "2026-11-04T10:00:00Z",
+                    "cpu_busy": 80000,
+                    "cpu_total": 1000000,
+                    "cpus": 4,
+                    "load": [0.3, 0.4, 0.4],
+                    "mem_used": 1181116006,
+                    "mem_total": 4294967296,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 3000000000,
+                    "disk_written": 5000000000,
+                    "net_in": 900000000,
+                    "net_out": 400000000,
+                    "thermal": 0,
+                    "boot": "2026-11-04T08:00:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 32,
+                    "cpu_total": 400,
+                    "cpus": 0,
+                    "load": [0, 0, 0],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 200000,
+                    "disk_written": 400000,
+                    "net_in": 300000,
+                    "net_out": 100000,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "top": {
+                    "cpu": [
+                        {
+                            "pid": 812,
+                            "name": "node",
+                            "value": 6
+                        },
+                        {
+                            "pid": 640,
+                            "name": "vite",
+                            "value": 2
+                        }
+                    ],
+                    "memory": [
+                        {
+                            "pid": 812,
+                            "name": "node",
+                            "value": 524288000
+                        },
+                        {
+                            "pid": 640,
+                            "name": "vite",
+                            "value": 209715200
+                        }
+                    ]
+                }
+            },
+            "self": {
+                "kind": "workspace",
+                "system": {
+                    "OS": "linux"
+                }
+            },
+            "apps": {
+                "mise": {
+                    "installed": {
+                        "node": "22.11.0"
+                    }
+                }
+            },
+            "disk": {
+                "total": 20000000000,
+                "free": 12400000000,
+                "files": {
+                    "~/.cache/go-build/x": 1200000000,
+                    "~/.cache/npm/x": 300000000
+                }
+            },
+            "identities": {
+                "github": {
+                    "State": "ok",
+                    "Who": ["jterrazz"],
+                    "Scopes": ["repo"]
+                },
+                "git": {
+                    "State": "ok",
+                    "Who": ["jterrazz"]
+                }
+            },
+            "secrets": {
+                "session:github": "fake-session-github-of-this-mac",
+                "operator:claude:oauth-token": "fake-claude-token-of-this-mac"
+            }
+        },
+        "infra": {
+            "meter": {
+                "sample": {
+                    "at": "2026-11-04T10:00:00Z",
+                    "cpu_busy": 1800000,
+                    "cpu_total": 10000000,
+                    "cpus": 8,
+                    "load": [1.4, 1.5, 1.6],
+                    "mem_used": 16106127360,
+                    "mem_total": 25769803776,
+                    "pressure": "normal",
+                    "swap_used": 0,
+                    "disk_read": 610000000000,
+                    "disk_written": 2300000000000,
+                    "net_in": 96000000000,
+                    "net_out": 141000000000,
+                    "thermal": 0,
+                    "boot": "2026-10-23T10:00:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 144,
+                    "cpu_total": 800,
+                    "cpus": 0,
+                    "load": [0, 0, 0],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 1100000,
+                    "disk_written": 5900000,
+                    "net_in": 800000,
+                    "net_out": 1300000,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "top": {
+                    "cpu": [
+                        {
+                            "pid": 901,
+                            "name": "k3s-server",
+                            "value": 9
+                        },
+                        {
+                            "pid": 902,
+                            "name": "containerd",
+                            "value": 3
+                        },
+                        {
+                            "pid": 903,
+                            "name": "traefik",
+                            "value": 1
+                        }
+                    ],
+                    "memory": [
+                        {
+                            "pid": 901,
+                            "name": "k3s-server",
+                            "value": 2254857830
+                        },
+                        {
+                            "pid": 904,
+                            "name": "postgres",
+                            "value": 1503238553
+                        },
+                        {
+                            "pid": 902,
+                            "name": "containerd",
+                            "value": 322122547
+                        }
+                    ]
+                }
+            },
+            "self": {
+                "kind": "server",
+                "system": {
+                    "OS": "linux"
+                }
+            },
+            "disk": {
+                "total": 80000000000,
+                "free": 44000000000
+            }
+        }
+    },
+    "user": "jterrazz",
+    "registry": {
+        "linux": "2026.11.03"
+    }
+}

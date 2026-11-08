@@ -69,7 +69,7 @@ func Tally(f AllMachines) Counts {
 				c.Running++
 			case Stopped, Suspended:
 				c.Stopped++
-			case Stale, Broken, UnknownState:
+			case Stale, Broken, UnknownState, Creating:
 			}
 		}
 	}
@@ -154,7 +154,7 @@ func Findings(f AllMachines) []finding.Finding {
 				if h := HealthOf(vm); !h.SSH && vm.Guest == "absent" {
 					add(ref, finding.Broken, vm.Name, vm.Name+" fails "+StepSSH, "station machines restart "+vm.Name+on)
 				}
-			case Stopped, Suspended, UnknownState:
+			case Stopped, Suspended, UnknownState, Creating:
 			}
 		}
 	}
@@ -182,7 +182,7 @@ func Down(vm VM) bool {
 		return vm.Restarts.Looping || vm.Detail == PoweredOffInside || Wanted(vm) == "running"
 	case Running:
 		return vm.Restarts.Looping
-	case Suspended, UnknownState:
+	case Suspended, UnknownState, Creating:
 	}
 	return false
 }

@@ -23,6 +23,10 @@ type World struct {
 	// invariant: every fake over the world holds this lock while it reads
 	// or writes it, as the engine's goroutines and a command share it.
 	mu sync.Mutex
+	// value: what a held call does before it waits: the run writes its world
+	// back and lets go of it, so a command run meanwhile reads what the held
+	// one has made so far; nil in a run that writes nothing back.
+	paused func()
 
 	Now time.Time `json:"now"`
 	// value: the Mac the binary runs on, and its owner's login.
@@ -326,6 +330,7 @@ type Kept struct {
 	Task      string            `json:"task,omitempty"`
 	Env       map[string]string `json:"env,omitempty"`
 	CreatedAt time.Time         `json:"created_at,omitzero"`
+	Birth     *machines.Birth   `json:"birth,omitempty"`
 	// value: the shares station v2 kept in the VM's record, by name, until
 	// the accounts' store moves them out once.
 	Shared []string `json:"lent,omitempty"`
@@ -456,6 +461,16 @@ func (w *World) Holds(call string) bool {
 	}
 	return false
 }
+
+func (w *World) Pause() {
+	// invariant: called under the world's lock, by a fake about to wait on
+	// a held call.
+	if w.paused != nil {
+		w.paused()
+	}
+}
+
+func (w *World) OnPause(f func()) { w.paused = f }
 
 func (w *World) Holder(vm string) string {
 	// value: the Mac that holds vm, empty when none does.

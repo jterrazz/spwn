@@ -49,7 +49,10 @@ type Capabilities struct {
 }
 
 type Hardware struct {
-	Model  string
+	// value: the model identifier the Mac reports ("Mac16,10"), its chip
+	// ("Apple M4 Max"), each empty when it does not say.
+	Model  string `json:",omitempty"`
+	Chip   string `json:",omitempty"`
 	Memory int64
 	CPUs   int
 }

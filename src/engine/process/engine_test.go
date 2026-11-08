@@ -40,7 +40,8 @@ func (f *fakeMachines) EngineRunning(_ context.Context, name string) bool { retu
 
 func (f *fakeMachines) MarkUptime(context.Context, model.UptimeMark) error { return nil }
 
-func (f *fakeMachines) ThisMacName() string { return "x" }
+func (f *fakeMachines) ThisMacName() string  { return "x" }
+func (f *fakeMachines) ThisMacLabel() string { return "x" }
 
 type fakeRun struct {
 	vm    string

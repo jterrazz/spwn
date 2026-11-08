@@ -32,6 +32,8 @@ type Remembered struct {
 	// value: why it is down, and its console's last lines then (SPEC B5.5).
 	Cause     string   `json:"cause,omitempty"`
 	LastLines []string `json:"last_lines,omitempty"`
+	// value: when its create made it ready (SPEC B5.10).
+	ReadyAt time.Time `json:"ready_at,omitzero"`
 	// value: what it was last heard listening on, so a successor lists
 	// the ports of a VM down or booting again.
 	LastHeard []ports.Listener `json:"last_heard,omitempty"`

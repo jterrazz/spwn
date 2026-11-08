@@ -82,4 +82,5 @@ type VMRecord struct {
 	Env                  map[string]string
 	Resources            Resources
 	CreatedAt            time.Time
+	Birth                *Birth
 }

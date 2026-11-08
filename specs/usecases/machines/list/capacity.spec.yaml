@@ -1,0 +1,7 @@
+description: 'each Mac says its memory, what macOS and each VM hold, what is free, and the roomiest Mac'
+env: two-macs
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''{roomiest, macs: [.macs[] | {name, capacity}]}'''
+      exit: 0
+      stdout: |
+          {"roomiest":"jterrazz-mac-mini","macs":[{"name":"jterrazz-macbook-pro","capacity":{"total_bytes":17179869184,"macos_bytes":4294967296,"free_bytes":4294967296,"vms":[{"name":"linux-1","memory_bytes":8589934592}]}},{"name":"jterrazz-mac-mini","capacity":{"total_bytes":68719476736,"macos_bytes":4294967296,"free_bytes":38654705664,"vms":[{"name":"infra","memory_bytes":25769803776}]}}]}

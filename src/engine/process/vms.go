@@ -71,6 +71,22 @@ type vmState struct {
 	// its console kept then; empty once it is back.
 	cause     string
 	lastLines []string
+	// value: SPEC B5.10: when its create made it ready.
+	readyAt time.Time
+}
+
+// invariant: SPEC B5.10: the create that made a VM tells its engine once it
+// is ready: the engine keeps when, and tells the owner.
+func (d *Engine) ready(ctx context.Context, vm string) error {
+	v, err := d.find(vm)
+	if err != nil {
+		return err
+	}
+	d.mu.Lock()
+	v.readyAt = d.h.Now().UTC()
+	d.mu.Unlock()
+	d.tell(ctx, vm, engine.Told{Kind: engine.NoticeVMReady, Parts: []string{vm + " is ready on " + d.m.ThisMacLabel()}})
+	return nil
 }
 
 // invariant: at start, a live run is ADOPTED (never touched); a dead one or none
@@ -85,7 +101,7 @@ func (d *Engine) adopt(ctx context.Context) {
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
 		v.agents, v.reported = readReport(known.Agents), known.Reported
-		v.cause, v.lastLines = known.Cause, known.LastLines
+		v.cause, v.lastLines, v.readyAt = known.Cause, known.LastLines, known.ReadyAt
 		d.mu.Lock()
 		d.vms[r.Name] = v
 		if len(known.LastHeard) > 0 {
@@ -280,7 +296,7 @@ func (d *Engine) vmViews() []engine.VMView {
 	for name, v := range d.vms {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
-			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines,
+			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt

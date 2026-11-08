@@ -59,7 +59,9 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Unlocker:  m.unlocker(knownHosts),
 		Answers:   m.answers,
 		SSHConfig: m.sshConfig(knownHosts),
-		Memory:    m.memory,
+		Hardware:  m.hardware,
+		Laptop:    m.profile.Caps.Lid,
+		Asleep:    m.asleep,
 		LAN:       m.lanAddress,
 		Uptime:    m.stores.uptime,
 	})
@@ -81,15 +83,25 @@ func (m machine) lanAddress(ctx context.Context) string {
 	return got.Value
 }
 
-// value: the memory this Mac has, as it reads itself (its world's in the
-// spec build).
-func (m machine) memory(ctx context.Context) int64 {
+// value: this Mac runs on battery with its lid closed, as its power reads
+// (its world's in the spec build).
+func (m machine) asleep(context.Context) bool {
+	if m.powerPort == nil || !m.profile.Caps.Lid {
+		return false
+	}
+	r, err := m.powerPort.Read()
+	return err == nil && r.LidClosedOnBattery()
+}
+
+// value: what this Mac is, as it reads itself (its world's in the spec
+// build).
+func (m machine) hardware(ctx context.Context) coremachine.Hardware {
 	self := selfOf(m.sys)
 	if m.world != nil {
 		self = m.world.self()
 	}
 	_, _, _, hw, _ := self.Read(ctx)
-	return hw.Memory
+	return hw
 }
 
 // invariant: a Mac answers when its station does, on a connection dialed

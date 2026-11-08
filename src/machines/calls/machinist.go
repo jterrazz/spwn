@@ -11,6 +11,7 @@ import (
 
 	background "github.com/jterrazz/studio-station/src/background/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 )
 
 type Options struct {
@@ -29,8 +30,13 @@ type Options struct {
 	// value: whether another Mac's station answers now, on a connection of
 	// its own; nil asks its sshd alone.
 	Answers func(ctx context.Context, mac string) bool
-	// value: the memory this Mac has, in bytes; zero when it cannot say.
-	Memory func(ctx context.Context) int64
+	// value: what this Mac is, as it reads itself; nil when it cannot say.
+	Hardware func(ctx context.Context) coremachine.Hardware
+	// value: this Mac has a lid: a laptop.
+	Laptop bool
+	// value: this Mac runs on battery with its lid closed now: it is going
+	// to sleep; nil when it cannot say.
+	Asleep func(ctx context.Context) bool
 	// value: this Mac's address on your LAN; empty when it cannot say.
 	LAN func(ctx context.Context) string
 	// value: its servers' uptime records; nil keeps none.
@@ -54,6 +60,8 @@ type EngineVM struct {
 	// value: why a server is down, and its console's last lines then.
 	Cause     string
 	LastLines []string
+	// value: when the create it was made by made it ready.
+	ReadyAt time.Time
 }
 
 type Engine interface {

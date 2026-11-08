@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -43,8 +44,12 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	if s.o.ThisMachine == catalog.Mac && s.o.LAN != nil {
 		thisMac.LAN = s.o.LAN(ctx)
 	}
+	if s.o.ThisMachine == catalog.Mac {
+		thisMac.Hardware, thisMac.Laptop = s.hardware(ctx), s.o.Laptop
+		thisMac.Asleep = s.o.Asleep != nil && s.o.Asleep(ctx)
+	}
 	if thisMacOnly || s.o.ThisMachine != catalog.Mac {
-		return model.AllMachines{Macs: []model.MacView{thisMac}}, nil
+		return model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now()}, nil
 	}
 	others := s.OtherMacs()
 	answers := map[string]model.MacView{}
@@ -69,6 +74,13 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 		})
 	}
 	return allMachines(true), nil
+}
+
+func (s *Machinist) hardware(ctx context.Context) coremachine.Hardware {
+	if s.o.Hardware == nil {
+		return coremachine.Hardware{}
+	}
+	return s.o.Hardware(ctx)
 }
 
 func (s *Machinist) nodeMap(ctx context.Context) map[string]model.Node {
@@ -106,7 +118,10 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answers map[string]model.MacView) model.MacView {
 	far, ok := answers[name]
 	if !ok {
-		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN}
+		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN, Laptop: h.Laptop, Asleep: h.Asleep}
+		if h.Hardware != nil {
+			silent.Hardware = *h.Hardware
+		}
 		for _, vm := range h.VMs {
 			silent.VMs = append(silent.VMs, model.VM{
 				Name: vm.Name, Mac: name, Lifetime: vm.Lifetime, State: model.UnknownState,
@@ -115,7 +130,10 @@ func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answer
 		}
 		return silent
 	}
-	view := model.MacView{Name: name, User: h.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine}
+	view := model.MacView{
+		Name: name, User: h.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine,
+		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep,
+	}
 	for _, vm := range far.VMs {
 		vm.Mac = name
 		view.VMs = append(view.VMs, vm)

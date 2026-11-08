@@ -1,6 +1,10 @@
 package machines
 
-import "time"
+import (
+	"time"
+
+	"github.com/jterrazz/studio-station/src/core/machine"
+)
 
 type Record struct {
 	// value: the declared VM as its Mac keeps it; never observed state.
@@ -17,6 +21,8 @@ type Record struct {
 	MemoryBytes int64
 	DiskBytes   int64
 	CreatedAt   time.Time
+	// value: SPEC B5.10: its create's progress while it runs; nil after.
+	Birth *Birth
 }
 
 type MacRecord struct {
@@ -29,6 +35,10 @@ type MacRecord struct {
 	// value: the address that Mac last answered with on your LAN: unlock
 	// dials it, Tailscale being down until its disk is unlocked.
 	LAN string `json:"lan,omitempty"`
+	// value: what that Mac is, as it last answered: shown while it is silent.
+	Hardware *machine.Hardware `json:"hardware,omitempty"`
+	Laptop   bool              `json:"laptop,omitempty"`
+	Asleep   bool              `json:"asleep,omitempty"`
 }
 
 type SeenVM struct {

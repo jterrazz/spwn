@@ -89,9 +89,12 @@ func (h *Hypervisor) Fetch(_ context.Context, img imagescontract.ImageLocation, 
 	return nil
 }
 
-func (h *Hypervisor) Clone(_ context.Context, from imagescontract.ImageLocation, vm string) error {
+func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocation, vm string) error {
 	h.w.Lock()
 	defer h.w.Unlock()
+	if err := h.held(ctx, "Hypervisor.Clone"); err != nil {
+		return err
+	}
 	m := h.thisMac()
 	_, fromDisk := h.disk(from.Ref)
 	if !fromDisk && !slices.Contains(m.Images, from.Ref) {
@@ -149,9 +152,12 @@ func (h *Hypervisor) Rename(_ context.Context, from, to string) error {
 	return nil
 }
 
-func (h *Hypervisor) Boot(_ context.Context, vm string, opts contract.BootOptions) (contract.Run, error) {
+func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOptions) (contract.Run, error) {
 	h.w.Lock()
 	defer h.w.Unlock()
+	if err := h.held(ctx, "Hypervisor.Boot"); err != nil {
+		return nil, err
+	}
 	v, ok := h.disk(vm)
 	if !ok {
 		return nil, ErrNoDisk
@@ -165,6 +171,19 @@ func (h *Hypervisor) Boot(_ context.Context, vm string, opts contract.BootOption
 	v.PID, v.Ended, v.UpAt = h.nextPID(), nil, h.w.Now
 	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: []string{}}
 	return &run{h: h, vm: vm, pid: v.PID}, nil
+}
+
+// invariant: a held call, called under the world's lock, lets the world go
+// and waits until it is interrupted, as a long clone or boot caught by ctrl-c.
+func (h *Hypervisor) held(ctx context.Context, method string) error {
+	if !h.w.Holds(method) {
+		return nil
+	}
+	h.w.Pause()
+	h.w.Unlock()
+	<-ctx.Done()
+	h.w.Lock()
+	return ctx.Err()
 }
 
 // value: pids count up over the whole world, so no two runs share one.

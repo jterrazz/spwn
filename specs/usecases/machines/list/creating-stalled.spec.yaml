@@ -1,0 +1,9 @@
+description: 'a create stalled for half an hour reads stopped and half made, its memory given back'
+env: creating
+runs:
+    - command: 'world advance 31m'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[0] | [(.vms[0] | .state, .detail, .birth), .capacity.free_bytes]'''
+      exit: 0
+      stdout: |
+          ["stopped","was left half made",null,21474836480]

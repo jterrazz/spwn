@@ -1,0 +1,13 @@
+description: 'a laptop last seen on battery with its lid closed is asleep when silent, not unreachable'
+env: air-asleep
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reach, hardware: (.hardware | {name, laptop})}'''
+      exit: 0
+      stdout: |
+          {"reach":"answers","hardware":{"name":"MacBook Air","laptop":true}}
+    - command: 'world offline jterrazz-macbook-air'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1] | {reachable, reach, hardware: .hardware.name}'''
+      exit: 0
+      stdout: |
+          {"reachable":false,"reach":"asleep","hardware":"MacBook Air"}

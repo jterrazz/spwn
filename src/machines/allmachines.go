@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 const SuperviseRetired = "supervise is retired: the engine supervises VMs (station setup)"
@@ -81,6 +82,10 @@ type VM struct {
 	// console kept then; empty while it is up.
 	Cause     string
 	LastLines []string
+	// value: SPEC B5.10: how far its create is while it runs, and when its
+	// create made it ready.
+	Birth   *Birth
+	ReadyAt time.Time
 }
 
 type EngineView struct {
@@ -101,6 +106,13 @@ type MacView struct {
 	Node   Node
 	Engine EngineView
 	VMs    []VM
+	// value: SPEC B5.12: what it is, as it read itself at its last answer,
+	// and whether it has a lid (a laptop) or not (a desktop).
+	Hardware machine.Hardware
+	Laptop   bool
+	// value: SPEC B5.15: at its last answer it was on battery with its lid
+	// closed, so its silence since is sleep.
+	Asleep bool
 }
 
 type AllMachines struct {

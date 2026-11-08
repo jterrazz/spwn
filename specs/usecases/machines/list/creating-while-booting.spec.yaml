@@ -1,0 +1,29 @@
+description: 'a create held at its boot reads booting; ctrl-c keeps it stopped, its birth gone'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world hold Hypervisor.Boot'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create linux-4'
+      stdin: |
+          see On which Mac?
+          send \r
+          see Running
+          run "$STATION" machines | /usr/bin/grep linux-4 >seen
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          ┃ On which Mac?
+          ┃ jterrazz-macbook-pro  2 VMs
+    - command: '--version >/dev/null; /bin/cat seen'
+      exit: 0
+      stdout: |
+          	linux-4	Workspace	jterrazz-macbook-pro	Creating · throwaway	4 CPU	4 GB	booting
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | select(.name == "linux-4") | {state, birth}]'''
+      exit: 0
+      stdout: |
+          [{"state":"stopped","birth":null}]

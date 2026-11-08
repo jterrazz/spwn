@@ -1,0 +1,13 @@
+description: 'a VM told ready a moment ago reads fresh, and no longer once its 8 s have passed'
+env: just-ready
+runs:
+    - command: 'machines --json --this-mac | /usr/bin/jq -c ''[.macs[0].vms[] | {name, fresh}]'''
+      exit: 0
+      stdout: |
+          [{"name":"api","fresh":null},{"name":"linux-1","fresh":true}]
+    - command: 'world advance 8s'
+      exit: 0
+    - command: 'machines --json --this-mac | /usr/bin/jq -c ''[.macs[0].vms[] | {name, fresh}]'''
+      exit: 0
+      stdout: |
+          [{"name":"api","fresh":null},{"name":"linux-1","fresh":null}]
