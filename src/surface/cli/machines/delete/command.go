@@ -48,7 +48,12 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			}
 			report, err := deleteIt(in.Confirm)
 			if _, typed := confirm.Answer(err); typed && in.Confirm == "" && io.Interactive && io.Prompt != nil {
-				answers, askErr := io.Prompt.Form(page.Form{Fields: []page.Field{{Key: "name", Label: "Type " + in.Name + " to delete it:", Kind: page.FieldText}}})
+				label := "Type " + in.Name + " to delete it:"
+				var asked *fail.Error
+				if errors.As(err, &asked) && asked.Detail["agents"] != "" {
+					label = "Its agents stop first: " + asked.Detail["agents"] + ". " + label
+				}
+				answers, askErr := io.Prompt.Form(page.Form{Fields: []page.Field{{Key: "name", Label: label, Kind: page.FieldText}}})
 				if askErr != nil {
 					return askErr
 				}

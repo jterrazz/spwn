@@ -1,0 +1,21 @@
+description: 'a finished agent forgotten from the Mac by its name alone, the one it took after its stop'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped · its workspace keeps running
+    - command: 'agents forget linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	forgotten · its workspace stays
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none

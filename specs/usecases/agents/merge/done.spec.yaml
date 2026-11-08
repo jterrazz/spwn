@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           # Agents	1 ◐
-          ◐	review-bot	claudecode	waiting · PR #42 is ready	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42 · station agents merge-pr review-bot
+          ◐	review-bot	claudecode	waiting · PR #42 is ready	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42 · station agents merge review-bot
     - command: 'agents reply review-bot also squash the fixups'
       exit: 0
       stdout: |
@@ -21,7 +21,7 @@ runs:
       stdout: |
           # Agents	1 ●
           ●	review-bot	claudecode	working · opening a PR	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42
-    - command: 'agents merge-pr review-bot'
+    - command: 'agents merge review-bot'
       exit: 0
       stdout: |
           ●	review-bot	merged PR #42 · finished

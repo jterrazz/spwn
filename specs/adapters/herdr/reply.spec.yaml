@@ -3,10 +3,10 @@ fixture: ./__fixtures__/hc/
 env:
     - STATION_MACHINE_KIND=linux
 runs:
-    - command: 'agents reply t7 yes, merge it'
+    - command: 'agents reply review-bot yes, merge it'
       exit: 0
       stdout: |
-          ●	t7	sent · it works on it
+          ●	review-bot	sent · it works on it
     - command: '--version >/dev/null; /bin/cat .calls'
       exit: 0
       stdout: |

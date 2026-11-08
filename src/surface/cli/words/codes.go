@@ -36,6 +36,15 @@ func typedGesture(action string) (doing, done string, ok bool) {
 	}
 }
 
+// value: SPEC A5: a VM's confirmation names the live agents that stop
+// first; nothing for a VM that hosts none.
+func agentsFirst(e *fail.Error) string {
+	if names := e.Detail["agents"]; names != "" {
+		return " (its agents stop first: " + names + ")"
+	}
+	return ""
+}
+
 func Codes() map[fail.Code]Wording {
 	// invariant: the one table of every error code's words (rule
 	// every-code-worded): a code raised anywhere is worded here once.
@@ -44,7 +53,7 @@ func Codes() map[fail.Code]Wording {
 			if doing, _, ok := typedGesture(e.Detail["action"]); ok && e.Detail["by"] == "yes" {
 				return doing + " a " + e.Detail["kind"] + " needs its name", "--confirm=" + e.Subject
 			}
-			return "refusing without the name typed: " + e.Subject, "in a script: --confirm=" + e.Subject
+			return "refusing without the name typed: " + e.Subject + agentsFirst(e), "in a script: --confirm=" + e.Subject
 		},
 		confirm.Mismatch: func(e *fail.Error) (string, string) {
 			said := "you typed \"" + e.Detail["typed"] + "\", not \"" + e.Subject + "\""
@@ -54,7 +63,7 @@ func Codes() map[fail.Code]Wording {
 			return said, "in a script: --confirm=" + e.Subject
 		},
 		confirm.YesNeeded: func(e *fail.Error) (string, string) {
-			return "refusing without --yes: " + e.Subject, "re-run with --yes"
+			return "refusing without --yes: " + e.Subject + agentsFirst(e), "re-run with --yes"
 		},
 		confirm.Declined: func(e *fail.Error) (string, string) {
 			return e.Subject + " kept: you said no", "--yes skips the question"
@@ -159,27 +168,42 @@ func Codes() map[fail.Code]Wording {
 		accountscalls.ToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
 		},
-		agentscalls.UnknownSession: func(e *fail.Error) (string, string) {
-			return "no agent session \"" + e.Subject + "\" here", "station agents"
+		agentscalls.UnknownAgent: func(e *fail.Error) (string, string) {
+			return "no agent named \"" + e.Subject + "\"", "station agents"
 		},
 		agentscalls.Ended: func(e *fail.Error) (string, string) {
-			said := "the agent of " + e.Subject + " has finished"
+			said := e.Subject + " has finished"
 			if r := e.Detail["reason"]; r != "" {
 				said += ": " + r
 			}
-			return said, "station agents start --task <task>"
+			return said, "station agents forget " + e.Subject
 		},
 		agentscalls.NoPR: func(e *fail.Error) (string, string) {
-			return "the agent of " + e.Subject + " has opened no PR", "station agents"
+			return e.Subject + " has opened no PR", "station agents"
 		},
 		agentscalls.NoText: func(e *fail.Error) (string, string) {
 			return "nothing to send to " + e.Subject, "station agents reply " + e.Subject + " <text>"
 		},
 		agentscalls.NoTerminal: func(e *fail.Error) (string, string) {
-			return "the agent of " + e.Subject + " runs in no terminal station opened", "station agents"
+			return e.Subject + " runs in no terminal station opened", "station agents"
 		},
 		agentscalls.UnknownApp: func(e *fail.Error) (string, string) {
 			return "no agent app \"" + e.Subject + "\": claudecode or codex", "station agents start --app claudecode"
+		},
+		agentscalls.NameTaken: func(e *fail.Error) (string, string) {
+			return "an agent is already named " + e.Subject, "name it another way: --name <name>"
+		},
+		agentscalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is no agent name: lowercase letters, digits and -", "--name review-bot"
+		},
+		agentscalls.StillLive: func(e *fail.Error) (string, string) {
+			return e.Subject + " is " + e.Detail["state"] + ": only a finished agent is forgotten", "station agents stop " + e.Subject
+		},
+		agentscalls.NoWhere: func(e *fail.Error) (string, string) {
+			if e.Detail["both"] == "both" {
+				return "an agent starts on a workspace (--on) or on a new throwaway (--new), not both", "station agents start \"<task>\" --new"
+			}
+			return "an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)", "station agents start \"<task>\" --on <workspace>"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

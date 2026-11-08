@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"encoding/json"
+	"github.com/jterrazz/studio-station/src/agents"
 	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"io"
 	"slices"
@@ -179,13 +180,33 @@ func (f farPorts) Undeclare(ctx context.Context, mac string, in portscalls.Undec
 	return call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: mac}, portscalls.Undeclare, in, nil)
 }
 
-// invariant: an agent is started inside the workspace, at its own station,
-// as any call for a VM of this Mac.
+// invariant: a workspace's agents are reached inside it, at its own
+// station, as any call for a VM of this Mac.
 type farAgents struct{ m machine }
 
-func (f farAgents) StartAgent(ctx context.Context, vm, task string) error {
-	_, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Start, agentscalls.StartIn{Task: task}, nil)
-	return err
+func (f farAgents) Live(ctx context.Context, vm string) []string {
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, struct{}{}, nil)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, a := range kept {
+		if agents.Live(a) {
+			names = append(names, a.Name)
+		}
+	}
+	return names
+}
+
+func (f farAgents) Stop(ctx context.Context, vm, reason string) (stopped, warnings []string) {
+	for _, name := range f.Live(ctx, vm) {
+		if _, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Stop, agentscalls.StopIn{Agent: name, Reason: reason, Confirm: confirm.Yes}, nil); err != nil {
+			warnings = append(warnings, name+" did not stop: "+err.Error())
+			continue
+		}
+		stopped = append(stopped, name)
+	}
+	return stopped, warnings
 }
 
 func orNone(err error) error {

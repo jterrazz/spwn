@@ -1,0 +1,23 @@
+description: 'a second agent on a workspace runs in a terminal of its own beside the first, named linux-1·2'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents start "Write the changelog" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1·2	starts · claudecode · Write the changelog
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	linux-1	claudecode	working	Build the landing page	linux-1	jterrazz-macbook-pro	28s ago
+          ●	linux-1·2	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	15s ago
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.terminals | map({address, name, typed})'' world.json'
+      exit: 0
+      stdout: |
+          [{"address":"t1","name":"linux-1","typed":["Build the landing page"]},{"address":"t2","name":"linux-1·2","typed":["Write the changelog"]}]

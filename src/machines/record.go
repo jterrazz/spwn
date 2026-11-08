@@ -8,10 +8,7 @@ type Record struct {
 	Lifetime             Lifetime
 	Want, Network        string
 	// value: a server's health check, a URL or host:port; empty for none.
-	Check string
-	// value: a workspace's task, what its agent was started on; empty for
-	// none.
-	Task        string
+	Check       string
 	Env         map[string]string
 	CPUs        int
 	MemoryBytes int64

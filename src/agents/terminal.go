@@ -18,9 +18,11 @@ type Terminal struct {
 	// value: a terminal station opened on the VM's multiplexer for an
 	// agent, by its address there.
 	Address string `json:"address"`
-	App     App    `json:"app,omitempty"`
-	Folder  string `json:"folder,omitempty"`
-	Seen    Seen   `json:"seen,omitempty"`
+	// value: the name of the agent station started in it, from its label.
+	Name   string `json:"name,omitempty"`
+	App    App    `json:"app,omitempty"`
+	Folder string `json:"folder,omitempty"`
+	Seen   Seen   `json:"seen,omitempty"`
 	// value: the program's own words with its status, the title of what it
 	// waits for.
 	Message string `json:"message,omitempty"`
@@ -36,7 +38,7 @@ func Detected(kept []Agent, live []Terminal) []Agent {
 		if !PlainSession(t.Address) || slices.ContainsFunc(kept, func(a Agent) bool { return a.Terminal == t.Address || a.Session == t.Address }) {
 			continue
 		}
-		a := Agent{App: t.App, Session: t.Address, Terminal: t.Address, Folder: t.Folder, State: Running}
+		a := Agent{Name: t.Name, App: t.App, Session: t.Address, Terminal: t.Address, Folder: t.Folder, State: Running}
 		switch t.Seen {
 		case SeenWorking:
 			a.State = Working

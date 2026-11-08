@@ -1,0 +1,24 @@
+description: 'on a Mac, station agents lists the agents of every running workspace, each with its VM and its Mac'
+env: mini-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world agent-stop linux-1 s-1 "PR #42 is ready"'
+      exit: 0
+    - command: 'agents start "Write the changelog" --on linux-1 --name docs-bot'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: 'agents start "Fix the flaky e2e test" --on ci-1'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	ci-1	starts · claudecode · Fix the flaky e2e test
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●	1 ◐
+          ◐	linux-1	claudecode	waiting · PR #42 is ready	Review the auth refresh	linux-1	jterrazz-macbook-pro	48s ago	station agents reply linux-1 <text>
+          ●	docs-bot	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
+          ●	ci-1	claudecode	working	Fix the flaky e2e test	ci-1	jterrazz-mac-mini	15s ago

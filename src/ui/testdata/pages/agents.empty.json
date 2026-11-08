@@ -13,7 +13,7 @@
       "title": "Agents",
       "columns": [
         {
-          "key": "session",
+          "key": "agent",
           "kind": "text",
           "keep": 100
         },

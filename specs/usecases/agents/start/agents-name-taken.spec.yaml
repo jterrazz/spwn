@@ -1,0 +1,16 @@
+description: 'a name an agent of the workspace holds starts nothing: one terminal was opened, for the first'
+env: in-workspace
+runs:
+    - command: 'agents start "Write the changelog" --name docs-bot'
+      exit: 0
+      stdout: |
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: 'agents start "Write the release notes" --name docs-bot'
+      exit: 2
+      stderr: |
+          Error: an agent is already named docs-bot
+          Hint: name it another way: --name <name>
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
+      exit: 0
+      stdout: |
+          {"opened":["claudecode"],"typed":["Write the changelog"]}

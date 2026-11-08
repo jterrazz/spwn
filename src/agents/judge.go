@@ -25,6 +25,9 @@ func fold(a Agent, e Event) Agent {
 	if a.Session == "" {
 		a.Session = e.Session
 	}
+	if a.Name == "" {
+		a.Name = e.Name
+	}
 	if a.App == "" {
 		a.App = e.App
 	}
@@ -43,6 +46,9 @@ func fold(a Agent, e Event) Agent {
 	switch e.Kind {
 	case Began:
 		a.State, a.Ended, a.Reason = Starting, time.Time{}, ""
+		if a.Task == "" {
+			a.Task, _ = Scrub(e.Prompt)
+		}
 	case Prompted:
 		a.State, a.Ask = Working, nil
 		if a.Task == "" {

@@ -1,0 +1,21 @@
+description: 'an agent stopped from the Mac by its name alone stops inside its workspace, which stays running'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped · its workspace keeps running
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ○
+          ○	linux-1	claudecode	finished · stopped	Build the landing page	linux-1	jterrazz-macbook-pro	28s ago
+    - command: 'machines --this-mac | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	8 GB

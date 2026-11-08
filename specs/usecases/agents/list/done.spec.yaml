@@ -15,5 +15,5 @@ runs:
       exit: 0
       stdout: |
           # Agents	1 ●	1 ◐
-          ◐	s-2	claudecode	waiting · PR #42 is ready. I moved the refresh into its own commit.	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42 · station agents merge-pr s-2
-          ●	s-1	claudecode	working · editing src/pages/index.astro	Build the landing page
+          ◐	linux-1·2	claudecode	waiting · PR #42 is ready. I moved the refresh into its own commit.	Review the auth refresh	PR #42 · https://github.com/jterrazz/app/pull/42 · station agents merge linux-1·2
+          ●	linux-1	claudecode	working · editing src/pages/index.astro	Build the landing page

@@ -1,6 +1,7 @@
 package process
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"slices"
@@ -22,7 +23,7 @@ func (d *Engine) heardAgents(ctx context.Context, v *vmState, now []agents.Agent
 		return
 	}
 	for _, a := range now {
-		i := slices.IndexFunc(was, func(b agents.Agent) bool { return b.Session == a.Session })
+		i := slices.IndexFunc(was, func(b agents.Agent) bool { return b.Session == a.Session || (a.Name != "" && b.Name == a.Name) })
 		var before agents.Agent
 		if i >= 0 {
 			before = was[i]
@@ -40,8 +41,10 @@ func sameAsk(a, b *agents.Ask) bool {
 	return (a == nil) == (b == nil) && (a == nil || (a.Title == b.Title && a.At.Equal(b.At)))
 }
 
+// value: SPEC B5.22: an agent's notice is keyed by its name; one no start
+// named is its VM's.
 func waiting(vm string, a agents.Agent) engine.Told {
-	t := engine.Told{Kind: engine.NoticeAgentWaiting, Parts: []string{vm + " is waiting"}}
+	t := engine.Told{Kind: engine.NoticeAgentWaiting, Parts: []string{cmp.Or(a.Name, vm) + " is waiting"}}
 	if a.Ask != nil && a.Ask.Title != "" {
 		t.Parts = append(t.Parts, a.Ask.Title)
 	}
@@ -49,7 +52,7 @@ func waiting(vm string, a agents.Agent) engine.Told {
 }
 
 func finished(vm string, a agents.Agent) engine.Told {
-	t := engine.Told{Kind: engine.NoticeAgentFinished, Parts: []string{vm + " is finished"}}
+	t := engine.Told{Kind: engine.NoticeAgentFinished, Parts: []string{cmp.Or(a.Name, vm) + " is finished"}}
 	if a.Reason != "" {
 		t.Parts = append(t.Parts, a.Reason)
 	}

@@ -1,0 +1,17 @@
+description: 'an agent at work is not forgotten: refused, with how to stop it first'
+env: in-workspace
+runs:
+    - command: 'agents start "Build the landing page"'
+      exit: 0
+      stdout: |
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents forget linux-1'
+      exit: 2
+      stderr: |
+          Error: linux-1 is working: only a finished agent is forgotten
+          Hint: station agents stop linux-1
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ●
+          ●	linux-1	claudecode	working	Build the landing page

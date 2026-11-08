@@ -21,9 +21,8 @@ type SessionSubject struct {
 	Typed func() []Typed
 	// value: every command line the adapter ran.
 	Lines func() []string
-	// value: makes the agent of a terminal say seen, with its words, and
-	// show screen.
-	Says func(terminal string, seen agents.Seen, message, screen string)
+	// value: makes the agent of a terminal say seen, with its words.
+	Says func(terminal string, seen agents.Seen, message string)
 }
 
 func Session(t *testing.T, open func(t *testing.T) SessionSubject) {
@@ -32,8 +31,8 @@ func Session(t *testing.T, open func(t *testing.T) SessionSubject) {
 	t.Run("each program opened runs in its folder, in a terminal of its own", func(t *testing.T) {
 		s := open(t)
 		at := make([]string, 0, 2)
-		for _, folder := range []string{"/Users/admin/app", "/Users/admin/api"} {
-			address, err := s.Session.Open(ctx, "claudecode", folder, []string{"agent"})
+		for i, folder := range []string{"/Users/admin/app", "/Users/admin/api"} {
+			address, err := s.Session.Open(ctx, "claudecode", []string{"linux-1", "linux-1" + agents.Nth + "2"}[i], folder, []string{"agent"})
 			if err != nil {
 				t.Fatalf("Open: %v", err)
 			}
@@ -49,8 +48,8 @@ func Session(t *testing.T, open func(t *testing.T) SessionSubject) {
 
 	t.Run("a text sent is typed once with Enter into its terminal, and never on a command line", func(t *testing.T) {
 		s := open(t)
-		_, _ = s.Session.Open(ctx, "claudecode", "/Users/admin/app", []string{"agent"})
-		address, err := s.Session.Open(ctx, "claudecode", "/Users/admin/api", []string{"agent"})
+		_, _ = s.Session.Open(ctx, "claudecode", "linux-1", "/Users/admin/app", []string{"agent"})
+		address, err := s.Session.Open(ctx, "claudecode", "linux-1"+agents.Nth+"2", "/Users/admin/api", []string{"agent"})
 		if err != nil {
 			t.Fatalf("Open: %v", err)
 		}
@@ -68,24 +67,37 @@ func Session(t *testing.T, open func(t *testing.T) SessionSubject) {
 		}
 	})
 
-	t.Run("the terminals opened are listed with what their agent says, and each screen read", func(t *testing.T) {
+	t.Run("the terminals opened are listed by name with what their agent says", func(t *testing.T) {
 		s := open(t)
-		address, err := s.Session.Open(ctx, "claudecode", "/Users/admin/app", []string{"agent"})
+		address, err := s.Session.Open(ctx, "claudecode", "review-bot", "/Users/admin/app", []string{"agent"})
 		if err != nil {
 			t.Fatalf("Open: %v", err)
 		}
-		s.Says(address, agents.SeenBlocked, "Claude needs your permission to use Bash", "Allow Bash? 1. Yes 2. No")
+		s.Says(address, agents.SeenBlocked, "Claude needs your permission to use Bash")
 		live, err := s.Session.Terminals(ctx)
 		if err != nil {
 			t.Fatalf("Terminals: %v", err)
 		}
-		want := []agents.Terminal{{Address: address, App: "claudecode", Folder: "/Users/admin/app", Seen: agents.SeenBlocked, Message: "Claude needs your permission to use Bash"}}
+		want := []agents.Terminal{{Address: address, Name: "review-bot", App: "claudecode", Folder: "/Users/admin/app", Seen: agents.SeenBlocked, Message: "Claude needs your permission to use Bash"}}
 		if !slices.Equal(live, want) {
 			t.Errorf("terminals %+v, want %+v", live, want)
 		}
-		screen, err := s.Session.Screen(ctx, address)
-		if err != nil || !strings.Contains(screen, "Allow Bash?") {
-			t.Errorf("screen %q (%v), want what it shows", screen, err)
+	})
+
+	t.Run("a terminal closed is no longer listed, and closing it again changes nothing", func(t *testing.T) {
+		s := open(t)
+		gone, err := s.Session.Open(ctx, "claudecode", "linux-1", "/Users/admin/app", []string{"agent"})
+		if err != nil {
+			t.Fatalf("Open: %v", err)
+		}
+		for range 2 {
+			if closeErr := s.Session.Close(ctx, gone); closeErr != nil {
+				t.Fatalf("Close: %v", closeErr)
+			}
+		}
+		live, err := s.Session.Terminals(ctx)
+		if err != nil || slices.ContainsFunc(live, func(t agents.Terminal) bool { return t.Address == gone }) {
+			t.Errorf("terminals %+v (%v), want %s gone", live, err, gone)
 		}
 	})
 }

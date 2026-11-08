@@ -78,7 +78,6 @@ type VMRecord struct {
 	Name, Image, Version string
 	Lifetime             Lifetime
 	Want, Network, Check string
-	Task                 string
 	Env                  map[string]string
 	Resources            Resources
 	CreatedAt            time.Time

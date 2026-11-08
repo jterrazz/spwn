@@ -10,7 +10,7 @@ runs:
       exit: 0
       stdout: |
           linux-1
-          ●	linux-1	deleted
+          ●	linux-1	deleted · its agent review-bot stopped
           hc machine ls --json
           hc machine add --install --json --name linux-1 linux-1
           hc machine ls --json

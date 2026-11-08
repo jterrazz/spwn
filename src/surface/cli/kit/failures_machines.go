@@ -101,7 +101,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 		}
 		return failed(down.Error(), "station setup", err), true
 	case errors.As(err, &agent):
-		return failed(agent.Name+" is ready, but its agent did not start: "+Translate(agent.Cause, "").Message, "station agents start --task <task> --on "+agent.Name, err), true
+		return failed(agent.Name+" is ready, but its agent did not start: "+Translate(agent.Cause, "").Message, "station agents start \"<task>\" --on "+agent.Name, err), true
 	case errors.As(err, &serverLifetime):
 		return usage(serverLifetime.Error(), "station machines create "+serverLifetime.Name+" --server"), true
 	case errors.As(err, &kindRule):

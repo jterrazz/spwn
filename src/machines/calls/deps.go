@@ -17,14 +17,18 @@ type Deps struct {
 	// value: this Mac reports a battery: a server made here stops whenever
 	// it sleeps.
 	Laptop bool
-	// value: what starts an agent in a workspace just made.
-	Agents AgentStarter
+	// value: the agents of this Mac's workspaces, stopped before their VM
+	// stops or goes; nil reaches none.
+	Agents Agents
 }
 
-type AgentStarter interface {
-	// value: starts an agent in vm's terminal session once it answers, task
-	// typed as its first prompt.
-	StartAgent(ctx context.Context, vm, task string) error
+type Agents interface {
+	// value: the names of vm's live agents; none when it does not answer.
+	Live(ctx context.Context, vm string) []string
+	// invariant: Stop finishes each live agent of vm, its terminal closed,
+	// for that reason, and answers the names it stopped; one it could not
+	// stop is a warning, never a refusal: the VM goes on.
+	Stop(ctx context.Context, vm, reason string) (stopped, warnings []string)
 }
 
 type ImageBuilds interface {

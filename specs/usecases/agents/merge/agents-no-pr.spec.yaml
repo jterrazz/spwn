@@ -5,8 +5,8 @@ runs:
       exit: 0
     - command: 'world agent-stop linux-1 s-1 "The changelog is written"'
       exit: 0
-    - command: 'agents merge-pr s-1'
+    - command: 'agents merge linux-1'
       exit: 2
       stderr: |
-          Error: the agent of s-1 has opened no PR
+          Error: linux-1 has opened no PR
           Hint: station agents

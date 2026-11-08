@@ -24,8 +24,9 @@ The families, each with its model, `contract/`, `calls/` and `adapter/<tech>/`:
 ```text
 src/
   machines/  apps/  settings/  disk/  ports/  accounts/  background/  awake/  activity/  images/
-  agents/    the coding agents of a workspace: Judge folds their hook events into a state, Scrub keeps
-             only what privacy lets through; contracts Hooks, Journal, Session, Forge, Repo
+  agents/    the coding agents of a workspace, each named and in a terminal of its own: Judge folds
+             their hook events into a state, Scrub keeps only what privacy lets through; contracts
+             Hooks, Journal, Session, Forge, Repo
   overview/  the Overview's read (overview/calls), which composes every section's own read
   setup/     setup.run, the one bootstrap call, and the preferences groups it writes
   engine/    the engine's model (its events, its own calls), engine/calls, engine/contract (the Notifier)

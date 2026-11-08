@@ -13,7 +13,7 @@
       "title": "Agents",
       "columns": [
         {
-          "key": "session",
+          "key": "agent",
           "kind": "text",
           "keep": 100
         },
@@ -77,15 +77,15 @@
             },
             "reason": "partial",
             "hint": {
-              "command": "station agents merge-pr review-bot"
+              "command": "station agents merge review-bot"
             }
           }
         },
         {
           "row": {
-            "id": "s-2",
+            "id": "review-bot·2",
             "mark": "ok",
-            "label": "s-2",
+            "label": "review-bot·2",
             "cells": [
               {
                 "kind": "text",
@@ -117,9 +117,9 @@
         },
         {
           "row": {
-            "id": "t-1",
+            "id": "review-bot·3",
             "mark": "absent",
-            "label": "t-1",
+            "label": "review-bot·3",
             "cells": [
               {
                 "kind": "text",

@@ -21,6 +21,7 @@ const (
 	// the app whose agent runs in it.
 	markKey, markValue = "station", "agent"
 	appKey             = "station.app"
+	nameKey            = "station.agent"
 	// value: how long an agent opened may take to be ready for its first
 	// prompt; past it the prompt is typed anyway.
 	ready  = 60
@@ -86,7 +87,9 @@ func (s *Session) call(ctx context.Context, wait time.Duration, method string, p
 }
 
 type runParams struct {
-	Argv          []string          `json:"argv"`
+	Argv []string `json:"argv"`
+	// value: the terminal's own name in Herdr, the agent's in Herdr's letters.
+	Name          string            `json:"name,omitempty"`
 	Cwd           string            `json:"cwd,omitempty"`
 	Labels        map[string]string `json:"labels"`
 	NoParent      bool              `json:"no_parent"`
@@ -96,12 +99,16 @@ type runParams struct {
 	Timeout       float64           `json:"timeout"`
 }
 
-func (s *Session) Open(ctx context.Context, app agents.App, folder string, argv []string) (string, error) {
+func (s *Session) Open(ctx context.Context, app agents.App, name, folder string, argv []string) (string, error) {
 	var ran struct {
 		Address string `json:"address"`
 	}
+	labels := map[string]string{markKey: markValue, appKey: string(app)}
+	if name != "" {
+		labels[nameKey] = name
+	}
 	err := s.call(ctx, budget+ready*time.Second, "terminal.run", runParams{
-		Argv: argv, Cwd: folder, Labels: map[string]string{markKey: markValue, appKey: string(app)},
+		Argv: argv, Name: strings.ReplaceAll(name, agents.Nth, "-"), Cwd: folder, Labels: labels,
 		NoParent: true, OutliveParent: true, Keep: true, Wait: true, Timeout: ready,
 	}, &ran)
 	if err == nil && ran.Address == "" {
@@ -114,12 +121,26 @@ func (s *Session) Send(ctx context.Context, terminal, text string) error {
 	return s.call(ctx, budget, "terminal.send", map[string]string{"terminal": terminal, "text": text}, nil)
 }
 
-func (s *Session) Screen(ctx context.Context, terminal string) (string, error) {
-	var read struct {
-		Text string `json:"text"`
+func (s *Session) Close(ctx context.Context, terminal string) error {
+	// invariant: a terminal is kept by Herdr, so its program is ended once
+	// it is no longer kept, then the finished terminal removed; one Herdr no
+	// longer holds is already closed.
+	at := map[string]any{"terminal": terminal}
+	for _, method := range []string{"terminal.keep", "terminal.kill", "terminal.rm"} {
+		params := at
+		if method == "terminal.keep" {
+			params = map[string]any{"terminal": terminal, "keep": false}
+		}
+		if err := s.call(ctx, budget, method, params, nil); err != nil {
+			if strings.Contains(err.Error(), "not_found") {
+				return nil
+			}
+			if method != "terminal.rm" {
+				return err
+			}
+		}
 	}
-	err := s.call(ctx, budget, "terminal.read", map[string]any{"terminal": terminal, "lines": 0}, &read)
-	return read.Text, err
+	return nil
 }
 
 type terminal struct {
@@ -145,7 +166,7 @@ func (s *Session) Terminals(ctx context.Context) ([]agents.Terminal, error) {
 		if t.Labels[markKey] != markValue || strings.Contains(t.Address, "/") || t.State != "live" {
 			continue
 		}
-		at := agents.Terminal{Address: t.Address, App: agents.App(t.Labels[appKey]), Folder: t.Cwd}
+		at := agents.Terminal{Address: t.Address, Name: t.Labels[nameKey], App: agents.App(t.Labels[appKey]), Folder: t.Cwd}
 		if t.Status != nil {
 			at.Seen, at.Message = agents.Seen(t.Status.State), t.Status.Msg
 		}

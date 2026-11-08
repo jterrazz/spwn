@@ -69,6 +69,23 @@ func Journal(t *testing.T, open func(t *testing.T) JournalSubject) {
 		}
 	})
 
+	t.Run("a session forgotten is gone, and forgetting one not kept changes nothing", func(t *testing.T) {
+		s := open(t)
+		for _, name := range []string{"s-1", "s-2"} {
+			if err := s.Journal.Write(ctx, agents.Agent{Session: name, State: agents.Finished}); err != nil {
+				t.Fatalf("Write: %v", err)
+			}
+		}
+		for _, name := range []string{"s-1", "s-1", "none"} {
+			if err := s.Journal.Forget(ctx, name); err != nil {
+				t.Fatalf("Forget %s: %v", name, err)
+			}
+		}
+		if got, err := s.Journal.Read(ctx); err != nil || !slices.Equal(sessions(got), []string{"s-2"}) {
+			t.Errorf("Read = %+v, %v; want s-2 alone", got, err)
+		}
+	})
+
 	t.Run("a session whose name is a path is refused", func(t *testing.T) {
 		s := open(t)
 		for _, name := range []string{"", "../escape", "a/b", ".", "s 1"} {

@@ -26,6 +26,7 @@ const (
 	RestartMac  Action = "restart-mac"
 	StopEngine  Action = "stop-engine"
 	Stop        Action = "stop"
+	StopAgent   Action = "stop-agent"
 	Delete      Action = "delete"
 	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.

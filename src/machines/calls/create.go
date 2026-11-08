@@ -19,10 +19,9 @@ import (
 const keptForMacOS = 4 << 30
 
 var (
-	errServerNeedsName   = &model.KindRuleError{Why: "a server needs a name", Fix: "station machines create <name> --server"}
-	errCheckForServers   = &model.KindRuleError{Why: "a health check is for servers", Fix: "station machines create <name> --server --check <url>"}
-	errTaskForWorkspaces = &model.KindRuleError{Why: "a task is for a workspace's agent: a server runs none", Fix: "station machines create --task <task> --agent"}
-	errServerBridged     = &model.KindRuleError{Why: "a server stays behind its Mac: --network bridged is for macOS workspaces", Fix: "share its ports instead: station ports share"}
+	errServerNeedsName = &model.KindRuleError{Why: "a server needs a name", Fix: "station machines create <name> --server"}
+	errCheckForServers = &model.KindRuleError{Why: "a health check is for servers", Fix: "station machines create <name> --server --check <url>"}
+	errServerBridged   = &model.KindRuleError{Why: "a server stays behind its Mac: --network bridged is for macOS workspaces", Fix: "share its ports instead: station ports share"}
 )
 
 func validCheck(check string) bool {
@@ -78,8 +77,6 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	switch {
 	case server && r.Name == "":
 		return r, errServerNeedsName
-	case server && (r.Task != "" || r.Start):
-		return r, errTaskForWorkspaces
 	case server && r.Network == model.Bridged:
 		return r, errServerBridged
 	case !server && r.Check != "":
@@ -228,7 +225,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	}
 	server := r.Lifetime == model.AlwaysOn
 	rec := model.VMRecord{
-		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check, Task: r.Task,
+		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second),
 	}
 	if r.Lifetime == model.Permanent || server {
@@ -291,7 +288,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	return model.Created{
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
-			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: r.Check, Task: r.Task, CreatedAt: rec.CreatedAt,
+			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: r.Check, CreatedAt: rec.CreatedAt,
 		},
 		Ports: reserved,
 		Env:   env,

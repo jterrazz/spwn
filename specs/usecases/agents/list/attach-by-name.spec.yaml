@@ -1,0 +1,19 @@
+description: 'attach by an agent''s name alone finds its workspace and puts this terminal on its terminal'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents start "Write the changelog" --on linux-1 --name docs-bot'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: 'agents attach docs-bot'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].attached'' world.json'
+      exit: 0
+      stdout: |
+          ["linux-1/t2"]

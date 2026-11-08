@@ -4,7 +4,7 @@ runs:
     - command: 'agents start --app codex'
       exit: 0
       stdout: |
-          ●	codex	started
+          ●	linux-1	starts · codex · waits for a prompt
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {opened, typed}'' world.json'
       exit: 0
       stdout: |

@@ -13,7 +13,7 @@ import (
 
 func recordOf(r model.Record) model.VMRecord {
 	return model.VMRecord{
-		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
+		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
 		CreatedAt: r.CreatedAt,
 	}
@@ -21,7 +21,7 @@ func recordOf(r model.Record) model.VMRecord {
 
 func storedOf(r model.VMRecord) model.Record {
 	return model.Record{
-		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
+		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
 	}
 }
@@ -74,7 +74,7 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 		vm := model.VM{
 			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
-			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: r.Check, Task: r.Task, CreatedAt: r.CreatedAt,
+			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: r.Check, CreatedAt: r.CreatedAt,
 		}
 		if d, ok := live[r.Name]; ok && live != nil {
 			if d.State != "" {

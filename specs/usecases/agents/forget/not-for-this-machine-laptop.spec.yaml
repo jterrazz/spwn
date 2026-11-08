@@ -1,0 +1,10 @@
+description: 'on a laptop (the mini on battery), station agents forget is refused: agents work in a workspace'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].power += {HasBattery: true, Source: "battery", Percent: 80, Lid: "open"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents forget linux-1 --on jterrazz-mac-mini'
+      exit: 2
+      stderr: |
+          Error: jterrazz-mac-mini is a mac: agents are recorded inside the workspace they work in
+          Hint: run station overview for what jterrazz-mac-mini has

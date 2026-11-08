@@ -1,0 +1,13 @@
+description: 'a name of capitals and spaces is refused: an agent is named in lowercase letters, digits and -'
+env: in-workspace
+runs:
+    - command: 'agents start "Write the changelog" --name "Docs Bot"'
+      exit: 2
+      stderr: |
+          Error: "Docs Bot" is no agent name: lowercase letters, digits and -
+          Hint: --name review-bot
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none
