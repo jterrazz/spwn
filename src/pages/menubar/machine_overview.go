@@ -456,7 +456,7 @@ func sectionSymbol(id section.ID) string {
 func asleep(label string) []page.Section {
 	empty := page.Empty{Glyph: symbol("moon", page.SignalQuiet), Text: label + " is asleep",
 		Sub: "A laptop that sleeps is not down. Its VMs are not known while it sleeps.", Actions: []string{ActionWake, ActionRemind}}
-	note := page.Note{Text: "Wake sends a Wake-on-LAN packet from This Mac. It works when " + label + " is plugged in and on the same network."}
+	note := page.Note{Text: "Wake sends a Wake-on-LAN packet from This Mac. It works when " + label + " is on power and on the same network."}
 	return []page.Section{
 		{ID: SectionAsleep, Title: label + " is asleep", Card: page.CardEmpty, Items: []page.Item{{Empty: &empty}}},
 		{ID: "wake-note", Title: "Wake", Role: page.Banner, Uncounted: true, Items: []page.Item{{Note: &note}}},

@@ -62,7 +62,7 @@
       "items": [
         {
           "note": {
-            "text": "Wake sends a Wake-on-LAN packet from This Mac. It works when macbook-air is plugged in and on the same network."
+            "text": "Wake sends a Wake-on-LAN packet from This Mac. It works when macbook-air is on power and on the same network."
           }
         }
       ],
