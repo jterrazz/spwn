@@ -9,7 +9,7 @@ import (
 
 func shellWorlds() []World {
 	return []World{
-		{Name: "machines.restarting", Edit: infraRestarting, Pages: []string{"menubar"}},
+		{Name: "machines.restarting", Edit: infraRestarting, Pages: []string{"menubar", "find"}},
 	}
 }
 

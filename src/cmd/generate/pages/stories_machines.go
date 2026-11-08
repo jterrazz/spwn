@@ -309,6 +309,7 @@ func (f Scene) draw() []Fixture {
 		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac)},
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
 		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
+		{Name: "find", Page: pagemenubar.Find(f.find(), thisMac)},
 	}
 	for _, h := range f.All.Macs {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})

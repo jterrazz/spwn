@@ -1,0 +1,482 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.find",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machines",
+      "title": "Machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "tags",
+          "label": "tags",
+          "kind": "list",
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "mac"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "machine"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "0 VMs"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "desktop",
+              "signal": "well",
+              "dot": "fill"
+            },
+            "verb": "open:macbook-pro",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "actions",
+      "title": "Actions",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "tags",
+          "label": "tags",
+          "kind": "list",
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "label": "Extend awake to 22:00",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "awake"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "caffeinate"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "keep"
+                  }
+                ]
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:sun.max"
+            },
+            "verb": "awake-for"
+          }
+        },
+        {
+          "row": {
+            "id": "new-vm:macbook-pro",
+            "label": "New VM on This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "create"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "vm"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "workspace"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "server"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "new"
+                  }
+                ]
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus"
+            },
+            "verb": "new-vm:macbook-pro"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "sections",
+      "title": "Sections",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "tags",
+          "label": "tags",
+          "kind": "list",
+          "show": "pipe"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "ports:macbook-pro",
+            "label": "Ports of This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "share"
+                  }
+                ]
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:network"
+            },
+            "verb": "open-ports:macbook-pro",
+            "nav": "menubar.ports:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "activity:macbook-pro",
+            "label": "Activity of This Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "activity"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "cpu"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "chart"
+                  }
+                ]
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu"
+            },
+            "verb": "open-activity:macbook-pro",
+            "nav": "menubar.activity:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "ports",
+            "label": "Ports",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "every"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "machines"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "All machines"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "symbol:network"
+            },
+            "verb": "open-ports",
+            "nav": "menubar.ports"
+          }
+        },
+        {
+          "row": {
+            "id": "accounts",
+            "label": "Accounts",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "accounts"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "sign-in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "share"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "All machines"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "symbol:key"
+            },
+            "verb": "open-accounts",
+            "nav": "menubar.accounts"
+          }
+        },
+        {
+          "row": {
+            "id": "awake",
+            "label": "Awake",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "awake"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "sleep"
+                  }
+                ]
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "All Macs"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "symbol:sun.max"
+            },
+            "verb": "open-awake",
+            "nav": "menubar.awake"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+1",
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ],
+      "id": "open:macbook-pro"
+    },
+    {
+      "label": "Keep awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "mutates": true,
+      "id": "awake-for",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "Lid": "true",
+          "Until": "\"2026-11-07T22:00:00Z\""
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "This Mac stays awake until 22:00"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "row",
+      "rows": [
+        "new-vm:macbook-pro"
+      ],
+      "mutates": true,
+      "id": "new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ],
+        "subtitle": "On This Mac"
+      }
+    },
+    {
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "ports:macbook-pro"
+      ],
+      "id": "open-ports:macbook-pro"
+    },
+    {
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "activity:macbook-pro"
+      ],
+      "id": "open-activity:macbook-pro"
+    },
+    {
+      "key": "cmd+p",
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "ports"
+      ],
+      "id": "open-ports"
+    },
+    {
+      "key": "cmd+u",
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "accounts"
+      ],
+      "id": "open-accounts"
+    },
+    {
+      "key": "cmd+e",
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "id": "open-awake"
+    }
+  ]
+}
