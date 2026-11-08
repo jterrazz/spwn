@@ -8,6 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/agents/contract"
 	"github.com/jterrazz/studio-station/src/core/call"
+	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 type Deps struct {
@@ -24,6 +25,12 @@ type Deps struct {
 	// value: the names every machine holds, as this workspace's Mac reads
 	// them; nil reads none.
 	Held func(ctx context.Context) (agents.Held, error)
+	// value: the kind of machine these calls run on: a Mac reads and starts
+	// every machine's agents, a workspace its own.
+	Kind machine.Kind
+	// value: the Router a Mac reaches every machine through, its own
+	// engine's calls included.
+	Calls call.Router
 }
 
 func All(d Deps) []call.Handler {

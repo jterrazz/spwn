@@ -1,4 +1,4 @@
-description: 'on a desktop Mac, station agents start is refused: agents work inside a workspace'
+description: 'agents start --on a Mac is refused: an agent starts on a workspace'
 env: two-macs
 runs:
     - command: 'agents start "Build the landing page" --on jterrazz-mac-mini'

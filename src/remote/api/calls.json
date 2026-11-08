@@ -116,6 +116,7 @@
       "errors": [
         "agents.bad-name",
         "agents.name-taken",
+        "agents.no-where",
         "agents.unknown-app"
       ],
       "in": "StartIn",

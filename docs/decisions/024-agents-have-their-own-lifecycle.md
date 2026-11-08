@@ -17,5 +17,5 @@ A workspace was made with its agent: `machines create --task --agent` kept the t
 ## Consequences
 
 - `station agents` is a family of the help, no longer plumbing, and `merge-pr` is `merge`.
-- The calls stay at the target, inside the workspace: the list of every machine is the CLI's read of each running workspace, not yet the engine's report of each VM.
+- `agents.list` and `agents.start` run on a Mac as well as inside a workspace, so every client, the menu bar's as the CLI's, has the one rule: on a Mac `agents.list` reads every machine, or with `On` that workspace's, and `agents.start` (`{Task, Name, App, On | New}`) judges the name against every machine before it makes the throwaway `New` asks or hands the start to the workspace `On` names, which judges it again with what its Mac's engine reads. The other agent calls stay inside the workspace. The list of every machine is each running workspace's read, not yet the engine's report of each VM.
 - `machines.cleanup` (another lot) is to offer finished agents and empty throwaways apart, forgetting an agent through `agents.forget`.

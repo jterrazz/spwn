@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/agents"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/page"
 
@@ -107,9 +108,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs: []process.Tick{sample.Run},
 		AgentsHeld: func(ctx context.Context) (agents.Held, error) {
-			inside := env
-			inside.Calls = calls
-			return agentsEverywhere{env: inside}.heldEverywhere(ctx)
+			return agentscalls.HeldEverywhere(ctx, calls)
 		},
 	})
 	shares.s = m.secretsVia(d, func(_ context.Context, vm string) (bool, error) {
