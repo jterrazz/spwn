@@ -60,7 +60,8 @@
           "kind": "text",
           "text": "on mac-mini",
           "pri": 2,
-          "short": "mini"
+          "short": "mini",
+          "nav": "menubar.machine:mac-mini"
         }
       ]
     },
@@ -115,7 +116,8 @@
                   "kind": "text",
                   "text": "on mac-mini",
                   "pri": 2,
-                  "short": "mini"
+                  "short": "mini",
+                  "nav": "menubar.machine:mac-mini"
                 },
                 {
                   "kind": "age",
@@ -300,7 +302,8 @@
         },
         {
           "gauge": {
-            "title": "CPU, 4 cores",
+            "title": "CPU",
+            "note": "4 cores",
             "value": {
               "kind": "percent",
               "n": 340,

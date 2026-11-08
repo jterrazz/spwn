@@ -2,21 +2,24 @@ import SwiftUI
 
 // invariant: SPEC A4: a machine page's header: the way back, the
 // machine's glyph and name, its buttons (New VM, its menu), its facts with
-// the stale marking after them, and its segments.
+// the stale marking after them, a fact that links pushing its page, and
+// its segments.
 public struct MachineHeader: View {
     let page: Page
     let segment: String?
     let pick: (String) -> Void
     let back: () -> Void
     let run: (Action) -> Void
+    let go: (String) -> Void
     @Environment(\.stationTokens) private var tokens
 
-    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }, go: @escaping (String) -> Void = { _ in }) {
         self.page = page
         self.segment = segment
         self.pick = pick
         self.back = back
         self.run = run
+        self.go = go
     }
 
     var summary: Section? { page.section("summary") }
@@ -69,6 +72,12 @@ public struct MachineHeader: View {
             }
             .frame(height: m.title)
             FactsLine(Self.facts(page)).padding(.top, m.factsTop)
+                .tint(tokens.color.accentText)
+                .environment(\.openURL, OpenURLAction { url in
+                    guard let nav = FactsLine.nav(url) else { return .systemAction }
+                    go(nav)
+                    return .handled
+                })
             if let segments = page.segments, !segments.isEmpty {
                 Segmented(options: segmented(segments))
                 .padding(.top, m.segmentsTop)

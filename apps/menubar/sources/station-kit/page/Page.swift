@@ -163,10 +163,19 @@ public struct Tile: Codable, Equatable, Sendable {
 
 public struct PageGauge: Codable, Equatable, Sendable {
     public var title: String?
+    public var note: String?
     public var value: Value?
     public var spark: [Int]?
     public var bar: Value?
     public var stale: Bool?
+}
+
+extension PageGauge {
+    // value: its title, then the words after it: its cores, or that it is
+    // the last value read.
+    public var heading: String {
+        [title, note].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+    }
 }
 
 public struct PageChart: Codable, Equatable, Sendable {
@@ -454,6 +463,7 @@ public struct Value: Codable, Equatable, Sendable {
     public var pri: Int?
     public var short: String?
     public var signal: String?
+    public var nav: String?
 
     public init(kind: String? = nil, text: String? = nil) {
         self.kind = kind

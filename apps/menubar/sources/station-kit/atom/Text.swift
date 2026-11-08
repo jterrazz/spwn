@@ -157,7 +157,25 @@ public struct FactsLine: View {
     }
 
     public static func words(_ parts: [Value], now: Date? = nil) -> String {
-        parts.map { Format.show($0, now: now) }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+        parts.map { word($0, now: now) }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+    }
+
+    // value: a part's words, a link's ending in its chevron.
+    static func word(_ part: Value, now: Date?) -> String {
+        let word = Format.show(part, now: now)
+        return word.isEmpty || part.nav == nil ? word : word + Token.Glyph.link
+    }
+
+    static let scheme = "station-page"
+
+    // value: the link a part that pushes a page carries, and the page a
+    // link names: the facts line is one text, so its links are its URLs.
+    public static func link(_ nav: String) -> URL? { URL(string: scheme + ":" + nav) }
+
+    public static func nav(_ url: URL) -> String? {
+        guard url.scheme == scheme else { return nil }
+        let page = String(url.absoluteString.dropFirst(scheme.count + 1))
+        return page.isEmpty ? nil : page
     }
 
     public static func fit(_ parts: [Value], width: CGFloat, now: Date? = nil, measure: (String) -> CGFloat) -> String {
@@ -169,11 +187,18 @@ public struct FactsLine: View {
         var text = Text(verbatim: "")
         var first = true
         for part in parts {
-            let word = Format.show(part, now: now)
+            let word = Self.word(part, now: now)
             if word.isEmpty { continue }
             if !first { text = text + Text(verbatim: Token.Glyph.sep) }
             first = false
-            text = text + Text(verbatim: word).foregroundStyle(part.signal.map(tokens.signalText) ?? tokens.tone(role.tone))
+            if let nav = part.nav, let url = Self.link(nav) {
+                var linked = AttributedString(word)
+                linked.link = url
+                linked.foregroundColor = tokens.color.accentText
+                text = text + Text(linked)
+            } else {
+                text = text + Text(verbatim: word).foregroundStyle(part.signal.map(tokens.signalText) ?? tokens.tone(role.tone))
+            }
         }
         return text
     }

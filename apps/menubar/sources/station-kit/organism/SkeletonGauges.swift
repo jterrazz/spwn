@@ -32,14 +32,14 @@ public struct SkeletonGauges: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel((section.items ?? []).compactMap(\.gauge?.title).joined(separator: ", "))
+        .accessibilityLabel((section.items ?? []).compactMap(\.gauge?.heading).joined(separator: ", "))
     }
 
     func tile(_ gauge: PageGauge, progress: Double) -> some View {
         let m = Token.Metric.Gauges.self
         let g = Token.Metric.GaugeParts.self
         return VStack(alignment: .leading, spacing: 0) {
-            Text(gauge.title ?? "")
+            Text(gauge.heading)
                 .font(Token.Role.gaugeTitle.font)
                 .foregroundStyle(tokens.tone(Token.Role.gaugeTitle.tone))
                 .lineLimit(1)

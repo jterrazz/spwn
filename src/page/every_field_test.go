@@ -5,7 +5,7 @@ import "github.com/jterrazz/studio-station/src/page"
 func everyField() page.Page {
 	cpu := page.Value{Kind: page.KindPercent, N: 340, Live: "cpu:linux-1", Signal: page.SignalActive}
 	disk := page.Value{Kind: page.KindSize, N: 2_400_000_000, Of: 20_000_000_000, Unit: "GB", Label: "disk", Stale: true}
-	on := page.Value{Kind: page.KindText, Text: "on mac-mini", Short: "mini", Pri: 2}
+	on := page.Value{Kind: page.KindText, Text: "on mac-mini", Short: "mini", Pri: 2, Nav: "menubar.machine:mac-mini"}
 	since := page.Value{Kind: page.KindAge, At: "2026-11-03T10:20:00Z", N: 600}
 	hint := &page.Hint{Command: "station machines linux-1", Key: "cmd+i", Text: "open it"}
 	createForm := &page.Form{
@@ -49,7 +49,7 @@ func everyField() page.Page {
 			{Error: &page.Error{Message: "linux-1 does not answer", Hint: "station machines linux-1"}},
 			{Link: &page.Link{Label: "web", Lead: page.PortMap(5173, 40001), Value: page.URL("http://localhost:40001"), Detail: page.Text("vite"), Page: "menubar.ports", Row: "web"}},
 			{Tile: &page.Tile{Caption: "VMs", Glyph: page.Glyph{Kind: "server"}, Number: page.Count(3, ""), Word: "running", Signal: page.SignalWell, Toggle: "awake", Nav: "menubar.awake", Plus: "+1"}},
-			{Gauge: &page.Gauge{Title: "CPU, 4 cores", Value: cpu, Spark: []int{10, 20, 34}, Bar: &disk, Stale: true}},
+			{Gauge: &page.Gauge{Title: "CPU", Note: "4 cores", Value: cpu, Spark: []int{10, 20, 34}, Bar: &disk, Stale: true}},
 			{Chart: &page.Chart{
 				Kind: page.ChartBars, Window: "6m",
 				Series:  []page.Series{{Key: "cpu", Points: []float64{1.5, 34, 12}, Unit: "%"}},

@@ -144,7 +144,7 @@ public struct GaugeTile: View {
     public var body: some View {
         let m = Token.Metric.Gauges.self
         VStack(alignment: .leading, spacing: 0) {
-            Text(gauge.title ?? "")
+            Text(gauge.heading)
                 .font(Token.Role.gaugeTitle.font)
                 .foregroundStyle(stale ? tokens.color.t3 : tokens.tone(Token.Role.gaugeTitle.tone))
                 .lineLimit(1)

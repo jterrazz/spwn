@@ -19,6 +19,7 @@ public enum Token {
         public static let add = "+ "
         public static let sent = "↑"
         public static let unbroken = "\u{2011}"
+        public static let link = " ›"
     }
 
     // value: the keys a menu item says and answers (vision a, b).

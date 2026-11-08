@@ -52,7 +52,7 @@ struct MacPage: View {
     }
 
     var header: MachineHeader {
-        MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap)
+        MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, go: handlers.push)
     }
 
     func tap(_ action: Action) { perform(action, handlers) }
