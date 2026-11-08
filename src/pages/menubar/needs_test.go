@@ -189,3 +189,19 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 		t.Error("a needs page read from nothing is not its frame")
 	}
 }
+
+func TestUpkeepIsNeverCountedAmongWhatNeedsYou(t *testing.T) {
+	p := NeedsPage(needsFleet(), "", page.Context{Machine: needsPro, Kind: "mac"})
+	for _, s := range p.Sections {
+		switch s.ID {
+		case SectionNeeds:
+			if len(s.Counts) == 0 {
+				t.Error("Needs you carries no count of its needs")
+			}
+		case SectionUpkeep:
+			if !s.Uncounted || len(s.Counts) > 0 {
+				t.Errorf("Upkeep is counted: uncounted %v, counts %v", s.Uncounted, s.Counts)
+			}
+		}
+	}
+}
