@@ -18,3 +18,16 @@ func TestACandidateCarriesItsIdleTimeAndItsDisk(t *testing.T) {
 		t.Errorf("stopped: %+v", stopped)
 	}
 }
+
+// invariant: SPEC B5.9: the note names the agents still running, never a
+// kept VM whose agent finished.
+func TestCleanupNamesOnlyTheAgentsStillRunning(t *testing.T) {
+	_, kept := Cleanup([]VM{
+		{Name: "review-bot", Lifetime: Permanent, State: Running, Agent: &AgentView{State: "waiting"}},
+		{Name: "infra", Lifetime: Permanent, State: Running, Agent: &AgentView{State: AgentFinished}},
+		{Name: "linux-1", Lifetime: Permanent, State: Running},
+	})
+	if len(kept) != 1 || kept[0].Name != "review-bot" {
+		t.Errorf("kept %v, want review-bot alone", kept)
+	}
+}

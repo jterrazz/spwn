@@ -7,8 +7,8 @@ type Cleaned struct {
 	// the confirmation lists their losses, the clean-up sheet draws them.
 	Candidates []Candidate
 	Deleted    []string
-	// value: what stays: the Mac's running VMs an agent still works in, and
-	// its throwaways still running.
+	// value: what stays: the Mac's running VMs whose agent has not
+	// finished, and its throwaways still running.
 	Kept []string
 }
 
@@ -36,7 +36,7 @@ func Cleanup(vms []VM) (gone, kept []VM) {
 		switch {
 		case vm.Lifetime == Throwaway && (vm.State == Stopped || vm.Finished()):
 			gone = append(gone, vm)
-		case vm.State == Running && (vm.Lifetime == Throwaway || vm.Agent != nil):
+		case vm.State == Running && (vm.Lifetime == Throwaway || vm.Agent != nil && !vm.Finished()):
 			kept = append(kept, vm)
 		}
 	}
