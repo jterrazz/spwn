@@ -1,0 +1,12 @@
+description: 'an agent''s page streams the agent it names, and says so when no machine holds one by that name'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/power/
+env: engine
+runs:
+    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; ( printf ''{"v":2,"id":"1","watch":"page","in":{"pages":["menubar.agent:ghost"]}}\n''; /bin/sleep 4 ) | /usr/bin/nc -U .local/state/station/engine.sock > agent.jsonl; /usr/bin/jq -c ''select(.out.stream)|.out.pages'' agent.jsonl; /usr/bin/jq -r ''select(.out.event=="page")|.out.page.state'' agent.jsonl | /usr/bin/uniq | /usr/bin/head -2 | /usr/bin/paste -sd " " -; /usr/bin/jq -c ''select(.out.event=="page")|[.out.page.id, .out.page.error.message, .out.page.error.hint]'' agent.jsonl | /usr/bin/tail -1; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          ["menubar.agent:ghost"]
+          loading failed
+          ["menubar.agent","no agent is named ghost","station agents"]

@@ -13,6 +13,8 @@ import (
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	"github.com/jterrazz/studio-station/src/activity"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
+	"github.com/jterrazz/studio-station/src/agents"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -98,6 +100,8 @@ type world struct {
 	reads map[string][]activitycalls.ReadIn
 	// value: each Mac's Awake, by name; a Mac absent does not answer.
 	awake map[string]awake.Report
+	// value: the fleet's agents; nil does not answer.
+	agents []agents.Agent
 }
 
 func (w *world) machines(here bool) machines.AllMachines {
@@ -150,6 +154,13 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 			head.Up = 21 * 24 * time.Hour
 		}
 		return overviewcalls.ReadOut{Summary: overview.Summary{Head: head, Needs: needs}}
+	case agentscalls.List.Name:
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		if w.agents == nil {
+			return nil
+		}
+		return slices.Clone(w.agents)
 	case awakecalls.Read.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
@@ -452,14 +463,17 @@ func TestAWorkspaceStartedOnThisMacReachesItsPageWhenTheEngineMoves(t *testing.T
 	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{}}
 	changed := make(chan struct{}, 1)
 	pages := watchWith(t, w, newSteps(), engine.FeedInput{Subject: "linux-1", Changed: changed})
-	until(t, pages, "linux-1 stopped", func(p page.Page) bool { r := row(p, "machine", "state"); return r != nil && r.Mark != page.OK })
+	stopped := func(p page.Page) bool {
+		return slices.ContainsFunc(p.Sections, func(s page.Section) bool { return s.ID == "stopped" })
+	}
+	until(t, pages, "linux-1 stopped", stopped)
 	w.mu.Lock()
 	linux.State = machines.Running
 	linux.Guest = "connected"
 	w.here = []machines.VM{linux}
 	w.mu.Unlock()
 	changed <- struct{}{}
-	until(t, pages, "linux-1 running", func(p page.Page) bool { r := row(p, "machine", "state"); return r != nil && r.Mark == page.OK })
+	until(t, pages, "linux-1 running", func(p page.Page) bool { return !stopped(p) && len(p.Segments) > 0 })
 }
 
 func TestAWorkspaceCreatedFromTheMenuBarAppearsInHomeWhenTheEngineMoves(t *testing.T) {

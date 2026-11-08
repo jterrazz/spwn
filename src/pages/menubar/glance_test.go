@@ -43,36 +43,37 @@ func TestNeedsYouSaysItsLinesInShortWords(t *testing.T) {
 	}
 }
 
-// invariant: a workspace that does not run has no activity: its measures
-// say none, never the last ones it had while it ran.
+// invariant: a workspace that does not run has no activity: its page
+// shows none, never the last measures it had while it ran.
 func TestAStoppedWorkspaceShowsNoActivity(t *testing.T) {
 	at := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
 	samples := []activity.Reading{
 		{Sample: activity.Sample{At: at, CPUBusy: 100, CPUTotal: 1000, MemUsed: 1 << 30, MemTotal: 4 << 30, DiskFree: 10, DiskTotal: 20}},
 		{Sample: activity.Sample{At: at.Add(2 * time.Second), CPUBusy: 180, CPUTotal: 2000, MemUsed: 1 << 30, MemTotal: 4 << 30, DiskFree: 10, DiskTotal: 20}},
 	}
-	read := func(state model.VMState) page.Section {
+	read := func(state model.VMState) (page.Section, bool) {
 		fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 			{Name: "linux-1", Lifetime: model.Throwaway, State: state},
 		}}}}
 		p := MachinePage(Machine{Name: "linux-1", All: fleet, Samples: samples, Asks: func(string, machine.Kind) string { return LevelYesNo }})
 		for _, s := range p.Sections {
 			if s.ID == SectionActivity {
-				return s
+				return s, true
 			}
 		}
-		t.Fatalf("no activity on %s", state)
-		return page.Section{}
+		return page.Section{}, false
 	}
-	for _, it := range read(model.Running).Items {
+	running, ok := read(model.Running)
+	if !ok {
+		t.Fatal("no activity on a running workspace")
+	}
+	for _, it := range running.Items {
 		if it.Row.Cells[0].Kind == "none" || it.Row.Cells[0].Kind == "pending" {
 			t.Fatalf("a running workspace's %s says %s", it.Row.ID, it.Row.Cells[0].Kind)
 		}
 	}
-	for _, it := range read(model.Stopped).Items {
-		if len(it.Row.Cells) != 1 || it.Row.Cells[0].Kind != "none" {
-			t.Fatalf("a stopped workspace's %s says %+v", it.Row.ID, it.Row.Cells)
-		}
+	if s, ok := read(model.Stopped); ok {
+		t.Fatalf("a stopped workspace shows its activity %+v", s.Items)
 	}
 }
 
