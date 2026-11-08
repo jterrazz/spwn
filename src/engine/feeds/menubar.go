@@ -49,15 +49,29 @@ type Clock interface {
 }
 
 type menubar struct {
-	o   Menubar
-	mu  sync.Mutex
-	r   pagemenubar.Reading
-	out chan any
+	o Menubar
+	// value: the page the feed draws from its reading: home, or Find.
+	draw func(pagemenubar.Reading) page.Page
+	mu   sync.Mutex
+	r    pagemenubar.Reading
+	out  chan any
 }
 
 func (o Menubar) Feed() engine.Feed {
+	return o.feed(func(r pagemenubar.Reading) page.Page { return pagemenubar.Page(r, o.ThisMachine) })
+}
+
+func (o Menubar) Find() engine.Feed {
+	// invariant: SPEC B5.6: Find is drawn from home's own reading, read as
+	// home reads it, so it asks nothing home does not.
+	return o.feed(func(r pagemenubar.Reading) page.Page {
+		return pagemenubar.Find(pagemenubar.FindReading{Reading: r, Now: o.Clock.Now(), Zone: time.Local, Asks: levels}, o.ThisMachine)
+	})
+}
+
+func (o Menubar) feed(draw func(pagemenubar.Reading) page.Page) engine.Feed {
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
-		f := &menubar{o: o, out: make(chan any, 1)}
+		f := &menubar{o: o, draw: draw, out: make(chan any, 1)}
 		go f.run(ctx, in)
 		return f.out
 	}
@@ -113,7 +127,7 @@ func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading))
 	f.mu.Lock()
 	change(&f.r)
 	f.r.Samples = f.o.Live.Readings(f.o.ThisMachine.Machine)
-	p := page.Document{Schema: page.Schema, Page: pagemenubar.Page(f.r, f.o.ThisMachine)}
+	p := page.Document{Schema: page.Schema, Page: f.draw(f.r)}
 	f.mu.Unlock()
 	select {
 	case <-f.out:

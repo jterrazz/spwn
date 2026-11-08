@@ -30,7 +30,8 @@ type banned struct {
 }
 
 // invariant: rule words, SPEC §2.2: the words v3 retired, each for the
-// concept it used to name, with the phrases it keeps.
+// concept it used to name, with the phrases it keeps; the menu bar's v4
+// contract keeps two gestures by name, "Lend an account" and "Clean up".
 func bannedWords() []banned {
 	return []banned{
 		{word: "host", allowed: []string{"host:port", "host key", "known host"}},
@@ -44,14 +45,14 @@ func bannedWords() []banned {
 		{word: "service", forms: []string{"services"}},
 		{word: "lease", forms: []string{"leases", "leased"}},
 		{word: "publish", forms: []string{"published", "publishes", "publishing"}},
-		{word: "lend", forms: []string{"lent", "lends", "lending"}},
+		{word: "lend", forms: []string{"lent", "lends", "lending"}, allowed: []string{"lend an account"}},
 		{word: "recall", forms: []string{"recalled", "recalls"}},
 		{word: "wish", forms: []string{"wishes"}},
 		{word: "probe", forms: []string{"probes", "probed"}},
 		{word: "temporary"},
 		{word: "lasting"},
 		{word: "stray", forms: []string{"strays"}},
-		{word: "clean", allowed: []string{"dclean"}},
+		{word: "clean", allowed: []string{"dclean", "clean up"}},
 		{word: "reset", allowed: []string{"dock-reset", "dock reset", "dreset", "counter reset"}},
 		{word: "power", allowed: []string{"power cut", "power-cut", "power source", "low power", "low-power", "power off", "power management"}},
 		{word: "place", forms: []string{"places"}},
