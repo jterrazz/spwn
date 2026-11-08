@@ -21,11 +21,11 @@ func (d *Engine) tellBack(ctx context.Context) {
 	if !d.askedBack.IsZero() && now.Sub(d.askedBack) < backEvery {
 		return
 	}
+	d.askedBack = now
 	armed := d.o.TellBack()
 	if len(armed) == 0 {
 		return
 	}
-	d.askedBack = now
 	macs := make([]string, 0, len(armed))
 	for mac := range armed {
 		macs = append(macs, mac)
