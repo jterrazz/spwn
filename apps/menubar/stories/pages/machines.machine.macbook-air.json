@@ -218,8 +218,14 @@
       "segment": "ports"
     },
     {
-      "id": "accounts",
-      "title": "Accounts",
+      "id": "accounts:shared",
+      "title": "Lent to VMs",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -234,12 +240,33 @@
       ],
       "items": [
         {
-          "empty": {
-            "text": "No account shared"
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
           }
         }
       ],
-      "segment": "accounts"
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "accounts",
+      "card": "flush"
     }
   ],
   "actions": [
@@ -331,6 +358,60 @@
           "name": "macbook-air"
         }
       }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share",
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From air. It ends by itself."
+      },
+      "sheet": "share-account"
     },
     {
       "key": "cmd+t",

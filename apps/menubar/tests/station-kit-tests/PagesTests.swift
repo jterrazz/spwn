@@ -61,7 +61,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "activity", "ports", "accounts"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "activity", "ports", "accounts:shared"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
@@ -160,8 +160,11 @@ final class PagesTests: XCTestCase {
     // takes the account back from linux-1.
     func testAccountTakeBack() async throws {
         let page = try Tree.page("menubar.vm.linux-1")
-        XCTAssertEqual(page.section("shared")?.items?.compactMap(\.row?.label), ["GitHub", "Claude"])
-        let take = try XCTUnwrap(page.rowActions("github").first)
+        let shared = try XCTUnwrap(page.section("shared"))
+        XCTAssertEqual(shared.title, "Lent to linux-1")
+        XCTAssertEqual(shared.items?.compactMap(\.row?.label), ["GitHub", "Claude", "Lend an account"])
+        let github = try XCTUnwrap(shared.rows.first { $0.label == "GitHub" }?.id)
+        let take = try XCTUnwrap(page.rowActions(github).first { $0.label == "Take back" })
         XCTAssertEqual(take.label, "Take back")
         XCTAssertEqual(take.confirm?.question, "Take back GitHub from linux-1?")
         XCTAssertNil(take.confirm?.type)

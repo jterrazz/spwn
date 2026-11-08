@@ -1,7 +1,7 @@
 mac-mini
 
 Gauges
-VMs  ● infra · healthy · up 12 days
+VMs          ● infra · healthy · up 12 days
 Care
   ● Upkeep                    5 of 6 ready
   └─ ◐ Ready to host servers                5 of 6 ready · disk unlock after a power cut
@@ -10,5 +10,4 @@ Activity
     Memory
 Ports
   No port shared yet
-Accounts
-  No account shared
+Lent to VMs  ● Lend an account · ends by itself

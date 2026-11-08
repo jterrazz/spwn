@@ -185,7 +185,13 @@
     },
     {
       "id": "shared",
-      "title": "Accounts shared from This Mac",
+      "title": "Lent to api",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -201,10 +207,42 @@
       "items": [
         {
           "empty": {
-            "text": "No account shared"
+            "noun": "accounts",
+            "text": "No account lent to api"
+          }
+        },
+        {
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
+          }
+        },
+        {
+          "note": {
+            "text": "These are This Mac's accounts. Every loan ends by itself."
           }
         }
-      ]
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "card": "flush"
     }
   ],
   "actions": [
@@ -248,6 +286,61 @@
         "in": {
           "VM": "api"
         }
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "api",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "sheet": "share-account",
+      "prefill": {
+        "With": "api"
       }
     },
     {

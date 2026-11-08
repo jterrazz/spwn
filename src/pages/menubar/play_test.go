@@ -63,8 +63,8 @@ func TestInsideSaysWhatIsThereInFewWords(t *testing.T) {
 	}
 }
 
-// invariant: an account shared with a workspace says its time left, never
-// its internal scope (`session:github`).
+// invariant: an account lent to a workspace says what it may do and its
+// time left, never its internal scope (`session:github`).
 func TestASharedAccountSaysNoInternalScope(t *testing.T) {
 	now := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
@@ -78,8 +78,8 @@ func TestASharedAccountSaysNoInternalScope(t *testing.T) {
 		if s.ID != SectionShared {
 			continue
 		}
-		if got := words(s.Items[0].Row.Cells[0]); got != "read only | 4 h left" {
-			t.Fatalf("shared account says %q", got)
+		if r := s.Items[0].Row; words(r.Detail) != "read only" || r.Left == nil || r.Left.N != int64((4*time.Hour).Seconds()) {
+			t.Fatalf("shared account says %q, %+v left", words(r.Detail), r.Left)
 		}
 		return
 	}

@@ -473,7 +473,13 @@
     },
     {
       "id": "shared",
-      "title": "Accounts shared from This Mac",
+      "title": "Lent to linux-1",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -489,42 +495,92 @@
       "items": [
         {
           "row": {
-            "id": "claude",
-            "mark": "ok",
+            "id": "macbook-pro/linux-1/claude",
+            "mark": "attention",
             "label": "Claude",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "24 min left"
-                  }
-                ]
+                "kind": "text",
+                "text": "linux-1"
               }
-            ]
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Claude Code inference"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/claude",
+              "take-back/claude"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 1440,
+              "of": 43200
+            }
           }
         },
         {
           "row": {
-            "id": "github",
+            "id": "macbook-pro/linux-1/github",
             "mark": "ok",
             "label": "GitHub",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "github"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "4 h left"
-                  }
-                ]
+                "kind": "text",
+                "text": "linux-1"
               }
-            ]
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "github"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/github",
+              "take-back/github"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 14400,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
+          }
+        },
+        {
+          "note": {
+            "text": "These are This Mac's accounts. Every loan ends by itself."
           }
         }
       ],
@@ -532,8 +588,13 @@
         {
           "mark": "ok",
           "n": 2
+        },
+        {
+          "mark": "attention",
+          "n": 1
         }
-      ]
+      ],
+      "card": "flush"
     }
   ],
   "actions": [
@@ -619,7 +680,7 @@
       "label": "Take back",
       "on": "row",
       "rows": [
-        "claude"
+        "macbook-pro/linux-1/claude"
       ],
       "confirm": {
         "question": "Take back Claude from linux-1?",
@@ -647,7 +708,7 @@
       "label": "Take back",
       "on": "row",
       "rows": [
-        "github"
+        "macbook-pro/linux-1/github"
       ],
       "confirm": {
         "question": "Take back GitHub from linux-1?",
@@ -669,6 +730,121 @@
           "Confirm": "yes",
           "From": "linux-1"
         }
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/github"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/github",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "8 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "linux-1",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "sheet": "share-account",
+      "prefill": {
+        "With": "linux-1"
       }
     },
     {

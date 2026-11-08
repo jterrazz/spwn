@@ -78,17 +78,20 @@ func TestEveryMacsAccountsAreReadThroughItsOwnEngineWhatNeedsYouFirst(t *testing
 	if got := w.askedOf(accountscalls.List.Name); !slices.Equal(got, []string{thisMac, mini}) {
 		t.Errorf("accounts read on %v, want This Mac then the mini, the asleep air not asked", got)
 	}
-	if got, want := sectionIDs(p), []string{"needs-you", "signed-in:" + thisMac, "signed-in:" + mini, "shared", "silent"}; !slices.Equal(got, want) {
+	if got, want := sectionIDs(p), []string{"summary", "needs-you", "shared", "signed-in", "silent"}; !slices.Equal(got, want) {
 		t.Fatalf("sections %v, want %v", got, want)
 	}
-	if got, want := rowIDs(p, "needs-you"), []string{id(thisMac, catalog.ProviderCloudflare), "short/" + id(thisMac, "linux-1", catalog.ProviderClaude)}; !slices.Equal(got, want) {
-		t.Errorf("needs you %v, want Cloudflare signed out then Claude's copy under 30 min", got)
+	if got, want := rowIDs(p, "needs-you"), []string{"short/" + id(thisMac, "linux-1", catalog.ProviderClaude), id(thisMac, catalog.ProviderCloudflare)}; !slices.Equal(got, want) {
+		t.Errorf("needs you %v, want Claude's copy under 30 min, then Cloudflare signed out", got)
 	}
-	if s := p.Sections[1]; s.Title != "Signed in on This Mac" || p.Sections[2].Title != "Signed in on mac-mini" {
-		t.Errorf("signed in under %q and %q, want each Mac by its name", s.Title, p.Sections[2].Title)
+	if got, want := rowIDs(p, "signed-in"), []string{catalog.ProviderGitHub, catalog.ProviderClaude}; !slices.Equal(got, want) {
+		t.Errorf("signed in to %v, want GitHub and Claude once each, git being no sign-in", got)
 	}
-	if got, want := rowIDs(p, "signed-in:"+thisMac), []string{id(thisMac, catalog.ProviderGitHub), id(thisMac, catalog.ProviderClaude)}; !slices.Equal(got, want) {
-		t.Errorf("This Mac signed in to %v, want GitHub and Claude, git being no sign-in", got)
+	if r := row(p, "signed-in", catalog.ProviderGitHub); r == nil || words(r.Detail.Items) != "This Mac | mac-mini" {
+		t.Errorf("GitHub is signed in on %+v, want This Mac then mac-mini", r)
+	}
+	if got := words(p.Sections[0].Caption); got != "All machines | 2 accounts | 2 lent to VMs" {
+		t.Errorf("the page's facts are %q, want where, the accounts signed in and the copies shared", got)
 	}
 	if r := row(p, "silent", air); r == nil || r.Cells[0].Text != "macbook-air does not answer" {
 		t.Errorf("the air is %+v, want it named as not answering", r)
@@ -96,7 +99,14 @@ func TestEveryMacsAccountsAreReadThroughItsOwnEngineWhatNeedsYouFirst(t *testing
 }
 
 func TestASignedInAccountSaysWhatItsProviderPrintedAndNothingMore(t *testing.T) {
-	p := watchAccounts(t, twoMacsSignedIn(), "")
+	p, pro, minis := watchAccounts(t, twoMacsSignedIn(), ""), watchAccounts(t, twoMacsSignedIn(), thisMac), watchAccounts(t, twoMacsSignedIn(), mini)
+	of := map[string]page.Page{thisMac: pro, mini: minis}
+	if got, want := rowIDs(pro, "signed-in:"+thisMac), []string{id(thisMac, catalog.ProviderGitHub), id(thisMac, catalog.ProviderClaude)}; !slices.Equal(got, want) {
+		t.Errorf("This Mac signed in to %v, want GitHub and Claude, git being no sign-in", got)
+	}
+	if s := minis.Sections[len(minis.Sections)-1]; s.Title != "Signed in on mac-mini" {
+		t.Errorf("the mini's sign-ins are under %q, want the Mac by its name", s.Title)
+	}
 	for _, c := range []struct {
 		section, id string
 		want        []string
@@ -106,7 +116,7 @@ func TestASignedInAccountSaysWhatItsProviderPrintedAndNothingMore(t *testing.T) 
 		{"signed-in:" + mini, id(mini, catalog.ProviderGitHub), []string{"jterrazz-bot", "repo"}},
 		{"signed-in:" + mini, id(mini, catalog.ProviderClaude), []string{"Max plan"}},
 	} {
-		r := row(p, c.section, c.id)
+		r := row(of[strings.TrimPrefix(c.section, "signed-in:")], c.section, c.id)
 		if r == nil {
 			t.Errorf("no row %s", c.id)
 			continue
@@ -146,23 +156,23 @@ func TestOneMacsAccountsAreThatMacsAloneReadThroughItsEngine(t *testing.T) {
 	if got := w.askedOf(accountscalls.List.Name); !slices.Equal(got, []string{mini}) {
 		t.Errorf("accounts read on %v, want the mini alone", got)
 	}
-	if got, want := sectionIDs(p), []string{"signed-in:" + mini}; !slices.Equal(got, want) {
+	if got, want := sectionIDs(p), []string{"summary", "shared", "signed-in:" + mini}; !slices.Equal(got, want) {
 		t.Errorf("the mini's accounts are %v, want %v", got, want)
 	}
 }
 
 func TestAWorkspacesAccountsAreTheCopiesItsMacSharedWithIt(t *testing.T) {
 	p := watchAccounts(t, twoMacsSignedIn(), "linux-1")
-	if got, want := sectionIDs(p), []string{"needs-you", "shared"}; !slices.Equal(got, want) {
+	if got, want := sectionIDs(p), []string{"summary", "needs-you", "shared"}; !slices.Equal(got, want) {
 		t.Fatalf("linux-1's accounts are %v, want %v", got, want)
 	}
-	if s := p.Sections[1]; s.Title != "Shared with linux-1" || len(s.Items) != 2 {
-		t.Errorf("linux-1's copies are %q with %d rows, want its two", s.Title, len(s.Items))
+	if s := p.Sections[2]; s.Title != "Lent to linux-1" || !slices.Equal(rowIDs(p, "shared"), []string{id(thisMac, "linux-1", catalog.ProviderClaude), id(thisMac, "linux-1", catalog.ProviderGitHub), "share-account"}) {
+		t.Errorf("linux-1's copies are %q with %v, want its two, then Lend an account", s.Title, rowIDs(p, "shared"))
 	}
 	w := twoMacsSignedIn()
 	w.beside = []machines.VM{{Name: "review-bot", Mac: mini, Lifetime: machines.Throwaway, State: machines.Running}}
 	bot := watchAccounts(t, w, "review-bot")
-	if s := bot.Sections; len(s) != 1 || s[0].Title != "Shared with review-bot" || s[0].Items[0].Empty == nil || s[0].Items[0].Empty.Text != "No account shared with review-bot" {
+	if s := bot.Sections; len(s) != 2 || s[1].Title != "Lent to review-bot" || s[1].Items[0].Empty == nil || s[1].Items[0].Empty.Text != "No account lent to review-bot" {
 		t.Errorf("review-bot's accounts are %+v, want none shared, said so", s)
 	}
 }
@@ -194,5 +204,57 @@ func TestHomeSaysACopysLastMinutesAtTheEnginesClock(t *testing.T) {
 	ends := newSteps().Now().Add(22 * time.Minute).In(time.Local).Format("15:04")
 	if head.Label != "Claude on linux-1 ends in 22 min" || len(head.Detail.Items) != 2 || head.Detail.Items[1].Text != "ends "+ends {
 		t.Errorf("hero %q %+v, want Claude on linux-1 ending in 22 min, at %s", head.Label, head.Detail.Items, ends)
+	}
+}
+
+func words(vs []page.Value) string {
+	out := make([]string, 0, len(vs))
+	for _, v := range vs {
+		out = append(out, v.Text)
+	}
+	return strings.Join(out, " | ")
+}
+
+func action(p page.Page, id string) *page.Action {
+	for i := range p.Actions {
+		if p.Actions[i].ID == id {
+			return &p.Actions[i]
+		}
+	}
+	return nil
+}
+
+func TestASignInOpensTerminalOnTheLoginAndWaitsWhileItRuns(t *testing.T) {
+	p := watchAccounts(t, twoMacsSignedIn(), "")
+	r := row(p, "needs-you", id(thisMac, catalog.ProviderCloudflare))
+	if r.Label != "This Mac" || r.Detail.Text != "Cloudflare needs sign-in" {
+		t.Errorf("the sign-in reads %q, %q, want This Mac, Cloudflare needs sign-in", r.Label, r.Detail.Text)
+	}
+	a := action(p, r.Verb)
+	if a == nil || a.Label != "Sign in" || a.Busy != "Waiting" || a.Run == nil || !a.Run.Terminal || !slices.Equal(a.Run.Argv, []string{"accounts"}) {
+		t.Fatalf("Sign in is %+v, want a terminal on station accounts, busy Waiting while it runs", a)
+	}
+	if a.Hud == nil || len(a.Hud.Items) != 2 || a.Hud.Items[1].Text != "station settings apply cloudflare-login on This Mac" {
+		t.Errorf("Sign in's HUD is %+v, want Terminal and the login it runs, on This Mac", a.Hud)
+	}
+}
+
+func TestACopyEndingSoonNeedsYouWithExtendAndTheFleetPageSharesFromItsFooter(t *testing.T) {
+	p := watchAccounts(t, twoMacsSignedIn(), "")
+	r := row(p, "needs-you", "short/"+id(thisMac, "linux-1", catalog.ProviderClaude))
+	if r.Label != "linux-1" || r.Detail.Text != "Claude ends in 22 min" {
+		t.Errorf("the copy ending reads %q, %q, want linux-1, Claude ends in 22 min", r.Label, r.Detail.Text)
+	}
+	if a := action(p, r.Verb); a == nil || a.Label != "Extend" || a.Run == nil || a.Run.Call != "accounts.share" || a.Run.In["With"] != "linux-1" || a.Run.In["Account"] != catalog.ProviderClaude {
+		t.Errorf("Extend is %+v, want Claude shared with linux-1 again", a)
+	}
+	if p.Footer == nil || !slices.Equal(p.Footer.Buttons, []string{"full-list", "share-account"}) {
+		t.Fatalf("the footer is %+v, want Full list in Terminal then Lend an account", p.Footer)
+	}
+	if full := action(p, "full-list"); full == nil || !slices.Equal(full.Run.Argv, []string{"accounts", "--all-machines"}) {
+		t.Errorf("Full list in Terminal is %+v, want station accounts --all-machines", full)
+	}
+	if slices.Contains(rowIDs(p, "shared"), "share-account") {
+		t.Error("the fleet page shares from its footer, never from a row")
 	}
 }

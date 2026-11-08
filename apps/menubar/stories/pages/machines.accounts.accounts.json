@@ -1,0 +1,650 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.accounts",
+  "command": "accounts",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Accounts",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All machines"
+        },
+        {
+          "kind": "text",
+          "text": "5 accounts"
+        },
+        {
+          "kind": "text",
+          "text": "4 lent to VMs"
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2",
+          "signal": "waits"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "short/macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "linux-1",
+            "detail": {
+              "kind": "text",
+              "text": "Claude ends in 24 min"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "symbol:clock",
+              "signal": "waits"
+            },
+            "verb": "ending:macbook-pro/linux-1/claude"
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/npm",
+            "mark": "broken",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "npm needs sign-in"
+            },
+            "reason": "refused",
+            "hint": {
+              "command": "npm login",
+              "external": true
+            },
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "waits"
+            },
+            "verb": "sign-in:macbook-pro/npm"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
+      "id": "shared",
+      "title": "Lent to VMs",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "4"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Claude Code inference"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/claude"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 1440,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/github",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "GitHub browser session"
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/github"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 14400,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/linux-3/github",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-3"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "GitHub browser session"
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-3",
+            "menu": [
+              "extend:mac-mini/linux-3/github"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 21600,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini/review-bot/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "review-bot"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Claude Code inference"
+            },
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "review-bot",
+            "menu": [
+              "extend:mac-mini/review-bot/claude"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 32400,
+              "of": 43200
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "card": "flush"
+    },
+    {
+      "id": "signed-in",
+      "title": "Signed in",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "5"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "github",
+            "mark": "ok",
+            "label": "GitHub",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "claude",
+            "mark": "ok",
+            "label": "Claude",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:claude"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale",
+            "mark": "ok",
+            "label": "Tailscale",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:tailscale"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "cloudflare",
+            "mark": "ok",
+            "label": "Cloudflare",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:cloudflare"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "docker",
+            "mark": "ok",
+            "label": "Docker",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:docker"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 5
+        }
+      ],
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "short/macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "ending:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Sign in",
+      "on": "row",
+      "rows": [
+        "macbook-pro/npm"
+      ],
+      "id": "sign-in:macbook-pro/npm",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts"
+        ]
+      },
+      "default": true,
+      "busy": "Waiting",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Terminal"
+          },
+          {
+            "kind": "text",
+            "text": "npm login on This Mac"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/github"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/github",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "8 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "mac-mini/linux-3/github"
+      ],
+      "mutates": true,
+      "id": "extend:mac-mini/linux-3/github",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-3"
+          },
+          {
+            "kind": "text",
+            "text": "10 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "mac-mini/review-bot/claude"
+      ],
+      "mutates": true,
+      "id": "extend:mac-mini/review-bot/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on review-bot"
+          },
+          {
+            "kind": "text",
+            "text": "13 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Full list in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "full-list",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts",
+          "--all-machines"
+        ]
+      },
+      "icon": "arrow.up.forward"
+    },
+    {
+      "label": "Lend an account",
+      "on": "page",
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "icon": "plus",
+      "sheet": "share-account"
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:key"
+    }
+  },
+  "footer": {
+    "kind": "terminal-list",
+    "buttons": [
+      "full-list",
+      "share-account"
+    ]
+  }
+}
