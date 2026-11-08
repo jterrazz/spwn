@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
+	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/engine/feeds"
@@ -163,5 +164,18 @@ func TestAWorkspacesAccountsAreTheCopiesItsMacSharedWithIt(t *testing.T) {
 	bot := watchAccounts(t, w, "review-bot")
 	if s := bot.Sections; len(s) != 1 || s[0].Title != "Shared with review-bot" || s[0].Items[0].Empty == nil || s[0].Items[0].Empty.Text != "No account shared with review-bot" {
 		t.Errorf("review-bot's accounts are %+v, want none shared, said so", s)
+	}
+}
+
+func TestTheStatusItemCountsACopySharedForLessThan30MinMore(t *testing.T) {
+	w := twoMacsSignedIn()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}, Report: func(awake.View) *awake.Report { return nil }}
+	in := engine.FeedInput{}
+	in.Awake = nothing(in.Awake)
+	p := until(t, o.Feed()(ctx, in), "the badge", func(p page.Page) bool { return p.Badge != nil })
+	if want := (page.Badge{Needs: 1, Label: "station, 1 thing needs you"}); *p.Badge != want {
+		t.Errorf("badge %+v, want %+v: Claude shared with linux-1 ends in 22 min", *p.Badge, want)
 	}
 }

@@ -50,33 +50,40 @@ func (o Menubar) Accounts() engine.Feed {
 				return pagemenubar.Unread(pagemenubar.AccountsID, o.ThisMachine, err)
 			}
 			of := accountsOf(listed.All, in.Subject)
-			all := accounts.AllMachines{Now: o.Clock.Now()}
-			for _, h := range listed.All.Macs {
-				if of.Mac != "" && h.Name != of.Mac {
-					continue
-				}
-				m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
-				if !h.ThisMac && !h.Reachable {
-					m.Silent = page.MacName(h.Name, o.ThisMachine.Machine) + " does not answer"
-					all.Macs = append(all.Macs, m)
-					continue
-				}
-				ref := machine.Ref{Name: h.Name}
-				if h.ThisMac {
-					ref = machine.Ref{}
-				}
-				r, err := call.Read(ctx, o.Calls, ref, accountscalls.List, accountscalls.ListIn{}, nil)
-				if err != nil {
-					m.Silent = err.Error()
-				} else if len(r.Machines) > 0 {
-					m.Accounts, m.Shares = r.Machines[0].Accounts, r.Shares
-				}
-				all.Macs = append(all.Macs, m)
-			}
+			all := o.everyMacsAccounts(ctx, listed.All, of)
 			return pagemenubar.Accounts(all, of, o.ThisMachine)
 		}
 		return o.reread(ctx, in, pagemenubar.AccountsID, remoteEvery, read)
 	}
+}
+
+// value: the accounts and the shared copies of every answering Mac, or of
+// the one Mac named, each read through its own engine.
+func (o Menubar) everyMacsAccounts(ctx context.Context, every machines.AllMachines, of pagemenubar.AccountsOf) accounts.AllMachines {
+	all := accounts.AllMachines{Now: o.Clock.Now()}
+	for _, h := range every.Macs {
+		if of.Mac != "" && h.Name != of.Mac {
+			continue
+		}
+		m := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
+		if !h.ThisMac && !h.Reachable {
+			m.Silent = page.MacName(h.Name, o.ThisMachine.Machine) + " does not answer"
+			all.Macs = append(all.Macs, m)
+			continue
+		}
+		ref := machine.Ref{Name: h.Name}
+		if h.ThisMac {
+			ref = machine.Ref{}
+		}
+		r, err := call.Read(ctx, o.Calls, ref, accountscalls.List, accountscalls.ListIn{}, nil)
+		if err != nil {
+			m.Silent = err.Error()
+		} else if len(r.Machines) > 0 {
+			m.Accounts, m.Shares = r.Machines[0].Accounts, r.Shares
+		}
+		all.Macs = append(all.Macs, m)
+	}
+	return all
 }
 
 // value: what an accounts page is of: a Mac named in full or as the
