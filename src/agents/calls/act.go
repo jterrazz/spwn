@@ -26,6 +26,9 @@ const (
 	StillLive    fail.Code = "agents.live"
 	// value: a start that names neither a workspace nor a new one, or both.
 	NoWhere fail.Code = "agents.no-where"
+	// value: an agent its workspace's stop or delete could not stop first;
+	// the VM goes on.
+	NotStopped fail.Code = "agents.not-stopped"
 )
 
 var List = call.Call[Deps, struct{}, []agents.Agent]{

@@ -205,6 +205,9 @@ func Codes() map[fail.Code]Wording {
 			}
 			return "an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)", "station agents start \"<task>\" --on <workspace>"
 		},
+		agentscalls.NotStopped: func(e *fail.Error) (string, string) {
+			return e.Subject + " did not stop: " + e.Detail["cause"], "station agents stop " + e.Subject
+		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},

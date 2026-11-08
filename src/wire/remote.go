@@ -201,7 +201,8 @@ func (f farAgents) Live(ctx context.Context, vm string) []string {
 func (f farAgents) Stop(ctx context.Context, vm, reason string) (stopped, warnings []string) {
 	for _, name := range f.Live(ctx, vm) {
 		if _, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Stop, agentscalls.StopIn{Agent: name, Reason: reason, Confirm: confirm.Yes}, nil); err != nil {
-			warnings = append(warnings, name+" did not stop: "+err.Error())
+			said, _ := word(fail.New(fail.Failed, agentscalls.NotStopped, name, map[string]string{"cause": kit.Translate(err, "").Message}))
+			warnings = append(warnings, said)
 			continue
 		}
 		stopped = append(stopped, name)
