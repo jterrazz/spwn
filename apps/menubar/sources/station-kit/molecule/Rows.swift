@@ -45,15 +45,17 @@ public struct NeedRow: View {
     let row: Row
     let actions: [Action]
     let highlighted: Bool
+    let busy: Set<String>
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
     @State private var hovering = false
 
-    public init(_ row: Row, actions: [Action] = [], highlighted: Bool = false, run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ row: Row, actions: [Action] = [], highlighted: Bool = false, busy: Set<String> = [], run: @escaping (Action) -> Void = { _ in }) {
         self.row = row
         self.actions = actions
         self.highlighted = highlighted
+        self.busy = busy
         self.run = run
     }
 
@@ -83,7 +85,9 @@ public struct NeedRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .opacity(stale ? Token.Metric.Row.staleShare : 1)
             if let verb = RowView.action(row.verb, in: actions) {
-                VerbButton(verb.label ?? "") { run(verb) }
+                let waiting = verb.id.map(busy.contains) == true && verb.busy != nil
+                VerbButton(waiting ? (verb.busy ?? "") + Token.Glyph.ellipsis : verb.label ?? "", busy: waiting) { run(verb) }
+                    .disabled(waiting)
             }
         }
         .modifier(RowSurface(height: Token.Metric.Need.height, padding: Token.Metric.Need.padding, tinted: row.nav != nil && (hovering || highlighted)))

@@ -76,7 +76,7 @@ struct MacPage: View {
         switch s.segment {
         case "activity": MacActivity(section: s)
         case "ports": MacPorts(section: s)
-        case "accounts": MacAccounts(section: s)
+        case "accounts": MacAccounts(section: s, page: page, busy: state.busy, run: run)
         default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })
         }
     }

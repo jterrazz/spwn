@@ -57,6 +57,10 @@ public struct PanelState: Equatable, Sendable {
     // on a machine page, and what is unfolded there.
     public var segment: String?
     public var unfolded: [String] = []
+    // value: the verbs that wait on what they started (a sign-in while
+    // Terminal runs the login): each reads its busy words until the page
+    // no longer offers it.
+    public var pending: [String] = []
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -71,6 +75,9 @@ public struct PanelState: Equatable, Sendable {
 
     // value: the page the owner sees, the pushed one over Home.
     public var shown: Page? { pushed ?? page }
+
+    // value: the verbs drawn busy: the one running, and those pending.
+    public var busy: Set<String> { Set(pending + [running].compactMap { $0 }) }
 
     // invariant: a status line is about the page it was said on: once
     // another page is shown it is gone, never carried onto the next one.
