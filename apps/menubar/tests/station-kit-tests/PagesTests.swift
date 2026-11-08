@@ -40,10 +40,11 @@ final class PagesTests: XCTestCase {
         XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
     }
 
-    func pushed(_ fixture: String, confirming: String? = nil, typed: String? = nil) throws -> PanelState {
+    func pushed(_ fixture: String, confirming: String? = nil, typed: String? = nil, segment: String? = nil) throws -> PanelState {
         let page = try Tree.page(fixture)
         var state = Snapshot.state(fixture, page)
         state.confirming = confirming
+        state.segment = segment
         if let confirming, let typed { state.answers[confirming] = [ActionRunner.typedKey: typed] }
         return state
     }
@@ -168,7 +169,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(take.label, "Take back")
         XCTAssertEqual(take.confirm?.question, "Take back GitHub from linux-1?")
         XCTAssertNil(take.confirm?.type)
-        try drawn("sheet.take-back", try pushed("menubar.vm.linux-1", confirming: take.id))
+        try drawn("sheet.take-back", try pushed("menubar.vm.linux-1", confirming: take.id, segment: "accounts"))
         let (frames, _) = try await sentAll(take, label: "mb-take-back", reread: [PageID.of("linux-1")])
         XCTAssertEqual(frames.map(\.call), ["accounts.take-back", "engine.refresh"])
         XCTAssertEqual(frames.first?.input, ["Account": "github", "From": "linux-1", "Confirm": "yes"])

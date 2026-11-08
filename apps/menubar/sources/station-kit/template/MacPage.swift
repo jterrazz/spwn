@@ -1,8 +1,10 @@
 import SwiftUI
 
-// invariant: SPEC A4, B1: a Mac's page: its header, then the sections of
-// the segment picked; the segment and what is unfolded are the client's
-// own, so a pick redraws the page it holds and asks the engine nothing.
+// invariant: SPEC A4, B1: a Mac's page, or a running workspace's: its
+// header, then the sections of the segment picked; the segment and what
+// is unfolded are the client's own, so a pick redraws the page it holds
+// and asks the engine nothing. A workspace's segments other than Accounts
+// are drawn as its machine page draws them until its own lot rebuilds them.
 struct MacPage: View {
     let page: Page
     let state: PanelState
@@ -31,15 +33,25 @@ struct MacPage: View {
         (page.sections ?? []).filter { $0.id != "summary" && ($0.segment == nil || $0.segment == segment) }
     }
 
+    // value: a segment of a page that is not a Mac's, other than
+    // Accounts: drawn by the machine page of before.
+    static func legacy(_ page: Page, segment: String) -> Bool {
+        page.context?.kind != "mac" && segment != "accounts"
+    }
+
     var body: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming) {
             header
         } content: {
-            VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-                ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
-                    section(s)
+            if Self.legacy(page, segment: segment) {
+                MachineContent(page: page, state: state, handlers: handlers, segment: segment)
+            } else {
+                VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                    ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
+                        section(s)
+                    }
+                    if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
                 }
-                if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
         } footer: {
             if let status = state.status { StatusBar(status.line, failed: status.failed) }

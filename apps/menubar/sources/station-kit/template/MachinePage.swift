@@ -1,8 +1,8 @@
 import SwiftUI
 
-// invariant: SPEC A4: a machine's page by its kind: a Mac's on its own
-// page frame, a workspace's and a server's on theirs; a workspace's
-// Accounts on the frame a Mac's segments are drawn in.
+// invariant: SPEC A4: a machine's page that has its header (a Mac's, a
+// running workspace's) on the page frame its segments are picked in; a
+// page without one, a server's or a stopped workspace's, on its own.
 struct MachinePage: View {
     let page: Page
     let state: PanelState
@@ -11,7 +11,6 @@ struct MachinePage: View {
     @MainActor
     static func view(_ state: PanelState, handlers: PopoverHandlers, scrolls: Bool) -> AnyView? {
         guard let page = state.shown, page.id == PageID.machine, page.header != nil else { return nil }
-        if page.context?.kind != "mac", state.segment != "accounts" { return nil }
         return AnyView(MacPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(page.context?.machine ?? ""))
     }
 
