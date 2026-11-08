@@ -84,6 +84,56 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "ok",
+            "label": "All machines are fine",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "infra healthy"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 12 days",
+                  "pri": 3
+                },
+                {
+                  "kind": "text",
+                  "text": "all 2 Macs answer",
+                  "pri": 1
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "symbol:checkmark.circle.fill",
+              "signal": "well"
+            }
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -658,6 +708,11 @@
   "badge": {
     "needs": 0,
     "label": "all machines are fine"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ]
   },
   "live": [
     "cpu:jterrazz-macbook-pro",

@@ -11,9 +11,9 @@ final class Round4Tests: XCTestCase {
     func testNeedsYouFoldsIntoTheEnginesShortWords() throws {
         let page = try Tree.page("menubar.home.two-macs")
         let needs = try XCTUnwrap(page.section(TodoBadge.section))
-        XCTAssertEqual(HomeContent.folded(needs), ["2 updates", "npm sign-in", "~/.tart", "firewall off", "1 failing task"].joined(separator: Token.Glyph.sep))
+        XCTAssertEqual(HomePage.folded(needs), ["2 updates", "npm sign-in", "~/.tart", "firewall off", "1 failing task"].joined(separator: Token.Glyph.sep))
         let bare: StationKit.Section = try decoded(#"{"id":"needs-you","items":[{"row":{"label":"npm sign-in expired"}}]}"#)
-        XCTAssertEqual(HomeContent.folded(bare), "npm sign-in expired")
+        XCTAssertEqual(HomePage.folded(bare), "npm sign-in expired")
     }
 
     // invariant: one duration format and one percent format across the
@@ -63,9 +63,9 @@ final class Round4Tests: XCTestCase {
     func testALongCallSaysWhatItDoesAtOnce() throws {
         let page = try Tree.page("menubar.home.two-macs")
         let new = try XCTUnwrap(page.action("new-vm"))
-        XCTAssertEqual(HomeContent.doing(new), "Creating the VM\(Token.Glyph.ellipsis)")
+        XCTAssertEqual(HomePage.doing(new), "Creating the VM\(Token.Glyph.ellipsis)")
         let stop = try XCTUnwrap(page.action("stop-all"))
-        XCTAssertEqual(HomeContent.doing(stop), "Stopping everything\(Token.Glyph.ellipsis)")
+        XCTAssertEqual(HomePage.doing(stop), "Stopping everything\(Token.Glyph.ellipsis)")
     }
 
     // invariant: a port being shared shows its row at once, pending, with

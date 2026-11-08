@@ -130,7 +130,7 @@ final class KitBoundaryTests: XCTestCase {
         return out
     }
 
-    static let drawnByTheKit = ["Popover(", "PageView(", "StatusItem(", "MenuPage.", "HomeContent(", "MachineContent(", "StoryView("]
+    static let drawnByTheKit = ["Popover(", "PageView(", "StatusItem(", "MenuPage.", "HomePage(", "MachineContent(", "StoryView("]
     static let engine = ["Client.", "UnixSocket.", "EnginePath.", "ActionRunner(", "Navigation(", "Terminal."]
 
     static func scanCatalog(_ files: [(path: String, text: String)]) -> [Finding] {

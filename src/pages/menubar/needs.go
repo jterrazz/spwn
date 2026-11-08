@@ -84,12 +84,14 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	// invariant: SPEC B5.7: what needs the owner, ranked by finding.Rank (a
 	// server down, a port exposed, an agent waiting on the owner, a share
 	// ending under 30 min, soonest first), and upkeep apart, ranked by
-	// finding.RankUpkeep, never in the badge. Two reds are two needs.
+	// finding.RankUpkeep, never in the badge. Two reds are two needs. A
+	// server restarting is not one, even while it is still stopped.
 	w := needSaid{r: r, self: self}
 	if r.All != nil {
 		for _, h := range r.All.Macs {
 			for _, vm := range h.VMs {
 				switch {
+				case vm.Lifetime == model.AlwaysOn && vm.Restart != nil:
 				case model.Down(vm):
 					needs = append(needs, w.down(h, vm))
 				case vm.Agent != nil && vm.Agent.State == string(agents.Waiting):

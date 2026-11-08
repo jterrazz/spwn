@@ -84,6 +84,66 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "ok",
+            "label": "Restarting infra",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "on mac-mini",
+                  "pri": 2
+                },
+                {
+                  "kind": "text",
+                  "text": "has an address"
+                },
+                {
+                  "kind": "text",
+                  "text": "2 of 4"
+                }
+              ]
+            },
+            "glyph": {
+              "signal": "active",
+              "spin": true
+            }
+          }
+        },
+        {
+          "link": {
+            "label": "2 more need you",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot, linux-1"
+            },
+            "page": "menubar.needs",
+            "row": "more-needs"
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -747,12 +807,62 @@
       "run": {
         "call": "apps.update"
       }
+    },
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "ending:macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "ending:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
     }
   ],
   "badge": {
-    "needs": 1,
+    "needs": 2,
     "restarting": true,
     "label": "infra restarting, 2 of 4 checks"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ],
+    "stale": {
+      "kind": "text",
+      "text": "checking air",
+      "signal": "stale"
+    }
   },
   "live": [
     "cpu:macbook-pro",

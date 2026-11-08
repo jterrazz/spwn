@@ -1,0 +1,823 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "strip": {
+    "cpu": {
+      "kind": "percent",
+      "n": 340,
+      "live": "cpu:macbook-pro"
+    },
+    "spark": [
+      12,
+      18,
+      25,
+      34,
+      30,
+      22,
+      41,
+      55,
+      48,
+      36,
+      28,
+      31,
+      44,
+      38,
+      29,
+      34
+    ],
+    "memory": {
+      "kind": "ratio",
+      "n": 40748502220,
+      "of": 51539607552,
+      "live": "memory:macbook-pro"
+    },
+    "memory_spark": [
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79
+    ],
+    "net_spark": [
+      1340,
+      1460,
+      1600,
+      1780,
+      1700,
+      1540,
+      1920,
+      2200,
+      2060,
+      1820,
+      1660,
+      1720,
+      1980,
+      1860,
+      1680,
+      1780
+    ],
+    "net": [
+      {
+        "kind": "size",
+        "n": 1780000,
+        "unit": "/s",
+        "live": "net:macbook-pro"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "attention",
+            "label": "review-bot is waiting",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "PR #42 is ready"
+                },
+                {
+                  "kind": "text",
+                  "text": "6 min",
+                  "pri": 1
+                }
+              ]
+            },
+            "reason": "waiting",
+            "glyph": {
+              "kind": "symbol:exclamationmark.circle.fill",
+              "signal": "waits"
+            },
+            "verb": "waiting:review-bot",
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "role": "actions",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "4 things need you"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0-npm",
+            "mark": "broken",
+            "label": "npm signed out",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "npm login"
+              }
+            ],
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "1-com.jterrazz.brain.x-snapshot",
+            "mark": "broken",
+            "label": "A background task is failing: brain snapshot",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "station background"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "com.jterrazz.brain.x-snapshot"
+            },
+            "reason": "failing"
+          }
+        },
+        {
+          "row": {
+            "id": "2-updates",
+            "mark": "attention",
+            "label": "2 app updates",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "station apps update"
+              }
+            ],
+            "reason": "degraded"
+          }
+        },
+        {
+          "row": {
+            "id": "3-firewall",
+            "mark": "attention",
+            "label": "Firewall off",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "System Settings > Network > Firewall"
+              }
+            ],
+            "reason": "degraded"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "attention",
+          "n": 2
+        },
+        {
+          "mark": "broken",
+          "n": 2
+        }
+      ],
+      "uncounted": true,
+      "glance": [
+        {
+          "kind": "text",
+          "text": "2 updates"
+        },
+        {
+          "kind": "text",
+          "text": "npm sign-in"
+        },
+        {
+          "kind": "text",
+          "text": "firewall off"
+        },
+        {
+          "kind": "text",
+          "text": "1 failing task"
+        }
+      ]
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 80
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "macbook-pro",
+              "mark": "attention",
+              "label": "This Mac",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "awake until 18:00"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "reason": "degraded"
+            },
+            "items": [
+              {
+                "group": {
+                  "head": {
+                    "id": "macbook-pro/workspaces",
+                    "label": "Workspaces"
+                  },
+                  "items": [
+                    {
+                      "row": {
+                        "id": "linux-1",
+                        "mark": "ok",
+                        "label": "linux-1",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Throwaway"
+                              },
+                              {
+                                "kind": "count",
+                                "n": 2,
+                                "unit": "ports shared"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "row": {
+                        "id": "agent-7f",
+                        "mark": "ok",
+                        "label": "agent-7f",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Throwaway"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "Running"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "row": {
+                        "id": "api",
+                        "mark": "absent",
+                        "label": "api",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Permanent"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "Stopped"
+                              }
+                            ]
+                          }
+                        ],
+                        "reason": "stopped"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "mac-mini",
+              "mark": "ok",
+              "label": "mac-mini",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "never sleeps"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "items": [
+              {
+                "group": {
+                  "head": {
+                    "id": "mac-mini/servers",
+                    "label": "Servers"
+                  },
+                  "items": [
+                    {
+                      "row": {
+                        "id": "infra",
+                        "mark": "ok",
+                        "label": "infra",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Server"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Always on"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "healthy"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "up 12 d"
+                              },
+                              {
+                                "kind": "count",
+                                "unit": "restarts"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "group": {
+                  "head": {
+                    "id": "mac-mini/workspaces",
+                    "label": "Workspaces"
+                  },
+                  "items": [
+                    {
+                      "row": {
+                        "id": "linux-3",
+                        "mark": "ok",
+                        "label": "linux-3",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Throwaway"
+                              },
+                              {
+                                "kind": "count",
+                                "n": 1,
+                                "unit": "port shared"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "row": {
+                        "id": "review-bot",
+                        "mark": "ok",
+                        "label": "review-bot",
+                        "cells": [
+                          {
+                            "kind": "text",
+                            "text": "Workspace"
+                          },
+                          {
+                            "kind": "list",
+                            "items": [
+                              {
+                                "kind": "text",
+                                "text": "Permanent"
+                              },
+                              {
+                                "kind": "text",
+                                "text": "Running"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "macbook-air",
+              "mark": "broken",
+              "label": "macbook-air",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "Unreachable"
+                }
+              ],
+              "reason": "unreachable"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 6
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "awake",
+      "title": "Awake",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "label": "Awake",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "This Mac until 18:00"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "mac-mini never sleeps"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "macbook-air sleeps"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "accounts",
+            "label": "Accounts",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "6",
+                    "label": "ok"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "npm needs sign-in",
+                    "label": "broken"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Stop everything on This Mac",
+      "on": "page",
+      "confirm": {
+        "question": "Stop everything on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "linux-1 will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "agent-7f will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-all",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      }
+    },
+    {
+      "label": "sleep",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "priority": 4,
+      "mutates": true,
+      "id": "awake-off",
+      "run": {
+        "call": "awake.off"
+      }
+    },
+    {
+      "label": "Accounts",
+      "on": "row",
+      "rows": [
+        "accounts"
+      ],
+      "priority": 6,
+      "id": "open-accounts",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts"
+        ]
+      }
+    },
+    {
+      "label": "Update all",
+      "on": "row",
+      "rows": [
+        "2-updates"
+      ],
+      "priority": 5,
+      "mutates": true,
+      "id": "update-all:2-updates",
+      "run": {
+        "call": "apps.update"
+      }
+    },
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    }
+  ],
+  "badge": {
+    "needs": 1,
+    "label": "station, 1 thing needs you"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ]
+  },
+  "live": [
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "net:macbook-pro"
+  ]
+}

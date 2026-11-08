@@ -64,12 +64,13 @@ final class HomeTests: XCTestCase {
         XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
     }
 
-    // invariant: MB-05: Home is the switcher's pill, the three measures,
-    // Needs you, the machines, the Awake and Accounts tiles, then New VM…,
-    // Open in Terminal and Stop everything on This Mac.
+    // invariant: MB-05: Home is its hero first, then the machines, the Awake
+    // and Accounts tiles, then Open in Terminal and Stop everything on This
+    // Mac; New VM is the header's.
     func testHomeLayout() throws {
         let page = try Tree.page("menubar.home.two-macs")
-        XCTAssertEqual(page.sections?.compactMap(\.id), ["needs-you", "machines", "awake", "accounts"])
+        XCTAssertEqual(page.sections?.compactMap(\.id), ["hero", "needs-you", "machines", "awake", "accounts"])
+        XCTAssertEqual(page.header?.buttons, ["new-vm"])
         let strip = try XCTUnwrap(page.strip)
         XCTAssertNotNil(strip.cpu)
         XCTAssertNotNil(strip.memory)

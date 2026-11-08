@@ -126,6 +126,7 @@ func fanOut(ctx context.Context, from <-chan struct{}, to []chan struct{}) {
 func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading)) {
 	f.mu.Lock()
 	change(&f.r)
+	f.r.Now, f.r.Zone = f.o.Clock.Now(), time.Local
 	f.r.Samples = f.o.Live.Readings(f.o.ThisMachine.Machine)
 	p := page.Document{Schema: page.Schema, Page: f.draw(f.r)}
 	f.mu.Unlock()

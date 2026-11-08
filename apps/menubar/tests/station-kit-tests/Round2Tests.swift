@@ -95,11 +95,11 @@ final class Round2Tests: XCTestCase {
     func testStoppedOffersStartOnceAndTheFoldedLineIsClean() {
         var start = Action(), open = Action()
         start.id = "start"; open.id = "open-station"
-        XCTAssertEqual(HomeContent.footer([start, open], stopped: true).map(\.id), ["open-station"])
-        XCTAssertEqual(HomeContent.footer([start, open], stopped: false).map(\.id), ["start", "open-station"])
+        XCTAssertEqual(HomePage.footer([start, open], stopped: true).map(\.id), ["open-station"])
+        XCTAssertEqual(HomePage.footer([start, open], stopped: false).map(\.id), ["start", "open-station"])
         var r1 = Row(), r2 = Row()
         r1.label = "a task is failing,"; r2.label = "x-snapshot is failing,."
-        XCTAssertEqual(HomeContent.folded([r1, r2]), "a task is failing\(Token.Glyph.sep)x-snapshot is failing")
+        XCTAssertEqual(HomePage.folded([r1, r2]), "a task is failing\(Token.Glyph.sep)x-snapshot is failing")
     }
 
     // invariant: a page is swapped once the click that asked for it ended,

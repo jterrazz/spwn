@@ -32,6 +32,7 @@ func TestTheStatusItemCountsWhatNeedsYouAndSaysItsOneSignal(t *testing.T) {
 		}
 		return &accounts.AllMachines{Now: now, Macs: []accounts.MacAccounts{mac}}
 	}
+	waiting := model.VM{Name: "review-bot", Lifetime: model.Permanent, State: model.Running, Agent: &model.AgentView{State: "waiting", Ask: "PR #42 is ready"}}
 	upkeep := &overview.Summary{Needs: []overview.Need{{Section: "apps", Subject: "updates", Text: "2 app updates"}, {Section: "settings", Subject: "firewall", Text: "Firewall: off"}}}
 	cases := []struct {
 		name string
@@ -41,6 +42,7 @@ func TestTheStatusItemCountsWhatNeedsYouAndSaysItsOneSignal(t *testing.T) {
 		{"nothing read yet", Reading{Home: upkeep}, nil},
 		{"only upkeep", Reading{Home: upkeep, All: fleet(server(model.Running, false))}, &page.Badge{Label: "all machines are fine"}},
 		{"a share under 30 min", Reading{All: fleet(), Accounts: shared(22*time.Minute, 4*time.Hour)}, &page.Badge{Needs: 1, Label: "station, 1 thing needs you"}},
+		{"an agent waiting on you", Reading{All: fleet(waiting), Accounts: shared(22 * time.Minute)}, &page.Badge{Needs: 2, Label: "station, 2 things need you"}},
 		{"two shares ending", Reading{All: fleet(), Accounts: shared(22*time.Minute, 9*time.Minute)}, &page.Badge{Needs: 2, Label: "station, 2 things need you"}},
 		{"a server down", Reading{All: fleet(server(model.Running, true)), Accounts: shared(22 * time.Minute)}, &page.Badge{Needs: 2, Down: true, Label: "station, infra down"}},
 		{"a port exposed that answers", Reading{All: fleet(), Ports: exposed}, &page.Badge{Needs: 1, Down: true, Label: "station, port 5000 exposed"}},

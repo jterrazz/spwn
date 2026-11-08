@@ -123,12 +123,20 @@ public struct ProgressRing: View {
 public struct Spinner: View {
     let small: Bool
     let tint: Color?
+    let drawn: (size: CGFloat, stroke: CGFloat)?
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
 
     public init(small: Bool = false, tint: Color? = nil) {
         self.small = small
         self.tint = tint
+        drawn = nil
+    }
+
+    public init(size: CGFloat, stroke: CGFloat, tint: Color? = nil) {
+        small = false
+        self.tint = tint
+        drawn = (size, stroke)
     }
 
     public var body: some View {
@@ -145,8 +153,8 @@ public struct Spinner: View {
 
     func ring(_ angle: Angle) -> some View {
         let m = Token.Metric.Marks.self
-        let size = small ? m.spinnerSmall : m.spinner
-        let stroke = small ? m.spinnerSmallStroke : m.spinnerStroke
+        let size = drawn?.size ?? (small ? m.spinnerSmall : m.spinner)
+        let stroke = drawn?.stroke ?? (small ? m.spinnerSmallStroke : m.spinnerStroke)
         return ZStack {
             Circle().inset(by: stroke / 2).stroke(tokens.color.track, lineWidth: stroke)
             Arc(share: m.spinnerArc, from: angle).inset(by: stroke / 2).stroke(tint ?? tokens.color.accent, lineWidth: stroke)

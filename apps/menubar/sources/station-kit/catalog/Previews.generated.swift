@@ -6,13 +6,31 @@ import SwiftUI
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
 
+#Preview("home.down-and-exposed") { StoryStage(Stories["home.down-and-exposed"]) }
+
+#Preview("home.down") { StoryStage(Stories["home.down"]) }
+
 #Preview("home.empty") { StoryStage(Stories["home.empty"]) }
+
+#Preview("home.exposed") { StoryStage(Stories["home.exposed"]) }
 
 #Preview("home.fine") { StoryStage(Stories["home.fine"]) }
 
+#Preview("home.loaded") { StoryStage(Stories["home.loaded"]) }
+
 #Preview("home.loading") { StoryStage(Stories["home.loading"]) }
 
+#Preview("home.many-needs") { StoryStage(Stories["home.many-needs"]) }
+
 #Preview("home.needs") { StoryStage(Stories["home.needs"]) }
+
+#Preview("home.one-need.lease") { StoryStage(Stories["home.one-need.lease"]) }
+
+#Preview("home.one-need.wait") { StoryStage(Stories["home.one-need.wait"]) }
+
+#Preview("home.recovered") { StoryStage(Stories["home.recovered"]) }
+
+#Preview("home.restarting") { StoryStage(Stories["home.restarting"]) }
 
 #Preview("mac.mini.overview") { StoryStage(Stories["mac.mini.overview"]) }
 
