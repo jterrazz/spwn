@@ -38,6 +38,9 @@ type SharedPort struct {
 	Bind       string     `json:"bind"`
 	LastSeenAt *time.Time `json:"last_seen_at"`
 	Detail     string     `json:"detail"`
+	// value: when the owner shared it: a share of the last few seconds is
+	// fresh on the panel.
+	ReservedAt time.Time `json:"reserved_at,omitzero"`
 }
 
 type EngineInfo struct {
