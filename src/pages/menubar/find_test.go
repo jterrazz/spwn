@@ -221,6 +221,12 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 		t.Errorf("Find's needs %+v, want Restart infra first, then Review review-bot", needs)
 	}
 	restart := findRow(p, FindNeeds, "down:infra")
+	if restart == nil || restart.Mark != page.Broken {
+		t.Errorf("infra's need %+v, want the red mark of a broken machine", restart)
+	}
+	if r := findRow(p, FindNeeds, "waiting:review-bot"); r == nil || r.Mark != page.Attention {
+		t.Errorf("review-bot's need %+v, want the orange mark of a wait", r)
+	}
 	for _, a := range p.Actions {
 		if restart != nil && a.ID == restart.Verb && (a.Confirm != nil || a.Run == nil || a.Run.Call != CallRestartVM) {
 			t.Errorf("Restart infra from Find runs %+v, want machines.restart at once", a)
@@ -234,7 +240,13 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 	}
 	for _, e := range entries(t, p, FindActions) {
 		if strings.HasPrefix(e.title, "Restart infra") && e != (said{"Restart infra", "down", "Restart", "", ""}) {
-			t.Errorf("the restart action reads %+v, want Restart infra, down, asking nothing", e)
+			t.Errorf("the restart action reads %+v, want Restart infra, down", e)
+		}
+	}
+	action := findRow(p, FindActions, "restart:infra")
+	for _, a := range p.Actions {
+		if action != nil && a.ID == action.Verb && (a.Confirm != nil || a.Run == nil || a.Run.Call != CallRestartVM) {
+			t.Errorf("Restart infra among the actions runs %+v, want machines.restart asking nothing", a)
 		}
 	}
 }
@@ -259,5 +271,35 @@ func TestFindExtendsAwakeWhenMoreThanFourHoursAreLeft(t *testing.T) {
 		if a.ID == "awake-for" && (a.Run.In["Until"] != `"2026-11-08T01:00:00Z"` || a.Run.In["Lid"] != "true") {
 			t.Errorf("the extension asks %v, want until 01:00 with the lid closed as held", a.Run.In)
 		}
+	}
+}
+
+// invariant: ⌘N goes to the roomiest Mac, even when it is not This Mac.
+func TestFindGivesNewVMToTheRoomiestMac(t *testing.T) {
+	r := findFleet()
+	r.All.Macs[0].Hardware.Memory = 24 * gib
+	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
+	var got []said
+	for _, e := range entries(t, p, FindActions) {
+		if strings.HasPrefix(e.title, "New VM") {
+			got = append(got, e)
+		}
+	}
+	if len(got) != 2 || got[0].title != "New VM on mac-mini" || got[0].key != "cmd+n" || got[1].title != "New VM on This Mac" || got[1].key != "" {
+		t.Errorf("Find's New VM actions %+v, want mac-mini first on ⌘N, then This Mac with no key", got)
+	}
+}
+
+// invariant: an asleep Mac offers no clean-up, finished throwaways or not.
+func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
+	r := findFleet()
+	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Throwaway, State: model.Running,
+		Agent: &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-3 * time.Hour)}}}
+	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
+	if row := findRow(p, FindActions, "cleanup:"+findAir); row != nil {
+		t.Errorf("the asleep macbook-air offers %+v, want no clean-up", row)
+	}
+	if row := findRow(p, FindActions, "cleanup:"+findPro); row == nil {
+		t.Errorf("This Mac lost its clean-up, want Clean up throwaways on This Mac…")
 	}
 }
