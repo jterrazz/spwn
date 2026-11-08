@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/awake"
+	model "github.com/jterrazz/studio-station/src/machines"
 )
 
 // value: the Awake stories: This Mac kept awake until 18:00 on battery,
@@ -21,7 +22,7 @@ func awakeWorlds() []World {
 
 func keeping(session func() *awake.Session) func(*Scene) {
 	return macs().then(func(f *Scene) {
-		f.Awake.Pauses = []string{"linux-1"}
+		f.Awake.Pauses = model.Pausing(f.All.Macs[0].VMs)
 		f.Awake.Session = nil
 		if session != nil {
 			f.Awake.Session = session()

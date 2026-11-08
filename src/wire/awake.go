@@ -49,8 +49,8 @@ func (m machine) servers() []string {
 	return out
 }
 
-// value: the workspaces this Mac runs now, as its engine says: what
-// pauses while it sleeps.
+// value: the work this Mac runs now, as its engine says: what pauses while
+// it sleeps.
 func (m machine) runningWorkspaces(ctx context.Context) []string {
 	records, err := m.machines(false).Records()
 	if err != nil {
@@ -60,14 +60,16 @@ func (m machine) runningWorkspaces(ctx context.Context) []string {
 	if err != nil {
 		return nil
 	}
-	var out []string
+	vms := make([]model.VM, 0, len(records))
 	for _, r := range records {
-		if r.Lifetime != model.AlwaysOn && live[r.Name].State == engine.StateRunning {
-			out = append(out, r.Name)
+		v := live[r.Name]
+		vm := model.VM{Name: r.Name, Lifetime: r.Lifetime, Agent: v.Agent}
+		if v.State == engine.StateRunning {
+			vm.State = model.Running
 		}
+		vms = append(vms, vm)
 	}
-	slices.Sort(out)
-	return out
+	return model.Pausing(vms)
 }
 
 func (m machine) awakeCmdDeps(env kit.Env) awakecmd.Deps {

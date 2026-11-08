@@ -1,6 +1,7 @@
 package machines
 
 import (
+	"slices"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -105,6 +106,20 @@ type AgentView struct {
 const AgentFinished = "finished"
 
 func (vm VM) Finished() bool { return vm.Agent != nil && vm.Agent.State == AgentFinished }
+
+// invariant: SPEC A9 1-11: what pauses while its Mac sleeps is the work it
+// runs now, by name: a running workspace whose agent has not finished; a
+// server is said apart.
+func Pausing(vms []VM) []string {
+	var out []string
+	for _, vm := range vms {
+		if vm.Lifetime != AlwaysOn && vm.State == Running && !vm.Finished() {
+			out = append(out, vm.Name)
+		}
+	}
+	slices.Sort(out)
+	return out
+}
 
 type EngineView struct {
 	Known, Running bool
