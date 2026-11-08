@@ -74,6 +74,7 @@ struct MacPage: View {
     @ViewBuilder
     func section(_ s: Section) -> some View {
         switch s.segment {
+        case _ where s.id == "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "activity": MacActivity(section: s)
         case "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "accounts": MacAccounts(section: s)

@@ -54,7 +54,7 @@ final class PagesTests: XCTestCase {
     // offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
-        XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "machine", "activity", "inside", "shared", "private"])
+        XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "machine", "activity", "inside", "shared", "ports", "private"])
         XCTAssertEqual(linux.section("machine")?.caption.map { $0.compactMap(\.text) }, ["Workspace VM", "Throwaway", "on This Mac"])
         XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "Share a port", "Open in Terminal"])
         let infra = try Tree.page("menubar.vm.infra")

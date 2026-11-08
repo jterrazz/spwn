@@ -49,6 +49,22 @@ final class PortsTests: XCTestCase {
         XCTAssertNil(try Golden.check("sheet.stop-sharing", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
 
+    // invariant: SPEC A4: a running workspace's Overview has its Ports
+    // card, its shares then its first listener with Share, and its menu
+    // lists Share a port…, Stop and Delete, each its own call.
+    func testAWorkspaceKeepsItsPortsAndItsVerbs() throws {
+        let page = try Tree.page("menubar.vm.linux-1")
+        let card = try XCTUnwrap(page.section("ports"))
+        XCTAssertEqual(card.segment, "overview")
+        XCTAssertEqual(PortsSection.label(card), "Ports")
+        XCTAssertEqual(card.rows.map(\.label), ["Vite", "Port 7000"])
+        XCTAssertEqual(PortRow.menu(card.rows[0], in: page.actions ?? []).last??.run?.call, "ports.stop-sharing")
+        let menu = try XCTUnwrap(page.action(page.header?.buttons?.last ?? ""))
+        let items = MachineHeader.menu(page, menu)
+        XCTAssertEqual(items.map(\.label), ["Share a port", "Stop", "Delete", "Open in Terminal"])
+        XCTAssertEqual(items.prefix(3).map { $0.run?.call }, ["ports.share", "machines.stop", "machines.delete"])
+    }
+
     // invariant: PO-34: mac-mini's Ports: what is exposed first, then
     // Public, then Private, each under its words; its facts count them, the
     // exposed in red.
