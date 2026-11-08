@@ -61,10 +61,10 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["machine", "needs-you", "readiness", "vms"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "activity", "ports", "accounts"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
-                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
+                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
             }
         }
         for name in ["menubar.vm.linux-1", "menubar.vm.infra", "menubar.mac.mini"] {
@@ -189,7 +189,7 @@ final class PagesTests: XCTestCase {
     // Terminal on station machines unlock mac-mini, and nothing else runs.
     func testMacUnlockOpensTerminal() async throws {
         let page = try Tree.page("menubar.mac.mini-offline")
-        XCTAssertEqual(page.section("machine")?.items?.first?.row?.cells?.first?.text, "Unreachable")
+        XCTAssertEqual(page.header?.stale?.items?.last?.text, "checking")
         let unlock = try XCTUnwrap(page.action("unlock"))
         XCTAssertNil(unlock.run?.call)
         try drawn("menubar.mac.mini-offline", try pushed("menubar.mac.mini-offline"))
@@ -207,8 +207,8 @@ final class PagesTests: XCTestCase {
     func testRemotePageRenders() async throws {
         let page = try Tree.page("menubar.mac.mini")
         XCTAssertEqual(page.context?.machine, "jterrazz-mac-mini")
-        XCTAssertEqual(page.section("vms")?.items?.first?.group?.items?.first?.row?.label, "infra")
-        XCTAssertEqual(page.section("needs-you")?.items?.first?.row?.label, "port 5000 is reachable outside Tailscale")
+        XCTAssertEqual(page.section("vms")?.items?.first?.row?.label, "infra")
+        XCTAssertEqual(page.section("summary")?.title, "mac-mini")
         let engine = try FakeEngine("mb-remote")
         defer { engine.stop() }
         let frame = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": JSONSerialization.jsonObject(with: page.encoded())]])

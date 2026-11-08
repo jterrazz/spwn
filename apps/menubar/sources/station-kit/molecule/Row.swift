@@ -109,6 +109,7 @@ public struct RowView: View {
         }
         .padding(.horizontal, m.padding)
         .frame(minHeight: sub == nil ? m.height : m.twoLines)
+        .overlay(alignment: .bottom) { if let birth = row.birth { BirthBar(birth) } }
         .background {
             if navigable && lit {
                 RoundedRectangle(cornerRadius: m.radius, style: .continuous).fill(tokens.color.q)
@@ -126,7 +127,8 @@ public struct RowView: View {
     @ViewBuilder var accessory: some View {
         if let glyph = row.glyph {
             switch Self.accessory(row) {
-            case .dot: StatusDot(glyph.dot, signal: glyph.signal)
+            case .dot:
+                if let progress = glyph.progress { ProgressRing(perMille: progress) } else { StatusDot(glyph.dot, signal: glyph.signal) }
             case .glyph, .ring: GlyphView(glyph)
             case .none: Color.clear
             }
@@ -171,6 +173,28 @@ public struct RowView: View {
     }
 
     var m: Token.Metric.Row.Type { Token.Metric.Row.self }
+}
+
+// invariant: SPEC A4, B5.10: a VM being created carries how far its
+// create is as a bar at its row's foot.
+struct BirthBar: View {
+    let share: Double
+    @Environment(\.stationTokens) private var tokens
+
+    init(_ birth: Value) {
+        share = (birth.of ?? 0) > 0 ? min(max(Double(birth.n ?? 0) / Double(birth.of ?? 1), 0), 1) : 0
+    }
+
+    var body: some View {
+        let m = Token.Metric.Birth.self
+        Capsule().fill(tokens.color.track)
+            .frame(height: m.bar)
+            .overlay(alignment: .leading) {
+                GeometryReader { g in Capsule().fill(tokens.color.accent).frame(width: g.size.width * share) }
+            }
+            .animation(tokens.motion(Token.Motion.progress), value: share)
+            .padding(m.inset)
+    }
 }
 
 // invariant: rows in a card: each row after the first has its inset

@@ -53,6 +53,10 @@ public struct PanelState: Equatable, Sendable {
     // was asked: each says Stopping until its line says it stopped.
     public var stopping: [String] = []
     public var scrub: Int?
+    // value: the UI state a page keeps on the client: the segment picked
+    // on a machine page, and what is unfolded there.
+    public var segment: String?
+    public var unfolded: [String] = []
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -188,7 +192,9 @@ public struct Popover: View {
     // invariant: the panel is the MenuBarExtra's own glass; nothing in it
     // is glass again (WWDC25: no glass on glass, none in the content).
     public var body: some View {
-        if let own = pushedView {
+        if let machine = MachinePage.view(state, handlers: handlers, scrolls: scrolls) {
+            machine
+        } else if let own = pushedView {
             own
         } else {
             panel
@@ -223,7 +229,7 @@ public struct Popover: View {
                     if shown.id == PageID.switcher {
                         SwitcherContent(page: shown, state: state, handlers: handlers)
                     } else if shown.id == PageID.machine {
-                        MachineContent(page: shown, state: state, handlers: handlers)
+                        MachinePage(page: shown, state: state, handlers: handlers)
                     } else {
                         HomeContent(page: shown, state: state, handlers: handlers)
                     }
