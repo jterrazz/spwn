@@ -107,9 +107,6 @@ const AgentFinished = "finished"
 
 func (vm VM) Finished() bool { return vm.Agent != nil && vm.Agent.State == AgentFinished }
 
-// invariant: SPEC A9 1-11: what pauses while its Mac sleeps is the work it
-// runs now, by name: a running workspace whose agent has not finished; a
-// server is said apart.
 func Pausing(vms []VM) []string {
 	var out []string
 	for _, vm := range vms {
