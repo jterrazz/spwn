@@ -152,7 +152,23 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 		unlockWorld(held)
 		return &worldRun{path: path, w: w, macs: map[string]*worldMac{}, shared: true}, nil
 	}
-	return &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}, nil
+	r := &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}
+	w.OnPause(r.pause)
+	return r, nil
+}
+
+// invariant: a call held in a run that writes its world back writes it back
+// as it stands and lets go of it, so a command run while it waits reads what
+// it made so far; its end writes the world again, over the other's.
+func (r *worldRun) pause() {
+	if r.shared {
+		return
+	}
+	if data, err := r.w.Encode(); err == nil {
+		_ = os.WriteFile(r.path, data, 0o600)
+	}
+	unlockWorld(r.held)
+	r.held = nil
 }
 
 // hazard: a run that runs station as a child while it holds its world would

@@ -1,0 +1,25 @@
+description: 'a create held at its clone is listed cloning, its memory held; ctrl-c rolls it back'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world hold Hypervisor.Clone'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create linux-4'
+      stdin: |
+          see On which Mac?
+          send \r
+          see cloning
+          run "$STATION" machines --json | /usr/bin/jq -c '.macs[0] | {vms: [.vms[] | select(.name == "linux-4") | {state, birth}], held: [.capacity.vms[] | select(.name == "linux-4") | .memory_bytes]}' >seen
+          send \x03
+      exit: 1
+    - command: '--version >/dev/null; /bin/cat seen'
+      exit: 0
+      stdout: |
+          {"vms":[{"state":"creating","birth":{"progress":50,"step":"cloning the image"}}],"held":[4294967296]}
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[] | select(.name == "linux-4")]'''
+      exit: 0
+      stdout: |
+          []
