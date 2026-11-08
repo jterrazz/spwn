@@ -3,14 +3,13 @@ package menubar
 import (
 	"strconv"
 
-	"github.com/jterrazz/studio-station/src/accounts"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 )
 
-// invariant: SPEC A3, B5.7: the status item counts what needs you and never
-// the upkeep: a server down, a port exposed, a copy shared for less than
-// 30 min more. A server down or a port exposed tints it red; a server
+// invariant: SPEC A3, B5.7: the status item counts what needs you, the
+// number the hero says, and never the upkeep: a server down, a port
+// exposed, an agent waiting on you, a copy shared for less than 30 min more. A server down or a port exposed tints it red; a server
 // restarting turns the busy mark in place of its red and is not counted.
 // Its label says the one signal it shows. nil until the machines are read.
 func badge(r Reading) *page.Badge {
@@ -40,7 +39,8 @@ func badge(r Reading) *page.Badge {
 			}
 		}
 	}
-	b := page.Badge{Needs: len(reds) + sharesEnding(r.Accounts), Down: len(reds) > 0}
+	ranked, _ := needsOf(r.needsReading(), "")
+	b := page.Badge{Needs: len(ranked), Down: len(reds) > 0}
 	switch {
 	case b.Down:
 		b.Label = "station, " + reds[0]
@@ -55,17 +55,4 @@ func badge(r Reading) *page.Badge {
 		b.Label = "all machines are fine"
 	}
 	return &b
-}
-
-func sharesEnding(a *accounts.AllMachines) int {
-	if a == nil {
-		return 0
-	}
-	n := 0
-	for _, c := range a.Read().Shared {
-		if c.Short {
-			n++
-		}
-	}
-	return n
 }

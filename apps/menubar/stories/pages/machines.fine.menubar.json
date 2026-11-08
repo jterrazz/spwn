@@ -84,6 +84,42 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "ok",
+            "label": "All machines are fine",
+            "detail": {
+              "kind": "text",
+              "text": "checking air",
+              "signal": "stale"
+            },
+            "glyph": {
+              "kind": "symbol:checkmark.circle.fill",
+              "signal": "well"
+            }
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -646,6 +682,16 @@
   "badge": {
     "needs": 0,
     "label": "all machines are fine"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ],
+    "stale": {
+      "kind": "text",
+      "text": "checking air",
+      "signal": "stale"
+    }
   },
   "live": [
     "cpu:macbook-pro",

@@ -84,6 +84,38 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No VMs yet",
+            "glyph": {
+              "kind": "symbol:shippingbox",
+              "signal": "quiet"
+            },
+            "actions": [
+              "new-vm"
+            ]
+          }
+        }
+      ],
+      "card": "empty"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -373,6 +405,7 @@
     "needs": 0,
     "label": "all machines are fine"
   },
+  "header": {},
   "live": [
     "cpu:macbook-pro",
     "memory:macbook-pro",

@@ -53,6 +53,10 @@ type Reading struct {
 	Away []overview.Summary
 	// value: every Mac's copies shared with its VMs, for the leases ending.
 	Accounts *accounts.AllMachines
+	// value: when the page is drawn and the zone its hours are said in; a
+	// page never reads the clock.
+	Now  time.Time
+	Zone *time.Location
 }
 
 func Page(r Reading, thisMac page.Context) page.Page {
@@ -63,6 +67,15 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	p.Sections = []page.Section{needs, tree, awakeTile(r), accountsTile(r.Home)}
 	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, awakeAction(r.Awake), openAccounts())
 	p.Actions = append(p.Actions, updateAll(needs, r.Home)...)
+	ranked, _ := needsOf(r.needsReading(), thisMac.Machine)
+	if top, stale, ok := hero(r, thisMac.Machine, ranked); ok {
+		p.Sections = append([]page.Section{top}, p.Sections...)
+		p.Header = &page.Header{Stale: stale}
+		if top.Card != page.CardEmpty {
+			p.Header.Buttons = []string{ActionNewVM}
+		}
+		p.Actions = append(p.Actions, verbs(ranked)...)
+	}
 	p.Badge = badge(r)
 	p.Live = liveKeys(p)
 	return page.Seal(p)

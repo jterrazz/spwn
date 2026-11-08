@@ -120,11 +120,11 @@ final class StoryTests: XCTestCase {
             $0[$1.id] = MenuBarIcon.of(connection: $1.state.connection, page: $1.state.page).label
         }
         XCTAssertEqual(labels, [
-            "menubar.count": "station, 1 thing needs you",
+            "menubar.count": "station, 2 things need you",
             "menubar.down": "station, infra down",
             "menubar.restarting": "infra restarting, 2 of 4 checks",
             "menubar.fine": "all machines are fine",
-            "menubar.open": "station, 1 thing needs you",
+            "menubar.open": "station, 2 things need you",
         ])
     }
 

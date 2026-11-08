@@ -84,6 +84,69 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "broken",
+            "label": "infra is down",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "out of memory"
+                },
+                {
+                  "kind": "text",
+                  "text": "since 10:26"
+                },
+                {
+                  "kind": "text",
+                  "text": "on mac-mini",
+                  "pri": 1
+                }
+              ]
+            },
+            "reason": "down",
+            "glyph": {
+              "kind": "symbol:xmark.octagon.fill",
+              "signal": "failing"
+            },
+            "verb": "down:infra",
+            "nav": "menubar.machine:infra"
+          }
+        },
+        {
+          "link": {
+            "label": "2 more need you",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot, linux-1"
+            },
+            "page": "menubar.needs",
+            "row": "more-needs"
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -740,12 +803,81 @@
       "run": {
         "call": "apps.update"
       }
+    },
+    {
+      "label": "Restart",
+      "on": "row",
+      "rows": [
+        "down:infra"
+      ],
+      "mutates": true,
+      "id": "down:infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "default": true
+    },
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "ending:macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "ending:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr 24 min left"
+          }
+        ]
+      }
     }
   ],
   "badge": {
-    "needs": 2,
+    "needs": 3,
     "down": true,
     "label": "station, infra down"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ],
+    "stale": {
+      "kind": "text",
+      "text": "checking air",
+      "signal": "stale"
+    }
   },
   "live": [
     "cpu:macbook-pro",

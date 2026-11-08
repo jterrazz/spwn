@@ -84,6 +84,49 @@
   },
   "sections": [
     {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "hero",
+            "mark": "broken",
+            "label": "infra is down",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "on mac-mini"
+                }
+              ]
+            },
+            "reason": "down",
+            "glyph": {
+              "kind": "symbol:xmark.octagon.fill",
+              "signal": "failing"
+            },
+            "verb": "down:infra",
+            "nav": "menubar.machine:infra"
+          }
+        }
+      ],
+      "card": "hero"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -646,12 +689,36 @@
       "run": {
         "call": "apps.update"
       }
+    },
+    {
+      "label": "Restart",
+      "on": "row",
+      "rows": [
+        "down:infra"
+      ],
+      "mutates": true,
+      "id": "down:infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "default": true
     }
   ],
   "badge": {
     "needs": 1,
     "down": true,
     "label": "station, infra down"
+  },
+  "header": {
+    "buttons": [
+      "new-vm"
+    ]
   },
   "live": [
     "cpu:jterrazz-macbook-pro",
