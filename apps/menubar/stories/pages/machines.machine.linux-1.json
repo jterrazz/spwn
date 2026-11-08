@@ -10,6 +10,25 @@
   "state": "ready",
   "sections": [
     {
+      "id": "summary",
+      "title": "linux-1",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "throwaway"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr"
+        },
+        {
+          "kind": "text",
+          "text": "1 agent"
+        }
+      ]
+    },
+    {
       "id": "machine",
       "title": "linux-1",
       "role": "summary",
@@ -53,7 +72,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "activity",
@@ -341,7 +361,8 @@
             ]
           }
         }
-      ]
+      ],
+      "segment": "overview"
     },
     {
       "id": "inside",
@@ -410,66 +431,8 @@
             ]
           }
         }
-      ]
-    },
-    {
-      "id": "ports",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "shared on Tailscale"
-        }
       ],
-      "items": [
-        {
-          "link": {
-            "label": "Vite",
-            "lead": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "Vite"
-                },
-                {
-                  "kind": "port",
-                  "n": 5173
-                }
-              ]
-            },
-            "value": {
-              "kind": "url",
-              "text": "https://macbook-pro.tail77a797.ts.net:40001"
-            },
-            "row": "5173"
-          }
-        },
-        {
-          "link": {
-            "label": "Web",
-            "lead": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "Web"
-                },
-                {
-                  "kind": "port",
-                  "n": 3000
-                }
-              ]
-            },
-            "value": {
-              "kind": "url",
-              "text": "https://macbook-pro.tail77a797.ts.net:40002"
-            },
-            "row": "3000"
-          }
-        }
-      ],
-      "uncounted": true
+      "segment": "overview"
     },
     {
       "id": "shared",
@@ -533,7 +496,121 @@
           "mark": "ok",
           "n": 2
         }
-      ]
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "Vite",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:5173"
+            },
+            "glyph": {
+              "kind": "port:vite"
+            },
+            "verb": "open-port:linux-1:5173",
+            "quick": "qr:linux-1:5173"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:3000",
+            "mark": "ok",
+            "label": "Port 3000",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:3000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-1:3000",
+            "quick": "qr:linux-1:3000"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "listening",
+              "label": "Listening, not shared"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "linux-1:4321",
+                  "mark": "ok",
+                  "label": "Astro",
+                  "detail": {
+                    "kind": "text",
+                    "text": "linux-1:4321"
+                  },
+                  "glyph": {
+                    "kind": "port:astro"
+                  },
+                  "verb": "share:linux-1:4321"
+                }
+              },
+              {
+                "row": {
+                  "id": "linux-1:9229",
+                  "mark": "ok",
+                  "label": "Node inspector",
+                  "detail": {
+                    "kind": "text",
+                    "text": "linux-1:9229"
+                  },
+                  "glyph": {
+                    "kind": "port:node"
+                  },
+                  "verb": "share:linux-1:9229"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "segment": "ports"
     }
   ],
   "actions": [
@@ -723,10 +800,50 @@
       }
     },
     {
+      "label": "Open Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "open-port:linux-1:5173",
+      "run": {
+        "open": "https://macbook-pro.tail77a797.ts.net:40001"
+      }
+    },
+    {
+      "label": "Copy link to Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "copy-port:linux-1:5173",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40001"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "qr:linux-1:5173",
+      "icon": "qrcode"
+    },
+    {
       "label": "Stop sharing",
       "on": "row",
       "rows": [
-        "5173"
+        "linux-1:5173"
       ],
       "confirm": {
         "question": "Stop sharing linux-1's port 5173?",
@@ -742,7 +859,7 @@
       },
       "priority": 3,
       "mutates": true,
-      "id": "stop-sharing:linux-1/5173",
+      "id": "stop-sharing:linux-1:5173",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
@@ -754,10 +871,50 @@
       }
     },
     {
+      "label": "Open Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "open-port:linux-1:3000",
+      "run": {
+        "open": "https://macbook-pro.tail77a797.ts.net:40002"
+      }
+    },
+    {
+      "label": "Copy link to Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "copy-port:linux-1:3000",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40002"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40002"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "qr:linux-1:3000",
+      "icon": "qrcode"
+    },
+    {
       "label": "Stop sharing",
       "on": "row",
       "rows": [
-        "3000"
+        "linux-1:3000"
       ],
       "confirm": {
         "question": "Stop sharing linux-1's port 3000?",
@@ -773,7 +930,7 @@
       },
       "priority": 3,
       "mutates": true,
-      "id": "stop-sharing:linux-1/3000",
+      "id": "stop-sharing:linux-1:3000",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
@@ -782,6 +939,56 @@
           "Port": "\"3000\"",
           "VM": "\"linux-1\""
         }
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:4321"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:4321",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "4321",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Astro of linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:9229"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:9229",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "9229",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Node inspector of linux-1"
+          }
+        ]
       }
     },
     {
@@ -797,6 +1004,48 @@
           "linux-1"
         ]
       }
+    },
+    {
+      "label": "More options for linux-1",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop",
+        "delete",
+        "open-station"
+      ]
+    }
+  ],
+  "header": {
+    "back": "This Mac",
+    "glyph": {
+      "kind": "agent"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
     }
   ],
   "live": [

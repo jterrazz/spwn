@@ -205,17 +205,126 @@
       "segment": "activity"
     },
     {
-      "id": "ports",
-      "title": "Ports",
+      "id": "public",
+      "title": "Public",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
       "items": [
         {
           "empty": {
-            "text": "No port shared yet"
+            "text": "Nothing public."
           }
         }
       ],
-      "uncounted": true,
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Public"
+        },
+        {
+          "kind": "text",
+          "text": "from outside"
+        }
+      ],
       "segment": "ports"
+    },
+    {
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing shared yet"
+          }
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "segment": "ports"
+    },
+    {
+      "id": "https",
+      "title": "HTTPS links",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "https",
+            "mark": "ok",
+            "label": "HTTPS links on macbook-air",
+            "cells": [
+              {
+                "kind": "on"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:lock"
+            },
+            "verb": "https:macbook-air"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "ports",
+      "card": "flush"
     },
     {
       "id": "accounts",
@@ -326,6 +435,24 @@
         "in": {
           "Confirm": "yes",
           "Names": "[\"never-sleeps\"]"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      }
+    },
+    {
+      "label": "HTTPS links on macbook-air",
+      "on": "row",
+      "rows": [
+        "https"
+      ],
+      "mutates": true,
+      "id": "https:macbook-air",
+      "run": {
+        "call": "ports.set-https",
+        "in": {
+          "On": "false"
         },
         "target": {
           "name": "macbook-air"

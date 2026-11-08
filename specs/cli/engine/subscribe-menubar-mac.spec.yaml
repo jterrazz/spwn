@@ -7,6 +7,6 @@ runs:
     - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; ( printf ''{"v":2,"id":"1","watch":"page","in":{"pages":["menubar.machine:x"]}}\n''; /bin/sleep 4 ) | /usr/bin/nc -U .local/state/station/engine.sock > mac.jsonl; /usr/bin/jq -c ''select(.out.event=="page")|.out.page|[.id, [.segments[]?.id], [.sections[]?|[.id, .segment]]]'' mac.jsonl | /usr/bin/tail -1; /usr/bin/jq -c ''select(.out.event=="page")|[.out.page.sections[]?|select(.id=="care")|.items[]|(.row // .group.head)|[.id, .label, .verb, (.cells[0].text // .cells[0].kind)]]'' mac.jsonl | /usr/bin/tail -1; /usr/bin/jq -c ''select(.out.event=="page")|[.out.page.actions[]?|select(.rows==["awake"])|[.id, .run.call]]'' mac.jsonl | /usr/bin/tail -1; kill $d; wait $d'
       exit: 0
       stdout: |
-          ["menubar.machine",["overview","activity","ports","accounts"],[["summary",null],["gauges","overview"],["vms","overview"],["care","overview"],["activity","activity"],["ports","ports"],["accounts","accounts"]]]
+          ["menubar.machine",["overview","activity","ports","accounts"],[["summary",null],["gauges","overview"],["vms","overview"],["care","overview"],["activity","activity"],["public","ports"],["private","ports"],["https","ports"],["accounts","accounts"]]]
           [["awake","Sleeps as usual","awake-keep","off"],["upkeep","Upkeep",null,"all fine"]]
           [["awake-keep","awake.keep"]]

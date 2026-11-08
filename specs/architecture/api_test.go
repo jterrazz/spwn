@@ -58,8 +58,8 @@ func TestCallsJSONFresh(t *testing.T) {
 
 // invariant: rule palette-covers-calls (13.3 rule 14, MB-08): every action a
 // page fixture carries (the menu bar's and the TUI's, the palette's entries
-// once it lands) names a call of calls.json, or opens a terminal; nothing
-// else runs.
+// once it lands) names a call of calls.json, opens a terminal, or copies
+// or opens a link the app handles itself; nothing else runs.
 func TestPaletteCoversCalls(t *testing.T) {
 	root := repoRoot(t)
 	data, err := os.ReadFile(filepath.Join(root, "src", "remote", "api", "calls.json"))
@@ -91,6 +91,8 @@ func TestPaletteCoversCalls(t *testing.T) {
 				Run *struct {
 					Call     string `json:"call"`
 					Terminal bool   `json:"terminal"`
+					Copy     string `json:"copy"`
+					Open     string `json:"open"`
 				} `json:"run"`
 			} `json:"actions"`
 		}
@@ -99,7 +101,7 @@ func TestPaletteCoversCalls(t *testing.T) {
 		}
 		for _, a := range p.Actions {
 			switch {
-			case a.Run == nil, a.Run.Terminal && a.Run.Call == "":
+			case a.Run == nil, a.Run.Terminal && a.Run.Call == "", a.Run.Call == "" && (a.Run.Copy != "" || a.Run.Open != ""):
 			case !known[a.Run.Call]:
 				t.Errorf("%s: the action %s names %q, no call of calls.json", e.Name(), a.ID, a.Run.Call)
 			default:

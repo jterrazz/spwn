@@ -754,58 +754,235 @@
       "segment": "activity"
     },
     {
-      "id": "ports",
-      "title": "Ports",
-      "items": [
+      "id": "public",
+      "title": "Public",
+      "caption": [
         {
-          "link": {
-            "label": "linux-1",
-            "lead": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "linux-1"
-                },
-                {
-                  "kind": "port",
-                  "n": 5173
-                }
-              ]
-            },
-            "value": {
-              "kind": "url",
-              "text": "https://macbook-pro.tail77a797.ts.net:40001"
-            },
-            "row": "linux-1/5173"
-          }
+          "kind": "text",
+          "text": "0"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
         },
         {
-          "link": {
-            "label": "linux-1",
-            "lead": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "linux-1"
-                },
-                {
-                  "kind": "port",
-                  "n": 3000
-                }
-              ]
-            },
-            "value": {
-              "kind": "url",
-              "text": "https://macbook-pro.tail77a797.ts.net:40002"
-            },
-            "row": "linux-1/3000"
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing public."
           }
         }
       ],
-      "uncounted": true,
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Public"
+        },
+        {
+          "kind": "text",
+          "text": "from outside"
+        }
+      ],
       "segment": "ports"
+    },
+    {
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "Vite",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:5173"
+            },
+            "glyph": {
+              "kind": "port:vite"
+            },
+            "verb": "open-port:linux-1:5173",
+            "quick": "qr:linux-1:5173"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:3000",
+            "mark": "ok",
+            "label": "Port 3000",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:3000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "open-port:linux-1:3000",
+            "quick": "qr:linux-1:3000"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "segment": "ports"
+    },
+    {
+      "id": "listening",
+      "title": "Listening, not shared",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "3"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:4321",
+            "mark": "ok",
+            "label": "Astro",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:4321"
+            },
+            "glyph": {
+              "kind": "port:astro"
+            },
+            "verb": "share:linux-1:4321"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:9229",
+            "mark": "ok",
+            "label": "Node inspector",
+            "detail": {
+              "kind": "text",
+              "text": "linux-1:9229"
+            },
+            "glyph": {
+              "kind": "port:node"
+            },
+            "verb": "share:linux-1:9229"
+          }
+        },
+        {
+          "row": {
+            "id": "agent-7f:6006",
+            "mark": "ok",
+            "label": "Storybook",
+            "detail": {
+              "kind": "text",
+              "text": "agent-7f:6006"
+            },
+            "glyph": {
+              "kind": "port:storybook"
+            },
+            "verb": "share:agent-7f:6006"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 3
+        }
+      ],
+      "segment": "ports"
+    },
+    {
+      "id": "https",
+      "title": "HTTPS links",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "https",
+            "mark": "ok",
+            "label": "HTTPS links on This Mac",
+            "cells": [
+              {
+                "kind": "on"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:lock"
+            },
+            "verb": "https:macbook-pro"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "segment": "ports",
+      "card": "flush"
     },
     {
       "id": "accounts",
@@ -1098,6 +1275,238 @@
       "id": "awake-off",
       "run": {
         "call": "awake.off"
+      }
+    },
+    {
+      "label": "Open Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "open-port:linux-1:5173",
+      "run": {
+        "open": "https://macbook-pro.tail77a797.ts.net:40001"
+      }
+    },
+    {
+      "label": "Copy link to Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "copy-port:linux-1:5173",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40001"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Vite",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "id": "qr:linux-1:5173",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 5173?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1:5173",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"5173\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "label": "Open Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "open-port:linux-1:3000",
+      "run": {
+        "open": "https://macbook-pro.tail77a797.ts.net:40002"
+      }
+    },
+    {
+      "label": "Copy link to Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "copy-port:linux-1:3000",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40002"
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40002"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show QR for Port 3000",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "id": "qr:linux-1:3000",
+      "icon": "qrcode"
+    },
+    {
+      "label": "Stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:3000"
+      ],
+      "confirm": {
+        "question": "Stop sharing linux-1's port 3000?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop sharing",
+        "no": "Cancel"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-sharing:linux-1:3000",
+      "run": {
+        "call": "ports.stop-sharing",
+        "in": {
+          "Confirm": "yes",
+          "Mac": "\"macbook-pro\"",
+          "Port": "\"3000\"",
+          "VM": "\"linux-1\""
+        }
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:4321"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:4321",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "4321",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Astro of linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "linux-1:9229"
+      ],
+      "mutates": true,
+      "id": "share:linux-1:9229",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "9229",
+          "VM": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Node inspector of linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share",
+      "on": "row",
+      "rows": [
+        "agent-7f:6006"
+      ],
+      "mutates": true,
+      "id": "share:agent-7f:6006",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "Port": "6006",
+          "VM": "agent-7f"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared Storybook of agent-7f"
+          }
+        ]
+      }
+    },
+    {
+      "label": "HTTPS links on This Mac",
+      "on": "row",
+      "rows": [
+        "https"
+      ],
+      "mutates": true,
+      "id": "https:macbook-pro",
+      "run": {
+        "call": "ports.set-https",
+        "in": {
+          "On": "false"
+        }
       }
     },
     {

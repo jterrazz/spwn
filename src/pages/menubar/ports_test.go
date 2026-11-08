@@ -3,50 +3,218 @@ package menubar
 import (
 	"slices"
 	"testing"
+	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/ports"
 )
 
-// invariant: MB-17: on the Ports of every Mac, Review on a red row of
-// mac-mini opens a terminal on station ports --on mac-mini, and Review on
-// one of This Mac's on station ports.
-func TestReviewOnEveryMacsPortsNamesTheMacOfItsRow(t *testing.T) {
-	red := func(mac string, port int) ports.Port {
-		return ports.Port{Machine: coremachine.Ref{Name: mac}, Port: port, Process: "p", Binds: []string{"*"}, Reach: ports.Outside}
+func portFleet() ports.AllMachines {
+	linux1, infra, linux3 := coremachine.Ref{Name: "linux-1", On: proMac}, coremachine.Ref{Name: "infra", On: miniMac}, coremachine.Ref{Name: "linux-3", On: miniMac}
+	listen := func(m coremachine.Ref, port int, process string) ports.Port {
+		return ports.Port{Machine: m, Port: port, Process: process, Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet}
 	}
-	l := ports.Listing{AllMachines: ports.AllMachines{Macs: []ports.MacPorts{
-		{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, Shared: []ports.SharedPort{}, Ports: []ports.Port{red("jterrazz-macbook-pro", 5000)}},
-		{Name: "jterrazz-mac-mini", Reachable: true, Shared: []ports.SharedPort{}, Ports: []ports.Port{red("jterrazz-mac-mini", 10250)}},
-	}}}
-	p := Ports(l, PortsOf{}, page.Context{Machine: "jterrazz-macbook-pro"})
-	var got [][]string
-	for _, a := range p.Actions {
-		if a.Run != nil && a.Run.Terminal {
-			got = append(got, append(append([]string{a.ID}, a.Rows...), a.Run.Argv...))
+	return ports.AllMachines{Macs: []ports.MacPorts{
+		{Name: proMac, ThisMac: true, Reachable: true, HTTPS: ports.HTTPSOff, Shared: []ports.SharedPort{
+			{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, HTTP: true, URLs: ports.URLSet{Public: "http://pro.ts.net:40001"}, ReservedAt: macNow.Add(-time.Hour)},
+		}, Ports: []ports.Port{listen(linux1, 4321, "astro"), {Machine: coremachine.Ref{Name: proMac}, Port: 5000, Process: "ControlCenter", Binds: []string{"*"}, Reach: ports.Outside}}},
+		{Name: miniMac, Reachable: true, HTTPS: ports.HTTPSPort, Ports: []ports.Port{
+			{Machine: infra, Port: 443, Process: "nginx", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Declared: &ports.Declaration{Machine: "infra", Port: 443, Via: catalog.RouteCloudflareTunnel}},
+			{Machine: infra, Port: 6443, Process: "kube-apiserver", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet, Device: true},
+			listen(linux3, 5432, "postgres"),
+		}},
+	}}
+}
+
+func fleetPorts(t *testing.T, f ports.AllMachines, of PortsOf) page.Page {
+	t.Helper()
+	page.Strict(true)
+	defer page.Strict(false)
+	return Ports(ports.Listing{AllMachines: f}, of, page.Context{Machine: proMac})
+}
+
+func rowsOf(p page.Page, section string) []page.Row {
+	s := sectionOf(p, section)
+	if s == nil {
+		return nil
+	}
+	var out []page.Row
+	var walk func([]page.Item)
+	walk = func(items []page.Item) {
+		for _, it := range items {
+			if it.Row != nil {
+				out = append(out, *it.Row)
+			}
+			if it.Group != nil {
+				walk(it.Group.Items)
+			}
 		}
 	}
-	want := [][]string{
-		{"review:jterrazz-macbook-pro", "jterrazz-macbook-pro:5000", "ports"},
-		{"review:jterrazz-mac-mini", "jterrazz-mac-mini:10250", "ports", "--on", "jterrazz-mac-mini"},
+	walk(s.Items)
+	return out
+}
+
+func ids(rows []page.Row) []string {
+	out := make([]string, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, r.ID)
 	}
-	if !slices.EqualFunc(got, want, slices.Equal) {
-		t.Fatalf("reviews %q, want %q", got, want)
+	return out
+}
+
+// invariant: the Ports of all machines say what is exposed first, then what
+// is public, private and only listening, each port in its one place: a
+// share or what listens on a VM with its own tailnet device is private,
+// what listens on a VM behind its Mac waits for Share.
+func TestEveryPortOfTheFleetIsListedOnceInItsReach(t *testing.T) {
+	p := fleetPorts(t, portFleet(), PortsOf{})
+	var got []string
+	for _, s := range p.Sections {
+		got = append(got, s.ID)
+	}
+	if want := []string{SectionSummary, SectionExposed, SectionPublic, SectionPrivate, SectionListening}; !slices.Equal(got, want) {
+		t.Fatalf("sections %q, want %q", got, want)
+	}
+	for section, want := range map[string][]string{
+		SectionExposed: {proMac + ":5000"}, SectionPublic: {"infra:443"},
+		SectionPrivate: {"linux-1:5173", "infra:6443"}, SectionListening: {"linux-1:4321", "linux-3:5432"},
+	} {
+		if got := ids(rowsOf(p, section)); !slices.Equal(got, want) {
+			t.Errorf("%s lists %q, want %q", section, got, want)
+		}
+	}
+	if facts := sectionOf(p, SectionSummary).Caption; len(facts) != 4 || facts[1].Text != "1 public" || facts[2].Text != "2 on your tailnet" ||
+		facts[3].Text != "1 exposed" || facts[3].Signal != page.SignalFailing {
+		t.Fatalf("facts %v", facts)
 	}
 }
 
-// invariant: PO-45: the Ports page of a Mac offers Declare public and
-// never Share a port, which is a workspace's page's own.
-func TestTheMacsPortsPageNeverOffersShareAPort(t *testing.T) {
-	l := ports.Listing{AllMachines: ports.AllMachines{Macs: []ports.MacPorts{
-		{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, Shared: []ports.SharedPort{
-			{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, Process: "node", URLs: ports.URLSet{Public: "https://mac.ts.net:40001"}},
-		}},
-	}}}
-	mac := Ports(l, PortsOf{}, page.Context{Machine: "jterrazz-macbook-pro"})
-	if action(mac, ActionShare) != nil || action(mac, ActionDeclarePublic) == nil {
-		t.Fatalf("the Ports page of every Mac offers %v", mac.Actions)
+// invariant: a web share opens in a click and offers its QR; a raw TCP
+// port is copied; a listener is shared on the Mac its VM runs on.
+func TestAPortRowIsItsOwnVerb(t *testing.T) {
+	p := fleetPorts(t, portFleet(), PortsOf{})
+	vite, kube := rowsOf(p, SectionPrivate)[0], rowsOf(p, SectionPrivate)[1]
+	if open := action(p, vite.Verb); open == nil || open.Run.Open != "http://pro.ts.net:40001" || vite.Quick != ActionQR+"linux-1:5173" {
+		t.Fatalf("Vite's row runs %+v with %q beside", open, vite.Quick)
+	}
+	if copyIt := action(p, kube.Verb); copyIt == nil || copyIt.Run.Copy != "infra:6443" {
+		t.Fatalf("Kubernetes API's row runs %+v", copyIt)
+	}
+	postgres := rowsOf(p, SectionListening)[1]
+	share := action(p, postgres.Verb)
+	if share == nil || share.Label != VerbShare || share.Run.Call != CallSharePort || share.Run.In["VM"] != "linux-3" || share.Run.In["Port"] != "5432" ||
+		share.Run.Target == nil || share.Run.Target.Name != miniMac {
+		t.Fatalf("Postgres's Share runs %+v", share)
+	}
+	if postgres.Label != "Postgres" || vite.Label != "Vite" || kube.Label != "Kubernetes API" {
+		t.Fatalf("the rows are named %q, %q, %q", postgres.Label, vite.Label, kube.Label)
+	}
+}
+
+// invariant: SPEC B5.17: a port follows its VM: while infra is down its
+// ports are greyed and said unreachable, with no verb to run.
+func TestAPortOfADownServerIsUnreachableAndRunsNothing(t *testing.T) {
+	f := portFleet()
+	for i := range f.Macs[1].Ports {
+		if f.Macs[1].Ports[i].Machine.Name == "infra" {
+			f.Macs[1].Ports[i].Answer = ports.Unreachable
+		}
+	}
+	p := fleetPorts(t, f, PortsOf{})
+	for _, r := range []page.Row{rowsOf(p, SectionPublic)[0], rowsOf(p, SectionPrivate)[1]} {
+		if r.Signal != page.SignalFaint || len(r.Cells) != 1 || r.Cells[0].Text != "unreachable" || r.Verb != "" || r.Quick != "" || r.Mac != "" {
+			t.Errorf("%s reads %+v", r.ID, r)
+		}
+	}
+}
+
+// invariant: the exposed card names the app that listens and where, and
+// offers Declare public… and Show process, a terminal on station ports
+// of that Mac.
+func TestAnExposedPortOffersDeclarePublicAndItsProcess(t *testing.T) {
+	f := portFleet()
+	f.Macs[1].Ports = append(f.Macs[1].Ports, ports.Port{Machine: coremachine.Ref{Name: miniMac}, Port: 10250, Process: "kubelet", Binds: []string{"*"}, Reach: ports.Outside})
+	p := fleetPorts(t, f, PortsOf{})
+	rows := rowsOf(p, SectionExposed)
+	if len(rows) != 2 || rows[0].Label != "5000" || rows[0].Cells[0].Text != "AirPlay Receiver" || rows[0].Detail.Items[0].Text != page.ThisMac {
+		t.Fatalf("exposed %+v", rows)
+	}
+	got := make([][]string, 0, len(rows))
+	for _, r := range rows {
+		show := action(p, r.Menu[1])
+		if r.Menu[0] != ActionDeclarePublic || show == nil || show.Label != "Show process" {
+			t.Fatalf("%s offers %q", r.ID, r.Menu)
+		}
+		got = append(got, show.Run.Argv)
+	}
+	if want := [][]string{{"ports"}, {"ports", "--on", miniMac}}; !slices.EqualFunc(got, want, slices.Equal) {
+		t.Fatalf("Show process runs %q, want %q", got, want)
+	}
+}
+
+// invariant: a Mac's Ports segment lists its ports and its VMs' alone,
+// then its HTTPS links switch, which turns them the other way with
+// ports.set-https on that Mac.
+func TestAMacsPortsEndOnItsHTTPSLinksSwitch(t *testing.T) {
+	f := portFleet()
+	p := macPageOf(t, miniMac, func(m *Machine) { m.Ports = &f })
+	if got := ids(rowsOf(p, SectionPrivate)); !slices.Equal(got, []string{"infra:6443"}) {
+		t.Fatalf("mac-mini's private ports %q", got)
+	}
+	if sectionOf(p, SectionExposed) != nil || sectionOf(p, SectionPublic).Segment != SegmentPorts {
+		t.Fatalf("mac-mini's ports %+v", p.Sections)
+	}
+	sw := rowsOf(p, SectionHTTPS)[0]
+	turn := action(p, sw.Verb)
+	if sw.Label != "HTTPS links on mac-mini" || sw.Cells[0].Kind != page.KindOn || turn.Run.Call != CallSetHTTPS || turn.Run.In["On"] != "false" ||
+		turn.Run.Target == nil || turn.Run.Target.Name != miniMac {
+		t.Fatalf("the switch reads %+v and runs %+v", sw, turn.Run)
+	}
+}
+
+// invariant: a workspace's Ports hides Public when it has none, and lists
+// its listeners in its Private card, under their own words once it shares
+// something; one with nothing at all says "Nothing shared yet".
+func TestAWorkspacesPortsKeepItsListenersInItsCard(t *testing.T) {
+	f := portFleet()
+	p := macPageOf(t, "linux-3", func(m *Machine) { m.Ports = &f })
+	if sectionOf(p, SectionPublic) != nil || sectionOf(p, SectionListening) != nil {
+		t.Fatalf("linux-3's ports %+v", p.Sections)
+	}
+	if got := ids(rowsOf(p, SectionPrivate)); !slices.Equal(got, []string{"linux-3:5432"}) {
+		t.Fatalf("linux-3's card %q", got)
+	}
+	f.Macs[1].Shared = []ports.SharedPort{{VM: "linux-3", GuestPort: 8080, Reserved: 40001, State: ports.PhaseShared}}
+	p = macPageOf(t, "linux-3", func(m *Machine) { m.Ports = &f })
+	items := sectionOf(p, SectionPrivate).Items
+	if len(items) != 2 || items[1].Group == nil || items[1].Group.Head.Label != TitleListening {
+		t.Fatalf("linux-3's card %+v", items)
+	}
+	p = macPageOf(t, "review-bot", func(m *Machine) { m.Ports = &f })
+	if empty := sectionOf(p, SectionPrivate).Items[0].Empty; empty == nil || empty.Text != "Nothing shared yet" {
+		t.Fatalf("review-bot's card %+v", sectionOf(p, SectionPrivate).Items)
+	}
+}
+
+// invariant: a port shared a moment ago lands fresh on the page.
+func TestAPortJustSharedIsFresh(t *testing.T) {
+	f := portFleet()
+	f.Macs[0].Shared = append(f.Macs[0].Shared, ports.SharedPort{VM: "linux-1", GuestPort: 4321, Reserved: 40002, State: ports.PhaseShared, HTTP: true,
+		URLs: ports.URLSet{Public: "http://pro.ts.net:40002"}, ReservedAt: macNow.Add(-2 * time.Second)})
+	fleet := macFleet()
+	fleet.Macs[0].VMs = append(fleet.Macs[0].VMs, macFleet().Macs[1].VMs[0])
+	fleet.Macs[0].VMs[0].Name = "linux-1"
+	p := macPageOf(t, "linux-1", func(m *Machine) { m.All, m.Ports = fleet, &f })
+	var fresh []string
+	for _, r := range rowsOf(p, SectionPrivate) {
+		if r.Fresh {
+			fresh = append(fresh, r.ID)
+		}
+	}
+	if !slices.Equal(fresh, []string{"linux-1:4321"}) {
+		t.Fatalf("fresh %q", fresh)
 	}
 }
 

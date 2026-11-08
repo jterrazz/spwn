@@ -180,8 +180,12 @@ func macPage(m Machine, h model.MacView) page.Page {
 		}
 		p.Segments = segments()
 		p.Sections = append(p.Sections, macOverviewSections(m, h, label, stale)...)
-		p.Sections = append(p.Sections, macActivity(m, h), macPorts(m, h), macAccounts(m, h))
+		shares := macPorts(m, h)
+		p.Sections = append(p.Sections, macActivity(m, h))
+		p.Sections = append(p.Sections, shares.Sections...)
+		p.Sections = append(p.Sections, macAccounts(m, h))
 		p.Actions = append(p.Actions, overviewActions(m, h, label)...)
+		p.Actions = append(p.Actions, shares.Actions...)
 	}
 	if slices.ContainsFunc(p.Actions, func(a page.Action) bool { return a.ID == ActionNewVM }) && len(h.VMs) > 0 {
 		p.Header.Buttons = append(p.Header.Buttons, ActionNewVM)

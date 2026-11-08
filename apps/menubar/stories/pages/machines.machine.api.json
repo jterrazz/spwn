@@ -10,6 +10,25 @@
   "state": "loading",
   "sections": [
     {
+      "id": "summary",
+      "title": "api",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "permanent"
+        },
+        {
+          "kind": "text",
+          "text": "stopped"
+        },
+        {
+          "kind": "text",
+          "text": "no agent"
+        }
+      ]
+    },
+    {
       "id": "machine",
       "title": "api",
       "role": "summary",
@@ -166,24 +185,6 @@
       ]
     },
     {
-      "id": "ports",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "shared on Tailscale"
-        }
-      ],
-      "items": [
-        {
-          "empty": {
-            "text": "No port shared yet"
-          }
-        }
-      ],
-      "uncounted": true
-    },
-    {
       "id": "shared",
       "title": "Accounts shared from This Mac",
       "columns": [
@@ -263,6 +264,26 @@
           "api"
         ]
       }
+    },
+    {
+      "label": "More options for api",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "start-vm",
+        "delete",
+        "open-station"
+      ]
     }
-  ]
+  ],
+  "header": {
+    "back": "This Mac",
+    "glyph": {
+      "kind": "workspace"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
 }
