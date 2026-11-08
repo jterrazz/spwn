@@ -40,10 +40,11 @@ final class PagesTests: XCTestCase {
         XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
     }
 
-    func pushed(_ fixture: String, confirming: String? = nil, typed: String? = nil) throws -> PanelState {
+    func pushed(_ fixture: String, confirming: String? = nil, typed: String? = nil, segment: String? = nil) throws -> PanelState {
         let page = try Tree.page(fixture)
         var state = Snapshot.state(fixture, page)
         state.confirming = confirming
+        state.segment = segment
         if let confirming, let typed { state.answers[confirming] = [ActionRunner.typedKey: typed] }
         return state
     }
@@ -62,7 +63,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:shared"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
@@ -161,12 +162,15 @@ final class PagesTests: XCTestCase {
     // takes the account back from linux-1.
     func testAccountTakeBack() async throws {
         let page = try Tree.page("menubar.vm.linux-1")
-        XCTAssertEqual(page.section("shared")?.items?.compactMap(\.row?.label), ["GitHub", "Claude"])
-        let take = try XCTUnwrap(page.rowActions("github").first)
+        let shared = try XCTUnwrap(page.section("shared"))
+        XCTAssertEqual(shared.title, "Lent to linux-1")
+        XCTAssertEqual(shared.items?.compactMap(\.row?.label), ["GitHub", "Claude", "Lend an account"])
+        let github = try XCTUnwrap(shared.rows.first { $0.label == "GitHub" }?.id)
+        let take = try XCTUnwrap(page.rowActions(github).first { $0.label == "Take back" })
         XCTAssertEqual(take.label, "Take back")
         XCTAssertEqual(take.confirm?.question, "Take back GitHub from linux-1?")
         XCTAssertNil(take.confirm?.type)
-        try drawn("sheet.take-back", try pushed("menubar.vm.linux-1", confirming: take.id))
+        try drawn("sheet.take-back", try pushed("menubar.vm.linux-1", confirming: take.id, segment: "accounts"))
         let (frames, _) = try await sentAll(take, label: "mb-take-back", reread: [PageID.of("linux-1")])
         XCTAssertEqual(frames.map(\.call), ["accounts.take-back", "engine.refresh"])
         XCTAssertEqual(frames.first?.input, ["Account": "github", "From": "linux-1", "Confirm": "yes"])

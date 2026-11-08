@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -411,8 +412,8 @@ func shared(p page.Page) []string {
 			continue
 		}
 		for _, it := range s.Items {
-			if it.Row != nil {
-				out = append(out, it.Row.ID)
+			if it.Row != nil && it.Row.ID != "share-account" {
+				out = append(out, it.Row.ID[strings.LastIndex(it.Row.ID, "/")+1:])
 			}
 		}
 	}

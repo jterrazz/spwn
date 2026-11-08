@@ -28,8 +28,8 @@ extension Story {
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
         state.lit = ui.hover ?? ui.highlight
-        state.running = ui.pending?.first
         if let window = ui.window, let machine = state.shown?.context?.machine { state.windows[machine] = window }
+        state.pending = ui.pending ?? []
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }

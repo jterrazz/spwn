@@ -175,6 +175,33 @@ func TestThePipeRefusesAPendingPage(t *testing.T) {
 	}
 }
 
+func TestALoanSaysHowLongItHasLeftInEveryMedium(t *testing.T) {
+	for _, f := range fixtures(t) {
+		for _, s := range f.page.Sections {
+			for _, it := range s.Items {
+				if it.Row == nil || it.Row.Left == nil {
+					continue
+				}
+				left := " left"
+				for medium, render := range map[string]func() (string, error){
+					"tty100": func() (string, error) {
+						return ansi.Strip(string(tty.Render(f.page, tty.Options{Width: 100, Dark: true}))), nil
+					},
+					"pipe": func() (string, error) { b, err := pipe.Render(f.page); return string(b), err },
+				} {
+					out, err := render()
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !slices.ContainsFunc(strings.Split(out, "\n"), func(l string) bool { return strings.Contains(l, it.Row.Label) && strings.Contains(l, left) }) {
+						t.Errorf("%s %s: %s does not say %q", f.name, medium, it.Row.Label, left)
+					}
+				}
+			}
+		}
+	}
+}
+
 func TestEveryHintIsWholeInEveryMedium(t *testing.T) {
 	for _, f := range fixtures(t) {
 		hints, piped := map[string]bool{}, map[string]bool{}

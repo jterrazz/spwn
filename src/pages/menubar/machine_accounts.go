@@ -5,31 +5,76 @@ import (
 	"github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
-	"strconv"
 	"strings"
-	"time"
 )
 
-// value: the accounts This Mac shared with the workspace, each with what
-// it may do, its time left and its Take back.
+// value: a Mac's Accounts segment: what needs you there about accounts,
+// the copies it lent to its VMs with Lend an account… under them, then
+// what it is signed in to; each section of the segment.
+func macAccounts(m Machine, h model.MacView) ([]page.Section, []page.Action) {
+	all := accounts.AllMachines{Now: m.Now}
+	if m.Shares != nil {
+		all = m.Shares.Of(h.Name, "")
+	}
+	b := accountsBody{r: all.Read(), now: all, self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name}, segment: SegmentAccounts}
+	return b.sections(), b.actions()
+}
+
+// value: a workspace's Accounts segment: the copies its Mac shared it, each
+// with its time left, Extend and Take back, then Lend an account…; with
+// none, the line that says so; the footnote names whose accounts they are.
 func sharedSection(m Machine, h model.MacView, vm model.VM) page.Section {
-	from := model.Label(*m.All, h)
-	s := page.Section{ID: SectionShared, Title: "Accounts shared from " + from, Columns: columns()}
+	b := vmAccounts(m, h, vm)
+	s := b.copies()
+	said := map[string][]string{}
 	for _, a := range sharedAccounts(m, vm.Name) {
-		left := a.Shared.Until.Sub(m.Now)
-		words := make([]page.Value, 0, len(a.Scopes)+1)
 		for _, scope := range a.Scopes {
 			if !strings.Contains(scope, ":") {
-				words = append(words, page.Text(scope))
+				said[a.Provider] = append(said[a.Provider], scope)
 			}
 		}
-		row := page.Row{ID: a.Provider, Label: accounts.Label(a.Provider), Mark: page.OK, Cells: []page.Value{page.List(append(words, page.Text(hours(left)+" left"))...)}}
-		s.Items = append(s.Items, page.Item{Row: &row})
 	}
-	if len(s.Items) == 0 {
-		s.Items = []page.Item{{Empty: &page.Empty{Text: "No account shared"}}}
+	for i, it := range s.Items {
+		if it.Row == nil || it.Row.ID == RowShare {
+			continue
+		}
+		provider := providerOf(*it.Row)
+		s.Items[i].Row.Menu = append(s.Items[i].Row.Menu, ActionTakeBack+"/"+provider)
+		if words := said[provider]; len(words) > 0 {
+			s.Items[i].Row.Detail = page.Texts(words...)
+		}
 	}
+	s.Items = append(s.Items, page.Item{Note: &page.Note{Text: "These are " + model.Label(*m.All, h) + "'s accounts. Every loan ends by itself."}})
 	return s
+}
+
+func vmAccounts(m Machine, h model.MacView, vm model.VM) accountsBody {
+	mac := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
+	for _, a := range sharedAccounts(m, vm.Name) {
+		mac.Shares = append(mac.Shares, accounts.Shared{Account: a.Provider, VM: vm.Name, At: a.Shared.At, Until: a.Shared.Until})
+	}
+	all := accounts.AllMachines{Now: m.Now, Macs: []accounts.MacAccounts{mac}}
+	return accountsBody{r: all.Read(), now: all, self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name, VM: vm.Name}}
+}
+
+// value: the actions of a workspace's Accounts segment: Extend of each
+// copy and Lend an account…, beside the Take backs.
+func vmAccountActions(m Machine, h model.MacView, vm model.VM) []page.Action {
+	b := vmAccounts(m, h, vm)
+	out := make([]page.Action, 0, len(b.r.Shared)+1)
+	for _, c := range b.r.Shared {
+		out = append(out, b.extend(c))
+	}
+	return append(out, b.share(vm.Name))
+}
+
+func providerOf(r page.Row) string {
+	for i := len(r.ID) - 1; i >= 0; i-- {
+		if r.ID[i] == '/' {
+			return r.ID[i+1:]
+		}
+	}
+	return r.ID
 }
 
 func sharedAccounts(m Machine, vm string) []accounts.Account {
@@ -50,38 +95,23 @@ func sharedAccounts(m Machine, vm string) []accounts.Account {
 	return out
 }
 
-func hours(d time.Duration) string {
-	if d < time.Hour {
-		return strconv.Itoa(max(int(d/time.Minute), 1)) + " min"
-	}
-	return strconv.Itoa(int(d/time.Hour)) + " h"
-}
-
-func takeBacks(m Machine, vm model.VM) []page.Action {
+func takeBacks(m Machine, h model.MacView, vm model.VM) []page.Action {
 	shared := sharedAccounts(m, vm.Name)
 	out := make([]page.Action, 0, len(shared))
 	for _, a := range shared {
 		label := accounts.Label(a.Provider)
 		c := ask(m.Asks, "take-back", machine.Workspace, label, "Take back "+label+" from "+vm.Name+"?", "take back", "Its copy on "+vm.Name+" is deleted.")
-		out = append(out, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow, Rows: []string{a.Provider}, Priority: 4, Mutates: true, Confirm: c,
-			Run: &page.Run{Call: CallTakeBack, In: answered(c, map[string]string{"Account": a.Provider, "From": vm.Name})}})
+		out = append(out, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow, Rows: []string{h.Name + "/" + vm.Name + "/" + a.Provider}, Priority: 4, Mutates: true, Confirm: c,
+			Run: &page.Run{Call: CallTakeBack, In: answered(c, map[string]string{"Account": a.Provider, "From": vm.Name}), Target: target(h)}})
 	}
-	return out
+	return append(out, vmAccountActions(m, h, vm)...)
 }
 
-// value: a Mac's Accounts segment: the accounts it shared with its VMs, each with
-// its time left.
-func macAccounts(m Machine, h model.MacView) page.Section {
-	s := page.Section{ID: SectionAccounts, Title: "Accounts", Segment: SegmentAccounts, Columns: columns()}
-	for _, vm := range h.VMs {
-		for _, a := range sharedAccounts(m, vm.Name) {
-			row := page.Row{ID: vm.Name + "/" + a.Provider, Label: accounts.Label(a.Provider), Mark: page.OK,
-				Cells: []page.Value{page.Texts("shared with "+vm.Name, hours(a.Shared.Until.Sub(m.Now))+" left")}}
-			s.Items = append(s.Items, page.Item{Row: &row})
+func thisMacOf(all model.AllMachines) string {
+	for _, h := range all.Macs {
+		if h.ThisMac {
+			return h.Name
 		}
 	}
-	if len(s.Items) == 0 {
-		s.Items = []page.Item{{Empty: &page.Empty{Text: "No account shared"}}}
-	}
-	return s
+	return ""
 }

@@ -1,8 +1,9 @@
 import SwiftUI
 
-// invariant: SPEC A4, B1: a Mac's page: its header, then the sections of
-// the segment picked; the segment and what is unfolded are the client's
-// own, so a pick redraws the page it holds and asks the engine nothing.
+// invariant: SPEC A4, B1: a Mac's page, or a running workspace's: its
+// header, then the sections of the segment picked; the segment and what
+// is unfolded are the client's own, so a pick redraws the page it holds
+// and asks the engine nothing.
 struct MacPage: View {
     let page: Page
     let state: PanelState
@@ -88,7 +89,7 @@ struct MacPage: View {
         switch s.segment {
         case _ where s.id == "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
-        case "accounts": MacAccounts(section: s)
+        case "accounts": MacAccounts(section: s, page: page, busy: state.busy, run: run)
         default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })
         }
     }

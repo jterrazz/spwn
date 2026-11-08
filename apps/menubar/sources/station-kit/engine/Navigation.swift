@@ -9,6 +9,7 @@ public final class Navigation: @unchecked Sendable {
     public static let ports = "menubar.ports"
     public static let awake = "menubar.awake"
     public static let activity = "menubar.activity"
+    public static let accounts = "menubar.accounts"
 
     // value: the watch of a page of one subject: a Mac's ports
     // (`menubar.ports:jterrazz-mac-mini`), the activity over a window
@@ -57,6 +58,7 @@ public final class Navigation: @unchecked Sendable {
         case ports: return "Ports"
         case awake: return "Awake"
         case activity: return "Activity"
+        case accounts: return "Accounts"
         case PageID.switcher: return "All machines"
         default:
             if let title = page?.section("machine")?.title ?? page?.section("summary")?.title, !title.isEmpty { return title }

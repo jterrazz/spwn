@@ -45,7 +45,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 			Run:  &page.Run{Call: CallSharePort, In: map[string]string{"VM": vm.Name}, Target: target(h)},
 			Form: &page.Form{Title: "Share a port of " + vm.Name, Fields: []page.Field{{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"}}}})
 	}
-	p.Actions = append(p.Actions, takeBacks(m, vm)...)
+	p.Actions = append(p.Actions, takeBacks(m, h, vm)...)
 	if vm.State == model.Running {
 		p.Actions = append(p.Actions, insideActions(vm.Name)...)
 	}

@@ -1,7 +1,7 @@
 mac-mini
 
 Gauges
-VMs  ● infra · healthy · up 12 days
+VMs          ● infra · healthy · up 12 days
 Care
   ● Upkeep                    5 of 6 ready
   └─ ◐ Ready to host servers    5 of 6 ready · disk unlock after a power cut
@@ -18,5 +18,4 @@ Public  0
 Private  0
   Nothing shared yet
 ● HTTPS links on mac-mini · on
-Accounts
-  No account shared
+Lent to VMs  ● Lend an account · ends by itself

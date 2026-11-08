@@ -2175,8 +2175,15 @@
       "card": "flush"
     },
     {
-      "id": "accounts",
-      "title": "Accounts",
+      "id": "accounts:needs-you",
+      "title": "Needs you",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2",
+          "signal": "waits"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -2192,46 +2199,223 @@
       "items": [
         {
           "row": {
-            "id": "linux-1/claude",
-            "mark": "ok",
-            "label": "Claude",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "shared with linux-1"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "24 min left"
-                  }
-                ]
-              }
-            ]
+            "id": "short/macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "linux-1",
+            "detail": {
+              "kind": "text",
+              "text": "Claude ends in 24 min"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "symbol:clock",
+              "signal": "waits"
+            },
+            "verb": "ending:macbook-pro/linux-1/claude"
           }
         },
         {
           "row": {
-            "id": "linux-1/github",
+            "id": "macbook-pro/npm",
+            "mark": "broken",
+            "label": "This Mac",
+            "detail": {
+              "kind": "text",
+              "text": "npm needs sign-in"
+            },
+            "reason": "refused",
+            "hint": {
+              "command": "npm login",
+              "external": true
+            },
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "waits"
+            },
+            "verb": "sign-in:macbook-pro/npm"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "accounts",
+      "card": "flush"
+    },
+    {
+      "id": "accounts:shared",
+      "title": "Lent to VMs",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/claude",
+            "mark": "attention",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Claude Code inference"
+            },
+            "reason": "expiring",
+            "glyph": {
+              "kind": "account:claude"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/claude"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 1440,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/linux-1/github",
             "mark": "ok",
             "label": "GitHub",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "shared with linux-1"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "4 h left"
-                  }
-                ]
+                "kind": "text",
+                "text": "linux-1"
               }
-            ]
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "GitHub browser session"
+            },
+            "glyph": {
+              "kind": "account:github"
+            },
+            "mac": "linux-1",
+            "menu": [
+              "extend:macbook-pro/linux-1/github"
+            ],
+            "left": {
+              "kind": "until",
+              "n": 14400,
+              "of": 43200
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "share-account",
+            "mark": "ok",
+            "label": "Lend an account",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ends by itself"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "trail": "value",
+            "verb": "share-account"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        },
+        {
+          "mark": "attention",
+          "n": 1
+        }
+      ],
+      "segment": "accounts",
+      "card": "flush"
+    },
+    {
+      "id": "accounts:signed-in:macbook-pro",
+      "title": "Signed in on This Mac",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro/github",
+            "mark": "ok",
+            "label": "GitHub",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "jterrazz"
+                },
+                {
+                  "kind": "text",
+                  "text": "repo, workflow"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:github"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Max plan"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "account:claude"
+            }
           }
         }
       ],
@@ -2241,7 +2425,8 @@
           "n": 2
         }
       ],
-      "segment": "accounts"
+      "segment": "accounts",
+      "card": "flush"
     }
   ],
   "actions": [
@@ -2271,7 +2456,7 @@
           },
           {
             "kind": "text",
-            "text": "4 hr 24 min left"
+            "text": "4 hr left"
           }
         ]
       }
@@ -2699,6 +2884,177 @@
           "On": "false"
         }
       }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "short/macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "ending:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Sign in",
+      "on": "row",
+      "rows": [
+        "macbook-pro/npm"
+      ],
+      "id": "sign-in:macbook-pro/npm",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "accounts"
+        ]
+      },
+      "default": true,
+      "busy": "Waiting",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Terminal"
+          },
+          {
+            "kind": "text",
+            "text": "npm login on This Mac"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/claude"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Extend",
+      "on": "row",
+      "rows": [
+        "macbook-pro/linux-1/github"
+      ],
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/github",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "sheet": "share-account"
     },
     {
       "key": "cmd+t",

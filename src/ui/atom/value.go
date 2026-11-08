@@ -29,10 +29,26 @@ func Plain(v page.Value) string {
 	case page.KindSpark:
 		return Plain(sparkNow(v))
 	case page.KindUntil:
-		return v.At
+		if v.At != "" {
+			return v.At
+		}
 	default:
 	}
 	return show(v)
+}
+
+func Detail(r page.Row) page.Value {
+	if r.Left == nil {
+		return r.Detail
+	}
+	if r.Detail.Kind == "" {
+		return *r.Left
+	}
+	parts := []page.Value{r.Detail}
+	if r.Detail.Kind == page.KindList {
+		parts = append([]page.Value{}, r.Detail.Items...)
+	}
+	return page.List(append(parts, *r.Left)...)
 }
 
 func Show(v page.Value) string {

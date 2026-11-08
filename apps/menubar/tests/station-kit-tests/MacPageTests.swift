@@ -74,6 +74,31 @@ final class MacPageTests: XCTestCase {
         XCTAssertEqual(Set(drawn).count, 3, "two windows draw the same charts")
     }
 
+    // invariant: SPEC A4: a running workspace's page, as the live app
+    // holds it with no segment picked, is drawn on the frame its segments
+    // are picked in; its loans, each with its time left, are one pick away
+    // under Accounts and never drawn on its Overview.
+    func testARunningWorkspacesLoansAreOnePickAwayUnderAccounts() throws {
+        let page = try Tree.page("menubar.vm.linux-1")
+        let state = Snapshot.state("menubar.vm.linux-1", page)
+        XCTAssertNil(state.segment)
+        let calls = Calls()
+        XCTAssertNotNil(MachinePage.view(state, handlers: handlers(calls), scrolls: false))
+        let view = MacPage(page: page, state: state, handlers: handlers(calls), scrolls: false)
+        XCTAssertEqual(view.header.segmented(page.segments ?? []).map(\.label), ["Overview", "Activity", "Ports", "Accounts"])
+        let loans = MacPage.sections(page, segment: "accounts").flatMap(\.rows).filter { $0.left != nil }
+        XCTAssertEqual(loans.map(\.label), ["GitHub", "Claude"])
+        let overview = MacPage.sections(page, segment: "overview").compactMap(\.id)
+        XCTAssertEqual(overview, ["machine", "activity", "inside", "ports"])
+        var picked = state
+        picked.segment = "accounts"
+        let drawn = try [state, picked].map { s in
+            try XCTUnwrap(Snapshot.render(AnyView(MacPage(page: page, state: s, handlers: handlers(calls), scrolls: false)), scheme: .dark)?.png)
+        }
+        XCTAssertNotEqual(drawn[0], drawn[1])
+        XCTAssertEqual(calls.made, [])
+    }
+
     // invariant: SPEC A4: Needs you shows its first rows until unfolded,
     // then every row; the fold's words are the page's.
     func testNeedsFoldAfterThePagesTopAndUnfoldInPlace() throws {

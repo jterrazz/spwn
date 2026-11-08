@@ -1,0 +1,11 @@
+{
+    "group": "workspace",
+    "heightNote": "the workspace page's footer (ssh linux-1 and Open in Terminal) is the workspace page's own lot, P9; the page above it matches the prototype's",
+    "id": "workspace.working.accounts",
+    "note": "linux-1's Accounts: what This Mac lent it, GitHub read only and Claude Max plan, each with its time left over its total (Claude's 24 min orange), Extend and Take back; Lend an account…; the footnote names This Mac's accounts.",
+    "pages": ["pages/machines.accounts.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "accounts"
+    }
+}

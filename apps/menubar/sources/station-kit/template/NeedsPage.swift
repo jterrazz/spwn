@@ -11,7 +11,7 @@ struct NeedsPage: View {
     let scrolls: Bool
     @Environment(\.stationStill) private var still
 
-    var running: String? { state.running ?? state.settling }
+    var busy: Set<String> { state.busy.union([state.settling].compactMap { $0 }) }
 
     var body: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming) {
@@ -42,7 +42,7 @@ struct NeedsPage: View {
                 if s.id != TodoBadge.section { CardLabel(s.title ?? "", value: s.caption ?? []) }
                 Card {
                     ForEach(Array(s.rows.enumerated()), id: \.offset) { _, row in
-                        NeedRow(row, actions: page.actions ?? [], running: running) { verb(page, $0, handlers) }
+                        NeedRow(row, actions: page.actions ?? [], busy: busy) { verb(page, $0, handlers) }
                     }
                 }
             }

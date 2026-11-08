@@ -98,7 +98,7 @@ func row(b *strings.Builder, r page.Row, cells []bool) {
 		fields = append(fields, atom.Plain(v))
 	}
 	var last []string
-	if s := atom.Plain(r.Detail); s != "" {
+	if s := atom.Plain(atom.Detail(r)); s != "" {
 		last = append(last, s)
 	}
 	if r.Hint != nil {

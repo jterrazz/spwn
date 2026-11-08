@@ -2,6 +2,14 @@
 #if DEBUG
 import SwiftUI
 
+#Preview("accounts.all") { StoryStage(Stories["accounts.all"]) }
+
+#Preview("accounts.extended") { StoryStage(Stories["accounts.extended"]) }
+
+#Preview("accounts.signed-in") { StoryStage(Stories["accounts.signed-in"]) }
+
+#Preview("accounts.signing-in") { StoryStage(Stories["accounts.signing-in"]) }
+
 #Preview("awake.all") { StoryStage(Stories["awake.all"]) }
 
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
@@ -46,6 +54,8 @@ import SwiftUI
 
 #Preview("mac.air.asleep") { StoryStage(Stories["mac.air.asleep"]) }
 
+#Preview("mac.mini.accounts") { StoryStage(Stories["mac.mini.accounts"]) }
+
 #Preview("mac.mini.activity.24h") { StoryStage(Stories["mac.mini.activity.24h"]) }
 
 #Preview("mac.mini.activity.6m") { StoryStage(Stories["mac.mini.activity.6m"]) }
@@ -69,6 +79,8 @@ import SwiftUI
 #Preview("mac.mini.ports") { StoryStage(Stories["mac.mini.ports"]) }
 
 #Preview("mac.mini.stale") { StoryStage(Stories["mac.mini.stale"]) }
+
+#Preview("mac.this.accounts") { StoryStage(Stories["mac.this.accounts"]) }
 
 #Preview("mac.this.activity") { StoryStage(Stories["mac.this.activity"]) }
 
@@ -118,7 +130,11 @@ import SwiftUI
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
 
+#Preview("workspace.waiting.accounts") { StoryStage(Stories["workspace.waiting.accounts"]) }
+
 #Preview("workspace.waiting.ports") { StoryStage(Stories["workspace.waiting.ports"]) }
+
+#Preview("workspace.working.accounts") { StoryStage(Stories["workspace.working.accounts"]) }
 
 #Preview("workspace.working.activity") { StoryStage(Stories["workspace.working.activity"]) }
 

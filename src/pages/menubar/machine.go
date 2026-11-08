@@ -151,10 +151,10 @@ func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 }
 
 // invariant: SPEC A4: a running VM's page carries its header and its
-// segments (a server's Overview and Activity, a workspace's four), each
-// section of its kind's page under Overview, then its Activity's; a
-// header or a summary its kind's page drew is kept; a VM that does not
-// run has none of these.
+// segments (a server's Overview and Activity, a workspace's four), a
+// workspace's loans under Accounts and every other section of its kind's
+// page under Overview, then its Activity's; a header or a summary its
+// kind's page drew is kept; a VM that does not run has none of these.
 func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 	if vm.State != model.Running {
 		return p
@@ -174,7 +174,10 @@ func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
 		p.Segments = p.Segments[:2]
 	}
 	for i := range p.Sections {
-		if p.Sections[i].Segment == "" && p.Sections[i].ID != SectionMachine {
+		switch {
+		case p.Sections[i].ID == SectionShared:
+			p.Sections[i].Segment = SegmentAccounts
+		case p.Sections[i].Segment == "" && p.Sections[i].ID != SectionMachine && p.Sections[i].ID != SectionSummary:
 			p.Sections[i].Segment = SegmentOverview
 		}
 	}
@@ -243,9 +246,11 @@ func macPage(m Machine, h model.MacView) page.Page {
 		shares := macPorts(m, h)
 		p.Sections = append(p.Sections, macActivity(m, h)...)
 		p.Sections = append(p.Sections, shares.Sections...)
-		p.Sections = append(p.Sections, macAccounts(m, h))
 		p.Actions = append(p.Actions, overviewActions(m, h, label)...)
 		p.Actions = append(p.Actions, shares.Actions...)
+		accountSections, accountActions := macAccounts(m, h)
+		p.Sections = append(p.Sections, accountSections...)
+		p.Actions = append(p.Actions, accountActions...)
 	}
 	if slices.ContainsFunc(p.Actions, func(a page.Action) bool { return a.ID == ActionNewVM }) && len(h.VMs) > 0 {
 		p.Header.Buttons = append(p.Header.Buttons, ActionNewVM)

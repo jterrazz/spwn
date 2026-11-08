@@ -11,9 +11,11 @@
      Apps      38 installed                 Disk  2.4 of 20 GB
      Settings  2 need a look
 
- Accounts shared from This Mac  2 ●
-   ● GitHub  read only · 4 h left
-   ● Claude  12 h left
+ Lent to linux-1  2  3 ●
+   ● GitHub           linux-1         read only · 4h left
+   ● Claude           linux-1         Claude Code inference · 12h left
+   ● Lend an account  ends by itself
+   These are This Mac's accounts. Every loan ends by itself.
 
  Ports  2  2 ●
    ● Vite       linux-1:5173

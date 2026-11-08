@@ -1,0 +1,8 @@
+{
+    "group": "accounts",
+    "heightNote": "4.5 pt shorter than the prototype: MachineHeader's back line is 24 pt where the prototype's is 28 (its 24 pt button and 4 pt margin), which a page without segments does not make up; every card below matches it row for row",
+    "id": "accounts.all",
+    "note": "Accounts · All machines: what needs you, every copy lent with its time left (the one under 30 min orange), each account signed in with the Macs that hold it, then Full list in Terminal and Lend an account….",
+    "pages": ["pages/machines.accounts.accounts.json"],
+    "schema": "station.story/v1"
+}

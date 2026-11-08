@@ -1,10 +1,6 @@
 home.keyboard
-mac.this.accounts
-mac.mini.accounts
 workspace.agents
 workspace.agents.finished
-workspace.working.accounts
-workspace.waiting.accounts
 workspace.stopped
 workspace.started
 agent.working
@@ -24,10 +20,6 @@ server.recovered
 server.stopped
 agents.list
 agents.empty
-accounts.all
-accounts.signing-in
-accounts.signed-in
-accounts.extended
 awake.all
 awake.off
 awake.4h

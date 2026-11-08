@@ -8,6 +8,7 @@ struct MachineContent: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
+    var segment: String?
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationNow) private var now
     @Environment(\.stationStill) private var still
@@ -35,12 +36,12 @@ struct MachineContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             if let error = page.error { ErrorLine(error) }
-            if let head { header(head) }
+            if segment == nil, let head { header(head) }
             if loading {
                 skeleton
             } else {
                 ForEach(Array((page.sections ?? []).enumerated()), id: \.offset) { _, s in
-                    if s.id != "machine", s.id != "summary", s.segment == nil || s.segment == "overview" { section(s) }
+                    if Self.drawn(s, segment: segment) { section(s) }
                 }
                 if mac { portsRow }
             }
@@ -52,8 +53,16 @@ struct MachineContent: View {
             }
         }
         .background {
-            if !still, BackKey.gesture(state) == .back { EscapeKey(back: handlers.back) }
+            if segment == nil, !still, BackKey.gesture(state) == .back { EscapeKey(back: handlers.back) }
         }
+    }
+
+    // value: whether a section is drawn here: never the head, the summary
+    // or Accounts, which have their own frame; on a segment picked (its
+    // header drawn above it) only that segment's sections, else Overview's.
+    static func drawn(_ s: Section, segment: String?) -> Bool {
+        guard s.id != "machine", s.id != "summary" else { return false }
+        return s.segment == nil || s.segment == (segment ?? "overview")
     }
 
     // value: the machine stops, or is stopped: its tiles say no figure.
