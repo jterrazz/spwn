@@ -17,6 +17,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/jterrazz/studio-station/src/page"
+	"github.com/jterrazz/studio-station/src/ui/atom"
 	pagejson "github.com/jterrazz/studio-station/src/ui/render/json"
 	"github.com/jterrazz/studio-station/src/ui/render/pipe"
 	"github.com/jterrazz/studio-station/src/ui/render/tty"
@@ -171,6 +172,33 @@ func TestThePipeRefusesAPendingPage(t *testing.T) {
 		_, err := pipe.Render(f.page)
 		if pending := f.page.State == page.Loading; pending != errors.Is(err, pipe.ErrPending) {
 			t.Errorf("%s (state %s): pipe answered %v", f.name, f.page.State, err)
+		}
+	}
+}
+
+func TestALoanSaysHowLongItHasLeftInEveryMedium(t *testing.T) {
+	for _, f := range fixtures(t) {
+		for _, s := range f.page.Sections {
+			for _, it := range s.Items {
+				if it.Row == nil || it.Row.Left == nil {
+					continue
+				}
+				left := atom.Show(*it.Row.Left)
+				for medium, render := range map[string]func() (string, error){
+					"tty100": func() (string, error) {
+						return ansi.Strip(string(tty.Render(f.page, tty.Options{Width: 100, Dark: true}))), nil
+					},
+					"pipe": func() (string, error) { b, err := pipe.Render(f.page); return string(b), err },
+				} {
+					out, err := render()
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !slices.ContainsFunc(strings.Split(out, "\n"), func(l string) bool { return strings.Contains(l, it.Row.Label) && strings.Contains(l, left) }) {
+						t.Errorf("%s %s: %s does not say %q", f.name, medium, it.Row.Label, left)
+					}
+				}
+			}
 		}
 	}
 }

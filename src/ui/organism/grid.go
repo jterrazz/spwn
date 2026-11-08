@@ -296,6 +296,7 @@ func (e entry) keyOr(section string) string {
 
 func (g Grid) entry(r page.Row, prefix string, head, hidden bool) entry {
 	key := RowKey(g.Section.ID, r.ID)
+	r.Detail = atom.Detail(r)
 	if hidden || (g.Match != nil && !g.Match(r)) {
 		key = ""
 	}

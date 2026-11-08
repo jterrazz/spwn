@@ -101,7 +101,7 @@ func Detail(st token.Styles, s page.Section, r page.Row, bindings []Binding, wid
 		}
 	}
 	facts = append(facts, fact{"category", s.Title})
-	if v := Full(r.Detail); v != "" {
+	if v := Full(atom.Detail(r)); v != "" {
 		facts = append(facts, fact{"detail", v})
 	}
 	if r.Hint != nil {
