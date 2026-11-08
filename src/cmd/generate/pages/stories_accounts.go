@@ -17,14 +17,15 @@ func accountsWorlds() []World {
 	}
 }
 
-// value: Extend pressed on Claude's copy to linux-1: 4 hr more than the
-// 24 min it had left.
+// value: Extend pressed on Claude's copy to linux-1: accounts.share shares
+// it again, from now for 4 hr, as Sharing.Share records a share.
 func claudeExtended(f *Scene) {
 	for i, m := range f.Accounts.Machines {
 		for j, a := range m.Accounts {
 			if m.Name == "linux-1" && a.Provider == catalog.ProviderClaude && a.Shared != nil {
 				loan := *a.Shared
-				loan.Until = loan.Until.Add(4 * time.Hour)
+				loan.At = f.Accounts.Now
+				loan.Until = f.Accounts.Now.Add(4 * time.Hour)
 				f.Accounts.Machines[i].Accounts[j].Shared = &loan
 			}
 		}

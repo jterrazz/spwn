@@ -265,7 +265,7 @@ func (b accountsBody) extend(c accounts.SharedCopy) page.Action {
 		run.Target = &page.Target{Name: c.Mac}
 	}
 	return page.Action{ID: ActionExtend + key, Label: VerbExtend, On: page.OnRow, Rows: []string{key}, Mutates: true, Run: run,
-		Hud: hud(account+" on "+c.VM, minutes(c.Left+extendBy)+" left")}
+		Hud: hud(account+" on "+c.VM, minutes(extendBy)+" left")}
 }
 
 // value: Lend an account…: the sheet that shares one of the Mac's accounts

@@ -2,6 +2,7 @@ package menubar
 
 import (
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -78,5 +79,25 @@ func TestAWorkspacesLoansAreItsAccountsSegment(t *testing.T) {
 	}
 	if s := sectionOf(stopped, SectionShared); s == nil || s.Segment != "" {
 		t.Errorf("a stopped workspace's loans are %+v, want them unsegmented", s)
+	}
+}
+
+// invariant: Extend shares the copy again for 4 hr from now, as
+// accounts.share records it, so its HUD says 4 hr left, never the time
+// that was left plus 4 hr.
+func TestExtendSaysTheCopyHas4HrLeftFromNow(t *testing.T) {
+	report := &accounts.Report{Machines: []accounts.Machine{{Name: "linux-3", Kind: accounts.KindVM, Accounts: []accounts.Account{
+		{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Origin: accounts.OriginShared, Scopes: []string{"session:github"},
+			Shared: &accounts.Loan{At: macNow.Add(-4 * time.Hour), Until: macNow.Add(24 * time.Minute)}},
+	}}}}
+	p := macPageOf(t, "linux-3", func(m *Machine) { m.Accounts, m.Summary = report, nil })
+	var a *page.Action
+	for i := range p.Actions {
+		if p.Actions[i].ID == ActionExtend+miniMac+"/linux-3/"+catalog.ProviderGitHub {
+			a = &p.Actions[i]
+		}
+	}
+	if a == nil || a.Hud == nil || words(*a.Hud) != "GitHub on linux-3 | 4 hr left" || a.Run.In["For"] != strconv.FormatInt(int64(4*time.Hour), 10) {
+		t.Errorf("Extend is %+v, want accounts.share for 4 hr and its HUD GitHub on linux-3, 4 hr left", a)
 	}
 }

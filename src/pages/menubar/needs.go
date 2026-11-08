@@ -213,7 +213,7 @@ func (w needSaid) ending(c accounts.SharedCopy) Need {
 		Facts: []page.Value{page.Text("shared from " + w.mac(c.Mac)), page.Text("ends " + w.at(w.r.Now.Add(c.Left)))},
 		Nav:   machinePage(c.VM), Scope: []string{c.Mac, c.VM},
 		Verb: page.Action{ID: key, Label: VerbExtend, On: page.OnRow, Rows: []string{key}, Mutates: true, Default: true, Run: run,
-			Hud: hud(account+" on "+c.VM, minutes(c.Left+extendBy)+" left")},
+			Hud: hud(account+" on "+c.VM, minutes(extendBy)+" left")},
 	}
 }
 
