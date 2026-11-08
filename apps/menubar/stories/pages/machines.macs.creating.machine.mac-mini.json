@@ -466,8 +466,8 @@
       "card": "care"
     },
     {
-      "id": "activity",
-      "title": "Activity",
+      "id": "window-6m",
+      "title": "Last 6 minutes",
       "role": "summary",
       "columns": [
         {
@@ -479,11 +479,6 @@
           "key": "value",
           "kind": "list",
           "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
         }
       ],
       "items": [
@@ -496,255 +491,29 @@
                 "kind": "percent",
                 "n": 340,
                 "live": "cpu:mac-mini"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 18
-                  },
-                  {
-                    "kind": "count",
-                    "n": 25
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  },
-                  {
-                    "kind": "count",
-                    "n": 30
-                  },
-                  {
-                    "kind": "count",
-                    "n": 22
-                  },
-                  {
-                    "kind": "count",
-                    "n": 41
-                  },
-                  {
-                    "kind": "count",
-                    "n": 55
-                  },
-                  {
-                    "kind": "count",
-                    "n": 48
-                  },
-                  {
-                    "kind": "count",
-                    "n": 36
-                  },
-                  {
-                    "kind": "count",
-                    "n": 28
-                  },
-                  {
-                    "kind": "count",
-                    "n": 31
-                  },
-                  {
-                    "kind": "count",
-                    "n": 44
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 29
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  }
-                ]
               }
-            ]
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
           }
         },
         {
           "row": {
-            "id": "memory",
-            "label": "Memory",
+            "id": "network",
+            "label": "Network",
             "cells": [
               {
-                "kind": "ratio",
-                "n": 54062900838,
-                "of": 68719476736,
-                "live": "memory:mac-mini"
-              },
-              {
-                "kind": "spark",
+                "kind": "list",
                 "items": [
                   {
-                    "kind": "none"
+                    "kind": "text",
+                    "text": "↓ 1.7"
                   },
                   {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  },
-                  {
-                    "kind": "count",
-                    "n": 78
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "percent",
-                "n": 386,
-                "live": "disk:mac-mini"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
+                    "kind": "text",
+                    "text": "↑ 0.1 MB/s"
                   }
                 ]
               }
@@ -752,6 +521,367 @@
           }
         }
       ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-1h",
+      "title": "Last hour",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:mac-mini"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "↓ 1.7"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "↑ 0.1 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-24h",
+      "title": "Last 24 hours",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:mac-mini"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "↓ 1.7"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "↑ 0.1 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Memory",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "now"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "14 GB free",
+              "live": "free:mac-mini"
+            },
+            "bar": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "size",
+                  "text": "14 GB",
+                  "n": 15408195174,
+                  "label": "macOS"
+                },
+                {
+                  "kind": "list",
+                  "text": "36 GB",
+                  "n": 38654705664,
+                  "label": "VMs",
+                  "items": [
+                    {
+                      "kind": "size",
+                      "n": 25769803776
+                    },
+                    {
+                      "kind": "size",
+                      "n": 8589934592
+                    },
+                    {
+                      "kind": "size",
+                      "n": 4294967296
+                    }
+                  ]
+                },
+                {
+                  "kind": "size",
+                  "text": "64 GB",
+                  "n": 68719476736,
+                  "label": "of"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart"
+    },
+    {
+      "id": "processes",
+      "title": "Top processes",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "CPU, of mac-mini"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "vm:linux-3",
+            "label": "linux-3",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 700,
+                "live": "cpuh:linux-3"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "4 cores"
+            },
+            "glyph": {
+              "kind": "agent"
+            },
+            "trail": "cpu",
+            "nav": "menubar.machine:linux-3"
+          }
+        },
+        {
+          "row": {
+            "id": "812",
+            "label": "station",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu",
+              "signal": "quiet"
+            },
+            "trail": "cpu"
+          }
+        },
+        {
+          "row": {
+            "id": "vm:infra",
+            "label": "infra",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 170,
+                "live": "cpuh:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "8 cores"
+            },
+            "glyph": {
+              "kind": "server"
+            },
+            "trail": "cpu",
+            "nav": "menubar.machine:infra"
+          }
+        },
+        {
+          "row": {
+            "id": "vm:review-bot",
+            "label": "review-bot",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 20,
+                "live": "cpuh:review-bot"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "2 cores"
+            },
+            "glyph": {
+              "kind": "agent"
+            },
+            "trail": "cpu",
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
       "segment": "activity"
     },
     {
@@ -1099,8 +1229,7 @@
     "cpuh:infra",
     "cpuh:linux-3",
     "cpu:mac-mini",
-    "memory:mac-mini",
-    "disk:mac-mini",
+    "cpuh:review-bot",
     "free:mac-mini",
     "net:mac-mini"
   ]

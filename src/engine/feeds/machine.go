@@ -7,6 +7,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
+	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -138,6 +139,7 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 		shared, serr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{AllMachines: true}, nil)
 		shares, aerr := call.Read(ctx, f.o.Calls, machine.Ref{}, accountscalls.List, accountscalls.ListIn{VMs: true}, nil)
 		read, oerr := call.Read(ctx, f.o.Calls, at, overviewcalls.Read, overviewcalls.ReadIn{}, nil)
+		kept, kerr := call.Read(ctx, f.o.Calls, at, activitycalls.Read, activitycalls.ReadIn{History: true, Graph: 6 * time.Minute, Quick: true}, nil)
 		var copies *accounts.AllMachines
 		var held *awake.Report
 		if h, ok := macNamed(listed.All, f.m.Name); ferr == nil && ok {
@@ -161,6 +163,9 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 			}
 			if oerr == nil {
 				m.Summary = &read.Summary
+			}
+			if kerr == nil {
+				m.Activity = &kept
 			}
 		})
 		if rest(ctx, f.o.Clock, remoteEvery, in) != nil {

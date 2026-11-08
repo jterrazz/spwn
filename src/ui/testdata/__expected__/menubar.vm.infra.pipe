@@ -3,3 +3,5 @@
 ●	Has an address	192.168.64.7
 ●	SSH answers
 ●	Check passes	https://infra:6443/readyz · 200
+# Measured
+	Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it.

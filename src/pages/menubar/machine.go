@@ -65,10 +65,13 @@ const (
 type Machine struct {
 	// value: the machine the page is of, a VM or a Mac, by its name among
 	// the machines; a nil part is still being read.
-	Name     string
-	All      *model.AllMachines
-	Summary  *overview.Summary
-	Samples  []activity.Reading
+	Name    string
+	All     *model.AllMachines
+	Summary *overview.Summary
+	Samples []activity.Reading
+	// value: the machine's activity as its engine keeps it: the last 6 min
+	// at 2 s (Graph) and the day at a minute (History), nil until read.
+	Activity *activity.Report
 	Ports    *ports.AllMachines
 	Accounts *accounts.Report
 	// value: a Mac's page: the copies every Mac shared, its Awake, and the
@@ -142,9 +145,61 @@ func running(m Machine, vm model.VM) []activity.Reading {
 
 func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.Lifetime.Kind() == machine.Server {
-		return serverPage(m, h, vm)
+		return vmFrame(m, h, vm, serverPage(m, h, vm))
 	}
-	return workspacePage(m, h, vm)
+	return vmFrame(m, h, vm, workspacePage(m, h, vm))
+}
+
+// invariant: SPEC A4: a running VM's page carries its header and its
+// segments (a server's Overview and Activity, a workspace's four), each
+// section of its kind's page under Overview, then its Activity's; a VM
+// that does not run has none.
+func vmFrame(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page {
+	if vm.State != model.Running {
+		return p
+	}
+	glyph := page.Glyph{Kind: "workspace"}
+	switch {
+	case vm.Lifetime.Kind() == machine.Server:
+		glyph.Kind = "server"
+	case vm.Agent != nil && !vm.Finished():
+		glyph.Kind = "agent"
+	}
+	p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: glyph}
+	p.Segments = segments()
+	if vm.Lifetime.Kind() == machine.Server {
+		p.Segments = p.Segments[:2]
+	}
+	for i := range p.Sections {
+		if p.Sections[i].Segment == "" && p.Sections[i].ID != SectionMachine {
+			p.Sections[i].Segment = SegmentOverview
+		}
+	}
+	p.Sections = append(p.Sections, page.Section{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: vmFacts(m, vm)})
+	p.Sections = append(p.Sections, vmActivity(m, h, vm)...)
+	if sectionHas(p, SectionGuestUpkeep) {
+		p.Actions = append(p.Actions, updateGuest(h, vm))
+	}
+	p.Live = pageLive(p)
+	return page.Seal(p)
+}
+
+func sectionHas(p page.Page, id string) bool {
+	return slices.ContainsFunc(p.Sections, func(s page.Section) bool { return s.ID == id })
+}
+
+// value: a VM's facts in its header: its kind or lifetime, how long it
+// has run.
+func vmFacts(m Machine, vm model.VM) []page.Value {
+	word := lifeWord(vm)
+	if vm.Lifetime.Kind() == machine.Server {
+		word = "server"
+	}
+	out := []page.Value{page.Text(word)}
+	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
+		out = append(out, page.Text("up "+days(m.Now.Sub(vm.BootAt))))
+	}
+	return out
 }
 
 func items(rows []page.Row) []page.Item {
@@ -180,7 +235,8 @@ func macPage(m Machine, h model.MacView) page.Page {
 		}
 		p.Segments = segments()
 		p.Sections = append(p.Sections, macOverviewSections(m, h, label, stale)...)
-		p.Sections = append(p.Sections, macActivity(m, h), macPorts(m, h), macAccounts(m, h))
+		p.Sections = append(p.Sections, macActivity(m, h)...)
+		p.Sections = append(p.Sections, macPorts(m, h), macAccounts(m, h))
 		p.Actions = append(p.Actions, overviewActions(m, h, label)...)
 	}
 	if slices.ContainsFunc(p.Actions, func(a page.Action) bool { return a.ID == ActionNewVM }) && len(h.VMs) > 0 {

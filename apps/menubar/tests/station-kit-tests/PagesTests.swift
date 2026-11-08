@@ -53,15 +53,15 @@ final class PagesTests: XCTestCase {
     // terminal, and each draws offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
-        XCTAssertEqual(linux.sections?.compactMap(\.id), ["machine", "activity", "inside", "ports", "shared"])
+        XCTAssertEqual(linux.sections?.compactMap(\.id), ["machine", "activity", "inside", "ports", "shared", "summary", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(linux.section("machine")?.caption.map { $0.compactMap(\.text) }, ["Workspace VM", "Throwaway", "on This Mac"])
         XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "Share a port", "Open in Terminal"])
         let infra = try Tree.page("menubar.vm.infra")
-        XCTAssertEqual(infra.sections?.compactMap(\.id), ["machine", "up", "health", "activity", "server"])
+        XCTAssertEqual(infra.sections?.compactMap(\.id), ["machine", "up", "health", "activity", "server", "summary", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
         XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
-        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "activity", "ports", "accounts"])
+        XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "ports", "accounts"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil, "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")

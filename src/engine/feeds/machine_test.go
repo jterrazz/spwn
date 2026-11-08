@@ -317,8 +317,14 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 		return ""
 	}
 	p := until(t, pages, "infra running", func(p page.Page) bool { return state(p) == page.OK })
-	if !slices.Equal(p.Live, []string{"cpu:infra", "memory:infra", "disk:infra"}) {
-		t.Errorf("infra's page reads the live keys %q, want its CPU, memory and disk", p.Live)
+	if !slices.Equal(p.Live, []string{"cpu:infra", "memory:infra", "disk:infra", "free:infra"}) {
+		t.Errorf("infra's page reads the live keys %q, want its CPU, memory, disk and its Activity's free memory", p.Live)
+	}
+	w.mu.Lock()
+	kept := w.reads["infra"]
+	w.mu.Unlock()
+	if len(kept) == 0 || !kept[0].History || kept[0].Graph != 6*time.Minute || !kept[0].Quick {
+		t.Errorf("infra's activity was read %+v, want its day and its last 6 min as its engine keeps them, without waiting", kept)
 	}
 	if got := needs(p); len(got) != 0 {
 		t.Errorf("infra's page draws Needs you %q", got)
