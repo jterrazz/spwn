@@ -90,8 +90,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				}
 				return io.Page(pagemachines.ServerStopped(in.Name, start, d.ThisMachine), nil)
 			}
-			if len(out.Agents) > 0 {
-				return io.Page(pagemachines.StoppedWithAgents(in.Name, out.Agents, d.ThisMachine), nil)
+			if len(out.Agents)+len(out.Warnings) > 0 {
+				return io.Page(pagemachines.StoppedWithAgents(in.Name, out.Agents, out.Warnings, d.ThisMachine), nil)
 			}
 			return io.Page(pagemachines.Change("stop", in.Name, "stopped, kept", d.ThisMachine), nil)
 		},

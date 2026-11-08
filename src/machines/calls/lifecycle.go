@@ -51,6 +51,8 @@ type StopOut struct {
 	Kind machine.Kind
 	// value: SPEC B5.22: its agents, stopped with it.
 	Agents []string
+	// value: each agent that did not stop, said; the VM stopped all the same.
+	Warnings []string
 }
 
 var Stop = call.Call[Deps, StopIn, StopOut]{
@@ -74,8 +76,8 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 		if err := naming(confirm.Ask(confirm.Stop, kind, in.VM, in.Confirm), live(ctx, d, in.VM)); err != nil {
 			return StopOut{Kind: kind}, err
 		}
-		stopped, _ := stopAgents(ctx, d, in.VM, "its workspace stopped")
-		return StopOut{Kind: kind, Agents: stopped}, d.Machines.Stop(ctx, in.VM)
+		stopped, warned := stopAgents(ctx, d, in.VM, "its workspace stopped")
+		return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, d.Machines.Stop(ctx, in.VM)
 	},
 }
 

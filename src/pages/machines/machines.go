@@ -196,10 +196,23 @@ func agentsStopped(names []string) string {
 	return "its agents " + strings.Join(names, ", ") + " stopped"
 }
 
-func StoppedWithAgents(name string, agents []string, thisMac page.Context) page.Page {
-	row := pages.Done(name, catalog.StateOK, "")
-	row.Detail = page.Texts("stopped, kept", agentsStopped(agents))
-	return pages.Outcome("machines stop", thisMac, nil, []page.Row{row}, "machines")
+func StoppedWithAgents(name string, agents, warnings []string, thisMac page.Context) page.Page {
+	row := pages.Done(name, catalog.StateOK, "stopped, kept")
+	if len(agents) > 0 {
+		row.Detail = page.Texts("stopped, kept", agentsStopped(agents))
+	}
+	return pages.Outcome("machines stop", thisMac, nil, append([]page.Row{row}, warned(name, warnings)...), "machines")
+}
+
+// value: a VM's stop or delete warnings, one row each under its own.
+func warned(name string, warnings []string) []page.Row {
+	rows := make([]page.Row, 0, len(warnings))
+	for i, w := range warnings {
+		row := pages.Done(name+"/"+strconv.Itoa(i), catalog.StateDegraded, w)
+		row.Label = name
+		rows = append(rows, row)
+	}
+	return rows
 }
 
 func Change(verb, name, change string, thisMac page.Context) page.Page {
@@ -406,11 +419,7 @@ func Deleted(r model.DeleteReport, thisMac page.Context) page.Page {
 	if len(r.Agents) > 0 {
 		rows[0].Detail = page.Texts("deleted", agentsStopped(r.Agents))
 	}
-	for i, w := range r.Warnings {
-		row := pages.Done(r.Name+"/"+strconv.Itoa(i), catalog.StateDegraded, w)
-		row.Label = r.Name
-		rows = append(rows, row)
-	}
+	rows = append(rows, warned(r.Name, r.Warnings)...)
 	return pages.Outcome("machines delete "+r.Name, thisMac, nil, rows, "VMs")
 }
 
