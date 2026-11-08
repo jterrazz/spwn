@@ -17,7 +17,7 @@ func macWorlds() []World {
 		{Name: "machines.macs", Edit: macIdentities, Pages: []string{pro, mini, air}},
 		{Name: "machines.macs.down", Edit: macs().then(infraDown), Pages: []string{mini}},
 		{Name: "machines.macs.four-needs", Edit: macs().then(infraDown, sharesEnding), Pages: []string{mini}},
-		{Name: "machines.macs.exposed", Edit: macs().then(airPlayExposed), Pages: []string{pro}},
+		{Name: "machines.macs.exposed", Edit: macs().then(airPlayOnEvery), Pages: []string{pro}},
 		{Name: "machines.macs.empty", Edit: edits{thisMacAlone}.then(macIdentities), Pages: []string{pro}},
 		{Name: "machines.macs.checking", Edit: macs().then(miniSilentFor(40 * time.Second)), Pages: []string{mini}},
 		{Name: "machines.macs.stale", Edit: macs().then(miniSilentFor(3 * time.Minute)), Pages: []string{mini}},
@@ -85,7 +85,7 @@ func sharesEnding(f *Scene) {
 	}
 }
 
-func airPlayExposed(f *Scene) {
+func airPlayOnEvery(f *Scene) {
 	f.Ports.Macs[0].Ports = append(f.Ports.Macs[0].Ports, ports.Port{Machine: coremachine.Ref{Name: proName}, Port: 5000, Process: "ControlCenter", Binds: []string{"*"}, Reach: ports.Outside})
 }
 

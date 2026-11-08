@@ -119,7 +119,7 @@ func (h heroReading) top() (page.Row, []page.Item) {
 			continue
 		}
 		others := append(append([]Need{}, h.needs[:i]...), h.needs[i+1:]...)
-		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Broken, Reason: reasonOf(n.Finding), Glyph: n.Glyph, Detail: facts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav}
+		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Broken, Reason: reasonOf(n.Finding), Glyph: n.Glyph, Detail: heroFacts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav}
 		return head, h.also(others)
 	}
 	switch len(h.needs) {
@@ -128,7 +128,7 @@ func (h heroReading) top() (page.Row, []page.Item) {
 	case 1:
 		n := h.needs[0]
 		head := page.Row{ID: RowHero, Label: n.Hero, Mark: page.Attention, Reason: reasonOf(n.Finding), Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits),
-			Detail: facts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav, Signal: h.signal(n)}
+			Detail: heroFacts(n.Facts), Verb: n.Verb.ID, Nav: n.Nav, Signal: h.signal(n)}
 		return head, nil
 	}
 	head := page.Row{ID: RowHero, Label: things(len(h.needs)), Mark: page.Attention, Reason: page.Waiting, Glyph: symbol("exclamationmark.circle.fill", page.SignalWaits)}
@@ -239,7 +239,7 @@ func (h heroReading) fine() page.Value {
 
 // value: a need's facts as the hero says them: when there are several, the
 // last one goes first when the line is too long.
-func facts(vs []page.Value) page.Value {
+func heroFacts(vs []page.Value) page.Value {
 	out := append([]page.Value{}, vs...)
 	if len(out) > 1 {
 		out[len(out)-1] = dropFirst(out[len(out)-1], 1)

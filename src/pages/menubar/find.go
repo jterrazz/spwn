@@ -39,8 +39,7 @@ const (
 	VerbRun     = "Run"
 	VerbCleanUp = "Clean up"
 
-	CallCleanup = "machines.cleanup"
-	awakeFor    = 4 * time.Hour
+	awakeFor = 4 * time.Hour
 )
 
 type FindReading struct {
