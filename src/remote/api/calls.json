@@ -329,6 +329,18 @@
       "out": "Added"
     },
     {
+      "name": "machines.cleanup",
+      "schema": "station.machines.cleanup/v1",
+      "where": "in-engine",
+      "confirm": "cleanup",
+      "errors": [
+        "confirm.yes-needed",
+        "machines.not-finished"
+      ],
+      "in": "CleanupIn",
+      "out": "Cleaned"
+    },
+    {
       "name": "machines.create-server",
       "schema": "station.machines.create-server/v1",
       "where": "in-engine",

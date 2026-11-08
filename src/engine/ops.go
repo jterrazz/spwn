@@ -46,6 +46,8 @@ type VMView struct {
 	LastLines []string `json:"last_lines,omitempty"`
 	// value: when the create that made it made it ready (SPEC B5.10).
 	ReadyAt time.Time `json:"ready_at,omitzero"`
+	// value: the agent its guest last reported it said by (SPEC B5.1).
+	Agent *model.AgentView `json:"agent,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

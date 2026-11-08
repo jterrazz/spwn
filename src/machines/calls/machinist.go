@@ -62,6 +62,7 @@ type EngineVM struct {
 	LastLines []string
 	// value: when the create it was made by made it ready.
 	ReadyAt time.Time
+	Agent   *model.AgentView
 }
 
 type Engine interface {

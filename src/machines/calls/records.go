@@ -84,7 +84,7 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 			vm.Guest, vm.IP, vm.Detail = d.Guest, d.IP, d.Detail
 			vm.SSH, vm.Restarts, vm.CheckStatus, vm.BootAt = d.SSH, d.Restarts, d.Check, d.BootAt
 			vm.Latency, vm.Restart = d.Latency, d.Restart
-			vm.Cause, vm.LastLines, vm.ReadyAt = d.Cause, d.LastLines, d.ReadyAt
+			vm.Cause, vm.LastLines, vm.ReadyAt, vm.Agent = d.Cause, d.LastLines, d.ReadyAt, d.Agent
 		}
 		vm = model.Born(vm, r.Birth, s.h.Now())
 		if r.Lifetime == model.AlwaysOn && s.o.Uptime != nil {

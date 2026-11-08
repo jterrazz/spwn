@@ -296,7 +296,7 @@ func (d *Engine) vmViews() []engine.VMView {
 	for name, v := range d.vms {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
-			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
+			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt, Agent: agentView(v.agents),
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt

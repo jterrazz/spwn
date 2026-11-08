@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/machine"
@@ -19,6 +20,14 @@ type Deps struct {
 	Laptop bool
 	// value: what starts an agent in a workspace just made.
 	Agents AgentStarter
+	// value: what a VM of this Mac holds beyond its disk, which goes with it.
+	Holdings Holdings
+	Now      func() time.Time
+}
+
+type Holdings interface {
+	// value: the guest ports reserved for vm and the accounts shared with it.
+	Held(ctx context.Context, vm string) (ports []int, accounts []string, err error)
 }
 
 type AgentStarter interface {
@@ -91,6 +100,6 @@ func All(d Deps) []call.Handler {
 	return []call.Handler{
 		call.BindWatch(List, d), call.Bind(CreateWorkspace, d), call.Bind(CreateServer, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(Delete, d),
 		call.Bind(Restart, d), call.Bind(RestartMac, d), call.Bind(Add, d), call.Bind(Forget, d), call.Bind(Unlock, d), call.Bind(SSH, d), call.Bind(Edit, d),
-		call.Bind(Log, d),
+		call.Bind(Log, d), call.Bind(Cleanup, d),
 	}
 }

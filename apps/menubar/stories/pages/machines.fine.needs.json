@@ -1,0 +1,51 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.needs",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Needs you",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All machines"
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing needs you",
+            "sub": "nothing blocks an agent or a server"
+          }
+        }
+      ],
+      "card": "flush"
+    }
+  ],
+  "header": {
+    "back": "All machines"
+  }
+}

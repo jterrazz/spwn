@@ -100,7 +100,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		NeverSleeps:   func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		AccountShares: shares, Peer: m.engineAPI(),
 		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageSwitcher: menubar.Switcher(), engine.PageMachine: menubar.Machine(),
-			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity(), engine.PageAccounts: menubar.Accounts()},
+			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity(), engine.PageAccounts: menubar.Accounts(), engine.PageNeeds: menubar.Needs()},
 		Sample:   live.Sample,
 		Notifier: notifier, Checks: checks, Join: func(parts ...string) string { return strings.Join(parts, token.Sep) },
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
@@ -192,7 +192,7 @@ func (d macEngine) VMs(ctx context.Context) (map[string]machinescalls.EngineVM, 
 	for _, v := range views {
 		out[v.Name] = machinescalls.EngineVM{
 			State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt,
-			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt,
+			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Agent: v.Agent,
 		}
 	}
 	return out, nil

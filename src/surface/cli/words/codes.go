@@ -17,6 +17,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
+	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/ports"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
 )
@@ -158,6 +159,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		accountscalls.ToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
+		},
+		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
+			return e.Subject + " stays: only a throwaway that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"
 		},
 		agentscalls.UnknownSession: func(e *fail.Error) (string, string) {
 			return "no agent session \"" + e.Subject + "\" here", "station agents"

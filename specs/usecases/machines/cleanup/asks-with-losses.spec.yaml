@@ -1,0 +1,28 @@
+description: 'a cleanup on a terminal names each throwaway, its idle time and what goes with it, then asks once'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 "tests pass"'
+      exit: 0
+    - command: 'world advance 12m'
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 140x30 "$STATION" machines cleanup'
+      stdin: |
+          see Delete linux-1?
+          send y
+          scrollback
+      exit: 0
+      stdout: |
+          ┃ Delete linux-1?
+          ┃ linux-1 · finished 12 min ago · tests pass · goes with its disk (50 GB), 2 shared ports and 2 shared accounts
+          ┃
+          ●       linux-1 deleted · with its disk, its ports and its shared accounts
+    - command: 'machines | /usr/bin/grep -c linux-1'
+      exit: 1
+      stdout: |
+          0
