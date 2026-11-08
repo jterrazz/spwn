@@ -1,0 +1,22 @@
+description: 'a Mac that went silent still holds the names its stopped workspace kept, as it last said them'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on ci-1 --name docs-bot'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: 'machines stop ci-1 --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	ci-1	stopped, kept · its agent docs-bot stopped
+    - command: 'machines >/dev/null'
+      exit: 0
+    - command: 'world offline jterrazz-mac-mini'
+      exit: 0
+    - command: 'agents start "Write the release notes" --on linux-1 --name docs-bot'
+      exit: 2
+      stderr: |
+          Error: an agent is already named docs-bot
+          Hint: name it another way: --name <name>
