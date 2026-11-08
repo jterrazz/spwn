@@ -292,7 +292,7 @@ func contains(list []string, s string) bool {
 	return false
 }
 
-// value: the verbs of what needs you, each once, for the hero's rows.
+// value: the verbs of what needs you, one per need, for the hero's rows.
 func verbs(ns []Need) []page.Action {
 	out := make([]page.Action, 0, len(ns))
 	for _, n := range ns {
