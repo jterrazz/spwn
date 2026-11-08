@@ -1,0 +1,15 @@
+description: 'infra''s 443 declared with its link keeps it, the link the menu bar opens, copies and shows as a QR'
+env: two-macs
+runs:
+    - command: 'world listen infra "*:443" traefik'
+      exit: 0
+    - command: 'world listen infra 127.0.0.1:20241 cloudflared'
+      exit: 0
+    - command: 'ports declare infra 443 --via cloudflare-tunnel --url https://jterrazz.com'
+      exit: 0
+      stdout: |
+          ●	443 on infra	declared public (Cloudflare Tunnel)
+    - command: 'ports --on jterrazz-mac-mini --json | /usr/bin/jq -c ''[.ports[] | select(.port == 443) | .declared]'''
+      exit: 0
+      stdout: |
+          [{"via":"cloudflare-tunnel","url":"https://jterrazz.com","seen":true}]

@@ -39,6 +39,8 @@ type PortJSON struct {
 
 type DeclaredJSON struct {
 	Via string `json:"via"`
+	// value: the link it is reached by from outside; absent when it has none.
+	URL string `json:"url,omitempty"`
 	// value: the setting that declared it; absent when the owner did.
 	By string `json:"by,omitempty"`
 	// value: its route is seen; what is missing when it is not.
@@ -121,7 +123,7 @@ func ListenerObject(p ports.Port) PortJSON {
 		o.What = w
 	}
 	if p.Declared != nil {
-		o.Declared = &DeclaredJSON{Via: p.Declared.Via, By: p.Declared.By}
+		o.Declared = &DeclaredJSON{Via: p.Declared.Via, URL: p.Declared.URL, By: p.Declared.By}
 		if v := p.Verified; v != nil {
 			o.Declared.Seen, o.Declared.Missing = v.Seen, v.Missing
 		}
