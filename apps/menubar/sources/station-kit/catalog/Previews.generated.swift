@@ -34,6 +34,14 @@ import SwiftUI
 
 #Preview("mac.air.asleep") { StoryStage(Stories["mac.air.asleep"]) }
 
+#Preview("mac.mini.activity.24h") { StoryStage(Stories["mac.mini.activity.24h"]) }
+
+#Preview("mac.mini.activity.6m") { StoryStage(Stories["mac.mini.activity.6m"]) }
+
+#Preview("mac.mini.activity.scrub") { StoryStage(Stories["mac.mini.activity.scrub"]) }
+
+#Preview("mac.mini.activity") { StoryStage(Stories["mac.mini.activity"]) }
+
 #Preview("mac.mini.created") { StoryStage(Stories["mac.mini.created"]) }
 
 #Preview("mac.mini.creating") { StoryStage(Stories["mac.mini.creating"]) }
@@ -72,10 +80,14 @@ import SwiftUI
 
 #Preview("ports.all") { StoryStage(Stories["ports.all"]) }
 
+#Preview("server.activity") { StoryStage(Stories["server.activity"]) }
+
 #Preview("server.down") { StoryStage(Stories["server.down"]) }
 
 #Preview("server.healthy") { StoryStage(Stories["server.healthy"]) }
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
+
+#Preview("workspace.working.activity") { StoryStage(Stories["workspace.working.activity"]) }
 
 #endif

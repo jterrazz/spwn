@@ -44,6 +44,36 @@ final class MacPageTests: XCTestCase {
         XCTAssertEqual(calls.made, [])
     }
 
+    // invariant: SPEC A4.1: Activity opens on the window last picked for
+    // that machine, else on the one its page opens on; picking one redraws
+    // the page held, remembers it for that machine, and asks nothing.
+    func testActivityOpensOnTheWindowLastPickedForThatMachine() throws {
+        let story = Stories["mac.mini.activity"]
+        let page = try XCTUnwrap(story.state.pushed)
+        var state = PanelState(page: nil, connection: .live, pushed: page)
+        XCTAssertEqual(ActivityWindow.remembered(state, page), "1h")
+        state.windows = ["macbook-pro": "6m"]
+        XCTAssertEqual(ActivityWindow.remembered(state, page), "1h", "another Mac's window carried over")
+        state.windows["mac-mini"] = "24h"
+        XCTAssertEqual(ActivityWindow.remembered(state, page), "24h")
+        XCTAssertEqual(Stories["mac.mini.activity.6m"].state.windows, ["mac-mini": "6m"])
+
+        let calls = Calls()
+        var h = handlers(calls)
+        h.remember = { machine, window in calls.made.append("remember \(window) on \(machine)") }
+        MacPage(page: page, state: story.state, handlers: h, scrolls: false).pickWindow("6m")
+        XCTAssertEqual(calls.made, ["remember 6m on mac-mini"])
+
+        let sections = MacPage.sections(page, segment: ActivityWindow.segment)
+        var drawn: [Data] = []
+        for window in ["6m", "1h", "24h"] {
+            XCTAssertEqual(MachineActivity.shown(sections, window: window)?.id, "window-\(window)")
+            let view = MachineActivity(page: page, sections: sections, window: window, pick: { _ in }, scrub: nil, onScrub: { _ in }, run: { _, _ in }, open: { _ in })
+            drawn.append(try XCTUnwrap(Snapshot.render(AnyView(view.frame(width: Token.Metric.Panel.width)), scheme: .dark)?.png))
+        }
+        XCTAssertEqual(Set(drawn).count, 3, "two windows draw the same charts")
+    }
+
     // invariant: SPEC A4: Needs you shows its first rows until unfolded,
     // then every row; the fold's words are the page's.
     func testNeedsFoldAfterThePagesTopAndUnfoldInPlace() throws {

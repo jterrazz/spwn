@@ -1,0 +1,11 @@
+{
+    "group": "workspace",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
+    "id": "workspace.working.activity",
+    "note": "linux-1's activity over the hour, then its upkeep: 2 app updates with Update.",
+    "pages": ["pages/machines.history.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "activity"
+    }
+}

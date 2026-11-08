@@ -32,6 +32,7 @@ type Scene struct {
 	Away     []overview.Summary
 	Insides  map[string]overview.Summary
 	Samples  map[string][]activity.Reading
+	History  map[string]activity.Report
 	Accounts accounts.Report
 	Awake    awake.Report
 	Macs     []awake.Report
@@ -46,6 +47,7 @@ func everyMachine() Scene {
 		Away:     []overview.Summary{miniOverview()},
 		Insides:  map[string]overview.Summary{"linux-1": linux1Inside(), "infra": infraInside()},
 		Samples:  sceneSamples(),
+		History:  sceneHistory(),
 		Accounts: sceneAccounts(),
 		Awake:    proAwake(),
 		Macs:     []awake.Report{miniAwakeReport(), airAwake()},
@@ -247,6 +249,9 @@ func (f Scene) reading() pagemenubar.Reading {
 
 func (f Scene) machine(name string) pagemenubar.Machine {
 	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC}
+	if h, ok := f.History[name]; ok {
+		m.Activity = &h
+	}
 	m.Shares = f.needs().Accounts
 	reports := append([]awake.Report{f.Awake}, f.Macs...)
 	for i := range reports {

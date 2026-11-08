@@ -1,0 +1,1749 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "infra",
+    "kind": "server",
+    "on": "mac-mini"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "machine",
+      "title": "infra",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "Server VM"
+        },
+        {
+          "kind": "text",
+          "text": "Always on"
+        },
+        {
+          "kind": "text",
+          "text": "on mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "8 CPU"
+        },
+        {
+          "kind": "text",
+          "text": "24 GB"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "state",
+            "mark": "ok",
+            "label": "State",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "Running"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "up",
+      "title": "Overview",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "up",
+            "label": "Up",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "12 d"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "since boot"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "restarts",
+            "label": "Restarts",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "count",
+                    "unit": "restarts"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "none since boot"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "after every boot"
+        },
+        {
+          "kind": "age",
+          "n": 40,
+          "at": "2026-11-07T10:29:20Z"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "running",
+            "mark": "ok",
+            "label": "Running",
+            "cells": [
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "address",
+            "mark": "ok",
+            "label": "Has an address",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "192.168.64.7"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "ssh",
+            "mark": "ok",
+            "label": "SSH answers",
+            "cells": [
+              {
+                "kind": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "check",
+            "mark": "ok",
+            "label": "Check passes",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "https://infra:6443/readyz"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "200"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 4
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 187,
+                "live": "cpu:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 15
+                  },
+                  {
+                    "kind": "count",
+                    "n": 16
+                  },
+                  {
+                    "kind": "count",
+                    "n": 16
+                  },
+                  {
+                    "kind": "count",
+                    "n": 16
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 17
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 20776904294,
+                "of": 25769803776,
+                "live": "memory:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 80
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 450,
+                "live": "disk:infra"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  },
+                  {
+                    "kind": "count",
+                    "n": 45
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "server",
+      "title": "Ports and shell",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "ports",
+            "label": "Ports",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "Public 1"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "Private 1"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "ssh",
+            "label": "SSH",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ssh admin@infra"
+              }
+            ]
+          }
+        },
+        {
+          "note": {
+            "text": "Apps, settings, accounts: not managed by station"
+          }
+        }
+      ],
+      "segment": "overview"
+    },
+    {
+      "id": "summary",
+      "title": "infra",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "server"
+        },
+        {
+          "kind": "text",
+          "text": "up 12 days"
+        }
+      ]
+    },
+    {
+      "id": "window-6m",
+      "title": "Last 6 minutes",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 187,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "line",
+            "window": "6m",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  10.5,
+                  10.6,
+                  11,
+                  11.4,
+                  11.7,
+                  11.9,
+                  11.9,
+                  11.6,
+                  11.4,
+                  11.1,
+                  11.1,
+                  11.5,
+                  12,
+                  12.9,
+                  13.8,
+                  14.6,
+                  15.1,
+                  15.3,
+                  15.1,
+                  14.7,
+                  14.2,
+                  13.8,
+                  13.5,
+                  13.5,
+                  13.7,
+                  14,
+                  14.3,
+                  14.4,
+                  14.1,
+                  13.7,
+                  13.1,
+                  12.4,
+                  11.9,
+                  11.7,
+                  11.8,
+                  12.3,
+                  13.1,
+                  13.9,
+                  14.6,
+                  15.1,
+                  15.3,
+                  15.3,
+                  15.2,
+                  15.1,
+                  15.2,
+                  15.4,
+                  15.9,
+                  16.6,
+                  17.3,
+                  17.8,
+                  18,
+                  17.8,
+                  17.3,
+                  16.6,
+                  15.9,
+                  15.3,
+                  14.9,
+                  14.8,
+                  15.1,
+                  15.5,
+                  15.8,
+                  16.1,
+                  16.1,
+                  16,
+                  15.6,
+                  15.3,
+                  15.2,
+                  15.3,
+                  15.7,
+                  16.5,
+                  17.4,
+                  18.3
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 71,
+              "value": {
+                "kind": "percent",
+                "n": 180
+              },
+              "at": "2 s ago"
+            },
+            "ends": [
+              "6 min ago",
+              "now"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "↓ 0.6"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "↑ 0.2 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "6m",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.19,
+                  0.19,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.21,
+                  0.22,
+                  0.23,
+                  0.25,
+                  0.27,
+                  0.29,
+                  0.32,
+                  0.34,
+                  0.36,
+                  0.37,
+                  0.38,
+                  0.37,
+                  0.36,
+                  0.35,
+                  0.33,
+                  0.31,
+                  0.29,
+                  0.28,
+                  0.27,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.25,
+                  0.25,
+                  0.25,
+                  0.25
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.41,
+                  0.42,
+                  0.43,
+                  0.43,
+                  0.44,
+                  0.45,
+                  0.46,
+                  0.47,
+                  0.47,
+                  0.48,
+                  0.49,
+                  0.5,
+                  0.51,
+                  0.51,
+                  0.52,
+                  0.53,
+                  0.53,
+                  0.54,
+                  0.55,
+                  0.57,
+                  0.59,
+                  0.63,
+                  0.68,
+                  0.74,
+                  0.82,
+                  0.91,
+                  1,
+                  1.09,
+                  1.15,
+                  1.19,
+                  1.18,
+                  1.15,
+                  1.08,
+                  0.99,
+                  0.9,
+                  0.8,
+                  0.71,
+                  0.64,
+                  0.59,
+                  0.54,
+                  0.52,
+                  0.5,
+                  0.49,
+                  0.48,
+                  0.48,
+                  0.47,
+                  0.47,
+                  0.47,
+                  0.47,
+                  0.48,
+                  0.48,
+                  0.48,
+                  0.49,
+                  0.49,
+                  0.5,
+                  0.5,
+                  0.51,
+                  0.52,
+                  0.53,
+                  0.53,
+                  0.54,
+                  0.55,
+                  0.56,
+                  0.57,
+                  0.58,
+                  0.59,
+                  0.6,
+                  0.61,
+                  0.62,
+                  0.63,
+                  0.63,
+                  0.64
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "6 min ago",
+              "now"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-1h",
+      "title": "Last hour",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 187,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "bars",
+            "window": "1h",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  13.4,
+                  11.6,
+                  12.4,
+                  13.5,
+                  11.3,
+                  14.1,
+                  11.3,
+                  13,
+                  12.6,
+                  11.7,
+                  14.3,
+                  12,
+                  15.4,
+                  14.7,
+                  16.1,
+                  18.9,
+                  18.7,
+                  24.7,
+                  26.5,
+                  33.2,
+                  38.3,
+                  40.7,
+                  44.3,
+                  39.6,
+                  37.7,
+                  31,
+                  25.9,
+                  23.8,
+                  19,
+                  20.8,
+                  18,
+                  18.9,
+                  18.7,
+                  16.2,
+                  17.9,
+                  13.8,
+                  14.8,
+                  12.5,
+                  11.2,
+                  12.4,
+                  9.5,
+                  12.6,
+                  10.9,
+                  12.6,
+                  13.9,
+                  12.6,
+                  15.8,
+                  13,
+                  14.9,
+                  13.5,
+                  12.1,
+                  13.4,
+                  10,
+                  12.5,
+                  10.6,
+                  11.8,
+                  13.6,
+                  12.8,
+                  17,
+                  15.7
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 22,
+              "value": {
+                "kind": "percent",
+                "n": 440
+              },
+              "at": "38 min ago"
+            },
+            "ends": [
+              "1 hr ago",
+              "now"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "↓ 0.6"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "↑ 0.2 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "1h",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.17,
+                  0.19,
+                  0.23,
+                  0.2,
+                  0.15,
+                  0.18,
+                  0.2,
+                  0.25,
+                  0.23,
+                  0.2,
+                  0.23,
+                  0.25,
+                  0.29,
+                  0.27,
+                  0.23,
+                  0.26,
+                  0.25,
+                  0.28,
+                  0.25,
+                  0.2,
+                  0.22,
+                  0.2,
+                  0.22,
+                  0.21,
+                  0.17,
+                  0.18,
+                  0.17,
+                  0.2,
+                  0.21,
+                  0.18,
+                  0.21,
+                  0.2,
+                  0.24,
+                  0.26,
+                  0.24,
+                  0.26,
+                  0.24,
+                  0.28,
+                  0.28,
+                  0.25,
+                  0.25,
+                  0.22,
+                  0.25,
+                  0.25,
+                  0.21,
+                  0.2,
+                  0.16,
+                  0.2,
+                  0.22,
+                  0.18,
+                  0.18,
+                  0.15,
+                  0.21,
+                  0.24,
+                  0.22,
+                  0.21,
+                  0.2,
+                  0.26,
+                  0.3,
+                  0.26
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.74,
+                  0.74,
+                  0.55,
+                  0.53,
+                  0.44,
+                  0.38,
+                  0.43,
+                  0.74,
+                  0.74,
+                  0.44,
+                  0.43,
+                  0.52,
+                  0.62,
+                  0.62,
+                  0.81,
+                  0.82,
+                  0.66,
+                  0.72,
+                  0.68,
+                  0.6,
+                  0.59,
+                  0.89,
+                  0.9,
+                  0.57,
+                  0.47,
+                  0.47,
+                  0.52,
+                  0.52,
+                  0.68,
+                  0.62,
+                  0.41,
+                  0.5,
+                  0.52,
+                  0.47,
+                  0.45,
+                  0.77,
+                  0.88,
+                  0.65,
+                  0.59,
+                  0.58,
+                  0.66,
+                  0.72,
+                  0.93,
+                  0.84,
+                  0.57,
+                  0.61,
+                  0.64,
+                  0.56,
+                  0.46,
+                  0.68,
+                  0.74,
+                  0.52,
+                  0.45,
+                  0.38,
+                  0.41,
+                  0.5,
+                  0.79,
+                  0.75,
+                  0.47,
+                  0.54
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "1 hr ago",
+              "now"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-24h",
+      "title": "Last 24 hours",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 187,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "bars",
+            "window": "24h",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  13.8,
+                  15.9,
+                  15.2,
+                  13.9,
+                  15.7,
+                  15.4,
+                  13.7,
+                  15.5,
+                  15.9,
+                  14,
+                  15.1,
+                  16,
+                  13.9,
+                  14.9,
+                  16.2,
+                  14.3,
+                  14.4,
+                  16,
+                  14.5,
+                  14.2,
+                  16.3,
+                  14.9,
+                  14,
+                  15.9,
+                  15.3,
+                  13.9,
+                  15.9,
+                  15.5,
+                  13.7,
+                  15.3,
+                  15.7,
+                  13.9,
+                  15.1,
+                  16.1,
+                  14,
+                  14.8,
+                  16.1,
+                  14.4,
+                  14.6,
+                  16.2,
+                  14.5,
+                  14,
+                  16.1,
+                  14.9,
+                  14.1,
+                  15.9,
+                  21.3,
+                  13.8
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 46,
+              "value": {
+                "kind": "percent",
+                "n": 210
+              },
+              "at": "09:52"
+            },
+            "ends": [
+              "yesterday 10:30",
+              "now"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "↓ 0.6"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "↑ 0.2 MB/s"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "24h",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.64,
+                  0.62,
+                  0.59,
+                  0.63,
+                  0.64,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.61,
+                  0.6,
+                  0.63,
+                  0.64,
+                  0.59,
+                  0.62,
+                  0.64,
+                  0.61,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.62,
+                  0.64,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.63,
+                  0.59,
+                  0.62,
+                  0.64,
+                  0.61,
+                  0.61,
+                  0.63,
+                  0.62,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.62,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.62,
+                  0.63,
+                  0.61,
+                  0.6
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "yesterday 10:30",
+              "now"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Memory",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "now"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "5 GB free",
+              "live": "free:infra"
+            },
+            "bar": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "size",
+                  "text": "19 GB",
+                  "n": 20776904294,
+                  "label": "used"
+                },
+                {
+                  "kind": "size",
+                  "text": "5 GB",
+                  "n": 4992899482,
+                  "label": "free"
+                },
+                {
+                  "kind": "size",
+                  "text": "24 GB",
+                  "n": 25769803776,
+                  "label": "of"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart"
+    },
+    {
+      "id": "processes",
+      "title": "Top processes",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "CPU, of infra"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "801",
+            "label": "k3s-server",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 90
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu",
+              "signal": "quiet"
+            },
+            "trail": "cpu"
+          }
+        },
+        {
+          "row": {
+            "id": "802",
+            "label": "traefik",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 40
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu",
+              "signal": "quiet"
+            },
+            "trail": "cpu"
+          }
+        },
+        {
+          "row": {
+            "id": "803",
+            "label": "station",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 10
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu",
+              "signal": "quiet"
+            },
+            "trail": "cpu"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity"
+    },
+    {
+      "id": "measured",
+      "title": "Measured",
+      "items": [
+        {
+          "note": {
+            "text": "Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it."
+          }
+        }
+      ],
+      "segment": "activity"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Restart",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      }
+    }
+  ],
+  "header": {
+    "back": "mac-mini",
+    "glyph": {
+      "kind": "server"
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "live": [
+    "cpu:infra",
+    "memory:infra",
+    "disk:infra",
+    "free:infra"
+  ]
+}

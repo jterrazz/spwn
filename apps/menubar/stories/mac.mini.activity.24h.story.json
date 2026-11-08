@@ -1,0 +1,12 @@
+{
+    "group": "mac",
+    "heightNote": "the prototype's panel stops at its 700 pt cap and scrolls the rest; the story draws the whole segment",
+    "id": "mac.mini.activity.24h",
+    "note": "mac-mini over the day: bars of 30 min, the 03:10 peak at 94 % shaded and said.",
+    "pages": ["pages/machines.history.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "segment": "activity",
+        "window": "24h"
+    }
+}
