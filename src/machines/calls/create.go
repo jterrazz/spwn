@@ -219,9 +219,17 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		want = model.WantRunning
 	}
 	made := &made{}
+	// invariant: a create the owner interrupts ends as an interruption,
+	// after the same rollback or keep as any failure at that step.
+	failed := func(err error) (model.Created, error) {
+		if ctx.Err() != nil {
+			return model.Created{}, ctx.Err()
+		}
+		return model.Created{}, err
+	}
 	fail := func(step string, cause error) (model.Created, error) {
 		s.undoCreate(ctx, r.Name, made)
-		return model.Created{}, &model.CreateFailedError{Name: r.Name, Step: step, Cause: cause}
+		return failed(&model.CreateFailedError{Name: r.Name, Step: step, Cause: cause})
 	}
 	// invariant: SPEC B5.10: the record exists from the create's first
 	// frame, its memory reserved, wanting nothing until its disk is made;
@@ -271,19 +279,19 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	say(model.StepRunning)
 	_ = born(model.BornBooting)
 	if err = s.engineAPI.Do(ctx, "run", r.Name); err != nil {
-		return model.Created{}, s.unhealthy(ctx, r.Name, err)
+		return failed(s.unhealthy(ctx, r.Name, err))
 	}
 	say(model.StepAddress)
 	_ = born(model.BornAddress)
 	addr, err := s.engine.Address(ctx, r.Name, ipWait)
 	if err != nil {
-		return model.Created{}, &model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"}
+		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"})
 	}
 	ip := addr.String()
 	say(model.StepSSH)
 	_ = born(model.BornSSH)
 	if err := s.setUp(ctx, img, r); err != nil {
-		return model.Created{}, &model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
+		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())})
 	}
 	if allMachines, err := s.AllMachines(ctx, false); err == nil {
 		_ = s.SSHBlocks(ctx, allMachines)

@@ -14,7 +14,11 @@ runs:
           see cloning
           run "$STATION" machines --json | /usr/bin/jq -c '.macs[0] | {vms: [.vms[] | select(.name == "linux-4") | {state, birth}], held: [.capacity.vms[] | select(.name == "linux-4") | .memory_bytes]}' >seen
           send \x03
-      exit: 1
+          scrollback
+      exit: 130
+      stdout: |
+          ┃ On which Mac?
+          ┃ jterrazz-macbook-pro  2 VMs
     - command: '--version >/dev/null; /bin/cat seen'
       exit: 0
       stdout: |
