@@ -57,6 +57,8 @@ public struct PanelState: Equatable, Sendable {
     // on a machine page, and what is unfolded there.
     public var segment: String?
     public var unfolded: [String] = []
+    // value: Activity's window last picked, by machine: the menu bar's own.
+    public var windows: [String: String] = [:]
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -109,6 +111,8 @@ public struct PopoverHandlers {
     // app (a link opened, a terminal): it closes, as a menu does.
     public var close: () -> Void
     public var scrub: (Int?) -> Void = { _ in }
+    // value: the window picked on a machine's Activity, to remember.
+    public var remember: (String, String) -> Void = { _, _ in }
 
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },

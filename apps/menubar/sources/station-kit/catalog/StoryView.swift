@@ -27,6 +27,7 @@ extension Story {
         state.scrub = ui.scrub
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
+        if let window = ui.window, let machine = state.shown?.context?.machine { state.windows[machine] = window }
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }

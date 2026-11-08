@@ -57,6 +57,10 @@ final class Live: ObservableObject {
             },
             close: { [weak self] in self?.log("close") })
         h.scrub = { [weak self] index in self?.state.scrub = index }
+        h.remember = { [weak self] machine, window in
+            self?.state.windows[machine] = window
+            self?.log("window \(window) on \(machine)")
+        }
         return h.deferred(Self.later)
     }
 }
