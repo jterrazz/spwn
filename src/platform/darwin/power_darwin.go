@@ -281,10 +281,13 @@ func (p *Power) Read() Reading {
 	return r
 }
 
-// invariant: kIOMessageSystemWillSleep is heard on a thread of C's own with
-// its own run loop, which only sets a flag this side reads: no callback
-// crosses into Go; the first call starts listening, and a wake clears it.
-func SleepAnnounced() bool { return C.station_sleep_announced() != 0 }
+func SleepAnnounced() bool {
+	// invariant: kIOMessageSystemWillSleep is heard on a thread of C's own
+	// with its own run loop, which only sets a flag this side reads: no
+	// callback crosses into Go; the first call starts listening, and a wake
+	// clears it.
+	return C.station_sleep_announced() != 0
+}
 
 func PowerSourcesChanged(ctx context.Context) <-chan struct{} {
 	return notified(ctx, C.kIOPSNotifyAnyPowerSource)
