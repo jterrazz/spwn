@@ -200,7 +200,10 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is " + e.Detail["state"] + ": only a finished agent is forgotten", "station agents stop " + e.Subject
 		},
 		agentscalls.NoWhere: func(e *fail.Error) (string, string) {
-			if e.Detail["both"] == "both" {
+			switch e.Detail["both"] {
+			case "inside":
+				return "an agent started inside a workspace runs on it: --new makes a throwaway from a Mac", "station agents start \"<task>\""
+			case "both":
 				return "an agent starts on a workspace (--on) or on a new throwaway (--new), not both", "station agents start \"<task>\" --new"
 			}
 			return "an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)", "station agents start \"<task>\" --on <workspace>"

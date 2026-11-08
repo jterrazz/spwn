@@ -24,7 +24,8 @@ const (
 	NameTaken    fail.Code = "agents.name-taken"
 	BadName      fail.Code = "agents.bad-name"
 	StillLive    fail.Code = "agents.live"
-	// value: a start that names neither a workspace nor a new one, or both.
+	// value: a start that names neither a workspace nor a new one, or both,
+	// or a new one from inside a workspace.
 	NoWhere fail.Code = "agents.no-where"
 	// value: an agent its workspace's stop or delete could not stop first;
 	// the VM goes on.

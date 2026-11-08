@@ -63,7 +63,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			// inside a workspace the agent starts on it.
 			onMac := env.Kind == machine.Mac && !env.Far()
 			if in.New == !onMac {
-				return fail.New(fail.Refused, agentscalls.NoWhere, "station agents start", map[string]string{"both": boolWord(in.New)})
+				return fail.New(fail.Refused, agentscalls.NoWhere, "station agents start", map[string]string{"both": nowhere(in.New, env)})
 			}
 			var taken []string
 			if env.Kind == machine.Mac {
@@ -100,11 +100,16 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
-func boolWord(both bool) string {
-	if both {
-		return "both"
+// value: how a start names no one place: neither, both, or --new alone
+// from inside a workspace.
+func nowhere(asked bool, env kit.Env) string {
+	switch {
+	case !asked:
+		return "neither"
+	case !env.Far() && env.Kind == machine.Workspace:
+		return "inside"
 	}
-	return "neither"
+	return "both"
 }
 
 // value: the names every agent of every machine holds; a name asked that
