@@ -3,8 +3,6 @@
     "heightNote": "A2 adds the Agents card to the prototype's page",
     "id": "workspace.started",
     "note": "api started, no agent on it yet: the one-line Agents card with New agent, its gauges and the ssh footer.",
-    "pages": [
-        "pages/machines.agents.started.machine.api.json"
-    ],
+    "pages": ["pages/machines.agents.started.machine.api.json"],
     "schema": "station.story/v1"
 }

@@ -3,8 +3,6 @@
     "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
     "id": "workspace.agents.finished",
     "note": "agent-7f, a throwaway whose one agent finished: the agent quiet in its card with its own Clean up, its workspace still running.",
-    "pages": [
-        "pages/machines.machine.agent-7f.json"
-    ],
+    "pages": ["pages/machines.machine.agent-7f.json"],
     "schema": "station.story/v1"
 }

@@ -3,8 +3,6 @@
     "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
     "id": "agent.finished",
     "note": "agent-7f finished: quiet, its Last steps with Clean up, the workspace it ran on idle, no footer.",
-    "pages": [
-        "pages/machines.agent.agent-7f.json"
-    ],
+    "pages": ["pages/machines.agent.agent-7f.json"],
     "schema": "station.story/v1"
 }

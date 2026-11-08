@@ -3,8 +3,6 @@
     "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
     "id": "agent.waiting.replied",
     "note": "The reply sent: review-bot works again, its Now card reading your reply.",
-    "pages": [
-        "pages/machines.agents.replied.agent.review-bot.json"
-    ],
+    "pages": ["pages/machines.agents.replied.agent.review-bot.json"],
     "schema": "station.story/v1"
 }
