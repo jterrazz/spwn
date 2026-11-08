@@ -40,4 +40,8 @@ type Power interface {
 	// safe direction, macOS deciding again.
 	Clamshell(held bool) error
 	DisplaySleepNow(ctx context.Context) error
+	// invariant: SPEC B5.15: macOS told this Mac it is going to sleep
+	// (kIOMessageSystemWillSleep) and it has not woken since, as the process
+	// that watches heard it; false where there is no power management.
+	Sleeping() bool
 }

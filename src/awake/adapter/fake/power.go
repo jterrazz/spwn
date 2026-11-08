@@ -58,6 +58,13 @@ func (p *Power) Read() (awake.Reading, error) {
 	return s.Reading, nil
 }
 
+func (p *Power) Sleeping() bool {
+	p.w.Lock()
+	defer p.w.Unlock()
+	s := p.slice()
+	return s != nil && s.Sleeping
+}
+
 func (p *Power) Set(r awake.Reading) {
 	// invariant: Set moves the reading and tells every watch which fields moved.
 	p.w.Lock()

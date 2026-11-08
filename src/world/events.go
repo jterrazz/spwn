@@ -49,6 +49,7 @@ func events() []event {
 		{"plug", nil, power(battery, func(p *Power) error { p.Source = "ac"; return nil })},
 		{"close-lid", nil, power(lid, func(p *Power) error { p.Lid = "closed"; return nil })},
 		{"open-lid", nil, power(lid, func(p *Power) error { p.Lid = "open"; return nil })},
+		{"will-sleep", []string{"<mac>"}, willSleep},
 		{"thermal", []string{"<level>"}, thermal},
 		{"battery", []string{"<percent>"}, percent},
 		{"low-power", []string{"on|off"}, lowPower},
@@ -155,6 +156,20 @@ func unlock(w *World, args []string) error {
 		return err
 	}
 	m.Locked = false
+	return nil
+}
+
+// invariant: macOS tells a Mac's engine it is going to sleep; the Mac
+// still answers until it goes offline.
+func willSleep(w *World, args []string) error {
+	m, err := w.known(args[0])
+	if err != nil {
+		return err
+	}
+	if m.Power == nil {
+		return fmt.Errorf("%s has no power management in this world", args[0])
+	}
+	m.Power.Sleeping = true
 	return nil
 }
 

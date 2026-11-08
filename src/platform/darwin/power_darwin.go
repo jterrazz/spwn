@@ -12,6 +12,8 @@ package darwin
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #include <IOKit/ps/IOPowerSources.h>
 #include <IOKit/ps/IOPSKeys.h>
+#include <IOKit/IOMessage.h>
+#include <pthread.h>
 #import <Foundation/Foundation.h>
 
 static int station_hold_idle(_GoString_ name, uint32_t *id) {
@@ -152,6 +154,46 @@ static int station_notify_fd(_GoString_ name, int *token) {
 
 static void station_notify_cancel(int token) { notify_cancel(token); }
 
+static io_connect_t station_root_port = 0;
+static int station_sleeping = 0;
+static pthread_once_t station_sleep_once = PTHREAD_ONCE_INIT;
+
+static void station_power_message(void *ref, io_service_t service, natural_t type, void *arg) {
+	switch (type) {
+	case kIOMessageCanSystemSleep:
+		IOAllowPowerChange(station_root_port, (long)arg);
+		break;
+	case kIOMessageSystemWillSleep:
+		__atomic_store_n(&station_sleeping, 1, __ATOMIC_SEQ_CST);
+		IOAllowPowerChange(station_root_port, (long)arg);
+		break;
+	case kIOMessageSystemWillPowerOn:
+	case kIOMessageSystemHasPoweredOn:
+		__atomic_store_n(&station_sleeping, 0, __ATOMIC_SEQ_CST);
+		break;
+	}
+}
+
+static void *station_sleep_loop(void *unused) {
+	IONotificationPortRef port = NULL;
+	io_object_t notifier = 0;
+	station_root_port = IORegisterForSystemPower(NULL, &port, station_power_message, &notifier);
+	if (!station_root_port) return NULL;
+	CFRunLoopAddSource(CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(port), kCFRunLoopDefaultMode);
+	CFRunLoopRun();
+	return NULL;
+}
+
+static void station_sleep_start(void) {
+	pthread_t t;
+	if (pthread_create(&t, NULL, station_sleep_loop, NULL) == 0) pthread_detach(t);
+}
+
+static int station_sleep_announced(void) {
+	pthread_once(&station_sleep_once, station_sleep_start);
+	return __atomic_load_n(&station_sleeping, __ATOMIC_SEQ_CST);
+}
+
 static int station_thermal(int token) {
 	uint64_t state = 0;
 	if (notify_get_state(token, &state) != NOTIFY_STATUS_OK) return 0;
@@ -238,6 +280,11 @@ func (p *Power) Read() Reading {
 	}
 	return r
 }
+
+// invariant: kIOMessageSystemWillSleep is heard on a thread of C's own with
+// its own run loop, which only sets a flag this side reads: no callback
+// crosses into Go; the first call starts listening, and a wake clears it.
+func SleepAnnounced() bool { return C.station_sleep_announced() != 0 }
 
 func PowerSourcesChanged(ctx context.Context) <-chan struct{} {
 	return notified(ctx, C.kIOPSNotifyAnyPowerSource)

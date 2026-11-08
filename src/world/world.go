@@ -143,6 +143,8 @@ type Power struct {
 	Clamshell bool     `json:"clamshell,omitempty"`
 	// value: how many times the display was put to sleep.
 	DisplaySleeps int `json:"display_sleeps,omitempty"`
+	// value: macOS told this Mac it is going to sleep, and it has not woken.
+	Sleeping bool `json:"sleeping,omitempty"`
 }
 
 type Node struct {

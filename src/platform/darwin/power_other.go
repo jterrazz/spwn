@@ -31,4 +31,6 @@ func SetClamshellSleep(bool) error { return errUnsupported }
 
 func (*Power) Read() Reading { return Reading{} }
 
+func SleepAnnounced() bool { return false }
+
 func PowerSourcesChanged(context.Context) <-chan struct{} { return nil }

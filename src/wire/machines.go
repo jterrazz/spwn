@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
+	"github.com/jterrazz/studio-station/src/awake"
+	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/images"
 	"github.com/jterrazz/studio-station/src/platform/local"
 
@@ -87,13 +89,19 @@ func (m machine) lanAddress(ctx context.Context) string {
 }
 
 // value: this Mac runs on battery with its lid closed, as its power reads
-// (its world's in the spec build).
-func (m machine) asleep(context.Context) bool {
-	if m.powerPort == nil || !m.profile.Caps.Lid {
+// (its world's in the spec build), or its engine heard macOS say it is
+// going to sleep.
+func (m machine) asleep(ctx context.Context) bool {
+	if m.powerPort == nil {
 		return false
 	}
-	r, err := m.powerPort.Read()
-	return err == nil && r.LidClosedOnBattery()
+	if r, err := m.powerPort.Read(); err == nil && m.profile.Caps.Lid && r.LidClosedOnBattery() {
+		return true
+	}
+	ctx, cancel := context.WithTimeout(ctx, lanBudget)
+	defer cancel()
+	var v awake.View
+	return m.engineAPI().do(ctx, engine.CallAwakeView, nil, &v) == nil && v.Sleeping
 }
 
 // value: what this Mac is, as it reads itself (its world's in the spec

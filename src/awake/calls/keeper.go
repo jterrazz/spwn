@@ -84,6 +84,7 @@ func (absent) Clamshell(bool) error             { return contract.ErrUnsupported
 func (absent) DisplaySleepNow(context.Context) error {
 	return contract.ErrUnsupported
 }
+func (absent) Sleeping() bool { return false }
 func (absent) Watch(context.Context) <-chan awake.Event {
 	out := make(chan awake.Event)
 	close(out)
@@ -148,7 +149,7 @@ func (m *Keeper) View() awake.View {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.reading = r
-	v := awake.View{Reading: r, Guards: awake.GuardStates(r, m.session), NeverSleeps: m.never, NeverSince: m.neverSince, NeverHeld: m.neverRelease != nil}
+	v := awake.View{Reading: r, Guards: awake.GuardStates(r, m.session), NeverSleeps: m.never, NeverSince: m.neverSince, NeverHeld: m.neverRelease != nil, Sleeping: m.port.Sleeping()}
 	if m.session != nil {
 		s := *m.session
 		v.Session = &s

@@ -15,11 +15,14 @@ import (
 )
 
 type door struct {
-	mu   sync.Mutex
-	r    darwin.Reading
-	none bool
-	tick chan struct{}
+	mu       sync.Mutex
+	r        darwin.Reading
+	none     bool
+	tick     chan struct{}
+	sleeping bool
 }
+
+func (d *door) Sleeping() bool { return d.sleeping }
 
 func (d *door) HoldIdle(string) (func(), error) {
 	if d.none {
@@ -66,6 +69,15 @@ func TestTheMacOSPowerKeepsTheContract(t *testing.T) {
 	contracttest.Power(t, func(_ *testing.T, r awake.Reading, none bool) contract.Power {
 		return New(&door{r: reading(r), none: none}, &pmset{}, "")
 	})
+}
+
+func TestAMacToldItGoesToSleepSaysSo(t *testing.T) {
+	if New(&door{r: reading(contracttest.Laptop())}, &pmset{}, "").Sleeping() {
+		t.Fatal("a Mac macOS told nothing reads sleeping")
+	}
+	if !New(&door{r: reading(contracttest.Laptop()), sleeping: true}, &pmset{}, "").Sleeping() {
+		t.Fatal("a Mac told it goes to sleep does not read sleeping")
+	}
 }
 
 func TestTheDisplaySleepsByThePmsetUnderTheRoot(t *testing.T) {

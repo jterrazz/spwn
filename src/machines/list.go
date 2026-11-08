@@ -127,6 +127,7 @@ func Findings(f AllMachines) []finding.Finding {
 			on = " --on " + label
 		}
 		switch {
+		case Reach(h) == ReachAsleep && !macsServer(h):
 		case !h.Reachable && h.LAN != "" && macsServer(h):
 			add(mac, finding.Broken, label, label+" does not answer", "station machines unlock "+label)
 		case !h.Reachable:

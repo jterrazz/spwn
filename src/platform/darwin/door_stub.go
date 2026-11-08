@@ -84,4 +84,6 @@ func (s *stubPower) Read() (Reading, error) {
 	return r, nil
 }
 
+func (s *stubPower) Sleeping() bool { return s.present() && s.word("sleeping", "0") == "1" }
+
 func (s *stubPower) Ticks(ctx context.Context) <-chan struct{} { return ticks(ctx, stubEvery, nil) }

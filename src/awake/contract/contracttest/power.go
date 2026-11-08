@@ -29,6 +29,14 @@ func Power(t *testing.T, open Open) {
 			t.Fatalf("Read = %+v, %v", r, err)
 		}
 	})
+	t.Run("a Mac macOS has not told it goes to sleep reads awake", func(t *testing.T) {
+		if open(t, Laptop(), false).Sleeping() {
+			t.Fatal("Sleeping = true with no will-sleep heard")
+		}
+		if open(t, awake.Reading{}, true).Sleeping() {
+			t.Fatal("Sleeping = true with no power management")
+		}
+	})
 	t.Run("a desktop reports neither battery nor lid, and those fields stay zero", func(t *testing.T) {
 		p := open(t, Desktop(), false)
 		if got := p.Capabilities(); got.Battery || got.Lid {

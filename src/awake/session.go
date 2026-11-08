@@ -59,6 +59,9 @@ type View struct {
 	// value: the policy's assertion is held now; false while the battery
 	// guard lets it go.
 	NeverHeld bool `json:"never_held"`
+	// value: SPEC B5.15: macOS told this Mac it is going to sleep, and it
+	// has not woken since.
+	Sleeping bool `json:"sleeping,omitempty"`
 }
 
 type Slept struct {

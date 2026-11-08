@@ -22,6 +22,8 @@ type port struct {
 	calls []string
 }
 
+func (p *port) Sleeping() bool { return false }
+
 func (p *port) Capabilities() contract.PowerCaps {
 	return contract.PowerCaps{Battery: p.r.HasBattery, Lid: p.r.Lid != "", Thermal: true}
 }
