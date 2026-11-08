@@ -37,8 +37,6 @@ func Plain(v page.Value) string {
 	return show(v)
 }
 
-// value: what a row says after its cells: its detail, then the time it
-// has left, as one value.
 func Detail(r page.Row) page.Value {
 	if r.Left == nil {
 		return r.Detail
