@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/agents"
@@ -17,10 +18,16 @@ type Deps struct {
 	Session contract.Session
 	Forge   contract.Forge
 	Now     func() time.Time
+	// value: the workspace these agents run in, by its name: the name its
+	// first agent takes.
+	Machine string
+	// value: the names every machine holds, as this workspace's Mac reads
+	// them; nil reads none.
+	Held func(ctx context.Context) (agents.Held, error)
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Record, d), call.Bind(List, d), call.Bind(Reply, d), call.Bind(Start, d), call.Bind(MergePR, d)}
+	return []call.Handler{call.Bind(Record, d), call.Bind(List, d), call.Bind(Reply, d), call.Bind(Start, d), call.Bind(Merge, d), call.Bind(Stop, d), call.Bind(Forget, d)}
 }
 
 func (d Deps) hooksOf(app agents.App) contract.Hooks {
@@ -67,16 +74,34 @@ var Record = call.Call[Deps, RecordIn, Recorded]{
 		if err != nil {
 			return Recorded{}, err
 		}
-		var a agents.Agent
-		for _, k := range kept {
-			if k.Session == e.Session {
-				a = k
-			}
-		}
+		a := adopted(kept, e)
+		was := a.Session
+		a.Session = e.Session
 		a = agents.Judge(a, e)
 		if err := d.Journal.Write(ctx, a); err != nil {
 			return Recorded{}, err
 		}
+		if was != "" && was != a.Session {
+			if err := d.Journal.Forget(ctx, was); err != nil {
+				return Recorded{}, err
+			}
+		}
 		return Recorded{Kept: true, Session: a.Session, State: a.State}, nil
 	},
+}
+
+// value: the agent an event folds into: the session its app named, else the
+// live agent station started in the terminal the hook ran in, whose name
+// and task the app's session takes.
+func adopted(kept []agents.Agent, e agents.Event) agents.Agent {
+	if i := slices.IndexFunc(kept, func(k agents.Agent) bool { return k.Session == e.Session }); i >= 0 {
+		return kept[i]
+	}
+	if e.Terminal == "" {
+		return agents.Agent{}
+	}
+	if i := slices.IndexFunc(kept, func(k agents.Agent) bool { return k.Terminal == e.Terminal && agents.Live(k) }); i >= 0 {
+		return kept[i]
+	}
+	return agents.Agent{}
 }

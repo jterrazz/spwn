@@ -78,9 +78,10 @@ type VMRecord struct {
 	Name, Image, Version string
 	Lifetime             Lifetime
 	Want, Network, Check string
-	Task                 string
 	Env                  map[string]string
 	Resources            Resources
 	CreatedAt            time.Time
 	Birth                *Birth
+	// value: the agents a workspace held when it last stopped.
+	Agents []string
 }

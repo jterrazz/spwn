@@ -1,0 +1,20 @@
+description: 'an agent stopped has its terminal closed and is finished; its workspace keeps running'
+env: in-workspace
+runs:
+    - command: 'agents start "Build the landing page"'
+      exit: 0
+      stdout: |
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped · its workspace keeps running
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	1 ○
+          ○	linux-1	claudecode	finished · stopped	Build the landing page
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"] | {closed: .agents.closed, terminals: .agents.terminals, running: (.pid != null)}'' world.json'
+      exit: 0
+      stdout: |
+          {"closed":["t1"],"terminals":null,"running":true}

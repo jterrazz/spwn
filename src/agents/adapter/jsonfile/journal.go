@@ -127,6 +127,16 @@ func (j *Journal) Write(_ context.Context, a agents.Agent) error {
 	return j.forget()
 }
 
+func (j *Journal) Forget(_ context.Context, session string) error {
+	if !agents.PlainSession(session) {
+		return nil
+	}
+	if err := j.files.Remove(j.file(session)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
 func (j *Journal) forget() error {
 	held, err := j.all()
 	if err != nil {

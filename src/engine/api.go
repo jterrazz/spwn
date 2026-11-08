@@ -23,6 +23,9 @@ const (
 	CallKeepAwake = "engine.awake-keep"
 	CallAwakeOff  = "engine.awake-off"
 	CallRefresh   = "engine.refresh"
+	// value: the names every machine's agents and workspaces hold, which a
+	// workspace asks before it names an agent.
+	CallAgentsHeld = "engine.agents-held"
 	// value: the activity this engine keeps, of This Mac and of each VM it
 	// sees, in its memory alone.
 	CallActivity = "engine.activity"

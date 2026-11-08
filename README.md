@@ -22,6 +22,7 @@ station                 # on a terminal: the TUI (the machines, then the section
 
 # Machines
 station machines        # All machines: every Mac, its servers and its workspaces; create, start, stop, delete
+station agents          # every agent of every workspace, by its name; start, reply, attach, merge, stop
 
 # On a machine (--on <machine>, or station use <machine>, else This Mac)
 station overview        # this machine at a glance: what needs you first, then each section

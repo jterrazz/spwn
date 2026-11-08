@@ -214,7 +214,7 @@ func (s *Machinist) Remember(_ context.Context, f model.AllMachines) error {
 		}
 		seen := make([]model.SeenVM, 0, len(h.VMs))
 		for _, vm := range model.Ordered(h.VMs) {
-			seen = append(seen, model.SeenVM{Name: vm.Name, Lifetime: vm.Lifetime, CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes})
+			seen = append(seen, model.SeenVM{Name: vm.Name, Lifetime: vm.Lifetime, CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes, Agents: vm.Agents})
 		}
 		known.Answered, known.VMs = s.h.Now().UTC().Truncate(time.Second), seen
 		known.Laptop, known.Asleep, known.Hardware = h.Laptop, h.Asleep, nil

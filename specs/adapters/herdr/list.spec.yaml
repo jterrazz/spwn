@@ -7,4 +7,4 @@ runs:
       exit: 0
       stdout: |
           # Agents	1 ◐
-          ◐	t7	claudecode	waiting · Claude needs your permission to use Bash		station agents reply t7 <text>
+          ◐	review-bot	claudecode	waiting · Claude needs your permission to use Bash		station agents reply review-bot <text>

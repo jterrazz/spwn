@@ -357,13 +357,14 @@ func (s *Agent) listen(ctx context.Context, g *session, quit context.CancelFunc)
 }
 
 // value: the calls the socket inside a VM serves, in station.api/v2 frames:
-// the three a command here asks its Mac's engine, relayed over the guest
+// the four a command here asks its Mac's engine, relayed over the guest
 // channel, and the quit a newer guest sends the one it replaces.
 const (
-	callPorts   = "engine.ports"
-	callReserve = "engine.reserve"
-	callRelease = "engine.release"
-	callQuit    = "guest.quit"
+	callPorts      = "engine.ports"
+	callReserve    = "engine.reserve"
+	callRelease    = "engine.release"
+	callAgentsHeld = "engine.agents-held"
+	callQuit       = "guest.quit"
 )
 
 type request struct {
@@ -396,7 +397,7 @@ func (g *session) serve(ctx context.Context, conn local.Conn, quit context.Cance
 			return
 		}
 		frame := map[string]any{"v": 2, "id": r.ID}
-		if op, ok := map[string]string{callPorts: "ports", callReserve: "reserve", callRelease: "release"}[r.Call]; !ok || r.V != 2 {
+		if op, ok := map[string]string{callPorts: "ports", callReserve: "reserve", callRelease: "release", callAgentsHeld: "agents-held"}[r.Call]; !ok || r.V != 2 {
 			frame["error"] = fault{Type: "refused", Code: "call.unknown", Message: "no call is named " + r.Call, Hint: "station ports"}
 		} else if reply := g.relay(ctx, op, r.In.Port); reply.OK {
 			frame["out"] = reply.Result

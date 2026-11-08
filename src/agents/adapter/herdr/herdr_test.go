@@ -18,7 +18,6 @@ type core struct {
 	// value: a recorded herdr-core: its terminals, what each shows and
 	// says, the machines it reaches, and every command line hc ran.
 	terminals []map[string]any
-	screens   map[string]string
 	opened    []string
 	typed     []contracttest.Typed
 	machines  []string
@@ -57,8 +56,19 @@ func (c *core) connect(stdin string) local.Output {
 	case "terminal.send":
 		c.typed = append(c.typed, contracttest.Typed{Terminal: p.Terminal, Text: p.Text})
 		return c.answer(req.ID, map[string]any{"turn": 1})
-	case "terminal.read":
-		return c.answer(req.ID, map[string]any{"text": c.screens[p.Terminal], "complete": true, "how": "screen"})
+	case "terminal.keep", "terminal.kill", "terminal.rm":
+		i := slices.IndexFunc(c.terminals, func(t map[string]any) bool { return t["address"] == p.Terminal })
+		if i < 0 {
+			line, _ := json.Marshal(map[string]any{"jsonrpc": "2.0", "id": req.ID, "error": map[string]any{"code": -32000, "message": "not_found", "data": map[string]string{"kind": "not_found"}}})
+			return local.Output{Stdout: string(line) + "\n"}
+		}
+		switch req.Method {
+		case "terminal.kill":
+			c.terminals[i]["state"] = "finished"
+		case "terminal.rm":
+			c.terminals = slices.Delete(c.terminals, i, i+1)
+		}
+		return c.answer(req.ID, map[string]any{"address": p.Terminal})
 	case "terminal.list":
 		other := map[string]any{"address": "t99", "cwd": "/", "state": "live", "labels": map[string]string{}}
 		remote := map[string]any{"address": "mini/t1", "cwd": "/", "state": "live", "labels": map[string]string{"station": "agent"}}
@@ -105,16 +115,12 @@ func (c *core) play(cmd local.Cmd) (local.Output, error) {
 	return local.Output{ExitCode: 2, Stderr: "unknown command"}, nil
 }
 
-func (c *core) says(terminal string, seen agents.Seen, message, screen string) {
+func (c *core) says(terminal string, seen agents.Seen, message string) {
 	for _, t := range c.terminals {
 		if t["address"] == terminal {
 			t["status"] = map[string]string{"state": string(seen), "msg": message}
 		}
 	}
-	if c.screens == nil {
-		c.screens = map[string]string{}
-	}
-	c.screens[terminal] = screen
 }
 
 func TestSession(t *testing.T) {
@@ -152,12 +158,15 @@ func TestAnAgentIsOpenedMarkedAsStationsAndReadyBeforeItsPrompt(t *testing.T) {
 		}
 		return c.play(cmd)
 	}, "hc")
-	if _, err := herdr.NewSession(run).Open(context.Background(), "claudecode", "/home/admin/app", []string{"agent"}); err != nil {
+	if _, err := herdr.NewSession(run).Open(context.Background(), "claudecode", "linux-1"+agents.Nth+"2", "/home/admin/app", []string{"agent"}); err != nil {
 		t.Fatalf("Open: %v", err)
 	}
 	labels, _ := asked["labels"].(map[string]any)
-	if labels["station"] != "agent" || labels["station.app"] != "claudecode" {
-		t.Errorf("labels %v, want station=agent and the app", labels)
+	if labels["station"] != "agent" || labels["station.app"] != "claudecode" || labels["station.agent"] != "linux-1"+agents.Nth+"2" {
+		t.Errorf("labels %v, want station=agent, the app and the agent's name", labels)
+	}
+	if asked["name"] != "linux-1-2" {
+		t.Errorf("name %v, want the agent's in Herdr's letters", asked["name"])
 	}
 	if asked["wait"] != true || asked["no_parent"] != true || asked["outlive_parent"] != true || asked["keep"] != true {
 		t.Errorf("run %v, want it waited for, parentless, outliving its caller and kept", asked)

@@ -1,0 +1,8 @@
+description: 'on a server, station agents forget is refused: agents work inside a workspace'
+env: two-macs
+runs:
+    - command: 'agents forget linux-1 --on infra'
+      exit: 2
+      stderr: |
+          Error: infra is a server: agents are recorded inside the workspace they work in
+          Hint: run station overview for what infra has

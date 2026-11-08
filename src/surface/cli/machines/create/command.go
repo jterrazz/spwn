@@ -37,8 +37,8 @@ type Deps struct {
 type Input struct {
 	Image, Name, Memory, Disk, Network, Check string
 	Permanent, Server                         bool
-	// value: the workspace's task, and whether an agent starts on it once
-	// the workspace answers.
+	// value: v3's --task and --agent, gone with A2: a create that names
+	// them is refused, pointed to station agents start.
 	Task  string
 	Agent bool
 	CPUs  int
@@ -74,18 +74,23 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
 			f.StringVar(&in.Network, "network", "", "bridged: its own address on your LAN (macOS images only); default behind its Mac")
-			f.StringVar(&in.Task, "task", "", "the workspace's task, kept on its record")
-			f.BoolVar(&in.Agent, "agent", false, "start an agent once it answers, --task as its first prompt")
+			f.StringVar(&in.Task, "task", "", "gone: station agents start \"<task>\" --new")
+			f.BoolVar(&in.Agent, "agent", false, "gone: station agents start \"<task>\" --new")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
 			f.StringVar(&in.Lifetime, "lifetime", "", "throwaway or permanent (--permanent)")
 			_ = f.MarkHidden("name")
 			_ = f.MarkHidden("lifetime")
 			_ = f.MarkHidden("always-on")
+			_ = f.MarkHidden("task")
+			_ = f.MarkHidden("agent")
 		},
 		Read: func(*Input) bool { return false },
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {
 				in.Name = args[0]
+			}
+			if in.Task != "" || in.Agent {
+				return &machines.KindRuleError{Why: "station machines create makes the VM only: an agent is started on it", Fix: taskWords(in)}
 			}
 			if in.AlwaysOn {
 				in.Server = true
@@ -114,7 +119,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					env.Out.Now(nowWords(in))
 				}
 			}
-			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server, Task: in.Task, Start: in.Agent}
+			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server}
 			return nil
 		},
 		Validate: func(ctx context.Context, in *Input) error {
@@ -160,6 +165,19 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return io.Page(pagemachines.Created(created, d.ThisMachine), pagemachines.CreatedContract(schema, created))
 		},
 	}, env)
+}
+
+// value: the A2 words of a create written with v3's --task.
+func taskWords(in *Input) string {
+	task := in.Task
+	if task == "" {
+		task = "<task>"
+	}
+	words := "station agents start \"" + task + "\" --new"
+	if in.Name != "" {
+		words += " --name " + in.Name
+	}
+	return words
 }
 
 // value: the v3 words of a create written with v2's --always-on.

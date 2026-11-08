@@ -16,12 +16,12 @@ func workspaceContext() page.Context { return page.Context{Kind: "workspace", Ma
 func agentsKept() []agents.Agent {
 	at := time.Date(2026, 11, 7, 9, 24, 0, 0, time.UTC)
 	return []agents.Agent{
-		{App: "claudecode", Session: "review-bot", State: agents.Waiting, Task: "Review the auth refresh", Folder: "/home/admin/app",
+		{Name: "review-bot", VM: "review-bot", App: "claudecode", Session: "review-bot", State: agents.Waiting, Task: "Review the auth refresh", Folder: "/home/admin/app",
 			Ask: &agents.Ask{Title: "PR #42 is ready", Detail: "I moved the refresh into its own commit.", At: at},
 			PR:  &agents.PR{Number: 42, URL: "https://github.com/jterrazz/app/pull/42"}, Change: &agents.Change{Files: 6, Plus: 214, Minus: 88}},
-		{App: "claudecode", Session: "s-2", State: agents.Working, Task: "Build the landing page", Folder: "/home/admin/site",
+		{Name: "review-bot" + agents.Nth + "2", VM: "review-bot", App: "claudecode", Session: "s-2", State: agents.Working, Task: "Build the landing page", Folder: "/home/admin/site",
 			Steps: []agents.Step{{At: at, Verb: catalog.AgentEdit, Object: "src/pages/index.astro", Diff: &agents.Diff{Plus: 86, Minus: 12}}, {At: at, Verb: catalog.AgentTest, Tests: &agents.Tests{Pass: 41, Total: 58}}}},
-		{App: "codex", Session: "t-1", State: agents.Finished, Task: "Write the changelog", Reason: "merged PR #40", Ended: at},
+		{Name: "review-bot" + agents.Nth + "3", VM: "review-bot", App: "codex", Session: "t-1", State: agents.Finished, Task: "Write the changelog", Reason: "merged PR #40", Ended: at},
 	}
 }
 

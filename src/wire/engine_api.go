@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -38,6 +39,12 @@ func (e engineAPI) do(ctx context.Context, name string, in, out any) error {
 		return &enginecalls.DownError{}
 	}
 	return err
+}
+
+func (e engineAPI) AgentsHeld(ctx context.Context) (agents.Held, error) {
+	var h agents.Held
+	err := e.do(ctx, engine.CallAgentsHeld, nil, &h)
+	return h, err
 }
 
 func (e engineAPI) Hello(ctx context.Context) (engine.Hello, error) {

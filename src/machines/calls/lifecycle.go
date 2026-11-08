@@ -2,6 +2,9 @@ package calls
 
 import (
 	"context"
+	"errors"
+	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
@@ -46,6 +49,10 @@ type StopOut struct {
 	Already bool
 	// value: what was stopped: a server's wanted state is Stopped from now on.
 	Kind machine.Kind
+	// value: SPEC B5.22: its agents, stopped with it.
+	Agents []string
+	// value: each agent that did not stop, said; the VM stopped all the same.
+	Warnings []string
 }
 
 var Stop = call.Call[Deps, StopIn, StopOut]{
@@ -66,10 +73,19 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 		if running, err := d.Machines.Running(ctx, in.VM); err != nil || !running {
 			return StopOut{Already: err == nil, Kind: kind}, err
 		}
-		if err := confirm.Ask(confirm.Stop, kind, in.VM, in.Confirm); err != nil {
+		if err := naming(confirm.Ask(confirm.Stop, kind, in.VM, in.Confirm), live(ctx, d, in.VM)); err != nil {
 			return StopOut{Kind: kind}, err
 		}
-		return StopOut{Kind: kind}, d.Machines.Stop(ctx, in.VM)
+		stopped, warned := stopAgents(ctx, d, in.VM, "its workspace stopped")
+		held := heldBy(ctx, d, in.VM)
+		if err := d.Machines.Stop(ctx, in.VM); err != nil {
+			return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, err
+		}
+		var kept error
+		if held != nil {
+			kept = d.Machines.KeepAgents(in.VM, held)
+		}
+		return StopOut{Kind: kind, Agents: stopped, Warnings: warned}, kept
 	},
 }
 
@@ -85,14 +101,59 @@ var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 		if err := d.Machines.CheckVM(in.VM, "delete"); err != nil {
 			return machines.DeleteReport{}, err
 		}
-		if err := confirm.Ask(confirm.Delete, d.Machines.LifetimeOf(in.VM).Kind(), in.VM, in.Confirm); err != nil {
+		running, _ := d.Machines.Running(ctx, in.VM)
+		var named []string
+		if running {
+			named = live(ctx, d, in.VM)
+		}
+		if err := naming(confirm.Ask(confirm.Delete, d.Machines.LifetimeOf(in.VM).Kind(), in.VM, in.Confirm), named); err != nil {
 			return machines.DeleteReport{}, err
 		}
 		if err := d.Machines.EngineUp(ctx); err != nil {
 			return machines.DeleteReport{}, err
 		}
-		return d.Machines.Delete(ctx, in.VM)
+		var stopped, warned []string
+		if running {
+			stopped, warned = stopAgents(ctx, d, in.VM, "its workspace was deleted")
+		}
+		report, err := d.Machines.Delete(ctx, in.VM)
+		report.Agents, report.Warnings = stopped, slices.Concat(warned, report.Warnings)
+		return report, err
 	},
+}
+
+// value: the live agents of a workspace of this Mac; none for a server.
+func live(ctx context.Context, d Deps, vm string) []string {
+	if d.Agents == nil || d.Machines.LifetimeOf(vm).Kind() != machine.Workspace {
+		return nil
+	}
+	return d.Agents.Live(ctx, vm)
+}
+
+// value: the name of every agent of a workspace of this Mac, finished ones
+// too; nil when it does not answer, or for a server.
+func heldBy(ctx context.Context, d Deps, vm string) []string {
+	if d.Agents == nil || d.Machines.LifetimeOf(vm).Kind() != machine.Workspace {
+		return nil
+	}
+	return d.Agents.Held(ctx, vm)
+}
+
+func stopAgents(ctx context.Context, d Deps, vm, reason string) (stopped, warnings []string) {
+	if d.Agents == nil || d.Machines.LifetimeOf(vm).Kind() != machine.Workspace {
+		return nil, nil
+	}
+	return d.Agents.Stop(ctx, vm, reason)
+}
+
+// invariant: SPEC A5: the confirmation of a VM that hosts live agents
+// names them, which stop first.
+func naming(err error, agents []string) error {
+	var e *fail.Error
+	if len(agents) > 0 && errors.As(err, &e) {
+		e.Detail["agents"] = strings.Join(agents, ", ")
+	}
+	return err
 }
 
 type RestartIn struct {

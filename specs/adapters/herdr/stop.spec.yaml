@@ -1,0 +1,16 @@
+description: 'an agent stopped in Herdr is no longer kept, its program ended, then its terminal removed'
+fixture: ./__fixtures__/hc/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'agents stop review-bot --yes'
+      exit: 0
+      stdout: |
+          ●	review-bot	stopped · its workspace keeps running
+    - command: '--version >/dev/null; /bin/cat .calls'
+      exit: 0
+      stdout: |
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.list","params":{"labels":{"station":"agent"}}}
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.keep","params":{"keep":false,"terminal":"t7"}}
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.kill","params":{"terminal":"t7"}}
+          hc connect {"jsonrpc":"2.0","id":1,"method":"terminal.rm","params":{"terminal":"t7"}}

@@ -193,6 +193,33 @@ func orDash(s string) page.Value {
 	return page.Identity(s)
 }
 
+func agentsStopped(names []string) string {
+	// value: SPEC B5.22: the agents a VM's stop or delete stopped first.
+	if len(names) == 1 {
+		return "its agent " + names[0] + " stopped"
+	}
+	return "its agents " + strings.Join(names, ", ") + " stopped"
+}
+
+func StoppedWithAgents(name string, agents, warnings []string, thisMac page.Context) page.Page {
+	row := pages.Done(name, catalog.StateOK, "stopped, kept")
+	if len(agents) > 0 {
+		row.Detail = page.Texts("stopped, kept", agentsStopped(agents))
+	}
+	return pages.Outcome("machines stop", thisMac, nil, append([]page.Row{row}, warned(name, warnings)...), "machines")
+}
+
+// value: a VM's stop or delete warnings, one row each under its own.
+func warned(name string, warnings []string) []page.Row {
+	rows := make([]page.Row, 0, len(warnings))
+	for i, w := range warnings {
+		row := pages.Done(name+"/"+strconv.Itoa(i), catalog.StateDegraded, w)
+		row.Label = name
+		rows = append(rows, row)
+	}
+	return rows
+}
+
 func Change(verb, name, change string, thisMac page.Context) page.Page {
 	return pages.Outcome("machines "+verb, thisMac, nil, []page.Row{pages.Done(name, catalog.StateOK, change)}, "machines")
 }
@@ -297,8 +324,6 @@ type CreatedJSON struct {
 	Mac         string            `json:"mac"`
 	Lifetime    string            `json:"lifetime"`
 	Check       string            `json:"check,omitempty"`
-	Task        string            `json:"task,omitempty"`
-	Agent       bool              `json:"agent,omitempty"`
 	Image       string            `json:"image"`
 	Version     string            `json:"version"`
 	CPUs        int               `json:"cpus"`
@@ -329,7 +354,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	// ssh: the three steps its page passes.
 	vm, r := c.VM, c.VM.Resources
 	body := CreatedJSON{
-		Schema: schema, Health: CreatedHealth{Running: true, Address: vm.IP != "", SSH: true}, Name: vm.Name, Kind: string(vm.Lifetime.Kind()), Mac: vm.Mac, Lifetime: string(vm.Lifetime), Check: vm.Check, Task: vm.Task, Agent: c.Agent, Image: vm.Image,
+		Schema: schema, Health: CreatedHealth{Running: true, Address: vm.IP != "", SSH: true}, Name: vm.Name, Kind: string(vm.Lifetime.Kind()), Mac: vm.Mac, Lifetime: string(vm.Lifetime), Check: vm.Check, Image: vm.Image,
 		Version: vm.Version, CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, IP: vm.IP,
 		Network: vm.Network, Ports: []CreatedPort{}, Env: c.Env,
 	}
@@ -361,9 +386,6 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 	if off != "" {
 		row := page.Row{ID: "ports", Label: "ports", Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(off)}}
 		rows = append(rows, row)
-	}
-	if c.Agent {
-		rows = append(rows, passed(model.StepAgent, vm.Task))
 	}
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("Created"), page.List(page.Text(titled(string(vm.Lifetime))), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}
@@ -418,11 +440,10 @@ func serverCreated(c model.Created, rows []page.Row, thisMac page.Context) page.
 func Deleted(r model.DeleteReport, thisMac page.Context) page.Page {
 	rows := make([]page.Row, 0, 1+len(r.Warnings))
 	rows = append(rows, pages.Done(r.Name, catalog.StateOK, "deleted"))
-	for i, w := range r.Warnings {
-		row := pages.Done(r.Name+"/"+strconv.Itoa(i), catalog.StateDegraded, w)
-		row.Label = r.Name
-		rows = append(rows, row)
+	if len(r.Agents) > 0 {
+		rows[0].Detail = page.Texts("deleted", agentsStopped(r.Agents))
 	}
+	rows = append(rows, warned(r.Name, r.Warnings)...)
 	return pages.Outcome("machines delete "+r.Name, thisMac, nil, rows, "VMs")
 }
 

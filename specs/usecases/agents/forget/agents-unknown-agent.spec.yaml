@@ -1,0 +1,8 @@
+description: 'forgetting an agent no workspace holds is refused'
+env: in-workspace
+runs:
+    - command: 'agents forget nobody'
+      exit: 2
+      stderr: |
+          Error: no agent named "nobody"
+          Hint: station agents

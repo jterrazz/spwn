@@ -1,8 +1,0 @@
-description: 'a reply to a session the journal does not hold is refused, with where to read the agents'
-env: in-workspace
-runs:
-    - command: 'agents reply s-9 hello'
-      exit: 2
-      stderr: |
-          Error: no agent session "s-9" here
-          Hint: station agents

@@ -74,6 +74,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Uptime:    m.stores.uptime,
 		Waker:     m.waker(),
 		Terminals: m.multiplexer(),
+		AgentsOf:  farAgents{m}.Held,
 	})
 }
 

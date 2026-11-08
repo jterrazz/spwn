@@ -1,0 +1,20 @@
+description: 'a silent Mac still holds its workspaces and their agents: no new agent takes their names'
+env: mini-offline
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.macs["jterrazz-mac-mini"].vms += [{name: "review", lifetime: "permanent", cpus: 4, memory_bytes: 8589934592, agents: ["docs-bot"]}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the changelog" --on linux-1 --name docs-bot'
+      exit: 2
+      stderr: |
+          Error: an agent is already named docs-bot
+          Hint: name it another way: --name <name>
+    - command: 'agents start "Write the changelog" --on linux-1 --name review·2'
+      exit: 2
+      stderr: |
+          Error: review·2 is review's: a workspace names its own agents review and review·<n>
+          Hint: name it another way: --name <name>
+    - command: 'machines create docs-bot'
+      exit: 2
+      stderr: |
+          Error: "docs-bot" is taken (an agent on review)
+          Hint: pick another name

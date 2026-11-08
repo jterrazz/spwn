@@ -61,20 +61,32 @@
       "out": "Reading"
     },
     {
-      "name": "agents.list",
-      "schema": "station.agents.list/v1",
-      "where": "at-target"
+      "name": "agents.forget",
+      "schema": "station.agents.forget/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.live",
+        "agents.unknown-agent"
+      ],
+      "in": "AgentIn",
+      "out": "Agent"
     },
     {
-      "name": "agents.merge-pr",
-      "schema": "station.agents.merge-pr/v1",
+      "name": "agents.list",
+      "schema": "station.agents.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "agents.merge",
+      "schema": "station.agents.merge/v1",
       "where": "at-target",
       "errors": [
         "agents.ended",
         "agents.no-pr",
-        "agents.unknown-session"
+        "agents.unknown-agent"
       ],
-      "in": "MergeIn",
+      "in": "AgentIn",
       "out": "Agent"
     },
     {
@@ -92,7 +104,7 @@
         "agents.ended",
         "agents.no-terminal",
         "agents.no-text",
-        "agents.unknown-session"
+        "agents.unknown-agent"
       ],
       "in": "ReplyIn",
       "out": "Agent"
@@ -102,10 +114,25 @@
       "schema": "station.agents.start/v1",
       "where": "at-target",
       "errors": [
+        "agents.bad-name",
+        "agents.name-taken",
         "agents.unknown-app"
       ],
       "in": "StartIn",
-      "out": "Started"
+      "out": "Agent"
+    },
+    {
+      "name": "agents.stop",
+      "schema": "station.agents.stop/v1",
+      "where": "at-target",
+      "confirm": "stop-agent",
+      "errors": [
+        "agents.ended",
+        "agents.unknown-agent",
+        "confirm.yes-needed"
+      ],
+      "in": "StopIn",
+      "out": "Agent"
     },
     {
       "name": "apps.install",

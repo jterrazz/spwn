@@ -1,0 +1,8 @@
+{
+    "group": "workspace",
+    "id": "workspace.agents",
+    "note": "linux-1's page in today's look, its one agent at work; the A2 Agents card redraws it.",
+    "pages": ["pages/machines.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "status": "today"
+}

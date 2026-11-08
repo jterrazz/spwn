@@ -1,0 +1,30 @@
+description: 'a workspace that hosts agents names them before its delete, then stops them first'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents start "Write the changelog" --on linux-1 --name docs-bot'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: 'machines delete linux-1'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: linux-1 (its agents stop first: docs-bot, linux-1)
+          Hint: in a script: --confirm=linux-1
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.closed'' world.json'
+      exit: 0
+      stdout: |
+          null
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted · its agents docs-bot, linux-1 stopped
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"]'' world.json'
+      exit: 0
+      stdout: |
+          null

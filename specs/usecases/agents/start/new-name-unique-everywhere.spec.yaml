@@ -1,0 +1,20 @@
+description: '--new makes its throwaway under a name no agent of any machine holds, and gives the agent that name'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-3"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the changelog" --on linux-1 --name linux-2'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-2	starts · claudecode · Write the changelog
+    - command: 'agents start "Build the landing page" --new'
+      exit: 0
+      stdout: |
+          ●	linux-3	starts on linux-3, a new throwaway · claudecode · Build the landing page
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	linux-2	claudecode	working	Write the changelog	linux-1	jterrazz-macbook-pro	24s ago
+          ●	linux-3	claudecode	working	Build the landing page	linux-3	jterrazz-macbook-pro	12s ago

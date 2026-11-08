@@ -56,9 +56,6 @@ type VM struct {
 	Want string
 	// value: a server's health check; empty for none.
 	Check string
-	// value: a workspace's task, what its agent was started on; empty for
-	// none.
-	Task string
 	// value: a server's own tailnet device, by its name on the tailnet,
 	// which the owner's tooling installed; empty for none.
 	Device    string
@@ -89,6 +86,9 @@ type VM struct {
 	// value: the agent a workspace is said by, as its guest last reported
 	// it; nil while none is known.
 	Agent *AgentView
+	// value: the agents a workspace held when it last stopped, which a
+	// stopped one or one of a silent Mac still holds.
+	Agents []string `json:",omitempty"`
 }
 
 type AgentView struct {
@@ -149,10 +149,6 @@ type CreateRequest struct {
 	Server bool
 	// value: a server's health check, a URL or host:port; empty for none.
 	Check string
-	// value: a workspace's task, kept on its record; with Start, the first
-	// prompt of an agent started in it once it answers.
-	Task  string
-	Start bool
 }
 
 type AgentNotStartedError struct {
@@ -188,8 +184,6 @@ type Created struct {
 	// value: the Mac it was made on reports a battery: a server there stops
 	// whenever the Mac sleeps.
 	OnALaptop bool
-	// value: an agent was started in it on its task, as the create asked.
-	Agent bool
 }
 
 type Step struct{ Label string }
@@ -199,11 +193,12 @@ const (
 	StepRunning = "Running"
 	StepAddress = "Has an address"
 	StepSSH     = "SSH answers"
-	StepAgent   = "Agent started"
 )
 
 type DeleteReport struct {
-	Name     string
+	Name string
+	// value: SPEC B5.22: the agents it hosted, stopped before it went.
+	Agents   []string
 	Warnings []string
 }
 

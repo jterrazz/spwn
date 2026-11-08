@@ -303,8 +303,10 @@ type Agents struct {
 	// "<folder> <argv>", and the texts typed into them.
 	Opened []string `json:"opened,omitempty"`
 	Typed  []string `json:"typed,omitempty"`
-	// value: the multiplexer's terminals, in the order opened.
+	// value: the multiplexer's terminals, in the order opened, and the
+	// addresses of those closed since.
 	Terminals []Terminal `json:"terminals,omitempty"`
+	Closed    []string   `json:"closed,omitempty"`
 	// value: the PRs of the VM's repositories, by number: open or merged.
 	PRs map[int]string `json:"prs,omitempty"`
 	// value: each folder's change since its base.
@@ -313,8 +315,7 @@ type Agents struct {
 
 type Terminal struct {
 	agents.Terminal
-	Screen string   `json:"screen,omitempty"`
-	Typed  []string `json:"typed,omitempty"`
+	Typed []string `json:"typed,omitempty"`
 }
 
 func (v *VM) Agentic() *Agents {
@@ -344,13 +345,14 @@ type Kept struct {
 	Want      string            `json:"want,omitempty"`
 	Network   string            `json:"network,omitempty"`
 	Check     string            `json:"check,omitempty"`
-	Task      string            `json:"task,omitempty"`
 	Env       map[string]string `json:"env,omitempty"`
 	CreatedAt time.Time         `json:"created_at,omitzero"`
 	Birth     *machines.Birth   `json:"birth,omitempty"`
 	// value: the shares station v2 kept in the VM's record, by name, until
 	// the accounts' store moves them out once.
 	Shared []string `json:"lent,omitempty"`
+	// value: the agents a workspace held when it last stopped.
+	Agents []string `json:"agents,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

@@ -35,8 +35,8 @@ func (s *Store) vms() map[string]*world.VM { return s.w.Mac(s.mac).VMs }
 func record(name string, v *world.VM) machines.Record {
 	k := v.Kept
 	return machines.Record{
-		Name: name, Image: k.Image, Version: k.Version, Lifetime: k.Lifetime, Want: k.Want, Network: k.Network, Check: k.Check, Task: k.Task,
-		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt, Birth: k.Birth,
+		Name: name, Image: k.Image, Version: k.Version, Lifetime: k.Lifetime, Want: k.Want, Network: k.Network, Check: k.Check,
+		Env: k.Env, CPUs: v.Size.CPUs, MemoryBytes: v.Size.Memory, DiskBytes: v.Size.Disk, CreatedAt: k.CreatedAt, Birth: k.Birth, Agents: k.Agents,
 	}
 }
 
@@ -58,9 +58,13 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 		v = &world.VM{}
 		s.vms()[r.Name] = v
 	}
+	agents := r.Agents
+	if agents == nil && v.Kept != nil {
+		agents = v.Kept.Agents
+	}
 	v.Kept = &world.Kept{
-		Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Task: r.Task, Env: r.Env,
-		CreatedAt: r.CreatedAt, Birth: r.Birth,
+		Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
+		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: agents,
 	}
 	v.Size = machines.Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}
 	return nil

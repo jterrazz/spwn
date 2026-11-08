@@ -8,4 +8,4 @@ runs:
       stdout: |
           	On linux-1:
           # Agents	1 ●
-          ●	s-1	claudecode	working	Build the landing page
+          ●	linux-1	claudecode	working	Build the landing page

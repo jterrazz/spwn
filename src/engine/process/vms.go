@@ -677,19 +677,31 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 			ch <- m
 		}
 	case "request":
-		result, err := d.guestRequest(ctx, name, m)
-		reply := map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": err == nil}
-		if err != nil {
-			var op *enginecalls.OpError
-			if !errors.As(err, &op) {
-				op = fault("internal", err.Error(), "station ports")
-			}
-			reply["error"] = op
-		} else {
-			reply["result"] = result
+		if m.Op == opAgentsHeld {
+			go d.answerGuest(ctx, v, m)
+			return
 		}
-		d.write(v, reply)
+		d.answerGuest(ctx, v, m)
 	}
+}
+
+// value: the op whose answer reads every machine, its own guest included,
+// so it is answered beside the guest's session, never in its way.
+const opAgentsHeld = "agents-held"
+
+func (d *Engine) answerGuest(ctx context.Context, v *vmState, m guestMessage) {
+	result, err := d.guestRequest(ctx, v.rec.Name, m)
+	reply := map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": err == nil}
+	if err != nil {
+		var op *enginecalls.OpError
+		if !errors.As(err, &op) {
+			op = fault("internal", err.Error(), "station ports")
+		}
+		reply["error"] = op
+	} else {
+		reply["result"] = result
+	}
+	d.write(v, reply)
 }
 
 func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (any, error) {
@@ -700,6 +712,8 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		return d.shareOf(ctx, vm, m.Port, false, "")
 	case "release":
 		return d.stopSharing(ctx, vm, m.Port)
+	case opAgentsHeld:
+		return d.AgentsHeld(ctx)
 	}
 	return nil, fault("unknown_op", "unknown op \""+m.Op+"\"", "station ports")
 }

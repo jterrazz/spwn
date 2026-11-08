@@ -22,7 +22,13 @@ const (
 )
 
 type Agent struct {
-	VM      string `json:"vm,omitempty"`
+	// value: SPEC B5.22: the agent's own name, short and unique across the
+	// fleet, by which every call and page addresses it.
+	Name string `json:"name,omitempty"`
+	VM   string `json:"vm,omitempty"`
+	// value: the Mac its VM runs on, said by a read of the fleet; empty
+	// inside the VM.
+	Mac     string `json:"mac,omitempty"`
 	App     App    `json:"app"`
 	Session string `json:"session"`
 	State   State  `json:"state"`

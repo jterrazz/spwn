@@ -1,0 +1,8 @@
+description: 'a reply to a session the journal does not hold is refused, with where to read the agents'
+env: in-workspace
+runs:
+    - command: 'agents reply nobody hello'
+      exit: 2
+      stderr: |
+          Error: no agent named "nobody"
+          Hint: station agents

@@ -23,18 +23,18 @@ func NewSession() *Session { return &Session{alone()} }
 
 func SessionOf(w *world.World, vm string) *Session { return &Session{inVM{w: w, vm: vm}} }
 
-func (s *Session) Open(_ context.Context, app agents.App, folder string, argv []string) (string, error) {
+func (s *Session) Open(_ context.Context, app agents.App, name, folder string, argv []string) (string, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
-	return openOn(s.agents(), app, folder, argv), nil
+	return openOn(s.agents(), app, name, folder, argv), nil
 }
 
-func openOn(held *world.Agents, app agents.App, folder string, argv []string) string {
+func openOn(held *world.Agents, app agents.App, name, folder string, argv []string) string {
 	// value: a terminal opened on a world VM's multiplexer, its address the
 	// next one.
 	address := "t" + strconv.Itoa(len(held.Terminals)+1)
 	held.Opened = append(held.Opened, strings.TrimSpace(folder+" "+strings.Join(argv, " ")))
-	held.Terminals = append(held.Terminals, world.Terminal{Terminal: agents.Terminal{Address: address, App: app, Folder: folder}})
+	held.Terminals = append(held.Terminals, world.Terminal{Terminal: agents.Terminal{Address: address, Name: name, App: app, Folder: folder}})
 	return address
 }
 
@@ -60,14 +60,15 @@ func (s *Session) Send(_ context.Context, terminal, text string) error {
 	return nil
 }
 
-func (s *Session) Screen(_ context.Context, terminal string) (string, error) {
+func (s *Session) Close(_ context.Context, terminal string) error {
 	s.w.Lock()
 	defer s.w.Unlock()
-	t, err := s.terminal(terminal)
-	if err != nil {
-		return "", err
+	held := s.agents()
+	if i := slices.IndexFunc(held.Terminals, func(t world.Terminal) bool { return t.Address == terminal }); i >= 0 {
+		held.Closed = append(held.Closed, terminal)
+		held.Terminals = slices.Delete(held.Terminals, i, i+1)
 	}
-	return t.Screen, nil
+	return nil
 }
 
 func (s *Session) Terminals(context.Context) ([]agents.Terminal, error) {
@@ -93,10 +94,10 @@ func (s *Session) Held() []world.Terminal {
 	return slices.Clone(s.agents().Terminals)
 }
 
-func (s *Session) Says(terminal string, seen agents.Seen, message, screen string) {
+func (s *Session) Says(terminal string, seen agents.Seen, message string) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	if t, err := s.terminal(terminal); err == nil {
-		t.Seen, t.Message, t.Screen = seen, message, screen
+		t.Seen, t.Message = seen, message
 	}
 }

@@ -1,0 +1,16 @@
+description: 'a stop off a terminal without --yes is refused, and the agent keeps working'
+env: in-workspace
+runs:
+    - command: 'agents start "Build the landing page"'
+      exit: 0
+      stdout: |
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents stop linux-1'
+      exit: 2
+      stderr: |
+          Error: refusing to stop without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.closed'' world.json'
+      exit: 0
+      stdout: |
+          null

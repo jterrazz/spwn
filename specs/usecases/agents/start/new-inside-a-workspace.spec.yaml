@@ -1,0 +1,12 @@
+description: 'inside a workspace, --new is refused: the agent starts on the workspace itself'
+env: in-workspace
+runs:
+    - command: 'agents start "Build the landing page" --new'
+      exit: 2
+      stderr: |
+          Error: an agent started inside a workspace runs on it: --new makes a throwaway from a Mac
+          Hint: station agents start "<task>"
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents'' world.json'
+      exit: 0
+      stdout: |
+          null

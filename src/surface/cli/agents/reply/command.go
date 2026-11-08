@@ -10,6 +10,7 @@ import (
 	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
+	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/page"
 	pageagents "github.com/jterrazz/studio-station/src/pages/agents"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
@@ -17,21 +18,23 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the workspace the calls for the agent of that name go to.
+	Where func(ctx context.Context, name string) (machine.Ref, error)
 }
 
 type Input struct {
-	Session string
-	Text    []string
+	Agent string
+	Text  []string
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
-		Use:     "reply <session> [text]",
+		Use:     "reply <agent> [text]",
 		Short:   "Type a reply to a waiting agent: it works on it",
-		Example: "  station agents reply s-1 yes, merge it\n  echo 'yes, merge it' | station agents reply s-1 --on linux-1",
+		Example: "  station agents reply review-bot yes, merge it\n  echo 'yes, merge it' | station agents reply review-bot",
 		Args:    cobra.MinimumNArgs(1),
 		Bind: func(in *Input, args []string) error {
-			in.Session, in.Text = args[0], args[1:]
+			in.Agent, in.Text = args[0], args[1:]
 			return nil
 		},
 		Run: func(ctx context.Context, in *Input, o kit.IO) error {
@@ -40,7 +43,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				data, _ := io.ReadAll(io.LimitReader(env.Stdin, catalog.AgentPayloadCap))
 				text = strings.TrimRight(string(data), "\n")
 			}
-			a, err := call.Invoke(ctx, env.Calls, env.Target(), agentscalls.Reply, agentscalls.ReplyIn{Session: in.Session, Text: text}, nil)
+			at, err := d.Where(ctx, in.Agent)
+			if err != nil {
+				return err
+			}
+			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Reply, agentscalls.ReplyIn{Agent: in.Agent, Text: text}, nil)
 			if err != nil {
 				return err
 			}

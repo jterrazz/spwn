@@ -79,6 +79,17 @@ func (j *Journal) Write(_ context.Context, a agents.Agent) error {
 	return nil
 }
 
+func (j *Journal) Forget(_ context.Context, session string) error {
+	j.w.Lock()
+	defer j.w.Unlock()
+	if j.w.Fails("Journal.Write") {
+		return errJournal
+	}
+	delete(j.agents().Journal, session)
+	j.Changed()
+	return nil
+}
+
 func (j *Journal) Changed() {
 	j.mu.Lock()
 	defer j.mu.Unlock()

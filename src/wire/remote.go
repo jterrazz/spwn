@@ -3,11 +3,13 @@ package wire
 import (
 	"context"
 	"encoding/json"
+	"github.com/jterrazz/studio-station/src/agents"
 	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"io"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/ports"
 
@@ -193,13 +195,57 @@ func (f farPorts) Undeclare(ctx context.Context, mac string, in portscalls.Undec
 	return call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: mac}, portscalls.Undeclare, in, nil)
 }
 
-// invariant: an agent is started inside the workspace, at its own station,
-// as any call for a VM of this Mac.
+// invariant: a workspace's agents are reached inside it, at its own
+// station, as any call for a VM of this Mac.
 type farAgents struct{ m machine }
 
-func (f farAgents) StartAgent(ctx context.Context, vm, task string) error {
-	_, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Start, agentscalls.StartIn{Task: task}, nil)
-	return err
+// value: how long a create waits for one workspace to say its agents' names;
+// one silent past it holds none.
+const heldBudget = 2 * time.Second
+
+func (f farAgents) Held(ctx context.Context, vm string) []string {
+	if f.m.far == nil || f.m.far.router == nil {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, heldBudget)
+	defer cancel()
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, agentscalls.ListIn{AsGiven: true}, nil)
+	if err != nil {
+		return nil
+	}
+	names := make([]string, 0, len(kept))
+	for _, a := range kept {
+		if a.Name != "" {
+			names = append(names, a.Name)
+		}
+	}
+	return names
+}
+
+func (f farAgents) Live(ctx context.Context, vm string) []string {
+	kept, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.List, agentscalls.ListIn{}, nil)
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, a := range kept {
+		if agents.Live(a) {
+			names = append(names, a.Name)
+		}
+	}
+	return names
+}
+
+func (f farAgents) Stop(ctx context.Context, vm, reason string) (stopped, warnings []string) {
+	for _, name := range f.Live(ctx, vm) {
+		if _, err := call.Invoke(ctx, f.m.far.router, coremachine.Ref{Name: vm}, agentscalls.Stop, agentscalls.StopIn{Agent: name, Reason: reason, Confirm: confirm.Yes}, nil); err != nil {
+			said, _ := word(fail.New(fail.Failed, agentscalls.NotStopped, name, map[string]string{"cause": kit.Translate(err, "").Message}))
+			warnings = append(warnings, said)
+			continue
+		}
+		stopped = append(stopped, name)
+	}
+	return stopped, warnings
 }
 
 func orNone(err error) error {

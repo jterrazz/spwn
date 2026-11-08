@@ -1,0 +1,16 @@
+description: 'a workspace stopped ends its agents first: each finished, its terminal closed, its workspace kept'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept · its agent linux-1 stopped
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents | {closed, state: (.journal | map_values(.state)), reason: (.journal | map_values(.reason))}'' world.json'
+      exit: 0
+      stdout: |
+          {"closed":["t1"],"state":{"station-linux-1":"finished"},"reason":{"station-linux-1":"its workspace stopped"}}

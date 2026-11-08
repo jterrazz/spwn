@@ -1,0 +1,17 @@
+description: 'a create with a task is refused, pointed to station agents start: a VM is made without an agent'
+env: two-macs
+runs:
+    - command: 'machines create --task "Build the landing page"'
+      exit: 2
+      stderr: |
+          Error: station machines create makes the VM only: an agent is started on it
+          Hint: station agents start "Build the landing page" --new
+    - command: 'machines create api-2 --agent'
+      exit: 2
+      stderr: |
+          Error: station machines create makes the VM only: an agent is started on it
+          Hint: station agents start "<task>" --new --name api-2
+    - command: 'machines --this-mac | /usr/bin/grep -c linux-2'
+      exit: 1
+      stdout: |
+          0

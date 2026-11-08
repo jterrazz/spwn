@@ -1,0 +1,32 @@
+description: 'inside a workspace a name is checked against every machine, through its Mac'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on ci-1 --name docs-bot'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	docs-bot	starts · claudecode · Write the changelog
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1" | .macs["linux-1"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents start "Write the release notes" --name docs-bot'
+      exit: 2
+      stderr: |
+          Error: an agent is already named docs-bot
+          Hint: name it another way: --name <name>
+    - command: 'agents start "Write the release notes" --name ci-1'
+      exit: 2
+      stderr: |
+          Error: ci-1 is ci-1's: a workspace names its own agents ci-1 and ci-1·<n>
+          Hint: name it another way: --name <name>
+    - command: 'agents start "Write the release notes"'
+      exit: 0
+      stdout: |
+          ●	linux-1	starts · claudecode · Write the release notes
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "jterrazz-macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents	2 ●
+          ●	linux-1	claudecode	working	Write the release notes	linux-1	jterrazz-macbook-pro	27s ago
+          ●	docs-bot	claudecode	working	Write the changelog	ci-1	jterrazz-mac-mini	1m ago

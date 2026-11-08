@@ -12,10 +12,7 @@ type Record struct {
 	Lifetime             Lifetime
 	Want, Network        string
 	// value: a server's health check, a URL or host:port; empty for none.
-	Check string
-	// value: a workspace's task, what its agent was started on; empty for
-	// none.
-	Task        string
+	Check       string
 	Env         map[string]string
 	CPUs        int
 	MemoryBytes int64
@@ -23,6 +20,9 @@ type Record struct {
 	CreatedAt   time.Time
 	// value: SPEC B5.10: its create's progress while it runs; nil after.
 	Birth *Birth
+	// value: the name of every agent a workspace held when it last stopped,
+	// finished ones too: what it holds while no one reads its journal.
+	Agents []string
 }
 
 type MacRecord struct {
@@ -49,4 +49,6 @@ type SeenVM struct {
 	Lifetime    Lifetime `json:"lifetime"`
 	CPUs        int      `json:"cpus"`
 	MemoryBytes int64    `json:"memory_bytes"`
+	// value: the agents a stopped workspace of it held, as that Mac last said.
+	Agents []string `json:"agents,omitempty"`
 }

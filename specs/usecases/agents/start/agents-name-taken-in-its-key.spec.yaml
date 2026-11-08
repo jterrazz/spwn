@@ -1,0 +1,18 @@
+description: 'a name whose key another holds starts nothing: linux-1-2 once linux-1·2 runs'
+env: two-macs
+runs:
+    - command: 'agents start "Build the landing page" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1	starts · claudecode · Build the landing page
+    - command: 'agents start "Write the changelog" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	linux-1·2	starts · claudecode · Write the changelog
+    - command: 'agents start "Write the release notes" --on linux-1 --name linux-1-2'
+      exit: 2
+      stderr: |
+          Error: an agent is already named linux-1-2
+          Hint: name it another way: --name <name>

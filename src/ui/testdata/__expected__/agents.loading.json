@@ -13,7 +13,7 @@
       "title": "Agents",
       "columns": [
         {
-          "key": "session",
+          "key": "agent",
           "kind": "text",
           "keep": 100
         },
@@ -57,9 +57,9 @@
         },
         {
           "row": {
-            "id": "s-2",
+            "id": "review-bot·2",
             "mark": "pending",
-            "label": "s-2",
+            "label": "review-bot·2",
             "cells": [
               {
                 "kind": "pending"
@@ -78,9 +78,9 @@
         },
         {
           "row": {
-            "id": "t-1",
+            "id": "review-bot·3",
             "mark": "pending",
-            "label": "t-1",
+            "label": "review-bot·3",
             "cells": [
               {
                 "kind": "pending"

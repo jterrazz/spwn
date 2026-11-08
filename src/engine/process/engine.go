@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecontract "github.com/jterrazz/studio-station/src/awake/contract"
 
@@ -109,6 +110,9 @@ type Options struct {
 	Answers  func(ctx context.Context, mac string) bool
 	ToldBack func(mac string) error
 	Label    func(mac string) string
+	// value: the names every machine's agents and workspaces hold, read
+	// across every Mac; nil holds none.
+	AgentsHeld func(ctx context.Context) (agents.Held, error)
 }
 
 type Engine struct {

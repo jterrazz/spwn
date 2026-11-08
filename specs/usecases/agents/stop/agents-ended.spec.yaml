@@ -1,0 +1,12 @@
+description: 'an agent already finished is not stopped again: refused with how it ended'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Write the changelog"'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 logout'
+      exit: 0
+    - command: 'agents stop linux-1 --yes'
+      exit: 2
+      stderr: |
+          Error: linux-1 has finished: logout
+          Hint: station agents forget linux-1

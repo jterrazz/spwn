@@ -67,6 +67,15 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	return s.engineAPI.Do(ctx, "start", name)
 }
 
+func (s *Machinist) KeepAgents(name string, agents []string) error {
+	rec, err := s.VM(name, "stop")
+	if err != nil {
+		return err
+	}
+	rec.Agents = agents
+	return s.writeRecord(rec)
+}
+
 func (s *Machinist) Stop(ctx context.Context, name string) error {
 	// invariant: a stop keeps the workspace, throwaway or permanent (SP-5), and
 	// like every action it is refused while the engine is stopped.

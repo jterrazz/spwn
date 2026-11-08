@@ -18,8 +18,9 @@ type Deps struct {
 	// value: this Mac reports a battery: a server made here stops whenever
 	// it sleeps.
 	Laptop bool
-	// value: what starts an agent in a workspace just made.
-	Agents AgentStarter
+	// value: the agents of this Mac's workspaces, stopped before their VM
+	// stops or goes; nil reaches none.
+	Agents Agents
 	// value: what a VM of this Mac holds beyond its disk, which goes with it.
 	Holdings Holdings
 	Now      func() time.Time
@@ -30,10 +31,16 @@ type Holdings interface {
 	Held(ctx context.Context, vm string) (ports []int, accounts []string, err error)
 }
 
-type AgentStarter interface {
-	// value: starts an agent in vm's terminal session once it answers, task
-	// typed as its first prompt.
-	StartAgent(ctx context.Context, vm, task string) error
+type Agents interface {
+	// value: the names of vm's live agents; none when it does not answer.
+	Live(ctx context.Context, vm string) []string
+	// invariant: Stop finishes each live agent of vm, its terminal closed,
+	// for that reason, and answers the names it stopped; one it could not
+	// stop is a warning, never a refusal: the VM goes on.
+	Stop(ctx context.Context, vm, reason string) (stopped, warnings []string)
+	// value: the name of every agent of vm, finished ones too; nil when it
+	// does not answer.
+	Held(ctx context.Context, vm string) []string
 }
 
 type ImageBuilds interface {
@@ -61,6 +68,9 @@ type Machines interface {
 	// value: whether the VM of this Mac runs now.
 	Running(ctx context.Context, name string) (bool, error)
 	Stop(ctx context.Context, name string) error
+	// value: keeps on a stopped workspace's record the agents it held,
+	// which name no other agent or VM while no one reads its journal.
+	KeepAgents(name string, agents []string) error
 	// value: refuses a name that is no VM of this host, worded for verb.
 	CheckVM(name, verb string) error
 	Delete(ctx context.Context, name string) (machines.DeleteReport, error)

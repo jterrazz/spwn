@@ -33,8 +33,10 @@ type Event struct {
 	// into words no app owns. Prompt, Command, Output and Message are
 	// read, then dropped: Judge keeps only what Scrub lets through, a
 	// command's class and counts.
-	Kind    Kind   `json:"kind"`
-	App     App    `json:"app"`
+	Kind Kind `json:"kind"`
+	App  App  `json:"app"`
+	// value: the agent's name, said only by the start station made.
+	Name    string `json:"name,omitempty"`
 	Session string `json:"session"`
 	// value: the terminal of the VM's terminal host the hook ran in.
 	Terminal string    `json:"terminal,omitempty"`

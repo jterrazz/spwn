@@ -1,0 +1,20 @@
+description: 'a finished agent forgotten leaves the list and the journal; its workspace stays'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Write the changelog"'
+      exit: 0
+    - command: 'world agent-end linux-1 s-1 logout'
+      exit: 0
+    - command: 'agents forget linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	forgotten · its workspace stays
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal'' world.json'
+      exit: 0
+      stdout: |
+          null

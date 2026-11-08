@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/page"
 
@@ -106,6 +107,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs:     []process.Tick{sample.Run},
 		TellBack: m.machines(false).TellBack, Answers: m.answers, ToldBack: m.machines(false).ToldBack, Label: m.label,
+		AgentsHeld: func(ctx context.Context) (agents.Held, error) {
+			inside := env
+			inside.Calls = calls
+			return agentsEverywhere{env: inside}.heldEverywhere(ctx)
+		},
 	})
 	shares.s = m.secretsVia(d, func(_ context.Context, vm string) (bool, error) {
 		for _, v := range d.VMs() {

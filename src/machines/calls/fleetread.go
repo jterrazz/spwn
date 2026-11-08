@@ -125,7 +125,7 @@ func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answer
 		for _, vm := range h.VMs {
 			silent.VMs = append(silent.VMs, model.VM{
 				Name: vm.Name, Mac: name, Lifetime: vm.Lifetime, State: model.UnknownState,
-				Resources: model.Resources{CPUs: vm.CPUs, MemoryBytes: vm.MemoryBytes},
+				Resources: model.Resources{CPUs: vm.CPUs, MemoryBytes: vm.MemoryBytes}, Agents: vm.Agents,
 			})
 		}
 		return silent

@@ -89,6 +89,7 @@ func calls(d *Engine, served []string) []call.Handler {
 		own(d, engine.CallRefresh, func(_ context.Context, d *Engine, in engine.PagesIn) (any, error) {
 			return struct{}{}, d.Refresh(in.Pages)
 		}),
+		own(d, engine.CallAgentsHeld, func(ctx context.Context, d *Engine, _ struct{}) (any, error) { return d.AgentsHeld(ctx) }),
 	)
 	for _, verb := range VMVerbs() {
 		out = append(out, own(d, engine.CallVM(verb), func(ctx context.Context, d *Engine, in engine.VMIn) (any, error) {

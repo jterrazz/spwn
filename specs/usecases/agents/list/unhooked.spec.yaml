@@ -11,6 +11,6 @@ runs:
       exit: 0
       stdout: |
           # Agents	2 ●	1 ◐
-          ◐	t1	claudecode	waiting · Claude needs your permission to use Bash		station agents reply t1 <text>
-          ●	t2	claudecode	working
-          ●	t3	claudecode	running
+          ◐	linux-1	claudecode	waiting · Claude needs your permission to use Bash		station agents reply linux-1 <text>
+          ●	linux-1·2	claudecode	working
+          ●	linux-1·3	claudecode	running

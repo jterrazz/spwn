@@ -1,0 +1,8 @@
+description: 'stopping an agent no workspace holds is refused, with where to read the agents'
+env: in-workspace
+runs:
+    - command: 'agents stop nobody --yes'
+      exit: 2
+      stderr: |
+          Error: no agent named "nobody"
+          Hint: station agents

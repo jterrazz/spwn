@@ -1,0 +1,16 @@
+description: 'an agent already finished is not merged again: refused with how it ended'
+env: in-workspace
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world agent-step linux-1 s-1 run "gh pr create --fill" "https://github.com/jterrazz/app/pull/42"'
+      exit: 0
+    - command: 'agents merge linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	merged PR #42 · finished
+    - command: 'agents merge linux-1'
+      exit: 2
+      stderr: |
+          Error: linux-1 has finished: merged PR #42
+          Hint: station agents forget linux-1

@@ -8,7 +8,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 
 **Global keys** (every panel story): esc pops then closes; ⌘K Find (or a letter on All machines); ↑ ↓ ↩ ⇥ move and open, ⌘↩ attaches a VM; ⌘N New VM, ⌘T Terminal; ⌘0 All machines, ⌘1…3 a Mac; ⌘I ⌘P ⌘U pick Activity, Ports, Accounts (a segment on a machine page, the fleet page on home); ⌘E Awake; ⌘[ and ← pop too; Space presses a focused row; ⌘↩ on a down server restarts it; ↩ on a workspace page with nothing highlighted attaches; ⌘K with the panel closed opens it on Find. Pointer: a click on the status item toggles the panel, a click outside it closes it, a pointer press clears the keyboard highlight; a right-click on a VM, Mac, lease or the Awake tile opens its menu.
 
-**Shared fixture**: unless a story says otherwise, the data is the default fleet: This Mac (MacBook Pro M4 Max 48 GB: linux-1 working agent, agent-7f finished agent, api stopped permanent), mac-mini (Mac mini M4 Pro 64 GB, never sleeps: infra server, linux-3 working agent, review-bot waiting agent with PR #42), macbook-air (asleep, seen 2 hr ago); 5 shared ports and 6 listeners; accounts per Mac (npm signed out on This Mac); 4 leases (Claude on linux-1 under 30 min); upkeep on This Mac (firewall off, 1 failed login item, 2 updates) and linux-1 (2 updates); This Mac awake until 18:00. Times (HH:MM, "N min") are live and differ per capture.
+**Shared fixture**: unless a story says otherwise, the data is the default fleet: This Mac (MacBook Pro M4 Max 48 GB: linux-1 working agent, agent-7f finished agent, api stopped permanent), mac-mini (Mac mini M4 Pro 64 GB, never sleeps: infra server, linux-3 working agent, review-bot waiting agent with PR #42); since A2 each of these agents is an object of its own on the VM of the same name (a VM's first agent takes its name), one Herdr terminal each, macbook-air (asleep, seen 2 hr ago); 5 shared ports and 6 listeners; accounts per Mac (npm signed out on This Mac); 4 leases (Claude on linux-1 under 30 min); upkeep on This Mac (firewall off, 1 failed login item, 2 updates) and linux-1 (2 updates); This Mac awake until 18:00. Times (HH:MM, "N min") are live and differ per capture.
 
 ## Index
 
@@ -16,14 +16,16 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **All machines (home)** (20): `home.needs`, `home.hover`, `home.keyboard`, `home.one-need.wait`, `home.one-need.lease`, `home.many-needs`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.agent-creating`, `home.agent-born`, `home.agents-folded`, `home.agents-unfolded`
 - **Needs you (fleet list)** (4): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`
 - **A Mac** (22): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.needs-unfolded`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
-- **A workspace** (15): `workspace.working`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting`, `workspace.waiting.pr-opened`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.waiting.reply`, `workspace.waiting.replied`, `workspace.waiting.merged`, `workspace.finished`, `workspace.stopped`, `workspace.started`, `workspace.remote`
+- **A workspace** (9): `workspace.agents`, `workspace.agents.finished`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.stopped`, `workspace.started`
+- **An agent** (8): `agent.working`, `agent.remote`, `agent.waiting`, `agent.waiting.pr-opened`, `agent.waiting.reply`, `agent.waiting.replied`, `agent.waiting.merged`, `agent.finished`
 - **A server** (8): `server.healthy`, `server.health-unfolded`, `server.activity`, `server.down`, `server.restarting`, `server.restarting.late`, `server.recovered`, `server.stopped`
+- **Agents (fleet)** (2): `agents.list`, `agents.empty`
 - **Ports (fleet and scoped)** (4): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`
 - **Accounts** (4): `accounts.all`, `accounts.signing-in`, `accounts.signed-in`, `accounts.extended`
 - **Awake** (4): `awake.all`, `awake.off`, `awake.4h`, `awake.until-run`
-- **Sheets** (17): `sheet.new-vm`, `sheet.new-vm.task`, `sheet.new-vm.options`, `sheet.new-vm.lend`, `sheet.new-vm.no-account`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.lend-account`, `sheet.lend-account.vm`, `sheet.share-port`, `sheet.share-port.vm`, `sheet.share-port.empty`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `sheet.hint.add-mac`, `sheet.hint.firewall`, `sheet.hint.declare-public`
-- **Confirmations (alerts)** (14): `alert.restart-server`, `alert.stop-server`, `alert.stop-server.typed`, `alert.delete-server`, `alert.stop-vm`, `alert.delete-vm.throwaway`, `alert.delete-vm.permanent`, `alert.stop-all`, `alert.stop-all.server`, `alert.restart-mac`, `alert.forget-mac`, `alert.take-back`, `alert.stop-share`, `alert.let-sleep`
-- **Menus** (21): `menu.station`, `menu.context.workspace`, `menu.context.workspace.copy`, `menu.context.workspace.share`, `menu.context.stopped`, `menu.context.server`, `menu.context.server.down`, `menu.context.mac`, `menu.context.mac.asleep`, `menu.context.lease`, `menu.awake`, `menu.page.mac`, `menu.page.this-mac`, `menu.page.mac.asleep`, `menu.page.workspace`, `menu.page.server`, `menu.page.ports`, `menu.new-vm.on`, `menu.new-vm.create`, `menu.lend.to`, `menu.share-port.of`
+- **Sheets** (18): `sheet.new-vm`, `sheet.new-vm.options`, `sheet.new-vm.lend`, `sheet.new-vm.no-account`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.new-agent`, `sheet.new-agent.new`, `sheet.lend-account`, `sheet.lend-account.vm`, `sheet.share-port`, `sheet.share-port.vm`, `sheet.share-port.empty`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `sheet.hint.add-mac`, `sheet.hint.firewall`, `sheet.hint.declare-public`
+- **Confirmations (alerts)** (16): `alert.restart-server`, `alert.stop-server`, `alert.stop-server.typed`, `alert.delete-server`, `alert.stop-vm`, `alert.stop-agent`, `alert.delete-vm.throwaway`, `alert.delete-vm.permanent`, `alert.delete-vm.agents`, `alert.stop-all`, `alert.stop-all.server`, `alert.restart-mac`, `alert.forget-mac`, `alert.take-back`, `alert.stop-share`, `alert.let-sleep`
+- **Menus** (24): `menu.station`, `menu.context.workspace`, `menu.context.workspace.copy`, `menu.context.workspace.share`, `menu.context.stopped`, `menu.context.agent`, `menu.context.server`, `menu.context.server.down`, `menu.context.mac`, `menu.context.mac.asleep`, `menu.context.lease`, `menu.awake`, `menu.page.mac`, `menu.page.this-mac`, `menu.page.mac.asleep`, `menu.page.workspace`, `menu.page.agent`, `menu.page.server`, `menu.page.ports`, `menu.new-vm.on`, `menu.new-vm.create`, `menu.new-agent.on`, `menu.lend.to`, `menu.share-port.of`
 - **Popovers, tooltips, HUD** (6): `pop.qr`, `pop.qr.public`, `pop.info`, `pop.tooltip`, `pop.hud.copy`, `pop.hud.terminal`
 - **Find (Cmd-K)** (10): `find.empty`, `find.down`, `find.port`, `find.machine`, `find.action`, `find.awake`, `find.keyboard`, `find.more-open`, `find.nomatch`, `find.type-to-find`
 - **Transitions (frozen mid-flight)** (14): `transition.panel-open`, `transition.panel-close`, `transition.push`, `transition.pop`, `transition.jump`, `transition.segment`, `transition.sheet`, `transition.alert`, `transition.find`, `transition.menu`, `transition.hero-morph`, `transition.need-collapse`, `transition.row-leave`, `transition.reduce-motion.push`
@@ -121,6 +123,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 39%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 66%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: circle: CSS stroke-dashoffset 340 ms cubic-bezier(0.32, 0.72, 0, 1); #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
+- **A2**: Review pushes the agent's page (`agent.waiting`), not the VM's.
 
 ### `home.one-need.lease`
 
@@ -264,6 +267,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Extend" → extend(s2); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 28%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "linux-3mac-mini editing src/auth/refresh.ts 72%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "linux-4mac-mini starting · fix the flaky e2e tes" → push(vm:linux-4); "Open linux-4 in Terminal" → attach(linux-4) [Open in Terminal · ⌘↩]; "Show less" → moreAgents; "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 11 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: #panel: height 544px → 683px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; #moreAgents: CSS grid-template-rows 340 ms cubic-bezier(0.32, 0.72, 0, 1); .fin: CSS opacity 120 ms; .fin: CSS transform 340 ms cubic-bezier(0.32, 0.72, 0, 1); #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
+- **A2**: reached from `sheet.new-agent.new` (an agent on a new throwaway), no longer from New VM with a task; the row is the agent linux-4 on its booting VM linux-4.
 
 ### `home.agent-born`
 
@@ -275,6 +279,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Extend" → extend(s2); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 42/58 pass 41%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "linux-3mac-mini editing src/auth/refresh.ts 62%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "linux-4mac-mini reading the repository 12%" → push(vm:linux-4); "Open linux-4 in Terminal" → attach(linux-4) [Open in Terminal · ⌘↩]; "2 more · linux-3, linux-4" → moreAgents; "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 2 working1 waiting 11 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: circle: CSS stroke-dashoffset 340 ms cubic-bezier(0.32, 0.72, 0, 1); .: CSS width 340 ms cubic-bezier(0.32, 0.72, 0, 1); .row.two: CSS land 340 ms linear; .fwrap.morph: CSS morph 340 ms linear; #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
+- **A2**: as home.agent-creating; the HUD is unchanged.
 
 ### `home.agents-folded`
 
@@ -588,16 +593,23 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 
 ## A workspace
 
-### `workspace.working`
+### `workspace.agents`
 
-![workspace.working](stories/workspace.working.png) ![workspace.working light](stories/workspace.working.light.png)
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference); the page around the card is the prototype's of `workspace.working` ([dark](stories/workspace.working.png))
+- **Shows**: linux-1 hosting two agents (world `fleet.two-agents`): facts "throwaway · on This Mac › · up 2 hr · 2 agents"; segments; the Agents card first ("Agents · 2 working", the `+`): linux-1 (running tests · 41/58 pass ›) and docs-bot (writes the changelog ›), each with its Open in Terminal quick slot; then Needs you (Claude ends in N min [Extend]); gauges CPU · 4 cores, Memory, Network; Ports (2 shared: Vite :5173, API :3000; Listening not shared: 4321 Astro [Share]); footnote "Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps"; footer ssh linux-1 (Copy) and Open in Terminal (a shell on linux-1).
+- **Data**: vm kind, life, uptime; its agents (name, state, step or ask); needs(vm); metrics; ports and listeners; host sleep policy
+- **Interactions**: "All machines" → back; "More options for linux-1" → pageMenu(vm:linux-1); "This Mac ›" → push(mac:thismac); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "New agent on linux-1" → newagent(vm:linux-1) [⇧⌘N]; "linux-1 running tests · 41/58 pass" → push(agent:linux-1); "Open linux-1 in Terminal" → attach(agent:linux-1); "docs-bot writes the changelog" → push(agent:docs-bot); "Open docs-bot in Terminal" → attach(agent:docs-bot); "Extend" → extend(s2); "CPU · 4 cores 34%" → seg(activity); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Share Astro" → sharePort(linux-1:4321); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → shell(vm:linux-1) [⌘↩]
+- **Enters**: a Mac's VM row, or an agent's Runs on, pushes it; the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
 
-- **Capture**: [dark](stories/workspace.working.png), [light](stories/workspace.working.light.png)
-- **Shows**: linux-1, an agent at work: agent glyph, title, More; facts "throwaway · on This Mac › · up 2 hr"; segments; Now card (task "builds the landing page", Full log ↗, steps with times: now running tests · 41/58 pass, 3 min ago edited src/pages/index.astro · +86 −12, 7 min ago added the pricing section); Needs you (Claude ends in N min [Extend]); gauges CPU · 4 cores, Memory, Network; Ports (2 shared: Vite :5173, API :3000 with Open, Copy, QR; Listening not shared: 4321 Astro [Share]); footnote "Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps"; footer ssh linux-1 (Copy) and Open in Terminal.
-- **Data**: vm kind, life, agent, state, task, steps (text, diff, at), tests pass/total, uptime; needs(vm); metrics; ports and listeners; host sleep policy
-- **Interactions**: "All machines" → back; "More options for linux-1" → pageMenu(vm:linux-1); "This Mac ›" → push(mac:thismac); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Full log" → terminal(claude log on linux-1); "Extend" → extend(s2); "CPU · 4 cores 34%" → seg(activity); "Memory 3.0 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Copy link to Vite" → copy(http://linux-1.tail3e9a.ts.net:5173); "Show QR for Vite (5173)" → qrpop(p1); "Open API dev server" → openUrl(http://linux-1.tail3e9a.ts.net:3000); "Copy link to API dev server" → copy(http://linux-1.tail3e9a.ts.net:3000); "Show QR for API dev server (3000)" → qrpop(p2); "Share Astro" → sharePort(linux-1:4321); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]
-- **Enters**: #panel: height 689px → 641px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear
-- **Leaves**: #panel: height 641px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .gauge.nav: CSS background-color 120 ms; .fwrap.morph: CSS morph 340 ms linear (esc)
+### `workspace.agents.finished`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference); the prototype's of `workspace.finished` ([dark](stories/workspace.finished.png)) shows the same machine
+- **Shows**: agent-7f, a throwaway whose one agent finished: facts "throwaway · on This Mac › · up 3 hr · no agent running"; the Agents card holds agent-7f quiet ("finished · tests pass") with Clean up; gauges near zero; Ports: Listening 6006 Storybook [Share].
+- **Data**: vm idle, idle minutes; its finished agent
+- **Interactions**: "All machines" → back; "More options for agent-7f" → pageMenu(vm:agent-7f); "agent-7f finished · tests pass" → push(agent:agent-7f); "Clean up" → cleanup(agent:agent-7f); "Share Storybook" → sharePort(agent-7f:6006); "ssh agent-7f" → copy(ssh agent-7f); "Open in Terminal" → shell(vm:agent-7f) [⌘↩]
+- **Enters**: the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
 
 ### `workspace.working.activity`
 
@@ -609,6 +621,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "6 min" → win(6m); "1 hr" → win(1h); "24 hr" → win(24h); "Update" → updateAll; "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 700px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
+- **A2**: id kept (the segment is unchanged); facts as workspace.working.ports.
 
 ### `workspace.working.ports`
 
@@ -620,6 +633,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "About private links" → info(ports); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Copy link to Vite" → copy(http://linux-1.tail3e9a.ts.net:5173); "Show QR for Vite (5173)" → qrpop(p1); "Open API dev server" → openUrl(http://linux-1.tail3e9a.ts.net:3000); "Copy link to API dev server" → copy(http://linux-1.tail3e9a.ts.net:3000); "Show QR for API dev server (3000)" → qrpop(p2); "Share Astro" → sharePort(linux-1:4321); "Share Node inspector" → sharePort(linux-1:9229); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 387px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
+- **A2**: id kept (the segment is unchanged); the facts line is the workspace's own ("throwaway · on This Mac › · up 2 hr · 1 agent").
 
 ### `workspace.working.accounts`
 
@@ -631,28 +645,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Extend" → extend(s1); "Lend an account… ends by itself" → shareAcc(linux-1); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 346px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
-
-### `workspace.waiting`
-
-![workspace.waiting](stories/workspace.waiting.png) ![workspace.waiting light](stories/workspace.waiting.light.png)
-
-- **Capture**: [dark](stories/workspace.waiting.png), [light](stories/workspace.waiting.light.png)
-- **Shows**: review-bot waits for you: the Waiting on you card first (orange bubble, 6 min), the agent's own message in bold then its detail ("I moved the refresh into its own commit…"), PR #42 · 6 files · +214 −88, buttons Open PR ↗ (tinted) and Merge PR #42, a reply field "Reply to review-bot…" with Send.
-- **Data**: agent last message (title + body), PR number and diff stat, wait duration; the agent hook (K4) is its source
-- **Interactions**: "All machines" → back; "More options for review-bot" → pageMenu(vm:review-bot); "mac-mini ›" → push(mac:mac-mini); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Open PR" → openPr(review-bot); "Merge PR #42" → mergePr(review-bot); field "Reply to review-bot"; "Send reply" → reply(review-bot) [Send · ↩]; "CPU · 4 cores 0%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
-- **Enters**: #panel: height 689px → 500px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear
-- **Leaves**: #panel: height 500px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear (esc)
-
-### `workspace.waiting.pr-opened`
-
-![workspace.waiting.pr-opened](stories/workspace.waiting.pr-opened.png)
-
-- **Capture**: [dark](stories/workspace.waiting.pr-opened.png)
-- **Shows**: After Open PR: the tint moves to Merge PR #42 (the next step is the filled one); HUD "Opens PR #42 in Safari".
-- **Data**: prOpened flag (session state)
-- **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Open PR" → openPr(review-bot); "Merge PR #42" → mergePr(review-bot); field "Reply to review-bot"; "Send reply" → reply(review-bot) [Send · ↩]; "CPU · 4 cores 0%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
-- **Enters**: .btn: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear
-- **Leaves**: #panel: height 500px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .btn: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
+- **A2**: id kept (the segment is unchanged); facts as workspace.working.ports.
 
 ### `workspace.waiting.ports`
 
@@ -664,6 +657,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "About private links" → info(ports); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 246px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
+- **A2**: id kept: the segment is unchanged (review-bot's workspace, whose agent waits); only the waiting agent's card left this page, for `agent.waiting`.
 
 ### `workspace.waiting.accounts`
 
@@ -675,49 +669,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Lend an account… ends by itself" → shareAcc(review-bot); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 304px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
-
-### `workspace.waiting.reply`
-
-![workspace.waiting.reply](stories/workspace.waiting.reply.png)
-
-- **Capture**: [dark](stories/workspace.waiting.reply.png)
-- **Shows**: Typing a reply to the agent in its card.
-- **Data**: none (outgoing text)
-- **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Open PR" → openPr(review-bot); "Merge PR #42" → mergePr(review-bot); field "Reply to review-bot"; "Send reply" → reply(review-bot) [Send · ↩]; "CPU · 4 cores 1%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
-
-### `workspace.waiting.replied`
-
-![workspace.waiting.replied](stories/workspace.waiting.replied.png)
-
-- **Capture**: [dark](stories/workspace.waiting.replied.png)
-- **Shows**: Reply sent: the agent goes back to work, the page shows the Now card ("now · reading your reply", "7 min ago · opened PR #42"); HUD "Sent to review-bot · it works on it".
-- **Data**: agent state working, its new steps
-- **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Full log" → terminal(claude log on review-bot); "CPU · 4 cores 0%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
-- **Enters**: #hud: CSS hud 2600 ms linear
-- **Leaves**: #panel: height 381px → 438px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; #hud: CSS hud 2600 ms linear (esc)
-
-### `workspace.waiting.merged`
-
-![workspace.waiting.merged](stories/workspace.waiting.merged.png)
-
-- **Capture**: [dark](stories/workspace.waiting.merged.png)
-- **Shows**: Merged: review-bot is finished ("finished · merged PR #42" in its facts), no wait card; HUD "PR #42 merged · review-bot finished".
-- **Data**: agent idle+done with its final task line
-- **Interactions**: "mac-mini" → back; "More options for review-bot" → pageMenu(vm:review-bot); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "CPU · 4 cores 0%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.9 MB/s" → seg(activity); "ssh review-bot" → copy(ssh review-bot); "Open in Terminal" → attach(review-bot) [⌘↩]
-- **Enters**: #hud: CSS hud 2600 ms linear
-- **Leaves**: #panel: height 287px → 438px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; #hud: CSS hud 2600 ms linear (esc)
-
-### `workspace.finished`
-
-![workspace.finished](stories/workspace.finished.png)
-
-- **Capture**: [dark](stories/workspace.finished.png)
-- **Shows**: agent-7f, a finished throwaway: facts "finished · tests pass · throwaway"; gauges near zero; Ports: Listening 6006 Storybook [Share].
-- **Data**: vm idle+done, idle minutes
-- **Interactions**: "This Mac" → back; "More options for agent-7f" → pageMenu(vm:agent-7f); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "CPU · 4 cores 2%" → seg(activity); "Memory 2.2 GB free" → seg(activity); "Network 0.9 MB/s" → seg(activity); "Share Storybook" → sharePort(agent-7f:6006); "ssh agent-7f" → copy(ssh agent-7f); "Open in Terminal" → attach(agent-7f) [⌘↩]
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
-- **Leaves**: #panel: height 361px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
+- **A2**: id kept, as workspace.waiting.ports.
 
 ### `workspace.stopped`
 
@@ -740,17 +692,82 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "This Mac" → back; "More options for api" → pageMenu(vm:api); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "CPU · 4 cores 0%" → seg(activity); "Memory 4.4 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "ssh api" → copy(ssh api); "Open in Terminal" → attach(api) [⌘↩]
 - **Enters**: #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: height 287px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .gauge.nav: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
+- **A2**: the Overview gains the empty Agents card first: "No agent on api" with New agent.
 
-### `workspace.remote`
+## An agent
 
-![workspace.remote](stories/workspace.remote.png)
+An agent is a job on a workspace, one Herdr terminal on its VM (DECISIONS A2, SPEC §A4 "An agent"). Its page holds what the agent says and asks; Activity, Ports and Accounts stay on its workspace's page.
 
-- **Capture**: [dark](stories/workspace.remote.png)
-- **Shows**: linux-3 on mac-mini: Now card (editing src/auth/refresh.ts, ran the auth tests · 3 failing); footnote "never paused" (its host never sleeps); Postgres 5432 to share.
-- **Data**: as workspace.working on a never-sleeping host
-- **Interactions**: "mac-mini" → back; "More options for linux-3" → pageMenu(vm:linux-3); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Full log" → terminal(claude log on linux-3); "CPU · 4 cores 69%" → seg(activity); "Memory 1.6 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "Open Preview" → openUrl(http://linux-3.tail3e9a.ts.net:8080); "Copy link to Preview" → copy(http://linux-3.tail3e9a.ts.net:8080); "Show QR for Preview (8080)" → qrpop(p5); "Share Postgres" → sharePort(linux-3:5432); "ssh linux-3" → copy(ssh linux-3); "Open in Terminal" → attach(linux-3) [⌘↩]
+### `agent.working`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference); the Now card is the prototype's of `workspace.working` ([dark](stories/workspace.working.png))
+- **Shows**: linux-1, an agent at work on the workspace linux-1: agent mark, name, More; facts "working · 40 min · Claude · on linux-1 ›"; Now card (task "builds the landing page", Full log ↗, steps with times: now running tests · 41/58 pass, 3 min ago edited src/pages/index.astro · +86 −12, 7 min ago added the pricing section); Runs on: "linux-1 · This Mac · throwaway · up 2 hr ›"; footer `station agents attach linux-1` (Copy) and Open in Terminal. No segments, no gauges, no ports: those are the workspace's.
+- **Data**: agent name, app, state, since, task, steps (text, diff, at), tests pass/total; its workspace (name, Mac, life, uptime)
+- **Interactions**: "‹ All machines" → back; "More options for linux-1" → pageMenu(agent:linux-1); "on linux-1 ›" → push(vm:linux-1); "Full log" → attach(agent:linux-1); "linux-1 This Mac · throwaway · up 2 hr" → push(vm:linux-1); "station agents attach linux-1" → copy(station agents attach linux-1); "Open in Terminal" → attach(agent:linux-1) [⌘↩]
+- **Enters**: home's agent row pushes it; the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.remote`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference); the Now card is the prototype's of `workspace.remote` ([dark](stories/workspace.remote.png))
+- **Shows**: linux-3, an agent on mac-mini: facts "working · Claude · on linux-3 › · mac-mini"; Now card (editing src/auth/refresh.ts, ran the auth tests · 3 failing); Runs on "linux-3 · mac-mini · throwaway · never paused ›".
+- **Data**: as agent.working, on a remote Mac's engine report
+- **Interactions**: "‹ All machines" → back; "More options for linux-3" → pageMenu(agent:linux-3); "on linux-3 ›" → push(vm:linux-3); "Full log" → attach(agent:linux-3); "linux-3 mac-mini · throwaway" → push(vm:linux-3); "station agents attach linux-3" → copy(station agents attach linux-3); "Open in Terminal" → attach(agent:linux-3) [⌘↩]
+- **Enters**: the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.waiting`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.waiting`, its predecessor, shows the same card: [dark](stories/workspace.waiting.png)
+- **Shows**: review-bot waits for you: facts "waiting · 6 min · Claude · on review-bot ›"; the Waiting on you card first (orange bubble, 6 min), the agent's own message in bold then its detail ("I moved the refresh into its own commit…"), PR #42 · 6 files · +214 −88, buttons Open PR ↗ (tinted) and Merge PR #42, a reply field "Reply to review-bot…" with Send; Runs on "review-bot · mac-mini · throwaway · up 2 hr ›"; footer attach.
+- **Data**: agent last message (title + body), PR number and diff stat, wait duration; the agent hook (K4) is its source; its workspace
+- **Interactions**: "‹ All machines" → back; "More options for review-bot" → pageMenu(agent:review-bot); "on review-bot ›" → push(vm:review-bot); "Open PR ↗" → openUrl(PR #42); "Merge PR #42" → merge(agent:review-bot); "Reply to review-bot…" → focus(reply); "Send" → reply(agent:review-bot) [↩]; "review-bot mac-mini · throwaway · up 2 hr" → push(vm:review-bot); "station agents attach review-bot" → copy(station agents attach review-bot); "Open in Terminal" → attach(agent:review-bot) [⌘↩]
+- **Enters**: the hero's Review (`home.one-need.wait`) or home's agent row pushes it; the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.waiting.pr-opened`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.waiting.pr-opened`, its predecessor, shows the same card: [dark](stories/workspace.waiting.pr-opened.png)
+- **Shows**: After Open PR: the tint moves to Merge PR #42 (the next step is the filled one); HUD "Opens PR #42 in Safari".
+- **Data**: prOpened flag (session state)
+- **Interactions**: as agent.waiting
+- **Enters**: .btn: background-color 120 ms; the HUD (2600 ms)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.waiting.reply`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.waiting.reply`, its predecessor, shows the same card: [dark](stories/workspace.waiting.reply.png)
+- **Shows**: Typing a reply to the agent in its card.
+- **Data**: none (outgoing text)
+- **Interactions**: as agent.waiting; ↩ in the field sends
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
-- **Leaves**: #panel: height 535px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth (esc)
+
+### `agent.waiting.replied`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.waiting.replied`, its predecessor, shows the same card: [dark](stories/workspace.waiting.replied.png)
+- **Shows**: Reply sent: the agent goes back to work, the page shows the Now card ("now · reading your reply", "7 min ago · opened PR #42"), facts "working"; HUD "Sent to review-bot · it works on it".
+- **Data**: agent state working, its new steps
+- **Interactions**: as agent.working, for review-bot
+- **Enters**: the HUD (2600 ms); the card's height morphs on smooth
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.waiting.merged`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.waiting.merged`, its predecessor, shows the same card: [dark](stories/workspace.waiting.merged.png)
+- **Shows**: Merged: review-bot is finished ("finished · merged PR #42" in its facts), no wait card, "Last steps" with Clean up, no footer; HUD "PR #42 merged · review-bot finished". Its workspace review-bot keeps running.
+- **Data**: agent finished with its final task line
+- **Interactions**: as agent.finished, for review-bot
+- **Enters**: the HUD (2600 ms)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agent.finished`
+
+- **Capture**: none of its own (designed in A2, after the prototype); the prototype's of `workspace.finished`, its predecessor, shows the same card: [dark](stories/workspace.finished.png)
+- **Shows**: agent-7f, a finished agent: quiet mark, facts "finished · tests pass · Claude · on agent-7f ›"; "Last steps" (every line t2) with Clean up in its header; Runs on "agent-7f · This Mac · throwaway · idle 12 min ›"; no footer.
+- **Data**: agent finished, its end and reason, its last steps; its workspace
+- **Interactions**: "‹ All machines" → back; "More options for agent-7f" → pageMenu(agent:agent-7f); "on agent-7f ›" → push(vm:agent-7f); "Clean up" → cleanup(agent:agent-7f); "agent-7f This Mac · throwaway · idle 12 min" → push(vm:agent-7f)
+- **Enters**: the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
 
 ## A server
 
@@ -841,6 +858,28 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "mac-mini" → back; "More options for infra" → pageMenu(server:infra); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Healthy · 4 of 4 checked after every boot · 41 s" → unfold(health:infra); "Restart…" → restartAsk(infra); "Show log" → terminal(journalctl -u k3s on infra); "CPU · 8 cores 17%" → seg(activity); "Memory 11.1 GB free" → seg(activity); "Network 0.0 MB/s" → seg(activity); "Open Traefik" → openUrl(https://jterrazz.com); "Copy link to Traefik" → copy(https://jterrazz.com); "Show QR for Traefik (443)" → qrpop(p3); "Copy Kubernetes API" → copy(http://infra.tail3e9a.ts.net:6443); "Copy link to Kubernetes API" → copy(http://infra.tail3e9a.ts.net:6443)
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 612px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .dot.sq: CSS ping 600 ms linear (esc)
+
+## Agents (fleet)
+
+Every agent of the fleet, the page behind home's Agents label (SPEC §A4, `station agents` in the CLI).
+
+### `agents.list`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: Agents · All machines: facts "All machines · 4 live · 1 finished", the `+`; one card ordered waiting, working, creating, finished: review-bot (mac-mini · waiting · on review-bot · 6 min), linux-1 (This Mac · running tests · 41/58 pass), linux-3 (mac-mini · editing src/auth/refresh.ts), agent-7f (quiet, finished · tests pass, Clean up); footer "Full list in Terminal ↗" and "New agent…".
+- **Data**: `agents.list`: every agent of the fleet, name, state, step or ask, VM, Mac, since
+- **Interactions**: "‹ All machines" → back; "New agent" → newagent() [⇧⌘N]; "review-bot mac-mini waiting" → push(agent:review-bot); "Open review-bot in Terminal" → attach(agent:review-bot) [⌘↩]; "linux-1 This Mac running tests" → push(agent:linux-1); "linux-3 mac-mini editing src/auth/refresh.ts" → push(agent:linux-3); "agent-7f tests pass Clean up" → cleanup(agent:agent-7f); "Full list in Terminal ↗" → terminal(station agents); "New agent…" → newagent()
+- **Enters**: home's Agents label pushes it; the push of `transition.push` (the page arrives from the trailing side on smooth 340 ms; the panel's height morphs to the page's)
+- **Leaves**: the pop of `transition.pop` (esc)
+
+### `agents.empty`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: No agent in the fleet (world `fleet.no-agents`): the empty state, the agent mark drawn on, "No agent running", "Start one on a workspace, or on a new throwaway", New agent.
+- **Data**: `agents.list` empty
+- **Interactions**: "‹ All machines" → back; "New agent" → newagent() [⇧⌘N]
+- **Enters**: as agents.list; the mark draws on (path draw 340 ms)
+- **Leaves**: the pop of `transition.pop` (esc)
 
 ## Ports (fleet and scoped)
 
@@ -994,16 +1033,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "This Mac 23 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: .sheet: clipPath+transform+opacity inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 1 → inset(0 0 0 0 round 14px) none 1 340 ms smooth +40 ms; .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
-
-### `sheet.new-vm.task`
-
-![sheet.new-vm.task](stories/sheet.new-vm.task.png)
-
-- **Capture**: [dark](stories/sheet.new-vm.task.png)
-- **Shows**: A task typed: the primary button becomes "Create and Start Claude" and the caption says Claude starts on it once the VM answers.
-- **Data**: as sheet.new-vm
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "mac-mini 19 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Cancel" → closeSheet; "Create and Start Claude" → createVm [↩]; "More ways to create" → nvMore
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
+- **A2**: no Task field: a VM is made without an agent; the task is the New agent sheet's (`sheet.new-agent.new`). The split button is Create / Create and Open in Terminal; the prototype capture predates A2.
 
 ### `sheet.new-vm.options`
 
@@ -1015,6 +1045,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "mac-mini 19 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Workspace" → nv(kind:ws); "Server" → nv(kind:server); "Throwaway" → nv(life:throwaway); "Permanent" → nv(life:permanent); "Linux" → nv(sys:linux); "macOS" → nv(sys:macos); "4 GB" → nv(mem:4); "8 GB" → nv(mem:8); "16 GB" → nv(mem:16); "32 GB" → nv(mem:32) (disabled); "GitHub, Claude for 4 hr" → nvLend; field "Name"; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: no Task field: a VM is made without an agent; the task is the New agent sheet's (`sheet.new-agent.new`). The split button is Create / Create and Open in Terminal; the prototype capture predates A2.
 
 ### `sheet.new-vm.lend`
 
@@ -1026,6 +1057,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "This Mac 23 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Workspace" → nv(kind:ws); "Server" → nv(kind:server); "Throwaway" → nv(life:throwaway); "Permanent" → nv(life:permanent); "Linux" → nv(sys:linux); "macOS" → nv(sys:macos); "4 GB" → nv(mem:4); "8 GB" → nv(mem:8); "16 GB" → nv(mem:16); "32 GB" → nv(mem:32) (disabled); "GitHub, Claude for 4 hr" → nvLend; "GitHub" → nvacc(github); "Claude" → nvacc(claude); "npm" → nvacc(npm) (disabled); "4 hr" → nvl(lend:4); "12 hr" → nvl(lend:12); "7 days" → nvl(lend:168); field "Name"; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: no Task field: a VM is made without an agent; the task is the New agent sheet's (`sheet.new-agent.new`). The split button is Create / Create and Open in Terminal; the prototype capture predates A2.
 
 ### `sheet.new-vm.no-account`
 
@@ -1037,6 +1069,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "This Mac 23 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: no Task field: a VM is made without an agent; the task is the New agent sheet's (`sheet.new-agent.new`). The split button is Create / Create and Open in Terminal; the prototype capture predates A2.
 
 ### `sheet.new-vm.server`
 
@@ -1048,6 +1081,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "This Mac 23 GB free" → nvOn; field "Name"; "Server · Linux · 8 GB" → nvOpts; "Workspace" → nv(kind:ws); "Server" → nv(kind:server); "Linux" → nv(sys:linux); "macOS" → nv(sys:macos); "4 GB" → nv(mem:4); "8 GB" → nv(mem:8); "16 GB" → nv(mem:16); "32 GB" → nv(mem:32) (disabled); "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: unchanged but for the Task row, gone from every kind.
 
 ### `sheet.new-vm.first`
 
@@ -1059,6 +1093,25 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "Task for Claude"; "This Mac 35 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore
 - **Enters**: .sheet: clipPath+transform+opacity inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 1 → inset(0 0 0 0 round 14px) none 1 340 ms smooth +40 ms; .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1); path: CSS draw 340 ms linear
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1); path: CSS draw 340 ms linear (esc)
+- **A2**: no Task field: a VM is made without an agent; the task is the New agent sheet's (`sheet.new-agent.new`). The split button is Create / Create and Open in Terminal; the prototype capture predates A2.
+
+### `sheet.new-agent`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: New agent from linux-1's page (`+` of its Agents card): title "New agent", subtitle "On linux-1, a workspace of This Mac. Starts in a few seconds."; Task focused ("What Claude should do", caption "Empty: Claude waits for your first prompt"); On popup (linux-1 · This Mac · 1 agent); Name "linux-1·2" ("Short and unique · Generated, editable"); App hidden (Claude only); footer Cancel and the split button Start / ▾.
+- **Data**: running workspaces of awake Macs with their agent count; the agent apps of the workspace; next free agent name
+- **Interactions**: "Task" → type; "On" → menu(new-agent.on); "Name" → type; "Cancel" → close [esc]; "Start" → agents.start(on: linux-1) [↩]; "▾" → split (Start and Open in Terminal ⌥↩)
+- **Enters**: the sheet of `transition.sheet` (it unrolls from the top on smooth, 40 ms delay; the scrim fades in)
+- **Leaves**: back to 46 pt and opacity 0 on snappy; the scrim fades (esc)
+
+### `sheet.new-agent.new`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference); the prototype's of `sheet.new-vm.task`, its predecessor, shows the task typed ([dark](stories/sheet.new-vm.task.png))
+- **Shows**: New agent from home's Agents `+`, on "A new throwaway workspace": subtitle "On a new throwaway on mac-mini. Ready in about a minute."; Task "fix the flaky e2e test"; On "A new throwaway workspace"; Mac popup (mac-mini · 19 GB free); Options folded "Throwaway · Linux · 8 GB" with the caption "linux-4 · lends GitHub and Claude for 4 hr"; Name "linux-4"; Start makes the VM then its agent (`home.agent-creating`, `home.agent-born`).
+- **Data**: as sheet.new-agent, plus New VM's: Macs with free memory and sleep state, next free VM name, host accounts
+- **Interactions**: "Task" → type; "On" → menu(new-agent.on); "Mac" → menu(new-vm.on); "Options" → disclose; "Cancel" → close [esc]; "Start" → agents.start(new: mac-mini) [↩]; "▾" → split (Start and Open in Terminal ⌥↩)
+- **Enters**: the sheet of `transition.sheet` (it unrolls from the top on smooth, 40 ms delay; the scrim fades in)
+- **Leaves**: back to 46 pt and opacity 0 on snappy; the scrim fades (esc)
 
 ### `sheet.lend-account`
 
@@ -1125,6 +1178,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "agent-7f finished 12 min ago · tests pass · 12 G" → cu(agent-7f); "Cancel" → closeSheet; "Delete 1 throwaway" → doCleanup
 - **Enters**: .sheet: clipPath+transform+opacity inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 1 → inset(0 0 0 0 round 14px) none 1 340 ms smooth +40 ms; .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: agents and VMs apart: Finished agents ("agent-7f · on agent-7f · finished 12 min ago · tests pass", forgotten, its workspace stays) then Empty throwaways ("agent-7f · idle 12 min · 12 GB disk", deleted with its disk, ports and lent accounts; checking it checks its finished agents); the note "linux-1 has a working agent, so it stays."; the button worded from what is checked ("Forget 1 agent", the red "Delete 1 throwaway").
 
 ### `sheet.cleanup.all`
 
@@ -1136,6 +1190,7 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "agent-7f finished 12 min ago · tests pass · 12 G" → cu(agent-7f); "Cancel" → closeSheet; "Delete 1 throwaway" → doCleanup
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .sheet: clipPath+transform+opacity inset(0 0 0 0 round 14px) none 1 → inset(0 0 calc(100% - 46px) 0 round 14px) translateY(-6px) 0 200 ms snappy; circle: CSS stroke-dashoffset 340 ms cubic-bezier(0.32, 0.72, 0, 1); .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: as sheet.cleanup.mac, unscoped; the note names every live agent (linux-1, linux-3, review-bot).
 
 ### `sheet.hint.add-mac`
 
@@ -1228,6 +1283,16 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Stop linux-1" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
+- **A2**: the consequence names the agent that stops with it: "Its agent linux-1 stops. Its disk is kept. 2 shared ports stop answering until it starts again."
+
+### `alert.stop-agent`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: Stop the agent review-bot? (y/n) "Its terminal closes; its workspace keeps running." Cancel and the red Stop.
+- **Data**: the agent, its workspace
+- **Interactions**: "Cancel" → close [esc]; "Stop" → agents.stop(review-bot)
+- **Enters**: the alert of `transition.alert` (1.08 → 1 with opacity on smooth, over the scrim)
+- **Leaves**: to .96 and opacity 0 on snappy (esc)
 
 ### `alert.delete-vm.throwaway`
 
@@ -1250,6 +1315,15 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; field "api"; "Cancel" → closeSheet; "Delete api" → sheetYes (disabled)
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1); path: CSS draw 340 ms linear
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1); path: CSS draw 340 ms linear (esc)
+
+### `alert.delete-vm.agents`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: Delete linux-1? (y/n for a throwaway, world `fleet.two-agents`) "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (16 GB) and 2 shared ports."
+- **Data**: the VM's live agents, disk, ports and shares
+- **Interactions**: "Cancel" → close [esc]; "Delete" → machines.delete(linux-1)
+- **Enters**: the alert of `transition.alert` (1.08 → 1 with opacity on smooth, over the scrim)
+- **Leaves**: to .96 and opacity 0 on snappy (esc)
 
 ### `alert.stop-all`
 
@@ -1342,6 +1416,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Extend" → extend(s2); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 40%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 74%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "New VM… ⌘N"; menu item "Add a Mac…"; menu item "Open station in Terminal ⌘T"; menu item "Open at login"; menu item "CPU in the menu bar"; … 1 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .round: CSS background-color 120 ms
 - **Leaves**: no recorded animation (esc)
+- **A2**: New agent… ⇧⌘N follows New VM… ⌘N.
 
 ### `menu.context.workspace`
 
@@ -1353,6 +1428,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Extend" → extend(s2); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 32%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 60%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "Open ↩"; menu item "Open in Terminal ⌘↩"; menu item "Open Vite"; menu item "Copy"; menu item "Share"; … 3 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .qa: CSS opacity 120 ms
 - **Leaves**: .row.two: CSS background-color 120 ms (esc)
+- **A2**: New agent on linux-1… ⇧⌘N follows Open in Terminal; Delete… asks with the agents it stops first (`alert.delete-vm.agents`).
 
 ### `menu.context.workspace.copy`
 
@@ -1386,6 +1462,15 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 - **Interactions**: "All machines" → back; "New VM" → newvm(thismac) [New VM on This Mac · ⌘N]; "More options for This Mac" → pageMenu(mac:thismac); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Extend" → extend(s2); "CPU 18%" → seg(activity); "Memory 23 GB free" → seg(activity); "Network 1.1 MB/s" → seg(activity); "linux-1 running tests · 41/58 pass 36%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "agent-7f finished · tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "api stopped · permanent" → push(vm:api); "Keep This Mac awake" → awakeToggle; "Upkeep firewall off · 3 more" → unfold(upkeep:thismac); "How to" → howto; "Copy fix" → copyCmd(launchctl bootout system/com.docker.vmnetd); "Sign in" → signin(thismac:npm); "Update" → updateAll; menu item "Open ↩"; menu item "Open in Terminal ⌘↩"; menu item "Copy"; menu item "Share"; menu item "Start"; menu item "Delete…"
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy
 - **Leaves**: .row.two: CSS background-color 120 ms (esc)
+
+### `menu.context.agent`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: Right-click an agent row (home, a workspace's Agents card, Agents · All machines): header "review-bot on mac-mini", Open ↩, Open in Terminal ⌘↩, Reply…, Merge PR #42, Open PR ↗, Copy › (attach command), Go to review-bot, Stop… (red).
+- **Data**: agent state, its PR, its workspace
+- **Interactions**: menu item "Open"; menu item "Open in Terminal"; menu item "Reply…"; menu item "Merge PR #42"; menu item "Open PR"; menu item "Copy"; menu item "Go to review-bot"; menu item "Stop…"
+- **Enters**: the menu of `transition.menu` (.97 → 1 with opacity on snappy)
+- **Leaves**: no recorded animation (esc)
 
 ### `menu.context.server`
 
@@ -1496,6 +1581,16 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Full log" → terminal(claude log on linux-1); "Extend" → extend(s2); "CPU · 4 cores 34%" → seg(activity); "Memory 3.0 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Copy link to Vite" → copy(http://linux-1.tail3e9a.ts.net:5173); "Show QR for Vite (5173)" → qrpop(p1); "Open API dev server" → openUrl(http://linux-1.tail3e9a.ts.net:3000); "Copy link to API dev server" → copy(http://linux-1.tail3e9a.ts.net:3000); "Show QR for API dev server (3000)" → qrpop(p2); "Share Astro" → sharePort(linux-1:4321); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]; menu item "Copy ssh command"; menu item "Share a port…"; menu item "Lend an account…"; menu item "Stop…"; menu item "Delete…"
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .iconbtn: CSS background-color 120 ms; .iconbtn: CSS color 120 ms
 - **Leaves**: no recorded animation (esc)
+- **A2**: New agent… ⇧⌘N comes first; a stopped workspace has none.
+
+### `menu.page.agent`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: review-bot's More menu on its Agent page: Copy attach command, Go to its workspace, Stop… (red).
+- **Data**: agent
+- **Interactions**: menu item "Copy attach command"; menu item "Go to review-bot"; menu item "Stop…"
+- **Enters**: the menu of `transition.menu` (.97 → 1 with opacity on snappy)
+- **Leaves**: no recorded animation (esc)
 
 ### `menu.page.server`
 
@@ -1540,6 +1635,15 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 - **Interactions**: field "Task for Claude"; "mac-mini 19 GB free" → nvOn; "Throwaway · Linux · 8 GB" → nvOpts; "Cancel" → closeSheet; "Create" → createVm [↩]; "More ways to create" → nvMore; menu item "Create ↩"; menu item "Create and Open in Terminal ⌥↩"; menu item "Create and Start Claude ⌘↩"
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy
 - **Leaves**: .btn.tint: CSS background-color 120 ms (esc)
+
+### `menu.new-agent.on`
+
+- **Capture**: none (designed in A2, after the prototype; its golden is the reference)
+- **Shows**: The New agent sheet's On popup: each running workspace of an awake Mac with its agent count (linux-1 · This Mac · 1 agent, linux-3 · mac-mini · 1 agent, review-bot · mac-mini · 1 agent, agent-7f · This Mac · no agent), a separator, A new throwaway workspace.
+- **Data**: running workspaces and their agents
+- **Interactions**: menu item per workspace; menu item "A new throwaway workspace"
+- **Enters**: the menu of `transition.menu` (.97 → 1 with opacity on snappy)
+- **Leaves**: no recorded animation (esc)
 
 ### `menu.lend.to`
 
@@ -1643,6 +1747,7 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Interactions**: field "Find a machine, a port, an action…"; result "Review review-bot · PR #42 is ready"; result "Extend Claude on linux-1"; result "linux-1 working · This Mac"; result "mac-mini 3 VMs · 19 GB free"; result "infra healthy · mac-mini"; result "Keep This Mac awake 4 hr"; result "New VM on This Mac 23 GB free"; result "New VM on mac-mini 19 GB free"
 - **Enters**: .find: opacity 0 → 1 200 ms snappy; .fh: transform translateY(-6px) → none 340 ms smooth; #panel: height 689px → 400px 340 ms smooth
 - **Leaves**: #panel: height 400px → 689px 340 ms smooth; .page: opacity 0 → 1 340 ms smooth; .findwrap.leaving: opacity 1 → 0 200 ms snappy (esc)
+- **A2**: Actions add New agent… (on a new throwaway); a need row's verb pushes the agent's page.
 
 ### `find.down`
 
@@ -1687,6 +1792,7 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Interactions**: field "Find a machine, a port, an action…"; result "New VM on This Mac 23 GB free ⌘N"; result "New VM on mac-mini 19 GB free"
 - **Enters**: #panel: height 400px → 520px 200 ms snappy
 - **Leaves**: #panel: height 172px → 689px 340 ms smooth; .page: opacity 0 → 1 340 ms smooth; .findwrap.leaving: opacity 1 → 0 200 ms snappy (esc)
+- **A2**: Find "new" lists New agent… beside the New VM actions.
 
 ### `find.awake`
 
@@ -1897,6 +2003,30 @@ Keys: type to filter, ↑ ↓ move, ↩ run, ⌘↩ attach a workspace, esc clos
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Extend" → extend(s2); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 28%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 56%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 
+## A2: agents as their own objects (owner, 2026-11-08)
+
+DECISIONS A2, over H1 (agents run in Herdr only): a VM is a machine, an agent is a job on it, a workspace hosts 0..n agents, each one Herdr terminal on the VM's Herdr machine. The design is SPEC §A4 ("A workspace", "An agent", Agents · All machines), §A5 (New VM without Task, New agent, Clean up apart, the alerts that name agents) and §B5.22 (identity, lifecycle, calls, CLI). The A2 stories have no prototype capture: each is designed, and its golden is its reference.
+
+**The id rule.** An id is kept when the state it names is still on the same page, even when a part of it changed (its golden is redrawn; its prototype capture then predates A2, and its "A2" line says what changed). An id is retired when what it names left its page, or is gone; its successor holds it now. A retired id has no `###` heading, so no story file or golden may hold it.
+
+| Retired | Successor | Why |
+| --- | --- | --- |
+| `workspace.working` | `agent.working` (the Now card), `workspace.agents` (the workspace's Overview) | the agent's work left the workspace page for its own |
+| `workspace.remote` | `agent.remote` | the same, for an agent on another Mac |
+| `workspace.waiting` | `agent.waiting` | a workspace does not wait; its agent does |
+| `workspace.waiting.pr-opened` | `agent.waiting.pr-opened` | the card moved |
+| `workspace.waiting.reply` | `agent.waiting.reply` | the card moved |
+| `workspace.waiting.replied` | `agent.waiting.replied` | the card moved |
+| `workspace.waiting.merged` | `agent.waiting.merged` | the card moved |
+| `workspace.finished` | `agent.finished`, `workspace.agents.finished` | finished is an agent's state; the machine page shows it in its Agents card |
+| `sheet.new-vm.task` | `sheet.new-agent.new` | New VM has no task; a task starts an agent |
+
+Kept with an "A2" line: `home.one-need.wait`, `home.agent-creating`, `home.agent-born`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.waiting.accounts` (their segments are unchanged), `workspace.started`, `sheet.new-vm`, `sheet.new-vm.options`, `sheet.new-vm.lend`, `sheet.new-vm.no-account`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `alert.stop-vm`, `menu.station`, `menu.context.workspace`, `menu.page.workspace`, `find.empty`, `find.action`.
+
+Added (19): `agents.list`, `agents.empty`, `agent.working`, `agent.remote`, `agent.waiting`, `agent.waiting.pr-opened`, `agent.waiting.reply`, `agent.waiting.replied`, `agent.waiting.merged`, `agent.finished`, `workspace.agents`, `workspace.agents.finished`, `sheet.new-agent`, `sheet.new-agent.new`, `alert.stop-agent`, `alert.delete-vm.agents`, `menu.context.agent`, `menu.page.agent`, `menu.new-agent.on`.
+
+**Every other story** keeps its id and its screen, read with A2's words: an agent row (home's Agents, the hero's and Needs you's wait rows, Find) pushes `agent:<name>`, not `vm:<name>`, and its quick slot attaches that agent's Herdr terminal (`attach(agent:<name>)`); home's Agents label links Agents · All machines and carries the `+` (New agent, ⇧⌘N), so the home goldens are redrawn with it; a Mac's VM row says "2 agents · 1 waiting" for a VM hosting several. In the default fleet each VM hosts one agent named as the VM, so every recorded label above still reads true.
+
 ## HUD words: the fixture variants of `pop.hud.*`
 
 Every transient confirmation the prototype fires, read from its code: the gesture, the glyph (prototype icon → SF Symbol) and the words. Each is one fixture of the HUD (the capsule of `pop.hud.copy`, §A3 of SPEC.md); the Catalog lists them under `pop.hud`. Words marked (prototype) are the prototype's placeholders, not product copy.
@@ -1910,9 +2040,11 @@ Every transient confirmation the prototype fires, read from its code: the gestur
 | Open a link, Open PR | ur → safari | Opens jterrazz.com in Safari / Opens PR #42 in Safari |
 | Create (New VM) | box → shippingbox | Creating linux-4 on mac-mini… |
 | The new VM answers | checkf → checkmark.circle.fill | linux-4 is ready on mac-mini / linux-4 is ready · Claude started / linux-4 is ready · opened in Terminal |
-| Create with a name in use | exclf → exclamationmark.circle.fill | linux-4 already exists |
-| Clean up with nothing finished | broom → (custom, or sparkles) | Nothing finished to clean up on This Mac |
-| Delete confirmed, Clean up | trash → trash | agent-7f deleted on This Mac |
+| Create with a name in use | exclf → exclamationmark.circle.fill | linux-4 already exists / docs-bot already exists (A2, an agent's name) |
+| Start an agent on a workspace (A2) | play → play.fill | docs-bot starts on linux-1 / docs-bot is working · Claude started |
+| Stop an agent confirmed (A2) | stop → stop.fill | review-bot stopped · its workspace keeps running |
+| Clean up with nothing finished | broom → (custom, or sparkles) | Nothing to clean up on This Mac |
+| Delete confirmed, Clean up | trash → trash | agent-7f deleted on This Mac / agent-7f forgotten (A2, a finished agent) |
 | Start | play → play.fill | api is starting |
 | Restart a workspace; Restart a Mac confirmed | restart → arrow.clockwise | linux-1 restarts / mac-mini restarts… |
 | Stop confirmed | stop → stop.fill | infra is stopped / linux-1 is stopped · its disk is kept / 2 workspaces stopped on This Mac |
@@ -1944,4 +2076,4 @@ These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture
 
 ---
 
-168 stories, 202 captures (34 light). Regenerate: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).
+178 stories (19 of them designed in A2, without a capture), 202 captures of the prototype (34 light; those of the 9 retired ids kept as their successors' reference). Since A2 this file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo A2, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).
