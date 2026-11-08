@@ -1,0 +1,151 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-air",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "macbook-air",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "MacBook Air",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "M3",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "24 GB",
+          "pri": 3
+        },
+        {
+          "kind": "text",
+          "text": "seen 2 hr ago"
+        }
+      ]
+    },
+    {
+      "id": "asleep",
+      "title": "macbook-air is asleep",
+      "items": [
+        {
+          "empty": {
+            "text": "macbook-air is asleep",
+            "glyph": {
+              "kind": "symbol:moon",
+              "signal": "quiet"
+            },
+            "sub": "A laptop that sleeps is not down. Its VMs are not known while it sleeps.",
+            "actions": [
+              "wake",
+              "remind"
+            ]
+          }
+        }
+      ],
+      "card": "empty"
+    },
+    {
+      "id": "wake-note",
+      "title": "Wake",
+      "role": "banner",
+      "items": [
+        {
+          "note": {
+            "text": "Wake sends a Wake-on-LAN packet from This Mac. It works when macbook-air is plugged in and on the same network."
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "label": "Wake",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "wake",
+      "run": {
+        "call": "machines.wake",
+        "in": {
+          "Mac": "macbook-air"
+        }
+      },
+      "icon": "alarm",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Waking macbook-air"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Tell me when it wakes",
+      "on": "page",
+      "priority": 2,
+      "id": "remind",
+      "run": {
+        "call": "machines.remind",
+        "in": {
+          "Mac": "macbook-air"
+        }
+      },
+      "icon": "bell",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "You will be told when macbook-air wakes"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "macbook-air"
+        ]
+      }
+    },
+    {
+      "label": "More options for macbook-air",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "open-station"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "laptop"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
+}

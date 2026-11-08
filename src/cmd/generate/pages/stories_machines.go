@@ -240,7 +240,14 @@ func (f Scene) reading() pagemenubar.Reading {
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
-	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow}
+	m := pagemenubar.Machine{Asks: Levels, Name: name, All: &f.All, Samples: f.Samples[name], Ports: &f.Ports, Accounts: &f.Accounts, Now: storyNow, Zone: time.UTC}
+	m.Shares = f.needs().Accounts
+	reports := append([]awake.Report{f.Awake}, f.Macs...)
+	for i := range reports {
+		if reports[i].Mac == name {
+			m.Awake = &reports[i]
+		}
+	}
 	if name == proName {
 		m.Summary = &f.Home
 	}

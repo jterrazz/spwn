@@ -6,22 +6,83 @@
     "machine": "macbook-air",
     "kind": "mac"
   },
-  "state": "ready",
+  "state": "loading",
   "sections": [
     {
-      "id": "machine",
+      "id": "summary",
       "title": "macbook-air",
-      "role": "summary",
-      "caption": [
+      "role": "summary"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
         {
-          "kind": "text",
-          "text": "Mac"
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "pending",
+              "live": "cpu:macbook-air"
+            },
+            "stale": true
+          }
         },
         {
-          "kind": "text",
-          "text": "macbook-air"
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "pending",
+              "live": "free:macbook-air"
+            },
+            "stale": true
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "pending",
+              "live": "net:macbook-air"
+            },
+            "stale": true
+          }
         }
       ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "vms",
+      "title": "VMs",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No VMs on macbook-air yet",
+            "actions": [
+              "new-vm"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "empty"
+    },
+    {
+      "id": "care",
+      "title": "Care",
       "columns": [
         {
           "key": "name",
@@ -37,23 +98,55 @@
       "items": [
         {
           "row": {
-            "id": "state",
-            "mark": "broken",
-            "label": "State",
+            "id": "awake",
+            "mark": "ok",
+            "label": "Sleeps as usual",
             "cells": [
               {
-                "kind": "text",
-                "text": "Unreachable"
+                "kind": "off"
               }
             ],
-            "reason": "unreachable"
+            "detail": {
+              "kind": "text",
+              "text": "nothing pauses if it sleeps"
+            },
+            "glyph": {
+              "kind": "symbol:moon",
+              "signal": "quiet"
+            },
+            "verb": "change:macbook-air"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "upkeep",
+              "mark": "ok",
+              "label": "Upkeep",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "checking"
+                }
+              ],
+              "glyph": {
+                "kind": "symbol:wrench.adjustable",
+                "signal": "quiet"
+              },
+              "trail": "value"
+            },
+            "fold": "folded"
           }
         }
-      ]
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "care"
     },
     {
-      "id": "vms",
-      "title": "VMs",
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
       "columns": [
         {
           "key": "name",
@@ -61,26 +154,184 @@
           "keep": 100
         },
         {
-          "key": "kind",
-          "kind": "text",
-          "keep": 40
+          "key": "value",
+          "kind": "list",
+          "keep": 60
         },
         {
-          "key": "detail",
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "cpu:macbook-air"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "memory:macbook-air"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "pending",
+                "live": "disk:macbook-air"
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "activity"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "items": [
+        {
+          "empty": {
+            "text": "No port shared yet"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "ports"
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
           "kind": "list",
-          "keep": 80
+          "keep": 60
         }
       ],
       "items": [
         {
           "empty": {
-            "noun": "VMs"
+            "text": "No account shared"
           }
         }
-      ]
+      ],
+      "segment": "accounts"
     }
   ],
   "actions": [
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "Keep macbook-air awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "confirm": {
+        "question": "Keep macbook-air awake for good?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Never sleeps: the always-on Mac policy, until you change it again."
+          }
+        ],
+        "yes": "Never sleep",
+        "no": "Cancel"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "change:macbook-air",
+      "run": {
+        "call": "settings.apply",
+        "in": {
+          "Confirm": "yes",
+          "Names": "[\"never-sleeps\"]"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      }
+    },
     {
       "key": "cmd+t",
       "label": "Open in Terminal",
@@ -94,6 +345,66 @@
           "macbook-air"
         ]
       }
+    },
+    {
+      "label": "More options for macbook-air",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "open-station"
+      ]
     }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "desktop"
+    },
+    "buttons": [
+      "menu"
+    ],
+    "stale": {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "text",
+          "text": "seen 2 hr ago"
+        },
+        {
+          "kind": "text",
+          "text": "checking"
+        }
+      ]
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpu:macbook-air",
+    "memory:macbook-air",
+    "disk:macbook-air",
+    "free:macbook-air",
+    "net:macbook-air"
   ]
 }

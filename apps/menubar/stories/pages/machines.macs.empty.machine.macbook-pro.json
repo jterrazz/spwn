@@ -1,0 +1,756 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "This Mac",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "MacBook Pro",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "M4 Max",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "48 GB",
+          "pri": 3
+        },
+        {
+          "kind": "text",
+          "text": "up 3 days",
+          "pri": 4
+        }
+      ]
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:macbook-pro"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "10 GB free",
+              "live": "free:macbook-pro"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 40748502220,
+              "of": 51539607552
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:macbook-pro"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
+            ]
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "vms",
+      "title": "VMs",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No VMs on This Mac yet",
+            "sub": "44 GB free for the first one",
+            "actions": [
+              "new-vm"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "empty"
+    },
+    {
+      "id": "care",
+      "title": "Care",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "mark": "ok",
+            "label": "Awake until 18:00",
+            "cells": [
+              {
+                "kind": "on"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "nothing pauses if it sleeps"
+            },
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "waits"
+            },
+            "verb": "awake-off"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "upkeep",
+              "mark": "ok",
+              "label": "Upkeep",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "all fine"
+                }
+              ],
+              "glyph": {
+                "kind": "symbol:wrench.adjustable",
+                "signal": "quiet"
+              },
+              "trail": "value"
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "line:settings",
+                  "mark": "ok",
+                  "label": "Settings",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "set by station"
+                      },
+                      {
+                        "kind": "text",
+                        "text": "12 of 12",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:slider.horizontal.3",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:background",
+                  "mark": "ok",
+                  "label": "Background",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "8",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:list.bullet.rectangle",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:apps",
+                  "mark": "ok",
+                  "label": "Apps",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "count",
+                        "n": 39,
+                        "unit": "ok",
+                        "label": "ok"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:square.grid.2x2",
+                    "signal": "quiet"
+                  }
+                }
+              },
+              {
+                "row": {
+                  "id": "line:disk",
+                  "mark": "ok",
+                  "label": "Disk",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "size",
+                        "n": 388000000000,
+                        "unit": "free"
+                      }
+                    ]
+                  },
+                  "glyph": {
+                    "kind": "symbol:internaldrive",
+                    "signal": "quiet"
+                  }
+                }
+              }
+            ],
+            "fold": "folded"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "care"
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:macbook-pro"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 40748502220,
+                "of": 51539607552,
+                "live": "memory:macbook-pro"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 79
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 609,
+                "live": "disk:macbook-pro"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  },
+                  {
+                    "kind": "count",
+                    "n": 60
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "activity"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "items": [
+        {
+          "empty": {
+            "text": "No port shared yet"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "ports"
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No account shared"
+          }
+        }
+      ],
+      "segment": "accounts"
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "Keep This Mac awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "priority": 4,
+      "mutates": true,
+      "id": "awake-off",
+      "run": {
+        "call": "awake.off"
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "More options for This Mac",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "open-station"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "laptop"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "disk:macbook-pro",
+    "free:macbook-pro",
+    "net:macbook-pro"
+  ]
+}

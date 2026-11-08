@@ -15,7 +15,7 @@ import (
 	pageawake "github.com/jterrazz/studio-station/src/pages/awake"
 )
 
-func workspacePage(t *testing.T, state model.VMState) page.Page {
+func apiPage(t *testing.T, state model.VMState) page.Page {
 	t.Helper()
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "api", Lifetime: model.Permanent, State: state},
@@ -34,15 +34,15 @@ func actionIDs(p page.Page) []string {
 // invariant: a stopped workspace's main action is Start, and it offers no
 // share: there is nothing to share while it is stopped.
 func TestAStoppedWorkspaceStartsAndSharesNothing(t *testing.T) {
-	stopped := actionIDs(workspacePage(t, model.Stopped))
+	stopped := actionIDs(apiPage(t, model.Stopped))
 	if !slices.Contains(stopped, ActionStartVM) || slices.Contains(stopped, ActionStop) || slices.Contains(stopped, ActionShare) {
 		t.Fatalf("stopped workspace offers %q", stopped)
 	}
-	running := actionIDs(workspacePage(t, model.Running))
+	running := actionIDs(apiPage(t, model.Running))
 	if slices.Contains(running, ActionStartVM) || !slices.Contains(running, ActionStop) || !slices.Contains(running, ActionShare) {
 		t.Fatalf("running workspace offers %q", running)
 	}
-	for _, a := range workspacePage(t, model.Stopped).Actions {
+	for _, a := range apiPage(t, model.Stopped).Actions {
 		if a.ID == ActionStartVM && (a.Run.Call != CallStartVM || a.Run.In["VM"] != "api") {
 			t.Fatalf("Start runs %+v", a.Run)
 		}

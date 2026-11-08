@@ -1,0 +1,983 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "mac-mini",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "mac-mini",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "Mac mini",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "M4 Pro",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "64 GB",
+          "pri": 3
+        },
+        {
+          "kind": "text",
+          "text": "up 21 days",
+          "pri": 4
+        }
+      ]
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "1",
+          "signal": "waits"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "waiting:review-bot",
+            "mark": "attention",
+            "label": "review-bot",
+            "detail": {
+              "kind": "text",
+              "text": "PR #42 is ready"
+            },
+            "reason": "waiting",
+            "glyph": {
+              "kind": "symbol:text.bubble",
+              "signal": "waits"
+            },
+            "verb": "waiting:review-bot",
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:mac-mini"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ],
+            "stale": true
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "14 GB free",
+              "live": "free:mac-mini"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 54062900838,
+              "of": 68719476736
+            },
+            "stale": true
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:mac-mini"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
+            ],
+            "stale": true
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "vms",
+      "title": "VMs",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "36 GB in use"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra",
+            "mark": "ok",
+            "label": "infra",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 170,
+                "live": "cpuh:infra"
+              }
+            ],
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "healthy"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 12 days"
+                }
+              ]
+            },
+            "glyph": {
+              "signal": "well",
+              "dot": "fill"
+            },
+            "trail": "cpu",
+            "quick": "attach:infra",
+            "nav": "menubar.machine:infra",
+            "signal": "stale"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-3",
+            "mark": "ok",
+            "label": "linux-3",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 700,
+                "live": "cpuh:linux-3"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "refresh the auth token"
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "trail": "cpu",
+            "quick": "attach:linux-3",
+            "nav": "menubar.machine:linux-3",
+            "signal": "stale"
+          }
+        },
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "text",
+              "text": "fixes the token refresh"
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "waits"
+            },
+            "quick": "attach:review-bot",
+            "nav": "menubar.machine:review-bot",
+            "signal": "stale"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "care",
+      "title": "Care",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "awake",
+            "mark": "ok",
+            "label": "Never sleeps",
+            "cells": [
+              {
+                "kind": "on"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "hosts infra, which pauses if it sleeps"
+            },
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "waits"
+            },
+            "verb": "change:mac-mini"
+          }
+        },
+        {
+          "group": {
+            "head": {
+              "id": "upkeep",
+              "mark": "ok",
+              "label": "Upkeep",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "all fine"
+                }
+              ],
+              "glyph": {
+                "kind": "symbol:wrench.adjustable",
+                "signal": "quiet"
+              },
+              "trail": "value"
+            },
+            "fold": "folded"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "care"
+    },
+    {
+      "id": "activity",
+      "title": "Activity",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        },
+        {
+          "key": "graph",
+          "kind": "spark",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:mac-mini"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 12
+                  },
+                  {
+                    "kind": "count",
+                    "n": 18
+                  },
+                  {
+                    "kind": "count",
+                    "n": 25
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  },
+                  {
+                    "kind": "count",
+                    "n": 30
+                  },
+                  {
+                    "kind": "count",
+                    "n": 22
+                  },
+                  {
+                    "kind": "count",
+                    "n": 41
+                  },
+                  {
+                    "kind": "count",
+                    "n": 55
+                  },
+                  {
+                    "kind": "count",
+                    "n": 48
+                  },
+                  {
+                    "kind": "count",
+                    "n": 36
+                  },
+                  {
+                    "kind": "count",
+                    "n": 28
+                  },
+                  {
+                    "kind": "count",
+                    "n": 31
+                  },
+                  {
+                    "kind": "count",
+                    "n": 44
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 29
+                  },
+                  {
+                    "kind": "count",
+                    "n": 34
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "memory",
+            "label": "Memory",
+            "cells": [
+              {
+                "kind": "ratio",
+                "n": 54062900838,
+                "of": 68719476736,
+                "live": "memory:mac-mini"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 77
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  },
+                  {
+                    "kind": "count",
+                    "n": 78
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "disk",
+            "label": "Disk",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 386,
+                "live": "disk:mac-mini"
+              },
+              {
+                "kind": "spark",
+                "items": [
+                  {
+                    "kind": "none"
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  },
+                  {
+                    "kind": "count",
+                    "n": 38
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "segment": "activity"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "items": [
+        {
+          "link": {
+            "label": "linux-3",
+            "lead": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "linux-3"
+                },
+                {
+                  "kind": "port",
+                  "n": 8080
+                }
+              ]
+            },
+            "value": {
+              "kind": "url",
+              "text": "https://mac-mini.tail77a797.ts.net:40001"
+            },
+            "row": "linux-3/8080"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "ports"
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-3/github",
+            "mark": "ok",
+            "label": "GitHub",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "shared with linux-3"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "6 h left"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "review-bot/claude",
+            "mark": "ok",
+            "label": "Claude",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "shared with review-bot"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "9 h left"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ],
+      "segment": "accounts"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Review",
+      "on": "row",
+      "rows": [
+        "waiting:review-bot"
+      ],
+      "id": "waiting:review-bot",
+      "default": true
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open infra in Terminal",
+      "on": "row",
+      "rows": [
+        "infra"
+      ],
+      "priority": 2,
+      "id": "attach:infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open linux-3 in Terminal",
+      "on": "row",
+      "rows": [
+        "linux-3"
+      ],
+      "priority": 2,
+      "id": "attach:linux-3",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "linux-3"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open review-bot in Terminal",
+      "on": "row",
+      "rows": [
+        "review-bot"
+      ],
+      "priority": 2,
+      "id": "attach:review-bot",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "review-bot"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Keep mac-mini awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "confirm": {
+        "question": "Let mac-mini sleep again?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It hosts infra (server): infra pauses while mac-mini sleeps."
+          }
+        ],
+        "danger": true,
+        "yes": "Allow sleep",
+        "no": "Keep it awake"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "change:mac-mini",
+      "run": {
+        "call": "settings.off",
+        "in": {
+          "Confirm": "yes",
+          "Names": "[\"never-sleeps\"]"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Unlock the disk",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "unlock",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "machines",
+          "unlock",
+          "mac-mini"
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      }
+    },
+    {
+      "label": "More options for mac-mini",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "unlock",
+        "open-station"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "desktop"
+    },
+    "buttons": [
+      "new-vm",
+      "menu"
+    ],
+    "stale": {
+      "kind": "list",
+      "items": [
+        {
+          "kind": "text",
+          "text": "seen 3 min ago"
+        },
+        {
+          "kind": "text",
+          "text": "checking"
+        }
+      ]
+    }
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    },
+    {
+      "id": "ports",
+      "label": "Ports",
+      "key": "cmd+p"
+    },
+    {
+      "id": "accounts",
+      "label": "Accounts",
+      "key": "cmd+u"
+    }
+  ],
+  "live": [
+    "cpuh:infra",
+    "cpuh:linux-3",
+    "cpu:mac-mini",
+    "memory:mac-mini",
+    "disk:mac-mini",
+    "free:mac-mini",
+    "net:mac-mini"
+  ]
+}

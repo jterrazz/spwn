@@ -1,11 +1,1 @@
-# Needs you
-✗	port 5000 is reachable outside Tailscale	station ports --on mac-mini
-# Mac readiness
-●	restarts after a power cut	applied
-●	never sleeps	applied
-●	logs in by itself	applied
-●	disk unlock after a power cut	no password at boot
-●	planned restarts unlock themselves	supported
-●	engine starts at login	installed
-# VMs
-●	infra	Server	Always on · healthy · up 12 d · 0 restarts
+ErrPending

@@ -1,15 +1,13 @@
-State · Unreachable
+mac-mini
 
-Mac readiness
-  ● restarts after a power cut  applied
-  ● never sleeps                applied
-  ● logs in by itself           applied
-  ◐ disk unlock after a power cut
-    waits at pre-boot
-    → station machines unlock mac-mini (from the same network)
-  ● planned restarts unlock themselves
-    supported
-  ● engine starts at login      installed
-VMs
-    Servers
-  └─ ? infra  Server  Always on · not known while mac-mini does not answer
+Gauges
+VMs  ● infra · healthy · up 12 days
+Care
+  ● Upkeep  all fine
+Activity
+    CPU                                    Disk
+    Memory
+Ports
+  No port shared yet
+Accounts
+  No account shared

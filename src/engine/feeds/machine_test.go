@@ -142,7 +142,11 @@ func (w *world) answer(name string, target machine.Ref, in any) any {
 			needs = append(needs, overview.Need{Machine: at, Section: "apps", Subject: "updates", Text: "2 app updates", Call: "apps.update"})
 		}
 		w.mu.Unlock()
-		return overviewcalls.ReadOut{Summary: overview.Summary{Head: overview.Head{Name: at}, Needs: needs}}
+		head := overview.Head{Name: at}
+		if at == mini {
+			head.Up = 21 * 24 * time.Hour
+		}
+		return overviewcalls.ReadOut{Summary: overview.Summary{Head: head, Needs: needs}}
 	case activitycalls.Read.Name:
 		w.mu.Lock()
 		defer w.mu.Unlock()
@@ -271,9 +275,20 @@ func needs(p page.Page) []string {
 
 func TestTheMacMinisPageOpenFromThisMacIsTheMinisOwnAnswer(t *testing.T) {
 	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
-	p := until(t, watch(t, w, newSteps(), mini), "mac-mini's Needs you", func(p page.Page) bool { return len(needs(p)) > 0 })
-	if got := needs(p); !slices.Equal(got, []string{"port 5000 is reachable from outside"}) {
-		t.Errorf("mac-mini's page needs you for %q, want only the mini's own port 5000", got)
+	facts := func(p page.Page) []string {
+		var out []string
+		for _, s := range p.Sections {
+			if s.ID == "summary" {
+				for _, v := range s.Caption {
+					out = append(out, v.Text)
+				}
+			}
+		}
+		return out
+	}
+	p := until(t, watch(t, w, newSteps(), mini), "mac-mini's time up", func(p page.Page) bool { return len(facts(p)) > 0 })
+	if got := facts(p); !slices.Equal(got, []string{"up 21 days"}) {
+		t.Errorf("mac-mini's page says %q, want the mini's own time up", got)
 	}
 	if got := w.askedOf(overviewcalls.Read.Name); !slices.Equal(got, []string{mini}) {
 		t.Errorf("the overview was read on %q, want on mac-mini only", got)
