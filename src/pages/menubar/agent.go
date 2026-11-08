@@ -153,7 +153,7 @@ func agentFacts(r Agent, a agents.Agent, h model.MacView) []page.Value {
 	if a.State == agents.Waiting {
 		state.Signal = page.SignalWaits
 	}
-	out := []page.Value{state, dropFirst(page.Text(appWord(a.App)), 2), dropFirst(page.Text("on "+a.VM), 1)}
+	out := []page.Value{state, dropFirst(page.Text(appWord(a.App)), 2), dropFirst(page.Linked(page.Text("on "+a.VM), machinePage(a.VM)), 1)}
 	if !h.ThisMac && h.Name != "" {
 		out = append(out, dropFirst(page.Text(model.Label(*r.All, h)), 3))
 	}

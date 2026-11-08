@@ -454,6 +454,7 @@ public struct Value: Codable, Equatable, Sendable {
     public var pri: Int?
     public var short: String?
     public var signal: String?
+    public var nav: String?
 
     public init(kind: String? = nil, text: String? = nil) {
         self.kind = kind

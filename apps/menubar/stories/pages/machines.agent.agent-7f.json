@@ -35,7 +35,8 @@
         {
           "kind": "text",
           "text": "on agent-7f",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:agent-7f"
         }
       ]
     },

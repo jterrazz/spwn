@@ -9,14 +9,16 @@ public struct MachineHeader: View {
     let pick: (String) -> Void
     let back: () -> Void
     let run: (Action) -> Void
+    let open: (String) -> Void
     @Environment(\.stationTokens) private var tokens
 
-    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }, open: @escaping (String) -> Void = { _ in }) {
         self.page = page
         self.segment = segment
         self.pick = pick
         self.back = back
         self.run = run
+        self.open = open
     }
 
     var summary: Section? { page.section("summary") }
@@ -77,7 +79,7 @@ public struct MachineHeader: View {
                 }
             }
             .frame(height: m.title)
-            FactsLine(Self.facts(page)).padding(.top, m.factsTop)
+            FactsLine(Self.facts(page), open: open).padding(.top, m.factsTop)
             if let segments = page.segments, !segments.isEmpty {
                 Segmented(options: segmented(segments))
                 .padding(.top, m.segmentsTop)

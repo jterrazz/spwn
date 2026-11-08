@@ -35,7 +35,8 @@
         {
           "kind": "text",
           "text": "on linux-1",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:linux-1"
         }
       ]
     },

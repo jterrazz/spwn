@@ -21,4 +21,18 @@ final class AgentPageTests: XCTestCase {
             XCTAssertEqual(state.pushed?.header?.back, "All machines", id)
         }
     }
+
+    // invariant: SPEC A4: an agent's facts name its workspace, a
+    // workspace's its Mac, as a link with its chevron whose tap pushes that
+    // page.
+    func testTheFactsLinkTheWorkspaceAndTheMacTheyNameToTheirPages() throws {
+        for (id, word, page) in [("agent.working", "on linux-1 ›", "menubar.machine:linux-1"), ("agent.waiting", "on review-bot ›", "menubar.machine:review-bot"),
+                                 ("workspace.agents", "on This Mac ›", "menubar.machine:macbook-pro")] {
+            let shown = try XCTUnwrap(Stories[id].state.shown, id)
+            let link = try XCTUnwrap(MachineHeader.facts(shown).items?.first { $0.nav != nil }, id)
+            XCTAssertEqual(FactsLine.word(link), word, id)
+            XCTAssertEqual(link.nav, page, id)
+            XCTAssertEqual(FactsLine.address(page).flatMap(FactsLine.page), page, id)
+        }
+    }
 }

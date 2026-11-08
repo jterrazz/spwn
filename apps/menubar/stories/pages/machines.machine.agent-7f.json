@@ -22,7 +22,8 @@
         {
           "kind": "text",
           "text": "on This Mac",
-          "pri": 2
+          "pri": 2,
+          "nav": "menubar.machine:macbook-pro"
         },
         {
           "kind": "text",

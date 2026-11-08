@@ -24,7 +24,7 @@ struct AgentPage: View {
 
     var body: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/agent/\(page.context?.machine ?? "")", sheet: state.confirming) {
-            MachineHeader(page, segment: nil, back: handlers.back, run: tap)
+            MachineHeader(page, segment: nil, back: handlers.back, run: tap, open: handlers.push)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array(MacPage.sections(page, segment: "").enumerated()), id: \.offset) { _, s in

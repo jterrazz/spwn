@@ -26,7 +26,8 @@
         {
           "kind": "text",
           "text": "on linux-3",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:linux-3"
         },
         {
           "kind": "text",

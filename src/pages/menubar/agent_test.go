@@ -119,3 +119,23 @@ func TestAnAgentNoHookReportsOffersTheHook(t *testing.T) {
 		t.Fatalf("Apply runs %+v", a)
 	}
 }
+
+// invariant: SPEC A4: an agent's facts name its workspace as a link that
+// opens it, and a workspace's facts name its Mac as a link that opens it.
+func TestAnAgentsFactsOpenItsWorkspaceAndAWorkspacesOpenItsMac(t *testing.T) {
+	linked := func(p page.Page, text string) page.ID {
+		for _, v := range sectionOf(p, SectionSummary).Caption {
+			if v.Text == text {
+				return v.Nav
+			}
+		}
+		t.Fatalf("no %q in the facts of %s", text, p.ID)
+		return ""
+	}
+	if nav := linked(agentPageOf(t, "review-bot"), "on review-bot"); nav != machinePage("review-bot") {
+		t.Fatalf("on review-bot opens %q", nav)
+	}
+	if nav := linked(macPageOf(t, "review-bot", func(m *Machine) { m.Agents = fleetAgents() }), "on mac-mini"); nav != machinePage(miniMac) {
+		t.Fatalf("on mac-mini opens %q", nav)
+	}
+}

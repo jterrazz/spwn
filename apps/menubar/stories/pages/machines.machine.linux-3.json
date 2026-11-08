@@ -22,7 +22,8 @@
         {
           "kind": "text",
           "text": "on mac-mini",
-          "pri": 2
+          "pri": 2,
+          "nav": "menubar.machine:mac-mini"
         },
         {
           "kind": "text",

@@ -23,7 +23,7 @@ struct WorkspacePage: View {
 
     var body: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming) {
-            MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap)
+            MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array(MacPage.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in

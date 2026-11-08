@@ -640,6 +640,8 @@ type Value struct {
 	Pri    int     `json:"pri,omitempty"`
 	Short  string  `json:"short,omitempty"`
 	Signal Signal  `json:"signal,omitempty"`
+	// value: the page the part opens, drawn as a link ("on mac-mini ›").
+	Nav ID `json:"nav,omitempty"`
 }
 
 type Kind string

@@ -33,7 +33,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	label := model.Label(*m.All, h)
 	mine := agentsOn(m, h, vm)
 	p.Header = &page.Header{Back: "All machines", Glyph: workspaceGlyph(vm, mine), Buttons: []string{ActionMenu}}
-	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, vm, label, mine)}}
+	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label, mine)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
 	kind := vm.Lifetime.Kind()
 	stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
@@ -130,8 +130,8 @@ func agentRank(a agents.Agent) int {
 // has run and how many agents it hosts; a stopped one says it stopped. On
 // a narrow line its uptime goes first, then its Mac, then its life: what
 // it runs stays.
-func workspaceFacts(m Machine, vm model.VM, label string, mine []agents.Agent) []page.Value {
-	out := []page.Value{dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Text("on "+label), 2)}
+func workspaceFacts(m Machine, h model.MacView, vm model.VM, label string, mine []agents.Agent) []page.Value {
+	out := []page.Value{dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Linked(page.Text("on "+label), machinePage(h.Name)), 2)}
 	if vm.State != model.Running {
 		return append(out, page.Text("stopped"))
 	}

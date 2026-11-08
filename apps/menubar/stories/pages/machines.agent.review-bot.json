@@ -36,7 +36,8 @@
         {
           "kind": "text",
           "text": "on review-bot",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:review-bot"
         },
         {
           "kind": "text",
