@@ -3,6 +3,7 @@ package menubar
 import (
 	"slices"
 	"strconv"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/page"
@@ -26,6 +27,9 @@ type PortsOf struct {
 	// value: the machine whose ports the page lists, as the owner names it
 	// (`mac-mini`, `linux-1`); empty is This Mac.
 	Machine string
+	// value: the hour the page is read at: a share of the last few
+	// seconds is fresh against it.
+	Now time.Time
 }
 
 func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
@@ -34,7 +38,7 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 	// exposed), then the ports body every page of ports shares; its footer
 	// is Full list in Terminal and Share a port…. Scoped to a machine it
 	// lists that machine's ports alone.
-	sc := portsScope{Self: thisMac.Machine}
+	sc := portsScope{Self: thisMac.Machine, Now: of.Now}
 	where := "All machines"
 	if of.Machine != "" {
 		where = of.Machine

@@ -216,6 +216,47 @@ func TestAPortJustSharedIsFresh(t *testing.T) {
 	if !slices.Equal(fresh, []string{"linux-1:4321"}) {
 		t.Fatalf("fresh %q", fresh)
 	}
+	fresh = nil
+	for _, r := range rowsOf(fleetPorts(t, f, PortsOf{Now: macNow}), SectionPrivate) {
+		if r.Fresh {
+			fresh = append(fresh, r.ID)
+		}
+	}
+	if !slices.Equal(fresh, []string{"linux-1:4321"}) {
+		t.Fatalf("Ports of all machines: fresh %q", fresh)
+	}
+}
+
+// invariant: a share's menu holds every verb of it: Open, Copy and its QR
+// for a web share, Copy for a raw port, then Stop sharing, so a share is
+// stopped from the panel wherever it is listed.
+func TestAShareMenuStopsIt(t *testing.T) {
+	f := portFleet()
+	f.Macs[0].Shared = append(f.Macs[0].Shared, ports.SharedPort{VM: "linux-1", GuestPort: 7000, Reserved: 40002, State: ports.PhaseShared,
+		URLs: ports.URLSet{Public: "pro.ts.net:40002"}})
+	p := fleetPorts(t, f, PortsOf{})
+	menus := map[string][]string{}
+	for _, r := range rowsOf(p, SectionPrivate) {
+		if r.Menu != nil {
+			menus[r.ID] = r.Menu
+		}
+	}
+	want := map[string][]string{
+		"linux-1:5173": {ActionOpenPort + "linux-1:5173", ActionCopyPort + "linux-1:5173", ActionQR + "linux-1:5173", "-", ActionStopSharing + "linux-1:5173"},
+		"linux-1:7000": {ActionCopyPort + "linux-1:7000", "-", ActionStopSharing + "linux-1:7000"},
+	}
+	if len(menus) != len(want) {
+		t.Fatalf("menus %q", menus)
+	}
+	for id, menu := range want {
+		if !slices.Equal(menus[id], menu) {
+			t.Fatalf("%s's menu %q, want %q", id, menus[id], menu)
+		}
+	}
+	stop := action(p, ActionStopSharing+"linux-1:7000")
+	if stop == nil || stop.Run == nil || stop.Run.Call != CallStopSharing || stop.Run.In["Port"] != `"7000"` || stop.Confirm == nil {
+		t.Fatalf("stop %+v", stop)
+	}
 }
 
 func action(p page.Page, id string) *page.Action {
@@ -226,3 +267,4 @@ func action(p page.Page, id string) *page.Action {
 	}
 	return nil
 }
+

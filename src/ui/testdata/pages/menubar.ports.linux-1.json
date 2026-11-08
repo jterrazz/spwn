@@ -62,7 +62,14 @@
               "kind": "port:vite"
             },
             "verb": "open-port:linux-1:5173",
-            "quick": "qr:linux-1:5173"
+            "quick": "qr:linux-1:5173",
+            "menu": [
+              "open-port:linux-1:5173",
+              "copy-port:linux-1:5173",
+              "qr:linux-1:5173",
+              "-",
+              "stop-sharing:linux-1:5173"
+            ]
           }
         },
         {
@@ -77,7 +84,12 @@
             "glyph": {
               "kind": "port:web"
             },
-            "verb": "copy-port:linux-1:7000"
+            "verb": "copy-port:linux-1:7000",
+            "menu": [
+              "copy-port:linux-1:7000",
+              "-",
+              "stop-sharing:linux-1:7000"
+            ]
           }
         }
       ],

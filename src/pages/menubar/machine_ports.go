@@ -32,6 +32,7 @@ const (
 	TitlePublic    = "Public"
 	TitlePrivate   = "Private"
 	TitleListening = "Listening, not shared"
+	TitlePorts     = "Ports"
 )
 
 // value: whose ports a body lists: every Mac's, one Mac's and its VMs',
@@ -50,6 +51,11 @@ type portsBody struct {
 	Public   int
 	Private  int
 	Exposed  int
+	// value: the shares and the listeners offered with Share, in the order
+	// listed: a workspace's Overview card draws its shares and its first
+	// listener.
+	Shares    []page.Item
+	Listeners []page.Item
 }
 
 func (b *portsBody) act(a page.Action) {
@@ -203,21 +209,24 @@ func (b *portsBody) sharedRow(s ports.SharedPort, a ports.Answer, h ports.MacPor
 		return page.Item{Row: &row}
 	}
 	link := cmpWord(s.URLs.Public, key)
-	b.linkVerbs(&row, named.Name, key, link, s.HTTP && s.URLs.Public != "")
+	verbs := b.linkVerbs(&row, named.Name, key, link, s.HTTP && s.URLs.Public != "")
 	stop := stopSharing(s, h.Name)
 	stop.ID, stop.Rows = ActionStopSharing+key, []string{key}
 	b.act(stop)
+	row.Menu = append(verbs, "-", stop.ID)
+	b.Shares = append(b.Shares, page.Item{Row: &row})
 	return page.Item{Row: &row}
 }
 
 // value: a link's verbs: the row opens a web page, or copies what is not
-// one, and offers its QR beside; the QR is the link's on a phone.
-func (b *portsBody) linkVerbs(row *page.Row, name, key, link string, web bool) {
+// one, and offers its QR beside; the QR is the link's on a phone. It
+// returns them in the order a share's menu lists them.
+func (b *portsBody) linkVerbs(row *page.Row, name, key, link string, web bool) []string {
 	copyIt := page.Action{ID: ActionCopyPort + key, Label: "Copy link to " + name, On: page.OnRow, Rows: []string{row.ID}, Run: &page.Run{Copy: link}, Hud: hud("Copied " + link)}
 	if !web {
 		row.Verb = copyIt.ID
 		b.act(copyIt)
-		return
+		return []string{copyIt.ID}
 	}
 	open := page.Action{ID: ActionOpenPort + key, Label: "Open " + name, On: page.OnRow, Rows: []string{row.ID}, Run: &page.Run{Open: link}}
 	qr := page.Action{ID: ActionQR + key, Label: "Show QR for " + name, Icon: "qrcode", On: page.OnRow, Rows: []string{row.ID}}
@@ -225,6 +234,7 @@ func (b *portsBody) linkVerbs(row *page.Row, name, key, link string, web bool) {
 	b.act(open)
 	b.act(copyIt)
 	b.act(qr)
+	return []string{open.ID, copyIt.ID, qr.ID}
 }
 
 func (b *portsBody) publicRow(p ports.Port, sc portsScope) page.Item {
@@ -257,6 +267,7 @@ func (b *portsBody) listenerRow(p ports.Port, sc portsScope, share bool) page.It
 		Hud: hud("Shared " + named.Name + " of " + p.Machine.Name)}
 	row.Verb = a.ID
 	b.act(a)
+	b.Listeners = append(b.Listeners, page.Item{Row: &row})
 	return page.Item{Row: &row}
 }
 

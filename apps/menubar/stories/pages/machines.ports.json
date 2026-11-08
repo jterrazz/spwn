@@ -127,7 +127,14 @@
               "kind": "port:vite"
             },
             "verb": "open-port:linux-1:5173",
-            "quick": "qr:linux-1:5173"
+            "quick": "qr:linux-1:5173",
+            "menu": [
+              "open-port:linux-1:5173",
+              "copy-port:linux-1:5173",
+              "qr:linux-1:5173",
+              "-",
+              "stop-sharing:linux-1:5173"
+            ]
           }
         },
         {
@@ -143,7 +150,14 @@
               "kind": "port:web"
             },
             "verb": "open-port:linux-1:3000",
-            "quick": "qr:linux-1:3000"
+            "quick": "qr:linux-1:3000",
+            "menu": [
+              "open-port:linux-1:3000",
+              "copy-port:linux-1:3000",
+              "qr:linux-1:3000",
+              "-",
+              "stop-sharing:linux-1:3000"
+            ]
           }
         },
         {
@@ -174,7 +188,14 @@
               "kind": "port:web"
             },
             "verb": "open-port:linux-3:8080",
-            "quick": "qr:linux-3:8080"
+            "quick": "qr:linux-3:8080",
+            "menu": [
+              "open-port:linux-3:8080",
+              "copy-port:linux-3:8080",
+              "qr:linux-3:8080",
+              "-",
+              "stop-sharing:linux-3:8080"
+            ]
           }
         },
         {

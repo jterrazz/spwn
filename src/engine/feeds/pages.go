@@ -28,7 +28,7 @@ func (o Menubar) Ports() engine.Feed {
 	// it opens, every 30 s and on a change of this engine's state.
 	return func(ctx context.Context, in engine.FeedInput) <-chan any {
 		read := func(ctx context.Context) page.Page {
-			of, list := pagemenubar.PortsOf{Machine: in.Subject}, portscalls.ListIn{AllMachines: true, Of: in.Subject}
+			of, list := pagemenubar.PortsOf{Machine: in.Subject, Now: o.Clock.Now()}, portscalls.ListIn{AllMachines: true, Of: in.Subject}
 			l, err := call.Invoke(ctx, o.Calls, machine.Ref{}, portscalls.List, list, nil)
 			if err != nil {
 				return pagemenubar.Unread(pagemenubar.PortsID, o.ThisMachine, err)

@@ -815,7 +815,14 @@
               "kind": "port:web"
             },
             "verb": "open-port:linux-3:8080",
-            "quick": "qr:linux-3:8080"
+            "quick": "qr:linux-3:8080",
+            "menu": [
+              "open-port:linux-3:8080",
+              "copy-port:linux-3:8080",
+              "qr:linux-3:8080",
+              "-",
+              "stop-sharing:linux-3:8080"
+            ]
           }
         },
         {
