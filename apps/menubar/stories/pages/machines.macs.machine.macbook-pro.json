@@ -1070,7 +1070,7 @@
       "icon": "terminal"
     },
     {
-      "label": "Delete",
+      "label": "Clean up",
       "on": "row",
       "confirm": {
         "question": "Delete the finished throwaways on This Mac?",
