@@ -37,12 +37,12 @@ station machines [--json] # All machines: every Mac, its VMs under it, then Need
 station machines <machine> [--json] # that machine's Overview, as station overview --on <machine>
 station machines add <mac> [--user <login>] [--key <file>]
 station machines forget <mac> [--yes]
+
 station machines create [<name>] [--permanent] [--image linux] [--cpus <n>] [--memory <size>] [--disk <size>] [--network bridged] [--task <task> [--agent]]
 station machines create <name> --server [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port>]
 station machines start <vm>
 station machines stop <vm> [--yes | --confirm=<name>]
 station machines restart <machine> [--yes]
-
 station machines edit <vm> [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port> | --no-check]
 station machines ssh <machine>
 station machines log <vm>
