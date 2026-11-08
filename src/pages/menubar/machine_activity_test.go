@@ -101,6 +101,29 @@ func TestAScrubbedPointSaysWhenItWas(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4.1: an anomaly is the whole run at or above 90 %
+// around the peak, on both of its sides, 90 % itself included.
+func TestAnAnomalyIsTheWholeRunAroundItsPeak(t *testing.T) {
+	p := macPageOf(t, miniMac, func(m *Machine) {
+		m.Activity = kept(30, func(at time.Time) (float64, bool) {
+			switch {
+			case at.Equal(macNow.Add(-35 * time.Minute)):
+				return 95, true
+			case !at.Before(macNow.Add(-40*time.Minute)) && at.Before(macNow.Add(-30*time.Minute)):
+				return 90, true
+			}
+			return 0, false
+		})
+	})
+	cpu, _ := chartsOf(t, sectionOf(p, SectionWindow+"1h"))
+	if cpu.Peak == nil || cpu.Peak.Index != 25 {
+		t.Fatalf("peak %+v, want the bar 35 min ago", cpu.Peak)
+	}
+	if a := cpu.Anomaly; a == nil || a.From != 20 || a.To != 29 || a.Sentence != "Peaked 95% at 09:55" {
+		t.Fatalf("anomaly %+v, want the ten bars at 90 %% and over, 40 to 30 min ago, Peaked 95%% at 09:55", a)
+	}
+}
+
 // invariant: SPEC A4.1: a window whose CPU stayed above 90 % shades the
 // bars it spans and says it: when it peaked once it is over, how long it
 // has lasted while it still holds.
@@ -167,7 +190,9 @@ func TestAMacsBusiestProcessesHoldItsVMsWhichOpenTheirPages(t *testing.T) {
 // where its figures come from, and a workspace's upkeep there runs Update
 // inside it.
 func TestAVMsActivityIsMeasuredInsideItAndUpdatesItsGuest(t *testing.T) {
-	server := macPageOf(t, "infra", func(m *Machine) { m.Summary = nil })
+	server := macPageOf(t, "infra", func(m *Machine) {
+		m.Summary = &overview.Summary{Head: overview.Head{Name: "infra"}, Needs: []overview.Need{{Machine: "infra", Section: "apps", Subject: "updates", Text: "2 updates", Call: CallUpdate}}}
+	})
 	if server.Header == nil || server.Header.Back != "mac-mini" || server.Header.Glyph.Kind != "server" || len(server.Segments) != 2 {
 		t.Fatalf("infra header %+v segments %+v, want back to the mini, the server glyph, Overview and Activity", server.Header, server.Segments)
 	}
