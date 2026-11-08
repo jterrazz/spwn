@@ -1,8 +1,8 @@
 {
     "group": "home",
+    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.needs",
-    "note": "The daily home: what needs you, then the machines.",
-    "pages": ["pages/machines.menubar.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "The daily home: two things need you, each with its verb.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "schema": "station.story/v1"
 }

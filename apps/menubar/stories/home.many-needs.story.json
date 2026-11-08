@@ -1,0 +1,8 @@
+{
+    "group": "home",
+    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
+    "id": "home.many-needs",
+    "note": "Five things need you: the three most urgent, then the link to the rest.",
+    "pages": ["pages/machines.home.many.menubar.json"],
+    "schema": "station.story/v1"
+}

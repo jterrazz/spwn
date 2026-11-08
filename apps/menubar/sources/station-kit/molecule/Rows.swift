@@ -57,6 +57,8 @@ public struct NeedRow: View {
         self.run = run
     }
 
+    var stale: Bool { row.signal == "stale" }
+
     func line(_ parts: [Value]) -> Text {
         let words = FactsLine.words(parts, now: now)
         let subject = Text(verbatim: row.label ?? "").font(Token.Role.needSubject.font)
@@ -71,12 +73,15 @@ public struct NeedRow: View {
                 if let glyph = row.glyph { GlyphView(glyph) } else { MarkView(row.mark) }
             }
             .frame(width: Token.Metric.Row.accessory)
+            .opacity(stale ? Token.Metric.Row.staleShare : 1)
             ViewThatFits(in: .horizontal) {
                 ForEach(Array(FactsLine.variants(parts).enumerated()), id: \.offset) { _, variant in
                     line(variant).foregroundStyle(tokens.tone(Token.Role.needWhat.tone)).lineLimit(1).fixedSize()
                 }
+                line(FactsLine.variants(parts).last ?? parts).foregroundStyle(tokens.tone(Token.Role.needWhat.tone)).lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(stale ? Token.Metric.Row.staleShare : 1)
             if let verb = RowView.action(row.verb, in: actions) {
                 VerbButton(verb.label ?? "") { run(verb) }
             }

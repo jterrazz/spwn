@@ -120,7 +120,7 @@ final class Round3Tests: XCTestCase {
     // by its last part, nothing past a comma.
     func testNeedsYouFoldedLineIsShort() throws {
         let rows: [Row] = try decoded(#"[{"label":"npm sign-in expired"},{"label":"com.jterrazz.brain.x-snapshot is failing, last exit 1"}]"#)
-        XCTAssertEqual(HomeContent.folded(rows), "npm sign-in expired · x-snapshot is failing")
+        XCTAssertEqual(HomePage.folded(rows), "npm sign-in expired · x-snapshot is failing")
     }
 
     // invariant: the engine-stopped page names the Mac as the engine does.

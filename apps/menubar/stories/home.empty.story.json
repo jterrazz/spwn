@@ -1,8 +1,8 @@
 {
     "group": "home",
+    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.empty",
-    "note": "First run: This Mac alone, no VM.",
-    "pages": ["pages/machines.empty.menubar.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "First run: This Mac alone, no VM: the empty state with New VM.",
+    "pages": ["pages/machines.home.empty.menubar.json"],
+    "schema": "station.story/v1"
 }

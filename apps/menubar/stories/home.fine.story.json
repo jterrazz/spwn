@@ -1,8 +1,8 @@
 {
     "group": "home",
+    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.fine",
-    "note": "Home when nothing needs you.",
-    "pages": ["pages/machines.fine.menubar.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "All machines are fine: the green check and the facts line.",
+    "pages": ["pages/machines.home.fine.menubar.json"],
+    "schema": "station.story/v1"
 }

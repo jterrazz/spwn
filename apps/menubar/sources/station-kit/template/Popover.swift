@@ -204,14 +204,44 @@ public struct Popover: View {
         return MenuPage.view(shown, handlers: handlers, scrolls: scrolls)
     }
 
+    var key: String { "\(state.openings)/\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")" }
+
+    // value: Home as SPEC A4 draws it, once its engine sends its header.
+    var home: Page? {
+        guard state.pushed == nil, let shown = state.shown, shown.id == PageID.home, shown.header != nil else { return nil }
+        return shown
+    }
+
+    @ViewBuilder
     var panel: some View {
-        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")", sheet: state.confirming) {
-            page
-        } footer: {
-            statusLine
+        if let home {
+            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming) {
+                HomeHeaderBar(page: home, state: state, handlers: handlers)
+            } content: {
+                VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                    if state.menu { menu }
+                    HomePage(page: home, state: state, handlers: handlers)
+                        .opacity(state.connection == .connecting ? Token.Fade.connecting : 1)
+                        .disabled(state.connection == .connecting)
+                }
+            } footer: {
+                if state.connection == .connecting {
+                    StatusBar("connecting\(Token.Glyph.ellipsis)", failed: false)
+                } else if let status = state.status {
+                    StatusBar(status.line, failed: status.failed)
+                }
+            }
+            .background { BackKey(state: state, handlers: handlers) }
+            .environment(\.stationHints, false)
+        } else {
+            Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming) {
+                page
+            } footer: {
+                statusLine
+            }
+            .background { BackKey(state: state, handlers: handlers) }
+            .environment(\.stationHints, false)
         }
-        .background { BackKey(state: state, handlers: handlers) }
-        .environment(\.stationHints, false)
     }
 
     var page: some View {
@@ -225,7 +255,7 @@ public struct Popover: View {
                     } else if shown.id == PageID.machine {
                         MachineContent(page: shown, state: state, handlers: handlers)
                     } else {
-                        HomeContent(page: shown, state: state, handlers: handlers)
+                        HomePage(page: shown, state: state, handlers: handlers)
                     }
                 }
                 .opacity(state.connection == .connecting ? Token.Fade.connecting : 1)

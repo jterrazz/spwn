@@ -1,8 +1,8 @@
 {
     "group": "home",
+    "heightNote": "below the hero, today's machines list and tiles stand until the tiles and the Agents, Servers and Macs cards land",
     "id": "home.loading",
-    "note": "Home while mac-mini has not answered yet.",
-    "pages": ["pages/machines.loading.menubar.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "mac-mini still answering: a spinner beside the count, its need dimmed.",
+    "pages": ["pages/machines.home.loading.menubar.json"],
+    "schema": "station.story/v1"
 }

@@ -1,9 +1,10 @@
 import SwiftUI
 
-// invariant: SPEC §10.2's Home, vision panel a, in its order: the three
-// measures' tiles, what needs you, the machines' list, the Awake and
-// Accounts tiles side by side, then the menu.
-struct HomeContent: View {
+// invariant: SPEC A4's Home: the hero the engine decides first; below it,
+// until the tiles and the cards land, the machines' list, the Awake and
+// Accounts tiles side by side, then the menu. A page from an engine that
+// sends no hero keeps today's look: the three measures, what needs you.
+struct HomePage: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
@@ -20,9 +21,22 @@ struct HomeContent: View {
 
     var litID: String? { lit.flatMap { i in lines.indices.contains(i) ? lines[i].id : nil } }
 
+    var hero: Section? { page.section(Self.hero) }
+    static let hero = "hero"
+
+    // value: the actions the header and the hero already offer, which the
+    // menu does not repeat.
+    var carried: [String] { (page.header?.buttons ?? []) + (hero?.items?.first?.empty?.actions ?? []) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
-            if let strip = page.strip {
+            if let hero {
+                Hero(hero, actions: page.actions ?? [], stale: page.header?.stale, run: { verb(page, $0, handlers) }, open: { go($0, handlers) })
+                    .onChange(of: Hero.announcement(hero)) { _, said in
+                        if let said, !still { AccessibilityNotification.Announcement(said).post() }
+                    }
+            }
+            if hero == nil, let strip = page.strip {
                 Button { handlers.push(Navigation.activity) } label: {
                     Metrics(measures: [("CPU", strip.cpu, strip.spark), ("Memory", strip.memory, strip.memory_spark), ("Network", strip.net?.first, strip.net_spark)])
                         .contentShape(Rectangle())
@@ -31,7 +45,7 @@ struct HomeContent: View {
             }
             if let needs = page.section(TodoBadge.section), stopped {
                 engineStopped(needs)
-            } else if let needs = page.section(TodoBadge.section), needs.items?.contains(where: { $0.row != nil }) == true {
+            } else if hero == nil, let needs = page.section(TodoBadge.section), needs.items?.contains(where: { $0.row != nil }) == true {
                 needsYou(needs)
             }
             if let machines = page.section("machines") {
@@ -231,8 +245,8 @@ struct HomeContent: View {
 
     // value: the footer's lines: the page's actions, but Start while the
     // engine-stopped card offers it already.
-    static func footer(_ actions: [Action], stopped: Bool) -> [Action] {
-        stopped ? actions.filter { $0.id != start } : actions
+    static func footer(_ actions: [Action], stopped: Bool, header: [String] = []) -> [Action] {
+        (stopped ? actions.filter { $0.id != start } : actions).filter { !header.contains($0.id ?? "") }
     }
 
     // value: what a call that takes a while says it does from the click
@@ -248,7 +262,7 @@ struct HomeContent: View {
     var menu: some View {
         VStack(alignment: .leading, spacing: 0) {
             SectionDivider().padding(.bottom, Token.Gap.tight)
-            ForEach(Array(Self.footer(page.pageActions, stopped: stopped).enumerated()), id: \.offset) { _, a in
+            ForEach(Array(Self.footer(page.pageActions, stopped: stopped, header: carried).enumerated()), id: \.offset) { _, a in
                 if state.running == a.id || (state.settling == a.id && Self.doing(a) != nil) {
                     HStack(spacing: Token.Tile.gap) {
                         PendingDot()
@@ -375,5 +389,59 @@ struct ArrowKeys: View {
             .onKeyPress(.return) { submit() ? .handled : .ignored }
             .onAppear { DispatchQueue.main.async { focused = true } }
             .accessibilityHidden(true)
+    }
+}
+
+// value: a verb that runs something runs it, its form or its question
+// first; one that runs nothing opens the page of the row it ends.
+@MainActor
+func verb(_ page: Page, _ action: Action, _ handlers: PopoverHandlers) {
+    if action.run != nil {
+        perform(action, handlers)
+        return
+    }
+    let rows = (page.sections ?? []).flatMap { ($0.items ?? []).compactMap(\.row) }
+    if let nav = rows.first(where: { $0.verb == action.id && $0.nav != nil })?.nav { go(nav, handlers) }
+}
+
+// value: a page by its id: a machine's opens as the machines do, any other
+// is pushed by its watch name.
+@MainActor
+func go(_ nav: String, _ handlers: PopoverHandlers) {
+    let machine = PageID.machine + ":"
+    if nav.hasPrefix(machine) {
+        handlers.openMachine(String(nav.dropFirst(machine.count)))
+    } else if !nav.isEmpty {
+        handlers.push(nav)
+    }
+}
+
+// invariant: SPEC A4: Home's header: "All machines", then the round +
+// (New VM, when the page offers it there) and the round … of the station
+// menu.
+struct HomeHeaderBar: View {
+    let page: Page
+    let state: PanelState
+    let handlers: PopoverHandlers
+    @Environment(\.stationTokens) private var tokens
+
+    var body: some View {
+        let h = Token.HomeHeader.self
+        HStack(spacing: h.gap) {
+            Text(h.title)
+                .font(Token.Role.homeTitle.font)
+                .foregroundStyle(tokens.tone(Token.Role.homeTitle.tone))
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 0)
+            ForEach(Array((page.header?.buttons ?? []).compactMap { page.action($0) }.enumerated()), id: \.offset) { _, a in
+                RoundButton(h.plus, size: .topBar) { perform(a, handlers) }
+                    .accessibilityLabel(Text(a.label ?? ""))
+                    .help(a.label ?? "")
+                    .keyboardShortcut("n", modifiers: .command)
+                    .disabled(state.running != nil)
+            }
+            RoundButton(h.menu, size: .topBar, action: handlers.toggleMenu)
+                .accessibilityLabel(Text(h.menuLabel))
+        }
     }
 }
