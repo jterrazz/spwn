@@ -100,7 +100,9 @@ func (s serverView) facts() []page.Value {
 		v.Pri = pri
 		return v
 	}
-	out := []page.Value{page.Text(string(machine.Server)), part("on "+s.on, 1)}
+	on := part("on "+s.on, 1)
+	on.Nav = machinePage(s.h.Name)
+	out := []page.Value{page.Text(string(machine.Server)), on}
 	switch s.state {
 	case serverDown:
 		down := page.Text("down")
@@ -402,12 +404,15 @@ func logLines(raw []string, end time.Time, zone *time.Location) []string {
 
 // value: the server's three gauges: CPU with its cores and spark, its
 // free memory over its bar, its network; while it is down or stopped
-// their last values and when it was last seen, while it restarts each
-// waits as a skeleton.
+// their last values, said last, and when it was last seen; while it
+// restarts each waits as a skeleton.
 func (s serverView) gauges() page.Section {
 	name := s.vm.Name
 	m := measured(s.m.Samples)
 	cpu := page.Gauge{Title: "CPU", Value: live(pendingOr(m.cpu), engine.LiveKey(engine.LiveCPU, name)), Spark: m.cpus}
+	if n := s.vm.Resources.CPUs; n > 0 {
+		cpu.Note = strconv.Itoa(n) + " " + plural(n, "core")
+	}
 	memory := page.Gauge{Title: "Memory", Value: live(pendingOr(freeWords(s.m.Samples)), engine.LiveKey(engine.LiveFree, name))}
 	if n := len(s.m.Samples); n > 0 {
 		if last := s.m.Samples[n-1].Sample; last.MemTotal > 0 {
@@ -422,8 +427,8 @@ func (s serverView) gauges() page.Section {
 		memory = page.Gauge{Title: "Memory", Value: page.Pending()}
 		net = page.Gauge{Title: "Network", Value: page.Pending()}
 	case serverDown, serverStopped:
-		cpu = page.Gauge{Title: "Last CPU", Value: pendingOr(m.cpu), Stale: true}
-		memory = page.Gauge{Title: "Last memory", Value: pendingOr(freeWords(s.m.Samples)), Stale: true}
+		cpu = page.Gauge{Title: "CPU", Note: "last", Value: pendingOr(m.cpu), Stale: true}
+		memory = page.Gauge{Title: "Memory", Note: "last", Value: pendingOr(freeWords(s.m.Samples)), Stale: true}
 		seen := page.None()
 		if n := len(s.m.Samples); n > 0 {
 			seen = page.Text(s.clock(s.m.Samples[n-1].Sample.At))
@@ -435,15 +440,23 @@ func (s serverView) gauges() page.Section {
 		Items: []page.Item{{Gauge: &cpu}, {Gauge: &memory}, {Gauge: &net}}}
 }
 
+// value: a port the server serves: its software, its number, what its
+// row says of it, and the address that reaches it, which its row copies.
+type served struct {
+	named  catalog.PortName
+	port   int
+	detail page.Value
+	link   string
+}
+
 // value: the server's ports: those declared public with their route,
 // those its own tailnet device serves, those its Mac shares, each by its
-// software; greyed, and said so, while it cannot answer.
-func (s serverView) ports() page.Section {
-	sec := page.Section{ID: SectionPorts, Title: "Ports", Segment: SegmentOverview, Card: page.CardFlush, Uncounted: true}
+// software.
+func (s serverView) served() []served {
 	if s.m.Ports == nil {
-		sec.Caption = []page.Value{page.Text("checking")}
-		return sec
+		return nil
 	}
+	var out []served
 	seen := map[int]bool{}
 	for _, mp := range s.m.Ports.Macs {
 		for _, p := range mp.Ports {
@@ -451,7 +464,7 @@ func (s serverView) ports() page.Section {
 				continue
 			}
 			seen[p.Port] = true
-			sec.Items = append(sec.Items, s.portRow(p.Named(), p.Port, s.address(p)))
+			out = append(out, served{named: p.Named(), port: p.Port, detail: s.address(p), link: s.link(p)})
 		}
 		for _, sv := range mp.Shared {
 			if sv.VM != s.vm.Name || seen[sv.GuestPort] {
@@ -461,8 +474,22 @@ func (s serverView) ports() page.Section {
 			if sv.URLs.Public != "" {
 				addr = strings.TrimPrefix(sv.URLs.Public, "https://")
 			}
-			sec.Items = append(sec.Items, s.portRow(sv.Named(), sv.GuestPort, page.Text(addr)))
+			out = append(out, served{named: sv.Named(), port: sv.GuestPort, detail: page.Text(addr), link: cmpWord(sv.URLs.Public, addr)})
 		}
+	}
+	return out
+}
+
+// value: the server's Ports card: a row per port it serves, greyed, and
+// said so, while it cannot answer.
+func (s serverView) ports() page.Section {
+	sec := page.Section{ID: SectionPorts, Title: "Ports", Segment: SegmentOverview, Card: page.CardFlush, Uncounted: true}
+	if s.m.Ports == nil {
+		sec.Caption = []page.Value{page.Text("checking")}
+		return sec
+	}
+	for _, p := range s.served() {
+		sec.Items = append(sec.Items, s.portRow(p))
 	}
 	switch {
 	case len(sec.Items) == 0:
@@ -490,8 +517,24 @@ func (s serverView) address(p ports.Port) page.Value {
 	return page.Text(s.vm.Name + ":" + strconv.Itoa(p.Port))
 }
 
-func (s serverView) portRow(named catalog.PortName, port int, addr page.Value) page.Item {
-	row := page.Row{ID: s.vm.Name + ":" + strconv.Itoa(port), Label: named.Name, Glyph: portGlyph(named), Mark: page.OK, Detail: addr}
+// value: the address that reaches a port: for one declared public, the
+// site its check asks when that site is served on this port (its route
+// reaches it there), else its own name and port on the tailnet.
+func (s serverView) link(p ports.Port) string {
+	if c, ok := model.ParseCheck(s.vm.Check); ok && c.URL != nil && p.Declared != nil {
+		site, port := c.URL.Hostname(), c.URL.Port()
+		if port == "" && c.URL.Scheme == "https" {
+			port = "443"
+		}
+		if site != s.vm.Name && site != s.vm.Device && port == strconv.Itoa(p.Port) {
+			return c.URL.Scheme + "://" + site
+		}
+	}
+	return s.vm.Name + ":" + strconv.Itoa(p.Port)
+}
+
+func (s serverView) portRow(p served) page.Item {
+	row := page.Row{ID: s.vm.Name + ":" + strconv.Itoa(p.port), Label: p.named.Name, Glyph: portGlyph(p.named), Mark: page.OK, Detail: p.detail}
 	if s.state != serverUp {
 		row.Signal = page.SignalFaint
 	} else {
@@ -571,13 +614,10 @@ func (s serverView) actions() []page.Action {
 	if s.state == serverUp {
 		ssh := s.ssh()
 		out = append(out, page.Action{ID: ActionCopySSH, Label: "Copy " + ssh, Icon: "doc.on.doc", On: page.OnPage, Priority: 4, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
-		for _, it := range s.ports().Items {
-			if it.Row == nil || it.Row.Quick == "" {
-				continue
-			}
-			addr := it.Row.Detail.Text
-			out = append(out, page.Action{ID: it.Row.Quick, Label: "Copy " + addr, Icon: "doc.on.doc", On: page.OnRow, Rows: []string{it.Row.ID}, Priority: 4,
-				Run: &page.Run{Copy: addr}, Hud: hud("Copied " + addr)})
+		for _, p := range s.served() {
+			id := s.vm.Name + ":" + strconv.Itoa(p.port)
+			out = append(out, page.Action{ID: "copy:" + id, Label: "Copy link to " + p.named.Name, Icon: "doc.on.doc", On: page.OnRow, Rows: []string{id}, Priority: 4,
+				Run: &page.Run{Copy: p.link}, Hud: hud("Copied " + p.link)})
 		}
 	}
 	open := openIn("--on", vm.Name)

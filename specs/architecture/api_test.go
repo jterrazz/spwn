@@ -57,9 +57,9 @@ func TestCallsJSONFresh(t *testing.T) {
 }
 
 // invariant: rule palette-covers-calls (13.3 rule 14, MB-08): every action a
-// page fixture carries (the menu bar's and the TUI's, the palette's entries
-// once it lands) names a call of calls.json, or opens a terminal; nothing
-// else runs.
+// page fixture carries (the menu bar's and the TUI's, the stories' pages,
+// the palette's entries once it lands) names a call of calls.json, or opens
+// a terminal, or copies or opens what its page gave it; nothing else runs.
 func TestPaletteCoversCalls(t *testing.T) {
 	root := repoRoot(t)
 	data, err := os.ReadFile(filepath.Join(root, "src", "remote", "api", "calls.json"))
@@ -74,14 +74,20 @@ func TestPaletteCoversCalls(t *testing.T) {
 	for _, e := range c.Calls {
 		known[e.Name] = true
 	}
-	dir := filepath.Join(root, "src", "ui", "testdata", "pages")
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		t.Fatal(err)
+	var files []string
+	for _, dir := range []string{filepath.Join(root, "src", "ui", "testdata", "pages"), filepath.Join(root, "apps", "menubar", "stories", "pages")} {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, e := range entries {
+			files = append(files, filepath.Join(dir, e.Name()))
+		}
 	}
 	called := 0
-	for _, e := range entries {
-		raw, err := os.ReadFile(filepath.Join(dir, e.Name()))
+	for _, file := range files {
+		name := filepath.Base(file)
+		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -97,13 +103,13 @@ func TestPaletteCoversCalls(t *testing.T) {
 			} `json:"actions"`
 		}
 		if err := json.Unmarshal(raw, &p); err != nil {
-			t.Fatalf("%s: %v", e.Name(), err)
+			t.Fatalf("%s: %v", name, err)
 		}
 		for _, a := range p.Actions {
 			switch {
 			case a.Run == nil, a.Run.Call == "" && (a.Run.Terminal || a.Run.Copy != "" || a.Run.Open != ""):
 			case !known[a.Run.Call]:
-				t.Errorf("%s: the action %s names %q, no call of calls.json", e.Name(), a.ID, a.Run.Call)
+				t.Errorf("%s: the action %s names %q, no call of calls.json", name, a.ID, a.Run.Call)
 			default:
 				called++
 			}

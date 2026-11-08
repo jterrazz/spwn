@@ -1,18 +1,24 @@
 package menubar
 
 import (
+	"maps"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
+	"github.com/jterrazz/studio-station/src/ports"
 )
 
 var serverNow = time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
 
-func serverOn(edit func(*model.VM)) page.Page {
+func serverOn(edit func(*model.VM)) page.Page { return serverServing(nil, edit) }
+
+func serverServing(served *ports.AllMachines, edit func(*model.VM)) page.Page {
 	vm := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, Want: "running", IP: "192.168.64.7", SSH: true, Guest: "connected",
 		Check: "https://jterrazz.com/healthz", BootAt: serverNow.Add(-12 * 24 * time.Hour), Resources: model.Resources{CPUs: 8, MemoryBytes: 24 << 30},
 		CheckStatus: model.CheckStatus{State: model.CheckPassing, At: serverNow.Add(-40 * time.Second), Answer: "200"}}
@@ -28,7 +34,7 @@ func serverOn(edit func(*model.VM)) page.Page {
 	}}
 	page.Strict(true)
 	defer page.Strict(false)
-	return MachinePage(Machine{Name: "infra", All: fleet, Now: serverNow, Zone: time.UTC, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+	return MachinePage(Machine{Name: "infra", All: fleet, Ports: served, Now: serverNow, Zone: time.UTC, Asks: func(string, machine.Kind) string { return LevelYesNo }})
 }
 
 func healthHead(t *testing.T, p page.Page) page.Group {
@@ -148,5 +154,63 @@ func TestTheLatencyCardSaysLatencyOnly(t *testing.T) {
 	}
 	if got := s.Items[0].Fact.Key + ": " + words(s.Items[0].Fact.Value); got != "health check: p50 40 ms | peak 50 ms, 1 s ago" {
 		t.Fatalf("service words %q", got)
+	}
+}
+
+// invariant: SPEC A4: the server's facts name the Mac it is on as a link
+// that pushes that Mac's page.
+func TestAServersFactsLinkToTheMacItIsOn(t *testing.T) {
+	for _, part := range sectionOf(serverOn(nil), SectionSummary).Caption {
+		if part.Text == "on jterrazz-mac-mini" {
+			if part.Nav != machinePage("jterrazz-mac-mini") {
+				t.Fatalf("on jterrazz-mac-mini pushes %q, want the Mac's page", part.Nav)
+			}
+			return
+		}
+	}
+	t.Fatal("the facts do not say the Mac it is on")
+}
+
+// invariant: SPEC A4: each port a healthy server serves copies, from its
+// row, the address that reaches it: a public one the site its check asks
+// through its route, one on its tailnet device its name and port.
+func TestEveryPortAServerServesCopiesTheAddressThatReachesIt(t *testing.T) {
+	infra := machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}
+	served := &ports.AllMachines{Macs: []ports.MacPorts{{Name: "jterrazz-mac-mini", Reachable: true, Ports: []ports.Port{
+		{Machine: infra, Port: 443, Process: "nginx", Reach: ports.Outside, Declared: &ports.Declaration{Machine: "infra", Port: 443, Via: catalog.RouteCloudflareTunnel}},
+		{Machine: infra, Port: 6443, Process: "kube-apiserver", Reach: ports.Tailnet, Device: true},
+	}}}}
+	p := serverServing(served, nil)
+	copied := map[string]string{}
+	for _, it := range sectionOf(p, SectionPorts).Items {
+		a := action(p, it.Row.Quick)
+		if a == nil || a.Run == nil || a.Run.Copy == "" {
+			t.Fatalf("row %q copies nothing: %+v", it.Row.Label, a)
+		}
+		copied[it.Row.Label] = a.Run.Copy
+	}
+	if want := map[string]string{"Traefik": "https://jterrazz.com", "Kubernetes API": "infra:6443"}; !maps.Equal(copied, want) {
+		t.Fatalf("copied %q, want %q", copied, want)
+	}
+}
+
+// invariant: SPEC A4 (Down): a server that cannot answer keeps its last
+// CPU and memory, said last, and when it was last seen.
+func TestADownServersGaugesSayTheyAreItsLast(t *testing.T) {
+	p := serverOn(func(vm *model.VM) { vm.State, vm.BootAt = model.Stopped, time.Time{} })
+	gauges := sectionOf(p, SectionGauges).Items
+	said := make([]string, 0, len(gauges))
+	for _, it := range gauges {
+		said = append(said, strings.TrimSpace(it.Gauge.Title+" "+it.Gauge.Note))
+		if !it.Gauge.Stale {
+			t.Fatalf("gauge %q is not stale", it.Gauge.Title)
+		}
+	}
+	if want := []string{"CPU last", "Memory last", "Last seen"}; !slices.Equal(said, want) {
+		t.Fatalf("gauges %q, want %q", said, want)
+	}
+	cpu := sectionOf(serverOn(nil), SectionGauges).Items[0].Gauge
+	if cpu.Title != "CPU" || cpu.Note != "8 cores" {
+		t.Fatalf("a healthy CPU gauge says %q %q, want its cores", cpu.Title, cpu.Note)
 	}
 }

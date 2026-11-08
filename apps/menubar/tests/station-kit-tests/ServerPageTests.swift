@@ -41,4 +41,34 @@ final class ServerPageTests: XCTestCase {
         XCTAssertEqual(healthy.footer?.copy?.text, "ssh admin@infra")
         XCTAssertNil(healthy.action("open-station")?.disabled)
     }
+
+    // invariant: SPEC A4: the server's facts name its Mac as a link, its
+    // chevron after it, that pushes the Mac's page.
+    func testTheFactsLinkToTheMacItIsOn() throws {
+        let page = try XCTUnwrap(Stories["server.healthy"].state.pushed)
+        let parts = MachineHeader.facts(page).items ?? []
+        let on = try XCTUnwrap(parts.first { $0.nav != nil })
+        XCTAssertEqual(on.nav, "menubar.machine:mac-mini")
+        XCTAssertTrue(FactsLine.words(parts).contains("on mac-mini ›"), FactsLine.words(parts))
+        XCTAssertEqual(FactsLine.link(try XCTUnwrap(on.nav)).flatMap(FactsLine.nav), on.nav)
+        XCTAssertNil(FactsLine.nav(try XCTUnwrap(URL(string: "https://jterrazz.com"))))
+    }
+
+    // invariant: SPEC A4: each port row of a healthy server copies the
+    // address that reaches it.
+    func testEveryPortRowCopiesTheAddressThatReachesIt() throws {
+        let page = try XCTUnwrap(Stories["server.healthy"].state.pushed)
+        let rows = try XCTUnwrap(page.section("ports")?.items?.compactMap(\.row))
+        let copied = rows.map { page.action($0.quick ?? "")?.run?.copy ?? "" }
+        XCTAssertEqual(copied, ["https://jterrazz.com", "infra:6443"])
+    }
+
+    // invariant: SPEC A4 (Down): the stale gauges say they are the last
+    // read: "CPU · last", "Memory · last", "Last seen".
+    func testADownServersGaugesSayTheyAreItsLast() throws {
+        for id in ["server.down", "server.stopped"] {
+            let gauges = try XCTUnwrap(Stories[id].state.pushed?.section("gauges")?.items?.compactMap(\.gauge))
+            XCTAssertEqual(gauges.map(\.heading), ["CPU · last", "Memory · last", "Last seen"], id)
+        }
+    }
 }

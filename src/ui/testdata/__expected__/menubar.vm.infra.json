@@ -21,7 +21,8 @@
         {
           "kind": "text",
           "text": "on mac-mini",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:jterrazz-mac-mini"
         },
         {
           "kind": "text",
@@ -160,6 +161,7 @@
         {
           "gauge": {
             "title": "CPU",
+            "note": "8 cores",
             "value": {
               "kind": "percent",
               "n": 340,

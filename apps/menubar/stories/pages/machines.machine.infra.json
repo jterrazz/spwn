@@ -21,7 +21,8 @@
         {
           "kind": "text",
           "text": "on mac-mini",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:mac-mini"
         },
         {
           "kind": "text",
@@ -160,6 +161,7 @@
         {
           "gauge": {
             "title": "CPU",
+            "note": "8 cores",
             "value": {
               "kind": "percent",
               "n": 340,
@@ -692,27 +694,29 @@
       }
     },
     {
-      "label": "Copy ",
+      "label": "Copy link to Traefik",
       "on": "row",
       "rows": [
         "infra:443"
       ],
       "priority": 4,
       "id": "copy:infra:443",
-      "run": {},
+      "run": {
+        "copy": "infra:443"
+      },
       "icon": "doc.on.doc",
       "hud": {
         "kind": "list",
         "items": [
           {
             "kind": "text",
-            "text": "Copied "
+            "text": "Copied infra:443"
           }
         ]
       }
     },
     {
-      "label": "Copy infra:6443",
+      "label": "Copy link to Kubernetes API",
       "on": "row",
       "rows": [
         "infra:6443"

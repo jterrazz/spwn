@@ -21,7 +21,8 @@
         {
           "kind": "text",
           "text": "on mac-mini",
-          "pri": 1
+          "pri": 1,
+          "nav": "menubar.machine:mac-mini"
         },
         {
           "kind": "text",
@@ -286,7 +287,8 @@
       "items": [
         {
           "gauge": {
-            "title": "Last CPU",
+            "title": "CPU",
+            "note": "last",
             "value": {
               "kind": "percent",
               "n": 340
@@ -296,7 +298,8 @@
         },
         {
           "gauge": {
-            "title": "Last memory",
+            "title": "Memory",
+            "note": "last",
             "value": {
               "kind": "text",
               "text": "5 GB free"
