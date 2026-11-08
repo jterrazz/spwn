@@ -1,0 +1,11 @@
+{
+    "group": "server",
+    "heightNote": "past the 700 cap the panel scrolls; the story draws the page whole, Health unfolded over every card",
+    "id": "server.health-unfolded",
+    "note": "infra's Health unfolded in place: its four checks with what each answered, then Restart… and Stop….",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "unfolded": ["health"]
+    }
+}

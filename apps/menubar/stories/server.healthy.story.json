@@ -1,8 +1,7 @@
 {
     "group": "server",
     "id": "server.healthy",
-    "note": "infra healthy, up 12 days.",
-    "pages": ["pages/machines.machine.infra.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "infra healthy, up 12 days: Health folded, its service's latency, its last 30 days, gauges and ports.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1"
 }

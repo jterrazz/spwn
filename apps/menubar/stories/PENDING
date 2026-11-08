@@ -36,14 +36,7 @@ agent.waiting.reply
 agent.waiting.replied
 agent.waiting.merged
 agent.finished
-server.healthy
-server.health-unfolded
 server.activity
-server.down
-server.restarting
-server.restarting.late
-server.recovered
-server.stopped
 agents.list
 agents.empty
 ports.all

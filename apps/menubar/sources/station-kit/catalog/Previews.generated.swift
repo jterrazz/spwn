@@ -74,7 +74,17 @@ import SwiftUI
 
 #Preview("server.down") { StoryStage(Stories["server.down"]) }
 
+#Preview("server.health-unfolded") { StoryStage(Stories["server.health-unfolded"]) }
+
 #Preview("server.healthy") { StoryStage(Stories["server.healthy"]) }
+
+#Preview("server.recovered") { StoryStage(Stories["server.recovered"]) }
+
+#Preview("server.restarting.late") { StoryStage(Stories["server.restarting.late"]) }
+
+#Preview("server.restarting") { StoryStage(Stories["server.restarting"]) }
+
+#Preview("server.stopped") { StoryStage(Stories["server.stopped"]) }
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
 
