@@ -31,5 +31,5 @@ The trial is `TrialPanel` and `TrialItemView` (`template/Trial.swift`). It runs 
 
 - D2's Panel template keeps the system window, its glass, its corner (`Token.Glass.window`) and its instant close. The 4 h fallback of PLAN §4 is not spent.
 - S7 builds the focus trap of SPEC §A7 as specified, plus the back-tab rule. The `PanelState` highlight fallback is not needed.
-- The status item's stories draw the snapped badge (M29). The item's busy mark is drawn at the angle of a 10 fps frame (M16), and the `Model` runs its timer only while a call runs or a server restarts.
+- The status item's stories draw the snapped badge (M29). The item's busy mark is drawn at the angle of a 10 fps frame (M16), and StationKit's `Turner` runs its timer only while a call runs or a server restarts.
 - The trial stays in the tree behind its flags until D2 and S7 replace it, so the record can be checked again on a new macOS.

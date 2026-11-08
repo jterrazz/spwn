@@ -179,6 +179,28 @@ final class IconTests: XCTestCase {
         }
     }
 
+    // invariant: SPEC A3: the mark turns while a server restarts, as while
+    // a call runs, and stops turning once nothing does.
+    @MainActor
+    func testTheMarkTurnsWhileAServerRestartsAndStopsAfter() throws {
+        let story = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menubar.restarting" })
+        let restarting = MenuBarIcon.of(connection: story.state.connection, page: story.state.page)
+        var turns: [Double] = []
+        let turner = Turner { turns.append($0) }
+        turner.follow(restarting)
+        XCTAssertTrue(turner.running)
+        RunLoop.main.run(until: Date().addingTimeInterval(3 / Token.Busy.fps))
+        XCTAssertGreaterThan(turner.turn, 0)
+        turner.follow(MenuBarIcon(.plain, count: restarting.count))
+        XCTAssertFalse(turner.running)
+        XCTAssertEqual(turner.turn, 0)
+        XCTAssertEqual(turns.last, 0)
+        turner.follow(MenuBarIcon(.plain, busy: true))
+        XCTAssertTrue(turner.running)
+        turner.follow(MenuBarIcon(.red))
+        XCTAssertFalse(turner.running)
+    }
+
     func testABusyItemTurnsItsMarkOneFrameAtATime() throws {
         let busy = MenuBarIcon(.plain, busy: true)
         func bitmap(_ turn: Double) throws -> Bitmap { try XCTUnwrap(busy.image(scheme: .dark, turn: turn).flatMap(Bitmap.init)) }

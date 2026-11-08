@@ -6,7 +6,7 @@ import UserNotifications
 @MainActor
 final class Model: ObservableObject {
     @Published var state = PanelState(page: nil, connection: .connecting) {
-        didSet { if icon.turning != (turner != nil) { turning() } }
+        didSet { turner.follow(icon) }
     }
     @Published private(set) var turn = 0.0
     @Published var loginItemOn = LoginItem.on
@@ -38,8 +38,7 @@ final class Model: ObservableObject {
     let live = LiveStore()
 
     private var settled: Task<Void, Never>?
-    private var turner: Timer?
-    private var frame = 0
+    private lazy var turner = Turner { [weak self] in self?.turn = $0 }
 
     init() {
         navigation = Navigation(socket: socket, window: UserDefaults.standard.string(forKey: Self.windowKey)) { [weak self] page, shown in
@@ -77,24 +76,6 @@ final class Model: ObservableObject {
 
     func iconImage(dark: Bool) -> NSImage {
         icon.nsImage(scheme: dark ? .dark : .light, turn: turn)
-    }
-
-    func turning() {
-        guard icon.turning else {
-            turner?.invalidate()
-            turner = nil
-            frame = 0
-            turn = 0
-            return
-        }
-        guard turner == nil else { return }
-        turner = Timer.scheduledTimer(withTimeInterval: 1 / Token.Busy.fps, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                self.frame += 1
-                self.turn = Token.Busy.turn(frame: self.frame)
-            }
-        }
     }
 
     func start() {
