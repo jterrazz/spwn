@@ -2169,6 +2169,7 @@
       "run": {
         "call": "apps.update"
       },
+      "busy": "Updating",
       "hud": {
         "kind": "list",
         "items": [
