@@ -2,6 +2,7 @@ package ports
 
 import (
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
@@ -26,8 +27,11 @@ type PortJSON struct {
 	Declared *DeclaredJSON `json:"declared"`
 	State    string        `json:"state,omitempty"`
 	Reserved int           `json:"reserved,omitempty"`
-	URL      string        `json:"url,omitempty"`
-	Detail   string        `json:"detail,omitempty"`
+	// value: when the owner shared it, in UTC; the menu bar marks a share
+	// of the last few seconds fresh.
+	SharedAt string `json:"shared_at,omitempty"`
+	URL      string `json:"url,omitempty"`
+	Detail   string `json:"detail,omitempty"`
 	// value: unreachable while its VM is down, starting while it boots
 	// again; absent while it answers.
 	Answer string `json:"answer,omitempty"`
@@ -97,7 +101,14 @@ func PortObject(s ports.SharedPort) PortJSON {
 	}
 	known := s.Named()
 	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: "private",
-		State: stateWord(s), Reserved: s.Reserved, URL: s.URLs.Public, Detail: s.Detail}
+		State: stateWord(s), Reserved: s.Reserved, SharedAt: sharedAt(s.ReservedAt), URL: s.URLs.Public, Detail: s.Detail}
+}
+
+func sharedAt(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.UTC().Format(time.RFC3339)
 }
 
 func ListenerObject(p ports.Port) PortJSON {

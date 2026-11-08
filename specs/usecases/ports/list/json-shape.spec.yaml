@@ -1,4 +1,4 @@
-description: 'ports --json is station.ports.list/v1: class, bind, reserved, url, the range, Tailscale''s variant'
+description: 'ports --json is station.ports.list/v1: class, bind, reserved, when shared, url, the range, Tailscale''s variant'
 env: two-macs
 runs:
     - command: 'ports --json | /usr/bin/jq -S -c ''.schema, keys, .ports[0], .range, .tailscale'''
@@ -6,7 +6,7 @@ runs:
       stdout: |
           "station.ports.list/v1"
           ["findings","generated_at","local_only","machine","ports","range","schema","tailscale"]
-          {"bind":["0.0.0.0"],"class":"private","declared":null,"logo":"vite","machine":"linux-1","name":"Vite","port":5173,"process":"node","proto":"http","reserved":40001,"state":"shared","url":"https://jterrazz-macbook-pro.tail1234.ts.net:40001"}
+          {"bind":["0.0.0.0"],"class":"private","declared":null,"logo":"vite","machine":"linux-1","name":"Vite","port":5173,"process":"node","proto":"http","reserved":40001,"shared_at":"2026-11-04T09:00:00Z","state":"shared","url":"https://jterrazz-macbook-pro.tail1234.ts.net:40001"}
           [{"free":998,"from":40000,"mac":"jterrazz-macbook-pro","reserved":2,"to":40999}]
           {"cli":"/Applications/Tailscale.app/Contents/MacOS/Tailscale","dns_name":"jterrazz-macbook-pro.tail1234.ts.net","ip":"100.64.0.1","name":"jterrazz-macbook-pro","serve":"on","state":"on","variant":"app-store"}
     - command: 'ports --json | /usr/bin/jq -c ''[.ports[] | [.machine, .port, .state, .reserved, .url]]'''
