@@ -256,7 +256,7 @@ final class Model: ObservableObject {
         if action.run?.terminal == true { closePanel() }
         let socket = self.socket
         let reread = [PageID.shown(navigation.watched)]
-        if SignInWatch.waits(action), let id = action.id { wait(on: id, reread: reread) }
+        if let id = SignInWatch.start(action, pending: &state.pending) { wait(on: id, reread: reread) }
         Task {
             let executable = await Client.executable(path: socket) ?? Self.fallbackExecutable
             let status = await ActionRunner(executable: executable, socket: socket, reread: reread).run(action, answers: answers)
@@ -283,8 +283,6 @@ final class Model: ObservableObject {
     }
 
     func wait(on id: String, reread: [String]) {
-        guard !state.pending.contains(id) else { return }
-        state.pending.append(id)
         let socket = self.socket
         Task { @MainActor in
             await SignInWatch.run(since: Date(), now: { Date() }, sleep: { try? await Task.sleep(nanoseconds: UInt64($0 * 1_000_000_000)) },

@@ -41,14 +41,31 @@ final class AccountsTests: XCTestCase {
         XCTAssertEqual(clock.now().timeIntervalSinceReferenceDate, 3 * SignInWatch.every)
     }
 
+    // invariant: a page that says signed in while the wait sleeps is not
+    // asked for again.
+    func testASignInSeenDuringTheWaitAsksNothingMore() async {
+        let clock = Clock()
+        let asked = await SignInWatch.run(since: clock.now(), now: { clock.now() },
+                                          sleep: { clock.advance($0); clock.lock.withLock { clock.open = false } },
+                                          open: { clock.lock.withLock { clock.open } }, refresh: { clock.lock.withLock { clock.asked += 1 } })
+        XCTAssertEqual(asked, 0)
+        XCTAssertEqual(clock.asked, 0)
+    }
+
     // invariant: only a verb that opens Terminal and names its busy words
-    // waits: Extend calls the engine and is done when it returns.
+    // waits, its verb pending from the press, once however often it is
+    // pressed: Extend calls the engine and is done when it returns.
     func testOnlySignInWaitsOnWhatItStarted() throws {
         let page = try story("machines.accounts.accounts")
         let signIn = try XCTUnwrap(page.action("sign-in:macbook-pro/npm"))
         XCTAssertEqual(signIn.busy, "Waiting")
-        XCTAssertTrue(SignInWatch.waits(signIn))
+        var pending: [String] = []
+        XCTAssertEqual(SignInWatch.start(signIn, pending: &pending), "sign-in:macbook-pro/npm")
+        XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
+        XCTAssertNil(SignInWatch.start(signIn, pending: &pending))
+        XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
         let extend = try XCTUnwrap(page.action("ending:macbook-pro/linux-1/claude"))
-        XCTAssertFalse(SignInWatch.waits(extend))
+        XCTAssertNil(SignInWatch.start(extend, pending: &pending))
+        XCTAssertEqual(pending, ["sign-in:macbook-pro/npm"])
     }
 }

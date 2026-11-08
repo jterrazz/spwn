@@ -12,6 +12,14 @@ public enum SignInWatch {
 
     public static func open(_ id: String, on page: Page?) -> Bool { page?.action(id) != nil }
 
+    // value: the verb's id, now pending, when the verb waits and is not
+    // waited on already; else nil, and nothing starts.
+    public static func start(_ action: Action, pending: inout [String]) -> String? {
+        guard waits(action), let id = action.id, !pending.contains(id) else { return nil }
+        pending.append(id)
+        return id
+    }
+
     // value: how many times the page was asked for again before the wait
     // ended.
     @discardableResult
