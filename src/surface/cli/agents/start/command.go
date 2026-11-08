@@ -9,10 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/src/agents"
 	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
-	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/core/machine"
-	"github.com/jterrazz/studio-station/src/machines"
-	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/page"
 	pageagents "github.com/jterrazz/studio-station/src/pages/agents"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
@@ -20,10 +17,9 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
-	// value: the names every machine holds, which a new agent may not take:
-	// read across every machine on a Mac, asked of its Mac's engine inside a
-	// workspace.
-	Held func(ctx context.Context) (agents.Held, error)
+	// value: the machine agents.start is asked of: this Mac, which reaches
+	// every machine, or inside a workspace its target.
+	At func() machine.Ref
 }
 
 type Input struct {
@@ -61,80 +57,23 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return nil
 		},
 		Run: func(ctx context.Context, in *Input, o kit.IO) error {
-			// invariant: SPEC B5.22: exactly one of --on and --new on a Mac;
-			// inside a workspace the agent starts on it.
-			onMac := env.Kind == machine.Mac && !env.Far()
-			if in.New == !onMac {
-				return fail.New(fail.Refused, agentscalls.NoWhere, "station agents start", map[string]string{"both": nowhere(in.New, env)})
+			// invariant: SPEC B5.22: the engine's agents.start judges where the
+			// agent runs and its name; --on names the workspace, --new the
+			// throwaway made first.
+			start := agentscalls.StartIn{Task: in.Task, Name: in.Name, App: agents.App(in.App), Folder: in.Folder}
+			if env.Far() {
+				start.On = env.Target().Name
 			}
-			held, err := d.Held(ctx)
+			if in.New {
+				start.New = &agentscalls.New{Mac: in.Mac, Image: in.Image, CPUs: in.CPUs, Memory: in.Memory, Disk: in.Disk, Confirm: o.YesAnswer()}
+			}
+			steps := kit.Steps(o)
+			a, err := call.Invoke(ctx, env.Calls, d.At(), agentscalls.Start, start, steps)
+			steps.Stop()
 			if err != nil {
 				return err
 			}
-			at := env.Target()
-			vm := at.Name
-			if in.New {
-				vm = in.Name
-			}
-			if ws, taken := held.Takes(in.Name, vm); in.Name != "" && taken {
-				return fail.New(fail.Refused, agentscalls.NameTaken, in.Name, map[string]string{"workspace": ws, "nth": ws + agents.Nth + "<n>"})
-			}
-			if in.New {
-				var made string
-				if made, err = create(ctx, env, in, o); err != nil {
-					return err
-				}
-				at = machine.Ref{Name: made}
-			}
-			if in.Name == "" {
-				in.Name = agents.NameFor(at.Name, held.Agents)
-			}
-			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Start, agentscalls.StartIn{App: agents.App(in.App), Name: in.Name, Folder: in.Folder, Task: in.Task}, nil)
-			if in.New {
-				if err != nil {
-					return &machines.AgentNotStartedError{Name: at.Name, Cause: err}
-				}
-				return o.Page(pageagents.Started(a, true, d.ThisMachine), a)
-			}
-			if err != nil {
-				return err
-			}
-			return o.Page(pageagents.Started(a, false, d.ThisMachine), a)
+			return o.Page(pageagents.Started(a, in.New, d.ThisMachine), a)
 		},
 	}, env)
-}
-
-// value: how a start names no one place: neither, both, or --new alone
-// from inside a workspace.
-func nowhere(asked bool, env kit.Env) string {
-	switch {
-	case !asked:
-		return "neither"
-	case !env.Far() && env.Kind == machine.Workspace:
-		return "inside"
-	}
-	return "both"
-}
-
-// value: the throwaway workspace made for the agent, by its name, on the
-// Mac asked; its steps said as they run.
-func create(ctx context.Context, env kit.Env, in *Input, o kit.IO) (string, error) {
-	size, err := machines.ParseResources(in.CPUs, in.Memory, in.Disk)
-	if err != nil {
-		return "", err
-	}
-	target := env.Self
-	if in.Mac != "" {
-		target = machine.Ref{Name: in.Mac}
-	}
-	steps := kit.Steps(o)
-	defer steps.Stop()
-	created, err := call.Invoke(ctx, env.Calls, target, machinescalls.CreateWorkspace, machinescalls.CreateIn{
-		Request: machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: machines.Throwaway, Size: size},
-		Confirm: o.YesAnswer(),
-	}, steps)
-	if err != nil {
-		return "", err
-	}
-	return created.VM.Name, nil
 }

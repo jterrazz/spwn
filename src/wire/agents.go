@@ -13,8 +13,6 @@ import (
 	"github.com/jterrazz/studio-station/src/core/fail"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
-	model "github.com/jterrazz/studio-station/src/machines"
-	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/page"
 	agentscmd "github.com/jterrazz/studio-station/src/surface/cli/agents"
 	agentsattach "github.com/jterrazz/studio-station/src/surface/cli/agents/attach"
@@ -31,102 +29,25 @@ type agentsDeps struct {
 	// value: the terminal of the multiplexer this process runs in, empty outside one.
 	Terminal string
 	Attach   func(ctx context.Context, machine, terminal string) error
-	// value: the names every machine holds as this machine's engine reads them,
-	// which a workspace asks its Mac's.
-	Engine func(ctx context.Context) (agents.Held, error)
 }
 
 func agentsCommand(env kit.Env, where page.Context, d agentsDeps) *cobra.Command {
-	f := agentsEverywhere{env: env, engine: d.Engine}
-	return agentscmd.Command(agentscmd.Deps{ThisMachine: where, Everywhere: f.all}, env,
+	f := agentsEverywhere{env: env}
+	return agentscmd.Command(agentscmd.Deps{ThisMachine: where}, env,
 		agentsrecord.Command(agentsrecord.Deps{Terminal: d.Terminal}, env),
 		agentsattach.Command(agentsattach.Deps{Attach: d.Attach, Find: f.find}, env),
 		agentsreply.Command(agentsreply.Deps{ThisMachine: where, Where: f.where}, env),
-		agentsstart.Command(agentsstart.Deps{ThisMachine: where, Held: f.held}, env),
+		agentsstart.Command(agentsstart.Deps{ThisMachine: where, At: func() coremachine.Ref { return agentscmd.At(env) }}, env),
 		agentsmerge.Command(agentsmerge.Deps{ThisMachine: where, Where: f.where}, env),
 		agentsstop.Command(agentsstop.Deps{ThisMachine: where, Where: f.where}, env),
 		agentsforget.Command(agentsforget.Deps{ThisMachine: where, Where: f.where}, env))
 }
 
 // invariant: SPEC B5.22: an agent is reached by its name alone: on a Mac,
-// every machine is read for it; with --on, or inside a workspace, it is
-// that workspace's.
+// among every machine's, as agents.list reads them; with --on, or inside a workspace, it
+// is that workspace's.
 type agentsEverywhere struct {
-	env    kit.Env
-	engine func(ctx context.Context) (agents.Held, error)
-}
-
-func (f agentsEverywhere) all(ctx context.Context) ([]agents.Agent, error) {
-	// value: the agents of every running workspace of every Mac that
-	// answers, each with its Mac; a workspace that does not answer adds none.
-	out, _, err := f.everyMachine(ctx, agentscalls.ListIn{})
-	return out, err
-}
-
-// value: the agents of every running workspace of every Mac that answers,
-// read as in asks; and the names no agent read holds: every workspace's of
-// every Mac, a silent one's too, and the agents a workspace held when it
-// last stopped, of one stopped or of a silent Mac.
-func (f agentsEverywhere) everyMachine(ctx context.Context, in agentscalls.ListIn) ([]agents.Agent, agents.Held, error) {
-	read, err := call.Read(ctx, f.env.Calls, f.env.Self, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
-	if err != nil {
-		return nil, agents.Held{}, err
-	}
-	var out []agents.Agent
-	var held agents.Held
-	for _, mac := range read.All.Macs {
-		for _, vm := range mac.VMs {
-			if vm.Lifetime.Kind() != coremachine.Workspace {
-				continue
-			}
-			held.Workspaces = append(held.Workspaces, vm.Name)
-			if !mac.Reachable || vm.State != model.Running {
-				held.Agents = append(held.Agents, vm.Agents...)
-				continue
-			}
-			kept, err := call.Invoke(ctx, f.env.Calls, coremachine.Ref{Name: vm.Name}, agentscalls.List, in, nil)
-			if err != nil {
-				continue
-			}
-			for _, a := range kept {
-				a.VM, a.Mac = vm.Name, mac.Name
-				out = append(out, a)
-			}
-		}
-	}
-	return out, held, nil
-}
-
-// invariant: SPEC B5.22: a new agent's name is checked against every
-// machine's whatever path starts it: a Mac reads every Mac, a workspace
-// asks its Mac's engine, which reads it from there. A workspace whose Mac's
-// engine is down checks its own agents alone: no Mac reaches its agents
-// meanwhile, and a find refuses a name two agents hold once one does.
-func (f agentsEverywhere) held(ctx context.Context) (agents.Held, error) {
-	if f.env.Kind != coremachine.Mac {
-		if f.engine == nil {
-			return agents.Held{}, nil
-		}
-		h, err := f.engine(ctx)
-		if down := new(enginecalls.DownError); errors.As(err, &down) {
-			return agents.Held{}, nil
-		}
-		return h, err
-	}
-	return f.heldEverywhere(ctx)
-}
-
-func (f agentsEverywhere) heldEverywhere(ctx context.Context) (agents.Held, error) {
-	all, h, err := f.everyMachine(ctx, agentscalls.ListIn{AsGiven: true})
-	if err != nil {
-		return agents.Held{}, err
-	}
-	for _, a := range all {
-		if a.Name != "" {
-			h.Agents = append(h.Agents, a.Name)
-		}
-	}
-	return h, nil
+	env kit.Env
 }
 
 func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind == coremachine.Mac }
@@ -136,7 +57,7 @@ func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind =
 // two agents hold is refused, both named with their workspace, so a gesture
 // never reaches the other one.
 func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, coremachine.Ref, error) {
-	all, err := f.among(ctx)
+	all, err := call.Invoke(ctx, f.env.Calls, agentscmd.At(f.env), agentscalls.List, agentscmd.Scope(f.env), nil)
 	if err != nil {
 		return agents.Agent{}, coremachine.Ref{}, err
 	}
@@ -162,15 +83,6 @@ func (f agentsEverywhere) find(ctx context.Context, name string) (agents.Agent, 
 	return agents.Agent{}, coremachine.Ref{}, fail.New(fail.Refused, agentscalls.Ambiguous, name, map[string]string{"on": strings.Join(on, ", ")})
 }
 
-// value: the agents a find looks among: every machine's on a Mac, the
-// target's with --on or inside a workspace.
-func (f agentsEverywhere) among(ctx context.Context) ([]agents.Agent, error) {
-	if f.onThisMac() {
-		return f.all(ctx)
-	}
-	return call.Invoke(ctx, f.env.Calls, f.env.Target(), agentscalls.List, agentscalls.ListIn{}, nil)
-}
-
 func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.Ref, error) {
 	// value: with --on, or inside a workspace, the target itself, which says
 	// whether it holds the agent.
@@ -182,7 +94,10 @@ func (f agentsEverywhere) where(ctx context.Context, name string) (coremachine.R
 }
 
 // value: the names every machine holds, which a workspace asks its Mac's
-// engine within heldBudget; nil on a Mac, whose read of every machine names its own.
+// engine within heldBudget; a Mac whose engine is down holds none, so the
+// workspace checks its own agents alone: no Mac reaches them meanwhile, and
+// a find refuses a name two agents hold once one does. Nil on a Mac, which
+// reads every machine itself.
 func (m machine) heldOnEveryMachine(kind coremachine.Kind) func(ctx context.Context) (agents.Held, error) {
 	if kind != coremachine.Workspace {
 		return nil
@@ -190,6 +105,28 @@ func (m machine) heldOnEveryMachine(kind coremachine.Kind) func(ctx context.Cont
 	return func(ctx context.Context) (agents.Held, error) {
 		ctx, cancel := context.WithTimeout(ctx, heldBudget)
 		defer cancel()
-		return m.engineAPI().AgentsHeld(ctx)
+		h, err := m.engineAPI().AgentsHeld(ctx)
+		if down := new(enginecalls.DownError); errors.As(err, &down) {
+			return agents.Held{}, nil
+		}
+		return h, err
 	}
+}
+
+// value: the Router a call reaches another machine through: this run's,
+// once it is built.
+type farRouter struct{ m machine }
+
+func (f farRouter) Invoke(ctx context.Context, target coremachine.Ref, name string, in, out any, p call.Progress) error {
+	if f.m.far == nil || f.m.far.router == nil {
+		return orNone(nil)
+	}
+	return f.m.far.router.Invoke(ctx, target, name, in, out, p)
+}
+
+func (f farRouter) Watch(ctx context.Context, target coremachine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
+	if f.m.far == nil || f.m.far.router == nil {
+		return nil, orNone(nil)
+	}
+	return f.m.far.router.Watch(ctx, target, name, in, p)
 }

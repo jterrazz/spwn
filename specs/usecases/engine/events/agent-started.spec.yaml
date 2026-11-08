@@ -1,0 +1,15 @@
+description: 'an agent that starts on a workspace the engine reads is told once, by its name and workspace'
+env: two-macs
+runs:
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world agent-prompt linux-1 s-1 "Review the auth refresh"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.told // [])[] | select(.Kind | startswith("agent_")) | {Kind, Subject, Text}]'' world.json'
+      exit: 0
+      stdout: |
+          [{"Kind":"agent_started","Subject":"linux-1","Text":"linux-1 starts on linux-1"}]

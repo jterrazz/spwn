@@ -53,7 +53,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 	registry, err := call.NewRegistry(
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
-		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Held: m.heldOnEveryMachine(kind)}),
+		agentscalls.All(agentscalls.Deps{Hooks: []agentscontract.Hooks{m.agentHooks(claudecode.ID), m.agentHooks(codex.ID)}, Journal: m.journal(), Session: m.agentSession(), Forge: m.forge(), Now: m.sys.Clock.Now, Machine: m.profile.Ref.Name, Held: m.heldOnEveryMachine(kind), Kind: kind, Calls: farRouter{m}}),
 		accountscalls.All(accountscalls.Deps{Accounts: m.accounts(), Shares: m.secrets(), Kind: kind}),
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Kind: kind}),
 		awakecalls.All(m.awakeDeps()),

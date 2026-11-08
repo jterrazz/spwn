@@ -123,7 +123,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		secretsAlias(kenv, thisMac),
 		retiredEngineCommand(kenv, thisMac),
 		guestCommand(kenv, thisMac),
-		agentsCommand(kenv, thisMac.where, agentsDeps{Terminal: thisMac.vars[herdr.TerminalVar], Attach: thisMac.multiplexer().Attach, Engine: thisMac.engineAPI().AgentsHeld}),
+		agentsCommand(kenv, thisMac.where, agentsDeps{Terminal: thisMac.vars[herdr.TerminalVar], Attach: thisMac.multiplexer().Attach}),
 		runCommand(kenv, thisMac),
 		shellcmd.Command(kenv),
 	)

@@ -10,3 +10,13 @@ func Applies(p machine.Profile) machine.Verdict {
 	}
 	return machine.Yes
 }
+
+func Reaches(p machine.Profile) machine.Verdict {
+	// invariant: SPEC B5.22: the fleet's agents are read and started from a
+	// Mac, which reaches every workspace, or inside the workspace itself; a
+	// server hosts none.
+	if p.Kind == machine.Mac {
+		return machine.Yes
+	}
+	return Applies(p)
+}
