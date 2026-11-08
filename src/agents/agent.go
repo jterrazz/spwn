@@ -25,10 +25,7 @@ type Agent struct {
 	// value: SPEC B5.22: the agent's own name, short and unique across the
 	// fleet, by which every call and page addresses it.
 	Name string `json:"name,omitempty"`
-	// value: the name was given, not asked: a VM's next free one, which the
-	// read of every machine gives again when an agent of another VM holds it.
-	Given bool   `json:"given,omitempty"`
-	VM    string `json:"vm,omitempty"`
+	VM   string `json:"vm,omitempty"`
 	// value: the Mac its VM runs on, said by a read of the fleet; empty
 	// inside the VM.
 	Mac     string `json:"mac,omitempty"`

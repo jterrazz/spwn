@@ -191,6 +191,9 @@ func Codes() map[fail.Code]Wording {
 			return "no agent app \"" + e.Subject + "\": claudecode or codex", "station agents start --app claudecode"
 		},
 		agentscalls.NameTaken: func(e *fail.Error) (string, string) {
+			if ws := e.Detail["workspace"]; ws != "" {
+				return e.Subject + " is " + ws + "'s: a workspace names its own agents " + ws + " and " + e.Detail["nth"], "name it another way: --name <name>"
+			}
 			return "an agent is already named " + e.Subject, "name it another way: --name <name>"
 		},
 		agentscalls.BadName: func(e *fail.Error) (string, string) {

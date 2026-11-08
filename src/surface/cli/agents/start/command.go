@@ -20,8 +20,10 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
-	// value: every agent of every machine, whose names a new one may not take.
-	Everywhere func(ctx context.Context) ([]agents.Agent, error)
+	// value: the names every machine holds, which a new agent may not take:
+	// read across every machine on a Mac, asked of its Mac's engine inside a
+	// workspace.
+	Held func(ctx context.Context) (agents.Held, error)
 }
 
 type Input struct {
@@ -65,33 +67,35 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.New == !onMac {
 				return fail.New(fail.Refused, agentscalls.NoWhere, "station agents start", map[string]string{"both": nowhere(in.New, env)})
 			}
-			var taken []string
-			if env.Kind == machine.Mac {
-				names, err := held(ctx, d, in.Name)
-				if err != nil {
-					return err
-				}
-				taken = names
+			held, err := d.Held(ctx)
+			if err != nil {
+				return err
 			}
 			at := env.Target()
+			vm := at.Name
 			if in.New {
-				vm, err := create(ctx, env, in, o)
-				if err != nil {
+				vm = in.Name
+			}
+			if ws, taken := held.Takes(in.Name, vm); in.Name != "" && taken {
+				return fail.New(fail.Refused, agentscalls.NameTaken, in.Name, map[string]string{"workspace": ws, "nth": ws + agents.Nth + "<n>"})
+			}
+			if in.New {
+				var made string
+				if made, err = create(ctx, env, in, o); err != nil {
 					return err
 				}
-				at = machine.Ref{Name: vm}
+				at = machine.Ref{Name: made}
 			}
-			if in.Name == "" && env.Kind == machine.Mac {
-				in.Name = agents.NameFor(at.Name, taken)
+			if in.Name == "" {
+				in.Name = agents.NameFor(at.Name, held.Agents)
 			}
+			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Start, agentscalls.StartIn{App: agents.App(in.App), Name: in.Name, Folder: in.Folder, Task: in.Task}, nil)
 			if in.New {
-				a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Start, agentscalls.StartIn{App: agents.App(in.App), Name: in.Name, Folder: in.Folder, Task: in.Task}, nil)
 				if err != nil {
 					return &machines.AgentNotStartedError{Name: at.Name, Cause: err}
 				}
 				return o.Page(pageagents.Started(a, true, d.ThisMachine), a)
 			}
-			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Start, agentscalls.StartIn{App: agents.App(in.App), Name: in.Name, Folder: in.Folder, Task: in.Task}, nil)
 			if err != nil {
 				return err
 			}
@@ -110,23 +114,6 @@ func nowhere(asked bool, env kit.Env) string {
 		return "inside"
 	}
 	return "both"
-}
-
-// value: the names every agent of every machine holds; a name asked that
-// one of them holds in its key is refused.
-func held(ctx context.Context, d Deps, name string) ([]string, error) {
-	all, err := d.Everywhere(ctx)
-	if err != nil {
-		return nil, err
-	}
-	names := make([]string, 0, len(all))
-	for _, a := range all {
-		names = append(names, a.Name)
-	}
-	if name != "" && agents.Clashes(names, name) {
-		return nil, fail.New(fail.Refused, agentscalls.NameTaken, name, nil)
-	}
-	return names, nil
 }
 
 // value: the throwaway workspace made for the agent, by its name, on the

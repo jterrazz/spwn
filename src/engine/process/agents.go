@@ -37,6 +37,15 @@ func (d *Engine) heardAgents(ctx context.Context, v *vmState, now []agents.Agent
 	}
 }
 
+func (d *Engine) AgentsHeld(ctx context.Context) (agents.Held, error) {
+	// invariant: SPEC B5.22: a workspace names an agent against the names
+	// every machine holds, which only its Mac can read.
+	if d.o.AgentsHeld == nil {
+		return agents.Held{}, nil
+	}
+	return d.o.AgentsHeld(ctx)
+}
+
 func sameAsk(a, b *agents.Ask) bool {
 	return (a == nil) == (b == nil) && (a == nil || (a.Title == b.Title && a.At.Equal(b.At)))
 }

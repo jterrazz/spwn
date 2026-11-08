@@ -166,7 +166,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 		if err != nil {
 			return agents.Agent{}, err
 		}
-		a := agents.Judge(agents.Agent{VM: d.Machine, Given: in.Name == ""}, agents.Event{Kind: agents.Began, App: app, Name: name, Session: agents.SessionOf(name), Terminal: terminal, Folder: in.Folder, Prompt: in.Task, At: d.Now()})
+		a := agents.Judge(agents.Agent{VM: d.Machine}, agents.Event{Kind: agents.Began, App: app, Name: name, Session: agents.SessionOf(name), Terminal: terminal, Folder: in.Folder, Prompt: in.Task, At: d.Now()})
 		if err := d.Journal.Write(ctx, a); err != nil {
 			return a, err
 		}

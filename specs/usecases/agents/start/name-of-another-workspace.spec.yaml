@@ -1,0 +1,18 @@
+description: 'a name another workspace gives its own agents starts nothing'
+env: mini-workspace
+runs:
+    - command: 'agents start "Write the changelog" --on linux-1 --name ci-1'
+      exit: 2
+      stderr: |
+          Error: ci-1 is ci-1's: a workspace names its own agents ci-1 and ci-1·<n>
+          Hint: name it another way: --name <name>
+    - command: 'agents start "Write the changelog" --on linux-1 --name ci-1·2'
+      exit: 2
+      stderr: |
+          Error: ci-1·2 is ci-1's: a workspace names its own agents ci-1 and ci-1·<n>
+          Hint: name it another way: --name <name>
+    - command: 'agents start "Write the release notes" --on ci-1'
+      exit: 0
+      stdout: |
+          	On ci-1:
+          ●	ci-1	starts · claudecode · Write the release notes

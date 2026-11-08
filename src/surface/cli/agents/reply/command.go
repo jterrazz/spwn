@@ -18,9 +18,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
-	// value: the workspace the calls for the agent of that name go to, and
-	// the name it knows the agent by.
-	Where func(ctx context.Context, name string) (machine.Ref, string, error)
+	// value: the workspace the calls for the agent of that name go to.
+	Where func(ctx context.Context, name string) (machine.Ref, error)
 }
 
 type Input struct {
@@ -44,15 +43,14 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				data, _ := io.ReadAll(io.LimitReader(env.Stdin, catalog.AgentPayloadCap))
 				text = strings.TrimRight(string(data), "\n")
 			}
-			at, local, err := d.Where(ctx, in.Agent)
+			at, err := d.Where(ctx, in.Agent)
 			if err != nil {
 				return err
 			}
-			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Reply, agentscalls.ReplyIn{Agent: local, Text: text}, nil)
+			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Reply, agentscalls.ReplyIn{Agent: in.Agent, Text: text}, nil)
 			if err != nil {
 				return err
 			}
-			a.Name = in.Agent
 			return o.Page(pageagents.Replied(a, d.ThisMachine), a)
 		},
 	}, env)

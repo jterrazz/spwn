@@ -54,34 +54,43 @@ func Named(kept []Agent, vm string) []Agent {
 		return cmp.Or(compareTime(out[i].Since, out[j].Since), strings.Compare(out[i].Session, out[j].Session))
 	})
 	for _, i := range order {
-		out[i].Name, out[i].Given = NameFor(vm, taken), true
+		out[i].Name = NameFor(vm, taken)
 		taken = append(taken, out[i].Name)
 	}
 	return out
 }
 
-func Unique(everywhere []Agent) []Agent {
-	// invariant: SPEC B5.22: across every machine a name asked is kept, and
-	// a given one another agent holds is given again, the next free name of
-	// its VM, in the order read; so every name is unique but for two asked
-	// inside two workspaces, which neither could see.
-	out := slices.Clone(everywhere)
-	var taken []string
-	for _, a := range out {
-		if !a.Given {
-			taken = append(taken, a.Name)
-		}
+type Held struct {
+	// value: every agent's name, of every running workspace of every Mac
+	// that answers.
+	Agents []string `json:"agents"`
+	// value: every workspace's name, of every Mac that answers.
+	Workspaces []string `json:"workspaces"`
+}
+
+func (h Held) Takes(name, vm string) (workspace string, taken bool) {
+	// invariant: SPEC B5.22: a name is taken on vm when an agent of any
+	// machine holds its key, or when it is another workspace's own: its name,
+	// or its name then ·<n>, which that workspace gives its agents unasked.
+	if Clashes(h.Agents, name) {
+		return "", true
 	}
-	for i, a := range out {
-		if !a.Given {
-			continue
-		}
-		if Clashes(taken, a.Name) {
-			out[i].Name = NameFor(a.VM, taken)
-		}
-		taken = append(taken, out[i].Name)
+	i := slices.IndexFunc(h.Workspaces, func(ws string) bool { return ws != vm && Defaults(ws, name) })
+	if i < 0 {
+		return "", false
 	}
-	return out
+	return h.Workspaces[i], true
+}
+
+func Defaults(vm, name string) bool {
+	// value: the name is one vm gives its agents unasked: vm itself, or
+	// vm·<n>, in any letters whose key is theirs.
+	key, own := Key(name), Key(vm)
+	if key == own {
+		return true
+	}
+	n, ok := strings.CutPrefix(key, own+"-")
+	return ok && n != "" && strings.Trim(n, "0123456789") == ""
 }
 
 func compareTime(a, b time.Time) int {

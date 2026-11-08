@@ -15,9 +15,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
-	// value: the workspace the calls for the agent of that name go to, and
-	// the name it knows the agent by.
-	Where func(ctx context.Context, name string) (machine.Ref, string, error)
+	// value: the workspace the calls for the agent of that name go to.
+	Where func(ctx context.Context, name string) (machine.Ref, error)
 }
 
 type Input struct{ Agent string }
@@ -30,15 +29,14 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Agent = args[0]; return nil },
 		Run: func(ctx context.Context, in *Input, o kit.IO) error {
-			at, local, err := d.Where(ctx, in.Agent)
+			at, err := d.Where(ctx, in.Agent)
 			if err != nil {
 				return err
 			}
-			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Forget, agentscalls.AgentIn{Agent: local}, nil)
+			a, err := call.Invoke(ctx, env.Calls, at, agentscalls.Forget, agentscalls.AgentIn{Agent: in.Agent}, nil)
 			if err != nil {
 				return err
 			}
-			a.Name = in.Agent
 			return o.Page(pageagents.Forgotten(a, d.ThisMachine), a)
 		},
 	}, env)
