@@ -33,7 +33,7 @@ public struct ReplyField: View {
                     .contentShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(Text(verbatim: placeholder))
+            .accessibilityLabel(Text(verbatim: "Send"))
         }
     }
 
