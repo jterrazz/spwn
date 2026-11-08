@@ -152,6 +152,324 @@
       "card": "hero"
     },
     {
+      "id": "tiles",
+      "title": "Tiles",
+      "role": "summary",
+      "items": [
+        {
+          "tile": {
+            "caption": "Ports",
+            "glyph": {
+              "kind": "symbol:network",
+              "signal": "quiet"
+            },
+            "number": {
+              "kind": "count",
+              "n": 5
+            },
+            "word": "shared",
+            "nav": "menubar.ports"
+          }
+        },
+        {
+          "tile": {
+            "caption": "Accounts",
+            "glyph": {
+              "kind": "symbol:key",
+              "signal": "quiet"
+            },
+            "number": {
+              "kind": "count",
+              "n": 1
+            },
+            "word": "signed out",
+            "signal": "waits",
+            "nav": "menubar.accounts"
+          }
+        },
+        {
+          "tile": {
+            "caption": "Awake",
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "waits"
+            },
+            "number": {
+              "kind": "text",
+              "text": "7 hr"
+            },
+            "word": "left",
+            "toggle": "awake-off",
+            "nav": "menubar.awake"
+          }
+        }
+      ],
+      "card": "tiles"
+    },
+    {
+      "id": "agents",
+      "title": "Agents",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2 working"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "text",
+              "text": "fixes the token refresh"
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "waits"
+            },
+            "mac": "mac-mini",
+            "quick": "attach:review-bot",
+            "nav": "menubar.machine:review-bot"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1",
+            "mark": "ok",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "none",
+                "live": "cpuh:linux-1"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "fix the flaky e2e test"
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "mac": "This Mac",
+            "trail": "cpu",
+            "quick": "attach:linux-1",
+            "nav": "menubar.machine:linux-1"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-3",
+            "mark": "ok",
+            "label": "linux-3",
+            "cells": [
+              {
+                "kind": "none",
+                "live": "cpuh:linux-3"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "refresh the auth token"
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "mac": "mac-mini",
+            "trail": "cpu",
+            "quick": "attach:linux-3",
+            "nav": "menubar.machine:linux-3"
+          }
+        },
+        {
+          "row": {
+            "id": "agent-7f",
+            "mark": "ok",
+            "label": "agent-7f",
+            "detail": {
+              "kind": "text",
+              "text": "tests pass"
+            },
+            "glyph": {
+              "kind": "symbol:checkmark",
+              "signal": "done"
+            },
+            "verb": "cleanup:macbook-pro",
+            "signal": "done"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
+      "id": "servers",
+      "title": "Servers",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra",
+            "mark": "ok",
+            "label": "infra",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "healthy"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 12 days"
+                },
+                {
+                  "kind": "text",
+                  "text": "2 ports"
+                }
+              ]
+            },
+            "glyph": {
+              "signal": "well",
+              "dot": "fill"
+            },
+            "nav": "menubar.machine:infra"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
+      "id": "macs",
+      "title": "Macs",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "ok",
+            "label": "This Mac",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "1 working"
+                },
+                {
+                  "kind": "text",
+                  "text": "4 upkeep",
+                  "pri": 1
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "desktop",
+              "ring": "cpu:macbook-pro"
+            },
+            "trail": "value",
+            "quick": "new-vm:macbook-pro",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "ok",
+            "label": "mac-mini",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "1 working"
+                },
+                {
+                  "kind": "text",
+                  "text": "1 waiting"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "desktop",
+              "ring": "cpu:mac-mini"
+            },
+            "trail": "value",
+            "quick": "new-vm:mac-mini",
+            "nav": "menubar.machine:mac-mini"
+          }
+        },
+        {
+          "row": {
+            "id": "macbook-air",
+            "mark": "ok",
+            "label": "macbook-air",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "seen 2 hr ago"
+                },
+                {
+                  "kind": "text",
+                  "text": "checking"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "desktop",
+              "ring": "cpu:macbook-air"
+            },
+            "trail": "value",
+            "quick": "new-vm:macbook-air",
+            "nav": "menubar.machine:macbook-air",
+            "signal": "stale"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -574,88 +892,6 @@
           "n": 1
         }
       ]
-    },
-    {
-      "id": "awake",
-      "title": "Awake",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "awake",
-            "label": "Awake",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "This Mac until 18:00"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "macbook-air sleeps"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "accounts",
-      "title": "Accounts",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "accounts",
-            "label": "Accounts",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "6",
-                    "label": "ok"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "npm needs sign-in",
-                    "label": "broken"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
     }
   ],
   "actions": [
@@ -761,34 +997,6 @@
       }
     },
     {
-      "label": "sleep",
-      "on": "row",
-      "rows": [
-        "awake"
-      ],
-      "priority": 4,
-      "mutates": true,
-      "id": "awake-off",
-      "run": {
-        "call": "awake.off"
-      }
-    },
-    {
-      "label": "Accounts",
-      "on": "row",
-      "rows": [
-        "accounts"
-      ],
-      "priority": 6,
-      "id": "open-accounts",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "accounts"
-        ]
-      }
-    },
-    {
       "label": "Update all",
       "on": "row",
       "rows": [
@@ -840,6 +1048,301 @@
           }
         ]
       }
+    },
+    {
+      "label": "Keep This Mac awake",
+      "on": "row",
+      "rows": [
+        "awake"
+      ],
+      "priority": 4,
+      "mutates": true,
+      "id": "awake-off",
+      "run": {
+        "call": "awake.off"
+      },
+      "picked": true
+    },
+    {
+      "label": "New VM on This Mac",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ],
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "New VM on mac-mini",
+      "on": "row",
+      "rows": [
+        "mac-mini"
+      ],
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:mac-mini",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "New VM on macbook-air",
+      "on": "row",
+      "rows": [
+        "macbook-air"
+      ],
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:macbook-air",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open linux-1 in Terminal",
+      "on": "row",
+      "rows": [
+        "linux-1"
+      ],
+      "priority": 2,
+      "id": "attach:linux-1",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "linux-1"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open infra in Terminal",
+      "on": "row",
+      "rows": [
+        "infra"
+      ],
+      "priority": 2,
+      "id": "attach:infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open linux-3 in Terminal",
+      "on": "row",
+      "rows": [
+        "linux-3"
+      ],
+      "priority": 2,
+      "id": "attach:linux-3",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "linux-3"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open review-bot in Terminal",
+      "on": "row",
+      "rows": [
+        "review-bot"
+      ],
+      "priority": 2,
+      "id": "attach:review-bot",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "review-bot"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Clean up",
+      "on": "row",
+      "confirm": {
+        "question": "Delete the finished throwaways on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Each goes with its disk, its ports and the accounts shared with it."
+          }
+        ],
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "cleanup:macbook-pro",
+      "run": {
+        "call": "machines.cleanup",
+        "in": {
+          "Confirm": "yes"
+        }
+      }
     }
   ],
   "badge": {
@@ -859,6 +1362,10 @@
   "live": [
     "cpu:macbook-pro",
     "memory:macbook-pro",
-    "net:macbook-pro"
+    "net:macbook-pro",
+    "cpuh:linux-1",
+    "cpuh:linux-3",
+    "cpu:mac-mini",
+    "cpu:macbook-air"
   ]
 }

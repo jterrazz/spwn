@@ -270,6 +270,7 @@
       "run": {
         "call": "apps.update"
       },
+      "busy": "Updating",
       "hud": {
         "kind": "list",
         "items": [
@@ -282,6 +283,10 @@
     }
   ],
   "header": {
-    "back": "All machines"
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:exclamationmark.circle.fill",
+      "signal": "waits"
+    }
   }
 }

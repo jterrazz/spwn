@@ -117,6 +117,62 @@
       "card": "empty"
     },
     {
+      "id": "macs",
+      "title": "Macs",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "44 GB free"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "0 VMs"
+            },
+            "glyph": {
+              "kind": "laptop",
+              "ring": "cpu:macbook-pro"
+            },
+            "trail": "value",
+            "quick": "new-vm:macbook-pro",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "add-mac",
+            "mark": "ok",
+            "label": "Add a Mac to run VMs on it",
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "verb": "add-mac"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
       "id": "needs-you",
       "title": "Needs you",
       "role": "actions",
@@ -202,79 +258,6 @@
         {
           "mark": "ok",
           "n": 1
-        }
-      ]
-    },
-    {
-      "id": "awake",
-      "title": "Awake",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "awake",
-            "label": "Awake",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "This Mac until 18:00"
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "accounts",
-      "title": "Accounts",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "accounts",
-            "label": "Accounts",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "6",
-                    "label": "ok"
-                  }
-                ]
-              }
-            ]
-          }
         }
       ]
     }
@@ -374,32 +357,71 @@
       }
     },
     {
-      "label": "sleep",
+      "label": "New VM on This Mac",
       "on": "row",
       "rows": [
-        "awake"
+        "macbook-pro"
       ],
-      "priority": 4,
+      "priority": 2,
       "mutates": true,
-      "id": "awake-off",
+      "id": "new-vm:macbook-pro",
       "run": {
-        "call": "awake.off"
-      }
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
     },
     {
-      "label": "Accounts",
+      "label": "Add a Mac",
       "on": "row",
       "rows": [
-        "accounts"
+        "add-mac"
       ],
-      "priority": 6,
-      "id": "open-accounts",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "accounts"
-        ]
-      }
+      "priority": 4,
+      "id": "add-mac",
+      "sheet": "hint:add-mac"
     }
   ],
   "badge": {

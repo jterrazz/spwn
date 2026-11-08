@@ -125,14 +125,6 @@ func TestAwakeNamesMacsAsHomeDoes(t *testing.T) {
 	}
 }
 
-// invariant: the Accounts tile says which account needs a sign-in.
-func TestTheAccountsTileSaysWhoNeedsSignIn(t *testing.T) {
-	got := words(signIns(page.List(page.Value{Kind: page.KindText, Text: "6", Label: "ok"}, page.Value{Kind: page.KindText, Text: "registry", Label: "broken"})))
-	if got != "6 | registry needs sign-in" {
-		t.Fatalf("tile %q", got)
-	}
-}
-
 func words(v page.Value) string {
 	parts := v.Items
 	if v.Kind != page.KindList {

@@ -1,5 +1,11 @@
 infra is down · on mac-mini
 
+Tiles
+Servers
+  ✗ infra  down
+Macs
+  ● This Mac  5 upkeep
+  ● mac-mini  1 down
 Needs you  5 things need you
   ◐ 2 app updates         station apps update
   ✗ npm sign-in expired   npm login
@@ -15,7 +21,3 @@ Machines
   ✗ mac-mini       Mac        never sleeps · 1 needs you
   └─   Servers
      └─ ✗ infra    Server     Always on · Stopped
-Awake
-    Awake  This Mac until 18:00 · mac-mini never sleeps
-Accounts
-    Accounts  ● 8 · ✗ npm needs sign-in

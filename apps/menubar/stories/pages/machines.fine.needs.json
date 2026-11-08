@@ -16,6 +16,10 @@
         {
           "kind": "text",
           "text": "All machines"
+        },
+        {
+          "kind": "text",
+          "text": "nothing blocks an agent or a server"
         }
       ]
     },
@@ -37,8 +41,7 @@
       "items": [
         {
           "empty": {
-            "text": "Nothing needs you",
-            "sub": "nothing blocks an agent or a server"
+            "text": "Nothing needs you"
           }
         }
       ],
@@ -46,6 +49,10 @@
     }
   ],
   "header": {
-    "back": "All machines"
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:exclamationmark.circle.fill",
+      "signal": "waits"
+    }
   }
 }

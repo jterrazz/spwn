@@ -46,6 +46,19 @@ func homeScene(f *Scene) {
 		case airName:
 			f.All.Macs[i].Asleep, f.All.Macs[i].Laptop = true, true
 		}
+		for j, vm := range h.VMs {
+			if step, ok := homeSteps()[vm.Name]; ok && vm.Agent != nil {
+				f.All.Macs[i].VMs[j].Agent.Step = step
+			}
+		}
+	}
+}
+
+// value: the step each working agent of the home stories is at.
+func homeSteps() map[string][]string {
+	return map[string][]string{
+		"linux-1": {"running tests", "41/58 pass"},
+		"linux-3": {"editing src/auth/refresh.ts"},
 	}
 }
 
