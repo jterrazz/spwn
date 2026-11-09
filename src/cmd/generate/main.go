@@ -31,6 +31,7 @@ func main() {
 	stream := flag.String("stream", streamPath, "the recorded menubar stream, rewritten whole")
 	catalogue := flag.String("calls", callsPath, "calls.json, the registry's catalogue, rewritten whole")
 	stories := flag.String("stories", storiesDir, "the folder the story worlds' pages are written to")
+	world := flag.String("world", pages.PlayWorldPath, "the stories' machines as an engine world, the play rig's, rewritten whole")
 	flag.Parse()
 	current, err := os.ReadFile(*path)
 	if err != nil {
@@ -66,6 +67,17 @@ func main() {
 	if err := os.WriteFile(*catalogue, calls(), 0o600); err != nil {
 		panic(err)
 	}
+	if err := os.WriteFile(*world, playWorld(), 0o600); err != nil {
+		panic(err)
+	}
+}
+
+func playWorld() []byte {
+	base, err := os.ReadFile(pages.PlayWorldBase)
+	if err != nil {
+		panic(err)
+	}
+	return pages.PlayWorld(base)
 }
 
 func rewrite(dir string, files map[string][]byte) error {

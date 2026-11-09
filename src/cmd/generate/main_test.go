@@ -73,6 +73,17 @@ func TestTheRecordedEventsHaveNotDriftedFromTheEngine(t *testing.T) {
 	}
 }
 
+func TestThePlayWorldHasNotDriftedFromTheStoriesMachines(t *testing.T) {
+	base, err := os.ReadFile(filepath.Join(root(t), pages.PlayWorldBase))
+	if err != nil {
+		t.Fatal(err)
+	}
+	current, err := os.ReadFile(filepath.Join(root(t), pages.PlayWorldPath))
+	if err != nil || !bytes.Equal(current, pages.PlayWorld(base)) {
+		t.Errorf("%s is out of sync with the stories' machines: run make generate and commit the result", pages.PlayWorldPath)
+	}
+}
+
 func TestTheStoryPagesHaveNotDriftedFromTheirWorlds(t *testing.T) {
 	want := storyPages()
 	dir := filepath.Join(root(t), storiesDir)
