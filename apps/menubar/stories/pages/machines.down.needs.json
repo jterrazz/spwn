@@ -276,6 +276,25 @@
         "upkeep:macbook-pro/settings/3"
       ],
       "id": "upkeep:macbook-pro/settings/3",
+      "form": {
+        "title": "Turn the firewall on",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "hint": {
+              "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+              "external": true
+            }
+          }
+        ],
+        "subtitle": "station never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
       "sheet": "hint:firewall"
     },
     {

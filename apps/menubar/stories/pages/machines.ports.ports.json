@@ -653,6 +653,357 @@
       }
     },
     {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port:linux-1",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:linux-1:4321",
+                "label": "Astro",
+                "note": "linux-1:4321",
+                "glyph": {
+                  "kind": "port:astro"
+                }
+              },
+              {
+                "value": "share:linux-1:9229",
+                "label": "Node inspector",
+                "note": "linux-1:9229",
+                "glyph": {
+                  "kind": "port:node"
+                }
+              }
+            ],
+            "note": "Nothing listens in linux-1 right now."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port:linux-1",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port:linux-1",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:linux-1:4321",
+                "label": "Astro",
+                "note": "linux-1:4321",
+                "glyph": {
+                  "kind": "port:astro"
+                }
+              },
+              {
+                "value": "share:linux-1:9229",
+                "label": "Node inspector",
+                "note": "linux-1:9229",
+                "glyph": {
+                  "kind": "port:node"
+                }
+              }
+            ],
+            "note": "Nothing listens in linux-1 right now."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port:agent-7f",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port:agent-7f",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now in agent-7f",
+            "kind": "rows",
+            "note": "Nothing listens in agent-7f right now."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port:linux-3",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port:linux-3",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now in linux-3",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:linux-3:5432",
+                "label": "Postgres",
+                "note": "linux-3:5432",
+                "glyph": {
+                  "kind": "port:postgres"
+                }
+              }
+            ],
+            "note": "Nothing listens in linux-3 right now."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port:review-bot",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port:review-bot",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now in review-bot",
+            "kind": "rows",
+            "note": "Nothing listens in review-bot right now."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
       "label": "Declare public",
       "on": "page",
       "priority": 2,
@@ -714,51 +1065,6 @@
       }
     },
     {
-      "label": "Share a port",
-      "on": "page",
-      "priority": 3,
-      "mutates": true,
-      "id": "share-port",
-      "run": {
-        "call": "ports.share"
-      },
-      "form": {
-        "title": "Share a port",
-        "fields": [
-          {
-            "key": "VM",
-            "label": "Of",
-            "kind": "select",
-            "options": [
-              {
-                "value": "linux-1",
-                "label": "linux-1"
-              },
-              {
-                "value": "infra",
-                "label": "infra"
-              },
-              {
-                "value": "linux-3",
-                "label": "linux-3"
-              }
-            ],
-            "default": "linux-1",
-            "required": true
-          },
-          {
-            "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
-          }
-        ],
-        "subtitle": "Private on your tailnet."
-      },
-      "sheet": "share-port"
-    },
-    {
       "label": "Full list in Terminal",
       "on": "page",
       "id": "full-list",
@@ -786,42 +1092,76 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@menu",
-      "run": {
-        "call": "ports.share"
-      },
       "form": {
         "title": "Share a port",
         "fields": [
           {
-            "key": "VM",
+            "key": "Of",
             "label": "Of",
             "kind": "select",
             "options": [
               {
-                "value": "linux-1",
-                "label": "linux-1"
+                "value": "share-port:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
               },
               {
-                "value": "infra",
-                "label": "infra"
+                "value": "share-port:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
               },
               {
-                "value": "linux-3",
-                "label": "linux-3"
+                "value": "share-port:linux-3",
+                "label": "linux-3",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-port:review-bot",
+                "label": "review-bot",
+                "note": "on mac-mini",
+                "glyph": {
+                  "kind": "workspace"
+                }
               }
             ],
-            "default": "linux-1",
-            "required": true
+            "default": "share-port:linux-1",
+            "swaps": true
           },
           {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:linux-1:4321",
+                "label": "Astro",
+                "note": "linux-1:4321",
+                "glyph": {
+                  "kind": "port:astro"
+                }
+              },
+              {
+                "value": "share:linux-1:9229",
+                "label": "Node inspector",
+                "note": "linux-1:9229",
+                "glyph": {
+                  "kind": "port:node"
+                }
+              }
+            ],
+            "note": "Nothing listens in linux-1 right now."
           }
         ],
-        "subtitle": "Private on your tailnet."
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
       "icon": "point.3.connected.trianglepath.dotted",
       "sheet": "share-port"

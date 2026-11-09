@@ -351,12 +351,12 @@ func (f Scene) draw() []Fixture {
 	r := f.reading()
 	out := []Fixture{
 		{Name: "menubar", Page: pagemenubar.Page(r, thisMac)},
-		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{}, thisMac)},
+		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{To: pagemenubar.RunningWorkspaces(f.All)}, thisMac)},
 		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac)},
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
 		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
 		{Name: "find", Page: pagemenubar.Find(f.find(), thisMac)},
-		{Name: "accounts", Page: pagemenubar.Accounts(*f.needs().Accounts, pagemenubar.AccountsOf{Asks: Levels}, thisMac)},
+		{Name: "accounts", Page: pagemenubar.Accounts(*f.needs().Accounts, pagemenubar.AccountsOf{Asks: Levels, To: pagemenubar.RunningWorkspaces(f.All)}, thisMac)},
 	}
 	for _, h := range f.All.Macs {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})

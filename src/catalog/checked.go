@@ -18,6 +18,11 @@ type CheckedSetting struct {
 	Pane string
 	// value: how long its facts may take; past it the row is Unknown.
 	Budget time.Duration
+	// value: the line that turns it on from Terminal, the owner's to type
+	// (station never changes a security setting); empty when only Fix does.
+	Command string
+	// value: what the owner does, as the hint that shows Command says it.
+	Turn string
 }
 
 const systemSettings = "x-apple.systempreferences:"
@@ -29,7 +34,8 @@ const (
 
 var CheckedSettings = []CheckedSetting{
 	{Name: "filevault", Label: "Disk encryption", Description: "FileVault encrypts the disk", Kinds: macKind, Facts: []Fact{FactFileVault}, Fix: "System Settings > Privacy & Security > FileVault", Pane: systemSettings + "com.apple.settings.PrivacySecurity.extension?FileVault", Budget: checkedBudget},
-	{Name: "firewall", Label: "Firewall", Description: "The macOS firewall refuses unasked connections", Kinds: macKind, Facts: []Fact{FactFirewall}, Fix: "System Settings > Network > Firewall", Pane: systemSettings + "com.apple.Network-Settings.extension?Firewall", Budget: checkedBudget},
+	{Name: "firewall", Label: "Firewall", Description: "The macOS firewall refuses unasked connections", Kinds: macKind, Facts: []Fact{FactFirewall}, Fix: "System Settings > Network > Firewall", Pane: systemSettings + "com.apple.Network-Settings.extension?Firewall", Budget: checkedBudget,
+		Command: AsRoot("/usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on"), Turn: "Turn the firewall on"},
 	{Name: "sip", Label: "System Integrity Protection", Description: "SIP keeps the system files read-only", Kinds: macKind, Facts: []Fact{FactSIP}, Fix: "Recovery > Terminal > csrutil enable", Budget: checkedBudget},
 	{Name: "automatic-updates", Label: "Automatic security updates", Description: "macOS installs its security responses by itself", Kinds: macKind, Facts: []Fact{FactAutoUpdates}, Fix: "System Settings > General > Software Update > Automatic updates", Pane: systemSettings + "com.apple.Software-Update-Settings.extension", Budget: checkedBudget},
 	{Name: "screen-lock", Label: "Screen lock", Description: "The screen locks after 5 min idle (a desktop: 5 min after the display turns off)", Kinds: macKind, Facts: []Fact{FactScreenLock, FactDisplaySleep}, Fix: "System Settings > Lock Screen", Pane: systemSettings + "com.apple.Lock-Screen-Settings.extension", Budget: checkedBudget},

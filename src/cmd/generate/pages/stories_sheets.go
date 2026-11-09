@@ -7,7 +7,7 @@ import (
 
 // value: the sheets' worlds: home as its stories draw it, reading what
 // every Mac is signed in to (mac-mini to GitHub and Claude as the bot),
-// and the fleet of This Mac alone.
+// with linux-3's page over it; and the fleet of This Mac alone.
 func sheetWorlds() []World {
 	sheet := func(name string, edits ...func(*Scene)) World {
 		return World{Name: name, Edit: func(f *Scene) {
@@ -19,8 +19,10 @@ func sheetWorlds() []World {
 			f.SignedIn = true
 		}, Pages: []string{"menubar"}}
 	}
+	mini := sheet("machines.sheet")
+	mini.Pages = append(mini.Pages, "machine.linux-3")
 	return []World{
-		sheet("machines.sheet"),
+		mini,
 		sheet("machines.sheet.first", thisMacAlone),
 	}
 }

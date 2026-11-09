@@ -46,6 +46,8 @@ type AccountsOf struct {
 	Mac, VM string
 	// value: the level each gesture asks at, the calls' own rule.
 	Asks Levels
+	// value: the workspaces an account may be lent to (RunningWorkspaces).
+	To []Workspace
 }
 
 func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.Page {
@@ -60,7 +62,7 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 	if of.Mac != "" {
 		a = a.Of(of.Mac, of.VM)
 	}
-	b := accountsBody{r: a.Read(), now: a, self: thisMac.Machine, of: of}
+	b := accountsBody{r: a.Read(), now: a, hosts: a, self: thisMac.Machine, of: of}
 	where := "All machines"
 	if of.Mac != "" {
 		where = b.name(of.Mac)
@@ -78,10 +80,10 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 	p.Actions = append(p.Actions, full)
 	p.Footer = &page.Footer{Kind: page.FooterTerminals, Buttons: []string{ActionFullList}}
 	if of.VM == "" {
-		share := b.share("")
-		share.On, share.Rows, share.Icon = page.OnPage, nil, "plus"
-		p.Actions = append(p.Actions, share)
-		p.Footer.Buttons = append(p.Footer.Buttons, share.ID)
+		lends := b.lends()
+		lends[0].On, lends[0].Rows, lends[0].Icon = page.OnPage, nil, "plus"
+		p.Actions = append(p.Actions, lends...)
+		p.Footer.Buttons = append(p.Footer.Buttons, lends[0].ID)
 	}
 	for _, c := range b.r.Shared {
 		withRowMenu(&p, c.Mac+"/"+c.VM+"/"+c.Provider, loanMenu(c, b.extend(c), of.Asks, b.self))
@@ -90,10 +92,12 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 }
 
 type accountsBody struct {
-	r    accounts.Reading
-	now  accounts.AllMachines
-	self string
-	of   AccountsOf
+	r   accounts.Reading
+	now accounts.AllMachines
+	// value: what each Mac is signed in to, the accounts it may lend.
+	hosts accounts.AllMachines
+	self  string
+	of    AccountsOf
 	// value: the segment of a machine page the sections belong to; empty
 	// on the fleet page.
 	segment string
@@ -272,36 +276,13 @@ func (b accountsBody) extend(c accounts.SharedCopy) page.Action {
 		Hud: hud(account+" on "+c.VM, minutes(extendBy)+" left")}
 }
 
-// value: Lend an account…: the sheet that shares one of the Mac's accounts
-// for a time, to the VM named when there is one.
-func (b accountsBody) share(vm string) page.Action {
-	from := b.self
-	if b.of.Mac != "" {
-		from = b.of.Mac
-	}
-	form := &page.Form{Title: ShareLabel, Subtitle: "From " + b.name(from) + ". It ends by itself.", Fields: []page.Field{
-		{Key: "With", Label: "To", Kind: page.FieldText, Required: true, Default: vm},
-		{Key: "Account", Label: "Account", Kind: page.FieldText, Required: true},
-		{Key: "For", Label: "For", Kind: page.FieldSegmented, Default: shareFor()[0].Value, Options: shareFor()},
-	}}
-	a := page.Action{ID: ActionShareAccount, Label: ShareLabel, On: page.OnRow, Rows: []string{RowShare}, Mutates: true, Sheet: page.SheetShareAccount, Form: form,
-		Run: &page.Run{Call: CallShareAccount, In: map[string]string{}}}
-	if vm != "" {
-		a.Prefill = map[string]string{"With": vm}
-	}
-	if b.of.Mac != "" && b.of.Mac != b.self {
-		a.Run.Target = &page.Target{Name: b.of.Mac}
-	}
-	return a
-}
-
 func (b accountsBody) actions() []page.Action {
 	_, out := b.needs()
 	for _, c := range b.r.Shared {
 		out = append(out, b.extend(c))
 	}
 	if b.of.Mac != "" {
-		out = append(out, b.share(b.of.VM))
+		out = append(out, b.lends()...)
 	}
 	return out
 }

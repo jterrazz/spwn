@@ -881,24 +881,36 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port",
-      "run": {
-        "call": "ports.share",
-        "in": {
-          "VM": "linux-1"
-        }
-      },
       "form": {
-        "title": "Share a port of linux-1",
+        "title": "Share a port",
         "fields": [
           {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port",
+            "swaps": true
+          },
+          {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "note": "Nothing listens in linux-1 right now."
           }
-        ]
-      }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
     },
     {
       "label": "Take back",
@@ -1031,22 +1043,35 @@
       "mutates": true,
       "id": "share-account",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": "linux-1"
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "default": "linux-1",
-            "required": true
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
             "required": true
           },
           {
@@ -1056,25 +1081,43 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 15:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 23:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Tuesday 10 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Share {Account} for {For}"
+          }
+        ]
       },
       "sheet": "share-account",
-      "prefill": {
-        "With": "linux-1"
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with linux-1"
+          }
+        ]
       }
     },
     {
@@ -1290,25 +1333,37 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@menu",
-      "run": {
-        "call": "ports.share",
-        "in": {
-          "VM": "linux-1"
-        }
-      },
       "form": {
-        "title": "Share a port of linux-1",
+        "title": "Share a port",
         "fields": [
           {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port",
+            "swaps": true
+          },
+          {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "note": "Nothing listens in linux-1 right now."
           }
-        ]
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
-      "icon": "point.3.connected.trianglepath.dotted"
+      "icon": "point.3.connected.trianglepath.dotted",
+      "sheet": "share-port"
     },
     {
       "label": "Lend an account",
@@ -1316,22 +1371,35 @@
       "mutates": true,
       "id": "share-account@menu",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": "linux-1"
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "default": "linux-1",
-            "required": true
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
             "required": true
           },
           {
@@ -1341,26 +1409,44 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 15:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 23:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Tuesday 10 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Share {Account} for {For}"
+          }
+        ]
       },
       "icon": "key",
       "sheet": "share-account",
-      "prefill": {
-        "With": "linux-1"
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with linux-1"
+          }
+        ]
       }
     },
     {
