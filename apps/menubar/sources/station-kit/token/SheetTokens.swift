@@ -54,3 +54,28 @@ extension Token.Role {
 extension Token.Symbol {
     public static let popup = "chevron.up.chevron.down"
 }
+
+// value: SPEC A5's other sheets: Lend an account's pick list, Share a
+// port's listeners, Clean up's checked lists and its note, a hint's
+// command box, as the prototype draws them.
+extension Token.Metric.Sheet {
+    public static let listRadius: CGFloat = 10
+    public static let listPadding = EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)
+    public static let listRow: CGFloat = 34
+    public static let listGap: CGFloat = 10
+    public static let listCheck: CGFloat = 11
+    public static let listLabelGap: CGFloat = 6
+    public static let commandPadding = EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 8)
+    public static let commandRadius: CGFloat = 10
+    public static let commandCopy: CGFloat = 26
+    public static let commandGlyph: CGFloat = 11
+    public static let fixedGlyph: CGFloat = 13
+}
+
+extension Token.Role {
+    public static let listTitle = Token.Role(13, .regular, .t1)
+    public static let listNote = Token.Role(11, .regular, .t2)
+    public static let listLabel = Token.Role(12, .regular, .t2)
+    public static let sheetNote = Token.Role(11, .regular, .t3)
+    public static let commandLine = Token.Role(12, .regular, .t1, design: .monospaced)
+}

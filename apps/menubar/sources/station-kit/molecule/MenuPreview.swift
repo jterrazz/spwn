@@ -88,6 +88,8 @@ public struct MenuPreview: View {
                     .foregroundStyle(lit ? P.litInk : tokens.color.t3)
             } else if let key = item.key {
                 Text(verbatim: MenuModel.keys(key)).font(Token.Role.keyCap.font).foregroundStyle(lit ? P.litInk : tokens.color.t3)
+            } else if let note = item.note {
+                Text(verbatim: note).font(Token.Role.findResult.font).foregroundStyle(lit ? P.litInk : tokens.color.t3).lineLimit(1)
             }
         }
         .padding(.horizontal, P.side)
@@ -126,20 +128,25 @@ public struct MenuStage: View {
     let anchor: CGRect
     let page: Bool
     let size: CGSize
+    // value: a sheet's popup opens under its field, its left edge on the
+    // field's.
+    let popup: Bool
 
-    public init(_ model: MenuModel, child: String? = nil, anchor: CGRect, page: Bool, in size: CGSize) {
+    public init(_ model: MenuModel, child: String? = nil, anchor: CGRect, page: Bool, popup: Bool = false, in size: CGSize) {
         self.model = model
         self.child = child
         self.anchor = anchor
         self.page = page
+        self.popup = popup
         self.size = size
     }
 
     var sub: MenuItem? { model.items.first { $0.id == child && !$0.submenu.isEmpty } }
 
     public var body: some View {
-        MenuPlacement(x: page ? anchor.maxX : anchor.minX + Token.MenuPreview.inset, y: page ? anchor.maxY + Token.MenuPreview.inset : anchor.minY + Token.MenuPreview.pointer,
-                      trailing: page, entry: sub.map { MenuPreview.top(of: $0.id, in: model) - Token.Metric.Menu.padding } ?? 0) {
+        MenuPlacement(x: popup ? anchor.minX : page ? anchor.maxX : anchor.minX + Token.MenuPreview.inset,
+                      y: page || popup ? anchor.maxY + Token.MenuPreview.inset : anchor.minY + Token.MenuPreview.pointer,
+                      trailing: page && !popup, entry: sub.map { MenuPreview.top(of: $0.id, in: model) - Token.Metric.Menu.padding } ?? 0) {
             MenuPreview(model, open: child)
             if let sub { MenuPreview(MenuModel(header: nil, items: sub.submenu)) }
         }

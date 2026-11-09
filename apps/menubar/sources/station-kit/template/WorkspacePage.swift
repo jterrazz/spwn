@@ -24,8 +24,9 @@ struct WorkspacePage: View {
     }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
-            MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push)
+        let layer = SheetLayer.of(page, state, handlers)
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+            MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push).modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 if segment == ActivityWindow.segment {
@@ -38,8 +39,9 @@ struct WorkspacePage: View {
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
+            .modifier(UnderSheet(layer != nil))
         } footer: {
-            PageFooter(page: page, state: state, handlers: handlers)
+            PageFooter(page: page, state: state, handlers: handlers).modifier(UnderSheet(layer != nil))
         }
         .background {
             BackKey(state: state, handlers: handlers)

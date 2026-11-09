@@ -5,6 +5,12 @@ extension Story {
     // station menu, the shown page's More menu, or a row's or a tile's.
     public var menu: MenuModel? {
         guard let open = ui.menu, let page = state.shown else { return nil }
+        if let sheet = ui.sheet, let action = page.action(sheet.id), let form = action.form, let id = open.id {
+            let answers = Answers(form, sheet.answers ?? [:])
+            if id == SheetAnchor.split { return MenuModel.split(action, page: page) }
+            if let f = answers.field(String(id.dropFirst(SheetAnchor.field("").count))) { return MenuModel.popup(f, answers) }
+            return nil
+        }
         guard let key = open.row else {
             return open.id == "station" ? MenuModel.station(page, loginItemOn: ui.loginItem ?? false, sparklineOn: false) : MenuModel.page(page)
         }
@@ -120,9 +126,10 @@ public struct StoryView: View {
         tipped.overlayPreferenceValue(MenuAnchors.self) { anchors in
             if let open = story.ui.menu, let model = story.menu {
                 GeometryReader { proxy in
-                    let key = open.row.map(MenuAnchors.row) ?? MenuAnchors.page
+                    let sheet = story.ui.sheet != nil ? open.id : nil
+                    let key = sheet ?? open.row.map(MenuAnchors.row) ?? MenuAnchors.page
                     if let anchor = anchors[key] {
-                        MenuStage(model, child: open.submenu, anchor: proxy[anchor], page: open.row == nil, in: proxy.size)
+                        MenuStage(model, child: open.submenu, anchor: proxy[anchor], page: open.row == nil, popup: sheet != nil && sheet != SheetAnchor.split, in: proxy.size)
                     }
                 }
             }

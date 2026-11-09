@@ -19,8 +19,9 @@ public struct AccountsPage: View {
     func tap(_ action: Action) { perform(action, handlers) }
 
     public var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
-            MachineHeader(page, segment: nil, back: handlers.back, run: tap)
+        let layer = SheetLayer.of(page, state, handlers)
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+            MachineHeader(page, segment: nil, back: handlers.back, run: tap).modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array(MacPage.sections(page, segment: "").enumerated()), id: \.offset) { _, s in
@@ -28,11 +29,13 @@ public struct AccountsPage: View {
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
+            .modifier(UnderSheet(layer != nil))
         } footer: {
             VStack(spacing: Token.Metric.Accounts.footerGap) {
                 if let status = state.status { StatusBar(status.line, failed: status.failed) }
                 ListFooter(page: page, run: tap)
             }
+            .modifier(UnderSheet(layer != nil))
         }
         .background {
             BackKey(state: state, handlers: handlers)

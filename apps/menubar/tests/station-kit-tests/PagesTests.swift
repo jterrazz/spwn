@@ -51,14 +51,15 @@ final class PagesTests: XCTestCase {
 
     // invariant: MB-07: a workspace's, a server's and a Mac's page each draw
     // their sections and show only actions that name a call, open a
-    // terminal, copy or open a link, or show a link's QR, or that only a
+    // terminal, copy or open a link, show a link's QR, or open a sheet of
+    // the page (Share a port, whose rows name the calls), or that only a
     // menu reaches with no call (its header, Open of its row's page), and
     // each draws offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "ports", "footnote", "private", "shared", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["throwaway", "on This Mac", "no agent running"])
-        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Share a port", "Open in Terminal", "Copy ssh linux-1"])
+        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Open in Terminal", "Copy ssh linux-1"])
         let infra = try Tree.page("menubar.vm.infra")
         XCTAssertEqual(infra.sections?.compactMap(\.id), ["summary", "health", "gauges", "ports", "tooling", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
@@ -67,7 +68,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:shared"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
-                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu"), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
+                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu") || (action.run == nil && action.sheet != nil), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
             }
         }
         for name in ["menubar.vm.linux-1", "menubar.vm.infra", "menubar.mac.mini"] {
@@ -127,8 +128,9 @@ final class PagesTests: XCTestCase {
     }
 
     // invariant: PO-45: linux-1's page, opened from Home, is the engine's
-    // watch of menubar.machine:linux-1; Share a port… there asks the port as
-    // text and sends ports.share for linux-1, and a shared port is a link.
+    // watch of menubar.machine:linux-1; Share a port… there types nothing:
+    // Of linux-1, then what listens there, here the line that nothing does;
+    // and a shared port is a link.
     func testWorkspaceSharePort() async throws {
         let engine = try FakeEngine("mb-share-open")
         defer { engine.stop() }
@@ -145,11 +147,11 @@ final class PagesTests: XCTestCase {
         let page = try Tree.page("menubar.vm.linux-1")
         XCTAssertNil(page.action("declare-public"))
         let share = try XCTUnwrap(page.action("share-port"))
-        XCTAssertEqual(share.form?.fields?.map(\.kind), ["text"])
-        let (frames, _) = try await sentAll(share, answers: ["Port": "3000"], label: "mb-share", reread: [watch])
-        XCTAssertEqual(frames.map(\.call), ["ports.share", "engine.refresh"])
-        XCTAssertEqual(frames.first?.input, ["VM": "linux-1", "Port": "3000"])
-        XCTAssertTrue(frames.first?.frame["in"].flatMap { ($0 as? [String: Any])?["Port"] } is String)
+        XCTAssertEqual(share.form?.fields?.map(\.kind), ["select", "rows"])
+        XCTAssertEqual(share.form?.fields?.first?.options?.map(\.label), ["linux-1"])
+        XCTAssertEqual(share.form?.fields?.last?.options ?? [], [])
+        XCTAssertEqual(share.form?.fields?.last?.note, "Nothing listens in linux-1 right now.")
+        XCTAssertNil(share.run)
         XCTAssertEqual(PortRow.link(try XCTUnwrap(page.section("private")?.rows.first), in: page.actions ?? [])?.run?.open, "https://jterrazz-macbook-pro.tail77a797.ts.net:40001")
         try drawn("sheet.share-port", try pushed("menubar.vm.linux-1", confirming: share.id))
     }

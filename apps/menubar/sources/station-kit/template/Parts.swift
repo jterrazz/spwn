@@ -330,14 +330,25 @@ struct SheetFor: View {
 // the panel's sheet layer, the page dimmed under its scrim; the forms of
 // today's kind stay in the flow of the page.
 public enum SheetLayer {
-    public static let kinds: Set<String> = ["new-vm"]
+    public static let kinds: Set<String> = ["new-vm", "share-account", "share-port", "cleanup"]
+    public static let hint = "hint:"
 
-    public static func layered(_ action: Action) -> Bool { kinds.contains(action.sheet ?? "") }
+    public static func layered(_ action: Action) -> Bool {
+        let sheet = action.sheet ?? ""
+        return kinds.contains(sheet) || sheet.hasPrefix(hint) && action.form != nil
+    }
 
     @MainActor
     public static func of(_ page: Page?, _ state: PanelState, _ handlers: PopoverHandlers) -> AnyView? {
         guard let id = state.confirming, let page, let action = page.action(id), layered(action) else { return nil }
-        return AnyView(NewVMSheet(page: page, action: action, given: state.answers[id] ?? [:], handlers: handlers))
+        let given = state.answers[id] ?? [:]
+        switch action.sheet ?? "" {
+        case "share-account": return AnyView(LendSheet(page: page, action: action, given: given, handlers: handlers))
+        case "share-port": return AnyView(SharePortSheet(page: page, action: action, given: given, handlers: handlers))
+        case "cleanup": return AnyView(CleanupSheet(page: page, action: action, given: given, handlers: handlers))
+        case let sheet where sheet.hasPrefix(hint): return AnyView(HintSheet(page: page, action: action, given: given, handlers: handlers))
+        default: return AnyView(NewVMSheet(page: page, action: action, given: given, handlers: handlers))
+        }
     }
 }
 

@@ -14,8 +14,9 @@ struct NeedsPage: View {
     var busy: Set<String> { state.busy.union([state.settling].compactMap { $0 }) }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
-            MachineHeader(page, segment: nil, back: handlers.back) { perform($0, handlers) }
+        let layer = SheetLayer.of(page, state, handlers)
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+            MachineHeader(page, segment: nil, back: handlers.back) { perform($0, handlers) }.modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array((page.sections ?? []).filter { $0.id != "summary" }.enumerated()), id: \.offset) { _, s in
@@ -23,8 +24,9 @@ struct NeedsPage: View {
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
+            .modifier(UnderSheet(layer != nil))
         } footer: {
-            if let status = state.status { StatusBar(status.line, failed: status.failed) }
+            if let status = state.status { StatusBar(status.line, failed: status.failed).modifier(UnderSheet(layer != nil)) }
         }
         .background {
             BackKey(state: state, handlers: handlers)
