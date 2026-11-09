@@ -65,16 +65,6 @@ pop.info
 pop.tooltip
 pop.hud.copy
 pop.hud.terminal
-find.empty
-find.down
-find.port
-find.machine
-find.action
-find.awake
-find.keyboard
-find.more-open
-find.nomatch
-find.type-to-find
 transition.panel-open
 transition.panel-close
 transition.push

@@ -6,9 +6,9 @@ public enum Connection: Equatable, Sendable {
 
 public enum PageID {
     public static let home = "menubar"
-    public static let switcher = "menubar.switcher"
     public static let machine = "menubar.machine"
     public static let agent = "menubar.agent"
+    public static let find = "menubar.find"
 
     // value: the watch name of one machine's page (SPEC §10.3).
     public static func of(_ machine: String) -> String { "\(Self.machine):\(machine)" }
@@ -27,11 +27,11 @@ public struct PanelState: Equatable, Sendable {
     public var qr: String?
     public var menu = false
     public var answers: [String: [String: String]] = [:]
-    // value: the page pushed over Home: the switcher, or one machine's.
+    // value: the page pushed over Home: one machine's, or a page of the
+    // menu bar's own.
     public var pushed: Page?
     // value: the machines last opened, newest first: the menu bar's own.
     public var recent: [String] = []
-    public var search = ""
     // value: the words of the way back, the page under the one pushed;
     // nil when Home is under it.
     public var back: String?
@@ -71,6 +71,10 @@ public struct PanelState: Equatable, Sendable {
     // being typed: the client's own until it is sent.
     public var prOpened: [String] = []
     public var reply = ""
+    // value: Find, open in the panel's place, and the engine's index it
+    // finds in (`menubar.find`), read while it is open.
+    public var find: FindQuery?
+    public var findIndex: Page?
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -113,12 +117,10 @@ public struct PopoverHandlers {
     public var sparkline: (Bool) -> Void
     public var sparklineOn: Bool
     public var quit: () -> Void
-    public var search: (String) -> Void
     public var copy: (String) -> Void
-    // value: navigation: open a machine's page, the switcher, a page by its
+    // value: navigation: open a machine's page, a page by its
     // watch name, Activity's window, back to Home.
     public var openMachine: (String) -> Void
-    public var openSwitcher: () -> Void
     public var push: (String) -> Void
     public var window: (String) -> Void
     public var back: () -> Void
@@ -126,6 +128,8 @@ public struct PopoverHandlers {
     // app (a link opened, a terminal): it closes, as a menu does.
     public var close: () -> Void
     public var scrub: (Int?) -> Void = { _ in }
+    // value: Find opened, typed in, moved through or closed (nil).
+    public var find: (FindQuery?) -> Void = { _ in }
     // value: the window picked on a machine's Activity, to remember.
     public var remember: (String, String) -> Void = { _, _ in }
 
@@ -133,7 +137,7 @@ public struct PopoverHandlers {
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },
                 toggleQR: @escaping (String) -> Void = { _ in }, toggleMenu: @escaping () -> Void = {}, loginItem: @escaping (Bool) -> Void = { _ in }, loginItemOn: Bool = false,
                 sparkline: @escaping (Bool) -> Void = { _ in }, sparklineOn: Bool = false, quit: @escaping () -> Void = {},
-                openMachine: @escaping (String) -> Void = { _ in }, openSwitcher: @escaping () -> Void = {}, search: @escaping (String) -> Void = { _ in },
+                openMachine: @escaping (String) -> Void = { _ in },
                 copy: @escaping (String) -> Void = { _ in }, window: @escaping (String) -> Void = { _ in },
                 push: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, close: @escaping () -> Void = {}) {
         self.run = run
@@ -148,8 +152,6 @@ public struct PopoverHandlers {
         self.sparklineOn = sparklineOn
         self.quit = quit
         self.openMachine = openMachine
-        self.openSwitcher = openSwitcher
-        self.search = search
         self.copy = copy
         self.window = window
         self.push = push
@@ -164,10 +166,9 @@ extension PopoverHandlers {
     // leaves the next click spent on the page that is gone.
     public func deferred(_ later: @escaping (@escaping () -> Void) -> Void) -> PopoverHandlers {
         var h = self
-        let (push, openMachine, openSwitcher, back, window, confirm) = (self.push, self.openMachine, self.openSwitcher, self.back, self.window, self.confirm)
+        let (push, openMachine, back, window, confirm) = (self.push, self.openMachine, self.back, self.window, self.confirm)
         h.push = { page in later { push(page) } }
         h.openMachine = { name in later { openMachine(name) } }
-        h.openSwitcher = { later { openSwitcher() } }
         h.back = { later { back() } }
         h.window = { flag in later { window(flag) } }
         h.confirm = { action in later { confirm(action) } }
@@ -211,7 +212,9 @@ public struct Popover: View {
     // invariant: the panel is the MenuBarExtra's own glass; nothing in it
     // is glass again (WWDC25: no glass on glass, none in the content).
     public var body: some View {
-        if let machine = MachinePage.view(state, handlers: handlers, scrolls: scrolls) {
+        if state.find != nil {
+            FindPanel(state: state, handlers: handlers, scrolls: scrolls)
+        } else if let machine = MachinePage.view(state, handlers: handlers, scrolls: scrolls) {
             machine
         } else if let own = pushedView {
             own
@@ -253,13 +256,18 @@ public struct Popover: View {
                 if home.section(HomeCards.macs) != nil {
                     VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                         statusBar
-                        FindCapsule(open: handlers.openSwitcher)
+                        FindCapsule { handlers.find(FindQuery()) }
                     }
                 } else {
                     statusBar
                 }
             }
             .background { BackKey(state: state, handlers: handlers) }
+            .onKeyPress(characters: .letters, phases: .down) { press in
+                guard state.confirming == nil, !state.menu else { return .ignored }
+                handlers.find(FindQuery(press.characters))
+                return .handled
+            }
             .environment(\.stationHints, false)
         } else {
             Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming) {
@@ -287,9 +295,7 @@ public struct Popover: View {
             if state.menu { menu }
             if let shown = state.shown {
                 SwiftUI.Group {
-                    if shown.id == PageID.switcher {
-                        SwitcherContent(page: shown, state: state, handlers: handlers)
-                    } else if shown.id == PageID.machine {
+                    if shown.id == PageID.machine {
                         MachinePage(page: shown, state: state, handlers: handlers)
                     } else {
                         HomePage(page: shown, state: state, handlers: handlers)
@@ -315,7 +321,7 @@ public struct Popover: View {
         }
     }
 
-    // invariant: Home and the switcher lead with the machine switcher,
+    // invariant: Home leads with the machine switcher, which opens Find,
     // This Mac's, its host's name and the settings; a machine's page leads
     // with the way back (its own header).
     @ViewBuilder
@@ -324,7 +330,7 @@ public struct Popover: View {
             EmptyView()
         } else {
             HStack(alignment: .center, spacing: Token.Gap.pair) {
-                Button(action: state.pushed == nil ? handlers.openSwitcher : handlers.back) {
+                Button(action: state.pushed == nil ? { handlers.find(FindQuery()) } : handlers.back) {
                     SwitcherPill(open: state.pushed != nil)
                 }
                 .buttonStyle(.plain)

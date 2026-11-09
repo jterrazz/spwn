@@ -85,7 +85,7 @@ extension View {
 
     public func stationHover() -> some View { modifier(Hover()) }
 
-    // value: a field's ground (the switcher's search): a tile's fill,
+    // value: a field's ground: a tile's fill,
     // 10 pt round.
     public func stationField() -> some View { modifier(FieldGround()) }
 }

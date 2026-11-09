@@ -1,8 +1,13 @@
 {
     "group": "find",
     "id": "find.empty",
-    "note": "Find opened: today's switcher.",
-    "pages": ["pages/machines.switcher.json"],
+    "note": "Find opened over home: the top needs with their verbs, the machines opened last, then This Mac's awake and the two New VM actions.",
+    "pages": ["pages/machines.find.find.json"],
     "schema": "station.story/v1",
-    "status": "today"
+    "ui": {
+        "find": {
+            "query": ""
+        },
+        "recent": ["linux-1", "mac-mini", "infra"]
+    }
 }

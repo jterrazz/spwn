@@ -86,15 +86,14 @@ enum Snapshot {
     static let now = ISO8601DateFormatter().date(from: "2026-11-03T10:30:00Z")!
 
     // value: the popover as a fixture shows it: Home or a page of the menu
-    // bar's own, or the switcher or a machine's page pushed over Home, the
-    // switcher with infra opened last.
+    // bar's own, or a machine's page pushed over Home.
     static func state(_ name: String, _ page: Page) -> PanelState {
         let connection: Connection = name.hasSuffix(".error") || name.hasSuffix(".engine-stopped") || name.hasSuffix(".engine-outdated") ? .stopped : .live
-        guard page.id == PageID.switcher || page.id == PageID.machine else { return PanelState(page: page, connection: connection) }
-        return PanelState(page: nil, connection: connection, pushed: page, recent: page.id == PageID.switcher ? ["infra"] : [])
+        guard page.id == PageID.machine else { return PanelState(page: page, connection: connection) }
+        return PanelState(page: nil, connection: connection, pushed: page)
     }
 
-    static func popover(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.switcher || page.id == PageID.machine }
+    static func popover(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.machine }
 
     @MainActor
     static func view(_ name: String, _ page: Page) -> AnyView {

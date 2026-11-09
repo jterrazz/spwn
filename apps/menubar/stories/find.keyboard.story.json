@@ -1,0 +1,13 @@
+{
+    "group": "find",
+    "id": "find.keyboard",
+    "note": "Find \"linux\", Vite lit by the arrows: its Open ↩ and Copy link ⌘↩ in the footer, three per group then Show N more, linux-1's verbs first among the actions.",
+    "pages": ["pages/machines.find.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "highlight": 2,
+            "query": "linux"
+        }
+    }
+}

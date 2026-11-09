@@ -52,7 +52,6 @@ final class PlayFixesTests: XCTestCase {
     func testTheWayBackIsWordedByThePageUnderTheTop() {
         XCTAssertEqual(Navigation.title(Navigation.ports, nil), "Ports")
         XCTAssertEqual(Navigation.title(Navigation.page(Navigation.ports, of: "infra"), nil), "Ports")
-        XCTAssertEqual(Navigation.title(PageID.switcher, nil), "All machines")
         XCTAssertEqual(Navigation.title(PageID.of("jterrazz-mac-mini"), try? Tree.page("menubar.mac.mini")), "mac-mini")
     }
 
@@ -76,16 +75,6 @@ final class PlayFixesTests: XCTestCase {
         XCTAssertEqual(Format.duration(3 * 3600 + 57 * 60), "3 h 57 min")
         XCTAssertEqual(Format.duration(12 * 86400 + 3600), "12 d 1 h")
         XCTAssertEqual(Format.duration(40), "40 s")
-    }
-
-    // invariant: Return opens the line lit, else the first a search found;
-    // with no search and nothing lit it opens nothing.
-    func testReturnOpensTheLitLineOrTheFirstFound() {
-        XCTAssertEqual(SwitcherKeys.picked(1, lit: nil, searching: true), 0)
-        XCTAssertNil(SwitcherKeys.picked(4, lit: nil, searching: false))
-        XCTAssertEqual(SwitcherKeys.picked(4, lit: 2, searching: false), 2)
-        XCTAssertEqual(SwitcherKeys.picked(2, lit: 7, searching: true), 1)
-        XCTAssertNil(SwitcherKeys.picked(0, lit: nil, searching: true))
     }
 
     // invariant: M29: a count of any size draws all its digits, never cut

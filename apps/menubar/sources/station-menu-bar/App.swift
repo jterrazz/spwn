@@ -47,7 +47,10 @@ struct StationMenuBarApp: App {
             } else {
                 Image(nsImage: model.iconImage)
                     .accessibilityLabel(model.icon.label)
-                    .task { model.start() }
+                    .task {
+                        model.start()
+                        FindHotKey.shared.register { model.findFromAnywhere() }
+                    }
             }
         }
         .menuBarExtraStyle(.window)
@@ -67,8 +70,6 @@ struct StationMenuBarApp: App {
             sparklineOn: model.sparkline,
             quit: { NSApplication.shared.terminate(nil) },
             openMachine: { name in model.openMachine(name) },
-            openSwitcher: { model.openSwitcher() },
-            search: { text in model.state.search = text },
             copy: { text in
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
@@ -76,6 +77,7 @@ struct StationMenuBarApp: App {
             close: { model.closePanel() }))
         h.push = { page in model.push(page) }
         h.scrub = { index in model.state.scrub = index }
+        h.find = { query in model.find(query) }
         h.remember = { machine, window in model.remember(machine, window: window) }
         return h.deferred { DispatchQueue.main.async(execute: $0) }
     }

@@ -59,7 +59,6 @@ public final class Navigation: @unchecked Sendable {
         case awake: return "Awake"
         case activity: return "Activity"
         case accounts: return "Accounts"
-        case PageID.switcher: return "All machines"
         default:
             if let title = page?.section("machine")?.title ?? page?.section("summary")?.title, !title.isEmpty { return title }
             return watch.split(separator: ":", maxSplits: 1).dropFirst().first.map(String.init) ?? watch
