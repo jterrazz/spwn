@@ -44,18 +44,19 @@ final class Round2Tests: XCTestCase {
         XCTAssertNil(state.status)
     }
 
-    // invariant: Keep awake for… draws chosen the term the page says is in
-    // force, never Until while a 1 h term holds.
+    // invariant: the picker draws chosen the term the page says is in
+    // force, never Until while a 1 hr term holds, and none while the
+    // keep-awake follows a run.
     func testKeepAwakeForDrawsThePickedTerm() {
         var one = Action(), four = Action(), until = Action()
-        one.id = "keep:1h"; one.label = "1 h"; one.picked = true
-        four.id = "keep:4h"; four.label = "4 h"
-        until.id = "keep-until"; until.label = "Until 11:58"; until.form = Form()
+        one.id = "keep:1h"; one.label = "1 hr"; one.picked = true
+        four.id = "keep:4h"; four.label = "4 hr"
+        until.id = "keep-until"; until.label = "Until 18:00"; until.form = Form()
         let keeps = [one, four, until]
         XCTAssertEqual(keeps.map { AwakePage.picked($0, among: keeps) }, [true, false, false])
         one.picked = nil
-        let old = [one, four, until]
-        XCTAssertEqual(old.map { AwakePage.picked($0, among: old) }, [false, false, true])
+        let following = [one, four, until]
+        XCTAssertEqual(following.map { AwakePage.picked($0, among: following) }, [false, false, false])
     }
 
     // invariant: a button whose sheet asks for the name reads as its label

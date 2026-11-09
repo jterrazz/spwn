@@ -14,12 +14,12 @@ public enum MenuPage {
         guard let page = state.page else { return nil }
         if page.id == needs { return AnyView(NeedsPage(page: page, state: state, handlers: handlers, scrolls: scrolls)) }
         if page.id == accounts { return AnyView(AccountsPage(state, handlers: handlers, scrolls: scrolls)) }
+        if page.id == awake { return AnyView(AwakePage(state, handlers: handlers, scrolls: scrolls)) }
         let body: AnyView
         switch page.id {
         case ports:
             if page.header != nil { return AnyView(PortsPage(state, handlers: handlers, scrolls: scrolls)) }
             body = AnyView(PortsPage(state, handlers: handlers))
-        case awake: body = AnyView(AwakePage(state, handlers: handlers))
         case activity: body = AnyView(ActivityPage(state, handlers: handlers))
         default: return nil
         }

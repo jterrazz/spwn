@@ -1,10 +1,6 @@
 # This Mac
-●	jterrazz-macbook-pro	until 18:00 · lid closed · 6h 30m left
-# Guards
-Temperature	normal
-Battery	80 %
-The screen	always turns off · protects the display
-	Awake stops by itself if the Mac gets too hot.
-# Other Macs
-●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d · hosts infra (server)
-	VMs are not listed: they follow their Mac.
+●	Keep This Mac awake	on	Stays on after agents finish
+●	Stay awake with the lid closed	on
+●	Stay awake on battery	off
+# mac-mini
+●	Never sleeps	on	hosts infra, which pauses if it sleeps

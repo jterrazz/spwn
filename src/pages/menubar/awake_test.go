@@ -2,6 +2,7 @@ package menubar
 
 import (
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,10 +26,10 @@ func TestAwakeOffersTheSwitchesThisMacHas(t *testing.T) {
 		}
 		return ids
 	}
-	if got, want := offered(machine.Capabilities{Engine: true}), []string{"keep:1h", "keep:4h", "keep-until"}; !slices.Equal(got, want) {
+	if got, want := offered(machine.Capabilities{Engine: true}), []string{"keep:1h", "keep:4h", "keep-until", "keep-on"}; !slices.Equal(got, want) {
 		t.Fatalf("a desktop Mac offers %q, want %q", got, want)
 	}
-	if got, want := offered(machine.Capabilities{Engine: true, Lid: true, Battery: true}), []string{"keep:1h", "keep:4h", "keep-until", "lid", "battery"}; !slices.Equal(got, want) {
+	if got, want := offered(machine.Capabilities{Engine: true, Lid: true, Battery: true}), []string{"keep:1h", "keep:4h", "keep-until", "keep-on", "lid", "battery"}; !slices.Equal(got, want) {
 		t.Fatalf("a laptop offers %q, want %q", got, want)
 	}
 }
@@ -60,6 +61,14 @@ func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 	if got := picked(nil); len(got) != 0 {
 		t.Fatalf("no session picks %q, want none", got)
 	}
+	if got := picked(&awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}); len(got) != 0 {
+		t.Fatalf("a keep-awake that follows a run picks %q, want none", got)
+	}
+	for _, d := range []time.Duration{time.Hour, 4 * time.Hour} {
+		if got := picked(&awake.Session{StartedAt: now, Until: now.Add(d), Run: "linux-1"}); len(got) != 0 {
+			t.Fatalf("a run held for %s picks %q, want none", d, got)
+		}
+	}
 }
 
 // invariant: Until's hours are sent as the hour itself, and a switch
@@ -87,19 +96,119 @@ func TestAwakeSendsTheEndItHoldsUntil(t *testing.T) {
 	}
 }
 
-// invariant: under Keep awake, This Mac's line says the end without the
-// title's word (vision panel e: `until 18:00 · lid closed · 3 h 58 min left`).
-func TestKeepAwakeSaysTheEndWithoutAwake(t *testing.T) {
-	now := time.Date(2026, 11, 3, 14, 2, 0, 0, time.UTC)
-	s := &awake.Session{StartedAt: now, Until: now.Add(3*time.Hour + 58*time.Minute), Lid: true}
-	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Reading: awake.Reading{Source: "ac"}, Caps: machine.Capabilities{Engine: true, Lid: true}, Session: s}
-	p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}}, page.Context{Machine: "this"})
-	row := p.Sections[0].Items[0].Row
-	words := make([]string, 0, len(row.Cells[0].Items))
-	for _, v := range row.Cells[0].Items {
+func awakeOf(t *testing.T, reports []awake.Report, silent ...pageawake.Silent) page.Page {
+	t.Helper()
+	page.Strict(true)
+	defer page.Strict(false)
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	return Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: reports, Silent: silent}, page.Context{Machine: "this"})
+}
+
+func notes(s *page.Section) []string {
+	var out []string
+	for _, it := range s.Items {
+		if it.Note != nil {
+			out = append(out, it.Note.Text)
+		}
+	}
+	return out
+}
+
+// invariant: SPEC B5.14, A9 2-11: a keep-awake that follows a run picks no
+// term and says the run it follows; the picker offers 1 hr, 4 hr and
+// Until 18:00 in one unit.
+func TestAwakeUntilARunSaysTheRunItFollows(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Caps: machine.Capabilities{Engine: true},
+		Session: &awake.Session{StartedAt: now, Until: now.Add(24 * time.Hour), Run: "linux-1"}}
+	p := awakeOf(t, []awake.Report{r})
+	if got := notes(sectionOf(p, SectionThisMac)); !slices.Equal(got, []string{"Until linux-1 is done"}) {
+		t.Fatalf("This Mac's card says %q", got)
+	}
+	var labels []string
+	for _, a := range p.Actions {
+		if strings.HasPrefix(a.ID, "keep") && a.ID != ActionKeepOn {
+			labels = append(labels, a.Label)
+		}
+	}
+	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) {
+		t.Fatalf("the picker offers %q, want %q", labels, want)
+	}
+}
+
+func pickerOf(p page.Page) (labels, picked []string) {
+	for _, a := range p.Actions {
+		if strings.HasPrefix(a.ID, "keep") && a.ID != ActionKeepOn {
+			labels = append(labels, a.Label)
+			if a.Picked {
+				picked = append(picked, a.Label)
+			}
+		}
+	}
+	return labels, picked
+}
+
+// invariant: SPEC A9 2-11: while a 4 hr term holds, the picker still
+// reads 1 hr, 4 hr and Until 18:00, with 4 hr picked: Until offers the
+// hour its form opens on, not the end of the term in force. Only an
+// Until in force says the hour it holds until.
+func TestAwakeUntilKeepsItsHourWhileATermHolds(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	held := func(s *awake.Session) page.Page {
+		return awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Caps: machine.Capabilities{Engine: true}, Session: s}})
+	}
+	labels, picked := pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(4 * time.Hour), For: 4 * time.Hour}))
+	if want := []string{"1 hr", "4 hr", "Until 18:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"4 hr"}) {
+		t.Fatalf("a held 4 hr term offers %q with %q picked, want %q with 4 hr", labels, picked, want)
+	}
+	labels, picked = pickerOf(held(&awake.Session{StartedAt: now, Until: now.Add(150 * time.Minute)}))
+	if want := []string{"1 hr", "4 hr", "Until 13:00"}; !slices.Equal(labels, want) || !slices.Equal(picked, []string{"Until 13:00"}) {
+		t.Fatalf("an Until 13:00 in force offers %q with %q picked, want %q", labels, picked, want)
+	}
+}
+
+// invariant: SPEC A9 1-11: the pause line names only the running work,
+// and the page has no footer.
+func TestAwakePauseLineListsOnlyRunningWork(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Pauses: []string{"linux-1"}}
+	p := awakeOf(t, []awake.Report{r})
+	if got := notes(sectionOf(p, SectionPauses)); !slices.Equal(got, []string{"linux-1 pauses while This Mac sleeps."}) {
+		t.Fatalf("the pause line says %q", got)
+	}
+	if p.Footer != nil {
+		t.Fatalf("Awake has a footer: %+v", p.Footer)
+	}
+	two := awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true, Pauses: []string{"agent-7f", "linux-1"}}})
+	if got := notes(sectionOf(two, SectionPauses)); !slices.Equal(got, []string{"agent-7f and linux-1 pause while This Mac sleeps."}) {
+		t.Fatalf("two running workspaces say %q", got)
+	}
+	if s := sectionOf(awakeOf(t, []awake.Report{{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true}}), SectionPauses); s != nil {
+		t.Fatalf("nothing running still says %q", notes(s))
+	}
+}
+
+// invariant: SPEC B5.14, B5.15: another Mac says its policy and what
+// depends on it; one asleep reads asleep with when it was seen, dimmed and
+// with no switch, never down.
+func TestAwakeSaysEachMacsPolicyAndDependants(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	this := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", ThisMac: true}
+	mini := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "mac-mini", NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}
+	p := awakeOf(t, []awake.Report{this, mini}, pageawake.Silent{Mac: "macbook-air", Why: "no answer", Asleep: true, Answered: now.Add(-2 * time.Hour)})
+	row := sectionOf(p, "mac-mini").Items[0].Row
+	if row.Label != "Never sleeps" || row.Detail.Text != "hosts infra, which pauses if it sleeps" || row.Verb != ActionChange+"mac-mini" {
+		t.Fatalf("mac-mini reads %q, %q, verb %q", row.Label, row.Detail.Text, row.Verb)
+	}
+	if len(row.Cells) != 1 || row.Cells[0].Kind != page.KindOn {
+		t.Fatalf("mac-mini's Never sleeps switch reads %+v, want on", row.Cells)
+	}
+	air := sectionOf(p, "macbook-air").Items[0].Row
+	words := make([]string, 0, len(air.Detail.Items))
+	for _, v := range air.Detail.Items {
 		words = append(words, v.Text)
 	}
-	if want := []string{"until 18:00", "lid closed", "3h 58m left"}; !slices.Equal(words, want) {
-		t.Fatalf("This Mac's line says %q, want %q", words, want)
+	if air.Label != "May sleep" || air.Signal != page.SignalAsleep || air.Verb != "" || !slices.Equal(words, []string{"asleep", "seen 2 hr ago", "nothing depends on it"}) {
+		t.Fatalf("the asleep Mac reads %q, %q (%s), verb %q", air.Label, words, air.Signal, air.Verb)
 	}
 }

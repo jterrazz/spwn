@@ -9,6 +9,21 @@
   "state": "ready",
   "sections": [
     {
+      "id": "summary",
+      "title": "Awake",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "All Macs"
+        },
+        {
+          "kind": "text",
+          "text": "which may sleep, and what pauses"
+        }
+      ]
+    },
+    {
       "id": "this-mac",
       "title": "This Mac",
       "columns": [
@@ -18,7 +33,7 @@
           "keep": 100
         },
         {
-          "key": "mode",
+          "key": "state",
           "kind": "text",
           "keep": 100
         }
@@ -28,35 +43,64 @@
           "row": {
             "id": "jterrazz-macbook-pro",
             "mark": "ok",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
+            "label": "Keep This Mac awake",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "until 18:00"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "lid closed"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "6h 30m left"
-                  }
-                ]
+                "kind": "on"
               }
-            ]
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Stays on after agents finish"
+            },
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "waits"
+            },
+            "verb": "let-sleep"
+          }
+        },
+        {
+          "row": {
+            "id": "lid",
+            "mark": "ok",
+            "label": "Stay awake with the lid closed",
+            "cells": [
+              {
+                "kind": "on"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:laptopcomputer",
+              "signal": "quiet"
+            },
+            "verb": "lid"
+          }
+        },
+        {
+          "row": {
+            "id": "battery",
+            "mark": "ok",
+            "label": "Stay awake on battery",
+            "cells": [
+              {
+                "kind": "off"
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:battery.75percent",
+              "signal": "quiet"
+            },
+            "verb": "battery"
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "card": "flush"
     },
     {
-      "id": "guards",
-      "title": "Guards",
+      "id": "mac-mini",
+      "title": "mac-mini",
       "columns": [
         {
           "key": "name",
@@ -64,67 +108,7 @@
           "keep": 100
         },
         {
-          "key": "mode",
-          "kind": "text",
-          "keep": 100
-        }
-      ],
-      "items": [
-        {
-          "fact": {
-            "key": "Temperature",
-            "value": {
-              "kind": "text",
-              "text": "normal"
-            }
-          }
-        },
-        {
-          "fact": {
-            "key": "Battery",
-            "value": {
-              "kind": "text",
-              "text": "80 %"
-            }
-          }
-        },
-        {
-          "fact": {
-            "key": "The screen",
-            "value": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "always turns off"
-                },
-                {
-                  "kind": "text",
-                  "text": "protects the display"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "note": {
-            "text": "Awake stops by itself if the Mac gets too hot."
-          }
-        }
-      ],
-      "uncounted": true
-    },
-    {
-      "id": "other-macs",
-      "title": "Other Macs",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "mode",
+          "key": "state",
           "kind": "text",
           "keep": 100
         }
@@ -134,50 +118,31 @@
           "row": {
             "id": "mac-mini",
             "mark": "ok",
-            "label": "mac-mini",
-            "short": "mac-mini",
+            "label": "Never sleeps",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "Never sleeps"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "always-on Mac policy"
-                  }
-                ]
+                "kind": "on"
               }
             ],
             "detail": {
-              "kind": "list",
-              "items": [
-                {
-                  "kind": "text",
-                  "text": "last slept: never in 12d"
-                },
-                {
-                  "kind": "text",
-                  "text": "hosts infra (server)"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "note": {
-            "text": "VMs are not listed: they follow their Mac."
+              "kind": "text",
+              "text": "hosts infra, which pauses if it sleeps"
+            },
+            "glyph": {
+              "kind": "symbol:sun.max",
+              "signal": "waits"
+            },
+            "verb": "change:mac-mini"
           }
         }
       ],
-      "uncounted": true
+      "uncounted": true,
+      "card": "flush"
     }
   ],
   "actions": [
     {
-      "label": "1 h",
+      "label": "1 hr",
       "on": "row",
       "rows": [
         "jterrazz-macbook-pro"
@@ -196,7 +161,7 @@
       }
     },
     {
-      "label": "4 h",
+      "label": "4 hr",
       "on": "row",
       "rows": [
         "jterrazz-macbook-pro"
@@ -272,7 +237,7 @@
                 "label": "19:00"
               }
             ],
-            "default": "\"2026-11-03T16:00:00Z\""
+            "default": "\"2026-11-03T18:00:00Z\""
           }
         ]
       },
@@ -361,5 +326,12 @@
         }
       }
     }
-  ]
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "symbol:sun.max",
+      "signal": "quiet"
+    }
+  }
 }

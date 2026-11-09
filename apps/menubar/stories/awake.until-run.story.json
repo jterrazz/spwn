@@ -1,0 +1,7 @@
+{
+    "group": "awake",
+    "id": "awake.until-run",
+    "note": "This Mac kept awake until linux-1 is done: no term picked, the line says the run it follows.",
+    "pages": ["pages/machines.keep.run.awake.json"],
+    "schema": "station.story/v1"
+}

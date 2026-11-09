@@ -2,7 +2,7 @@ import StationKit
 import SwiftUI
 import XCTest
 
-// invariant: L50e: each of the vision's seven menu-bar panels, drawn with
+// invariant: L50e: each of the vision's menu-bar panels the stories do not draw yet, drawn with
 // the vision's own data at 340 pt over its desk, light and dark; its PNG
 // sits beside the vision's (station-design/vision-panels) for the eye.
 @MainActor
@@ -33,10 +33,6 @@ final class VisionTests: XCTestCase {
 
     func testAPortItsQROpen() throws {
         try drawn("d.port-qr", PanelState(page: try page("d.port-qr"), connection: .live, qr: "https://jterrazz-macbook-pro.tail77a797.ts.net:40001"))
-    }
-
-    func testAwakeEveryMac() throws {
-        try drawn("e.awake", PanelState(page: try page("e.awake"), connection: .live))
     }
 
     func testAServer() throws {

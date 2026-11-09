@@ -1,0 +1,11 @@
+description: 'a Mac gone to sleep reads asleep, with its last answer and the servers it then hosted'
+env: air-asleep
+runs:
+    - command: 'machines > /dev/null'
+      exit: 0
+    - command: 'world offline jterrazz-macbook-air'
+      exit: 0
+    - command: 'awake --json | /usr/bin/jq -c ''.silent[] | {name, asleep, last_answer: (.last_answer != null), hosts_servers}'''
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-air","asleep":true,"last_answer":true,"hosts_servers":[]}

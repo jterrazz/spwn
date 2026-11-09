@@ -18,7 +18,7 @@ station awake --until-done <vm>           # until the agent working in that VM i
 station awake off                         # end the keep-awake now; Never sleeps stays
 ```
 
-Every Mac is listed, This Mac first, the others asked through their engines, so a Mac mini's mode is read and changed from the MacBook (`--on mac-mini`). Each is in one mode: `sleeps-normally`, `awake-until` (`Awake until 18:00`), `never-sleeps`, or `stopped-by-guard` (the guard that ended the last keep-awake, kept on the page for 24 hours), with its reading: lid, power source, battery, thermal. Each Mac also names what depends on it, what pauses while it sleeps: the servers it hosts (`hosts_servers`) and the workspaces running there now (`pauses`); a stopped workspace is not listed.
+Every Mac is listed, This Mac first, the others asked through their engines, so a Mac mini's mode is read and changed from the MacBook (`--on mac-mini`). Each is in one mode: `sleeps-normally`, `awake-until` (`Awake until 18:00`), `never-sleeps`, or `stopped-by-guard` (the guard that ended the last keep-awake, kept on the page for 24 hours), with its reading: lid, power source, battery, thermal. Each Mac also names what depends on it, what pauses while it sleeps: the servers it hosts (`hosts_servers`) and the work running there now (`pauses`), a running workspace whose agent has not finished; a stopped workspace, or one whose agent finished, is not listed. A Mac that does not answer is listed under `silent` with why, and as it last answered: `asleep` (it told it was going to sleep, or last answered on battery with its lid closed), `last_answer`, and the servers it then hosted (`hosts_servers`).
 
 ## Keep awake
 

@@ -1,0 +1,19 @@
+description: 'a workspace whose agent has finished is no longer work that pauses while its Mac sleeps'
+env: two-macs
+runs:
+    - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[0] | {name, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-pro","pauses":["linux-1"]}
+    - command: 'world agent-end linux-1 s-1 "tests pass"'
+      exit: 0
+    - command: 'world advance 1m'
+      exit: 0
+    - command: 'awake --json | /usr/bin/jq -c ''.macs[0] | {name, pauses}'''
+      exit: 0
+      stdout: |
+          {"name":"jterrazz-macbook-pro","pauses":[]}

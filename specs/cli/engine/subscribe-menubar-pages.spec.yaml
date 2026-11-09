@@ -12,7 +12,7 @@ runs:
           ["menubar.ports",["summary","public","private"],null]
           ["menubar.awake"]
           loading ready
-          ["menubar.awake",["this-mac","guards"],null]
+          ["menubar.awake",["summary","this-mac"],null]
           ["menubar.activity:6m"]
           loading ready
           ["menubar.activity",["machine","graphs"],null]

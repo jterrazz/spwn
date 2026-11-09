@@ -103,25 +103,15 @@ func TestHomeListsRunningWorkspacesFirst(t *testing.T) {
 	}
 }
 
-// invariant: the Awake page names another Mac as Home does (`mac-mini`),
-// and says a cool Mac's temperature is normal.
+// invariant: the Awake page names another Mac as Home does (`mac-mini`).
 func TestAwakeNamesMacsAsHomeDoes(t *testing.T) {
 	f := pageawake.AllMachines{Reports: []awake.Report{
 		{Mac: "jterrazz-macbook-pro", ThisMac: true, Caps: machine.Capabilities{Thermal: true}},
 		{Mac: "jterrazz-mac-mini", NeverSleeps: true},
 	}}
 	p := Awake(f, page.Context{})
-	for _, s := range p.Sections {
-		switch s.ID {
-		case SectionOthers:
-			if got := s.Items[0].Row.Short; got != "mac-mini" {
-				t.Fatalf("other Mac named %q", got)
-			}
-		case SectionGuards:
-			if got := s.Items[0].Fact.Value.Text; got != "normal" {
-				t.Fatalf("temperature %q", got)
-			}
-		}
+	if got := p.Sections[len(p.Sections)-1].Title; got != "mac-mini" {
+		t.Fatalf("other Mac named %q", got)
 	}
 }
 
