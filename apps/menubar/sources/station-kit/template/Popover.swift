@@ -211,13 +211,16 @@ public struct Popover: View {
     // invariant: the panel is the MenuBarExtra's own glass; nothing in it
     // is glass again (WWDC25: no glass on glass, none in the content).
     public var body: some View {
-        if let machine = MachinePage.view(state, handlers: handlers, scrolls: scrolls) {
-            machine
-        } else if let own = pushedView {
-            own
-        } else {
-            panel
+        SwiftUI.Group {
+            if let machine = MachinePage.view(state, handlers: handlers, scrolls: scrolls) {
+                machine
+            } else if let own = pushedView {
+                own
+            } else {
+                panel
+            }
         }
+        .environment(\.stationMenuPick, MenuPick(handlers))
     }
 
     // value: a page of the menu bar's own (Ports, Awake, Activity) drawn in

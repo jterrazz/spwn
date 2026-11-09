@@ -13,6 +13,7 @@ public struct MachineHeader: View {
     let open: (String) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
+    @Environment(\.stationMenuPick) private var menuPick
 
     public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }, open: @escaping (String) -> Void = { _ in }) {
         self.page = page
@@ -89,24 +90,16 @@ public struct MachineHeader: View {
         }
     }
 
-    // value: what a page's menu lists: each action of its submenu the page
-    // carries, in order.
-    public static func menu(_ page: Page, _ action: Action) -> [Action] {
-        (action.submenu ?? []).compactMap { page.action($0) }
-    }
-
     // value: the page's menu: its submenu's verbs on a click, each run as
     // its own; drawn still as the round button it opens from.
     @ViewBuilder
     func menu(_ a: Action) -> some View {
-        let items = Self.menu(page, a)
-        if still || items.isEmpty {
-            IconButton(Token.Symbol.menu) { run(a) }.accessibilityLabel(a.label ?? "")
+        let model = MenuModel.page(page)
+        if still || model.isEmpty {
+            IconButton(Token.Symbol.menu) { run(a) }.accessibilityLabel(a.label ?? "").menuAnchor(MenuAnchors.page)
         } else {
             Menu {
-                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                    Button((item.label ?? "") + (item.form != nil || item.confirm != nil ? Token.Glyph.ellipsis : "")) { run(item) }
-                }
+                MenuContent(model) { menuPick?($0, nav: nil) }
             } label: {
                 Image(systemName: Token.Symbol.menu).font(.system(size: Token.Metric.Control.iconGlyph, weight: .regular))
                     .foregroundStyle(tokens.color.t2)
@@ -118,6 +111,7 @@ public struct MachineHeader: View {
             .menuIndicator(.hidden)
             .fixedSize()
             .accessibilityLabel(a.label ?? "")
+            .menuAnchor(MenuAnchors.page)
         }
     }
 

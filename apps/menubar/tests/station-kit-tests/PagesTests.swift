@@ -51,8 +51,9 @@ final class PagesTests: XCTestCase {
 
     // invariant: MB-07: a workspace's, a server's and a Mac's page each draw
     // their sections and show only actions that name a call, open a
-    // terminal, copy or open a link, or show a link's QR, and each draws
-    // offscreen.
+    // terminal, copy or open a link, or show a link's QR, or that only a
+    // menu reaches with no call (its header, Open of its row's page), and
+    // each draws offscreen.
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "ports", "footnote", "private", "shared", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
@@ -66,7 +67,7 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:shared"])
         for page in [linux, infra, mini] {
             for action in page.actions ?? [] {
-                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
+                XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu"), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
             }
         }
         for name in ["menubar.vm.linux-1", "menubar.vm.infra", "menubar.mac.mini"] {

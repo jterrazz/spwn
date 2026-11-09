@@ -237,6 +237,8 @@ public struct RowStack: View {
                     if on { hovered = i } else if hovered == i { hovered = nil }
                 }
                 .onTapGesture { if row.nav != nil { open?(row) } }
+                .stationContextMenu(MenuModel.context(row, actions: actions), nav: row.nav)
+                .menuAnchor(MenuAnchors.row(row.id ?? ""))
                 .overlay(alignment: .top) {
                     if i > 0 {
                         Rectangle().fill(tokens.color.hair)

@@ -62,6 +62,8 @@ public struct AccountsSection: View {
             AddRow((add.label ?? "") + Token.Glyph.ellipsis, trail: RowView.trail(row, columns: section.columns ?? []).map { Format.show($0) }) { run(add, row) }
         } else {
             AccountRow(row, actions: actions) { run($0, row) }
+                .stationContextMenu(MenuModel.context(row, actions: actions), nav: row.nav)
+                .menuAnchor(MenuAnchors.row(row.id ?? ""))
         }
     }
 
