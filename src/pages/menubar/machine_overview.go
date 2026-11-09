@@ -207,11 +207,21 @@ func (o macOverview) vms() page.Section {
 	return s
 }
 
+// value: a VM's place on its Mac's card: servers first, then the VMs an
+// agent works or waits in, the other running ones, the finished, then the
+// stopped (SPEC A4's linux-1, agent-7f, api).
 func rank(vm model.VM) int {
-	if vm.Lifetime == model.AlwaysOn {
+	switch {
+	case vm.Lifetime == model.AlwaysOn:
 		return 0
+	case vm.State != model.Running && vm.State != model.Creating:
+		return 4
+	case vm.Finished():
+		return 3
+	case vm.Agent != nil:
+		return 1
 	}
-	return 1
+	return 2
 }
 
 // value: a VM on its Mac's page: the agent mark or the status dot, what
@@ -269,6 +279,9 @@ func (o macOverview) vmRow(vm model.VM) page.Row {
 	case vm.Agent != nil:
 		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalActive}
 		row.Detail = page.Text(cmpWord(vm.Agent.Task, "working"))
+		if len(vm.Agent.Step) > 0 {
+			row.Detail = page.Texts(vm.Agent.Step...)
+		}
 	default:
 		row.Glyph = page.Glyph{Dot: page.DotFill, Signal: page.SignalWell}
 		row.Detail = page.Texts("running", life)

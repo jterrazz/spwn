@@ -130,6 +130,35 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4: This Mac's VMs read the working one first with its
+// agent's step, then the finished, then the stopped, and every row, the
+// finished one too, opens its VM's page.
+func TestAMacsVMsListTheWorkingFirstAndEachOpensItsPage(t *testing.T) {
+	p := macPageOf(t, proMac, func(m *Machine) {
+		m.All.Macs[0].VMs = []model.VM{
+			{Name: "agent-7f", Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Reason: "tests pass"}},
+			{Name: "api", Lifetime: model.Permanent, State: model.Stopped},
+			{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running,
+				Agent: &model.AgentView{State: "working", Task: "builds the landing page", Step: []string{"running tests", "41/58 pass"}}},
+		}
+	})
+	vms := sectionOf(p, SectionVMs)
+	if got := labels(vms.Items); !slices.Equal(got, []string{"linux-1", "agent-7f", "api"}) {
+		t.Fatalf("VMs %q, want the working linux-1, then the finished agent-7f, then the stopped api", got)
+	}
+	if d := words(vms.Items[0].Row.Detail); d != "running tests | 41/58 pass" {
+		t.Errorf("linux-1 reads %q, want its agent's step as Home says it", d)
+	}
+	for _, it := range vms.Items {
+		if want := machinePage(it.Row.Label); it.Row.Nav != want {
+			t.Errorf("%s's row opens %q, want its page %q", it.Row.Label, it.Row.Nav, want)
+		}
+	}
+	if finished := vms.Items[1].Row; finished.Verb != ActionCleanup {
+		t.Errorf("agent-7f's row offers %q, want Clean up beside its way in", finished.Verb)
+	}
+}
+
 // invariant: SPEC A4: an exposed port on This Mac leads its card, in its
 // own words; its app is the one fact after them, and the first to go.
 func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
