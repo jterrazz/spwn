@@ -78,6 +78,11 @@ final class KeyboardTests: XCTestCase {
         XCTAssertNil(PanelOrder.follow(.panel, in: PanelOrder.walk(home)))
     }
 
+    func testTheStoryDrawsTheAccountsTileLitByTheKeyboard() {
+        XCTAssertEqual(Stories["home.keyboard"].ui.highlight.map(PanelFocus.init), .control("menubar.accounts"))
+        XCTAssertEqual(PanelFocus("linux-1"), .row("linux-1"))
+    }
+
     func testARowUnderAStillPointerWaitsForItToMoveThreePoints() {
         XCTAssertFalse(PointerRule.releases(from: .zero, to: CGPoint(x: 2, y: 2)))
         XCTAssertTrue(PointerRule.releases(from: .zero, to: CGPoint(x: 3, y: 0)))

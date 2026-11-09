@@ -108,6 +108,8 @@ import SwiftUI
 
 #Preview("home.hover") { StoryStage(Stories["home.hover"]) }
 
+#Preview("home.keyboard") { StoryStage(Stories["home.keyboard"]) }
+
 #Preview("home.loaded") { StoryStage(Stories["home.loaded"]) }
 
 #Preview("home.loading") { StoryStage(Stories["home.loading"]) }
