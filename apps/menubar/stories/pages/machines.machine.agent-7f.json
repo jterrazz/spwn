@@ -1379,14 +1379,6 @@
                 "unit": "%"
               }
             ],
-            "peak": {
-              "index": 46,
-              "value": {
-                "kind": "percent",
-                "n": 40
-              },
-              "at": "09:42"
-            },
             "ends": [
               "yesterday 10:30",
               "now"
