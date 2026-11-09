@@ -35,8 +35,9 @@ struct MacPage: View {
     }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming) {
-            header
+        let layer = SheetLayer.of(page, state, handlers)
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: PanelLayers(sheet: layer)) {
+            header.blur(radius: layer == nil ? 0 : S.blur)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 if segment == ActivityWindow.segment {
@@ -49,6 +50,8 @@ struct MacPage: View {
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
+            .blur(radius: layer == nil ? 0 : S.blur)
+            .disabled(layer != nil)
         } footer: {
             if let status = state.status { StatusBar(status.line, failed: status.failed) }
         }

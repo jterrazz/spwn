@@ -275,3 +275,72 @@ public struct SheetButton: View {
     }
 }
 
+
+// invariant: SPEC A5's sheet: an opaque card inset in the panel, its
+// title and why, its body, then its buttons over a hairline; it unrolls
+// from the top (M20), drawn here at rest.
+public struct SheetCard<Content: View, Footer: View>: View {
+    let title: String
+    let subtitle: String?
+    let content: Content
+    let footer: Footer
+    @Environment(\.stationTokens) private var tokens
+
+    public init(_ title: String, subtitle: String?, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
+        self.title = title
+        self.subtitle = subtitle
+        self.content = content()
+        self.footer = footer()
+    }
+
+    public var body: some View {
+        let shape = RoundedRectangle(cornerRadius: S.radius, style: .continuous)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: S.subtitleGap) {
+                Text(title).font(Token.Role.sheetTitle.font).foregroundStyle(tokens.tone(Token.Role.sheetTitle.tone))
+                if let subtitle {
+                    Text(subtitle).font(Token.Role.sheetBody.font).foregroundStyle(tokens.tone(Token.Role.sheetBody.tone)).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(S.header)
+            content.padding(S.body)
+            Rectangle().fill(tokens.color.hair).frame(height: S.footerHair)
+            footer.padding(S.footer)
+        }
+        .background(shape.fill(tokens.color.sheetSolid))
+        .overlay(shape.strokeBorder(tokens.color.hair, lineWidth: S.footerHair))
+        .clipShape(shape)
+        .shadow(color: S.shadowNear.color, radius: S.shadowNear.radius, y: S.shadowNear.y)
+        .shadow(color: S.shadow.color, radius: S.shadow.radius, y: S.shadow.y)
+        .padding(S.inset)
+    }
+}
+
+// value: a form's row on the sheet's label grid: its label right-aligned
+// in the 58 pt column, the control, then its caption under it.
+public struct FormRow<Control: View>: View {
+    let label: String?
+    let caption: String?
+    let control: Control
+    @Environment(\.stationTokens) private var tokens
+
+    public init(_ label: String?, caption: String? = nil, @ViewBuilder control: () -> Control) {
+        self.label = label
+        self.caption = caption
+        self.control = control()
+    }
+
+    public var body: some View {
+        HStack(alignment: .top, spacing: S.formGap) {
+            RoleText(label ?? "", .formLabel).frame(width: S.labelColumn, height: S.field, alignment: .trailing)
+            VStack(alignment: .leading, spacing: S.caption) {
+                control
+                if let caption, !caption.isEmpty {
+                    Text(caption).font(Token.Role.formCaption.font).foregroundStyle(tokens.tone(Token.Role.formCaption.tone)).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}

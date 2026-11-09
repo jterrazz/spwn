@@ -240,8 +240,9 @@ public struct Popover: View {
     @ViewBuilder
     var panel: some View {
         if let home {
-            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming) {
-                HomeHeaderBar(page: home, state: state, handlers: handlers)
+            let layer = SheetLayer.of(home, state, handlers)
+            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming, layers: PanelLayers(sheet: layer)) {
+                HomeHeaderBar(page: home, state: state, handlers: handlers).blur(radius: layer == nil ? 0 : S.blur)
             } content: {
                 VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                     if state.menu { menu }
@@ -249,15 +250,20 @@ public struct Popover: View {
                         .opacity(state.connection == .connecting ? Token.Fade.connecting : 1)
                         .disabled(state.connection == .connecting)
                 }
+                .blur(radius: layer == nil ? 0 : S.blur)
+                .disabled(layer != nil)
             } footer: {
-                if home.section(HomeCards.macs) != nil {
-                    VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                SwiftUI.Group {
+                    if home.section(HomeCards.macs) != nil {
+                        VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
+                            statusBar
+                            FindCapsule(open: handlers.openSwitcher)
+                        }
+                    } else {
                         statusBar
-                        FindCapsule(open: handlers.openSwitcher)
                     }
-                } else {
-                    statusBar
                 }
+                .blur(radius: layer == nil ? 0 : S.blur)
             }
             .background { BackKey(state: state, handlers: handlers) }
             .environment(\.stationHints, false)
