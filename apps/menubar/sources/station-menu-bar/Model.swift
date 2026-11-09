@@ -262,8 +262,11 @@ final class Model: ObservableObject {
         }
     }
 
+    // invariant: the panel hidden is back at its top, so its next opening
+    // draws its first frame there.
     func closed() {
         open = false
+        state.openings += 1
         find(nil)
         reviving?.cancel()
         reviving = nil

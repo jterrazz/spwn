@@ -35,6 +35,7 @@ struct StationMenuBarApp: App {
             } else {
                 Popover(model.state, handlers: handlers)
                     .environment(\.stationLive, model.live)
+                    .modifier(PanelOpening())
                     .stationSystemTheme()
                     .stationSystemAccessibility()
                     .onAppear { model.opened() }

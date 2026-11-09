@@ -54,6 +54,16 @@ final class MotionTests: XCTestCase {
         near(PanelAppear.frozen(0.35, closing: true), 1 - Self.snappy(0.35), "it closes on snappy")
     }
 
+    // invariant: play round V2 [transition.panel-open]: the panel the
+    // owner opens from the menu bar grows out of its item, as the catalogue
+    // draws it, never shown whole on its first frame.
+    func testTheAppsPanelGrowsOutOfItsItemEachTimeItOpens() throws {
+        let app = try String(contentsOf: Tree.app.appendingPathComponent("App.swift"), encoding: .utf8)
+        let panel = try XCTUnwrap(app.range(of: "Popover(model.state"))
+        let theme = try XCTUnwrap(app.range(of: ".stationSystemTheme()", range: panel.upperBound..<app.endIndex))
+        XCTAssertTrue(app[panel.upperBound..<theme.lowerBound].contains(".modifier(PanelOpening())"), "the app's panel opens without M1")
+    }
+
     func testAPushedPageSlidesInOpaqueOverThePageBelowWhichDimsAThirdAway() {
         for t in Self.moments {
             let p = Self.smooth(t)
