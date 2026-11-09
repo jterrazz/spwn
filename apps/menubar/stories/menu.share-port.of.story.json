@@ -1,0 +1,16 @@
+{
+    "group": "menu",
+    "heightNote": "5 pt under the prototype's 556, as ports.all under it: the page header's top inset is the panel frame's",
+    "id": "menu.share-port.of",
+    "note": "The Of popup of Share a port: the running workspaces with their Mac.",
+    "pages": ["pages/machines.ports.ports.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "id": "field:Of"
+        },
+        "sheet": {
+            "id": "share-port"
+        }
+    }
+}

@@ -188,6 +188,12 @@ import SwiftUI
 
 #Preview("menu.context.workspace") { StoryStage(Stories["menu.context.workspace"]) }
 
+#Preview("menu.lend.to") { StoryStage(Stories["menu.lend.to"]) }
+
+#Preview("menu.new-vm.create") { StoryStage(Stories["menu.new-vm.create"]) }
+
+#Preview("menu.new-vm.on") { StoryStage(Stories["menu.new-vm.on"]) }
+
 #Preview("menu.page.mac.asleep") { StoryStage(Stories["menu.page.mac.asleep"]) }
 
 #Preview("menu.page.mac") { StoryStage(Stories["menu.page.mac"]) }
@@ -199,6 +205,8 @@ import SwiftUI
 #Preview("menu.page.this-mac") { StoryStage(Stories["menu.page.this-mac"]) }
 
 #Preview("menu.page.workspace") { StoryStage(Stories["menu.page.workspace"]) }
+
+#Preview("menu.share-port.of") { StoryStage(Stories["menu.share-port.of"]) }
 
 #Preview("menu.station") { StoryStage(Stories["menu.station"]) }
 
@@ -256,6 +264,20 @@ import SwiftUI
 
 #Preview("server.stopped") { StoryStage(Stories["server.stopped"]) }
 
+#Preview("sheet.cleanup.all") { StoryStage(Stories["sheet.cleanup.all"]) }
+
+#Preview("sheet.cleanup.mac") { StoryStage(Stories["sheet.cleanup.mac"]) }
+
+#Preview("sheet.hint.add-mac") { StoryStage(Stories["sheet.hint.add-mac"]) }
+
+#Preview("sheet.hint.declare-public") { StoryStage(Stories["sheet.hint.declare-public"]) }
+
+#Preview("sheet.hint.firewall") { StoryStage(Stories["sheet.hint.firewall"]) }
+
+#Preview("sheet.lend-account") { StoryStage(Stories["sheet.lend-account"]) }
+
+#Preview("sheet.lend-account.vm") { StoryStage(Stories["sheet.lend-account.vm"]) }
+
 #Preview("sheet.new-vm.first") { StoryStage(Stories["sheet.new-vm.first"]) }
 
 #Preview("sheet.new-vm.lend") { StoryStage(Stories["sheet.new-vm.lend"]) }
@@ -267,6 +289,12 @@ import SwiftUI
 #Preview("sheet.new-vm.server") { StoryStage(Stories["sheet.new-vm.server"]) }
 
 #Preview("sheet.new-vm") { StoryStage(Stories["sheet.new-vm"]) }
+
+#Preview("sheet.share-port.empty") { StoryStage(Stories["sheet.share-port.empty"]) }
+
+#Preview("sheet.share-port") { StoryStage(Stories["sheet.share-port"]) }
+
+#Preview("sheet.share-port.vm") { StoryStage(Stories["sheet.share-port.vm"]) }
 
 #Preview("workspace.agents.finished") { StoryStage(Stories["workspace.agents.finished"]) }
 

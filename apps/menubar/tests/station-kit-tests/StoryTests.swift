@@ -104,7 +104,7 @@ final class StoryTests: XCTestCase {
 
     func testEveryPanelStoryStaysGlass() throws {
         var failures: [String] = []
-        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert {
+        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert && story.ui.sheet == nil {
             for scheme in Self.schemes {
                 let share = GlassTests.opaque(view(story), scheme: scheme) ?? 1
                 if share >= 0.4 { failures.append("\(story.id) \(scheme): \(Int(share * 100)) % of it is opaque") }

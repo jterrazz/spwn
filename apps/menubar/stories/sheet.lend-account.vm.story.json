@@ -1,0 +1,13 @@
+{
+    "group": "sheet",
+    "heightNote": "the panel keeps the height of linux-3's page under it, as P9 draws it, 60 pt under the prototype's; the sheet is shorter than both",
+    "id": "sheet.lend-account.vm",
+    "note": "Lend an account from linux-3's page: To linux-3 said, not asked; From mac-mini, its accounts alone.",
+    "pages": ["pages/machines.sheet.machine.linux-3.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "share-account"
+        }
+    }
+}

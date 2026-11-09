@@ -18,6 +18,7 @@ final class MenuTests: XCTestCase {
         var words = (item.checked ? "✓ " : "") + item.title + (item.destructive ? " (red)" : "")
         if let key = item.key, item.submenu.isEmpty { words += " " + MenuModel.keys(key) }
         if !item.submenu.isEmpty { words += " [" + item.submenu.map(read).joined(separator: ", ") + "]" }
+        if let note = item.note { words += " · " + note + (item.enabled ? "" : " (off)") }
         return words
     }
 
@@ -26,6 +27,11 @@ final class MenuTests: XCTestCase {
     // the row or the tile right-clicked, found on the page as drawn.
     static func attached(_ story: Story) -> MenuModel? {
         guard let open = story.ui.menu, let page = story.state.shown else { return nil }
+        if let sheet = story.ui.sheet, let action = page.action(sheet.id), let form = action.form {
+            let answers = Answers(form, sheet.answers ?? [:])
+            if open.id == SheetAnchor.split { return MenuModel.split(action, page: page) }
+            return (form.fields ?? []).first { SheetAnchor.field($0.key ?? "") == open.id }.map { MenuModel.popup($0, answers) }
+        }
         guard let key = open.row else {
             return page.id == PageID.home ? MenuModel.station(page, loginItemOn: story.ui.loginItem ?? false, sparklineOn: false) : MenuModel.page(page)
         }
@@ -40,7 +46,7 @@ final class MenuTests: XCTestCase {
     // hands the system, so its golden shows what the native menu lists.
     func testEveryMenuStoryPreviewsTheMenuThePanelAttaches() throws {
         let stories = try menuStories()
-        XCTAssertEqual(stories.count, 17)
+        XCTAssertEqual(stories.count, 21)
         for story in stories {
             let drawn = try XCTUnwrap(story.menu, story.id)
             XCTAssertFalse(drawn.isEmpty, story.id)
@@ -56,6 +62,11 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…, An account…]", "-",
                                                         "Stop…", "-", "Delete… (red)"])
+        XCTAssertEqual(read["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 24 GB free", "macbook-air · asleep (off)"])
+        XCTAssertEqual(read["menu.new-vm.create"], ["Create ↩", "Create and Open in Terminal ⌥↩"])
+        let workspaces = ["✓ linux-1 · on This Mac", "agent-7f · on This Mac", "linux-3 · on mac-mini", "review-bot · on mac-mini"]
+        XCTAssertEqual(read["menu.lend.to"], workspaces)
+        XCTAssertEqual(read["menu.share-port.of"], workspaces)
         XCTAssertEqual(read["menu.context.stopped"], ["api on This Mac", "Open ↩", "-", "Start", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart"), true)
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
