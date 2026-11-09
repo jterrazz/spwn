@@ -79,12 +79,13 @@ func aliasName(name string) bool {
 
 // invariant: another program's own text is not station's vocabulary: a
 // file's location (`~/.ssh/config`, `{config}/gh/hosts.yml`), a URL, a
-// launchd label or a bundle id, a file's name, an environment variable's
+// launchd label or a bundle id, a menu bar story's id (`sheet.lend-account`,
+// STORIES.md's name for it), a file's name, an environment variable's
 // name, ssh_config's own lines (`Host *`), the JSON keys of another program
 // (Tailscale's `HostName`), a code span quoted in a text, and a command line
 // station runs: the literal Args, Run and Command of a step, the literal
 // arguments of a run…, Script…, Shell… or Command call.
-var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
+var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|[a-z]+\.[a-z0-9]+-[a-z0-9-]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
 
 func commandLine(fun ast.Expr) bool {
 	var name string
