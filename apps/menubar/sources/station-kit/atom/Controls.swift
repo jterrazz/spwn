@@ -169,6 +169,7 @@ public struct PanelButton: View {
             .contentShape(shape)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
         .onHover { hovering = $0 }
         .animation(tokens.motion(Token.Motion.tint), value: hovering)
     }
@@ -201,6 +202,7 @@ public struct VerbButton: View {
                 .contentShape(shape)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
         .fixedSize()
         .onHover { hovering = $0 }
         .animation(tokens.motion(Token.Motion.tint), value: hovering)

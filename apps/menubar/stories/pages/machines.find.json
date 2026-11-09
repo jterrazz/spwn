@@ -1368,6 +1368,36 @@
         },
         {
           "row": {
+            "id": "needs",
+            "label": "Needs you",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "needs"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "upkeep"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "updates"
+                  }
+                ]
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:exclamationmark.circle"
+            },
+            "verb": "open-needs",
+            "nav": "menubar.needs"
+          }
+        },
+        {
+          "row": {
             "id": "ports",
             "label": "Ports",
             "cells": [
@@ -2741,6 +2771,14 @@
         "activity:mac-mini"
       ],
       "id": "open-activity:mac-mini"
+    },
+    {
+      "label": "Open",
+      "on": "row",
+      "rows": [
+        "needs"
+      ],
+      "id": "open-needs"
     },
     {
       "key": "cmd+p",

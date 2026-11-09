@@ -32,6 +32,24 @@ public struct PanelAppear: Movement {
     }
 }
 
+// invariant: M1 in the live app: each time the system shows the panel's
+// window it grows out of its status item on smooth, from nothing; once
+// hidden it is at its start again, so the next opening's first frame is
+// never the panel whole.
+public struct PanelOpening: ViewModifier {
+    @State private var shown = 0.0
+    @Environment(\.stationTokens) private var tokens
+
+    public init() {}
+
+    public func body(content: Content) -> some View {
+        content
+            .modifier(PanelAppear(progress: shown))
+            .onAppear { withAnimation(tokens.motion(Token.Motion.smooth)) { shown = 1 } }
+            .onDisappear { shown = 0 }
+    }
+}
+
 // value: M2 and M3, a page pushed or popped: the top page slides on the
 // trailing edge, opaque and shaded; the page under it moves a third and
 // dims. Progress is how far each page is shown, so at a push's moment t the

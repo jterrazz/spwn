@@ -307,7 +307,7 @@ func (f finder) ports() []entry {
 	}
 	for _, h := range f.r.Ports.Macs {
 		for _, p := range h.Ports {
-			if p.Machine.On == "" {
+			if p.Machine.On == "" || p.Reach == ports.ThisMachine {
 				continue
 			}
 			addr := p.Key()
@@ -354,8 +354,9 @@ func portTags(n catalog.PortName, port int, vm, state string) []string {
 }
 
 func (f finder) sections() []entry {
-	// value: Ports of and Activity of each awake Mac, then the three pages
-	// of every machine, each with its key.
+	// value: Ports of and Activity of each awake Mac, then the pages of
+	// every machine, each with its key: Needs you, the one way to every
+	// need and the upkeep once the hero lists them all.
 	var out []entry
 	for _, h := range f.r.All.Macs {
 		if !awakeMac(h) {
@@ -373,12 +374,17 @@ func (f finder) sections() []entry {
 		nav                           page.ID
 		tags                          []string
 	}{
+		{"needs", "Needs you", "", "exclamationmark.circle", "", NeedsID, []string{"needs", "upkeep", "updates"}},
 		{"ports", "Ports", "All machines", "network", "cmd+p", PortsID, []string{"ports", "every", "machines"}},
 		{"accounts", "Accounts", "All machines", "key", "cmd+u", AccountsID, []string{"accounts", "sign-in", "share"}},
 		{"awake", "Awake", "All Macs", "sun.max", "cmd+e", AwakeID, []string{"awake", "sleep"}},
 	}
 	for _, s := range every {
-		out = append(out, entry{row: page.Row{ID: s.id, Label: s.label, Detail: page.Texts(s.where), Glyph: symbol(s.symbol, ""), Nav: s.nav}, tags: s.tags, verb: opens("open-"+s.id, s.key)})
+		row := page.Row{ID: s.id, Label: s.label, Glyph: symbol(s.symbol, ""), Nav: s.nav}
+		if s.where != "" {
+			row.Detail = page.Texts(s.where)
+		}
+		out = append(out, entry{row: row, tags: s.tags, verb: opens("open-"+s.id, s.key)})
 	}
 	return out
 }

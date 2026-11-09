@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/background"
 	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
+	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/images"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -54,9 +55,10 @@ type playMac struct {
 }
 
 type playEngine struct {
-	Version   string      `json:"version,omitempty"`
-	StartedAt time.Time   `json:"started_at,omitzero"`
-	Awake     *awake.Kept `json:"awake,omitempty"`
+	Version   string        `json:"version,omitempty"`
+	StartedAt time.Time     `json:"started_at,omitzero"`
+	Memory    engine.Memory `json:"memory,omitempty"`
+	Awake     *awake.Kept   `json:"awake,omitempty"`
 }
 
 type playSelf struct {
@@ -168,6 +170,12 @@ func PlayWorld(base []byte) []byte {
 		for _, vm := range h.VMs {
 			pid++
 			m.VMs[vm.Name] = playMachine(f, h.Name, vm, pid)
+			if vm.State == model.Running && !vm.BootAt.IsZero() {
+				if m.Engine.Memory == nil {
+					m.Engine.Memory = engine.Memory{}
+				}
+				m.Engine.Memory[vm.Name] = engine.Remembered{State: engine.StateRunning, BootAt: vm.BootAt}
+			}
 			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name])
 		}
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {

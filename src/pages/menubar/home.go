@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/src/engine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
+	"github.com/jterrazz/studio-station/src/ports"
 )
 
 const (
@@ -415,7 +416,7 @@ func (h homeReading) ports(vm string) int {
 	n := 0
 	for _, m := range h.r.Ports.Macs {
 		for _, p := range m.Ports {
-			if p.Machine.Name == vm {
+			if p.Machine.Name == vm && p.Reach != ports.ThisMachine {
 				n++
 			}
 		}

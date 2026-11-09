@@ -45,6 +45,15 @@ public struct Hero: View {
         return [title(head), facts].filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
     }
 
+    // value: what VoiceOver reads on the hero's heading: its title and
+    // facts, then the Mac still being checked when no facts are said.
+    public static func heading(_ section: Section?, stale: Value?) -> String {
+        let said = announcement(section) ?? ""
+        let facts = section?.items?.first?.row?.detail.flatMap { $0.isNone ? nil : $0 }
+        guard let stale, facts == nil else { return said }
+        return [said, Format.show(stale) + Token.Glyph.ellipsis].filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+    }
+
     // value: a title of work going on reads on with an ellipsis.
     static func title(_ head: Row) -> String {
         (head.label ?? "") + (head.glyph?.spin == true ? Token.Glyph.ellipsis : "")
@@ -86,7 +95,8 @@ public struct Hero: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(Self.heading(section, stale: stale)))
             .accessibilityAddTraits(.isHeader)
             if let verb {
                 if head.mark == .broken {
