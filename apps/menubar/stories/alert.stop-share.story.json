@@ -1,0 +1,11 @@
+{
+    "group": "alert",
+    "id": "alert.stop-share",
+    "note": "Stop sharing linux-1:5173? The link stops answering on the tailnet; the service keeps running inside the VM.",
+    "pages": ["pages/machines.ports.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop-sharing:linux-1:5173",
+        "segment": "ports"
+    }
+}

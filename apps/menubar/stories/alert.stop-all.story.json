@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.stop-all",
+    "note": "Stop every workspace on This Mac? linux-1 and agent-7f stop and keep their disk; Awake ends.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop-all"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.stop-server",
+    "note": "Stop infra, typed: jterrazz.com goes offline; the red Stop infra stays off until infra is typed.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop"
+    }
+}

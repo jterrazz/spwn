@@ -1,0 +1,11 @@
+{
+    "group": "alert",
+    "heightNote": "the page under it is linux-1's v4 workspace page (P9), shorter than the prototype's; the alert is the prototype's",
+    "id": "alert.stop-vm",
+    "note": "Stop linux-1 on This Mac? Its agent linux-1 stops, its disk is kept, its 2 shared ports stop answering until it starts again.",
+    "pages": ["pages/machines.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop"
+    }
+}

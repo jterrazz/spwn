@@ -1,0 +1,12 @@
+{
+    "group": "alert",
+    "heightNote": "the page under it is workspace.working.accounts, whose footer is the workspace page's own (P9)",
+    "id": "alert.take-back",
+    "note": "Take GitHub back from linux-1? It loses access right away; the GitHub account on This Mac is untouched.",
+    "pages": ["pages/machines.accounts.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "take-back/github",
+        "segment": "accounts"
+    }
+}

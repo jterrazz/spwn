@@ -1,0 +1,11 @@
+{
+    "group": "alert",
+    "heightNote": "heights.json holds no prototype height for it; the page under it is mac.mini.overview's",
+    "id": "alert.stop-all.server",
+    "note": "Stop every workspace on mac-mini? linux-3 and review-bot stop and keep their disk; servers keep running.",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop-all"
+    }
+}
