@@ -1,0 +1,8 @@
+{
+    "group": "server",
+    "heightNote": "stopped by its owner, the page drops its service card and its checks for Stopped and Start; the prototype's capture draws the healthy layout",
+    "id": "server.stopped",
+    "note": "infra stopped by its owner: the square dot, Stopped with Start, its gauges as last seen.",
+    "pages": ["pages/machines.server.stopped.machine.infra.json"],
+    "schema": "station.story/v1"
+}

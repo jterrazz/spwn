@@ -2,7 +2,8 @@ import SwiftUI
 
 // invariant: SPEC A4: a machine page's header: the way back, the
 // machine's glyph and name, its buttons (New VM, its menu), its facts with
-// the stale marking after them, and its segments.
+// the stale marking after them, a fact that links pushing its page, and
+// its segments.
 public struct MachineHeader: View {
     let page: Page
     let segment: String?

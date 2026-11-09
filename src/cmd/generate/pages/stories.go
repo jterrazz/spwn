@@ -16,11 +16,11 @@ type World struct {
 func Worlds() []World {
 	return append([]World{
 		{Name: "machines"},
-		{Name: "machines.down", Edit: infraDown, Pages: []string{"menubar", "machine.infra", "needs", "find"}},
+		{Name: "machines.down", Edit: infraDown, Pages: []string{"menubar", "needs", "find"}},
 		{Name: "machines.fine", Edit: nothingNeedsYou, Pages: []string{"menubar", "needs", "find"}},
 		{Name: "machines.empty", Edit: thisMacAlone, Pages: []string{"menubar", "find"}},
 		{Name: "machines.loading", Edit: miniStillAnswering, Pages: []string{"menubar", "find"}},
-	}, append(append(append(append(append(append(append(append(shellWorlds(), homeWorlds()...), needsWorlds()...), macWorlds()...), activityWorlds()...), portsWorlds()...), accountsWorlds()...), awakeWorlds()...), workspaceWorlds()...)...)
+	}, append(append(append(append(append(append(append(append(append(shellWorlds(), homeWorlds()...), needsWorlds()...), macWorlds()...), activityWorlds()...), portsWorlds()...), accountsWorlds()...), awakeWorlds()...), workspaceWorlds()...), serverWorlds()...)...)
 }
 
 func StoryPages() []Fixture {

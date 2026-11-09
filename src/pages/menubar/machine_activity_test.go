@@ -193,8 +193,8 @@ func TestAVMsActivityIsMeasuredInsideItAndUpdatesItsGuest(t *testing.T) {
 	server := macPageOf(t, "infra", func(m *Machine) {
 		m.Summary = &overview.Summary{Head: overview.Head{Name: "infra"}, Needs: []overview.Need{{Machine: "infra", Section: "apps", Subject: "updates", Text: "2 updates", Call: CallUpdate}}}
 	})
-	if server.Header == nil || server.Header.Back != "mac-mini" || server.Header.Glyph.Kind != "server" || len(server.Segments) != 2 {
-		t.Fatalf("infra header %+v segments %+v, want back to the mini, the server glyph, Overview and Activity", server.Header, server.Segments)
+	if server.Header == nil || server.Header.Back != "All machines" || server.Header.Glyph.Kind != "server" || len(server.Segments) != 2 {
+		t.Fatalf("infra header %+v segments %+v, want back to All machines, the server glyph, Overview and Activity", server.Header, server.Segments)
 	}
 	if note := sectionOf(server, SectionMeasured); note == nil || note.Items[0].Note.Text != "Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it." {
 		t.Fatalf("infra's footnote %+v", note)

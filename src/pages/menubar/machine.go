@@ -135,14 +135,6 @@ func vmHead(m Machine, h model.MacView, vm model.VM) (page.Page, page.Section) {
 	return page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: vm.Name, Kind: string(kind), On: on}}, section
 }
 
-// value: the samples a VM's page reads: none while it does not run.
-func running(m Machine, vm model.VM) []activity.Reading {
-	if vm.State != model.Running {
-		return nil
-	}
-	return m.Samples
-}
-
 func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.Lifetime.Kind() == machine.Server {
 		return vmFrame(m, h, vm, serverPage(m, h, vm))

@@ -264,6 +264,9 @@ type Tile struct {
 
 type Gauge struct {
 	Title string `json:"title,omitempty"`
+	// value: the words after its title, joined to it by the renderer: its
+	// cores, or "last" while its value is the last one read.
+	Note  string `json:"note,omitempty"`
 	Value Value  `json:"value,omitzero"`
 	Spark []int  `json:"spark,omitempty"`
 	Bar   *Value `json:"bar,omitempty"`
@@ -651,7 +654,8 @@ type Value struct {
 	Pri    int     `json:"pri,omitempty"`
 	Short  string  `json:"short,omitempty"`
 	Signal Signal  `json:"signal,omitempty"`
-	// value: the page the part opens, drawn as a link ("on mac-mini ›").
+	// value: the page a part pushes when it is a link (a fact's "on
+	// mac-mini ›"), as a row's Nav names it.
 	Nav ID `json:"nav,omitempty"`
 }
 

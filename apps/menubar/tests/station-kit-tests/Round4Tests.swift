@@ -84,15 +84,6 @@ final class Round4Tests: XCTestCase {
         XCTAssertNil(MachineContent.sharing(page, state), "a port the page lists already is its own row")
     }
 
-    // invariant: a stopped machine's measures are none: its tiles say no
-    // figure while it is stopped or stopping.
-    func testAStoppingMachineDrawsNoFigures() throws {
-        let page = try Tree.page("menubar.vm.infra")
-        let activity = try XCTUnwrap(page.section("activity"))
-        XCTAssertNotNil(MachineContent.measures(activity, stopping: false).first?.value)
-        XCTAssertTrue(MachineContent.measures(activity, stopping: true).allSatisfy { $0.value == nil && $0.spark == nil })
-    }
-
     // invariant: a switch flipped after a term was picked sends that
     // term, by its length (1 h) or by its end (Until 17:00), never the
     // page's stale one; Until is held by the end it sent.

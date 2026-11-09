@@ -1,0 +1,2246 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "infra",
+    "kind": "server",
+    "on": "mac-mini"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "infra",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "server"
+        },
+        {
+          "kind": "text",
+          "text": "on mac-mini",
+          "pri": 1,
+          "nav": "menubar.machine:mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "up 1 min"
+        },
+        {
+          "kind": "text",
+          "text": "restarted 1 time",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "restarts after a power cut",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "health",
+              "mark": "ok",
+              "label": "Healthy",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "4 of 4"
+                }
+              ],
+              "detail": {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "checked after every boot"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "1 s ago"
+                  }
+                ]
+              },
+              "glyph": {
+                "kind": "symbol:checkmark.circle.fill",
+                "signal": "well"
+              },
+              "menu": [
+                "restart",
+                "stop"
+              ]
+            },
+            "items": [
+              {
+                "row": {
+                  "id": "running",
+                  "mark": "ok",
+                  "label": "Running",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "running"
+                      }
+                    ]
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "address",
+                  "mark": "ok",
+                  "label": "Has an address",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "192.168.64.7"
+                      }
+                    ]
+                  },
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "ssh",
+                  "mark": "ok",
+                  "label": "SSH answers",
+                  "signal": "well"
+                }
+              },
+              {
+                "row": {
+                  "id": "check",
+                  "mark": "ok",
+                  "label": "Check passes",
+                  "detail": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "kind": "text",
+                        "text": "200"
+                      },
+                      {
+                        "kind": "text",
+                        "text": "42 ms"
+                      }
+                    ]
+                  },
+                  "signal": "well"
+                }
+              }
+            ],
+            "fold": "folded"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "health"
+    },
+    {
+      "id": "latency",
+      "title": "jterrazz.com",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "42 ms"
+        }
+      ],
+      "items": [
+        {
+          "fact": {
+            "key": "health check",
+            "value": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "p50 38 ms"
+                },
+                {
+                  "kind": "text",
+                  "text": "peak 98 ms, 34 min ago"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "line",
+            "series": [
+              {
+                "key": "latency",
+                "points": [
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  40,
+                  38,
+                  36,
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  40,
+                  38,
+                  36,
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  64,
+                  98,
+                  91,
+                  58,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  40,
+                  38,
+                  36,
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  40,
+                  38,
+                  36,
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42,
+                  40,
+                  38,
+                  36,
+                  34,
+                  41,
+                  39,
+                  37,
+                  35,
+                  42
+                ],
+                "unit": "ms"
+              }
+            ],
+            "peak": {
+              "index": 25,
+              "value": {
+                "kind": "text",
+                "text": "98 ms"
+              },
+              "at": "34 min ago"
+            },
+            "ends": [
+              "1 hr ago",
+              "now"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "chart"
+    },
+    {
+      "id": "uptime",
+      "title": "Last 30 days",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "99.97% available"
+        }
+      ],
+      "items": [
+        {
+          "uptime": {
+            "days": [
+              {
+                "date": "2026-10-09",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-10",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-11",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-12",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-13",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-14",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-15",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-16",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-17",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-18",
+                "mark": "restart",
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
+              },
+              {
+                "date": "2026-10-19",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-20",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-21",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-22",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-23",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-24",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-25",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-26",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-27",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-28",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-29",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-30",
+                "mark": "restart",
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
+              },
+              {
+                "date": "2026-10-31",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-01",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-02",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-03",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-04",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-05",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-06",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-07",
+                "mark": "restart",
+                "tip": "Down from 10:28 to 10:29, out of memory; restarted 1 time"
+              }
+            ],
+            "availability": {
+              "kind": "text",
+              "text": "99.97% available"
+            }
+          }
+        },
+        {
+          "note": {
+            "text": "30 days ago"
+          }
+        },
+        {
+          "note": {
+            "text": "today"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "uptime"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "note": "8 cores",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:infra"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "5 GB free",
+              "live": "free:infra"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 20776904294,
+              "of": 25769803776
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:infra"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
+            ]
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "2 shared"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra:443",
+            "mark": "ok",
+            "label": "Traefik",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "443 public"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "quick": "copy:infra:443"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "quick": "copy:infra:6443"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "tooling",
+      "title": "Tooling",
+      "items": [
+        {
+          "note": {
+            "text": "Apps, settings and accounts: your own tooling (Ansible)."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
+    },
+    {
+      "id": "window-6m",
+      "title": "Last 6 minutes",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "line",
+            "window": "6m",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  10.5,
+                  10.6,
+                  11,
+                  11.4,
+                  11.7,
+                  11.9,
+                  11.9,
+                  11.6,
+                  11.4,
+                  11.1,
+                  11.1,
+                  11.5,
+                  12,
+                  12.9,
+                  13.8,
+                  14.6,
+                  15.1,
+                  15.3,
+                  15.1,
+                  14.7,
+                  14.2,
+                  13.8,
+                  13.5,
+                  13.5,
+                  13.7,
+                  14,
+                  14.3,
+                  14.4,
+                  14.1,
+                  13.7,
+                  13.1,
+                  12.4,
+                  11.9,
+                  11.7,
+                  11.8,
+                  12.3,
+                  13.1,
+                  13.9,
+                  14.6,
+                  15.1,
+                  15.3,
+                  15.3,
+                  15.2,
+                  15.1,
+                  15.2,
+                  15.4,
+                  15.9,
+                  16.6,
+                  17.3,
+                  17.8,
+                  18,
+                  17.8,
+                  17.3,
+                  16.6,
+                  15.9,
+                  15.3,
+                  14.9,
+                  14.8,
+                  15.1,
+                  15.5,
+                  15.8,
+                  16.1,
+                  16.1,
+                  16,
+                  15.6,
+                  15.3,
+                  15.2,
+                  15.3,
+                  15.7,
+                  16.5,
+                  17.4,
+                  18.3
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 71,
+              "value": {
+                "kind": "percent",
+                "n": 180
+              },
+              "at": "2 s ago"
+            },
+            "ends": [
+              "6 min ago",
+              "now"
+            ],
+            "at": [
+              "6 min ago",
+              "5 min 55 s ago",
+              "5 min 50 s ago",
+              "5 min 45 s ago",
+              "5 min 40 s ago",
+              "5 min 35 s ago",
+              "5 min 30 s ago",
+              "5 min 25 s ago",
+              "5 min 20 s ago",
+              "5 min 15 s ago",
+              "5 min 10 s ago",
+              "5 min 5 s ago",
+              "5 min ago",
+              "4 min 55 s ago",
+              "4 min 50 s ago",
+              "4 min 45 s ago",
+              "4 min 40 s ago",
+              "4 min 35 s ago",
+              "4 min 30 s ago",
+              "4 min 25 s ago",
+              "4 min 20 s ago",
+              "4 min 15 s ago",
+              "4 min 10 s ago",
+              "4 min 5 s ago",
+              "4 min ago",
+              "3 min 55 s ago",
+              "3 min 50 s ago",
+              "3 min 45 s ago",
+              "3 min 40 s ago",
+              "3 min 35 s ago",
+              "3 min 30 s ago",
+              "3 min 25 s ago",
+              "3 min 20 s ago",
+              "3 min 15 s ago",
+              "3 min 10 s ago",
+              "3 min 5 s ago",
+              "3 min ago",
+              "2 min 55 s ago",
+              "2 min 50 s ago",
+              "2 min 45 s ago",
+              "2 min 40 s ago",
+              "2 min 35 s ago",
+              "2 min 30 s ago",
+              "2 min 25 s ago",
+              "2 min 20 s ago",
+              "2 min 15 s ago",
+              "2 min 10 s ago",
+              "2 min 5 s ago",
+              "2 min ago",
+              "1 min 55 s ago",
+              "1 min 50 s ago",
+              "1 min 45 s ago",
+              "1 min 40 s ago",
+              "1 min 35 s ago",
+              "1 min 30 s ago",
+              "1 min 25 s ago",
+              "1 min 20 s ago",
+              "1 min 15 s ago",
+              "1 min 10 s ago",
+              "1 min 5 s ago",
+              "1 min ago",
+              "55 s ago",
+              "50 s ago",
+              "45 s ago",
+              "40 s ago",
+              "35 s ago",
+              "30 s ago",
+              "25 s ago",
+              "20 s ago",
+              "15 s ago",
+              "10 s ago",
+              "5 s ago"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.7",
+                    "label": "received"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0.1 MB/s",
+                    "label": "sent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "6m",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.22,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.21,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.19,
+                  0.19,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.2,
+                  0.21,
+                  0.22,
+                  0.23,
+                  0.25,
+                  0.27,
+                  0.29,
+                  0.32,
+                  0.34,
+                  0.36,
+                  0.37,
+                  0.38,
+                  0.37,
+                  0.36,
+                  0.35,
+                  0.33,
+                  0.31,
+                  0.29,
+                  0.28,
+                  0.27,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.26,
+                  0.25,
+                  0.25,
+                  0.25,
+                  0.25
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.41,
+                  0.42,
+                  0.43,
+                  0.43,
+                  0.44,
+                  0.45,
+                  0.46,
+                  0.47,
+                  0.47,
+                  0.48,
+                  0.49,
+                  0.5,
+                  0.51,
+                  0.51,
+                  0.52,
+                  0.53,
+                  0.53,
+                  0.54,
+                  0.55,
+                  0.57,
+                  0.59,
+                  0.63,
+                  0.68,
+                  0.74,
+                  0.82,
+                  0.91,
+                  1,
+                  1.09,
+                  1.15,
+                  1.19,
+                  1.18,
+                  1.15,
+                  1.08,
+                  0.99,
+                  0.9,
+                  0.8,
+                  0.71,
+                  0.64,
+                  0.59,
+                  0.54,
+                  0.52,
+                  0.5,
+                  0.49,
+                  0.48,
+                  0.48,
+                  0.47,
+                  0.47,
+                  0.47,
+                  0.47,
+                  0.48,
+                  0.48,
+                  0.48,
+                  0.49,
+                  0.49,
+                  0.5,
+                  0.5,
+                  0.51,
+                  0.52,
+                  0.53,
+                  0.53,
+                  0.54,
+                  0.55,
+                  0.56,
+                  0.57,
+                  0.58,
+                  0.59,
+                  0.6,
+                  0.61,
+                  0.62,
+                  0.63,
+                  0.63,
+                  0.64
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "6 min ago",
+              "now"
+            ],
+            "at": [
+              "6 min ago",
+              "5 min 55 s ago",
+              "5 min 50 s ago",
+              "5 min 45 s ago",
+              "5 min 40 s ago",
+              "5 min 35 s ago",
+              "5 min 30 s ago",
+              "5 min 25 s ago",
+              "5 min 20 s ago",
+              "5 min 15 s ago",
+              "5 min 10 s ago",
+              "5 min 5 s ago",
+              "5 min ago",
+              "4 min 55 s ago",
+              "4 min 50 s ago",
+              "4 min 45 s ago",
+              "4 min 40 s ago",
+              "4 min 35 s ago",
+              "4 min 30 s ago",
+              "4 min 25 s ago",
+              "4 min 20 s ago",
+              "4 min 15 s ago",
+              "4 min 10 s ago",
+              "4 min 5 s ago",
+              "4 min ago",
+              "3 min 55 s ago",
+              "3 min 50 s ago",
+              "3 min 45 s ago",
+              "3 min 40 s ago",
+              "3 min 35 s ago",
+              "3 min 30 s ago",
+              "3 min 25 s ago",
+              "3 min 20 s ago",
+              "3 min 15 s ago",
+              "3 min 10 s ago",
+              "3 min 5 s ago",
+              "3 min ago",
+              "2 min 55 s ago",
+              "2 min 50 s ago",
+              "2 min 45 s ago",
+              "2 min 40 s ago",
+              "2 min 35 s ago",
+              "2 min 30 s ago",
+              "2 min 25 s ago",
+              "2 min 20 s ago",
+              "2 min 15 s ago",
+              "2 min 10 s ago",
+              "2 min 5 s ago",
+              "2 min ago",
+              "1 min 55 s ago",
+              "1 min 50 s ago",
+              "1 min 45 s ago",
+              "1 min 40 s ago",
+              "1 min 35 s ago",
+              "1 min 30 s ago",
+              "1 min 25 s ago",
+              "1 min 20 s ago",
+              "1 min 15 s ago",
+              "1 min 10 s ago",
+              "1 min 5 s ago",
+              "1 min ago",
+              "55 s ago",
+              "50 s ago",
+              "45 s ago",
+              "40 s ago",
+              "35 s ago",
+              "30 s ago",
+              "25 s ago",
+              "20 s ago",
+              "15 s ago",
+              "10 s ago",
+              "5 s ago"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-1h",
+      "title": "Last hour",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "bars",
+            "window": "1h",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  13.4,
+                  11.6,
+                  12.4,
+                  13.5,
+                  11.3,
+                  14.1,
+                  11.3,
+                  13,
+                  12.6,
+                  11.7,
+                  14.3,
+                  12,
+                  15.4,
+                  14.7,
+                  16.1,
+                  18.9,
+                  18.7,
+                  24.7,
+                  26.5,
+                  33.2,
+                  38.3,
+                  40.7,
+                  44.3,
+                  39.6,
+                  37.7,
+                  31,
+                  25.9,
+                  23.8,
+                  19,
+                  20.8,
+                  18,
+                  18.9,
+                  18.7,
+                  16.2,
+                  17.9,
+                  13.8,
+                  14.8,
+                  12.5,
+                  11.2,
+                  12.4,
+                  9.5,
+                  12.6,
+                  10.9,
+                  12.6,
+                  13.9,
+                  12.6,
+                  15.8,
+                  13,
+                  14.9,
+                  13.5,
+                  12.1,
+                  13.4,
+                  10,
+                  12.5,
+                  10.6,
+                  11.8,
+                  13.6,
+                  12.8,
+                  17,
+                  15.7
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 22,
+              "value": {
+                "kind": "percent",
+                "n": 440
+              },
+              "at": "38 min ago"
+            },
+            "ends": [
+              "1 hr ago",
+              "now"
+            ],
+            "at": [
+              "1 hr ago",
+              "59 min ago",
+              "58 min ago",
+              "57 min ago",
+              "56 min ago",
+              "55 min ago",
+              "54 min ago",
+              "53 min ago",
+              "52 min ago",
+              "51 min ago",
+              "50 min ago",
+              "49 min ago",
+              "48 min ago",
+              "47 min ago",
+              "46 min ago",
+              "45 min ago",
+              "44 min ago",
+              "43 min ago",
+              "42 min ago",
+              "41 min ago",
+              "40 min ago",
+              "39 min ago",
+              "38 min ago",
+              "37 min ago",
+              "36 min ago",
+              "35 min ago",
+              "34 min ago",
+              "33 min ago",
+              "32 min ago",
+              "31 min ago",
+              "30 min ago",
+              "29 min ago",
+              "28 min ago",
+              "27 min ago",
+              "26 min ago",
+              "25 min ago",
+              "24 min ago",
+              "23 min ago",
+              "22 min ago",
+              "21 min ago",
+              "20 min ago",
+              "19 min ago",
+              "18 min ago",
+              "17 min ago",
+              "16 min ago",
+              "15 min ago",
+              "14 min ago",
+              "13 min ago",
+              "12 min ago",
+              "11 min ago",
+              "10 min ago",
+              "9 min ago",
+              "8 min ago",
+              "7 min ago",
+              "6 min ago",
+              "5 min ago",
+              "4 min ago",
+              "3 min ago",
+              "2 min ago",
+              "1 min ago"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.7",
+                    "label": "received"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0.1 MB/s",
+                    "label": "sent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "1h",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.17,
+                  0.19,
+                  0.23,
+                  0.2,
+                  0.15,
+                  0.18,
+                  0.2,
+                  0.25,
+                  0.23,
+                  0.2,
+                  0.23,
+                  0.25,
+                  0.29,
+                  0.27,
+                  0.23,
+                  0.26,
+                  0.25,
+                  0.28,
+                  0.25,
+                  0.2,
+                  0.22,
+                  0.2,
+                  0.22,
+                  0.21,
+                  0.17,
+                  0.18,
+                  0.17,
+                  0.2,
+                  0.21,
+                  0.18,
+                  0.21,
+                  0.2,
+                  0.24,
+                  0.26,
+                  0.24,
+                  0.26,
+                  0.24,
+                  0.28,
+                  0.28,
+                  0.25,
+                  0.25,
+                  0.22,
+                  0.25,
+                  0.25,
+                  0.21,
+                  0.2,
+                  0.16,
+                  0.2,
+                  0.22,
+                  0.18,
+                  0.18,
+                  0.15,
+                  0.21,
+                  0.24,
+                  0.22,
+                  0.21,
+                  0.2,
+                  0.26,
+                  0.3,
+                  0.26
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.74,
+                  0.74,
+                  0.55,
+                  0.53,
+                  0.44,
+                  0.38,
+                  0.43,
+                  0.74,
+                  0.74,
+                  0.44,
+                  0.43,
+                  0.52,
+                  0.62,
+                  0.62,
+                  0.81,
+                  0.82,
+                  0.66,
+                  0.72,
+                  0.68,
+                  0.6,
+                  0.59,
+                  0.89,
+                  0.9,
+                  0.57,
+                  0.47,
+                  0.47,
+                  0.52,
+                  0.52,
+                  0.68,
+                  0.62,
+                  0.41,
+                  0.5,
+                  0.52,
+                  0.47,
+                  0.45,
+                  0.77,
+                  0.88,
+                  0.65,
+                  0.59,
+                  0.58,
+                  0.66,
+                  0.72,
+                  0.93,
+                  0.84,
+                  0.57,
+                  0.61,
+                  0.64,
+                  0.56,
+                  0.46,
+                  0.68,
+                  0.74,
+                  0.52,
+                  0.45,
+                  0.38,
+                  0.41,
+                  0.5,
+                  0.79,
+                  0.75,
+                  0.47,
+                  0.54
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "1 hr ago",
+              "now"
+            ],
+            "at": [
+              "1 hr ago",
+              "59 min ago",
+              "58 min ago",
+              "57 min ago",
+              "56 min ago",
+              "55 min ago",
+              "54 min ago",
+              "53 min ago",
+              "52 min ago",
+              "51 min ago",
+              "50 min ago",
+              "49 min ago",
+              "48 min ago",
+              "47 min ago",
+              "46 min ago",
+              "45 min ago",
+              "44 min ago",
+              "43 min ago",
+              "42 min ago",
+              "41 min ago",
+              "40 min ago",
+              "39 min ago",
+              "38 min ago",
+              "37 min ago",
+              "36 min ago",
+              "35 min ago",
+              "34 min ago",
+              "33 min ago",
+              "32 min ago",
+              "31 min ago",
+              "30 min ago",
+              "29 min ago",
+              "28 min ago",
+              "27 min ago",
+              "26 min ago",
+              "25 min ago",
+              "24 min ago",
+              "23 min ago",
+              "22 min ago",
+              "21 min ago",
+              "20 min ago",
+              "19 min ago",
+              "18 min ago",
+              "17 min ago",
+              "16 min ago",
+              "15 min ago",
+              "14 min ago",
+              "13 min ago",
+              "12 min ago",
+              "11 min ago",
+              "10 min ago",
+              "9 min ago",
+              "8 min ago",
+              "7 min ago",
+              "6 min ago",
+              "5 min ago",
+              "4 min ago",
+              "3 min ago",
+              "2 min ago",
+              "1 min ago"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "window-24h",
+      "title": "Last 24 hours",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "cpu",
+            "label": "CPU",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340,
+                "live": "cpu:infra"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "now"
+            }
+          }
+        },
+        {
+          "chart": {
+            "kind": "bars",
+            "window": "24h",
+            "series": [
+              {
+                "key": "cpu",
+                "points": [
+                  13.8,
+                  15.9,
+                  15.2,
+                  13.9,
+                  15.7,
+                  15.4,
+                  13.7,
+                  15.5,
+                  15.9,
+                  14,
+                  15.1,
+                  16,
+                  13.9,
+                  14.9,
+                  16.2,
+                  14.3,
+                  14.4,
+                  16,
+                  14.5,
+                  14.2,
+                  16.3,
+                  14.9,
+                  14,
+                  15.9,
+                  15.3,
+                  13.9,
+                  15.9,
+                  15.5,
+                  13.7,
+                  15.3,
+                  15.7,
+                  13.9,
+                  15.1,
+                  16.1,
+                  14,
+                  14.8,
+                  16.1,
+                  14.4,
+                  14.6,
+                  16.2,
+                  14.5,
+                  14,
+                  16.1,
+                  14.9,
+                  14.1,
+                  15.9,
+                  21.3,
+                  13.8
+                ],
+                "unit": "%"
+              }
+            ],
+            "peak": {
+              "index": 46,
+              "value": {
+                "kind": "percent",
+                "n": 210
+              },
+              "at": "09:52"
+            },
+            "ends": [
+              "yesterday 10:30",
+              "now"
+            ],
+            "at": [
+              "10:30",
+              "11:00",
+              "11:30",
+              "12:00",
+              "12:30",
+              "13:00",
+              "13:30",
+              "14:00",
+              "14:30",
+              "15:00",
+              "15:30",
+              "16:00",
+              "16:30",
+              "17:00",
+              "17:30",
+              "18:00",
+              "18:30",
+              "19:00",
+              "19:30",
+              "20:00",
+              "20:30",
+              "21:00",
+              "21:30",
+              "22:00",
+              "22:30",
+              "23:00",
+              "23:30",
+              "00:00",
+              "00:30",
+              "01:00",
+              "01:30",
+              "02:00",
+              "02:30",
+              "03:00",
+              "03:30",
+              "04:00",
+              "04:30",
+              "05:00",
+              "05:30",
+              "06:00",
+              "06:30",
+              "07:00",
+              "07:30",
+              "08:00",
+              "08:30",
+              "09:00",
+              "09:30",
+              "10:00"
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "network",
+            "label": "Network",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1.7",
+                    "label": "received"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "0.1 MB/s",
+                    "label": "sent"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "chart": {
+            "kind": "mirror",
+            "window": "24h",
+            "series": [
+              {
+                "key": "sent",
+                "points": [
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23,
+                  0.22,
+                  0.22,
+                  0.23
+                ],
+                "unit": "MB/s"
+              },
+              {
+                "key": "received",
+                "points": [
+                  0.64,
+                  0.62,
+                  0.59,
+                  0.63,
+                  0.64,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.61,
+                  0.6,
+                  0.63,
+                  0.64,
+                  0.59,
+                  0.62,
+                  0.64,
+                  0.61,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.62,
+                  0.64,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.63,
+                  0.59,
+                  0.62,
+                  0.64,
+                  0.61,
+                  0.61,
+                  0.63,
+                  0.62,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.61,
+                  0.64,
+                  0.62,
+                  0.6,
+                  0.63,
+                  0.63,
+                  0.6,
+                  0.62,
+                  0.63,
+                  0.61,
+                  0.6
+                ],
+                "unit": "MB/s"
+              }
+            ],
+            "ends": [
+              "yesterday 10:30",
+              "now"
+            ],
+            "at": [
+              "10:30",
+              "11:00",
+              "11:30",
+              "12:00",
+              "12:30",
+              "13:00",
+              "13:30",
+              "14:00",
+              "14:30",
+              "15:00",
+              "15:30",
+              "16:00",
+              "16:30",
+              "17:00",
+              "17:30",
+              "18:00",
+              "18:30",
+              "19:00",
+              "19:30",
+              "20:00",
+              "20:30",
+              "21:00",
+              "21:30",
+              "22:00",
+              "22:30",
+              "23:00",
+              "23:30",
+              "00:00",
+              "00:30",
+              "01:00",
+              "01:30",
+              "02:00",
+              "02:30",
+              "03:00",
+              "03:30",
+              "04:00",
+              "04:30",
+              "05:00",
+              "05:30",
+              "06:00",
+              "06:30",
+              "07:00",
+              "07:30",
+              "08:00",
+              "08:30",
+              "09:00",
+              "09:30",
+              "10:00"
+            ]
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart",
+      "picker": [
+        {
+          "label": "6 min",
+          "on": "page",
+          "id": "window-6m"
+        },
+        {
+          "label": "1 hr",
+          "on": "page",
+          "id": "window-1h",
+          "picked": true
+        },
+        {
+          "label": "24 hr",
+          "on": "page",
+          "id": "window-24h"
+        }
+      ]
+    },
+    {
+      "id": "memory",
+      "title": "Memory",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "now"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "5 GB free",
+              "live": "free:infra"
+            },
+            "bar": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "size",
+                  "text": "19 GB",
+                  "n": 20776904294,
+                  "label": "used"
+                },
+                {
+                  "kind": "size",
+                  "text": "5 GB",
+                  "n": 4992899482,
+                  "label": "free"
+                },
+                {
+                  "kind": "size",
+                  "text": "24 GB",
+                  "n": 25769803776,
+                  "label": "of"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity",
+      "card": "chart"
+    },
+    {
+      "id": "processes",
+      "title": "Top processes",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "CPU, of infra"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cpu",
+          "kind": "percent",
+          "keep": 20
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "812",
+            "label": "station",
+            "cells": [
+              {
+                "kind": "percent",
+                "n": 340
+              }
+            ],
+            "glyph": {
+              "kind": "symbol:cpu",
+              "signal": "quiet"
+            },
+            "trail": "cpu"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "activity"
+    },
+    {
+      "id": "measured",
+      "title": "Measured",
+      "items": [
+        {
+          "note": {
+            "text": "Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it."
+          }
+        }
+      ],
+      "segment": "activity"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Restart",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "destructive": true
+    },
+    {
+      "label": "Copy ssh admin@infra",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh admin@infra"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh admin@infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy link to Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "priority": 4,
+      "id": "copy:infra:443",
+      "run": {
+        "copy": "https://jterrazz.com"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://jterrazz.com"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy link to Kubernetes API",
+      "on": "row",
+      "rows": [
+        "infra:6443"
+      ],
+      "priority": 4,
+      "id": "copy:infra:6443",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "More options for infra",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "restart",
+        "stop",
+        "delete"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "server"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh admin@infra"
+    },
+    "buttons": [
+      "copy-ssh",
+      "open-station"
+    ]
+  },
+  "live": [
+    "cpu:infra",
+    "free:infra",
+    "net:infra"
+  ]
+}

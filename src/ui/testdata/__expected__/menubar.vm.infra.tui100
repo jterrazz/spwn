@@ -1,24 +1,19 @@
- infra  Server VM · Always on · on mac-mini · 8 CPU · 24 GB
-   ● State  Running
+ infra  server · on mac-mini · up 12 days · restarts after a power cut
 
- Overview
-     Up  12 d 4 h · since boot              Restarts  0 restarts · none since boot
+ Health
+   ● Healthy            4 of 4  checked after every boot · 40 s ago
+   ├─ ● Running                 running
+   ├─ ● Has an address          192.168.64.7
+   ├─ ● SSH answers
+   └─ ● Check passes            200
 
- Health  after every boot · 40s ago  4 ●
-   ● Running
-   ● Has an address  192.168.64.7
-   ● SSH answers
-   ● Check passes    https://infra:6443/readyz · 200
+ Gauges
 
- Activity
-     CPU     34%           ▁▂▂▃▃▂▃▄▄▃▂▃▄▃▃▃       Disk  45%  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 
-     Memory  20.8/25.8 GB  ▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆ 
+ Ports
+   No port shared yet
 
- Ports and shell
-     Ports  Public 1 · Private 2          Apps, settings, accounts: not managed by station
-     SSH    ssh admin@infra
-
- infra  server · up 12 days
+ Tooling
+   Apps, settings and accounts: your own tooling (Ansible).
 
  Last 6 minutes
      CPU  34%  now                          Network  1.7 · 0.1 MB/s

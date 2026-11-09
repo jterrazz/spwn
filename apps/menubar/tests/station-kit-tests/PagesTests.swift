@@ -59,9 +59,9 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["throwaway", "on This Mac", "no agent running"])
         XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Share a port", "Open in Terminal"])
         let infra = try Tree.page("menubar.vm.infra")
-        XCTAssertEqual(infra.sections?.compactMap(\.id), ["machine", "up", "health", "activity", "server", "summary", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
-        XCTAssertEqual(infra.section("health")?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
-        XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Open in Terminal"])
+        XCTAssertEqual(infra.sections?.compactMap(\.id), ["summary", "health", "gauges", "ports", "tooling", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
+        XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])
+        XCTAssertEqual(infra.pageActions.map(\.label), ["Restart", "Stop", "Delete", "Copy ssh admin@infra", "Open in Terminal"])
         let mini = try Tree.page("menubar.mac.mini")
         XCTAssertEqual(mini.sections?.compactMap(\.id), ["summary", "gauges", "vms", "care", "window-6m", "window-1h", "window-24h", "memory", "processes", "public", "private", "https", "accounts:shared"])
         for page in [linux, infra, mini] {

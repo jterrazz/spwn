@@ -1,0 +1,7 @@
+{
+    "group": "server",
+    "id": "server.restarting",
+    "note": "infra restarting at step 2 of 4: Health open by itself, the gauges waiting as skeletons, the ports unreachable until ready.",
+    "pages": ["pages/machines.server.restarting-2.machine.infra.json"],
+    "schema": "station.story/v1"
+}

@@ -1,0 +1,576 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.machine",
+  "command": "menubar",
+  "context": {
+    "machine": "infra",
+    "kind": "server",
+    "on": "mac-mini"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "infra",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "server"
+        },
+        {
+          "kind": "text",
+          "text": "on mac-mini",
+          "pri": 1,
+          "nav": "menubar.machine:mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "down since 10:26",
+          "signal": "failing"
+        },
+        {
+          "kind": "text",
+          "text": "restarts after a power cut",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "title": "Health",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "down",
+              "mark": "broken",
+              "label": "Down since 10:26",
+              "detail": {
+                "kind": "text",
+                "text": "Out of memory"
+              },
+              "reason": "down",
+              "glyph": {
+                "kind": "symbol:xmark.octagon.fill",
+                "signal": "failing"
+              },
+              "verb": "restart-now"
+            }
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "health"
+    },
+    {
+      "id": "log",
+      "title": "Last lines before it went down",
+      "items": [
+        {
+          "log": {
+            "lines": [
+              "10:25:59 k3s etcd: slow fdatasync, took 1.9 s",
+              "10:25:59 kernel Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB",
+              "10:26:00 oom_reaper reaped process 812 (k3s-server), now anon-rss:0kB"
+            ],
+            "cause": 2,
+            "more": "log"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "log"
+    },
+    {
+      "id": "uptime",
+      "title": "Last 30 days",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "99.97% available"
+        }
+      ],
+      "items": [
+        {
+          "uptime": {
+            "days": [
+              {
+                "date": "2026-10-09",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-10",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-11",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-12",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-13",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-14",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-15",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-16",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-17",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-18",
+                "mark": "restart",
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
+              },
+              {
+                "date": "2026-10-19",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-20",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-21",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-22",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-23",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-24",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-25",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-26",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-27",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-28",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-29",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-10-30",
+                "mark": "restart",
+                "tip": "Down from 04:30 to 04:34, out of memory; restarted 1 time"
+              },
+              {
+                "date": "2026-10-31",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-01",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-02",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-03",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-04",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-05",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-06",
+                "mark": "ok",
+                "tip": "Up all day"
+              },
+              {
+                "date": "2026-11-07",
+                "mark": "down",
+                "tip": "Down from 10:26 to now, out of memory"
+              }
+            ],
+            "availability": {
+              "kind": "text",
+              "text": "99.97% available"
+            }
+          }
+        },
+        {
+          "note": {
+            "text": "30 days ago"
+          }
+        },
+        {
+          "note": {
+            "text": "today"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "uptime"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "note": "last",
+            "value": {
+              "kind": "percent",
+              "n": 340
+            },
+            "stale": true
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "note": "last",
+            "value": {
+              "kind": "text",
+              "text": "5 GB free"
+            },
+            "stale": true
+          }
+        },
+        {
+          "gauge": {
+            "title": "Last seen",
+            "value": {
+              "kind": "text",
+              "text": "10:26"
+            },
+            "stale": true
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "unreachable while down"
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "infra:443",
+            "mark": "ok",
+            "label": "Traefik",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "443 public"
+                },
+                {
+                  "kind": "text",
+                  "text": "Cloudflare Tunnel"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "port:traefik"
+            },
+            "signal": "faint"
+          }
+        },
+        {
+          "row": {
+            "id": "infra:6443",
+            "mark": "ok",
+            "label": "Kubernetes API",
+            "detail": {
+              "kind": "text",
+              "text": "infra:6443"
+            },
+            "glyph": {
+              "kind": "port:kubernetes"
+            },
+            "signal": "faint"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "tooling",
+      "title": "Tooling",
+      "items": [
+        {
+          "note": {
+            "text": "Apps, settings and accounts: your own tooling (Ansible)."
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Restart",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "page",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "page",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "destructive": true
+    },
+    {
+      "label": "Restart",
+      "on": "row",
+      "rows": [
+        "down"
+      ],
+      "priority": 1,
+      "mutates": true,
+      "id": "restart-now",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Restarting infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Show full log",
+      "on": "page",
+      "priority": 4,
+      "id": "log",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "machines",
+          "log",
+          "infra"
+        ],
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal",
+      "disabled": "Needs infra running"
+    },
+    {
+      "label": "More options for infra",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "restart",
+        "stop",
+        "delete"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "server"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "segments": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "picked": true
+    },
+    {
+      "id": "activity",
+      "label": "Activity",
+      "key": "cmd+i"
+    }
+  ],
+  "footer": {
+    "kind": "ssh",
+    "note": "Needs infra running",
+    "buttons": [
+      "open-station"
+    ]
+  }
+}

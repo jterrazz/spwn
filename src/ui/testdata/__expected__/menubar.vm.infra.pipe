@@ -1,7 +1,13 @@
 # Health
-●	Running
-●	Has an address	192.168.64.7
+●	Healthy	4 of 4	checked after every boot · 40 s ago
+●	Running		running
+●	Has an address		192.168.64.7
 ●	SSH answers
-●	Check passes	https://infra:6443/readyz · 200
+●	Check passes		200
+# Gauges
+# Ports
+	none
+# Tooling
+	Apps, settings and accounts: your own tooling (Ansible).
 # Measured
 	Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it.

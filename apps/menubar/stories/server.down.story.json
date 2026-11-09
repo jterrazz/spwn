@@ -1,8 +1,7 @@
 {
     "group": "server",
     "id": "server.down",
-    "note": "infra down: out of memory, in a restart loop.",
-    "pages": ["pages/machines.down.machine.infra.json"],
-    "schema": "station.story/v1",
-    "status": "today"
+    "note": "infra down since 10:26, out of memory: the red banner with Restart, the console's last lines, its gauges as last seen, its ports unreachable.",
+    "pages": ["pages/machines.server.down.machine.infra.json"],
+    "schema": "station.story/v1"
 }

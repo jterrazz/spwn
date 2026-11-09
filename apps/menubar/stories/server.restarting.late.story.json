@@ -1,0 +1,7 @@
+{
+    "group": "server",
+    "id": "server.restarting.late",
+    "note": "infra restarting at step 4 of 4: only Check passes left.",
+    "pages": ["pages/machines.server.restarting-4.machine.infra.json"],
+    "schema": "station.story/v1"
+}

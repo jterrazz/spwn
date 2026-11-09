@@ -323,14 +323,16 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	live := &feeds.Live{Calls: w, Clock: clock, ThisMac: thisMac}
 	pages := watchWith(t, w, clock, engine.FeedInput{Subject: "infra"}, live)
 	state := func(p page.Page) page.Mark {
-		if r := row(p, "machine", "state"); r != nil {
-			return r.Mark
+		for _, s := range p.Sections {
+			if s.ID == "health" && len(s.Items) > 0 && s.Items[0].Group != nil {
+				return s.Items[0].Group.Head.Mark
+			}
 		}
 		return ""
 	}
 	p := until(t, pages, "infra running", func(p page.Page) bool { return state(p) == page.OK })
-	if !slices.Equal(p.Live, []string{"cpu:infra", "memory:infra", "disk:infra", "free:infra"}) {
-		t.Errorf("infra's page reads the live keys %q, want its CPU, memory, disk and its Activity's free memory", p.Live)
+	if !slices.Equal(p.Live, []string{"cpu:infra", "free:infra", "net:infra"}) {
+		t.Errorf("infra's page reads the live keys %q, want its CPU, free memory and network", p.Live)
 	}
 	w.mu.Lock()
 	kept := w.reads["infra"]
@@ -342,9 +344,9 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 		t.Errorf("infra's page draws Needs you %q", got)
 	}
 	first := live.Sample(t.Context(), p.Live)
-	memory, _ := first.Values["memory:infra"].(page.Value)
-	if memory.Kind != page.KindSpark || memory.Items[0].Kind != page.KindRatio || memory.Items[0].Of != 24*gb {
-		t.Errorf("the first tick reads infra's memory as %+v, want infra's own 24 GB", memory)
+	memory, _ := first.Values["free:infra"].(page.Value)
+	if memory.Kind != page.KindSize || memory.N != 12*gb {
+		t.Errorf("the first tick reads infra's free memory as %+v, want infra's own 12 GB", memory)
 	}
 	if _, ok := first.Values["cpu:infra"]; ok {
 		t.Errorf("the first tick reads infra's CPU from one reading, want it once a second one came")
@@ -361,16 +363,23 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	}
 	clock.pass(t, 30*time.Second)
 	p = until(t, pages, "infra down while it restarts", func(p page.Page) bool { return state(p) == page.Broken })
-	if r := row(p, "activity", "memory"); r == nil || r.Cells[0].Kind != page.KindNone || r.Cells[0].Live != "" {
-		t.Errorf("infra stopped draws its memory as %+v, want none, read live no more", r)
+	if g := gaugeOf(p, "free:infra"); g != nil || slices.Contains(p.Live, "free:infra") {
+		t.Errorf("infra stopped draws its memory as %+v, live %q, want it read live no more", g, p.Live)
 	}
 	clock.pass(t, 30*time.Second)
-	p = until(t, pages, "infra back with the memory the ticks kept", func(p page.Page) bool {
-		r := row(p, "activity", "memory")
-		return state(p) == page.OK && r != nil && r.Cells[0].Kind == page.KindRatio
+	p = until(t, pages, "infra back with its memory read live again", func(p page.Page) bool {
+		return state(p) == page.OK && gaugeOf(p, "free:infra") != nil
 	})
-	if r := row(p, "up", "restarts"); r == nil || r.Cells[0].Items[0].N != 1 {
-		t.Errorf("infra back counts %+v restarts, want 1", r)
+	var facts []string
+	for _, s := range p.Sections {
+		if s.ID == "summary" {
+			for _, v := range s.Caption {
+				facts = append(facts, v.Text)
+			}
+		}
+	}
+	if !slices.Contains(facts, "restarted 1 time") {
+		t.Errorf("infra back says %q, want it restarted 1 time", facts)
 	}
 	for _, name := range []string{activitycalls.Sample.Name, overviewcalls.Read.Name} {
 		for _, at := range w.askedOf(name) {
@@ -586,4 +595,15 @@ func TestTheMacMinisPageSaysItsAwakeTheCopiesEndingAndItsTimesInTheOwnersClock(t
 	if r := row(p, "vms", "infra"); r == nil || len(r.Detail.Items) == 0 || r.Detail.Items[0].Text != "down since 11:05" {
 		t.Errorf("infra reads %+v, want down since 11:05 in the owner's clock", r)
 	}
+}
+
+func gaugeOf(p page.Page, key string) *page.Value {
+	for _, s := range p.Sections {
+		for _, it := range s.Items {
+			if it.Gauge != nil && it.Gauge.Value.Live == key {
+				return &it.Gauge.Value
+			}
+		}
+	}
+	return nil
 }

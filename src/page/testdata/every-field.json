@@ -306,7 +306,8 @@
         },
         {
           "gauge": {
-            "title": "CPU, 4 cores",
+            "title": "CPU",
+            "note": "4 cores",
             "value": {
               "kind": "percent",
               "n": 340,
