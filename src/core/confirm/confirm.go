@@ -2,6 +2,7 @@ package confirm
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/core/machine"
@@ -68,6 +69,34 @@ func For(a Action, k machine.Kind) Level {
 	default:
 		return YesNo
 	}
+}
+
+// value: what a gesture's question depends on beyond its machine's kind,
+// as the page that asks it knows: a workspace thrown away when done, a
+// server that answers its checks, a Mac that hosts a server.
+type Fact string
+
+const (
+	Throwaway   Fact = "throwaway"
+	Healthy     Fact = "healthy"
+	HostsServer Fact = "hosts-server"
+)
+
+func Of(a Action, k machine.Kind, facts ...Fact) Level {
+	// invariant: SPEC A5: the menu bar's alert asks at the level its facts
+	// grade: a throwaway's delete yes or no, a healthy server's restart yes
+	// or no (an outage), a Mac hosting a server its name typed to restart.
+	// With no fact, the level is the call's own, For's.
+	has := func(f Fact) bool { return slices.Contains(facts, f) }
+	switch {
+	case a == Delete && k == machine.Workspace && has(Throwaway):
+		return YesNo
+	case a == Restart && k == machine.Server && has(Healthy):
+		return YesNo
+	case a == RestartMac && has(HostsServer):
+		return TypeName
+	}
+	return For(a, k)
 }
 
 func Require(l Level, name, given string) error {

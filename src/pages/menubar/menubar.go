@@ -544,7 +544,7 @@ func awakeAction(r *awake.Report) page.Action {
 		}}}
 }
 
-type Levels func(gesture string, kind machine.Kind) string
+type Levels func(gesture string, kind machine.Kind, facts ...string) string
 
 // value: the levels a gesture on a machine of a kind asks at, as the
 // call's confirmation rule gives them (confirm.For, its caller's): a page

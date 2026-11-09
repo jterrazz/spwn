@@ -70,3 +70,33 @@ func TestAYesNoQuestionIsAnsweredByYes(t *testing.T) {
 		t.Errorf("installing jq asked: %v", err)
 	}
 }
+
+func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
+	for _, c := range []struct {
+		alert  string
+		action confirm.Action
+		kind   machine.Kind
+		facts  []confirm.Fact
+		want   confirm.Level
+	}{
+		{"alert.restart-server", confirm.Restart, machine.Server, []confirm.Fact{confirm.Healthy}, confirm.YesNo},
+		{"a down server restarts at once", confirm.Restart, machine.Server, nil, confirm.None},
+		{"alert.stop-server", confirm.Stop, machine.Server, []confirm.Fact{confirm.Healthy}, confirm.TypeName},
+		{"alert.delete-server", confirm.Delete, machine.Server, nil, confirm.TypeName},
+		{"alert.stop-vm", confirm.Stop, machine.Workspace, []confirm.Fact{confirm.Throwaway}, confirm.YesNo},
+		{"alert.stop-agent", confirm.StopAgent, machine.Workspace, nil, confirm.YesNo},
+		{"alert.delete-vm.throwaway", confirm.Delete, machine.Workspace, []confirm.Fact{confirm.Throwaway}, confirm.YesNo},
+		{"alert.delete-vm.permanent", confirm.Delete, machine.Workspace, nil, confirm.TypeName},
+		{"alert.stop-all", confirm.StopEngine, machine.Mac, nil, confirm.YesNo},
+		{"alert.restart-mac", confirm.RestartMac, machine.Mac, []confirm.Fact{confirm.HostsServer}, confirm.TypeName},
+		{"a Mac hosting no server restarts on yes", confirm.RestartMac, machine.Mac, nil, confirm.YesNo},
+		{"alert.forget-mac", confirm.Forget, machine.Mac, nil, confirm.YesNo},
+		{"alert.take-back", confirm.TakeBack, machine.Workspace, nil, confirm.YesNo},
+		{"alert.stop-share", confirm.StopSharing, machine.Workspace, nil, confirm.YesNo},
+		{"alert.let-sleep", confirm.OffHere, machine.Mac, []confirm.Fact{confirm.HostsServer}, confirm.YesNo},
+	} {
+		if got := confirm.Of(c.action, c.kind, c.facts...); got != c.want {
+			t.Errorf("%s asks %s, want %s", c.alert, got, c.want)
+		}
+	}
+}

@@ -41,7 +41,7 @@ func macFleet() *model.AllMachines {
 
 func macPageOf(t *testing.T, name string, edit func(*Machine)) page.Page {
 	t.Helper()
-	m := Machine{Name: name, All: macFleet(), Now: macNow, Zone: time.UTC, Asks: func(string, coremachine.Kind) string { return LevelYesNo },
+	m := Machine{Name: name, All: macFleet(), Now: macNow, Zone: time.UTC, Asks: func(string, coremachine.Kind, ...string) string { return LevelYesNo },
 		Summary: &overview.Summary{Head: overview.Head{Name: name, Kind: coremachine.Mac, Up: 21 * 24 * time.Hour}}}
 	if edit != nil {
 		edit(&m)

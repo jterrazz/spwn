@@ -23,7 +23,7 @@ func agentPageOf(t *testing.T, name string) page.Page {
 	t.Helper()
 	page.Strict(true)
 	defer page.Strict(false)
-	return AgentPage(Agent{Name: name, All: macFleet(), Agents: fleetAgents(), Now: macNow, Asks: func(string, coremachine.Kind) string { return LevelYesNo }})
+	return AgentPage(Agent{Name: name, All: macFleet(), Agents: fleetAgents(), Now: macNow, Asks: func(string, coremachine.Kind, ...string) string { return LevelYesNo }})
 }
 
 func agentActionOf(p page.Page, id string) *page.Action {
@@ -95,7 +95,7 @@ func TestAWorkspaceWhoseAgentFinishedWearsTheBox(t *testing.T) {
 	done.Name = "review-bot"
 	page.Strict(true)
 	defer page.Strict(false)
-	p := AgentPage(Agent{Name: "review-bot", All: macFleet(), Agents: []agents.Agent{done}, Now: macNow, Asks: func(string, coremachine.Kind) string { return LevelYesNo }})
+	p := AgentPage(Agent{Name: "review-bot", All: macFleet(), Agents: []agents.Agent{done}, Now: macNow, Asks: func(string, coremachine.Kind, ...string) string { return LevelYesNo }})
 	runs := sectionOf(p, SectionRunsOn)
 	if runs == nil || runs.Items[0].Row.Glyph.Kind != "workspace" {
 		t.Fatalf("Runs on %+v", runs)

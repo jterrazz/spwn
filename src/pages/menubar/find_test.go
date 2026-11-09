@@ -24,7 +24,7 @@ const (
 
 var findNow = time.Date(2026, 11, 7, 15, 30, 0, 0, time.UTC)
 
-func asksYesNo(gesture string, k machine.Kind) string {
+func asksYesNo(gesture string, k machine.Kind, _ ...string) string {
 	if gesture == "restart" && k == machine.Server {
 		return LevelYesNo
 	}

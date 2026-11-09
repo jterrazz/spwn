@@ -20,7 +20,7 @@ func apiPage(t *testing.T, state model.VMState) page.Page {
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 		{Name: "api", Lifetime: model.Permanent, State: state},
 	}}}}
-	return MachinePage(Machine{Name: "api", All: fleet, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+	return MachinePage(Machine{Name: "api", All: fleet, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 }
 
 func actionIDs(p page.Page) []string {
@@ -59,7 +59,7 @@ func TestASharedAccountSaysNoInternalScope(t *testing.T) {
 	report := &accounts.Report{Machines: []accounts.Machine{{Name: "linux-1", Accounts: []accounts.Account{
 		{Provider: "github", Scopes: []string{"session:github", "read only"}, Shared: &accounts.Loan{Until: now.Add(4 * time.Hour)}},
 	}}}}
-	p := MachinePage(Machine{Name: "linux-1", All: fleet, Accounts: report, Now: now, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+	p := MachinePage(Machine{Name: "linux-1", All: fleet, Accounts: report, Now: now, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 	for _, s := range p.Sections {
 		if s.ID != SectionShared {
 			continue
@@ -125,7 +125,7 @@ func TestAServerOfAnotherMacIsActedOnByItsMac(t *testing.T) {
 		{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true},
 		{Name: "jterrazz-mac-mini", Reachable: true, VMs: []model.VM{{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
 	}}
-	p := MachinePage(Machine{Name: "infra", All: fleet, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+	p := MachinePage(Machine{Name: "infra", All: fleet, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 	for _, a := range p.Actions {
 		if a.Run == nil || a.Run.Call == "" {
 			continue
