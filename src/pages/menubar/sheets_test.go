@@ -60,7 +60,7 @@ func sheetAgents() []agents.Agent {
 		done("changelog-bot", "agent-7f", "pro"),
 		done("docs-bot", "linux-1", "pro"),
 		done("docs", "docs", "pro"),
-		done("infra·1", "infra", "mini"),
+		done("infra-2", "infra", "mini"),
 	}
 }
 
@@ -91,12 +91,12 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 		calls = append(calls, r.Call+" "+r.In["VMs"]+r.In["Agent"]+on)
 	}
 	want := []string{`machines.cleanup ["agent-7f"]`, `agents.forget changelog-bot on agent-7f/`, `agents.forget docs-bot on linux-1/`, `agents.forget docs on docs/`,
-		`machines.cleanup ["old"] on mini/`, `agents.forget infra·1 on infra/mini`}
+		`machines.cleanup ["old"] on mini/`, `agents.forget infra-2 on infra/mini`}
 	if !slices.Equal(calls, want) {
 		t.Fatalf("Clean up runs %q, want %q", calls, want)
 	}
 	finished, vms := fieldOf(a, "Agent"), fieldOf(a, "VMs")
-	if finished.Follows != "VMs" || finished.Options[0].Of != "agent-7f" || finished.Options[1].Of != "" || finished.Default != "docs-bot,docs,infra·1" {
+	if finished.Follows != "VMs" || finished.Options[0].Of != "agent-7f" || finished.Options[1].Of != "" || finished.Default != "docs-bot,docs,infra-2" {
 		t.Errorf("the finished agents %+v: changelog-bot goes with its throwaway, the others are checked on their own", finished)
 	}
 	if o := finished.Options[1]; o.Label != "docs-bot" || o.Note != "on linux-1{sep}finished 12 min ago{sep}tests pass" {
@@ -128,7 +128,7 @@ func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 	if a.Form.Title != "Clean up on mini" || a.Run.Target.Name != "mini" || len(a.Run.And) != 1 || fieldOf(a, "VMs").Options[0].Note != "stopped{sep}8 GB disk" {
 		t.Errorf("Clean up on mini: %+v, runs %+v", a.Form, a.Run)
 	}
-	if o := fieldOf(a, "Agent").Options; len(o) != 1 || o[0].Value != "infra·1" {
+	if o := fieldOf(a, "Agent").Options; len(o) != 1 || o[0].Value != "infra-2" {
 		t.Errorf("Clean up on mini offers the agents %+v", o)
 	}
 }
