@@ -3,6 +3,7 @@ package pages
 import (
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -86,6 +87,8 @@ func sharesLong(f *Scene) {
 func reviewMerged(f *Scene) {
 	bot := &f.All.Macs[1].VMs[2]
 	bot.Agent = &model.AgentView{State: model.AgentFinished, Task: bot.Agent.Task, Ended: storyNow.Add(-3 * time.Minute), Reason: "merged PR #42"}
+	a := agentIn(f, "review-bot")
+	a.State, a.Ask, a.Ended, a.Reason = agents.Finished, nil, bot.Agent.Ended, bot.Agent.Reason
 }
 
 func manyNeeds(f *Scene) {

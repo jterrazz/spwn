@@ -2,37 +2,42 @@ package menubar
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 	pagemachines "github.com/jterrazz/studio-station/src/pages/machines"
 )
 
 // value: what one Mac gives Clean up: its empty throwaways, its finished
-// agents, and the VMs that stay because an agent works there or they run.
+// agents by their own names, and the VMs that stay because an agent lives
+// there or they run.
 type cleanupOf struct {
 	mac      model.MacView
 	gone     []model.VM
-	finished []model.VM
-	working  []string
+	finished []agents.Agent
+	live     []string
 	running  []string
 }
 
-func cleanupsOf(macs []model.MacView) []cleanupOf {
+// value: each Mac's Clean up, its finished agents read from the fleet's
+// agents, every one of them, whatever the VM's speaker is.
+func cleanupsOf(macs []model.MacView, as []agents.Agent) []cleanupOf {
 	out := make([]cleanupOf, 0, len(macs))
 	for _, m := range macs {
 		gone, kept := model.Cleanup(m.VMs)
 		c := cleanupOf{mac: m, gone: gone}
-		for _, vm := range m.VMs {
-			if vm.Agent != nil && vm.Finished() {
-				c.finished = append(c.finished, vm)
+		for _, a := range as {
+			if a.State == agents.Finished && (a.Mac == "" || a.Mac == m.Name) && slices.ContainsFunc(m.VMs, func(vm model.VM) bool { return vm.Name == a.VM }) {
+				c.finished = append(c.finished, a)
 			}
 		}
 		for _, vm := range kept {
 			if vm.Agent != nil && !vm.Finished() {
-				c.working = append(c.working, vm.Name)
+				c.live = append(c.live, vm.Name)
 			} else {
 				c.running = append(c.running, vm.Name)
 			}
@@ -56,7 +61,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 	agentsField := page.Field{Key: "Agent", Label: "Finished agents", Kind: page.FieldMulti, Note: "each is forgotten; its workspace stays", Follows: "VMs"}
 	vmsField := page.Field{Key: "VMs", Label: "Empty throwaways", Kind: page.FieldMulti, Note: "no live agent; each goes with its disk, its ports and the accounts lent to it"}
 	var runs []page.Run
-	var working, running []string
+	var live, running []string
 	for _, c := range of {
 		label := model.Label(all, c.mac)
 		var names []string
@@ -79,26 +84,22 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 			list, _ := json.Marshal(names)
 			runs = append(runs, page.Run{Call: CallCleanup, In: map[string]string{"VMs": string(list), "Confirm": yes}, Target: target(c.mac)})
 		}
-		for _, vm := range c.finished {
-			parts := []string{"on " + vm.Name}
-			if !vm.Agent.Ended.IsZero() && now.After(vm.Agent.Ended) {
-				parts = append(parts, "finished "+minutes(now.Sub(vm.Agent.Ended))+" ago")
+		for _, a := range c.finished {
+			parts := []string{"on " + a.VM}
+			if !a.Ended.IsZero() && now.After(a.Ended) {
+				parts = append(parts, "finished "+minutes(now.Sub(a.Ended))+" ago")
 			}
-			if vm.Agent.Reason != "" {
-				parts = append(parts, vm.Agent.Reason)
+			if a.Reason != "" {
+				parts = append(parts, a.Reason)
 			}
-			o := page.Option{Value: vm.Name, Label: vm.Name, Note: strings.Join(parts, "{sep}")}
-			if contains(names, vm.Name) {
-				o.Of = vm.Name
+			o := page.Option{Value: a.Name, Label: a.Name, Note: strings.Join(parts, "{sep}")}
+			if contains(names, a.VM) {
+				o.Of = a.VM
 			}
-			t := &page.Target{Name: vm.Name}
-			if !c.mac.ThisMac {
-				t.On = c.mac.Name
-			}
-			runs = append(runs, page.Run{Call: CallAgentsForget, In: map[string]string{"Agent": vm.Name}, Target: t})
+			runs = append(runs, *agentRun(c.mac, a)(CallAgentsForget, nil))
 			agentsField.Options = append(agentsField.Options, o)
 		}
-		working, running = append(working, c.working...), append(running, c.running...)
+		live, running = append(live, c.live...), append(running, c.running...)
 	}
 	vmsField.Default = values(vmsField.Options, false)
 	agentsField.Default = values(agentsField.Options, true)
@@ -109,7 +110,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 	if len(vmsField.Options) > 0 {
 		fields = append(fields, vmsField)
 	}
-	if note := stays(working, running); note != "" {
+	if note := stays(live, running); note != "" {
 		fields = append(fields, page.Field{Key: "stays", Kind: page.FieldNote, Note: note})
 	}
 	var primary []page.Primary
@@ -144,14 +145,15 @@ func values(opts []page.Option, own bool) string {
 	return strings.Join(out, ",")
 }
 
-// value: the note naming what stays: the VMs an agent works in, then the
+// value: the note naming what stays: the VMs a live agent is in, then the
 // throwaways still running.
-func stays(working, running []string) string {
+func stays(live []string, running []string) string {
+	agent := "a working agent"
 	var lines []string
-	if n := len(working); n == 1 {
-		lines = append(lines, working[0]+" has a working agent, so it stays.")
+	if n := len(live); n == 1 {
+		lines = append(lines, live[0]+" has "+agent+", so it stays.")
 	} else if n > 1 {
-		lines = append(lines, joinAnd(working)+" have a working agent, so they stay.")
+		lines = append(lines, joinAnd(live)+" have "+agent+", so they stay.")
 	}
 	if n := len(running); n == 1 {
 		lines = append(lines, running[0]+" is still running, so it stays.")

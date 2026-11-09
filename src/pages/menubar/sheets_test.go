@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
@@ -47,14 +48,39 @@ func fleetOfTwo() model.AllMachines {
 	}}
 }
 
+// value: the fleet's agents, each named apart from its VM as the New agent
+// sheet names them: a finished one on a throwaway, one finished beside a
+// working one, one on a workspace, one on another Mac.
+func sheetAgents() []agents.Agent {
+	done := func(name, vm, mac string) agents.Agent {
+		return agents.Agent{Name: name, VM: vm, Mac: mac, State: agents.Finished, Ended: sheetNow.Add(-12 * time.Minute), Reason: "tests pass"}
+	}
+	return []agents.Agent{
+		{Name: "linux-1", VM: "linux-1", Mac: "pro", State: agents.Working},
+		done("changelog-bot", "agent-7f", "pro"),
+		done("docs-bot", "linux-1", "pro"),
+		done("docs", "docs", "pro"),
+		done("infra·1", "infra", "mini"),
+	}
+}
+
+func fieldOf(a page.Action, key string) page.Field {
+	for _, f := range a.Form.Fields {
+		if f.Key == key {
+			return f
+		}
+	}
+	return page.Field{}
+}
+
 // invariant: SPEC A5 Clean up across every Mac: the empty throwaways of
-// each Mac deleted on that Mac, each finished agent forgotten on its own,
-// the one its throwaway carries too, should the owner keep the throwaway;
-// the button worded from what is checked, red once a throwaway is; the
-// note names what an agent still works in.
+// each Mac deleted on that Mac, every finished agent listed and forgotten
+// by its own name in its own VM, the one a throwaway carries too, should
+// the owner keep the throwaway; the button worded from what is checked,
+// red once a throwaway is; the note names what an agent still works in.
 func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 	all := fleetOfTwo()
-	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs), sheetNow, false)
+	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs, sheetAgents()), sheetNow, false)
 	calls := make([]string, 0, 1+len(a.Run.And))
 	calls = append(calls, a.Run.Call+" "+a.Run.In["VMs"])
 	for _, r := range a.Run.And {
@@ -64,18 +90,22 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 		}
 		calls = append(calls, r.Call+" "+r.In["VMs"]+r.In["Agent"]+on)
 	}
-	want := []string{`machines.cleanup ["agent-7f"]`, `agents.forget agent-7f on agent-7f/`, `agents.forget docs on docs/`, `machines.cleanup ["old"] on mini/`}
+	want := []string{`machines.cleanup ["agent-7f"]`, `agents.forget changelog-bot on agent-7f/`, `agents.forget docs-bot on linux-1/`, `agents.forget docs on docs/`,
+		`machines.cleanup ["old"] on mini/`, `agents.forget infra·1 on infra/mini`}
 	if !slices.Equal(calls, want) {
 		t.Fatalf("Clean up runs %q, want %q", calls, want)
 	}
-	agents, vms := a.Form.Fields[0], a.Form.Fields[1]
-	if agents.Follows != "VMs" || agents.Options[0].Of != "agent-7f" || agents.Options[1].Of != "" || agents.Default != "docs" {
-		t.Errorf("the finished agents %+v: agent-7f goes with its throwaway, docs is checked on its own", agents)
+	finished, vms := fieldOf(a, "Agent"), fieldOf(a, "VMs")
+	if finished.Follows != "VMs" || finished.Options[0].Of != "agent-7f" || finished.Options[1].Of != "" || finished.Default != "docs-bot,docs,infra·1" {
+		t.Errorf("the finished agents %+v: changelog-bot goes with its throwaway, the others are checked on their own", finished)
+	}
+	if o := finished.Options[1]; o.Label != "docs-bot" || o.Note != "on linux-1{sep}finished 12 min ago{sep}tests pass" {
+		t.Errorf("the agent beside a working one is listed as %+v", o)
 	}
 	if vms.Default != "agent-7f,old" || vms.Options[1].Note != "mini{sep}stopped{sep}8 GB disk" {
 		t.Errorf("the throwaways %+v", vms)
 	}
-	if note := a.Form.Fields[2].Note; note != "linux-1 has a working agent, so it stays. away is still running, so it stays." {
+	if note := fieldOf(a, "stays").Note; note != "linux-1 has a working agent, so it stays. away is still running, so it stays." {
 		t.Errorf("the note says %q", note)
 	}
 	words := make([]string, 0, len(a.Form.Primary))
@@ -85,18 +115,21 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 			t.Errorf("%q is red: %v", p.Label, p.Danger)
 		}
 	}
-	if want := []string{"Delete 2 throwaways", "Delete 1 throwaway", "Forget 2 agents", "Forget 1 agent"}; !slices.Equal(words, want) {
+	if want := []string{"Delete 2 throwaways", "Delete 1 throwaway", "Forget 4 agents", "Forget 3 agents", "Forget 2 agents", "Forget 1 agent"}; !slices.Equal(words, want) {
 		t.Errorf("the button says %q, want %q", words, want)
 	}
 }
 
 // invariant: SPEC A5 Clean up on one Mac: its title names the Mac, its
-// throwaways say no Mac, and it deletes on that Mac alone.
+// throwaways say no Mac, and it deletes and forgets on that Mac alone.
 func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 	all := fleetOfTwo()
-	a := cleanupSheet(ActionCleanup+":mini", all, cleanupsOf(all.Macs[1:2]), sheetNow, true)
-	if a.Form.Title != "Clean up on mini" || a.Run.Target.Name != "mini" || len(a.Run.And) != 0 || a.Form.Fields[0].Options[0].Note != "stopped{sep}8 GB disk" {
+	a := cleanupSheet(ActionCleanup+":mini", all, cleanupsOf(all.Macs[1:2], sheetAgents()), sheetNow, true)
+	if a.Form.Title != "Clean up on mini" || a.Run.Target.Name != "mini" || len(a.Run.And) != 1 || fieldOf(a, "VMs").Options[0].Note != "stopped{sep}8 GB disk" {
 		t.Errorf("Clean up on mini: %+v, runs %+v", a.Form, a.Run)
+	}
+	if o := fieldOf(a, "Agent").Options; len(o) != 1 || o[0].Value != "infra·1" {
+		t.Errorf("Clean up on mini offers the agents %+v", o)
 	}
 }
 

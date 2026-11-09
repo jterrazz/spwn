@@ -250,7 +250,7 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares(), Asks: Levels}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares(), Agents: f.Agents, Asks: Levels}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {

@@ -74,9 +74,9 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 			}
 		}
 	}
-	every, cleans := cleanupsOf(r.All.Macs), false
+	every, cleans := cleanupsOf(r.All.Macs, r.Agents), false
 	for _, c := range every {
-		if slices.ContainsFunc(c.mac.VMs, model.VM.Finished) {
+		if len(c.finished) > 0 || slices.ContainsFunc(c.mac.VMs, model.VM.Finished) {
 			actions = append(actions, cleanupSheet(ActionCleanup+":"+c.mac.Name, *r.All, []cleanupOf{c}, h.now, true))
 		}
 		cleans = cleans || c.any()
