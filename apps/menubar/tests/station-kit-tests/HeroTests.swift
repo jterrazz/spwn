@@ -31,6 +31,17 @@ final class HeroTests: XCTestCase {
         XCTAssertEqual(failures, [])
     }
 
+    // invariant: VoiceOver names the hero's heading by its title and its
+    // facts, and while a Mac is still checked by the Mac it waits on, never
+    // a bare "heading".
+    func testVoiceOverNamesTheHeroHeading() throws {
+        let loading = try XCTUnwrap(try stories().first { $0.id == "home.loading" }?.pages.first)
+        XCTAssertEqual(Hero.heading(try hero("home.needs"), stale: nil), "2 things need you")
+        let said = Hero.heading(loading.section("hero"), stale: loading.header?.stale)
+        XCTAssertTrue(said.hasPrefix("2 things need you"), said)
+        XCTAssertTrue(said.hasSuffix(Token.Glyph.ellipsis), said)
+    }
+
     func hero(_ id: String) throws -> StationKit.Section? {
         let story = try XCTUnwrap(try stories().first { $0.id == id })
         return story.pages.first?.section("hero")
