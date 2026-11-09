@@ -21,7 +21,6 @@ const (
 // (ports.stop-sharing): a page that holds no rule draws it so.
 func yesOrNo(string, machine.Kind, ...string) string { return LevelYesNo }
 
-// value: the icon an alert leads with: the app's own.
 const IconApp = "app"
 
 // value: SPEC A5's alert of one gesture: its question, the consequence the
@@ -145,7 +144,6 @@ func deleteServer(vm model.VM, ports int) alert {
 	}
 	return alert{Gesture: "delete", Kind: machine.Server, Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: []string{says}, Verb: "Delete " + vm.Name, Danger: true}
 }
-
 
 func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
 	var says []string

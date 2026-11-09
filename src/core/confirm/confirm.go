@@ -71,9 +71,6 @@ func For(a Action, k machine.Kind) Level {
 	}
 }
 
-// value: what a gesture's question depends on beyond its machine's kind,
-// as the page that asks it knows: a workspace thrown away when done, a
-// server that answers its checks, a Mac that hosts a server.
 type Fact string
 
 const (
@@ -84,7 +81,8 @@ const (
 
 func Of(a Action, k machine.Kind, facts ...Fact) Level {
 	// invariant: SPEC A5: the menu bar's alert asks at the level its facts
-	// grade: a throwaway's delete yes or no, a healthy server's restart yes
+	// grade, facts the page that asks it knows beyond the machine's kind: a
+	// throwaway's delete yes or no, a healthy server's restart yes
 	// or no (an outage), a Mac hosting a server its name typed to restart.
 	// With no fact, the level is the call's own, For's.
 	has := func(f Fact) bool { return slices.Contains(facts, f) }
