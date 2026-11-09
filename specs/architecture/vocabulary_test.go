@@ -85,7 +85,7 @@ func aliasName(name string) bool {
 // (Tailscale's `HostName`), a code span quoted in a text, and a command line
 // station runs: the literal Args, Run and Command of a step, the literal
 // arguments of a run…, Script…, Shell… or Command call.
-var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|[a-z]+\.[a-z0-9]+-[a-z0-9-]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
+var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|sheet\.[a-z0-9]+-[a-z0-9-]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
 
 func commandLine(fun ast.Expr) bool {
 	var name string
@@ -473,12 +473,12 @@ func TestVocabularyLetsOnlyTheCatalogueSayOrbStack(t *testing.T) {
 }
 
 func TestVocabularyReadsPastForeignTextOnly(t *testing.T) {
-	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`} {
+	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`, "sheet.lend-account"} {
 		if !foreignShape.MatchString(text) {
 			t.Errorf("%q is another program's text, read as station's", text)
 		}
 	}
-	for _, text := range []string{"the daemon runs", "Host port 40000 is busy", "Storage", "lend list", `json:"leased"`} {
+	for _, text := range []string{"the daemon runs", "Host port 40000 is busy", "Storage", "lend list", `json:"leased"`, "accounts.lend-github"} {
 		if foreignShape.MatchString(text) {
 			t.Errorf("%q is station's text, read past as another program's", text)
 		}
