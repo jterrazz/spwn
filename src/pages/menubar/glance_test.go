@@ -54,7 +54,7 @@ func TestAStoppedWorkspaceShowsNoActivity(t *testing.T) {
 		fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
 			{Name: "linux-1", Lifetime: model.Throwaway, State: state},
 		}}}}
-		p := MachinePage(Machine{Name: "linux-1", All: fleet, Samples: samples, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+		p := MachinePage(Machine{Name: "linux-1", All: fleet, Samples: samples, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 		for _, s := range p.Sections {
 			if s.Segment == SegmentActivity {
 				return s, true

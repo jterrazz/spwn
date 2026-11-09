@@ -42,8 +42,12 @@ func storyPages() map[string][]byte {
 }
 
 // value: the confirmation rule the machine pages draw: the calls' own.
-func levels(gesture string, kind machine.Kind) string {
-	return string(confirm.For(confirm.Action(gesture), kind))
+func levels(gesture string, kind machine.Kind, facts ...string) string {
+	graded := make([]confirm.Fact, 0, len(facts))
+	for _, f := range facts {
+		graded = append(graded, confirm.Fact(f))
+	}
+	return string(confirm.Of(confirm.Action(gesture), kind, graded...))
 }
 
 func menubarStream() []byte {

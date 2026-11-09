@@ -27,7 +27,7 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(PortRow.menu(row, in: actions).map { $0?.label }, ["Open Vite", "Copy link to Vite", "Show QR for Vite", nil, "Stop sharing"])
         XCTAssertEqual(PortRow.menu(rows[1], in: actions).map { $0?.label }, ["Copy link to Port 7000", nil, "Stop sharing"])
         let stop = try XCTUnwrap(PortRow.menu(row, in: actions).last ?? nil)
-        XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1's port 5173?")
+        XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1:5173?")
         XCTAssertEqual(stop.run?.call, "ports.stop-sharing")
         XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "jterrazz-macbook-pro", "Confirm": "yes"] as NSDictionary)
         var copied: [String] = []
@@ -44,9 +44,6 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(opened, [])
         link[1].tap()
         XCTAssertEqual(opened.map(\.absoluteString), [url])
-        state.qr = nil
-        state.confirming = stop.id
-        XCTAssertNil(try Golden.check("sheet.stop-sharing", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
 
     // invariant: SPEC A4: a running workspace's Overview has its Ports

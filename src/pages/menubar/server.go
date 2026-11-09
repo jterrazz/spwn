@@ -582,18 +582,13 @@ func (s serverView) footer() *page.Footer {
 
 func (s serverView) actions() []page.Action {
 	m, h, vm := s.m, s.h, s.vm
-	kind := machine.Server
-	restart := page.Action{ID: ActionRestart, Label: "Restart", On: page.OnPage, Priority: 1, Mutates: true, Confirm: ask(m.Asks, "restart", kind, vm.Name, "Restart "+vm.Name+"?", "restart"),
-		Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}}
-	restart.Run.In = answered(restart.Confirm, restart.Run.In)
-	stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 2, Mutates: true,
-		Confirm: ask(m.Asks, "stop", kind, vm.Name, "Stop "+vm.Name+"?", "stop", "It stays stopped until you start it: the engine no longer restarts it."),
-		Run:     &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
-	stop.Run.In = answered(stop.Confirm, stop.Run.In)
-	del := page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 3, Mutates: true,
-		Confirm: ask(m.Asks, "delete", kind, vm.Name, "Delete "+vm.Name+"?", "delete", "Its disk is erased: nothing of it is kept."),
-		Run:     &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
-	del.Run.In, del.Destructive = answered(del.Confirm, del.Run.In), del.Confirm != nil
+	restart := restartServer(vm, s.on, s.state == serverUp).action(m.Asks, page.Action{ID: ActionRestart, Label: "Restart", On: page.OnPage, Priority: 1, Mutates: true,
+		Run: &page.Run{Call: CallRestartVM, In: map[string]string{"Name": vm.Name}, Target: target(h)}})
+	stop := stopServer(vm, s.on).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 2, Mutates: true,
+		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
+	del := deleteServer(vm, len(s.served())).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 3, Mutates: true,
+		Run: &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
+	del.Destructive = del.Confirm != nil
 	out := []page.Action{restart, stop, del}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage, Submenu: []string{ActionRestart, ActionStop, ActionDelete}}
 	switch s.state {

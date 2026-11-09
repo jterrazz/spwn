@@ -36,7 +36,7 @@ struct MacPage: View {
 
     var body: some View {
         let layer = SheetLayer.of(page, state, handlers)
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: PanelLayers(sheet: layer)) {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             header.blur(radius: layer == nil ? 0 : S.blur)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

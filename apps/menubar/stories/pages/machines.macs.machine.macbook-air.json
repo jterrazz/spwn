@@ -130,12 +130,40 @@
       }
     },
     {
+      "label": "Forget macbook-air",
+      "on": "page",
+      "confirm": {
+        "question": "Forget macbook-air?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs keep running; station stops showing it. You can add it again."
+          }
+        ],
+        "danger": true,
+        "yes": "Forget macbook-air",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "\"macbook-air\""
+        }
+      }
+    },
+    {
       "label": "More options for macbook-air",
       "on": "page",
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "open-station",
+        "forget-mac"
       ]
     }
   ],

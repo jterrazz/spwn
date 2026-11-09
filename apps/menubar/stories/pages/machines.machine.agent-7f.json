@@ -1782,14 +1782,16 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop agent-7f?",
+        "question": "Stop agent-7f on This Mac?",
         "lines": [
           {
             "kind": "text",
             "text": "Its disk is kept."
           }
         ],
-        "yes": "Stop"
+        "yes": "Stop agent-7f",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 1,
       "mutates": true,
@@ -1810,16 +1812,13 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type agent-7f to delete it."
+            "text": "This can't be undone. It goes with its disk (40 GB)."
           }
         ],
         "danger": true,
-        "type": "agent-7f",
-        "yes": "Delete"
+        "yes": "Delete agent-7f",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,
@@ -1827,6 +1826,7 @@
       "run": {
         "call": "machines.delete",
         "in": {
+          "Confirm": "\"agent-7f\"",
           "VM": "agent-7f"
         }
       }

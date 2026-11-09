@@ -167,14 +167,17 @@
       "label": "Stop linux-1",
       "on": "page",
       "confirm": {
-        "question": "Stop linux-1?",
+        "question": "Stop the agent linux-1?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its terminal closes; linux-1 keeps running."
+            "text": "Its terminal closes; its workspace keeps running."
           }
         ],
-        "yes": "Stop"
+        "danger": true,
+        "yes": "Stop",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 4,
       "mutates": true,

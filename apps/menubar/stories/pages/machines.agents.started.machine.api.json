@@ -658,14 +658,16 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop api?",
+        "question": "Stop api on This Mac?",
         "lines": [
           {
             "kind": "text",
             "text": "Its disk is kept."
           }
         ],
-        "yes": "Stop"
+        "yes": "Stop api",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 1,
       "mutates": true,
@@ -686,16 +688,14 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type api to delete it."
+            "text": "This can't be undone. It goes with its disk (40 GB)."
           }
         ],
         "danger": true,
         "type": "api",
-        "yes": "Delete"
+        "yes": "Delete api",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,

@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.restart-server",
+    "note": "Restart infra on mac-mini? A healthy server's restart is an outage, so it asks yes or no: infra is unreachable for about a minute while it boots.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "restart"
+    }
+}

@@ -1779,14 +1779,16 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop review-bot?",
+        "question": "Stop review-bot on mac-mini?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is kept."
+            "text": "Its agent review-bot stops. Its disk is kept."
           }
         ],
-        "yes": "Stop"
+        "yes": "Stop review-bot",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 1,
       "mutates": true,
@@ -1810,16 +1812,14 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type review-bot to delete it."
+            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB)."
           }
         ],
         "danger": true,
         "type": "review-bot",
-        "yes": "Delete"
+        "yes": "Delete review-bot",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,

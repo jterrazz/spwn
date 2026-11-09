@@ -26,6 +26,38 @@ import SwiftUI
 
 #Preview("agent.working") { StoryStage(Stories["agent.working"]) }
 
+#Preview("alert.delete-server") { StoryStage(Stories["alert.delete-server"]) }
+
+#Preview("alert.delete-vm.agents") { StoryStage(Stories["alert.delete-vm.agents"]) }
+
+#Preview("alert.delete-vm.permanent") { StoryStage(Stories["alert.delete-vm.permanent"]) }
+
+#Preview("alert.delete-vm.throwaway") { StoryStage(Stories["alert.delete-vm.throwaway"]) }
+
+#Preview("alert.forget-mac") { StoryStage(Stories["alert.forget-mac"]) }
+
+#Preview("alert.let-sleep") { StoryStage(Stories["alert.let-sleep"]) }
+
+#Preview("alert.restart-mac") { StoryStage(Stories["alert.restart-mac"]) }
+
+#Preview("alert.restart-server") { StoryStage(Stories["alert.restart-server"]) }
+
+#Preview("alert.stop-agent") { StoryStage(Stories["alert.stop-agent"]) }
+
+#Preview("alert.stop-all.server") { StoryStage(Stories["alert.stop-all.server"]) }
+
+#Preview("alert.stop-all") { StoryStage(Stories["alert.stop-all"]) }
+
+#Preview("alert.stop-server") { StoryStage(Stories["alert.stop-server"]) }
+
+#Preview("alert.stop-server.typed") { StoryStage(Stories["alert.stop-server.typed"]) }
+
+#Preview("alert.stop-share") { StoryStage(Stories["alert.stop-share"]) }
+
+#Preview("alert.stop-vm") { StoryStage(Stories["alert.stop-vm"]) }
+
+#Preview("alert.take-back") { StoryStage(Stories["alert.take-back"]) }
+
 #Preview("awake.4h") { StoryStage(Stories["awake.4h"]) }
 
 #Preview("awake.all") { StoryStage(Stories["awake.all"]) }

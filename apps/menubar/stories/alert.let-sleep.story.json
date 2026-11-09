@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.let-sleep",
+    "note": "Let mac-mini sleep? infra pauses while it sleeps.",
+    "pages": ["pages/machines.keep.awake.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "change:mac-mini"
+    }
+}

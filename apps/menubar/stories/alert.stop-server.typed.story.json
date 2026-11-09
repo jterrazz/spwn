@@ -1,0 +1,16 @@
+{
+    "group": "alert",
+    "id": "alert.stop-server.typed",
+    "note": "Stop infra with its name typed: Stop infra is on.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop",
+        "sheet": {
+            "answers": {
+                "Confirm": "infra"
+            },
+            "id": "stop"
+        }
+    }
+}

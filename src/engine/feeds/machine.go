@@ -103,8 +103,12 @@ func latest(ctx context.Context, out chan any, p any) {
 }
 
 // value: the confirmation rule of the calls, which the page only draws.
-func levels(gesture string, kind machine.Kind) string {
-	return string(confirm.For(confirm.Action(gesture), kind))
+func levels(gesture string, kind machine.Kind, facts ...string) string {
+	graded := make([]confirm.Fact, 0, len(facts))
+	for _, f := range facts {
+		graded = append(graded, confirm.Fact(f))
+	}
+	return string(confirm.Of(confirm.Action(gesture), kind, graded...))
 }
 
 type one struct {

@@ -79,8 +79,7 @@ final class PagesTests: XCTestCase {
         let stop = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("stop"))
         let confirm = try XCTUnwrap(stop.confirm)
         XCTAssertNil(confirm.type)
-        XCTAssertEqual(confirm.question, "Stop linux-1?")
-        try drawn("sheet.stop-workspace", try pushed("menubar.vm.linux-1", confirming: "stop"))
+        XCTAssertEqual(confirm.question, "Stop linux-1 on This Mac?")
         let (frame, started) = try await sent(stop, label: "mb-stop-ws")
         XCTAssertEqual(frame.call, "machines.stop")
         XCTAssertEqual(frame.input, ["VM": "linux-1", "Confirm": "yes"])
@@ -88,18 +87,14 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(started, [])
     }
 
-    // invariant: LC-24: Delete… on linux-1 is a typed sheet whose Delete
-    // stays off until linux-1 is typed exactly, then sends that name.
-    func testWorkspaceDeleteSheetTyped() async throws {
+    // invariant: SPEC A5: Delete… on linux-1, a throwaway, asks yes or no;
+    // its yes sends the name the delete call checks.
+    func testThrowawayDeleteAsksYesOrNoAndSendsItsName() async throws {
         let delete = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("delete"))
         let confirm = try XCTUnwrap(delete.confirm)
-        XCTAssertEqual(confirm.type, "linux-1")
-        XCTAssertEqual(texts(confirm.lines).last, "Type linux-1 to delete it.")
-        XCTAssertFalse(ConfirmSheet.allows(confirm, typed: "linux-"))
-        XCTAssertFalse(ConfirmSheet.allows(confirm, typed: "linux-1 "))
-        XCTAssertTrue(ConfirmSheet.allows(confirm, typed: "linux-1"))
-        try drawn("sheet.delete-workspace", try pushed("menubar.vm.linux-1", confirming: "delete", typed: "linux-"))
-        let (frame, _) = try await sent(delete, answers: [ActionRunner.typedKey: "linux-1"], label: "mb-delete")
+        XCTAssertNil(confirm.type)
+        XCTAssertEqual(texts(confirm.lines), ["This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 accounts lent to it."])
+        let (frame, _) = try await sent(delete, label: "mb-delete")
         XCTAssertEqual(frame.call, "machines.delete")
         XCTAssertEqual(frame.input, ["VM": "linux-1", "Confirm": "linux-1"])
     }
@@ -109,19 +104,19 @@ final class PagesTests: XCTestCase {
     func testServerStopSheetTyped() async throws {
         let stop = try XCTUnwrap(Tree.page("menubar.vm.infra").action("stop"))
         XCTAssertEqual(stop.confirm?.type, "infra")
-        XCTAssertEqual(texts(stop.confirm?.lines).last, "Type infra to stop it.")
-        try drawn("sheet.stop-server", try pushed("menubar.vm.infra", confirming: "stop", typed: "infra"))
+        XCTAssertEqual(texts(stop.confirm?.lines).first, "infra stays stopped until you start it.")
         let (frame, _) = try await sent(stop, answers: [ActionRunner.typedKey: "infra"], label: "mb-stop-srv")
         XCTAssertEqual(frame.call, "machines.stop")
         XCTAssertEqual(frame.input, ["VM": "infra", "Confirm": "infra"])
         XCTAssertEqual(frame.target, ["name": "jterrazz-mac-mini"])
     }
 
-    // invariant: LC-24: Restart on infra asks nothing and runs at once on
-    // infra's Mac.
-    func testServerRestartDirect() async throws {
+    // invariant: SPEC A5: Restart on a healthy infra asks yes or no (an
+    // outage), and its yes runs on infra's Mac, the call asking nothing.
+    func testHealthyServerRestartAsksYesOrNo() async throws {
         let restart = try XCTUnwrap(Tree.page("menubar.vm.infra").action("restart"))
-        XCTAssertNil(restart.confirm)
+        XCTAssertEqual(restart.confirm?.question, "Restart infra on mac-mini?")
+        XCTAssertNil(restart.confirm?.type)
         XCTAssertNil(restart.form)
         let (frame, started) = try await sent(restart, label: "mb-restart")
         XCTAssertEqual(frame.call, "machines.restart")
@@ -168,9 +163,8 @@ final class PagesTests: XCTestCase {
         let github = try XCTUnwrap(shared.rows.first { $0.label == "GitHub" }?.id)
         let take = try XCTUnwrap(page.rowActions(github).first { $0.label == "Take back" })
         XCTAssertEqual(take.label, "Take back")
-        XCTAssertEqual(take.confirm?.question, "Take back GitHub from linux-1?")
+        XCTAssertEqual(take.confirm?.question, "Take GitHub back from linux-1?")
         XCTAssertNil(take.confirm?.type)
-        try drawn("sheet.take-back", try pushed("menubar.vm.linux-1", confirming: take.id, segment: "accounts"))
         let (frames, _) = try await sentAll(take, label: "mb-take-back", reread: [PageID.of("linux-1")])
         XCTAssertEqual(frames.map(\.call), ["accounts.take-back", "engine.refresh"])
         XCTAssertEqual(frames.first?.input, ["Account": "github", "From": "linux-1", "Confirm": "yes"])

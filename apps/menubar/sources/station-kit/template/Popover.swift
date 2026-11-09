@@ -241,7 +241,7 @@ public struct Popover: View {
     var panel: some View {
         if let home {
             let layer = SheetLayer.of(home, state, handlers)
-            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming, layers: PanelLayers(sheet: layer)) {
+            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming, layers: AlertLayer.layers(home, state, handlers, sheet: layer)) {
                 HomeHeaderBar(page: home, state: state, handlers: handlers).blur(radius: layer == nil ? 0 : S.blur)
             } content: {
                 VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
@@ -268,7 +268,7 @@ public struct Popover: View {
             .background { BackKey(state: state, handlers: handlers) }
             .environment(\.stationHints, false)
         } else {
-            Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming) {
+            Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming, layers: AlertLayer.layers(state.shown, state, handlers)) {
                 page
             } footer: {
                 statusLine

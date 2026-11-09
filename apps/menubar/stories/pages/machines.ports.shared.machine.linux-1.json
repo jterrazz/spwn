@@ -2089,14 +2089,16 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop linux-1?",
+        "question": "Stop linux-1 on This Mac?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is kept."
+            "text": "Its agent linux-1 stops. Its disk is kept. 3 shared ports stop answering until it starts again."
           }
         ],
-        "yes": "Stop"
+        "yes": "Stop linux-1",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 1,
       "mutates": true,
@@ -2117,16 +2119,13 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type linux-1 to delete it."
+            "text": "Its agent linux-1 stops first. This can't be undone. It goes with its disk (40 GB), 3 shared ports and 2 accounts lent to it."
           }
         ],
         "danger": true,
-        "type": "linux-1",
-        "yes": "Delete"
+        "yes": "Delete linux-1",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,
@@ -2134,6 +2133,7 @@
       "run": {
         "call": "machines.delete",
         "in": {
+          "Confirm": "\"linux-1\"",
           "VM": "linux-1"
         }
       }
@@ -2246,14 +2246,17 @@
         "macbook-pro/linux-1/claude"
       ],
       "confirm": {
-        "question": "Take back Claude from linux-1?",
+        "question": "Take Claude back from linux-1?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its copy on linux-1 is deleted."
+            "text": "linux-1 loses access right away. The Claude account on This Mac is untouched."
           }
         ],
-        "yes": "Take back"
+        "danger": true,
+        "yes": "Take back",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 4,
       "mutates": true,
@@ -2274,14 +2277,17 @@
         "macbook-pro/linux-1/github"
       ],
       "confirm": {
-        "question": "Take back GitHub from linux-1?",
+        "question": "Take GitHub back from linux-1?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its copy on linux-1 is deleted."
+            "text": "linux-1 loses access right away. The GitHub account on This Mac is untouched."
           }
         ],
-        "yes": "Take back"
+        "danger": true,
+        "yes": "Take back",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 4,
       "mutates": true,
@@ -2457,16 +2463,17 @@
         "linux-1:5173"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 5173?",
+        "question": "Stop sharing linux-1:5173?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -2528,16 +2535,17 @@
         "linux-1:3000"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 3000?",
+        "question": "Stop sharing linux-1:3000?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -2599,16 +2607,17 @@
         "linux-1:4321"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 4321?",
+        "question": "Stop sharing linux-1:4321?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40003 is let go."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,

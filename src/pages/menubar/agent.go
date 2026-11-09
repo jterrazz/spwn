@@ -7,7 +7,6 @@ import (
 
 	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 )
@@ -86,9 +85,9 @@ func AgentPage(r Agent) page.Page {
 		attach.ID, attach.Label, attach.Rows, attach.On = ActionAttachHere, "Open in Terminal", nil, page.OnPage
 		log := attachAgent(a)
 		log.ID, log.Label, log.Rows, log.On, log.Key = ActionFullLog, "Full log", nil, page.OnPage, ""
-		stop := page.Action{ID: ActionStopAgent, Label: "Stop " + a.Name, On: page.OnPage, Priority: 4, Mutates: true, Destructive: true,
-			Confirm: stopAsk(r.Asks, a), Run: run(CallAgentsStop, nil), Hud: hud(a.Name + " stopped")}
-		stop.Run.In = answered(stop.Confirm, stop.Run.In)
+		stop := stopAgent(a.Name).action(r.Asks, page.Action{ID: ActionStopAgent, Label: "Stop " + a.Name, On: page.OnPage, Priority: 4, Mutates: true,
+			Run: run(CallAgentsStop, nil), Hud: hud(a.Name + " stopped")})
+		stop.Destructive = stop.Confirm != nil
 		p.Actions = append(p.Actions, attach, log, stop)
 		menu.Submenu = append(menu.Submenu, ActionStopAgent)
 		p.Footer = &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: "station agents attach " + a.Name}, Buttons: []string{ActionAttachHere}}
@@ -286,10 +285,6 @@ func attachAgent(a agents.Agent) page.Action {
 func forgetAgent(h model.MacView, a agents.Agent) page.Action {
 	return page.Action{ID: ActionForget + a.Name, Label: "Clean up", On: page.OnRow, Rows: []string{a.Name}, Priority: 3, Mutates: true,
 		Run: agentRun(h, a)(CallAgentsForget, nil), Hud: hud(a.Name + " cleaned up")}
-}
-
-func stopAsk(levels Levels, a agents.Agent) *page.Confirm {
-	return ask(levels, "stop-agent", machine.Workspace, a.Name, "Stop "+a.Name+"?", "stop", "Its terminal closes; "+a.VM+" keeps running.")
 }
 
 // value: SPEC B5.1: the hook that reports an agent is missing on its

@@ -341,12 +341,7 @@ func change(r awake.Report, name string) (page.Action, bool) {
 	a := page.Action{ID: ActionChange + r.Mac, Label: "Change", On: page.OnRow, Rows: []string{r.Mac}, Priority: 2, Mutates: true, Run: run}
 	if r.Mode() == awake.NeverSleeps {
 		run.Call = CallSettingsOff
-		lines := make([]page.Value, 0, len(r.Servers))
-		for _, s := range r.Servers {
-			lines = append(lines, page.Text("It hosts "+s+" (server): "+s+" pauses while "+name+" sleeps."))
-		}
-		a.Confirm = &page.Confirm{Question: "Let " + name + " sleep again?", Lines: lines, Yes: "Allow sleep", No: "Keep it awake", Danger: len(r.Servers) > 0}
-		return a, true
+		return letSleep(name, r.Servers).action(yesOrNo, a), true
 	}
 	run.Call = CallSettingsApply
 	a.Confirm = &page.Confirm{Question: "Keep " + name + " awake for good?", Lines: []page.Value{page.Text("Never sleeps: the always-on Mac policy, until you change it again.")}, Yes: "Never sleep", No: "Cancel"}

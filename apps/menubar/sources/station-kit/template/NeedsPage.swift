@@ -14,7 +14,7 @@ struct NeedsPage: View {
     var busy: Set<String> { state.busy.union([state.settling].compactMap { $0 }) }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming) {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: nil, back: handlers.back) { perform($0, handlers) }
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

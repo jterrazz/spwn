@@ -1,0 +1,11 @@
+{
+    "group": "alert",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "alert.stop-agent",
+    "note": "Stop the agent review-bot? Its terminal closes; its workspace keeps running. Cancel is the default, Stop is red.",
+    "pages": ["pages/machines.agent.review-bot.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "stop-agent"
+    }
+}

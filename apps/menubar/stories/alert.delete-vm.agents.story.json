@@ -1,0 +1,11 @@
+{
+    "group": "alert",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "alert.delete-vm.agents",
+    "note": "Delete linux-1, hosting two live agents: they stop first, named; then it goes with its disk, its shared ports and its lent accounts.",
+    "pages": ["pages/machines.agents.two.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "delete"
+    }
+}

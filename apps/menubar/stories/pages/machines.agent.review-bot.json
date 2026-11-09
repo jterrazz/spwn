@@ -249,14 +249,17 @@
       "label": "Stop review-bot",
       "on": "page",
       "confirm": {
-        "question": "Stop review-bot?",
+        "question": "Stop the agent review-bot?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its terminal closes; review-bot keeps running."
+            "text": "Its terminal closes; its workspace keeps running."
           }
         ],
-        "yes": "Stop"
+        "danger": true,
+        "yes": "Stop",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 4,
       "mutates": true,

@@ -32,20 +32,19 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Header = &page.Header{Back: "All machines", Glyph: workspaceGlyph(vm, mine), Buttons: []string{ActionMenu}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label, mine)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
-	kind := vm.Lifetime.Kind()
-	stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
-		Confirm: ask(m.Asks, "stop", kind, vm.Name, "Stop "+vm.Name+"?", "stop", "Its disk is kept."),
-		Run:     &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
-	stop.Run.In = answered(stop.Confirm, stop.Run.In)
+	live, shared, loans := liveAgents(mine), len(workspacePorts(m, vm).Shares), len(sharedAccounts(m, vm.Name))
+	stop := stopWorkspace(vm, label, live, shared).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
+		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	running := vm.State == model.Running
 	if !running && !model.Down(vm) {
 		stop = page.Action{ID: ActionStartVM, Label: "Start " + vm.Name, On: page.OnPage, Priority: 1, Mutates: true,
 			Run: &page.Run{Call: CallStartVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}, Hud: hud(vm.Name + " is starting")}
 	}
-	del := page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
-		Confirm: ask(m.Asks, "delete", kind, vm.Name, "Delete "+vm.Name+"?", "delete", "Its disk is erased: nothing of it is kept."),
-		Run:     &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
-	del.Run.In = answered(del.Confirm, del.Run.In)
+	if vm.State != model.Running {
+		live = nil
+	}
+	del := deleteWorkspace(vm, live, shared, loans).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
+		Run: &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	p.Actions = []page.Action{stop, del}
 	if running {
 		menu.Submenu = append(menu.Submenu, ActionShare)
@@ -90,6 +89,18 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 // value: the agents a workspace hosts, by name, as the fleet's agents say
 // them; until they are read, the one its guest last reported, named by
 // its workspace.
+// value: the names of the agents of a workspace that still run, which a
+// stop or a delete of it ends.
+func liveAgents(as []agents.Agent) []string {
+	var out []string
+	for _, a := range as {
+		if a.State != agents.Finished {
+			out = append(out, a.Name)
+		}
+	}
+	return out
+}
+
 func agentsOn(m Machine, h model.MacView, vm model.VM) []agents.Agent {
 	if m.Agents == nil {
 		if vm.Agent == nil {

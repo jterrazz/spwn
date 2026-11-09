@@ -337,16 +337,17 @@
         "mac-mini"
       ],
       "confirm": {
-        "question": "Let mac-mini sleep again?",
+        "question": "Let mac-mini sleep?",
         "lines": [
           {
             "kind": "text",
-            "text": "It hosts infra (server): infra pauses while mac-mini sleeps."
+            "text": "infra pauses while mac-mini sleeps."
           }
         ],
         "danger": true,
-        "yes": "Allow sleep",
-        "no": "Keep it awake"
+        "yes": "Let it sleep",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,

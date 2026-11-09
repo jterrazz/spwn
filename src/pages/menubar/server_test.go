@@ -34,7 +34,7 @@ func serverServing(served *ports.AllMachines, edit func(*model.VM)) page.Page {
 	}}
 	page.Strict(true)
 	defer page.Strict(false)
-	return MachinePage(Machine{Name: "infra", All: fleet, Ports: served, Now: serverNow, Zone: time.UTC, Asks: func(string, machine.Kind) string { return LevelYesNo }})
+	return MachinePage(Machine{Name: "infra", All: fleet, Ports: served, Now: serverNow, Zone: time.UTC, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 }
 
 func healthHead(t *testing.T, p page.Page) page.Group {

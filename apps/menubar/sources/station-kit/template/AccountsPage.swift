@@ -19,7 +19,7 @@ public struct AccountsPage: View {
     func tap(_ action: Action) { perform(action, handlers) }
 
     public var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming) {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: nil, back: handlers.back, run: tap)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

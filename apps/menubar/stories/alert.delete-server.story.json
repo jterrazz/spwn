@@ -1,0 +1,10 @@
+{
+    "group": "alert",
+    "id": "alert.delete-server",
+    "note": "Delete infra, typed: it goes with its disk, its address and its 2 ports, and jterrazz.com stops answering.",
+    "pages": ["pages/machines.server.machine.infra.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "alert": "delete"
+    }
+}
