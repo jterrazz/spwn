@@ -152,7 +152,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			err := io.Confirmed(func(answer string) (err error) {
 				r := in.request
 				if in.Server {
-					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Resources: r.Size, Check: r.Check, Confirm: answer}, steps)
+					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Confirm: answer}, steps)
 				} else {
 					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateWorkspace, machinescalls.CreateIn{Request: r, Confirm: answer}, steps)
 				}
