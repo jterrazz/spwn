@@ -57,6 +57,11 @@ final class Live: ObservableObject {
             },
             close: { [weak self] in self?.log("close") })
         h.scrub = { [weak self] index in self?.state.scrub = index }
+        h.toggleAbout = { [weak self] id in
+            guard let self else { return }
+            state.about = state.about == id ? nil : id
+        }
+        h.hud = { [weak self] notice in self?.log("hud \(notice.symbol) \(notice.text)") }
         h.remember = { [weak self] machine, window in
             self?.state.windows[machine] = window
             self?.log("window \(window) on \(machine)")

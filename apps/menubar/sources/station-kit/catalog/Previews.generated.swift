@@ -202,6 +202,18 @@ import SwiftUI
 
 #Preview("needs.updating") { StoryStage(Stories["needs.updating"]) }
 
+#Preview("pop.hud.copy") { StoryStage(Stories["pop.hud.copy"]) }
+
+#Preview("pop.hud.terminal") { StoryStage(Stories["pop.hud.terminal"]) }
+
+#Preview("pop.info") { StoryStage(Stories["pop.info"]) }
+
+#Preview("pop.qr.public") { StoryStage(Stories["pop.qr.public"]) }
+
+#Preview("pop.qr") { StoryStage(Stories["pop.qr"]) }
+
+#Preview("pop.tooltip") { StoryStage(Stories["pop.tooltip"]) }
+
 #Preview("ports.all.down") { StoryStage(Stories["ports.all.down"]) }
 
 #Preview("ports.all.exposed") { StoryStage(Stories["ports.all.exposed"]) }

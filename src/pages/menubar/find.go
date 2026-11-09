@@ -273,7 +273,7 @@ func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 
 func attachOf(vm model.VM) page.Action {
 	return page.Action{ID: "attach:" + vm.Name, Label: "Open in Terminal", Key: "cmd+enter", Run: &page.Run{Terminal: true, Argv: []string{"--on", vm.Name}},
-		Hud: hud("Opened " + vm.Name + " in Terminal")}
+		Hud: opened(vm.Name)}
 }
 
 func (f finder) ports() []entry {

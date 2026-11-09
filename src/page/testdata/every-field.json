@@ -301,7 +301,21 @@
             "signal": "well",
             "toggle": "awake",
             "nav": "menubar.awake",
-            "plus": "+1"
+            "plus": "+1",
+            "tip": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "3 running"
+                },
+                {
+                  "kind": "text",
+                  "text": "right-click for a term"
+                }
+              ]
+            },
+            "key": "cmd+e"
           }
         },
         {

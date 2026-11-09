@@ -2155,7 +2155,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Apply",
@@ -2624,6 +2633,35 @@
         "argv": [
           "--on",
           "linux-1"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy ssh linux-1",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh linux-1"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh linux-1"
+          }
         ]
       }
     },

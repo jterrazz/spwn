@@ -509,6 +509,9 @@ func (s serverView) address(p ports.Port) page.Value {
 		if r, ok := catalog.RouteNamed(via); ok {
 			via = r.Label
 		}
+		if site, ok := web(s.link(p)); ok {
+			return page.Texts(site, via)
+		}
 		return page.Texts(strconv.Itoa(p.Port)+" public", via)
 	}
 	return page.Text(s.vm.Name + ":" + strconv.Itoa(p.Port))
@@ -534,10 +537,21 @@ func (s serverView) portRow(p served) page.Item {
 	row := page.Row{ID: s.vm.Name + ":" + strconv.Itoa(p.port), Label: p.named.Name, Glyph: portGlyph(p.named), Mark: page.OK, Detail: p.detail}
 	if s.state != serverUp {
 		row.Signal = page.SignalFaint
+	} else if _, ok := web(p.link); ok {
+		row.Verb, row.Quick = ActionOpenPort+row.ID, ActionQR+row.ID
 	} else {
 		row.Quick = "copy:" + row.ID
 	}
 	return page.Item{Row: &row}
+}
+
+func web(link string) (string, bool) {
+	for _, scheme := range []string{"https://", "http://"} {
+		if site, ok := strings.CutPrefix(link, scheme); ok {
+			return site, true
+		}
+	}
+	return "", false
 }
 
 // value: what station leaves to the server's own tooling: everything
@@ -605,11 +619,16 @@ func (s serverView) actions() []page.Action {
 	}
 	if s.state == serverUp {
 		ssh := s.ssh()
-		out = append(out, page.Action{ID: ActionCopySSH, Label: "Copy " + ssh, Icon: "doc.on.doc", On: page.OnPage, Priority: 4, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
+		out = append(out, copied(ActionCopySSH, "Copy "+ssh, ssh))
 		for _, p := range s.served() {
 			id := s.vm.Name + ":" + strconv.Itoa(p.port)
 			out = append(out, page.Action{ID: "copy:" + id, Label: "Copy link to " + p.named.Name, Icon: "doc.on.doc", On: page.OnRow, Rows: []string{id}, Priority: 4,
 				Run: &page.Run{Copy: p.link}, Hud: hud("Copied " + p.link)})
+			if _, ok := web(p.link); ok {
+				out = append(out,
+					page.Action{ID: ActionOpenPort + id, Label: "Open " + p.named.Name, On: page.OnRow, Rows: []string{id}, Run: &page.Run{Open: p.link}},
+					page.Action{ID: ActionQR + id, Label: "Show QR for " + p.named.Name, Icon: "qrcode", On: page.OnRow, Rows: []string{id}})
+			}
 		}
 	}
 	open := openIn("--on", vm.Name)

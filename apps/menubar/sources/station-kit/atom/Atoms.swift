@@ -98,9 +98,13 @@ public enum QR {
 
 public struct QRView: View {
     let text: String
+    let size: CGFloat
     @Environment(\.stationPalette) private var palette
 
-    public init(_ text: String) { self.text = text }
+    public init(_ text: String, size: CGFloat = Token.Tile.qr) {
+        self.text = text
+        self.size = size
+    }
 
     public var body: some View {
         if let image = QR.modules(text) {
@@ -108,7 +112,7 @@ public struct QRView: View {
                 .interpolation(.none)
                 .resizable()
                 .aspectRatio(1, contentMode: .fit)
-                .frame(width: Token.Tile.qr, height: Token.Tile.qr)
+                .frame(width: size, height: size)
         }
     }
 }

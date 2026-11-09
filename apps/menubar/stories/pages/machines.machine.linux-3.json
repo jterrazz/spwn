@@ -1963,7 +1963,16 @@
           "linux-3"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Share a port",
@@ -2229,6 +2238,35 @@
         "argv": [
           "--on",
           "linux-3"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy ssh linux-3",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh linux-3"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh linux-3"
+          }
         ]
       }
     },

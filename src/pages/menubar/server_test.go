@@ -183,7 +183,7 @@ func TestEveryPortAServerServesCopiesTheAddressThatReachesIt(t *testing.T) {
 	p := serverServing(served, nil)
 	copied := map[string]string{}
 	for _, it := range sectionOf(p, SectionPorts).Items {
-		a := action(p, it.Row.Quick)
+		a := action(p, "copy:"+it.Row.ID)
 		if a == nil || a.Run == nil || a.Run.Copy == "" {
 			t.Fatalf("row %q copies nothing: %+v", it.Row.Label, a)
 		}
@@ -191,6 +191,13 @@ func TestEveryPortAServerServesCopiesTheAddressThatReachesIt(t *testing.T) {
 	}
 	if want := map[string]string{"Traefik": "https://jterrazz.com", "Kubernetes API": "infra:6443"}; !maps.Equal(copied, want) {
 		t.Fatalf("copied %q, want %q", copied, want)
+	}
+	traefik := sectionOf(p, SectionPorts).Items[0].Row
+	if open := action(p, traefik.Verb); open == nil || open.Run == nil || open.Run.Open != "https://jterrazz.com" || traefik.Quick != ActionQR+traefik.ID {
+		t.Fatalf("Traefik opens %+v and its quick is %q, want jterrazz.com opened and its QR", open, traefik.Quick)
+	}
+	if got := traefik.Detail.Items[0].Text; got != "jterrazz.com" {
+		t.Fatalf("Traefik reads %q, want the site its route reaches", got)
 	}
 }
 

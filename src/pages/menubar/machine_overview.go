@@ -99,7 +99,7 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 func attach(h model.MacView, vm model.VM) page.Action {
 	argv := []string{"--on", vm.Name}
 	return page.Action{ID: ActionAttach + vm.Name, Label: "Open " + vm.Name + " in Terminal", Icon: "terminal", Key: "cmd+enter", On: page.OnRow, Rows: []string{vm.Name},
-		Priority: 2, Run: &page.Run{Terminal: true, Argv: argv, Target: target(h)}}
+		Priority: 2, Run: &page.Run{Terminal: true, Argv: argv, Target: target(h)}, Hud: opened(vm.Name)}
 }
 
 func (o macOverview) needsCard() page.Section {

@@ -38,6 +38,8 @@ final class Model: ObservableObject {
     private var outdated = false
     private(set) var navigation: Navigation!
     let live = LiveStore()
+    let hud = HUDWindow()
+    private var open = false
 
     private var settled: Task<Void, Never>?
     private lazy var turner = Turner { [weak self] in self?.turn = $0 }
@@ -64,6 +66,7 @@ final class Model: ObservableObject {
         if page == nil || changed {
             state.confirming = nil
             state.qr = nil
+            state.about = nil
             DispatchQueue.main.async { PanelWindow.key(NSApp.windows) }
         }
         if page == nil {
@@ -138,9 +141,10 @@ final class Model: ObservableObject {
         case .sample(let sample):
             live.take(sample)
             if sparkline { objectWillChange.send() }
-        case .notice(_, _, let text):
+        case .notice(_, let icon, let text):
             state.say(Status(text, failed: false), on: navigation.watched)
             clearLater()
+            if !open, let notice = HUDNotice(notice: text, icon: icon) { hud.show(notice) }
         case .down:
             if FileManager.default.fileExists(atPath: socket) && state.page != nil && state.connection == .live {
                 state.connection = .connecting
@@ -197,6 +201,7 @@ final class Model: ObservableObject {
     // and its keys are its own; the app it hands the owner to takes the
     // focus back, and the panel closes then.
     func opened() {
+        open = true
         NSApp.activate()
         for delay in PanelWindow.tries {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { PanelWindow.key(NSApp.windows) }
@@ -234,6 +239,7 @@ final class Model: ObservableObject {
     }
 
     func closed() {
+        open = false
         reviving?.cancel()
         reviving = nil
         watching?.cancel()
@@ -268,6 +274,7 @@ final class Model: ObservableObject {
             let status = await ActionRunner(executable: executable, socket: socket, reread: reread).run(action, answers: answers)
             state.running = nil
             state.say(status, on: on)
+            if status == nil, let notice = HUDNotice(action) { hud.show(notice) }
             state.showing(navigation.watched)
             if status?.failed != true, action.run?.call == ActionRunner.awake, state.pushed?.id == MenuPage.awake {
                 let sent = (action.run?.in ?? [:]).merging(answers) { $1 }

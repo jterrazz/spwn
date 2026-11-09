@@ -4673,7 +4673,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -4694,7 +4703,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Keep mac-mini awake",
@@ -5392,7 +5410,16 @@
           "linux-3"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Open Port 8080",
@@ -5639,7 +5666,16 @@
           "review-bot"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "SSH command",

@@ -54,13 +54,13 @@ final class ServerPageTests: XCTestCase {
         XCTAssertNil(FactsLine.page(try XCTUnwrap(URL(string: "https://jterrazz.com"))))
     }
 
-    // invariant: SPEC A4: each port row of a healthy server copies the
-    // address that reaches it.
-    func testEveryPortRowCopiesTheAddressThatReachesIt() throws {
+    func testEveryPortRowCopiesTheAddressThatReachesItAndAWebOneShowsItsQR() throws {
         let page = try XCTUnwrap(Stories["server.healthy"].state.pushed)
         let rows = try XCTUnwrap(page.section("ports")?.items?.compactMap(\.row))
-        let copied = rows.map { page.action($0.quick ?? "")?.run?.copy ?? "" }
+        let copied = rows.map { page.action("copy:" + ($0.id ?? ""))?.run?.copy ?? "" }
         XCTAssertEqual(copied, ["https://jterrazz.com", "infra:6443"])
+        let qr = try XCTUnwrap(page.action(rows[0].quick ?? ""))
+        XCTAssertEqual(PortsSection.qr(qr, of: rows[0], in: page.actions ?? []), "https://jterrazz.com")
     }
 
     // invariant: SPEC A4 (Down): the stale gauges say they are the last

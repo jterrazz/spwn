@@ -260,6 +260,8 @@ type Tile struct {
 	Toggle  string `json:"toggle,omitempty"`
 	Nav     ID     `json:"nav,omitempty"`
 	Plus    string `json:"plus,omitempty"`
+	Tip     Value  `json:"tip,omitzero"`
+	Key     string `json:"key,omitempty"`
 }
 
 type Gauge struct {

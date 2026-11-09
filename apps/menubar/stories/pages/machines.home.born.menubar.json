@@ -168,7 +168,17 @@
               "n": 5
             },
             "word": "shared",
-            "nav": "menubar.ports"
+            "nav": "menubar.ports",
+            "tip": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "5 shared"
+                }
+              ]
+            },
+            "key": "cmd+p"
           }
         },
         {
@@ -184,7 +194,21 @@
             },
             "word": "signed out",
             "signal": "waits",
-            "nav": "menubar.accounts"
+            "nav": "menubar.accounts",
+            "tip": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Accounts"
+                },
+                {
+                  "kind": "text",
+                  "text": "All machines"
+                }
+              ]
+            },
+            "key": "cmd+u"
           }
         },
         {
@@ -200,7 +224,21 @@
             },
             "word": "left",
             "toggle": "awake-off",
-            "nav": "menubar.awake"
+            "nav": "menubar.awake",
+            "tip": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "Awake until 18:00"
+                },
+                {
+                  "kind": "text",
+                  "text": "right-click for a duration"
+                }
+              ]
+            },
+            "key": "cmd+e"
           }
         }
       ],
@@ -3202,7 +3240,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -3223,7 +3270,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "infra opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -3244,7 +3300,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -3265,7 +3330,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -3286,7 +3360,16 @@
           "name": "mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-4 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Clean up",

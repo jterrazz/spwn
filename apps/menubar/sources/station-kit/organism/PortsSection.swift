@@ -12,18 +12,18 @@ public struct PortsSection: View {
     let qr: (String) -> Void
     let about: (About) -> Void
     let shown: String?
-    let unfolded: (Row, URL) -> AnyView
+    let opened: Bool
     @Environment(\.stationTokens) private var tokens
 
     public init(_ section: Section, actions: [Action] = [], run: @escaping (Action) -> Void = { _ in }, qr: @escaping (String) -> Void = { _ in },
-                about: @escaping (About) -> Void = { _ in }, shown: String? = nil, unfolded: @escaping (Row, URL) -> AnyView = { _, _ in AnyView(EmptyView()) }) {
+                about: @escaping (About) -> Void = { _ in }, shown: String? = nil, opened: Bool = false) {
         self.section = section
         self.actions = actions
         self.run = run
         self.qr = qr
         self.about = about
         self.shown = shown
-        self.unfolded = unfolded
+        self.opened = opened
     }
 
     // value: the link a row unfolds under it: the one its QR shows, while
@@ -34,9 +34,17 @@ public struct PortsSection: View {
     }
 
     func port(_ row: Row) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            PortRow(row, actions: actions, run: tap(row))
-            if let url = Self.unfolds(row, shown: shown, in: actions) { unfolded(row, url) }
+        let url = Self.unfolds(row, shown: shown, in: actions)
+        return PortRow(row, actions: actions, highlighted: url != nil, run: tap(row))
+            .popoverPin(url != nil, side: .above, width: Token.Metric.Popover.widthQR) {
+                if let url { QRPopover(url: url, row: row, actions: actions, run: popped(url)) }
+            }
+    }
+
+    func popped(_ url: URL) -> (Action) -> Void {
+        { action in
+            qr(url.absoluteString)
+            run(action)
         }
     }
 
@@ -72,7 +80,7 @@ public struct PortsSection: View {
     }
 
     // value: a list's label line: its words, its info button, its count.
-    public var header: CardLabel { CardLabel(Self.label(section), value: section.caption ?? [], about: section.about, tap: about) }
+    public var header: CardLabel { CardLabel(Self.label(section), value: section.caption ?? [], about: section.about, open: opened, tap: about) }
 
     // value: a list's label: its words, joined, or its title.
     public static func label(_ section: Section) -> String {

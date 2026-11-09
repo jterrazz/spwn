@@ -77,6 +77,8 @@ struct StationMenuBarApp: App {
         h.push = { page in model.push(page) }
         h.scrub = { index in model.state.scrub = index }
         h.remember = { machine, window in model.remember(machine, window: window) }
+        h.toggleAbout = { id in model.state.about = model.state.about == id ? nil : id }
+        h.hud = { notice in model.hud.show(notice) }
         return h.deferred { DispatchQueue.main.async(execute: $0) }
     }
 }

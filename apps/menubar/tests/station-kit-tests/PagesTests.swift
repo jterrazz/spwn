@@ -58,7 +58,7 @@ final class PagesTests: XCTestCase {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "ports", "footnote", "private", "shared", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["throwaway", "on This Mac", "no agent running"])
-        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Share a port", "Open in Terminal"])
+        XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Share a port", "Open in Terminal", "Copy ssh linux-1"])
         let infra = try Tree.page("menubar.vm.infra")
         XCTAssertEqual(infra.sections?.compactMap(\.id), ["summary", "health", "gauges", "ports", "tooling", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
         XCTAssertEqual(infra.section("health")?.items?.first?.group?.items?.compactMap(\.row?.label), ["Running", "Has an address", "SSH answers", "Check passes"])

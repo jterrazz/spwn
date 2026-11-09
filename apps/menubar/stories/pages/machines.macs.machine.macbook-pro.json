@@ -4647,7 +4647,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+enter",
@@ -4665,7 +4674,16 @@
           "agent-7f"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Clean up",
@@ -5201,7 +5219,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Open Vite",
@@ -5447,7 +5474,16 @@
           "agent-7f"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "SSH command",

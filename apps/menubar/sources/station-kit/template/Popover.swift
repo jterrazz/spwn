@@ -71,6 +71,7 @@ public struct PanelState: Equatable, Sendable {
     // being typed: the client's own until it is sent.
     public var prOpened: [String] = []
     public var reply = ""
+    public var about: String?
 
     public init(page: Page?, connection: Connection, running: String? = nil, confirming: String? = nil, status: Status? = nil, qr: String? = nil, pushed: Page? = nil, recent: [String] = []) {
         self.page = page
@@ -128,6 +129,8 @@ public struct PopoverHandlers {
     public var scrub: (Int?) -> Void = { _ in }
     // value: the window picked on a machine's Activity, to remember.
     public var remember: (String, String) -> Void = { _, _ in }
+    public var toggleAbout: (String) -> Void = { _ in }
+    public var hud: (HUDNotice) -> Void = { _ in }
 
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },

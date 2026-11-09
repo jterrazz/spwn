@@ -48,13 +48,11 @@ public struct PageStack<Element: Equatable>: Equatable {
 public struct PanelLayers {
     public var find: AnyView?
     public var sheet: AnyView?
-    public var popover: AnyView?
     public var alert: AnyView?
 
-    public init(find: AnyView? = nil, sheet: AnyView? = nil, popover: AnyView? = nil, alert: AnyView? = nil) {
+    public init(find: AnyView? = nil, sheet: AnyView? = nil, alert: AnyView? = nil) {
         self.find = find
         self.sheet = sheet
-        self.popover = popover
         self.alert = alert
     }
 }
@@ -126,6 +124,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.footer = $0 }
         }
         .frame(width: width, alignment: .topLeading)
+        .overlayPreferenceValue(PopoverPins.self) { PopoverLayer(pins: $0) }
         .overlay(alignment: .top) { layered }
         .modifier(PanelPane())
     }
@@ -223,7 +222,6 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
                 shape.fill(tokens.color.scrim)
                 sheet
             }
-            if let popover = layers.popover { popover }
             if let alert = layers.alert {
                 shape.fill(tokens.color.scrim)
                 alert

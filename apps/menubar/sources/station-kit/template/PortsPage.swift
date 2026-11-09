@@ -257,7 +257,6 @@ struct SharedPortCard: View {
     let page: Page
     let state: PanelState
     let handlers: PopoverHandlers
-    var ownSheet = true
     @Environment(\.stationPalette) private var palette
     @State private var copied = false
 
@@ -283,19 +282,10 @@ struct SharedPortCard: View {
             if let stop, !act.open(stop) {
                 StationButton(stop.label ?? "", role: .danger, wide: true) { act.tap(stop) }.fixedSize(horizontal: false, vertical: true)
             }
-            if ownSheet, let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
+            if let stop, act.open(stop) { SheetFor(page: page, state: state, handlers: handlers) }
         }
         .frame(maxWidth: .infinity)
         .padding(EdgeInsets(top: 0, leading: Token.Gap.edge, bottom: Token.Gap.edge, trailing: Token.Gap.edge))
-    }
-
-    // value: a share's link unfolded on a page that draws its own sheet:
-    // its QR, Copy link, Open and Stop sharing, until the QR pops over it.
-    static func unfolded(_ page: Page, _ state: PanelState, _ handlers: PopoverHandlers) -> (Row, URL) -> AnyView {
-        { row, url in
-            let stop = page.actions(for: row.id ?? "").first { $0.id?.hasPrefix("stop-sharing:") == true }
-            return AnyView(SharedPortCard(url: url, stop: stop, page: page, state: state, handlers: handlers, ownSheet: false))
-        }
     }
 
     func flash() {
@@ -325,7 +315,7 @@ struct AllPorts: View {
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array((page.sections ?? []).filter { $0.id != "summary" }.enumerated()), id: \.offset) { _, s in
-                    PortsSection(s, actions: page.actions ?? [], run: tap, qr: handlers.toggleQR, shown: state.qr, unfolded: SharedPortCard.unfolded(page, state, handlers))
+                    PortsSection(s, actions: page.actions ?? [], run: tap, qr: handlers.toggleQR, about: { _ in handlers.toggleAbout(s.id ?? "") }, shown: state.qr, opened: state.about != nil && state.about == s.id)
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }

@@ -146,7 +146,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Full log",
@@ -161,7 +170,16 @@
           "linux-1"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Stop linux-1",

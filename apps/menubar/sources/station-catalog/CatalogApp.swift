@@ -154,10 +154,24 @@ struct Inspector: View {
                     if let play = story.play { Field(title: "Play", text: "from \(play.from), \(play.gesture)") }
                     if let note = story.file.heightNote { Field(title: "Height", text: note) }
                     Capture(id: story.id, dark: catalog.knobs.scheme == .dark)
+                    if story.id.hasPrefix(Self.hud) { HUDWords(notices: HUDNotice.all(in: catalog.stories.flatMap(\.pages))) }
                     if catalog.live, let session = catalog.session { Calls(session: session) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
+            }
+        }
+    }
+
+    static let hud = "pop.hud"
+
+    struct HUDWords: View {
+        let notices: [HUDNotice]
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("HUD words, \(notices.count) the pages carry").font(.caption).foregroundStyle(.secondary)
+                ForEach(notices, id: \.text) { HUDCapsule($0).fixedSize() }
             }
         }
     }

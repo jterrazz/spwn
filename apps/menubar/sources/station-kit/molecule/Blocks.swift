@@ -35,6 +35,7 @@ public struct TileView: View {
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
+    @Environment(\.stationTooltip) private var tooltip
     @State private var hovering = false
 
     public init(_ tile: Tile, actions: [Action] = [], highlighted: Bool = false, run: @escaping (Action) -> Void = { _ in }) {
@@ -97,9 +98,20 @@ public struct TileView: View {
         .padding(m.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: m.height)
-        .modifier(CardFill(lit: tile.nav != nil && (hovering || highlighted), radius: m.radius))
+        .modifier(CardFill(lit: tile.nav != nil && (hovering || highlighted || tipped), radius: m.radius))
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
+        .help(Self.tooltip(tile) ?? "")
+        .popoverPin(tipped, side: .tooltip) { TooltipPreview(Self.tooltip(tile) ?? "") }
+    }
+
+    var tipped: Bool { tile.tip != nil && tooltip != nil && tooltip == tile.nav }
+
+    public static func tooltip(_ tile: Tile) -> String? {
+        guard let tip = tile.tip else { return nil }
+        var said = (tip.kind == "list" ? tip.items ?? [] : [tip]).map { Format.show($0) }.filter { !$0.isEmpty }
+        if let key = tile.key, !said.isEmpty { said.insert(Token.Key.shown(key), at: 1) }
+        return said.isEmpty ? nil : said.joined(separator: Token.Glyph.sep)
     }
 }
 
@@ -278,9 +290,11 @@ public struct HUDCapsule: View {
     @Environment(\.stationTokens) private var tokens
 
     public init(_ words: Value, symbol: String) {
-        self.words = words.text ?? words.label ?? ""
+        self.words = Format.show(words)
         self.symbol = symbol
     }
+
+    public init(_ notice: HUDNotice) { self.init(notice.words, symbol: notice.symbol) }
 
     public var body: some View {
         let m = Token.Metric.HUD.self

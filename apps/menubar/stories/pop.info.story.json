@@ -1,0 +1,11 @@
+{
+    "group": "pop",
+    "heightNote": "5 pt under the prototype's 556, as ports.all: the page header's top inset is the panel frame's",
+    "id": "pop.info",
+    "note": "Ports on all machines with the Private card's info open: private links open only on your tailnet, public routes are declared.",
+    "pages": ["pages/machines.ports.ports.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "popover": "about:private"
+    }
+}

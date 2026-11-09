@@ -2540,7 +2540,16 @@
           "name": "jterrazz-mac-mini"
         }
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "infra opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "HTTPS links on mac-mini",

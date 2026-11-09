@@ -22,6 +22,13 @@ extension Story {
         return nil
     }
 
+    public static let about = "about:"
+
+    public var hud: HUDNotice? {
+        guard let id = ui.hud, let action = state.shown?.action(id) else { return nil }
+        return HUDNotice(action)
+    }
+
     public var connection: Connection {
         switch ui.connection {
         case "stopped": .stopped
@@ -42,7 +49,11 @@ extension Story {
         }
         let ui = ui
         state.confirming = ui.alert
-        state.qr = ui.popover
+        if let popover = ui.popover, popover.hasPrefix(Story.about) {
+            state.about = String(popover.dropFirst(Story.about.count))
+        } else {
+            state.qr = ui.popover
+        }
         state.search = ui.find?.query ?? ""
         state.scrub = ui.scrub
         state.segment = ui.segment
@@ -79,18 +90,30 @@ public struct StoryView: View {
     public var body: some View {
         SwiftUI.Group {
             if let live {
-                staged.environment(\.stationSamples, story.samples).environment(\.stationLive, live)
+                topped.environment(\.stationSamples, story.samples).environment(\.stationLive, live)
             } else {
-                staged
+                topped
             }
         }
         .environment(\.stationMenuPick, MenuPick(handlers))
     }
 
+    @ViewBuilder
+    var topped: some View {
+        if let hud = story.hud {
+            VStack(spacing: Token.Metric.HUD.above) {
+                HUDCapsule(hud).fixedSize()
+                staged
+            }
+        } else {
+            staged
+        }
+    }
+
     // invariant: SPEC C4: a menu story draws its menu's preview where the
     // menu opens, over the page it opens on.
     var staged: some View {
-        drawn.overlayPreferenceValue(MenuAnchors.self) { anchors in
+        tipped.overlayPreferenceValue(MenuAnchors.self) { anchors in
             if let open = story.ui.menu, let model = story.menu {
                 GeometryReader { proxy in
                     let key = open.row.map(MenuAnchors.row) ?? MenuAnchors.page
@@ -101,6 +124,8 @@ public struct StoryView: View {
             }
         }
     }
+
+    var tipped: some View { drawn.environment(\.stationTooltip, story.ui.tooltip) }
 
     // value: the measure a CPU's live key starts with (`cpu:`, `cpuh:`).
     static let cpu = "cpu"
