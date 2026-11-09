@@ -85,7 +85,7 @@
               "signal": "failing"
             },
             "menu": [
-              "declare-public",
+              "declare-public:mac-mini:5000",
               "show-process:mac-mini:5000"
             ]
           }
@@ -120,7 +120,7 @@
               "signal": "failing"
             },
             "menu": [
-              "declare-public",
+              "declare-public:infra:10250",
               "show-process:infra:10250"
             ]
           }
@@ -277,6 +277,34 @@
   ],
   "actions": [
     {
+      "label": "Declare public",
+      "on": "row",
+      "rows": [
+        "mac-mini:5000"
+      ],
+      "priority": 2,
+      "id": "declare-public:mac-mini:5000",
+      "form": {
+        "title": "Declare a port public",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "hint": {
+              "command": "station ports declare mac-mini 5000 --via <route>"
+            }
+          }
+        ],
+        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
+      "sheet": "hint:declare-public"
+    },
+    {
       "label": "Show process",
       "on": "row",
       "rows": [
@@ -292,6 +320,34 @@
           "mac-mini"
         ]
       }
+    },
+    {
+      "label": "Declare public",
+      "on": "row",
+      "rows": [
+        "infra:10250"
+      ],
+      "priority": 2,
+      "id": "declare-public:infra:10250",
+      "form": {
+        "title": "Declare a port public",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "hint": {
+              "command": "station ports declare infra 10250 --via <route>"
+            }
+          }
+        ],
+        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
+      "sheet": "hint:declare-public"
     },
     {
       "label": "Show process",
@@ -457,34 +513,24 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port",
-      "run": {
-        "call": "ports.share"
-      },
       "form": {
         "title": "Share a port",
         "fields": [
           {
-            "key": "VM",
+            "key": "Of",
             "label": "Of",
             "kind": "select",
-            "options": [
-              {
-                "value": "infra",
-                "label": "infra"
-              }
-            ],
-            "default": "infra",
-            "required": true
+            "default": "share-port",
+            "swaps": true
           },
           {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now",
+            "kind": "rows",
+            "note": "No workspace runs to share a port of."
           }
         ],
-        "subtitle": "Private on your tailnet."
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
       "sheet": "share-port"
     },
@@ -517,34 +563,24 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@menu",
-      "run": {
-        "call": "ports.share"
-      },
       "form": {
         "title": "Share a port",
         "fields": [
           {
-            "key": "VM",
+            "key": "Of",
             "label": "Of",
             "kind": "select",
-            "options": [
-              {
-                "value": "infra",
-                "label": "infra"
-              }
-            ],
-            "default": "infra",
-            "required": true
+            "default": "share-port",
+            "swaps": true
           },
           {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now",
+            "kind": "rows",
+            "note": "No workspace runs to share a port of."
           }
         ],
-        "subtitle": "Private on your tailnet."
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
       "icon": "point.3.connected.trianglepath.dotted",
       "sheet": "share-port"

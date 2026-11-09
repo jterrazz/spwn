@@ -2723,6 +2723,34 @@
       "label": "Add a Mac",
       "on": "menu",
       "id": "add-mac",
+      "form": {
+        "title": "Add a Mac",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "note": "On the new Mac",
+            "hint": {
+              "command": "curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh",
+              "external": true
+            }
+          },
+          {
+            "key": "command-2",
+            "kind": "command",
+            "note": "Then on This Mac",
+            "hint": {
+              "command": "station machines add <mac>"
+            }
+          }
+        ],
+        "subtitle": "Install station on the new Mac, then add it from This Mac by its Tailscale name. It appears here once its ssh and its station answer.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
       "sheet": "hint:add-mac"
     },
     {

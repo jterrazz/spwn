@@ -241,6 +241,33 @@
       }
     },
     {
+      "label": "Share a port",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port",
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "default": "share-port",
+            "swaps": true
+          },
+          {
+            "key": "Port",
+            "label": "Listening now",
+            "kind": "rows",
+            "note": "No workspace runs to share a port of."
+          }
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
+      },
+      "sheet": "share-port"
+    },
+    {
       "label": "Declare public",
       "on": "page",
       "priority": 2,
@@ -283,36 +310,6 @@
       }
     },
     {
-      "label": "Share a port",
-      "on": "page",
-      "priority": 3,
-      "mutates": true,
-      "id": "share-port",
-      "run": {
-        "call": "ports.share"
-      },
-      "form": {
-        "title": "Share a port",
-        "fields": [
-          {
-            "key": "VM",
-            "label": "Of",
-            "kind": "select",
-            "required": true
-          },
-          {
-            "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
-          }
-        ],
-        "subtitle": "Private on your tailnet."
-      },
-      "sheet": "share-port"
-    },
-    {
       "label": "Full list in Terminal",
       "on": "page",
       "id": "full-list",
@@ -341,27 +338,24 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@menu",
-      "run": {
-        "call": "ports.share"
-      },
       "form": {
         "title": "Share a port",
         "fields": [
           {
-            "key": "VM",
+            "key": "Of",
             "label": "Of",
             "kind": "select",
-            "required": true
+            "default": "share-port",
+            "swaps": true
           },
           {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now",
+            "kind": "rows",
+            "note": "No workspace runs to share a port of."
           }
         ],
-        "subtitle": "Private on your tailnet."
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
       "icon": "point.3.connected.trianglepath.dotted",
       "sheet": "share-port"
