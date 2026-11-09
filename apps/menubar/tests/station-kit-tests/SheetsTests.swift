@@ -15,11 +15,11 @@ final class SheetsTests: XCTestCase {
 
     func testALoanSaysTheAccountAndTheTimeAndWhenItEnds() throws {
         let (_, _, answers) = try sheet("sheet.lend-account", "share-account")
-        XCTAssertEqual(answers.primary.map { answers.fill($0.label ?? "") }, "Share GitHub for 4 hr")
+        XCTAssertEqual(answers.primary.map { answers.fill($0.label ?? "") }, "Lend GitHub for 4 hr")
         var longer = answers
         longer.given["Account"] = "claude"
         longer.given["For"] = "604800000000000"
-        XCTAssertEqual(longer.primary.map { longer.fill($0.label ?? "") }, "Share Claude for 7 days")
+        XCTAssertEqual(longer.primary.map { longer.fill($0.label ?? "") }, "Lend Claude for 7 days")
         let ends = try XCTUnwrap(answers.field("For")?.options).compactMap(\.note)
         XCTAssertEqual(ends, ["Ends at 14:30, then taken back", "Ends at 22:30, then taken back", "Ends Saturday 14 Nov"])
         XCTAssertEqual(answers.sent["Account"], "github")

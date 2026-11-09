@@ -4988,7 +4988,7 @@
               "key": "Account",
               "set": true
             },
-            "label": "Share {Account} for {For}"
+            "label": "Lend {Account} for {For}"
           }
         ]
       },
@@ -5085,7 +5085,7 @@
               "key": "Account",
               "set": true
             },
-            "label": "Share {Account} for {For}"
+            "label": "Lend {Account} for {For}"
           }
         ]
       },
@@ -5182,7 +5182,7 @@
               "key": "Account",
               "set": true
             },
-            "label": "Share {Account} for {For}"
+            "label": "Lend {Account} for {For}"
           }
         ]
       },
@@ -5757,7 +5757,7 @@
               "key": "Account",
               "set": true
             },
-            "label": "Share {Account} for {For}"
+            "label": "Lend {Account} for {For}"
           }
         ]
       },
@@ -6029,7 +6029,7 @@
               "key": "Account",
               "set": true
             },
-            "label": "Share {Account} for {For}"
+            "label": "Lend {Account} for {For}"
           }
         ]
       },

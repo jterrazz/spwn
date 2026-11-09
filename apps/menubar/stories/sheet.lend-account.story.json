@@ -2,7 +2,7 @@
     "group": "sheet",
     "heightNote": "4.5 pt shorter than the prototype, as accounts.all under it: MachineHeader's back line is 24 pt where the prototype's is 28",
     "id": "sheet.lend-account",
-    "note": "Lend an account from the Accounts footer: From This Mac, To linux-1, the accounts This Mac can lend picked from a list, For 4 hr and the hour it ends, then Share GitHub for 4 hr.",
+    "note": "Lend an account from the Accounts footer: From This Mac, To linux-1, the accounts This Mac can lend picked from a list, For 4 hr and the hour it ends, then Lend GitHub for 4 hr.",
     "pages": ["pages/machines.accounts.accounts.json"],
     "schema": "station.story/v1",
     "ui": {

@@ -90,7 +90,7 @@ func (b accountsBody) loanSheet(id string, t workspace, every []workspace) page.
 	pick := b.accountsOf(t.Mac)
 	form := &page.Form{Title: ShareLabel, Subtitle: "From " + b.name(t.Mac) + ". It ends by itself.",
 		Fields:  []page.Field{field, pick, b.loanFor()},
-		Primary: []page.Primary{{When: &page.When{Key: "Account", Set: true}, Label: "Share {Account} for {For}"}}}
+		Primary: []page.Primary{{When: &page.When{Key: "Account", Set: true}, Label: "Lend {Account} for {For}"}}}
 	a := page.Action{ID: id, Label: ShareLabel, On: page.OnRow, Rows: []string{RowShare}, Mutates: true, Sheet: page.SheetShareAccount, Form: form,
 		Run: &page.Run{Call: CallShareAccount, In: map[string]string{"With": t.VM}}, Hud: hud("Shared {Account} with " + t.VM)}
 	if t.Mac != "" && t.Mac != b.self {
@@ -146,8 +146,6 @@ func (b accountsBody) loanFor() page.Field {
 }
 
 func endsBy(now, end time.Time) string {
-	// value: SPEC A5: when a loan ends, said by day: at its hour today,
-	// tomorrow at its hour, else its weekday and date.
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
 	switch {

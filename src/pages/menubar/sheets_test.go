@@ -136,7 +136,7 @@ func TestLendAnAccountOffersEachWorkspaceTheAccountsOfItsMac(t *testing.T) {
 	if len(pick.Options) != 2 || pick.Default != catalog.ProviderGitHub || pick.Options[1].Disabled != "needs sign-in on mini" {
 		t.Errorf("mini's accounts %+v", pick)
 	}
-	if p := mini.Form.Primary[0]; p.Label != "Share {Account} for {For}" || p.When.Key != "Account" || !p.When.Set {
+	if p := mini.Form.Primary[0]; p.Label != "Lend {Account} for {For}" || p.When.Key != "Account" || !p.When.Set {
 		t.Errorf("the button %+v", p)
 	}
 }
@@ -162,5 +162,12 @@ func TestShareAPortListsWhatListensInEachWorkspace(t *testing.T) {
 	}
 	if of := sheets[0].Form.Fields[0]; of.Options[1].Note != "on mini" || !of.Swaps || of.Default != ActionSharePortSheet+"linux-1" {
 		t.Errorf("Of %+v", of)
+	}
+}
+
+// invariant: the Add a Mac hint copies the real command, naming the Mac to add.
+func TestTheAddMacHintCopiesTheCommandThatAddsTheMac(t *testing.T) {
+	if got := addMacCommands()[1]; got != "station machines add <mac>" {
+		t.Errorf("hint command = %q", got)
 	}
 }
