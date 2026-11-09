@@ -277,12 +277,14 @@ public struct SplitButton: View {
 }
 
 // invariant: a sheet's text field on the form's 26 pt ground: the text and
-// its caret drawn still, a live text field in the app.
+// its caret drawn still, a live text field in the app that takes the
+// caret as its sheet opens, as the still one draws it.
 public struct FormText: View {
     @Binding var text: String
     let submit: () -> Void
     @Environment(\.stationStill) private var still
     @Environment(\.stationTokens) private var tokens
+    @FocusState private var typing: Bool
 
     public init(text: Binding<String>, submit: @escaping () -> Void) {
         _text = text
@@ -296,6 +298,8 @@ public struct FormText: View {
                 Rectangle().fill(tokens.color.accent).frame(width: Token.Stroke.caret, height: Token.Detail.caretHeight)
             } else {
                 TextField("", text: $text).textFieldStyle(.plain).font(Token.Role.formValue.font).onSubmit(submit)
+                    .focused($typing)
+                    .onAppear { DispatchQueue.main.async { typing = true } }
             }
             Spacer(minLength: 0)
         }
