@@ -3373,7 +3373,7 @@
           {
             "key": "stays",
             "kind": "note",
-            "note": "linux-1, linux-3 and review-bot have a working agent, so they stay."
+            "note": "linux-1, linux-3 and review-bot have a live agent, so they stay."
           }
         ],
         "subtitle": "Finished agents and empty throwaways.",

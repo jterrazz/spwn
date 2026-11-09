@@ -133,6 +133,14 @@ func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A5 Clean up: a VM whose agent waits on the owner is not
+// said working.
+func TestCleanUpSaysAWaitingAgentIsLive(t *testing.T) {
+	if got := stays([]string{"linux-1", "review-bot"}, true, nil); got != "linux-1 and review-bot have a live agent, so they stay." {
+		t.Errorf("the note says %q", got)
+	}
+}
+
 // invariant: SPEC A5 Lend an account: one sheet per running workspace of
 // an awake Mac, To swapping between them; each lists its Mac's accounts
 // it may share, the one signed out there disabled with why; the button

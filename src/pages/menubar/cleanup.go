@@ -20,6 +20,7 @@ type cleanupOf struct {
 	gone     []model.VM
 	finished []agents.Agent
 	live     []string
+	waiting  bool
 	running  []string
 }
 
@@ -38,6 +39,7 @@ func cleanupsOf(macs []model.MacView, as []agents.Agent) []cleanupOf {
 		for _, vm := range kept {
 			if vm.Agent != nil && !vm.Finished() {
 				c.live = append(c.live, vm.Name)
+				c.waiting = c.waiting || vm.Agent.State == string(agents.Waiting)
 			} else {
 				c.running = append(c.running, vm.Name)
 			}
@@ -62,6 +64,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 	vmsField := page.Field{Key: "VMs", Label: "Empty throwaways", Kind: page.FieldMulti, Note: "no live agent; each goes with its disk, its ports and the accounts lent to it"}
 	var runs []page.Run
 	var live, running []string
+	waiting := false
 	for _, c := range of {
 		label := model.Label(all, c.mac)
 		var names []string
@@ -100,6 +103,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 			agentsField.Options = append(agentsField.Options, o)
 		}
 		live, running = append(live, c.live...), append(running, c.running...)
+		waiting = waiting || c.waiting
 	}
 	vmsField.Default = values(vmsField.Options, false)
 	agentsField.Default = values(agentsField.Options, true)
@@ -110,7 +114,7 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 	if len(vmsField.Options) > 0 {
 		fields = append(fields, vmsField)
 	}
-	if note := stays(live, running); note != "" {
+	if note := stays(live, waiting, running); note != "" {
 		fields = append(fields, page.Field{Key: "stays", Kind: page.FieldNote, Note: note})
 	}
 	var primary []page.Primary
@@ -145,10 +149,13 @@ func values(opts []page.Option, own bool) string {
 	return strings.Join(out, ",")
 }
 
-// value: the note naming what stays: the VMs a live agent is in, then the
-// throwaways still running.
-func stays(live []string, running []string) string {
+// value: the note naming what stays: the VMs a live agent is in, said
+// working while none of them waits, then the throwaways still running.
+func stays(live []string, waiting bool, running []string) string {
 	agent := "a working agent"
+	if waiting {
+		agent = "a live agent"
+	}
 	var lines []string
 	if n := len(live); n == 1 {
 		lines = append(lines, live[0]+" has "+agent+", so it stays.")

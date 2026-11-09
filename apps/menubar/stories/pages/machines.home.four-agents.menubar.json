@@ -3599,7 +3599,7 @@
           {
             "key": "stays",
             "kind": "note",
-            "note": "linux-1, linux-3, review-bot, linux-5 and linux-6 have a working agent, so they stay."
+            "note": "linux-1, linux-3, review-bot, linux-5 and linux-6 have a live agent, so they stay."
           }
         ],
         "subtitle": "Finished agents and empty throwaways.",
