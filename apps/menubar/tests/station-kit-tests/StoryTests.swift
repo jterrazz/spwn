@@ -41,7 +41,7 @@ struct Heights: Decodable {
 
 enum Budget {
     static let stories: Int64 = 120_000_000
-    static let rest: Int64 = 202_000_000
+    static let rest: Int64 = 187_000_000
     static let slack: Int64 = 5_000_000
 
     static func bytes(_ folder: URL, skipping skipped: String? = nil) -> Int64 {
@@ -163,10 +163,10 @@ final class StoryTests: XCTestCase {
     func testTheBudgetOnlyLetsTheOldGoldensShrink() {
         XCTAssertEqual(Budget.audit(stories: Budget.stories + 1, rest: Budget.rest + 1), [
             "the story goldens weigh 120000001 bytes, past their 120000000",
-            "the other goldens weigh 202000001 bytes, past their ratchet of 202000000",
+            "the other goldens weigh 187000001 bytes, past their ratchet of 187000000",
         ])
-        XCTAssertEqual(Budget.audit(stories: 0, rest: 190_000_000), [
-            "the other goldens weigh 190000000 bytes: lower their ratchet of 202000000 to what they weigh",
+        XCTAssertEqual(Budget.audit(stories: 0, rest: 180_000_000), [
+            "the other goldens weigh 180000000 bytes: lower their ratchet of 187000000 to what they weigh",
         ])
     }
 }
