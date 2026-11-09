@@ -1,0 +1,11 @@
+{
+    "group": "menu",
+    "heightNote": "linux-1's page as A2 draws it, its Agents card in place of the prototype's Now card: no prototype height holds, its golden is the reference",
+    "id": "menu.page.workspace",
+    "note": "linux-1's … menu: New agent…, Copy ssh command, Share a port…, Lend an account…; Stop…; Delete….",
+    "pages": ["pages/machines.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {}
+    }
+}

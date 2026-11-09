@@ -1,0 +1,18 @@
+{
+    "group": "menu",
+    "id": "menu.context.server.down",
+    "note": "Right-click infra while it is down: Restart is direct.",
+    "pages": ["pages/machines.home.down.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "row": "infra"
+        }
+    }
+}

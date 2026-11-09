@@ -1,0 +1,14 @@
+{
+    "group": "menu",
+    "heightNote": "drawn on This Mac's page, whose VMs card holds linux-1: since A2 Home lists agents, so a workspace's row is right-clicked on its Mac's page",
+    "id": "menu.context.workspace.share",
+    "note": "linux-1's Share submenu open: Show QR…, A port…, An account….",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "row": "linux-1",
+            "submenu": "share-of:linux-1"
+        }
+    }
+}

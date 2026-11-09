@@ -118,6 +118,40 @@ import SwiftUI
 
 #Preview("mac.this.upkeep") { StoryStage(Stories["mac.this.upkeep"]) }
 
+#Preview("menu.awake") { StoryStage(Stories["menu.awake"]) }
+
+#Preview("menu.context.lease") { StoryStage(Stories["menu.context.lease"]) }
+
+#Preview("menu.context.mac.asleep") { StoryStage(Stories["menu.context.mac.asleep"]) }
+
+#Preview("menu.context.mac") { StoryStage(Stories["menu.context.mac"]) }
+
+#Preview("menu.context.server.down") { StoryStage(Stories["menu.context.server.down"]) }
+
+#Preview("menu.context.server") { StoryStage(Stories["menu.context.server"]) }
+
+#Preview("menu.context.stopped") { StoryStage(Stories["menu.context.stopped"]) }
+
+#Preview("menu.context.workspace.copy") { StoryStage(Stories["menu.context.workspace.copy"]) }
+
+#Preview("menu.context.workspace.share") { StoryStage(Stories["menu.context.workspace.share"]) }
+
+#Preview("menu.context.workspace") { StoryStage(Stories["menu.context.workspace"]) }
+
+#Preview("menu.page.mac.asleep") { StoryStage(Stories["menu.page.mac.asleep"]) }
+
+#Preview("menu.page.mac") { StoryStage(Stories["menu.page.mac"]) }
+
+#Preview("menu.page.ports") { StoryStage(Stories["menu.page.ports"]) }
+
+#Preview("menu.page.server") { StoryStage(Stories["menu.page.server"]) }
+
+#Preview("menu.page.this-mac") { StoryStage(Stories["menu.page.this-mac"]) }
+
+#Preview("menu.page.workspace") { StoryStage(Stories["menu.page.workspace"]) }
+
+#Preview("menu.station") { StoryStage(Stories["menu.station"]) }
+
 #Preview("menubar.count") { StoryStage(Stories["menubar.count"]) }
 
 #Preview("menubar.down") { StoryStage(Stories["menubar.down"]) }

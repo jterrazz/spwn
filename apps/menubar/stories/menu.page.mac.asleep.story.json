@@ -1,0 +1,11 @@
+{
+    "group": "menu",
+    "heightNote": "no prototype height: the prototype draws this menu over macbook-air's asleep page, whose own height (325 pt) its golden keeps",
+    "id": "menu.page.mac.asleep",
+    "note": "macbook-air's … menu while it sleeps: Wake macbook-air, Forget….",
+    "pages": ["pages/machines.macs.machine.macbook-air.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {}
+    }
+}

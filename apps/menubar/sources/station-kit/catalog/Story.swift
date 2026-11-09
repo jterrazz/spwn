@@ -24,10 +24,13 @@ public struct SheetState: Codable, Equatable, Sendable {
 public struct MenuOpen: Codable, Equatable, Sendable {
     public var id: String?
     public var row: String?
+    // value: the entry whose submenu is open beside it, by its id.
+    public var submenu: String?
 
-    public init(id: String? = nil, row: String? = nil) {
+    public init(id: String? = nil, row: String? = nil, submenu: String? = nil) {
         self.id = id
         self.row = row
+        self.submenu = submenu
     }
 }
 
@@ -61,6 +64,8 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var hud: String?
     public var statusItem: Bool?
     public var pressed: Bool?
+    // value: the app's own Open at login switch, as the station menu shows it.
+    public var loginItem: Bool?
 
     public init() {}
 }
