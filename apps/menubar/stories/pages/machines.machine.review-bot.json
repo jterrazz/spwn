@@ -1836,7 +1836,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 lent account."
+            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 account lent to it."
           }
         ],
         "danger": true,

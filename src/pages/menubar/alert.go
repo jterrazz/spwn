@@ -107,11 +107,11 @@ func site(vm model.VM) string {
 	if !ok || c.URL == nil {
 		return ""
 	}
-	host := c.URL.Hostname()
-	if host == vm.Name || host == vm.Device {
+	name := c.URL.Hostname()
+	if name == vm.Name || name == vm.Device {
 		return ""
 	}
-	return host
+	return name
 }
 
 func restartServer(vm model.VM, on string, healthy bool) alert {
@@ -165,7 +165,7 @@ func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
 	return a
 }
 
-func deleteWorkspace(vm model.VM, live []string, shared, lent int) alert {
+func deleteWorkspace(vm model.VM, live []string, shared, loans int) alert {
 	var says []string
 	switch len(live) {
 	case 0:
@@ -178,8 +178,8 @@ func deleteWorkspace(vm model.VM, live []string, shared, lent int) alert {
 	if shared > 0 {
 		goes = append(goes, counted(shared, "shared port", "shared ports"))
 	}
-	if lent > 0 {
-		goes = append(goes, counted(lent, "lent account", "lent accounts"))
+	if loans > 0 {
+		goes = append(goes, counted(loans, "account", "accounts")+" lent to it")
 	}
 	says = append(says, "This can't be undone. It goes with "+and(goes)+".")
 	a := alert{Gesture: "delete", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: says, Verb: "Delete " + vm.Name, Danger: true}
@@ -231,7 +231,7 @@ func takeBack(account, vm, from string) alert {
 
 func stopShare(vm, port string) alert {
 	return alert{Gesture: "stop-sharing", Kind: machine.Workspace, Name: vm + ":" + port, Question: "Stop sharing " + vm + ":" + port + "?",
-		Says: []string{"The link stops answering on your tailnet. The service keeps running inside the VM."}, Verb: "Stop sharing", Danger: true}
+		Says: []string{"The link stops answering on your tailnet. What answers on it keeps running inside the VM."}, Verb: "Stop sharing", Danger: true}
 }
 
 func letSleep(label string, servers []string) alert {
@@ -268,7 +268,7 @@ func macAlerts(m Machine, h model.MacView, label string) []page.Action {
 	asleep := model.Reach(h) == model.ReachAsleep
 	if !h.ThisMac && !asleep {
 		out = append(out, restartMac(label, servers).action(m.Asks, page.Action{ID: ActionRestartMac, Label: "Restart " + label, On: page.OnPage, Priority: 3, Mutates: true,
-			Run: &page.Run{Call: CallRestartMac, In: map[string]string{"Name": strconv.Quote(h.Name)}}, Hud: hud(label + " restarts…")}))
+			Run: &page.Run{Call: CallRestartMac, In: map[string]string{"Name": strconv.Quote(h.Name)}}, Hud: hud(label + " is restarting")}))
 	}
 	if len(running) > 0 && !asleep {
 		out = append(out, stopEveryWorkspace(label, h.ThisMac, running, len(servers)).action(m.Asks, page.Action{ID: ActionStopAll, Label: "Stop everything on " + label, On: page.OnPage, Priority: 3, Mutates: true,

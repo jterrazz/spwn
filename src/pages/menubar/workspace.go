@@ -32,7 +32,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Header = &page.Header{Back: "All machines", Glyph: workspaceGlyph(vm, mine), Buttons: []string{ActionMenu}}
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label, mine)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
-	live, shared, lent := liveAgents(mine), len(workspacePorts(m, vm).Shares), len(sharedAccounts(m, vm.Name))
+	live, shared, loans := liveAgents(mine), len(workspacePorts(m, vm).Shares), len(sharedAccounts(m, vm.Name))
 	stop := stopWorkspace(vm, label, live, shared).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
 		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	running := vm.State == model.Running
@@ -43,7 +43,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.State != model.Running {
 		live = nil
 	}
-	del := deleteWorkspace(vm, live, shared, lent).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
+	del := deleteWorkspace(vm, live, shared, loans).action(m.Asks, page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
 		Run: &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
 	p.Actions = []page.Action{stop, del}
 	if running {

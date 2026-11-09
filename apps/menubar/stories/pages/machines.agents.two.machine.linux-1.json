@@ -2103,7 +2103,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 lent accounts."
+            "text": "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 accounts lent to it."
           }
         ],
         "danger": true,
@@ -2470,7 +2470,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
@@ -2542,7 +2542,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,

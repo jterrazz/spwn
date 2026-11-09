@@ -2704,7 +2704,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
@@ -2776,7 +2776,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,

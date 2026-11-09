@@ -1895,7 +1895,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 lent account."
+            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 account lent to it."
           }
         ],
         "danger": true,
@@ -2169,7 +2169,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
+            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
           }
         ],
         "danger": true,
