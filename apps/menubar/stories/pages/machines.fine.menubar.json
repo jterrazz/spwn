@@ -107,7 +107,7 @@
             "label": "All machines are fine",
             "detail": {
               "kind": "text",
-              "text": "checking air",
+              "text": "checking macbook-air",
               "signal": "stale"
             },
             "glyph": {
@@ -5052,7 +5052,7 @@
     ],
     "stale": {
       "kind": "text",
-      "text": "checking air",
+      "text": "checking macbook-air",
       "signal": "stale"
     }
   },

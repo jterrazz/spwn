@@ -35,3 +35,17 @@ extension Token.Symbol {
     public static let checkmark = "checkmark"
     public static let submenu = "chevron.right"
 }
+
+extension Token {
+    // value: the system's own menu as the kit fills it: red what destroys,
+    // the popup's note in grey after its own gap, the room under a button
+    // a menu hangs from.
+    public enum SystemMenu {
+        public static let destructive = NSColor.systemRed
+        public static let note = NSColor.secondaryLabelColor
+        public static let text = NSColor.labelColor
+        public static let off = NSColor.disabledControlTextColor
+        public static let noteGap: CGFloat = 24
+        public static let drop: CGFloat = 4
+    }
+}

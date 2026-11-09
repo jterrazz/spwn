@@ -212,3 +212,47 @@ func TestTheAddMacHintCopiesTheCommandThatAddsTheMac(t *testing.T) {
 		t.Errorf("hint command = %q", got)
 	}
 }
+
+// invariant: a Mac's VMs come from the engine by name; a sheet picks live
+// work first and a question names it first, a finished throwaway last.
+func TestAFinishedThrowawayIsNeverWhatASheetPicksFirst(t *testing.T) {
+	fleet := fleetOfTwo()
+	this := &fleet.Macs[0]
+	this.VMs[0], this.VMs[1] = this.VMs[1], this.VMs[0]
+	if to := runningWorkspaces(fleet); len(to) < 2 || to[0].VM != "linux-1" || to[1].VM != "agent-7f" {
+		t.Errorf("the workspaces %v, want linux-1 before agent-7f", to)
+	}
+	sheets := sharePortSheets(nil, runningWorkspaces(fleet), "pro")
+	if of := sheets[0].Form.Fields[0]; of.Default != ActionSharePortSheet+"linux-1" || of.Options[0].Label != "linux-1" {
+		t.Errorf("Of picks %q first of %+v", of.Default, of.Options)
+	}
+	stops := 0
+	for _, a := range macAlerts(Machine{Asks: graded}, *this, page.ThisMac) {
+		if a.ID == ActionStopAll {
+			stops++
+			if got := consequence(a.Confirm); got != "linux-1, agent-7f, docs stop and keep their disk. Awake ends." {
+				t.Errorf("Stop everything says %q", got)
+			}
+		}
+	}
+	if stops != 1 {
+		t.Errorf("%d Stop everything", stops)
+	}
+}
+
+// invariant: one gesture, one surface: a Mac page's Clean up is Home's
+// sheet scoped to that Mac, never a bare question.
+func TestAMacPagesCleanUpIsTheSheetOfThatMac(t *testing.T) {
+	all := fleetOfTwo()
+	m := Machine{Name: "pro", All: &all, Agents: sheetAgents(), Now: sheetNow, Asks: graded}
+	for _, a := range overviewActions(m, all.Macs[0], page.ThisMac) {
+		if a.ID != ActionCleanup {
+			continue
+		}
+		if a.Confirm != nil || a.Sheet != page.SheetCleanup || a.Form.Title != "Clean up on This Mac" || len(fieldOf(a, "VMs").Options) == 0 {
+			t.Errorf("This Mac's Clean up %+v", a)
+		}
+		return
+	}
+	t.Fatal("This Mac's page has no Clean up")
+}

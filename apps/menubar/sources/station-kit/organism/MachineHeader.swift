@@ -99,19 +99,14 @@ public struct MachineHeader: View {
         if still || model.isEmpty {
             IconButton(Token.Symbol.menu) { run(a) }.accessibilityLabel(a.label ?? "").menuAnchor(MenuAnchors.page)
         } else {
-            Menu {
-                MenuContent(model) { menuPick?($0, nav: nil) }
-            } label: {
-                Image(systemName: Token.Symbol.menu).font(.system(size: Token.Metric.Control.iconGlyph, weight: .regular))
-                    .foregroundStyle(tokens.color.t2)
-                    .frame(width: Token.Metric.Control.icon, height: Token.Metric.Control.icon)
-                    .contentShape(Circle())
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .accessibilityLabel(a.label ?? "")
+            Image(systemName: Token.Symbol.menu).font(.system(size: Token.Metric.Control.iconGlyph, weight: .regular))
+                .foregroundStyle(tokens.color.t2)
+                .frame(width: Token.Metric.Control.icon, height: Token.Metric.Control.icon)
+                .contentShape(Circle())
+                .systemMenu(model) { menuPick?($0, nav: nil) }
+                .accessibilityElement()
+                .accessibilityAddTraits(.isButton)
+                .accessibilityLabel(a.label ?? "")
             .menuAnchor(MenuAnchors.page)
         }
     }

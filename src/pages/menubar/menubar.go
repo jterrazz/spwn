@@ -513,7 +513,7 @@ func stopAll(r Reading) page.Action {
 			if !h.ThisMac {
 				continue
 			}
-			for _, vm := range h.VMs {
+			for _, vm := range liveFirst(h.VMs) {
 				switch {
 				case vm.State != model.Running:
 				case vm.Lifetime == model.AlwaysOn:

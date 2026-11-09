@@ -1,6 +1,7 @@
 package menubar
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -22,13 +23,28 @@ func runningWorkspaces(all model.AllMachines) []workspace {
 		if h.Asleep || !h.ThisMac && !h.Reachable {
 			continue
 		}
-		for _, vm := range h.VMs {
+		for _, vm := range liveFirst(h.VMs) {
 			if vm.Lifetime != model.AlwaysOn && vm.State == model.Running {
 				out = append(out, workspace{VM: vm.Name, Mac: h.Name})
 			}
 		}
 	}
 	return out
+}
+
+// value: a Mac's VMs, those whose agent finished after the others, so
+// what a sheet picks first and a question names first is live work.
+func liveFirst(vms []model.VM) []model.VM {
+	out := slices.Clone(vms)
+	slices.SortStableFunc(out, func(a, b model.VM) int { return finished(a) - finished(b) })
+	return out
+}
+
+func finished(vm model.VM) int {
+	if vm.Finished() {
+		return 1
+	}
+	return 0
 }
 
 // value: the workspaces Lend an account… offers: the page's own VM, else

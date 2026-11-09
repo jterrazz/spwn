@@ -37,6 +37,8 @@ public struct TileView: View {
     @Environment(\.stationNow) private var now
     @Environment(\.stationTooltip) private var tooltip
     @State private var hovering = false
+    @State private var tipping = false
+    @State private var waiting: Task<Void, Never>?
 
     public init(_ tile: Tile, actions: [Action] = [], highlighted: Bool = false, run: @escaping (Action) -> Void = { _ in }) {
         self.tile = tile
@@ -100,13 +102,25 @@ public struct TileView: View {
         .frame(height: m.height)
         .modifier(CardFill(lit: tile.nav != nil && (hovering || highlighted || tipped), radius: m.radius))
         .contentShape(Rectangle())
-        .onHover { hovering = $0 }
+        .onHover(perform: hover)
         .modifier(TileFocus(nav: tile.nav, radius: m.radius))
-        .help(Self.tooltip(tile) ?? "")
         .popoverPin(tipped, side: .tooltip) { TooltipPreview(Self.tooltip(tile) ?? "") }
     }
 
-    var tipped: Bool { tile.tip != nil && tooltip != nil && tooltip == tile.nav }
+    // invariant: the tooltip the page draws, hung under the tile once the
+    // pointer rests on it, never the system's under the pointer.
+    func hover(_ inside: Bool) {
+        hovering = inside
+        waiting?.cancel()
+        tipping = false
+        guard inside, tile.tip != nil else { return }
+        waiting = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(Token.Metric.Tooltip.delay * 1_000_000_000))
+            if !Task.isCancelled { tipping = true }
+        }
+    }
+
+    var tipped: Bool { tile.tip != nil && (tipping || tooltip != nil && tooltip == tile.nav) }
 
     public static func tooltip(_ tile: Tile) -> String? {
         guard let tip = tile.tip else { return nil }
