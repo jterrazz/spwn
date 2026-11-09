@@ -562,7 +562,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "443 public"
+                  "text": "jterrazz.com"
                 },
                 {
                   "kind": "text",
@@ -573,7 +573,8 @@
             "glyph": {
               "kind": "port:traefik"
             },
-            "quick": "copy:infra:443"
+            "verb": "open-port:infra:443",
+            "quick": "qr:infra:443"
           }
         },
         {
@@ -2151,6 +2152,26 @@
           }
         ]
       }
+    },
+    {
+      "label": "Open Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "open-port:infra:443",
+      "run": {
+        "open": "https://jterrazz.com"
+      }
+    },
+    {
+      "label": "Show QR for Traefik",
+      "on": "row",
+      "rows": [
+        "infra:443"
+      ],
+      "id": "qr:infra:443",
+      "icon": "qrcode"
     },
     {
       "label": "Copy link to Kubernetes API",
