@@ -48,8 +48,8 @@ func fleetOfTwo() model.AllMachines {
 }
 
 // invariant: SPEC A5 Clean up across every Mac: the empty throwaways of
-// each Mac deleted on that Mac, the finished agent whose workspace stays
-// forgotten on its own, the one its throwaway carries left to the delete;
+// each Mac deleted on that Mac, each finished agent forgotten on its own,
+// the one its throwaway carries too, should the owner keep the throwaway;
 // the button worded from what is checked, red once a throwaway is; the
 // note names what an agent still works in.
 func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
@@ -64,7 +64,7 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 		}
 		calls = append(calls, r.Call+" "+r.In["VMs"]+r.In["Agent"]+on)
 	}
-	want := []string{`machines.cleanup ["agent-7f"]`, `agents.forget docs on docs/`, `machines.cleanup ["old"] on mini/`}
+	want := []string{`machines.cleanup ["agent-7f"]`, `agents.forget agent-7f on agent-7f/`, `agents.forget docs on docs/`, `machines.cleanup ["old"] on mini/`}
 	if !slices.Equal(calls, want) {
 		t.Fatalf("Clean up runs %q, want %q", calls, want)
 	}

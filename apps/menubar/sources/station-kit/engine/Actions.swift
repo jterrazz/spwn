@@ -70,7 +70,7 @@ public struct ActionRunner: Sendable {
     // again; only a terminal action starts a program, the terminal.
     public func run(_ action: Action, answers: [String: String] = [:]) async -> Status? {
         guard let run = action.run else { return nil }
-        if let more = run.and, !more.isEmpty { return await chain([run] + more, of: action, answers: answers) }
+        if !(run.and ?? []).isEmpty || !Self.checks(action).isEmpty { return await chain([run] + (run.and ?? []), of: action, answers: answers) }
         if let name = run.call {
             let reply = await Client.call(path: socket, name: name, input: Client.input(Self.filled(action, answers: answers), fixed: run.in, words: Self.words(action)), target: run.target,
                                           within: name == Self.endsTheEngine ? stopWithin : nil)
@@ -110,10 +110,9 @@ public struct ActionRunner: Sendable {
     // a call left with nothing is not made, and the first refusal stops the
     // rest and is the status.
     func chain(_ runs: [Run], of action: Action, answers: [String: String]) async -> Status? {
-        let sent = action.form.map { Answers($0, answers).sent } ?? answers
         var status: Status?
-        for step in runs {
-            guard let name = step.call, let input = Self.narrowed(step.in ?? [:], by: sent) else { continue }
+        for (step, input) in Self.steps(runs, of: action, answers: answers) {
+            guard let name = step.call else { continue }
             let reply = await Client.call(path: socket, name: name, input: Client.input([:], fixed: input), target: step.target)
             if !reply.ok {
                 let message = reply.message ?? name
@@ -126,13 +125,34 @@ public struct ActionRunner: Sendable {
         return status
     }
 
+    // value: the calls a sheet makes as the owner left it checked, in
+    // turn, each with what it is sent; a call left with nothing is not
+    // among them.
+    public static func steps(_ runs: [Run], of action: Action, answers: [String: String]) -> [(Run, [String: String])] {
+        let sent = action.form.map { Answers($0, answers).sent } ?? answers
+        let checks = checks(action)
+        return runs.compactMap { step in narrowed(step.in ?? [:], by: sent, checks: checks).map { (step, $0) } }
+    }
+
+    // value: the keys of a sheet's checkboxes that its calls name: what
+    // the owner leaves unchecked there is never sent.
+    static func checks(_ action: Action) -> Set<String> {
+        let keys = Set(([action.run].compactMap { $0 } + (action.run?.and ?? [])).flatMap { ($0.in ?? [:]).keys })
+        let multi = action.form.map { Answers($0).fields.filter { $0.kind == "multiselect" }.compactMap(\.key) } ?? []
+        return keys.intersection(multi)
+    }
+
     // value: a call's fixed input narrowed by the answers of the same key:
     // a list keeps what is checked, a single value stays only while it is
-    // checked; nil when nothing is left to send.
-    public static func narrowed(_ fixed: [String: String], by sent: [String: String]) -> [String: String]? {
+    // checked, and a checkbox answer left empty keeps nothing; nil when
+    // nothing is left to send.
+    public static func narrowed(_ fixed: [String: String], by sent: [String: String], checks: Set<String> = []) -> [String: String]? {
         var out = fixed
         for (key, value) in fixed {
-            guard let answer = sent[key] else { continue }
+            guard let answer = sent[key] else {
+                if checks.contains(key) { return nil }
+                continue
+            }
             let checked = items(answer) ?? [answer]
             if let list = items(value) {
                 let kept = list.filter(checked.contains)

@@ -51,13 +51,36 @@ final class SheetsTests: XCTestCase {
         XCTAssertEqual(action.run?.call, "machines.cleanup")
     }
 
-    func testCleanUpSendsOnlyWhatIsLeftChecked() throws {
+    func calls(_ action: Action, _ given: [String: String]) throws -> [String] {
+        let run = try XCTUnwrap(action.run)
+        return ActionRunner.steps([run] + (run.and ?? []), of: action, answers: given).map { step, input in
+            ([step.call ?? ""] + input.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }).joined(separator: " ")
+        }
+    }
+
+    func testCleanUpDeletesTheThrowawayCheckedAndItsAgentGoesWithIt() throws {
+        let (_, action, _) = try sheet("sheet.cleanup.mac", "cleanup:macbook-pro")
+        XCTAssertEqual(try calls(action, [:]), [#"machines.cleanup Confirm=yes VMs=["agent-7f"]"#])
+        XCTAssertEqual(try calls(action, ["Agent": "agent-7f"]), [#"machines.cleanup Confirm=yes VMs=["agent-7f"]"#], "an agent its throwaway takes is not forgotten apart")
+    }
+
+    func testCleanUpKeepsTheThrowawayUncheckedAndForgetsTheAgentChecked() throws {
+        let (_, action, form) = try sheet("sheet.cleanup.mac", "cleanup:macbook-pro")
+        var kept = form
+        kept.given = ["VMs": "", "Agent": "agent-7f"]
+        XCTAssertEqual(kept.primary?.label, "Forget 1 agent")
+        XCTAssertEqual(try calls(action, kept.given), ["agents.forget Agent=agent-7f"])
+        XCTAssertEqual(try calls(action, ["VMs": ""]), [], "nothing checked, nothing is asked")
+    }
+
+    func testCleanUpOfEveryMacSendsOnlyWhatIsLeftChecked() throws {
         let fixed = ["VMs": #"["agent-7f","old"]"#, "Confirm": "yes"]
-        XCTAssertEqual(ActionRunner.narrowed(fixed, by: ["VMs": #"["old"]"#]), ["VMs": #"["old"]"#, "Confirm": "yes"])
-        XCTAssertNil(ActionRunner.narrowed(fixed, by: ["VMs": #"["linux-1"]"#]), "a Mac with nothing checked is not asked")
-        XCTAssertEqual(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["docs"]"#]), ["Agent": "docs"])
-        XCTAssertNil(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["agent-7f"]"#]), "an agent unchecked is not forgotten")
-        XCTAssertEqual(ActionRunner.narrowed(["Agent": "docs"], by: [:]), ["Agent": "docs"])
+        XCTAssertEqual(ActionRunner.narrowed(fixed, by: ["VMs": #"["old"]"#], checks: ["VMs"]), ["VMs": #"["old"]"#, "Confirm": "yes"])
+        XCTAssertNil(ActionRunner.narrowed(fixed, by: ["VMs": #"["linux-1"]"#], checks: ["VMs"]), "a Mac with nothing checked is not asked")
+        XCTAssertNil(ActionRunner.narrowed(fixed, by: [:], checks: ["VMs"]), "a throwaway unchecked is not deleted")
+        XCTAssertEqual(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["docs"]"#], checks: ["Agent"]), ["Agent": "docs"])
+        XCTAssertNil(ActionRunner.narrowed(["Agent": "docs"], by: ["Agent": #"["agent-7f"]"#], checks: ["Agent"]), "an agent unchecked is not forgotten")
+        XCTAssertNil(ActionRunner.narrowed(["Agent": "docs"], by: [:], checks: ["Agent"]), "no agent checked, none is forgotten")
     }
 
     func testAHintsCommandIsThePagesOwn() throws {

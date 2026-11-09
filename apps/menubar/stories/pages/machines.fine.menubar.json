@@ -3795,7 +3795,18 @@
         "in": {
           "Confirm": "yes",
           "VMs": "[\"agent-7f\"]"
-        }
+        },
+        "and": [
+          {
+            "call": "agents.forget",
+            "in": {
+              "Agent": "agent-7f"
+            },
+            "target": {
+              "name": "agent-7f"
+            }
+          }
+        ]
       },
       "form": {
         "title": "Clean up on This Mac",
@@ -3867,7 +3878,18 @@
         "in": {
           "Confirm": "yes",
           "VMs": "[\"agent-7f\"]"
-        }
+        },
+        "and": [
+          {
+            "call": "agents.forget",
+            "in": {
+              "Agent": "agent-7f"
+            },
+            "target": {
+              "name": "agent-7f"
+            }
+          }
+        ]
       },
       "form": {
         "title": "Clean up",

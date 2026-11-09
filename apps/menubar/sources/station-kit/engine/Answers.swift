@@ -150,12 +150,15 @@ public struct Answers: Equatable, Sendable {
     }
 
     // value: the answers the call is sent: each field shown and holding
-    // something, never a swap, a disclosure or a field hidden.
+    // something, never a swap, a disclosure or a field hidden; a
+    // multiselect never sends what its leader carries (an agent goes with
+    // its throwaway, not by a call of its own).
     public var sent: [String: String] {
         var out: [String: String] = [:]
         for f in fields where f.swaps != true && f.kind != "disclosure" && applies(f) {
             guard let key = f.key else { continue }
-            let v = f.kind == "multiselect" ? (picked(f).isEmpty ? "" : Self.list(picked(f))) : value(f)
+            let own = picked(f).filter { v in !(f.options ?? []).contains { $0.value == v && follows(f, $0) } }
+            let v = f.kind == "multiselect" ? (own.isEmpty ? "" : Self.list(own)) : value(f)
             if !v.isEmpty { out[key] = v }
         }
         return out

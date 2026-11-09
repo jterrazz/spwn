@@ -47,7 +47,9 @@ func (c cleanupOf) any() bool { return len(c.gone) > 0 || len(c.finished) > 0 }
 // invariant: SPEC A5 Clean up (A2): finished agents and empty throwaways
 // apart, each checked: an agent is forgotten and its workspace stays; a
 // throwaway goes with its disk, its ports and the accounts lent to it, and
-// checking it checks the finished agents that ran in it; the note names
+// checking it checks the finished agents that ran in it; every finished
+// agent has its own forget, which the client makes only while the agent is
+// checked and its throwaway is not; the note names
 // what stays. The button is worded from what is checked, red once a
 // throwaway is. One Mac's, or every Mac's when scoped to none.
 func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Time, scoped bool) page.Action {
@@ -88,13 +90,12 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 			o := page.Option{Value: vm.Name, Label: vm.Name, Note: strings.Join(parts, "{sep}")}
 			if contains(names, vm.Name) {
 				o.Of = vm.Name
-			} else {
-				t := &page.Target{Name: vm.Name}
-				if !c.mac.ThisMac {
-					t.On = c.mac.Name
-				}
-				runs = append(runs, page.Run{Call: CallAgentsForget, In: map[string]string{"Agent": vm.Name}, Target: t})
 			}
+			t := &page.Target{Name: vm.Name}
+			if !c.mac.ThisMac {
+				t.On = c.mac.Name
+			}
+			runs = append(runs, page.Run{Call: CallAgentsForget, In: map[string]string{"Agent": vm.Name}, Target: t})
 			agentsField.Options = append(agentsField.Options, o)
 		}
 		working, running = append(working, c.working...), append(running, c.running...)
