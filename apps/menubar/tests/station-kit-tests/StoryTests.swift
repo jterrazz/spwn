@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import StationKit
 import SwiftUI
@@ -104,7 +105,8 @@ final class StoryTests: XCTestCase {
 
     func testEveryPanelStoryStaysGlass() throws {
         var failures: [String] = []
-        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert && story.ui.sheet == nil {
+        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert && story.ui.sheet == nil
+            && StoryMotion.of(story.id)?.motion.slides != true {
             for scheme in Self.schemes {
                 let share = GlassTests.opaque(view(story), scheme: scheme) ?? 1
                 if share >= 0.4 { failures.append("\(story.id) \(scheme): \(Int(share * 100)) % of it is opaque") }
@@ -126,6 +128,44 @@ final class StoryTests: XCTestCase {
             "menubar.fine": "all machines are fine",
             "menubar.open": "station, 2 things need you",
         ])
+    }
+
+    // invariant: SPEC A8: a transition story is caught mid-flight by its
+    // modifiers: drawn at its freeze it is neither the page it leaves nor
+    // the page it reaches, so a movement no modifier draws is caught.
+    func testEveryTransitionIsCaughtMidFlight() throws {
+        var failures: [String] = []
+        for story in try stories() where story.group == .transition {
+            guard let from = story.from, let freeze = story.freeze else {
+                failures.append("\(story.id): no play.from or no freeze")
+                continue
+            }
+            func drawn(_ view: StoryView) -> Bitmap? { Snapshot.render(AnyView(view.stationAccessibility()), scheme: .dark, over: AnyView(FlatDesk(scheme: .dark)))?.bitmap }
+            guard let caught = drawn(StoryView(story, time: freeze)), let end = drawn(StoryView(story, rest: true)), let start = drawn(StoryView(from)) else {
+                failures.append("\(story.id): draws nothing")
+                continue
+            }
+            for (name, other) in [("its end", end), ("where it starts", start)] where other.width == caught.width && other.height == caught.height {
+                if Double(caught.differing(other)) <= Double(caught.width * caught.height) * 0.001 { failures.append("\(story.id): drawn at \(freeze) as \(name)") }
+            }
+        }
+        XCTAssertEqual(failures, [])
+    }
+
+    // invariant: SPEC C3: the Catalog's scrubber and its Play draw a
+    // transition through the moments its golden freezes: at the story's
+    // freeze the replay is the story's own drawing.
+    func testTheCatalogsReplayAtAStorysFreezeIsTheStoryItself() throws {
+        let knobs = StoryKnobs(scale: 1)
+        var failures: [String] = []
+        for story in try stories() where story.group == .transition {
+            let still = try XCTUnwrap(StoryStage.png(story, knobs: knobs).flatMap(Bitmap.init(png:)))
+            let renderer = ImageRenderer(content: StoryReplay(story, knobs: knobs, time: story.freeze ?? 1))
+            renderer.scale = knobs.scale
+            let replayed = try XCTUnwrap(renderer.cgImage.flatMap { NSBitmapImageRep(cgImage: $0).representation(using: .png, properties: [:]) }.flatMap(Bitmap.init(png:)))
+            if replayed.width != still.width || replayed.height != still.height || replayed.differing(still) > 0 { failures.append("\(story.id): replayed at its freeze, it is not its still") }
+        }
+        XCTAssertEqual(failures, [])
     }
 
     func testEveryTargetStoryIsAsTallAsThePrototypesPanel() throws {

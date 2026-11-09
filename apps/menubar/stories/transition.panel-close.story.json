@@ -1,0 +1,19 @@
+{
+    "freeze": 0.5,
+    "group": "transition",
+    "heightNote": "the panel is drawn scaled, which leaves its frame whole: the story measures the frame, the prototype the scaled glass",
+    "id": "transition.panel-close",
+    "note": "The panel closes: opacity to 0 and scale .98 on snappy, caught halfway.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "press esc"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

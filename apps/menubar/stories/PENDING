@@ -5,17 +5,3 @@ sheet.new-agent.new
 menu.context.agent
 menu.page.agent
 menu.new-agent.on
-transition.panel-open
-transition.panel-close
-transition.push
-transition.pop
-transition.jump
-transition.segment
-transition.sheet
-transition.alert
-transition.find
-transition.menu
-transition.hero-morph
-transition.need-collapse
-transition.row-leave
-transition.reduce-motion.push

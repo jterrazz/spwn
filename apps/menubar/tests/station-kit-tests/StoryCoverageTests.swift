@@ -168,6 +168,25 @@ final class StoryCoverageTests: XCTestCase {
         XCTAssertEqual(findings, [])
     }
 
+    // invariant: SPEC A8: every transition of STORIES.md names a movement
+    // the kit draws, every movement has its story, and each story plays
+    // from a story and is caught at a moment of its run.
+    func testEveryTransitionNamesAMovementTheKitDraws() throws {
+        let ids = try catalogue().entries.filter { $0.section.hasPrefix("Transitions") }.map(\.id)
+        XCTAssertEqual(ids.count, 14)
+        XCTAssertEqual(ids.filter { StoryMotion.of($0) == nil }, [], "a transition no movement draws")
+        XCTAssertEqual(Set(ids.compactMap { StoryMotion.of($0)?.motion }), Set(StoryMotion.allCases))
+        XCTAssertEqual(ids.filter { StoryMotion.of($0)?.reduce == true }, ["transition.reduce-motion.push"])
+        let files = try stories()
+        for id in ids {
+            let story = try XCTUnwrap(files[id], "\(id): no story file")
+            XCTAssertNotNil(story.play, "\(id): no gesture to play from")
+            XCTAssertTrue((story.freeze ?? 0) > 0 && (story.freeze ?? 1) < 1, "\(id): frozen at \(String(describing: story.freeze)), not mid-flight")
+        }
+        XCTAssertNil(StoryMotion.of("transition.wobble"))
+        XCTAssertNil(StoryMotion.of("home.needs"))
+    }
+
     func testOnlyThePrototypesOwnPageIsExcluded() throws {
         XCTAssertEqual(try excluded(), ["phone.explainer"])
         for line in try lines("EXCLUDED") {
