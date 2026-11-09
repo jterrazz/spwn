@@ -54,14 +54,14 @@ final class MenuTests: XCTestCase {
         let read = Dictionary(uniqueKeysWithValues: try menuStories().compactMap { s in s.menu.map { (s.id, Self.read($0)) } })
         XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "CPU in the menu bar", "-", "Quit station ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
-                                                        "Copy [ssh command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…, An account…]", "-",
+                                                        "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…, An account…]", "-",
                                                         "Stop…", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.context.stopped"], ["api on This Mac", "Open ↩", "-", "Start", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart"), true)
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
         XCTAssertEqual(read["menu.context.mac.asleep"], ["macbook-air", "Open ↩", "Wake macbook-air"])
-        XCTAssertEqual(read["menu.context.lease"], ["GitHub → linux-1", "Extend 4 hr", "-", "Take back… (red)"])
-        XCTAssertEqual(read["menu.awake"], ["Keep This Mac awake", "For 1 hr", "For 4 hr", "✓ Until 18:00", "-", "Let it sleep", "Awake · All Macs ⌘E"])
+        XCTAssertEqual(read["menu.context.lease"], ["GitHub lent to linux-1", "Extend 4 hr", "-", "Take back… (red)"])
+        XCTAssertEqual(read["menu.awake"], ["Keep This Mac awake", "For 1 hr", "For 4 hr", "✓ Until 18:00", "-", "Let it sleep", "Awake of all Macs ⌘E"])
         XCTAssertEqual(read["menu.page.mac"], ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
         XCTAssertEqual(read["menu.page.this-mac"], ["This Mac", "Open in Terminal ⌘T", "-", "Stop everything… (red)"])
         XCTAssertEqual(read["menu.page.mac.asleep"], ["macbook-air", "Wake macbook-air", "-", "Forget… (red)"])
@@ -91,7 +91,7 @@ final class MenuTests: XCTestCase {
         let page = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.context.workspace" }?.state.shown)
         let model = MenuModel.context(try XCTUnwrap(page.sections?.flatMap { $0.items ?? [] }.compactMap(\.row).first { $0.id == "linux-1" }), actions: page.actions ?? [])
         let entries = model.items + model.items.flatMap(\.submenu)
-        for title in ["Open", "Open Vite", "ssh command", "Stop…"] {
+        for title in ["Open", "Open Vite", "SSH command", "Stop…"] {
             pick(try XCTUnwrap(entries.first { $0.title == title }, title), nav: "menubar.machine:linux-1")
         }
         let home = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.station" }?.state.shown)

@@ -3127,7 +3127,7 @@
       "icon": "safari"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@infra",
       "run": {
@@ -3315,7 +3315,7 @@
       "icon": "safari"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@linux-3",
       "run": {
@@ -3361,7 +3361,7 @@
       ]
     },
     {
-      "label": "Show QR…",
+      "label": "Show QR",
       "on": "menu",
       "id": "qr:linux-3:8080@linux-3",
       "icon": "qrcode"
@@ -3553,7 +3553,7 @@
       "icon": "terminal"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@review-bot",
       "run": {

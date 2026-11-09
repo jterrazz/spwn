@@ -84,7 +84,7 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 		p.Footer.Buttons = append(p.Footer.Buttons, share.ID)
 	}
 	for _, c := range b.r.Shared {
-		withRowMenu(&p, c.Mac+"/"+c.VM+"/"+c.Provider, leaseMenu(c, b.extend(c), of.Asks, b.self))
+		withRowMenu(&p, c.Mac+"/"+c.VM+"/"+c.Provider, loanMenu(c, b.extend(c), of.Asks, b.self))
 	}
 	return page.Seal(p)
 }

@@ -1,7 +1,7 @@
 {
     "group": "menu",
     "id": "menu.awake",
-    "note": "Right-click the Awake tile: keep This Mac awake for 1 hr, 4 hr or until 18:00 (picked), let it sleep, Awake · All Macs.",
+    "note": "Right-click the Awake tile: keep This Mac awake for 1 hr, 4 hr or until 18:00 (picked), let it sleep, Awake of all Macs.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

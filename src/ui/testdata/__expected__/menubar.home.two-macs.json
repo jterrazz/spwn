@@ -1216,7 +1216,7 @@
     },
     {
       "key": "cmd+e",
-      "label": "Awake · All Macs",
+      "label": "Awake of all Macs",
       "on": "menu",
       "id": "open:awake",
       "icon": "sun.max"

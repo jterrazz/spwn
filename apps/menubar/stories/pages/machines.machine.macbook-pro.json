@@ -3136,7 +3136,7 @@
       "icon": "safari"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@linux-1",
       "run": {
@@ -3201,7 +3201,7 @@
       ]
     },
     {
-      "label": "Show QR…",
+      "label": "Show QR",
       "on": "menu",
       "id": "qr:linux-1:5173@linux-1",
       "icon": "qrcode"
@@ -3373,7 +3373,7 @@
       "icon": "terminal"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@agent-7f",
       "run": {

@@ -150,7 +150,7 @@ func vmMenu(row page.Row, header string, own page.Page) menu {
 	m.next()
 	copies := menu{}
 	if ssh := sshOf(own); ssh != "" {
-		copies.add(page.Action{ID: menuID(ActionCopySSH, key), Label: "ssh command", Icon: "terminal", On: OnMenu, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
+		copies.add(page.Action{ID: menuID(ActionCopySSH, key), Label: "SSH command", Icon: "terminal", On: OnMenu, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
 	}
 	for _, l := range links {
 		copies.add(menuCopy(l, menuID(l.ID, key), underCopy(l.Label), "link"))
@@ -161,7 +161,7 @@ func vmMenu(row page.Row, header string, own page.Page) menu {
 	}
 	shares := menu{}
 	if qr := actionsWith(own, ActionQR); len(qr) > 0 {
-		shares.add(menuCopy(qr[0], menuID(qr[0].ID, key), "Show QR…", "qrcode"))
+		shares.add(menuCopy(qr[0], menuID(qr[0].ID, key), "Show QR", "qrcode"))
 	}
 	if a, ok := pageAction(own, ActionShare); ok {
 		shares.add(menuCopy(a, menuID(a.ID, key), "A port", "point.3.connected.trianglepath.dotted"))
@@ -440,7 +440,7 @@ func macRowMenu(p page.Page, h model.MacView, label string) menu {
 }
 
 // value: the Awake tile's menu: This Mac kept awake for each term, until
-// the hour, let sleep; then Awake · All Macs.
+// the hour, let sleep; then Awake of all Macs.
 func awakeMenu(r awake.Report, now time.Time, zone *time.Location) menu {
 	var m menu
 	m.title(TileAwake, "Keep "+page.ThisMac+" awake")
@@ -465,17 +465,17 @@ func awakeMenu(r awake.Report, now time.Time, zone *time.Location) menu {
 			m.add(menuCopy(a, menuID(a.ID, TileAwake), "", "moon"))
 		}
 	}
-	m.add(page.Action{ID: ActionOpenRow + TileAwake, Label: "Awake · All Macs", Icon: "sun.max", Key: "cmd+e", On: OnMenu})
+	m.add(page.Action{ID: ActionOpenRow + TileAwake, Label: "Awake of all Macs", Icon: "sun.max", Key: "cmd+e", On: OnMenu})
 	return m
 }
 
-// invariant: SPEC A5: a copy lent to a VM: its header (the account to
-// the VM), Extend by its term, Take back… last.
-func leaseMenu(c accounts.SharedCopy, extend page.Action, levels Levels, self string) menu {
+// invariant: SPEC A5: a copy lent to a VM: its header (the account lent
+// to the VM), Extend by its term, Take back last.
+func loanMenu(c accounts.SharedCopy, extend page.Action, levels Levels, self string) menu {
 	var m menu
 	key := c.Mac + "/" + c.VM + "/" + c.Provider
 	label := accounts.Label(c.Provider)
-	m.title(key, label+" "+"→ "+c.VM)
+	m.title(key, label+" lent to "+c.VM)
 	m.add(menuCopy(extend, menuID(extend.ID, "menu"), VerbExtend+" "+hoursLeft(extendBy), "clock"))
 	if levels == nil {
 		return m

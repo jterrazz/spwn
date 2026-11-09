@@ -934,7 +934,7 @@
       "icon": "terminal"
     },
     {
-      "label": "ssh command",
+      "label": "SSH command",
       "on": "menu",
       "id": "copy-ssh@infra",
       "run": {

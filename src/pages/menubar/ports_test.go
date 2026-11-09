@@ -163,7 +163,7 @@ func TestAPortOfADownServerIsUnreachableAndRunsNothing(t *testing.T) {
 }
 
 // invariant: the exposed card names the app that listens and where, and
-// offers Declare public… and Show process, a terminal on station ports
+// offers Declare public... and Show process, a terminal on station ports
 // of that Mac.
 func TestAnExposedPortOffersDeclarePublicAndItsProcess(t *testing.T) {
 	f := portFleet()
@@ -325,7 +325,7 @@ func action(p page.Page, id string) *page.Action {
 
 // invariant: SPEC A4: a running workspace's Overview has its Ports card,
 // its shares then its first listener offered with Share, and its menu
-// holds Share a port…, Stop and Delete.
+// holds Share a port..., Stop and Delete.
 func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 	f := portFleet()
 	f.Macs[0].Ports = append(f.Macs[0].Ports, ports.Port{Machine: coremachine.Ref{Name: "linux-1", On: proMac}, Port: 9229, Process: "node", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet})
@@ -345,7 +345,7 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("verbs %q %q", rows[0].Verb, rows[1].Verb)
 	}
 	menu := action(p, ActionMenu)
-	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "New agent…", "Copy ssh command", "Share a port…", "Lend an account…", "-", "Stop…", "-", "Delete… (red)"}) {
+	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "New agent...", "Copy ssh command", "Share a port...", "Lend an account...", "-", "Stop...", "-", "Delete... (red)"}) {
 		t.Fatalf("menu %q", menuWords(p, menu.Submenu))
 	}
 	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil

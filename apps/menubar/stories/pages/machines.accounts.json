@@ -577,7 +577,7 @@
       "sheet": "share-account"
     },
     {
-      "label": "Claude → linux-1",
+      "label": "Claude lent to linux-1",
       "on": "menu",
       "id": "title:macbook-pro/linux-1/claude"
     },
@@ -636,7 +636,7 @@
       "destructive": true
     },
     {
-      "label": "GitHub → linux-1",
+      "label": "GitHub lent to linux-1",
       "on": "menu",
       "id": "title:macbook-pro/linux-1/github"
     },
@@ -695,7 +695,7 @@
       "destructive": true
     },
     {
-      "label": "GitHub → linux-3",
+      "label": "GitHub lent to linux-3",
       "on": "menu",
       "id": "title:mac-mini/linux-3/github"
     },
@@ -760,7 +760,7 @@
       "destructive": true
     },
     {
-      "label": "Claude → review-bot",
+      "label": "Claude lent to review-bot",
       "on": "menu",
       "id": "title:mac-mini/review-bot/claude"
     },
