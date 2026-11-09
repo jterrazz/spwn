@@ -3,5 +3,6 @@
     "id": "awake.all",
     "note": "Awake on every Mac: This Mac kept until 18:00 on battery, linux-1 pausing while it sleeps; mac-mini never sleeps, hosting infra; the air asleep.",
     "pages": ["pages/machines.keep.awake.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

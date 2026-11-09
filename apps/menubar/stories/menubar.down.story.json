@@ -4,6 +4,7 @@
     "note": "The status item while infra is down: the Orbit slashed beside its count, in the bar's one ink.",
     "pages": ["pages/machines.down.menubar.json"],
     "schema": "station.story/v1",
+    "tags": ["a11y"],
     "ui": {
         "statusItem": true
     }

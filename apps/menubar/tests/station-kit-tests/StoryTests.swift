@@ -130,6 +130,28 @@ final class StoryTests: XCTestCase {
         ])
     }
 
+    // invariant: SPEC C4: one story of each group, tagged a11y, holds at
+    // Increase Contrast in dark and at Reduce Transparency in light, each
+    // proved by its golden.
+    func testEveryGroupHasAStoryProvedAtIncreasedContrastAndReducedTransparency() throws {
+        let stories = try stories()
+        let tagged = stories.filter(\.a11y)
+        XCTAssertEqual(Set(tagged.map(\.group)), Set(stories.map(\.group)), "a group without an a11y story")
+        XCTAssertEqual(tagged.count, Set(tagged.map(\.group)).count, "one a11y story per group")
+        var failures: [String] = []
+        for story in tagged {
+            let variants: [(knob: String, scheme: ColorScheme, view: AnyView)] = [
+                ("ic", .dark, AnyView(StoryView(story).stationAccessibility(contrast: .increased))),
+                ("rt", .light, AnyView(StoryView(story).stationAccessibility(reduceTransparency: true))),
+            ]
+            for v in variants {
+                let rendered = Snapshot.render(v.view, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
+                if let f = try Golden.match(rendered, file: "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")", in: Tree.storyGoldens) { failures.append(f) }
+            }
+        }
+        XCTAssertEqual(failures, [])
+    }
+
     // invariant: SPEC A8: a transition story is caught mid-flight by its
     // modifiers: drawn at its freeze it is neither the page it leaves nor
     // the page it reaches, so a movement no modifier draws is caught.

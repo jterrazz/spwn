@@ -3,5 +3,6 @@
     "id": "mac.mini.overview",
     "note": "mac-mini's page: it never sleeps and hosts infra; its upkeep is all fine.",
     "pages": ["pages/machines.macs.machine.mac-mini.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }
