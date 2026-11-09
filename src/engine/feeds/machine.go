@@ -42,38 +42,6 @@ func (o Menubar) Machine() engine.Feed {
 	}
 }
 
-func (o Menubar) Switcher() engine.Feed {
-	// invariant: the switcher is every Mac and its machines as a tree, read
-	// when it opens, every 30 s while it stays open, and again as soon as the
-	// engine's state moves or a refresh names it.
-	return func(ctx context.Context, in engine.FeedInput) <-chan any {
-		out := make(chan any, 1)
-		go func() {
-			defer close(out)
-			for {
-				f := &menubar{o: o}
-				fl, sv, ferr, serr := f.read(ctx, false)
-				var r pagemenubar.Reading
-				if ferr == nil {
-					r.All, r.Away = &fl, f.away(ctx, fl)
-					if serr == nil {
-						r.Ports = &sv
-					}
-					if home, err := call.Read(ctx, o.Calls, machine.Ref{}, overviewcalls.Read, overviewcalls.ReadIn{}, nil); err == nil {
-						r.Home = &home.Summary
-					}
-				}
-				p := pagemenubar.Switcher(r)
-				latest(ctx, out, page.Document{Schema: page.Schema, Page: p})
-				if rest(ctx, o.Clock, remoteEvery, in) != nil {
-					return
-				}
-			}
-		}()
-		return out
-	}
-}
-
 // value: the wait between two reads of a page: its period, cut short by the
 // engine's state moving or by a refresh; an error once the watch ends.
 func rest(ctx context.Context, clock Clock, every time.Duration, in engine.FeedInput) error {

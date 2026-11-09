@@ -1,8 +1,0 @@
-All machines
-  ◐ This Mac       Mac        Engine running
-  └─   Workspaces
-     ├─ ● linux-1  Workspace  Throwaway · 2 ports shared
-     └─ ○ api      Workspace  Permanent · Stopped
-  ✗ mac-mini       Mac        Engine running
-  └─   Servers
-     └─ ● infra    Server     Always on · healthy · checked 40s ago

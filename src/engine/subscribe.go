@@ -14,7 +14,6 @@ const (
 	// machine's page; `menubar.ports:jterrazz-mac-mini`, the ports of that
 	// Mac; `menubar.activity:6m`, This Mac over 6 min, and
 	// `menubar.activity:infra:24h`, infra over 24 h.
-	PageSwitcher = "menubar.switcher"
 	PageMachine  = "menubar.machine"
 	PagePorts    = "menubar.ports"
 	PageAwake    = "menubar.awake"

@@ -390,32 +390,6 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	}
 }
 
-func TestTheSwitcherDrawsEachMacsServersThenWorkspacesAndRereadsEveryThirtySeconds(t *testing.T) {
-	build := machines.VM{Name: "build", Mac: mini, Lifetime: machines.Throwaway, State: machines.Running}
-	w := &world{infra: []machines.VM{infraAt(machines.Running, 0), infraAt(machines.Stopped, 0)}, beside: []machines.VM{build}, asked: map[string][]string{}, activity: map[string]uint64{}}
-	clock := newSteps()
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
-	pages := feeds.Menubar{Calls: w, Clock: clock}.Switcher()(ctx, engine.FeedInput{})
-	p := until(t, pages, "every Mac", func(p page.Page) bool { return row(p, "machines", "infra") != nil })
-	var groups []string
-	for _, it := range p.Sections[0].Items {
-		if it.Group != nil && it.Group.Head.ID == mini {
-			for _, g := range it.Group.Items {
-				groups = append(groups, g.Group.Head.Label)
-			}
-		}
-	}
-	if !slices.Equal(groups, []string{"Servers", "Workspaces"}) {
-		t.Errorf("mac-mini's groups are %q, want its Servers then its Workspaces", groups)
-	}
-	if r := row(p, "machines", "infra"); r.Mark != page.OK {
-		t.Errorf("infra is drawn %q before it stopped", r.Mark)
-	}
-	clock.pass(t, 30*time.Second)
-	until(t, pages, "infra down thirty seconds later", func(p page.Page) bool { return row(p, "machines", "infra").Mark == page.Broken })
-}
-
 func lentTo(vm string, providers ...string) accounts.Report {
 	until := time.Date(2026, 11, 4, 6, 30, 0, 0, time.UTC)
 	m := accounts.Machine{Name: vm, Kind: accounts.KindVM}
@@ -458,20 +432,6 @@ func TestAnAccountTakenBackLeavesLinux1sPageOnceTheCallReturns(t *testing.T) {
 			t.Errorf("linux-1's page still offers %q after GitHub was taken back", a.Label)
 		}
 	}
-}
-
-func TestAMacAddedReachesTheSwitcherOnceTheCallReturns(t *testing.T) {
-	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
-	refresh := make(chan struct{}, 1)
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
-	pages := feeds.Menubar{Calls: w, Clock: newSteps()}.Switcher()(ctx, engine.FeedInput{Refresh: refresh})
-	until(t, pages, "every Mac", func(p page.Page) bool { return row(p, "machines", mini) != nil })
-	w.mu.Lock()
-	w.added = []machines.MacView{{Name: "studio-1", Reachable: true, Engine: machines.EngineView{Known: true, Running: true}}}
-	w.mu.Unlock()
-	refresh <- struct{}{}
-	until(t, pages, "studio-1 in the switcher", func(p page.Page) bool { return row(p, "machines", "studio-1") != nil })
 }
 
 func TestAWorkspaceStartedOnThisMacReachesItsPageWhenTheEngineMoves(t *testing.T) {

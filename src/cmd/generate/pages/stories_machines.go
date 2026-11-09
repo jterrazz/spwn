@@ -348,7 +348,6 @@ func (f Scene) draw() []Fixture {
 	r := f.reading()
 	out := []Fixture{
 		{Name: "menubar", Page: pagemenubar.Page(r, thisMac)},
-		{Name: "switcher", Page: pagemenubar.Switcher(r)},
 		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{}, thisMac)},
 		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac)},
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
