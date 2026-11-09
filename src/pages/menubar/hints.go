@@ -37,11 +37,11 @@ func hintSheet(a page.Action, kind, title, why string, lines ...hintLine) page.A
 // value: Add a Mac: station installed on the new Mac, then added from
 // this one by its name.
 func addMacHint(a page.Action) page.Action {
-	return hintSheet(a, HintAddMac, "Add a Mac", "Install station on the new Mac, then add it from This Mac by its Tailscale name. It appears here once its ssh and its station answer.",
-		hintLine{"On the new Mac", AddMacCommands()[0]}, hintLine{"Then on This Mac", AddMacCommands()[1]})
+	return hintSheet(a, HintAddMac, "Add a Mac", "Install station on the new Mac, then add it from This Mac by its "+catalog.TailnetProduct+" name. It appears here once its ssh and its station answer.",
+		hintLine{"On the new Mac", addMacCommands()[0]}, hintLine{"Then on This Mac", addMacCommands()[1]})
 }
 
-func AddMacCommands() []string {
+func addMacCommands() []string {
 	return []string{catalog.InstallLine, "station machines add <mac>"}
 }
 
@@ -70,10 +70,10 @@ func settingHint(a page.Action, subject string) page.Action {
 func declareHint(p ports.Port, mac, self string) page.Action {
 	a := page.Action{ID: ActionDeclareHint + p.Key(), Label: "Declare public", On: page.OnRow, Rows: []string{p.Key()}, Priority: 2}
 	why := "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is " + catalog.RouteNames() + "."
-	return hintSheet(a, HintDeclarePublic, "Declare a port public", why, hintLine{Command: DeclareCommand(p, mac, self)})
+	return hintSheet(a, HintDeclarePublic, "Declare a port public", why, hintLine{Command: declareCommand(p, mac, self)})
 }
 
-func DeclareCommand(p ports.Port, mac, self string) string {
+func declareCommand(p ports.Port, mac, self string) string {
 	line := "station ports declare "
 	switch {
 	case p.Machine.On != "":

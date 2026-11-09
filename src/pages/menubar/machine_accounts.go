@@ -15,7 +15,7 @@ func macAccounts(m Machine, h model.MacView) ([]page.Section, []page.Action) {
 	if m.Shares != nil {
 		all = m.Shares.Of(h.Name, "")
 	}
-	b := accountsBody{r: all.Read(), now: all, hosts: all, self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name, To: RunningWorkspaces(*m.All)}, segment: SegmentAccounts}
+	b := accountsBody{r: all.Read(), now: all, hosts: all, self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name, Machines: m.All}, segment: SegmentAccounts}
 	return b.sections(), b.actions()
 }
 
@@ -68,7 +68,7 @@ func vmAccountActions(m Machine, h model.MacView, vm model.VM) []page.Action {
 	for _, c := range b.r.Shared {
 		out = append(out, b.extend(c))
 	}
-	return append(out, b.lends()...)
+	return append(out, b.loanSheets()...)
 }
 
 func providerOf(r page.Row) string {

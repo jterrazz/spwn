@@ -10,21 +10,21 @@ import (
 	"github.com/jterrazz/studio-station/src/page"
 )
 
-type Workspace struct {
+type workspace struct {
 	// value: a running workspace of an awake Mac, a port may be shared
 	// from and an account lent to.
 	VM, Mac string
 }
 
-func RunningWorkspaces(all model.AllMachines) []Workspace {
-	var out []Workspace
+func runningWorkspaces(all model.AllMachines) []workspace {
+	var out []workspace
 	for _, h := range all.Macs {
 		if h.Asleep || !h.ThisMac && !h.Reachable {
 			continue
 		}
 		for _, vm := range h.VMs {
 			if vm.Lifetime != model.AlwaysOn && vm.State == model.Running {
-				out = append(out, Workspace{VM: vm.Name, Mac: h.Name})
+				out = append(out, workspace{VM: vm.Name, Mac: h.Name})
 			}
 		}
 	}
@@ -33,12 +33,15 @@ func RunningWorkspaces(all model.AllMachines) []Workspace {
 
 // value: the workspaces Lend an account… offers: the page's own VM, else
 // the running workspaces of the page's Mac, or of every Mac.
-func (b accountsBody) lendTo() []Workspace {
+func (b accountsBody) loanTargets() []workspace {
 	if b.of.VM != "" {
-		return []Workspace{{VM: b.of.VM, Mac: b.of.Mac}}
+		return []workspace{{VM: b.of.VM, Mac: b.of.Mac}}
 	}
-	var out []Workspace
-	for _, t := range b.of.To {
+	var out []workspace
+	if b.of.Machines == nil {
+		return nil
+	}
+	for _, t := range runningWorkspaces(*b.of.Machines) {
 		if b.of.Mac == "" || t.Mac == b.of.Mac {
 			out = append(out, t)
 		}
@@ -51,26 +54,26 @@ func (b accountsBody) lendTo() []Workspace {
 // the one signed out there offered disabled with its reason; For 4 hr, 12
 // hr or 7 days, each saying when it ends by day; the button names the
 // account and the time. The sheet the page opens is its first.
-func (b accountsBody) lends() []page.Action {
-	to := b.lendTo()
+func (b accountsBody) loanSheets() []page.Action {
+	to := b.loanTargets()
 	if len(to) == 0 {
 		mac := b.of.Mac
 		if mac == "" {
 			mac = b.self
 		}
-		return []page.Action{b.lend(ActionShareAccount, Workspace{Mac: mac}, nil)}
+		return []page.Action{b.loanSheet(ActionShareAccount, workspace{Mac: mac}, nil)}
 	}
 	if len(to) == 1 {
-		return []page.Action{b.lend(ActionShareAccount, to[0], nil)}
+		return []page.Action{b.loanSheet(ActionShareAccount, to[0], nil)}
 	}
-	out := []page.Action{b.lend(ActionShareAccount, to[0], to)}
+	out := []page.Action{b.loanSheet(ActionShareAccount, to[0], to)}
 	for _, t := range to {
-		out = append(out, b.lend(ActionShareAccount+":"+t.VM, t, to))
+		out = append(out, b.loanSheet(ActionShareAccount+":"+t.VM, t, to))
 	}
 	return out
 }
 
-func (b accountsBody) lend(id string, t Workspace, every []Workspace) page.Action {
+func (b accountsBody) loanSheet(id string, t workspace, every []workspace) page.Action {
 	field := page.Field{Key: "To", Label: "To", Kind: page.FieldSelect, Swaps: true, Default: id}
 	if len(every) == 0 && t.VM != "" {
 		field.Options = []page.Option{b.toOption(id, t)}
@@ -86,7 +89,7 @@ func (b accountsBody) lend(id string, t Workspace, every []Workspace) page.Actio
 	}
 	pick := b.accountsOf(t.Mac)
 	form := &page.Form{Title: ShareLabel, Subtitle: "From " + b.name(t.Mac) + ". It ends by itself.",
-		Fields:  []page.Field{field, pick, b.lendFor()},
+		Fields:  []page.Field{field, pick, b.loanFor()},
 		Primary: []page.Primary{{When: &page.When{Key: "Account", Set: true}, Label: "Share {Account} for {For}"}}}
 	a := page.Action{ID: id, Label: ShareLabel, On: page.OnRow, Rows: []string{RowShare}, Mutates: true, Sheet: page.SheetShareAccount, Form: form,
 		Run: &page.Run{Call: CallShareAccount, In: map[string]string{"With": t.VM}}, Hud: hud("Shared {Account} with " + t.VM)}
@@ -96,13 +99,13 @@ func (b accountsBody) lend(id string, t Workspace, every []Workspace) page.Actio
 	return a
 }
 
-func (b accountsBody) toOption(value string, t Workspace) page.Option {
+func (b accountsBody) toOption(value string, t workspace) page.Option {
 	return page.Option{Value: value, Label: t.VM, Note: "on " + b.name(t.Mac), Glyph: page.Glyph{Kind: "workspace"}}
 }
 
-// value: the accounts a Mac may lend, as it is signed in to them: each
+// value: the accounts a Mac may share, as it is signed in to them: each
 // with its logo and its words; one it is signed out of, disabled with
-// why. The first it may lend is picked.
+// why. The first it may share is picked.
 func (b accountsBody) accountsOf(mac string) page.Field {
 	f := page.Field{Key: "Account", Label: "Account", Kind: page.FieldPick, Required: true}
 	r := b.hosts.Read()
@@ -132,17 +135,17 @@ func (b accountsBody) accountsOf(mac string) page.Field {
 }
 
 // value: For: 4 hr, 12 hr or 7 days, each saying when it ends by day.
-func (b accountsBody) lendFor() page.Field {
+func (b accountsBody) loanFor() page.Field {
 	f := page.Field{Key: "For", Label: "For", Kind: page.FieldSegmented, Options: shareFor()}
 	f.Default = f.Options[0].Value
 	for i, o := range f.Options {
 		n, _ := strconv.ParseInt(o.Value, 10, 64)
-		f.Options[i].Note = EndsBy(b.now.Now, b.now.Now.Add(time.Duration(n)))
+		f.Options[i].Note = endsBy(b.now.Now, b.now.Now.Add(time.Duration(n)))
 	}
 	return f
 }
 
-func EndsBy(now, end time.Time) string {
+func endsBy(now, end time.Time) string {
 	// value: SPEC A5: when a loan ends, said by day: at its hour today,
 	// tomorrow at its hour, else its weekday and date.
 	y, m, d := now.Date()

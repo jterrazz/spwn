@@ -68,7 +68,7 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	copies.Segment = SegmentAccounts
 	p.Sections = append(p.Sections, copies)
 	p.Actions = append(p.Actions, agentActions(h, vm, mine)...)
-	p.Actions = append(p.Actions, sharePortSheets(shares.Listeners, []Workspace{{VM: vm.Name, Mac: h.Name}}, m.self())...)
+	p.Actions = append(p.Actions, sharePortSheets(shares.Listeners, []workspace{{VM: vm.Name, Mac: h.Name}}, m.self())...)
 	if n, ok := needsOfVM(m, h, vm, label); ok {
 		for _, need := range n {
 			p.Actions = append(p.Actions, need.Verb)

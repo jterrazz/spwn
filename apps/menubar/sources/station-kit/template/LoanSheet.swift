@@ -4,7 +4,7 @@ import SwiftUI
 // popup swapping to that workspace's sheet), the Mac's accounts as a pick
 // list, For with the day it ends under it; Cancel, then the button that
 // names the account and the time. Every word is the page's.
-public struct LendSheet: View {
+public struct LoanSheet: View {
     let sheet: SheetForm
 
     public init(page: Page, action: Action, given: [String: String], handlers: PopoverHandlers) {

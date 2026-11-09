@@ -3,7 +3,7 @@ import StationKit
 import XCTest
 
 // invariant: SPEC A5's other sheets, in what the owner sees: Lend an
-// account names the account and the time and lends from the workspace's
+// account names the account and the time and shares from the workspace's
 // own Mac; Clean up's button says what it does with what is checked, and
 // sends only what is left checked; a hint's command is the page's.
 final class SheetsTests: XCTestCase {
@@ -13,7 +13,7 @@ final class SheetsTests: XCTestCase {
         return (page, action, Answers(try XCTUnwrap(action.form)))
     }
 
-    func testLendingSaysTheAccountAndTheTimeAndWhenItEnds() throws {
+    func testALoanSaysTheAccountAndTheTimeAndWhenItEnds() throws {
         let (_, _, answers) = try sheet("sheet.lend-account", "share-account")
         XCTAssertEqual(answers.primary.map { answers.fill($0.label ?? "") }, "Share GitHub for 4 hr")
         var longer = answers
@@ -26,7 +26,7 @@ final class SheetsTests: XCTestCase {
         XCTAssertNil(answers.sent["To"])
     }
 
-    func testPickingAnotherWorkspaceLendsFromItsMac() throws {
+    func testPickingAnotherWorkspaceSharesFromItsMac() throws {
         let (page, action, answers) = try sheet("sheet.lend-account", "share-account")
         let to = try XCTUnwrap(answers.field("To"))
         let linux3 = try XCTUnwrap(to.options?.first { $0.label == "linux-3" }?.value)

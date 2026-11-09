@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
+	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/pages"
 	pageaccounts "github.com/jterrazz/studio-station/src/pages/accounts"
@@ -46,8 +47,9 @@ type AccountsOf struct {
 	Mac, VM string
 	// value: the level each gesture asks at, the calls' own rule.
 	Asks Levels
-	// value: the workspaces an account may be lent to (RunningWorkspaces).
-	To []Workspace
+	// value: the machines as read, whose running workspaces an account
+	// may be lent to; nil offers none.
+	Machines *model.AllMachines
 }
 
 func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.Page {
@@ -80,10 +82,10 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 	p.Actions = append(p.Actions, full)
 	p.Footer = &page.Footer{Kind: page.FooterTerminals, Buttons: []string{ActionFullList}}
 	if of.VM == "" {
-		lends := b.lends()
-		lends[0].On, lends[0].Rows, lends[0].Icon = page.OnPage, nil, "plus"
-		p.Actions = append(p.Actions, lends...)
-		p.Footer.Buttons = append(p.Footer.Buttons, lends[0].ID)
+		sheets := b.loanSheets()
+		sheets[0].On, sheets[0].Rows, sheets[0].Icon = page.OnPage, nil, "plus"
+		p.Actions = append(p.Actions, sheets...)
+		p.Footer.Buttons = append(p.Footer.Buttons, sheets[0].ID)
 	}
 	for _, c := range b.r.Shared {
 		withRowMenu(&p, c.Mac+"/"+c.VM+"/"+c.Provider, loanMenu(c, b.extend(c), of.Asks, b.self))
@@ -94,7 +96,7 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 type accountsBody struct {
 	r   accounts.Reading
 	now accounts.AllMachines
-	// value: what each Mac is signed in to, the accounts it may lend.
+	// value: what each Mac is signed in to, the accounts it may share.
 	hosts accounts.AllMachines
 	self  string
 	of    AccountsOf
@@ -282,7 +284,7 @@ func (b accountsBody) actions() []page.Action {
 		out = append(out, b.extend(c))
 	}
 	if b.of.Mac != "" {
-		out = append(out, b.lends()...)
+		out = append(out, b.loanSheets()...)
 	}
 	return out
 }

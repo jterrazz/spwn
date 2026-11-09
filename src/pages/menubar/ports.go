@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 	pageports "github.com/jterrazz/studio-station/src/pages/ports"
 	"github.com/jterrazz/studio-station/src/ports"
@@ -29,8 +30,9 @@ type PortsOf struct {
 	// value: the hour the page is read at: a share of the last few
 	// seconds is fresh against it.
 	Now time.Time
-	// value: the running workspaces a port may be shared from.
-	To []Workspace
+	// value: the machines as read, whose running workspaces a port may
+	// be shared from; nil, those whose listeners the page lists.
+	Machines *model.AllMachines
 }
 
 func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
@@ -66,9 +68,13 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 	} else if sc.Mac == "" || sc.Mac != thisMac.Machine {
 		full = append(full, "--on", of.Machine)
 	}
-	to := shareTargets(of.To, b.Listeners, sc)
+	var running []workspace
+	if of.Machines != nil {
+		running = runningWorkspaces(*of.Machines)
+	}
+	to := shareTargets(running, b.Listeners, sc)
 	if len(to) == 0 {
-		to = []Workspace{{}}
+		to = []workspace{{}}
 	}
 	for _, a := range sharePortSheets(b.Listeners, to, sc.Self) {
 		b.act(a)

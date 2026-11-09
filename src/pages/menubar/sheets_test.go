@@ -24,7 +24,7 @@ func TestALoanSaysWhenItEndsByDay(t *testing.T) {
 		{17 * time.Hour, "Ends tomorrow at 03:30"},
 		{7 * 24 * time.Hour, "Ends Saturday 14 Nov"},
 	} {
-		if got := EndsBy(sheetNow, sheetNow.Add(c.after)); got != c.want {
+		if got := endsBy(sheetNow, sheetNow.Add(c.after)); got != c.want {
 			t.Errorf("a loan of %s says %q, want %q", c.after, got, c.want)
 		}
 	}
@@ -102,11 +102,11 @@ func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 
 // invariant: SPEC A5 Lend an account: one sheet per running workspace of
 // an awake Mac, To swapping between them; each lists its Mac's accounts
-// that can be lent, the one signed out there disabled with why; the button
+// it may share, the one signed out there disabled with why; the button
 // names the account and the time, and the call goes to that Mac.
 func TestLendAnAccountOffersEachWorkspaceTheAccountsOfItsMac(t *testing.T) {
-	to := RunningWorkspaces(fleetOfTwo())
-	if want := []Workspace{{VM: "linux-1", Mac: "pro"}, {VM: "agent-7f", Mac: "pro"}, {VM: "docs", Mac: "pro"}}; !slices.Equal(to, want) {
+	to := runningWorkspaces(fleetOfTwo())
+	if want := []workspace{{VM: "linux-1", Mac: "pro"}, {VM: "agent-7f", Mac: "pro"}, {VM: "docs", Mac: "pro"}}; !slices.Equal(to, want) {
 		t.Fatalf("the workspaces %v, want %v", to, want)
 	}
 	mac := func(name string, this bool, as ...accounts.Account) accounts.MacAccounts {
@@ -115,16 +115,20 @@ func TestLendAnAccountOffersEachWorkspaceTheAccountsOfItsMac(t *testing.T) {
 	in := accounts.Account{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Identity: []string{"jterrazz"}}
 	out := accounts.Account{Provider: catalog.ProviderClaude, State: catalog.StateAbsent}
 	all := accounts.AllMachines{Now: sheetNow, Macs: []accounts.MacAccounts{mac("pro", true, in), mac("mini", false, in, out)}}
-	b := accountsBody{now: all, hosts: all, self: "pro", of: AccountsOf{To: []Workspace{{VM: "linux-1", Mac: "pro"}, {VM: "linux-3", Mac: "mini"}}}}
-	lends := b.lends()
-	ids := make([]string, 0, len(lends))
-	for _, a := range lends {
+	machines := model.AllMachines{Macs: []model.MacView{
+		{Name: "pro", ThisMac: true, VMs: []model.VM{{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running}}},
+		{Name: "mini", Reachable: true, VMs: []model.VM{{Name: "linux-3", Lifetime: model.Throwaway, State: model.Running}, {Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
+	}}
+	b := accountsBody{now: all, hosts: all, self: "pro", of: AccountsOf{Machines: &machines}}
+	sheets := b.loanSheets()
+	ids := make([]string, 0, len(sheets))
+	for _, a := range sheets {
 		ids = append(ids, a.ID)
 	}
 	if want := []string{"share-account", "share-account:linux-1", "share-account:linux-3"}; !slices.Equal(ids, want) {
 		t.Fatalf("the sheets %q, want %q", ids, want)
 	}
-	mini := lends[2]
+	mini := sheets[2]
 	pick := mini.Form.Fields[1]
 	if mini.Form.Subtitle != "From mini. It ends by itself." || mini.Run.Target.Name != "mini" || mini.Run.In["With"] != "linux-3" || mini.Form.Fields[0].Default != "share-account:linux-3" {
 		t.Errorf("linux-3's sheet: %+v runs %+v", mini.Form, mini.Run)
@@ -145,7 +149,7 @@ func TestShareAPortListsWhatListensInEachWorkspace(t *testing.T) {
 		return page.Item{Row: &page.Row{ID: key, Label: key, Verb: verb}}
 	}
 	rows := []page.Item{listener("linux-1:4321", "share:linux-1:4321"), listener("linux-3:5432", "share:linux-3:5432")}
-	sheets := sharePortSheets(rows, []Workspace{{VM: "linux-1", Mac: "pro"}, {VM: "review-bot", Mac: "mini"}}, "pro")
+	sheets := sharePortSheets(rows, []workspace{{VM: "linux-1", Mac: "pro"}, {VM: "review-bot", Mac: "mini"}}, "pro")
 	if len(sheets) != 3 || sheets[0].Run != nil {
 		t.Fatalf("the sheets %+v", sheets)
 	}

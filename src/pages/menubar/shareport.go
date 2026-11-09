@@ -13,7 +13,7 @@ const ActionSharePortSheet = "share-port:"
 // with Share, the call its row runs; nothing listening, the line that
 // says so and no button. Nothing is typed. The sheet the page opens is
 // its first.
-func sharePortSheets(listeners []page.Item, to []Workspace, self string) []page.Action {
+func sharePortSheets(listeners []page.Item, to []workspace, self string) []page.Action {
 	if len(to) == 1 {
 		return []page.Action{sharePortSheet(ActionShare, to[0], nil, listeners, self)}
 	}
@@ -24,7 +24,7 @@ func sharePortSheets(listeners []page.Item, to []Workspace, self string) []page.
 	return out
 }
 
-func sharePortSheet(id string, t Workspace, every []Workspace, listeners []page.Item, self string) page.Action {
+func sharePortSheet(id string, t workspace, every []workspace, listeners []page.Item, self string) page.Action {
 	of := page.Field{Key: "Of", Label: "Of", Kind: page.FieldSelect, Swaps: true, Default: id}
 	if len(every) == 0 {
 		of.Options = []page.Option{workspaceOption(id, t, self)}
@@ -50,15 +50,15 @@ func sharePortSheet(id string, t Workspace, every []Workspace, listeners []page.
 	return page.Action{ID: id, Label: "Share a port", On: page.OnPage, Priority: 3, Mutates: true, Sheet: page.SheetSharePort, Form: form}
 }
 
-func workspaceOption(value string, t Workspace, self string) page.Option {
+func workspaceOption(value string, t workspace, self string) page.Option {
 	return page.Option{Value: value, Label: t.VM, Note: "on " + page.MacName(t.Mac, self), Glyph: page.Glyph{Kind: "workspace"}}
 }
 
 // value: the workspaces a page of ports offers to share from: the page's
 // own VM, the running workspaces of its Mac, or of every Mac; read none,
 // those whose listeners it lists.
-func shareTargets(to []Workspace, listeners []page.Item, sc portsScope) []Workspace {
-	var out []Workspace
+func shareTargets(to []workspace, listeners []page.Item, sc portsScope) []workspace {
+	var out []workspace
 	for _, t := range to {
 		if sc.VM != "" && t.VM != sc.VM || sc.Mac != "" && t.Mac != sc.Mac {
 			continue
@@ -74,13 +74,13 @@ func shareTargets(to []Workspace, listeners []page.Item, sc portsScope) []Worksp
 		}
 		vm := it.Row.ID[:strings.LastIndex(it.Row.ID, ":")]
 		if !containsVM(out, vm) {
-			out = append(out, Workspace{VM: vm})
+			out = append(out, workspace{VM: vm})
 		}
 	}
 	return out
 }
 
-func containsVM(ws []Workspace, vm string) bool {
+func containsVM(ws []workspace, vm string) bool {
 	for _, w := range ws {
 		if w.VM == vm {
 			return true

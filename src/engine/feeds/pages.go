@@ -30,7 +30,7 @@ func (o Menubar) Ports() engine.Feed {
 		read := func(ctx context.Context) page.Page {
 			of, list := pagemenubar.PortsOf{Machine: in.Subject, Now: o.Clock.Now()}, portscalls.ListIn{AllMachines: true, Of: in.Subject}
 			if listed, err := call.Read(ctx, o.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil); err == nil {
-				of.To = pagemenubar.RunningWorkspaces(listed.All)
+				of.Machines = &listed.All
 			}
 			l, err := call.Invoke(ctx, o.Calls, machine.Ref{}, portscalls.List, list, nil)
 			if err != nil {
@@ -54,7 +54,7 @@ func (o Menubar) Accounts() engine.Feed {
 				return pagemenubar.Unread(pagemenubar.AccountsID, o.ThisMachine, err)
 			}
 			of := accountsOf(listed.All, in.Subject)
-			of.Asks, of.To = levels, pagemenubar.RunningWorkspaces(listed.All)
+			of.Asks, of.Machines = levels, &listed.All
 			all := o.everyMacAccounts(ctx, listed.All, of.Mac)
 			return pagemenubar.Accounts(all, of, o.ThisMachine)
 		}
