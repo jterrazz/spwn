@@ -501,9 +501,130 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "start-vm",
-        "delete"
+        "title:infra",
+        "restart@menu",
+        "start-vm@menu",
+        "stop@menu",
+        "-",
+        "delete@menu"
       ]
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@menu",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Start",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "start-vm@menu",
+      "run": {
+        "call": "machines.start",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "play",
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Starting infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@menu",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

@@ -418,7 +418,20 @@
               "signal": "well",
               "dot": "fill"
             },
-            "nav": "menubar.machine:infra"
+            "nav": "menubar.machine:infra",
+            "menu": [
+              "title:infra",
+              "open:infra",
+              "open-station@infra",
+              "open-link@infra",
+              "-",
+              "copy-of:infra",
+              "-",
+              "restart@infra",
+              "stop@infra",
+              "-",
+              "delete@infra"
+            ]
           }
         }
       ],
@@ -472,7 +485,13 @@
             },
             "trail": "value",
             "quick": "new-vm:macbook-pro",
-            "nav": "menubar.machine:macbook-pro"
+            "nav": "menubar.machine:macbook-pro",
+            "menu": [
+              "title:macbook-pro",
+              "open:macbook-pro",
+              "new-vm:macbook-pro@menu",
+              "open-station@macbook-pro"
+            ]
           }
         },
         {
@@ -505,7 +524,13 @@
             },
             "trail": "value",
             "quick": "new-vm:mac-mini",
-            "nav": "menubar.machine:mac-mini"
+            "nav": "menubar.machine:mac-mini",
+            "menu": [
+              "title:mac-mini",
+              "open:mac-mini",
+              "new-vm:mac-mini@menu",
+              "open-station@mac-mini"
+            ]
           }
         },
         {
@@ -532,6 +557,11 @@
               "ring": "cpu:macbook-air"
             },
             "nav": "menubar.machine:macbook-air",
+            "menu": [
+              "title:macbook-air",
+              "open:macbook-air",
+              "wake@macbook-air"
+            ],
             "signal": "asleep"
           }
         }
@@ -1412,6 +1442,525 @@
           "Confirm": "yes"
         }
       }
+    },
+    {
+      "label": "Add a Mac",
+      "on": "menu",
+      "id": "add-mac",
+      "sheet": "hint:add-mac"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open station in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Open at login",
+      "on": "menu",
+      "id": "app:login"
+    },
+    {
+      "label": "CPU in the menu bar",
+      "on": "menu",
+      "id": "app:sparkline"
+    },
+    {
+      "key": "cmd+q",
+      "label": "Quit station",
+      "on": "menu",
+      "id": "app:quit"
+    },
+    {
+      "label": "More options for station",
+      "on": "menu",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "new-vm",
+        "add-mac",
+        "open-station@menu",
+        "-",
+        "app:login",
+        "app:sparkline",
+        "-",
+        "app:quit"
+      ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:macbook-pro"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:macbook-pro",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM on This Mac",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:macbook-pro@menu",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@macbook-pro",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:infra",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Open Traefik",
+      "on": "menu",
+      "id": "open-link@infra",
+      "run": {
+        "open": "infra:443"
+      },
+      "icon": "safari"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@infra",
+      "run": {
+        "copy": "ssh infra"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Traefik",
+      "on": "menu",
+      "priority": 4,
+      "id": "copy:infra:443@infra",
+      "run": {
+        "copy": "infra:443"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Kubernetes API",
+      "on": "menu",
+      "priority": 4,
+      "id": "copy:infra:6443@infra",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:infra",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@infra",
+        "copy:infra:443@infra",
+        "copy:infra:6443@infra"
+      ]
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@infra",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@infra",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "mac-mini",
+      "on": "menu",
+      "id": "title:mac-mini"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:mac-mini",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM on mac-mini",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:mac-mini@menu",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@mac-mini",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "macbook-air",
+      "on": "menu",
+      "id": "title:macbook-air"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:macbook-air",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "label": "Wake macbook-air",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "wake@macbook-air",
+      "run": {
+        "call": "machines.wake",
+        "in": {
+          "Mac": "macbook-air"
+        }
+      },
+      "icon": "alarm",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Waking macbook-air"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Keep This Mac awake",
+      "on": "menu",
+      "id": "title:awake"
+    },
+    {
+      "label": "For 1 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:1h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "3600000000000",
+          "Lid": "true"
+        }
+      }
+    },
+    {
+      "label": "For 4 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:4h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "14400000000000",
+          "Lid": "true"
+        }
+      }
+    },
+    {
+      "label": "Until 18:00",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep-until@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "Lid": "true",
+          "Until": "\"2026-11-07T18:00:00Z\""
+        }
+      },
+      "picked": true
+    },
+    {
+      "label": "Let it sleep",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "let-sleep@awake",
+      "run": {
+        "call": "awake.off"
+      },
+      "icon": "moon"
+    },
+    {
+      "key": "cmd+e",
+      "label": "Awake · All Macs",
+      "on": "menu",
+      "id": "open:awake",
+      "icon": "sun.max"
+    },
+    {
+      "label": "More options for Awake",
+      "on": "menu",
+      "id": "menu:awake",
+      "submenu": [
+        "title:awake",
+        "keep:1h@awake",
+        "keep:4h@awake",
+        "keep-until@awake",
+        "-",
+        "let-sleep@awake",
+        "open:awake"
+      ]
     }
   ],
   "badge": {

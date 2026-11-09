@@ -247,7 +247,7 @@ func proActivity() pageactivity.View {
 }
 
 func (f Scene) reading() pagemenubar.Reading {
-	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares()}
+	return pagemenubar.Reading{Home: &f.Home, Samples: f.Samples[proName], All: &f.All, Ports: &f.Ports, Awake: &f.Awake, Macs: f.Macs, Away: f.Away, Accounts: f.shares(), Asks: Levels}
 }
 
 func (f Scene) machine(name string) pagemenubar.Machine {
@@ -354,7 +354,7 @@ func (f Scene) draw() []Fixture {
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
 		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
 		{Name: "find", Page: pagemenubar.Find(f.find(), thisMac)},
-		{Name: "accounts", Page: pagemenubar.Accounts(*f.needs().Accounts, pagemenubar.AccountsOf{}, thisMac)},
+		{Name: "accounts", Page: pagemenubar.Accounts(*f.needs().Accounts, pagemenubar.AccountsOf{Asks: Levels}, thisMac)},
 	}
 	for _, h := range f.All.Macs {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})

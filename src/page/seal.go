@@ -325,7 +325,7 @@ func checkAction(a Action, n names) error {
 	if a.Destructive && a.Confirm == nil {
 		return errors.New("action " + a.ID + ": a destructive action carries a confirm")
 	}
-	if err := n.named("action "+a.ID+"'s submenu item", a.Submenu...); err != nil {
+	if err := n.named("action "+a.ID+"'s submenu item", slices.DeleteFunc(slices.Clone(a.Submenu), func(id string) bool { return id == "-" })...); err != nil {
 		return err
 	}
 	if a.Form != nil {

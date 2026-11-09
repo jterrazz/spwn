@@ -153,7 +153,13 @@
             },
             "trail": "value",
             "quick": "new-vm:macbook-pro",
-            "nav": "menubar.machine:macbook-pro"
+            "nav": "menubar.machine:macbook-pro",
+            "menu": [
+              "title:macbook-pro",
+              "open:macbook-pro",
+              "new-vm:macbook-pro@menu",
+              "open-station@macbook-pro"
+            ]
           }
         },
         {
@@ -422,6 +428,126 @@
       "priority": 4,
       "id": "add-mac",
       "sheet": "hint:add-mac"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open station in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Open at login",
+      "on": "menu",
+      "id": "app:login"
+    },
+    {
+      "label": "CPU in the menu bar",
+      "on": "menu",
+      "id": "app:sparkline"
+    },
+    {
+      "key": "cmd+q",
+      "label": "Quit station",
+      "on": "menu",
+      "id": "app:quit"
+    },
+    {
+      "label": "More options for station",
+      "on": "menu",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "new-vm",
+        "add-mac",
+        "open-station@menu",
+        "-",
+        "app:login",
+        "app:sparkline",
+        "-",
+        "app:quit"
+      ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:macbook-pro"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:macbook-pro",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM on This Mac",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:macbook-pro@menu",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@macbook-pro",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
     }
   ],
   "badge": {

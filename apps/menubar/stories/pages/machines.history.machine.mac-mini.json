@@ -214,7 +214,20 @@
             },
             "trail": "cpu",
             "quick": "attach:infra",
-            "nav": "menubar.machine:infra"
+            "nav": "menubar.machine:infra",
+            "menu": [
+              "title:infra",
+              "open:infra",
+              "open-station@infra",
+              "open-link@infra",
+              "-",
+              "copy-of:infra",
+              "-",
+              "restart@infra",
+              "stop@infra",
+              "-",
+              "delete@infra"
+            ]
           }
         },
         {
@@ -239,7 +252,20 @@
             },
             "trail": "cpu",
             "quick": "attach:linux-3",
-            "nav": "menubar.machine:linux-3"
+            "nav": "menubar.machine:linux-3",
+            "menu": [
+              "title:linux-3",
+              "open:linux-3",
+              "attach:linux-3@linux-3",
+              "open-link@linux-3",
+              "-",
+              "copy-of:linux-3",
+              "share-of:linux-3",
+              "-",
+              "stop@linux-3",
+              "-",
+              "delete@linux-3"
+            ]
           }
         },
         {
@@ -256,7 +282,19 @@
               "signal": "waits"
             },
             "quick": "attach:review-bot",
-            "nav": "menubar.machine:review-bot"
+            "nav": "menubar.machine:review-bot",
+            "menu": [
+              "title:review-bot",
+              "open:review-bot",
+              "attach:review-bot@review-bot",
+              "-",
+              "copy-of:review-bot",
+              "share-of:review-bot",
+              "-",
+              "stop@review-bot",
+              "-",
+              "delete@review-bot"
+            ]
           }
         }
       ],
@@ -2848,8 +2886,779 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "title:mac-mini",
+        "open-station@menu",
+        "-",
+        "restart-mac",
+        "stop-all:mac-mini",
+        "-",
+        "forget-mac"
       ]
+    },
+    {
+      "label": "mac-mini",
+      "on": "menu",
+      "id": "title:mac-mini"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "confirm": {
+        "question": "Restart mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs pause, then run again once it answers."
+          }
+        ],
+        "yes": "Restart"
+      },
+      "mutates": true,
+      "id": "restart-mac",
+      "run": {
+        "call": "machines.restart-mac",
+        "in": {
+          "Confirm": "yes",
+          "Name": "mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Restarting mac-mini"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Stop everything",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop everything on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "linux-3 will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "review-bot will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "infra skipped (server)"
+          },
+          {
+            "kind": "text",
+            "text": "Awake ends, and the engine keeps running for infra"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "mutates": true,
+      "id": "stop-all:mac-mini",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Forget",
+      "on": "menu",
+      "confirm": {
+        "question": "Forget mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "station stops reaching it; its VMs stay on it."
+          }
+        ],
+        "yes": "Forget"
+      },
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:infra",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Open Traefik",
+      "on": "menu",
+      "id": "open-link@infra",
+      "run": {
+        "open": "infra:443"
+      },
+      "icon": "safari"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@infra",
+      "run": {
+        "copy": "ssh infra"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Traefik",
+      "on": "menu",
+      "priority": 4,
+      "id": "copy:infra:443@infra",
+      "run": {
+        "copy": "infra:443"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Kubernetes API",
+      "on": "menu",
+      "priority": 4,
+      "id": "copy:infra:6443@infra",
+      "run": {
+        "copy": "infra:6443"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied infra:6443"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:infra",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@infra",
+        "copy:infra:443@infra",
+        "copy:infra:6443@infra"
+      ]
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@infra",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@infra",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "linux-3 on mac-mini",
+      "on": "menu",
+      "id": "title:linux-3"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:linux-3",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "attach:linux-3@linux-3",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-3"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Open Port 8080",
+      "on": "menu",
+      "id": "open-link@linux-3",
+      "run": {
+        "open": "https://mac-mini.tail77a797.ts.net:40001"
+      },
+      "icon": "safari"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@linux-3",
+      "run": {
+        "copy": "ssh linux-3"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh linux-3"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Port 8080",
+      "on": "menu",
+      "id": "copy-port:linux-3:8080@linux-3",
+      "run": {
+        "copy": "https://mac-mini.tail77a797.ts.net:40001"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://mac-mini.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:linux-3",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@linux-3",
+        "copy-port:linux-3:8080@linux-3"
+      ]
+    },
+    {
+      "label": "Show QR…",
+      "on": "menu",
+      "id": "qr:linux-3:8080@linux-3",
+      "icon": "qrcode"
+    },
+    {
+      "label": "A port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@linux-3",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Share a port of linux-3",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "An account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@linux-3",
+      "run": {
+        "call": "accounts.share",
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "linux-3",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From mac-mini. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "linux-3"
+      }
+    },
+    {
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:linux-3",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "qr:linux-3:8080@linux-3",
+        "share-port@linux-3",
+        "share-account@linux-3"
+      ]
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop linux-3?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@linux-3",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete linux-3?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type linux-3 to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "linux-3",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@linux-3",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "review-bot on mac-mini",
+      "on": "menu",
+      "id": "title:review-bot"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:review-bot",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "attach:review-bot@review-bot",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@review-bot",
+      "run": {
+        "copy": "ssh review-bot"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh review-bot"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:review-bot",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@review-bot"
+      ]
+    },
+    {
+      "label": "A port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@review-bot",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Share a port of review-bot",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "An account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@review-bot",
+      "run": {
+        "call": "accounts.share",
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "review-bot",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From mac-mini. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "review-bot"
+      }
+    },
+    {
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:review-bot",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "share-port@review-bot",
+        "share-account@review-bot"
+      ]
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@review-bot",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type review-bot to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "review-bot",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@review-bot",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

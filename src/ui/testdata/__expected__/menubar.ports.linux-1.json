@@ -329,9 +329,83 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "share-port",
-        "declare-public"
+        "share-port@menu",
+        "declare-public@menu"
       ]
+    },
+    {
+      "label": "Share a port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@menu",
+      "run": {
+        "call": "ports.share"
+      },
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "VM",
+            "label": "Of",
+            "kind": "select",
+            "required": true
+          },
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ],
+        "subtitle": "Private on your tailnet."
+      },
+      "icon": "point.3.connected.trianglepath.dotted",
+      "sheet": "share-port"
+    },
+    {
+      "label": "Declare a port public",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "declare-public@menu",
+      "run": {
+        "call": "ports.declare"
+      },
+      "form": {
+        "title": "Declare a port public",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "select",
+            "required": true
+          },
+          {
+            "key": "Via",
+            "label": "Via",
+            "kind": "select",
+            "options": [
+              {
+                "value": "cloudflare-tunnel",
+                "label": "Cloudflare Tunnel"
+              },
+              {
+                "value": "tailscale-funnel",
+                "label": "Tailscale Funnel"
+              },
+              {
+                "value": "lan",
+                "label": "your LAN"
+              }
+            ],
+            "default": "cloudflare-tunnel",
+            "required": true
+          }
+        ]
+      },
+      "icon": "globe"
     }
   ],
   "header": {

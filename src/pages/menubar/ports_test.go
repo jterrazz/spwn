@@ -345,8 +345,8 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("verbs %q %q", rows[0].Verb, rows[1].Verb)
 	}
 	menu := action(p, ActionMenu)
-	if menu == nil || !slices.Equal(menu.Submenu, []string{ActionShare, ActionStop, ActionDelete}) {
-		t.Fatalf("menu %+v", menu)
+	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "New agent…", "Copy ssh command", "Share a port…", "Lend an account…", "-", "Stop…", "-", "Delete… (red)"}) {
+		t.Fatalf("menu %q", menuWords(p, menu.Submenu))
 	}
 	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil
 	p = macPageOf(t, "linux-1", func(m *Machine) { m.All, m.Ports = fleet, &f })

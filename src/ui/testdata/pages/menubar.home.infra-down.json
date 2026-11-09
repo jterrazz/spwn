@@ -261,7 +261,13 @@
             },
             "trail": "value",
             "quick": "new-vm:jterrazz-macbook-pro",
-            "nav": "menubar.machine:jterrazz-macbook-pro"
+            "nav": "menubar.machine:jterrazz-macbook-pro",
+            "menu": [
+              "title:jterrazz-macbook-pro",
+              "open:jterrazz-macbook-pro",
+              "new-vm:jterrazz-macbook-pro@menu",
+              "open-station@jterrazz-macbook-pro"
+            ]
           }
         },
         {
@@ -285,7 +291,13 @@
             },
             "trail": "value",
             "quick": "new-vm:jterrazz-mac-mini",
-            "nav": "menubar.machine:jterrazz-mac-mini"
+            "nav": "menubar.machine:jterrazz-mac-mini",
+            "menu": [
+              "title:jterrazz-mac-mini",
+              "open:jterrazz-mac-mini",
+              "new-vm:jterrazz-mac-mini@menu",
+              "open-station@jterrazz-mac-mini"
+            ]
           }
         }
       ],
@@ -913,6 +925,303 @@
         ]
       },
       "icon": "terminal"
+    },
+    {
+      "label": "Add a Mac",
+      "on": "menu",
+      "id": "add-mac",
+      "sheet": "hint:add-mac"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open station in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Open at login",
+      "on": "menu",
+      "id": "app:login"
+    },
+    {
+      "label": "CPU in the menu bar",
+      "on": "menu",
+      "id": "app:sparkline"
+    },
+    {
+      "key": "cmd+q",
+      "label": "Quit station",
+      "on": "menu",
+      "id": "app:quit"
+    },
+    {
+      "label": "More options for station",
+      "on": "menu",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "new-vm",
+        "add-mac",
+        "open-station@menu",
+        "-",
+        "app:login",
+        "app:sparkline",
+        "-",
+        "app:quit"
+      ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:jterrazz-macbook-pro"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:jterrazz-macbook-pro",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM on This Mac",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:jterrazz-macbook-pro@menu",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@jterrazz-macbook-pro",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "mac-mini",
+      "on": "menu",
+      "id": "title:jterrazz-mac-mini"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:jterrazz-mac-mini",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+n",
+      "label": "New VM on mac-mini",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-vm:jterrazz-mac-mini@menu",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Image": "linux",
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "Request.Lifetime",
+            "label": "Will it last?",
+            "kind": "select",
+            "options": [
+              {
+                "value": "throwaway",
+                "label": "Throwaway",
+                "note": "Deleted when it powers off from inside."
+              },
+              {
+                "value": "permanent",
+                "label": "Permanent",
+                "note": "Kept until you delete it."
+              }
+            ],
+            "default": "throwaway"
+          },
+          {
+            "key": "Request.Size.MemoryBytes",
+            "label": "Memory",
+            "kind": "select",
+            "options": [
+              {
+                "value": "4294967296",
+                "label": "4 GB"
+              },
+              {
+                "value": "8589934592",
+                "label": "8 GB"
+              }
+            ],
+            "default": "4294967296"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@jterrazz-mac-mini",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Keep This Mac awake",
+      "on": "menu",
+      "id": "title:awake"
+    },
+    {
+      "label": "For 1 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:1h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "3600000000000",
+          "Lid": "true"
+        }
+      }
+    },
+    {
+      "label": "For 4 hr",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep:4h@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "For": "14400000000000",
+          "Lid": "true"
+        }
+      }
+    },
+    {
+      "label": "Until 18:00",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "keep-until@awake",
+      "run": {
+        "call": "awake.keep",
+        "in": {
+          "Battery": "false",
+          "By": "the menu bar",
+          "Lid": "true",
+          "Until": "\"2026-11-03T18:00:00Z\""
+        }
+      },
+      "picked": true
+    },
+    {
+      "label": "Let it sleep",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "let-sleep@awake",
+      "run": {
+        "call": "awake.off"
+      },
+      "icon": "moon"
+    },
+    {
+      "key": "cmd+e",
+      "label": "Awake · All Macs",
+      "on": "menu",
+      "id": "open:awake",
+      "icon": "sun.max"
+    },
+    {
+      "label": "More options for Awake",
+      "on": "menu",
+      "id": "menu:awake",
+      "submenu": [
+        "title:awake",
+        "keep:1h@awake",
+        "keep:4h@awake",
+        "keep-until@awake",
+        "-",
+        "let-sleep@awake",
+        "open:awake"
+      ]
     }
   ],
   "badge": {

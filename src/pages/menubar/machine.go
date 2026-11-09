@@ -137,9 +137,9 @@ func vmHead(m Machine, h model.MacView, vm model.VM) (page.Page, page.Section) {
 
 func vmPage(m Machine, h model.MacView, vm model.VM) page.Page {
 	if vm.Lifetime.Kind() == machine.Server {
-		return vmFrame(m, h, vm, serverPage(m, h, vm))
+		return vmPageMenu(m, h, vm, vmFrame(m, h, vm, serverPage(m, h, vm)))
 	}
-	return vmFrame(m, h, vm, workspacePage(m, h, vm))
+	return vmPageMenu(m, h, vm, vmFrame(m, h, vm, workspacePage(m, h, vm)))
 }
 
 // invariant: SPEC A4: a running VM's page carries its header and its
@@ -260,7 +260,7 @@ func macPage(m Machine, h model.MacView) page.Page {
 	p.Actions = append(p.Actions, menu)
 	p.Header.Buttons = append(p.Header.Buttons, ActionMenu)
 	p.Live = pageLive(p)
-	return page.Seal(p)
+	return page.Seal(macMenus(m, h, p))
 }
 
 // value: a Mac's glyph by its lid, a capability, never its model.

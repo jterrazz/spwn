@@ -114,7 +114,10 @@
             },
             "mac": "linux-1",
             "menu": [
-              "extend:macbook-pro/linux-1/claude"
+              "title:macbook-pro/linux-1/claude",
+              "extend:macbook-pro/linux-1/claude@menu",
+              "-",
+              "take-back/claude@macbook-pro/linux-1/claude"
             ],
             "left": {
               "kind": "until",
@@ -143,7 +146,10 @@
             },
             "mac": "linux-1",
             "menu": [
-              "extend:macbook-pro/linux-1/github"
+              "title:macbook-pro/linux-1/github",
+              "extend:macbook-pro/linux-1/github@menu",
+              "-",
+              "take-back/github@macbook-pro/linux-1/github"
             ],
             "left": {
               "kind": "until",
@@ -172,7 +178,10 @@
             },
             "mac": "linux-3",
             "menu": [
-              "extend:mac-mini/linux-3/github"
+              "title:mac-mini/linux-3/github",
+              "extend:mac-mini/linux-3/github@menu",
+              "-",
+              "take-back/github@mac-mini/linux-3/github"
             ],
             "left": {
               "kind": "until",
@@ -201,7 +210,10 @@
             },
             "mac": "review-bot",
             "menu": [
-              "extend:mac-mini/review-bot/claude"
+              "title:mac-mini/review-bot/claude",
+              "extend:mac-mini/review-bot/claude@menu",
+              "-",
+              "take-back/claude@mac-mini/review-bot/claude"
             ],
             "left": {
               "kind": "until",
@@ -601,6 +613,254 @@
       },
       "icon": "plus",
       "sheet": "share-account"
+    },
+    {
+      "label": "Claude → linux-1",
+      "on": "menu",
+      "id": "title:macbook-pro/linux-1/claude"
+    },
+    {
+      "label": "Extend 4 hr",
+      "on": "menu",
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/claude@menu",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "icon": "clock",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "menu",
+      "confirm": {
+        "question": "Take back Claude from linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on linux-1 is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "mutates": true,
+      "id": "take-back/claude@macbook-pro/linux-1/claude",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "claude",
+          "Confirm": "yes",
+          "From": "linux-1"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "GitHub → linux-1",
+      "on": "menu",
+      "id": "title:macbook-pro/linux-1/github"
+    },
+    {
+      "label": "Extend 4 hr",
+      "on": "menu",
+      "mutates": true,
+      "id": "extend:macbook-pro/linux-1/github@menu",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-1"
+        }
+      },
+      "icon": "clock",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-1"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "menu",
+      "confirm": {
+        "question": "Take back GitHub from linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on linux-1 is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "mutates": true,
+      "id": "take-back/github@macbook-pro/linux-1/github",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "github",
+          "Confirm": "yes",
+          "From": "linux-1"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "GitHub → linux-3",
+      "on": "menu",
+      "id": "title:mac-mini/linux-3/github"
+    },
+    {
+      "label": "Extend 4 hr",
+      "on": "menu",
+      "mutates": true,
+      "id": "extend:mac-mini/linux-3/github@menu",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "github",
+          "For": "14400000000000",
+          "With": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "clock",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "GitHub on linux-3"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "menu",
+      "confirm": {
+        "question": "Take back GitHub from linux-3?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on linux-3 is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "mutates": true,
+      "id": "take-back/github@mac-mini/linux-3/github",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "github",
+          "Confirm": "yes",
+          "From": "linux-3"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Claude → review-bot",
+      "on": "menu",
+      "id": "title:mac-mini/review-bot/claude"
+    },
+    {
+      "label": "Extend 4 hr",
+      "on": "menu",
+      "mutates": true,
+      "id": "extend:mac-mini/review-bot/claude@menu",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "Account": "claude",
+          "For": "14400000000000",
+          "With": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "clock",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Claude on review-bot"
+          },
+          {
+            "kind": "text",
+            "text": "4 hr left"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Take back",
+      "on": "menu",
+      "confirm": {
+        "question": "Take back Claude from review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its copy on review-bot is deleted."
+          }
+        ],
+        "yes": "Take back"
+      },
+      "mutates": true,
+      "id": "take-back/claude@mac-mini/review-bot/claude",
+      "run": {
+        "call": "accounts.take-back",
+        "in": {
+          "Account": "claude",
+          "Confirm": "yes",
+          "From": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
     }
   ],
   "header": {

@@ -55,6 +55,9 @@ type Reading struct {
 	// page never reads the clock.
 	Now  time.Time
 	Zone *time.Location
+	// value: the level each gesture of its menus asks at, the calls' own
+	// rule; nil draws no menu that asks.
+	Asks Levels
 }
 
 func Page(r Reading, thisMac page.Context) page.Page {
@@ -76,6 +79,7 @@ func Page(r Reading, thisMac page.Context) page.Page {
 		p.Actions = append(p.Actions, actions...)
 	}
 	p.Badge = badge(r)
+	p = homeMenus(r, p)
 	p.Live = liveKeys(p)
 	return page.Seal(p)
 }

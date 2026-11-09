@@ -229,7 +229,20 @@
             },
             "trail": "cpu",
             "quick": "attach:linux-1",
-            "nav": "menubar.machine:linux-1"
+            "nav": "menubar.machine:linux-1",
+            "menu": [
+              "title:linux-1",
+              "open:linux-1",
+              "attach:linux-1@linux-1",
+              "open-link@linux-1",
+              "-",
+              "copy-of:linux-1",
+              "share-of:linux-1",
+              "-",
+              "stop@linux-1",
+              "-",
+              "delete@linux-1"
+            ]
           }
         },
         {
@@ -256,6 +269,17 @@
             },
             "verb": "cleanup",
             "quick": "attach:agent-7f",
+            "menu": [
+              "title:agent-7f",
+              "open-station@agent-7f",
+              "-",
+              "copy-of:agent-7f",
+              "share-of:agent-7f",
+              "-",
+              "stop@agent-7f",
+              "-",
+              "delete@agent-7f"
+            ],
             "signal": "done"
           }
         },
@@ -282,7 +306,15 @@
               "signal": "quiet",
               "dot": "square"
             },
-            "nav": "menubar.machine:api"
+            "nav": "menubar.machine:api",
+            "menu": [
+              "title:api",
+              "open:api",
+              "-",
+              "start-vm@api",
+              "-",
+              "delete@api"
+            ]
           }
         }
       ],
@@ -3265,8 +3297,577 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "title:macbook-pro",
+        "open-station@menu",
+        "-",
+        "stop-all:macbook-pro"
       ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:macbook-pro"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop everything",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop everything on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "linux-1 will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "agent-7f will stop; its disk is kept"
+          },
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "mutates": true,
+      "id": "stop-all:macbook-pro",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "linux-1 on This Mac",
+      "on": "menu",
+      "id": "title:linux-1"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:linux-1",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "attach:linux-1@linux-1",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-1"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Open Vite",
+      "on": "menu",
+      "id": "open-link@linux-1",
+      "run": {
+        "open": "https://macbook-pro.tail77a797.ts.net:40001"
+      },
+      "icon": "safari"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@linux-1",
+      "run": {
+        "copy": "ssh linux-1"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Vite",
+      "on": "menu",
+      "id": "copy-port:linux-1:5173@linux-1",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40001"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40001"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Link to Port 3000",
+      "on": "menu",
+      "id": "copy-port:linux-1:3000@linux-1",
+      "run": {
+        "copy": "https://macbook-pro.tail77a797.ts.net:40002"
+      },
+      "icon": "link",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied https://macbook-pro.tail77a797.ts.net:40002"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:linux-1",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@linux-1",
+        "copy-port:linux-1:5173@linux-1",
+        "copy-port:linux-1:3000@linux-1"
+      ]
+    },
+    {
+      "label": "Show QR…",
+      "on": "menu",
+      "id": "qr:linux-1:5173@linux-1",
+      "icon": "qrcode"
+    },
+    {
+      "label": "A port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@linux-1",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "linux-1"
+        }
+      },
+      "form": {
+        "title": "Share a port of linux-1",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "An account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@linux-1",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "linux-1",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "linux-1"
+      }
+    },
+    {
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:linux-1",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "qr:linux-1:5173@linux-1",
+        "share-port@linux-1",
+        "share-account@linux-1"
+      ]
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@linux-1",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "linux-1"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete linux-1?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type linux-1 to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "linux-1",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@linux-1",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "linux-1"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "agent-7f on This Mac",
+      "on": "menu",
+      "id": "title:agent-7f"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@agent-7f",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "agent-7f"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@agent-7f",
+      "run": {
+        "copy": "ssh agent-7f"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh agent-7f"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:agent-7f",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@agent-7f"
+      ]
+    },
+    {
+      "label": "A port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@agent-7f",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "agent-7f"
+        }
+      },
+      "form": {
+        "title": "Share a port of agent-7f",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "An account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@agent-7f",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "agent-7f",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "agent-7f"
+      }
+    },
+    {
+      "label": "Share",
+      "on": "menu",
+      "id": "share-of:agent-7f",
+      "icon": "square.and.arrow.up",
+      "submenu": [
+        "share-port@agent-7f",
+        "share-account@agent-7f"
+      ]
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop agent-7f?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@agent-7f",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "agent-7f"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete agent-7f?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type agent-7f to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "agent-7f",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@agent-7f",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "agent-7f"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "api on This Mac",
+      "on": "menu",
+      "id": "title:api"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:api",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "label": "Start",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "start-vm@api",
+      "run": {
+        "call": "machines.start",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "play",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete api?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type api to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "api",
+        "yes": "Delete"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@api",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

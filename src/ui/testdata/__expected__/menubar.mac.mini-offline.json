@@ -98,6 +98,18 @@
             "trail": "cpu",
             "quick": "attach:infra",
             "nav": "menubar.machine:infra",
+            "menu": [
+              "title:infra",
+              "open:infra",
+              "open-station@infra",
+              "-",
+              "copy-of:infra",
+              "-",
+              "restart@infra",
+              "stop@infra",
+              "-",
+              "delete@infra"
+            ],
             "signal": "stale"
           }
         }
@@ -811,9 +823,280 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "unlock",
-        "open-station"
+        "title:jterrazz-mac-mini",
+        "open-station@menu",
+        "unlock@menu",
+        "-",
+        "restart-mac",
+        "stop-all:jterrazz-mac-mini",
+        "-",
+        "forget-mac"
       ]
+    },
+    {
+      "label": "mac-mini",
+      "on": "menu",
+      "id": "title:jterrazz-mac-mini"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Unlock the disk",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "unlock@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "machines",
+          "unlock",
+          "mac-mini"
+        ]
+      },
+      "icon": "lock.open"
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "confirm": {
+        "question": "Restart mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs pause, then run again once it answers."
+          }
+        ],
+        "yes": "Restart"
+      },
+      "mutates": true,
+      "id": "restart-mac",
+      "run": {
+        "call": "machines.restart-mac",
+        "in": {
+          "Confirm": "yes",
+          "Name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Restarting mac-mini"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Stop everything",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop everything on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra skipped (server)"
+          },
+          {
+            "kind": "text",
+            "text": "Awake ends, and the engine keeps running for infra"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "mutates": true,
+      "id": "stop-all:jterrazz-mac-mini",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Forget",
+      "on": "menu",
+      "confirm": {
+        "question": "Forget mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "station stops reaching it; its VMs stay on it."
+          }
+        ],
+        "yes": "Forget"
+      },
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:infra",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "ssh command",
+      "on": "menu",
+      "id": "copy-ssh@infra",
+      "run": {
+        "copy": "ssh infra"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:infra",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@infra"
+      ]
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It stays stopped until you start it: the engine no longer restarts it."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to stop it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@infra",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is erased: nothing of it is kept."
+          },
+          {
+            "kind": "text",
+            "text": "Type infra to delete it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@infra",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

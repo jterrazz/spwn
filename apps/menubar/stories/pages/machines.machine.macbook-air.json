@@ -766,8 +766,125 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "title:macbook-air",
+        "open-station@menu",
+        "-",
+        "restart-mac",
+        "stop-all:macbook-air",
+        "-",
+        "forget-mac"
       ]
+    },
+    {
+      "label": "macbook-air",
+      "on": "menu",
+      "id": "title:macbook-air"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "macbook-air"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "confirm": {
+        "question": "Restart macbook-air?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs pause, then run again once it answers."
+          }
+        ],
+        "yes": "Restart"
+      },
+      "mutates": true,
+      "id": "restart-mac",
+      "run": {
+        "call": "machines.restart-mac",
+        "in": {
+          "Confirm": "yes",
+          "Name": "macbook-air"
+        }
+      },
+      "icon": "arrow.clockwise",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Restarting macbook-air"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Stop everything",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop everything on macbook-air?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "mutates": true,
+      "id": "stop-all:macbook-air",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Forget",
+      "on": "menu",
+      "confirm": {
+        "question": "Forget macbook-air?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "station stops reaching it; its VMs stay on it."
+          }
+        ],
+        "yes": "Forget"
+      },
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "macbook-air"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

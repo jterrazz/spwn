@@ -2186,8 +2186,57 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "title:macbook-pro",
+        "open-station@menu",
+        "-",
+        "stop-all:macbook-pro"
       ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:macbook-pro"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop everything",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop everything on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "mutates": true,
+      "id": "stop-all:macbook-pro",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
     }
   ],
   "header": {
