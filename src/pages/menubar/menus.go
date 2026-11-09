@@ -17,9 +17,9 @@ const (
 	// value: a menu's header, the first entry of its list: its words only.
 	ActionTitle = "title:"
 	// value: a row's own page, opened from its menu: the row's Nav.
-	ActionOpenRow    = "open:"
-	ActionCopyOf     = "copy-of:"
-	ActionShareOf    = "share-of:"
+	ActionOpenRow = "open:"
+	ActionCopyOf  = "copy-of:"
+	ActionShareOf = "share-of:"
 
 	// value: an action reached through a menu alone, never drawn as a
 	// row's or a page's button.
