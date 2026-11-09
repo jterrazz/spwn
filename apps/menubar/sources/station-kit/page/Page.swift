@@ -355,6 +355,15 @@ public struct Run: Codable, Equatable, Sendable {
     public var target: Target?
     public var copy: String?
     public var open: String?
+    public var then: Then?
+}
+
+// value: what runs once a call returned well (Go's Run.Then): a terminal
+// on what the call made.
+public struct Then: Codable, Equatable, Sendable {
+    public var terminal: Bool?
+    public var argv: [String]?
+    public var target: Target?
 }
 
 public struct Target: Codable, Equatable, Sendable {
@@ -378,6 +387,7 @@ public struct Form: Codable, Equatable, Sendable {
     public var subtitle: String?
     public var primary: [Primary]?
     public var split: [String]?
+    public var warn: String?
 }
 
 public struct Primary: Codable, Equatable, Sendable {
@@ -388,6 +398,7 @@ public struct Primary: Codable, Equatable, Sendable {
 public struct When: Codable, Equatable, Sendable {
     public var key: String?
     public var value: String?
+    public var set: Bool?
 }
 
 public struct Field: Codable, Equatable, Sendable {
@@ -404,6 +415,9 @@ public struct Field: Codable, Equatable, Sendable {
     public var fields: [Field]?
     public var summary: Value?
     public var when: When?
+    public var swaps: Bool?
+    public var taken: [String]?
+    public var taken_hud: String?
 }
 
 public struct Option: Codable, Equatable, Sendable {
