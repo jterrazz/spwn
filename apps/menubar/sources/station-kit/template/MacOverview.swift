@@ -8,13 +8,14 @@ struct MacOverview: View {
     let fold: (String) -> Void
     let run: (Action, Row?) -> Void
     let open: () -> Void
+    let go: (String) -> Void
     @Environment(\.stationTokens) private var tokens
 
     var id: String { section.id ?? "" }
 
     var body: some View {
         if id == "vms" {
-            VMsCard(section, actions: page.actions ?? [], run: run)
+            VMsCard(section, actions: page.actions ?? [], open: go, run: run)
         } else {
             card
         }

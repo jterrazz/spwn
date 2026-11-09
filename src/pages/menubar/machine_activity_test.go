@@ -124,6 +124,19 @@ func TestAnAnomalyIsTheWholeRunAroundItsPeak(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4.1: a CPU that never moved draws its bars at one
+// height and names no peak over them.
+func TestAFlatCPUNamesNoPeak(t *testing.T) {
+	p := macPageOf(t, miniMac, func(m *Machine) {
+		m.Activity = kept(0, func(time.Time) (float64, bool) { return 0, false })
+	})
+	for _, w := range []string{"6m", "1h", "24h"} {
+		if cpu, _ := chartsOf(t, sectionOf(p, SectionWindow+w)); cpu.Peak != nil {
+			t.Errorf("the %s window of a CPU flat at 0 %% names the peak %+v, want none", w, cpu.Peak)
+		}
+	}
+}
+
 // invariant: SPEC A4.1: a window whose CPU stayed above 90 % shades the
 // bars it spans and says it: when it peaked once it is over, how long it
 // has lasted while it still holds.

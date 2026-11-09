@@ -108,7 +108,7 @@ struct MachineContent: View {
     // panel does not jump.
     var skeleton: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
-            Metrics(measures: [("CPU", nil, nil), ("Memory", nil, nil), ("Disk", nil, nil)])
+            Metrics(measures: [("CPU", nil, nil), ("Memory", nil, nil), ("Network", nil, nil)])
             Rows {
                 ForEach(0..<3, id: \.self) { _ in
                     HStack(spacing: Token.Tile.gap) {

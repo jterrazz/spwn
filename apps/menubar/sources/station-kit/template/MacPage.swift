@@ -116,7 +116,7 @@ struct MacPage: View {
         case _ where s.id == "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "ports": MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case "accounts": MacAccounts(section: s, page: page, busy: state.busy, run: run)
-        default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })
+        default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" }, go: handlers.push)
         }
     }
 }

@@ -132,7 +132,7 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 	}
 	clock.pass(25 * time.Second)
 	stale := late()
-	if got := lead(stale, "free:"+mini); !got.Stale || got.N != 48*gb {
+	if got := lead(stale, "free:"+mini); !got.Stale || got.Text != "48 GB free" {
 		t.Errorf("the mini unheard for 35 s shows its free memory %+v, want its last 48 GB, stale", got)
 	}
 	if want := []string{"memory:" + mini, "free:" + mini}; !slices.Equal(stale.Stale, want) {

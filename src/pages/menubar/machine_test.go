@@ -130,6 +130,35 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 	}
 }
 
+// invariant: SPEC A4: This Mac's VMs read the working one first with its
+// agent's step, then the finished, then the stopped, and every row, the
+// finished one too, opens its VM's page.
+func TestAMacsVMsListTheWorkingFirstAndEachOpensItsPage(t *testing.T) {
+	p := macPageOf(t, proMac, func(m *Machine) {
+		m.All.Macs[0].VMs = []model.VM{
+			{Name: "agent-7f", Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Reason: "tests pass"}},
+			{Name: "api", Lifetime: model.Permanent, State: model.Stopped},
+			{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running,
+				Agent: &model.AgentView{State: "working", Task: "builds the landing page", Step: []string{"running tests", "41/58 pass"}}},
+		}
+	})
+	vms := sectionOf(p, SectionVMs)
+	if got := labels(vms.Items); !slices.Equal(got, []string{"linux-1", "agent-7f", "api"}) {
+		t.Fatalf("VMs %q, want the working linux-1, then the finished agent-7f, then the stopped api", got)
+	}
+	if d := words(vms.Items[0].Row.Detail); d != "running tests | 41/58 pass" {
+		t.Errorf("linux-1 reads %q, want its agent's step as Home says it", d)
+	}
+	for _, it := range vms.Items {
+		if want := machinePage(it.Row.Label); it.Row.Nav != want {
+			t.Errorf("%s's row opens %q, want its page %q", it.Row.Label, it.Row.Nav, want)
+		}
+	}
+	if finished := vms.Items[1].Row; finished.Verb != ActionCleanup {
+		t.Errorf("agent-7f's row offers %q, want Clean up beside its way in", finished.Verb)
+	}
+}
+
 // invariant: SPEC A4: an exposed port on This Mac leads its card, in its
 // own words; its app is the one fact after them, and the first to go.
 func TestAnExposedPortLeadsThisMacsNeeds(t *testing.T) {
@@ -230,7 +259,8 @@ func TestAVMBeingCreatedShowsItsBirthThenLands(t *testing.T) {
 func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 	p := macPageOf(t, miniMac, func(m *Machine) {
 		m.Awake = &awake.Report{Mac: miniMac, Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}
-		m.Summary.Needs = []overview.Need{{Section: "settings", Subject: "firewall", Text: "Firewall off"}, {Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate}}
+		m.Summary.Needs = []overview.Need{{Section: "settings", Subject: "firewall", Text: "Firewall: off"}, {Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate}}
+		m.Summary.Lines = append(m.Summary.Lines, overview.Line{Section: "disk", Parts: []overview.Part{{Bytes: 388_000_000_000, Word: "free"}, {Word: "can rebuild"}}})
 		m.Samples = []activity.Reading{{Sample: activity.Sample{MemTotal: 64 << 30, MemUsed: 45 << 30}}}
 	})
 	care := sectionOf(p, SectionCare).Items
@@ -238,13 +268,23 @@ func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 		t.Fatalf("awake row %+v", r)
 	}
 	head := care[1].Group.Head
-	if words(head.Cells[0]) != "firewall off | 1 more" || care[1].Group.Fold != page.Folded || len(care[1].Group.Items) != 2 {
+	if words(head.Cells[0]) != "firewall off | 1 more" || care[1].Group.Fold != page.Folded || len(care[1].Group.Items) != 3 {
 		t.Fatalf("upkeep %q folded %s over %d rows", words(head.Cells[0]), care[1].Group.Fold, len(care[1].Group.Items))
 	}
+	disk := false
 	for _, it := range care[1].Group.Items {
 		if it.Row.Label == "Apps" && words(it.Row.Detail) != "2 updates" {
 			t.Fatalf("the Apps item reads %q, want its updates said once", words(it.Row.Detail))
 		}
+		if it.Row.Label == "Disk" {
+			disk = true
+			if d := it.Row.Detail; d.Kind != page.KindList || len(d.Items) != 1 || d.Items[0].Unit != "free" {
+				t.Fatalf("the Disk item reads %+v, want its free space alone when nothing can be rebuilt", d)
+			}
+		}
+	}
+	if !disk {
+		t.Fatal("the upkeep unfolds to no Disk item")
 	}
 	if g := sectionOf(p, SectionGauges).Items[1].Gauge; g.Value.Text != "19 GB free" || g.Bar == nil {
 		t.Fatalf("memory gauge %+v, want 19 GB free over its bar", g)

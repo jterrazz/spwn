@@ -244,7 +244,8 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 		}
 		switch n.Section {
 		case section.Settings:
-			row(n.Text+" on "+label, strings.ToLower(n.Text), VerbHowTo)
+			said := strings.Replace(n.Text, ": ", " ", 1)
+			row(said+" on "+label, strings.ToLower(said), VerbHowTo)
 			item.Glyph = symbol("shield", page.SignalWaits)
 			item.Verb = settingHint(item.Verb, n.Subject)
 			if n.Path != "" {

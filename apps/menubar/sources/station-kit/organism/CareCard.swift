@@ -83,6 +83,7 @@ public struct CareCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(head.label ?? "")
         .accessibilityValue(open ? "open" : "closed")
     }
 }

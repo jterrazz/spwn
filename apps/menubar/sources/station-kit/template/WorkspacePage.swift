@@ -74,22 +74,23 @@ struct WorkspacePage: View {
         switch (s.segment, s.id) {
         case ("ports", _), (_, "ports"): MacPorts(section: s, page: page, state: state, handlers: handlers, run: tap)
         case ("accounts", _): MacAccounts(section: s, page: page, busy: state.busy, run: run)
-        case (_, "agents"): WorkspaceAgents(section: s, actions: page.actions ?? [], run: run)
+        case (_, "agents"): WorkspaceAgents(section: s, actions: page.actions ?? [], open: handlers.push, run: run)
         case (_, "stopped"):
             ForEach(Array((s.items ?? []).compactMap(\.empty).enumerated()), id: \.offset) { _, empty in
                 Card(flush: false) { EmptyState(empty, actions: page.actions ?? []) { run($0, nil) } }
             }
-        default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" })
+        default: MacOverview(section: s, page: page, unfolded: unfolded, fold: fold, run: run, open: { segment = "activity" }, go: handlers.push)
         }
     }
 }
 
 // invariant: SPEC A4: a workspace's Agents card: its label, its counts
 // and the round + that starts one more, then one row per agent; with none,
-// the one line that offers the first.
+// the one line that offers the first; a row opens its agent's page.
 struct WorkspaceAgents: View {
     let section: Section
     let actions: [Action]
+    let open: (String) -> Void
     let run: (Action, Row?) -> Void
     @Environment(\.stationTokens) private var tokens
 
@@ -113,7 +114,7 @@ struct WorkspaceAgents: View {
                 }
             } else {
                 Card {
-                    RowStack(section.rows, columns: section.columns ?? [], actions: actions) { action in
+                    RowStack(section.rows, columns: section.columns ?? [], actions: actions, open: { row in row.nav.map(open) }) { action in
                         run(action, section.rows.first { $0.verb == action.id || $0.quick == action.id })
                     }
                 }

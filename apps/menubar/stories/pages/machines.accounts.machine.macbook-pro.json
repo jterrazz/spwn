@@ -245,8 +245,10 @@
             },
             "verb": "cleanup",
             "quick": "attach:agent-7f",
+            "nav": "menubar.machine:agent-7f",
             "menu": [
               "title:agent-7f",
+              "open:agent-7f",
               "open-station@agent-7f",
               "-",
               "copy-of:agent-7f",
@@ -5926,6 +5928,13 @@
       "label": "agent-7f on This Mac",
       "on": "menu",
       "id": "title:agent-7f"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:agent-7f",
+      "icon": "arrow.up.forward.square"
     },
     {
       "key": "cmd+enter",

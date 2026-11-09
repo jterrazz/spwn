@@ -59,7 +59,7 @@ struct AgentPage: View {
         case "wait": WaitCard(s, actions: page.actions ?? [], opened: opened, reply: $reply, run: tap, send: send)
         case "now": NowCard(s, actions: page.actions ?? [], run: tap)
         default:
-            VMsCard(s, actions: page.actions ?? []) { action, row in
+            VMsCard(s, actions: page.actions ?? [], open: handlers.push) { action, row in
                 if action.run == nil, let nav = row?.nav { handlers.push(nav) } else { tap(action) }
             }
         }

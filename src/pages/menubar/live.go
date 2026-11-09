@@ -11,8 +11,8 @@ type measures struct {
 	// memory and disk), and its series over the readings kept: CPU's share,
 	// memory's and disk's use of their total from 0 to 100, the network in
 	// kB/s; a measure not read yet is the zero Value.
-	cpu, memory, free, disk, net page.Value
-	cpus, memories, disks, nets  []int
+	cpu, memory, disk, net      page.Value
+	cpus, memories, disks, nets []int
 }
 
 func measured(readings []activity.Reading) measures {
@@ -43,7 +43,6 @@ func measured(readings []activity.Reading) measures {
 	}
 	if last.MemTotal > 0 {
 		m.memory = page.Ratio(min(last.MemUsed, last.MemTotal), last.MemTotal)
-		m.free = page.Size(last.MemTotal - min(last.MemUsed, last.MemTotal))
 	}
 	if last.DiskTotal > 0 {
 		m.disk = page.Percent((last.DiskTotal - last.DiskFree) * 1000 / last.DiskTotal)
@@ -54,7 +53,7 @@ func measured(readings []activity.Reading) measures {
 func LiveValue(key string, readings []activity.Reading) page.Value {
 	// value: a live key's value from its machine's readings, as the page
 	// that lists the key draws it: the measure now led into its series, the
-	// free memory alone; the zero Value while the measure is not read yet.
+	// free memory in the gauge's own words; the zero Value while the measure is not read yet.
 	m := measured(readings)
 	measure, subject := engine.LiveOf(key)
 	switch measure {
@@ -65,7 +64,7 @@ func LiveValue(key string, readings []activity.Reading) page.Value {
 	case engine.LiveMemory:
 		return led(m.memory, m.memories)
 	case engine.LiveFree:
-		return m.free
+		return freeWords(readings)
 	case engine.LiveDisk:
 		return led(m.disk, m.disks)
 	case engine.LiveNet:

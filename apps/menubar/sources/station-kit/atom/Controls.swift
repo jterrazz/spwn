@@ -82,6 +82,8 @@ public struct Segmented: View {
                 }
                 .buttonStyle(.plain)
                 .keyboardShortcut(shortcut(i))
+                .accessibilityLabel(o.label)
+                .accessibilityAddTraits(o.on ? .isSelected : [])
             }
         }
         .background(alignment: .topLeading) {
