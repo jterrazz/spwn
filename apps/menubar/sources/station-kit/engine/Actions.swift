@@ -70,6 +70,7 @@ public struct ActionRunner: Sendable {
     // again; only a terminal action starts a program, the terminal.
     public func run(_ action: Action, answers: [String: String] = [:]) async -> Status? {
         guard let run = action.run else { return nil }
+        if let more = run.and, !more.isEmpty { return await chain([run] + more, of: action, answers: answers) }
         if let name = run.call {
             let reply = await Client.call(path: socket, name: name, input: Client.input(Self.filled(action, answers: answers), fixed: run.in, words: Self.words(action)), target: run.target,
                                           within: name == Self.endsTheEngine ? stopWithin : nil)
@@ -102,6 +103,51 @@ public struct ActionRunner: Sendable {
         let open = Terminal.opening(terminal, executable: executable, words: run.argv ?? [])
         let done = await launcher.run(open.path, open.args, environment: [:])
         return done.code == 0 ? nil : Self.failure("\(terminal) did not open station", nil)
+    }
+
+    // invariant: SPEC A5 Clean up: a sheet's calls are made in turn, each
+    // sent only what its In names, narrowed to what the owner left checked;
+    // a call left with nothing is not made, and the first refusal stops the
+    // rest and is the status.
+    func chain(_ runs: [Run], of action: Action, answers: [String: String]) async -> Status? {
+        let sent = action.form.map { Answers($0, answers).sent } ?? answers
+        var status: Status?
+        for step in runs {
+            guard let name = step.call, let input = Self.narrowed(step.in ?? [:], by: sent) else { continue }
+            let reply = await Client.call(path: socket, name: name, input: Client.input([:], fixed: input), target: step.target)
+            if !reply.ok {
+                let message = reply.message ?? name
+                status = Self.failure(message, reply.hint)
+                status?.posted = Notifications.failedCall(reply.task ?? action.label ?? name, message)
+                break
+            }
+        }
+        if !reread.isEmpty { _ = await Client.call(path: socket, name: Self.refresh, input: ["pages": reread]) }
+        return status
+    }
+
+    // value: a call's fixed input narrowed by the answers of the same key:
+    // a list keeps what is checked, a single value stays only while it is
+    // checked; nil when nothing is left to send.
+    public static func narrowed(_ fixed: [String: String], by sent: [String: String]) -> [String: String]? {
+        var out = fixed
+        for (key, value) in fixed {
+            guard let answer = sent[key] else { continue }
+            let checked = items(answer) ?? [answer]
+            if let list = items(value) {
+                let kept = list.filter(checked.contains)
+                if kept.isEmpty { return nil }
+                out[key] = Answers.list(kept)
+            } else if !checked.contains(value) {
+                return nil
+            }
+        }
+        return out
+    }
+
+    static func items(_ text: String) -> [String]? {
+        guard text.first == "[", let data = text.data(using: .utf8) else { return nil }
+        return try? JSONSerialization.jsonObject(with: data) as? [String]
     }
 
     // value: a call that worked as a task (Update all) says it is done, so

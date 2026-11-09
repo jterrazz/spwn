@@ -623,6 +623,31 @@
               "kind": "text",
               "text": "NAT, throwaway"
             }
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz",
+                "glyph": {
+                  "kind": "account:github"
+                },
+                "of": "linux-1"
+              }
+            ],
+            "follows": "VMs"
+          },
+          {
+            "key": "copy",
+            "kind": "command",
+            "note": "On the new Mac, run this once.",
+            "hint": {
+              "command": "station machines add mac-mini"
+            }
           }
         ],
         "subtitle": "on This Mac",
@@ -633,9 +658,11 @@
           {
             "when": {
               "key": "task",
-              "value": "*"
+              "value": "*",
+              "count": 1
             },
-            "label": "Create and Start Claude"
+            "label": "Create and Start Claude",
+            "danger": true
           }
         ],
         "split": [
@@ -659,7 +686,15 @@
             "--on",
             "{name}"
           ]
-        }
+        },
+        "and": [
+          {
+            "call": "agents.forget",
+            "in": {
+              "Agent": "agent-7f"
+            }
+          }
+        ]
       }
     },
     {

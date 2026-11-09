@@ -329,7 +329,25 @@ func checkAction(a Action, n names) error {
 		return err
 	}
 	if a.Form != nil {
+		if err := checkFields(a.Form.Fields); err != nil {
+			return errors.New("action " + a.ID + ": " + err.Error())
+		}
 		return n.named("action "+a.ID+"'s split item", a.Form.Split...)
+	}
+	return nil
+}
+
+func checkFields(fields []Field) error {
+	for _, f := range fields {
+		if err := checkHint(f.Hint); err != nil {
+			return err
+		}
+		if f.Kind == FieldCommand && f.Hint == nil {
+			return errors.New("field " + f.Key + ": a command field carries its hint")
+		}
+		if err := checkFields(f.Fields); err != nil {
+			return err
+		}
 	}
 	return nil
 }
