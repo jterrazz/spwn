@@ -22,6 +22,8 @@ public struct TileStrip: View {
             ForEach(Array(tiles.enumerated()), id: \.offset) { _, tile in
                 TileView(tile, actions: actions, run: run)
                     .onTapGesture { if let nav = tile.nav { open(nav) } }
+                    .stationContextMenu(MenuModel.tile(tile, actions: actions), nav: tile.nav)
+                    .menuAnchor(MenuAnchors.row(actions.first { $0.id == tile.toggle }?.rows?.first ?? tile.caption ?? ""))
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel(Text(Self.said(tile)))
                     .accessibilityAddTraits(.isButton)
@@ -142,17 +144,19 @@ public struct AgentsCard: View {
 // invariant: SPEC A4 Home 4: one row per server, its dot and its words.
 public struct ServersCard: View {
     let section: Section
+    let actions: [Action]
     let lit: String?
     let go: (String) -> Void
 
-    public init(_ section: Section, lit: String? = nil, go: @escaping (String) -> Void = { _ in }) {
+    public init(_ section: Section, actions: [Action] = [], lit: String? = nil, go: @escaping (String) -> Void = { _ in }) {
         self.section = section
+        self.actions = actions
         self.lit = lit
         self.go = go
     }
 
     public var body: some View {
-        HomeRowsCard(section, actions: [], lit: lit, run: { _, _ in }, go: go) { EmptyView() }
+        HomeRowsCard(section, actions: actions, lit: lit, run: { _, _ in }, go: go) { EmptyView() }
     }
 }
 

@@ -1,0 +1,13 @@
+{
+    "group": "menu",
+    "heightNote": "4.5 pt shorter than the prototype: MachineHeader's back line is 24 pt where the prototype's is 28 (its 24 pt button and 4 pt margin), which a page without segments does not make up; every card below matches it row for row",
+    "id": "menu.context.lease",
+    "note": "Right-click GitHub lent to linux-1: Extend 4 hr, then Take back… in red.",
+    "pages": ["pages/machines.accounts.accounts.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "row": "macbook-pro/linux-1/github"
+        }
+    }
+}

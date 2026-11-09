@@ -2203,10 +2203,110 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "restart",
-        "stop",
-        "delete"
+        "title:infra",
+        "restart@menu",
+        "stop@menu",
+        "-",
+        "delete@menu"
       ]
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "confirm": {
+        "question": "Restart infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
+          }
+        ],
+        "yes": "Restart infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@menu",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra stays stopped until you start it. jterrazz.com goes offline."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@menu",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop",
+      "destructive": true
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports, and jterrazz.com stops answering."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

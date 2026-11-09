@@ -71,7 +71,7 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 		b.act(a)
 	}
 	p.Actions = b.Actions
-	return page.Seal(p)
+	return page.Seal(portsMenu(p))
 }
 
 // value: Share a port…: the workspaces whose listeners are not shared, and

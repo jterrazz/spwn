@@ -3489,8 +3489,8 @@
       }
     },
     {
-      "label": "Restart macbook-air",
-      "on": "page",
+      "label": "Restart",
+      "on": "menu",
       "confirm": {
         "question": "Restart macbook-air?",
         "lines": [
@@ -3514,6 +3514,7 @@
           "Name": "\"macbook-air\""
         }
       },
+      "icon": "arrow.clockwise",
       "hud": {
         "kind": "list",
         "items": [
@@ -3525,8 +3526,8 @@
       }
     },
     {
-      "label": "Forget macbook-air",
-      "on": "page",
+      "label": "Forget",
+      "on": "menu",
       "confirm": {
         "question": "Forget macbook-air?",
         "lines": [
@@ -3549,7 +3550,9 @@
           "Confirm": "yes",
           "Name": "\"macbook-air\""
         }
-      }
+      },
+      "icon": "trash",
+      "destructive": true
     },
     {
       "label": "More options for macbook-air",
@@ -3557,10 +3560,33 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station",
+        "title:macbook-air",
+        "open-station@menu",
+        "-",
         "restart-mac",
+        "-",
         "forget-mac"
       ]
+    },
+    {
+      "label": "macbook-air",
+      "on": "menu",
+      "id": "title:macbook-air"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "macbook-air"
+        ]
+      },
+      "icon": "terminal"
     }
   ],
   "header": {

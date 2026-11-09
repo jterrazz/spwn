@@ -94,7 +94,19 @@
             },
             "trail": "cpu",
             "quick": "attach:infra",
-            "nav": "menubar.machine:infra"
+            "nav": "menubar.machine:infra",
+            "menu": [
+              "title:infra",
+              "open:infra",
+              "open-station@infra",
+              "-",
+              "copy-of:infra",
+              "-",
+              "restart@infra",
+              "stop@infra",
+              "-",
+              "delete@infra"
+            ]
           }
         }
       ],
@@ -2617,8 +2629,8 @@
       }
     },
     {
-      "label": "Restart mac-mini",
-      "on": "page",
+      "label": "Restart",
+      "on": "menu",
       "confirm": {
         "question": "Restart mac-mini?",
         "lines": [
@@ -2643,6 +2655,7 @@
           "Name": "\"jterrazz-mac-mini\""
         }
       },
+      "icon": "arrow.clockwise",
       "hud": {
         "kind": "list",
         "items": [
@@ -2654,8 +2667,8 @@
       }
     },
     {
-      "label": "Forget mac-mini",
-      "on": "page",
+      "label": "Forget",
+      "on": "menu",
       "confirm": {
         "question": "Forget mac-mini?",
         "lines": [
@@ -2678,7 +2691,9 @@
           "Confirm": "yes",
           "Name": "\"jterrazz-mac-mini\""
         }
-      }
+      },
+      "icon": "trash",
+      "destructive": true
     },
     {
       "label": "More options for mac-mini",
@@ -2686,10 +2701,179 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station",
+        "title:jterrazz-mac-mini",
+        "open-station@menu",
+        "-",
         "restart-mac",
+        "-",
         "forget-mac"
       ]
+    },
+    {
+      "label": "mac-mini",
+      "on": "menu",
+      "id": "title:jterrazz-mac-mini"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "mac-mini"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "infra on mac-mini",
+      "on": "menu",
+      "id": "title:infra"
+    },
+    {
+      "key": "enter",
+      "label": "Open",
+      "on": "menu",
+      "id": "open:infra",
+      "icon": "arrow.up.forward.square"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@infra",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "--on",
+          "infra"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "SSH command",
+      "on": "menu",
+      "id": "copy-ssh@infra",
+      "run": {
+        "copy": "ssh infra"
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh infra"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy",
+      "on": "menu",
+      "id": "copy-of:infra",
+      "icon": "doc.on.doc",
+      "submenu": [
+        "copy-ssh@infra"
+      ]
+    },
+    {
+      "label": "Restart",
+      "on": "menu",
+      "confirm": {
+        "question": "Restart infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
+          }
+        ],
+        "yes": "Restart infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "restart@infra",
+      "run": {
+        "call": "machines.restart",
+        "in": {
+          "Name": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "arrow.clockwise"
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra stays stopped until you start it."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Stop infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "stop@infra",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete infra?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (80 GB), its address."
+          }
+        ],
+        "danger": true,
+        "type": "infra",
+        "yes": "Delete infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "delete@infra",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "infra"
+        },
+        "target": {
+          "name": "jterrazz-mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

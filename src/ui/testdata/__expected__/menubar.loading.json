@@ -126,6 +126,53 @@
           "Confirm": "yes"
         }
       }
+    },
+    {
+      "label": "Add a Mac",
+      "on": "menu",
+      "id": "add-mac",
+      "sheet": "hint:add-mac"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open station in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Open at login",
+      "on": "menu",
+      "id": "app:login"
+    },
+    {
+      "label": "CPU in the menu bar",
+      "on": "menu",
+      "id": "app:sparkline"
+    },
+    {
+      "key": "cmd+q",
+      "label": "Quit station",
+      "on": "menu",
+      "id": "app:quit"
+    },
+    {
+      "label": "More options for station",
+      "on": "menu",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "add-mac",
+        "open-station@menu",
+        "-",
+        "app:login",
+        "app:sparkline",
+        "-",
+        "app:quit"
+      ]
     }
   ],
   "live": [

@@ -914,9 +914,137 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "share-port",
-        "declare-public"
+        "share-port@menu",
+        "declare-public@menu"
       ]
+    },
+    {
+      "label": "Share a port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@menu",
+      "run": {
+        "call": "ports.share"
+      },
+      "form": {
+        "title": "Share a port",
+        "fields": [
+          {
+            "key": "VM",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "linux-1",
+                "label": "linux-1"
+              },
+              {
+                "value": "agent-7f",
+                "label": "agent-7f"
+              },
+              {
+                "value": "infra",
+                "label": "infra"
+              },
+              {
+                "value": "linux-3",
+                "label": "linux-3"
+              },
+              {
+                "value": "review-bot",
+                "label": "review-bot"
+              }
+            ],
+            "default": "linux-1",
+            "required": true
+          },
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ],
+        "subtitle": "Private on your tailnet."
+      },
+      "icon": "point.3.connected.trianglepath.dotted",
+      "sheet": "share-port"
+    },
+    {
+      "label": "Declare a port public",
+      "on": "menu",
+      "priority": 2,
+      "mutates": true,
+      "id": "declare-public@menu",
+      "run": {
+        "call": "ports.declare"
+      },
+      "form": {
+        "title": "Declare a port public",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "select",
+            "options": [
+              {
+                "value": "Machine=\"linux-1\" Port=\"4321\"",
+                "label": "linux-1:4321"
+              },
+              {
+                "value": "Machine=\"linux-1\" Port=\"9229\"",
+                "label": "linux-1:9229"
+              },
+              {
+                "value": "Machine=\"agent-7f\" Port=\"6006\"",
+                "label": "agent-7f:6006"
+              },
+              {
+                "value": "Machine=\"infra\" Port=\"6443\"",
+                "label": "infra:6443"
+              },
+              {
+                "value": "Machine=\"linux-3\" Port=\"5432\"",
+                "label": "linux-3:5432"
+              },
+              {
+                "value": "Machine=\"review-bot\" Port=\"8000\"",
+                "label": "review-bot:8000"
+              },
+              {
+                "value": "Machine=\"mac-mini\" Port=\"5900\"",
+                "label": "mac-mini:5900"
+              }
+            ],
+            "default": "Machine=\"linux-1\" Port=\"4321\"",
+            "required": true
+          },
+          {
+            "key": "Via",
+            "label": "Via",
+            "kind": "select",
+            "options": [
+              {
+                "value": "cloudflare-tunnel",
+                "label": "Cloudflare Tunnel"
+              },
+              {
+                "value": "tailscale-funnel",
+                "label": "Tailscale Funnel"
+              },
+              {
+                "value": "lan",
+                "label": "your LAN"
+              }
+            ],
+            "default": "cloudflare-tunnel",
+            "required": true
+          }
+        ]
+      },
+      "icon": "globe"
     }
   ],
   "header": {

@@ -44,6 +44,8 @@ type AccountsOf struct {
 	// value: the Mac whose accounts the page lists, and with VM the copies
 	// that Mac shared with it; both empty is every Mac.
 	Mac, VM string
+	// value: the level each gesture asks at, the calls' own rule.
+	Asks Levels
 }
 
 func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.Page {
@@ -80,6 +82,9 @@ func Accounts(a accounts.AllMachines, of AccountsOf, thisMac page.Context) page.
 		share.On, share.Rows, share.Icon = page.OnPage, nil, "plus"
 		p.Actions = append(p.Actions, share)
 		p.Footer.Buttons = append(p.Footer.Buttons, share.ID)
+	}
+	for _, c := range b.r.Shared {
+		withRowMenu(&p, c.Mac+"/"+c.VM+"/"+c.Provider, loanMenu(c, b.extend(c), of.Asks, b.self))
 	}
 	return page.Seal(p)
 }

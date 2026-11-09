@@ -3298,8 +3298,25 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "title:macbook-pro",
+        "open-station@menu"
       ]
+    },
+    {
+      "label": "This Mac",
+      "on": "menu",
+      "id": "title:macbook-pro"
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "menu",
+      "priority": 2,
+      "id": "open-station@menu",
+      "run": {
+        "terminal": true
+      },
+      "icon": "terminal"
     }
   ],
   "header": {

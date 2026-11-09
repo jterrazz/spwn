@@ -103,7 +103,7 @@ struct HomePage: View {
                        run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
         }
         if let servers = page.section(HomeCards.servers) {
-            ServersCard(servers, lit: litID, go: { go($0, handlers) })
+            ServersCard(servers, actions: actions, lit: litID, go: { go($0, handlers) })
         }
         if let macs = page.section(HomeCards.macs) {
             MacsCard(macs, actions: actions, lit: litID, run: { a, _ in perform(a, handlers) }, go: { go($0, handlers) })
@@ -470,6 +470,8 @@ struct HomeHeaderBar: View {
     let state: PanelState
     let handlers: PopoverHandlers
     @Environment(\.stationTokens) private var tokens
+    @Environment(\.stationStill) private var still
+    @Environment(\.stationMenuPick) private var pick
 
     var body: some View {
         let h = Token.HomeHeader.self
@@ -486,8 +488,34 @@ struct HomeHeaderBar: View {
                     .keyboardShortcut("n", modifiers: .command)
                     .disabled(state.running != nil)
             }
-            RoundButton(h.menu, size: .topBar, action: handlers.toggleMenu)
+            station
                 .accessibilityLabel(Text(h.menuLabel))
+                .menuAnchor(MenuAnchors.page)
+        }
+    }
+
+    // value: the station menu, the system's own, from the More button.
+    @ViewBuilder
+    var station: some View {
+        let h = Token.HomeHeader.self
+        let model = MenuModel.station(page, loginItemOn: handlers.loginItemOn, sparklineOn: handlers.sparklineOn)
+        if still || model.isEmpty {
+            RoundButton(h.menu, size: .topBar, action: handlers.toggleMenu)
+        } else {
+            let c = Token.Metric.Control.self
+            Menu {
+                MenuContent(model) { pick?($0, nav: nil) }
+            } label: {
+                Image(systemName: h.menu).font(.system(size: c.roundTopBarGlyph, weight: .semibold))
+                    .foregroundStyle(tokens.color.t1)
+                    .frame(width: c.roundTopBar, height: c.roundTopBar)
+                    .background(tokens.color.q, in: Circle())
+                    .contentShape(Circle())
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .fixedSize()
         }
     }
 }

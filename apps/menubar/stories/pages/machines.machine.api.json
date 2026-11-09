@@ -108,9 +108,68 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "start-vm",
-        "delete"
+        "title:api",
+        "start-vm@menu",
+        "-",
+        "delete@menu"
       ]
+    },
+    {
+      "label": "api on This Mac",
+      "on": "menu",
+      "id": "title:api"
+    },
+    {
+      "label": "Start",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "start-vm@menu",
+      "run": {
+        "call": "machines.start",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "play",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete api?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (40 GB)."
+          }
+        ],
+        "danger": true,
+        "type": "api",
+        "yes": "Delete api",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

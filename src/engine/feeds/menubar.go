@@ -58,7 +58,10 @@ type menubar struct {
 }
 
 func (o Menubar) Feed() engine.Feed {
-	return o.feed(func(r pagemenubar.Reading) page.Page { return pagemenubar.Page(r, o.ThisMachine) })
+	return o.feed(func(r pagemenubar.Reading) page.Page {
+		r.Asks = levels
+		return pagemenubar.Page(r, o.ThisMachine)
+	})
 }
 
 func (o Menubar) Find() engine.Feed {

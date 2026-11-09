@@ -51,6 +51,7 @@ func (o Menubar) Accounts() engine.Feed {
 				return pagemenubar.Unread(pagemenubar.AccountsID, o.ThisMachine, err)
 			}
 			of := accountsOf(listed.All, in.Subject)
+			of.Asks = levels
 			all := o.everyMacAccounts(ctx, listed.All, of.Mac)
 			return pagemenubar.Accounts(all, of, o.ThisMachine)
 		}

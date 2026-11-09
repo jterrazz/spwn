@@ -1,0 +1,12 @@
+{
+    "group": "menu",
+    "id": "menu.context.stopped",
+    "note": "Right-click api, stopped: Open, then Start in place of Stop, and Delete….",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {
+            "row": "api"
+        }
+    }
+}

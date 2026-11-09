@@ -130,8 +130,8 @@
       }
     },
     {
-      "label": "Forget macbook-air",
-      "on": "page",
+      "label": "Forget",
+      "on": "menu",
       "confirm": {
         "question": "Forget macbook-air?",
         "lines": [
@@ -154,7 +154,9 @@
           "Confirm": "yes",
           "Name": "\"macbook-air\""
         }
-      }
+      },
+      "icon": "trash",
+      "destructive": true
     },
     {
       "label": "More options for macbook-air",
@@ -162,9 +164,39 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station",
+        "title:macbook-air",
+        "wake@menu",
+        "-",
         "forget-mac"
       ]
+    },
+    {
+      "label": "macbook-air",
+      "on": "menu",
+      "id": "title:macbook-air"
+    },
+    {
+      "label": "Wake macbook-air",
+      "on": "menu",
+      "priority": 1,
+      "mutates": true,
+      "id": "wake@menu",
+      "run": {
+        "call": "machines.wake",
+        "in": {
+          "Mac": "macbook-air"
+        }
+      },
+      "icon": "alarm",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Waking macbook-air"
+          }
+        ]
+      }
     }
   ],
   "header": {

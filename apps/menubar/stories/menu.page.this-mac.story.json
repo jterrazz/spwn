@@ -1,0 +1,10 @@
+{
+    "group": "menu",
+    "id": "menu.page.this-mac",
+    "note": "This Mac's … menu: Open in Terminal, Stop everything…; no Restart, no Forget.",
+    "pages": ["pages/machines.macs.machine.macbook-pro.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "menu": {}
+    }
+}

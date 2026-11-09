@@ -2107,10 +2107,186 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "share-port",
-        "stop",
-        "delete"
+        "title:review-bot",
+        "new-agent",
+        "copy-ssh@menu",
+        "share-port@menu",
+        "share-account@menu",
+        "-",
+        "stop@menu",
+        "-",
+        "delete@menu"
       ]
+    },
+    {
+      "label": "review-bot on mac-mini",
+      "on": "menu",
+      "id": "title:review-bot"
+    },
+    {
+      "label": "Copy ssh command",
+      "on": "menu",
+      "id": "copy-ssh@menu",
+      "run": {
+        "copy": "ssh review-bot"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh review-bot"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share a port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@menu",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Share a port of review-bot",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "Lend an account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@menu",
+      "run": {
+        "call": "accounts.share",
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "review-bot",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From mac-mini. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "review-bot"
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop review-bot on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its agent review-bot stops. Its disk is kept."
+          }
+        ],
+        "yes": "Stop review-bot",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@menu",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its agent review-bot stops first. This can't be undone. It goes with its disk (40 GB) and 1 account lent to it."
+          }
+        ],
+        "danger": true,
+        "type": "review-bot",
+        "yes": "Delete review-bot",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {

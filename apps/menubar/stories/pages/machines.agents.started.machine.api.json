@@ -833,10 +833,174 @@
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "share-port",
-        "stop",
-        "delete"
+        "title:api",
+        "new-agent",
+        "copy-ssh@menu",
+        "share-port@menu",
+        "share-account@menu",
+        "-",
+        "stop@menu",
+        "-",
+        "delete@menu"
       ]
+    },
+    {
+      "label": "api on This Mac",
+      "on": "menu",
+      "id": "title:api"
+    },
+    {
+      "label": "Copy ssh command",
+      "on": "menu",
+      "id": "copy-ssh@menu",
+      "run": {
+        "copy": "ssh api"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh api"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Share a port",
+      "on": "menu",
+      "priority": 3,
+      "mutates": true,
+      "id": "share-port@menu",
+      "run": {
+        "call": "ports.share",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "form": {
+        "title": "Share a port of api",
+        "fields": [
+          {
+            "key": "Port",
+            "label": "Port",
+            "kind": "text",
+            "note": "a port number, like 5173",
+            "required": true
+          }
+        ]
+      },
+      "icon": "point.3.connected.trianglepath.dotted"
+    },
+    {
+      "label": "Lend an account",
+      "on": "menu",
+      "mutates": true,
+      "id": "share-account@menu",
+      "run": {
+        "call": "accounts.share"
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "With",
+            "label": "To",
+            "kind": "text",
+            "default": "api",
+            "required": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "text",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself."
+      },
+      "icon": "key",
+      "sheet": "share-account",
+      "prefill": {
+        "With": "api"
+      }
+    },
+    {
+      "label": "Stop",
+      "on": "menu",
+      "confirm": {
+        "question": "Stop api on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its disk is kept."
+          }
+        ],
+        "yes": "Stop api",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 1,
+      "mutates": true,
+      "id": "stop@menu",
+      "run": {
+        "call": "machines.stop",
+        "in": {
+          "Confirm": "yes",
+          "VM": "api"
+        }
+      },
+      "icon": "stop"
+    },
+    {
+      "label": "Delete",
+      "on": "menu",
+      "confirm": {
+        "question": "Delete api?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "This can't be undone. It goes with its disk (40 GB)."
+          }
+        ],
+        "danger": true,
+        "type": "api",
+        "yes": "Delete api",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 2,
+      "mutates": true,
+      "id": "delete@menu",
+      "run": {
+        "call": "machines.delete",
+        "in": {
+          "VM": "api"
+        }
+      },
+      "icon": "trash",
+      "destructive": true
     }
   ],
   "header": {
