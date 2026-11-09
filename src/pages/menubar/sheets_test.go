@@ -239,3 +239,20 @@ func TestAFinishedThrowawayIsNeverWhatASheetPicksFirst(t *testing.T) {
 		t.Errorf("%d Stop everything", stops)
 	}
 }
+
+// invariant: one gesture, one surface: a Mac page's Clean up is Home's
+// sheet scoped to that Mac, never a bare question.
+func TestAMacPagesCleanUpIsTheSheetOfThatMac(t *testing.T) {
+	all := fleetOfTwo()
+	m := Machine{Name: "pro", All: &all, Agents: sheetAgents(), Now: sheetNow, Asks: graded}
+	for _, a := range overviewActions(m, all.Macs[0], page.ThisMac) {
+		if a.ID != ActionCleanup {
+			continue
+		}
+		if a.Confirm != nil || a.Sheet != page.SheetCleanup || a.Form.Title != "Clean up on This Mac" || len(fieldOf(a, "VMs").Options) == 0 {
+			t.Errorf("This Mac's Clean up %+v", a)
+		}
+		return
+	}
+	t.Fatal("This Mac's page has no Clean up")
+}

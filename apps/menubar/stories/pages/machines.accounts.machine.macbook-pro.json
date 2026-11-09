@@ -4785,26 +4785,86 @@
     },
     {
       "label": "Clean up",
-      "on": "row",
-      "confirm": {
-        "question": "Delete the finished throwaways on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Each goes with its disk, its ports and the accounts shared with it."
-          }
-        ],
-        "yes": "Delete"
-      },
+      "on": "page",
       "priority": 3,
       "mutates": true,
       "id": "cleanup",
       "run": {
         "call": "machines.cleanup",
         "in": {
-          "Confirm": "yes"
-        }
-      }
+          "Confirm": "yes",
+          "VMs": "[\"agent-7f\"]"
+        },
+        "and": [
+          {
+            "call": "agents.forget",
+            "in": {
+              "Agent": "agent-7f"
+            },
+            "target": {
+              "name": "agent-7f"
+            }
+          }
+        ]
+      },
+      "form": {
+        "title": "Clean up on This Mac",
+        "fields": [
+          {
+            "key": "Agent",
+            "label": "Finished agents",
+            "kind": "multiselect",
+            "options": [
+              {
+                "value": "agent-7f",
+                "label": "agent-7f",
+                "note": "on agent-7f{sep}finished 12 min ago{sep}tests pass",
+                "of": "agent-7f"
+              }
+            ],
+            "note": "each is forgotten; its workspace stays",
+            "follows": "VMs"
+          },
+          {
+            "key": "VMs",
+            "label": "Empty throwaways",
+            "kind": "multiselect",
+            "options": [
+              {
+                "value": "agent-7f",
+                "label": "agent-7f",
+                "note": "idle 12 min{sep}42.9 GB disk"
+              }
+            ],
+            "default": "agent-7f",
+            "note": "no live agent; each goes with its disk, its ports and the accounts lent to it"
+          },
+          {
+            "key": "stays",
+            "kind": "note",
+            "note": "linux-1 has a working agent, so it stays."
+          }
+        ],
+        "subtitle": "Finished agents and empty throwaways.",
+        "primary": [
+          {
+            "when": {
+              "key": "VMs",
+              "count": 1
+            },
+            "label": "Delete 1 throwaway",
+            "danger": true
+          },
+          {
+            "when": {
+              "key": "Agent",
+              "count": 1
+            },
+            "label": "Forget 1 agent"
+          }
+        ]
+      },
+      "sheet": "cleanup"
     },
     {
       "label": "Keep This Mac awake",

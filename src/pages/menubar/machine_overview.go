@@ -11,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
-	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
 	"github.com/jterrazz/studio-station/src/engine"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -85,9 +84,7 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 		}
 	}
 	if slices.ContainsFunc(h.VMs, model.VM.Finished) {
-		c := ask(m.Asks, "cleanup", machine.Mac, label, "Delete the finished throwaways on "+label+"?", "delete", "Each goes with its disk, its ports and the accounts shared with it.")
-		out = append(out, page.Action{ID: ActionCleanup, Label: "Clean up", On: page.OnRow, Priority: 3, Mutates: true, Confirm: c,
-			Run: &page.Run{Call: CallCleanup, In: answered(c, map[string]string{}), Target: target(h)}})
+		out = append(out, cleanupSheet(ActionCleanup, *m.All, cleanupsOf([]model.MacView{h}, m.Agents), m.Now, true))
 	}
 	if a, ok := o.awakeAction(); ok {
 		out = append(out, a)
