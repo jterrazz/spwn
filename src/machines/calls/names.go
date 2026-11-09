@@ -2,7 +2,6 @@ package calls
 
 import (
 	"slices"
-	"strconv"
 
 	"github.com/jterrazz/studio-station/src/agents"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -50,10 +49,4 @@ func (c claims) taken(name string) *model.NameTakenError {
 	return &model.NameTakenError{Name: name, VM: c.held[name] == claimVM, Mac: c.held[name] == claimMac, On: c.on[name]}
 }
 
-func allocateName(image string, c claims) string {
-	for n := 1; ; n++ {
-		if name := image + "-" + strconv.Itoa(n); c.free(name) {
-			return name
-		}
-	}
-}
+func allocateName(image string, c claims) string { return model.FirstFree(image, c.free) }
