@@ -89,60 +89,6 @@
   ],
   "actions": [
     {
-      "key": "cmd+n",
-      "label": "New VM",
-      "on": "page",
-      "priority": 1,
-      "mutates": true,
-      "id": "new-vm",
-      "run": {
-        "call": "machines.create-workspace",
-        "in": {
-          "Request.Image": "linux",
-          "Request.Network": "nat"
-        }
-      },
-      "form": {
-        "title": "New VM",
-        "fields": [
-          {
-            "key": "Request.Lifetime",
-            "label": "Will it last?",
-            "kind": "select",
-            "options": [
-              {
-                "value": "throwaway",
-                "label": "Throwaway",
-                "note": "Deleted when it powers off from inside."
-              },
-              {
-                "value": "permanent",
-                "label": "Permanent",
-                "note": "Kept until you delete it."
-              }
-            ],
-            "default": "throwaway"
-          },
-          {
-            "key": "Request.Size.MemoryBytes",
-            "label": "Memory",
-            "kind": "select",
-            "options": [
-              {
-                "value": "4294967296",
-                "label": "4 GB"
-              },
-              {
-                "value": "8589934592",
-                "label": "8 GB"
-              }
-            ],
-            "default": "4294967296"
-          }
-        ]
-      }
-    },
-    {
       "key": "cmd+t",
       "label": "Open in Terminal",
       "on": "page",

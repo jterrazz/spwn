@@ -2234,7 +2234,6 @@
       "run": {
         "call": "machines.create-workspace",
         "in": {
-          "Request.Image": "linux",
           "Request.Network": "nat"
         },
         "target": {
@@ -2245,42 +2244,2771 @@
         "title": "New VM",
         "fields": [
           {
-            "key": "Request.Lifetime",
-            "label": "Will it last?",
+            "key": "On",
+            "label": "On",
             "kind": "select",
             "options": [
               {
-                "value": "throwaway",
-                "label": "Throwaway",
-                "note": "Deleted when it powers off from inside."
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
               },
               {
-                "value": "permanent",
-                "label": "Permanent",
-                "note": "Kept until you delete it."
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
               }
             ],
-            "default": "throwaway"
+            "default": "new-vm",
+            "swaps": true
           },
           {
-            "key": "Request.Size.MemoryBytes",
-            "label": "Memory",
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ],
+          "target": {
+            "name": "mac-mini"
+          }
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
             "kind": "select",
             "options": [
               {
-                "value": "4294967296",
-                "label": "4 GB"
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
               },
               {
-                "value": "8589934592",
-                "label": "8 GB"
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
               }
             ],
-            "default": "4294967296"
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
           }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm"
         ]
       },
-      "icon": "plus"
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ],
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-pro",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-pro"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ]
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-pro",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-pro"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-server:macbook-pro",
+      "run": {
+        "call": "machines.create-server"
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-pro",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-pro"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-server:macbook-pro",
+      "run": {
+        "call": "machines.create-server",
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Name}"
+          ]
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-pro",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-pro"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "on": "row",
+      "rows": [
+        "mac-mini"
+      ],
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm:mac-mini",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:mac-mini",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:mac-mini"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm:mac-mini",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "mac-mini"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ],
+          "target": {
+            "name": "mac-mini"
+          }
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:mac-mini",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:mac-mini"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-server:mac-mini",
+      "run": {
+        "call": "machines.create-server",
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:mac-mini",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:mac-mini",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:mac-mini"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-server:mac-mini",
+      "run": {
+        "call": "machines.create-server",
+        "target": {
+          "name": "mac-mini"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Name}"
+          ],
+          "target": {
+            "name": "mac-mini"
+          }
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:mac-mini",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:mac-mini",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:mac-mini",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On mac-mini. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:mac-mini"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on mac-mini{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "on": "row",
+      "rows": [
+        "macbook-air"
+      ],
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm:macbook-air",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm:macbook-air",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-air",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-air",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-air",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On macbook-air. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-air"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on macbook-air{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm:macbook-air",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "target": {
+          "name": "macbook-air"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ],
+          "target": {
+            "name": "macbook-air"
+          }
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-vm",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-vm:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-vm:macbook-air",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-air",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-air",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-air",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-2",
+                "note": "Generated, editable",
+                "taken": [
+                  "agent-7f",
+                  "api",
+                  "infra",
+                  "linux-1",
+                  "linux-3",
+                  "mac-mini",
+                  "macbook-air",
+                  "macbook-pro",
+                  "review-bot"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On macbook-air. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-air"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on macbook-air{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-server:macbook-air",
+      "run": {
+        "call": "machines.create-server",
+        "target": {
+          "name": "macbook-air"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:macbook-air",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-air",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-air",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-air",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On macbook-air. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-air"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on macbook-air{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-server:macbook-air",
+      "run": {
+        "call": "machines.create-server",
+        "target": {
+          "name": "macbook-air"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Name}"
+          ],
+          "target": {
+            "name": "macbook-air"
+          }
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac"
+              },
+              {
+                "value": "new-server:mac-mini",
+                "label": "mac-mini"
+              },
+              {
+                "value": "new-server:macbook-air",
+                "label": "macbook-air"
+              }
+            ],
+            "default": "new-server:macbook-air",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-2",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "agent-7f",
+              "api",
+              "infra",
+              "linux-1",
+              "linux-3",
+              "mac-mini",
+              "macbook-air",
+              "macbook-pro",
+              "review-bot"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm:macbook-air",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-air",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-air",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ]
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On macbook-air. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-air"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on macbook-air{ellipsis}"
+      }
     },
     {
       "key": "cmd+enter",

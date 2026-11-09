@@ -432,13 +432,6 @@ func (h homeReading) macs() (page.Section, []page.Action) {
 	var actions []page.Action
 	for _, m := range h.r.All.Macs {
 		row := h.macRow(m)
-		if row.Quick != "" {
-			create := newVM()
-			create.ID, create.Icon, create.Label = row.Quick, "plus", "New VM on "+row.Label
-			create.Key, create.Priority, create.On, create.Rows = "", 2, page.OnRow, []string{m.Name}
-			create.Run.Target = target(m)
-			actions = append(actions, create)
-		}
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
 	if len(h.r.All.Macs) == 1 {

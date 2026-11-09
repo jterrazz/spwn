@@ -46,11 +46,7 @@ public struct ActionRunner: Sendable {
     public static let typedKey = "Confirm"
 
     public static func filled(_ action: Action, answers: [String: String]) -> [String: String] {
-        var out: [String: String] = [:]
-        for f in action.form?.fields ?? [] {
-            guard let key = f.key, let value = answers[key] ?? f.default, !value.isEmpty else { continue }
-            out[key] = value
-        }
+        var out = action.form.map { Answers($0, answers).sent } ?? [:]
         if action.confirm?.type != nil, let typed = answers[typedKey] { out[typedKey] = typed }
         for (key, value) in answers where action.run?.in?[key] != nil { out[key] = value }
         return out
@@ -59,7 +55,7 @@ public struct ActionRunner: Sendable {
     // value: the answers the owner typed: a text field's, and a typed
     // confirmation's name.
     static func words(_ action: Action) -> Set<String> {
-        var out = Set((action.form?.fields ?? []).filter { $0.kind == "text" }.compactMap(\.key))
+        var out = Set(action.form.map { Answers($0).fields.filter { $0.kind == "text" }.compactMap(\.key) } ?? [])
         if action.confirm?.type != nil { out.insert(typedKey) }
         return out
     }
@@ -86,6 +82,13 @@ public struct ActionRunner: Sendable {
                 return Status(posted, failed: true, posted: posted)
             }
             if reply.ok, action.on == "row", reply.task != nil || Self.saysDone(action) { return Self.done(action, name) }
+            if reply.ok, let then = run.then, then.terminal == true {
+                let said = action.form.map { Answers($0, answers) }
+                let words = (then.argv ?? []).map { said?.fill($0) ?? $0 }
+                let open = Terminal.opening(terminal, executable: executable, words: words)
+                let done = await launcher.run(open.path, open.args, environment: [:])
+                return done.code == 0 ? nil : Self.failure("\(terminal) did not open station", nil)
+            }
             if reply.ok || (reply.closed && name == Self.endsTheEngine) { return nil }
             let message = reply.message ?? name
             var status = Self.failure(message, reply.hint)

@@ -63,7 +63,7 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	tree := Tree(r.All, r.Ports, homeLine(r))
 	markMacs(&tree, r)
 	p.Sections = []page.Section{needs, tree}
-	p.Actions = append([]page.Action{newVM(), openStation(), stopAll(r)}, updateAll(needs, r.Home)...)
+	p.Actions = append(append(newVMSheets(r.All, r.Accounts, thisMac.Machine, roomiest(r.All, thisMac.Machine), true), openStation(), stopAll(r)), updateAll(needs, r.Home)...)
 	ranked, upkeep := needsOf(r.needsReading(), thisMac.Machine)
 	if top, stale, ok := hero(r, thisMac.Machine, ranked); ok {
 		sections, actions := homeSections(r, thisMac.Machine, upkeep)
@@ -474,18 +474,16 @@ const (
 
 func gigabytes(n int64) string { return strconv.FormatInt(n<<30, 10) }
 
-// value: New VM…'s sheet: the create form of the CLI and the TUI, its
-// questions in the same words.
-func newVM() page.Action {
-	return page.Action{ID: ActionNewVM, Key: "cmd+n", Label: "New VM", On: page.OnPage, Priority: 1, Mutates: true,
-		Run: &page.Run{Call: CallCreate, In: map[string]string{"Request.Image": "linux", "Request.Network": "nat"}},
-		Form: &page.Form{Title: "New VM", Fields: []page.Field{
-			{Key: "Request.Lifetime", Label: "Will it last?", Kind: page.FieldSelect, Default: "throwaway", Options: []page.Option{
-				{Value: "throwaway", Label: "Throwaway", Note: "Deleted when it powers off from inside."},
-				{Value: "permanent", Label: "Permanent", Note: "Kept until you delete it."},
-			}},
-			{Key: "Request.Size.MemoryBytes", Label: "Memory", Kind: page.FieldSelect, Default: gigabytes(4), Options: []page.Option{{Value: gigabytes(4), Label: "4 GB"}, {Value: gigabytes(8), Label: "8 GB"}}},
-		}}}
+// value: the Mac New VM opens on from home: the roomiest awake one, or
+// This Mac while none says what it has free.
+func roomiest(all *model.AllMachines, self string) string {
+	if all == nil {
+		return self
+	}
+	if r := model.Roomiest(*all); r != "" {
+		return r
+	}
+	return self
 }
 
 // value: Open in Terminal: a new terminal runs station, on the machine
