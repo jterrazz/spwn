@@ -1,4 +1,4 @@
-description: 'every station line a menu bar hint gives the owner to copy is a leaf station has today, its flags its own: asked for its help, station answers with that leaf, never its parent'
+description: 'every station line a menu bar hint gives to copy is a leaf station has, its flags its own'
 runs:
     - command: 'machines add "<mac>" --help | /usr/bin/grep -o "station machines add <mac>"'
       exit: 0
