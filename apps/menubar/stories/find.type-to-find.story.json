@@ -1,0 +1,12 @@
+{
+    "group": "find",
+    "id": "find.type-to-find",
+    "note": "A letter typed on home opens Find with it: \"l\" over every group.",
+    "pages": ["pages/machines.find.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "query": "l"
+        }
+    }
+}

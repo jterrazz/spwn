@@ -45,8 +45,6 @@ final class Live: ObservableObject {
             sparkline: { [weak self] on in self?.log("sparkline \(on ? "on" : "off")") },
             quit: { [weak self] in self?.log("quit") },
             openMachine: { [weak self] name in self?.log("open machine \(name)") },
-            openSwitcher: { [weak self] in self?.log("open switcher") },
-            search: { [weak self] text in self?.state.search = text },
             copy: { [weak self] text in self?.log("copy \(text)") },
             window: { [weak self] window in self?.log("window \(window)") },
             push: { [weak self] page in self?.log("push \(page)") },

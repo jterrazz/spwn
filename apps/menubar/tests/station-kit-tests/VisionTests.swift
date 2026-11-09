@@ -22,11 +22,6 @@ final class VisionTests: XCTestCase {
         try drawn("a.home", PanelState(page: try page("a.home"), connection: .live))
     }
 
-    func testTheSwitcherOpen() throws {
-        let home = try page("a.home")
-        try drawn("b.switcher", PanelState(page: home, connection: .live, pushed: try page("b.switcher"), recent: ["infra"]))
-    }
-
     func testAWorkspace() throws {
         try drawn("c.linux-1", PanelState(page: nil, connection: .live, pushed: try page("c.linux-1")))
     }

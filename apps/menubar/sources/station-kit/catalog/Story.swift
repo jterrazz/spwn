@@ -37,10 +37,12 @@ public struct MenuOpen: Codable, Equatable, Sendable {
 public struct FindState: Codable, Equatable, Sendable {
     public var query: String
     public var highlight: Int?
+    public var open: [String]?
 
-    public init(query: String, highlight: Int? = nil) {
+    public init(query: String, highlight: Int? = nil, open: [String]? = nil) {
         self.query = query
         self.highlight = highlight
+        self.open = open
     }
 }
 
@@ -57,6 +59,7 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var menu: MenuOpen?
     public var popover: String?
     public var find: FindState?
+    public var recent: [String]?
     public var scrub: Int?
     public var pending: [String]?
     public var prOpened: [String]?

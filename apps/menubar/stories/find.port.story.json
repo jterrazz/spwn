@@ -1,0 +1,12 @@
+{
+    "group": "find",
+    "id": "find.port",
+    "note": "Find \"5173\": the port it names, its address in mono, the match in t1 semibold.",
+    "pages": ["pages/machines.find.find.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "find": {
+            "query": "5173"
+        }
+    }
+}

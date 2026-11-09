@@ -174,6 +174,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 		}},
 		{FindActions, []findSaid{
 			{"Keep This Mac awake 4 hr", "", "Keep awake", "", ""},
+			{"Awake until linux-1 ends", "", "Keep awake", "", ""},
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
 			{"Restart infra", "asks first", "Restart", "", ""},
@@ -322,5 +323,37 @@ func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
 		if a := actions[row.Verb]; a.Confirm == nil {
 			t.Errorf("%q runs without asking, want its question so the app draws its ellipsis", row.Label)
 		}
+	}
+}
+
+// invariant: SPEC A6 [find.awake]: Find offers to keep This Mac awake until
+// its agent at work ends, which follows that run, and offers it no more
+// once the keep-awake already follows it.
+func TestFindKeepsThisMacAwakeUntilItsAgentAtWorkEnds(t *testing.T) {
+	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"})
+	row := findRow(p, FindActions, "awake-run:linux-1")
+	if row == nil || row.Label != "Awake until linux-1 ends" {
+		t.Fatalf("Find's actions lack Awake until linux-1 ends: %+v", row)
+	}
+	for _, a := range p.Actions {
+		if a.ID == row.Verb && (a.Run == nil || a.Run.Call != CallKeepAwake || a.Run.In["Run"] != "linux-1" || a.Run.In["Lid"] != "true") {
+			t.Errorf("Awake until linux-1 ends runs %+v, want awake.keep following linux-1 with the lid closed as held", a.Run)
+		}
+	}
+	r := findFleet()
+	r.Awake.Session.Run = "linux-1"
+	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindActions, "awake-run:linux-1"); row != nil {
+		t.Errorf("a keep-awake that follows linux-1 is offered again: %+v", row)
+	}
+}
+
+// invariant: a listener reached from outside keeps its address, then says
+// it is public.
+func TestFindSaysAPublicListenersAddressThenPublic(t *testing.T) {
+	r := findFleet()
+	r.Ports.Macs[1].Ports = append(r.Ports.Macs[1].Ports, ports.Port{Machine: machine.Ref{Name: "infra", On: findMini}, Port: 443, Process: "nginx", Reach: ports.Outside})
+	row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindPorts, "listening:infra:443")
+	if row == nil || words(row.Detail) != "infra:443 | public" {
+		t.Errorf("infra's public listener %+v, want infra:443, then public", row)
 	}
 }

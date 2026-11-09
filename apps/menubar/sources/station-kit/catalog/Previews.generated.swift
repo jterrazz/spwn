@@ -66,7 +66,25 @@ import SwiftUI
 
 #Preview("awake.until-run") { StoryStage(Stories["awake.until-run"]) }
 
+#Preview("find.action") { StoryStage(Stories["find.action"]) }
+
+#Preview("find.awake") { StoryStage(Stories["find.awake"]) }
+
+#Preview("find.down") { StoryStage(Stories["find.down"]) }
+
 #Preview("find.empty") { StoryStage(Stories["find.empty"]) }
+
+#Preview("find.keyboard") { StoryStage(Stories["find.keyboard"]) }
+
+#Preview("find.machine") { StoryStage(Stories["find.machine"]) }
+
+#Preview("find.more-open") { StoryStage(Stories["find.more-open"]) }
+
+#Preview("find.nomatch") { StoryStage(Stories["find.nomatch"]) }
+
+#Preview("find.port") { StoryStage(Stories["find.port"]) }
+
+#Preview("find.type-to-find") { StoryStage(Stories["find.type-to-find"]) }
 
 #Preview("home.agent-born") { StoryStage(Stories["home.agent-born"]) }
 

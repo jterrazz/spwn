@@ -15,9 +15,8 @@ public struct TypedField: View {
     @Environment(\.stationStill) private var still
     @Environment(\.colorScheme) private var scheme
 
-    // value: a field that takes the keys as it opens (the switcher's
-    // search), its Up and Down moving through what it finds, its Return
-    // opening it.
+    // value: a field that may take the keys as it opens, its Up and Down
+    // moving through what it lists, its Return picking it.
     public init(_ placeholder: String, text: Binding<String>, symbol: String? = nil, key: String? = nil, autofocus: Bool = false,
                 move: ((Int) -> Void)? = nil, submit: (() -> Void)? = nil) {
         self.placeholder = placeholder

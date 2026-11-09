@@ -101,7 +101,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(),
 		NeverSleeps:   func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		AccountShares: shares, Peer: m.engineAPI(),
-		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageSwitcher: menubar.Switcher(), engine.PageMachine: menubar.Machine(),
+		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageMachine: menubar.Machine(),
 			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity(), engine.PageAccounts: menubar.Accounts(), engine.PageNeeds: menubar.Needs(), engine.PageFind: menubar.Find(), engine.PageAgent: menubar.Agent()},
 		Sample:   live.Sample,
 		Notifier: notifier, Checks: checks, Join: func(parts ...string) string { return strings.Join(parts, token.Sep) },

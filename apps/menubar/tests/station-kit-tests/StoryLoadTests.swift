@@ -38,7 +38,7 @@ final class StoryLoadTests: XCTestCase {
         let story = StoryFile(id: "transition.push", group: .transition, note: "The machine page slides in over Home.",
                               pages: ["pages/menubar.home.two-macs.json", "pages/menubar.mac.mini.json"], ui: ui,
                               samples: ["cpu:mac-mini": 46], play: StoryPlay(from: "home.needs", gesture: "push(mac:mac-mini)"),
-                              freeze: 0.35, heightNote: "the switcher is taller than the prototype's")
+                              freeze: 0.35, heightNote: "the machine page is taller than the prototype's")
         try write(story)
         let loaded = try XCTUnwrap(Stories.load(root: root).first)
         XCTAssertEqual(loaded.file, story)
@@ -92,7 +92,7 @@ final class StoryLoadTests: XCTestCase {
         let mac = try XCTUnwrap(stories["mac.mini.overview"]).state
         XCTAssertEqual(mac.page?.id, PageID.home)
         XCTAssertEqual(mac.pushed?.id, PageID.machine)
-        XCTAssertEqual(try XCTUnwrap(stories["home.needs"]).state.search, "5173")
+        XCTAssertEqual(try XCTUnwrap(stories["home.needs"]).state.find, FindQuery("5173"))
 
         let home = try XCTUnwrap(stories["home.needs"])
         let today = try XCTUnwrap(Snapshot.render(Snapshot.view("home", try Tree.page("menubar.home.two-macs")), scheme: .dark)).bitmap

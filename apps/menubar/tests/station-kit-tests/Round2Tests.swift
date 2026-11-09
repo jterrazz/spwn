@@ -40,7 +40,7 @@ final class Round2Tests: XCTestCase {
         state.say(Status("Update all: done", failed: false), on: nil)
         state.showing(nil)
         XCTAssertNotNil(state.status)
-        state.showing(PageID.switcher)
+        state.showing(PageID.find)
         XCTAssertNil(state.status)
     }
 

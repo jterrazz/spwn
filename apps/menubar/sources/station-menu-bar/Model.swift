@@ -15,8 +15,8 @@ final class Model: ObservableObject {
     // value: the menu bar's own display option, in its macOS user defaults,
     // never in station's preferences.
     static let sparklineKey = "cpuSparkline"
-    // value: the machines last opened, the switcher's Recent: the menu bar's
-    // own, in its macOS user defaults.
+    // value: the machines last opened, Find's Recent (SPEC B5.21): the menu
+    // bar's own, in its macOS user defaults.
     static let recentKey = "recentMachines"
     static let recentKept = 3
     // value: Activity's window last picked, the menu bar's own.
@@ -34,6 +34,7 @@ final class Model: ObservableObject {
     private var clearing: Task<Void, Never>?
     private var watching: Task<Void, Never>?
     private var reviving: Task<Void, Never>?
+    private var finding: Task<Void, Never>?
     private var asked = false
     private var outdated = false
     private(set) var navigation: Navigation!
@@ -68,9 +69,6 @@ final class Model: ObservableObject {
             state.qr = nil
             state.about = nil
             DispatchQueue.main.async { PanelWindow.key(NSApp.windows) }
-        }
-        if page == nil {
-            state.search = ""
         }
     }
 
@@ -115,9 +113,35 @@ final class Model: ObservableObject {
         UserDefaults.standard.set(state.windows, forKey: Self.windowsKey)
     }
 
-    func openSwitcher() {
-        state.recent = UserDefaults.standard.stringArray(forKey: Self.recentKey) ?? []
-        push(PageID.switcher)
+    // invariant: SPEC A6: Find opens in the panel's place over the machines
+    // opened last, its index (`menubar.find`) watched only while it is open;
+    // nil closes it and ends that watch.
+    func find(_ query: FindQuery?) {
+        guard let query else {
+            finding?.cancel()
+            finding = nil
+            state.find = nil
+            state.findIndex = nil
+            return
+        }
+        if state.find == nil || finding == nil {
+            state.recent = UserDefaults.standard.stringArray(forKey: Self.recentKey) ?? []
+            state.confirming = nil
+            watchFind()
+        }
+        state.find = query
+    }
+
+    func watchFind() {
+        finding?.cancel()
+        let sub = Subscription(path: socket, pages: [PageID.find]) { [weak self] event in
+            guard case .page(let page) = event, page.id == PageID.find else { return }
+            Task { @MainActor in
+                guard let self, self.state.find != nil else { return }
+                self.state.findIndex = page
+            }
+        }
+        finding = Task.detached { await sub.run() }
     }
 
     func setSparkline(_ on: Bool) {
@@ -240,6 +264,7 @@ final class Model: ObservableObject {
 
     func closed() {
         open = false
+        find(nil)
         reviving?.cancel()
         reviving = nil
         watching?.cancel()
@@ -259,6 +284,7 @@ final class Model: ObservableObject {
     }
 
     func run(_ action: Action, answers: [String: String]) {
+        if state.find != nil { find(nil) }
         state.running = action.id
         state.settling = nil
         state.status = nil

@@ -39,10 +39,12 @@ extension Story {
     }
 
     public var state: PanelState {
+        let index = pages.first { $0.id == PageID.find }
+        let pages = pages.filter { $0.id != PageID.find }
         let bottom = pages.first
         let over = pages.count > 1 ? pages.last : nil
         var state: PanelState
-        if over == nil, let bottom, bottom.id == PageID.switcher || bottom.id == PageID.machine || bottom.id == PageID.agent {
+        if over == nil, let bottom, bottom.id == PageID.machine || bottom.id == PageID.agent {
             state = PanelState(page: nil, connection: connection, pushed: bottom)
         } else {
             state = PanelState(page: bottom, connection: connection, pushed: over)
@@ -54,7 +56,9 @@ extension Story {
         } else {
             state.qr = ui.popover
         }
-        state.search = ui.find?.query ?? ""
+        state.findIndex = index
+        state.find = ui.find.map { FindQuery($0.query, selected: $0.highlight ?? 0, open: $0.open ?? []) }
+        state.recent = ui.recent ?? []
         state.scrub = ui.scrub
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
@@ -85,7 +89,7 @@ public struct StoryView: View {
         live = story.samples.isEmpty ? nil : Self.live(story.samples)
     }
 
-    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.switcher || page.id == PageID.machine || page.id == PageID.agent }
+    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.machine || page.id == PageID.agent }
 
     public var body: some View {
         SwiftUI.Group {
@@ -149,7 +153,7 @@ public struct StoryView: View {
     var drawn: some View {
         if story.ui.statusItem == true {
             MenuBarStrip(MenuBarIcon.of(connection: state.connection, page: state.page), pressed: story.ui.pressed == true, turn: story.freeze ?? 0)
-        } else if state.pushed != nil || state.page.map(Self.panel) == true {
+        } else if state.find != nil || state.pushed != nil || state.page.map(Self.panel) == true {
             Popover(state, handlers: handlers, scrolls: false)
         } else if let own = MenuPage.view(state, handlers: handlers, scrolls: false) {
             own
