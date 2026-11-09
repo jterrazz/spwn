@@ -769,12 +769,78 @@
       }
     },
     {
+      "label": "Restart mac-mini",
+      "on": "page",
+      "confirm": {
+        "question": "Restart mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It hosts a server. infra is down while mac-mini restarts, about 2 min."
+          }
+        ],
+        "danger": true,
+        "type": "mac-mini",
+        "yes": "Restart mac-mini",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "restart-mac",
+      "run": {
+        "call": "machines.restart-mac",
+        "in": {
+          "Confirm": "yes",
+          "Name": "\"jterrazz-mac-mini\""
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "mac-mini restarts…"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Forget mac-mini",
+      "on": "page",
+      "confirm": {
+        "question": "Forget mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs keep running; station stops showing it. You can add it again."
+          }
+        ],
+        "danger": true,
+        "yes": "Forget mac-mini",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "\"jterrazz-mac-mini\""
+        }
+      }
+    },
+    {
       "label": "More options for mac-mini",
       "on": "page",
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "open-station",
+        "restart-mac",
+        "forget-mac"
       ]
     }
   ],

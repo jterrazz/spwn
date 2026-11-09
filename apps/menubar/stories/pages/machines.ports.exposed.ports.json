@@ -417,16 +417,17 @@
         "linux-1:5173"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 5173?",
+        "question": "Stop sharing linux-1:5173?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -488,16 +489,17 @@
         "linux-1:3000"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 3000?",
+        "question": "Stop sharing linux-1:3000?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -624,16 +626,17 @@
         "linux-3:8080"
       ],
       "confirm": {
-        "question": "Stop sharing linux-3's port 8080?",
+        "question": "Stop sharing linux-3:8080?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,

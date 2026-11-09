@@ -460,8 +460,7 @@ func (f finder) restart(h model.MacView, vm model.VM) entry {
 	case model.Down(vm):
 		row.Detail = page.Text("down")
 	case f.r.Asks != nil:
-		verb.Confirm = ask(f.r.Asks, "restart", machine.Server, vm.Name, "Restart "+vm.Name+"?", "restart")
-		verb.Run.In = answered(verb.Confirm, verb.Run.In)
+		verb = restartServer(vm, model.Label(*f.r.All, h), true).action(f.r.Asks, verb)
 		if verb.Confirm != nil {
 			row.Detail = page.Text("asks first")
 		}

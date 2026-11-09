@@ -1726,6 +1726,18 @@
     {
       "label": "Restart",
       "on": "page",
+      "confirm": {
+        "question": "Restart infra on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
+          }
+        ],
+        "yes": "Restart infra",
+        "no": "Cancel",
+        "icon": "app"
+      },
       "priority": 1,
       "mutates": true,
       "id": "restart",
@@ -1743,20 +1755,18 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop infra?",
+        "question": "Stop infra on mac-mini?",
         "lines": [
           {
             "kind": "text",
-            "text": "It stays stopped until you start it: the engine no longer restarts it."
-          },
-          {
-            "kind": "text",
-            "text": "Type infra to stop it."
+            "text": "infra stays stopped until you start it."
           }
         ],
         "danger": true,
         "type": "infra",
-        "yes": "Stop"
+        "yes": "Stop infra",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,
@@ -1779,16 +1789,14 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type infra to delete it."
+            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports."
           }
         ],
         "danger": true,
         "type": "infra",
-        "yes": "Delete"
+        "yes": "Delete infra",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,

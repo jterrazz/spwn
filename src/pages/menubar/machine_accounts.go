@@ -2,7 +2,6 @@ package menubar
 
 import (
 	"github.com/jterrazz/studio-station/src/accounts"
-	"github.com/jterrazz/studio-station/src/core/machine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 	"strings"
@@ -100,9 +99,9 @@ func takeBacks(m Machine, h model.MacView, vm model.VM) []page.Action {
 	out := make([]page.Action, 0, len(shared))
 	for _, a := range shared {
 		label := accounts.Label(a.Provider)
-		c := ask(m.Asks, "take-back", machine.Workspace, label, "Take back "+label+" from "+vm.Name+"?", "take back", "Its copy on "+vm.Name+" is deleted.")
-		out = append(out, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow, Rows: []string{h.Name + "/" + vm.Name + "/" + a.Provider}, Priority: 4, Mutates: true, Confirm: c,
-			Run: &page.Run{Call: CallTakeBack, In: answered(c, map[string]string{"Account": a.Provider, "From": vm.Name}), Target: target(h)}})
+		out = append(out, takeBack(label, vm.Name, model.Label(*m.All, h)).action(m.Asks, page.Action{ID: ActionTakeBack + "/" + a.Provider, Label: "Take back", On: page.OnRow,
+			Rows: []string{h.Name + "/" + vm.Name + "/" + a.Provider}, Priority: 4, Mutates: true,
+			Run: &page.Run{Call: CallTakeBack, In: map[string]string{"Account": a.Provider, "From": vm.Name}, Target: target(h)}}))
 	}
 	return append(out, vmAccountActions(m, h, vm)...)
 }

@@ -1862,14 +1862,16 @@
       "label": "Stop",
       "on": "page",
       "confirm": {
-        "question": "Stop linux-3?",
+        "question": "Stop linux-3 on mac-mini?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is kept."
+            "text": "Its agent linux-3 stops. Its disk is kept. 1 shared port stops answering until it starts again."
           }
         ],
-        "yes": "Stop"
+        "yes": "Stop linux-3",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 1,
       "mutates": true,
@@ -1893,16 +1895,13 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its disk is erased: nothing of it is kept."
-          },
-          {
-            "kind": "text",
-            "text": "Type linux-3 to delete it."
+            "text": "Its agent linux-3 stops first. This can't be undone. It goes with its disk (40 GB), 1 shared port and 1 lent account."
           }
         ],
         "danger": true,
-        "type": "linux-3",
-        "yes": "Delete"
+        "yes": "Delete linux-3",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,
@@ -1910,6 +1909,7 @@
       "run": {
         "call": "machines.delete",
         "in": {
+          "Confirm": "\"linux-3\"",
           "VM": "linux-3"
         },
         "target": {
@@ -2000,14 +2000,17 @@
         "mac-mini/linux-3/github"
       ],
       "confirm": {
-        "question": "Take back GitHub from linux-3?",
+        "question": "Take GitHub back from linux-3?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its copy on linux-3 is deleted."
+            "text": "linux-3 loses access right away. The GitHub account on mac-mini is untouched."
           }
         ],
-        "yes": "Take back"
+        "danger": true,
+        "yes": "Take back",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 4,
       "mutates": true,
@@ -2162,16 +2165,17 @@
         "linux-3:8080"
       ],
       "confirm": {
-        "question": "Stop sharing linux-3's port 8080?",
+        "question": "Stop sharing linux-3:8080?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,

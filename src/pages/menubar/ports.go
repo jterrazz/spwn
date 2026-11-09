@@ -142,16 +142,6 @@ func declarePublic(l ports.Listing) page.Action {
 func stopSharing(s ports.SharedPort, mac string) page.Action {
 	id := pageports.Row(s).ID
 	port := strconv.Itoa(s.GuestPort)
-	confirm := &page.Confirm{Question: "Stop sharing " + s.VM + "'s port " + port + "?",
-		Lines: []page.Value{page.Text(released(s))},
-		Yes:   "Stop sharing", No: "Cancel", Danger: true}
-	return page.Action{ID: ActionStopSharing + id, Label: "Stop sharing", On: page.OnRow, Rows: []string{id}, Priority: 3, Mutates: true, Confirm: confirm,
-		Run: &page.Run{Call: CallStopSharing, In: map[string]string{"VM": strconv.Quote(s.VM), "Port": strconv.Quote(port), "Mac": strconv.Quote(mac), "Confirm": "yes"}}}
-}
-
-func released(s ports.SharedPort) string {
-	if s.Reserved == 0 {
-		return "Its link stops working on " + catalog.TailnetProduct + "."
-	}
-	return "Its link stops working on " + catalog.TailnetProduct + ", and reserved port " + strconv.Itoa(s.Reserved) + " is let go."
+	return stopShare(s.VM, port).action(yesOrNo, page.Action{ID: ActionStopSharing + id, Label: "Stop sharing", On: page.OnRow, Rows: []string{id}, Priority: 3, Mutates: true,
+		Run: &page.Run{Call: CallStopSharing, In: map[string]string{"VM": strconv.Quote(s.VM), "Port": strconv.Quote(port), "Mac": strconv.Quote(mac)}}})
 }

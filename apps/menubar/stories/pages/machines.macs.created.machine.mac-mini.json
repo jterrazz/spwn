@@ -2493,16 +2493,17 @@
         "awake"
       ],
       "confirm": {
-        "question": "Let mac-mini sleep again?",
+        "question": "Let mac-mini sleep?",
         "lines": [
           {
             "kind": "text",
-            "text": "It hosts infra (server): infra pauses while mac-mini sleeps."
+            "text": "infra pauses while mac-mini sleeps."
           }
         ],
         "danger": true,
-        "yes": "Allow sleep",
-        "no": "Keep it awake"
+        "yes": "Let it sleep",
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 2,
       "mutates": true,
@@ -2565,16 +2566,17 @@
         "linux-3:8080"
       ],
       "confirm": {
-        "question": "Stop sharing linux-3's port 8080?",
+        "question": "Stop sharing linux-3:8080?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -2878,12 +2880,109 @@
       }
     },
     {
+      "label": "Restart mac-mini",
+      "on": "page",
+      "confirm": {
+        "question": "Restart mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "It hosts a server. infra is down while mac-mini restarts, about 2 min."
+          }
+        ],
+        "danger": true,
+        "type": "mac-mini",
+        "yes": "Restart mac-mini",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "restart-mac",
+      "run": {
+        "call": "machines.restart-mac",
+        "in": {
+          "Confirm": "yes",
+          "Name": "\"mac-mini\""
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "mac-mini restarts…"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Stop everything on mac-mini",
+      "on": "page",
+      "confirm": {
+        "question": "Stop every workspace on mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "linux-3, review-bot, linux-4 stop and keep their disk. Servers keep running."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop 3 workspaces",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-all",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      }
+    },
+    {
+      "label": "Forget mac-mini",
+      "on": "page",
+      "confirm": {
+        "question": "Forget mac-mini?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its VMs keep running; station stops showing it. You can add it again."
+          }
+        ],
+        "danger": true,
+        "yes": "Forget mac-mini",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "forget-mac",
+      "run": {
+        "call": "machines.forget",
+        "in": {
+          "Confirm": "yes",
+          "Name": "\"mac-mini\""
+        }
+      }
+    },
+    {
       "label": "More options for mac-mini",
       "on": "page",
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "open-station",
+        "restart-mac",
+        "stop-all",
+        "forget-mac"
       ]
     }
   ],

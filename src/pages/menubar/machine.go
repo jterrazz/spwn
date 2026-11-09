@@ -257,6 +257,10 @@ func macPage(m Machine, h model.MacView) page.Page {
 		p.Actions = append(p.Actions, openIn())
 	}
 	menu.Submenu = append(menu.Submenu, ActionOpenStation)
+	for _, a := range macAlerts(m, h, label) {
+		p.Actions = append(p.Actions, a)
+		menu.Submenu = append(menu.Submenu, a.ID)
+	}
 	p.Actions = append(p.Actions, menu)
 	p.Header.Buttons = append(p.Header.Buttons, ActionMenu)
 	p.Live = pageLive(p)

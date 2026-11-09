@@ -2801,16 +2801,17 @@
         "linux-1:5173"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 5173?",
+        "question": "Stop sharing linux-1:5173?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -2872,16 +2873,17 @@
         "linux-1:3000"
       ],
       "confirm": {
-        "question": "Stop sharing linux-1's port 3000?",
+        "question": "Stop sharing linux-1:3000?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40002 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
@@ -3260,12 +3262,40 @@
       }
     },
     {
+      "label": "Stop everything on This Mac",
+      "on": "page",
+      "confirm": {
+        "question": "Stop every workspace on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "linux-1, agent-7f stop and keep their disk. Awake ends."
+          }
+        ],
+        "danger": true,
+        "yes": "Stop 2 workspaces",
+        "no": "Cancel",
+        "icon": "app"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-all",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      }
+    },
+    {
       "label": "More options for This Mac",
       "on": "page",
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
-        "open-station"
+        "open-station",
+        "stop-all"
       ]
     }
   ],

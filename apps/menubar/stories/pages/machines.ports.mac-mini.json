@@ -299,16 +299,17 @@
         "linux-3:8080"
       ],
       "confirm": {
-        "question": "Stop sharing linux-3's port 8080?",
+        "question": "Stop sharing linux-3:8080?",
         "lines": [
           {
             "kind": "text",
-            "text": "Its link stops working on Tailscale, and reserved port 40001 is let go."
+            "text": "The link stops answering on your tailnet. The service keeps running inside the VM."
           }
         ],
         "danger": true,
         "yes": "Stop sharing",
-        "no": "Cancel"
+        "no": "Cancel",
+        "icon": "app"
       },
       "priority": 3,
       "mutates": true,
