@@ -102,7 +102,7 @@
         {
           "row": {
             "id": "macbook-air",
-            "label": "air",
+            "label": "macbook-air",
             "cells": [
               {
                 "kind": "list",

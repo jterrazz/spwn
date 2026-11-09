@@ -761,12 +761,13 @@ func MacName(name, self string) string {
 	// invariant: how the interface names a Mac (SPEC §2.5): This Mac for the
 	// one this binary runs on, named self, and every other by its name
 	// without the `<user>-` both names start with (`mac-mini` for
-	// `jterrazz-mac-mini`).
+	// `jterrazz-mac-mini`); a self with no name after that word,
+	// `macbook-pro`, has no user in its name, so `macbook-air` stays whole.
 	if name == self && self != "" {
 		return ThisMac
 	}
-	owner, _, ok := strings.Cut(self, "-")
-	if !ok || owner == "" {
+	owner, rest, ok := strings.Cut(self, "-")
+	if !ok || owner == "" || !strings.Contains(rest, "-") {
 		return name
 	}
 	if short, ok := strings.CutPrefix(name, owner+"-"); ok && short != "" {
