@@ -23,7 +23,7 @@ struct AgentPage: View {
     }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/agent/\(page.context?.machine ?? "")", sheet: state.confirming) {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/agent/\(page.context?.machine ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: nil, back: handlers.back, run: tap, open: handlers.push)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

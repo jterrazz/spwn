@@ -240,7 +240,7 @@ public struct Popover: View {
     @ViewBuilder
     var panel: some View {
         if let home {
-            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming) {
+            Panel(insets: .page, bounded: scrolls, key: key, sheet: state.confirming, layers: AlertLayer.layers(home, state, handlers)) {
                 HomeHeaderBar(page: home, state: state, handlers: handlers)
             } content: {
                 VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
@@ -262,7 +262,7 @@ public struct Popover: View {
             .background { BackKey(state: state, handlers: handlers) }
             .environment(\.stationHints, false)
         } else {
-            Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming) {
+            Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming, layers: AlertLayer.layers(state.shown, state, handlers)) {
                 page
             } footer: {
                 statusLine

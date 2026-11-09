@@ -41,7 +41,7 @@ struct MenuPageFrame<Content: View>: View {
     }
 
     var body: some View {
-        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.page?.id ?? "")", sheet: state.confirming) {
+        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.page?.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(state.page, state, handlers)) {
             VStack(alignment: .leading, spacing: Token.Tile.section) {
                 content
             }

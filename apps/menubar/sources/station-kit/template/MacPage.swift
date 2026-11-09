@@ -35,7 +35,7 @@ struct MacPage: View {
     }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming) {
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             header
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

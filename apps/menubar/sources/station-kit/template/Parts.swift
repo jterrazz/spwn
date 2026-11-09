@@ -300,7 +300,8 @@ func perform(_ action: Action, _ handlers: PopoverHandlers) {
     }
 }
 
-// value: the sheet of the action being confirmed, if any, on this page.
+// value: the sheet of the action being confirmed, if any, on this page; a
+// question with no form is the alert layer's (AlertLayer).
 struct SheetFor: View {
     let page: Page
     let state: PanelState
@@ -311,12 +312,6 @@ struct SheetFor: View {
             let answers = Binding(get: { state.answers[id] ?? [:] }, set: { new in for (k, v) in new { handlers.answer(id, k, v) } })
             if let form = action.form {
                 FormSheet(form, run: action.label ?? "", answers: answers) { yes in
-                    handlers.confirm(nil)
-                    if yes { handlers.run(action, state.answers[id] ?? [:]) }
-                }
-            } else if let confirm = action.confirm {
-                let typed = Binding(get: { state.answers[id]?[ActionRunner.typedKey] ?? "" }, set: { handlers.answer(id, ActionRunner.typedKey, $0) })
-                ConfirmSheet(confirm, typed: typed) { yes in
                     handlers.confirm(nil)
                     if yes { handlers.run(action, state.answers[id] ?? [:]) }
                 }
