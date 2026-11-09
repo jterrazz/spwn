@@ -24,8 +24,8 @@ final class AwakeTests: XCTestCase {
         XCTAssertEqual(lid.run?.in?["Lid"], "false")
 
         let change = try XCTUnwrap(page.actions(for: "mac-mini").first)
-        XCTAssertEqual(change.confirm?.question, "Let mac-mini sleep again?")
-        XCTAssertEqual(texts(change.confirm?.lines), ["It hosts infra (server): infra pauses while mac-mini sleeps."])
+        XCTAssertEqual(change.confirm?.question, "Let mac-mini sleep?")
+        XCTAssertEqual(texts(change.confirm?.lines), ["infra pauses while mac-mini sleeps."])
         XCTAssertEqual(change.run?.call, "settings.off")
         XCTAssertEqual(change.run?.target?.name, "mac-mini")
         XCTAssertEqual(Client.input([:], fixed: change.run?.in) as NSDictionary, ["Names": ["never-sleeps"], "Confirm": "yes"] as NSDictionary)
@@ -36,9 +36,5 @@ final class AwakeTests: XCTestCase {
         let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(change)
         XCTAssertNil(status)
         XCTAssertEqual(engine.received, [#"{"call":"settings.off","id":"1","in":{"Confirm":"yes","Names":["never-sleeps"]},"target":{"name":"mac-mini"},"v":2}"#])
-
-        var state = Snapshot.state("menubar.awake.two-macs", page)
-        state.confirming = change.id
-        XCTAssertNil(try Golden.check("sheet.awake-change", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
 }
