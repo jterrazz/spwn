@@ -161,12 +161,16 @@ func TestAnAgentRowSaysWhatItsAgentDoes(t *testing.T) {
 
 // invariant: SPEC A4 Home 4: a server's row says it is healthy, how long
 // it is up and its ports; red while down, its count while it restarts.
+// invariant: a server's ports are those reached beyond it: the tunnel
+// connector's loopback listener inside it is none.
 func TestAServerRowSaysItsHealth(t *testing.T) {
 	w := newHeroWorld()
 	infra := &w.mini().VMs[0]
 	infra.IP, infra.SSH, infra.Guest = "192.168.64.7", true, "connected"
 	w.r.Ports.Macs = []ports.MacPorts{{Name: heroMini, Ports: []ports.Port{
-		{Machine: machine.Ref{Name: "infra", On: heroMini}, Port: 443}, {Machine: machine.Ref{Name: "infra", On: heroMini}, Port: 6443},
+		{Machine: machine.Ref{Name: "infra", On: heroMini}, Port: 443, Reach: ports.Outside},
+		{Machine: machine.Ref{Name: "infra", On: heroMini}, Port: 6443, Reach: ports.Tailnet},
+		{Machine: machine.Ref{Name: "infra", On: heroMini}, Port: 20241, Process: "connector", Reach: ports.ThisMachine},
 	}}}
 	if got := rowWords(homeSection(t, homeOf(t, w), SectionServers)); !reflect.DeepEqual(got, []string{"infra | healthy | up 12 days | 2 ports"}) {
 		t.Fatalf("healthy %q", got)

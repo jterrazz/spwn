@@ -307,7 +307,7 @@ func (f finder) ports() []entry {
 	}
 	for _, h := range f.r.Ports.Macs {
 		for _, p := range h.Ports {
-			if p.Machine.On == "" {
+			if p.Machine.On == "" || p.Reach == ports.ThisMachine {
 				continue
 			}
 			addr := p.Key()

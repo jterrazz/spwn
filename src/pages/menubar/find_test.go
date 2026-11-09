@@ -357,3 +357,13 @@ func TestFindSaysAPublicListenersAddressThenPublic(t *testing.T) {
 		t.Errorf("infra's public listener %+v, want infra:443, then public", row)
 	}
 }
+
+// invariant: a listener bound to its VM's loopback is reached from that VM
+// only: Find offers no Share for it.
+func TestFindOffersNoShareOfAListenerOnItsVMsLoopback(t *testing.T) {
+	r := findFleet()
+	r.Ports.Macs[1].Ports = append(r.Ports.Macs[1].Ports, ports.Port{Machine: machine.Ref{Name: "linux-3", On: findMini}, Port: 20241, Process: "connector", Reach: ports.ThisMachine})
+	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindPorts, "listening:linux-3:20241"); row != nil {
+		t.Errorf("linux-3's loopback listener %+v, want no entry", row)
+	}
+}
