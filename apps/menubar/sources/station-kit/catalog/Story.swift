@@ -59,6 +59,7 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var prOpened: [String]?
     public var reply: String?
     public var hud: String?
+    public var tooltip: String?
     public var statusItem: Bool?
     public var pressed: Bool?
 

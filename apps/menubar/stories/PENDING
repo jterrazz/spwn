@@ -59,12 +59,6 @@ menu.new-vm.create
 menu.new-agent.on
 menu.lend.to
 menu.share-port.of
-pop.qr
-pop.qr.public
-pop.info
-pop.tooltip
-pop.hud.copy
-pop.hud.terminal
 find.empty
 find.down
 find.port

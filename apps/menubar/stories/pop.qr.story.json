@@ -1,0 +1,11 @@
+{
+    "group": "pop",
+    "heightNote": "the page under the popover is linux-1's page since A2, its Agents card in place of the prototype's Now card; the popover adds no height",
+    "id": "pop.qr",
+    "note": "linux-1's Vite link as a QR over its row: scan with your phone, linux-1:5173, it opens on any device of your tailnet, Copy, Open, Stop sharing.",
+    "pages": ["pages/machines.ports.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "popover": "http://macbook-pro.tail77a797.ts.net:40001"
+    }
+}

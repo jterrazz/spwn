@@ -1,0 +1,11 @@
+{
+    "group": "pop",
+    "heightNote": "the HUD is drawn above the panel, 34 pt and 8 pt apart; the panel under it is linux-1's page since A2, its Agents card in place of the prototype's Now card",
+    "id": "pop.hud.terminal",
+    "note": "The HUD once Open in Terminal opened linux-1: linux-1 opened in Terminal, over linux-1's page.",
+    "pages": ["pages/machines.ports.machine.linux-1.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "hud": "open-station"
+    }
+}

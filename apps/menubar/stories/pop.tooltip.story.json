@@ -1,0 +1,16 @@
+{
+    "group": "pop",
+    "id": "pop.tooltip",
+    "note": "Home with the Ports tile's tooltip kept inside the panel: 5 shared · ⌘P.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "tooltip": "menubar.ports"
+    }
+}

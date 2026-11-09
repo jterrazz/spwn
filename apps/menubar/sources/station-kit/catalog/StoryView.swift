@@ -1,6 +1,13 @@
 import SwiftUI
 
 extension Story {
+    public static let about = "about:"
+
+    public var hud: HUDNotice? {
+        guard let id = ui.hud, let action = state.shown?.action(id) else { return nil }
+        return HUDNotice(action)
+    }
+
     public var connection: Connection {
         switch ui.connection {
         case "stopped": .stopped
@@ -21,7 +28,11 @@ extension Story {
         }
         let ui = ui
         state.confirming = ui.alert
-        state.qr = ui.popover
+        if let popover = ui.popover, popover.hasPrefix(Story.about) {
+            state.about = String(popover.dropFirst(Story.about.count))
+        } else {
+            state.qr = ui.popover
+        }
         state.menu = ui.menu?.id == "station"
         state.search = ui.find?.query ?? ""
         state.scrub = ui.scrub
@@ -55,11 +66,25 @@ public struct StoryView: View {
 
     public var body: some View {
         if let live {
-            drawn.environment(\.stationSamples, story.samples).environment(\.stationLive, live)
+            topped.environment(\.stationSamples, story.samples).environment(\.stationLive, live)
         } else {
-            drawn
+            topped
         }
     }
+
+    @ViewBuilder
+    var topped: some View {
+        if let hud = story.hud {
+            VStack(spacing: Token.Metric.HUD.above) {
+                HUDCapsule(hud).fixedSize()
+                tipped
+            }
+        } else {
+            tipped
+        }
+    }
+
+    var tipped: some View { drawn.environment(\.stationTooltip, story.ui.tooltip) }
 
     // value: the measure a CPU's live key starts with (`cpu:`, `cpuh:`).
     static let cpu = "cpu"
