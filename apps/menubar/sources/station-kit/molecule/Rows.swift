@@ -97,6 +97,7 @@ public struct NeedRow: View {
         .modifier(RowSurface(height: Token.Metric.Need.height, padding: Token.Metric.Need.padding, tinted: row.nav != nil && (hovering || highlighted || keyed)))
         .onHover { hovering = $0 }
         .modifier(RowFocus(id: row.id, navigable: row.nav != nil || row.verb != nil))
+        .caughtRow(row.id)
     }
 }
 

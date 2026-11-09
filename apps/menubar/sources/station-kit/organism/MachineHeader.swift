@@ -14,6 +14,7 @@ public struct MachineHeader: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
     @Environment(\.stationMenuPick) private var menuPick
+    @Environment(\.stationCaught) private var caught
 
     public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }, open: @escaping (String) -> Void = { _ in }) {
         self.page = page
@@ -84,7 +85,7 @@ public struct MachineHeader: View {
             .frame(height: m.title)
             FactsLine(Self.facts(page), open: open).padding(.top, m.factsTop)
             if let segments = page.segments, !segments.isEmpty {
-                Segmented(options: segmented(segments), keys: segments.map(\.key))
+                Segmented(options: segmented(segments), keys: segments.map(\.key), leaving: caught?.segment.flatMap { from in segments.firstIndex { $0.id == from } })
                 .padding(.top, m.segmentsTop)
             }
         }

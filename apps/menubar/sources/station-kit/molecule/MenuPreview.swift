@@ -147,7 +147,7 @@ public struct MenuStage: View {
         MenuPlacement(x: popup ? anchor.minX : page ? anchor.maxX : anchor.minX + Token.MenuPreview.inset,
                       y: page || popup ? anchor.maxY + Token.MenuPreview.inset : anchor.minY + Token.MenuPreview.pointer,
                       trailing: page && !popup, entry: sub.map { MenuPreview.top(of: $0.id, in: model) - Token.Metric.Menu.padding } ?? 0) {
-            MenuPreview(model, open: child)
+            MenuPreview(model, open: child).modifier(CaughtMenu(anchor: page && !popup ? .topTrailing : .topLeading))
             if let sub { MenuPreview(MenuModel(header: nil, items: sub.submenu)) }
         }
         .frame(width: size.width, height: size.height)
