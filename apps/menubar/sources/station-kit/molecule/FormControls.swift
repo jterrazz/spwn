@@ -49,11 +49,13 @@ public struct PopupField: View {
 
     var face: some View {
         HStack(spacing: S.popupGap) {
+            if let glyph = chosen?.glyph { OptionGlyph(glyph) }
             RoleText(chosen?.label ?? "", .formValue)
-            if let note = chosen?.note { RoleText(note, .formNote) }
+            if let note = chosen?.note { RoleText(answers.fill(note), .formNote) }
             Image(systemName: Token.Symbol.popup).font(.system(size: S.chevron, weight: .semibold)).foregroundStyle(tokens.color.t2)
         }
         .modifier(FieldBox())
+        .menuAnchor(SheetAnchor.field(field.key ?? ""))
     }
 
     public var body: some View {
@@ -61,8 +63,8 @@ public struct PopupField: View {
             face
         } else {
             Menu {
-                ForEach(Array((field.options ?? []).enumerated()), id: \.offset) { _, o in
-                    Button([o.label, o.note ?? o.disabled].compactMap { $0 }.joined(separator: "  ")) { pick(o.value ?? "") }.disabled(o.disabled != nil)
+                ForEach(Array(MenuModel.popup(field, answers).items.enumerated()), id: \.offset) { _, item in
+                    Button([item.title, item.note].compactMap { $0 }.joined(separator: "  ")) { pick(item.id) }.disabled(!item.enabled)
                 }
             } label: { face }
                 .menuStyle(.button).buttonStyle(.plain).fixedSize()
@@ -270,7 +272,7 @@ public struct SplitButton: View {
             .keyboardShortcut(.defaultAction)
             Rectangle().fill(tokens.onTint.opacity(Token.Fade.disabled)).frame(width: S.splitDivider, height: c.height)
             if still || items.isEmpty {
-                arrow
+                arrow.menuAnchor(SheetAnchor.split)
             } else {
                 Menu {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, a in

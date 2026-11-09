@@ -501,6 +501,11 @@ type Run struct {
 	// on what the call made (Create and Open in Terminal); its words may
 	// name an answer, as a Form's notes do.
 	Then *Run `json:"then,omitempty"`
+	// value: the calls a sheet makes after this one, in turn (Clean up's
+	// delete on each Mac, then each agent forgotten): each is sent only the
+	// answers its In names, its fixed value narrowed to what the owner
+	// left checked, and a call left with nothing is not made.
+	And []Run `json:"and,omitempty"`
 }
 
 type Target struct {
@@ -539,6 +544,8 @@ type Form struct {
 type Primary struct {
 	When  *When  `json:"when,omitempty"`
 	Label string `json:"label,omitempty"`
+	// value: the wording is red: what it runs deletes (Delete 1 throwaway).
+	Danger bool `json:"danger,omitempty"`
 }
 
 type When struct {
@@ -547,6 +554,9 @@ type When struct {
 	// value: shown while Key holds any answer at all (Lend for, once an
 	// account is checked), whatever Value says.
 	Set bool `json:"set,omitempty"`
+	// value: shown while Key holds exactly this many answers (Clean up's
+	// button worded from how many are checked).
+	Count int `json:"count,omitempty"`
 }
 
 type Field struct {
@@ -576,6 +586,12 @@ type Field struct {
 	// them runs nothing and the HUD says TakenHud.
 	Taken    []string `json:"taken,omitempty"`
 	TakenHud string   `json:"taken_hud,omitempty"`
+	// value: the field whose answers carry some of this one's: an option
+	// whose Of is checked there is checked too, and dimmed (a finished
+	// agent goes with the throwaway it ran in).
+	Follows string `json:"follows,omitempty"`
+	// value: a command field's command, the owner's to run, copied.
+	Hint *Hint `json:"hint,omitempty"`
 }
 
 type FieldKind string
@@ -589,6 +605,16 @@ const (
 	FieldSegmented  FieldKind = "segmented"
 	FieldSlider     FieldKind = "slider"
 	FieldDisclosure FieldKind = "disclosure"
+	// value: one answer picked from a list of rows (Lend an account's
+	// accounts), each its glyph, its label and its note.
+	FieldPick FieldKind = "pick"
+	// value: rows whose button runs the action each option's value names
+	// (Share a port's listeners); Note is the line said when none is.
+	FieldRows FieldKind = "rows"
+	// value: a command to copy (a hint's), its lead line the Note.
+	FieldCommand FieldKind = "command"
+	// value: a line the sheet says, its Note (what Clean up leaves).
+	FieldNote FieldKind = "note"
 )
 
 type Option struct {
@@ -596,6 +622,9 @@ type Option struct {
 	Label    string `json:"label,omitempty"`
 	Note     string `json:"note,omitempty"`
 	Disabled string `json:"disabled,omitempty"`
+	Glyph    Glyph  `json:"glyph,omitzero"`
+	// value: the answer of its field's Follows this option goes with.
+	Of string `json:"of,omitempty"`
 }
 
 type Strip struct {

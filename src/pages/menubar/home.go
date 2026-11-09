@@ -74,10 +74,15 @@ func homeSections(r Reading, self string, upkeep []Need) ([]page.Section, []page
 			}
 		}
 	}
-	for _, m := range r.All.Macs {
-		if slices.ContainsFunc(m.VMs, model.VM.Finished) {
-			actions = append(actions, h.cleanup(m))
+	every, cleans := cleanupsOf(r.All.Macs, r.Agents), false
+	for _, c := range every {
+		if len(c.finished) > 0 || slices.ContainsFunc(c.mac.VMs, model.VM.Finished) {
+			actions = append(actions, cleanupSheet(ActionCleanup+":"+c.mac.Name, *r.All, []cleanupOf{c}, h.now, true))
 		}
+		cleans = cleans || c.any()
+	}
+	if cleans {
+		actions = append(actions, cleanupSheet(ActionCleanup, *r.All, every, h.now, false))
 	}
 	return sections, actions
 }
@@ -350,15 +355,6 @@ func (h homeReading) stale(m model.MacView) bool {
 	return !m.Asleep && model.Unheard(m, h.now)
 }
 
-// value: Clean up on a finished agent's row: the finished throwaways of
-// its Mac, asked as that Mac's page asks it.
-func (h homeReading) cleanup(m model.MacView) page.Action {
-	label := model.Label(*h.r.All, m)
-	c := &page.Confirm{Question: "Delete the finished throwaways on " + label + "?", Lines: []page.Value{page.Text("Each goes with its disk, its ports and the accounts shared with it.")}, Yes: "Delete"}
-	return page.Action{ID: ActionCleanup + ":" + m.Name, Label: "Clean up", On: page.OnRow, Priority: 3, Mutates: true, Confirm: c,
-		Run: &page.Run{Call: CallCleanup, In: answered(c, map[string]string{}), Target: target(m)}}
-}
-
 // invariant: SPEC A4 Home 4: one row per server: healthy with its time up
 // and its ports, red while down, its ring while it restarts, hollow while
 // its Mac is checked; no uptime strip.
@@ -440,7 +436,7 @@ func (h homeReading) macs() (page.Section, []page.Action) {
 	}
 	if len(h.r.All.Macs) == 1 {
 		s.Items = append(s.Items, page.Item{Row: &page.Row{ID: RowAddMac, Label: "Add a Mac to run VMs on it", Mark: page.OK, Glyph: symbol("plus", page.SignalActive), Verb: ActionAddMac}})
-		actions = append(actions, page.Action{ID: ActionAddMac, Label: "Add a Mac", On: page.OnRow, Rows: []string{RowAddMac}, Priority: 4, Sheet: page.SheetHint + RowAddMac})
+		actions = append(actions, addMacHint(page.Action{ID: ActionAddMac, Label: "Add a Mac", On: page.OnRow, Rows: []string{RowAddMac}, Priority: 4}))
 	}
 	return s, actions
 }

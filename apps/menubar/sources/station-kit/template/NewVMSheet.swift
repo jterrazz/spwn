@@ -37,7 +37,7 @@ public struct NewVMSheet: View {
             HStack {
                 PanelButton("Cancel") { handlers.confirm(nil) }.keyboardShortcut(.cancelAction)
                 Spacer(minLength: 0)
-                SplitButton(form.primary?.first?.label ?? action.label ?? "", items: (form.split ?? []).compactMap(page.action), run: { create(action) }, other: create)
+                SplitButton(form.primary?.first?.label ?? action.label ?? "", items: MenuModel.split(action, page: page).items.compactMap { item in item.action.map { var a = $0; a.label = item.title; return a } }, run: { create(action) }, other: create)
             }
         }
     }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/agents"
+	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/engine/feeds"
 	"github.com/jterrazz/studio-station/src/machines"
@@ -55,4 +56,30 @@ func TestAnAgentNoMachineHoldsIsSaidSo(t *testing.T) {
 	t.Cleanup(cancel)
 	pages := feeds.Menubar{Calls: agentWorld(), Clock: newSteps()}.Agent()(ctx, engine.FeedInput{Subject: "ghost"})
 	until(t, pages, "no agent named ghost", func(p page.Page) bool { return p.Error != nil && p.Error.Message == "no agent is named ghost" })
+}
+
+// invariant: SPEC A5 Clean up (A2): Home forgets a finished agent by its
+// own name, read from the fleet's agents, though it shares its VM with a
+// working one.
+func TestHomesCleanUpForgetsAFinishedAgentByItsOwnName(t *testing.T) {
+	w := agentWorld()
+	w.agents[0].State, w.agents[0].Ask = agents.Working, nil
+	w.agents[1].State = agents.Finished
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac}, Report: func(awake.View) *awake.Report { return nil }}
+	pages := o.Feed()(ctx, engine.FeedInput{Changed: make(chan struct{}), Refresh: make(chan struct{}), Awake: func() awake.View { return awake.View{} }})
+	until(t, pages, "Clean up forgetting docs-bot", func(p page.Page) bool {
+		for _, a := range p.Actions {
+			if a.ID != "cleanup" || a.Run == nil {
+				continue
+			}
+			for _, r := range append([]page.Run{*a.Run}, a.Run.And...) {
+				if r.Call == "agents.forget" && r.In["Agent"] == "docs-bot" && r.Target != nil && r.Target.Name == "linux-1" {
+					return true
+				}
+			}
+		}
+		return false
+	})
 }

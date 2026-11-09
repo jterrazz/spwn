@@ -300,7 +300,9 @@ func (b *portsBody) exposedRow(p ports.Port, h ports.MacPorts, self string) page
 	}
 	show := review(machine, []string{key})
 	show.ID, show.Label = ActionShowProcess+key, "Show process"
-	row.Menu = []string{ActionDeclarePublic, show.ID}
+	declare := declareHint(p, h.Name, self)
+	row.Menu = []string{declare.ID, show.ID}
+	b.act(declare)
 	b.act(show)
 	return page.Item{Row: &row}
 }

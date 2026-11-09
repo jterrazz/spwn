@@ -3240,21 +3240,44 @@
       "mutates": true,
       "id": "share-account",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": ""
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "required": true
+            "kind": "select",
+            "default": "share-account",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
             "required": true
           },
           {
@@ -3264,23 +3287,44 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
       },
-      "sheet": "share-account"
+      "sheet": "share-account",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with "
+          }
+        ]
+      }
     },
     {
       "key": "cmd+t",

@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/agents"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -175,12 +177,19 @@ func (f *menubar) remote(ctx context.Context, in engine.FeedInput) {
 		fl, sv, ferr, serr := f.read(ctx, false)
 		macs, away := f.awake(ctx, fl), f.away(ctx, fl)
 		shared := f.o.everyMacAccounts(ctx, fl, "")
+		kept, aerr := call.Invoke(ctx, f.o.Calls, machine.Ref{}, agentscalls.List, agentscalls.ListIn{}, nil)
 		f.update(ctx, func(r *pagemenubar.Reading) {
 			if ferr == nil {
 				r.All = &fl
 				r.Macs = macs
 				r.Away = away
 				r.Accounts = &shared
+			}
+			if aerr == nil {
+				r.Agents = kept
+				if r.Agents == nil {
+					r.Agents = []agents.Agent{}
+				}
 			}
 			if serr == nil {
 				r.Ports = &sv

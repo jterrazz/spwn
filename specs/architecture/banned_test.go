@@ -45,7 +45,7 @@ func bannedWords() []banned {
 		{word: "service", forms: []string{"services"}},
 		{word: "lease", forms: []string{"leases", "leased"}},
 		{word: "publish", forms: []string{"published", "publishes", "publishing"}},
-		{word: "lend", forms: []string{"lent", "lends", "lending"}, allowed: []string{"lend an account", "lent to"}},
+		{word: "lend", forms: []string{"lent", "lends", "lending"}, allowed: []string{"lend an account", "lent to", "lend {account} for"}},
 		{word: "recall", forms: []string{"recalled", "recalls"}},
 		{word: "wish", forms: []string{"wishes"}},
 		{word: "probe", forms: []string{"probes", "probed"}},

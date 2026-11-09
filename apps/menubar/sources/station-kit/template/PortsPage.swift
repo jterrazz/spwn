@@ -310,8 +310,9 @@ struct AllPorts: View {
     func tap(_ action: Action) { perform(action, handlers) }
 
     var body: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")/\(page.context?.machine ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
-            MachineHeader(page, segment: nil, back: handlers.back, run: tap)
+        let layer = SheetLayer.of(page, state, handlers)
+        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")/\(page.context?.machine ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+            MachineHeader(page, segment: nil, back: handlers.back, run: tap).modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                 ForEach(Array((page.sections ?? []).filter { $0.id != "summary" }.enumerated()), id: \.offset) { _, s in
@@ -319,11 +320,13 @@ struct AllPorts: View {
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
+            .modifier(UnderSheet(layer != nil))
         } footer: {
             VStack(spacing: Token.Metric.Ports.footerGap) {
                 if let status = state.status { StatusBar(status.line, failed: status.failed) }
                 footer
             }
+            .modifier(UnderSheet(layer != nil))
         }
         .background { BackKey(state: state, handlers: handlers) }
         .environment(\.stationHints, false)

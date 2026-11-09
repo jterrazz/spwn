@@ -48,7 +48,8 @@ final class PortsTests: XCTestCase {
 
     // invariant: SPEC A4: a running workspace's Overview has its Ports
     // card, its shares then its first listener with Share, and its menu
-    // offers Share a port…, Stop… and Delete…, each its own call.
+    // offers Share a port… (its sheet), Stop… and Delete…, each its own
+    // call.
     func testAWorkspaceKeepsItsPortsAndItsVerbs() throws {
         let page = try Tree.page("menubar.vm.linux-1")
         let card = try XCTUnwrap(page.section("ports"))
@@ -57,7 +58,7 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(card.rows.map(\.label), ["Vite", "Port 7000"])
         XCTAssertEqual(PortRow.menu(card.rows[0], in: page.actions ?? []).last??.run?.call, "ports.stop-sharing")
         let items = MenuModel.page(page).items.filter { ["Share a port…", "Stop…", "Delete…"].contains($0.title) }
-        XCTAssertEqual(items.map { $0.action?.run?.call }, ["ports.share", "machines.stop", "machines.delete"])
+        XCTAssertEqual(items.map { $0.action?.run?.call ?? $0.action?.sheet }, ["share-port", "machines.stop", "machines.delete"])
     }
 
     // invariant: PO-34: mac-mini's Ports: what is exposed first, then
@@ -117,7 +118,7 @@ final class PortsTests: XCTestCase {
         let page = try Tree.page("menubar.ports.mini")
         let red = try XCTUnwrap(page.section("exposed")?.rows.first)
         let show = try XCTUnwrap(page.action(red.menu?.last ?? ""))
-        XCTAssertEqual(red.menu?.first, "declare-public")
+        XCTAssertEqual(page.action(red.menu?.first ?? "")?.form?.fields?.first?.hint?.command, "station ports declare mac-mini 5000 --via <route>")
         XCTAssertEqual(show.label, "Show process")
         let calls = Recorded()
         let status = await ActionRunner(executable: "/u/bin/station", socket: "/nonexistent", launcher: RecordingLauncher(calls: calls)).run(show)

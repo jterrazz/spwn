@@ -358,6 +358,8 @@ public struct Run: Codable, Equatable, Sendable {
     public var copy: String?
     public var open: String?
     public var then: Then?
+    // value: the calls a sheet makes after this one, in turn (Go's Run.And).
+    public var and: [Run]?
 }
 
 // value: what runs once a call returned well (Go's Run.Then): a terminal
@@ -395,12 +397,14 @@ public struct Form: Codable, Equatable, Sendable {
 public struct Primary: Codable, Equatable, Sendable {
     public var when: When?
     public var label: String?
+    public var danger: Bool?
 }
 
 public struct When: Codable, Equatable, Sendable {
     public var key: String?
     public var value: String?
     public var set: Bool?
+    public var count: Int?
 }
 
 public struct Field: Codable, Equatable, Sendable {
@@ -420,6 +424,8 @@ public struct Field: Codable, Equatable, Sendable {
     public var swaps: Bool?
     public var taken: [String]?
     public var taken_hud: String?
+    public var follows: String?
+    public var hint: Hint?
 }
 
 public struct Option: Codable, Equatable, Sendable {
@@ -427,6 +433,8 @@ public struct Option: Codable, Equatable, Sendable {
     public var label: String?
     public var note: String?
     public var disabled: String?
+    public var glyph: Glyph?
+    public var of: String?
 }
 
 public struct Strip: Codable, Equatable, Sendable {

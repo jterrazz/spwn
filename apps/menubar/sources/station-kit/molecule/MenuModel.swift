@@ -15,6 +15,9 @@ public struct MenuItem: Equatable, Sendable {
     public var action: Action?
     // value: the link a QR item shows, the one its row opens or copies.
     public var link: String?
+    // value: the grey words on its right in a popup (a Mac's free memory,
+    // a workspace's Mac), in the page's words.
+    public var note: String?
 
     public var separator: Bool { id == MenuModel.separator }
 
@@ -86,6 +89,31 @@ public struct MenuModel: Equatable, Sendable {
               let head = action(menu + ":" + key, in: actions) else { return MenuModel(header: nil, items: []) }
         return list(head.submenu ?? [], actions: actions)
     }
+
+    // value: a sheet's popup: each option, the one answered checked, one
+    // it cannot take off with its reason as its note.
+    public static func popup(_ field: Field, _ answers: Answers) -> MenuModel {
+        let items = (field.options ?? []).map { o in
+            MenuItem(id: o.value ?? "", title: o.label ?? "", destructive: false, enabled: o.disabled == nil,
+                     checked: o.value == answers.value(field), submenu: [], note: (o.disabled ?? o.note).map(answers.fill))
+        }
+        return MenuModel(header: nil, items: items)
+    }
+
+    // value: a split button's menu: its own action first, worded as its
+    // button, then each other way, each with its key.
+    public static func split(_ action: Action, page: Page) -> MenuModel {
+        let actions = page.actions ?? []
+        let own = MenuItem(id: action.id ?? "", title: action.form?.primary?.first?.label ?? action.label ?? "", icon: action.icon, key: splitKey,
+                           destructive: false, enabled: true, checked: false, submenu: [], action: action)
+        let others = (action.form?.split ?? []).compactMap { id -> MenuItem? in
+            guard let a = MenuModel.action(id, in: actions) else { return nil }
+            return MenuItem(id: id, title: a.label ?? "", icon: a.icon, key: a.key, destructive: false, enabled: a.disabled == nil, checked: false, submenu: [], action: a)
+        }
+        return MenuModel(header: nil, items: [own] + others)
+    }
+
+    static let splitKey = "enter"
 
     // value: a page's More menu.
     public static func page(_ page: Page) -> MenuModel {

@@ -246,7 +246,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 		case section.Settings:
 			row(n.Text+" on "+label, strings.ToLower(n.Text), VerbHowTo)
 			item.Glyph = symbol("shield", page.SignalWaits)
-			item.Verb.Sheet = page.SheetHint + n.Subject
+			item.Verb = settingHint(item.Verb, n.Subject)
 			if n.Path != "" {
 				item.Detail = []string{"station never changes it for you"}
 			}

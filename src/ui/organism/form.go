@@ -85,7 +85,7 @@ func unfolded(fields []page.Field) []page.Field {
 func Field(f page.Field) (field huh.Field, read func() string) {
 	value := f.Default
 	switch f.Kind {
-	case page.FieldSelect, page.FieldSegmented:
+	case page.FieldSelect, page.FieldSegmented, page.FieldPick:
 		if value == "" && len(f.Options) > 0 {
 			value = f.Options[0].Value
 		}
@@ -137,6 +137,14 @@ func Field(f page.Field) (field huh.Field, read func() string) {
 		return c, func() string { return strconv.FormatBool(answer) }
 	case page.FieldSecret:
 		return input(f, &value).EchoMode(huh.EchoModePassword), func() string { return value }
+	case page.FieldCommand, page.FieldNote, page.FieldRows:
+		// value: what a sheet only says (its line, a hint's command, what
+		// listens) is a note in the terminal, answering nothing.
+		said := f.Note
+		if f.Hint != nil {
+			said = strings.TrimSpace(said + "\n" + f.Hint.Command)
+		}
+		return huh.NewNote().Title(f.Label).Description(said), func() string { return "" }
 	case page.FieldText, page.FieldSlider, page.FieldDisclosure:
 	}
 	return input(f, &value), func() string { return value }

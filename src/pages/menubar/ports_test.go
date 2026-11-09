@@ -163,8 +163,8 @@ func TestAPortOfADownServerIsUnreachableAndRunsNothing(t *testing.T) {
 }
 
 // invariant: the exposed card names the app that listens and where, and
-// offers Declare public... and Show process, a terminal on station ports
-// of that Mac.
+// offers Declare public..., the hint that names that port's declare leaf,
+// and Show process, a terminal on station ports of that Mac.
 func TestAnExposedPortOffersDeclarePublicAndItsProcess(t *testing.T) {
 	f := portFleet()
 	f.Macs[1].Ports = append(f.Macs[1].Ports, ports.Port{Machine: coremachine.Ref{Name: miniMac}, Port: 10250, Process: "kubelet", Binds: []string{"*"}, Reach: ports.Outside})
@@ -174,15 +174,20 @@ func TestAnExposedPortOffersDeclarePublicAndItsProcess(t *testing.T) {
 		t.Fatalf("exposed %+v", rows)
 	}
 	got := make([][]string, 0, len(rows))
+	lines := make([]string, 0, len(rows))
 	for _, r := range rows {
-		show := action(p, r.Menu[1])
-		if r.Menu[0] != ActionDeclarePublic || show == nil || show.Label != "Show process" {
+		declare, show := action(p, r.Menu[0]), action(p, r.Menu[1])
+		if declare == nil || declare.Sheet != page.SheetHint+HintDeclarePublic || show == nil || show.Label != "Show process" {
 			t.Fatalf("%s offers %q", r.ID, r.Menu)
 		}
+		lines = append(lines, declare.Form.Fields[0].Hint.Command)
 		got = append(got, show.Run.Argv)
 	}
 	if want := [][]string{{"ports"}, {"ports", "--on", miniMac}}; !slices.EqualFunc(got, want, slices.Equal) {
 		t.Fatalf("Show process runs %q, want %q", got, want)
+	}
+	if want := []string{"station ports declare 5000 --via <route>", "station ports declare " + miniMac + " 10250 --via <route>"}; !slices.Equal(lines, want) {
+		t.Fatalf("Declare public names %q, want %q", lines, want)
 	}
 }
 

@@ -1,11 +1,11 @@
 package menubar
 
 import (
-	"slices"
 	"strconv"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
 	pageports "github.com/jterrazz/studio-station/src/pages/ports"
 	"github.com/jterrazz/studio-station/src/ports"
@@ -30,6 +30,9 @@ type PortsOf struct {
 	// value: the hour the page is read at: a share of the last few
 	// seconds is fresh against it.
 	Now time.Time
+	// value: the machines as read, whose running workspaces a port may
+	// be shared from; nil, those whose listeners the page lists.
+	Machines *model.AllMachines
 }
 
 func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
@@ -65,37 +68,24 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 	} else if sc.Mac == "" || sc.Mac != thisMac.Machine {
 		full = append(full, "--on", of.Machine)
 	}
-	for _, a := range []page.Action{declarePublic(l), shareAPort(l, sc),
+	var running []workspace
+	if of.Machines != nil {
+		running = runningWorkspaces(*of.Machines)
+	}
+	to := shareTargets(running, b.Listeners, sc)
+	if len(to) == 0 {
+		to = []workspace{{}}
+	}
+	for _, a := range sharePortSheets(b.Listeners, to, sc.Self) {
+		b.act(a)
+	}
+	for _, a := range []page.Action{declarePublic(l),
 		{ID: ActionFullList, Label: "Full list in Terminal", On: page.OnPage, Run: &page.Run{Terminal: true, Argv: full}},
 		{ID: ActionMenu, Label: "More options for Ports", Icon: "ellipsis", On: page.OnPage, Submenu: []string{ActionShare, ActionDeclarePublic}}} {
 		b.act(a)
 	}
 	p.Actions = b.Actions
 	return page.Seal(portsMenu(p))
-}
-
-// value: Share a port…: the workspaces whose listeners are not shared, and
-// the port to share; ports.share on the Mac of the workspace picked.
-func shareAPort(l ports.Listing, sc portsScope) page.Action {
-	var opts []page.Option
-	for _, h := range l.AllMachines.Macs {
-		for _, p := range h.Ports {
-			if p.Machine.On == "" || p.Device || !sc.holds(h, p.Machine.Name) {
-				continue
-			}
-			if !slices.ContainsFunc(opts, func(o page.Option) bool { return o.Value == p.Machine.Name }) {
-				opts = append(opts, page.Option{Value: p.Machine.Name, Label: p.Machine.Name})
-			}
-		}
-	}
-	form := &page.Form{Title: "Share a port", Subtitle: "Private on your tailnet.", Fields: []page.Field{
-		{Key: "VM", Label: "Of", Kind: page.FieldSelect, Options: opts, Required: true},
-		{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"},
-	}}
-	if len(opts) > 0 {
-		form.Fields[0].Default = opts[0].Value
-	}
-	return page.Action{ID: ActionShare, Label: "Share a port", On: page.OnPage, Priority: 3, Mutates: true, Sheet: page.SheetSharePort, Form: form, Run: &page.Run{Call: CallSharePort}}
 }
 
 func review(machine string, rows []string) page.Action {

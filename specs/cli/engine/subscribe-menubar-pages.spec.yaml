@@ -30,5 +30,5 @@ runs:
           ["menubar.find",["machines","actions","sections"],null]
           Over the last 6 min
           Over the last 24 h
-          [["declare-public","ports.declare"],["share-port","ports.share"],["full-list",null],["menu",null]]
+          [["share-port",null],["declare-public","ports.declare"],["full-list",null],["menu",null]]
           "unknown_page"

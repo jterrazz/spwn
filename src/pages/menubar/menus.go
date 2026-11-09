@@ -348,7 +348,7 @@ func homeMenus(r Reading, p page.Page) page.Page {
 	if _, ok := pageAction(p, ActionAddMac); ok {
 		sm.item(ActionAddMac)
 	} else {
-		sm.add(page.Action{ID: ActionAddMac, Label: "Add a Mac", On: OnMenu, Sheet: page.SheetHint + RowAddMac})
+		sm.add(addMacHint(page.Action{ID: ActionAddMac, Label: "Add a Mac", On: OnMenu}))
 	}
 	if a, ok := pageAction(p, ActionOpenStation); ok {
 		sm.add(menuCopy(a, menuID(a.ID, "menu"), "Open station in Terminal", ""))

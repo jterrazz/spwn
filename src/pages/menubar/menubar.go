@@ -1,6 +1,7 @@
 package menubar
 
 import (
+	"github.com/jterrazz/studio-station/src/agents"
 	"slices"
 	"strconv"
 	"strings"
@@ -51,6 +52,9 @@ type Reading struct {
 	Away []overview.Summary
 	// value: every Mac's copies shared with its VMs, for the leases ending.
 	Accounts *accounts.AllMachines
+	// value: the fleet's agents by their own names, which Clean up forgets;
+	// nil until read.
+	Agents []agents.Agent
 	// value: when the page is drawn and the zone its hours are said in; a
 	// page never reads the clock.
 	Now  time.Time

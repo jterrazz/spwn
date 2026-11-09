@@ -2434,6 +2434,25 @@
         "upkeep:macbook-pro/settings/3"
       ],
       "id": "upkeep:macbook-pro/settings/3",
+      "form": {
+        "title": "Turn the firewall on",
+        "fields": [
+          {
+            "key": "command-1",
+            "kind": "command",
+            "hint": {
+              "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+              "external": true
+            }
+          }
+        ],
+        "subtitle": "station never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
+        "primary": [
+          {
+            "label": "Done"
+          }
+        ]
+      },
       "sheet": "hint:firewall"
     },
     {
@@ -5744,21 +5763,62 @@
       "mutates": true,
       "id": "share-account",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": "linux-1"
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "required": true
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-account:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account:linux-1",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
             "required": true
           },
           {
@@ -5768,23 +5828,270 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
       },
-      "sheet": "share-account"
+      "sheet": "share-account",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account:linux-1",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "With": "linux-1"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "To",
+            "label": "To",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-account:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account:linux-1",
+            "swaps": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
+      },
+      "sheet": "share-account",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with linux-1"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Lend an account",
+      "on": "row",
+      "rows": [
+        "share-account"
+      ],
+      "mutates": true,
+      "id": "share-account:agent-7f",
+      "run": {
+        "call": "accounts.share",
+        "in": {
+          "With": "agent-7f"
+        }
+      },
+      "form": {
+        "title": "Lend an account",
+        "fields": [
+          {
+            "key": "To",
+            "label": "To",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account:linux-1",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              },
+              {
+                "value": "share-account:agent-7f",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account:agent-7f",
+            "swaps": true
+          },
+          {
+            "key": "Account",
+            "label": "Account",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
+            "required": true
+          },
+          {
+            "key": "For",
+            "label": "For",
+            "kind": "segmented",
+            "options": [
+              {
+                "value": "14400000000000",
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
+              },
+              {
+                "value": "43200000000000",
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
+              },
+              {
+                "value": "604800000000000",
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
+              }
+            ],
+            "default": "14400000000000"
+          }
+        ],
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
+      },
+      "sheet": "share-account",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with agent-7f"
+          }
+        ]
+      }
     },
     {
       "key": "cmd+t",
@@ -5976,25 +6283,55 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@linux-1",
-      "run": {
-        "call": "ports.share",
-        "in": {
-          "VM": "linux-1"
-        }
-      },
       "form": {
-        "title": "Share a port of linux-1",
+        "title": "Share a port",
         "fields": [
           {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port",
+            "swaps": true
+          },
+          {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now in linux-1",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:linux-1:4321",
+                "label": "Astro",
+                "note": "linux-1:4321",
+                "glyph": {
+                  "kind": "port:astro"
+                }
+              },
+              {
+                "value": "share:linux-1:9229",
+                "label": "Node inspector",
+                "note": "linux-1:9229",
+                "glyph": {
+                  "kind": "port:node"
+                }
+              }
+            ],
+            "note": "Nothing listens in linux-1 right now."
           }
-        ]
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
-      "icon": "point.3.connected.trianglepath.dotted"
+      "icon": "point.3.connected.trianglepath.dotted",
+      "sheet": "share-port"
     },
     {
       "label": "An account",
@@ -6002,22 +6339,54 @@
       "mutates": true,
       "id": "share-account@linux-1",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": "linux-1"
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "default": "linux-1",
-            "required": true
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account",
+                "label": "linux-1",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
             "required": true
           },
           {
@@ -6027,26 +6396,44 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
       },
       "icon": "key",
       "sheet": "share-account",
-      "prefill": {
-        "With": "linux-1"
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with linux-1"
+          }
+        ]
       }
     },
     {
@@ -6178,25 +6565,47 @@
       "priority": 3,
       "mutates": true,
       "id": "share-port@agent-7f",
-      "run": {
-        "call": "ports.share",
-        "in": {
-          "VM": "agent-7f"
-        }
-      },
       "form": {
-        "title": "Share a port of agent-7f",
+        "title": "Share a port",
         "fields": [
           {
+            "key": "Of",
+            "label": "Of",
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-port",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-port",
+            "swaps": true
+          },
+          {
             "key": "Port",
-            "label": "Port",
-            "kind": "text",
-            "note": "a port number, like 5173",
-            "required": true
+            "label": "Listening now in agent-7f",
+            "kind": "rows",
+            "options": [
+              {
+                "value": "share:agent-7f:6006",
+                "label": "Storybook",
+                "note": "agent-7f:6006",
+                "glyph": {
+                  "kind": "port:storybook"
+                }
+              }
+            ],
+            "note": "Nothing listens in agent-7f right now."
           }
-        ]
+        ],
+        "subtitle": "Private on your tailnet. Pick a listener, no typing."
       },
-      "icon": "point.3.connected.trianglepath.dotted"
+      "icon": "point.3.connected.trianglepath.dotted",
+      "sheet": "share-port"
     },
     {
       "label": "An account",
@@ -6204,22 +6613,54 @@
       "mutates": true,
       "id": "share-account@agent-7f",
       "run": {
-        "call": "accounts.share"
+        "call": "accounts.share",
+        "in": {
+          "With": "agent-7f"
+        }
       },
       "form": {
         "title": "Lend an account",
         "fields": [
           {
-            "key": "With",
+            "key": "To",
             "label": "To",
-            "kind": "text",
-            "default": "agent-7f",
-            "required": true
+            "kind": "select",
+            "options": [
+              {
+                "value": "share-account",
+                "label": "agent-7f",
+                "note": "on This Mac",
+                "glyph": {
+                  "kind": "workspace"
+                }
+              }
+            ],
+            "default": "share-account",
+            "swaps": true
           },
           {
             "key": "Account",
             "label": "Account",
-            "kind": "text",
+            "kind": "pick",
+            "options": [
+              {
+                "value": "github",
+                "label": "GitHub",
+                "note": "jterrazz{sep}repo, workflow",
+                "glyph": {
+                  "kind": "account:github"
+                }
+              },
+              {
+                "value": "claude",
+                "label": "Claude",
+                "note": "Max plan",
+                "glyph": {
+                  "kind": "account:claude"
+                }
+              }
+            ],
+            "default": "github",
             "required": true
           },
           {
@@ -6229,26 +6670,44 @@
             "options": [
               {
                 "value": "14400000000000",
-                "label": "4 hr"
+                "label": "4 hr",
+                "note": "Ends at 14:30, then taken back"
               },
               {
                 "value": "43200000000000",
-                "label": "12 hr"
+                "label": "12 hr",
+                "note": "Ends at 22:30, then taken back"
               },
               {
                 "value": "604800000000000",
-                "label": "7 days"
+                "label": "7 days",
+                "note": "Ends Saturday 14 Nov"
               }
             ],
             "default": "14400000000000"
           }
         ],
-        "subtitle": "From This Mac. It ends by itself."
+        "subtitle": "From This Mac. It ends by itself.",
+        "primary": [
+          {
+            "when": {
+              "key": "Account",
+              "set": true
+            },
+            "label": "Lend {Account} for {For}"
+          }
+        ]
       },
       "icon": "key",
       "sheet": "share-account",
-      "prefill": {
-        "With": "agent-7f"
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Shared {Account} with agent-7f"
+          }
+        ]
       }
     },
     {

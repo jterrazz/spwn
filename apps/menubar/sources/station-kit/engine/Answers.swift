@@ -33,16 +33,35 @@ public struct Answers: Equatable, Sendable {
     public func isOpen(_ f: Field) -> Bool { value(f) == Self.open }
 
     public func picked(_ f: Field) -> [String] {
-        value(f).split(separator: ",").map(String.init).filter { v in f.options?.contains { $0.value == v && $0.disabled == nil } ?? true }
+        let own = value(f).split(separator: ",").map(String.init).filter { v in f.options?.contains { $0.value == v && $0.disabled == nil } ?? true }
+        let carried = (f.options ?? []).filter { follows(f, $0) }.compactMap(\.value)
+        return own + carried.filter { !own.contains($0) }
+    }
+
+    // value: an option checked because the answer it goes with is checked
+    // in the field it follows (a finished agent with its throwaway).
+    public func follows(_ f: Field, _ o: Option) -> Bool {
+        guard let key = f.follows, let of = o.of, let leader = field(key), leader.key != f.key else { return false }
+        return picked(leader).contains(of)
     }
 
     // value: a field is shown while its When holds, and only inside a
     // disclosure that is open.
-    public func shown(_ f: Field) -> Bool {
-        guard let when = f.when, let key = when.key else { return true }
-        let v = field(key).map { $0.kind == "multiselect" ? picked($0).joined(separator: ",") : value($0) } ?? value(key)
+    public func shown(_ f: Field) -> Bool { holds(f.when) }
+
+    // value: a When holds while its key's answer is the one it names, is
+    // set at all, or counts as many answers as it says.
+    public func holds(_ when: When?) -> Bool {
+        guard let when, let key = when.key else { return true }
+        let multi = field(key).map { $0.kind == "multiselect" ? picked($0) : nil } ?? nil
+        let v = multi.map { $0.joined(separator: ",") } ?? field(key).map(value) ?? value(key)
+        if let count = when.count { return (multi?.count ?? (v.isEmpty ? 0 : 1)) == count }
         return when.set == true ? !v.isEmpty : v == (when.value ?? "")
     }
+
+    // value: the primary button's wording as the answers stand: the first
+    // whose When holds; none when no wording holds (nothing checked).
+    public var primary: Primary? { (form.primary ?? []).first { holds($0.when) } }
 
     // value: a field applies while it and every disclosure holding it
     // are shown, open or not; it is drawn only once they are open too.
@@ -131,12 +150,15 @@ public struct Answers: Equatable, Sendable {
     }
 
     // value: the answers the call is sent: each field shown and holding
-    // something, never a swap, a disclosure or a field hidden.
+    // something, never a swap, a disclosure or a field hidden; a
+    // multiselect never sends what its leader carries (an agent goes with
+    // its throwaway, not by a call of its own).
     public var sent: [String: String] {
         var out: [String: String] = [:]
         for f in fields where f.swaps != true && f.kind != "disclosure" && applies(f) {
             guard let key = f.key else { continue }
-            let v = f.kind == "multiselect" ? (picked(f).isEmpty ? "" : Self.list(picked(f))) : value(f)
+            let own = picked(f).filter { v in !(f.options ?? []).contains { $0.value == v && follows(f, $0) } }
+            let v = f.kind == "multiselect" ? (own.isEmpty ? "" : Self.list(own)) : value(f)
             if !v.isEmpty { out[key] = v }
         }
         return out

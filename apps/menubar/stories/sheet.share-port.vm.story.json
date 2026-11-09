@@ -1,0 +1,13 @@
+{
+    "group": "sheet",
+    "heightNote": "the panel keeps the height of linux-3's page under it, as P9 draws it, 60 pt under the prototype's; the sheet is shorter than both",
+    "id": "sheet.share-port.vm",
+    "note": "Share a port from linux-3's page: Of linux-3 said, Postgres with Share.",
+    "pages": ["pages/machines.sheet.machine.linux-3.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "share-port"
+        }
+    }
+}
