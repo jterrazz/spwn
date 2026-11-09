@@ -32,7 +32,10 @@ extension Story {
         state.pending = ui.pending ?? []
         state.prOpened = ui.prOpened ?? []
         state.reply = ui.reply ?? ""
-        if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
+        if let sheet = ui.sheet {
+            state.confirming = sheet.id
+            if let answers = sheet.answers { state.answers[sheet.id] = answers }
+        }
         return state
     }
 }

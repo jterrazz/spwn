@@ -495,6 +495,10 @@ type Run struct {
 	Target *Target `json:"target,omitempty"`
 	Copy   string  `json:"copy,omitempty"`
 	Open   string  `json:"open,omitempty"`
+	// value: what runs once the call returned well: a split item's terminal
+	// on what the call made (Create and Open in Terminal); its words may
+	// name an answer, as a Form's notes do.
+	Then *Run `json:"then,omitempty"`
 }
 
 type Target struct {
@@ -525,6 +529,9 @@ type Form struct {
 	Subtitle string    `json:"subtitle,omitempty"`
 	Primary  []Primary `json:"primary,omitempty"`
 	Split    []string  `json:"split,omitempty"`
+	// value: the orange line above the footer, what the sheet risks as asked
+	// ("This Mac may sleep: a server pauses with it.").
+	Warn string `json:"warn,omitempty"`
 }
 
 type Primary struct {
@@ -535,6 +542,9 @@ type Primary struct {
 type When struct {
 	Key   string `json:"key,omitempty"`
 	Value string `json:"value,omitempty"`
+	// value: shown while Key holds any answer at all (Lend for, once an
+	// account is checked), whatever Value says.
+	Set bool `json:"set,omitempty"`
 }
 
 type Field struct {
@@ -549,8 +559,21 @@ type Field struct {
 	Limit     int       `json:"limit,omitempty"`
 	LimitNote string    `json:"limit_note,omitempty"`
 	Fields    []Field   `json:"fields,omitempty"`
-	Summary   Value     `json:"summary,omitzero"`
-	When      *When     `json:"when,omitempty"`
+	// value: SPEC B1: the words a sheet says of its own answers (a
+	// disclosure's Summary, a Note, a HUD, a Then's argv) are the engine's,
+	// with the answers named in them: {Key} is the answer's label, {Key:, |none}
+	// a multiselect's labels joined by ", " or "none" when it holds none, and
+	// a [part] is dropped whole when an answer it names is empty or hidden.
+	Summary Value `json:"summary,omitzero"`
+	When    *When `json:"when,omitempty"`
+	// value: a select whose options are actions of the page: picking one
+	// opens that action's sheet in place, the answers kept by their keys;
+	// its answer is never sent.
+	Swaps bool `json:"swaps,omitempty"`
+	// value: the names a text field refuses, held already; its answer among
+	// them runs nothing and the HUD says TakenHud.
+	Taken    []string `json:"taken,omitempty"`
+	TakenHud string   `json:"taken_hud,omitempty"`
 }
 
 type FieldKind string

@@ -24,6 +24,9 @@ func (f Scene) shares() *accounts.AllMachines {
 	for _, h := range f.All.Macs {
 		mac := accounts.MacAccounts{Name: h.Name, ThisMac: h.ThisMac}
 		for _, m := range f.Accounts.Machines {
+			if f.SignedIn && m.Name == h.Name {
+				mac.Accounts = m.Accounts
+			}
 			if m.Kind != accounts.KindVM || !hosts(h, m.Name) {
 				continue
 			}

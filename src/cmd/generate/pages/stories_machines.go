@@ -39,6 +39,9 @@ type Scene struct {
 	Macs     []awake.Report
 	Activity pageactivity.View
 	Agents   []agents.Agent
+	// value: home reads every Mac's own accounts beside the copies it
+	// lent, as the engine does: what a sheet offers to lend.
+	SignedIn bool
 }
 
 func everyMachine() Scene {

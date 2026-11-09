@@ -307,7 +307,7 @@ struct SheetFor: View {
     let handlers: PopoverHandlers
 
     var body: some View {
-        if let id = state.confirming, let action = page.action(id) {
+        if let id = state.confirming, let action = page.action(id), !SheetLayer.layered(action) {
             let answers = Binding(get: { state.answers[id] ?? [:] }, set: { new in for (k, v) in new { handlers.answer(id, k, v) } })
             if let form = action.form {
                 FormSheet(form, run: action.label ?? "", answers: answers) { yes in
@@ -322,6 +322,21 @@ struct SheetFor: View {
                 }
             }
         }
+    }
+}
+
+// invariant: SPEC A5: a sheet of the v4 kind is drawn over the page on
+// the panel's sheet layer, the page dimmed under its scrim; the forms of
+// today's kind stay in the flow of the page.
+public enum SheetLayer {
+    public static let kinds: Set<String> = ["new-vm"]
+
+    public static func layered(_ action: Action) -> Bool { kinds.contains(action.sheet ?? "") }
+
+    @MainActor
+    public static func of(_ page: Page?, _ state: PanelState, _ handlers: PopoverHandlers) -> AnyView? {
+        guard let id = state.confirming, let page, let action = page.action(id), layered(action) else { return nil }
+        return AnyView(NewVMSheet(page: page, action: action, given: state.answers[id] ?? [:], handlers: handlers))
     }
 }
 

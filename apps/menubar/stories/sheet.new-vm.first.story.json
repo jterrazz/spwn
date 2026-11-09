@@ -1,0 +1,13 @@
+{
+    "group": "sheet",
+    "heightNote": "the sheet holds On and Options folded, a little taller than the prototype's empty panel, which grows to hold it (SPEC A5)",
+    "id": "sheet.new-vm.first",
+    "note": "New VM from the empty fleet: the same sheet, on This Mac.",
+    "pages": ["pages/machines.sheet.first.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "new-vm"
+        }
+    }
+}

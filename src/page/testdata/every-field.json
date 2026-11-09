@@ -566,6 +566,36 @@
             "limit_note": "the most this Mac can lend"
           },
           {
+            "key": "on",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac"
+              }
+            ],
+            "swaps": true
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "kind": "text",
+            "taken": [
+              "linux-1"
+            ],
+            "taken_hud": "{name} already exists"
+          },
+          {
+            "key": "lend-for",
+            "label": "Lend for",
+            "kind": "segmented",
+            "when": {
+              "key": "lend",
+              "set": true
+            }
+          },
+          {
             "key": "more",
             "label": "More",
             "kind": "disclosure",
@@ -596,7 +626,8 @@
         ],
         "split": [
           "create-only"
-        ]
+        ],
+        "warn": "This Mac may sleep: a server pauses with it."
       },
       "sheet": "new-vm",
       "prefill": {
@@ -607,7 +638,14 @@
       "label": "Create only",
       "id": "create-only",
       "run": {
-        "call": "machines.create-workspace"
+        "call": "machines.create-workspace",
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{name}"
+          ]
+        }
       }
     },
     {

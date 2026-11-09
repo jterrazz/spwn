@@ -15,10 +15,14 @@ func everyField() page.Page {
 			{Key: "kind", Label: "Kind", Kind: page.FieldSegmented, Options: []page.Option{{Value: "workspace", Label: "Workspace"}, {Value: "server", Label: "Server", Note: "always on", Disabled: "Needs infra running"}}, Default: "workspace", Required: true},
 			{Key: "task", Label: "Task", Kind: page.FieldText, Note: "what Claude starts on", When: &page.When{Key: "kind", Value: "workspace"}},
 			{Key: "memory", Label: "Memory", Kind: page.FieldSlider, Stops: []int{4, 8, 16}, Limit: 16, LimitNote: "the most this Mac can lend"},
+			{Key: "on", Label: "On", Kind: page.FieldSelect, Swaps: true, Options: []page.Option{{Value: "new-vm", Label: "This Mac"}}},
+			{Key: "name", Label: "Name", Kind: page.FieldText, Taken: []string{"linux-1"}, TakenHud: "{name} already exists"},
+			{Key: "lend-for", Label: "Lend for", Kind: page.FieldSegmented, When: &page.When{Key: "lend", Set: true}},
 			{Key: "more", Label: "More", Kind: page.FieldDisclosure, Summary: page.Text("NAT, throwaway"), Fields: []page.Field{{Key: "network", Kind: page.FieldSelect}}},
 		},
 		Primary: []page.Primary{{Label: "Create"}, {When: &page.When{Key: "task", Value: "*"}, Label: "Create and Start Claude"}},
 		Split:   []string{"create-only"},
+		Warn:    "This Mac may sleep: a server pauses with it.",
 	}
 	agentRow := page.Row{
 		ID: "agent-7f", Mark: page.Attention, Label: "agent-7f", Short: "a7", Sentence: true,
@@ -85,7 +89,7 @@ func everyField() page.Page {
 			{ID: "delete", Label: "Delete", Mutates: true, Destructive: true, Run: &page.Run{Terminal: true, Argv: []string{"machines", "delete", "linux-1"}},
 				Confirm: &page.Confirm{Question: "Delete linux-1?", Lines: []page.Value{page.Text("its disk is removed")}, Danger: true, Type: "linux-1", Yes: "Delete", No: "Cancel", Icon: "warn"}},
 			{ID: "new-vm", Label: "New VM", Key: "cmd+n", Sheet: page.SheetNewVM, Prefill: map[string]string{"kind": "server"}, Form: createForm, Run: &page.Run{Call: "machines.create-workspace"}},
-			{ID: "create-only", Label: "Create only", Run: &page.Run{Call: "machines.create-workspace"}},
+			{ID: "create-only", Label: "Create only", Run: &page.Run{Call: "machines.create-workspace", Then: &page.Run{Terminal: true, Argv: []string{"--on", "{name}"}}}},
 			{ID: "awake", Label: "Keep awake", Run: &page.Run{Call: "awake.keep"}},
 			{ID: "logs", Label: "Show the log", Run: &page.Run{Open: "https://grafana.example/linux-1"}},
 			{ID: "menu", Label: "More", Submenu: []string{"copy", "logs"}},

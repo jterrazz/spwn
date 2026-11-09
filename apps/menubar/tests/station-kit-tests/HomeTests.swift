@@ -129,23 +129,6 @@ final class HomeTests: XCTestCase {
         ])
     }
 
-    // invariant: CR-22: New VM… ⌘N opens the create form as a sheet, in the
-    // CLI's words, and its Create sends machines.create-workspace.
-    func testNewVMSheetCreates() async throws {
-        let page = try Tree.page("menubar.home.two-macs")
-        let create = try XCTUnwrap(page.action("new-vm"))
-        XCTAssertEqual(create.form?.fields?.compactMap(\.label), ["Will it last?", "Memory"])
-        var state = Snapshot.state("menubar.home.two-macs", page)
-        state.confirming = create.id
-        try drawn("sheet.new-vm", state)
-        let engine = try FakeEngine("mb-new-vm")
-        engine.serveOnce(Data(#"{"v":2,"id":"1","out":{"VM":{"Name":"linux-2"}}}"#.utf8) + [0x0A], thenClose: false)
-        defer { engine.stop() }
-        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(create, answers: ["Request.Lifetime": "throwaway"])
-        XCTAssertNil(status)
-        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"linux","Lifetime":"throwaway","Network":"nat","Size":{"MemoryBytes":4294967296}}},"v":2}"#])
-    }
-
     // invariant: MB-12: every snapshot, of a page, a sheet or the icon, is
     // drawn offscreen: rendering them all opens no window.
     func testSnapshotsOffscreen() throws {

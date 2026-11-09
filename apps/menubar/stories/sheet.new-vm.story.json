@@ -1,0 +1,12 @@
+{
+    "group": "sheet",
+    "id": "sheet.new-vm",
+    "note": "New VM from home's +: on the roomiest Mac, Options folded into its line and the name and the accounts it shares.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "new-vm"
+        }
+    }
+}

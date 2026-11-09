@@ -1,12 +1,6 @@
 home.keyboard
 agents.list
 agents.empty
-sheet.new-vm
-sheet.new-vm.options
-sheet.new-vm.lend
-sheet.new-vm.no-account
-sheet.new-vm.server
-sheet.new-vm.first
 sheet.new-agent
 sheet.new-agent.new
 sheet.lend-account

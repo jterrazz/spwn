@@ -78,10 +78,7 @@ func overviewActions(m Machine, h model.MacView, label string) []page.Action {
 	for _, n := range append(o.needs, o.upkeep...) {
 		out = append(out, n.Verb)
 	}
-	create := newVM()
-	create.Icon, create.Label = "plus", "New VM"
-	create.Run.Target = target(h)
-	out = append(out, create)
+	out = append(out, newVMSheets(m.All, m.Shares, o.self, h.Name, false)...)
 	for _, vm := range h.VMs {
 		if vm.State == model.Running || vm.State == model.Creating {
 			out = append(out, attach(h, vm))

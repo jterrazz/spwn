@@ -94,6 +94,11 @@ func Find(r FindReading, thisMac page.Context) page.Page {
 	if verbs := f.verbs(&p); len(verbs.Items) > 0 {
 		p.Sections = append(p.Sections, verbs)
 	}
+	for _, a := range newVMSheets(r.All, r.Accounts, f.self, "", false) {
+		if !slices.ContainsFunc(p.Actions, func(b page.Action) bool { return b.ID == a.ID }) {
+			p.Actions = append(p.Actions, a)
+		}
+	}
 	return page.Seal(p)
 }
 
@@ -400,11 +405,14 @@ func (f finder) actions() []entry {
 		rooms = append(rooms, room{h, n})
 	}
 	slices.SortStableFunc(rooms, func(a, b room) int { return cmp.Compare(b.free, a.free) })
+	sheets := newVMSheets(f.r.All, f.r.Accounts, f.self, "", false)
 	for _, m := range rooms {
-		a := newVM()
-		a.ID, a.Key, a.Priority = "new-vm:"+m.h.Name, "", 0
-		a.Run.Target = macTarget(m.h.Name, f.self)
-		a.Form.Subtitle = "On " + f.mac(m.h.Name)
+		i := slices.IndexFunc(sheets, func(a page.Action) bool { return a.ID == ActionNewVMOn+m.h.Name })
+		if i < 0 {
+			continue
+		}
+		a := sheets[i]
+		a.Key, a.Priority = "", 0
 		if m.h.Name == roomiest {
 			a.Key = "cmd+n"
 		}
