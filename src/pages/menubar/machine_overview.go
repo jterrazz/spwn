@@ -261,7 +261,7 @@ func (o macOverview) vmRow(vm model.VM) page.Row {
 		row.Glyph = page.Glyph{Kind: "symbol:checkmark", Signal: page.SignalDone}
 		row.Signal = page.SignalDone
 		row.Detail = page.Texts("finished", cmpWord(vm.Agent.Reason, "done"))
-		row.Verb, row.Cells, row.Trail, row.Nav = ActionCleanup, nil, "", ""
+		row.Verb, row.Cells, row.Trail = ActionCleanup, nil, ""
 	case vm.Agent != nil && vm.Agent.State == string(agents.Waiting):
 		row.Glyph = page.Glyph{Kind: "agent", Signal: page.SignalWaits}
 		row.Detail = page.Text(cmpWord(vm.Agent.Task, "waits for you"))
