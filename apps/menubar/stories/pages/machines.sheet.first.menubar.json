@@ -1,0 +1,1492 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar",
+  "command": "menubar",
+  "context": {
+    "machine": "macbook-pro",
+    "kind": "mac"
+  },
+  "state": "ready",
+  "strip": {
+    "cpu": {
+      "kind": "percent",
+      "n": 340,
+      "live": "cpu:macbook-pro"
+    },
+    "spark": [
+      12,
+      18,
+      25,
+      34,
+      30,
+      22,
+      41,
+      55,
+      48,
+      36,
+      28,
+      31,
+      44,
+      38,
+      29,
+      34
+    ],
+    "memory": {
+      "kind": "ratio",
+      "n": 40748502220,
+      "of": 51539607552,
+      "live": "memory:macbook-pro"
+    },
+    "memory_spark": [
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79,
+      77,
+      78,
+      78,
+      79
+    ],
+    "net_spark": [
+      1340,
+      1460,
+      1600,
+      1780,
+      1700,
+      1540,
+      1920,
+      2200,
+      2060,
+      1820,
+      1660,
+      1720,
+      1980,
+      1860,
+      1680,
+      1780
+    ],
+    "net": [
+      {
+        "kind": "size",
+        "n": 1780000,
+        "unit": "/s",
+        "live": "net:macbook-pro"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "title": "Needs you",
+      "role": "summary",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No VMs yet",
+            "glyph": {
+              "kind": "symbol:shippingbox",
+              "signal": "quiet"
+            },
+            "sub": "44 GB free on This Mac",
+            "actions": [
+              "new-vm"
+            ]
+          }
+        }
+      ],
+      "card": "empty"
+    },
+    {
+      "id": "macs",
+      "title": "Macs",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "ok",
+            "label": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "44 GB free"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "0 VMs"
+            },
+            "glyph": {
+              "kind": "laptop",
+              "ring": "cpu:macbook-pro"
+            },
+            "trail": "value",
+            "quick": "new-vm:macbook-pro",
+            "nav": "menubar.machine:macbook-pro"
+          }
+        },
+        {
+          "row": {
+            "id": "add-mac",
+            "mark": "ok",
+            "label": "Add a Mac to run VMs on it",
+            "glyph": {
+              "kind": "symbol:plus",
+              "signal": "active"
+            },
+            "verb": "add-mac"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    },
+    {
+      "id": "needs-you",
+      "title": "Needs you",
+      "role": "actions",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "nothing needs you"
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "Nothing needs you"
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "machines",
+      "title": "Machines",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "kind",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "detail",
+          "kind": "list",
+          "keep": 80
+        }
+      ],
+      "items": [
+        {
+          "group": {
+            "head": {
+              "id": "macbook-pro",
+              "mark": "ok",
+              "label": "This Mac",
+              "cells": [
+                {
+                  "kind": "text",
+                  "text": "Mac"
+                },
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "kind": "list",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "text": "awake until 18:00"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+n",
+      "label": "New VM",
+      "on": "page",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-1",
+                "note": "Generated, editable",
+                "taken": [
+                  "macbook-pro"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac, the Mac with the most free memory. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm"
+        ]
+      },
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ]
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-1",
+                "note": "Generated, editable",
+                "taken": [
+                  "macbook-pro"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac, the Mac with the most free memory. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "on": "row",
+      "rows": [
+        "macbook-pro"
+      ],
+      "priority": 1,
+      "mutates": true,
+      "id": "new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-1",
+                "note": "Generated, editable",
+                "taken": [
+                  "macbook-pro"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-pro"
+        ]
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-vm:macbook-pro",
+      "run": {
+        "call": "machines.create-workspace",
+        "in": {
+          "Request.Network": "nat"
+        },
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Request.Name}"
+          ]
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-vm",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-vm",
+            "swaps": true
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "note": "{Request.Name}{sep}shares {Share: and |no account}[ for {ShareFor}]",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-vm:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Request.Lifetime",
+                "label": "Lifetime",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "throwaway",
+                    "label": "Throwaway"
+                  },
+                  {
+                    "value": "permanent",
+                    "label": "Permanent"
+                  }
+                ],
+                "default": "throwaway"
+              },
+              {
+                "key": "Request.Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Request.Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              },
+              {
+                "key": "Sharing",
+                "label": "Share",
+                "kind": "disclosure",
+                "fields": [
+                  {
+                    "key": "Share",
+                    "kind": "multiselect",
+                    "options": [
+                      {
+                        "value": "github",
+                        "label": "GitHub"
+                      },
+                      {
+                        "value": "claude",
+                        "label": "Claude"
+                      }
+                    ],
+                    "default": "github,claude"
+                  },
+                  {
+                    "key": "ShareFor",
+                    "label": "Share for",
+                    "kind": "segmented",
+                    "options": [
+                      {
+                        "value": "14400000000000",
+                        "label": "4 hr"
+                      },
+                      {
+                        "value": "43200000000000",
+                        "label": "12 hr"
+                      },
+                      {
+                        "value": "604800000000000",
+                        "label": "7 days"
+                      }
+                    ],
+                    "default": "14400000000000",
+                    "when": {
+                      "key": "Share",
+                      "set": true
+                    }
+                  }
+                ],
+                "summary": {
+                  "kind": "text",
+                  "text": "{Share:, |No account}[ for {ShareFor}]"
+                }
+              },
+              {
+                "key": "Request.Name",
+                "label": "Name",
+                "kind": "text",
+                "default": "linux-1",
+                "note": "Generated, editable",
+                "taken": [
+                  "macbook-pro"
+                ],
+                "taken_hud": "{Request.Name} already exists"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Request.Lifetime}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Request.Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-vm:macbook-pro"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Request.Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "label": "New VM",
+      "priority": 1,
+      "mutates": true,
+      "id": "new-server:macbook-pro",
+      "run": {
+        "call": "machines.create-server"
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-server:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-1",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "macbook-pro"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-pro"
+        ],
+        "warn": "This Mac may sleep: a server pauses with it."
+      },
+      "icon": "plus",
+      "sheet": "new-vm",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "opt+enter",
+      "label": "Create and Open in Terminal",
+      "priority": 4,
+      "mutates": true,
+      "id": "open-new:new-server:macbook-pro",
+      "run": {
+        "call": "machines.create-server",
+        "then": {
+          "terminal": true,
+          "argv": [
+            "--on",
+            "{Name}"
+          ]
+        }
+      },
+      "form": {
+        "title": "New VM",
+        "fields": [
+          {
+            "key": "On",
+            "label": "On",
+            "kind": "select",
+            "options": [
+              {
+                "value": "new-server:macbook-pro",
+                "label": "This Mac",
+                "note": "44 GB free"
+              }
+            ],
+            "default": "new-server:macbook-pro",
+            "swaps": true
+          },
+          {
+            "key": "Name",
+            "label": "Name",
+            "kind": "text",
+            "default": "linux-1",
+            "note": "A server needs a name you will recognize",
+            "taken": [
+              "macbook-pro"
+            ],
+            "taken_hud": "{Name} already exists"
+          },
+          {
+            "key": "Options",
+            "label": "Options",
+            "kind": "disclosure",
+            "fields": [
+              {
+                "key": "Kind",
+                "label": "Kind",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "new-vm",
+                    "label": "Workspace"
+                  },
+                  {
+                    "value": "new-server:macbook-pro",
+                    "label": "Server"
+                  }
+                ],
+                "default": "new-server:macbook-pro",
+                "swaps": true
+              },
+              {
+                "key": "Image",
+                "label": "System",
+                "kind": "segmented",
+                "options": [
+                  {
+                    "value": "linux",
+                    "label": "Linux"
+                  },
+                  {
+                    "value": "macos",
+                    "label": "macOS"
+                  }
+                ],
+                "default": "linux"
+              },
+              {
+                "key": "Size.MemoryBytes",
+                "label": "Memory",
+                "kind": "slider",
+                "options": [
+                  {
+                    "value": "4294967296",
+                    "label": "4 GB"
+                  },
+                  {
+                    "value": "8589934592",
+                    "label": "8 GB"
+                  },
+                  {
+                    "value": "17179869184",
+                    "label": "16 GB"
+                  },
+                  {
+                    "value": "34359738368",
+                    "label": "32 GB"
+                  }
+                ],
+                "default": "8589934592",
+                "stops": [
+                  4,
+                  8,
+                  16,
+                  32
+                ],
+                "limit": 44,
+                "limit_note": "Over 44 GB would squeeze This Mac"
+              }
+            ],
+            "summary": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "{Kind}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Image}"
+                },
+                {
+                  "kind": "text",
+                  "text": "{Size.MemoryBytes}"
+                }
+              ]
+            }
+          }
+        ],
+        "subtitle": "On This Mac. Ready in about a minute.",
+        "primary": [
+          {
+            "label": "Create"
+          }
+        ],
+        "split": [
+          "open-new:new-server:macbook-pro"
+        ],
+        "warn": "This Mac may sleep: a server pauses with it."
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "text",
+        "text": "Creating {Name} on This Mac{ellipsis}"
+      }
+    },
+    {
+      "key": "cmd+t",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "open-station",
+      "run": {
+        "terminal": true
+      }
+    },
+    {
+      "label": "Stop everything on This Mac",
+      "on": "page",
+      "confirm": {
+        "question": "Stop everything on This Mac?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Awake ends; the engine stays off until you log in again or run"
+          },
+          {
+            "kind": "command",
+            "text": "station engine start"
+          }
+        ],
+        "danger": true,
+        "yes": "Stop"
+      },
+      "priority": 3,
+      "mutates": true,
+      "id": "stop-all",
+      "run": {
+        "call": "engine.stop",
+        "in": {
+          "By": "the menu bar",
+          "Confirm": "yes"
+        }
+      }
+    },
+    {
+      "label": "Add a Mac",
+      "on": "row",
+      "rows": [
+        "add-mac"
+      ],
+      "priority": 4,
+      "id": "add-mac",
+      "sheet": "hint:add-mac"
+    }
+  ],
+  "badge": {
+    "needs": 0,
+    "label": "all machines are fine"
+  },
+  "header": {},
+  "live": [
+    "cpu:macbook-pro",
+    "memory:macbook-pro",
+    "net:macbook-pro"
+  ]
+}

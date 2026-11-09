@@ -1,0 +1,16 @@
+{
+    "group": "sheet",
+    "id": "sheet.new-vm.lend",
+    "note": "Options and Share open on This Mac: the accounts it can share checked, Share for under them.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "answers": {
+                "Options": "open",
+                "Sharing": "open"
+            },
+            "id": "new-vm"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "group": "sheet",
+    "heightNote": "the prototype measured no panel for it: home's, under the sheet, as sheet.new-vm's",
+    "id": "sheet.new-vm.no-account",
+    "note": "Every account unchecked, Options folded: its line says the VM shares no account.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "answers": {
+                "Share": ""
+            },
+            "id": "new-vm"
+        }
+    }
+}

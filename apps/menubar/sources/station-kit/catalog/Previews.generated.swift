@@ -160,6 +160,18 @@ import SwiftUI
 
 #Preview("server.stopped") { StoryStage(Stories["server.stopped"]) }
 
+#Preview("sheet.new-vm.first") { StoryStage(Stories["sheet.new-vm.first"]) }
+
+#Preview("sheet.new-vm.lend") { StoryStage(Stories["sheet.new-vm.lend"]) }
+
+#Preview("sheet.new-vm.no-account") { StoryStage(Stories["sheet.new-vm.no-account"]) }
+
+#Preview("sheet.new-vm.options") { StoryStage(Stories["sheet.new-vm.options"]) }
+
+#Preview("sheet.new-vm.server") { StoryStage(Stories["sheet.new-vm.server"]) }
+
+#Preview("sheet.new-vm") { StoryStage(Stories["sheet.new-vm"]) }
+
 #Preview("workspace.agents.finished") { StoryStage(Stories["workspace.agents.finished"]) }
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }
