@@ -3,5 +3,6 @@
     "id": "server.down",
     "note": "infra down since 10:26, out of memory: the red banner with Restart, the console's last lines, its gauges as last seen, its ports unreachable.",
     "pages": ["pages/machines.server.down.machine.infra.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

@@ -105,6 +105,8 @@ struct Canvas: View {
     func stage(_ story: Story) -> some View {
         if catalog.live, let session = catalog.session {
             LiveStage(story: story, knobs: catalog.knobs, session: session)
+        } else if story.freeze != nil {
+            StoryReplay(story, knobs: catalog.knobs, time: catalog.progress)
         } else if let image = Self.still(story, knobs: catalog.knobs) {
             Image(nsImage: image).interpolation(.none)
         }

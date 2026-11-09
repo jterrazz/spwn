@@ -56,8 +56,8 @@ public struct Hero: View {
                 .modifier(HeroCard())
         } else if let head {
             VStack(alignment: .leading, spacing: 0) {
-                top(head)
-                if !rest.isEmpty { rows }
+                top(head).caughtHero(.top)
+                if !rest.isEmpty { rows.caughtHero(.rows) }
             }
             .modifier(HeroCard())
             .accessibilityElement(children: .contain)
@@ -68,7 +68,7 @@ public struct Hero: View {
         let m = Token.Metric.Hero.self
         let p = Token.HeroParts.self
         return HStack(spacing: Token.Metric.Row.gap) {
-            glyph(head).frame(width: m.slot.width, height: m.slot.height)
+            glyph(head).caughtHero(.glyph).frame(width: m.slot.width, height: m.slot.height)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: p.titleGap) {
                     Text(Self.title(head))

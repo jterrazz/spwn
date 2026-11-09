@@ -28,6 +28,7 @@ struct FindPanel: View {
                       submit: { quick in if let lit { pick(lit, quick: quick) } },
                       close: { handlers.find(nil) })
                 .padding(Token.Metric.Find.margin)
+                .modifier(CaughtField())
         } content: {
             VStack(alignment: .leading, spacing: 0) {
                 if lines.isEmpty, !find.query.trimmingCharacters(in: .whitespaces).isEmpty {

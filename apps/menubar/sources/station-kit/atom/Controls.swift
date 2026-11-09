@@ -33,12 +33,30 @@ public struct Switch: View {
 public struct Segmented: View {
     let options: [(label: String, on: Bool, tap: () -> Void)]
     let keys: [String?]
+    let leaving: Int?
     @Environment(\.stationTokens) private var tokens
+    @Environment(\.stationCaught) private var caught
     @Namespace private var thumb
 
-    public init(options: [(label: String, on: Bool, tap: () -> Void)], keys: [String?] = []) {
+    // value: leaving, the segment the thumb slides away from while a
+    // moment is caught.
+    public init(options: [(label: String, on: Bool, tap: () -> Void)], keys: [String?] = [], leaving: Int? = nil) {
         self.options = options
         self.keys = keys
+        self.leaving = leaving
+    }
+
+    var sliding: (from: Int, to: Int, time: Double)? {
+        guard let caught, let leaving, let to = options.firstIndex(where: \.on), leaving != to else { return nil }
+        return (leaving, to, caught.time)
+    }
+
+    func thumbShape() -> some View {
+        let c = Token.Metric.Control.self
+        return RoundedRectangle(cornerRadius: c.thumbRadius, style: .continuous)
+            .fill(tokens.thumb)
+            .overlay(RoundedRectangle(cornerRadius: c.thumbRadius, style: .continuous).strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Row.hairline))
+            .shadow(color: Token.Shadow.segmentThumb.color, radius: Token.Shadow.segmentThumb.radius, y: Token.Shadow.segmentThumb.y)
     }
 
     func shortcut(_ i: Int) -> KeyboardShortcut? {
@@ -56,18 +74,23 @@ public struct Segmented: View {
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background {
-                            if o.on {
-                                RoundedRectangle(cornerRadius: c.thumbRadius, style: .continuous)
-                                    .fill(tokens.thumb)
-                                    .overlay(RoundedRectangle(cornerRadius: c.thumbRadius, style: .continuous).strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Row.hairline))
-                                    .shadow(color: Token.Shadow.segmentThumb.color, radius: Token.Shadow.segmentThumb.radius, y: Token.Shadow.segmentThumb.y)
-                                    .matchedGeometryEffect(id: "thumb", in: thumb)
+                            if o.on && sliding == nil {
+                                thumbShape().matchedGeometryEffect(id: "thumb", in: thumb)
                             }
                         }
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .keyboardShortcut(shortcut(i))
+            }
+        }
+        .background(alignment: .topLeading) {
+            if let sliding {
+                GeometryReader { g in
+                    let w = g.size.width / CGFloat(max(options.count, 1))
+                    let at = { (i: Int) in CGRect(x: w * CGFloat(i), y: 0, width: w, height: g.size.height) }
+                    thumbShape().modifier(SegmentThumb(progress: SegmentThumb.frozen(sliding.time, reduce: tokens.reduceMotion), from: at(sliding.from), to: at(sliding.to)))
+                }
             }
         }
         .padding(c.segmented.padding)

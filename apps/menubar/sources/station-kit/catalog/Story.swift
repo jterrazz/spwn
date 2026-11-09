@@ -70,6 +70,9 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var pressed: Bool?
     // value: the app's own Open at login switch, as the station menu shows it.
     public var loginItem: Bool?
+    // value: the row a transition story catches leaving its list, by its
+    // id.
+    public var leaving: String?
 
     public init() {}
 }
@@ -96,9 +99,12 @@ public struct StoryFile: Codable, Equatable, Sendable {
     public var play: StoryPlay?
     public var freeze: Double?
     public var heightNote: String?
+    // value: SPEC C4's tags: `a11y` renders the story at Increase Contrast
+    // and at Reduce Transparency too.
+    public var tags: [String]?
 
     public init(id: String, group: StoryGroup, note: String, pages: [String], status: String? = nil, ui: StoryUI? = nil,
-                samples: [String: Double]? = nil, play: StoryPlay? = nil, freeze: Double? = nil, heightNote: String? = nil) {
+                samples: [String: Double]? = nil, play: StoryPlay? = nil, freeze: Double? = nil, heightNote: String? = nil, tags: [String]? = nil) {
         schema = storySchema
         self.id = id
         self.group = group
@@ -110,7 +116,10 @@ public struct StoryFile: Codable, Equatable, Sendable {
         self.play = play
         self.freeze = freeze
         self.heightNote = heightNote
+        self.tags = tags
     }
+
+    public static let a11y = "a11y"
 
     public var today: Bool { status == "today" }
 
@@ -124,6 +133,18 @@ public struct StoryFile: Codable, Equatable, Sendable {
 public struct Story: Identifiable, Sendable {
     public let file: StoryFile
     public let pages: [Page]
+    // value: the story its gesture plays from, loaded with it: a
+    // transition draws its way from there.
+    var before: [Story] = []
+
+    public init(file: StoryFile, pages: [Page], from: Story? = nil) {
+        self.file = file
+        self.pages = pages
+        before = from.map { [$0] } ?? []
+    }
+
+    public var from: Story? { before.first }
+    public var a11y: Bool { file.tags?.contains(StoryFile.a11y) == true }
 
     public var id: String { file.id }
     public var group: StoryGroup { file.group }
@@ -141,6 +162,7 @@ public enum StoryError: Error, Equatable, CustomStringConvertible {
     case noPages(id: String)
     case missingPage(id: String, page: String)
     case undecodable(id: String, page: String, reason: String)
+    case missingFrom(id: String, from: String)
 
     public var description: String {
         switch self {
@@ -150,6 +172,7 @@ public enum StoryError: Error, Equatable, CustomStringConvertible {
         case let .noPages(id): "\(id): names no page"
         case let .missingPage(id, page): "\(id): its page \(page) does not exist"
         case let .undecodable(id, page, reason): "\(id): its page \(page) does not decode: \(reason)"
+        case let .missingFrom(id, from): "\(id): plays from \(from), which no story file holds"
         }
     }
 }
@@ -192,10 +215,18 @@ public enum Stories {
         }
     }
 
+    // invariant: a story's gesture plays from a story that loads; a
+    // transition is drawn from it.
     public static func load(root: URL) throws -> [Story] {
-        try files(root: root).map { file in
+        let loaded = try files(root: root).map { file in
             let story = try read(file)
             return Story(file: story, pages: try story.pages.map { try page($0, of: story, root: root) })
+        }
+        let byID = Dictionary(loaded.map { ($0.id, $0) }) { first, _ in first }
+        return try loaded.map { story in
+            guard let from = story.play?.from else { return story }
+            guard let origin = byID[from] else { throw StoryError.missingFrom(id: story.id, from: from) }
+            return Story(file: story.file, pages: story.pages, from: origin)
         }
     }
 }

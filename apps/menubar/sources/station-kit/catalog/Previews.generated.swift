@@ -298,6 +298,34 @@ import SwiftUI
 
 #Preview("sheet.share-port.vm") { StoryStage(Stories["sheet.share-port.vm"]) }
 
+#Preview("transition.alert") { StoryStage(Stories["transition.alert"]) }
+
+#Preview("transition.find") { StoryStage(Stories["transition.find"]) }
+
+#Preview("transition.hero-morph") { StoryStage(Stories["transition.hero-morph"]) }
+
+#Preview("transition.jump") { StoryStage(Stories["transition.jump"]) }
+
+#Preview("transition.menu") { StoryStage(Stories["transition.menu"]) }
+
+#Preview("transition.need-collapse") { StoryStage(Stories["transition.need-collapse"]) }
+
+#Preview("transition.panel-close") { StoryStage(Stories["transition.panel-close"]) }
+
+#Preview("transition.panel-open") { StoryStage(Stories["transition.panel-open"]) }
+
+#Preview("transition.pop") { StoryStage(Stories["transition.pop"]) }
+
+#Preview("transition.push") { StoryStage(Stories["transition.push"]) }
+
+#Preview("transition.reduce-motion.push") { StoryStage(Stories["transition.reduce-motion.push"]) }
+
+#Preview("transition.row-leave") { StoryStage(Stories["transition.row-leave"]) }
+
+#Preview("transition.segment") { StoryStage(Stories["transition.segment"]) }
+
+#Preview("transition.sheet") { StoryStage(Stories["transition.sheet"]) }
+
 #Preview("workspace.agents.finished") { StoryStage(Stories["workspace.agents.finished"]) }
 
 #Preview("workspace.agents") { StoryStage(Stories["workspace.agents"]) }

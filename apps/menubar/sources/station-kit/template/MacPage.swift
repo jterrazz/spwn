@@ -13,6 +13,8 @@ struct MacPage: View {
     @State private var window: String
     @State private var unfolded: Set<String>
     @Environment(\.stationStill) private var still
+    @Environment(\.stationCaught) private var caught
+    @Environment(\.stationTokens) private var tokens
 
     init(page: Page, state: PanelState, handlers: PopoverHandlers, scrolls: Bool) {
         self.page = page
@@ -40,13 +42,13 @@ struct MacPage: View {
             header.blur(radius: layer == nil ? 0 : S.blur)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-                if segment == ActivityWindow.segment {
-                    MachineActivity(page: page, sections: Self.sections(page, segment: segment), window: window, pick: pickWindow,
-                                    scrub: state.scrub, onScrub: handlers.scrub, run: run, open: handlers.push)
-                } else {
-                    ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
-                        section(s)
+                if let leaving = caught?.segment, leaving != segment, let time = caught?.time {
+                    Morph(share: HeightMorph.frozen(time, reduce: tokens.reduceMotion)) {
+                        stacked(leaving).opacity(1 - SegmentSlide.frozen(time, reduce: tokens.reduceMotion))
+                        stacked(segment).modifier(SegmentSlide(progress: SegmentSlide.frozen(time, reduce: tokens.reduceMotion), forward: forward(from: leaving)))
                     }
+                } else {
+                    sections(segment)
                 }
                 if state.confirming != nil { SheetFor(page: page, state: state, handlers: handlers) }
             }
@@ -60,6 +62,27 @@ struct MacPage: View {
             if !still, BackKey.gesture(state) == .back { EscapeKey(back: handlers.back) }
         }
         .environment(\.stationHints, false)
+    }
+
+    @ViewBuilder
+    func sections(_ segment: String) -> some View {
+        if segment == ActivityWindow.segment {
+            MachineActivity(page: page, sections: Self.sections(page, segment: segment), window: window, pick: pickWindow,
+                            scrub: state.scrub, onScrub: handlers.scrub, run: run, open: handlers.push)
+        } else {
+            ForEach(Array(Self.sections(page, segment: segment).enumerated()), id: \.offset) { _, s in
+                section(s)
+            }
+        }
+    }
+
+    func stacked(_ segment: String) -> some View {
+        VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) { sections(segment) }
+    }
+
+    func forward(from leaving: String) -> Bool {
+        let ids = (page.segments ?? []).map(\.id)
+        return (ids.firstIndex(of: segment) ?? 0) >= (ids.firstIndex(of: leaving) ?? 0)
     }
 
     var header: MachineHeader {

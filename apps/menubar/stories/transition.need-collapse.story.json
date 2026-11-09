@@ -1,0 +1,22 @@
+{
+    "freeze": 0.15,
+    "group": "transition",
+    "heightNote": "caught with the row half its height; the prototype's capture is later, the row all but gone",
+    "id": "transition.need-collapse",
+    "note": "linux-1's need resolved from its row by Extend: the row collapses, slides and fades before the hero re-renders.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "click Extend"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "leaving": "ending:macbook-pro/linux-1/claude"
+    }
+}

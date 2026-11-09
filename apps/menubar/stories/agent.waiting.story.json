@@ -4,5 +4,6 @@
     "id": "agent.waiting",
     "note": "review-bot waits on you: its own line and detail, PR #42 and its change, Open PR tinted, Merge, and the reply.",
     "pages": ["pages/machines.agent.review-bot.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

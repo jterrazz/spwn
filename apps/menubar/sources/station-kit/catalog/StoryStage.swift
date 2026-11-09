@@ -79,21 +79,23 @@ public struct StoryStage: View {
     let knobs: StoryKnobs
     let state: PanelState?
     let handlers: PopoverHandlers
+    let time: Double?
 
-    public init(_ story: Story, knobs: StoryKnobs = StoryKnobs(), state: PanelState? = nil, handlers: PopoverHandlers = PopoverHandlers()) {
+    public init(_ story: Story, knobs: StoryKnobs = StoryKnobs(), state: PanelState? = nil, handlers: PopoverHandlers = PopoverHandlers(), time: Double? = nil) {
         self.story = story
         self.knobs = knobs
         self.state = state
         self.handlers = handlers
+        self.time = time
     }
 
     public var body: some View {
         SwiftUI.Group {
             if story.ui.statusItem == true {
-                StoryView(story, state: state, handlers: handlers)
+                StoryView(story, state: state, handlers: handlers, time: time)
                     .background(StoryDeskView(knobs.desk, scheme: knobs.scheme))
             } else {
-                StoryView(story, state: state, handlers: handlers)
+                StoryView(story, state: state, handlers: handlers, time: time)
                     .fixedSize()
                     .padding(Self.room)
                     .background(StoryDeskView(knobs.desk, scheme: knobs.scheme))
@@ -104,10 +106,33 @@ public struct StoryStage: View {
     }
 
     @MainActor
-    public static func png(_ story: Story, knobs: StoryKnobs) -> Data? {
-        let renderer = ImageRenderer(content: StoryStage(story, knobs: knobs).environment(\.stationStill, true))
+    public static func png(_ story: Story, knobs: StoryKnobs, time: Double? = nil) -> Data? {
+        let renderer = ImageRenderer(content: StoryStage(story, knobs: knobs, time: time).environment(\.stationStill, true))
         renderer.scale = knobs.scale
         guard let image = renderer.cgImage else { return nil }
         return NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
+    }
+}
+
+// invariant: SPEC C3's Play: a transition story replayed through the same
+// moments its golden freezes, its time animated from 0 to 1.
+public struct StoryReplay: View, Animatable {
+    let story: Story
+    let knobs: StoryKnobs
+    public var time: Double
+
+    public init(_ story: Story, knobs: StoryKnobs, time: Double) {
+        self.story = story
+        self.knobs = knobs
+        self.time = time
+    }
+
+    public var animatableData: Double {
+        get { time }
+        set { time = newValue }
+    }
+
+    public var body: some View {
+        StoryStage(story, knobs: knobs, time: time).environment(\.stationStill, true)
     }
 }

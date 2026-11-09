@@ -25,6 +25,9 @@ extension Token.Motion {
 
     public static func freeze(_ progress: Double, _ pace: Pace) -> Double { pace.at(progress) }
 
+    public static let snappyDuration = 0.20
+    public static let smoothDuration = 0.34
+
     public static let reducedCurve = UnitCurve.easeInOut
     public static let easeOutCurve = UnitCurve.easeOut
 

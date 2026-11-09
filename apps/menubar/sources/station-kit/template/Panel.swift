@@ -76,6 +76,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationPanelWidth) private var width
     @Environment(\.stationPanelRoom) private var room
+    @Environment(\.stationCaught) private var caught
 
     @State private var measured = Measured()
     @State private var shown: CGFloat = 0
@@ -126,7 +127,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
         .frame(width: width, alignment: .topLeading)
         .overlayPreferenceValue(PopoverPins.self) { PopoverLayer(pins: $0) }
         .overlay(alignment: .top) { layered }
-        .modifier(PanelPane())
+        .modifier(PanelPane(bare: caught?.bare == true))
     }
 
     func padded<V: View>(_ view: V, _ edges: EdgeInsets?) -> some View {
@@ -219,13 +220,24 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
                 find
             }
             if let sheet = layers.sheet {
-                shape.fill(tokens.color.scrim)
-                sheet
+                arriving(shape.fill(tokens.color.scrim), sheet) { SheetReveal(progress: SheetReveal.frozen($0, reduce: $1)) }
             }
             if let alert = layers.alert {
-                shape.fill(tokens.color.scrim)
-                alert
+                arriving(shape.fill(tokens.color.scrim), alert) { PopAppear(progress: PopAppear.frozen($0, kind: .alert, reduce: $1), kind: .alert) }
             }
+        }
+    }
+
+    // invariant: a layer caught arriving draws its scrim and its card at
+    // their moment; at rest both are drawn as they stand.
+    @ViewBuilder
+    func arriving<Scrim: View, M: ViewModifier>(_ scrim: Scrim, _ card: AnyView, _ move: (Double, Bool) -> M) -> some View {
+        if let caught, caught.layer {
+            scrim.modifier(ScrimFade(progress: SheetReveal.frozen(caught.time, reduce: tokens.reduceMotion)))
+            card.modifier(move(caught.time, tokens.reduceMotion))
+        } else {
+            scrim
+            card
         }
     }
 }
@@ -313,13 +325,22 @@ struct EdgeFade: View {
 }
 
 struct PanelPane: ViewModifier {
+    var bare = false
     @Environment(\.stationStill) private var still
     @Environment(\.stationTokens) private var tokens
 
     func body(content: Content) -> some View {
+        if bare {
+            content.containerShape(RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous))
+        } else {
+            pane(content)
+        }
+    }
+
+    func pane(_ content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous)
         let scheme = tokens.scheme
-        content
+        return content
             .containerShape(shape)
             .background {
                 shape.fill(tokens.panel)

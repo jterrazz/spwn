@@ -4,6 +4,7 @@
     "note": "Stop infra with its name typed: Stop infra is on.",
     "pages": ["pages/machines.server.machine.infra.json"],
     "schema": "station.story/v1",
+    "tags": ["a11y"],
     "ui": {
         "alert": "stop",
         "sheet": {

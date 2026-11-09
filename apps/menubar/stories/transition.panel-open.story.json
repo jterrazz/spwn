@@ -1,0 +1,19 @@
+{
+    "freeze": 0.35,
+    "group": "transition",
+    "heightNote": "the panel is drawn scaled, which leaves its frame whole: the story measures the frame, the prototype the scaled glass",
+    "id": "transition.panel-open",
+    "note": "The panel grows out of the status item: scale .96 to 1 with opacity on smooth, caught at 120 ms of its 340.",
+    "pages": ["pages/machines.home.menubar.json"],
+    "play": {
+        "from": "menubar.count",
+        "gesture": "click the status item"
+    },
+    "samples": {
+        "cpu:mac-mini": 55,
+        "cpu:macbook-pro": 30,
+        "cpuh:linux-1": 37,
+        "cpuh:linux-3": 60
+    },
+    "schema": "station.story/v1"
+}

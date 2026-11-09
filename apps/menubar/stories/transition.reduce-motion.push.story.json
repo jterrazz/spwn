@@ -1,0 +1,12 @@
+{
+    "freeze": 0.58,
+    "group": "transition",
+    "id": "transition.reduce-motion.push",
+    "note": "Reduce Motion: the push is a dissolve in two halves, home gone before mac-mini shows, the height on 200 ms ease-in-out.",
+    "pages": ["pages/machines.macs.machine.mac-mini.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "click mac-mini with Reduce Motion on"
+    },
+    "schema": "station.story/v1"
+}

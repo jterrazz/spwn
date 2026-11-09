@@ -1,0 +1,13 @@
+{
+    "freeze": 0.5,
+    "group": "transition",
+    "heightNote": "caught at 160 ms, once the arriving page shows, where the prototype's capture is earlier and 6 pt taller",
+    "id": "transition.jump",
+    "note": "A sideways jump from mac-mini to Awake: the old page is gone in 130 ms before the new one fades in over 320, so two pages never overlap.",
+    "pages": ["pages/machines.keep.awake.json"],
+    "play": {
+        "from": "mac.mini.overview",
+        "gesture": "press ⌘E"
+    },
+    "schema": "station.story/v1"
+}

@@ -265,6 +265,7 @@ public struct RowStack: View {
                             .opacity(Self.hairline(i, of: rows, hovered: hovered, highlighted: lit) ? 1 : 0)
                     }
                 }
+                .caughtRow(row.id)
             }
         }
     }

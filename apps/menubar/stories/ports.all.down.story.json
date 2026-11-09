@@ -4,5 +4,6 @@
     "id": "ports.all.down",
     "note": "Ports while infra is down: its two ports greyed, unreachable, with nothing to run.",
     "pages": ["pages/machines.ports.down.ports.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

@@ -11,6 +11,7 @@
         "cpuh:linux-3": 60
     },
     "schema": "station.story/v1",
+    "tags": ["a11y"],
     "ui": {
         "unfolded": ["agents"]
     }

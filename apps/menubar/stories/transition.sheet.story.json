@@ -1,0 +1,17 @@
+{
+    "freeze": 0.35,
+    "group": "transition",
+    "id": "transition.sheet",
+    "note": "New VM unrolls from the panel's top: its header there from the first frame, the body revealed with a 6 pt drop, the scrim fading in.",
+    "pages": ["pages/machines.sheet.menubar.json"],
+    "play": {
+        "from": "home.needs",
+        "gesture": "click New VM"
+    },
+    "schema": "station.story/v1",
+    "ui": {
+        "sheet": {
+            "id": "new-vm"
+        }
+    }
+}

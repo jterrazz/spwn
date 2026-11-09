@@ -4,5 +4,6 @@
     "id": "accounts.all",
     "note": "Accounts · All machines: what needs you, every copy lent with its time left (the one under 30 min orange), each account signed in with the Macs that hold it, then Full list in Terminal and Lend an account….",
     "pages": ["pages/machines.accounts.accounts.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }

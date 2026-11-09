@@ -4,5 +4,6 @@
     "id": "needs.all",
     "note": "Needs you over every machine: five things, most urgent first, each with its verb; the upkeep apart.",
     "pages": ["pages/machines.needs.five.needs.json"],
-    "schema": "station.story/v1"
+    "schema": "station.story/v1",
+    "tags": ["a11y"]
 }
