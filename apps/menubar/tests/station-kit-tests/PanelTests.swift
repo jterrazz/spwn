@@ -134,8 +134,12 @@ final class PanelTests: XCTestCase {
         }
         let bare = try share(PanelLayers())
         let solid = AnyView(Token.Pane.opaque.frame(width: 100, height: 60))
-        for layers in [PanelLayers(find: solid), PanelLayers(sheet: solid), PanelLayers(popover: solid), PanelLayers(alert: solid)] {
+        for layers in [PanelLayers(find: solid), PanelLayers(sheet: solid), PanelLayers(alert: solid)] {
             XCTAssertGreaterThan(try share(layers), bare)
         }
+        let pinned = try XCTUnwrap(GlassTests.opaque(AnyView(Panel {
+            Color.clear.frame(height: 200).popoverPin(true) { Token.Pane.opaque.frame(width: 100, height: 60) }
+        }.stationAccessibility()), scheme: .dark))
+        XCTAssertGreaterThan(pinned, bare, "a popover pinned in the page draws over it")
     }
 }

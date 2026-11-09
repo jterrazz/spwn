@@ -104,7 +104,7 @@ struct ServerPage: View {
                 Card {
                     ForEach(Array(s.rows.enumerated()), id: \.offset) { i, row in
                         if i > 0 { RowSeparator() }
-                        PortRow(row, actions: actions, run: tap)
+                        PortsSection(s, actions: actions, run: tap, qr: handlers.toggleQR, shown: state.qr).port(row)
                     }
                 }
             }

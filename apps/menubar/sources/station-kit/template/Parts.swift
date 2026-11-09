@@ -295,6 +295,12 @@ struct MenuText: View {
 func perform(_ action: Action, _ handlers: PopoverHandlers) {
     if action.confirm != nil || action.form != nil {
         handlers.confirm(action)
+    } else if let text = action.run?.copy {
+        handlers.copy(text)
+        if let notice = HUDNotice(action) { handlers.hud(notice) }
+    } else if let link = action.run?.open, let url = URL(string: link) {
+        if let notice = HUDNotice(action) { handlers.hud(notice) }
+        handlers.open(url)
     } else {
         handlers.run(action, [:])
     }

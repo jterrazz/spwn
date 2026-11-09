@@ -37,7 +37,7 @@ public struct CopyFooter: View {
         let m = Token.Metric.CopyFooter.self
         HStack(spacing: 0) {
             if let command = footer.copy?.text {
-                Button { copy(command) } label: {
+                Button { if let action = actions.first(where: { $0.run?.copy == command }) { run(action) } else { copy(command) } } label: {
                     HStack(spacing: m.gap) {
                         Text(verbatim: command).font(Token.Role.copyCommand.font).lineLimit(1)
                         Image(systemName: Token.Symbol.copy).font(.system(size: m.glyph, weight: .regular))

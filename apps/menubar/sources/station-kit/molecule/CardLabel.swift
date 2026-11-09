@@ -6,14 +6,16 @@ public struct CardLabel: View {
     let title: String
     let value: [Value]
     let about: About?
+    let open: Bool
     let tap: (About) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
 
-    public init(_ title: String, value: [Value] = [], about: About? = nil, tap: @escaping (About) -> Void = { _ in }) {
+    public init(_ title: String, value: [Value] = [], about: About? = nil, open: Bool = false, tap: @escaping (About) -> Void = { _ in }) {
         self.title = title
         self.value = value
         self.about = about
+        self.open = open
         self.tap = tap
     }
 
@@ -52,8 +54,9 @@ public struct CardLabel: View {
         .buttonStyle(.plain)
         .focusEffectDisabled()
         .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + m.aboutRise }
-        .help(about.label ?? "")
+        .help(open ? "" : about.label ?? "")
         .accessibilityLabel(about.label ?? "")
+        .popoverPin(open, width: Token.Metric.Popover.width) { InfoPopover(about.text ?? "") }
     }
 }
 

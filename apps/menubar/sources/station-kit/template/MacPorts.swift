@@ -10,6 +10,6 @@ struct MacPorts: View {
     let run: (Action) -> Void
 
     var body: some View {
-        PortsSection(section, actions: page.actions ?? [], run: run, qr: handlers.toggleQR, shown: state.qr, unfolded: SharedPortCard.unfolded(page, state, handlers))
+        PortsSection(section, actions: page.actions ?? [], run: run, qr: handlers.toggleQR, about: { _ in handlers.toggleAbout(section.id ?? "") }, shown: state.qr, opened: state.about != nil && state.about == section.id)
     }
 }
