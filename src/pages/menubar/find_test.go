@@ -168,6 +168,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"Activity of This Mac", "", "Open", "", ""},
 			{"Ports of mac-mini", "", "Open", "", ""},
 			{"Activity of mac-mini", "", "Open", "", ""},
+			{"Needs you", "", "Open", "", ""},
 			{"Ports", "All machines", "Open", "cmd+p", ""},
 			{"Accounts", "All machines", "Open", "cmd+u", ""},
 			{"Awake", "All Macs", "Open", "cmd+e", ""},
@@ -365,5 +366,14 @@ func TestFindOffersNoShareOfAListenerOnItsVMsLoopback(t *testing.T) {
 	r.Ports.Macs[1].Ports = append(r.Ports.Macs[1].Ports, ports.Port{Machine: machine.Ref{Name: "linux-3", On: findMini}, Port: 20241, Process: "connector", Reach: ports.ThisMachine})
 	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindPorts, "listening:linux-3:20241"); row != nil {
 		t.Errorf("linux-3's loopback listener %+v, want no entry", row)
+	}
+}
+
+// invariant: SPEC 2-9: Needs you is a section of Find, so every need and
+// the upkeep are reached when the hero lists the needs whole.
+func TestFindOpensNeedsYou(t *testing.T) {
+	row := findRow(Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"}), FindSections, "needs")
+	if row == nil || row.Nav != NeedsID {
+		t.Errorf("the Needs you entry %+v, want it to open %s", row, NeedsID)
 	}
 }
