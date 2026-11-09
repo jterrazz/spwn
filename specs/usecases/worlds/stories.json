@@ -241,7 +241,21 @@
             },
             "engine": {
                 "version": "v4.0.0",
-                "started_at": "2026-10-17T10:30:00Z"
+                "started_at": "2026-10-17T10:30:00Z",
+                "memory": {
+                    "infra": {
+                        "state": "running",
+                        "boot_at": "2026-10-26T10:30:00Z"
+                    },
+                    "linux-3": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    },
+                    "review-bot": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    }
+                }
             },
             "facts": {
                 "automatic-updates": {
@@ -721,6 +735,16 @@
             "engine": {
                 "version": "v4.0.0",
                 "started_at": "2026-11-04T10:30:00Z",
+                "memory": {
+                    "agent-7f": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    },
+                    "linux-1": {
+                        "state": "running",
+                        "boot_at": "2026-11-07T08:30:00Z"
+                    }
+                },
                 "awake": {
                     "session": {
                         "lid": true,
