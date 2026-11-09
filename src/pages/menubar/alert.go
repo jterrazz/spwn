@@ -97,7 +97,7 @@ func disk(vm model.VM) string {
 	if vm.SizeGB <= 0 {
 		return "its disk"
 	}
-	return "its disk (" + strconv.Itoa(vm.SizeGB) + " GB)"
+	return "its disk (" + strconv.Itoa(vm.SizeGB) + " GB)"
 }
 
 // value: the site a server answers the world on: the host its health

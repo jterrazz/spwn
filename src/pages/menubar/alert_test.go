@@ -42,7 +42,7 @@ func TestAThrowawaysDeleteAsksYesOrNoAndListsWhatGoesWithIt(t *testing.T) {
 	if a.Confirm.Type != "" || !a.Confirm.Danger || a.Confirm.Yes != "Delete agent-7f" {
 		t.Fatalf("a throwaway's delete asks %+v, want yes or no, red, Delete agent-7f", a.Confirm)
 	}
-	if got := consequence(a.Confirm); got != "This can't be undone. It goes with its disk (12 GB), 2 shared ports and 2 accounts lent to it." {
+	if got := consequence(a.Confirm); got != "This can't be undone. It goes with its disk (12 GB), 2 shared ports and 2 accounts lent to it." {
 		t.Errorf("a throwaway's delete says %q", got)
 	}
 	if a.Run.In["Confirm"] != `"agent-7f"` {
@@ -53,7 +53,7 @@ func TestAThrowawaysDeleteAsksYesOrNoAndListsWhatGoesWithIt(t *testing.T) {
 func TestAPermanentWorkspacesDeleteAsksItsNameTyped(t *testing.T) {
 	vm := model.VM{Name: "api", Lifetime: model.Permanent, SizeGB: 24}
 	a := deleteWorkspace(vm, nil, 0, 0).action(graded, page.Action{Run: &page.Run{In: map[string]string{}}})
-	if a.Confirm.Type != "api" || consequence(a.Confirm) != "This can't be undone. It goes with its disk (24 GB)." {
+	if a.Confirm.Type != "api" || consequence(a.Confirm) != "This can't be undone. It goes with its disk (24 GB)." {
 		t.Errorf("a permanent workspace's delete asks %+v", a.Confirm)
 	}
 	if _, fixed := a.Run.In["Confirm"]; fixed {
@@ -67,7 +67,7 @@ func TestStoppingOrDeletingAVMNamesTheAgentsThatStopWithIt(t *testing.T) {
 		alert alert
 		want  string
 	}{
-		{deleteWorkspace(vm, []string{"linux-1", "docs-bot"}, 2, 0), "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (16 GB) and 2 shared ports."},
+		{deleteWorkspace(vm, []string{"linux-1", "docs-bot"}, 2, 0), "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (16 GB) and 2 shared ports."},
 		{stopWorkspace(vm, "This Mac", []string{"linux-1"}, 2), "Its agent linux-1 stops. Its disk is kept. 2 shared ports stop answering until it starts again."},
 		{stopWorkspace(vm, "This Mac", nil, 1), "Its disk is kept. 1 shared port stops answering until it starts again."},
 	} {

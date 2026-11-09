@@ -688,7 +688,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (40 GB)."
+            "text": "This can't be undone. It goes with its disk (40 GB)."
           }
         ],
         "danger": true,

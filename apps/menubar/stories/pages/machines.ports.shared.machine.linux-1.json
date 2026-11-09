@@ -2119,7 +2119,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agent linux-1 stops first. This can't be undone. It goes with its disk (40 GB), 3 shared ports and 2 accounts lent to it."
+            "text": "Its agent linux-1 stops first. This can't be undone. It goes with its disk (40 GB), 3 shared ports and 2 accounts lent to it."
           }
         ],
         "danger": true,

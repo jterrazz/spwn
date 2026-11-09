@@ -2103,7 +2103,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 accounts lent to it."
+            "text": "Its agents stop first: linux-1, docs-bot. This can't be undone. It goes with its disk (40 GB), 2 shared ports and 2 accounts lent to it."
           }
         ],
         "danger": true,

@@ -1823,7 +1823,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports."
+            "text": "This can't be undone. It goes with its disk (80 GB), its address and 2 ports."
           }
         ],
         "danger": true,
