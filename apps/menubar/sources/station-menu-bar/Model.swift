@@ -115,13 +115,13 @@ final class Model: ObservableObject {
 
     // invariant: SPEC A6: Find opens in the panel's place over the machines
     // opened last, its index (`menubar.find`) watched only while it is open;
-    // nil closes it and ends that watch.
+    // nil closes it and ends that watch. The index last read is kept, so
+    // Find opens with its list at once and the watch brings it up to date.
     func find(_ query: FindQuery?) {
         guard let query else {
             finding?.cancel()
             finding = nil
             state.find = nil
-            state.findIndex = nil
             return
         }
         if state.find == nil || finding == nil {
