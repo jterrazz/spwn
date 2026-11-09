@@ -17,6 +17,7 @@ extension Token.Metric.Popover {
 extension Token.Metric.Tooltip {
     public static let gap: CGFloat = 4
     public static let lead: CGFloat = 12
+    public static let delay: Double = 0.7
 }
 
 extension Token.Metric.HUD {
