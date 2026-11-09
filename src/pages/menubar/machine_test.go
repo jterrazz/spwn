@@ -259,7 +259,8 @@ func TestAVMBeingCreatedShowsItsBirthThenLands(t *testing.T) {
 func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 	p := macPageOf(t, miniMac, func(m *Machine) {
 		m.Awake = &awake.Report{Mac: miniMac, Engine: awake.EngineRunning, NeverSleeps: true, NeverHeld: true, Servers: []string{"infra"}}
-		m.Summary.Needs = []overview.Need{{Section: "settings", Subject: "firewall", Text: "Firewall off"}, {Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate}}
+		m.Summary.Needs = []overview.Need{{Section: "settings", Subject: "firewall", Text: "Firewall: off"}, {Section: "apps", Subject: "updates", Text: "2 app updates", Call: CallUpdate}}
+		m.Summary.Lines = append(m.Summary.Lines, overview.Line{Section: "disk", Parts: []overview.Part{{Bytes: 388_000_000_000, Word: "free"}, {Word: "can rebuild"}}})
 		m.Samples = []activity.Reading{{Sample: activity.Sample{MemTotal: 64 << 30, MemUsed: 45 << 30}}}
 	})
 	care := sectionOf(p, SectionCare).Items
@@ -267,13 +268,23 @@ func TestTheCareCardSaysAwakeAndTheWorstUpkeep(t *testing.T) {
 		t.Fatalf("awake row %+v", r)
 	}
 	head := care[1].Group.Head
-	if words(head.Cells[0]) != "firewall off | 1 more" || care[1].Group.Fold != page.Folded || len(care[1].Group.Items) != 2 {
+	if words(head.Cells[0]) != "firewall off | 1 more" || care[1].Group.Fold != page.Folded || len(care[1].Group.Items) != 3 {
 		t.Fatalf("upkeep %q folded %s over %d rows", words(head.Cells[0]), care[1].Group.Fold, len(care[1].Group.Items))
 	}
+	disk := false
 	for _, it := range care[1].Group.Items {
 		if it.Row.Label == "Apps" && words(it.Row.Detail) != "2 updates" {
 			t.Fatalf("the Apps item reads %q, want its updates said once", words(it.Row.Detail))
 		}
+		if it.Row.Label == "Disk" {
+			disk = true
+			if d := it.Row.Detail; d.Kind != page.KindList || len(d.Items) != 1 || d.Items[0].Unit != "free" {
+				t.Fatalf("the Disk item reads %+v, want its free space alone when nothing can be rebuilt", d)
+			}
+		}
+	}
+	if !disk {
+		t.Fatal("the upkeep unfolds to no Disk item")
 	}
 	if g := sectionOf(p, SectionGauges).Items[1].Gauge; g.Value.Text != "19 GB free" || g.Bar == nil {
 		t.Fatalf("memory gauge %+v, want 19 GB free over its bar", g)

@@ -453,13 +453,25 @@ func (o macOverview) upkeepRows() []page.Item {
 		if v.IsNone() {
 			continue
 		}
-		row := page.Row{ID: "line:" + string(id), Label: sectionWord(id), Glyph: symbol(sectionSymbol(id), page.SignalQuiet), Mark: page.OK, Detail: v}
+		row := page.Row{ID: "line:" + string(id), Label: sectionWord(id), Glyph: symbol(sectionSymbol(id), page.SignalQuiet), Mark: page.OK, Detail: withoutNothing(v)}
 		out = append(out, page.Item{Row: &row})
 	}
 	if ready := o.ready(); ready.of > 0 {
 		out = append(out, page.Item{Row: ready.row()})
 	}
 	return out
+}
+
+// value: an upkeep line without the sizes that hold nothing: a Disk with
+// nothing to rebuild says its free space alone.
+func withoutNothing(v page.Value) page.Value {
+	if v.Kind != page.KindList {
+		return v
+	}
+	v.Items = slices.DeleteFunc(slices.Clone(v.Items), func(p page.Value) bool {
+		return p.Kind == page.KindSize && p.N == 0 && p.Unit != "free"
+	})
+	return v
 }
 
 const RowReady = "ready"
