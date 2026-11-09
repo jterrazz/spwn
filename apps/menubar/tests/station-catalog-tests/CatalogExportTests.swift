@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+@testable import StationCatalog
 import StationKit
 import XCTest
 
@@ -73,6 +74,20 @@ final class CatalogExportTests: XCTestCase {
     func size(_ file: String) throws -> (Int, Int) {
         let rep = try XCTUnwrap(NSBitmapImageRep(data: Data(contentsOf: out.appendingPathComponent(file))), "\(file) is not an image")
         return (rep.pixelsWide, rep.pixelsHigh)
+    }
+
+    // invariant: SPEC C3's Play replays a transition over its movement's
+    // run at 1, 0.25 and 0.1 of its speed; a story at rest has no replay.
+    func testPlayReplaysATransitionOverItsRunAtEachSpeed() throws {
+        try StoryFile(id: "transition.push", group: .transition, note: "n", pages: ["pages/menubar.home.two-macs.json", "pages/menubar.mac.mini.json"],
+                      play: StoryPlay(from: "home.needs", gesture: "click mac-mini"), freeze: 0.35)
+            .encoded().write(to: stories.appendingPathComponent("transition.push" + Stories.suffix))
+        let loaded = try Stories.load(root: stories)
+        let push = try XCTUnwrap(loaded.first { $0.id == "transition.push" })
+        let runs = Catalog.speeds.compactMap { Catalog.replay(push, speed: $0) }
+        XCTAssertEqual(runs.count, 3)
+        for (run, want) in zip(runs, [0.34, 1.36, 3.4]) { XCTAssertEqual(run, want, accuracy: 1e-9) }
+        XCTAssertNil(Catalog.replay(try XCTUnwrap(loaded.first { $0.id == "home.needs" }), speed: 1))
     }
 
     func testTheExportDrawsEveryStoryTheFilterNamesInDarkAndLightThenReturns() throws {

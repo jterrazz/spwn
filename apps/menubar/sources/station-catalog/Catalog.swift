@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 final class Catalog: ObservableObject {
-    static let speeds: [Double] = [1, 0.25, 0.1]
+    nonisolated static let speeds: [Double] = [1, 0.25, 0.1]
 
     @Published private(set) var stories: [Story] = []
     @Published private(set) var failure: String?
@@ -55,8 +55,20 @@ final class Catalog: ObservableObject {
 
     var playable: Bool { current?.play.flatMap { story($0.from) } != nil }
 
+    // value: a transition story's replay, its time from 0 to 1 over its
+    // movement's run slowed by the speed.
+    nonisolated static func replay(_ story: Story, speed: Double) -> Double? {
+        StoryMotion.of(story.id).map { $0.motion.duration / speed }
+    }
+
     func play() {
         guard let target = current, let from = target.play.flatMap({ story($0.from) }) else { return }
+        if let run = Self.replay(target, speed: speed) {
+            live = false
+            progress = 0
+            DispatchQueue.main.async { withAnimation(.linear(duration: run)) { self.progress = 1 } }
+            return
+        }
         let session = Live(from.state)
         self.session = session
         live = true
