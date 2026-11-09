@@ -171,6 +171,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 page.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.content = $0 }
+                    .background(OverlayScroller())
             }
             .scrollPosition($position)
             .onScrollGeometryChange(for: Edges.self) { g in
@@ -368,3 +369,37 @@ struct PanelPane: ViewModifier {
     }
 }
 
+// invariant: the panel's scroll view keeps no scroller room: with a mouse
+// plugged in macOS lays its scroller beside the content and narrows the
+// visible width under a body laid out at the panel's full width, so its
+// trailing edge is cut; its scrollers float over the content, and stay
+// hidden as the panel draws none.
+struct OverlayScroller: NSViewRepresentable {
+    final class Floater: NSView {
+        var watching: NSObjectProtocol?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            float()
+            guard watching == nil else { return }
+            watching = NotificationCenter.default.addObserver(forName: NSScroller.preferredScrollerStyleDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.float() }
+            }
+        }
+
+        func float() {
+            guard let scroll = enclosingScrollView else { return }
+            scroll.scrollerStyle = .overlay
+            scroll.hasVerticalScroller = false
+            scroll.hasHorizontalScroller = false
+        }
+
+        deinit {
+            if let watching { NotificationCenter.default.removeObserver(watching) }
+        }
+    }
+
+    func makeNSView(context: NSViewRepresentableContext<OverlayScroller>) -> Floater { Floater() }
+
+    func updateNSView(_ view: Floater, context: NSViewRepresentableContext<OverlayScroller>) { view.float() }
+}
