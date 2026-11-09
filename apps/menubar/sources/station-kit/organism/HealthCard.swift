@@ -43,6 +43,7 @@ public struct HealthCard: View {
                 Button(action: fold) { headLine }
                     .buttonStyle(.plain)
                     .allowsHitTesting(group?.fold == "folded")
+                    .accessibilityLabel(head.label ?? "")
                     .accessibilityValue(unfolded ? "open" : "closed")
                 if unfolded {
                     VStack(alignment: .leading, spacing: 0) {

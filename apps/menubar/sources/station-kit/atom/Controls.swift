@@ -82,6 +82,8 @@ public struct Segmented: View {
                 }
                 .buttonStyle(.plain)
                 .keyboardShortcut(shortcut(i))
+                .accessibilityLabel(o.label)
+                .accessibilityAddTraits(o.on ? .isSelected : [])
             }
         }
         .background(alignment: .topLeading) {
@@ -169,6 +171,7 @@ public struct PanelButton: View {
             .contentShape(shape)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
         .onHover { hovering = $0 }
         .animation(tokens.motion(Token.Motion.tint), value: hovering)
     }
@@ -202,6 +205,7 @@ public struct VerbButton: View {
         }
         .buttonStyle(.plain)
         .fixedSize()
+        .accessibilityLabel(title)
         .onHover { hovering = $0 }
         .animation(tokens.motion(Token.Motion.tint), value: hovering)
     }
