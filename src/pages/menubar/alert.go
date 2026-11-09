@@ -256,7 +256,7 @@ const (
 // Forget… of another Mac, Stop everything… while a workspace runs on it.
 func macAlerts(m Machine, h model.MacView, label string) []page.Action {
 	var running, servers []string
-	for _, vm := range h.VMs {
+	for _, vm := range liveFirst(h.VMs) {
 		switch {
 		case vm.Lifetime.Kind() == machine.Server:
 			servers = append(servers, vm.Name)
