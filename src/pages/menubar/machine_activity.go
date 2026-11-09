@@ -157,13 +157,21 @@ func means(c activity.Chart) []float64 {
 }
 
 // value: the bar drawn highest: the bucket of the highest mean; -1 when
-// no bucket holds a point.
+// no bucket holds a point, or when every bar is drawn at one height, a
+// flat series having no peak to name.
 func peakOf(c activity.Chart) int {
-	peak := -1
+	peak, low := -1, math.Inf(1)
 	for i, b := range c.Buckets {
-		if b.Points > 0 && (peak < 0 || b.Mean > c.Buckets[peak].Mean) {
+		if b.Points == 0 {
+			continue
+		}
+		low = min(low, math.Round(b.Mean))
+		if peak < 0 || b.Mean > c.Buckets[peak].Mean {
 			peak = i
 		}
+	}
+	if peak >= 0 && math.Round(c.Buckets[peak].Mean) <= low {
+		return -1
 	}
 	return peak
 }
