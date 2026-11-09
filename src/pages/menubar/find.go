@@ -139,8 +139,9 @@ func opens(id, key string) page.Action {
 
 func (f finder) needs() []entry {
 	// value: SPEC A6: what needs you, ranked as Needs you ranks it, each
-	// titled by its verb first ("Restart infra", "Review review-bot", "PR #42
-	// is ready"); upkeep is not Find's.
+	// titled by its verb first ("Restart infra", "Review review-bot"), the
+	// rest of its title the list of its detail ("PR #42 is ready"), else
+	// its detail what Needs you says of it; upkeep is not Find's.
 	r := NeedsReading{Now: f.r.Now, Zone: f.r.Zone, All: f.r.All, Ports: f.r.Ports, Accounts: f.r.Accounts}
 	if f.r.Home != nil {
 		r.Overviews = append([]overview.Summary{*f.r.Home}, f.r.Away...)
@@ -311,7 +312,7 @@ func (f finder) ports() []entry {
 			named := p.Named()
 			row := page.Row{ID: "listening:" + addr, Label: named.Name, Detail: page.Texts(addr), Glyph: portGlyph(named)}
 			if p.Reach == ports.Outside {
-				row.Detail = page.Text("public")
+				row.Detail = page.Texts(addr, "public")
 			}
 			e := entry{row: row, tags: portTags(named, p.Port, p.Machine.Name, "listening")}
 			if f.workspace(p.Machine.Name) {
@@ -379,9 +380,10 @@ func (f finder) sections() []entry {
 
 func (f finder) actions() []entry {
 	// value: SPEC B5.6's actions available now: This Mac's keep-awake, never
-	// shortening the term it holds; New VM on each awake Mac, the roomiest
-	// first and on ⌘N; each server's restart, asking first while it is
-	// healthy; each Mac's clean-up of its finished throwaways.
+	// shortening the term it holds, and the one that follows its agent at
+	// work; New VM on each awake Mac, the roomiest first and on ⌘N; each
+	// server's restart, asking first while it is healthy; each Mac's
+	// clean-up of its finished throwaways.
 	out := f.awake()
 	roomiest := model.Roomiest(*f.r.All)
 	if roomiest == "" {
@@ -449,7 +451,34 @@ func (f finder) awake() []entry {
 	}
 	verb := page.Action{ID: "awake-for", Label: "Keep awake", Mutates: true, Run: &page.Run{Call: CallKeepAwake, In: in},
 		Hud: hud("This Mac stays awake until " + f.at(until))}
-	return []entry{{row: page.Row{ID: "awake", Label: label, Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "keep"}, verb: verb}}
+	out := []entry{{row: page.Row{ID: "awake", Label: label, Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "keep"}, verb: verb}}
+	if run, ok := f.working(); ok && (r.Session == nil || r.Session.Run != run) {
+		in := map[string]string{"Run": run}
+		if s := r.Session; s != nil {
+			in = flags(s.Lid, s.Battery)
+			in["Run"] = run
+		}
+		follow := page.Action{ID: "awake-run:" + run, Label: "Keep awake", Mutates: true, Run: &page.Run{Call: CallKeepAwake, In: in},
+			Hud: hud("This Mac stays awake until " + run + " is done")}
+		out = append(out, entry{row: page.Row{ID: "awake-run:" + run, Label: "Awake until " + run + " ends", Glyph: symbol("sun.max", "")}, tags: []string{"awake", "caffeinate", "run"}, verb: follow})
+	}
+	return out
+}
+
+// value: the first VM of This Mac whose agent is at work: the run a
+// keep-awake can follow.
+func (f finder) working() (string, bool) {
+	for _, h := range f.r.All.Macs {
+		if !h.ThisMac {
+			continue
+		}
+		for _, vm := range model.Ordered(h.VMs) {
+			if vm.State == model.Running && vm.Agent != nil && vm.Agent.State == "working" {
+				return vm.Name, true
+			}
+		}
+	}
+	return "", false
 }
 
 func (f finder) restart(h model.MacView, vm model.VM) entry {
