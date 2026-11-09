@@ -33,7 +33,7 @@ func TestEveryStationLineAHintGivesIsALeafOfStation(t *testing.T) {
 	}
 }
 
-func askedHelp(t *testing.T, args []string) (string, int) {
+func askedHelp(t *testing.T, args []string) (usage string, code int) {
 	t.Helper()
 	dir := t.TempDir()
 	open := func(name string) *os.File {
@@ -45,10 +45,11 @@ func askedHelp(t *testing.T, args []string) (string, int) {
 		return f
 	}
 	in, out, errs := open("in"), open("out"), open("err")
-	code := Run(args, []string{"HOME=" + dir, "PATH=/usr/bin:/bin", "NO_COLOR=1"}, in, out, errs)
+	code = Run(args, []string{"HOME=" + dir, "PATH=/usr/bin:/bin", "NO_COLOR=1"}, in, out, errs)
 	said, err := os.ReadFile(out.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
-	return string(said), code
+	usage = string(said)
+	return usage, code
 }

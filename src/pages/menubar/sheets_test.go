@@ -55,7 +55,8 @@ func fleetOfTwo() model.AllMachines {
 func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 	all := fleetOfTwo()
 	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs), sheetNow, false)
-	calls := []string{a.Run.Call + " " + a.Run.In["VMs"]}
+	calls := make([]string, 0, 1+len(a.Run.And))
+	calls = append(calls, a.Run.Call+" "+a.Run.In["VMs"])
 	for _, r := range a.Run.And {
 		on := ""
 		if r.Target != nil {
@@ -77,7 +78,7 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 	if note := a.Form.Fields[2].Note; note != "linux-1 has a working agent, so it stays. away is still running, so it stays." {
 		t.Errorf("the note says %q", note)
 	}
-	var words []string
+	words := make([]string, 0, len(a.Form.Primary))
 	for _, p := range a.Form.Primary {
 		words = append(words, p.Label)
 		if p.Danger != (p.When.Key == "VMs") {

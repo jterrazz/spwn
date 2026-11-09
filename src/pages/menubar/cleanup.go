@@ -21,7 +21,7 @@ type cleanupOf struct {
 }
 
 func cleanupsOf(macs []model.MacView) []cleanupOf {
-	var out []cleanupOf
+	out := make([]cleanupOf, 0, len(macs))
 	for _, m := range macs {
 		gone, kept := model.Cleanup(m.VMs)
 		c := cleanupOf{mac: m, gone: gone}

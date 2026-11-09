@@ -10,8 +10,11 @@ import (
 	"github.com/jterrazz/studio-station/src/page"
 )
 
-// value: a workspace an account may be lent to: running, on an awake Mac.
-type Workspace struct{ VM, Mac string }
+type Workspace struct {
+	// value: a running workspace of an awake Mac, a port may be shared
+	// from and an account lent to.
+	VM, Mac string
+}
 
 func RunningWorkspaces(all model.AllMachines) []Workspace {
 	var out []Workspace
@@ -139,9 +142,9 @@ func (b accountsBody) lendFor() page.Field {
 	return f
 }
 
-// value: SPEC A5: when a loan ends, said by day: at its hour today,
-// tomorrow at its hour, else its weekday and date.
 func EndsBy(now, end time.Time) string {
+	// value: SPEC A5: when a loan ends, said by day: at its hour today,
+	// tomorrow at its hour, else its weekday and date.
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
 	switch {

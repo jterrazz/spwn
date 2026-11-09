@@ -67,13 +67,13 @@ func settingHint(a page.Action, subject string) page.Action {
 
 // value: an exposed port's Declare public…: what declaring means, and
 // the leaf that declares it, the route the owner's to name.
-func declareHint(p ports.Port, mac string, self string) page.Action {
+func declareHint(p ports.Port, mac, self string) page.Action {
 	a := page.Action{ID: ActionDeclareHint + p.Key(), Label: "Declare public", On: page.OnRow, Rows: []string{p.Key()}, Priority: 2}
 	why := "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is " + catalog.RouteNames() + "."
 	return hintSheet(a, HintDeclarePublic, "Declare a port public", why, hintLine{Command: DeclareCommand(p, mac, self)})
 }
 
-func DeclareCommand(p ports.Port, mac string, self string) string {
+func DeclareCommand(p ports.Port, mac, self string) string {
 	line := "station ports declare "
 	switch {
 	case p.Machine.On != "":

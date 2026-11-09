@@ -174,7 +174,7 @@ func TestAnExposedPortOffersDeclarePublicAndItsProcess(t *testing.T) {
 		t.Fatalf("exposed %+v", rows)
 	}
 	got := make([][]string, 0, len(rows))
-	var lines []string
+	lines := make([]string, 0, len(rows))
 	for _, r := range rows {
 		declare, show := action(p, r.Menu[0]), action(p, r.Menu[1])
 		if declare == nil || declare.Sheet != page.SheetHint+HintDeclarePublic || show == nil || show.Label != "Show process" {
