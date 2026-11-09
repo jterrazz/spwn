@@ -29,6 +29,7 @@ public struct FindCapsule: View {
         .buttonStyle(.plain)
         .keyboardShortcut("k", modifiers: .command)
         .onHover { hovering = $0 }
+        .panelFocus(.find, look: .control, radius: m.fieldRadius)
         .animation(tokens.motion(Token.Motion.tint), value: hovering)
         .accessibilityLabel(Text(Token.FindCapsule.words))
     }

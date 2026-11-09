@@ -68,7 +68,7 @@ extension Story {
         state.scrub = ui.scrub
         state.segment = ui.segment
         state.unfolded = ui.unfolded ?? []
-        state.lit = ui.hover ?? ui.highlight
+        state.lit = ui.hover
         if let window = ui.window, let machine = state.shown?.context?.machine { state.windows[machine] = window }
         state.pending = ui.pending ?? []
         state.prOpened = ui.prOpened ?? []
@@ -106,6 +106,7 @@ public struct StoryView: View {
             }
         }
         .environment(\.stationMenuPick, MenuPick(handlers))
+        .environment(\.stationFocus, story.ui.highlight.map(PanelFocus.init))
     }
 
     @ViewBuilder

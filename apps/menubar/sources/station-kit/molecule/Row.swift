@@ -33,6 +33,8 @@ public struct RowView: View {
     let run: (Action) -> Void
     let hovered: (Bool) -> Void
     @Environment(\.stationTokens) private var tokens
+    @Environment(\.stationFocus) private var focus
+    @Environment(\.stationPointerHeld) private var held
     @State private var hovering = false
 
     public init(_ row: Row, columns: [Column] = [], actions: [Action] = [], highlighted: Bool = false, run: @escaping (Action) -> Void = { _ in }, hovered: @escaping (Bool) -> Void = { _ in }) {
@@ -75,7 +77,8 @@ public struct RowView: View {
         return actions.first { $0.id == id || $0.key == id }
     }
 
-    var lit: Bool { highlighted || hovering }
+    var keyed: Bool { row.id.map { focus == .row($0) } ?? false }
+    var lit: Bool { highlighted || hovering || keyed }
     var navigable: Bool { row.nav != nil }
     var dim: Bool { row.signal == "asleep" || row.signal == "faint" }
     var stale: Bool { row.signal == "stale" }
@@ -97,6 +100,7 @@ public struct RowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             if let quick = Self.action(row.quick, in: actions) {
                 RoundButton(quick.icon ?? Token.Symbol.terminal, size: Self.accessory(row) == .ring ? .small : .regular) { run(quick) }
+                    .accessibilityLabel(Text(quick.label ?? ""))
                     .opacity(lit ? 1 : 0)
                     .animation(tokens.motion(Token.Motion.tint), value: lit)
                     .offset(x: lit ? 0 : m.quickSlide)
@@ -117,10 +121,17 @@ public struct RowView: View {
         }
         .contentShape(Rectangle())
         .coordinateSpace(name: Self.space)
-        .onHover { on in
+        .onContinuousHover { phase in
+            let on: Bool
+            switch phase {
+            case .active: on = !held
+            case .ended: on = false
+            }
+            guard on != hovering else { return }
             hovering = on
             hovered(on)
         }
+        .modifier(RowFocus(id: row.id, navigable: navigable || row.verb != nil))
         .animation(tokens.motion(Token.Motion.tint), value: lit)
     }
 
@@ -207,7 +218,13 @@ public struct RowStack: View {
     let open: ((Row) -> Void)?
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
+    @Environment(\.stationFocus) private var focus
     @State private var hovered: Int?
+
+    var lit: String? {
+        if case let .row(id)? = focus { return id }
+        return highlighted
+    }
 
     public init(_ rows: [Row], columns: [Column] = [], actions: [Action] = [], highlighted: String? = nil, open: ((Row) -> Void)? = nil,
                 run: @escaping (Action) -> Void = { _ in }) {
@@ -245,10 +262,23 @@ public struct RowStack: View {
                             .frame(height: m.hairline)
                             .padding(.leading, RowView.inset(RowView.accessory(row)))
                             .padding(.trailing, m.insetEnd)
-                            .opacity(Self.hairline(i, of: rows, hovered: hovered, highlighted: highlighted) ? 1 : 0)
+                            .opacity(Self.hairline(i, of: rows, hovered: hovered, highlighted: lit) ? 1 : 0)
                     }
                 }
             }
+        }
+    }
+}
+
+struct RowFocus: ViewModifier {
+    let id: String?
+    let navigable: Bool
+
+    func body(content: Content) -> some View {
+        if let id, navigable {
+            content.panelFocus(.row(id), look: .row, radius: Token.Metric.Row.radius)
+        } else {
+            content
         }
     }
 }

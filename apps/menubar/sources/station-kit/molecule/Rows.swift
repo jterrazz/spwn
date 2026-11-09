@@ -30,6 +30,7 @@ struct QuickSlot: View {
     var body: some View {
         if let action {
             RoundButton(action.icon ?? Token.Symbol.copy, size: size, quiet: true) { run(action) }
+                .accessibilityLabel(Text(action.label ?? ""))
                 .opacity(lit ? 1 : 0)
                 .animation(tokens.motion(Token.Motion.tint), value: lit)
                 .offset(x: lit ? 0 : Token.Metric.Row.quickSlide)
@@ -49,7 +50,10 @@ public struct NeedRow: View {
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
+    @Environment(\.stationFocus) private var focus
     @State private var hovering = false
+
+    var keyed: Bool { row.id.map { focus == .row($0) } ?? false }
 
     public init(_ row: Row, actions: [Action] = [], highlighted: Bool = false, busy: Set<String> = [], run: @escaping (Action) -> Void = { _ in }) {
         self.row = row
@@ -90,8 +94,9 @@ public struct NeedRow: View {
                     .allowsHitTesting(!waiting)
             }
         }
-        .modifier(RowSurface(height: Token.Metric.Need.height, padding: Token.Metric.Need.padding, tinted: row.nav != nil && (hovering || highlighted)))
+        .modifier(RowSurface(height: Token.Metric.Need.height, padding: Token.Metric.Need.padding, tinted: row.nav != nil && (hovering || highlighted || keyed)))
         .onHover { hovering = $0 }
+        .modifier(RowFocus(id: row.id, navigable: row.nav != nil || row.verb != nil))
     }
 }
 
@@ -107,6 +112,7 @@ public struct PortRow: View {
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
+    @Environment(\.stationFocus) private var focus
     @State private var hovering = false
     @State private var landed = false
 
@@ -136,7 +142,7 @@ public struct PortRow: View {
     }
 
     var off: Bool { row.signal == "faint" || row.signal == "asleep" }
-    var lit: Bool { hovering || highlighted }
+    var lit: Bool { hovering || highlighted || row.id.map { focus == .row($0) } == true }
     var link: Action? { Self.link(row, in: actions) }
 
     var name: Text {
@@ -219,6 +225,7 @@ public struct PortRow: View {
             withAnimation(Token.Motion.fresh) { landed = true }
         }
         .onHover { hovering = $0 }
+        .modifier(RowFocus(id: row.id, navigable: row.nav != nil || row.verb != nil))
     }
 }
 

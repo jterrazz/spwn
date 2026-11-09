@@ -130,11 +130,11 @@ public struct AlertCard: View {
         let yes = PanelButton(confirm.yes ?? "OK", look: danger ? .destructive : .tint, big: true, grow: true) { onAnswer(true) }.disabled(!allowed)
         return HStack(spacing: a.buttonGap) {
             if Self.yesIsDefault(confirm) {
-                cancel.keyboardShortcut(.cancelAction)
-                yes.keyboardShortcut(.defaultAction)
+                cancel.keyboardShortcut(.cancelAction).panelFocus(.cancel, look: .control, radius: Token.Metric.Control.big.radius)
+                yes.keyboardShortcut(.defaultAction).panelFocus(.confirm, look: .control, radius: Token.Metric.Control.big.radius)
             } else {
-                cancel.keyboardShortcut(.defaultAction)
-                yes
+                cancel.keyboardShortcut(.defaultAction).panelFocus(.cancel, look: .control, radius: Token.Metric.Control.big.radius)
+                yes.panelFocus(.confirm, look: .control, radius: Token.Metric.Control.big.radius)
             }
         }
     }

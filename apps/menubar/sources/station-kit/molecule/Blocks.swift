@@ -101,6 +101,7 @@ public struct TileView: View {
         .modifier(CardFill(lit: tile.nav != nil && (hovering || highlighted || tipped), radius: m.radius))
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
+        .modifier(TileFocus(nav: tile.nav, radius: m.radius))
         .help(Self.tooltip(tile) ?? "")
         .popoverPin(tipped, side: .tooltip) { TooltipPreview(Self.tooltip(tile) ?? "") }
     }
@@ -306,5 +307,18 @@ public struct HUDCapsule: View {
         .padding(m.padding)
         .frame(height: m.height)
         .background(UnevenRoundedRectangle(bottomLeadingRadius: m.corner, bottomTrailingRadius: m.corner, style: .continuous).fill(tokens.color.hud))
+    }
+}
+
+struct TileFocus: ViewModifier {
+    let nav: String?
+    let radius: CGFloat
+
+    func body(content: Content) -> some View {
+        if let nav {
+            content.panelFocus(.control(nav), look: .control, radius: radius)
+        } else {
+            content
+        }
     }
 }
