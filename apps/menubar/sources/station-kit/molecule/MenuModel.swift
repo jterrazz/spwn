@@ -58,7 +58,7 @@ public struct MenuModel: Equatable, Sendable {
         let sub = (a.submenu ?? []).compactMap { item($0, actions: actions, checked: checked) }
         let asks = a.confirm != nil || a.form != nil || a.sheet != nil || id.hasPrefix(qr)
         let words = (a.label ?? "") + (asks && !(a.label ?? "").hasSuffix(Token.Glyph.ellipsis) ? Token.Glyph.ellipsis : "")
-        return MenuItem(id: id, title: words, icon: a.icon, key: a.key, destructive: a.destructive == true || a.confirm?.danger == true,
+        return MenuItem(id: id, title: words, icon: a.icon, key: a.key, destructive: a.destructive == true,
                         enabled: a.disabled == nil, checked: a.picked == true || checked.contains(id), submenu: sub, action: a, link: link(of: a, in: actions))
     }
 

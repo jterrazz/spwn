@@ -65,7 +65,7 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.page.mac"], ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
         XCTAssertEqual(read["menu.page.this-mac"], ["This Mac", "Open in Terminal ⌘T", "-", "Stop everything… (red)"])
         XCTAssertEqual(read["menu.page.mac.asleep"], ["macbook-air", "Wake macbook-air", "-", "Forget… (red)"])
-        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart", "Stop… (red)", "-", "Delete… (red)"])
+        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart…", "Stop… (red)", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.page.ports"], ["Share a port…", "Declare a port public…"])
     }
 
