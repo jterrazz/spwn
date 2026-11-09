@@ -148,6 +148,7 @@ public final class Navigation: @unchecked Sendable {
         h.push = { [weak self] in self?.open($0) }
         h.window = { [weak self] in self?.window($0) }
         h.back = { [weak self] in self?.back() }
+        h.home = { [weak self] in self?.home() }
         return h
     }
 }

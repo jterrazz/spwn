@@ -135,6 +135,7 @@ public struct PopoverHandlers {
     public var remember: (String, String) -> Void = { _, _ in }
     public var toggleAbout: (String) -> Void = { _ in }
     public var hud: (HUDNotice) -> Void = { _ in }
+    public var home: () -> Void = {}
 
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },
@@ -227,6 +228,7 @@ public struct Popover: View {
             }
         }
         .environment(\.stationMenuPick, MenuPick(handlers))
+        .modifier(PanelKeyboard(state: state, handlers: handlers))
     }
 
     // value: a page of the menu bar's own (Ports, Awake, Activity) drawn in
@@ -275,11 +277,6 @@ public struct Popover: View {
                 .blur(radius: layer == nil ? 0 : S.blur)
             }
             .background { BackKey(state: state, handlers: handlers) }
-            .onKeyPress(characters: .letters, phases: .down) { press in
-                guard state.confirming == nil, !state.menu else { return .ignored }
-                handlers.find(FindQuery(press.characters))
-                return .handled
-            }
             .environment(\.stationHints, false)
         } else {
             Panel(insets: .flush, bounded: scrolls, key: key, sheet: state.confirming, layers: AlertLayer.layers(state.shown, state, handlers)) {
@@ -393,7 +390,7 @@ struct BackKey: View {
     enum Gesture: Equatable { case close, back }
 
     static func gesture(_ state: PanelState) -> Gesture? {
-        guard state.confirming == nil else { return nil }
+        guard state.confirming == nil, !state.menu, state.qr == nil, state.about == nil else { return nil }
         return state.pushed == nil ? .close : .back
     }
 

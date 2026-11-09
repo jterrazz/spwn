@@ -10,8 +10,8 @@ struct HomePage: View {
     let state: PanelState
     let handlers: PopoverHandlers
     @State private var unfolded = false
-    @State private var lit: Int?
     @State private var folds: Set<String>
+    @Environment(\.stationFocus) private var focus
     @Environment(\.stationPalette) private var palette
     @Environment(\.stationStill) private var still
 
@@ -26,15 +26,10 @@ struct HomePage: View {
     // the engine sends them.
     var cards: Bool { page.section(HomeCards.macs) != nil }
 
-    // value: the lines the arrows move through, as drawn: the cards'
-    // navigable rows, else the machines' lines.
-    var lines: [Row] {
-        if cards { return HomeCards.navigable(page, unfolded: folds) }
-        guard let machines = page.section("machines") else { return [] }
-        return HomeKeys.rows(MachineTree(section: machines, kinds: false, only: nil, open: { _ in }).lines())
+    var litID: String? {
+        if case let .row(id)? = focus { return id }
+        return state.lit
     }
-
-    var litID: String? { lit.flatMap { i in lines.indices.contains(i) ? lines[i].id : nil } ?? state.lit }
 
     var hero: Section? { page.section(Self.hero) }
     static let hero = "hero"
@@ -74,18 +69,6 @@ struct HomePage: View {
             SheetFor(page: page, state: state, handlers: handlers)
             if (!cards || state.menu), state.confirming == nil || page.action(state.confirming ?? "")?.on == "row" {
                 menu
-            }
-        }
-        .background {
-            if !still, state.confirming == nil {
-                ArrowKeys(move: { lit = HomeKeys.moved(lit, by: $0, count: lines.count) },
-                          submit: { guard let id = litID else { return false }
-                              if cards, let nav = lines.first(where: { $0.id == id })?.nav {
-                                  go(nav, handlers)
-                              } else {
-                                  handlers.openMachine(id)
-                              }
-                              return true })
             }
         }
     }
@@ -411,33 +394,6 @@ public enum HomeKeys {
     }
 }
 
-// invariant: a page's keys without a field to type in: Up and Down move
-// the line lit, Return opens it; it takes the keys as the page shows, and
-// every other key goes on to the panel's shortcuts.
-struct ArrowKeys: View {
-    let move: (Int) -> Void
-    let submit: () -> Bool
-    @FocusState private var focused: Bool
-
-    var body: some View {
-        Color.clear.frame(width: Token.Detail.anchor, height: Token.Detail.anchor)
-            .focusable()
-            .focusEffectDisabled()
-            .focused($focused)
-            .onKeyPress(.downArrow) {
-                move(1)
-                return .handled
-            }
-            .onKeyPress(.upArrow) {
-                move(-1)
-                return .handled
-            }
-            .onKeyPress(.return) { submit() ? .handled : .ignored }
-            .onAppear { DispatchQueue.main.async { focused = true } }
-            .accessibilityHidden(true)
-    }
-}
-
 // value: a verb that runs something runs it, its form or its question
 // first; one that runs nothing opens the page of the row it ends.
 @MainActor
@@ -487,10 +443,12 @@ struct HomeHeaderBar: View {
                     .help(a.label ?? "")
                     .keyboardShortcut("n", modifiers: .command)
                     .disabled(state.running != nil)
+                    .panelFocus(.control(a.id ?? ""), look: .control, radius: Token.Metric.Control.roundTopBar / 2)
             }
             station
                 .accessibilityLabel(Text(h.menuLabel))
                 .menuAnchor(MenuAnchors.page)
+                .panelFocus(.menu, look: .control, radius: Token.Metric.Control.roundTopBar / 2)
         }
     }
 

@@ -84,7 +84,7 @@ public struct MachineHeader: View {
             .frame(height: m.title)
             FactsLine(Self.facts(page), open: open).padding(.top, m.factsTop)
             if let segments = page.segments, !segments.isEmpty {
-                Segmented(options: segmented(segments))
+                Segmented(options: segmented(segments), keys: segments.map(\.key))
                 .padding(.top, m.segmentsTop)
             }
         }

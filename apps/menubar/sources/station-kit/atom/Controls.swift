@@ -32,15 +32,23 @@ public struct Switch: View {
 
 public struct Segmented: View {
     let options: [(label: String, on: Bool, tap: () -> Void)]
+    let keys: [String?]
     @Environment(\.stationTokens) private var tokens
     @Namespace private var thumb
 
-    public init(options: [(label: String, on: Bool, tap: () -> Void)]) { self.options = options }
+    public init(options: [(label: String, on: Bool, tap: () -> Void)], keys: [String?] = []) {
+        self.options = options
+        self.keys = keys
+    }
+
+    func shortcut(_ i: Int) -> KeyboardShortcut? {
+        keys.indices.contains(i) ? keys[i].flatMap(MenuModel.shortcut) : nil
+    }
 
     public var body: some View {
         let c = Token.Metric.Control.self
         HStack(spacing: 0) {
-            ForEach(Array(options.enumerated()), id: \.offset) { _, o in
+            ForEach(Array(options.enumerated()), id: \.offset) { i, o in
                 Button(action: o.tap) {
                     Text(o.label)
                         .font(.system(size: c.segmentedSize).monospacedDigit())
@@ -59,6 +67,7 @@ public struct Segmented: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .keyboardShortcut(shortcut(i))
             }
         }
         .padding(c.segmented.padding)
