@@ -1727,7 +1727,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened agent-7f in Terminal"
+            "text": "agent-7f opened in Terminal"
           }
         ]
       }
@@ -1768,7 +1768,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened linux-1 in Terminal"
+            "text": "linux-1 opened in Terminal"
           }
         ]
       }
@@ -1809,7 +1809,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened linux-3 in Terminal"
+            "text": "linux-3 opened in Terminal"
           }
         ]
       }
@@ -1842,7 +1842,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened review-bot in Terminal"
+            "text": "review-bot opened in Terminal"
           }
         ]
       }
@@ -2373,7 +2373,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened agent-7f in Terminal"
+            "text": "agent-7f opened in Terminal"
           }
         ]
       }
@@ -2464,7 +2464,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened linux-1 in Terminal"
+            "text": "linux-1 opened in Terminal"
           }
         ]
       }
@@ -2603,7 +2603,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened linux-3 in Terminal"
+            "text": "linux-3 opened in Terminal"
           }
         ]
       }
@@ -2658,7 +2658,7 @@
         "items": [
           {
             "kind": "text",
-            "text": "Opened review-bot in Terminal"
+            "text": "review-bot opened in Terminal"
           }
         ]
       }

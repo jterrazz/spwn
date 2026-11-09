@@ -610,7 +610,7 @@ func (s serverView) actions() []page.Action {
 	}
 	if s.state == serverUp {
 		ssh := s.ssh()
-		out = append(out, page.Action{ID: ActionCopySSH, Label: "Copy " + ssh, Icon: "doc.on.doc", On: page.OnPage, Priority: 4, Run: &page.Run{Copy: ssh}, Hud: hud("Copied " + ssh)})
+		out = append(out, copied(ActionCopySSH, "Copy "+ssh, ssh))
 		for _, p := range s.served() {
 			id := s.vm.Name + ":" + strconv.Itoa(p.port)
 			out = append(out, page.Action{ID: "copy:" + id, Label: "Copy link to " + p.named.Name, Icon: "doc.on.doc", On: page.OnRow, Rows: []string{id}, Priority: 4,

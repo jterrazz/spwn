@@ -825,6 +825,35 @@
           "--on",
           "api"
         ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy ssh api",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh api"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh api"
+          }
+        ]
       }
     },
     {

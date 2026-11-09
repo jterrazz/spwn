@@ -278,7 +278,7 @@ func agentRun(h model.MacView, a agents.Agent) func(string, map[string]string) *
 // workspace and its Mac by its name.
 func attachAgent(a agents.Agent) page.Action {
 	return page.Action{ID: ActionAttach + a.Name, Label: "Open " + a.Name + " in Terminal", Icon: "terminal", Key: "cmd+enter", On: page.OnRow, Rows: []string{a.Name},
-		Priority: 2, Run: &page.Run{Terminal: true, Argv: []string{"agents", "attach", a.Name}}}
+		Priority: 2, Run: &page.Run{Terminal: true, Argv: []string{"agents", "attach", a.Name}}, Hud: opened(a.Name)}
 }
 
 // value: SPEC B5.9: Clean up on a finished agent forgets it; its

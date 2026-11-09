@@ -228,7 +228,16 @@
           "review-bot"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Full log",
@@ -243,7 +252,16 @@
           "review-bot"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Stop review-bot",

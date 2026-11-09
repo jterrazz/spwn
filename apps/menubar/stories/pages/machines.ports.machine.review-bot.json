@@ -1872,7 +1872,16 @@
           "review-bot"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Share a port",
@@ -2035,6 +2044,35 @@
         "argv": [
           "--on",
           "review-bot"
+        ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy ssh review-bot",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh review-bot"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh review-bot"
+          }
         ]
       }
     },

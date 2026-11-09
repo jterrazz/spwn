@@ -134,7 +134,16 @@
           "linux-3"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Full log",
@@ -149,7 +158,16 @@
           "linux-3"
         ]
       },
-      "icon": "terminal"
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 opened in Terminal"
+          }
+        ]
+      }
     },
     {
       "label": "Stop linux-3",

@@ -98,7 +98,7 @@ func (h homeReading) tiles() (page.Section, page.Action) {
 // exposed, or what a server down leaves unreachable; what a server
 // restarting is starting.
 func (h homeReading) portsTile() *page.Tile {
-	t := &page.Tile{Caption: "Ports", Glyph: symbol("network", page.SignalQuiet), Nav: PortsID}
+	t := &page.Tile{Caption: "Ports", Glyph: symbol("network", page.SignalQuiet), Nav: PortsID, Tip: page.Texts("Ports"), Key: keyPorts}
 	if h.r.Ports == nil {
 		t.Number = page.Pending()
 		return t
@@ -129,6 +129,7 @@ func (h homeReading) portsTile() *page.Tile {
 	case starting > 0:
 		t.Number, t.Word = page.Count(int64(starting), ""), "starting"
 	}
+	t.Tip = page.Texts(strconv.FormatInt(t.Number.N, 10) + " " + t.Word)
 	return t
 }
 
@@ -146,7 +147,7 @@ func (h homeReading) vm(name string) (model.VM, bool) {
 // value: the Accounts tile: what is signed out on any Mac, as its upkeep
 // says it, else how many accounts are shared with VMs.
 func (h homeReading) accountsTile() *page.Tile {
-	t := &page.Tile{Caption: "Accounts", Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID}
+	t := &page.Tile{Caption: "Accounts", Glyph: symbol("key", page.SignalQuiet), Nav: AccountsID, Tip: page.Texts("Accounts", "All machines"), Key: keyAccounts}
 	out := 0
 	for _, n := range h.upkeep {
 		if n.Finding.Section == section.Accounts {
@@ -172,8 +173,11 @@ func (h homeReading) accountsTile() *page.Tile {
 // value: the Awake tile: the time This Mac stays awake, or Off; its glyph
 // the switch, the sun while it holds, the moon while it may sleep.
 func (h homeReading) awakeTile(toggle page.Action) *page.Tile {
-	t := &page.Tile{Caption: "Awake", Toggle: toggle.ID, Nav: AwakeID, Glyph: symbol("moon", page.SignalQuiet), Number: page.Text("Off")}
+	t := &page.Tile{Caption: "Awake", Toggle: toggle.ID, Nav: AwakeID, Glyph: symbol("moon", page.SignalQuiet), Number: page.Text("Off"), Tip: page.Texts("Awake", durations), Key: keyAwake}
 	r := h.r.Awake
+	if r != nil && r.Session != nil {
+		t.Tip = page.Texts("Awake "+awakeWords(*r), durations)
+	}
 	switch {
 	case r == nil:
 		t.Number = page.Pending()

@@ -2002,6 +2002,35 @@
           "--on",
           "agent-7f"
         ]
+      },
+      "icon": "terminal",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f opened in Terminal"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Copy ssh agent-7f",
+      "on": "page",
+      "priority": 4,
+      "id": "copy-ssh",
+      "run": {
+        "copy": "ssh agent-7f"
+      },
+      "icon": "doc.on.doc",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Copied ssh agent-7f"
+          }
+        ]
       }
     },
     {

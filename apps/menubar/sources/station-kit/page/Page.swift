@@ -165,6 +165,8 @@ public struct Tile: Codable, Equatable, Sendable {
     public var toggle: String?
     public var nav: String?
     public var plus: String?
+    public var tip: Value?
+    public var key: String?
 }
 
 public struct PageGauge: Codable, Equatable, Sendable {
