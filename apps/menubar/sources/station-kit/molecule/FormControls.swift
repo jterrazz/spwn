@@ -62,12 +62,7 @@ public struct PopupField: View {
         if still {
             face
         } else {
-            Menu {
-                ForEach(Array(MenuModel.popup(field, answers).items.enumerated()), id: \.offset) { _, item in
-                    Button([item.title, item.note].compactMap { $0 }.joined(separator: "  ")) { pick(item.id) }.disabled(!item.enabled)
-                }
-            } label: { face }
-                .menuStyle(.button).buttonStyle(.plain).fixedSize()
+            face.fixedSize().systemMenu(MenuModel.popup(field, answers), .over) { pick($0.id) }
         }
     }
 }
@@ -243,15 +238,15 @@ public struct ChipPicker: View {
 // the other ways (the system's menu in the app, drawn still).
 public struct SplitButton: View {
     let title: String
-    let items: [Action]
+    let menu: MenuModel
     let run: () -> Void
     let other: (Action) -> Void
     @Environment(\.stationStill) private var still
     @Environment(\.stationTokens) private var tokens
 
-    public init(_ title: String, items: [Action], run: @escaping () -> Void, other: @escaping (Action) -> Void) {
+    public init(_ title: String, menu: MenuModel, run: @escaping () -> Void, other: @escaping (Action) -> Void) {
         self.title = title
-        self.items = items
+        self.menu = menu
         self.run = run
         self.other = other
     }
@@ -271,15 +266,10 @@ public struct SplitButton: View {
             .buttonStyle(.plain)
             .keyboardShortcut(.defaultAction)
             Rectangle().fill(tokens.onTint.opacity(Token.Fade.disabled)).frame(width: S.splitDivider, height: c.height)
-            if still || items.isEmpty {
+            if still || menu.isEmpty {
                 arrow.menuAnchor(SheetAnchor.split)
             } else {
-                Menu {
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, a in
-                        Button(a.label ?? "") { other(a) }
-                    }
-                } label: { arrow }
-                    .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize()
+                arrow.systemMenu(menu) { item in item.action.map(other) }
             }
         }
         .background(Capsule().fill(tokens.color.accent))

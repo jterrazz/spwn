@@ -461,19 +461,14 @@ struct HomeHeaderBar: View {
             RoundButton(h.menu, size: .topBar, action: handlers.toggleMenu)
         } else {
             let c = Token.Metric.Control.self
-            Menu {
-                MenuContent(model) { pick?($0, nav: nil) }
-            } label: {
-                Image(systemName: h.menu).font(.system(size: c.roundTopBarGlyph, weight: .semibold))
-                    .foregroundStyle(tokens.color.t1)
-                    .frame(width: c.roundTopBar, height: c.roundTopBar)
-                    .background(tokens.color.q, in: Circle())
-                    .contentShape(Circle())
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
+            Image(systemName: h.menu).font(.system(size: c.roundTopBarGlyph, weight: .semibold))
+                .foregroundStyle(tokens.color.t1)
+                .frame(width: c.roundTopBar, height: c.roundTopBar)
+                .background(tokens.color.q, in: Circle())
+                .contentShape(Circle())
+                .systemMenu(model) { pick?($0, nav: nil) }
+                .accessibilityElement()
+                .accessibilityAddTraits(.isButton)
         }
     }
 }

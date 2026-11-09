@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import StationKit
 import SwiftUI
@@ -110,5 +111,54 @@ final class MenuTests: XCTestCase {
             pick(item, nav: nil)
         }
         XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "asks stop@linux-1", "login false", "quits"])
+    }
+
+    // value: a native menu as the owner reads it: its header, each entry's
+    // words, red ones marked, its key as the system draws it, checked ones
+    // ticked, a submenu's in brackets, a popup's grey note after a dot.
+    static func read(_ menu: NSMenu) -> [String] {
+        menu.items.map { entry in
+            if entry.isSeparatorItem { return "-" }
+            if entry.isSectionHeader { return entry.title }
+            let words = entry.attributedTitle?.string ?? entry.title
+            let parts = words.components(separatedBy: "\t")
+            var said = (entry.state == .on ? "✓ " : "") + parts[0]
+            let ink = entry.attributedTitle?.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor
+            if ink == Token.SystemMenu.destructive { said += " (red)" }
+            if !entry.keyEquivalent.isEmpty {
+                let m = entry.keyEquivalentModifierMask
+                let mods = (m.contains(.option) ? "opt+" : "") + (m.contains(.shift) ? "shift+" : "") + (m.contains(.command) ? "cmd+" : "")
+                said += " " + MenuModel.keys(mods + (entry.keyEquivalent == "\r" ? "enter" : entry.keyEquivalent))
+            }
+            if let sub = entry.submenu { said += " [" + read(sub).joined(separator: ", ") + "]" }
+            if parts.count > 1 { said += " · " + parts[1] + (entry.isEnabled ? "" : " (off)") }
+            if entry.image != nil { said += " (icon)" }
+            return said
+        }
+    }
+
+    // invariant: SPEC A5: the menu the system shows is the one the story
+    // draws: the same header and entries, red what destroys, the keys, the
+    // checks, a popup's notes in their grey column, a split button's icons.
+    func testTheSystemsMenuSaysWhatTheStoryDraws() throws {
+        let stories = try menuStories()
+        let shown = Dictionary(uniqueKeysWithValues: stories.compactMap { s in s.menu.map { (s.id, Self.read(SystemMenu.make($0) { _ in })) } })
+        for story in stories {
+            let drawn = try XCTUnwrap(story.menu, story.id)
+            XCTAssertEqual(shown[story.id]?.map { $0.replacingOccurrences(of: " (icon)", with: "") }, Self.read(drawn), story.id)
+        }
+        XCTAssertEqual(shown["menu.page.mac"]?.map { $0.replacingOccurrences(of: " (icon)", with: "") }, ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
+        XCTAssertEqual(shown["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 24 GB free", "macbook-air · asleep (off)"])
+        XCTAssertEqual(shown["menu.new-vm.create"], ["Create ↩ (icon)", "Create and Open in Terminal ⌥↩ (icon)"])
+    }
+
+    // invariant: a button's menu hangs right-aligned under it, inside the
+    // panel; a popup lays its picked entry over its field.
+    func testAMenuHangsWhereThePanelDrawsIt() {
+        let button = CGRect(x: 280, y: 0, width: 28, height: 28)
+        let under = SystemMenu.origin(.under, menu: NSSize(width: 220, height: 160), in: button)
+        XCTAssertEqual(under.x + 220, button.maxX)
+        XCTAssertEqual(under.y, button.maxY + Token.SystemMenu.drop)
+        XCTAssertEqual(SystemMenu.origin(.over, menu: NSSize(width: 220, height: 80), in: CGRect(x: 0, y: 0, width: 180, height: 26)), .zero)
     }
 }
