@@ -345,8 +345,8 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 	}
 	first := live.Sample(t.Context(), p.Live)
 	memory, _ := first.Values["free:infra"].(page.Value)
-	if memory.Kind != page.KindSize || memory.N != 12*gb {
-		t.Errorf("the first tick reads infra's free memory as %+v, want infra's own 12 GB", memory)
+	if memory.Kind != page.KindText || memory.Text != "12 GB free" {
+		t.Errorf("the first tick reads infra's free memory as %+v, want infra's own 12 GB free, in the gauge's words", memory)
 	}
 	if _, ok := first.Values["cpu:infra"]; ok {
 		t.Errorf("the first tick reads infra's CPU from one reading, want it once a second one came")
