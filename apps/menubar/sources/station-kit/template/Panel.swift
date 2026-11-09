@@ -195,7 +195,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
             position.scrollTo(edge: .top)
         }
         .onChange(of: measured.footer) { was, now in
-            guard now > was, PanelHeight.scrolls(measured.content, room: bodyRoom) else { return }
+            guard was > 0, now > was, PanelHeight.scrolls(measured.content, room: bodyRoom) else { return }
             position.scrollTo(y: offset + now - was)
         }
         .onChange(of: target, initial: true) { _, now in
@@ -367,3 +367,4 @@ struct PanelPane: ViewModifier {
             }
     }
 }
+
