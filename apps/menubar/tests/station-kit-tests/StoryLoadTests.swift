@@ -35,13 +35,17 @@ final class StoryLoadTests: XCTestCase {
         ui.find = FindState(query: "5173", highlight: 1)
         ui.pending = ["restart:infra"]
         ui.statusItem = false
+        ui.leaving = "agent-7f"
         let story = StoryFile(id: "transition.push", group: .transition, note: "The machine page slides in over Home.",
                               pages: ["pages/menubar.home.two-macs.json", "pages/menubar.mac.mini.json"], ui: ui,
                               samples: ["cpu:mac-mini": 46], play: StoryPlay(from: "home.needs", gesture: "push(mac:mac-mini)"),
-                              freeze: 0.35, heightNote: "the machine page is taller than the prototype's")
+                              freeze: 0.35, heightNote: "the machine page is taller than the prototype's", tags: [StoryFile.a11y])
         try write(story)
-        let loaded = try XCTUnwrap(Stories.load(root: root).first)
+        try write(StoryFile(id: "home.needs", group: .home, note: "n", pages: ["pages/menubar.home.two-macs.json"]))
+        let loaded = try XCTUnwrap(Stories.load(root: root).first { $0.id == story.id })
         XCTAssertEqual(loaded.file, story)
+        XCTAssertEqual(loaded.from?.id, "home.needs", "a transition is drawn from the story its gesture plays from")
+        XCTAssertTrue(loaded.a11y)
         XCTAssertEqual(loaded.pages.map(\.id), [PageID.home, PageID.machine])
         XCTAssertEqual(try JSONDecoder().decode(StoryFile.self, from: story.encoded()), story)
         XCTAssertTrue(String(decoding: try story.encoded(), as: UTF8.self).contains("\"schema\" : \"station.story/v1\""))
@@ -58,6 +62,8 @@ final class StoryLoadTests: XCTestCase {
             (StoryFile(id: "home.needs", group: .home, note: "n", pages: []), nil, .noPages(id: "home.needs")),
             (StoryFile(id: "home.needs", group: .home, note: "n", pages: ["pages/fleet.menubar.json"]), nil,
              .missingPage(id: "home.needs", page: "pages/fleet.menubar.json")),
+            (StoryFile(id: "transition.push", group: .transition, note: "n", pages: page, play: StoryPlay(from: "home.gone", gesture: "g"), freeze: 0.35), nil,
+             .missingFrom(id: "transition.push", from: "home.gone")),
         ]
         for (story, name, want) in cases {
             try write(story, as: name)

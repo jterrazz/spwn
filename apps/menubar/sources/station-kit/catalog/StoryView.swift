@@ -86,13 +86,20 @@ public struct StoryView: View {
     let state: PanelState
     let handlers: PopoverHandlers
     let live: LiveStore?
+    let time: Double?
+    let motion: (motion: StoryMotion, reduce: Bool)?
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.stationReduceMotion) private var reduced
 
-    public init(_ story: Story, state: PanelState? = nil, handlers: PopoverHandlers = PopoverHandlers()) {
+    // value: time, the moment a transition story is drawn at, its freeze
+    // unless given; rest draws its pages as they stand.
+    public init(_ story: Story, state: PanelState? = nil, handlers: PopoverHandlers = PopoverHandlers(), time: Double? = nil, rest: Bool = false) {
         self.story = story
         self.state = state ?? story.state
         self.handlers = handlers
+        self.time = time
         live = story.samples.isEmpty ? nil : Self.live(story.samples)
+        motion = rest ? nil : StoryMotion.of(story.id)
     }
 
     static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.machine || page.id == PageID.agent }
@@ -111,7 +118,7 @@ public struct StoryView: View {
 
     @ViewBuilder
     var topped: some View {
-        if let hud = story.hud {
+        if motion == nil, let hud = story.hud {
             VStack(spacing: Token.Metric.HUD.above) {
                 HUDCapsule(hud).fixedSize()
                 staged
@@ -122,10 +129,11 @@ public struct StoryView: View {
     }
 
     // invariant: SPEC C4: a menu story draws its menu's preview where the
-    // menu opens, over the page it opens on.
+    // menu opens, over the page it opens on; a transition leaves its HUD
+    // and its menu to the pages it moves.
     var staged: some View {
         tipped.overlayPreferenceValue(MenuAnchors.self) { anchors in
-            if let open = story.ui.menu, let model = story.menu {
+            if motion == nil, let open = story.ui.menu, let model = story.menu {
                 GeometryReader { proxy in
                     let sheet = story.ui.sheet != nil ? open.id : nil
                     let key = sheet ?? open.row.map(MenuAnchors.row) ?? MenuAnchors.page
@@ -159,7 +167,10 @@ public struct StoryView: View {
 
     @ViewBuilder
     var drawn: some View {
-        if story.ui.statusItem == true {
+        if let motion {
+            TransitionView(story: story, motion: motion.motion, time: time ?? story.freeze ?? 1, handlers: handlers)
+                .environment(\.stationReduceMotion, motion.reduce || reduced)
+        } else if story.ui.statusItem == true {
             MenuBarStrip(MenuBarIcon.of(connection: state.connection, page: state.page), pressed: story.ui.pressed == true, turn: story.freeze ?? 0)
         } else if state.find != nil || state.pushed != nil || state.page.map(Self.panel) == true {
             Popover(state, handlers: handlers, scrolls: false)
