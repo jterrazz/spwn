@@ -1,0 +1,8 @@
+{
+    "group": "agent",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "agent.working",
+    "note": "linux-1 at work: its Now card with its task, Full log and its last three steps, then the workspace it runs on and its terminal.",
+    "pages": ["pages/machines.agent.linux-1.json"],
+    "schema": "station.story/v1"
+}

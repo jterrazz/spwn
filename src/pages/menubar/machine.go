@@ -8,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/activity"
+	"github.com/jterrazz/studio-station/src/agents"
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/machine"
@@ -35,8 +36,6 @@ const (
 	ActionCleanup  = "cleanup"
 	ActionWake     = "wake"
 	ActionRemind   = "remind"
-	// value: a terminal on one family of a workspace (`open:apps`).
-	ActionOpenFamily = "open:"
 
 	CallCleanup = "machines.cleanup"
 	CallWake    = "machines.wake"
@@ -45,7 +44,6 @@ const (
 	SectionMachine  = "machine"
 	SectionSummary  = "summary"
 	SectionActivity = "activity"
-	SectionInside   = "inside"
 	SectionPorts    = "ports"
 	SectionShared   = "shared"
 	SectionUp       = "up"
@@ -81,6 +79,8 @@ type Machine struct {
 	Zone   *time.Location
 	Now    time.Time
 	Asks   Levels
+	// value: a workspace's page: the fleet's agents, nil until they are read.
+	Agents []agents.Agent
 }
 
 func MachinePage(m Machine) page.Page {

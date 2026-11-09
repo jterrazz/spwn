@@ -1,13 +1,17 @@
+# Agents
+	none
+# Gauges
+# Ports
+●	Vite		linux-1:5173
+●	Port 7000		linux-1:7000
+	Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps.
+# Private
+●	Vite		linux-1:5173
+●	Port 7000		linux-1:7000
 # Lent to linux-1
 ●	GitHub	linux-1	read only · 4h left
 ●	Claude	linux-1	Claude Code inference · 12h left
 ●	Lend an account	ends by itself
 	These are This Mac's accounts. Every loan ends by itself.
-# Ports
-●	Vite		linux-1:5173
-●	Port 7000		linux-1:7000
-# Private
-●	Vite		linux-1:5173
-●	Port 7000		linux-1:7000
 # Measured
 	Measured inside the guest. If linux-1 stops answering, this shows what This Mac sees of it.

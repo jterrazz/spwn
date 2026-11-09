@@ -60,6 +60,20 @@ final class AtomTests: XCTestCase {
         XCTAssertEqual(FactsLine.fit(facts, width: 1, measure: Self.measure), "Mac mini")
     }
 
+    // invariant: SPEC B1: a pushed page's facts line is rewritten to fit
+    // the panel, never run past its edge and push the header's buttons out.
+    @MainActor
+    func testNoPushedPagesFactsRunPastThePanel() throws {
+        let width = Token.Metric.Panel.width - Token.Metric.Panel.header.leading - Token.Metric.Panel.header.trailing
+        let over = try Stories.load(root: Stories.root).flatMap { story in
+            story.pages.filter { $0.header?.back != nil }.compactMap { page -> String? in
+                let words = FactsLine.fit(MachineHeader.facts(page).items ?? [], width: width, measure: Self.measure)
+                return Self.measure(words) > width ? "\(story.id): \(words)" : nil
+            }
+        }
+        XCTAssertEqual(Array(Set(over)).sorted(), [])
+    }
+
     func testAMacIsDrawnByItsLidNeverByItsModel() {
         func glyph(_ kind: String, ring: String? = nil) -> Glyph {
             var g = Glyph()

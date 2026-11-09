@@ -1,0 +1,8 @@
+{
+    "group": "agent",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "agent.waiting.merged",
+    "note": "PR #42 merged: review-bot finished with it, its Last steps and Clean up, no footer; its workspace keeps running.",
+    "pages": ["pages/machines.agents.merged.agent.review-bot.json"],
+    "schema": "station.story/v1"
+}

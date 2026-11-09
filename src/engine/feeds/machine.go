@@ -8,6 +8,8 @@ import (
 	"github.com/jterrazz/studio-station/src/accounts"
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
+	"github.com/jterrazz/studio-station/src/agents"
+	agentscalls "github.com/jterrazz/studio-station/src/agents/calls"
 	"github.com/jterrazz/studio-station/src/awake"
 	awakecalls "github.com/jterrazz/studio-station/src/awake/calls"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -122,6 +124,18 @@ func (f *one) send(ctx context.Context, change func(*pagemenubar.Machine)) {
 	latest(ctx, f.out, p)
 }
 
+// value: the Mac that runs the VM a page is of.
+func macOfVM(all machines.AllMachines, vm string) (machines.MacView, bool) {
+	for _, h := range all.Macs {
+		for _, v := range h.VMs {
+			if v.Name == vm {
+				return h, true
+			}
+		}
+	}
+	return machines.MacView{}, false
+}
+
 // value: the Mac a page is of, when it is a Mac's.
 func macNamed(all machines.AllMachines, name string) (machines.MacView, bool) {
 	for _, h := range all.Macs {
@@ -142,16 +156,26 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 		kept, kerr := call.Read(ctx, f.o.Calls, at, activitycalls.Read, activitycalls.ReadIn{History: true, Graph: 6 * time.Minute, Quick: true}, nil)
 		var copies *accounts.AllMachines
 		var held *awake.Report
-		if h, ok := macNamed(listed.All, f.m.Name); ferr == nil && ok {
+		var hosted []agents.Agent
+		h, isMac := macNamed(listed.All, f.m.Name)
+		if ferr == nil && isMac {
 			all := f.o.everyMacAccounts(ctx, listed.All, "")
 			copies = &all
+		}
+		if ferr == nil && !isMac {
+			h, _ = macOfVM(listed.All, f.m.Name)
+			if read, err := call.Invoke(ctx, f.o.Calls, machine.Ref{}, agentscalls.List, agentscalls.ListIn{}, nil); err == nil {
+				hosted = append([]agents.Agent{}, read...)
+			}
+		}
+		if ferr == nil && h.Name != "" {
 			if r, err := call.Read(ctx, f.o.Calls, macRef(h), awakecalls.Read, awakecalls.ReadIn{}, nil); err == nil {
 				r.Mac = h.Name
 				held = &r
 			}
 		}
 		f.send(ctx, func(m *pagemenubar.Machine) {
-			m.Zone, m.Shares, m.Awake = time.Local, copies, held
+			m.Zone, m.Shares, m.Awake, m.Agents = time.Local, copies, held, hosted
 			if ferr == nil {
 				m.All = &listed.All
 			}

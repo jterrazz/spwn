@@ -1,16 +1,4 @@
 home.keyboard
-workspace.agents
-workspace.agents.finished
-workspace.stopped
-workspace.started
-agent.working
-agent.remote
-agent.waiting
-agent.waiting.pr-opened
-agent.waiting.reply
-agent.waiting.replied
-agent.waiting.merged
-agent.finished
 server.healthy
 server.health-unfolded
 server.down

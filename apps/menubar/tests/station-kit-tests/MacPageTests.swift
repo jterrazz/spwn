@@ -84,16 +84,15 @@ final class MacPageTests: XCTestCase {
         XCTAssertNil(state.segment)
         let calls = Calls()
         XCTAssertNotNil(MachinePage.view(state, handlers: handlers(calls), scrolls: false))
-        let view = MacPage(page: page, state: state, handlers: handlers(calls), scrolls: false)
-        XCTAssertEqual(view.header.segmented(page.segments ?? []).map(\.label), ["Overview", "Activity", "Ports", "Accounts"])
+        XCTAssertEqual(page.segments?.map(\.label), ["Overview", "Activity", "Ports", "Accounts"])
         let loans = MacPage.sections(page, segment: "accounts").flatMap(\.rows).filter { $0.left != nil }
         XCTAssertEqual(loans.map(\.label), ["GitHub", "Claude"])
         let overview = MacPage.sections(page, segment: "overview").compactMap(\.id)
-        XCTAssertEqual(overview, ["machine", "activity", "inside", "ports"])
+        XCTAssertEqual(overview, ["agents", "gauges", "ports", "footnote"])
         var picked = state
         picked.segment = "accounts"
         let drawn = try [state, picked].map { s in
-            try XCTUnwrap(Snapshot.render(AnyView(MacPage(page: page, state: s, handlers: handlers(calls), scrolls: false)), scheme: .dark)?.png)
+            try XCTUnwrap(Snapshot.render(AnyView(WorkspacePage(page: page, state: s, handlers: handlers(calls), scrolls: false)), scheme: .dark)?.png)
         }
         XCTAssertNotEqual(drawn[0], drawn[1])
         XCTAssertEqual(calls.made, [])

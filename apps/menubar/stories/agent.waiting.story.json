@@ -1,0 +1,8 @@
+{
+    "group": "agent",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "agent.waiting",
+    "note": "review-bot waits on you: its own line and detail, PR #42 and its change, Open PR tinted, Merge, and the reply.",
+    "pages": ["pages/machines.agent.review-bot.json"],
+    "schema": "station.story/v1"
+}

@@ -129,9 +129,31 @@ public struct FactsLine: View {
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationNow) private var now
 
-    public init(_ value: Value?, role: Token.Role = .facts) {
+    let open: (String) -> Void
+
+    public init(_ value: Value?, role: Token.Role = .facts, open: @escaping (String) -> Void = { _ in }) {
         parts = value.map { $0.items ?? [$0] } ?? []
         self.role = role
+        self.open = open
+    }
+
+    // value: a part's words, a link's with its chevron ("on mac-mini ›").
+    public static func word(_ part: Value, now: Date? = nil) -> String {
+        let word = Format.show(part, now: now)
+        return word.isEmpty || part.nav == nil ? word : word + Token.Glyph.link
+    }
+
+    // value: the page a link part's address opens, and the address of it.
+    public static func address(_ nav: String) -> URL? {
+        var c = URLComponents()
+        c.scheme = "station-page"
+        c.path = nav
+        return c.url
+    }
+
+    public static func page(_ url: URL) -> String? {
+        guard url.scheme == "station-page" else { return nil }
+        return URLComponents(url: url, resolvingAgainstBaseURL: false)?.path
     }
 
     public static func variants(_ parts: [Value]) -> [[Value]] {
@@ -157,7 +179,7 @@ public struct FactsLine: View {
     }
 
     public static func words(_ parts: [Value], now: Date? = nil) -> String {
-        parts.map { Format.show($0, now: now) }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
+        parts.map { word($0, now: now) }.filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep)
     }
 
     public static func fit(_ parts: [Value], width: CGFloat, now: Date? = nil, measure: (String) -> CGFloat) -> String {
@@ -169,11 +191,17 @@ public struct FactsLine: View {
         var text = Text(verbatim: "")
         var first = true
         for part in parts {
-            let word = Format.show(part, now: now)
+            let word = Self.word(part, now: now)
             if word.isEmpty { continue }
             if !first { text = text + Text(verbatim: Token.Glyph.sep) }
             first = false
-            text = text + Text(verbatim: word).foregroundStyle(part.signal.map(tokens.signalText) ?? tokens.tone(role.tone))
+            if let nav = part.nav, let url = Self.address(nav) {
+                var link = AttributedString(word)
+                link.link = url
+                text = text + Text(link)
+            } else {
+                text = text + Text(verbatim: word).foregroundStyle(part.signal.map(tokens.signalText) ?? tokens.tone(role.tone))
+            }
         }
         return text
     }
@@ -184,6 +212,12 @@ public struct FactsLine: View {
                 line(variant).font(role.font).foregroundStyle(tokens.tone(role.tone)).lineLimit(1).fixedSize()
             }
         }
+        .tint(tokens.color.accentText)
+        .environment(\.openURL, OpenURLAction { url in
+            guard let nav = Self.page(url) else { return .systemAction }
+            open(nav)
+            return .handled
+        })
     }
 }
 

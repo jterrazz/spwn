@@ -61,7 +61,7 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(PortRow.menu(card.rows[0], in: page.actions ?? []).last??.run?.call, "ports.stop-sharing")
         let menu = try XCTUnwrap(page.action(page.header?.buttons?.last ?? ""))
         let items = MachineHeader.menu(page, menu)
-        XCTAssertEqual(items.map(\.label), ["Share a port", "Stop", "Delete", "Open in Terminal"])
+        XCTAssertEqual(items.map(\.label), ["Share a port", "Stop", "Delete"])
         XCTAssertEqual(items.prefix(3).map { $0.run?.call }, ["ports.share", "machines.stop", "machines.delete"])
     }
 

@@ -1,0 +1,316 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "review-bot",
+    "kind": "agent",
+    "on": "review-bot"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "waiting"
+            },
+            {
+              "kind": "text",
+              "text": "6 min"
+            }
+          ],
+          "signal": "waits"
+        },
+        {
+          "kind": "text",
+          "text": "Claude",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "on review-bot",
+          "pri": 1,
+          "nav": "menubar.machine:review-bot"
+        },
+        {
+          "kind": "text",
+          "text": "mac-mini",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "wait",
+      "title": "Waiting on you",
+      "items": [
+        {
+          "message": {
+            "title": "PR #42 is ready, tests pass",
+            "body": "I moved the refresh into its own commit. The retry path changes how a 401 is handled: check it before I merge.",
+            "since": {
+              "kind": "text",
+              "text": "6 min"
+            },
+            "pr": {
+              "number": 42,
+              "url": "https://github.com/jterrazz/app/pull/42",
+              "files": 6,
+              "plus": 214,
+              "minus": 88
+            },
+            "reply": true
+          }
+        }
+      ],
+      "card": "wait"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "permanent"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 2 hr"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "waits"
+            },
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Open PR",
+      "on": "page",
+      "priority": 1,
+      "id": "open-pr",
+      "run": {
+        "open": "https://github.com/jterrazz/app/pull/42"
+      },
+      "icon": "arrow.up.right",
+      "default": true,
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Opens PR #42"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Merge PR #42",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "merge",
+      "run": {
+        "call": "agents.merge",
+        "in": {
+          "Agent": "review-bot"
+        },
+        "target": {
+          "name": "review-bot",
+          "on": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "PR #42 merged"
+          },
+          {
+            "kind": "text",
+            "text": "review-bot finished"
+          }
+        ]
+      }
+    },
+    {
+      "key": "enter",
+      "label": "Reply to review-bot",
+      "on": "page",
+      "priority": 3,
+      "mutates": true,
+      "id": "reply",
+      "run": {
+        "call": "agents.reply",
+        "in": {
+          "Agent": "review-bot"
+        },
+        "target": {
+          "name": "review-bot",
+          "on": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "Reply to review-bot",
+        "fields": [
+          {
+            "key": "Text",
+            "label": "Reply to review-bot",
+            "kind": "text",
+            "required": true
+          }
+        ]
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "Sent to review-bot"
+          },
+          {
+            "kind": "text",
+            "text": "it works on it"
+          }
+        ]
+      }
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "attach",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Full log",
+      "on": "page",
+      "priority": 2,
+      "id": "full-log",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop review-bot",
+      "on": "page",
+      "confirm": {
+        "question": "Stop review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its terminal closes; review-bot keeps running."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "stop-agent",
+      "run": {
+        "call": "agents.stop",
+        "in": {
+          "Agent": "review-bot",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "review-bot",
+          "on": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot stopped"
+          }
+        ]
+      },
+      "destructive": true
+    },
+    {
+      "label": "More options for review-bot",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop-agent"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "waits"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "station agents attach review-bot"
+    },
+    "buttons": [
+      "attach"
+    ]
+  }
+}

@@ -9,15 +9,17 @@ public struct MachineHeader: View {
     let pick: (String) -> Void
     let back: () -> Void
     let run: (Action) -> Void
+    let open: (String) -> Void
     @Environment(\.stationTokens) private var tokens
     @Environment(\.stationStill) private var still
 
-    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }) {
+    public init(_ page: Page, segment: String?, pick: @escaping (String) -> Void = { _ in }, back: @escaping () -> Void = {}, run: @escaping (Action) -> Void = { _ in }, open: @escaping (String) -> Void = { _ in }) {
         self.page = page
         self.segment = segment
         self.pick = pick
         self.back = back
         self.run = run
+        self.open = open
     }
 
     var summary: Section? { page.section("summary") }
@@ -33,6 +35,15 @@ public struct MachineHeader: View {
         var line = Value(kind: "list")
         line.items = parts
         return line
+    }
+
+    // value: the page's mark: a symbol, or the agent's own.
+    static func image(_ glyph: Glyph) -> Image? {
+        switch GlyphView.drawn(glyph) {
+        case let .symbol(name): Image(systemName: name)
+        case let .custom(name): Image(name, bundle: .module)
+        default: nil
+        }
     }
 
     public var body: some View {
@@ -51,18 +62,10 @@ public struct MachineHeader: View {
                 .padding(.bottom, m.backBottom)
             }
             HStack(spacing: m.titleGap) {
-                if let glyph = page.header?.glyph {
-                    switch GlyphView.drawn(glyph) {
-                    case let .symbol(name):
-                        Image(systemName: name).font(.system(size: m.glyph, weight: .regular))
-                            .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
-                            .frame(width: m.glyphSlot)
-                    case let .custom(name):
-                        Image(name, bundle: .module).font(.system(size: m.glyph, weight: .regular))
-                            .foregroundStyle(glyph.signal.map(tokens.signal) ?? tokens.color.t2)
-                            .frame(width: m.glyphSlot)
-                    default: EmptyView()
-                    }
+                if let glyph = page.header?.glyph, let image = Self.image(glyph) {
+                    image.font(.system(size: m.glyph, weight: .regular))
+                        .foregroundStyle(glyph.signal.map { $0 == "active" ? tokens.color.t2 : tokens.signal($0) } ?? tokens.color.t2)
+                        .frame(width: m.glyphSlot)
                 }
                 Text(summary?.title ?? "").font(Token.Role.pageTitle.font).foregroundStyle(tokens.tone(Token.Role.pageTitle.tone)).lineLimit(1)
                 Spacer(minLength: 0)
@@ -77,7 +80,7 @@ public struct MachineHeader: View {
                 }
             }
             .frame(height: m.title)
-            FactsLine(Self.facts(page)).padding(.top, m.factsTop)
+            FactsLine(Self.facts(page), open: open).padding(.top, m.factsTop)
             if let segments = page.segments, !segments.isEmpty {
                 Segmented(options: segmented(segments))
                 .padding(.top, m.segmentsTop)

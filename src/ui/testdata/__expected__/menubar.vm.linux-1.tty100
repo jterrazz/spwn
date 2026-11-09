@@ -1,24 +1,21 @@
-linux-1  throwaway · no agent
+linux-1  throwaway · on This Mac · no agent running
 
-linux-1  Workspace VM · Throwaway · on This Mac
-  ● State  Running
-Activity
-    CPU     34%         ▁▂▂▃▃▂▃▄▄▃▂▃▄▃▃▃       Disk  12%  ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ 
-    Memory  4.1/4.3 GB  ▆▆▆▇▇▆▆▇▇▆▆▇▇▆▆▇▇ 
-Inside
-    Apps      38 installed                 Disk  2.4 of 20 GB
-    Settings  2 need a look
+Agents
+  No agent on linux-1
+Gauges
+Ports  2
+  ● Vite       linux-1:5173
+  ● Port 7000  linux-1:7000
+Life
+  Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps.
+Private  2
+  ● Vite       linux-1:5173
+  ● Port 7000  linux-1:7000
 Lent to linux-1  2
   ● GitHub           linux-1         read only · 4h left
   ● Claude           linux-1         Claude Code inference · 12h left
   ● Lend an account  ends by itself
   These are This Mac's accounts. Every loan ends by itself.
-Ports  2
-  ● Vite       linux-1:5173
-  ● Port 7000  linux-1:7000
-Private  2
-  ● Vite       linux-1:5173
-  ● Port 7000  linux-1:7000
 Last 6 minutes
     CPU  34%  now                          Network  1.7 · 0.1 MB/s
 Last hour

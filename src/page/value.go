@@ -113,6 +113,11 @@ func Labeled(label string, v Value) Value {
 	return v
 }
 
+func Linked(v Value, to ID) Value {
+	v.Nav = to
+	return v
+}
+
 func On() Value { return Value{Kind: KindOn} }
 
 func Off() Value { return Value{Kind: KindOff} }

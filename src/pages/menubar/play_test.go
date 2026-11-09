@@ -49,20 +49,6 @@ func TestAStoppedWorkspaceStartsAndSharesNothing(t *testing.T) {
 	}
 }
 
-// invariant: Inside says what is there and what needs a look, in the
-// vision's few words; never what station does not manage.
-func TestInsideSaysWhatIsThereInFewWords(t *testing.T) {
-	apps := page.List(page.Value{Kind: page.KindCount, N: 38, Unit: "ok", Label: "ok"}, page.Value{Kind: page.KindCount, N: 1, Unit: "not managed", Label: "unknown"},
-		page.Value{Kind: page.KindCount, N: 62, Unit: "not installed", Label: "absent"}, page.Value{Kind: page.KindCount, N: 2, Unit: "outdated", Label: "attention"})
-	if got := words(inside("apps", apps)); got != "38 installed | 2 need a look" {
-		t.Fatalf("apps %q", got)
-	}
-	settings := page.List(page.Text("set by station"), page.Value{Kind: page.KindText, Text: "0 of 6", Label: "absent"})
-	if got := words(inside("settings", settings)); got != "0 of 6 set" {
-		t.Fatalf("settings %q", got)
-	}
-}
-
 // invariant: an account lent to a workspace says what it may do and its
 // time left, never its internal scope (`session:github`).
 func TestASharedAccountSaysNoInternalScope(t *testing.T) {

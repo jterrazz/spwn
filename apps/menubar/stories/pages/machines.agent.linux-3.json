@@ -1,0 +1,222 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "linux-3",
+    "kind": "agent",
+    "on": "linux-3"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "linux-3",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "working"
+        },
+        {
+          "kind": "text",
+          "text": "Claude",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "on linux-3",
+          "pri": 1,
+          "nav": "menubar.machine:linux-3"
+        },
+        {
+          "kind": "text",
+          "text": "mac-mini",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "now",
+      "title": "Now",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "refresh the auth token"
+        }
+      ],
+      "items": [
+        {
+          "steps": [
+            {
+              "at": {
+                "kind": "text",
+                "text": "now"
+              },
+              "text": "editing src/auth/refresh.ts",
+              "current": true
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "5 min ago"
+              },
+              "text": "ran the tests",
+              "diff": "55/58 pass"
+            }
+          ]
+        }
+      ],
+      "card": "now"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-3",
+            "mark": "ok",
+            "label": "linux-3",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "throwaway"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 2 hr"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "nav": "menubar.machine:linux-3"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "attach",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-3"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Full log",
+      "on": "page",
+      "priority": 2,
+      "id": "full-log",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "linux-3"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop linux-3",
+      "on": "page",
+      "confirm": {
+        "question": "Stop linux-3?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its terminal closes; linux-3 keeps running."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "stop-agent",
+      "run": {
+        "call": "agents.stop",
+        "in": {
+          "Agent": "linux-3",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "linux-3",
+          "on": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 stopped"
+          }
+        ]
+      },
+      "destructive": true
+    },
+    {
+      "label": "More options for linux-3",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop-agent"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "active"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "station agents attach linux-3"
+    },
+    "buttons": [
+      "attach"
+    ]
+  }
+}

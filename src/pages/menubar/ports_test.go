@@ -345,7 +345,7 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("verbs %q %q", rows[0].Verb, rows[1].Verb)
 	}
 	menu := action(p, ActionMenu)
-	if menu == nil || !slices.Equal(menu.Submenu, []string{ActionShare, ActionStop, ActionDelete, ActionOpenStation}) {
+	if menu == nil || !slices.Equal(menu.Submenu, []string{ActionShare, ActionStop, ActionDelete}) {
 		t.Fatalf("menu %+v", menu)
 	}
 	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil

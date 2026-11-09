@@ -1,115 +1,286 @@
 package menubar
 
 import (
+	"slices"
+	"strconv"
+	"strings"
+
+	"github.com/jterrazz/studio-station/src/agents"
+	"github.com/jterrazz/studio-station/src/awake"
+	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/overview"
 	"github.com/jterrazz/studio-station/src/page"
 	pagehome "github.com/jterrazz/studio-station/src/pages/home"
 	pagemachines "github.com/jterrazz/studio-station/src/pages/machines"
-	"slices"
-	"strconv"
-	"strings"
+)
+
+const (
+	SectionFootnote = "footnote"
+	SectionStopped  = "stopped"
 )
 
 func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
-	p, head := vmHead(m, h, vm)
+	// invariant: SPEC A4 A workspace: a machine whose agents are objects of
+	// their own: its Overview lists them first, then what needs you there,
+	// its gauges, its ports and what its life means; its Ports segment lists
+	// its ports by reach, its Accounts its loans; a stopped one says so with
+	// Start and has no segment and no footer.
+	p, _ := vmHead(m, h, vm)
+	label := model.Label(*m.All, h)
+	mine := agentsOn(m, h, vm)
+	p.Header = &page.Header{Back: "All machines", Glyph: workspaceGlyph(vm, mine), Buttons: []string{ActionMenu}}
+	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label, mine)}}
+	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
 	kind := vm.Lifetime.Kind()
-	p.Sections = []page.Section{head, activitySection(running(m, vm), vm.State == model.Running, "Activity", vm.Name), insideSection(m.Summary), sharedSection(m, h, vm)}
-	var shares portsBody
-	if vm.State == model.Running {
-		for i := range p.Sections {
-			p.Sections[i].Segment = SegmentOverview
-		}
-		shares = workspacePorts(m, vm)
-		p.Segments = segments()
-		p.Sections = append(p.Sections, workspacePortsCard(shares))
-		p.Sections = append(p.Sections, shares.Sections...)
-	}
-	p.Sections = append([]page.Section{workspaceSummary(m, vm)}, p.Sections...)
-	p.Header = &page.Header{Back: model.Label(*m.All, h), Glyph: page.Glyph{Kind: workspaceGlyph(vm)}, Buttons: []string{ActionMenu}}
 	stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
 		Confirm: ask(m.Asks, "stop", kind, vm.Name, "Stop "+vm.Name+"?", "stop", "Its disk is kept."),
 		Run:     &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
 	stop.Run.In = answered(stop.Confirm, stop.Run.In)
-	if vm.State != model.Running && !model.Down(vm) {
-		stop = page.Action{ID: ActionStartVM, Label: "Start", On: page.OnPage, Priority: 1, Mutates: true,
-			Run: &page.Run{Call: CallStartVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
+	running := vm.State == model.Running
+	if !running && !model.Down(vm) {
+		stop = page.Action{ID: ActionStartVM, Label: "Start " + vm.Name, On: page.OnPage, Priority: 1, Mutates: true,
+			Run: &page.Run{Call: CallStartVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}, Hud: hud(vm.Name + " is starting")}
 	}
 	del := page.Action{ID: ActionDelete, Label: "Delete", On: page.OnPage, Priority: 2, Mutates: true,
 		Confirm: ask(m.Asks, "delete", kind, vm.Name, "Delete "+vm.Name+"?", "delete", "Its disk is erased: nothing of it is kept."),
 		Run:     &page.Run{Call: CallDeleteVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}}
 	del.Run.In = answered(del.Confirm, del.Run.In)
 	p.Actions = []page.Action{stop, del}
-	if vm.State == model.Running {
-		p.Actions = append(p.Actions, page.Action{ID: ActionShare, Label: "Share a port", On: page.OnPage, Priority: 3, Mutates: true,
-			Run:  &page.Run{Call: CallSharePort, In: map[string]string{"VM": vm.Name}, Target: target(h)},
-			Form: &page.Form{Title: "Share a port of " + vm.Name, Fields: []page.Field{{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"}}}})
+	if running {
+		menu.Submenu = append(menu.Submenu, ActionShare)
+	}
+	menu.Submenu = append(menu.Submenu, stop.ID, ActionDelete)
+	if !running {
+		p.Sections = append(p.Sections, stoppedCard(vm))
+		p.Actions = append(p.Actions, menu)
+		p.Header.Buttons = []string{ActionMenu}
+		return page.Seal(p)
+	}
+	p.Segments = segments()
+	p.Sections = append(p.Sections, agentsCard(vm, mine))
+	if needs := vmNeeds(m, h, vm, label); needs != nil {
+		p.Sections = append(p.Sections, *needs)
+	}
+	shares := workspacePorts(m, vm)
+	p.Sections = append(p.Sections, vmGauges(m, vm), workspacePortsCard(shares), footnote(m, vm, label))
+	p.Sections = append(p.Sections, shares.Sections...)
+	copies := sharedSection(m, h, vm)
+	copies.Segment = SegmentAccounts
+	p.Sections = append(p.Sections, copies)
+	p.Actions = append(p.Actions, agentActions(h, vm, mine)...)
+	p.Actions = append(p.Actions, page.Action{ID: ActionShare, Label: "Share a port", On: page.OnPage, Priority: 3, Mutates: true,
+		Run:  &page.Run{Call: CallSharePort, In: map[string]string{"VM": vm.Name}, Target: target(h)},
+		Form: &page.Form{Title: "Share a port of " + vm.Name, Fields: []page.Field{{Key: "Port", Label: "Port", Kind: page.FieldText, Required: true, Note: "a port number, like 5173"}}}})
+	if n, ok := needsOfVM(m, h, vm, label); ok {
+		for _, need := range n {
+			p.Actions = append(p.Actions, need.Verb)
+		}
 	}
 	p.Actions = append(p.Actions, takeBacks(m, h, vm)...)
-	if vm.State == model.Running {
-		p.Actions = append(p.Actions, insideActions(vm.Name)...)
-	}
 	p.Actions = append(p.Actions, shares.Actions...)
-	p.Actions = append(p.Actions, openIn("--on", vm.Name), page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage, Submenu: workspaceMenu(vm, stop.ID)})
-	p.Live = liveKeys(p)
+	shell := openIn("--on", vm.Name)
+	shell.Key = "cmd+enter"
+	p.Actions = append(p.Actions, shell, menu)
+	p.Footer = &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: catalog.SSHCommand("", vm.Name)}, Buttons: []string{ActionOpenStation}}
+	p.Live = pageLive(p)
 	return page.Seal(p)
 }
 
-// value: a workspace's Apps, Settings and Disk, as its Overview counts them
-// inside it: station manages them there.
-func insideSection(s *overview.Summary) page.Section {
-	rows := []page.Row{{ID: "apps", Label: "Apps"}, {ID: "settings", Label: "Settings"}, {ID: "disk", Label: "Disk"}}
-	for i := range rows {
-		rows[i].Cells = []page.Value{page.Pending()}
-		if s == nil {
-			continue
+// value: the agents a workspace hosts, by name, as the fleet's agents say
+// them; until they are read, the one its guest last reported, named by
+// its workspace.
+func agentsOn(m Machine, h model.MacView, vm model.VM) []agents.Agent {
+	if m.Agents == nil {
+		if vm.Agent == nil {
+			return nil
 		}
-		rows[i].Cells = []page.Value{page.None()}
-		for _, l := range s.Lines {
-			if string(l.Section) == rows[i].ID {
-				rows[i].Cells = []page.Value{inside(rows[i].ID, lineOf(*s, rows[i].ID))}
-			}
+		return []agents.Agent{{Name: vm.Name, VM: vm.Name, Mac: h.Name, State: agents.State(vm.Agent.State), Task: vm.Agent.Task, Reason: vm.Agent.Reason, Ended: vm.Agent.Ended}}
+	}
+	var out []agents.Agent
+	for _, a := range m.Agents {
+		if a.VM == vm.Name && (a.Mac == "" || a.Mac == h.Name) {
+			out = append(out, a)
 		}
 	}
-	return page.Section{ID: SectionInside, Title: "Inside", Role: page.Summary, Columns: columns(), Items: items(rows)}
+	slices.SortStableFunc(out, func(a, b agents.Agent) int { return agentOrder(a) - agentOrder(b) })
+	return out
 }
 
-// value: an Inside line in the vision's few words (`38 installed`, `2
-// need a look`, `12.4 GB free`): what is there and what needs you, never
-// what station does not manage.
-func inside(id string, v page.Value) page.Value {
-	parts := v.Items
-	if v.Kind != page.KindList {
-		parts = []page.Value{v}
+// value: SPEC A4's order of agents: waiting, working, then finished.
+func agentOrder(a agents.Agent) int {
+	switch a.State {
+	case agents.Waiting:
+		return 0
+	case agents.Finished:
+		return 2
+	case agents.Starting, agents.Working, agents.Running:
 	}
-	var out []page.Value
-	look := 0
-	for _, p := range parts {
-		switch {
-		case p.Label == string(page.Attention) || p.Label == string(page.Broken):
-			switch {
-			case p.Kind == page.KindCount:
-				look += int(p.N)
-			case id == "disk" && p.Kind == page.KindSize:
-				out = append(out, p)
-			default:
-				look++
-			}
-		case id == "apps" && p.Label == string(page.OK):
-			out = append(out, page.Count(p.N, "installed"))
-		case id == "settings" && p.Label == string(page.Absent) && p.Kind == page.KindText:
-			out = append(out, page.Text(p.Text+" set"))
-		case id == "disk" && p.Kind == page.KindSize && p.Unit == "free":
-			out = append(out, p)
+	return 1
+}
+
+// value: SPEC A4's facts of a workspace: its life, its Mac, how long it
+// has run and how many agents it hosts; a stopped one says it stopped. On
+// a narrow line its uptime goes first, then its Mac, then its life: what
+// it runs stays.
+func workspaceFacts(m Machine, h model.MacView, vm model.VM, label string, mine []agents.Agent) []page.Value {
+	out := []page.Value{dropFirst(page.Text(lifeWord(vm)), 1), dropFirst(page.Linked(page.Text("on "+label), machinePage(h.Name)), 2)}
+	if vm.State != model.Running {
+		return append(out, page.Text("stopped"))
+	}
+	if !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
+		out = append(out, dropFirst(page.Text("up "+days(m.Now.Sub(vm.BootAt))), 3))
+	}
+	live := 0
+	for _, a := range mine {
+		if agents.Live(a) {
+			live++
 		}
 	}
-	if look > 0 {
-		out = append(out, page.Text(strconv.Itoa(look)+" "+pluralVerb(look, "needs", "need")+" a look"))
+	if live == 0 {
+		return append(out, page.Text("no agent running"))
 	}
-	if len(out) == 0 {
-		return v
+	return append(out, page.Text(counted(live, "agent", "agents")))
+}
+
+// value: SPEC A4's Agents card: one row per agent, its state's words, its
+// page behind it and its terminal in the quick slot; a finished one is
+// quiet with its Clean up; none, the line that offers the first; the
+// hook's absence where an agent runs unreported.
+func agentsCard(vm model.VM, mine []agents.Agent) page.Section {
+	s := page.Section{ID: SectionAgents, Title: "Agents", Segment: SegmentOverview, Card: page.CardFlush, Columns: columns(), Uncounted: true}
+	if len(mine) == 0 {
+		s.Card = page.CardEmpty
+		s.Items = []page.Item{{Empty: &page.Empty{Text: "No agent on " + vm.Name, Actions: []string{ActionNewAgent}}}}
+		return s
 	}
-	return page.List(out...)
+	counts := map[agents.State]int{}
+	for _, a := range mine {
+		counts[a.State]++
+		row := agentRow(a)
+		s.Items = append(s.Items, page.Item{Row: &row})
+	}
+	var words []page.Value
+	for _, st := range []agents.State{agents.Working, agents.Running, agents.Waiting, agents.Finished} {
+		if counts[st] > 0 {
+			v := page.Text(strconv.Itoa(counts[st]) + " " + string(st))
+			if st == agents.Waiting {
+				v.Signal = page.SignalWaits
+			}
+			words = append(words, v)
+		}
+	}
+	s.Caption = []page.Value{page.List(words...)}
+	if a, ok := hookMissing(vm.Name, mine); ok {
+		detail := page.Text("station only sees that " + appWord(a.App) + " runs")
+		row := page.Row{ID: RowHook, Label: "Agent hook not installed", Mark: page.OK, Detail: detail, Glyph: symbol("exclamationmark.triangle", page.SignalWaits), Verb: ActionApplyHook}
+		s.Items = append(s.Items, page.Item{Row: &row})
+	}
+	return s
+}
+
+// value: an agent's row on its workspace's page: home's agent row
+// without its Mac.
+func agentRow(a agents.Agent) page.Row {
+	row := page.Row{ID: a.Name, Label: a.Name, Mark: page.OK, Nav: agentPage(a.Name), Glyph: page.Glyph{Kind: "agent", Signal: agentSignal(a)}}
+	switch a.State {
+	case agents.Waiting:
+		ask := page.Text(cmpWord(a.Task, "waits for you"))
+		if a.Ask != nil && a.Ask.Title != "" {
+			ask = page.Text(a.Ask.Title)
+		}
+		ask.Signal = page.SignalWaits
+		row.Detail = page.List(ask)
+	case agents.Finished:
+		row.Detail, row.Signal = page.Texts("finished", cmpWord(a.Reason, "done")), page.SignalDone
+		row.Verb = ActionForget + a.Name
+	case agents.Running:
+		row.Detail = page.Text(appWord(a.App) + " running")
+	default:
+		if w := agents.Words(a); len(w) > 0 {
+			row.Detail = page.Texts(w...)
+		} else {
+			row.Detail = page.Text(cmpWord(a.Task, "working"))
+		}
+	}
+	if agents.Live(a) {
+		row.Quick = ActionAttach + a.Name
+	}
+	return row
+}
+
+func agentActions(h model.MacView, vm model.VM, mine []agents.Agent) []page.Action {
+	start := page.Action{ID: ActionNewAgent, Label: "New agent", Icon: "plus", Key: "shift+cmd+n", On: page.OnPage, Priority: 2, Mutates: true,
+		Run:  &page.Run{Call: CallAgentsStart, In: map[string]string{"On": vm.Name}, Target: target(h)},
+		Form: &page.Form{Title: "New agent on " + vm.Name, Fields: []page.Field{{Key: "Task", Label: "Task", Kind: page.FieldText, Note: "empty, it waits for a prompt"}}}}
+	out := []page.Action{start}
+	for _, a := range mine {
+		if agents.Live(a) {
+			out = append(out, attachAgent(a))
+		} else {
+			out = append(out, forgetAgent(h, a))
+		}
+	}
+	if _, ok := hookMissing(vm.Name, mine); ok {
+		out = append(out, applyHook(h, vm.Name))
+	}
+	return out
+}
+
+// value: what needs you on the workspace, its agents' waits left to its
+// Agents card.
+func needsOfVM(m Machine, h model.MacView, vm model.VM, label string) ([]Need, bool) {
+	o := overviewOf(m, h, label, false)
+	var out []Need
+	for _, n := range scoped(o.needs, vm.Name) {
+		if !strings.HasPrefix(n.Key, "waiting:") {
+			out = append(out, n)
+		}
+	}
+	return out, len(out) > 0
+}
+
+func vmNeeds(m Machine, h model.MacView, vm model.VM, label string) *page.Section {
+	needs, ok := needsOfVM(m, h, vm, label)
+	if !ok {
+		return nil
+	}
+	o := overviewOf(m, model.MacView{Name: vm.Name}, label, false)
+	o.needs = needs
+	s := o.needsCard()
+	return &s
+}
+
+// value: the workspace's gauges, read inside it.
+func vmGauges(m Machine, vm model.VM) page.Section {
+	s := macOverview{m: m, h: model.MacView{Name: vm.Name}}.gauges()
+	return s
+}
+
+// value: what a workspace's life means, and whether it pauses when its
+// Mac sleeps.
+func footnote(m Machine, vm model.VM, label string) page.Section {
+	life := "Permanent: kept until you delete it"
+	if vm.Lifetime == model.Throwaway {
+		life = "Throwaway: deleted when it powers off from inside"
+	}
+	sleeps := "pauses when " + label + " sleeps"
+	if m.Awake != nil && m.Awake.Mode() == awake.NeverSleeps {
+		sleeps = "never paused"
+	}
+	note := page.Note{Text: life + "; " + sleeps + "."}
+	return page.Section{ID: SectionFootnote, Title: "Life", Role: page.Banner, Segment: SegmentOverview, Uncounted: true, Items: []page.Item{{Note: &note}}}
+}
+
+// value: SPEC A4's stopped workspace: what it keeps and the memory it
+// takes again, with Start.
+func stoppedCard(vm model.VM) page.Section {
+	sub := []string{"Disk kept"}
+	if b := vm.Resources.MemoryBytes; b > 0 {
+		sub = append(sub, "starts with "+pagemachines.Memory(b).Text)
+	}
+	empty := page.Empty{Glyph: page.Glyph{Kind: "workspace", Signal: page.SignalQuiet}, Text: vm.Name + " is stopped", Sub: strings.Join(sub, ", "), Actions: []string{ActionStartVM}}
+	return page.Section{ID: SectionStopped, Title: vm.Name + " is stopped", Card: page.CardEmpty, Items: []page.Item{{Empty: &empty}}}
 }
 
 func pluralVerb(n int, one, many string) string {
@@ -117,17 +288,6 @@ func pluralVerb(n int, one, many string) string {
 		return one
 	}
 	return many
-}
-
-// value: what opening Apps, Settings or Disk on a workspace's page does: a
-// terminal on that family, on the workspace.
-func insideActions(vm string) []page.Action {
-	ids := []string{"apps", "settings", "disk"}
-	out := make([]page.Action, 0, len(ids))
-	for _, id := range ids {
-		out = append(out, page.Action{ID: ActionOpenFamily + id, Label: "Open " + id, On: page.OnRow, Rows: []string{id}, Priority: 5, Run: &page.Run{Terminal: true, Argv: []string{id, "--on", vm}}})
-	}
-	return out
 }
 
 func lineOf(s overview.Summary, id string) page.Value {
@@ -139,47 +299,6 @@ func lineOf(s overview.Summary, id string) page.Value {
 		}
 	}
 	return page.None()
-}
-
-// value: a workspace's header facts: its lifetime, how long it has run,
-// how many agents it hosts.
-func workspaceSummary(m Machine, vm model.VM) page.Section {
-	facts := []page.Value{page.Text(strings.ToLower(pagemachines.Lifetime(vm.Lifetime).Text))}
-	if vm.State == model.Running && !vm.BootAt.IsZero() && m.Now.After(vm.BootAt) {
-		facts = append(facts, page.Text("up "+days(m.Now.Sub(vm.BootAt))))
-	} else if vm.State != model.Running {
-		facts = append(facts, page.Text("stopped"))
-	}
-	n := len(vm.Agents)
-	if n == 0 && vm.Agent != nil {
-		n = 1
-	}
-	switch n {
-	case 0:
-		facts = append(facts, page.Text("no agent"))
-	case 1:
-		facts = append(facts, page.Text("1 agent"))
-	default:
-		facts = append(facts, page.Text(strconv.Itoa(n)+" agents"))
-	}
-	return page.Section{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: facts}
-}
-
-// value: a workspace's glyph: the agent mark while it hosts a live agent.
-func workspaceGlyph(vm model.VM) string {
-	if vm.Agent != nil && !vm.Finished() {
-		return "agent"
-	}
-	return "workspace"
-}
-
-// value: a workspace's menu: Share a port… while it runs, then Stop (or
-// Start), Delete and Open station.
-func workspaceMenu(vm model.VM, stop string) []string {
-	if vm.State != model.Running {
-		return []string{stop, ActionDelete, ActionOpenStation}
-	}
-	return []string{ActionShare, stop, ActionDelete, ActionOpenStation}
 }
 
 // value: a workspace's Overview Ports card: its shares, each opening its

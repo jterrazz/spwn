@@ -1,0 +1,230 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "review-bot",
+    "kind": "agent",
+    "on": "review-bot"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "review-bot",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "working"
+            },
+            {
+              "kind": "text",
+              "text": "1 min"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Claude",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "on review-bot",
+          "pri": 1,
+          "nav": "menubar.machine:review-bot"
+        },
+        {
+          "kind": "text",
+          "text": "mac-mini",
+          "pri": 3
+        }
+      ]
+    },
+    {
+      "id": "now",
+      "title": "Now",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "fixes the token refresh"
+        }
+      ],
+      "items": [
+        {
+          "steps": [
+            {
+              "at": {
+                "kind": "text",
+                "text": "now"
+              },
+              "text": "reading your reply",
+              "current": true
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "7 min ago"
+              },
+              "text": "opened a PR"
+            }
+          ]
+        }
+      ],
+      "card": "now"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "mac-mini"
+                },
+                {
+                  "kind": "text",
+                  "text": "permanent"
+                },
+                {
+                  "kind": "text",
+                  "text": "up 2 hr"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "active"
+            },
+            "nav": "menubar.machine:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "key": "cmd+enter",
+      "label": "Open in Terminal",
+      "on": "page",
+      "priority": 2,
+      "id": "attach",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Full log",
+      "on": "page",
+      "priority": 2,
+      "id": "full-log",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
+      "label": "Stop review-bot",
+      "on": "page",
+      "confirm": {
+        "question": "Stop review-bot?",
+        "lines": [
+          {
+            "kind": "text",
+            "text": "Its terminal closes; review-bot keeps running."
+          }
+        ],
+        "yes": "Stop"
+      },
+      "priority": 4,
+      "mutates": true,
+      "id": "stop-agent",
+      "run": {
+        "call": "agents.stop",
+        "in": {
+          "Agent": "review-bot",
+          "Confirm": "yes"
+        },
+        "target": {
+          "name": "review-bot",
+          "on": "mac-mini"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot stopped"
+          }
+        ]
+      },
+      "destructive": true
+    },
+    {
+      "label": "More options for review-bot",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "stop-agent"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "active"
+    },
+    "buttons": [
+      "menu"
+    ]
+  },
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "station agents attach review-bot"
+    },
+    "buttons": [
+      "attach"
+    ]
+  }
+}

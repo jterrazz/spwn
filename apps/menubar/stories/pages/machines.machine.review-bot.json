@@ -7,7 +7,7 @@
     "kind": "workspace",
     "on": "mac-mini"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
       "id": "summary",
@@ -16,11 +16,19 @@
       "caption": [
         {
           "kind": "text",
-          "text": "permanent"
+          "text": "permanent",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "up 2 hr"
+          "text": "on mac-mini",
+          "pri": 2,
+          "nav": "menubar.machine:mac-mini"
+        },
+        {
+          "kind": "text",
+          "text": "up 2 hr",
+          "pri": 3
         },
         {
           "kind": "text",
@@ -29,21 +37,148 @@
       ]
     },
     {
-      "id": "machine",
-      "title": "review-bot",
-      "role": "summary",
+      "id": "agents",
+      "title": "Agents",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "1 waiting",
+              "signal": "waits"
+            }
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "review-bot",
+            "mark": "ok",
+            "label": "review-bot",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "PR #42 is ready, tests pass",
+                  "signal": "waits"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "waits"
+            },
+            "quick": "attach:review-bot",
+            "nav": "menubar.agent:review-bot"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:review-bot"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "0 GB free",
+              "live": "free:review-bot"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 4133906022,
+              "of": 4294967296
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:review-bot"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
+            ]
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
       "caption": [
         {
           "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Permanent"
-        },
-        {
-          "kind": "text",
-          "text": "on mac-mini"
+          "text": "0"
         }
       ],
       "columns": [
@@ -61,313 +196,51 @@
       "items": [
         {
           "row": {
-            "id": "state",
+            "id": "review-bot:8000",
             "mark": "ok",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Running"
-              }
-            ]
+            "label": "Port 8000",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot:8000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "share:review-bot:8000"
           }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
         }
       ],
       "segment": "overview"
     },
     {
-      "id": "activity",
-      "title": "Activity",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
-        }
-      ],
+      "id": "footnote",
+      "title": "Life",
+      "role": "banner",
       "items": [
         {
-          "row": {
-            "id": "cpu",
-            "label": "CPU",
-            "cells": [
-              {
-                "kind": "percent",
-                "n": 340,
-                "live": "cpu:review-bot"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 18
-                  },
-                  {
-                    "kind": "count",
-                    "n": 25
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  },
-                  {
-                    "kind": "count",
-                    "n": 30
-                  },
-                  {
-                    "kind": "count",
-                    "n": 22
-                  },
-                  {
-                    "kind": "count",
-                    "n": 41
-                  },
-                  {
-                    "kind": "count",
-                    "n": 55
-                  },
-                  {
-                    "kind": "count",
-                    "n": 48
-                  },
-                  {
-                    "kind": "count",
-                    "n": 36
-                  },
-                  {
-                    "kind": "count",
-                    "n": 28
-                  },
-                  {
-                    "kind": "count",
-                    "n": 31
-                  },
-                  {
-                    "kind": "count",
-                    "n": 44
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 29
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "memory",
-            "label": "Memory",
-            "cells": [
-              {
-                "kind": "ratio",
-                "n": 4133906022,
-                "of": 4294967296,
-                "live": "memory:review-bot"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 89
-                  },
-                  {
-                    "kind": "count",
-                    "n": 96
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 89
-                  },
-                  {
-                    "kind": "count",
-                    "n": 96
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 89
-                  },
-                  {
-                    "kind": "count",
-                    "n": 96
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 89
-                  },
-                  {
-                    "kind": "count",
-                    "n": 96
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "percent",
-                "n": 100,
-                "live": "disk:review-bot"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  },
-                  {
-                    "kind": "count",
-                    "n": 10
-                  }
-                ]
-              }
-            ]
+          "note": {
+            "text": "Permanent: kept until you delete it; never paused."
           }
         }
       ],
+      "uncounted": true,
       "segment": "overview"
     },
     {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -383,39 +256,41 @@
       "items": [
         {
           "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
+            "id": "review-bot:8000",
+            "mark": "ok",
+            "label": "Port 8000",
+            "detail": {
+              "kind": "text",
+              "text": "review-bot:8000"
+            },
+            "glyph": {
+              "kind": "port:web"
+            },
+            "verb": "share:review-bot:8000"
           }
         }
       ],
-      "segment": "overview"
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "segment": "ports",
+      "about": {
+        "label": "About private links",
+        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+      }
     },
     {
       "id": "shared",
@@ -502,112 +377,6 @@
       ],
       "segment": "accounts",
       "card": "flush"
-    },
-    {
-      "id": "ports",
-      "title": "Ports",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "review-bot:8000",
-            "mark": "ok",
-            "label": "Port 8000",
-            "detail": {
-              "kind": "text",
-              "text": "review-bot:8000"
-            },
-            "glyph": {
-              "kind": "port:web"
-            },
-            "verb": "share:review-bot:8000"
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "segment": "overview"
-    },
-    {
-      "id": "private",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "review-bot:8000",
-            "mark": "ok",
-            "label": "Port 8000",
-            "detail": {
-              "kind": "text",
-              "text": "review-bot:8000"
-            },
-            "glyph": {
-              "kind": "port:web"
-            },
-            "verb": "share:review-bot:8000"
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "glance": [
-        {
-          "kind": "text",
-          "text": "Private"
-        },
-        {
-          "kind": "text",
-          "text": "on your tailnet"
-        }
-      ],
-      "segment": "ports",
-      "about": {
-        "label": "About private links",
-        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
-      }
     },
     {
       "id": "window-6m",
@@ -2090,6 +1859,54 @@
       }
     },
     {
+      "key": "shift+cmd+n",
+      "label": "New agent",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-agent",
+      "run": {
+        "call": "agents.start",
+        "in": {
+          "On": "review-bot"
+        },
+        "target": {
+          "name": "mac-mini"
+        }
+      },
+      "form": {
+        "title": "New agent on review-bot",
+        "fields": [
+          {
+            "key": "Task",
+            "label": "Task",
+            "kind": "text",
+            "note": "empty, it waits for a prompt"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "key": "cmd+enter",
+      "label": "Open review-bot in Terminal",
+      "on": "row",
+      "rows": [
+        "review-bot"
+      ],
+      "priority": 2,
+      "id": "attach:review-bot",
+      "run": {
+        "terminal": true,
+        "argv": [
+          "agents",
+          "attach",
+          "review-bot"
+        ]
+      },
+      "icon": "terminal"
+    },
+    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -2240,57 +2057,6 @@
       }
     },
     {
-      "label": "Open apps",
-      "on": "row",
-      "rows": [
-        "apps"
-      ],
-      "priority": 5,
-      "id": "open:apps",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "apps",
-          "--on",
-          "review-bot"
-        ]
-      }
-    },
-    {
-      "label": "Open settings",
-      "on": "row",
-      "rows": [
-        "settings"
-      ],
-      "priority": 5,
-      "id": "open:settings",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "settings",
-          "--on",
-          "review-bot"
-        ]
-      }
-    },
-    {
-      "label": "Open disk",
-      "on": "row",
-      "rows": [
-        "disk"
-      ],
-      "priority": 5,
-      "id": "open:disk",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "disk",
-          "--on",
-          "review-bot"
-        ]
-      }
-    },
-    {
       "label": "Share",
       "on": "row",
       "rows": [
@@ -2319,7 +2085,7 @@
       }
     },
     {
-      "key": "cmd+t",
+      "key": "cmd+enter",
       "label": "Open in Terminal",
       "on": "page",
       "priority": 2,
@@ -2340,15 +2106,15 @@
       "submenu": [
         "share-port",
         "stop",
-        "delete",
-        "open-station"
+        "delete"
       ]
     }
   ],
   "header": {
-    "back": "mac-mini",
+    "back": "All machines",
     "glyph": {
-      "kind": "agent"
+      "kind": "agent",
+      "signal": "waits"
     },
     "buttons": [
       "menu"
@@ -2376,10 +2142,19 @@
       "key": "cmd+u"
     }
   ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh review-bot"
+    },
+    "buttons": [
+      "open-station"
+    ]
+  },
   "live": [
     "cpu:review-bot",
-    "memory:review-bot",
-    "disk:review-bot",
-    "free:review-bot"
+    "free:review-bot",
+    "net:review-bot"
   ]
 }

@@ -7,7 +7,7 @@
     "kind": "workspace",
     "on": "This Mac"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
       "id": "summary",
@@ -16,34 +16,172 @@
       "caption": [
         {
           "kind": "text",
-          "text": "throwaway"
+          "text": "throwaway",
+          "pri": 1
         },
         {
           "kind": "text",
-          "text": "up 2 hr"
+          "text": "on This Mac",
+          "pri": 2,
+          "nav": "menubar.machine:macbook-pro"
         },
         {
           "kind": "text",
-          "text": "1 agent"
+          "text": "up 2 hr",
+          "pri": 3
+        },
+        {
+          "kind": "text",
+          "text": "no agent running"
         }
       ]
     },
     {
-      "id": "machine",
-      "title": "agent-7f",
-      "role": "summary",
+      "id": "agents",
+      "title": "Agents",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "1 finished"
+            }
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "agent-7f",
+            "mark": "ok",
+            "label": "agent-7f",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "finished"
+                },
+                {
+                  "kind": "text",
+                  "text": "tests pass"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "agent",
+              "signal": "done"
+            },
+            "verb": "forget:agent-7f",
+            "nav": "menubar.agent:agent-7f",
+            "signal": "done"
+          }
+        }
+      ],
+      "uncounted": true,
+      "segment": "overview",
+      "card": "flush"
+    },
+    {
+      "id": "gauges",
+      "title": "Gauges",
+      "items": [
+        {
+          "gauge": {
+            "title": "CPU",
+            "value": {
+              "kind": "percent",
+              "n": 340,
+              "live": "cpu:agent-7f"
+            },
+            "spark": [
+              12,
+              18,
+              25,
+              34,
+              30,
+              22,
+              41,
+              55,
+              48,
+              36,
+              28,
+              31,
+              44,
+              38,
+              29,
+              34
+            ]
+          }
+        },
+        {
+          "gauge": {
+            "title": "Memory",
+            "value": {
+              "kind": "text",
+              "text": "1 GB free",
+              "live": "free:agent-7f"
+            },
+            "bar": {
+              "kind": "ratio",
+              "n": 7462505676,
+              "of": 8589934592
+            }
+          }
+        },
+        {
+          "gauge": {
+            "title": "Network",
+            "value": {
+              "kind": "size",
+              "n": 1780000,
+              "unit": "/s",
+              "live": "net:agent-7f"
+            },
+            "spark": [
+              1340,
+              1460,
+              1600,
+              1780,
+              1700,
+              1540,
+              1920,
+              2200,
+              2060,
+              1820,
+              1660,
+              1720,
+              1980,
+              1860,
+              1680,
+              1780
+            ]
+          }
+        }
+      ],
+      "segment": "overview",
+      "card": "gauges"
+    },
+    {
+      "id": "ports",
+      "title": "Ports",
       "caption": [
         {
           "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Throwaway"
-        },
-        {
-          "kind": "text",
-          "text": "on This Mac"
+          "text": "0"
         }
       ],
       "columns": [
@@ -61,313 +199,51 @@
       "items": [
         {
           "row": {
-            "id": "state",
+            "id": "agent-7f:6006",
             "mark": "ok",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Running"
-              }
-            ]
+            "label": "Storybook",
+            "detail": {
+              "kind": "text",
+              "text": "agent-7f:6006"
+            },
+            "glyph": {
+              "kind": "port:storybook"
+            },
+            "verb": "share:agent-7f:6006"
           }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
         }
       ],
       "segment": "overview"
     },
     {
-      "id": "activity",
-      "title": "Activity",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
-        }
-      ],
+      "id": "footnote",
+      "title": "Life",
+      "role": "banner",
       "items": [
         {
-          "row": {
-            "id": "cpu",
-            "label": "CPU",
-            "cells": [
-              {
-                "kind": "percent",
-                "n": 340,
-                "live": "cpu:agent-7f"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 18
-                  },
-                  {
-                    "kind": "count",
-                    "n": 25
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  },
-                  {
-                    "kind": "count",
-                    "n": 30
-                  },
-                  {
-                    "kind": "count",
-                    "n": 22
-                  },
-                  {
-                    "kind": "count",
-                    "n": 41
-                  },
-                  {
-                    "kind": "count",
-                    "n": 55
-                  },
-                  {
-                    "kind": "count",
-                    "n": 48
-                  },
-                  {
-                    "kind": "count",
-                    "n": 36
-                  },
-                  {
-                    "kind": "count",
-                    "n": 28
-                  },
-                  {
-                    "kind": "count",
-                    "n": 31
-                  },
-                  {
-                    "kind": "count",
-                    "n": 44
-                  },
-                  {
-                    "kind": "count",
-                    "n": 38
-                  },
-                  {
-                    "kind": "count",
-                    "n": 29
-                  },
-                  {
-                    "kind": "count",
-                    "n": 34
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "memory",
-            "label": "Memory",
-            "cells": [
-              {
-                "kind": "ratio",
-                "n": 7462505676,
-                "of": 8589934592,
-                "live": "memory:agent-7f"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 80
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 86
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 80
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 86
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 80
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 86
-                  },
-                  {
-                    "kind": "count",
-                    "n": 77
-                  },
-                  {
-                    "kind": "count",
-                    "n": 80
-                  },
-                  {
-                    "kind": "count",
-                    "n": 83
-                  },
-                  {
-                    "kind": "count",
-                    "n": 86
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "percent",
-                "n": 125,
-                "live": "disk:agent-7f"
-              },
-              {
-                "kind": "spark",
-                "items": [
-                  {
-                    "kind": "none"
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  },
-                  {
-                    "kind": "count",
-                    "n": 12
-                  }
-                ]
-              }
-            ]
+          "note": {
+            "text": "Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps."
           }
         }
       ],
+      "uncounted": true,
       "segment": "overview"
     },
     {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
+      "id": "private",
+      "title": "Private",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "0"
+        }
+      ],
       "columns": [
         {
           "key": "name",
@@ -383,39 +259,41 @@
       "items": [
         {
           "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
+            "id": "agent-7f:6006",
+            "mark": "ok",
+            "label": "Storybook",
+            "detail": {
+              "kind": "text",
+              "text": "agent-7f:6006"
+            },
+            "glyph": {
+              "kind": "port:storybook"
+            },
+            "verb": "share:agent-7f:6006"
           }
         }
       ],
-      "segment": "overview"
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "glance": [
+        {
+          "kind": "text",
+          "text": "Private"
+        },
+        {
+          "kind": "text",
+          "text": "on your tailnet"
+        }
+      ],
+      "segment": "ports",
+      "about": {
+        "label": "About private links",
+        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
+      }
     },
     {
       "id": "shared",
@@ -478,112 +356,6 @@
       ],
       "segment": "accounts",
       "card": "flush"
-    },
-    {
-      "id": "ports",
-      "title": "Ports",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "agent-7f:6006",
-            "mark": "ok",
-            "label": "Storybook",
-            "detail": {
-              "kind": "text",
-              "text": "agent-7f:6006"
-            },
-            "glyph": {
-              "kind": "port:storybook"
-            },
-            "verb": "share:agent-7f:6006"
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "segment": "overview"
-    },
-    {
-      "id": "private",
-      "title": "Private",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "agent-7f:6006",
-            "mark": "ok",
-            "label": "Storybook",
-            "detail": {
-              "kind": "text",
-              "text": "agent-7f:6006"
-            },
-            "glyph": {
-              "kind": "port:storybook"
-            },
-            "verb": "share:agent-7f:6006"
-          }
-        }
-      ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "glance": [
-        {
-          "kind": "text",
-          "text": "Private"
-        },
-        {
-          "kind": "text",
-          "text": "on your tailnet"
-        }
-      ],
-      "segment": "ports",
-      "about": {
-        "label": "About private links",
-        "text": "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared."
-      }
     },
     {
       "id": "window-6m",
@@ -2060,6 +1832,60 @@
       }
     },
     {
+      "key": "shift+cmd+n",
+      "label": "New agent",
+      "on": "page",
+      "priority": 2,
+      "mutates": true,
+      "id": "new-agent",
+      "run": {
+        "call": "agents.start",
+        "in": {
+          "On": "agent-7f"
+        }
+      },
+      "form": {
+        "title": "New agent on agent-7f",
+        "fields": [
+          {
+            "key": "Task",
+            "label": "Task",
+            "kind": "text",
+            "note": "empty, it waits for a prompt"
+          }
+        ]
+      },
+      "icon": "plus"
+    },
+    {
+      "label": "Clean up",
+      "on": "row",
+      "rows": [
+        "agent-7f"
+      ],
+      "priority": 3,
+      "mutates": true,
+      "id": "forget:agent-7f",
+      "run": {
+        "call": "agents.forget",
+        "in": {
+          "Agent": "agent-7f"
+        },
+        "target": {
+          "name": "agent-7f"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f cleaned up"
+          }
+        ]
+      }
+    },
+    {
       "label": "Share a port",
       "on": "page",
       "priority": 3,
@@ -2140,57 +1966,6 @@
       }
     },
     {
-      "label": "Open apps",
-      "on": "row",
-      "rows": [
-        "apps"
-      ],
-      "priority": 5,
-      "id": "open:apps",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "apps",
-          "--on",
-          "agent-7f"
-        ]
-      }
-    },
-    {
-      "label": "Open settings",
-      "on": "row",
-      "rows": [
-        "settings"
-      ],
-      "priority": 5,
-      "id": "open:settings",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "settings",
-          "--on",
-          "agent-7f"
-        ]
-      }
-    },
-    {
-      "label": "Open disk",
-      "on": "row",
-      "rows": [
-        "disk"
-      ],
-      "priority": 5,
-      "id": "open:disk",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "disk",
-          "--on",
-          "agent-7f"
-        ]
-      }
-    },
-    {
       "label": "Share",
       "on": "row",
       "rows": [
@@ -2216,7 +1991,7 @@
       }
     },
     {
-      "key": "cmd+t",
+      "key": "cmd+enter",
       "label": "Open in Terminal",
       "on": "page",
       "priority": 2,
@@ -2237,15 +2012,15 @@
       "submenu": [
         "share-port",
         "stop",
-        "delete",
-        "open-station"
+        "delete"
       ]
     }
   ],
   "header": {
-    "back": "This Mac",
+    "back": "All machines",
     "glyph": {
-      "kind": "workspace"
+      "kind": "workspace",
+      "signal": "quiet"
     },
     "buttons": [
       "menu"
@@ -2273,10 +2048,19 @@
       "key": "cmd+u"
     }
   ],
+  "footer": {
+    "kind": "ssh",
+    "copy": {
+      "kind": "command",
+      "text": "ssh agent-7f"
+    },
+    "buttons": [
+      "open-station"
+    ]
+  },
   "live": [
     "cpu:agent-7f",
-    "memory:agent-7f",
-    "disk:agent-7f",
-    "free:agent-7f"
+    "free:agent-7f",
+    "net:agent-7f"
   ]
 }

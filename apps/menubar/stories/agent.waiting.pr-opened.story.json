@@ -1,0 +1,11 @@
+{
+    "group": "agent",
+    "heightNote": "designed in A2 after the prototype: no prototype height, its golden is the reference",
+    "id": "agent.waiting.pr-opened",
+    "note": "After Open PR: the tint moves to Merge PR #42, the next step.",
+    "pages": ["pages/machines.agent.review-bot.json"],
+    "schema": "station.story/v1",
+    "ui": {
+        "prOpened": ["review-bot"]
+    }
+}

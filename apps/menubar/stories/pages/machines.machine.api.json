@@ -7,7 +7,7 @@
     "kind": "workspace",
     "on": "This Mac"
   },
-  "state": "loading",
+  "state": "ready",
   "sections": [
     {
       "id": "summary",
@@ -16,239 +16,45 @@
       "caption": [
         {
           "kind": "text",
-          "text": "permanent"
+          "text": "permanent",
+          "pri": 1
+        },
+        {
+          "kind": "text",
+          "text": "on This Mac",
+          "pri": 2,
+          "nav": "menubar.machine:macbook-pro"
         },
         {
           "kind": "text",
           "text": "stopped"
-        },
-        {
-          "kind": "text",
-          "text": "no agent"
         }
       ]
     },
     {
-      "id": "machine",
-      "title": "api",
-      "role": "summary",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "Workspace VM"
-        },
-        {
-          "kind": "text",
-          "text": "Permanent"
-        },
-        {
-          "kind": "text",
-          "text": "on This Mac"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "state",
-            "mark": "absent",
-            "label": "State",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "Stopped"
-              }
-            ],
-            "reason": "stopped"
-          }
-        }
-      ]
-    },
-    {
-      "id": "activity",
-      "title": "Activity",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        },
-        {
-          "key": "graph",
-          "kind": "spark",
-          "keep": 50
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "cpu",
-            "label": "CPU",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "memory",
-            "label": "Memory",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "none"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "inside",
-      "title": "Inside",
-      "role": "summary",
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
-      "items": [
-        {
-          "row": {
-            "id": "apps",
-            "label": "Apps",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "settings",
-            "label": "Settings",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "disk",
-            "label": "Disk",
-            "cells": [
-              {
-                "kind": "pending"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "shared",
-      "title": "Lent to api",
-      "caption": [
-        {
-          "kind": "text",
-          "text": "0"
-        }
-      ],
-      "columns": [
-        {
-          "key": "name",
-          "kind": "text",
-          "keep": 100
-        },
-        {
-          "key": "value",
-          "kind": "list",
-          "keep": 60
-        }
-      ],
+      "id": "stopped",
+      "title": "api is stopped",
       "items": [
         {
           "empty": {
-            "noun": "accounts",
-            "text": "No account lent to api"
-          }
-        },
-        {
-          "row": {
-            "id": "share-account",
-            "mark": "ok",
-            "label": "Lend an account",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ends by itself"
-              }
-            ],
+            "text": "api is stopped",
             "glyph": {
-              "kind": "symbol:plus",
-              "signal": "active"
+              "kind": "workspace",
+              "signal": "quiet"
             },
-            "trail": "value",
-            "verb": "share-account"
-          }
-        },
-        {
-          "note": {
-            "text": "These are This Mac's accounts. Every loan ends by itself."
+            "sub": "Disk kept, starts with 8 GB",
+            "actions": [
+              "start-vm"
+            ]
           }
         }
       ],
-      "counts": [
-        {
-          "mark": "ok",
-          "n": 1
-        }
-      ],
-      "card": "flush"
+      "card": "empty"
     }
   ],
   "actions": [
     {
-      "label": "Start",
+      "label": "Start api",
       "on": "page",
       "priority": 1,
       "mutates": true,
@@ -258,6 +64,15 @@
         "in": {
           "VM": "api"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is starting"
+          }
+        ]
       }
     },
     {
@@ -290,90 +105,21 @@
       }
     },
     {
-      "label": "Lend an account",
-      "on": "row",
-      "rows": [
-        "share-account"
-      ],
-      "mutates": true,
-      "id": "share-account",
-      "run": {
-        "call": "accounts.share"
-      },
-      "form": {
-        "title": "Lend an account",
-        "fields": [
-          {
-            "key": "With",
-            "label": "To",
-            "kind": "text",
-            "default": "api",
-            "required": true
-          },
-          {
-            "key": "Account",
-            "label": "Account",
-            "kind": "text",
-            "required": true
-          },
-          {
-            "key": "For",
-            "label": "For",
-            "kind": "segmented",
-            "options": [
-              {
-                "value": "14400000000000",
-                "label": "4 hr"
-              },
-              {
-                "value": "43200000000000",
-                "label": "12 hr"
-              },
-              {
-                "value": "604800000000000",
-                "label": "7 days"
-              }
-            ],
-            "default": "14400000000000"
-          }
-        ],
-        "subtitle": "From This Mac. It ends by itself."
-      },
-      "sheet": "share-account",
-      "prefill": {
-        "With": "api"
-      }
-    },
-    {
-      "key": "cmd+t",
-      "label": "Open in Terminal",
-      "on": "page",
-      "priority": 2,
-      "id": "open-station",
-      "run": {
-        "terminal": true,
-        "argv": [
-          "--on",
-          "api"
-        ]
-      }
-    },
-    {
       "label": "More options for api",
       "on": "page",
       "id": "menu",
       "icon": "ellipsis",
       "submenu": [
         "start-vm",
-        "delete",
-        "open-station"
+        "delete"
       ]
     }
   ],
   "header": {
-    "back": "This Mac",
+    "back": "All machines",
     "glyph": {
-      "kind": "workspace"
+      "kind": "workspace",
+      "signal": "quiet"
     },
     "buttons": [
       "menu"

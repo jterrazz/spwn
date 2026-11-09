@@ -1,0 +1,182 @@
+{
+  "schema": "station.page/v1",
+  "id": "menubar.agent",
+  "command": "menubar",
+  "context": {
+    "machine": "agent-7f",
+    "kind": "agent",
+    "on": "agent-7f"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "agent-7f",
+      "role": "summary",
+      "caption": [
+        {
+          "kind": "list",
+          "items": [
+            {
+              "kind": "text",
+              "text": "finished"
+            },
+            {
+              "kind": "text",
+              "text": "tests pass"
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Claude",
+          "pri": 2
+        },
+        {
+          "kind": "text",
+          "text": "on agent-7f",
+          "pri": 1,
+          "nav": "menubar.machine:agent-7f"
+        }
+      ]
+    },
+    {
+      "id": "now",
+      "title": "Last steps",
+      "caption": [
+        {
+          "kind": "text",
+          "text": "write the changelog"
+        }
+      ],
+      "items": [
+        {
+          "steps": [
+            {
+              "at": {
+                "kind": "text",
+                "text": "13 min ago"
+              },
+              "text": "committed"
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "18 min ago"
+              },
+              "text": "ran the tests",
+              "diff": "58/58 pass"
+            },
+            {
+              "at": {
+                "kind": "text",
+                "text": "31 min ago"
+              },
+              "text": "edited CHANGELOG.md",
+              "diff": "+42 −3"
+            }
+          ]
+        }
+      ],
+      "card": "now"
+    },
+    {
+      "id": "runs-on",
+      "title": "Runs on",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "agent-7f",
+            "mark": "ok",
+            "label": "agent-7f",
+            "detail": {
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "This Mac"
+                },
+                {
+                  "kind": "text",
+                  "text": "throwaway"
+                },
+                {
+                  "kind": "text",
+                  "text": "idle 12 min"
+                }
+              ]
+            },
+            "glyph": {
+              "kind": "workspace",
+              "signal": "quiet"
+            },
+            "nav": "menubar.machine:agent-7f"
+          }
+        }
+      ],
+      "uncounted": true,
+      "card": "flush"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Clean up",
+      "on": "row",
+      "rows": [
+        "now"
+      ],
+      "priority": 3,
+      "mutates": true,
+      "id": "forget:agent-7f",
+      "run": {
+        "call": "agents.forget",
+        "in": {
+          "Agent": "agent-7f"
+        },
+        "target": {
+          "name": "agent-7f"
+        }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f cleaned up"
+          }
+        ]
+      }
+    },
+    {
+      "label": "More options for agent-7f",
+      "on": "page",
+      "id": "menu",
+      "icon": "ellipsis",
+      "submenu": [
+        "forget:agent-7f"
+      ]
+    }
+  ],
+  "header": {
+    "back": "All machines",
+    "glyph": {
+      "kind": "agent",
+      "signal": "done"
+    },
+    "buttons": [
+      "menu"
+    ]
+  }
+}

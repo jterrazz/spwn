@@ -38,15 +38,15 @@ func TestTheAccountMostMacsHoldIsSignedInFirst(t *testing.T) {
 
 // invariant: SPEC A4 A workspace: a running workspace's page carries its
 // header and four segments, its loans under Accounts alone; a stopped one
-// carries no segment, its loans on its one page.
+// carries no segment.
 func TestAWorkspacesLoansAreItsAccountsSegment(t *testing.T) {
 	report := &accounts.Report{Machines: []accounts.Machine{{Name: "linux-3", Kind: accounts.KindVM, Accounts: []accounts.Account{
 		{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Origin: accounts.OriginShared, Scopes: []string{"session:github", "read only"},
 			Shared: &accounts.Loan{At: macNow.Add(-time.Hour), Until: macNow.Add(3 * time.Hour)}},
 	}}}}
 	p := macPageOf(t, "linux-3", func(m *Machine) { m.Accounts, m.Summary = report, nil })
-	if p.Header == nil || p.Header.Back != "mac-mini" || len(p.Segments) != 4 {
-		t.Fatalf("header %+v, segments %+v: want the way back to mac-mini and the four segments", p.Header, p.Segments)
+	if p.Header == nil || p.Header.Back != "All machines" || len(p.Segments) != 4 {
+		t.Fatalf("header %+v, segments %+v: want the way back to All machines and the four segments", p.Header, p.Segments)
 	}
 	for _, s := range p.Sections {
 		switch {
@@ -74,9 +74,6 @@ func TestAWorkspacesLoansAreItsAccountsSegment(t *testing.T) {
 	})
 	if len(stopped.Segments) != 0 {
 		t.Errorf("a stopped workspace has segments %+v, want none", stopped.Segments)
-	}
-	if s := sectionOf(stopped, SectionShared); s == nil || s.Segment != "" {
-		t.Errorf("a stopped workspace's loans are %+v, want them unsegmented", s)
 	}
 }
 

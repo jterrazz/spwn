@@ -14,7 +14,7 @@ extension Story {
         let bottom = pages.first
         let over = pages.count > 1 ? pages.last : nil
         var state: PanelState
-        if over == nil, let bottom, bottom.id == PageID.switcher || bottom.id == PageID.machine {
+        if over == nil, let bottom, bottom.id == PageID.switcher || bottom.id == PageID.machine || bottom.id == PageID.agent {
             state = PanelState(page: nil, connection: connection, pushed: bottom)
         } else {
             state = PanelState(page: bottom, connection: connection, pushed: over)
@@ -30,6 +30,8 @@ extension Story {
         state.lit = ui.hover ?? ui.highlight
         if let window = ui.window, let machine = state.shown?.context?.machine { state.windows[machine] = window }
         state.pending = ui.pending ?? []
+        state.prOpened = ui.prOpened ?? []
+        state.reply = ui.reply ?? ""
         if let sheet = ui.sheet, let answers = sheet.answers { state.answers[sheet.id] = answers }
         return state
     }
@@ -49,7 +51,7 @@ public struct StoryView: View {
         live = story.samples.isEmpty ? nil : Self.live(story.samples)
     }
 
-    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.switcher || page.id == PageID.machine }
+    static func panel(_ page: Page) -> Bool { page.id == PageID.home || page.id == PageID.switcher || page.id == PageID.machine || page.id == PageID.agent }
 
     public var body: some View {
         if let live {

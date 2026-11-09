@@ -16,7 +16,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **All machines (home)** (20): `home.needs`, `home.hover`, `home.keyboard`, `home.one-need.wait`, `home.one-need.lease`, `home.many-needs`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.agent-creating`, `home.agent-born`, `home.agents-folded`, `home.agents-unfolded`
 - **Needs you (fleet list)** (4): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`
 - **A Mac** (22): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.needs-unfolded`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
-- **A workspace** (9): `workspace.agents`, `workspace.agents.finished`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.stopped`, `workspace.started`
+- **A workspace** (10): `workspace.agents`, `workspace.agents.finished`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.stopped`, `workspace.started`, `workspace.hook-missing`
 - **An agent** (8): `agent.working`, `agent.remote`, `agent.waiting`, `agent.waiting.pr-opened`, `agent.waiting.reply`, `agent.waiting.replied`, `agent.waiting.merged`, `agent.finished`
 - **A server** (8): `server.healthy`, `server.health-unfolded`, `server.activity`, `server.down`, `server.restarting`, `server.restarting.late`, `server.recovered`, `server.stopped`
 - **Agents (fleet)** (2): `agents.list`, `agents.empty`
@@ -693,6 +693,15 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Enters**: #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: height 287px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .gauge.nav: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
 - **A2**: the Overview gains the empty Agents card first: "No agent on api" with New agent.
+
+### `workspace.hook-missing`
+
+- **Capture**: none (the gap state SPEC B5.1 and §C6 rule, K4: the prototype does not draw it)
+- **Shows**: linux-1's agent runs but no hook reports it: its row says only "Claude running" (no step, no message), and the Agents card ends with "Agent hook not installed · station only sees that Claude runs" with Apply.
+- **Data**: an agent detected without a hook (state running, no steps); the `agent-hooks` setting missing on the workspace
+- **Interactions**: as `workspace.agents`; "Apply" → settingsApply(agent-hooks, vm:linux-1)
+- **Enters**: no animation (a state reached in place)
+- **Leaves**: the row leaves in place once the hook reports the agent
 
 ## An agent
 
