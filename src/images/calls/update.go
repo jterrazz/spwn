@@ -66,7 +66,8 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 	latest, err := s.source.Latest(ctx, name)
 	switch {
 	case errors.Is(err, imagescontract.ErrNotReleased):
-		return images.Update{}, &images.NotReleasedError{Image: name}
+		img, _ := s.image(name)
+		return images.Update{}, &images.NotReleasedError{Image: name, Buildable: img.Recipe != ""}
 	case err != nil:
 		return images.Update{}, &images.RegistryError{Image: name, Cause: err}
 	}

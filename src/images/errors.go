@@ -37,9 +37,19 @@ func (e *NoRecipeError) Error() string {
 	return "station has no recipe for " + e.Image + ": it is fetched, never built here"
 }
 
-type NotReleasedError struct{ Image string }
+// value: Buildable is true when station has a recipe for the image, so the
+// owner's way out of "not released" is to build it on this Mac.
+type NotReleasedError struct {
+	Image     string
+	Buildable bool
+}
 
-func (e *NotReleasedError) Error() string { return "no version of " + e.Image + " is released" }
+func (e *NotReleasedError) Error() string {
+	if e.Buildable {
+		return "image " + e.Image + " is not released"
+	}
+	return "no version of " + e.Image + " is released"
+}
 
 type RegistryError struct {
 	Image string

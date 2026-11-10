@@ -3,6 +3,7 @@ package oci
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -42,4 +43,22 @@ func TestAVersionIsPulledFromItsRepositoryTaggedWithIt(t *testing.T) {
 	if err != nil || loc.Ref != "registry.test/jterrazz/station-linux:2026.11.01" {
 		t.Fatalf("Locate = %+v, %v; want registry.test/jterrazz/station-linux:2026.11.01", loc, err)
 	}
+}
+
+// value: ghcr answers 403 to the pull token of a package nobody released (or
+// that is private) and 404 to the tags of one that is absent; both mean the
+// image is not released, whatever the status.
+func TestAnImageTheRegistryRefusesOrDoesNotKnowIsNotReleased(t *testing.T) {
+	for status := range map[int]bool{403: true, 404: true} {
+		source := New(refusing{status: status}, base, "jterrazz", "runner")
+		if got, err := source.Latest(t.Context(), "linux"); !errors.Is(err, contract.ErrNotReleased) {
+			t.Errorf("a %d token: Latest = %+v, %v; want ErrNotReleased", status, got, err)
+		}
+	}
+}
+
+type refusing struct{ status int }
+
+func (r refusing) Get(context.Context, string, map[string]string) (int, []byte, error) {
+	return r.status, nil, nil
 }

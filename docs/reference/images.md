@@ -1,12 +1,12 @@
 # Images
 
-An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a base with a recipe embedded in the binary, or fetched where it is released. The catalogue has two images: `linux`, built or fetched, and `macos`, fetched only (station has no recipe for it).
+An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac holds its own: built there from a base with a recipe embedded in the binary, or fetched where a registry offers it. The catalogue has two images: `linux`, built or fetched, and `macos`, fetched only (station has no recipe for it).
 
 | Section           | Answers                                                    |
 | ----------------- | ---------------------------------------------------------- |
 | Listing           | `station images`, every Mac's                              |
 | Building          | `station images build`, the base and the version           |
-| Updating          | `station images update`, the released versions             |
+| Updating          | `station images update`, a version a registry offers       |
 | The recipe        | What the image contains, and the two sessions that make it |
 | The binary inside | `--binary` and `make build-linux`                          |
 | Cleaning          | `images delete`; Tart's pull cache is `disk free tart`     |
@@ -37,7 +37,7 @@ station images update           # every image this Mac holds
 station images update linux     # ●  linux  2026.11.03  fetched
 ```
 
-The images are released at `ghcr.io/jterrazz/station-<image>`, one tag per version. An update asks the registry for the newest version, and fetches it only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
+Station releases no image: each Mac builds its own. An update asks the registry `ghcr.io/jterrazz/station-<image>` (one tag per version) for the newest version, and an image it does not offer (the registry answers 403 or 404) exits 1 with `not released · station images build linux`, the gesture that makes it here. A version the registry does offer is fetched only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
 
 ## The recipe
 
