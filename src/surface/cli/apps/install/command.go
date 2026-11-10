@@ -44,7 +44,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, names []string, io kit.IO) er
 	if err != nil {
 		return err
 	}
-	if err := io.Page(pageapps.Outcomes("install", outcomes, ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
+	if err := io.Page(pageapps.Outcomes("install", kit.Worded(outcomes), ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
 		return err
 	}
 	return partial(outcomes, "station apps install ")

@@ -49,7 +49,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := io.Page(pageapps.Updated(outcomes, ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
+			if err := io.Page(pageapps.Updated(kit.Worded(outcomes), ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
 				return err
 			}
 			return partial(outcomes, "re-run it: station apps update ")
@@ -68,7 +68,7 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, req appscalls.Update
 	failed := 0
 	run := func(name string, target machine.Ref) {
 		outcomes, err := call.Invoke(ctx, env.Calls, target, appscalls.Update, req, nil)
-		u := pageapps.MachineUpdate{Machine: name, Outcomes: outcomes}
+		u := pageapps.MachineUpdate{Machine: name, Outcomes: kit.Worded(outcomes)}
 		var refused *fail.Error
 		switch {
 		case errors.As(err, &refused) && refused.Type == fail.NotForThisMachine:

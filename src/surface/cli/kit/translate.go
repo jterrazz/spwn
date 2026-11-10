@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/surface/cli/words"
 )
@@ -76,3 +77,8 @@ func AdminApply(setting, mac string, thisMac bool) string {
 const MachinesSSHUse = words.MachinesSSHUse
 
 func SSHConfigNotRefreshed(cause string) string { return words.SSHConfigNotRefreshed(cause) }
+
+func Worded(outcomes []apps.Outcome) []apps.Outcome {
+	// value: apps outcomes with their typed reasons worded, for a leaf's page.
+	return words.Outcomes(outcomes)
+}

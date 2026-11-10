@@ -30,9 +30,10 @@ const (
 	WhyPartial   Why = "partial"
 	WhyLate      Why = "late"
 	WhyFailing   Why = "failing"
+	// value: the verb was interrupted before its end; its words are the
+	// surface's.
+	WhyInterrupted Why = "interrupted"
 )
-
-const Interrupted = "interrupted (Ctrl-C)"
 
 type Outcome struct {
 	Name   string
@@ -44,12 +45,16 @@ type Outcome struct {
 	// the verb has run ("" where nothing lists one).
 	Method  catalog.Method
 	Version string
+	// value: why it ended broken, when the reason is typed rather than
+	// worded in Detail.
+	Why Why
 }
 
 type Step struct {
 	Item   string
 	Result catalog.State
 	Detail string
+	Why    Why
 }
 
 type InstallRequest struct {

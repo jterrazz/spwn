@@ -217,7 +217,7 @@ func reason(w apps.Why) page.Reason {
 		return page.Missing
 	case apps.WhyPartial:
 		return page.Partial
-	case apps.WhyFailing:
+	case apps.WhyFailing, apps.WhyInterrupted:
 		return page.Failing
 	case apps.WhyOutdated, apps.WhyUnmanaged, apps.WhyLate:
 	}

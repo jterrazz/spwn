@@ -13,21 +13,21 @@ import (
 // invariant: an installer's own words (its stderr, its exit) go to the log
 // and only there (SPEC §12.3); the outcome says, in station's words, what
 // failed and where the tool's output is kept.
-func (s *Shelf) failed(verb string, list []catalog.App, cause error) string {
-	// invariant: an interrupt is worded as one, and its cause is not the
-	// installer's output, so the log keeps nothing of it.
+func (s *Shelf) failed(verb string, list []catalog.App, cause error) (string, apps.Why) {
+	// invariant: an interrupt is a typed reason, worded by the surface, and
+	// its cause is not the installer's output, so the log keeps nothing of it.
 	if errors.Is(cause, context.Canceled) {
-		return apps.Interrupted
+		return "", apps.WhyInterrupted
 	}
 	words := "the " + verb + " failed"
 	if s.o.Log == "" || s.keep(verb, list, cause) != nil {
-		return words
+		return words, apps.WhyFailing
 	}
 	shown := s.o.Log
 	if home := s.m.Home(); home != "" && strings.HasPrefix(shown, home+"/") {
 		shown = "~" + strings.TrimPrefix(shown, home)
 	}
-	return words + ": its output is in " + shown
+	return words + ": its output is in " + shown, apps.WhyFailing
 }
 
 func (s *Shelf) keep(verb string, list []catalog.App, cause error) error {

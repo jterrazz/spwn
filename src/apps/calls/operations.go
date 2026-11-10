@@ -106,7 +106,8 @@ func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 	}
 	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
 	if err := s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, nil); err != nil {
-		step.Result, step.Detail = catalog.StateBroken, s.failed(verbUninstall, []catalog.App{t}, err)
+		step.Detail, step.Why = s.failed(verbUninstall, []catalog.App{t}, err)
+		step.Result = catalog.StateBroken
 	}
 	return []apps.Step{step}
 }
@@ -248,16 +249,16 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 		l, _ := s.lined(t)
 		lines = append(lines, l.Line(s.install(t)))
 	}
-	failure := ""
+	failure, why := "", apps.Why("")
 	if err := s.o.Bundler.Bundle(ctx, lines, update, nil); err != nil {
-		failure = s.failed(verb, list, err)
+		failure, why = s.failed(verb, list, err)
 	}
 	out := make([]apps.Outcome, 0, len(list))
 	if verb == verbUpdate {
 		for _, t := range list {
 			o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
-			if failure != "" {
-				o.Result, o.Detail = catalog.StateBroken, failure
+			if why != "" {
+				o.Result, o.Detail, o.Why = catalog.StateBroken, failure, why
 			}
 			out = append(out, o)
 		}
@@ -270,8 +271,8 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 	for _, t := range list {
 		o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
 		if !settled(states[t.Name]) {
-			o.Result, o.Detail = catalog.StateBroken, failure
-			if failure == "" {
+			o.Result, o.Detail, o.Why = catalog.StateBroken, failure, why
+			if why == "" {
 				o.Detail = "not listed after " + s.o.Bundler.Name()
 			}
 		}
@@ -302,7 +303,8 @@ func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, op verbOf) 
 	case errors.As(err, &signedOut):
 		o.Result, o.Detail = catalog.StateBroken, signedOut.Error()
 	case err != nil:
-		o.Result, o.Detail = catalog.StateBroken, s.failed(verb, []catalog.App{t}, err)
+		o.Detail, o.Why = s.failed(verb, []catalog.App{t}, err)
+		o.Result = catalog.StateBroken
 	}
 	return o
 }
