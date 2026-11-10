@@ -101,13 +101,13 @@ final class IconTests: XCTestCase {
     // invariant: the image the app hands the status item, as AppKit draws
     // it into the bar at its point size, is a template in every state with
     // no colour baked in, and its Orbit fills the optical box of the bar's
-    // own round symbol: on the owner's real bar at 2x Wi-Fi drew 33 by 24
-    // pixels and the Display circle 30 by 30, the Orbit drawn at 13 pt only
-    // 26, and red while a server was down.
+    // own round symbol: in the menu bar VM, the reference, at 2x Wi-Fi draws
+    // 34 by 25 pixels and the Display circle 30 by 30 (33 by 24 on a host
+    // Mac), the Orbit drawn at 13 pt only 26, and red while a server was down.
     func testTheItemDrawsAsLargeAsTheBarsSymbolsAndInNoColour() throws {
         let wifi = try XCTUnwrap(Ink(Self.native("wifi")))
-        XCTAssertEqual(wifi.box.width, 33)
-        XCTAssertEqual(wifi.box.height, 24)
+        XCTAssertEqual(wifi.box.width, 34)
+        XCTAssertEqual(wifi.box.height, 25)
         let circle = try XCTUnwrap(Ink(Self.native("circle")))
         XCTAssertEqual(circle.box.height, 30)
         let icons = [MenuBarIcon(.plain), MenuBarIcon(.plain, count: 5), MenuBarIcon(.plain, count: 120), MenuBarIcon(.down, count: 2),
