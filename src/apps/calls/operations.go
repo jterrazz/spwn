@@ -99,9 +99,7 @@ func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 		return nil
 	}
 	listings := s.listings(ctx, []catalog.App{t})
-	own := s.install(t)
-	_, listed := listings[own.Method()].keys[own.Key()]
-	if !listedOld(t, listings) || !listed && !s.bundled(t) {
+	if !listedOld(t, listings) || !s.ownInstall(t, listings) {
 		return nil
 	}
 	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
@@ -266,11 +264,17 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 	}
 	// invariant: one exit code answers for N tools, so each tool's verdict is
 	// whether the inventory lists it installed once the bundle has run, behind
-	// its newest or not: a bundle uses what is there and upgrades nothing.
+	// its newest or not: a bundle uses what is there and upgrades nothing. A
+	// failed bundle's tool counts only by its own install, so a command
+	// another install provides (a superseded formula's) never passes for it.
 	states := s.states(ctx, list)
+	var listings map[catalog.Method]listing
+	if why != "" {
+		listings = s.listings(ctx, list)
+	}
 	for _, t := range list {
 		o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
-		if !settled(states[t.Name]) {
+		if !settled(states[t.Name]) || why != "" && !s.ownInstall(t, listings) {
 			o.Result, o.Detail, o.Why = catalog.StateBroken, failure, why
 			if why == "" {
 				o.Detail = "not listed after " + s.o.Bundler.Name()
@@ -408,6 +412,14 @@ func (s *Shelf) statesWithRequirements(ctx context.Context, list []catalog.App) 
 		flat = append(flat, t)
 	}
 	return s.states(ctx, flat)
+}
+
+// value: the app is installed by its own install: its method lists it, or
+// its bundle is in /Applications.
+func (s *Shelf) ownInstall(t catalog.App, listings map[catalog.Method]listing) bool {
+	own := s.install(t)
+	_, listed := listings[own.Method()].keys[own.Key()]
+	return listed || s.bundled(t)
 }
 
 func settled(s catalog.State) bool { return s == catalog.StateOK || s == catalog.StateDegraded }

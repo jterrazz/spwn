@@ -1,16 +1,17 @@
-description: 'the tailscale cask fails while the formula''s tailscale answers: the formula it supersedes stays'
+description: 'the tailscale cask fails while the formula answers: the install is broken, the formula stays'
 fixture:
     - ../__fixtures__/system-tools/
     - ./__fixtures__/tailscale-app-fails/
 env: engine
 runs:
     - command: '--version >/dev/null; "$STATION" apps install tailscale </dev/null'
-      exit: 0
+      exit: 1
       stdout: |
-          ●	tailscale		cask
-          ●	tailscale-cli			~/.local/bin/tailscale
+          ✗	tailscale		cask	the install failed: its output is in ~/.local/state/station/logs/apps.log
       stderr: |
           Error: tailscale-app: the download failed
+          Error: 1 of 1 apps failed
+          Hint: station apps install tailscale
       files:
           .calls:
               equals: |
