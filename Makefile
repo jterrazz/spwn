@@ -1,4 +1,4 @@
-.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall catalog catalog-open catalog-export catalog-gallery e2e-machine provision deprovision generate clean
+.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
 
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
@@ -115,6 +115,10 @@ catalog-gallery: catalog ## Draw every story and write $(CATALOG_OUT)/index.html
 
 e2e-machine: build build-linux ## The machine specs on a real VM of this host: KIND=linux (tier 2) or KIND=macos (tier 3); never in check
 	@specs/machine/run.sh $(KIND) $(LABEL)
+
+e2e-binaries: build-linux ## The two binaries the machine tiers carry (darwin/arm64 and linux/arm64, no cgo, as the release builds them), cross-built where Go is, to copy to the host
+	@GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./src/cmd/station
+	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH) and $(LINUX_PATH) for the machine tiers\n"
 
 # hazard: macOS kills (SIGKILL) a signed binary rewritten in place once it has run, so
 # the build lands as a new file renamed over the old one; a running engine keeps its own.

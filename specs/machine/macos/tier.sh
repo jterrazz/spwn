@@ -295,3 +295,32 @@ others() { jq -r '.rows[] | select(.app != "go" and .group == "your-data") | "\(
 diff <(others "$work/erase-before.json") <(others "$work/erase-after.json") >> "$log" || fail "disk erase go touched another app's data"
 say "   only go's data gone"
 case_pass
+
+
+# value: the owner's first minutes on a bare Mac: Homebrew is absent, one process
+# installs it and then bundles through it, and a second process finds it where the
+# first left it, so Homebrew's installer (and its sudo) runs once. The clone comes
+# from the raw base, never the prebaked image that already holds Homebrew, and no
+# /opt/homebrew is on the PATH the station is run with.
+case_begin bare-mac-homebrew SU-08
+tart stop "$erase_vm" >> "$log" 2>&1 || true
+bare="station-e2e-macos-$run_id-bare"
+made+=("$bare")
+tart clone ghcr.io/cirruslabs/macos-tahoe-base:latest "$bare" >> "$log" 2>&1 || fail "clone the raw base"
+tart set "$bare" --memory 8192 >> "$log" 2>&1 || fail "size $bare"
+ip=$(boot "$bare") || fail "boot $bare"
+bare_path='PATH=/usr/bin:/bin:/usr/sbin:/sbin'
+in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
+in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
+in_vm 'test ! -e /opt/homebrew/bin/brew' || fail "the base still holds Homebrew"
+in_vm "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh </dev/null" >> "$log" 2>&1 || miss "install.sh exited $?"
+in_vm "$bare_path $station apps install homebrew jq </dev/null" >> "$log" 2>&1 || miss "apps install homebrew jq exited $?: the manager installed in this run was not found in it"
+in_vm 'test -x /opt/homebrew/bin/jq' || miss "no jq under /opt/homebrew after the install"
+first=$(in_vm 'stat -f %m /opt/homebrew/bin/brew')
+out=$(in_vm "$bare_path $station apps install homebrew </dev/null" 2>&1)
+say "   second run: $(tr '\n' ' ' <<< "$out" | cut -c1-160)"
+grep -q 'already installed' <<< "$out" || miss "a second run does not find the Homebrew the first installed"
+[ "$(in_vm 'stat -f %m /opt/homebrew/bin/brew')" = "$first" ] || miss "a second run ran Homebrew's installer again"
+case_pass
