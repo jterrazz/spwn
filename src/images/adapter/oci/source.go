@@ -81,8 +81,8 @@ func (s *Source) token(ctx context.Context, repo string) (string, error) {
 	case err != nil:
 		return "", err
 	case status == 403 || status == 404:
-		// an image nobody released answers a pull token with 403 (a private or
-		// absent package), the same as a tags list with 404.
+		// outside: an image nobody released answers a pull token with 403 (a
+		// private or absent package), the same as a tags list with 404.
 		return "", contract.ErrNotReleased
 	case status != 200:
 		return "", fmt.Errorf("the registry refused a pull token for %s: %d", repo, status)
