@@ -24,7 +24,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 }
 
 func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
-	// value: init's leaf; a note, when set, is said on stderr before it runs.
+	// value: init's leaf; a note, when set, is said on stderr before it
+	// runs, never with --json or --page, which keep stderr for the script.
 	return kit.Leaf[Input]{
 		Use:     "init",
 		Short:   "Make this machine known to station: its name, the ~/.zshrc block, the XDG folders",
@@ -34,7 +35,7 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 			f.StringVar(&in.Name, "name", "", "the name this Mac takes (asked on a terminal when omitted)")
 		},
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			if note != "" {
+			if note != "" && !io.JSON && !io.PageJSON {
 				io.Note(note)
 			}
 			report, err := call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Interactive: io.Interactive}, nil)
