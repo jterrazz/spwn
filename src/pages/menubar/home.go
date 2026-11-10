@@ -116,6 +116,7 @@ func (h homeReading) portsTile() *page.Tile {
 			switch {
 			case p.Red():
 				exposed++
+			case p.Reach == ports.ThisMachine:
 			case p.Declared != nil || p.Device:
 				shared++
 				if vm, ok := h.vm(p.Machine.Name); ok && vm.Restart != nil {

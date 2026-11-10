@@ -178,6 +178,23 @@ func PlayWorld(base []byte) []byte {
 			}
 			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name])
 		}
+		var notShared []string
+		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
+			for _, port := range p.Ports {
+				if port.Machine.On != h.Name {
+					continue
+				}
+				switch {
+				case port.Device:
+					m.Tailnet.Self.Peers = append(m.Tailnet.Self.Peers, ports.Node{ID: port.Machine.Name, Name: port.Machine.Name, DNSName: port.Machine.Name + tailnet, Online: true})
+				case port.Reach == ports.Tailnet && port.Declared == nil:
+					notShared = append(notShared, port.Machine.Name+":"+strconv.Itoa(port.Port))
+				}
+			}
+		}
+		if notShared != nil {
+			m.Preferences["ports"] = ports.PortsGroup{NotShared: notShared}
+		}
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
 			for _, s := range p.Shared {
 				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, Profile: s.Profile, Pinned: s.Profile != "", HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})

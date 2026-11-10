@@ -388,6 +388,12 @@
             },
             "preferences": {
                 "never_sleeps": true,
+                "ports": {
+                    "not_shared": [
+                        "linux-3:5432",
+                        "review-bot:8000"
+                    ]
+                },
                 "vm_user": "admin"
             },
             "secrets": {
@@ -477,7 +483,16 @@
                         "Path": "",
                         "Variant": ""
                     },
-                    "Peers": null
+                    "Peers": [
+                        {
+                            "ID": "infra",
+                            "Name": "infra",
+                            "DNSName": "infra.tail77a797.ts.net",
+                            "IP": "",
+                            "Online": true,
+                            "Tags": null
+                        }
+                    ]
                 },
                 "shares": [
                     {
@@ -929,6 +944,13 @@
                         "laptop": true,
                         "user": "jterrazz"
                     }
+                },
+                "ports": {
+                    "not_shared": [
+                        "linux-1:4321",
+                        "linux-1:9229",
+                        "agent-7f:6006"
+                    ]
                 },
                 "vm_user": "admin"
             },

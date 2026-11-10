@@ -140,6 +140,8 @@ func (f *one) reads(ctx context.Context, in engine.FeedInput) {
 				all := f.o.everyMacAccounts(ctx, listed.All, h.Name)
 				copies = &all
 			}
+		}
+		if ferr == nil {
 			if read, err := call.Invoke(ctx, f.o.Calls, machine.Ref{}, agentscalls.List, agentscalls.ListIn{}, nil); err == nil {
 				hosted = append([]agents.Agent{}, read...)
 			}
