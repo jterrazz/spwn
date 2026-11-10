@@ -76,5 +76,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [024 Agents run in Herdr, and tmux is no adapter](decisions/024-agents-run-in-herdr.md)
 - [025 Agents have their own lifecycle, apart from their VM](decisions/025-agents-have-their-own-lifecycle.md)
 - [026 The catalogue of stories is the menu bar's test suite](decisions/026-the-catalogue-is-the-menu-bars-test-suite.md)
+- [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
