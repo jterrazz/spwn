@@ -316,7 +316,8 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		paths:  paths,
 		stores: st,
 	}
-	pin, self := vars["STATION_MACHINE_KIND"], selfOf(h)
+	pin := vars["STATION_MACHINE_KIND"]
+	self := selfOf(h, pin)
 	m.powerPort = awakemacos.New(door, h.Run, m.systemRoot())
 	if world != nil {
 		// invariant: a world says what each of its machines is: its Self is

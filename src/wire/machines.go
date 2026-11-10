@@ -120,7 +120,7 @@ func (m machine) asleep(ctx context.Context) bool {
 // value: what this Mac is, as it reads itself (its world's in the spec
 // build).
 func (m machine) hardware(ctx context.Context) coremachine.Hardware {
-	self := selfOf(m.sys)
+	self := selfOf(m.sys, m.vars["STATION_MACHINE_KIND"])
 	if m.world != nil {
 		self = m.world.self()
 	}

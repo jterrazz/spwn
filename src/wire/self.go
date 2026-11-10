@@ -12,8 +12,14 @@ import (
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
-func selfOf(h local.System) contract.Self {
-	if h.Env.GOOS() == "linux" {
+// invariant: the system STATION_MACHINE_KIND pins reads itself with its own
+// adapter, so a pinned Mac is read as a Mac on every host the binary runs on.
+func selfOf(h local.System, pin string) contract.Self {
+	system := h.Env.GOOS()
+	if _, os, ok := pinned(pin); ok {
+		system = string(os)
+	}
+	if system == "linux" {
 		return coreadapterlinux.New(h.Env.Hostname())
 	}
 	return coreadaptermacos.New(h.Run, h.Env.Hostname())
