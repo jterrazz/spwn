@@ -92,7 +92,6 @@ public struct StoryFile: Codable, Equatable, Sendable {
     public var id: String
     public var group: StoryGroup
     public var note: String
-    public var status: String?
     public var pages: [String]
     public var ui: StoryUI?
     public var samples: [String: Double]?
@@ -103,13 +102,12 @@ public struct StoryFile: Codable, Equatable, Sendable {
     // and at Reduce Transparency too.
     public var tags: [String]?
 
-    public init(id: String, group: StoryGroup, note: String, pages: [String], status: String? = nil, ui: StoryUI? = nil,
+    public init(id: String, group: StoryGroup, note: String, pages: [String], ui: StoryUI? = nil,
                 samples: [String: Double]? = nil, play: StoryPlay? = nil, freeze: Double? = nil, heightNote: String? = nil, tags: [String]? = nil) {
         schema = storySchema
         self.id = id
         self.group = group
         self.note = note
-        self.status = status
         self.pages = pages
         self.ui = ui
         self.samples = samples
@@ -120,8 +118,6 @@ public struct StoryFile: Codable, Equatable, Sendable {
     }
 
     public static let a11y = "a11y"
-
-    public var today: Bool { status == "today" }
 
     public func encoded() throws -> Data {
         let encoder = JSONEncoder()

@@ -23,7 +23,7 @@ struct Heights: Decodable {
 
     func audit(_ stories: [StoryFile], measured: [String: Double]) -> [String] {
         var findings: [String] = []
-        for story in stories where !story.today && story.group != .shell && story.heightNote == nil {
+        for story in stories where story.group != .shell && story.heightNote == nil {
             guard let want = heights[story.id] else {
                 findings.append("\(story.id): no prototype height in heights.json")
                 continue
@@ -42,8 +42,8 @@ struct Heights: Decodable {
 
 enum Budget {
     static let stories: Int64 = 120_000_000
-    static let rest: Int64 = 187_000_000
-    static let slack: Int64 = 5_000_000
+    static let rest: Int64 = 5_000_000
+    static let slack: Int64 = 1_000_000
 
     static func bytes(_ folder: URL, skipping skipped: String? = nil) -> Int64 {
         guard let walk = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey]) else { return 0 }
@@ -86,7 +86,10 @@ final class StoryTests: XCTestCase {
         return renderer.cgImage.map { Double($0.height) }
     }
 
+    // invariant: MB-12: every story is drawn offscreen, and drawing them
+    // all opens no window.
     func testEveryStoryMatchesItsGoldensInBothSchemes() throws {
+        let windows = NSApplication.shared.windows.count
         let stories = try stories()
         XCTAssertFalse(stories.isEmpty)
         var failures: [String] = []
@@ -101,6 +104,7 @@ final class StoryTests: XCTestCase {
             }
         }
         XCTAssertEqual(failures, [])
+        XCTAssertEqual(NSApplication.shared.windows.count, windows)
     }
 
     func testEveryPanelStoryStaysGlass() throws {
@@ -193,7 +197,7 @@ final class StoryTests: XCTestCase {
     func testEveryTargetStoryIsAsTallAsThePrototypesPanel() throws {
         let stories = try stories()
         var measured: [String: Double] = [:]
-        for story in stories where !story.file.today && panel(story) { measured[story.id] = height(story) }
+        for story in stories where panel(story) { measured[story.id] = height(story) }
         XCTAssertEqual(try Heights.load().audit(stories.map(\.file), measured: measured), [])
     }
 
@@ -204,11 +208,10 @@ final class StoryTests: XCTestCase {
             StoryFile(id: "home.needs", group: .home, note: "n", pages: page),
             StoryFile(id: "home.fine", group: .home, note: "n", pages: page),
             StoryFile(id: "home.empty", group: .home, note: "n", pages: page, heightNote: "the empty state keeps the footer"),
-            StoryFile(id: "home.loading", group: .home, note: "n", pages: page, status: "today"),
             StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page),
             StoryFile(id: "home.unknown", group: .home, note: "n", pages: page),
         ]
-        let measured = ["home.needs": 692.0, "home.fine": 600, "home.empty": 200, "home.loading": 100]
+        let measured = ["home.needs": 692.0, "home.fine": 600, "home.empty": 200]
         XCTAssertEqual(heights.audit(stories, measured: measured), [
             "home.fine: 600 pt tall, the prototype's 637 pt (a heightNote names a difference on purpose)",
             "home.unknown: no prototype height in heights.json",
@@ -225,10 +228,10 @@ final class StoryTests: XCTestCase {
     func testTheBudgetOnlyLetsTheOldGoldensShrink() {
         XCTAssertEqual(Budget.audit(stories: Budget.stories + 1, rest: Budget.rest + 1), [
             "the story goldens weigh 120000001 bytes, past their 120000000",
-            "the other goldens weigh 187000001 bytes, past their ratchet of 187000000",
+            "the other goldens weigh 5000001 bytes, past their ratchet of 5000000",
         ])
-        XCTAssertEqual(Budget.audit(stories: 0, rest: 180_000_000), [
-            "the other goldens weigh 180000000 bytes: lower their ratchet of 187000000 to what they weigh",
+        XCTAssertEqual(Budget.audit(stories: 0, rest: 3_000_000), [
+            "the other goldens weigh 3000000 bytes: lower their ratchet of 5000000 to what they weigh",
         ])
     }
 }

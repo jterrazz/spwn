@@ -1,5 +1,5 @@
 import AppKit
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -57,10 +57,6 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(Snapshot.state("menubar.home.engine-stopped", page).connection, .stopped)
     }
 
-    func drawn(_ name: String, _ state: PanelState) throws {
-        XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
-    }
-
     // invariant: MB-05, SPEC A4: Home is its hero first, then its tiles,
     // its servers and its Macs; Open in Terminal and Stop everything on
     // This Mac are the station menu's; New VM is the header's.
@@ -77,7 +73,6 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(page.pageActions.map(\.label), ["New VM", "Open in Terminal", "Stop everything on This Mac"])
         XCTAssertEqual(page.pageActions.map(\.key), ["cmd+n", "cmd+t", nil])
         XCTAssertEqual(page.section("tiles")?.items?.compactMap(\.tile).map(TileStrip.said), ["Ports, 2 shared", "Accounts, 1 signed out", "Awake, 6 hr left"])
-        try drawn("menubar.home.two-macs", Snapshot.state("menubar.home.two-macs", page))
     }
 
     // invariant: MA-14: under each Mac its Servers, then its Workspaces,
@@ -126,18 +121,60 @@ final class HomeTests: XCTestCase {
         ])
     }
 
-    // invariant: MB-12: every snapshot, of a page, a sheet or the icon, is
-    // drawn offscreen: rendering them all opens no window.
+    // invariant: MB-12: the menu bar icon of every page is drawn
+    // offscreen: rendering them all opens no window (the stories' own
+    // drawing is held to the same by StoryTests).
     func testSnapshotsOffscreen() throws {
         let before = NSApplication.shared.windows.count
-        var drawn = 0
-        for (name, data) in try Tree.fixtures() {
-            let page = try Page.decode(data)
-            if Snapshot.render(Snapshot.view(name, page), scheme: .dark) != nil { drawn += 1 }
-            if MenuBarIcon.of(connection: .live, page: page).image(scheme: .dark) != nil { drawn += 1 }
-        }
-        XCTAssertEqual(drawn, try Tree.fixtures().count * 2)
+        let fixtures = try Tree.fixtures()
+        let drawn = try fixtures.filter { MenuBarIcon.of(connection: .live, page: try Page.decode($0.data)).image(scheme: .dark) != nil }
+        XCTAssertEqual(drawn.count, fixtures.count)
         XCTAssertEqual(NSApplication.shared.windows.count, before)
         XCTAssertEqual(before, 0)
+    }
+}
+
+@MainActor
+final class HomeLineTests: XCTestCase {
+    func decoded<T: Decodable>(_ json: String) throws -> T { try JSONDecoder().decode(T.self, from: Data(json.utf8)) }
+
+    // invariant: the engine-stopped card's Start is the one Start: the
+    // footer does not offer it again; the folded Needs you line ends in no
+    // stray punctuation.
+    func testStoppedOffersStartOnceAndTheFoldedLineIsClean() {
+        var start = Action(), open = Action()
+        start.id = "start"; open.id = "open-station"
+        XCTAssertEqual(HomePage.footer([start, open], stopped: true).map(\.id), ["open-station"])
+        XCTAssertEqual(HomePage.footer([start, open], stopped: false).map(\.id), ["start", "open-station"])
+        var r1 = Row(), r2 = Row()
+        r1.label = "a task is failing,"; r2.label = "x-snapshot is failing,."
+        XCTAssertEqual(HomePage.folded([r1, r2]), "a task is failing\(Token.Glyph.sep)x-snapshot is failing")
+    }
+
+    // invariant: Needs you's folded line is short words: a launchd label
+    // by its last part, nothing past a comma.
+    func testNeedsYouFoldedLineIsShort() throws {
+        let rows: [Row] = try decoded(#"[{"label":"npm sign-in expired"},{"label":"com.jterrazz.brain.x-snapshot is failing, last exit 1"}]"#)
+        XCTAssertEqual(HomePage.folded(rows), "npm sign-in expired · x-snapshot is failing")
+    }
+
+    // invariant: Needs you's folded line is the engine's short words
+    // (vision panel a), never its rows' long labels.
+    func testNeedsYouFoldsIntoTheEnginesShortWords() throws {
+        let page = try Tree.page("menubar.home.two-macs")
+        let needs = try XCTUnwrap(page.section(TodoBadge.section))
+        XCTAssertEqual(HomePage.folded(needs), ["2 updates", "npm sign-in", "~/.tart", "firewall off", "1 failing task"].joined(separator: Token.Glyph.sep))
+        let bare: StationKit.Section = try decoded(#"{"id":"needs-you","items":[{"row":{"label":"npm sign-in expired"}}]}"#)
+        XCTAssertEqual(HomePage.folded(bare), "npm sign-in expired")
+    }
+
+    // invariant: Home's arrows light a machine line and move through
+    // them, never past either end.
+    func testHomeArrowsMoveThroughTheMachines() {
+        XCTAssertEqual(HomeKeys.moved(nil, by: 1, count: 4), 0)
+        XCTAssertEqual(HomeKeys.moved(nil, by: -1, count: 4), 3)
+        XCTAssertEqual(HomeKeys.moved(3, by: 1, count: 4), 3)
+        XCTAssertEqual(HomeKeys.moved(0, by: -1, count: 4), 0)
+        XCTAssertNil(HomeKeys.moved(nil, by: 1, count: 0))
     }
 }

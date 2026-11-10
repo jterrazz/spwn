@@ -36,25 +36,11 @@ final class PagesTests: XCTestCase {
         return (frames.map(Sent.init(frame:)), calls.all)
     }
 
-    func drawn(_ name: String, _ state: PanelState) throws {
-        XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
-    }
-
-    func pushed(_ fixture: String, confirming: String? = nil, typed: String? = nil, segment: String? = nil) throws -> PanelState {
-        let page = try Tree.page(fixture)
-        var state = Snapshot.state(fixture, page)
-        state.confirming = confirming
-        state.segment = segment
-        if let confirming, let typed { state.answers[confirming] = [ActionRunner.typedKey: typed] }
-        return state
-    }
-
     // invariant: MB-07: a workspace's, a server's and a Mac's page each draw
     // their sections and show only actions that name a call, open a
     // terminal, copy or open a link, show a link's QR, or open a sheet of
     // the page (Share a port, whose rows name the calls), or that only a
-    // menu reaches with no call (its header, Open of its row's page), and
-    // each draws offscreen.
+    // menu reaches with no call (its header, Open of its row's page).
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "ports", "footnote", "private", "shared", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
@@ -70,9 +56,6 @@ final class PagesTests: XCTestCase {
             for action in page.actions ?? [] {
                 XCTAssertTrue(action.run?.call != nil || action.run?.terminal == true || action.submenu != nil || action.run?.copy != nil || action.run?.open != nil || (action.run == nil && action.icon == Token.Symbol.qr) || (action.run == nil && action.on == "menu") || (action.run == nil && action.sheet != nil), "\(page.context?.machine ?? ""): \(action.id ?? "") names no call")
             }
-        }
-        for name in ["menubar.vm.linux-1", "menubar.vm.infra", "menubar.mac.mini"] {
-            try drawn(name, try pushed(name))
         }
     }
 
@@ -153,7 +136,6 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(share.form?.fields?.last?.note, "Nothing listens in linux-1 right now.")
         XCTAssertNil(share.run)
         XCTAssertEqual(PortRow.link(try XCTUnwrap(page.section("private")?.rows.first), in: page.actions ?? [])?.run?.open, "https://jterrazz-macbook-pro.tail77a797.ts.net:40001")
-        try drawn("sheet.share-port", try pushed("menubar.vm.linux-1", confirming: share.id))
     }
 
     // invariant: AU-15: Take back on linux-1's page asks yes or no, then
@@ -194,7 +176,6 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(page.header?.stale?.items?.last?.text, "checking")
         let unlock = try XCTUnwrap(page.action("unlock"))
         XCTAssertNil(unlock.run?.call)
-        try drawn("menubar.mac.mini-offline", try pushed("menubar.mac.mini-offline"))
         let calls = Recorded()
         let status = await ActionRunner(executable: "/u/bin/station", socket: "/nonexistent", launcher: RecordingLauncher(calls: calls)).run(unlock)
         XCTAssertNil(status)
@@ -224,7 +205,6 @@ final class PagesTests: XCTestCase {
         task.cancel()
         XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar.machine:jterrazz-mac-mini"]},"v":2,"watch":"page"}"#])
         XCTAssertEqual(got.page?.section("vms"), page.section("vms"))
-        try drawn("menubar.mac.mini", Snapshot.state("menubar.mac.mini", try XCTUnwrap(got.page)))
     }
 }
 

@@ -1,32 +1,5 @@
 import SwiftUI
 
-// invariant: the generic page renderer's frame, the look the panel had
-// before the v4 pane: live it paints nothing; drawn still it stands in
-// for a window's glass. Its corner is the container shape every grouping
-// inside is concentric with.
-struct PageGlass: ViewModifier {
-    @Environment(\.stationStill) private var still
-    @Environment(\.colorScheme) private var scheme
-
-    func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous)
-        if still {
-            content
-                .containerShape(shape)
-                .background {
-                    ZStack {
-                        shape.fill(Token.Glass.pane(scheme))
-                        shape.fill(LinearGradient(colors: Token.Glass.sheen(scheme), startPoint: .top, endPoint: .center))
-                        shape.strokeBorder(Token.Glass.edge(scheme), lineWidth: Token.Stroke.rim)
-                    }
-                    .shadow(color: Token.Glass.shade(scheme), radius: Token.Shadow.panelRadius, y: Token.Shadow.panelY)
-                }
-        } else {
-            content.containerShape(shape)
-        }
-    }
-}
-
 // value: a tile of the vision on the panel's glass: a translucent fill
 // 16 pt round (white at 8 % in dark, 58 % in light), never glass, padded
 // 10 by 12; a finding mixes its colour in. With Reduce Transparency or
@@ -71,9 +44,6 @@ struct Hover: ViewModifier {
 }
 
 extension View {
-    // value: the generic page's frame (see PageGlass).
-    public func stationPageGlass() -> some View { modifier(PageGlass()) }
-
     // value: a tile (see TileGround).
     public func stationTile(padding: EdgeInsets = Token.Tile.groupPadding, tint: Color? = nil) -> some View { modifier(TileGround(padding: padding, tint: tint)) }
 
@@ -726,30 +696,6 @@ public struct FootNote: View {
 
     public var body: some View {
         SubText(text).padding(.horizontal, Token.Gap.small)
-    }
-}
-
-// value: the machine switcher as the vision's capsule: This Mac's icon,
-// its name in 13.5 pt semibold, a chevron; open, raised and ringed in the
-// accent.
-struct SwitcherPill: View {
-    let open: Bool
-    @Environment(\.colorScheme) private var scheme
-    @Environment(\.stationPalette) private var palette
-
-    var body: some View {
-        HStack(spacing: Token.Gap.item) {
-            IconTile(Token.Symbol.mac, active: true, size: Token.Detail.pillIcon)
-            Text(Page.ThisMacWord).font(.system(size: Token.Size.pill, weight: .semibold)).foregroundStyle(Token.Ink.primary)
-            Image(systemName: Token.Symbol.down).font(.system(size: Token.Detail.caret, weight: .bold)).foregroundStyle(palette.glyph)
-        }
-        .padding(EdgeInsets(top: Token.Gap.flank, leading: Token.Gap.flank, bottom: Token.Gap.flank, trailing: Token.Gap.block))
-        .background {
-            Capsule().fill(open ? Token.Fill.raised(scheme) : Token.Fill.tile(scheme))
-            Capsule().strokeBorder(Token.Fill.edge(scheme), lineWidth: Token.Stroke.hair)
-            if open { Capsule().stroke(palette.accent.opacity(Token.Fill.ring), lineWidth: Token.Stroke.open).padding(-Token.Stroke.open / 2) }
-        }
-        .contentShape(Capsule())
     }
 }
 

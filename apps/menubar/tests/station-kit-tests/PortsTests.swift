@@ -1,5 +1,5 @@
 import AppKit
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -35,7 +35,7 @@ final class PortsTests: XCTestCase {
         var asked: [String?] = []
         let handlers = PopoverHandlers(confirm: { asked.append($0?.id) }, open: { opened.append($0) }, copy: { copied.append($0) })
         var state = PanelState(page: page, connection: .live, qr: url)
-        XCTAssertNil(try Golden.check("menubar.ports.linux-1.qr", try XCTUnwrap(MenuPage.view(state, handlers: handlers, scrolls: false))))
+        XCTAssertNotNil(Snapshot.render(try XCTUnwrap(MenuPage.view(state, handlers: handlers, scrolls: false)), scheme: .dark))
         XCTAssertEqual(copied + opened.map(\.absoluteString) + asked.compactMap { $0 }, [])
         let link = PortsPage.link(try XCTUnwrap(URL(string: url)), handlers: handlers)
         XCTAssertEqual(link.map(\.label), ["Copy link", "Open"])
@@ -108,9 +108,6 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(PortsPage.routes(declare), "To open a port on purpose, declare it public: a Cloudflare Tunnel, Tailscale Funnel or your LAN.")
         let input = Client.input(ActionRunner.filled(declare, answers: [:]), fixed: declare.run?.in)
         XCTAssertEqual(input as NSDictionary, ["Machine": "mac-mini", "Port": "5000", "Via": "cloudflare-tunnel"] as NSDictionary)
-        var state = Snapshot.state("menubar.ports.mini", page)
-        state.confirming = declare.id
-        XCTAssertNil(try Golden.check("sheet.declare-public", try XCTUnwrap(MenuPage.view(state, scrolls: false))))
     }
     // invariant: MB-17: Show process on a red row of mac-mini's Ports opens
     // a new terminal on station ports --on mac-mini, and starts nothing else.
@@ -126,5 +123,20 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(calls.all, [
             ["/usr/bin/osascript", "-e", #"tell application "Terminal" to do script "'/u/bin/station' 'ports' '--on' 'mac-mini'""#, "-e", #"tell application "Terminal" to activate"#],
         ])
+    }
+}
+
+@MainActor
+final class PortsNeedTests: XCTestCase {
+    // invariant: SPEC §10.2 Ports: a port that needs you is said in red on
+    // top, even when nothing is reachable outside Tailscale undeclared: a
+    // public port declared whose tunnel is not seen.
+    func testPortsSayWhatNeedsYouOnTop() throws {
+        let page = try Page.decode(Data(#"{"schema":"station.page/v1","id":"menubar.ports","sections":[{"id":"public","title":"Public: reachable from anywhere else","columns":[{"key":"machine","kind":"text"},{"key":"port","kind":"port"},{"key":"class","kind":"text"},{"key":"what","kind":"text"},{"key":"bind","kind":"list"},{"key":"declared","kind":"text"}],"items":[{"row":{"id":"infra:443","mark":"attention","label":"infra","cells":[{"kind":"port","n":443},{"kind":"text","text":"public"},{"kind":"text","text":"nginx"},{"kind":"list","items":[]},{"kind":"text","text":"declared, but no tunnel seen on infra"}],"reason":"degraded"}},{"row":{"id":"infra:80","mark":"ok","label":"infra","cells":[{"kind":"port","n":80},{"kind":"text","text":"public"},{"kind":"text","text":"nginx"},{"kind":"list","items":[]},{"kind":"text","text":"tunnel seen"}]}}]}]}"#.utf8))
+        let needs = PortsPage.needing(page)
+        XCTAssertEqual(needs.map(\.title), ["infra\(Token.Glyph.sep)443"])
+        XCTAssertEqual(needs.map(\.words), ["nginx\(Token.Glyph.sep)declared, but no tunnel seen on infra"])
+        let reachable = try Page.decode(Data(#"{"schema":"station.page/v1","id":"menubar.ports","sections":[{"id":"needs-you","title":"Needs you: reachable outside Tailscale, not declared public","items":[{"row":{"id":"n","mark":"broken","label":"mac-mini","cells":[]}}]},{"id":"public","items":[{"row":{"id":"a","mark":"attention","label":"infra","cells":[]}}]}]}"#.utf8))
+        XCTAssertEqual(PortsPage.needing(reachable).count, 0)
     }
 }

@@ -330,28 +330,15 @@ public struct Popover: View {
         }
     }
 
-    // invariant: Home leads with the machine switcher, which opens Find,
-    // This Mac's, its host's name and the settings; a machine's page leads
-    // with the way back (its own header).
+    // invariant: Home, until its engine sends its header, leads with its
+    // host's name and the settings; a pushed page leads with its own header.
     @ViewBuilder
     var header: some View {
-        if let pushed = state.pushed, pushed.id == PageID.machine || pushed.id == PageID.agent {
-            EmptyView()
-        } else {
+        if state.pushed == nil {
             HStack(alignment: .center, spacing: Token.Gap.pair) {
-                Button(action: state.pushed == nil ? { handlers.find(FindQuery()) } : handlers.back) {
-                    SwitcherPill(open: state.pushed != nil)
-                }
-                .buttonStyle(.plain)
-                .focusEffectDisabled()
-                .keyboardShortcut("0", modifiers: .command)
-                if state.pushed == nil {
-                    Text(state.page?.context?.machine ?? "station").font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).lineLimit(1).truncationMode(.middle)
-                }
+                Text(state.page?.context?.machine ?? "station").font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: Token.Gap.small)
-                if state.pushed == nil {
-                    PlainIcon(Token.Symbol.settings, picked: state.menu, round: true, tap: handlers.toggleMenu)
-                }
+                PlainIcon(Token.Symbol.settings, picked: state.menu, round: true, tap: handlers.toggleMenu)
             }
             .padding(.horizontal, Token.Gap.tight).padding(.top, Token.Gap.tight)
         }

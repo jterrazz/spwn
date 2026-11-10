@@ -147,24 +147,6 @@ public struct ErrorLine: View {
     }
 }
 
-public struct CountsView: View {
-    let counts: [Tally]
-    @Environment(\.stationPalette) private var palette
-
-    public init(_ counts: [Tally]) { self.counts = counts }
-
-    public var body: some View {
-        HStack(spacing: Token.Space.gap / 2) {
-            ForEach(Array(counts.enumerated()), id: \.offset) { _, t in
-                HStack(spacing: Token.Gap.tight) {
-                    Text("\(t.n ?? 0)").font(.system(size: Token.Space.small)).monospacedDigit().foregroundStyle(palette.muted)
-                    MarkView(t.mark)
-                }
-            }
-        }
-    }
-}
-
 public struct ConfirmPanel: View {
     let confirm: Confirm
     let onAnswer: (Bool) -> Void

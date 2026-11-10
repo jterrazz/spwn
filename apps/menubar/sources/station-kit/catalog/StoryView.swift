@@ -176,8 +176,8 @@ public struct StoryView: View {
             Popover(state, handlers: handlers, scrolls: false)
         } else if let own = MenuPage.view(state, handlers: handlers, scrolls: false) {
             own
-        } else if let page = state.page {
-            PageView(page)
+        } else {
+            Popover(state, handlers: handlers, scrolls: false)
         }
     }
 }

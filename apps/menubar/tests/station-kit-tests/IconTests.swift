@@ -1,4 +1,4 @@
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -301,4 +301,24 @@ struct Ink {
         return sum
     }
 
+}
+
+@MainActor
+final class IconCountTests: XCTestCase {
+    // invariant: M29: a count of any size draws all its digits, never cut
+    // to `…`: the item snaps to the width they take.
+    func testACountOfAnySizeDrawsAllItsDigits() throws {
+        let width = { (n: Int) in MenuBarIcon(.plain, count: n).image(scheme: .dark)?.width ?? 0 }
+        XCTAssertGreaterThan(width(1), MenuBarIcon(.plain).image(scheme: .dark)?.width ?? 0)
+        XCTAssertGreaterThan(width(10), width(1))
+        XCTAssertGreaterThan(width(120), width(10))
+    }
+
+    // invariant: the engine stopped keeps a badge: the icon never says
+    // all good while nothing answers.
+    func testTheEngineStoppedIsNotTheSymbolAlone() {
+        let icon = MenuBarIcon.of(connection: .stopped, page: nil)
+        XCTAssertEqual(icon.mark, .stopped)
+        XCTAssertNotEqual(icon.symbol, Token.Icon.orbit)
+    }
 }

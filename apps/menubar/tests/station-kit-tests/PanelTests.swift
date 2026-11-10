@@ -1,4 +1,5 @@
-import StationKit
+import AppKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -141,5 +142,39 @@ final class PanelTests: XCTestCase {
             Color.clear.frame(height: 200).popoverPin(true) { Token.Pane.opaque.frame(width: 100, height: 60) }
         }.stationAccessibility()), scheme: .dark))
         XCTAssertGreaterThan(pinned, bare, "a popover pinned in the page draws over it")
+    }
+}
+
+final class Clicks: NSObject {
+    var n = 0
+    @objc func clicked(_: Any?) { n += 1 }
+}
+
+@MainActor
+final class PanelWindowTests: XCTestCase {
+    // invariant: the panel closes through the status item's button, so the
+    // next click on the icon opens it; its window is never closed behind
+    // the extra's back.
+    func testThePanelClosesThroughItsStatusButton() {
+        let clicks = Clicks()
+        let button = NSStatusBarButton(frame: .zero)
+        button.target = clicks
+        button.action = #selector(Clicks.clicked(_:))
+        let holder = NSView()
+        let inner = NSView()
+        holder.addSubview(inner)
+        inner.addSubview(button)
+        XCTAssertTrue(PanelWindow.statusButton(in: holder) === button)
+        let panel = NSWindow(contentRect: .zero, styleMask: [], backing: .buffered, defer: true)
+        panel.isReleasedWhenClosed = false
+        PanelWindow.close(panel: panel, button: button)
+        XCTAssertEqual(clicks.n, 1)
+    }
+
+    // invariant: the panel is made key again after it shows, not only at
+    // once: macOS shows its window after the content appears.
+    func testPanelIsMadeKeyAfterItShows() {
+        XCTAssertGreaterThan(PanelWindow.tries.count, 1)
+        XCTAssertGreaterThanOrEqual(PanelWindow.tries.max() ?? 0, 0.5)
     }
 }

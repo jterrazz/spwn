@@ -71,21 +71,6 @@ public struct ValueText: View {
     }
 }
 
-public struct Meter: View {
-    let fraction: Double
-    @Environment(\.stationPalette) private var palette
-
-    public init(_ fraction: Double) { self.fraction = min(max(fraction, 0), 1) }
-
-    public var body: some View {
-        ZStack(alignment: .leading) {
-            Capsule().fill(Token.Ink.track)
-            Capsule().fill(palette.accent).frame(width: Token.Space.meterWidth * fraction)
-        }
-        .frame(width: Token.Space.meterWidth, height: Token.Space.meterHeight)
-    }
-}
-
 public enum QR {
     public static func modules(_ text: String) -> CGImage? {
         let filter = CIFilter.qrCodeGenerator()
