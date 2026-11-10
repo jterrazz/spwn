@@ -1,10 +1,10 @@
-description: 'with no hypervisor installed, create is refused before anything is made, and the hint installs tart'
+description: 'without tart, create is refused before anything is made, with the install that gives it'
 env: no-tart
 runs:
     - command: 'machines create'
       exit: 2
       stderr: |
-          Error: tart is not installed on This Mac
+          Error: tart is required by machines
           Hint: station apps install tart
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[]]'''
       exit: 0

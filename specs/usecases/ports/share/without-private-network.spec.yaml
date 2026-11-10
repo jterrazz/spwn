@@ -1,0 +1,14 @@
+description: 'without the Tailscale app on This Mac, a share is refused before any port is reserved'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].absent = ["tailscale"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'ports share linux-1 9000'
+      exit: 2
+      stderr: |
+          Error: tailscale is required by port sharing
+          Hint: station apps install tailscale
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].stores.reservations[] | select(.guest_port == 9000)]'' world.json'
+      exit: 0
+      stdout: |
+          []

@@ -24,8 +24,10 @@ const (
 
 const (
 	NotForThisMachine fail.Code = "section.not-for-this-machine"
-	BadInput          fail.Code = "call.bad-input"
-	BadOutput         fail.Code = "call.bad-output"
+	// value: a call whose need this Mac lacks the provider of.
+	NeedMissing fail.Code = "call.needs"
+	BadInput    fail.Code = "call.bad-input"
+	BadOutput   fail.Code = "call.bad-output"
 	// value: a line a server cannot read as a request frame.
 	BadFrame fail.Code = "call.bad-frame"
 )
@@ -42,6 +44,9 @@ type Call[D, In, Out any] struct {
 	Section section.ID
 	Where   Where
 	Applies machine.Applies
+	// value: what the call cannot run without, judged by the gate after
+	// Applies, from the Profile's one presence read.
+	Needs   []machine.Need
 	Confirm confirm.Action
 	Errors  []fail.Code
 	Run     func(ctx context.Context, d D, in In, p Progress) (Out, error)
@@ -59,6 +64,7 @@ type Watch[D, In, Out any] struct {
 	Section section.ID
 	Where   Where
 	Applies machine.Applies
+	Needs   []machine.Need
 	Errors  []fail.Code
 	Run     func(ctx context.Context, d D, in In, p Progress) (<-chan Update[Out], error)
 }
@@ -68,6 +74,7 @@ type Meta struct {
 	Section section.ID
 	Where   Where
 	Applies machine.Applies
+	Needs   []machine.Need
 	Confirm confirm.Action
 	Errors  []fail.Code
 	In      string
@@ -142,14 +149,14 @@ func valueOf[Out any](name string, v any) (Out, error) {
 
 func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
-		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Confirm: c.Confirm, Errors: c.Errors,
+		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(),
 	}, runFn: c.Run, deps: d}
 }
 
 func BindWatch[D, In, Out any](w Watch[D, In, Out], d D) Handler {
 	return watched[D, In, Out]{meta: Meta{
-		Name: w.Name, Section: w.Section, Where: w.Where, Applies: w.Applies, Errors: w.Errors,
+		Name: w.Name, Section: w.Section, Where: w.Where, Applies: w.Applies, Needs: w.Needs, Errors: w.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), Watch: true,
 	}, runFn: w.Run, deps: d}
 }
@@ -236,7 +243,8 @@ func (w watched[D, In, Out]) Invoke(ctx context.Context, target machine.Profile,
 }
 
 // invariant: the gate every call passes before it runs, in this order: the
-// section table of the target's kind, the call's own rule, its input.
+// section table of the target's kind, the call's own rule, its needs, its
+// input.
 func admit[In any](m Meta, target machine.Profile, raw json.RawMessage) (In, error) {
 	var in In
 	if err := gate(m, target); err != nil {
@@ -268,6 +276,11 @@ func gate(m Meta, target machine.Profile) error {
 			return fail.New(fail.NotForThisMachine, NotForThisMachine, target.Ref.Name, map[string]string{
 				"call": m.Name, "why": v.Why, "fix": v.Fix,
 			})
+		}
+	}
+	for _, n := range m.Needs {
+		if p, lacks := target.Caps.Lacks(n); lacks {
+			return fail.New(fail.Refused, NeedMissing, p.Name, map[string]string{"call": m.Name, "need": string(n), "item": p.Item})
 		}
 	}
 	return nil

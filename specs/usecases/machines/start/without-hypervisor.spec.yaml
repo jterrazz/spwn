@@ -1,0 +1,8 @@
+description: 'without tart, start is refused before the engine is asked, with the install that gives it'
+env: no-tart
+runs:
+    - command: 'machines start linux-1'
+      exit: 2
+      stderr: |
+          Error: tart is required by machines
+          Hint: station apps install tart

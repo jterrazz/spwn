@@ -29,19 +29,25 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Bind:     bind,
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			start := d.Now()
-			steps := kit.Steps(io)
-			outcomes, err := call.Invoke(ctx, env.Calls, env.Target(), appscalls.Install, appscalls.InstallIn{Names: in.Names, Interactive: io.Interactive}, steps)
-			steps.Stop()
-			if err != nil {
-				return err
-			}
-			if err := io.Page(pageapps.Outcomes("install", outcomes, ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
-				return err
-			}
-			return partial(outcomes, "station apps install ")
+			return Run(ctx, d, env, in.Names, io)
 		},
 	}, env)
+}
+
+func Run(ctx context.Context, d Deps, env kit.Env, names []string, io kit.IO) error {
+	// value: the install of apps and what it prints, for this leaf and for
+	// the terminal that answers a missing need with one.
+	start := d.Now()
+	steps := kit.Steps(io)
+	outcomes, err := call.Invoke(ctx, env.Calls, env.Target(), appscalls.Install, appscalls.InstallIn{Names: names, Interactive: io.Interactive}, steps)
+	steps.Stop()
+	if err != nil {
+		return err
+	}
+	if err := io.Page(pageapps.Outcomes("install", outcomes, ran(env, d.Now().Sub(start)), d.ThisMachine), nil); err != nil {
+		return err
+	}
+	return partial(outcomes, "station apps install ")
 }
 
 func partial(outcomes []apps.Outcome, repair string) error {

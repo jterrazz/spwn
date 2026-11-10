@@ -178,7 +178,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 			Resources: model.ParseResources, Check: createCheck(vms),
 			NotBuilt: func(image string) error { return &model.NoImageError{Image: image} },
 			Admit: func() error {
-				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies}, m.profile)
+				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies, Needs: machinescalls.CreateWorkspace.Needs}, m.profile)
 			},
 			AllMachines: func(ctx context.Context) (model.AllMachines, error) { return vms.AllMachines(ctx, false) },
 			ThisMachine: m.where, Ask: createAsker(env),

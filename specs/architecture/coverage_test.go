@@ -19,7 +19,7 @@ type reference struct {
 }
 
 func references() []reference {
-	mac := machine.Capabilities{Jobs: true, VMs: true, Engine: true}
+	mac := machine.Capabilities{Jobs: true, Engine: true}
 	laptop := mac
 	laptop.Battery, laptop.Lid, laptop.Thermal = true, true, true
 	return []reference{
@@ -44,12 +44,13 @@ const (
 	outcomeDone      = "done"
 	outcomeNotFor    = "not-for-this-machine"
 	outcomeElsewhere = "on-another-machine"
+	outcomeWithout   = "without"
 	coverageRule     = "coverage"
 )
 
 // value: the outcomes a call declares: done, each code it may end in, one
-// per reference machine its Applies refuses, and its run on another
-// machine when it is routable.
+// per reference machine its Applies refuses, one per need it refuses
+// without, and its run on another machine when it is routable.
 func outcomes(m call.Meta, refs []reference) []string {
 	out := []string{outcomeDone}
 	for _, code := range m.Errors {
@@ -59,6 +60,9 @@ func outcomes(m call.Meta, refs []reference) []string {
 		if m.Applies != nil && !m.Applies(r.profile).OK {
 			out = append(out, outcomeNotFor+"-"+r.name)
 		}
+	}
+	for _, n := range m.Needs {
+		out = append(out, outcomeWithout+"-"+string(n))
 	}
 	if m.Where != call.InProcess {
 		out = append(out, outcomeElsewhere)
@@ -89,7 +93,7 @@ func outcomeOf(stem string, declared, namespaces []string) (string, bool) {
 }
 
 func namespacesOf(metas []call.Meta) []string {
-	out := []string{outcomeNotFor, outcomeElsewhere}
+	out := []string{outcomeNotFor, outcomeElsewhere, outcomeWithout}
 	for _, m := range metas {
 		for _, code := range m.Errors {
 			if ns, _, ok := strings.Cut(string(code), "."); ok && !slices.Contains(out, ns) {

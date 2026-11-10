@@ -66,6 +66,16 @@ func (t *CLI) variant() string {
 	return ""
 }
 
+const (
+	// value: the app a share rides, by the catalogue's name for it.
+	App = "tailscale"
+)
+
+func (t *CLI) Present() bool {
+	// value: the app is here: its CLI resolves, read from the paths alone.
+	return t.client().Path != ""
+}
+
 func (t *CLI) AppStoreCLI() string {
 	if t.variant() != ports.VariantAppStore {
 		return ""

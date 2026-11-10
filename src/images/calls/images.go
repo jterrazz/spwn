@@ -27,7 +27,7 @@ type BuildIn struct {
 }
 
 var Build = call.Call[Deps, BuildIn, []images.Record]{
-	Name: "images.build", Where: call.InEngine, Applies: images.Applies,
+	Name: "images.build", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(),
 	Errors: []fail.Code{Unknown},
 	Run: func(ctx context.Context, d Deps, in BuildIn, p call.Progress) ([]images.Record, error) {
 		steps := stepper(p)
@@ -43,7 +43,7 @@ type UpdateIn struct {
 }
 
 var Update = call.Call[Deps, UpdateIn, []images.Update]{
-	Name: "images.update", Where: call.InEngine, Applies: images.Applies,
+	Name: "images.update", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(),
 	Errors: []fail.Code{Unknown},
 	Run: func(ctx context.Context, d Deps, in UpdateIn, p call.Progress) ([]images.Update, error) {
 		steps := stepper(p)
@@ -82,7 +82,7 @@ type DeleteIn struct {
 }
 
 var Delete = call.Call[Deps, DeleteIn, []images.Record]{
-	Name: "images.delete", Where: call.InEngine, Applies: images.Applies, Confirm: confirm.DeleteImage,
+	Name: "images.delete", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(), Confirm: confirm.DeleteImage,
 	Errors: []fail.Code{Unknown, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) ([]images.Record, error) {
 		if err := d.Images.CheckDelete(in.Image, in.Version); err != nil {

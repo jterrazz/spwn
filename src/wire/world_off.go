@@ -83,5 +83,6 @@ func (*worldMac) engineFrom(func() *process.Engine)                     {}
 func (*worldMac) macs() remotecontract.EndpointDialer                   { return nil }
 func (*worldMac) stopMarks() engine.StopMarks                           { return nil }
 func (*worldMac) engineVersion() string                                 { return "" }
+func (*worldMac) absent(string) bool                                    { return false }
 func (*worldMac) stationVersion() string                                { return "" }
 func (*worldMac) engineStarted() time.Time                              { return time.Time{} }

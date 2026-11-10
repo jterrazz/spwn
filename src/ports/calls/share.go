@@ -19,7 +19,7 @@ type ShareIn struct {
 var Share = call.Call[Deps, ShareIn, ports.SharedPort]{
 	// invariant: a share reserves the port on the VM's Mac now, before
 	// anything listens, and prints its URL; it takes back a stop of sharing.
-	Name: "ports.share", Section: section.Ports, Where: call.InEngine, Applies: machine.Anywhere,
+	Name: "ports.share", Section: section.Ports, Where: call.InEngine, Applies: machine.Anywhere, Needs: ports.ShareNeeds(),
 	Run: func(ctx context.Context, d Deps, in ShareIn, _ call.Progress) (ports.SharedPort, error) {
 		port, err := d.Ports.CheckPort(in.Port)
 		if err != nil {

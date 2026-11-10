@@ -23,7 +23,7 @@ type StartOut struct {
 }
 
 var Start = call.Call[Deps, VMIn, StartOut]{
-	Name: "machines.start", Where: call.InEngine, Applies: machine.Anywhere,
+	Name: "machines.start", Where: call.InEngine, Applies: machine.Anywhere, Needs: machines.VMNeeds(),
 	Run: func(ctx context.Context, d Deps, in VMIn, _ call.Progress) (StartOut, error) {
 		if err := d.Machines.CheckStart(in.VM); err != nil {
 			return StartOut{}, err

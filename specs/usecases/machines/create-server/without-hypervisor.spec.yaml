@@ -1,0 +1,8 @@
+description: 'without tart, a server is refused before anything is made, with the install that gives it'
+env: no-tart
+runs:
+    - command: 'machines create infra --server'
+      exit: 2
+      stderr: |
+          Error: tart is required by machines
+          Hint: station apps install tart

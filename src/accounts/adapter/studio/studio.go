@@ -11,7 +11,22 @@ import (
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
-const command = "studio"
+const (
+	command = "studio"
+	// value: the program a share exports an account with, as the owner
+	// names it.
+	Command = command
+)
+
+type PathLooker interface {
+	LookPath(name string) (string, bool)
+}
+
+func Present(run PathLooker) bool {
+	// value: the command is on this machine's search path.
+	_, ok := run.LookPath(command)
+	return ok
+}
 
 type Runner interface {
 	Output(ctx context.Context, c local.Cmd) (local.Output, error)

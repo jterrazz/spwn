@@ -78,6 +78,9 @@ func Codes() map[fail.Code]Wording {
 			}
 			return e.Subject + " is a " + e.Detail["kind"] + ": station does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
 		},
+		call.NeedMissing: func(e *fail.Error) (string, string) {
+			return e.Subject + " is required by " + NeededBy(e.Detail["call"]), NeedFix(e.Subject, e.Detail["item"])
+		},
 		call.BadInput: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot read its input", "check the request against " + e.Detail["in"]
 		},

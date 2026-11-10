@@ -6,7 +6,7 @@ runs:
     - command: 'machines create'
       exit: 2
       stderr: |
-          Error: tart is not installed on This Mac
+          Error: tart is required by machines
           Hint: station apps install tart
       files:
           .calls: absent

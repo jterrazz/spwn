@@ -41,11 +41,48 @@ type Capabilities struct {
 	Lid     bool
 	Thermal bool
 	Jobs    bool
-	VMs     bool
 	Engine  bool
-	// value: the hypervisor a Mac runs its VMs with, by its adapter's name,
-	// installed or not (VMs says which).
-	Hypervisor string
+	// value: what provides each need of a call on this Mac, present or not,
+	// read once when the Profile is built; a need no entry names is not
+	// judged here (a VM: its Mac provides it). Never sent: a far Mac judges
+	// its own.
+	Provides map[Need]Provider `json:"-"`
+}
+
+type Need string
+
+const (
+	// value: a Need is what a family of calls cannot run without on a Mac,
+	// named by what it does, never by the app that does it; Hypervisor is
+	// what makes, boots and deletes VMs and their images.
+	Hypervisor Need = "hypervisor"
+	// value: what carries a shared port to the owner's other devices.
+	PrivateNetwork Need = "private-network"
+	// value: the credential store an account is copied out of.
+	Credentials Need = "credentials"
+)
+
+type Provider struct {
+	// value: the program that provides the need, as the owner reads it.
+	Name    string
+	Present bool
+	// value: the catalogue item that installs it; empty when station
+	// installs none.
+	Item string
+	// value: the presence read again; asked only when the cached read said
+	// absent, so a provider installed since, by this run or another process,
+	// lets the call through.
+	Look func() bool `json:"-"`
+}
+
+func (c Capabilities) Lacks(n Need) (Provider, bool) {
+	// invariant: a need no entry names is not judged here; a cached absent
+	// is read once more before it refuses.
+	p, judged := c.Provides[n]
+	if !judged || p.Present || p.Look != nil && p.Look() {
+		return Provider{}, false
+	}
+	return p, true
 }
 
 type Hardware struct {

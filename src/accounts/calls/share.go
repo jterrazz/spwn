@@ -21,7 +21,7 @@ type ShareIn struct {
 }
 
 var Share = call.Call[Deps, ShareIn, accounts.Shared]{
-	Name: "accounts.share", Section: section.Accounts, Where: call.InEngine, Applies: accounts.SharedFrom,
+	Name: "accounts.share", Section: section.Accounts, Where: call.InEngine, Applies: accounts.SharedFrom, Needs: accounts.ShareNeeds(),
 	Errors: []fail.Code{Unknown, NotShareable, NotSignedIn, Unreadable, VMStopped, ToServer, OtherMac, UnknownVM},
 	Run: func(ctx context.Context, d Deps, in ShareIn, _ call.Progress) (accounts.Shared, error) {
 		if err := d.Shares.CheckFrom(ctx, in.Account, in.With, in.From); err != nil {

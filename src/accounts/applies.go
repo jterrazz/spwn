@@ -7,6 +7,11 @@ import (
 
 var Applies = section.Shown(section.Accounts)
 
+func ShareNeeds() []machine.Need {
+	// value: a share copies an account out of this Mac's credential store.
+	return []machine.Need{machine.Credentials}
+}
+
 var SharedFrom machine.Applies = func(p machine.Profile) machine.Verdict {
 	// invariant: a share is a Mac's: its accounts are copied into its own VMs.
 	if p.Kind == machine.Mac {

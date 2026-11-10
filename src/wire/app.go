@@ -26,6 +26,7 @@ import (
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/setup"
 	"github.com/jterrazz/studio-station/src/surface/cli"
+	appsinstall "github.com/jterrazz/studio-station/src/surface/cli/apps/install"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 	shellcmd "github.com/jterrazz/studio-station/src/surface/cli/shell"
 	"github.com/jterrazz/studio-station/src/ui/help"
@@ -88,6 +89,9 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	router := thisMac.router(kenv)
 	defer router.Close()
 	kenv.Calls = router
+	kenv.Install = func(ctx context.Context, item string, o kit.IO) error {
+		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{item}, o)
+	}
 	if session != nil {
 		world.engineFrom(func() *process.Engine { return thisMac.engine(kenv) })
 		session.farFrom(func(w *worldMac) farMac { return thisMac.farMac(kenv, w) })
@@ -347,7 +351,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		pin, self, m.powerPort = "", world.self(), world.power()
 	}
 	name := thisMacName(registered, h.Env.Hostname())
-	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, func() (string, bool) { h := m.hypervisor(); return h.Name(), h.Installed() })
+	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, m.providers)
 	m.kind = legacyKind(m.profile)
 	m.where = page.Context{Machine: name, Kind: string(m.kind), Registered: registered != ""}
 	return m

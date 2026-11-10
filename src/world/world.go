@@ -78,6 +78,9 @@ type Mac struct {
 	// with; none, no hypervisor installed; another name, a second fake that
 	// stands for another adapter (vz).
 	Hypervisor string `json:"hypervisor,omitempty"`
+	// value: the programs a need of station is provided by that this Mac has
+	// not installed (tailscale, studio); its hypervisor is Hypervisor's.
+	Absent []string `json:"absent,omitempty"`
 	// value: the station version this Mac runs; empty, the spec binary's.
 	Station string `json:"station,omitempty"`
 	// value: the calls that older station does not serve, until an upgrade.

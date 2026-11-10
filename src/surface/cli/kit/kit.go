@@ -44,6 +44,9 @@ type Env struct {
 	// value: a name as this Mac's records hold it: a Mac by its full name,
 	// a VM of this Mac with On set; false for any other name.
 	Locate func(name string) (machine.Ref, bool)
+	// value: installs one catalogue item on the target and prints its
+	// outcome, as apps install does; how a terminal answers a missing need.
+	Install func(ctx context.Context, item string, o IO) error
 }
 
 type IO struct {
@@ -275,6 +278,7 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			o.values = func() (map[string]string, error) { return valuesOn(env.Stdin) }
 		}
 		err := run(c.Context(), c, l, in, a, env, o)
+		err = env.answerNeed(c.Context(), err, o, func() error { return run(c.Context(), c, l, in, a, env, o) })
 		read := err != nil && l.Read != nil && l.Read(in)
 		silent := read && env.Far() && unanswered(err)
 		if silent && (o.JSON || o.PageJSON) {

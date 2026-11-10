@@ -10,10 +10,14 @@ import (
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 )
 
+func present() map[coremachine.Need]coremachine.Provider {
+	return map[coremachine.Need]coremachine.Provider{coremachine.Hypervisor: {Name: "hv", Present: true}}
+}
+
 func TestALaptopAndADesktopDifferByWhatTheirPowerReports(t *testing.T) {
-	laptop := profileOf(context.Background(), nil, "mac", "macbook", awakefake.NewPower(contracttest.Laptop()), func() (string, bool) { return "hv", true })
-	desktop := profileOf(context.Background(), nil, "mac", "mini", awakefake.NewPower(contracttest.Desktop()), func() (string, bool) { return "hv", true })
-	if !laptop.Caps.Battery || !laptop.Caps.Lid || !laptop.Caps.Engine || !laptop.Caps.VMs || !laptop.Caps.Jobs {
+	laptop := profileOf(context.Background(), nil, "mac", "macbook", awakefake.NewPower(contracttest.Laptop()), present)
+	desktop := profileOf(context.Background(), nil, "mac", "mini", awakefake.NewPower(contracttest.Desktop()), present)
+	if !laptop.Caps.Battery || !laptop.Caps.Lid || !laptop.Caps.Engine || !laptop.Caps.Provides[coremachine.Hypervisor].Present || !laptop.Caps.Jobs {
 		t.Errorf("the laptop's capabilities: %+v", laptop.Caps)
 	}
 	if desktop.Caps.Battery || desktop.Caps.Lid || !desktop.Caps.Thermal || !desktop.Caps.Engine {
@@ -26,8 +30,8 @@ func TestALaptopAndADesktopDifferByWhatTheirPowerReports(t *testing.T) {
 
 func TestAPinnedVMRunsNoEngineAndHoldsNoPower(t *testing.T) {
 	for pin, want := range map[string]catalog.MachineKind{"linux": catalog.Linux, "macos": catalog.MacOS} {
-		p := profileOf(context.Background(), nil, pin, "dev", awakefake.NewPower(contracttest.Laptop()), func() (string, bool) { return "hv", true })
-		if p.Kind != coremachine.Workspace || legacyKind(p) != want || p.Caps.Engine || p.Caps.Battery {
+		p := profileOf(context.Background(), nil, pin, "dev", awakefake.NewPower(contracttest.Laptop()), present)
+		if p.Kind != coremachine.Workspace || legacyKind(p) != want || p.Caps.Engine || p.Caps.Battery || p.Caps.Provides != nil {
 			t.Errorf("%s: %+v", pin, p)
 		}
 	}

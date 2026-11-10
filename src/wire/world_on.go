@@ -389,6 +389,8 @@ func (m *worldMac) engineVersion() string {
 
 func (m *worldMac) stationVersion() string { return m.slice().Station }
 
+func (m *worldMac) absent(program string) bool { return slices.Contains(m.slice().Absent, program) }
+
 func (m *worldMac) engineStarted() time.Time {
 	if e := m.slice().Engine; e != nil {
 		return e.StartedAt
