@@ -59,6 +59,6 @@ func TestAnImageTheRegistryRefusesOrDoesNotKnowIsNotReleased(t *testing.T) {
 
 type refusing struct{ status int }
 
-func (r refusing) Get(context.Context, string, map[string]string) (int, []byte, error) {
+func (r refusing) Get(context.Context, string, map[string]string) (status int, body []byte, err error) {
 	return r.status, nil, nil
 }
