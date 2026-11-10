@@ -215,7 +215,7 @@ final class Model: ObservableObject {
             row.cells = [Value(kind: "text", text: "not installed")]
             row.hint = Hint(command: "station engine start")
             s.items = [Item(row: row)]
-            s.caption = [Value(kind: "text", text: "The engine is not installed on this Mac")]
+            s.caption = [Value(kind: "text", text: "the engine is not installed on this Mac")]
             p.sections = [s]
         }
         return p
