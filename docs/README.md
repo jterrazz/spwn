@@ -78,5 +78,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [026 The catalogue of stories is the menu bar's test suite](decisions/026-the-catalogue-is-the-menu-bars-test-suite.md)
 - [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)
 - [028 A server's card shows its latency, not its traffic](decisions/028-a-servers-card-shows-latency-not-traffic.md)
+- [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
