@@ -2,6 +2,7 @@ package local
 
 import (
 	"context"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -53,5 +54,38 @@ func TestALongSocketPathIsServedAndLeavesNothingInTheTempFolder(t *testing.T) {
 	}
 	if _, err := os.Lstat(sock); !os.IsNotExist(err) {
 		t.Errorf("the socket outlived its listener: %v", err)
+	}
+}
+
+func TestAPipeWhoseReaderLeftEndsWithoutAnError(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = l.Close() })
+	go func() {
+		c, acceptErr := l.Accept()
+		if acceptErr != nil {
+			return
+		}
+		defer func() { _ = c.Close() }()
+		for range 64 {
+			if _, writeErr := c.Write([]byte("SSH-2.0-far\r\n")); writeErr != nil {
+				return
+			}
+		}
+	}()
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = r.Close()
+	t.Cleanup(func() { _ = w.Close() })
+	addr, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		t.Fatalf("listener address %v is not TCP", l.Addr())
+	}
+	if err = (sockets{}).Pipe(context.Background(), "127.0.0.1", addr.Port, strings.NewReader(""), w); err != nil {
+		t.Fatalf("Pipe = %v, want nil once its reader left", err)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -126,7 +127,9 @@ func (sockets) Pipe(ctx context.Context, ip string, port int, in io.Reader, out 
 	}()
 	_, err = io.Copy(out, conn)
 	_ = conn.Close()
-	if errors.Is(err, net.ErrClosed) {
+	// invariant: a reader that left (ssh exited, a head took its bytes) ends
+	// the pipe as the far side's close does: neither is the sshd failing.
+	if errors.Is(err, net.ErrClosed) || errors.Is(err, syscall.EPIPE) {
 		return nil
 	}
 	return err
