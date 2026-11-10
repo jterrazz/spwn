@@ -32,7 +32,7 @@ func (u *Usage) Volume(context.Context) (total, free int64, err error) {
 	if err := unix.Statfs(dataVolume, &st); err != nil {
 		return 0, 0, err
 	}
-	block := int64(st.Bsize)
+	block := int64(st.Bsize)                                       //nolint:unconvert // Bsize is a uint32 on darwin, an int64 on linux.
 	return int64(st.Blocks) * block, int64(st.Bavail) * block, nil //nolint:gosec // outside: a volume's block counts fit an int64.
 }
 

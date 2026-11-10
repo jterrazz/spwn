@@ -49,6 +49,7 @@ lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode ov
 	@unformatted=$$(gofmt -l ./src ./specs); \
 		if [ -n "$$unformatted" ]; then printf "gofmt would rewrite:\n%s\n" "$$unformatted"; exit 1; fi
 	@go tool golangci-lint run ./src/... ./specs/...
+	@GOOS=linux $$(go tool -n golangci-lint) run ./src/... ./specs/...
 	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./src/...); \
 		if [ -n "$$dead" ]; then printf "deadcode found unreachable functions:\n%s\n" "$$dead"; exit 1; fi
 	@printf "$(GREEN)●$(RESET) Go lint passed\n"
