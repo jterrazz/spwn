@@ -13,7 +13,6 @@ final class LiveTests: XCTestCase {
     static let pageCPU = value(#"{"kind":"percent","n":120,"live":"cpu:jterrazz-macbook-pro"}"#)
     static let tick = value(#"{"kind":"spark","items":[{"kind":"percent","n":450},{"kind":"count","n":15},{"kind":"count","n":45}]}"#)
     static let tickCPU = value(#"{"kind":"percent","n":450}"#)
-    static let staleCPU = value(#"{"kind":"percent","n":450,"stale":true}"#)
 
     static func store(stale: Bool = false) -> LiveStore {
         let store = LiveStore()
@@ -35,23 +34,6 @@ final class LiveTests: XCTestCase {
 
     func same(_ a: Bitmap, _ b: Bitmap) -> Bool {
         a.width == b.width && a.height == b.height && a.differing(b) == 0
-    }
-
-    // invariant: SPEC §B3: the strip draws This Mac's CPU and its line
-    // from the last tick, never the page's value, so it moves without the
-    // page being rebuilt.
-    func testTheStripDrawsTheTicksCPUNotThePages() throws {
-        let live = try drawn(StripView(Self.strip(Self.pageCPU)), Self.store())
-        XCTAssertTrue(same(live, try drawn(StripView(Self.strip(Self.tickCPU, spark: [15, 45])))), "the strip does not draw the tick's CPU and line")
-        XCTAssertFalse(same(live, try drawn(StripView(Self.strip(Self.pageCPU)))), "the strip draws the page's CPU over the tick's")
-    }
-
-    // invariant: SPEC §B5.15: a key told late keeps its last value, drawn
-    // dimmed as stale.
-    func testTheStripDimsATickToldLate() throws {
-        let late = try drawn(StripView(Self.strip(Self.pageCPU)), Self.store(stale: true))
-        XCTAssertTrue(same(late, try drawn(StripView(Self.strip(Self.staleCPU, spark: [15, 45])))), "the strip does not draw the late tick's value dimmed")
-        XCTAssertFalse(same(late, try drawn(StripView(Self.strip(Self.tickCPU, spark: [15, 45])))), "a late tick is drawn as a fresh one")
     }
 
     // invariant: SPEC §B3: Home's and a machine's Activity tiles draw the

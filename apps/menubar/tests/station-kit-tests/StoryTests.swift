@@ -86,7 +86,10 @@ final class StoryTests: XCTestCase {
         return renderer.cgImage.map { Double($0.height) }
     }
 
+    // invariant: MB-12: every story is drawn offscreen, and drawing them
+    // all opens no window.
     func testEveryStoryMatchesItsGoldensInBothSchemes() throws {
+        let windows = NSApplication.shared.windows.count
         let stories = try stories()
         XCTAssertFalse(stories.isEmpty)
         var failures: [String] = []
@@ -101,6 +104,7 @@ final class StoryTests: XCTestCase {
             }
         }
         XCTAssertEqual(failures, [])
+        XCTAssertEqual(NSApplication.shared.windows.count, windows)
     }
 
     func testEveryPanelStoryStaysGlass() throws {

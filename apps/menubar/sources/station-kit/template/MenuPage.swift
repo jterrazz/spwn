@@ -1,7 +1,7 @@
 import SwiftUI
 
 // value: the menu bar's own pages of SPEC §10.2 a page id names; any other
-// page draws as PageView.
+// page is the panel's (Popover).
 public enum MenuPage {
     public static let ports = Navigation.ports
     public static let awake = Navigation.awake

@@ -98,8 +98,7 @@ enum Snapshot {
     @MainActor
     static func view(_ name: String, _ page: Page) -> AnyView {
         if popover(page) { return AnyView(Popover(state(name, page), scrolls: false)) }
-        if let own = MenuPage.view(state(name, page), scrolls: false) { return own }
-        return AnyView(PageView(page))
+        return MenuPage.view(state(name, page), scrolls: false) ?? AnyView(Popover(state(name, page), scrolls: false))
     }
 
     // invariant: a page is drawn over a fixed colourful desk, the vision's,

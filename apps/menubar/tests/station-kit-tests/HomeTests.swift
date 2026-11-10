@@ -121,17 +121,14 @@ final class HomeTests: XCTestCase {
         ])
     }
 
-    // invariant: MB-12: every snapshot, of a page, a sheet or the icon, is
-    // drawn offscreen: rendering them all opens no window.
+    // invariant: MB-12: the menu bar icon of every page is drawn
+    // offscreen: rendering them all opens no window (the stories' own
+    // drawing is held to the same by StoryTests).
     func testSnapshotsOffscreen() throws {
         let before = NSApplication.shared.windows.count
-        var drawn = 0
-        for (name, data) in try Tree.fixtures() {
-            let page = try Page.decode(data)
-            if Snapshot.render(Snapshot.view(name, page), scheme: .dark) != nil { drawn += 1 }
-            if MenuBarIcon.of(connection: .live, page: page).image(scheme: .dark) != nil { drawn += 1 }
-        }
-        XCTAssertEqual(drawn, try Tree.fixtures().count * 2)
+        let fixtures = try Tree.fixtures()
+        let drawn = try fixtures.filter { MenuBarIcon.of(connection: .live, page: try Page.decode($0.data)).image(scheme: .dark) != nil }
+        XCTAssertEqual(drawn.count, fixtures.count)
         XCTAssertEqual(NSApplication.shared.windows.count, before)
         XCTAssertEqual(before, 0)
     }

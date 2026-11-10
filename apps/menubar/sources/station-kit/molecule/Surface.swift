@@ -1,32 +1,5 @@
 import SwiftUI
 
-// invariant: the generic page renderer's frame, the look the panel had
-// before the v4 pane: live it paints nothing; drawn still it stands in
-// for a window's glass. Its corner is the container shape every grouping
-// inside is concentric with.
-struct PageGlass: ViewModifier {
-    @Environment(\.stationStill) private var still
-    @Environment(\.colorScheme) private var scheme
-
-    func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous)
-        if still {
-            content
-                .containerShape(shape)
-                .background {
-                    ZStack {
-                        shape.fill(Token.Glass.pane(scheme))
-                        shape.fill(LinearGradient(colors: Token.Glass.sheen(scheme), startPoint: .top, endPoint: .center))
-                        shape.strokeBorder(Token.Glass.edge(scheme), lineWidth: Token.Stroke.rim)
-                    }
-                    .shadow(color: Token.Glass.shade(scheme), radius: Token.Shadow.panelRadius, y: Token.Shadow.panelY)
-                }
-        } else {
-            content.containerShape(shape)
-        }
-    }
-}
-
 // value: a tile of the vision on the panel's glass: a translucent fill
 // 16 pt round (white at 8 % in dark, 58 % in light), never glass, padded
 // 10 by 12; a finding mixes its colour in. With Reduce Transparency or
@@ -71,9 +44,6 @@ struct Hover: ViewModifier {
 }
 
 extension View {
-    // value: the generic page's frame (see PageGlass).
-    public func stationPageGlass() -> some View { modifier(PageGlass()) }
-
     // value: a tile (see TileGround).
     public func stationTile(padding: EdgeInsets = Token.Tile.groupPadding, tint: Color? = nil) -> some View { modifier(TileGround(padding: padding, tint: tint)) }
 
