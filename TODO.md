@@ -34,6 +34,21 @@ work in workspaces.
   toggles and values in forms. It writes the files, which stay the source of
   truth, and it is designed with the owner (prototype, then stories) before any
   lot.
+- **Claude Code's settings are a blueprint setting** (the owner, 2026-11-10).
+  Today station never touches `~/.claude/settings.json` on a Mac (only
+  `agent-hooks`, in VMs), so the new MacBook's were set by hand: session
+  retention (`cleanupPeriodDays: 365`, against a default that erased the old
+  Mac's sessions past 30 days), the auto-compact window, notifications, the
+  theme, the statusline and the `no-local-poll` hook (rtk's hook only where
+  rtk is installed). A blueprint layer declares them and `apply` writes them,
+  the owner's keys beside station's. Open: the Claude theme is copied today by
+  studio-os's `apps/herdr` install, so one of the two owns it; and whether
+  moving a checkout's sessions and memory to its new path (done by hand on
+  2026-11-10) is a station gesture.
+- **git's identity**: no setting writes `user.name` and `user.email`; Accounts
+  only reports them unset, and `git-signing` reads them from the preferences
+  without writing them. The new MacBook's were set by hand (2026-11-10); a
+  blueprint names them.
 
 It replaces the idea of `station apps install --all`. Starts once the new
 MacBook runs station v3 and the owner opens the design.
