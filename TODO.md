@@ -10,6 +10,19 @@ minor removes them, with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`, `lend_list`), once
 `studio doctor` reads `station.overview.read/v1`.
 
+## The test VMs show in Disk
+Tier 3 (`specs/machine/macos/tier.sh`) makes its macOS VM with tart directly,
+so the engine never knows it: `station-e2e-macos-<hash>` held 31 GB and showed
+nowhere in the app (2026-11-10). Disk lists a `station-e2e-*` or
+`station-play` VM as a test VM, with its size and erase; it never becomes a
+machine. Starts with the next tier 3 run.
+
+## The goldens stay small
+The menu bar's snapshot goldens weighed 2.8 GB across history and pushed the
+branch past GitHub's 2 GB push limit; their history was dropped on
+2026-11-10. A golden is compressed or drawn at 1x before it is committed, so
+one story's update stays in kilobytes. Starts at the next golden change.
+
 ## Choose the secret manager
 Bitwarden Secrets Manager or 1Password service accounts, as a second adapter of
 `accounts/contract.Vault`. It becomes the home of the secrets shared with a VM
