@@ -90,10 +90,18 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 }
 
 // invariant: a superseded formula goes only once the app replacing it is
-// installed: the formula alone is a half install, named, never removed.
+// installed by its own install, listed by its method or its bundle in
+// /Applications, never because the command the formula itself provides
+// answers: the formula alone is a half install, named, never removed.
 func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 	old, ok := t.Superseded()
-	if !ok || !listedOld(t, s.listings(ctx, []catalog.App{t})) {
+	if !ok {
+		return nil
+	}
+	listings := s.listings(ctx, []catalog.App{t})
+	own := s.install(t)
+	_, listed := listings[own.Method()].keys[own.Key()]
+	if !listedOld(t, listings) || !listed && !s.bundled(t) {
 		return nil
 	}
 	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
