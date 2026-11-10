@@ -78,7 +78,7 @@ The data, the presentation and the surfaces:
   cmd/       station/ (process entry: argv, environment, streams, once), generate/ (the compiler)
 ```
 
-Beside `src/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-catalogue-is-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
+Beside `src/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-stories-are-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
 
 ## The hexagon in each family
 
