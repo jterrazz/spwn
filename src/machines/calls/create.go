@@ -126,17 +126,21 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if left, ok := s.memoryLeft(ctx); ok && r.Size.MemoryBytes > left {
 		return r, &model.TooBigError{Mac: "This Mac", AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
 	}
-	if err := s.EngineUp(ctx); err != nil {
+	if err := s.engineUp(ctx, false); err != nil {
 		return r, err
 	}
 	return r, nil
 }
 
-func (s *Machinist) EngineUp(ctx context.Context) error {
+func (s *Machinist) EngineUp(ctx context.Context) error { return s.engineUp(ctx, true) }
+
+func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	// invariant: the engine comes to a Mac with its hypervisor the first
 	// time a call needs it: an engine that does not answer and whose job was
 	// never installed is installed and started here, then asked again; an
-	// engine the owner stopped stays stopped, refused with its start.
+	// engine the owner stopped stays stopped, refused with its start. A
+	// check that does not start it (create's, before its questions) lets
+	// such an engine through: the create itself starts it.
 	if s.engineAPI == nil {
 		return &model.EngineDownError{Mac: "This Mac", Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
 	}
@@ -147,6 +151,9 @@ func (s *Machinist) EngineUp(ctx context.Context) error {
 	installed := s.h.Exists(catalog.EnginePlist(s.h.Home()))
 	if installed || s.o.StartEngine == nil || !s.engine.Installed() {
 		return &model.EngineDownError{Mac: "This Mac", Installed: installed}
+	}
+	if !start {
+		return nil
 	}
 	if err := s.o.StartEngine(ctx); err != nil {
 		return err
@@ -220,6 +227,9 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	r, err := s.CheckCreate(ctx, r)
 	if err != nil {
 		return model.Created{}, err
+	}
+	if up := s.EngineUp(ctx); up != nil {
+		return model.Created{}, up
 	}
 	say := func(label string) {
 		if progress != nil {

@@ -278,7 +278,7 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			o.values = func() (map[string]string, error) { return valuesOn(env.Stdin) }
 		}
 		err := run(c.Context(), c, l, in, a, env, o)
-		err = env.answerNeed(c.Context(), err, o, func() error { return run(c.Context(), c, l, in, a, env, o) })
+		err = env.answerNeed(c.Context(), err, o, func() error { return proceed(c.Context(), c, l, in, a, env, o) })
 		read := err != nil && l.Read != nil && l.Read(in)
 		silent := read && env.Far() && unanswered(err)
 		if silent && (o.JSON || o.PageJSON) {
@@ -315,6 +315,12 @@ func run[I any](ctx context.Context, c *cobra.Command, l Leaf[I], in *I, args []
 			return err
 		}
 	}
+	return proceed(ctx, c, l, in, args, env, o)
+}
+
+func proceed[I any](ctx context.Context, c *cobra.Command, l Leaf[I], in *I, args []string, env Env, o IO) error {
+	// value: a leaf's run past its binding, which says what it says once:
+	// what a terminal runs again once a missing need is installed.
 	if l.Validate != nil && !env.Far() {
 		// invariant: Validate checks against this machine; a call sent
 		// elsewhere is checked by its own use case, there.
