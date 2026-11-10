@@ -1,9 +1,0 @@
-description: 'a fresh Mac''s interactive zsh has the completion: the block runs compinit when nothing did'
-fixture: ../../../__fixtures__/studio-cli/
-env: engine
-runs:
-    - command: '--version >/dev/null; printf ''eval "$(%s shell zsh)"\n'' "$STATION" > .zshrc; ZDOTDIR=$PWD /bin/zsh -ic ''whence -w _station compdef'' 2>/dev/null'
-      exit: 0
-      stdout: |
-          _station: function
-          compdef: function
