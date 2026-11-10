@@ -9,7 +9,7 @@
 #   the log is .artifacts/e2e/menubar-<label>.log; what the run wrote under
 #   apps/menubar (an .actual.png, or with --update-goldens the rewritten goldens and
 #   INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
-#   STATION_XCODE_TAG picks the cirruslabs/macos-tahoe-xcode tag (default below);
+#   STATION_XCODE_IMAGE picks another image (default below, pinned by digest);
 #   STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display.
 set -uo pipefail
 
@@ -40,8 +40,9 @@ tart_bin="$HOME/.local/bin/tart"
 # value: the store is the owner's: a clone never prunes its other images to make room.
 tart() { TART_NO_AUTO_PRUNE=1 "$tart_bin" "$@"; }
 
-tag=${STATION_XCODE_TAG:-27.2}
-image="ghcr.io/cirruslabs/macos-tahoe-xcode:$tag"
+# invariant: the goldens are drawn by this image, so it is pinned by digest, not by a
+# tag a registry may move; the digest is macos-tahoe-xcode:27.2 (macOS 26.6.2, Xcode 27.2).
+image=${STATION_XCODE_IMAGE:-ghcr.io/cirruslabs/macos-tahoe-xcode@sha256:f8315a2f627daf64ab2c4e11d29a4d267953902a16151ee28fcdd7185927c317}
 hash=$(printf '%s' "$image" | shasum -a 256 | cut -c1-12)
 base="station-e2e-xcode-$hash"
 vm="station-e2e-menubar-$label"
