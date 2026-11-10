@@ -123,8 +123,9 @@ code=$?
 say "-- make menubar-check exit $code in $((SECONDS - t)) s"
 
 # value: what the run wrote under apps/menubar (an .actual.png, a rewritten golden,
-# INDEX) comes back as one tar, whatever the verdict.
-in_vm "cd ~/station && git ls-files -m -o --exclude-standard apps/menubar | tar -cf - -T -" > "$work/changes.tar" 2>> "$log"
+# INDEX) comes back as one tar, whatever the verdict: the .actual.png are gitignored,
+# so the listing takes the ignored untracked files too.
+in_vm "cd ~/station && git ls-files -m -o apps/menubar | tar -cf - -T -" > "$work/changes.tar" 2>> "$log"
 tar -xf "$work/changes.tar" -C "$work/changes" 2>> "$log"
 changed=$(tar -tf "$work/changes.tar" 2> /dev/null | grep -c . || true)
 say "-- $changed files came back to $work/changes"
