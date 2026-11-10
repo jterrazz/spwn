@@ -11,13 +11,13 @@ import (
 )
 
 func present() map[coremachine.Need]coremachine.Provider {
-	return map[coremachine.Need]coremachine.Provider{coremachine.Hypervisor: {Name: "hv", Present: true}}
+	return map[coremachine.Need]coremachine.Provider{coremachine.Hypervisor: {Name: "hv", Look: func() bool { return true }}}
 }
 
 func TestALaptopAndADesktopDifferByWhatTheirPowerReports(t *testing.T) {
 	laptop := profileOf(context.Background(), nil, "mac", "macbook", awakefake.NewPower(contracttest.Laptop()), present)
 	desktop := profileOf(context.Background(), nil, "mac", "mini", awakefake.NewPower(contracttest.Desktop()), present)
-	if !laptop.Caps.Battery || !laptop.Caps.Lid || !laptop.Caps.Engine || !laptop.Caps.Provides[coremachine.Hypervisor].Present || !laptop.Caps.Jobs {
+	if !laptop.Caps.Battery || !laptop.Caps.Lid || !laptop.Caps.Engine || laptop.Caps.Provides[coremachine.Hypervisor].Look == nil || !laptop.Caps.Jobs {
 		t.Errorf("the laptop's capabilities: %+v", laptop.Caps)
 	}
 	if desktop.Caps.Battery || desktop.Caps.Lid || !desktop.Caps.Thermal || !desktop.Caps.Engine {

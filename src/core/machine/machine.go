@@ -42,8 +42,8 @@ type Capabilities struct {
 	Thermal bool
 	Jobs    bool
 	Engine  bool
-	// value: what provides each need of a call on this Mac, present or not,
-	// read once when the Profile is built; a need no entry names is not
+	// value: what provides each need of a call on this Mac, by its name and
+	// how its presence is read; a need no entry names is not
 	// judged here (a VM: its Mac provides it). Never sent: a far Mac judges
 	// its own.
 	Provides map[Need]Provider `json:"-"`
@@ -64,22 +64,21 @@ const (
 
 type Provider struct {
 	// value: the program that provides the need, as the owner reads it.
-	Name    string
-	Present bool
+	Name string
 	// value: the catalogue item that installs it; empty when station
 	// installs none.
 	Item string
-	// value: the presence read again; asked only when the cached read said
-	// absent, so a provider installed since, by this run or another process,
-	// lets the call through.
+	// value: the presence read, asked only by the gate of a call that needs
+	// it, at each such call: a call that declares no need reads nothing, and
+	// a provider installed since, by this run or another process, is seen.
 	Look func() bool `json:"-"`
 }
 
 func (c Capabilities) Lacks(n Need) (Provider, bool) {
-	// invariant: a need no entry names is not judged here; a cached absent
-	// is read once more before it refuses.
+	// invariant: a need no entry names is not judged here; one that names
+	// it reads its presence now.
 	p, judged := c.Provides[n]
-	if !judged || p.Present || p.Look != nil && p.Look() {
+	if !judged || p.Look == nil || p.Look() {
 		return Provider{}, false
 	}
 	return p, true
