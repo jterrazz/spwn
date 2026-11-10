@@ -65,7 +65,7 @@ func (m machine) disk() diskcontract.DiskUsage {
 	if m.profile.System.OS == coremachine.Linux {
 		return posix.New(m.sys.Run)
 	}
-	return apfs.New(m.sys.Run)
+	return apfs.New(m.sys.Run, m.systemRoot())
 }
 
 func (m machine) expander() disk.Expander {

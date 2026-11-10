@@ -2,6 +2,9 @@ package apfs
 
 import (
 	"context"
+	"errors"
+	"io/fs"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/sys/unix"
@@ -19,17 +22,33 @@ type Commands interface {
 	Output(ctx context.Context, c local.Cmd) (local.Output, error)
 }
 
-type Usage struct{ run Commands }
+type Usage struct {
+	run Commands
+	// value: the system root the Mac's own folders are read under, "" for the
+	// real one.
+	root string
+}
 
-func New(run Commands) *Usage { return &Usage{run: run} }
+func New(run Commands, root string) *Usage { return &Usage{run: run, root: root} }
 
 func (u *Usage) Sizes(ctx context.Context, roots []string, each func(int, int64)) {
 	local.Sizes(ctx, roots, each)
 }
 
 func (u *Usage) Volume(context.Context) (total, free int64, err error) {
+	// invariant: the volume is the one that holds the data volume's folder
+	// under the system root, so a root without that folder is measured where
+	// it is.
 	var st unix.Statfs_t
-	if err := unix.Statfs(dataVolume, &st); err != nil {
+	path := filepath.Join(u.root, dataVolume)
+	for {
+		err = unix.Statfs(path, &st)
+		if !errors.Is(err, fs.ErrNotExist) || path == "/" {
+			break
+		}
+		path = filepath.Dir(path)
+	}
+	if err != nil {
 		return 0, 0, err
 	}
 	block := int64(st.Bsize)                                       //nolint:unconvert // Bsize is a uint32 on darwin, an int64 on linux.

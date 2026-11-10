@@ -33,6 +33,7 @@ func lay(t *testing.T, files map[string]int) string {
 
 func TestTheAPFSDiskUsageKeepsTheContract(t *testing.T) {
 	contracttest.DiskUsage(t, func(t *testing.T, files map[string]int) (contract.DiskUsage, string) {
-		return New(pgrep{}), lay(t, files)
+		root := lay(t, files)
+		return New(pgrep{}, root), root
 	})
 }
