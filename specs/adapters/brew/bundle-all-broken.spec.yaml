@@ -1,0 +1,15 @@
+description: 'one bundle for two apps that both fail: each is named'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/all-broken/
+runs:
+    - command: 'apps install bat ghostty'
+      exit: 1
+      stdout: |
+          ✗	bat		brew	the install failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	ghostty		cask	the install failed: its output is in ~/.local/state/station/logs/apps.log
+      stderr: |
+          ==> Downloading ghostty
+          curl: (22) The requested URL returned error: 404
+          Error: 2 of 2 apps failed
+          Hint: station apps install bat

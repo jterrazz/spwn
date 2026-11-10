@@ -1,0 +1,22 @@
+description: 'ctrl-c mid-bundle is an interruption per app, exit 130, never a failed install'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/bundle-interrupted/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" setup --name m'
+      stdin: |
+          file bundle-started
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          ^C●     name    m
+          ●       zshrc
+          ●       layout  nothing to retire
+          ●       relocate        bunfig, go env, mise settings, npmrc
+          ○       engine  not needed until tart is installed
+          ✗       mise    interrupted (Ctrl-C) · station setup resumes
+          ✗       git     interrupted (Ctrl-C) · station setup resumes
+          ✗       tart    interrupted (Ctrl-C) · station setup resumes
+          ✗       tailscale       interrupted (Ctrl-C) · station setup resumes

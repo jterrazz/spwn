@@ -1,0 +1,19 @@
+#!/bin/sh
+# Homebrew just installed: a bundle is recorded with its Brewfile and puts mise on PATH, then
+# fails on the Tailscale cask.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") if [ -f "$HOME/bin/mise" ]; then printf 'mise 2026.10.25\n'; fi ;;
+    "list --cask --versions") if [ -f "$HOME/bin/tailscale" ]; then printf 'tailscale-app 1.90.6\n'; fi ;;
+    "bundle install --no-upgrade --file=-")
+        printf 'brew %s\n' "$*" >> "$HOME/.calls"
+        /bin/cat >> "$HOME/.calls"
+        /bin/cp "$HOME/later/version" "$HOME/bin/mise"
+        echo "Error: tailscale-app: sudo needs a terminal" >&2
+        exit 1
+        ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
