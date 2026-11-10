@@ -23,12 +23,12 @@ final class CatalogExportTests: XCTestCase {
         var item = StoryUI()
         item.statusItem = true
         for story in [
-            StoryFile(id: "home.needs", group: .home, note: "Home with a need on top.", pages: ["pages/menubar.home.two-macs.json"], status: "today"),
-            StoryFile(id: "home.fine", group: .home, note: "Home when all is well.", pages: ["pages/menubar.home.two-macs.json"], status: "today"),
+            StoryFile(id: "home.needs", group: .home, note: "Home with a need on top.", pages: ["pages/menubar.home.two-macs.json"]),
+            StoryFile(id: "home.fine", group: .home, note: "Home when all is well.", pages: ["pages/menubar.home.two-macs.json"]),
             StoryFile(id: "mac.mini.overview", group: .mac, note: "The mini's page.",
-                      pages: ["pages/menubar.home.two-macs.json", "pages/menubar.mac.mini.json"], status: "today"),
+                      pages: ["pages/menubar.home.two-macs.json", "pages/menubar.mac.mini.json"]),
             StoryFile(id: "menubar.count", group: .shell, note: "The status item with a count.",
-                      pages: ["pages/menubar.home.two-macs.json"], status: "today", ui: item),
+                      pages: ["pages/menubar.home.two-macs.json"], ui: item),
         ] {
             try story.encoded().write(to: stories.appendingPathComponent(story.id + Stories.suffix))
         }

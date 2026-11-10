@@ -23,7 +23,7 @@ struct Heights: Decodable {
 
     func audit(_ stories: [StoryFile], measured: [String: Double]) -> [String] {
         var findings: [String] = []
-        for story in stories where !story.today && story.group != .shell && story.heightNote == nil {
+        for story in stories where story.group != .shell && story.heightNote == nil {
             guard let want = heights[story.id] else {
                 findings.append("\(story.id): no prototype height in heights.json")
                 continue
@@ -197,7 +197,7 @@ final class StoryTests: XCTestCase {
     func testEveryTargetStoryIsAsTallAsThePrototypesPanel() throws {
         let stories = try stories()
         var measured: [String: Double] = [:]
-        for story in stories where !story.file.today && panel(story) { measured[story.id] = height(story) }
+        for story in stories where panel(story) { measured[story.id] = height(story) }
         XCTAssertEqual(try Heights.load().audit(stories.map(\.file), measured: measured), [])
     }
 
@@ -208,11 +208,10 @@ final class StoryTests: XCTestCase {
             StoryFile(id: "home.needs", group: .home, note: "n", pages: page),
             StoryFile(id: "home.fine", group: .home, note: "n", pages: page),
             StoryFile(id: "home.empty", group: .home, note: "n", pages: page, heightNote: "the empty state keeps the footer"),
-            StoryFile(id: "home.loading", group: .home, note: "n", pages: page, status: "today"),
             StoryFile(id: "menubar.count", group: .shell, note: "n", pages: page),
             StoryFile(id: "home.unknown", group: .home, note: "n", pages: page),
         ]
-        let measured = ["home.needs": 692.0, "home.fine": 600, "home.empty": 200, "home.loading": 100]
+        let measured = ["home.needs": 692.0, "home.fine": 600, "home.empty": 200]
         XCTAssertEqual(heights.audit(stories, measured: measured), [
             "home.fine: 600 pt tall, the prototype's 637 pt (a heightNote names a difference on purpose)",
             "home.unknown: no prototype height in heights.json",
