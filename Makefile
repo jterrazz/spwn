@@ -19,6 +19,7 @@ MENUBAR_HOME := $(HOME)/Applications/Station.app
 CATALOG_BIN  := .artifacts/menubar/build/debug/StationCatalog
 CATALOG_OUT  ?= .artifacts/catalog
 LDFLAGS      := -X github.com/jterrazz/studio-station/src/wire.version=$(shell git describe --tags --always --dirty)
+SPEC_LDFLAGS := -X github.com/jterrazz/studio-station/src/wire.version=$(shell git describe --tags --always --dirty --long)
 
 CYAN  := \033[36m
 GREEN := \033[32m
@@ -67,7 +68,7 @@ VZ_SUITES    := specs/usecases/machines specs/usecases/engine/keep
 
 test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
 	@go test ./src/... ./specs/...
-	@go build -tags $(SPEC_TAGS) -ldflags "$(LDFLAGS)" -o $(TEST_PATH) ./src/cmd/station && touch $(TEST_PATH)
+	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./src/cmd/station && touch $(TEST_PATH)
 	@STATION_SPEC_BUILT=1 npx typescript test
 	@STATION_SPEC_BUILT=1 STATION_SPEC_HYPERVISOR=vz npx vitest run $(VZ_SUITES)
 
