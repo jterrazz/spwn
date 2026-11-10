@@ -1,5 +1,5 @@
 #!/bin/bash
-# value: tier 3: one fresh macOS VM plays a Mac: install.sh, setup, the apps of every
+# value: tier 3: one fresh macOS VM plays a Mac: install.sh, init, the apps of every
 # method, every setting, the shell block, Activity, then free and erase on a clone.
 # Sourced by run.sh.
 
@@ -103,10 +103,24 @@ step() {
 }
 
 
-case_begin install-then-setup SU-08
+case_begin install-then-init SU-08
 listing > "$fp/0-before.txt" || fail "list the home"
-step "install.sh" 'STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh </dev/null'
-step "setup" "$brew_path $station setup --name e2e </dev/null"
+# value: brew and sudo recorded on their way to the real ones, so the run says
+# whether init reached either; the record lives outside the home the footprint reads.
+in_vm 'mkdir -p /tmp/station-e2e/watch && for c in brew sudo; do real=$(PATH=/opt/homebrew/bin:$PATH command -v $c || echo /usr/bin/false); printf "#!/bin/sh\necho \"%s \$*\" >> /tmp/station-e2e/.calls\nexec %s \"\$@\"\n" "$c" "$real" > /tmp/station-e2e/watch/$c; chmod +x /tmp/station-e2e/watch/$c; done' || fail "the brew and sudo recorders"
+began=$(date +%s)
+step "install.sh" 'PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:$PATH STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null'
+say "   install.sh and init took $(($(date +%s) - began)) s"
+if in_vm 'grep -E "^(brew|sudo) " /tmp/station-e2e/.calls 2>/dev/null'; then
+  fail "init ran brew or sudo"
+fi
+init=$(in_vm "PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:\$PATH $station init </dev/null")
+say "$(sed 's/^/   init: /' <<< "$init")"
+for row in name zshrc layout; do
+  grep -q "^●	$row" <<< "$init" || fail "init shows no ● $row step"
+done
+grep -qE "^	?none yet" <<< "$init" || fail "init ends on no empty Machinefile"
+in_vm 'test -e ~/Library/LaunchAgents/com.jterrazz.station.engine.plist' && fail "init installed the engine"
 while read -r app; do
   case "$app" in '' | '#'*) continue ;; esac
   step "apps install $app" "$brew_path $mise_path $station apps install $app </dev/null"
@@ -119,7 +133,7 @@ step "uv tool install" "$mise_path; uv tool install pyflakes==3.2.0"
 step "brew install" "$brew_path; brew install hello && hello"
 step "gopls" "$mise_path; go install golang.org/x/tools/gopls@v0.20.0"
 in_vm 'test -x ~/.local/share/go/bin/gopls' || fail "go install put no gopls in ~/.local/share/go/bin: mise set GOBIN"
-in_vm 'test -f ~/.bunfig.toml' || fail "setup wrote no ~/.bunfig.toml"
+in_vm 'test -f ~/.bunfig.toml' || fail "init wrote no ~/.bunfig.toml"
 in_vm 'test -e ~/.bun' && fail "~/.bun present after apps install skills, bun add -g and bunx: bun ignored the bunfig"
 in_vm "$station disk --json" > "$fp/disk.json" || fail "disk --json"
 footprint "$fp" "$fp/disk.json" "$suite/macos/os-noise.txt" || fail "the footprint test"
