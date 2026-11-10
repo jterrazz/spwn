@@ -149,6 +149,18 @@ Four gaps found setting up the owner's new Mac and its first workspace, `os`.
   `xcodebuild -runFirstLaunch`), outside the minimal host. The release
   carries the signed bundle, so the host needs no Xcode.
 
+## A workspace that reads the host's checkout
+The owner's idea (2026-11-10): share the host's studio-os checkout with a
+workspace, the way a Docker volume would, so a gate runs without a push.
+Today nothing of a Mac is shared into a VM ([Machines](docs/reference/machines.md#files-and-editors)),
+because a writable mount lets a guest write the host's `.git/hooks` or
+`Makefile`, which then run on the host. Until it is designed, the host edits
+and signs, pushes the branch to the workspace over ssh (`git push os:...`),
+and the workspace runs the gate. Open: a read-only mount (`tart run --dir`
+with `ro`) copied into the guest before a gate, since a gate writes into its
+tree; and whether it is a blueprint's volume. Starts when the push loop
+becomes the bottleneck.
+
 ## Smaller follow-ups
 - A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
