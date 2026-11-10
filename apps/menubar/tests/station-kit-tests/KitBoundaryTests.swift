@@ -7,14 +7,11 @@ final class KitBoundaryTests: XCTestCase {
         var description: String { "\(file): \(rule)" }
     }
 
-    static let forbidden = ["ProgressView", "Gauge(", "List(", "List {", "WindowGroup", "NSWindow(", "Settings {"]
+    static let forbidden = ["ProgressView", "Gauge(", "List(", "List {", "WindowGroup", "NSWindow(", "Settings {", ".buttonStyle(.bordered", ".toggleStyle(.switch)"]
     static let models = ["\"laptopcomputer", "\"macmini", "\"macbook", "\"macpro", "\"imac", "\"macstudio"]
     // value: L50d, Apple's rules: the MenuBarExtra's window is the only
-    // glass, so no view of the kit is glass or a material; L50e: the
-    // vision's tiles are translucent fills drawn by molecule/Surface only.
-    static let glass = ["glassEffect", "GlassEffectContainer", "Material", ".containerBackground"]
-    static let surface = "molecule/Surface.swift"
-    static let surfaceOnly = [".quinary", "Token.Fill.tile", ".glassProminent", ".buttonStyle(.bordered", ".toggleStyle(.switch)"]
+    // glass, so no view of the kit is glass or a material.
+    static let glass = ["glassEffect", "GlassEffectContainer", "Material", ".containerBackground", ".quinary", ".glassProminent"]
     static let glyphs: [Character] = ["→", "·", "…", "⏻", "⚡", "●", "◐", "○", "✗", "◌"]
 
     static let views = ["atom/", "molecule/", "organism/", "template/", "catalog/", "motion/"]
@@ -108,11 +105,6 @@ final class KitBoundaryTests: XCTestCase {
             for word in glass where text.contains(word) {
                 out.append(Finding(file: path, rule: "\(word) in the content"))
             }
-            if path != surface {
-                for word in surfaceOnly where text.contains(word) {
-                    out.append(Finding(file: path, rule: "\(word) outside the kit's surface"))
-                }
-            }
             if text.range(of: #"\.background\(palette\.(?!qrLight)"#, options: .regularExpression) != nil {
                 out.append(Finding(file: path, rule: "a painted background"))
             }
@@ -192,8 +184,8 @@ final class KitBoundaryTests: XCTestCase {
             ("token/AtomTokens.swift", "static func mac(lid: Bool) -> String { lid ? \"laptopcomputer\" : \"macmini\" }"),
             ("template/Panel.swift", "x.background(palette.surface).glassEffect(.regular)"),
             ("molecule/Field.swift", "x.background(.quinary).background(.ultraThinMaterial)"),
-            ("template/Many.swift", "a.background(Token.Fill.tile(scheme))\nStationButton(role: .primary)\nStationButton(role: x ? .primary : .plain)"),
-            ("molecule/Surface.swift", "Toggle().toggleStyle(.switch); x.background(.quinary)"),
+            ("template/Many.swift", "Toggle().toggleStyle(.switch)\nStationButton(role: .primary)\nStationButton(role: x ? .primary : .plain)"),
+            ("molecule/Surface.swift", "x.background(.quinary)"),
             ("atom/Ring.swift", "VStack(spacing: 6) { x.frame(width: Token.Tile.dot + 2).opacity(on ? 1 : 0.4).foregroundStyle(.secondary) }\n// spacing: 4\n.padding(Token.Gap.small * 2).animation(.snappy, value: on)"),
             ("engine/Clock.swift", "x.frame(width: 4)"),
             ("template/Awake.swift", "Spacer(minLength: 6).cornerRadius(7).lineSpacing(3).opacity(max(0, 1) > 0 ? 1 : 0.3)\nx.padding(Token.Gap.small * 3).frame(width: max(w, 4))"),
@@ -206,8 +198,9 @@ final class KitBoundaryTests: XCTestCase {
             "import SwiftUI: Page and Engine import Foundation only",
             "macmini draws a Mac's model, which no capability reports",
             "glassEffect in the content", "a painted background",
-            "Material in the content", ".quinary outside the kit's surface",
-            "Token.Fill.tile outside the kit's surface", "2 primary actions on one page",
+            "Material in the content", ".quinary in the content",
+            ".toggleStyle(.switch) is not drawn offscreen", "2 primary actions on one page",
+            ".quinary in the content",
             "a size literal (spacing)", "a size literal (width)", "a size literal (opacity)", "a share literal", "a style outside Token", "an animation outside Token",
             "a size literal (minLength)", "a size literal (cornerRadius)", "a size literal (lineSpacing)", "a size literal (opacity)", "a share literal", "a size literal (width)", "a size literal (padding)",
             "a size defined outside Token", "a share literal",
