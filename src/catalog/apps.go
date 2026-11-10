@@ -10,8 +10,8 @@ const (
 )
 
 var coreApps = []App{
-	{Name: "homebrew", Description: "macOS package manager", Category: CategoryPackageManagers, Installs: OnMacOS(Script("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")), Provides: []string{"brew"}, Path: []string{"/opt/homebrew/bin", "/usr/local/bin"}, Version: VersionRead{Args: []string{"brew", "--version"}, Pattern: `^Homebrew (\S+)`}, Disk: diskHomebrew, System: true},
-	{Name: "mise", Description: "Polyglot runtime manager: node, go, python, bun, rust, java", Category: CategoryPackageManagers, Installs: Everywhere(Brew("mise"), Script("https://mise.run")), Provides: []string{"mise"}, Disk: diskMise, System: true},
+	{Name: "homebrew", Description: "macOS package manager", Category: CategoryPackageManagers, Installs: OnMacOS(Script("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")), Provides: []string{"brew"}, Path: []string{"/opt/homebrew/bin", "/usr/local/bin"}, Version: VersionRead{Args: []string{"brew", "--version"}, Pattern: `^Homebrew (\S+)`}, Disk: diskHomebrew},
+	{Name: "mise", Description: "Polyglot runtime manager: node, go, python, bun, rust, java", Category: CategoryPackageManagers, Installs: Everywhere(Brew("mise"), Script("https://mise.run")), Provides: []string{"mise"}, Disk: diskMise},
 	{Name: "mas", Description: "Mac App Store command line", Category: CategoryPackageManagers, Installs: OnMacOS(Brew("mas")), Provides: []string{"mas"}},
 	{Name: "uv", Description: "Fast Python package and project manager", Category: CategoryPackageManagers, Installs: Everywhere(Brew("uv"), Mise("uv", "latest")), Provides: []string{"uv"}, Disk: diskUv},
 	{Name: "cocoapods", Description: "Dependency manager for iOS and macOS projects", Category: CategoryPackageManagers, Installs: OnMacOS(Brew("cocoapods")), Provides: []string{"pod"}, Disk: diskCocoapods},
@@ -42,7 +42,7 @@ var coreApps = []App{
 	{Name: "difftastic", Description: "Structural diff", Replaces: "diff", Category: CategoryCLIApps, Installs: Everywhere(Brew("difftastic"), Mise("difftastic", "latest")), Provides: []string{"difft"}},
 	{Name: "jq", Description: "Command-line JSON processor", Category: CategoryCLIApps, Installs: Everywhere(Brew("jq"), Mise("jq", "latest")), Provides: []string{"jq"}},
 
-	{Name: "git", Description: "Distributed version control system, from xcode-select", Category: CategoryGit, Installs: OnMacOS(Shell("xcode-select --install")), Provides: []string{"git"}, Version: VersionRead{Args: []string{"git", "--version"}, Pattern: `git version (\S+)`}, Disk: diskGit, System: true},
+	{Name: "git", Description: "Distributed version control system, from xcode-select", Category: CategoryGit, Installs: OnMacOS(Shell("xcode-select --install")), Provides: []string{"git"}, Version: VersionRead{Args: []string{"git", "--version"}, Pattern: `git version (\S+)`}, Disk: diskGit},
 	{Name: "gpg", Description: "GNU Privacy Guard for encryption and signing", Category: CategoryGit, Installs: OnMacOS(Brew("gnupg")), Provides: []string{"gpg"}, Then: []string{"git-signing"}, Disk: diskGpg},
 	{Name: "lazygit", Description: "Terminal UI for git", Replaces: "raw git porcelain (interactive)", Category: CategoryGit, Installs: Everywhere(Brew("lazygit"), Mise("lazygit", "latest")), Provides: []string{"lazygit"}, Disk: diskLazygit},
 	{Name: "gh", Description: "GitHub CLI for repository management", Replaces: "raw GitHub API / web UI", Category: CategoryGit, Installs: Everywhere(Brew("gh"), Mise("gh", "latest")), Provides: []string{"gh"}, Then: []string{"github-login"}, Disk: diskGh},
@@ -53,7 +53,7 @@ var coreApps = []App{
 	{Name: "xcode", Description: "Apple development IDE", Category: CategoryEditors, Installs: OnMacOS(Mas("Xcode", 497799835)), Provides: []string{"xcodebuild"}, Bundle: "Xcode", Version: VersionRead{Args: []string{"xcodebuild", "-version"}, Pattern: `^Xcode (\S+)`}, Disk: diskXcode},
 	{Name: "xcodegen", Description: "Generates Xcode projects from a spec", Category: CategoryEditors, Installs: OnMacOS(Brew("xcodegen")), Provides: []string{"xcodegen"}},
 
-	{Name: HypervisorApp, Description: "Virtual machines on Apple silicon: the engine of station's VMs", Category: CategoryContainersVMs, Installs: MacOnly(Shell(`d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"`)), Provides: []string{"tart"}, Then: []string{"tart-launcher"}, Version: VersionRead{Args: []string{"tart", "--version"}, Pattern: `^(\S+)`}, Disk: diskTart, System: true},
+	{Name: HypervisorApp, Description: "Virtual machines on Apple silicon: the engine of station's VMs", Category: CategoryContainersVMs, Installs: MacOnly(Shell(`d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"`)), Provides: []string{"tart"}, Then: []string{"tart-launcher"}, Version: VersionRead{Args: []string{"tart", "--version"}, Pattern: `^(\S+)`}, Disk: diskTart},
 	{Name: "docker", Description: "Container engine, inside the Linux VM", Category: CategoryContainersVMs, Installs: LinuxOnly(Script("https://get.docker.com")), Provides: []string{"docker"}, Version: VersionRead{Args: []string{"docker", "--version"}, Pattern: `Docker version ([^,\s]+)`}, Disk: diskDocker},
 	{Name: "orbstack", Description: "Docker and Linux machines on the Mac, for exploration on a Mac", Category: CategoryContainersVMs, Installs: MacOnly(Cask("orbstack")), Provides: []string{"orb"}, Bundle: "OrbStack", Disk: diskOrbstack},
 	{Name: "lens", Description: "Kubernetes IDE for managing clusters", Category: CategoryContainersVMs, Installs: OnMacOS(Cask("lens")), Bundle: "Lens"},
@@ -114,7 +114,7 @@ var coreApps = []App{
 
 	{Name: "jump-desktop-connect", Description: "Remote GUI recovery for headless Macs", Category: CategoryRemoteAccess, Installs: MacOnly(Cask("jump-desktop-connect")), Bundle: "Jump Desktop Connect"},
 	{Name: "jump-desktop", Description: "Jump Desktop viewer/client app", Category: CategoryRemoteAccess, Installs: MacOnly(Cask("jump-desktop")), Bundle: "Jump Desktop"},
-	{Name: "tailscale", Description: "The Tailscale app: each Mac is a node, and station reads it", Category: CategoryRemoteAccess, Installs: MacOnly(Cask("tailscale-app")), Supersedes: "tailscale", AppStore: true, Provides: []string{"tailscale"}, Bundle: "Tailscale", Disk: diskTailscale, System: true},
+	{Name: "tailscale", Description: "The Tailscale app: each Mac is a node, and station reads it", Category: CategoryRemoteAccess, Installs: MacOnly(Cask("tailscale-app")), Supersedes: "tailscale", AppStore: true, Provides: []string{"tailscale"}, Bundle: "Tailscale", Then: []string{TailscaleCLISetting}, Disk: diskTailscale},
 
 	{Name: "bitwarden", Description: "Password manager", Category: CategorySecurityApps, Installs: MacOnly(Cask("bitwarden")), Bundle: "Bitwarden"},
 	{Name: "adguard", Description: "Ad blocker for Safari", Category: CategorySecurityApps, Installs: MacOnly(Mas("AdGuard for Safari", 1440147259)), Bundle: "AdGuard for Safari"},

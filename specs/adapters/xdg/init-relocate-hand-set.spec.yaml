@@ -1,0 +1,21 @@
+description: 'a value the owner set by hand is reported and never overwritten; the other key is still added'
+fixture:
+    - ./__fixtures__/npmrc-hand/
+    - ./__fixtures__/goenv-hand/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ◐	relocate	GOPATH set by hand to /y; station leaves it; npm cache set by hand to /x; station leaves it
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .npmrc: { equals: "cache=/x\n" }
+    - command: '--version >/dev/null; /bin/cat "Library/Application Support/go/env"'
+      exit: 0
+      stdout: |
+          GOPATH=/y
+          GOMODCACHE={{workdir}}/.cache/go/mod

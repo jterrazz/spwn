@@ -4,4 +4,4 @@ const Sudo = "sudo" // value: the one spelling of sudo outside the owner's words
 
 func AsRoot(line string) string { return Sudo + " " + line }
 
-const InstallLine = "curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh" // value: the one line that installs station on a new Mac, as docs/start/getting-started.md gives it: the release's script, which then runs station setup.
+const InstallLine = "curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh" // value: the one line that installs station on a new Mac, as docs/start/getting-started.md gives it: the release's script, which then runs station init.

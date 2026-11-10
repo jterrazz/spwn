@@ -44,7 +44,7 @@
             ],
             "reason": "outdated",
             "hint": {
-              "command": "station setup"
+              "command": "station engine start"
             }
           }
         }

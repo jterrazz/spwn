@@ -37,7 +37,7 @@ Marks
   ◐ differs               attention
     → station settings apply tart-launcher
   ◐ unset                 attention
-    → station setup
+    → station init
   ◐ stopped               attention
     → station engine start
   ◐ late                  attention
@@ -77,7 +77,7 @@ Prose
   machine until it is turned on in the
   admin console.
   Error: defaults is not installed
-  Hint: run station setup
+  Hint: run station init
   no shared accounts  → station accounts share <account> --with <vm>
 Peers  iphone · offline
 

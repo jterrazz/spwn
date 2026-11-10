@@ -10,7 +10,7 @@ A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and 
 xcode-select --install
 curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/scripts/install.sh | sh
 exec zsh
-station setup --name macbook
+station init --name macbook
 ```
 
 The binary lives at `~/.local/bin/station`; its files follow the XDG folders. The first steps after it are [Getting started](docs/start/getting-started.md); what it writes is [Footprint](docs/reference/footprint.md), and the release it comes from [Release](docs/guides/release.md).
@@ -43,12 +43,12 @@ station engine          # this Mac's engine: running, its version, the VMs it ru
 station use linux-1     # every later command of this terminal runs on linux-1
 
 # Station itself
-station setup           # name this machine, wire the shell, start the engine, apply its settings
+station init            # make this machine known: its name, the shell block, the XDG folders
 ```
 
 Every command is in [Commands](docs/reference/commands.md); `--on <machine>` runs any of them elsewhere.
 
-The menu bar app, `apps/menubar`, shows All machines, Needs you, Activity and Awake from this Mac's engine. `station setup` never installs it: `make menubar-install` copies it to `~/Applications`, and [Develop](docs/guides/develop.md) holds its targets.
+The menu bar app, `apps/menubar`, shows All machines, Needs you, Activity and Awake from this Mac's engine. `station init` never installs it: `make menubar-install` copies it to `~/Applications`, and [Develop](docs/guides/develop.md) holds its targets.
 
 ## Documentation
 

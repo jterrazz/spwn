@@ -337,8 +337,8 @@ func entries() map[string]entry {
 		"settings.show": {key: keyed("enter"), item: func(t, _ Target) Item {
 			return asked("Show a setting"+ellipsis, field("Setting"), shown(func(a string) []string { return words(t, "settings", a) }))
 		}},
-		"setup.run": {kinds: []machine.Kind{machine.Mac, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
-			return terminal("Run setup in a new terminal", words(t, "setup")...)
+		"setup.init": {kinds: []machine.Kind{machine.Mac, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
+			return terminal("Run init in a new terminal", words(t, "init")...)
 		}},
 		"settings.zsh-block": {kinds: []machine.Kind{machine.Mac, machine.Workspace, machine.Server}, item: func(_, _ Target) Item {
 			return terminal("Print the shell block in a new terminal", "shell", "zsh")

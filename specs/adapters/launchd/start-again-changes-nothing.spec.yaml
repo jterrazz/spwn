@@ -1,0 +1,11 @@
+description: 'a second engine start, its engine installed and answering, neither bootstraps nor restarts it'
+fixture: ../__fixtures__/launchctl/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" engine start </dev/null >/dev/null; /bin/rm -f .calls; "$STATION" engine start </dev/null; n=$(/usr/bin/grep -c -E "bootstrap|kickstart" .calls); "$STATION" engine stop >/dev/null; echo "$n"'
+      exit: 0
+      stdout: |+
+          ●	engine	already running · {{string}}
+
+      stderr: |
+          /usr/bin/grep: .calls: No such file or directory

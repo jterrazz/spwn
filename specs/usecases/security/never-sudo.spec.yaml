@@ -16,7 +16,7 @@ runs:
       stdout: |
           ●	tart	1.0.0	shell
           ●	tart-launcher			~/.local/bin/tart
-    - command: 'setup --name jterrazz-macbook-pro >/dev/null; /usr/bin/grep -c "\"as_root\"" world.json'
+    - command: 'init --name jterrazz-macbook-pro >/dev/null; /usr/bin/grep -c "\"as_root\"" world.json'
       exit: 1
       stdout: |
           0

@@ -26,10 +26,6 @@ func RetiredNodeDetail(thisMac string) string {
 	return "userspace tailscaled retired; its node \"" + thisMac + "\" stays at " + nodeConsole + " until you remove it"
 }
 
-func TailnetWrapperWritten(at string) string { return TailnetCLI + " wrapper written: " + at }
-
-const TailnetWrapperDue = TailnetCLI + " wrapper due: station setup"
-
 func SSHCommand(user, mac string) string {
 	if user != "" {
 		return "ssh " + user + "@" + mac

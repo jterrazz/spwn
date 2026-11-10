@@ -113,7 +113,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		{page.Missing, page.Attention, "installed, mise not installed", "station apps install mise"},
 		{page.Partial, page.Attention, "policy partly applied", ""},
 		{page.Differs, page.Attention, "differs from station's", "station settings apply " + catalog.HypervisorLauncher},
-		{page.Unset, page.Attention, "name not set", "station setup"},
+		{page.Unset, page.Attention, "name not set", "station init"},
 		{page.Stopped, page.Attention, "stopped", "station engine start"},
 		{page.Late, page.Attention, "no answer in 2s", ""},
 		{page.Degraded, page.Attention, "Serve is off on Tailscale", ""},
@@ -174,7 +174,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 			{Fact: &page.Fact{Key: "machine", Value: page.Text("jterrazz-macbook-pro")}},
 			{Fact: &page.Fact{Key: "uptime", Value: page.Duration(1951200)}},
 			{Note: &page.Note{Text: "Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned on in the admin console."}},
-			{Error: &page.Error{Message: "defaults is not installed", Hint: "run station setup"}},
+			{Error: &page.Error{Message: "defaults is not installed", Hint: "run station init"}},
 			{Empty: &page.Empty{Noun: "shared accounts", Hint: page.Cmd("station accounts share <account> --with <vm>")}},
 		},
 	}

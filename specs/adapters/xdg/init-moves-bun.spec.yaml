@@ -1,0 +1,28 @@
+description: 'init moves what bun put in ~/.bun so its relative bin links still resolve'
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .bun/install/global/node_modules/skills .bun/install/cache/x .bun/bin && echo skills-cli > .bun/install/global/node_modules/skills/cli.mjs && echo x > .bun/install/cache/x/f && /bin/ln -s ../install/global/node_modules/skills/cli.mjs .bun/bin/skills'
+      exit: 0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.bun
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .bun/bin: absent
+          .bun/install/global: absent
+    - command: '--version >/dev/null; /bin/cat .local/share/bun/bin/skills'
+      exit: 0
+      stdout: |
+          skills-cli
+    - command: 'disk free bun </dev/null >/dev/null; /bin/ls -a . | /usr/bin/grep -cx .bun'
+      exit: 1
+      stdout: |
+          0
+    - command: 'init </dev/null | /usr/bin/grep relocate'
+      exit: 0
+      stdout: |
+          ●	relocate	nothing to do

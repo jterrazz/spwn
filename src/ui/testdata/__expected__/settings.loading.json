@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "19 set by station here"
+                    "text": "20 set by station here"
                   },
                   {
                     "kind": "text",
@@ -213,6 +213,16 @@
         },
         {
           "row": {
+            "id": "tailscale-cli",
+            "mark": "pending",
+            "label": "tailscale-cli",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "tart-launcher",
             "mark": "pending",
             "label": "tart-launcher",
@@ -265,7 +275,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 19
+          "n": 20
         }
       ],
       "pipe_counts": true

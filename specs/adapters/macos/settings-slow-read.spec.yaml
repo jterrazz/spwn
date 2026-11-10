@@ -9,5 +9,5 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 18 set by station here · 9 checked · nothing needs a look
+          This Mac · 19 set by station here · 9 checked · nothing needs a look
           no spinner

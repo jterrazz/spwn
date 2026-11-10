@@ -11,4 +11,4 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''[.setup.state, (.setup.steps[0] | [.name, .state, .detail])]'''
       exit: 0
       stdout: |
-          ["absent",["name","absent","station setup --name <name>"]]
+          ["absent",["name","absent","station init --name <name>"]]

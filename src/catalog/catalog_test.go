@@ -187,23 +187,6 @@ func TestStoragePatternsStartAtARootAndTheHomeRootIsDeclared(t *testing.T) {
 	}
 }
 
-func TestSystemAppsAreExactlyTheFleetsAndPlacedOnAMac(t *testing.T) {
-	var system []string
-	for _, tool := range catalog.Apps {
-		if !tool.System {
-			continue
-		}
-		system = append(system, tool.Name)
-		if !slices.Contains(tool.LivesOn(), catalog.Mac) {
-			t.Errorf("%s is a system tool not placed on a host", tool.Name)
-		}
-	}
-	slices.Sort(system)
-	if !slices.Equal(system, []string{"git", "homebrew", "mise", "tailscale", "tart"}) {
-		t.Errorf("system tools = %v", system)
-	}
-}
-
 func TestTheLinuxImageKernelWritesItsConsoleWhereTheHostReadsIt(t *testing.T) {
 	recipe, err := catalog.Recipes.ReadFile("images/linux.sh")
 	if err != nil {

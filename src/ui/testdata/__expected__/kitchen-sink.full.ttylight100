@@ -34,7 +34,7 @@
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mpartial[m               [38;2;76;79;105mattention[m                   [38;2;108;111;133mpolicy partly applied[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mdiffers[m               [38;2;76;79;105mattention[m                   [38;2;108;111;133mdiffers from station's[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings apply tart-launcher[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105munset[m                 [38;2;76;79;105mattention[m                   [38;2;108;111;133mname not set[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation setup[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105munset[m                 [38;2;76;79;105mattention[m                   [38;2;108;111;133mname not set[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation init[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mstopped[m               [38;2;76;79;105mattention[m                   [38;2;108;111;133mstopped[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation engine start[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlate[m                  [38;2;76;79;105mattention[m                   [38;2;108;111;133mno answer in 2s[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mdegraded[m              [38;2;76;79;105mattention[m                   [38;2;108;111;133mServe is off on Tailscale[m
@@ -68,7 +68,7 @@
   [38;2;76;79;105mServe is off on Tailscale, so no shared port is reachable from another machine until it is turned[m
   [38;2;76;79;105mon in the admin console.[m
   [1;38;2;210;15;57mError:[m [38;2;76;79;105mdefaults is not installed[m
-  [38;2;108;111;133mHint:[m [38;2;76;79;105mrun station setup[m
+  [38;2;108;111;133mHint:[m [38;2;76;79;105mrun station init[m
   [38;2;108;111;133mno shared accounts[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation accounts share <account> --with <vm>[m
 [1;38;2;76;79;105mPeers[m  [38;2;76;79;105miphone[m[38;2;76;79;105m · offline[m
 

@@ -987,7 +987,7 @@
         {
           "error": {
             "message": "defaults is not installed",
-            "hint": "run station setup"
+            "hint": "run station init"
           }
         },
         {

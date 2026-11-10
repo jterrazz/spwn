@@ -1,0 +1,17 @@
+description: 'on a Mac init made known, engine start installs the engine; a second start says it runs'
+env: fresh
+runs:
+    - command: 'init --name jterrazz-macbook-pro >/dev/null'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	installed, running · {{string}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["com.jterrazz.station.engine"]
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	already running · {{string}}

@@ -74,7 +74,7 @@ func jobRow(j background.Task) page.Row {
 	case j.Plist == "" && r.Reason != "":
 		r.Detail = page.Text("managed by " + j.Owner + ", remove it from the app")
 	case j.Group == background.GroupStation && j.Run == background.NotLoaded:
-		r.Hint = page.Cmd("station setup")
+		r.Hint = page.Cmd("station engine start")
 	}
 	return r
 }

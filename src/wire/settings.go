@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"io/fs"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/jterrazz/studio-station/src/settings/adapter/git"
 	"github.com/jterrazz/studio-station/src/settings/adapter/macos"
 	"github.com/jterrazz/studio-station/src/settings/adapter/neversleeps"
+	settingstailscale "github.com/jterrazz/studio-station/src/settings/adapter/tailscale"
 	"github.com/jterrazz/studio-station/src/settings/adapter/touch"
 	"github.com/jterrazz/studio-station/src/settings/adapter/vault"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
@@ -137,13 +139,27 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		vault.NewClaudeToken(m.sys.Run, accountscalls.NewShareList(m.stores.shareList())),
 		git.NewSigning(m.sys.Run, m.stores.identity()),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
+		settingstailscale.New(m.sys.FS, settingstailscale.Options{
+			Bin: m.paths.Bin, Shown: m.expander().Display(filepath.Join(m.paths.Bin, catalog.TailnetCLI)),
+			AppStoreCLI: m.tailnetCLI().AppStoreCLI, LookPath: m.sys.Run.LookPath,
+		}),
 	)
 }
 
-// value: the app is installed here: its program is on the PATH.
+// value: the app is installed here: its program is on the PATH, or its
+// bundle is in /Applications (the App Store Tailscale puts no program on
+// any PATH).
 func (m machine) has(app string) bool {
-	_, ok := m.sys.Run.LookPath(app)
-	return ok
+	if _, ok := m.sys.Run.LookPath(app); ok {
+		return true
+	}
+	for _, t := range catalog.Apps {
+		if t.Name == app && t.Bundle != "" {
+			_, err := m.sys.FS.Stat(path.Join("/", m.systemRoot(), "Applications", t.Bundle+".app"))
+			return err == nil
+		}
+	}
+	return false
 }
 
 // value: the hook of one app's agents in this VM's own settings file; a

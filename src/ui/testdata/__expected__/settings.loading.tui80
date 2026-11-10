@@ -1,7 +1,7 @@
  Summary
-   ● This Mac  19 set by station here · 9 checked · nothing needs a look
+   ● This Mac  20 set by station here · 9 checked · nothing needs a look
 
- Set by station  19 ◌
+ Set by station  20 ◌
    ◌ hushlogin
    ◌ ghostty-dotfiles
    ◌ tmux-dotfiles
@@ -16,6 +16,7 @@
    ◌ dock-reset
    ◌ dock-spacer
    ◌ backup-exclusions
+   ◌ tailscale-cli
    ◌ tart-launcher
    ◌ git-shortcuts
    ◌ agent-hooks

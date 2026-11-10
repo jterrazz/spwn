@@ -7,8 +7,8 @@ Needs a look
     → station settings diff github-login
   ◐ dock-reset        changed since 2 d ago
     → station settings diff dock-reset
-  ◐ agent-hooks       changed since 2 d ago
-    → station settings diff agent-hooks
+  ◐ git-shortcuts     changed since 2 d ago
+    → station settings diff git-shortcuts
   ◐ firewall          off
     → System Settings > Network > Firewall
   ◐ screen-lock       locks after 10 min · expected 5 min
@@ -16,7 +16,7 @@ Needs a look
 Set by station  ● 4  ◐ 4  ○ 4  ⊘ 4 · ghostty-dotfiles, github-login, …
 Always-on Mac   ○ 5 · for a Mac that hosts servers
 Checked         ● 5  ◐ 2  ⊘ 1  ? 1 · firewall, screen-lock, time-machine, …
-– 3 not for this machine · VMs only
+– 4 not for this machine · VMs only
 
 → station settings apply  apply the 8
 → station settings --all  for every row

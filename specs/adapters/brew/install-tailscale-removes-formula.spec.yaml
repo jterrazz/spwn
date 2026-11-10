@@ -1,0 +1,15 @@
+description: 'with the app installed, apps install tailscale uninstalls the tailscale formula it supersedes'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/tailscale-formula/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p answers/brew; echo "tailscale-app 1.104.4" > answers/brew/cask.txt; "$STATION" apps install tailscale </dev/null'
+      exit: 0
+      stdout: |
+          ●	tailscale	1.104.4	cask	already installed
+          ●	tailscale formula			uninstalled: the app replaces it
+      files:
+          .calls:
+              equals: |
+                  brew uninstall tailscale

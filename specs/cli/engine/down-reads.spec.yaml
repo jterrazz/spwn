@@ -8,10 +8,10 @@ runs:
       exit: 0
       stdout: |
           {"state":"not-set-up","version":""}
-          ✗	This Mac	has no engine set up	station setup
+          ✗	This Mac	has no engine installed	station engine start
           ●	Tailscale	signed in · macbook.tail1234.ts.net · ports are shared
           # Private: shared with you on Tailscale	1 ◐
-          ◐	engine				the engine is not installed		station setup
+          ◐	engine				the engine is not installed		station engine start
           	Reserved on This Mac: 0 of 1000 (40000-40999), 1000 free
     - command: '--version >/dev/null; /bin/mkdir -p Library/LaunchAgents; : >Library/LaunchAgents/com.jterrazz.station.engine.plist; "$STATION" overview | /usr/bin/grep "Engine"; "$STATION" machines | /usr/bin/grep engine; "$STATION" ports'
       exit: 0

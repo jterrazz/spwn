@@ -5,7 +5,7 @@ runs:
       exit: 2
       stderr: |
           Error: this terminal has no station block
-          Hint: use --on linux-1, or run station setup
+          Hint: use --on linux-1, or run station init
     - command: 'overview --json | /usr/bin/jq -r .machine.name'
       exit: 0
       stdout: |

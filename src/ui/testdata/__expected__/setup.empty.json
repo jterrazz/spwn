@@ -1,7 +1,7 @@
 {
   "schema": "station.page/v1",
   "id": "outcome",
-  "command": "setup",
+  "command": "init",
   "context": {
     "kind": "mac"
   },

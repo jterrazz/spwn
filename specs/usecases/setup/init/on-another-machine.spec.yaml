@@ -1,0 +1,13 @@
+description: 'init on another Mac runs there, its steps read back here'
+env: two-macs
+runs:
+    - command: 'init --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	name	jterrazz-mac-mini
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time

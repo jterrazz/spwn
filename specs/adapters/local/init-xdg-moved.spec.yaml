@@ -1,0 +1,18 @@
+description: 'XDG_CONFIG_HOME moves settings.json and nothing is written to the default folder'
+env:
+    - XDG_CONFIG_HOME=$WORKDIR/c
+runs:
+    - command: 'init --name t'
+      exit: 0
+      stdout: |
+          ●	name	t
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          c/station/preferences.json:
+              contains: '"name": "t",'
+          .config: absent
+          .studio: absent

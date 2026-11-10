@@ -3,8 +3,6 @@ fixture: ../../../__fixtures__/stubs/
 runs:
     - command: 'apps --all | /usr/bin/awk -F "\t" ''$4 ~ / · system$/ { print $2 }'' | /usr/bin/sort | /usr/bin/tr "\n" " "'
       exit: 0
-      stdout: |-
-          git homebrew mise tailscale tart 
     - command: 'apps --all | /usr/bin/awk -F "\t" ''$2 ~ /^(node|xcode|orbstack|cocoapods|xcodegen|android-studio|lens)$/ { print $2, $4 }'''
       exit: 0
       stdout: |

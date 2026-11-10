@@ -1,12 +1,46 @@
 {
   "schema": "station.page/v1",
   "id": "outcome",
-  "command": "setup",
+  "command": "init",
   "context": {
     "kind": "mac"
   },
   "state": "ready",
   "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/init",
+            "mark": "attention",
+            "label": "Known to station, with a step left",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "1 step left"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
     {
       "id": "changes",
       "title": "Changes",
@@ -69,19 +103,20 @@
             ],
             "detail": {
               "kind": "text",
-              "text": "73 GB: move it with station setup --move"
+              "text": "73 GB: move it with station init --move"
             },
             "reason": "partial"
           }
         },
         {
           "row": {
-            "id": "apps",
+            "id": "relocate",
             "mark": "ok",
-            "label": "apps",
+            "label": "relocate",
             "cells": [
               {
-                "kind": "none"
+                "kind": "text",
+                "text": "bunfig, go env, mise settings, npmrc"
               }
             ],
             "detail": {
@@ -100,6 +135,29 @@
           "n": 1
         }
       ]
+    },
+    {
+      "id": "machinefile",
+      "title": "Machinefile",
+      "fold": "open",
+      "items": [
+        {
+          "note": {
+            "text": "none yet: apps and settings come one at a time"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station apps install <app>",
+      "text": "one app, and what it requires"
+    },
+    {
+      "command": "station settings apply <setting>",
+      "text": "one setting"
     }
   ]
 }

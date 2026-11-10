@@ -2,7 +2,7 @@
    ✗ brain.x-snapshot         failing · last exit 2
      → launchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&
        rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-   ◐ engine                   not installed  → station setup
+   ◐ engine                   not installed  → station engine start
    ◐ brew                     120 outdated  → station apps update --method brew
    ◐ misplaced                2 misplaced folders · 80.5 GB
      → station disk move ~/.tart

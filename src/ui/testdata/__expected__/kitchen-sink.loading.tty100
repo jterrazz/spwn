@@ -62,7 +62,7 @@ Prose
   Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned
   on in the admin console.
   Error: defaults is not installed
-  Hint: run station setup
+  Hint: run station init
   no shared accounts  → station accounts share <account> --with <vm>
 Peers
   ◌ iphone

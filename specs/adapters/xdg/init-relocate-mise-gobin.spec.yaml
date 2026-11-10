@@ -1,0 +1,23 @@
+description: 'init turns off mise''s GOBIN under the owner''s own [settings], so go install lands in {data}/go/bin'
+fixture: ./__fixtures__/mise-config/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .config/mise/config.toml: { equals: "[tools]\ngo = \"1.27.3\"\n\n[settings]\ngo_set_gobin = false\nexperimental = true\n" }
+    - command: 'init </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none yet: apps and settings come one at a time

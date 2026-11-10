@@ -8,6 +8,6 @@
   "state": "failed",
   "error": {
     "message": "a VM is named by its Mac",
-    "hint": "station setup on its Mac"
+    "hint": "station init on its Mac"
   }
 }

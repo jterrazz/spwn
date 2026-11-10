@@ -61,7 +61,7 @@ func Read(r engine.Reading, zone *time.Location, thisMac page.Context) page.Page
 		if r.Skewed() {
 			row.Mark, row.Reason = page.Attention, page.Mismatch
 			row.Cells = append(row.Cells, page.Text("the engine runs "+r.Version+", station is "+r.Station))
-			row.Hint = page.Cmd("station setup")
+			row.Hint = page.Cmd("station engine start")
 		}
 	case engine.EngineStopped:
 		row.Mark, row.Reason = page.Attention, page.Stopped
@@ -74,7 +74,7 @@ func Read(r engine.Reading, zone *time.Location, thisMac page.Context) page.Page
 	default:
 		row.Mark, row.Reason = page.Attention, page.Missing
 		row.Cells = []page.Value{page.Text("not installed")}
-		row.Hint = page.Cmd("station setup")
+		row.Hint = page.Cmd("station engine start")
 	}
 	s := page.Section{ID: "engine", Title: "Engine", Role: page.Banner, Columns: columns(), Items: []page.Item{{Row: &row}}}
 	return page.Seal(page.Page{ID: ID, Command: "engine", Context: thisMac, Sections: []page.Section{s}})
@@ -145,11 +145,21 @@ func StopConfirm(w engine.Work, mac string) page.Confirm {
 }
 
 func Start(r engine.StartReport, thisMac page.Context) page.Page {
-	row := pages.Done(Row, catalog.StateOK, "running")
-	if r.Already {
-		row.Detail = page.Texts("already running", r.Version)
-	} else {
-		row.Detail = page.Texts("running", r.Version)
+	words := []string{"running", r.Version}
+	switch {
+	case r.Installed.From != "":
+		words = []string{"restarted", r.Installed.From + " to " + r.Version}
+	case r.Installed.Restarted:
+		words[0] = "restarted"
+	case r.Installed.Written:
+		words[0] = "installed, running"
+	case r.Already:
+		words[0] = "already running"
 	}
+	if r.Installed.Moved {
+		words = append(words, "its job moved to "+catalog.EngineLabel)
+	}
+	row := pages.Done(Row, catalog.StateOK, "running")
+	row.Detail = page.Texts(words...)
 	return pages.Outcome("engine start", thisMac, nil, []page.Row{row}, "engine to start")
 }

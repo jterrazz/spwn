@@ -2,9 +2,9 @@
    ✗ brain.x-snapshot         failing · last exit 2
      → launchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&
        rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-   ◐ setup                    name not set  → station setup
+   ◐ setup                    name not set  → station init
    ◐ engine                   runs v2.0.0-242-gd653060, station is v2.0.0-250
-     → station setup
+     → station engine start
    ◐ brew                     120 outdated  → station apps update --method brew
    ◐ misplaced                2 misplaced folders · 80.5 GB
      → station disk move ~/.tart
@@ -32,8 +32,9 @@
  Machine  1 ●  3 ◐
    ◐ name    unregistered  Mac · Darwin 27.0.0 arm64 · jterrazz · zsh
    ● uptime  22d 14h       battery 100% charged
-   ◐ setup   name          not set  → station setup
-   ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250  → station setup
+   ◐ setup   name          not set  → station init
+   ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250
+     → station engine start
 
  Environment  6 ●  2 ◐
    ● local ip    192.168.1.152
@@ -75,8 +76,7 @@
    ● Tailscale Serve  on
 
  Apps  6 ●  7 ◐  4 ○
-   ○ mise                                brew · system
-     → station apps install mise
+   ○ mise                                brew   → station apps install mise
    ○ mas                                 brew   → station apps install mas
    ◐ pnpm             11.21.0 → 11.22.1  brew   update available
      → station apps update pnpm

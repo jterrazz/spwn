@@ -5,7 +5,6 @@ runs:
       stdin: |
           {"kind":"prompted","session":"s-1","prompt":"Build the landing page"}
       exit: 0
-      stdout: ''
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[].vms[]?.agents | select(.)]'' world.json'
       exit: 0
       stdout: |

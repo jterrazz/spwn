@@ -42,6 +42,16 @@ type StartReport struct {
 	Already bool
 	Version string
 	PID     int
+	// value: what the start did to the engine's job before it ran.
+	Installed Installed
+}
+
+type Installed struct {
+	// value: what bringing the engine's job to this station changed: written
+	// for the first time (or changed), moved from v2's label, restarted, and
+	// the version it ran before ("" when it did not answer).
+	Written, Moved, Restarted bool
+	From                      string
 }
 
 type StartFailedError struct {

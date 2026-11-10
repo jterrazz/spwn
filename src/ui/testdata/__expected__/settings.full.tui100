@@ -5,19 +5,19 @@
    ◐ ghostty-dotfiles   changed since 2 d ago       → station settings diff ghostty-dotfiles
    ◐ github-login       changed since 2 d ago       → station settings diff github-login
    ◐ dock-reset         changed since 2 d ago       → station settings diff dock-reset
-   ◐ agent-hooks        changed since 2 d ago       → station settings diff agent-hooks
+   ◐ git-shortcuts      changed since 2 d ago       → station settings diff git-shortcuts
    ○ tmux-dotfiles      not applied                 → station settings apply tmux-dotfiles
    ○ spotlight-exclude  not applied                 → station settings apply spotlight-exclude
    ○ dock-spacer        not applied                 → station settings apply dock-spacer
-   ○ herdr-machine      not applied                 → station settings apply herdr-machine
+   ○ agent-hooks        not applied                 → station settings apply agent-hooks
    ● hushlogin          applied · ~/.hushlogin
    ● ssh-key            applied · ~/.ssh-key
    ● zed-dotfiles       applied · ~/.zed-dotfiles
-   ● git-shortcuts      applied · ~/.git-shortcuts
+   ● tart-launcher      applied · ~/.tart-launcher
    ⊘ starship-dotfiles  off here
    ⊘ dns                off here
    ⊘ backup-exclusions  off here
-   ⊘ docker-shortcuts   off here
+   ⊘ herdr-machine      off here
 
  Always-on Mac
    ○ Always-on Mac  5 · for a Mac that hosts servers
@@ -35,4 +35,4 @@
    ⊘ gatekeeper         off here · not checked on this machine
 
  Not for this machine
-   – 3 not for this machine  VMs only
+   – 4 not for this machine  VMs only

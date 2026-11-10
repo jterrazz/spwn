@@ -43,7 +43,7 @@ Paths under `~/.config`, `~/.local/share`, `~/.local/state` and `~/.cache` follo
 | `~/.local/state/station/leases.json`                       | never touched | the reserved ports of its Mac: deleting it changes every URL                                                                                                        |
 | `~/.local/bin/station`                                     | installed     | removed by `station apps remove`                                                                                                                                    |
 
-The keychain entry `station` holds nothing since round 5: `station setup` removed the three tailnet accounts the earlier rounds kept there. It also retired round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM.
+The keychain entry `station` holds nothing since round 5: `station init` removes the three tailnet accounts the earlier rounds kept there, and `station engine start` retires round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM.
 
 ## Apps
 
@@ -577,18 +577,18 @@ Erase: none (an app's data is its account's: erase it in the app). An erase refu
 
 ### tailscale
 
-| Path                                                     | Group         | Note                                                                                               |
-| -------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
-| `~/Library/Containers/io.tailscale.ipn.macos*`           | never touched | Mac; the App Store app's login                                                                     |
-| `~/Library/Containers/io.tailscale.ipn.macsys*`          | never touched | Mac; the Standalone app's login                                                                    |
-| `~/Library/Containers/Tailscale`                         | never touched | Mac                                                                                                |
-| `~/Library/Group Containers/*io.tailscale.ipn.macos`     | never touched | Mac                                                                                                |
-| `~/Library/Group Containers/*io.tailscale.ipn.macsys`    | never touched | Mac                                                                                                |
-| `~/Library/Group Containers/group.*.io.tailscale.shared` | never touched | Mac                                                                                                |
-| `~/Library/Application Scripts/*io.tailscale.*`          | never touched | Mac                                                                                                |
-| `/Applications/Tailscale.app`                            | installed     | removed by `station apps remove`                                                                   |
-| `/usr/local/bin/tailscale`                               | installed     | removed by `station apps remove`                                                                   |
-| `~/.local/bin/tailscale`                                 | installed     | written by `station setup` for the App Store app, whose uninstall station refuses: removed by hand |
+| Path                                                     | Group         | Note                                                                                                          |
+| -------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `~/Library/Containers/io.tailscale.ipn.macos*`           | never touched | Mac; the App Store app's login                                                                                |
+| `~/Library/Containers/io.tailscale.ipn.macsys*`          | never touched | Mac; the Standalone app's login                                                                               |
+| `~/Library/Containers/Tailscale`                         | never touched | Mac                                                                                                           |
+| `~/Library/Group Containers/*io.tailscale.ipn.macos`     | never touched | Mac                                                                                                           |
+| `~/Library/Group Containers/*io.tailscale.ipn.macsys`    | never touched | Mac                                                                                                           |
+| `~/Library/Group Containers/group.*.io.tailscale.shared` | never touched | Mac                                                                                                           |
+| `~/Library/Application Scripts/*io.tailscale.*`          | never touched | Mac                                                                                                           |
+| `/Applications/Tailscale.app`                            | installed     | removed by `station apps remove`                                                                              |
+| `/usr/local/bin/tailscale`                               | installed     | removed by `station apps remove`                                                                              |
+| `~/.local/bin/tailscale`                                 | installed     | written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it |
 
 Erase: none (nothing to erase: the login is the Tailscale app's).
 
@@ -680,7 +680,7 @@ What an app keeps at the root of the home folder, declared with its reason; anyt
 
 ## Relocations
 
-Written by `station setup` into the app's own file, never by a shell variable.
+Written by `station init` into the app's own file, never by a shell variable.
 
 | App  | File          | Key                     | Value                               | Status  |
 | ---- | ------------- | ----------------------- | ----------------------------------- | ------- |

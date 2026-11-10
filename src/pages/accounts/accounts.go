@@ -206,11 +206,7 @@ func group(m accounts.Machine, now time.Time) page.Item {
 }
 
 func engineRow(state string) page.Row {
-	r := page.Row{ID: EngineRow, Label: EngineRow, Mark: page.Attention, Reason: page.Stopped, Cells: []page.Value{page.Text(state)}, Hint: page.Cmd("station engine start")}
-	if state == accounts.EngineAbsent {
-		r.Hint = page.Cmd("station setup")
-	}
-	return r
+	return page.Row{ID: EngineRow, Label: EngineRow, Mark: page.Attention, Reason: page.Stopped, Cells: []page.Value{page.Text(state)}, Hint: page.Cmd("station engine start")}
 }
 
 func Section(r accounts.Report) page.Section {

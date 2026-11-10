@@ -12,6 +12,7 @@ runs:
       exit: 0
       stdout: |
           ●	tailscale	1.90.0	cask
+          ●	tailscale-cli			~/.local/bin/tailscale
       files:
           .calls:
               contains:

@@ -1,4 +1,4 @@
-description: 'an engine older than station reads as running, the two versions named, and setup to match them'
+description: 'an engine older than station reads as running, both versions named, and engine start to match'
 env: two-macs
 runs:
     - command: 'world upgrade jterrazz-macbook-pro v3.0.0'
@@ -6,4 +6,4 @@ runs:
     - command: 'engine'
       exit: 0
       stdout: |
-          ◐	engine	running · v3.0.0 · up 3 d · 1 VM	the engine runs v3.0.0, station is {{string}}	station setup
+          ◐	engine	running · v3.0.0 · up 3 d · 1 VM	the engine runs v3.0.0, station is {{string}}	station engine start

@@ -2,8 +2,9 @@
    ✗ brain.x-snapshot         failing · last exit 2
      → launchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&
        rm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist
-   ◐ setup                    name not set  → station setup
-   ◐ engine                   runs v2.0.0-242-gd653060, station is v2.0.0-250  → station setup
+   ◐ setup                    name not set  → station init
+   ◐ engine                   runs v2.0.0-242-gd653060, station is v2.0.0-250
+     → station engine start
    ◐ brew                     120 outdated  → station apps update --method brew
    ◐ misplaced                2 misplaced folders · 80.5 GB  → station disk move ~/.tart
    ◐ pnpm                     update available  → station apps update pnpm
@@ -24,8 +25,8 @@
  Machine  1 ●  3 ◐
    ◐ name    unregistered  Mac · Darwin 27.0.0 arm64 · jterrazz · zsh
    ● uptime  22d 14h       battery 100% charged
-   ◐ setup   name          not set  → station setup
-   ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250  → station setup
+   ◐ setup   name          not set  → station init
+   ◐ engine  runs v2.0.0-242-gd653060, station is v2.0.0-250  → station engine start
 
  Environment  6 ●  2 ◐
    ● local ip    192.168.1.152
@@ -65,24 +66,21 @@
    ● Tailscale Serve  on
 
  Apps  6 ●  7 ◐  4 ○
-   ○ mise                                brew · system  → station apps install mise
-   ○ mas                                 brew           → station apps install mas
-   ◐ pnpm             11.21.0 → 11.22.1  brew           update available
-     → station apps update pnpm
-   ? bun                                 mise           installed, mise not installed
+   ○ mise                                brew   → station apps install mise
+   ○ mas                                 brew   → station apps install mas
+   ◐ pnpm             11.21.0 → 11.22.1  brew   update available  → station apps update pnpm
+   ? bun                                 mise   installed, mise not installed
      → station apps install mise
-   ? go                                  mise           installed, mise not installed
+   ? go                                  mise   installed, mise not installed
      → station apps install mise
-   ? java             17.0.20            mise           installed, mise not installed
+   ? java             17.0.20            mise   installed, mise not installed
      → station apps install mise
-   ? python           3.14.6             mise           installed, mise not installed
+   ? python           3.14.6             mise   installed, mise not installed
      → station apps install mise
-   ? chatgpt                             cask           on PATH, not managed by cask
-   ○ typewhisper                         cask           → station apps install typewhisper
-   ○ frontend-design                     skill          skills not installed
-     → station apps install skills
-   ◐ better-ui                           skill          update available
-     → station apps update better-ui
+   ? chatgpt                             cask   on PATH, not managed by cask
+   ○ typewhisper                         cask   → station apps install typewhisper
+   ○ frontend-design                     skill  skills not installed  → station apps install skills
+   ◐ better-ui                           skill  update available  → station apps update better-ui
 
  Settings  1 ●  1 ◐
    ◐ restart-after-power-cut  Restarts after a power cut, and wakes for the network  partly applied

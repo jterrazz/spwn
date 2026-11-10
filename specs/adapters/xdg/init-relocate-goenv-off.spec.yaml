@@ -1,0 +1,15 @@
+description: 'with GOENV=off init writes no go env file and says the go part is off'
+env:
+    - GOENV=off
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ◐	relocate	go env is off (GOENV=off): station writes nothing
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          Library/Application Support/go: absent

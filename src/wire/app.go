@@ -116,7 +116,9 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		imagesCommand(kenv, thisMac),
 		engineCommand(kenv, thisMac),
 		useCommand(kenv, thisMac),
-		setupCommand(kenv, thisMac),
+	)
+	commands = append(commands, initCommands(kenv, thisMac)...)
+	commands = append(commands,
 		statusCommand(kenv, thisMac),
 		appsAlias(kenv, thisMac),
 		storageAlias(kenv, thisMac),

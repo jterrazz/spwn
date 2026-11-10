@@ -23,9 +23,9 @@ func engineFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &running):
 		return usage(running.Error(), "station overview shows it"), true
 	case errors.As(err, &macOnly):
-		return usage(macOnly.Error(), "run it on a Mac: station setup installs it"), true
+		return usage(macOnly.Error(), "run it on a Mac: station engine start installs it"), true
 	case errors.As(err, &down):
-		return failed(down.Error(), "station setup", err), true
+		return failed(down.Error(), "station engine start", err), true
 	case errors.As(err, &guestMacOnly):
 		return usage(guestMacOnly.Error(), "its Mac's engine runs it inside each VM"), true
 	}
@@ -62,7 +62,7 @@ func controlFailure(err error) (*fail.Error, bool) {
 	var boot *enginecalls.BootError
 	switch {
 	case errors.As(err, &notInstalled):
-		return failed(notInstalled.Error(), "station setup", err), true
+		return failed(notInstalled.Error(), "station engine start", err), true
 	case errors.As(err, &stuck):
 		return failed(stuck.Error(), "station machines delete "+stuck.VM, err), true
 	case errors.As(err, &boot):

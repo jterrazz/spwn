@@ -1,0 +1,17 @@
+description: 'a binary of the same name already in the new home stays, the old one too, and init says so'
+fixture:
+    - ./__fixtures__/go-bin/
+    - ./__fixtures__/go-bin-conflict/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ◐	relocate	~/go/bin/foo already in ~/.local/share/go/bin
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .local/share/go/bin/foo: { equals: "another foo\n" }
+          go/bin/foo: { equals: "foo binary\n" }

@@ -1,15 +1,15 @@
-description: 'a v2 share in a VM''s record moves to the accounts'' store once, at setup'
+description: 'a v2 share in a VM''s record moves to the accounts'' store once, at init'
 env:
     - two-macs
     - engine
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].vms.api.kept.lent = ["session:github"]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; "$STATION" setup > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.vms.api.kept.lent, [.stores.shares.api[] | [.name, (((.until|fromdate) - (.at|fromdate)) / 3600)]]]'' world.json; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares'' world.json > first.json'
+    - command: '--version >/dev/null; "$STATION" init > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.vms.api.kept.lent, [.stores.shares.api[] | [.name, (((.until|fromdate) - (.at|fromdate)) / 3600)]]]'' world.json; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares'' world.json > first.json'
       exit: 0
       stdout: |
           [null,[["session:github",12]]]
-    - command: '--version >/dev/null; "$STATION" setup > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares'' world.json | /usr/bin/cmp - first.json && echo unchanged'
+    - command: '--version >/dev/null; "$STATION" init > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares'' world.json | /usr/bin/cmp - first.json && echo unchanged'
       exit: 0
       stdout: |
           unchanged

@@ -18,7 +18,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 
 | Working on                                           | Read                                |
 | ---------------------------------------------------- | ----------------------------------- |
-| A fresh machine: install, setup                      | `docs/start/getting-started.md`     |
+| A fresh machine: install, init                       | `docs/start/getting-started.md`     |
 | The families, contracts, Router, engine, world       | `docs/concepts/architecture.md`     |
 | Palette, marks, pipe format, the TUI, graphs         | `docs/concepts/design-system.md`    |
 | What a word means                                    | `docs/concepts/glossary.md`         |
@@ -56,7 +56,7 @@ make build      # Build .artifacts/go/station
 make check      # lint (gofmt, golangci-lint, deadcode, typescript check), test, build-linux, then menubar-check (apps/menubar: swift test, the bundle)
 make fix        # gofmt -w, then typescript fix
 make generate   # the projections: the toolbelt skill, footprint, page fixtures, calls.json
-make provision  # put this build on the machine as the real station, then station setup
+make provision  # put this build on the machine as the real station, then station init
 ```
 
 `make install` never touches the machine; `make provision` does.

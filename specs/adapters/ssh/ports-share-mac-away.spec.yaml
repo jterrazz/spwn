@@ -6,4 +6,4 @@ runs:
       exit: 1
       stderr: |
           Error: macbook is not connected to this VM
-          Hint: on macbook: station setup
+          Hint: on macbook: station engine start

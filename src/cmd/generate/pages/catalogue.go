@@ -13,7 +13,6 @@ type app struct {
 	name     string
 	category catalog.Category
 	method   catalog.Method
-	system   bool
 	state    catalog.State
 	version  string
 	newest   string
@@ -26,7 +25,7 @@ func reports(list []app, pending bool) []appmodel.Report {
 	out := make([]appmodel.Report, 0, len(list))
 	for _, t := range list {
 		r := appmodel.Report{
-			App:     catalog.App{Name: t.name, Category: t.category, System: t.system},
+			App:     catalog.App{Name: t.name, Category: t.category},
 			Method:  t.method,
 			State:   t.state,
 			Version: t.version,
@@ -56,8 +55,8 @@ func thisMac() []app {
 		return app{name: name, category: rt, method: catalog.MethodMise, state: catalog.StateDegraded, version: version, detail: "installed, mise not installed", why: appmodel.WhyMissing, needs: "mise"}
 	}
 	return []app{
-		{name: "homebrew", category: pm, method: catalog.MethodScript, system: true, state: catalog.StateOK, version: "7.0.12-8-g57cac9d"},
-		{name: "mise", category: pm, method: catalog.MethodBrew, system: true, state: catalog.StateAbsent},
+		{name: "homebrew", category: pm, method: catalog.MethodScript, state: catalog.StateOK, version: "7.0.12-8-g57cac9d"},
+		{name: "mise", category: pm, method: catalog.MethodBrew, state: catalog.StateAbsent},
 		{name: "mas", category: pm, method: catalog.MethodBrew, state: catalog.StateAbsent},
 		{name: "uv", category: pm, method: catalog.MethodBrew, state: catalog.StateOK, version: "0.12.3"},
 		{name: "cocoapods", category: pm, method: catalog.MethodBrew, state: catalog.StateOK, version: "1.17.0"},

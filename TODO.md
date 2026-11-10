@@ -21,7 +21,7 @@ work in workspaces.
   declined, 2026-11-10); the engine reads them from one path.
 - **Plan, then apply**: `station plan` prints the difference between the
   blueprint and the machine (to install, to set, extra), and `station apply`
-  does it, idempotent and check-first like `setup`. Removing what a blueprint
+  does it, idempotent and check-first like `init`. Removing what a blueprint
   does not list is a separate flag, never the default.
 - **Drift**: the engine compares on its own and the menu bar shows "3 apps
   missing, 1 extra" on the machine's card, with Apply.
@@ -103,7 +103,7 @@ there.
 
 ## The Mac mini as an always-on Mac
 Installing station there is the owner's go, never a lot's. When its disk is
-upgraded: `station setup --name mac-mini` there, the Always-on Mac settings,
+upgraded: `station init --name mac-mini` there, the Always-on Mac settings,
 the infrastructure moved from OrbStack to a server (`machines create infra
 --server --check https://infra:6443/readyz`), images built there. Ask the
 owner before any test on it.

@@ -26,7 +26,7 @@
 ◐	missing	attention	installed, mise not installed · station apps install mise
 ◐	partial	attention	policy partly applied
 ◐	differs	attention	differs from station's · station settings apply tart-launcher
-◐	unset	attention	name not set · station setup
+◐	unset	attention	name not set · station init
 ◐	stopped	attention	stopped · station engine start
 ◐	late	attention	no answer in 2s
 ◐	degraded	attention	Serve is off on Tailscale
@@ -54,6 +54,6 @@
 machine	jterrazz-macbook-pro
 uptime	22d 14h
 	Serve is off on Tailscale, so no shared port is reachable from another machine until it is turned on in the admin console.
-✗	error	defaults is not installed · run station setup
+✗	error	defaults is not installed · run station init
 	none
 	iphone	offline

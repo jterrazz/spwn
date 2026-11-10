@@ -125,7 +125,7 @@ func macRow(label string, h model.MacView, thisVersion string, now time.Time) pa
 	case !h.Reachable:
 		row.Mark, row.Reason, state = page.Broken, page.Unreachable, page.Text("Unreachable")
 	case h.Engine.Known && !h.Engine.Running && !h.Engine.Installed && h.ThisMac:
-		row.Mark, row.Reason, state = page.Broken, page.Missing, page.Text("Engine not set up")
+		row.Mark, row.Reason, state = page.Broken, page.Missing, page.Text("Engine not installed")
 	case h.Engine.Known && !h.Engine.Running:
 		row.Mark, row.Reason, state = page.Broken, page.Stopped, page.Text("Engine stopped")
 	case h.Engine.Known:

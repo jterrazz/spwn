@@ -34,10 +34,7 @@ func awakeFailure(err error) (*fail.Error, bool) {
 		}
 		return failed(guard.Error(), "station awake", err), true
 	case errors.As(err, &down):
-		if down.Installed {
-			return failed(down.Error(), "station engine start", err), true
-		}
-		return failed(down.Error(), "station setup", err), true
+		return failed(down.Error(), "station engine start", err), true
 	}
 	return nil, false
 }

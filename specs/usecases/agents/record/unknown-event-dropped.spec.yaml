@@ -5,17 +5,14 @@ runs:
       stdin: |
           {"kind":"compacted","session":"s-1"}
       exit: 0
-      stdout: ''
     - command: 'agents record --app cursor'
       stdin: |
           {"kind":"prompted","session":"s-1","prompt":"Build the landing page"}
       exit: 0
-      stdout: ''
     - command: 'agents record'
       stdin: |
           not json
       exit: 0
-      stdout: ''
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents'' world.json'
       exit: 0
       stdout: |

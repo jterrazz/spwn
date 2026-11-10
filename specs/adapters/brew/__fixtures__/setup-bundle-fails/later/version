@@ -1,6 +1,0 @@
-#!/bin/sh
-# A freshly installed tool: it answers its version and an empty listing.
-case "$*" in
-    "ls --global --json") echo "{}" ;;
-    *) echo "1.0.0" ;;
-esac

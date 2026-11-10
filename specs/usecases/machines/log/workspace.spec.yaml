@@ -3,7 +3,6 @@ env: two-macs
 runs:
     - command: 'machines log linux-1'
       exit: 0
-      stdout: ''
     - command: 'world console linux-1 ''[    1.902331] Run /sbin/init as init process'''
       exit: 0
     - command: 'world console linux-1 ''[   92.004012] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009'''

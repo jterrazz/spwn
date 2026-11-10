@@ -5,7 +5,7 @@ runs:
       exit: 1
       stderr: |
           Error: no Mac has connected to this VM yet
-          Hint: on the VM's Mac: station setup
+          Hint: on the VM's Mac: station engine start
     - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports --all-machines --json'
       exit: 1
       stdout: |
@@ -15,19 +15,19 @@ runs:
             "code": null,
             "subject": null,
             "message": "no Mac has connected to this VM yet",
-            "hint": "on the VM's Mac: station setup",
+            "hint": "on the VM's Mac: station engine start",
             "fix": null
           }
       stderr: |
           Error: no Mac has connected to this VM yet
-          Hint: on the VM's Mac: station setup
+          Hint: on the VM's Mac: station engine start
     - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports share 3000'
       exit: 1
       stderr: |
           Error: no Mac has connected to this VM yet
-          Hint: on the VM's Mac: station setup
+          Hint: on the VM's Mac: station engine start
     - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports stop-sharing 3000 --yes'
       exit: 1
       stderr: |
           Error: no Mac has connected to this VM yet
-          Hint: on the VM's Mac: station setup
+          Hint: on the VM's Mac: station engine start

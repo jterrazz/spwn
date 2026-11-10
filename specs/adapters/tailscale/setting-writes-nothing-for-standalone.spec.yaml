@@ -1,0 +1,12 @@
+description: 'the Standalone app brings its own CLI: tailscale-cli writes no script'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ./__fixtures__/tailscale-standalone/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/rm bin/tailscale; "$STATION" settings apply tailscale-cli </dev/null'
+      exit: 0
+      stdout: |
+          ●	tailscale-cli	~/.local/bin/tailscale: the app brings its own command
+      files:
+          .local/bin/tailscale: absent

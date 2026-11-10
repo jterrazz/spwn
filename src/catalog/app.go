@@ -59,7 +59,6 @@ type App struct {
 	Then     []string
 	Live     Liveness
 	Disk     Disk
-	System   bool
 }
 
 // invariant: which machine kinds accept a method is the `kinds` column of the

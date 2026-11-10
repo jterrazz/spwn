@@ -1,0 +1,18 @@
+description: 'a rerun after the retirement finds nothing to retire and prints no retired row'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ../__fixtures__/userspace-era/
+env:
+    - USER=tester
+runs:
+    - command: 'init > /dev/null; echo 44 > .security-delete'
+      exit: 0
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none yet: apps and settings come one at a time

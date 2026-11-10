@@ -1,14 +1,13 @@
-description: 'engine start bootstraps the agent, kicks it and waits for the engine; running, it only says so'
+description: 'engine start installs an absent agent, bootstraps and kicks it, waits; running, it only says so'
 fixture:
     - ../../__fixtures__/vms/
     - ../__fixtures__/launchctl/
 env: engine
 runs:
-    - command: 'engine start'
-      exit: 1
-      stderr: |
-          Error: the engine is not installed
-          Hint: station setup
+    - command: '--version > /dev/null; "$STATION" engine start; "$STATION" engine stop > /dev/null; /bin/rm -f .calls Library/LaunchAgents/com.jterrazz.station.engine.plist'
+      exit: 0
+      stdout: |
+          ●	engine	installed, running · {{string}}
     - command: '--version > /dev/null; /bin/mkdir -p Library/LaunchAgents; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; "$STATION" engine start | /usr/bin/sed -E ''s/running · .*/running · V/''; "$STATION" engine start | /usr/bin/sed -E ''s/running · .*/running · V/''; /usr/bin/grep -c "^launchctl bootstrap gui/[0-9]* $HOME/Library/LaunchAgents/com.jterrazz.station.engine.plist" .calls; "$STATION" engine stop > /dev/null'
       exit: 0
       stdout: |

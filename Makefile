@@ -122,14 +122,14 @@ e2e-binaries: build-linux ## The two binaries the machine tiers carry (darwin/ar
 
 # hazard: macOS kills (SIGKILL) a signed binary rewritten in place once it has run, so
 # the build lands as a new file renamed over the old one; a running engine keeps its own.
-provision: build ## Put this build on the machine (~/.local/bin/station), then run station setup
+provision: build ## Put this build on the machine (~/.local/bin/station), then run station init
 	@mkdir -p $(BIN_DIR)
 	@cp $(BUILD_PATH) $(INSTALL_PATH).new
 	@chmod +x $(INSTALL_PATH).new
 	@mv -f $(INSTALL_PATH).new $(INSTALL_PATH)
 	@rm -f $(HOME)/.studio/bin/workstation $(HOME)/.studio/bin/station
 	@printf "$(GREEN)●$(RESET) Installed $(INSTALL_PATH)\n"
-	@$(INSTALL_PATH) setup
+	@$(INSTALL_PATH) init
 
 deprovision: ## Remove the binary from ~/.local/bin; the user data stays
 	@if [ -f "$(INSTALL_PATH)" ]; then \

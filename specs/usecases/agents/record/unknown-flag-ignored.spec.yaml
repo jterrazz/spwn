@@ -5,18 +5,12 @@ runs:
       stdin: |
           {"kind":"prompted","session":"s-1","prompt":"Build the landing page"}
       exit: 0
-      stdout: ''
-      stderr: ''
     - command: 'agents record --app claudecode --json'
       stdin: |
           {"kind":"prompted","session":"s-2","folder":"/home/admin/app","prompt":"Build the landing page"}
       exit: 0
-      stdout: ''
-      stderr: ''
     - command: 'agents record --app'
       exit: 0
-      stdout: ''
-      stderr: ''
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["s-2"] | {state, task}'' world.json'
       exit: 0
       stdout: |

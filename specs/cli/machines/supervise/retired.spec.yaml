@@ -4,6 +4,6 @@ runs:
     - command: 'machines supervise linux-1'
       exit: 0
       stderr: |
-          supervise is retired: the engine supervises VMs (station setup)
+          supervise is retired: the engine supervises VMs (station engine start)
       files:
           .calls: absent

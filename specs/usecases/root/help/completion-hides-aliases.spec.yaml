@@ -17,7 +17,7 @@ runs:
           images
           engine
           use
-          setup
+          init
           agents
           help
     - command: 'completion zsh | /usr/bin/grep -c "compdef _station station"'

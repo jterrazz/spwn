@@ -1,5 +1,11 @@
+◐ Known to station, with a step left · 1 step left
+
 Changes
-  ● name    macbook
-  ● zshrc   the station block
-  ◐ layout  ~/.tart not moved  73 GB: move it with station setup --move
-  ● apps
+  ● name      macbook
+  ● zshrc     the station block
+  ◐ layout    ~/.tart not moved  73 GB: move it with station init --move
+  ● relocate  bunfig, go env, mise settings, npmrc
+Machinefile  none yet: apps and settings come one at a time
+
+→ station apps install <app>        one app, and what it requires
+→ station settings apply <setting>  one setting

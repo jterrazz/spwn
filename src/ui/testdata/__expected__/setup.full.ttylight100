@@ -1,5 +1,11 @@
+[38;2;223;142;29m◐[m [38;2;76;79;105mKnown to station, with a step left[m[38;2;76;79;105m · [m[38;2;76;79;105m1 step left[m
+
 [1;38;2;76;79;105mChanges[m
-  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mname[m    [38;2;76;79;105mmacbook[m
-  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mzshrc[m   [38;2;76;79;105mthe station block[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlayout[m  [38;2;76;79;105m~/.tart not moved[m  [38;2;108;111;133m73 GB: move it with station setup --move[m
-  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mapps[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mname[m      [38;2;76;79;105mmacbook[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mzshrc[m     [38;2;76;79;105mthe station block[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlayout[m    [38;2;76;79;105m~/.tart not moved[m                     [38;2;108;111;133m73 GB: move it with station init --move[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mrelocate[m  [38;2;76;79;105mbunfig, go env, mise settings, npmrc[m
+[1;38;2;76;79;105mMachinefile[m  [38;2;108;111;133mnone yet: apps and settings come one at a time[m
+
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation apps install <app>[m        [38;2;108;111;133mone app, and what it requires[m
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation settings apply <setting>[m  [38;2;108;111;133mone setting[m

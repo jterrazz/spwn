@@ -6,4 +6,4 @@ runs:
     - command: 'apps | /usr/bin/awk -F "\t" ''$2 == "tailscale"'''
       exit: 0
       stdout: |
-          ?	tailscale		cask · system	formula installed, app absent
+          ?	tailscale		cask	formula installed, app absent

@@ -1,0 +1,32 @@
+description: 'a settings.json that differs from the converted v1 file is never overwritten'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ../__fixtures__/v1-studio/
+    - ./__fixtures__/other-settings/
+env:
+    - USER=tester
+runs:
+    - command: 'init'
+      exit: 1
+      stdout: |
+          ●	name	elsewhere
+          ●	zshrc
+          ✗	layout	{{workdir}}/.config/station/preferences.json already exists with different content
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      stderr: |
+          Error: init step layout: {{workdir}}/.config/station/preferences.json already exists with different content
+          Hint: keep one of the two files, then run station init again
+      files:
+          .studio/config.json: exists
+          .calls: absent
+          .config/station/preferences.json:
+              equals: |
+                  {
+                    "here": "elsewhere",
+                    "hosts": {
+                      "elsewhere": {}
+                    },
+                    "vm_user": "someone"
+                  }

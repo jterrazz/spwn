@@ -34,7 +34,7 @@ make provision
 exec zsh
 ```
 
-`make provision` builds, copies the binary to `~/.local/bin/station`, and runs `station setup`, which asks the machine's name on a terminal and writes or migrates the `~/.zshrc` block ([Dotfiles](../reference/dotfiles.md)).
+`make provision` builds, copies the binary to `~/.local/bin/station`, and runs `station init`, which asks the machine's name on a terminal and writes or migrates the `~/.zshrc` block ([Dotfiles](../reference/dotfiles.md)).
 
 `make deprovision` removes the binary and touches nothing else; the user data survives.
 

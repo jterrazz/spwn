@@ -213,9 +213,9 @@ final class Model: ObservableObject {
         p.actions = p.actions?.filter { $0.id == "open-station" }
         if var s = p.sections?.first, var row = s.items?.first?.row {
             row.cells = [Value(kind: "text", text: "not installed")]
-            row.hint = Hint(command: "station setup")
+            row.hint = Hint(command: "station engine start")
             s.items = [Item(row: row)]
-            s.caption = [Value(kind: "text", text: "station is not set up on this Mac")]
+            s.caption = [Value(kind: "text", text: "The engine is not installed on this Mac")]
             p.sections = [s]
         }
         return p

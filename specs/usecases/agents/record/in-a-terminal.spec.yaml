@@ -8,7 +8,6 @@ runs:
       stdin: |
           {"kind":"prompted","session":"s-1","folder":"/home/admin/app","prompt":"Build the landing page"}
       exit: 0
-      stdout: ''
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents.journal["s-1"] | {state, terminal}'' world.json'
       exit: 0
       stdout: |

@@ -16,7 +16,7 @@ type Deps struct {
 
 type Setup interface {
 	CheckName(name string) error
-	Run(ctx context.Context, name string, interactive bool, ask func() (string, error)) (setup.Report, error)
+	Init(ctx context.Context, name string, interactive bool, ask func() (string, error)) (setup.Report, error)
 }
 
 type Ask interface {
@@ -24,5 +24,5 @@ type Ask interface {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Run, d)}
+	return []call.Handler{call.Bind(Init, d)}
 }

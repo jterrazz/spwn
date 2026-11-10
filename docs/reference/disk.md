@@ -31,7 +31,7 @@ station's own files follow the XDG rule: `~/.config/station` (settings), `~/.loc
 
 ## Relocation
 
-An app's path moves only through the app's own settings file, the one it reads whoever launches it (an IDE started from the Dock included), never through a shell variable alone. `station setup` writes them, absolute, and never over a value the owner set by hand:
+An app's path moves only through the app's own settings file, the one it reads whoever launches it (an IDE started from the Dock included), never through a shell variable alone. `station init` writes them, absolute, and never over a value the owner set by hand:
 
 | App | File                                                                                                                   | Keys                                             | Old home |
 | --- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------- |
@@ -42,13 +42,13 @@ An app's path moves only through the app's own settings file, the one it reads w
 
 mise's go backend sets `GOBIN` to the running version's own install unless `go_set_gobin` is false, so `go install` would put its binaries where an upgrade or a prune loses them and `disk erase go` never sees them; with it off, they land in `~/.local/share/go/bin`. The key goes under the owner's own `[settings]` table when there is one.
 
-bun's values sit in a managed block between `# >>> station >>>` and `# <<< station <<<`; a bunfig with its own `[install]` table is left alone, and setup says which keys to set by hand. The macOS machine tier proved that `bun add -g`, `bun install -g`, `bunx` and `bun pm cache rm` honour the global bunfig and create no `~/.bun`. `station setup` moves an existing `~/.bun`'s globals and bins into `~/.local/share/bun`, one rename each, so their relative bin links still resolve; `station disk free bun` deletes its old cache.
+bun's values sit in a managed block between `# >>> station >>>` and `# <<< station <<<`; a bunfig with its own `[install]` table is left alone, and init says which keys to set by hand. The macOS machine tier proved that `bun add -g`, `bun install -g`, `bunx` and `bun pm cache rm` honour the global bunfig and create no `~/.bun`. `station init` moves an existing `~/.bun`'s globals and bins into `~/.local/share/bun`, one rename each, so their relative bin links still resolve; `station disk free bun` deletes its old cache.
 
 Nothing already under `~/Library/Caches` or another `~/Library` folder moves: go-build, Homebrew, mise's cache, the pnpm store and Playwright are where macOS keeps them. The folders an app keeps at the home root on purpose (`.ssh`, `.gnupg`, `.cargo` and `.rustup`, which rust-analyzer started by a GUI IDE needs, `.claude`, `.codex`, the dotfiles) are the declared exceptions, listed with their reasons in [Footprint](footprint.md#home-root-exceptions).
 
 ## Tart
 
-Tart's app and its `LICENSE` live in `~/.local/share/station/tart/`, its home (`TART_HOME`) is `~/.local/share/station/vms`: the VMs and images, the OCI and IPSW caches and `tmp`, so a clone from the cache stays an APFS clone. The launcher `~/.local/bin/tart`, written by the setting `tart-launcher`, sets `TART_HOME` itself: a launchd agent, `--on` over ssh and a GUI all get it, with no shell variable. `station disk move ~/.tart` (and `station setup`) moves an existing `~/.tart` and `~/.local/opt/tart.app` where they stand, one rename each, never a copy and never a pull; it refuses while `tart` runs, onto a destination that holds anything, and across volumes.
+Tart's app and its `LICENSE` live in `~/.local/share/station/tart/`, its home (`TART_HOME`) is `~/.local/share/station/vms`: the VMs and images, the OCI and IPSW caches and `tmp`, so a clone from the cache stays an APFS clone. The launcher `~/.local/bin/tart`, written by the setting `tart-launcher`, sets `TART_HOME` itself: a launchd agent, `--on` over ssh and a GUI all get it, with no shell variable. `station disk move ~/.tart` (and `station init`) moves an existing `~/.tart` and `~/.local/opt/tart.app` where they stand, one rename each, never a copy and never a pull; it refuses while `tart` runs, onto a destination that holds anything, and across volumes.
 
 ## `station disk`
 

@@ -669,10 +669,10 @@
       "out": "string"
     },
     {
-      "name": "setup.run",
-      "schema": "station.setup.run/v1",
+      "name": "setup.init",
+      "schema": "station.setup.init/v1",
       "where": "at-target",
-      "in": "RunIn",
+      "in": "InitIn",
       "out": "Report"
     }
   ]

@@ -1,0 +1,14 @@
+description: 'on a Linux VM go''s env file is the XDG one, and follows XDG_CONFIG_HOME'
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .config/go/env: exists
+          Library: absent

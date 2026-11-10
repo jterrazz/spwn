@@ -184,10 +184,6 @@
                   {
                     "kind": "text",
                     "text": "brew"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "system"
                   }
                 ]
               }
@@ -508,10 +504,6 @@
                   {
                     "kind": "text",
                     "text": "script"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "system"
                   }
                 ]
               }

@@ -54,4 +54,4 @@ runs:
     - command: 'status --json | /usr/bin/jq -r ''.setup.steps | map(.name) | join(" ")'''
       exit: 0
       stdout: |
-          name zshrc layout apps
+          name zshrc layout

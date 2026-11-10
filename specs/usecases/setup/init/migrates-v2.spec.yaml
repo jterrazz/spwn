@@ -1,0 +1,22 @@
+description: 'init moves a v2 settings.json and engine job once; a second run says nothing of it'
+env: fresh-v2
+runs:
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	preferences	moved settings.json to preferences.json
+          ●	name	jterrazz-macbook-pro
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	name	jterrazz-macbook-pro
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none yet: apps and settings come one at a time

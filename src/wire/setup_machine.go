@@ -35,10 +35,6 @@ func (s setupMachine) MkdirAll(path string, mode uint32) error {
 	return s.h.FS.MkdirAll(path, fs.FileMode(mode))
 }
 
-func (s setupMachine) Chmod(path string, mode uint32) error {
-	return s.h.FS.Chmod(path, fs.FileMode(mode))
-}
-
 func (s setupMachine) Mode(path string, otherwise uint32) uint32 {
 	if info, err := s.h.FS.Stat(path); err == nil {
 		return uint32(info.Mode().Perm())
@@ -57,11 +53,6 @@ func (s setupMachine) IsDir(path string) (dir, found bool) {
 		return false, false
 	}
 	return info.IsDir(), true
-}
-
-func (s setupMachine) IsLink(path string) bool {
-	_, err := s.h.FS.Readlink(path)
-	return err == nil
 }
 
 func (s setupMachine) Entries(dir string) ([]setupcalls.Entry, bool, error) {
@@ -96,8 +87,6 @@ func (s setupMachine) Rename(from, to string) (bool, error) {
 	err := s.h.FS.Rename(from, to)
 	return errors.Is(err, local.ErrCrossDevice), err
 }
-
-func (s setupMachine) LookPath(name string) (string, bool) { return s.h.Run.LookPath(name) }
 
 func (s setupMachine) Output(ctx context.Context, name string, args []string, budget time.Duration) (stdout string, code int, err error) {
 	out, err := s.h.Run.Output(ctx, local.Cmd{Name: name, Args: args, Timeout: budget})

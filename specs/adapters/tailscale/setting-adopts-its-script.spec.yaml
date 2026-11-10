@@ -1,0 +1,26 @@
+description: 'with the App Store app and no tailscale on PATH, tailscale-cli writes its script, then adopts it'
+fixture:
+    - ../__fixtures__/system-tools/
+    - ../../__fixtures__/tailscale-app-store/
+env: engine
+runs:
+    - command: '--version >/dev/null; /bin/rm bin/tailscale; "$STATION" settings tailscale-cli | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	tailscale-cli	not applied	station settings apply tailscale-cli
+    - command: 'settings apply tailscale-cli </dev/null'
+      exit: 0
+      stdout: |
+          ●	tailscale-cli	~/.local/bin/tailscale: written
+      files:
+          .local/bin/tailscale:
+              equals: |
+                  #!/bin/sh
+                  exec {{workdir}}/root/Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"
+    - command: '--version >/dev/null; /bin/ls -l .local/bin/tailscale | /usr/bin/cut -c1-10; /usr/bin/touch -t 202601010000 .local/bin/tailscale; "$STATION" settings apply tailscale-cli </dev/null; /bin/ls -l .local/bin/tailscale | /usr/bin/grep -c " 2026 "; "$STATION" settings tailscale-cli | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          -rwxr-xr-x
+          ●	tailscale-cli	~/.local/bin/tailscale: already there
+          1
+          ●	tailscale-cli	applied · ~/.local/bin/tailscale

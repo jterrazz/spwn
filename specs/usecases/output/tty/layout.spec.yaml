@@ -22,7 +22,7 @@ runs:
             4 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
           {bold Apps}        {good ●} 5 ok · {warn ◐} 3 updates · {muted ○} 100 not installed
-          {bold Settings}    set by station · {muted ○} 0 of 18 · checked · {good ●} 8 of 9
+          {bold Settings}    set by station · {muted ○} 0 of 19 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
           {bold Accounts}    {good ●} 6 · {bad ✗} npm
@@ -57,30 +57,30 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 18 set by station here · 9 checked · 1 needs a look
+          This Mac · 19 set by station here · 9 checked · 1 needs a look
 
           Needs a look
             ◐ firewall  off  → System Settings > Network > Firewall
-          Set by station  ○ 18 · hushlogin, ghostty-dotfiles, tmux-dotfiles, …
+          Set by station  ○ 19 · hushlogin, ghostty-dotfiles, tmux-dotfiles, …
           Always-on Mac   ○ 5 · for a Mac that hosts servers
           Checked         ● 8  ◐ 1 · firewall, filevault, sip, automatic-updates, …
           – 1 not for this machine · VMs only
 
-          → station settings apply  apply the 18
+          → station settings apply  apply the 19
           → station settings --all  for every row
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" settings --all-machines'
       stdin: |
           scrollback
       exit: 0
       stdout: |
-          33 settings on 4 machines · 1 needs a look · infra is a server: not checked
+          34 settings on 4 machines · 1 needs a look · infra is a server: not checked
 
           Needs a look
             ◐ This Mac  firewall  off  → System Settings > Network > Firewall
           Machines  ● 3  – 1  ? 1 · This Mac, mac-mini, linux-1, api, infra
           Set by station
                            This Mac  mac-mini  linux-1  api  OK
-            ○ 19 settings  ○ 0/18    ○ 1/18    ○ 0/7    ?    1/43
+            ○ 20 settings  ○ 0/19    ○ 1/19    ○ 0/7    ?    1/45
           Always-on Mac
                           This Mac  mac-mini  linux-1  api  OK
             ○ 5 settings  ○         ○ 3/5     –        ?    3/5

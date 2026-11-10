@@ -4,13 +4,13 @@
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mghostty-dotfiles[m  [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff ghostty-dotfiles[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mgithub-login[m      [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff github-login[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mdock-reset[m        [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff dock-reset[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105magent-hooks[m       [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff agent-hooks[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mgit-shortcuts[m     [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff git-shortcuts[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mfirewall[m          [38;2;76;79;105moff[m                                  [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Network > Firewall[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mscreen-lock[m       [38;2;76;79;105mlocks after 10 min · expected 5 min[m  [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Lock Screen[m
-[1;38;2;76;79;105mSet by station[m  [38;2;64;160;43m●[m [38;2;76;79;105m4[m  [38;2;223;142;29m◐[m [38;2;76;79;105m4[m  [38;2;108;111;133m○[m [38;2;76;79;105m4[m  [38;2;108;111;133m⊘[m [38;2;76;79;105m4[m[38;2;108;111;133m · ghostty-dotfiles, github-login, dock-reset, agent-hooks, …[m
+[1;38;2;76;79;105mSet by station[m  [38;2;64;160;43m●[m [38;2;76;79;105m4[m  [38;2;223;142;29m◐[m [38;2;76;79;105m4[m  [38;2;108;111;133m○[m [38;2;76;79;105m4[m  [38;2;108;111;133m⊘[m [38;2;76;79;105m4[m[38;2;108;111;133m · ghostty-dotfiles, github-login, dock-reset, git-shortcuts, …[m
 [1;38;2;76;79;105mAlways-on Mac [m  [38;2;108;111;133m○[m [38;2;76;79;105m5[m[38;2;76;79;105m · for a Mac that hosts servers[m
 [1;38;2;76;79;105mChecked       [m  [38;2;64;160;43m●[m [38;2;76;79;105m5[m  [38;2;223;142;29m◐[m [38;2;76;79;105m2[m  [38;2;108;111;133m⊘[m [38;2;76;79;105m1[m  [38;2;108;111;133m?[m [38;2;76;79;105m1[m[38;2;108;111;133m · firewall, screen-lock, time-machine, filevault, sip, …[m
-[38;2;156;160;176m–[m [38;2;76;79;105m3 not for this machine[m[38;2;76;79;105m · VMs only[m
+[38;2;156;160;176m–[m [38;2;76;79;105m4 not for this machine[m[38;2;76;79;105m · VMs only[m
 
 [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings apply[m  [38;2;108;111;133mapply the 8[m
 [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings --all[m  [38;2;108;111;133mfor every row[m

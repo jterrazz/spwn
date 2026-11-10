@@ -1,0 +1,26 @@
+description: 'init drops the retired tailnet key from settings.json and keeps every other key'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/retired-key/
+env:
+    - USER=tester
+runs:
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	name	t
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .config/station/preferences.json:
+              equals: |
+                  {
+                    "name": "t",
+                    "macs": {
+                      "t": {}
+                    },
+                    "vm_user": "tester"
+                  }

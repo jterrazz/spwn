@@ -113,7 +113,7 @@ func macHeadRow(h model.MacView, thisVersion string) page.Row {
 		case !h.ThisMac:
 			fix = catalog.SSHCommand("", h.Name) + " station engine start"
 		case !h.Engine.Installed:
-			row.Reason, word, fix = page.Missing, "engine not installed", "station setup"
+			row.Reason, word, fix = page.Missing, "engine not installed", "station engine start"
 		}
 		detail = page.List(page.Text(word), page.Command(fix))
 	}

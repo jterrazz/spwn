@@ -1,0 +1,38 @@
+description: 'install.sh installs a local binary through its test seam, then runs init with its own arguments'
+fixture: ./__fixtures__/install-tools/
+env: install
+runs:
+    - command: '--version >/dev/null; for c in uname tr mktemp cp mkdir mv chmod rm awk sed; do for d in /bin /usr/bin; do [ -x "$d/$c" ] && /bin/ln -sf "$d/$c" "bin/$c" && break; done; done; STATION_INSTALL_FROM="$STATION" /bin/sh "$INSTALL_SH" </dev/null | /usr/bin/sed "s|$PWD|WORKDIR|g; s|(darwin/arm64)|(OS/ARCH)|; s|(linux/[a-z0-9]*)|(OS/ARCH)|"'
+      exit: 0
+      stdout: |
+          Installing station (OS/ARCH)...
+          ✓ Installed WORKDIR/.local/bin/station (local)
+          ✓ Done. Run 'exec zsh', then 'station'
+      stderr: |
+          Error: this Mac needs a name: init asks it on a terminal
+          Hint: station init --name <name>
+      files:
+          .calls: absent
+    - command: '--version >/dev/null; STATION_INSTALL_FROM="$STATION" /bin/sh "$INSTALL_SH" --name m </dev/null | /usr/bin/sed "s|$PWD|WORKDIR|g; s|(darwin/arm64)|(OS/ARCH)|; s|(linux/[a-z0-9]*)|(OS/ARCH)|"'
+      exit: 0
+      stdout: |
+          Installing station (OS/ARCH)...
+          ✓ Installed WORKDIR/.local/bin/station (local)
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+          ✓ Done. Run 'exec zsh', then 'station'
+      files:
+          .calls: absent
+    - command: '--version >/dev/null; .local/bin/station --version >/dev/null && echo answers'
+      exit: 0
+      stdout: |
+          answers
+    - command: '--version >/dev/null; STATION_INSTALL_FROM=nowhere /bin/sh "$INSTALL_SH" </dev/null > out.txt; echo "exit $?"; /usr/bin/sed 1d out.txt'
+      exit: 0
+      stdout: |
+          exit 1
+          STATION_INSTALL_FROM: no file at nowhere

@@ -8,7 +8,7 @@ runs:
     - command: 'settings --json | /usr/bin/jq -c ''[.schema, .findings, (.settings | length)]'''
       exit: 0
       stdout: |
-          ["station.settings.list/v1",[{"severity":"needs-a-look","section":"settings","subject":"firewall","text":"Firewall: off","fix":{"call":null,"command":null,"path":"System Settings > Network > Firewall"}}],33]
+          ["station.settings.list/v1",[{"severity":"needs-a-look","section":"settings","subject":"firewall","text":"Firewall: off","fix":{"call":null,"command":null,"path":"System Settings > Network > Firewall"}}],34]
     - command: 'settings --json | /usr/bin/jq -c ''.settings[] | select(.name == "hushlogin" or .name == "restart-after-power-cut") | .applied_at |= (. != null)'''
       exit: 0
       stdout: |

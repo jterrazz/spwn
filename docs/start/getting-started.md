@@ -1,6 +1,6 @@
 # Getting started
 
-From a fresh Mac to a machine `station` knows: the one-line install, naming the machine, then apps and settings.
+From a fresh Mac to a machine `station` knows: the one-line install, naming the machine, then the engine, the apps and the settings, one at a time.
 
 ## 1. Install `station`
 
@@ -10,24 +10,25 @@ curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/script
 exec zsh
 ```
 
-The script reads the latest release tag, downloads `station-<os>-<arch>`, checks it against the release's `checksums.txt`, installs it to `~/.local/bin/station` and runs `station setup` on the terminal, so setup asks this Mac's name. There is no clone: the dotfiles are in the binary. Running the script again is the upgrade.
+The script reads the latest release tag, downloads `station-<os>-<arch>`, checks it against the release's `checksums.txt`, installs it to `~/.local/bin/station` and runs `station init` on the terminal, so init asks this Mac's name. Its own arguments go to init: `curl -fsSL … | sh -s -- --name macbook`. There is no clone: the dotfiles are in the binary. Running the script again is the upgrade.
 
 ## 2. Name this machine
 
 ```sh
-station setup --name macbook
+station init --name macbook
 ```
 
-Where no terminal can be asked (a script, an ssh command without a terminal), setup on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. `setup` names this Mac, writes the managed block of `~/.zshrc`, moves an old `~/.studio/` to the XDG folders, starts the engine, installs the missing system apps and applies the settings that need nobody; the others it lists as next steps. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
+`init` makes this Mac known to station: it names it, writes the managed block of `~/.zshrc`, moves an old `~/.studio/` to the XDG folders and brings station's stores to their version. It installs no app, runs no package manager and asks no password, and it ends on what the Mac carries: `Machinefile  none yet`, then the next steps. Where no terminal can be asked (a script, an ssh command without a terminal), init on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
 
-## 3. Apps, then settings
+## 3. The engine, the apps, then the settings
 
 ```sh
-station apps install homebrew tailscale tart
+station apps install homebrew tart tailscale
+station engine start
 station settings apply ghostty-dotfiles zed-dotfiles hushlogin
 station overview
 ```
 
-Open the Tailscale app once and log in: station only reads it. A setting that needs values (a password, a token) opens a form on a terminal ([Settings](../reference/settings.md)). A Mac stays tidy: dev work lives in VMs ([Machines](../reference/machines.md)), and Claude Code reaches them with a shared token ([Accounts](../reference/accounts.md#claude-in-a-vm)).
+An app whose method needs a manager is installed with it, named in the same command: Homebrew for a cask, its installer asking your password once. `station engine start` installs the engine at login the first time ([Machines](../reference/machines.md#the-engine)); the VMs need it, and tart. Open the Tailscale app once and log in: station only reads it. A setting that needs values (a password, a token) opens a form on a terminal ([Settings](../reference/settings.md)). A Mac stays tidy: dev work lives in VMs ([Machines](../reference/machines.md)), and Claude Code reaches them with a shared token ([Accounts](../reference/accounts.md#claude-in-a-vm)).
 
 Every command is in [Commands](../reference/commands.md); every file written is in [Footprint](../reference/footprint.md).

@@ -56,7 +56,7 @@
             },
             "reason": "unset",
             "hint": {
-              "command": "station setup"
+              "command": "station init"
             }
           }
         },
@@ -71,7 +71,7 @@
             },
             "reason": "degraded",
             "hint": {
-              "command": "station setup"
+              "command": "station engine start"
             }
           }
         },
@@ -550,7 +550,7 @@
             },
             "reason": "unset",
             "hint": {
-              "command": "station setup"
+              "command": "station init"
             }
           }
         },
@@ -570,7 +570,7 @@
             },
             "reason": "degraded",
             "hint": {
-              "command": "station setup"
+              "command": "station engine start"
             }
           }
         }
@@ -1195,10 +1195,6 @@
                   {
                     "kind": "text",
                     "text": "brew"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "system"
                   }
                 ]
               }

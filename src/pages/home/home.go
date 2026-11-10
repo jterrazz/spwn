@@ -207,7 +207,7 @@ func checkRows(checks []overview.Check) []page.Row {
 }
 
 // invariant: a domain detail that is a station command is the row's fix, so
-// it renders as a hint (`→ station setup`) and the pipe's last field is unchanged.
+// it renders as a hint (`→ station engine start`) and the pipe's last field is unchanged.
 func fixed(r page.Row) page.Row {
 	if r.Detail.Kind == page.KindText && strings.HasPrefix(r.Detail.Text, "station ") {
 		r.Hint, r.Detail = page.Cmd(r.Detail.Text), page.None()
@@ -246,7 +246,7 @@ func setupRow(s overview.Setup) page.Row {
 	if s.State == catalog.StatePending {
 		return pending("setup", "setup")
 	}
-	fix := page.Cmd("station setup")
+	fix := page.Cmd("station init")
 	for _, step := range s.Steps {
 		if step.State == catalog.StateOK {
 			continue
@@ -356,7 +356,7 @@ func todo(detail []page.Section, jobs []background.Task) page.Section {
 		}
 		for _, r := range rows {
 			// invariant: an unregistered name is one action, the setup row's
-			// `name not set → station setup`; the Machine row only reads it.
+			// `name not set → station init`; the Machine row only reads it.
 			if s.ID == "machine" && r.ID == "name" {
 				continue
 			}

@@ -1,14 +1,13 @@
-description: 'setup moves ~/.config/station/settings.json to preferences.json byte for byte, once'
+description: 'init moves ~/.config/station/settings.json to preferences.json byte for byte, once'
 fixture: ./__fixtures__/v2-settings/
 env: engine
 runs:
-    - command: '--version > /dev/null; "$STATION" setup | /usr/bin/head -2; /bin/ls .config/station; /bin/cat .config/station/preferences.json; "$STATION" setup | /usr/bin/head -1'
+    - command: '--version > /dev/null; "$STATION" init | /usr/bin/head -2; /bin/ls .config/station; /bin/cat .config/station/preferences.json; "$STATION" init | /usr/bin/head -1'
       exit: 0
       stdout: |
           ●	preferences	moved settings.json to preferences.json
           ●	name	x
           preferences.json
-          zsh
           {
             "name": "x",
             "vm_user": "vmu"

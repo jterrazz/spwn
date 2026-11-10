@@ -69,8 +69,8 @@ func TestASettingNotAppliedNamesItsFixAndRootOnlyWhereItNeedsIt(t *testing.T) {
 func TestAnEngineJobNotInstalledIsBrokenWhileOneNotReadIsUnknown(t *testing.T) {
 	f := ready()
 	f.EngineAtLogin = false
-	if item := machines.Readiness(f)[5]; item.State != catalog.StateBroken || item.Fix != "station setup" {
-		t.Errorf("no engine job: %+v, want broken with station setup", item)
+	if item := machines.Readiness(f)[5]; item.State != catalog.StateBroken || item.Fix != "station engine start" {
+		t.Errorf("no engine job: %+v, want broken with station engine start", item)
 	}
 	f.EngineKnown = false
 	if item := machines.Readiness(f)[5]; item.State != catalog.StateUnknown {

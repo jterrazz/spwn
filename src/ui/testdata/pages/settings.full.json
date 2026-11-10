@@ -128,9 +128,9 @@
         },
         {
           "row": {
-            "id": "agent-hooks",
+            "id": "git-shortcuts",
             "mark": "attention",
-            "label": "agent-hooks",
+            "label": "git-shortcuts",
             "cells": [
               {
                 "kind": "text",
@@ -139,7 +139,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff agent-hooks",
+              "command": "station settings diff git-shortcuts",
               "key": "d"
             }
           }
@@ -275,9 +275,9 @@
         },
         {
           "row": {
-            "id": "agent-hooks",
+            "id": "git-shortcuts",
             "mark": "attention",
-            "label": "agent-hooks",
+            "label": "git-shortcuts",
             "cells": [
               {
                 "kind": "text",
@@ -286,7 +286,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff agent-hooks",
+              "command": "station settings diff git-shortcuts",
               "key": "d"
             }
           }
@@ -344,9 +344,9 @@
         },
         {
           "row": {
-            "id": "herdr-machine",
+            "id": "agent-hooks",
             "mark": "absent",
-            "label": "herdr-machine",
+            "label": "agent-hooks",
             "cells": [
               {
                 "kind": "text",
@@ -354,7 +354,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply herdr-machine",
+              "command": "station settings apply agent-hooks",
               "key": "a"
             }
           }
@@ -427,9 +427,9 @@
         },
         {
           "row": {
-            "id": "git-shortcuts",
+            "id": "tart-launcher",
             "mark": "ok",
-            "label": "git-shortcuts",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "list",
@@ -440,7 +440,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.git-shortcuts"
+                    "text": "~/.tart-launcher"
                   }
                 ]
               }
@@ -488,9 +488,9 @@
         },
         {
           "row": {
-            "id": "docker-shortcuts",
+            "id": "herdr-machine",
             "mark": "off-here",
-            "label": "docker-shortcuts",
+            "label": "herdr-machine",
             "cells": [
               {
                 "kind": "text",
@@ -824,7 +824,7 @@
           "row": {
             "id": "not-for-this-machine",
             "mark": "not-for-this-machine",
-            "label": "3 not for this machine",
+            "label": "4 not for this machine",
             "cells": [
               {
                 "kind": "list",

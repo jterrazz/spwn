@@ -6,10 +6,10 @@
    ◐ better-ui                     skill  update available  → station apps update better-ui
 
  Not installed  4 ○
-   ○ mise             brew · system  → station apps install mise
-   ○ mas              brew           → station apps install mas
-   ○ typewhisper      cask           → station apps install typewhisper
-   ○ frontend-design  skill          skills not installed  → station apps install skills
+   ○ mise             brew   → station apps install mise
+   ○ mas              brew   → station apps install mas
+   ○ typewhisper      cask   → station apps install typewhisper
+   ○ frontend-design  skill  skills not installed  → station apps install skills
 
  Not managed  5 ?
    ? bun               mise  installed, mise not installed  → station apps install mise

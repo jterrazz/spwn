@@ -11,7 +11,14 @@ import (
 
 type Deps struct {
 	Control Control
-	Kind    machine.Kind
+	// value: writes this Mac's engine job and brings the engine to this
+	// station; nil where no job can be written.
+	Installer Installer
+	Kind      machine.Kind
+}
+
+type Installer interface {
+	Install(ctx context.Context) (engine.Installed, error)
 }
 
 type Control interface {

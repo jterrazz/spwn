@@ -5,7 +5,7 @@ runs:
       exit: 1
       stderr: |
           Error: the engine is not installed on This Mac
-          Hint: station setup
+          Hint: station engine start
     - command: '--version >/dev/null; /usr/bin/grep -c ''tart clone'' .calls'
       exit: 1
       stdout: |

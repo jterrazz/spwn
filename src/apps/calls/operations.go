@@ -77,11 +77,30 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 			outcomes[o.Name] = &o
 		}
 	}
+	for _, t := range ordered {
+		if o := outcomes[t.Name]; o.Result == catalog.StateOK {
+			o.Steps = append(o.Steps, s.supersede(ctx, t)...)
+		}
+	}
 	result := make([]apps.Outcome, 0, len(ordered))
 	for _, t := range requested {
 		result = append(result, *outcomes[t.Name])
 	}
 	return s.held(ctx, result), nil
+}
+
+// invariant: a superseded formula goes only once the app replacing it is
+// installed: the formula alone is a half install, named, never removed.
+func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
+	old, ok := t.Superseded()
+	if !ok || !listedOld(t, s.listings(ctx, []catalog.App{t})) {
+		return nil
+	}
+	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
+	if err := s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, nil); err != nil {
+		step.Result, step.Detail = catalog.StateBroken, s.failed(verbUninstall, []catalog.App{t}, err)
+	}
+	return []apps.Step{step}
 }
 
 func (s *Shelf) Uninstall(ctx context.Context, names []string) ([]apps.Outcome, error) {
@@ -385,35 +404,4 @@ func settled(s catalog.State) bool { return s == catalog.StateOK || s == catalog
 
 func sameName(t catalog.App) func(catalog.App) bool {
 	return func(o catalog.App) bool { return o.Name == t.Name }
-}
-
-func (s *Shelf) Superseded(ctx context.Context) []string {
-	// invariant: a superseded formula goes only once the tool replacing it is
-	// ok: the formula alone is a half install, named, never removed.
-	var list []catalog.App
-	for _, t := range s.Placed() {
-		if t.Supersedes != "" {
-			list = append(list, t)
-		}
-	}
-	if len(list) == 0 {
-		return nil
-	}
-	listings := s.listings(ctx, list)
-	var out []string
-	for _, t := range list {
-		if listedOld(t, listings) && s.report(ctx, t, listings).State == catalog.StateOK {
-			out = append(out, t.Supersedes)
-		}
-	}
-	return out
-}
-
-func (s *Shelf) RemoveFormula(ctx context.Context, formula string) error {
-	for _, t := range s.Placed() {
-		if old, ok := t.Superseded(); ok && t.Supersedes == formula {
-			return s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, nil)
-		}
-	}
-	return &apps.UnknownError{Name: formula}
 }

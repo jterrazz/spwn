@@ -16,13 +16,11 @@ type Machine interface {
 	ReadFile(path string) (data []byte, found bool, err error)
 	WriteFile(path string, data []byte, mode uint32) error
 	MkdirAll(path string, mode uint32) error
-	Chmod(path string, mode uint32) error
 	// value: the permission bits of path, or otherwise when there is none.
 	Mode(path string, otherwise uint32) uint32
 	Exists(path string) bool
 	// value: whether path is a folder; found is false when there is none.
 	IsDir(path string) (dir, found bool)
-	IsLink(path string) bool
 	// value: the entries of dir; found is false when there is no such folder.
 	Entries(dir string) (entries []Entry, found bool, err error)
 	Glob(pattern string) []string
@@ -30,7 +28,6 @@ type Machine interface {
 	Remove(path string) (removed bool, err error)
 	// value: crossDevice is true when from and to are on two volumes.
 	Rename(from, to string) (crossDevice bool, err error)
-	LookPath(name string) (where string, found bool)
 	// value: name run with args within budget: its stdout and its exit code.
 	Output(ctx context.Context, name string, args []string, budget time.Duration) (stdout string, code int, err error)
 	// value: name started detached with env, its output appended to log.

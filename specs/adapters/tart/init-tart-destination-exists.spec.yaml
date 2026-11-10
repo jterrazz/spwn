@@ -1,0 +1,20 @@
+description: 'a non-empty destination is never merged into: init stops, both trees untouched'
+fixture:
+    - ./__fixtures__/tart-store/
+    - ./__fixtures__/vms-taken/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 1
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ✗	relocate	~/.local/share/station/vms already exists
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      stderr: |
+          Error: init step relocate: ~/.local/share/station/vms already exists
+          Hint: ~/.local/share/station/vms already exists: move one of them by hand
+      files:
+          .tart/vms/station-image-linux-2026.11.01/config.json: exists
+          .local/share/station/vms/vms/other/config.json: exists

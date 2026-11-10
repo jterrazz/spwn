@@ -1,0 +1,17 @@
+description: 'the owner''s own lines stay first, byte for byte, and station''s key follows'
+fixture: ./__fixtures__/npmrc-registry/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+    - command: '--version >/dev/null; /bin/cat .npmrc'
+      exit: 0
+      stdout: |
+          registry=https://r.example/
+          cache={{workdir}}/.cache/npm

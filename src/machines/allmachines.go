@@ -8,7 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
-const SuperviseRetired = "supervise is retired: the engine supervises VMs (station setup)"
+const SuperviseRetired = "supervise is retired: the engine supervises VMs (station engine start)"
 
 type Node struct {
 	Online bool

@@ -102,7 +102,7 @@ func engineAtLogin(installed, known bool) ReadinessItem {
 	case installed:
 		return ReadinessItem{Name: ItemEngineAtLogin, State: catalog.StateOK, Value: "installed"}
 	case known:
-		return ReadinessItem{Name: ItemEngineAtLogin, State: catalog.StateBroken, Value: "not installed", Fix: "station setup"}
+		return ReadinessItem{Name: ItemEngineAtLogin, State: catalog.StateBroken, Value: "not installed", Fix: "station engine start"}
 	}
 	return ReadinessItem{Name: ItemEngineAtLogin, State: catalog.StateUnknown}
 }

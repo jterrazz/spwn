@@ -88,15 +88,10 @@ func AppObject(r apps.Report) AppStatusJSON {
 		Managed:  r.Managed,
 		Provides: append([]string{}, r.App.Provides...),
 		Detail:   detail,
-		Use:      use(r.App),
+		// invariant: kept byte for byte, though no app is the bootstrap's
+		// since init installs none: every row reads exploration.
+		Use: "exploration",
 	}
-}
-
-func use(t catalog.App) string {
-	if t.System {
-		return "system"
-	}
-	return "exploration"
 }
 
 func installed(version string) *string {

@@ -1,0 +1,19 @@
+description: 'engine start boots out the per-VM agents of stopped VMs; one stopped by its owner stays so'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/old-agents/
+runs:
+    - command: 'engine start </dev/null'
+      exit: 1
+      stderr: |
+          Error: the engine did not start: it did not answer in 15s
+          Hint: station engine
+      files:
+          .calls:
+              contains:
+                  - 'launchctl bootout gui/{{int}}/com.jterrazz.station.vm.t'
+                  - 'launchctl bootout gui/{{int}}/com.jterrazz.station.vm.api'
+          Library/LaunchAgents/com.jterrazz.station.vm.t.plist: absent
+          Library/LaunchAgents/com.jterrazz.station.vm.api.plist: absent
+          .local/state/station/vms/api.json:
+              contains: '"want": "stopped"'

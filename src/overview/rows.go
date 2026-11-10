@@ -86,9 +86,9 @@ func EngineRow(d EngineCheck, station string) Check {
 	case d.Err != nil && d.Agent:
 		c.State, c.Value, c.Detail = catalog.StateDegraded, "stopped", "station engine start"
 	case d.Err != nil:
-		c.State, c.Value, c.Detail = catalog.StateDegraded, "not installed", "station setup"
+		c.State, c.Value, c.Detail = catalog.StateDegraded, "not installed", "station engine start"
 	case d.Version != station:
-		c.State, c.Value, c.Detail = catalog.StateDegraded, "runs "+d.Version+", station is "+station, "station setup"
+		c.State, c.Value, c.Detail = catalog.StateDegraded, "runs "+d.Version+", station is "+station, "station engine start"
 	default:
 		c.State, c.Value = catalog.StateOK, "running "+d.Version
 	}

@@ -1,11 +1,11 @@
-description: 'setup moves ~/.studio: settings and dns; the userspace tailscaled is retired, not moved'
+description: 'init moves ~/.studio: settings and dns; the userspace tailscaled is retired, not moved'
 fixture:
     - ../__fixtures__/setup-stubs/
     - ../__fixtures__/v1-studio/
 env:
     - USER=tester
 runs:
-    - command: 'setup'
+    - command: 'init'
       exit: 0
       stdout: |
           ●	name	base
@@ -13,15 +13,8 @@ runs:
           ●	layout	moved to the XDG folders
           ●	layout	userspace tailscaled retired; its node "base" stays at https://login.tailscale.com/admin/machines until you remove it
           ●	relocate	bunfig, go env, mise settings, npmrc
-          ○	engine	not needed until tart is installed
-          ○	apps	missing: homebrew mise git tart tailscale: run station setup on a terminal
-          ●	settings	applied hushlogin tart-launcher git-shortcuts docker-shortcuts
-          ○	ssh-key	next: station settings apply ssh-key
-          ○	spotlight-exclude	next: station settings apply spotlight-exclude
-          ○	dns	next: station settings apply dns
-          ○	claude-token	next: station settings apply claude-token
-          ○	dock-reset	next: station settings apply dock-reset
-          ○	dock-spacer	next: station settings apply dock-spacer
+          # Machinefile
+          	none yet: apps and settings come one at a time
       files:
           .config/station/preferences.json:
               equals: |
@@ -45,21 +38,14 @@ runs:
           .local/state/station/tailscaled: absent
           .local/state/station/dns/quad9-dns.mobileconfig: exists
           .studio: absent
-    - command: 'setup'
+    - command: 'init'
       exit: 0
       stdout: |
           ●	name	base
           ●	zshrc
           ●	layout	nothing to retire
           ●	relocate	nothing to do
-          ○	engine	launchd is not here to run it
-          ○	apps	missing: homebrew mise git tart tailscale: run station setup on a terminal
-          ●	settings
-          ○	ssh-key	next: station settings apply ssh-key
-          ○	spotlight-exclude	next: station settings apply spotlight-exclude
-          ○	dns	next: station settings apply dns
-          ○	claude-token	next: station settings apply claude-token
-          ○	dock-reset	next: station settings apply dock-reset
-          ○	dock-spacer	next: station settings apply dock-spacer
+          # Machinefile
+          	none yet: apps and settings come one at a time
       files:
           .studio: absent

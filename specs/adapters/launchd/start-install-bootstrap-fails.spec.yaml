@@ -1,0 +1,14 @@
+description: 'an engine launchd refuses to load is a failed start, never a running row'
+fixture:
+    - ../../__fixtures__/vms/
+    - ./__fixtures__/launchctl-fails-bootstrap/
+runs:
+    - command: 'engine start </dev/null'
+      exit: 1
+      stderr: |
+          Error: the engine did not start: launchctl bootstrap exited 5: Bootstrap failed: 5: Input/output error
+          Hint: station engine
+    - command: '--version >/dev/null; /usr/bin/grep -c "launchctl kickstart" .calls || true'
+      exit: 0
+      stdout: |
+          0

@@ -29,7 +29,8 @@ src/
              ([ADR-027](../decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)); contracts
              Hooks, Journal, Session, Multiplexer, Forge, Repo
   overview/  the Overview's read (overview/calls), which composes every section's own read
-  setup/     setup.run, the one bootstrap call, and the preferences groups it writes
+  setup/     setup.init, the call that makes a machine known (the verb `init`: Go names no package
+             init), and the preferences groups it writes
   engine/    the engine's model (its events, its own calls), engine/calls, engine/contract (the Notifier)
     process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server
     jobs/    the sample job, which feeds Activity's history
@@ -46,7 +47,7 @@ The shared kernel, which does no I/O:
     confirm/   the graded confirmations: confirm.For(action, kind) and confirm.Require
     call/      a use case as a Call or a Watch, Bind and Gate, the Registry, the Router; lanes/, the read pool
     contract/  the contracts every family shares: Self, Preferences
-    store/     what every store shares: its errors, its version, the Migrator setup runs
+    store/     what every store shares: its errors, its version, the Migrator init runs
     fail/      the error: its type, its code, its words
     adapter/   macos and linux (Self), jsonfile (Preferences), fake
 ```
@@ -91,7 +92,7 @@ Every family has the same four parts, named the same way, so a reader sees the b
 | `calls/`          | the use cases, each a `call.Call` or `call.Watch` named `<family>.<verb>`, and `All`, the family's list  | the model, its contracts, other families' `contract` and `calls` |
 | `adapter/<tech>/` | one adapter per technology (`tart`, `launchd`, `brew`...); `fake/`, over the world; `jsonfile/`, a store | its contract, `platform/local`                                   |
 
-A call declares its name, its section (empty for a call of no section: `machines.*`, `images.*`, `engine.*`, `setup.run`), its `Where`, its `Applies` (a `machine.Applies` rule over the target's Profile), the confirmation it may require, the error codes it may end in, and its `Run`. `wire` binds each family's `All` to its dependencies and hands them to the Registry. Before every call the gate runs (`call.Gate`): the target's kind must list the call's section in `core/section.For`, and the call's own `Applies` must say yes; a no is `not-for-this-machine`, exit 2, with the reason in words.
+A call declares its name, its section (empty for a call of no section: `machines.*`, `images.*`, `engine.*`, `setup.init`), its `Where`, its `Applies` (a `machine.Applies` rule over the target's Profile), the confirmation it may require, the error codes it may end in, and its `Run`. `wire` binds each family's `All` to its dependencies and hands them to the Registry. Before every call the gate runs (`call.Gate`): the target's kind must list the call's section in `core/section.For`, and the call's own `Applies` must say yes; a no is `not-for-this-machine`, exit 2, with the reason in words.
 
 What a machine can do is its `core/machine.Profile`, built once by `wire`: its kind and system from `Self`, its battery, lid and thermal from `awake/contract.Power`, a job manager, a hypervisor and an engine from what it wires. A rule reads the capabilities, never a model name: a desktop Mac has no battery guard because it reports no battery, and a Linux workspace has no Background because it reports no job manager.
 
@@ -233,7 +234,7 @@ The binary holds the catalogue; the machine holds its own state, in the XDG fold
 | `UptimeStore`      | `machines` | `~/.local/state/station/uptime.json`, written by the engine's keep job alone      |
 | `Journal`          | `agents`   | `~/.local/state/station/agents/`, inside a VM, one file per session               |
 
-Each store carries its version; `station setup` runs every store's `Migrator`, and a store written by a newer station is refused rather than read. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
+Each store carries its version; `station init` runs every store's `Migrator`, and a store written by a newer station is refused rather than read. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
 
 ## The compiler
 

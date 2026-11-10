@@ -99,6 +99,7 @@ const (
 	ProcSshd                 Procedure = "sshd"
 	ProcClaudeToken          Procedure = "claude-token"
 	ProcBackupExclusions     Procedure = "backup-exclusions"
+	ProcTailscaleCLI         Procedure = "tailscale-cli"
 )
 
 func (Touch) Kind() EffectKind        { return EffectTouch }
@@ -146,12 +147,6 @@ type Setting struct {
 	Sets []Value
 }
 
-func (it Setting) AlwaysOn() bool {
-	// invariant: Always-on Mac changes how a Mac sleeps, logs in and is
-	// reached, so it is applied by name only, never by setup.
-	return it.Category == CategoryHeadless
-}
-
 func (it Setting) Needs() []string {
 	// value: the apps of which one must be installed for the setting to
 	// apply, Requires first; none for a setting that needs no app.
@@ -164,12 +159,6 @@ func (it Setting) Needs() []string {
 func (it Setting) NeedsSaid() string {
 	// value: the owner's words for what it needs: "claude or codex".
 	return strings.Join(it.Needs(), " or ")
-}
-
-func (it Setting) NeedsOwner() bool {
-	// invariant: a value, admin rights, the owner at System Settings, or no
-	// trace to tell it was applied: setup lists it as a next step.
-	return len(it.Inputs) > 0 || it.Interactive || it.Guided || it.NeedsRoot || it.RunOnce
 }
 
 type Value struct{ Key, Value string }
@@ -220,6 +209,7 @@ var Settings = []Setting{
 		noted(conf("{cache}"), "a sticky Time Machine exclusion (`tmutil addexclusion`)"),
 		noted(conf("{data}/station/vms"), "a sticky Time Machine exclusion (`tmutil addexclusion`)"),
 	}},
+	{Name: TailscaleCLISetting, Description: "The tailscale command for the App Store app: a script on PATH, never a link to the app", Category: CategoryNetwork, Kinds: macKind, Requires: "tailscale", Effect: ProcTailscaleCLI, Reversible: true},
 	{Name: "tart-launcher", Description: "The tart launcher: Tart's home is station's VMs folder", Category: CategorySystem, Kinds: macKind, Effect: Dotfiles{Files: []Copy{{From: "tart/tart", To: "~/.local/bin/tart", Mode: 0o755}}}},
 	{Name: GitShortcutsSetting, Description: "Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup", Category: CategoryShell, Kinds: everyKind, Effect: GitShortcuts, Reversible: true, Writes: []Stored{noted(conf("~/.gitconfig"), "station's `[alias]` block")}},
 	{Name: AgentHooksSetting, Description: "The agent hook: station sees what Claude Code and Codex do, and what they wait for", Category: CategoryAgents, Kinds: vmKinds, Requires: "claude", OrRequires: []string{"codex"}, Effect: AgentHooks{Apps: []string{"claude", "codex"}}, Reversible: true, Writes: []Stored{
@@ -231,6 +221,8 @@ var Settings = []Setting{
 }
 
 const GitShortcutsSetting = "git-shortcuts"
+
+const TailscaleCLISetting = "tailscale-cli"
 
 const AgentHooksSetting = "agent-hooks"
 

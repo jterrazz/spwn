@@ -35,26 +35,19 @@ type Registrar interface {
 	Register(name string) error
 }
 
-type EngineInstaller interface {
-	Install(ctx context.Context) (setup.Step, error)
-}
-
 type ProvisionerOptions struct {
 	Kind catalog.MachineKind
 	// value: this machine is a server: its own tooling keeps it, never station.
 	Server bool
 	// value: the preferences' file (a v1 config.json converts only while it
 	// is absent), station's state folder and the user's bin.
-	PreferencesFile, State, Bin string
-	Executable                  string
-	Detached                    bool
-	Apps                        []catalog.App
-	Expand                      disk.Expander
-	Files                       map[catalog.AppFile]string
-	Configurer                  Configurer
-	Installer                   Installer
-	Settings                    Settings
-	AppStoreCLI                 func() string
+	PreferencesFile, State string
+	Executable             string
+	Detached               bool
+	Apps                   []catalog.App
+	Expand                 disk.Expander
+	Files                  map[catalog.AppFile]string
+	Configurer             Configurer
 	// value: moves the preferences out of the file station v2 kept them in,
 	// once; nil where there is none to move.
 	MovePreferences func(ctx context.Context) (moved bool, err error)
@@ -73,20 +66,19 @@ type ProvisionerPrefs struct {
 }
 
 type Provisioner struct {
-	m      Machine
-	p      ProvisionerPrefs
-	vault  Vault
-	reg    Registrar
-	engine EngineInstaller
-	o      ProvisionerOptions
+	m     Machine
+	p     ProvisionerPrefs
+	vault Vault
+	reg   Registrar
+	o     ProvisionerOptions
 }
 
 type Vault interface {
 	Forget(ctx context.Context, name string) error
 }
 
-func NewProvisioner(m Machine, p ProvisionerPrefs, v Vault, reg Registrar, e EngineInstaller, o ProvisionerOptions) *Provisioner {
-	return &Provisioner{m: m, p: p, vault: v, reg: reg, engine: e, o: o}
+func NewProvisioner(m Machine, p ProvisionerPrefs, v Vault, reg Registrar, o ProvisionerOptions) *Provisioner {
+	return &Provisioner{m: m, p: p, vault: v, reg: reg, o: o}
 }
 
 type Request struct {
@@ -184,26 +176,7 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 	layout, layoutErr := s.layout(ctx, migrated)
 	relocate, relocateErr := s.relocate(ctx, r.Interactive)
 	steps := append(append([]setup.Step{name, zshrc}, layout...), relocate)
-	var engineErr, appsErr, settingsErr error
-	if s.engine != nil {
-		var engine setup.Step
-		engine, engineErr = s.engine.Install(ctx)
-		steps = append(steps, engine)
-	}
-	if relocateErr == nil {
-		var apps []setup.Step
-		apps, appsErr = s.apps(ctx, r.Interactive)
-		steps = append(steps, apps...)
-		// invariant: an app that failed skips only what needs it (a setting
-		// requiring it is not due while it is absent), never the whole step;
-		// an interrupt skips the rest, since the run is over.
-		if ctx.Err() == nil {
-			var set []setup.Step
-			set, settingsErr = s.settings(ctx)
-			steps = append(steps, set...)
-		}
-	}
-	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, relocateErr, engineErr, appsErr, settingsErr)
+	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, relocateErr)
 }
 
 // invariant: the move comes before any step reads a preference, and says so
@@ -244,7 +217,7 @@ func (s *Provisioner) name(r Request, blocked bool) (setup.Step, error) {
 		name = asked
 	}
 	if name == "" {
-		return setup.Step{Name: stepName, State: catalog.StateAbsent, Detail: "not set: station setup --name <name>"}, nil
+		return setup.Step{Name: stepName, State: catalog.StateAbsent, Detail: "not set: station init --name <name>"}, nil
 	}
 	if !setup.ValidName(name) {
 		return setup.Step{}, &setup.BadNameError{Name: name}
@@ -284,20 +257,20 @@ func (s *Provisioner) Check(_ context.Context) (setup.Report, error) {
 		if thisMac, ok := s.reg.ThisMac(); ok {
 			steps = append(steps, setup.Step{Name: stepName, State: catalog.StateOK, Detail: thisMac})
 		} else {
-			steps = append(steps, setup.Step{Name: stepName, State: catalog.StateAbsent, Detail: "station setup --name <name>"})
+			steps = append(steps, setup.Step{Name: stepName, State: catalog.StateAbsent, Detail: "station init --name <name>"})
 		}
 	}
 	zshrc := setup.Step{Name: stepZshrc, State: catalog.StateOK}
 	if data, found, err := s.m.ReadFile(s.zshrcPath()); err != nil || !found || !settings.HasBlock(string(data)) {
-		zshrc = setup.Step{Name: stepZshrc, State: catalog.StateAbsent, Detail: "station setup"}
+		zshrc = setup.Step{Name: stepZshrc, State: catalog.StateAbsent, Detail: "station init"}
 	}
 	steps = append(steps, zshrc)
 	if s.onMac() {
 		layout := setup.Step{Name: stepLayout, State: catalog.StateOK}
 		if s.holdsStationFiles() {
-			layout = setup.Step{Name: stepLayout, State: catalog.StateDegraded, Detail: "~/.studio still holds station's files: station setup"}
+			layout = setup.Step{Name: stepLayout, State: catalog.StateDegraded, Detail: "~/.studio still holds station's files: station init"}
 		}
-		steps = append(steps, layout, s.appsCheck())
+		steps = append(steps, layout)
 	}
 	return setup.Report{Steps: steps}, nil
 }

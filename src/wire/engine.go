@@ -39,7 +39,6 @@ import (
 	portscontract "github.com/jterrazz/studio-station/src/ports/contract"
 	"github.com/jterrazz/studio-station/src/remote"
 	"github.com/jterrazz/studio-station/src/remote/api"
-	"github.com/jterrazz/studio-station/src/setup"
 	enginerun "github.com/jterrazz/studio-station/src/surface/cli/engine/run"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 	"github.com/jterrazz/studio-station/src/ui/token"
@@ -326,30 +325,28 @@ func (i engineInstaller) env() map[string]string {
 	return env
 }
 
-// invariant: setup installs ONE engine per system, after migrating the round-3
-// per-VM agents; it restarts the engine only when its plist changed or it runs
+// invariant: ONE engine per system, after migrating the round-3 per-VM
+// agents; it restarts the engine only when its plist changed or it runs
 // another version, and the VMs survive that restart.
-func (i engineInstaller) Install(ctx context.Context) (setup.Step, error) {
-	const step = "engine"
-	if hv := i.m.hypervisor(); !hv.Installed() {
-		return setup.Step{Name: step, State: catalog.StateAbsent, Detail: "not needed until " + hv.Name() + " is installed"}, nil
-	}
+func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) {
 	jobs := i.m.jobs(0)
 	if !jobs.Present() {
-		return setup.Step{Name: step, State: catalog.StateAbsent, Detail: jobs.Names().Manager + " is not here to run it"}, nil
+		return engine.Installed{}, &enginecalls.NotInstalledError{}
 	}
 	if _, err := i.machines.MigrateAgents(ctx); err != nil {
-		return setup.Step{Name: step, State: catalog.StateBroken, Detail: err.Error()}, &setup.StepFailedError{Step: step, Cause: err}
+		return engine.Installed{}, err
 	}
 	moved, err := i.retire(ctx, jobs)
 	if err != nil {
-		return setup.Step{Name: step, State: catalog.StateBroken, Detail: err.Error()}, &setup.StepFailedError{Step: step, Cause: err}
+		return engine.Installed{}, startFailed(err)
 	}
-	s, err := i.install(ctx, jobs)
-	if moved {
-		s.Detail, s.Changed = s.Detail+", its job moved to "+catalog.EngineLabel, true
-	}
-	return s, err
+	done, err := i.install(ctx, jobs)
+	done.Moved = moved
+	return done, err
+}
+
+func startFailed(cause error) error {
+	return &engine.StartFailedError{Last: cause.Error(), Cause: cause}
 }
 
 // invariant: the job station v2 named com.jterrazz.station.daemon is
@@ -362,35 +359,34 @@ func (i engineInstaller) retire(ctx context.Context, jobs contract.Jobs) (bool, 
 	return true, jobs.Remove(ctx, ref)
 }
 
-func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (setup.Step, error) {
-	const step = "engine"
+func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
 	job := i.m.engineJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
 		Label: job.Label, Program: []string{i.m.sys.Env.Executable(), "engine", "run"}, Env: i.env(),
 		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "engine.log"), File: job.File,
 	})
 	if err != nil {
-		return setup.Step{Name: step, State: catalog.StateBroken, Detail: err.Error()}, &setup.StepFailedError{Step: step, Cause: err}
+		return engine.Installed{}, startFailed(err)
 	}
-	version := Version()
 	if !jobs.Read(ctx, job).Loaded {
 		for _, run := range []func(context.Context, contract.Ref) error{jobs.Load, jobs.Start} {
 			if runErr := run(ctx, job); runErr != nil {
-				return setup.Step{Name: step, State: catalog.StateBroken, Detail: runErr.Error()}, &setup.StepFailedError{Step: step, Cause: runErr}
+				return engine.Installed{}, startFailed(runErr)
 			}
 		}
-		return setup.Step{Name: step, State: catalog.StateOK, Detail: "running " + version, Changed: true}, nil
+		return engine.Installed{Written: changed}, nil
 	}
 	running, err := i.m.engineAPI().Hello(ctx)
+	version := Version()
 	if changed || (err == nil && running.Version != version) {
 		if kickErr := jobs.Restart(ctx, job); kickErr != nil {
-			return setup.Step{Name: step, State: catalog.StateBroken, Detail: kickErr.Error()}, &setup.StepFailedError{Step: step, Cause: kickErr}
+			return engine.Installed{}, startFailed(kickErr)
 		}
-		detail := "restarted"
+		done := engine.Installed{Restarted: true}
 		if err == nil && running.Version != version {
-			detail += " (" + running.Version + " to " + version + ")"
+			done.From = running.Version
 		}
-		return setup.Step{Name: step, State: catalog.StateOK, Detail: detail, Changed: true}, nil
+		return done, nil
 	}
-	return setup.Step{Name: step, State: catalog.StateOK, Detail: "running " + version}, nil
+	return engine.Installed{}, nil
 }

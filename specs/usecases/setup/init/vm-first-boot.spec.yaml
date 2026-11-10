@@ -1,0 +1,19 @@
+description: 'inside a workspace, init writes the shell block and the layout, never a name nor an engine'
+env: in-workspace
+runs:
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+    - command: '--version >/dev/null; /usr/bin/grep -c "^# >>> station >>>$" .zshrc'
+      exit: 0
+      stdout: |
+          1
+    - command: 'init --name x'
+      exit: 2
+      stderr: |
+          Error: a VM's name is given when it is created
+          Hint: run station init without --name

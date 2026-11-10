@@ -1,12 +1,48 @@
 {
   "schema": "station.page/v1",
   "id": "outcome",
-  "command": "setup",
+  "command": "init",
   "context": {
     "kind": "mac"
   },
   "state": "loading",
   "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/init",
+            "mark": "pending",
+            "label": "Known to station, with a step left",
+            "cells": [
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "uncounted": true
+    },
     {
       "id": "changes",
       "title": "Changes",
@@ -71,9 +107,9 @@
         },
         {
           "row": {
-            "id": "apps",
+            "id": "relocate",
             "mark": "pending",
-            "label": "apps",
+            "label": "relocate",
             "cells": [
               {
                 "kind": "pending"
@@ -91,6 +127,29 @@
           "n": 4
         }
       ]
+    },
+    {
+      "id": "machinefile",
+      "title": "Machinefile",
+      "fold": "open",
+      "items": [
+        {
+          "note": {
+            "text": "none yet: apps and settings come one at a time"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "hints": [
+    {
+      "command": "station apps install <app>",
+      "text": "one app, and what it requires"
+    },
+    {
+      "command": "station settings apply <setting>",
+      "text": "one setting"
     }
   ]
 }

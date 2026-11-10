@@ -245,9 +245,9 @@ func (e *MacAwayError) Error() string {
 
 func (e *MacAwayError) Hint() string {
 	if e.Mac == "" {
-		return "on the VM's Mac: station setup"
+		return "on the VM's Mac: station engine start"
 	}
-	return "on " + e.Mac + ": station setup"
+	return "on " + e.Mac + ": station engine start"
 }
 
 type UnknownVMError struct{ Name string }

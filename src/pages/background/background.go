@@ -186,7 +186,7 @@ func Row(t background.Task) page.Row {
 	case t.Run == background.Unread:
 		r.Reason = page.Late
 	case t.Group == background.GroupStation && t.Run == background.NotLoaded:
-		r.Reason, r.Hint = page.Stopped, page.Cmd("station setup")
+		r.Reason, r.Hint = page.Stopped, page.Cmd("station engine start")
 	}
 	if r.Reason == page.Failing || r.Reason == page.Orphan {
 		switch fix := fixOf(t); {

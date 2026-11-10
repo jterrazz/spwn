@@ -5,11 +5,11 @@ Updates
 Not installed  ○ 2 · typewhisper, frontend-design
 Not managed    ? 5 · bun, go, java, python, chatgpt
 Not known
-  ? mise       ?  brew · system  no answer in 5s
-  ? mas        ?  brew           no answer in 5s
-  ? uv         ?  brew           no answer in 5s
-  ? cocoapods  ?  brew           no answer in 5s
-  ? pnpm       ?  brew           no answer in 5s
+  ? mise       ?  brew  no answer in 5s
+  ? mas        ?  brew  no answer in 5s
+  ? uv         ?  brew  no answer in 5s
+  ? cocoapods  ?  brew  no answer in 5s
+  ? pnpm       ?  brew  no answer in 5s
 OK             ● 4 · homebrew, skills, claude-desktop, modern-web-guidance
 Not for this machine  98 apps live on other machines
 

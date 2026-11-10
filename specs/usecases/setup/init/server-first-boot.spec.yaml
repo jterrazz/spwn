@@ -1,0 +1,12 @@
+description: 'inside a server, init learns it is a server and sets nothing up: its own tooling keeps it'
+env: in-server
+runs:
+    - command: 'init'
+      exit: 0
+      stdout: |
+          ●	kind	server: its own tooling keeps it, station sets nothing up
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .zshrc: absent
+          .npmrc: absent

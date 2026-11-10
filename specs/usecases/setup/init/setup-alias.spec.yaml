@@ -1,0 +1,19 @@
+description: 'setup still runs init for one release, naming the new word and where apps and settings went'
+env: fresh
+runs:
+    - command: 'setup --name jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	name	jterrazz-macbook-pro
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      stderr: |
+          → now: station init --name=jterrazz-macbook-pro
+          apps and settings no longer come with setup: station apps install <app>, station settings apply <setting>
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.name, (.jobs // {} | keys)]'' world.json'
+      exit: 0
+      stdout: |
+          ["jterrazz-macbook-pro",[]]

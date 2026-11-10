@@ -24,7 +24,7 @@ func controlPages() []Fixture {
 	out := states("engine",
 		pending(pageengine.Read(running, time.UTC, thisMacContext())),
 		pageengine.Read(halted, time.UTC, thisMacContext()),
-		failure("engine", "engine", "the engine runs v3.0.0, station is v3.1.0", "station setup"),
+		failure("engine", "engine", "the engine runs v3.0.0, station is v3.1.0", "station engine start"),
 		pageengine.Read(running, time.UTC, thisMacContext()),
 	)
 	out = append(out, states("outcome-stop",

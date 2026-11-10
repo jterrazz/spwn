@@ -46,7 +46,7 @@ func bind(in *Input, args []string) error {
 
 func run(ctx context.Context, d Deps, env kit.Env, in *Input, io kit.IO) error {
 	if env.Use == nil || !env.Use.Block() {
-		return kit.Refuse("this terminal has no station block", "use --on "+example(in.Machine)+", or run station setup")
+		return kit.Refuse("this terminal has no station block", "use --on "+example(in.Machine)+", or run station init")
 	}
 	now, _ := env.Use.Read()
 	switch in.Machine {

@@ -1,0 +1,33 @@
+description: 'init on a fresh Mac names it in three steps, installs nothing, and ends on the empty Machinefile'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - fresh
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" init'
+      stdin: |
+          see Name this machine
+          send \r
+          see one setting
+          screen
+      exit: 0
+      stdout: |
+          ┃ Name this machine
+          ┃ lowercase letters, digits and -, as in macbook or mac-mini
+          ✓ Known to station · 3 steps changed
+
+          Changes
+            ● name      jterrazz-macbook-pro
+            ● zshrc
+            ● layout    nothing to retire
+            ● relocate  bunfig, go env, mise settings, npmrc
+          Machinefile  none yet: apps and settings come one at a time
+
+          → station apps install <app>        one app, and what it requires
+          → station settings apply <setting>  one setting
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
+      exit: 0
+      stdout: |
+          ["jterrazz-macbook-pro",[],null]
+          1
+          no setting applied

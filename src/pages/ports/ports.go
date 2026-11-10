@@ -155,7 +155,7 @@ func macRows(h ports.MacPorts) []page.Item {
 	case h.ThisMac && !h.Engine.Running:
 		reason, word, fix := page.Stopped, "not shared while the engine is stopped", "station engine start"
 		if !h.Engine.Installed {
-			reason, word, fix = page.Missing, "the engine is not installed", "station setup"
+			reason, word, fix = page.Missing, "the engine is not installed", "station engine start"
 		}
 		row = page.Row{ID: "engine", Label: "engine", Mark: page.Attention, Reason: reason,
 			Cells: []page.Value{page.None(), page.None(), page.None(), page.Text(word)},

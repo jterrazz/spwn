@@ -1,0 +1,17 @@
+description: 'on a terminal, init offers the Mac''s local name, made a machine name, and registers it on enter'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/local-host-name/
+    - ../__fixtures__/system-tools/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" init'
+      stdin: |
+          see jean-baptiste-s-macbook-pro
+          send \r
+          see settings
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -r .name .config/station/preferences.json'
+      exit: 0
+      stdout: |
+          jean-baptiste-s-macbook-pro

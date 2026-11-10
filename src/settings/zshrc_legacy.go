@@ -3,7 +3,7 @@ package settings
 import "strings"
 
 // invariant: the ONLY home of the old product's literals: the block the base's
-// install script wrote into ~/.zshrc, recognized here so `station setup` can
+// install script wrote into ~/.zshrc, recognized here so `station init` can
 // replace it. The rename greps exclude this file by name.
 const (
 	legacyMarker = "# studio-workstation"

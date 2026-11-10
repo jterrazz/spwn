@@ -209,7 +209,7 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 			Text: "Engine stopped", Fix: finding.Fix{Call: "engine.start"}}}
 	case engine.EngineNotInstalled:
 		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: "engine",
-			Text: "Engine not set up", Fix: finding.Fix{Call: "setup.run"}}}
+			Text: "Engine not installed", Fix: finding.Fix{Call: "engine.start"}}}
 	}
 	return overview.EngineRunning, nil
 }

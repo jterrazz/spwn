@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	18 ○
+          # Set by station	19 ○
           ○	hushlogin	not applied	station settings apply hushlogin
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
@@ -19,6 +19,7 @@ runs:
           ○	dock-reset	not applied	station settings apply dock-reset
           ○	dock-spacer	not applied	station settings apply dock-spacer
           ○	backup-exclusions	not applied	station settings apply backup-exclusions
+          ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
           ○	tart-launcher	not applied	station settings apply tart-launcher
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	herdr-machine	not applied · needs herdr-app	station apps install herdr-app

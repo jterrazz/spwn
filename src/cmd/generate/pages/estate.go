@@ -69,7 +69,7 @@ func snapshot() pagehome.Overview {
 	appReports := reports(thisMac(), false)
 	return pagehome.Overview{
 		GeneratedAt: built,
-		Station:     overview.Station{Version: "v2.0.0-250", Engine: check("engine", catalog.StateDegraded, "not installed", "station setup")},
+		Station:     overview.Station{Version: "v2.0.0-250", Engine: check("engine", catalog.StateDegraded, "not installed", "station engine start")},
 		Machine:     overview.Machine{Name: "macbook", Registered: true, Kind: catalog.Mac, Hostname: "jterrazz-macbook-pro", OS: "Darwin 27.0.0", Arch: "arm64", User: "jterrazz", Shell: "zsh"},
 		System:      overview.System{Uptime: "22d 14h", Battery: "100% charged", MemoryTotal: 17179869184},
 		Environment: overview.Environment{
@@ -131,7 +131,7 @@ func calmSnapshot() pagehome.Overview {
 	s.Station.Engine = check("engine", catalog.StateOK, "running v2.0.0-250", "")
 	s.Environment.Updates = []overview.Check{check("macos", catalog.StateOK, "up to date", "checked 22m ago"), check("brew", catalog.StateOK, "up to date", "")}
 	s.Workspace.Misplaced = nil
-	s.Apps = reports([]app{{name: "homebrew", category: catalog.CategoryPackageManagers, method: catalog.MethodScript, system: true, state: catalog.StateOK, version: "7.0.12"}}, false)
+	s.Apps = reports([]app{{name: "homebrew", category: catalog.CategoryPackageManagers, method: catalog.MethodScript, state: catalog.StateOK, version: "7.0.12"}}, false)
 	s.Settings = s.Settings[:1]
 	s.Background = s.Background[:1]
 	s.Gateways = nil
@@ -158,7 +158,7 @@ func unnamedSnapshot() pagehome.Overview {
 	s := snapshot()
 	s.Machine.Name, s.Machine.Registered = "", false
 	s.Setup = overview.Setup{State: catalog.StateDegraded, Steps: []overview.Step{{Name: "name", State: catalog.StateDegraded}}}
-	s.Station.Engine = check("engine", catalog.StateDegraded, "runs v2.0.0-242-gd653060, station is v2.0.0-250", "station setup")
+	s.Station.Engine = check("engine", catalog.StateDegraded, "runs v2.0.0-242-gd653060, station is v2.0.0-250", "station engine start")
 	return s
 }
 
@@ -482,8 +482,8 @@ func setupReport() setup.Report {
 	return setup.Report{Steps: []setup.Step{
 		{Name: "name", State: catalog.StateOK, Detail: "macbook"},
 		{Name: "zshrc", State: catalog.StateOK, Detail: "the station block", Changed: true},
-		{Name: "layout", State: catalog.StateDegraded, Detail: "~/." + catalog.HypervisorApp + " not moved", Log: "73 GB: move it with station setup --move"},
-		{Name: "apps", State: catalog.StateOK},
+		{Name: "layout", State: catalog.StateDegraded, Detail: "~/." + catalog.HypervisorApp + " not moved", Log: "73 GB: move it with station init --move"},
+		{Name: "relocate", State: catalog.StateOK, Detail: "bunfig, go env, mise settings, npmrc", Changed: true},
 	}}
 }
 
@@ -491,7 +491,7 @@ func setups() []Fixture {
 	return states("setup",
 		pending(pagesetup.Outcome(setupReport(), thisMacContext())),
 		pagesetup.Outcome(setup.Report{}, thisMacContext()),
-		failure("outcome", "setup", "a VM is named by its Mac", "station setup on its Mac"),
+		failure("outcome", "setup", "a VM is named by its Mac", "station init on its Mac"),
 		pagesetup.Outcome(setupReport(), thisMacContext()))
 }
 

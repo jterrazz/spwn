@@ -1,5 +1,11 @@
+◌ Known to station, with a step left
+
 Changes
   ◌ name
   ◌ zshrc
   ◌ layout
-  ◌ apps
+  ◌ relocate
+Machinefile  none yet: apps and settings come one at a time
+
+→ station apps install <app>        one app, and what it requires
+→ station settings apply <setting>  one setting

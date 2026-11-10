@@ -184,7 +184,7 @@ var SSHDisk = Disk{
 	NoErase: appsNoErase,
 }
 
-const StationRetiredNote = "The keychain entry `station` holds nothing since round 5: `station setup` removed the three tailnet accounts the earlier rounds kept there. It also retired round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM."
+const StationRetiredNote = "The keychain entry `station` holds nothing since round 5: `station init` removes the three tailnet accounts the earlier rounds kept there, and `station engine start` retires round 3's per-VM launchd agents, `~/Library/LaunchAgents/com.jterrazz.station.vm.*.plist`: booted out and removed, the one engine runs every VM."
 
 var HomeExceptions = []Exception{
 	{Path: ".ssh", Reason: "the owner's keys and ssh_config"},
@@ -413,7 +413,7 @@ var (
 			kept("~/Library/Application Scripts/*io.tailscale.*", Mac),
 		},
 		Installed: []string{TailscaleApp, TailscaleStandaloneCLI, "~/.local/bin/tailscale"},
-		Removal:   map[string]string{"~/.local/bin/tailscale": "written by `station setup` for the App Store app, whose uninstall station refuses: removed by hand"},
+		Removal:   map[string]string{"~/.local/bin/tailscale": "written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it"},
 		NoErase:   "nothing to erase: the login is the Tailscale app's",
 	}
 	diskGit = Disk{

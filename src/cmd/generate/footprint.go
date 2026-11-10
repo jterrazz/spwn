@@ -44,7 +44,7 @@ func footprint() string {
 	parts = append(parts,
 		"## Settings", table([]string{"Setting", "Path", "Group", "Note"}, settingsRows()),
 		"## Home-root exceptions", "What an app keeps at the root of the home folder, declared with its reason; anything else there is misplaced.", table([]string{"Path", "Reason"}, exceptionRows()),
-		"## Relocations", "Written by `station setup` into the app's own file, never by a shell variable.", table([]string{"App", "File", "Key", "Value", "Status"}, relocationRows()),
+		"## Relocations", "Written by `station init` into the app's own file, never by a shell variable.", table([]string{"App", "File", "Key", "Value", "Status"}, relocationRows()),
 	)
 	return strings.Join(parts, "\n\n") + "\n"
 }

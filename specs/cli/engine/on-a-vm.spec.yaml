@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: the engine runs only on a Mac; this machine is a linux VM
-          Hint: run it on a Mac: station setup installs it
+          Hint: run it on a Mac: station engine start installs it

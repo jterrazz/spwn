@@ -1,0 +1,15 @@
+description: 'init moves what go install put in ~/go/bin into its new home, by rename'
+fixture: ./__fixtures__/go-bin/
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/go
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .local/share/go/bin/foo: { equals: "foo binary\n" }
+          go: absent

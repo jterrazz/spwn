@@ -39,7 +39,7 @@ An App Store app is installed by mas itself, outside the bundle: signed out, the
 
 ## Superseded installs and App Store copies
 
-A catalogue app can name the formula it `Supersedes`: with the formula alone the app is `? formula installed, app absent`, and once the app itself is OK `station setup` uninstalls the formula. An `AppStore` app whose bundle carries the App Store's receipt (`Contents/_MASReceipt`) is present through that copy, Not managed, detail `app-store`: `apps install` says it is already installed, `apps update` leaves it to the App Store (`○ the App Store updates it` when named), and `apps remove` refuses it (`Hint: remove it from /Applications`). Tailscale is both ([The tailnet](machines.md#tailscale)).
+A catalogue app can name the formula it `Supersedes`: with the formula alone the app is `? formula installed, app absent`, and once the app itself is OK `station apps install <app>` uninstalls the formula (`● tailscale formula  uninstalled: the app replaces it`). An `AppStore` app whose bundle carries the App Store's receipt (`Contents/_MASReceipt`) is present through that copy, Not managed, detail `app-store`: `apps install` says it is already installed, `apps update` leaves it to the App Store (`○ the App Store updates it` when named), and `apps remove` refuses it (`Hint: remove it from /Applications`). Tailscale is both ([The tailnet](machines.md#tailscale)).
 
 ## Runtimes
 

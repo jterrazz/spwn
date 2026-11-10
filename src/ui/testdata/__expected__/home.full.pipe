@@ -2,7 +2,7 @@
 ●	name	macbook	Mac · Darwin 27.0.0 arm64 · jterrazz · zsh
 ●	uptime	22d 14h	battery 100% charged
 ●	setup	done
-◐	engine	not installed	station setup
+◐	engine	not installed	station engine start
 # Environment
 ●	local ip	192.168.1.152
 ●	filevault	on
@@ -26,7 +26,7 @@
 # Gateways
 ●	Tailscale Serve	on
 # Apps	6 ●	7 ◐	4 ○
-○	mise		brew · system	station apps install mise
+○	mise		brew	station apps install mise
 ○	mas		brew	station apps install mas
 ◐	pnpm	11.21.0	brew	update available · station apps update pnpm
 ?	bun		mise	installed, mise not installed · station apps install mise

@@ -12,4 +12,4 @@ runs:
           # Updates	1 ◐
           ◐	node	22.11.0	mise	update available · station apps update node
           # Not installed	100 ○
-          ○	homebrew		script · system	station apps install homebrew
+          ○	homebrew		script	station apps install homebrew

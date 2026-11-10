@@ -1,7 +1,13 @@
-description: 'the v2 job com.jterrazz.station.daemon is removed once; the engine runs under its new label'
+description: 'the first engine start retires the v2 job com.jterrazz.station.daemon for the new label'
 env: fresh-v2
 runs:
-    - command: 'setup > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs | keys'' world.json'
+    - command: 'init --name jterrazz-macbook-pro > /dev/null'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	installed, running · {{string}} · its job moved to com.jterrazz.station.engine
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs | keys'' world.json'
       exit: 0
       stdout: |
           ["com.jterrazz.station.engine"]

@@ -1,11 +1,13 @@
 description: 'settings.json becomes preferences.json once, and every command then reads it: the Mac keeps its name'
 env: fresh-v2
 runs:
-    - command: 'setup > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [(.files // {} | keys), .preferences.name]'' world.json'
+    - command: 'init > /dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [(.files // {} | keys), .preferences.name]'' world.json'
       exit: 0
       stdout: |
           [[],"jterrazz-macbook-pro"]
     - command: 'machines --this-mac'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ✗	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine not installed
+          # Needs you
+          ✗	This Mac	has no engine installed	station engine start

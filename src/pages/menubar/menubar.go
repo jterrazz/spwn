@@ -95,19 +95,19 @@ func Stopped(thisMac page.Context, installed bool) page.Page {
 	actions := []page.Action{start(), openStation()}
 	if !installed {
 		row.Cells = []page.Value{page.Text("not installed")}
-		row.Hint = page.Cmd("station setup")
+		row.Hint = page.Cmd("station engine start")
 		actions = actions[1:]
 	}
 	caption := "The engine is stopped"
 	if !installed {
-		caption = "station is not set up on this Mac"
+		caption = "The engine is not installed on this Mac"
 	}
 	s := page.Section{ID: SectionNeeds, Title: "Needs you", Role: page.Actions, Caption: []page.Value{page.Text(caption)}, Columns: columns(), Items: []page.Item{{Row: &row}}}
 	return page.Seal(page.Page{ID: ID, Command: "menubar", Context: thisMac, Sections: []page.Section{s}, Actions: actions})
 }
 
 func Outdated(thisMac page.Context) page.Page {
-	row := page.Row{ID: "engine", Label: "engine", Mark: page.Attention, Reason: page.Outdated, Cells: []page.Value{page.Text("older than this app")}, Hint: page.Cmd("station setup")}
+	row := page.Row{ID: "engine", Label: "engine", Mark: page.Attention, Reason: page.Outdated, Cells: []page.Value{page.Text("older than this app")}, Hint: page.Cmd("station engine start")}
 	s := page.Section{ID: SectionNeeds, Title: "Needs you", Role: page.Actions, Caption: []page.Value{page.Text("Update station here (scripts/install.sh)")}, Columns: columns(), Items: []page.Item{{Row: &row}}}
 	return page.Seal(page.Page{ID: ID, Command: "menubar", Context: thisMac, Sections: []page.Section{s}, Actions: []page.Action{openStation()}})
 }

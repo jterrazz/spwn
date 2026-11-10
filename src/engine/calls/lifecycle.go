@@ -25,15 +25,35 @@ var Start = call.Call[Deps, StartIn, engine.StartReport]{
 	Name: "engine.start", Where: call.AtTarget, Applies: Applies,
 	Errors: []fail.Code{StartFailed},
 	Run: func(ctx context.Context, d Deps, _ StartIn, _ call.Progress) (engine.StartReport, error) {
+		// invariant: start is also how the engine comes to a Mac: its job is
+		// written when it is not installed, and an engine of another version
+		// restarted; an engine installed and current is only started.
+		var installed engine.Installed
+		if d.Installer != nil {
+			reading, err := d.Control.Read(ctx)
+			if err != nil {
+				return engine.StartReport{}, err
+			}
+			if reading.State == engine.EngineNotInstalled || reading.Skewed() {
+				if installed, err = d.Installer.Install(ctx); err != nil {
+					return engine.StartReport{}, startError(err)
+				}
+			}
+		}
 		if err := d.Control.Check(); err != nil {
 			return engine.StartReport{}, err
 		}
 		report, err := d.Control.Start(ctx)
-		if failed := new(engine.StartFailedError); errors.As(err, &failed) {
-			return report, &fail.Error{Type: fail.Failed, Code: StartFailed, Subject: "engine", Detail: map[string]string{"last": failed.Last}, Cause: err}
-		}
-		return report, err
+		report.Installed = installed
+		return report, startError(err)
 	},
+}
+
+func startError(err error) error {
+	if failed := new(engine.StartFailedError); errors.As(err, &failed) {
+		return &fail.Error{Type: fail.Failed, Code: StartFailed, Subject: "engine", Detail: map[string]string{"last": failed.Last}, Cause: err}
+	}
+	return err
 }
 
 type StopIn struct {

@@ -9,7 +9,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 | On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake` |
 | A Mac's images and engine | `images`, `engine`                                                                             |
 | This terminal             | `use`                                                                                          |
-| Station itself            | `setup`, `--version`, `help`                                                                   |
+| Station itself            | `init`, `--version`, `help`                                                                    |
 | Hidden aliases            | The v2 words that still run, for one release                                                   |
 | Plumbing                  | The hidden commands the machine runs for itself                                                |
 | Exit codes                | What 0, 1, 2 and 130 mean                                                                      |
@@ -196,10 +196,10 @@ A bare `build` builds every image that is missing or whose recipe changed; a bar
 ```sh
 station engine [--json] # running, its version, up, the VMs it runs, Awake; or stopped, since when and by what
 station engine stop [--yes] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it
-station engine start # the engine bootstrapped again; the VMs it stopped stay stopped
+station engine start # the engine installed when it is not, restarted when it runs another version, bootstrapped again; the VMs it stopped stay stopped
 ```
 
-`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station setup`. A Mac only; `--on <mac>` runs it on another Mac. `station stop` and `station start` are hidden aliases of `engine stop` and `engine start` for one release, saying `→ now: station engine stop` on stderr (see [Hidden aliases](#hidden-aliases)). A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
+`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. A Mac only; `--on <mac>` runs it on another Mac. `station stop` and `station start` are hidden aliases of `engine stop` and `engine start` for one release, saying `→ now: station engine stop` on stderr (see [Hidden aliases](#hidden-aliases)). A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
 
 ## This terminal
 
@@ -216,16 +216,16 @@ station use # the machine this terminal uses, and since when
 ## Station itself
 
 ```sh
-station setup [--name <name>]
+station init [--name <name>]
 station --version
 station help [command]
 ```
 
-`setup` is the one bootstrap verb, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station setup --name <name>`), writes the one managed block of `~/.zshrc`, moves `~/.studio/` to the XDG folders, starts the engine, installs this Mac's missing system apps (on a terminal; piped it names them), then applies the Set by station settings that need no value and no admin. An app that fails to install gets its own `✗` row, as does each other app of its batch, and skips only what needs it: the settings still apply. Ctrl-C during the apps is an interruption, not a failure: each app of the batch reads `✗ <app> interrupted (Ctrl-C) · station setup resumes`, the run exits 130 and applies nothing more. The others are listed as next steps, one row each (`next: station settings apply ssh-key`); the Always-on Mac group is opt-in, so setup neither applies nor lists it. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
+`init` makes this machine known to station, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station init --name <name>`), writes the one managed block of `~/.zshrc`, moves `~/.studio/` to the XDG folders and brings every store to its version, and writes the apps' own files (`relocate`). It installs no app, runs no package manager and asks no password; the engine comes with `station engine start`. On a terminal it opens on a line that sums it up and ends on the empty state of what the machine carries (`Machinefile  none yet: apps and settings come one at a time`), then the next steps, `station apps install <app>` and `station settings apply <setting>`. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
 
 ## Hidden aliases
 
-A v2 word runs its v3 command with the same arguments, for one release, and prints one muted line on stderr naming it (nothing there with `--json` or `--page`); help and completion never list it.
+A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments, for one release, and prints one muted line on stderr naming it (nothing there with `--json` or `--page`); help and completion never list it.
 
 | Old                                   | Runs                                                                                                                                                                                                      |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -239,6 +239,7 @@ A v2 word runs its v3 command with the same arguments, for one release, and prin
 | `station power`                       | `station awake`; `awake --for <d>` runs `awake <d>`, `sleep` runs `awake off`                                                                                                                             |
 | `station services`, `station tailnet` | `station ports`; `url` and `release` run `ports share` and `ports stop-sharing`                                                                                                                           |
 | `station machines probe <machine>`    | `station machines <machine>`                                                                                                                                                                              |
+| `station setup`                       | `station init`, v3.0's word, and one more muted line on stderr: apps and settings no longer come with it (`station apps install <app>`, `station settings apply <setting>`)                               |
 | `machines create --always-on`         | `machines create --server`                                                                                                                                                                                |
 | `station run git <shortcut>`          | `git <alias>`, the [Git shortcuts](settings.md#the-items) setting's alias (`log`, `push`, `status` are `lg`, `pushup`, `st`); refused with `station settings apply git-shortcuts` while it is not applied |
 | `station run docker rm\|rmi\|reset`   | the steps of `dclean`, `dclean-images`, `dreset`, the [Docker shortcuts](settings.md#the-items), asking as before (`--yes` off a terminal)                                                                |
@@ -257,7 +258,7 @@ These commands exist for the machine's own use. They are hidden from help and th
 | `station agents record --app <app>` | an agent's hook runs it inside a workspace on each event, the event on stdin or as its last argument: it folds it into the VM's journal of agents, prints nothing, and exits 0 within 200 ms whatever its flags ([Settings](settings.md#the-items))  |
 | `station engine attach`             | another Mac runs it over ssh: bridges ssh's stdio to this Mac's engine socket ([The API](api.md#the-transport))                                                                                                                                      |
 | `station machines pipe <vm>`        | a VM's `~/.ssh/config` ProxyCommand runs it: ssh's bytes to the VM's ip behind its Mac ([Machines](machines.md#ssh-and-herdr))                                                                                                                       |
-| `station machines supervise <vm>`   | retired: an old per-VM agent that still runs it exits at once; `station setup` removes those agents                                                                                                                                                  |
+| `station machines supervise <vm>`   | retired: an old per-VM agent that still runs it exits at once; `station engine start` removes those agents                                                                                                                                           |
 
 `--on` is refused on `shell`, `completion`, `help`, `use`, `engine run` (and `daemon`, its v2 name), `engine attach`, `guest`, `machines pipe` and `machines supervise`: none of them sends a call.
 

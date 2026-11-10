@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "33 settings on 4 machines",
+            "label": "34 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -123,7 +123,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/agent-hooks",
+            "id": "jterrazz-macbook-pro/git-shortcuts",
             "mark": "pending",
             "label": "jterrazz-macbook-pro",
             "short": "This Mac",
@@ -237,7 +237,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/agent-hooks",
+            "id": "jterrazz-mac-mini/git-shortcuts",
             "mark": "pending",
             "label": "jterrazz-mac-mini",
             "short": "mac-mini",
@@ -351,7 +351,7 @@
         },
         {
           "row": {
-            "id": "linux-1/agent-hooks",
+            "id": "linux-1/git-shortcuts",
             "mark": "pending",
             "label": "linux-1",
             "short": "linux-1",
@@ -427,7 +427,7 @@
         },
         {
           "row": {
-            "id": "api/agent-hooks",
+            "id": "api/git-shortcuts",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -701,9 +701,9 @@
         },
         {
           "row": {
-            "id": "agent-hooks",
+            "id": "git-shortcuts",
             "mark": "pending",
-            "label": "agent-hooks",
+            "label": "git-shortcuts",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "15 more",
+            "label": "16 more",
             "cells": [
               {
                 "kind": "pending"
@@ -1002,6 +1002,7 @@
         "lock-after-login",
         "sshd",
         "backup-exclusions",
+        "tailscale-cli",
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",
@@ -1035,6 +1036,7 @@
         "lock-after-login",
         "sshd",
         "backup-exclusions",
+        "tailscale-cli",
         "tart-launcher",
         "git-shortcuts",
         "agent-hooks",

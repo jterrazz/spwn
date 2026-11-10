@@ -26,7 +26,7 @@ runs:
             4 more: station overview --all
           Activity    memory 12.4 of 16 GB · 388 GB free
           Apps        ● 5 ok · ◐ 3 updates · ○ 100 not installed
-          Settings    set by station · ○ 0 of 18 · checked · ● 8 of 9
+          Settings    set by station · ○ 0 of 19 · checked · ● 8 of 9
           Disk        ◐ 388 GB free · 34.8 GB can rebuild
                       ◐ 1 misplaced
           Ports       Public 0 · Private 2
@@ -101,7 +101,7 @@ runs:
             ◐ ~/go is misplaced  station disk move ~/go
           Activity    memory 26 of 64 GB · 1.6 TB free
           Apps        ● 0 ok · ○ 108 not installed
-          Settings    set by station · ● 1 of 18 · checked · ● 9 of 9
+          Settings    set by station · ● 1 of 19 · checked · ● 9 of 9
           Disk        ◐ 1.6 TB free · 1.1 GB can rebuild
                       ◐ 1 misplaced
           Ports       Public 0 · Private 0

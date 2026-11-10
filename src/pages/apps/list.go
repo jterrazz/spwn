@@ -231,9 +231,4 @@ func version(r apps.Report) page.Value {
 	return page.Version(r.Version)
 }
 
-func method(r apps.Report) page.Value {
-	if r.App.System {
-		return page.Texts(string(r.Method), "system")
-	}
-	return page.Texts(string(r.Method))
-}
+func method(r apps.Report) page.Value { return page.Texts(string(r.Method)) }

@@ -160,7 +160,7 @@ func (s *Provisioner) detach() error {
 	if err := s.m.MkdirAll(path.Dir(s.logPath()), 0o700); err != nil {
 		return err
 	}
-	return s.m.Start(s.o.Executable, []string{"setup"}, []string{"STATION_XDG_DETACHED=1"}, s.logPath())
+	return s.m.Start(s.o.Executable, []string{"init"}, []string{"STATION_XDG_DETACHED=1"}, s.logPath())
 }
 
 // invariant: a destination holding the same bytes is a move already done, one

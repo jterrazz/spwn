@@ -31,7 +31,7 @@ ClientAliveCountMax 4
 CONF
 
 install -m 0755 /tmp/station /usr/local/bin/station
-sudo -u "$VM_USER" -H /usr/local/bin/station setup
+sudo -u "$VM_USER" -H /usr/local/bin/station init
 
 cat > /etc/systemd/system/station-hostkeys.service <<'UNIT'
 [Unit]

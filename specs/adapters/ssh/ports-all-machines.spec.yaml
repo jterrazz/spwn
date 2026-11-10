@@ -18,7 +18,7 @@ runs:
       stdout: |
           ●	Tailscale	signed in · macbook.tail1234.ts.net · ports are shared
           # Private: shared with you on Tailscale	1 ●	4 ◐
-          ◐	engine				the engine is not installed		station setup
+          ◐	engine				the engine is not installed		station engine start
           ◐	api	3000	private	https://macbook.tail1234.ts.net:40002	not shared while the engine is stopped · reserved 40002
           ◐	api	8081	private	https://macbook.tail1234.ts.net:40000	not shared while the engine is stopped · reserved 40000		expo
           ●	w	3000	private	https://y.tail1234.ts.net:40000	shared	node

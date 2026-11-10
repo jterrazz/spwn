@@ -1,0 +1,23 @@
+description: 'init leaves a damaged VM record and reservations file as they are, for the reading command to name'
+fixture:
+    - ../__fixtures__/setup-stubs/
+    - ./__fixtures__/damaged-records/
+env:
+    - USER=tester
+runs:
+    - command: 'init --name t'
+      exit: 0
+      stdout: |
+          ●	name	t
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          .local/state/station/vms/x.json:
+              equals: |-
+                  {"name": "x", "ima
+          .local/state/station/leases.json:
+              equals: |-
+                  {"schema": "station.le

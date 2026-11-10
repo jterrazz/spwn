@@ -1,0 +1,31 @@
+description: 'init writes go''s env file, mise''s settings, ~/.npmrc and the bunfig; a rerun changes nothing'
+runs:
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none yet: apps and settings come one at a time
+      files:
+          Library/Application Support/go/env: { equals: "GOPATH={{workdir}}/.local/share/go\nGOMODCACHE={{workdir}}/.cache/go/mod\n" }
+          .npmrc: { equals: "cache={{workdir}}/.cache/npm\n" }
+          .config/mise/config.toml: { equals: "[settings]\ngo_set_gobin = false\n" }
+          .bunfig.toml: { equals: "# >>> station >>>\n[install]\nglobalDir = \"{{workdir}}/.local/share/bun/install/global\"\nglobalBinDir = \"{{workdir}}/.local/share/bun/bin\"\n\n[install.cache]\ndir = \"{{workdir}}/.cache/bun/install\"\n# <<< station <<<\n" }
+    - command: 'init </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none yet: apps and settings come one at a time
+    - command: '--version >/dev/null; /bin/cat "Library/Application Support/go/env" .npmrc'
+      exit: 0
+      stdout: |
+          GOPATH={{workdir}}/.local/share/go
+          GOMODCACHE={{workdir}}/.cache/go/mod
+          cache={{workdir}}/.cache/npm
