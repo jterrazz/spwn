@@ -33,17 +33,20 @@ type hypervisor struct {
 	fs     local.FS
 	clock  local.Clock
 	kernel Kernel
-	path   string
 	files  files
 }
 
 func New(run local.Runner, fs local.FS, clock local.Clock, kernel Kernel, stateDir string) contract.Hypervisor {
-	// invariant: the tart path is resolved here, absolute, because a launchd agent has no PATH of the owner's.
-	path, ok := run.LookPath(name)
-	if !ok {
-		path = name
+	return &hypervisor{run: run, fs: fs, clock: clock, kernel: kernel, files: files{state: stateDir}}
+}
+
+// invariant: the tart path is resolved at each call, absolute, because a launchd
+// agent has no PATH of the owner's and tart may land after this value is built.
+func (h *hypervisor) bin() string {
+	if path, ok := h.run.LookPath(name); ok {
+		return path
 	}
-	return &hypervisor{run: run, fs: fs, clock: clock, kernel: kernel, path: path, files: files{state: stateDir}}
+	return name
 }
 
 func (h *hypervisor) Name() string { return name }
@@ -87,7 +90,7 @@ func stateOf(s string) contract.DiskState {
 }
 
 func (h *hypervisor) exec(ctx context.Context, timeout time.Duration, args ...string) (string, error) {
-	out, err := h.run.Output(ctx, local.Cmd{Name: h.path, Args: args, Timeout: timeout})
+	out, err := h.run.Output(ctx, local.Cmd{Name: h.bin(), Args: args, Timeout: timeout})
 	if err != nil {
 		return "", fmt.Errorf("tart %s: %w", args[0], err)
 	}

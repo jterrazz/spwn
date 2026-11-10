@@ -1,6 +1,8 @@
 #!/bin/sh
 # bash as a curl installer meets it: each argument recorded in brackets, then the
-# variables that keep the installer from touching ~/.zshrc.
+# variables that keep the installer from touching ~/.zshrc. Homebrew's installer puts
+# brew where the real one does, under the system root's /opt/homebrew/bin, which is
+# on no PATH; every other installer leaves nothing behind.
 case "$1 $2" in
     "-c script=\"\$(curl -fsSL \"\$0\")\" && exec bash -c \"\$script\" bash \"\$@\"") ;;
     *)
@@ -11,3 +13,9 @@ esac
 line='bash'
 for arg in "$@"; do line="$line [$arg]"; done
 printf '%s env RUNZSH=%s CHSH=%s KEEP_ZSHRC=%s\n' "$line" "$RUNZSH" "$CHSH" "$KEEP_ZSHRC" >> "$HOME/.calls"
+case "$*" in
+    *Homebrew/install*)
+        /bin/mkdir -p "$STATION_SYSTEM_ROOT/opt/homebrew/bin"
+        /bin/cp "$HOME/later/brew" "$STATION_SYSTEM_ROOT/opt/homebrew/bin/brew"
+        ;;
+esac

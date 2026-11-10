@@ -65,7 +65,7 @@ func (h *hypervisor) Boot(ctx context.Context, vm string, o contract.BootOptions
 		return nil, err
 	}
 	_ = h.fs.Remove(h.files.exit(vm))
-	argv := []string{h.path, "run", "--no-graphics", "--no-audio", "--serial-path", console}
+	argv := []string{h.bin(), "run", "--no-graphics", "--no-audio", "--serial-path", console}
 	if o.Network.Bridged {
 		if iface := h.defaultInterface(ctx); iface != "" {
 			argv = append(argv, "--net-bridged="+iface)

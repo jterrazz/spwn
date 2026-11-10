@@ -1,0 +1,14 @@
+description: 'a Homebrew installed by this very run is found at once: the next step bundles through it'
+fixture: ./__fixtures__/script-installers/
+runs:
+    - command: 'apps install homebrew jq'
+      exit: 0
+      stdout: |
+          ●	homebrew		script
+          ●	jq	1.7.1	brew
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh] env RUNZSH= CHSH= KEEP_ZSHRC=
+                  brew bundle install --no-upgrade --file=-
+                  brew "jq"

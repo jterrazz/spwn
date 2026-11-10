@@ -67,7 +67,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 		if _, ok := s.lined(ready[0]); ok {
 			done = s.bundle(ctx, verbInstall, ready, false)
 		} else {
-			done = []apps.Outcome{s.run(ctx, verbInstall, ready[0], contract.Installer.Install)}
+			done = []apps.Outcome{s.landed(ctx, ready[0], s.run(ctx, verbInstall, ready[0], contract.Installer.Install))}
 		}
 		for i := range done {
 			o := done[i]
@@ -251,6 +251,18 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 		out = append(out, o)
 	}
 	return out
+}
+
+// invariant: a script reports only its own exit code, so an install that left
+// none of the commands the item provides behind is a failure, never an OK.
+func (s *Shelf) landed(ctx context.Context, t catalog.App, o apps.Outcome) apps.Outcome {
+	if o.Result != catalog.StateOK || s.install(t).Method() != catalog.MethodScript || len(t.Provides) == 0 {
+		return o
+	}
+	if !settled(s.states(ctx, []catalog.App{t})[t.Name]) {
+		o.Result, o.Detail = catalog.StateBroken, "installed, but "+t.Provides[0]+" is not found on the search path"
+	}
+	return o
 }
 
 type verbOf func(contract.Installer, context.Context, []catalog.Install, call.Progress) error

@@ -1,0 +1,19 @@
+#!/bin/sh
+# Homebrew as its installer leaves it, under /opt/homebrew/bin: a bundle is recorded
+# with its Brewfile and puts jq on PATH, which its listing then shows.
+case "$*" in
+    "--version") echo "Homebrew 5.0.1" ;;
+    "list --formula --versions") if [ -f "$HOME/bin/jq" ]; then printf 'jq 1.7.1\n'; fi ;;
+    "list --cask --versions") ;;
+    "bundle install --no-upgrade --file=-")
+        printf 'brew %s\n' "$*" >> "$HOME/.calls"
+        /bin/cat >> "$HOME/.calls"
+        /bin/mkdir -p "$HOME/bin"
+        printf '#!/bin/sh\necho jq-1.7.1\n' > "$HOME/bin/jq"
+        /bin/chmod +x "$HOME/bin/jq"
+        ;;
+    *)
+        echo "stub brew: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

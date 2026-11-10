@@ -1,0 +1,15 @@
+description: 'a later run finds the Homebrew an earlier one installed: its installer, and its sudo, never run twice'
+fixture: ../script/__fixtures__/script-installers/
+runs:
+    - command: 'apps install homebrew'
+      exit: 0
+      stdout: |
+          ●	homebrew		script
+    - command: 'apps install homebrew'
+      exit: 0
+      stdout: |
+          ●	homebrew		script	already installed
+    - command: '--version >/dev/null; /usr/bin/grep -c Homebrew/install .calls'
+      exit: 0
+      stdout: |
+          1

@@ -1,0 +1,10 @@
+description: 'a script that exits 0 and leaves no command behind is a failure, not an install'
+fixture: ./__fixtures__/script-installers/
+runs:
+    - command: 'apps install claude'
+      exit: 1
+      stdout: |
+          ✗	claude		script	installed, but claude is not found on the search path
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install claude
