@@ -10,7 +10,7 @@ const (
 )
 
 var coreApps = []App{
-	{Name: "homebrew", Description: "macOS package manager", Category: CategoryPackageManagers, Installs: OnMacOS(Script("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")), Provides: []string{"brew"}, Version: VersionRead{Args: []string{"brew", "--version"}, Pattern: `^Homebrew (\S+)`}, Disk: diskHomebrew, System: true},
+	{Name: "homebrew", Description: "macOS package manager", Category: CategoryPackageManagers, Installs: OnMacOS(Script("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")), Provides: []string{"brew"}, Path: []string{"/opt/homebrew/bin", "/usr/local/bin"}, Version: VersionRead{Args: []string{"brew", "--version"}, Pattern: `^Homebrew (\S+)`}, Disk: diskHomebrew, System: true},
 	{Name: "mise", Description: "Polyglot runtime manager: node, go, python, bun, rust, java", Category: CategoryPackageManagers, Installs: Everywhere(Brew("mise"), Script("https://mise.run")), Provides: []string{"mise"}, Disk: diskMise, System: true},
 	{Name: "mas", Description: "Mac App Store command line", Category: CategoryPackageManagers, Installs: OnMacOS(Brew("mas")), Provides: []string{"mas"}},
 	{Name: "uv", Description: "Fast Python package and project manager", Category: CategoryPackageManagers, Installs: Everywhere(Brew("uv"), Mise("uv", "latest")), Provides: []string{"uv"}, Disk: diskUv},

@@ -49,13 +49,17 @@ type App struct {
 	AppStore    bool
 	Installs    []LivesOn
 	Provides    []string
-	Bundle      string
-	Version     VersionRead
-	Requires    []string
-	Then        []string
-	Live        Liveness
-	Disk        Disk
-	System      bool
+	// value: the absolute folders the item lands its commands in, off the
+	// system's PATH, which station's own search adds so what it installs is
+	// found in the same run; the forerunner of the method key `path:`.
+	Path     []string
+	Bundle   string
+	Version  VersionRead
+	Requires []string
+	Then     []string
+	Live     Liveness
+	Disk     Disk
+	System   bool
 }
 
 // invariant: which machine kinds accept a method is the `kinds` column of the

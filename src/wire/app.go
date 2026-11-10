@@ -70,7 +70,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	if session != nil {
 		world = session.thisMac()
 	}
-	thisMac := resolve(local.New(env, childIn, stdout, stderr), darwin.NewDoor(env), vars, world)
+	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(vars)), darwin.NewDoor(env), vars, world)
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
@@ -223,9 +223,7 @@ func withAppBins(env []string, guest bool) []string {
 	if home == "" {
 		return env
 	}
-	if !filepath.IsAbs(apps) {
-		apps = filepath.Join(home, catalog.AppData)
-	}
+	apps = appData(home, apps)
 	have := strings.Split(path, ":")
 	var dirs []string
 	if guest {
@@ -248,6 +246,28 @@ func withAppBins(env []string, guest bool) []string {
 	}
 	out[at] = "PATH=" + path
 	return out
+}
+
+func appData(home, moved string) string {
+	if filepath.IsAbs(moved) {
+		return moved
+	}
+	return filepath.Join(home, catalog.AppData)
+}
+
+// value: the folders an install lands its commands in, declared by their
+// owners and handed to the platform's search: each catalogue item's Path, of
+// the system, and under home the bin a script installs into and the app
+// manager's shims.
+func landing(vars map[string]string) local.Search {
+	var s local.Search
+	for _, a := range catalog.Apps {
+		s.System = append(s.System, a.Path...)
+	}
+	if home := vars["HOME"]; filepath.IsAbs(home) {
+		s.Home = []string{filepath.Join(home, ".local", "bin"), filepath.Join(appData(home, vars[catalog.AppDataVar]), catalog.AppShims)}
+	}
+	return s
 }
 
 type machine struct {
