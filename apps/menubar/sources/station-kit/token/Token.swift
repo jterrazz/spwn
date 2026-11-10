@@ -80,7 +80,6 @@ public enum Token {
         public static let label: CGFloat = 11
         public static let caption: CGFloat = 10.5
         public static let tag: CGFloat = 10
-        public static let pill: CGFloat = 13.5
         public static let mini: CGFloat = 12
         public static let key: CGFloat = 12
         public static let segment: CGFloat = 12.5
@@ -882,12 +881,10 @@ extension Token {
     public enum Detail {
         public static let chevron: CGFloat = 12
         public static let back: CGFloat = 11
-        public static let caret: CGFloat = 10
         public static let menu: CGFloat = 13
         public static let menuStroke: CGFloat = 14
         public static let check: CGFloat = 12
         public static let knob: CGFloat = 18
-        public static let pillIcon: CGFloat = 22
         public static let caretHeight: CGFloat = 14
         public static let anchor: CGFloat = 1
         public static let figureTracking: CGFloat = -0.01

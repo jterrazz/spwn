@@ -699,27 +699,3 @@ public struct FootNote: View {
     }
 }
 
-// value: the machine switcher as the vision's capsule: This Mac's icon,
-// its name in 13.5 pt semibold, a chevron; open, raised and ringed in the
-// accent.
-struct SwitcherPill: View {
-    let open: Bool
-    @Environment(\.colorScheme) private var scheme
-    @Environment(\.stationPalette) private var palette
-
-    var body: some View {
-        HStack(spacing: Token.Gap.item) {
-            IconTile(Token.Symbol.mac, active: true, size: Token.Detail.pillIcon)
-            Text(Page.ThisMacWord).font(.system(size: Token.Size.pill, weight: .semibold)).foregroundStyle(Token.Ink.primary)
-            Image(systemName: Token.Symbol.down).font(.system(size: Token.Detail.caret, weight: .bold)).foregroundStyle(palette.glyph)
-        }
-        .padding(EdgeInsets(top: Token.Gap.flank, leading: Token.Gap.flank, bottom: Token.Gap.flank, trailing: Token.Gap.block))
-        .background {
-            Capsule().fill(open ? Token.Fill.raised(scheme) : Token.Fill.tile(scheme))
-            Capsule().strokeBorder(Token.Fill.edge(scheme), lineWidth: Token.Stroke.hair)
-            if open { Capsule().stroke(palette.accent.opacity(Token.Fill.ring), lineWidth: Token.Stroke.open).padding(-Token.Stroke.open / 2) }
-        }
-        .contentShape(Capsule())
-    }
-}
-
