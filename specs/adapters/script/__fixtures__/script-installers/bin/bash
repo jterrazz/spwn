@@ -2,7 +2,8 @@
 # bash as a curl installer meets it: each argument recorded in brackets, then the
 # variables that keep the installer from touching ~/.zshrc. Homebrew's installer puts
 # brew where the real one does, under the system root's /opt/homebrew/bin, which is
-# on no PATH; every other installer leaves nothing behind.
+# on no PATH; Claude's puts claude in ~/.local/bin, on no PATH either, after calling
+# brew by name as a later step of the run does; every other installer leaves nothing.
 case "$1 $2" in
     "-c script=\"\$(curl -fsSL \"\$0\")\" && exec bash -c \"\$script\" bash \"\$@\"") ;;
     *)
@@ -17,5 +18,11 @@ case "$*" in
     *Homebrew/install*)
         /bin/mkdir -p "$STATION_SYSTEM_ROOT/opt/homebrew/bin"
         /bin/cp "$HOME/later/brew" "$STATION_SYSTEM_ROOT/opt/homebrew/bin/brew"
+        ;;
+    *claude.ai/install*)
+        brew --version >> "$HOME/.calls"
+        /bin/mkdir -p "$HOME/.local/bin"
+        printf '#!/bin/sh\necho 2.1.0\n' > "$HOME/.local/bin/claude"
+        /bin/chmod +x "$HOME/.local/bin/claude"
         ;;
 esac

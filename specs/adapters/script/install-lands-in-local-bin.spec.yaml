@@ -1,0 +1,14 @@
+description: 'a script that lands its command in ~/.local/bin, on no PATH, is installed, and what it runs by name finds the Homebrew installed just before'
+fixture: ./__fixtures__/script-installers/
+runs:
+    - command: 'apps install homebrew claude'
+      exit: 0
+      stdout: |
+          ●	homebrew		script
+          ●	claude		script
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh] env RUNZSH= CHSH= KEEP_ZSHRC=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://claude.ai/install.sh] env RUNZSH= CHSH= KEEP_ZSHRC=
+                  Homebrew 5.0.1

@@ -17,11 +17,12 @@ import (
 )
 
 type runner struct {
-	env    []string
-	dirs   []string
-	stdin  io.Reader
-	stdout io.Writer
-	stderr io.Writer
+	env      []string
+	dirs     []string
+	managers []string // the folders a manager or a script lands in, which a child's PATH carries too
+	stdin    io.Reader
+	stdout   io.Writer
+	stderr   io.Writer
 }
 
 func (r *runner) LookPath(name string) (string, bool) {
@@ -53,7 +54,7 @@ func (r *runner) command(ctx context.Context, c Cmd) (context.Context, *exec.Cmd
 	}
 	cmd := exec.CommandContext(ctx, path, c.Args...)
 	cmd.Dir = c.Dir
-	cmd.Env = append(append([]string{}, r.env...), c.Env...)
+	cmd.Env = r.withManagers(append(append([]string{}, r.env...), c.Env...))
 	if c.Track != "" {
 		// invariant: a tracked child leads its own process group, so the end of
 		// its context kills whatever it spawned too, never only the direct child.
@@ -62,6 +63,35 @@ func (r *runner) command(ctx context.Context, c Cmd) (context.Context, *exec.Cmd
 		cmd.WaitDelay = time.Second
 	}
 	return ctx, cmd, cancel, nil
+}
+
+// invariant: a child finds by name what an earlier step of the run installed: the
+// manager folders that exist now are appended to the PATH it is given, the last
+// PATH of env, so a PATH set for one command keeps its order and gains them last.
+func (r *runner) withManagers(env []string) []string {
+	path := ""
+	for _, kv := range env {
+		if v, ok := strings.CutPrefix(kv, "PATH="); ok {
+			path = v
+		}
+	}
+	have := map[string]bool{}
+	for _, d := range strings.Split(path, ":") {
+		have[d] = true
+	}
+	for _, d := range r.managers {
+		if info, err := os.Stat(d); err == nil && info.IsDir() && !have[d] {
+			if path != "" {
+				path += ":"
+			}
+			path += d
+			have[d] = true
+		}
+	}
+	if path != "" {
+		env = append(env, "PATH="+path)
+	}
+	return env
 }
 
 func run(cmd *exec.Cmd, track string) error {

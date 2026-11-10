@@ -8,8 +8,8 @@ runs:
           ●	zshrc
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart, ~/.local/opt
-          ○	engine	not needed until tart is installed
-          ○	apps	missing: homebrew mise git tart tailscale: run station setup on a terminal
+          ○	engine	launchd is not here to run it
+          ○	apps	missing: homebrew mise git tailscale: run station setup on a terminal
           ●	settings	applied hushlogin git-shortcuts docker-shortcuts
           ○	ssh-key	next: station settings apply ssh-key
           ○	spotlight-exclude	next: station settings apply spotlight-exclude
@@ -32,8 +32,8 @@ runs:
           ●	zshrc
           ●	layout	nothing to retire
           ●	relocate	nothing to do
-          ○	engine	not needed until tart is installed
-          ○	apps	missing: homebrew mise git tart tailscale: run station setup on a terminal
+          ○	engine	launchd is not here to run it
+          ○	apps	missing: homebrew mise git tailscale: run station setup on a terminal
           ●	settings
           ○	ssh-key	next: station settings apply ssh-key
           ○	spotlight-exclude	next: station settings apply spotlight-exclude

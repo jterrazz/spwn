@@ -10,7 +10,7 @@ runs:
           ●	zshrc
           ●	layout	nothing to retire
           ✗	relocate	tart is running: its files cannot move under it
-          ○	engine	not needed until tart is installed
+          ○	engine	launchd is not here to run it
       stderr: |
           Error: setup step relocate: tart is running: its files cannot move under it
           Hint: stop the permanent VMs and delete the throwaway ones (station machines), then station setup
