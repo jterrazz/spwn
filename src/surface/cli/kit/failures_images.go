@@ -36,7 +36,7 @@ func imagesFailure(err error) (*fail.Error, bool) {
 		return usage(noRecipe.Error(), "station images update "+noRecipe.Image), true
 	case errors.As(err, &unpublished):
 		if unpublished.Buildable {
-			return failed(unpublished.Error(), "not released · station images build "+unpublished.Image, err), true
+			return failed(unpublished.Error(), "station images build "+unpublished.Image, err), true
 		}
 		return failed(unpublished.Error(), "station images", err), true
 	case errors.As(err, &registry):

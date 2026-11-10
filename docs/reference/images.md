@@ -37,7 +37,7 @@ station images update           # every image this Mac holds
 station images update linux     # ●  linux  2026.11.03  fetched
 ```
 
-Station releases no image: each Mac builds its own. An update asks the registry `ghcr.io/jterrazz/station-<image>` (one tag per version) for the newest version, and an image it does not offer (the registry answers 403 or 404) exits 1 with `not released · station images build linux`, the gesture that makes it here. A version the registry does offer is fetched only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
+Station releases no image: each Mac builds its own. An update asks the registry `ghcr.io/jterrazz/station-<image>` (one tag per version) for the newest version, and an image it does not offer (the registry answers 403 or 404) exits 1 with `image linux is not released` and the hint `station images build linux`, the gesture that makes it here. A version the registry does offer is fetched only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
 
 ## The recipe
 

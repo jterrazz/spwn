@@ -5,4 +5,4 @@ runs:
       exit: 1
       stderr: |
           Error: image linux is not released
-          Hint: not released · station images build linux
+          Hint: station images build linux
