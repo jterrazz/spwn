@@ -1,8 +1,10 @@
-description: 'the five apps every machine depends on say system beside their method; the dev apps do not'
+description: 'no app says system beside its method, since init installs none; the dev apps say their method alone'
 fixture: ../../../__fixtures__/stubs/
 runs:
-    - command: 'apps --all | /usr/bin/awk -F "\t" ''$4 ~ / · system$/ { print $2 }'' | /usr/bin/sort | /usr/bin/tr "\n" " "'
+    - command: 'apps --all | /usr/bin/awk -F "\t" ''$4 ~ / · system$/ { n++ } END { print n + 0 }'''
       exit: 0
+      stdout: |
+          0
     - command: 'apps --all | /usr/bin/awk -F "\t" ''$2 ~ /^(node|xcode|orbstack|cocoapods|xcodegen|android-studio|lens)$/ { print $2, $4 }'''
       exit: 0
       stdout: |
