@@ -48,7 +48,7 @@ func managerDirs(vars map[string]string) []string {
 	_, fenced := vars["STATION_SYSTEM_DIRS"]
 	switch {
 	case filepath.IsAbs(root):
-		dirs = append(dirs, filepath.Join(root, "/opt/homebrew/bin"), filepath.Join(root, "/usr/local/bin"))
+		dirs = append(dirs, filepath.Join(root, "opt", "homebrew", "bin"), filepath.Join(root, "usr", "local", "bin"))
 	case !fenced:
 		dirs = append(dirs, "/opt/homebrew/bin", "/usr/local/bin")
 	}
