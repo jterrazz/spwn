@@ -9,7 +9,8 @@
 #   the log is .artifacts/e2e/menubar-<label>.log; what the run wrote under
 #   apps/menubar (an .actual.png, or with --update-goldens the rewritten goldens and
 #   INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
-#   STATION_XCODE_TAG picks the cirruslabs/macos-tahoe-xcode tag (default below).
+#   STATION_XCODE_TAG picks the cirruslabs/macos-tahoe-xcode tag (default below);
+#   STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display.
 set -uo pipefail
 
 label=${1:-}
@@ -39,7 +40,7 @@ tart_bin="$HOME/.local/bin/tart"
 # value: the store is the owner's: a clone never prunes its other images to make room.
 tart() { TART_NO_AUTO_PRUNE=1 "$tart_bin" "$@"; }
 
-tag=${STATION_XCODE_TAG:-26.5}
+tag=${STATION_XCODE_TAG:-27.2}
 image="ghcr.io/cirruslabs/macos-tahoe-xcode:$tag"
 hash=$(printf '%s' "$image" | shasum -a 256 | cut -c1-12)
 base="station-e2e-xcode-$hash"
@@ -82,6 +83,9 @@ fi
 t=$SECONDS
 tart clone "$base" "$vm" >> "$log" 2>&1 || fail "clone $base"
 tart set "$vm" --memory 8192 >> "$log" 2>&1 || fail "size $vm"
+# value: STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display, since the
+# icon goldens are drawn at the screen's scale.
+[ -z "${STATION_VM_DISPLAY:-}" ] || tart set "$vm" --display "$STATION_VM_DISPLAY" >> "$log" 2>&1 || fail "display $vm"
 tart run --no-graphics "$vm" >> "$work/tart.log" 2>&1 &
 tart_pid=$!
 ip=$(tart ip "$vm" --wait 180) || fail "no address for $vm"
@@ -103,6 +107,7 @@ until SSH_ASKPASS="$askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=none \
 done
 say "-- $vm at $ip, booted in $((SECONDS - t)) s"
 in_vm() { ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "$1"; }
+say "display: $(in_vm 'system_profiler SPDisplaysDataType | grep -E "Chipset|Resolution|UI Looks|Retina|Display Type"' 2>&1 | tr -s ' ' | tr '\n' ';')"
 say "xcode: $(in_vm 'xcodebuild -version | head -1; sw_vers -productVersion' 2>&1 | tr '\n' ' ')"
 
 # invariant: the branch goes in by git, the committed tree and nothing of the
