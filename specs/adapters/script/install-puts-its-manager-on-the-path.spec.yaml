@@ -1,5 +1,5 @@
 description: 'a Homebrew installed by this very run is found at once: the next step bundles through it'
-fixture: ./__fixtures__/script-installers/
+fixture: ../__fixtures__/script-installers/
 runs:
     - command: 'apps install homebrew jq'
       exit: 0

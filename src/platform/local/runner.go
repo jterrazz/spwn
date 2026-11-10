@@ -19,7 +19,7 @@ import (
 type runner struct {
 	env      []string
 	dirs     []string
-	managers []string // the folders a manager or a script lands in, which a child's PATH carries too
+	managers []string
 	stdin    io.Reader
 	stdout   io.Writer
 	stderr   io.Writer

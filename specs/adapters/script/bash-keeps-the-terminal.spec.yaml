@@ -1,5 +1,5 @@
 description: 'curl installers run under bash -c with the terminal kept, ohmyzsh leaving ~/.zshrc alone'
-fixture: ./__fixtures__/script-installers/
+fixture: ../__fixtures__/script-installers/
 runs:
     - command: 'apps install homebrew ohmyzsh'
       exit: 0

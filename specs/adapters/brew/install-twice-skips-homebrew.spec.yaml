@@ -1,5 +1,5 @@
-description: 'a later run finds the Homebrew an earlier one installed: its installer, and its sudo, never run twice'
-fixture: ../script/__fixtures__/script-installers/
+description: 'a second install finds the Homebrew the first one installed, so its installer never runs twice'
+fixture: ../__fixtures__/script-installers/
 runs:
     - command: 'apps install homebrew'
       exit: 0
