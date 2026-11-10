@@ -129,6 +129,26 @@ what its Mac binds on every interface, and the other VMs of its Mac (sshd,
 Docker's ports), whatever the Tailscale policy says; the Ports section shows
 each as Public when it is.
 
+## What the new MacBook met (2026-11-10)
+Four gaps found setting up the owner's new Mac and its first workspace, `os`.
+
+- **`git-signing` on a Linux workspace**: the setting is for Macs and macOS
+  VMs only, so a commit made in a Linux workspace is unsigned. Until it is
+  designed, the host edits and signs, and the workspace only runs the gates.
+- **The released images refuse a pull**: `station images update linux`
+  answered `the registry refused a pull token for jterrazz/station-linux:
+  403`, so the Mac built its own (`images build linux`, 2 min). Either the
+  ghcr package is published public, or `update` says it is private and
+  names `build`.
+- **The `linux` recipe lacks Chromium's libraries**: Playwright's headless
+  shell failed on `libatk-1.0.so.0` until `playwright install-deps chromium`
+  ran in the workspace. The recipe installs those packages, so a gate with a
+  browser runs on a fresh workspace.
+- **The release ships no `Station.app`**: the menu bar was built on the host
+  with `make menubar-install`, which needs a full Xcode (`actool`, then
+  `xcodebuild -runFirstLaunch`), outside the minimal host. The release
+  carries the signed bundle, so the host needs no Xcode.
+
 ## Smaller follow-ups
 - A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
