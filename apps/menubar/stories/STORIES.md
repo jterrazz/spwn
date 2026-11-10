@@ -2081,8 +2081,26 @@ Every transient confirmation the prototype fires, read from its code: the gestur
 
 ## Gaps: IA states the prototype does not draw
 
-These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture; the build owes each a story once designed: Mac unreachable / disk locked at boot (chip + Unlock the disk ↗); engine stopped (Start); a server in a restart loop (↺ 5 in 10 min banner); Apps, Settings, Disk and Background section pages; a misplaced folder (Move… sheet); disk under 5 % free; Ready to host servers with a failing check unfolded; Activity of a silent guest ("infra's guest does not answer"); a Mac row folding past 4 workspaces; more than 3 Macs collapsing; the stale marking on a remote Mac's own page (see `mac.mini.loading`); an agent hook not installed (K4: the tile shows only what is detected).
+These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture. Each has an id, which `StoryCoverageTests` lists as pending until it is designed into this file as a story of its own; that list only shrinks. Two are built, since SPEC v4 rules them.
+
+| Gap | Id | Status |
+| --- | --- | --- |
+| the stale marking on a remote Mac's own page (see `mac.mini.loading`) | `mac.mini.stale` | built (P4), its story under A Mac |
+| an agent hook not installed (K4: the tile shows only what is detected) | `workspace.hook-missing` | built (P9), its story under A workspace |
+| a Mac unreachable, told apart from an asleep one | `mac.unreachable` | pending |
+| a Mac's disk locked at boot (chip + Unlock the disk ↗) | `mac.disk-locked` | pending |
+| the engine stopped (Start) | `engine.stopped` | pending |
+| a server in a restart loop (↺ 5 in 10 min banner) | `server.loop` | pending |
+| the Apps, Settings, Disk and Background section pages | `section.apps`, `section.settings`, `section.disk`, `section.background` | pending |
+| a misplaced folder (Move… sheet) | `sheet.move-folder` | pending |
+| a disk under 5 % free | `mac.disk-low` | pending |
+| Ready to host servers with a failing check unfolded | `mac.ready.failing` | pending |
+| the Activity of a silent guest ("infra's guest does not answer") | `server.activity.silent` | pending |
+| a Mac row folding past 4 workspaces | `mac.many-workspaces` | pending |
+| more than 3 Macs collapsing | `home.many-macs` | pending |
+
+Beside the gaps, seven stories A2 designed after the prototype are held here and not built yet, pending in the same output as `unbuilt`: `agents.list`, `agents.empty`, `sheet.new-agent`, `sheet.new-agent.new`, `menu.context.agent`, `menu.page.agent`, `menu.new-agent.on`. Every other story of this file is green: its story file, its pages and its dark and light goldens (`INDEX.md`).
 
 ---
 
-178 stories (19 of them designed in A2, without a capture), 202 captures of the prototype (34 light; those of the 9 retired ids kept as their successors' reference). Since A2 this file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo A2, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).
+180 ids: 178 stories (19 of them designed in A2, without a capture) and the 2 gap stories built since; 202 captures of the prototype (34 light; those of the 9 retired ids kept as their successors' reference). Since A2 this file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo A2, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).

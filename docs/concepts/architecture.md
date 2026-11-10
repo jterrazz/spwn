@@ -25,8 +25,9 @@ The families, each with its model, `contract/`, `calls/` and `adapter/<tech>/`:
 src/
   machines/  apps/  settings/  disk/  ports/  accounts/  background/  awake/  activity/  images/
   agents/    the coding agents of a workspace, each named and in a terminal of its own: Judge folds
-             their hook events into a state, Scrub keeps only what privacy lets through; contracts
-             Hooks, Journal, Session, Forge, Repo
+             their hook events into a state, Scrub keeps only what privacy lets through
+             ([ADR-027](../decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)); contracts
+             Hooks, Journal, Session, Multiplexer, Forge, Repo
   overview/  the Overview's read (overview/calls), which composes every section's own read
   setup/     setup.run, the one bootstrap call, and the preferences groups it writes
   engine/    the engine's model (its events, its own calls), engine/calls, engine/contract (the Notifier)
@@ -77,7 +78,7 @@ The data, the presentation and the surfaces:
   cmd/       station/ (process entry: argv, environment, streams, once), generate/ (the compiler)
 ```
 
-Beside `src/`: `apps/menubar` (Swift, a client of the engine's socket), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
+Beside `src/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-stories-are-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
 
 ## The hexagon in each family
 
@@ -100,22 +101,22 @@ A strategy is a contract with several adapters chosen per item at run time, thro
 
 Each contract has a real adapter, a fake in its family's `adapter/fake/`, and a suite in its `contract/contracttest/` that both pass; the rule `contracts-are-whole` fails a contract missing any of the three.
 
-| Family       | Contracts                                                                                                | Adapters                                                                                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `machines`   | `Hypervisor`, `Guest` and `GuestDialer`, `CheckRunner`, `SSHConfig`, `Unlocker`, `Waker`, `MachineStore` | `tart`; `ssh` (one x/crypto connection per VM), `dial`; `openssh` (the `~/.ssh/config` block); `macos`; `udp` (the Wake-on-LAN packet); `jsonfile`   |
-| `images`     | `ImageSource`, `ImageStore`                                                                              | `oci` (ghcr); `jsonfile`                                                                                                                             |
-| `apps`       | `Installer` (strategy), `Bundler`, `Lined`                                                               | `brew`, `mas`, `mise`, `npm`, `bun`, `uv`, `skills`, `script`, `shell`, `app` (presence only)                                                        |
-| `settings`   | `Applier` (strategy), `Inspector`, `AppliedStore`                                                        | `dotfile`, `touch`, `gitaliases`, `zshblock`, `defaults`, `vault`, `neversleeps`, `agenthooks`, `docker`, `git`, `macos`; `cli`, `linux`; `jsonfile` |
-| `disk`       | `DiskUsage`                                                                                              | `apfs` (macOS), `posix` (Linux), `docker`                                                                                                            |
-| `ports`      | `Listeners`, `Tailnet`, `PublicRoute` (strategy), `ReservationStore`, `DeclarationStore`                 | `lsof` (macOS), `procnet` (Linux), `docker`, `guest`; `tailscale`; `cloudflare`, `funnel`, `lan`; `jsonfile`                                         |
-| `accounts`   | `Identities`, `Vault`, `SecretSource`, `ShareStore`                                                      | `cli` (catalogue-driven sign-in reads), `tailscale`; `keychain`; `studio`; `jsonfile`                                                                |
-| `background` | `Jobs`                                                                                                   | `launchd`                                                                                                                                            |
-| `awake`      | `Power`                                                                                                  | `macos` (IOKit through `platform/darwin`, `pmset`)                                                                                                   |
-| `activity`   | `Meter`                                                                                                  | `macos` (sysctl, IOKit block devices, proc_pidinfo), `linux` (`/proc`)                                                                               |
-| `agents`     | `Hooks` (strategy), `Journal`, `Session`, `Multiplexer`, `Forge`, `Repo`                                 | `claudecode`, `codex`; `jsonfile`; `herdr`; `gh`; `git`                                                                                              |
-| `engine`     | `Notifier`                                                                                               | `log` (the engine log)                                                                                                                               |
-| `remote`     | `Endpoint` and `EndpointDialer`                                                                          | `unix` (this Mac's engine socket), `sshstdio` (another Mac: `ssh <mac> station engine attach`)                                                       |
-| `core`       | `Self`, `Preferences`                                                                                    | `macos`, `linux`; `jsonfile` (`preferences.json`)                                                                                                    |
+| Family       | Contracts                                                                                                               | Adapters                                                                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `machines`   | `Hypervisor`, `Guest` and `GuestDialer`, `CheckRunner`, `SSHConfig`, `Unlocker`, `Waker`, `MachineStore`, `UptimeStore` | `tart`; `ssh` (one x/crypto connection per VM), `dial`; `openssh` (the `~/.ssh/config` block); `macos`; `udp` (the Wake-on-LAN packet); `jsonfile` (the VM records, the uptime) |
+| `images`     | `ImageSource`, `ImageStore`                                                                                             | `oci` (ghcr); `jsonfile`                                                                                                                                                        |
+| `apps`       | `Installer` (strategy), `Bundler`, `Lined`                                                                              | `brew`, `mas`, `mise`, `npm`, `bun`, `uv`, `skills`, `script`, `shell`, `app` (presence only)                                                                                   |
+| `settings`   | `Applier` (strategy), `Inspector`, `AppliedStore`                                                                       | `dotfile`, `touch`, `gitaliases`, `zshblock`, `defaults`, `vault`, `neversleeps`, `agenthooks`, `docker`, `git`, `macos`; `cli`, `linux`; `jsonfile`                            |
+| `disk`       | `DiskUsage`                                                                                                             | `apfs` (macOS), `posix` (Linux), `docker`                                                                                                                                       |
+| `ports`      | `Listeners`, `Tailnet`, `PublicRoute` (strategy), `ReservationStore`, `DeclarationStore`                                | `lsof` (macOS), `procnet` (Linux), `docker`, `guest`; `tailscale`; `cloudflare`, `funnel`, `lan`; `jsonfile`                                                                    |
+| `accounts`   | `Identities`, `Vault`, `SecretSource`, `ShareStore`                                                                     | `cli` (catalogue-driven sign-in reads), `tailscale`; `keychain`; `studio`; `jsonfile`                                                                                           |
+| `background` | `Jobs`                                                                                                                  | `launchd`                                                                                                                                                                       |
+| `awake`      | `Power`                                                                                                                 | `macos` (IOKit through `platform/darwin`, `pmset`)                                                                                                                              |
+| `activity`   | `Meter`                                                                                                                 | `macos` (sysctl, IOKit block devices, proc_pidinfo), `linux` (`/proc`)                                                                                                          |
+| `agents`     | `Hooks` (strategy), `Journal`, `Session`, `Multiplexer`, `Forge`, `Repo`                                                | `claudecode`, `codex`; `jsonfile`; `herdr`; `gh`; `git`                                                                                                                         |
+| `engine`     | `Notifier`                                                                                                              | `log` (the engine log)                                                                                                                                                          |
+| `remote`     | `Endpoint` and `EndpointDialer`                                                                                         | `unix` (this Mac's engine socket), `sshstdio` (another Mac: `ssh <mac> station engine attach`)                                                                                  |
+| `core`       | `Self`, `Preferences`                                                                                                   | `macos`, `linux`; `jsonfile` (`preferences.json`)                                                                                                                               |
 
 Not a contract, on purpose: the activity history and the engine's run registry live in `engine/process` and are reached through the small consumer-side interfaces a family's `calls` declares (`machines/calls.Runs`, `activity/calls.History`); there is nothing to swap and nothing to fake. Infrastructure is not a contract either: `Runner`, `FS`, `Env`, `Net`, `Sockets` and `Clock` are `platform/local`'s, importable by adapters only, so no call and no model can run a command or open a file.
 
@@ -146,8 +147,10 @@ So there is one way into a VM (its Mac's engine and its one `Guest` connection) 
 | `awake`    | on a reading change, on `never_sleeps`, on the loop    | holds the keep-awake session and Never sleeps (`Power.Hold`), ends them by the guards this Mac's capabilities allow |
 | `sample`   | every 2 s while a surface watches a machine, else 60 s | feeds Activity's history (`engine/jobs`)                                                                            |
 | `exposure` | every 5 min                                            | reads every listener of this Mac and its VMs; a port reachable outside Tailscale undeclared is told                 |
+| `back`     | every 30 s while the owner asked to be told of a Mac   | asks that Mac; the moment it answers, `mac_back` is told once and the ask is cleared                                |
+| `live`     | every 2 s while a watch of pages lists live keys       | reads every open page's live keys at once and sends each watch one `sample`                                         |
 
-An event (`engine.Event`: its name, its machine, its text, its severity) is the one channel the `Notifier` and the menu bar read: `server_restarting`, `server_loop`, `server_powered_off`, `server_back`, `awake_ended`, `port_exposed`, `disk_low`. The menu bar's pages are built in `engine/feeds` over watches, and streamed to it as `station.page/v1`.
+An event is the one channel the `Notifier` and the menu bar read, a `notice` of the closed list `engine.Notifies` holds: `server_restarting`, `server_loop`, `server_powered_off`, `server_back`, `awake_ended`, `port_exposed`, `disk_low`, and the menu bar's own, `agent_started`, `agent_waiting` and `agent_finished` (the `guest` job's report of a VM's agents, told on a change), `vm_ready`, `mac_back` (the `back` job) and `share_ended` (in the list, told by no job yet). Each carries its kind, the SF Symbol its HUD draws and its words ([The API](../reference/api.md#the-engines-own-calls)). The menu bar's pages are built in `engine/feeds` over watches, and streamed to it as `station.page/v1`.
 
 ## The fake world
 
@@ -234,7 +237,7 @@ Each store carries its version; `station setup` runs every store's `Migrator`, a
 
 ## The compiler
 
-This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`src/cmd/generate/`), which writes, from the catalogue and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the page fixtures of `src/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`src/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM and its variants, the clock pinned at 2026-11-07 10:30) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `src/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
+This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`src/cmd/generate/`), which writes, from the catalogue and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the page fixtures of `src/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`src/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM, the clock pinned at 2026-11-07 10:30, and its variants, one file per group of stories, `stories_<group>.go`) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `src/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
 
 ## Related
 

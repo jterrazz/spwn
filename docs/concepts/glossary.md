@@ -87,19 +87,24 @@ Code identifiers follow the words (`Mac`, `VM`, `Lifetime`, `LivesOn`). A word l
 
 The architecture has its own words, used in Go and in the docs, never in the interface ([Architecture](architecture.md)):
 
-| Word           | Means                                                                                                             |
-| -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **family**     | a top-level package of `src/`: a section's family, or a noun of its own (`machines`, `images`, `engine`, `setup`) |
-| **model**      | a family's root package: its values and rules, no I/O                                                             |
-| **contract**   | an interface in a family's `contract/`: one need of station from the world outside                                |
-| **adapter**    | a contract's implementation for one technology, in `adapter/<tech>/`; `fake` is the one over the world            |
-| **strategy**   | a contract with several adapters chosen per item at run time, through one registry                                |
-| **call**       | a use case, `<family>.<verb>`, in a family's `calls/`; a **watch** is a read that fills progressively             |
-| **Router**     | what decides on which machine and in which process a call runs                                                    |
-| **Profile**    | what a machine is and can do: its kind, its system, its capabilities                                              |
-| **capability** | a fact a machine reports through the contract that owns it (a battery, a lid, a job manager, a hypervisor)        |
-| **world**      | the fake world the spec build runs every fake over                                                                |
-| **tailnet**    | Tailscale's private network, as the `Tailnet` contract names it; the interface says Tailscale                     |
+| Word                | Means                                                                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **family**          | a top-level package of `src/`: a section's family, or a noun of its own (`machines`, `images`, `engine`, `setup`)                                                                  |
+| **model**           | a family's root package: its values and rules, no I/O                                                                                                                              |
+| **contract**        | an interface in a family's `contract/`: one need of station from the world outside                                                                                                 |
+| **adapter**         | a contract's implementation for one technology, in `adapter/<tech>/`; `fake` is the one over the world                                                                             |
+| **strategy**        | a contract with several adapters chosen per item at run time, through one registry                                                                                                 |
+| **call**            | a use case, `<family>.<verb>`, in a family's `calls/`; a **watch** is a read that fills progressively                                                                              |
+| **Router**          | what decides on which machine and in which process a call runs                                                                                                                     |
+| **Profile**         | what a machine is and can do: its kind, its system, its capabilities                                                                                                               |
+| **capability**      | a fact a machine reports through the contract that owns it (a battery, a lid, a job manager, a hypervisor)                                                                         |
+| **world**           | the fake world the spec build runs every fake over                                                                                                                                 |
+| **tailnet**         | Tailscale's private network, as the `Tailnet` contract names it; the interface says Tailscale                                                                                      |
+| **story**           | one state of the menu bar's panel: an id of `apps/menubar/stories/STORIES.md`, its `<id>.story.json` and its goldens; never the catalogue, which is what station puts on a machine |
+| **golden**          | the PNG a story or a view is proved against, dark and light, drawn offscreen                                                                                                       |
+| **Station Catalog** | the dev-only window over every story, `make catalog-open`; its export and gallery draw the same stories headless                                                                   |
+| **live key**        | `<measure>:<machine>`, a moving number a page follows (`cpu:linux-1`), its value sent in each `sample`                                                                             |
+| **notice**          | what the engine tells, of a closed list of kinds: the menu bar's HUD and the owner's notifications                                                                                 |
 
 ## The verbs
 

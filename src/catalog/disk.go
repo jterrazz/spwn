@@ -158,6 +158,7 @@ var StationDisk = Disk{
 		noted(conf("{config}/station/services.env", Linux, MacOS), "its profiles' exports, written by the guest"),
 		noted(data("{state}/station/guest.json", Linux, MacOS), "the Mac that runs it"),
 		noted(data("{state}/station/guest.sock", Linux, MacOS), "the guest's socket, live while it runs"),
+		noted(data("{state}/station/agents/*.json", Linux, MacOS), "its agents' journal, one file per session, 0600: each agent's name, task, state, steps and the scrubbed words of its last message, folded from its hooks"),
 		noted(conf("~/.zshrc"), "the one managed block"),
 		noted(conf("~/.ssh/config"), "one block per machine"),
 		noted(kept("{state}/station/vms/*.json"), "VM records: do not delete"),

@@ -39,6 +39,16 @@ the infrastructure moved from OrbStack to a server (`machines create infra
 --server --check https://infra:6443/readyz`), images built there. Ask the
 owner before any test on it.
 
+## The menu bar's stories left after v4
+Seven stories A2 designed are in STORIES.md but not built: the Agents
+fleet page (`agents.list`, `agents.empty`), the New agent sheet
+(`sheet.new-agent`, `sheet.new-agent.new`) and the agent's menus
+(`menu.context.agent`, `menu.page.agent`, `menu.new-agent.on`). Fourteen
+gap ids wait for a design before they are stories (STORIES.md, "Gaps").
+`share_ended` is a notice kind the HUD knows and no engine job tells yet:
+the take-back of a copy at its term is where it would be told. Each starts
+as a lot of its own once the owner asks for it.
+
 ## Long-running agents
 Hermes and OpenClaw as long-running VMs on an always-on Mac. Not designed: the
 owner still starts them by hand. Their gateway rows were dropped from the
@@ -51,6 +61,7 @@ Docker's ports), whatever the Tailscale policy says; the Ports section shows
 each as Public when it is.
 
 ## Smaller follow-ups
+- A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
 - Memory soak: a Linux VM 8 h under load, the Mac's RSS of the VM process.
 - `machines edit <vm> --permanent`: turn a throwaway workspace permanent (rewrite its record; the engine reads it).

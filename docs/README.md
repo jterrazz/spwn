@@ -75,5 +75,9 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [023 A VM's CPU on its Mac is the process that holds its guest's disk](decisions/023-a-vms-cpu-is-its-guests-process.md)
 - [024 Agents run in Herdr, and tmux is no adapter](decisions/024-agents-run-in-herdr.md)
 - [025 Agents have their own lifecycle, apart from their VM](decisions/025-agents-have-their-own-lifecycle.md)
+- [026 The stories are the menu bar's test suite](decisions/026-the-stories-are-the-menu-bars-test-suite.md)
+- [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)
+- [028 A server's card shows its latency, not its traffic](decisions/028-a-servers-card-shows-latency-not-traffic.md)
+- [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
