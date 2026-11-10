@@ -4,9 +4,9 @@
 
 ## Start
 
-| Page                                        | Answers                                           |
-| ------------------------------------------- | ------------------------------------------------- |
-| [Getting started](start/getting-started.md) | From a fresh Mac to a named, set-up Mac, in order |
+| Page                                        | Answers                                        |
+| ------------------------------------------- | ---------------------------------------------- |
+| [Getting started](start/getting-started.md) | From a fresh Mac to a named Mac, then its apps |
 
 ## Guides
 
@@ -79,5 +79,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [027 The agent hook keeps a scrubbed line, never code or commands](decisions/027-the-agent-hook-keeps-a-scrubbed-line.md)
 - [028 A server's card shows its latency, not its traffic](decisions/028-a-servers-card-shows-latency-not-traffic.md)
 - [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
+- [030 init makes a machine known; apply carries its Machinefile](decisions/030-init-makes-a-machine-known-apply-carries-its-machinefile.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
