@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -57,7 +58,7 @@ func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, _ call.P
 	ran, err := b.run.Attach(ctx, c, local.ToStderr)
 	switch {
 	case err != nil:
-		return errors.New(bundle + ": " + err.Error())
+		return fmt.Errorf("%s: %w", bundle, err)
 	case ran.ExitCode != 0:
 		failure := bundle + " exited " + strconv.Itoa(ran.ExitCode)
 		if ran.LastStderr != "" {
@@ -219,7 +220,7 @@ func (b *Brew) outdated(ctx context.Context, flags ...string) (map[string]string
 	}
 	var parsed outdatedJSON
 	if err := json.Unmarshal([]byte(out.Stdout), &parsed); err != nil {
-		return nil, errors.New("brew outdated: " + err.Error())
+		return nil, fmt.Errorf("brew outdated: %w", err)
 	}
 	behind := map[string]string{}
 	for _, f := range parsed.Formulae {

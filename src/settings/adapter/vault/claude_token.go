@@ -3,7 +3,7 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"slices"
 	"time"
 
@@ -77,7 +77,7 @@ func (c *ClaudeToken) Apply(ctx context.Context, it catalog.Setting, values map[
 	cmd := local.Command("studio", "credentials", "import")
 	cmd.Stdin = string(payload)
 	if _, err = local.Must(ctx, c.run, cmd); err != nil {
-		return settings.Change{}, errors.New("studio credentials import failed: " + err.Error())
+		return settings.Change{}, fmt.Errorf("studio credentials import failed: %w", err)
 	}
 	change := settings.Change{Steps: []settings.ChangeStep{{Label: tokenName, State: catalog.StateOK, Detail: kept}}}
 	if err := c.share.Add(tokenName); err != nil {

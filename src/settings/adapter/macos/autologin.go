@@ -3,6 +3,7 @@ package macos
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/fs"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -48,7 +49,7 @@ func (m *Mac) applyAutologin(ctx context.Context, values map[string]string) (set
 	// XOR cipher loginwindow has read since 10.4) plus autoLoginUser; loginwindow at boot
 	// still honors DisableFDEAutoLogin.
 	if err := m.files.WriteFile(kcpasswordTo, encodeKCPassword(password), 0o600); err != nil {
-		return change, errors.New("write " + kcpasswordTo + ": " + err.Error())
+		return change, fmt.Errorf("write %s: %w", kcpasswordTo, err)
 	}
 	if err := m.files.Chmod(kcpasswordTo, 0o600); err != nil {
 		return change, err
