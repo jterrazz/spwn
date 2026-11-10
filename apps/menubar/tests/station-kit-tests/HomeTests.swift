@@ -1,5 +1,5 @@
 import AppKit
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -139,5 +139,50 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(drawn, try Tree.fixtures().count * 2)
         XCTAssertEqual(NSApplication.shared.windows.count, before)
         XCTAssertEqual(before, 0)
+    }
+}
+
+@MainActor
+final class HomeLineTests: XCTestCase {
+    func decoded<T: Decodable>(_ json: String) throws -> T { try JSONDecoder().decode(T.self, from: Data(json.utf8)) }
+
+    // invariant: the engine-stopped card's Start is the one Start: the
+    // footer does not offer it again; the folded Needs you line ends in no
+    // stray punctuation.
+    func testStoppedOffersStartOnceAndTheFoldedLineIsClean() {
+        var start = Action(), open = Action()
+        start.id = "start"; open.id = "open-station"
+        XCTAssertEqual(HomePage.footer([start, open], stopped: true).map(\.id), ["open-station"])
+        XCTAssertEqual(HomePage.footer([start, open], stopped: false).map(\.id), ["start", "open-station"])
+        var r1 = Row(), r2 = Row()
+        r1.label = "a task is failing,"; r2.label = "x-snapshot is failing,."
+        XCTAssertEqual(HomePage.folded([r1, r2]), "a task is failing\(Token.Glyph.sep)x-snapshot is failing")
+    }
+
+    // invariant: Needs you's folded line is short words: a launchd label
+    // by its last part, nothing past a comma.
+    func testNeedsYouFoldedLineIsShort() throws {
+        let rows: [Row] = try decoded(#"[{"label":"npm sign-in expired"},{"label":"com.jterrazz.brain.x-snapshot is failing, last exit 1"}]"#)
+        XCTAssertEqual(HomePage.folded(rows), "npm sign-in expired · x-snapshot is failing")
+    }
+
+    // invariant: Needs you's folded line is the engine's short words
+    // (vision panel a), never its rows' long labels.
+    func testNeedsYouFoldsIntoTheEnginesShortWords() throws {
+        let page = try Tree.page("menubar.home.two-macs")
+        let needs = try XCTUnwrap(page.section(TodoBadge.section))
+        XCTAssertEqual(HomePage.folded(needs), ["2 updates", "npm sign-in", "~/.tart", "firewall off", "1 failing task"].joined(separator: Token.Glyph.sep))
+        let bare: StationKit.Section = try decoded(#"{"id":"needs-you","items":[{"row":{"label":"npm sign-in expired"}}]}"#)
+        XCTAssertEqual(HomePage.folded(bare), "npm sign-in expired")
+    }
+
+    // invariant: Home's arrows light a machine line and move through
+    // them, never past either end.
+    func testHomeArrowsMoveThroughTheMachines() {
+        XCTAssertEqual(HomeKeys.moved(nil, by: 1, count: 4), 0)
+        XCTAssertEqual(HomeKeys.moved(nil, by: -1, count: 4), 3)
+        XCTAssertEqual(HomeKeys.moved(3, by: 1, count: 4), 3)
+        XCTAssertEqual(HomeKeys.moved(0, by: -1, count: 4), 0)
+        XCTAssertNil(HomeKeys.moved(nil, by: 1, count: 0))
     }
 }

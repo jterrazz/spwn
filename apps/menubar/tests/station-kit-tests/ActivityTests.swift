@@ -1,5 +1,5 @@
 import AppKit
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -42,5 +42,34 @@ final class ActivityTests: XCTestCase {
         XCTAssertEqual(shown.all, ["menubar.activity menubar.activity", "menubar.activity:6m menubar.activity"])
         XCTAssertEqual(nav.watched, "menubar.activity:6m")
         handlers.back()
+    }
+}
+
+@MainActor
+final class ActivityChartTests: XCTestCase {
+    func decoded<T: Decodable>(_ json: String) throws -> T { try JSONDecoder().decode(T.self, from: Data(json.utf8)) }
+
+    // invariant: SPEC §10.2 Activity draws every measure with a series as
+    // its graph, the vision's line over an area; one not sampled yet keeps
+    // its graph's room, waiting, never a table line alone.
+    func testActivityDrawsEveryMeasureAsAGraph() throws {
+        let page = try Tree.page("menubar.activity.mac")
+        let rows = try XCTUnwrap(page.section("graphs")?.rows)
+        XCTAssertGreaterThan(rows.count, 4)
+        for r in rows where r.id != "disk-free" {
+            guard case .graph(let points) = ActivityPage.chart(r) else { return XCTFail("\(r.id ?? "") is not a graph") }
+            XCTAssertGreaterThan(points.count, 1)
+        }
+        let free = try XCTUnwrap(rows.first { $0.id == "disk-free" })
+        guard case .meter = ActivityPage.chart(free) else { return XCTFail("disk free is not a meter") }
+        let unsampled: Row = try decoded(#"{"id":"cpu","label":"CPU","cells":[{"kind":"text","text":"34 % of 10 CPU"}]}"#)
+        guard case .waiting = ActivityPage.chart(unsampled) else { return XCTFail("an unsampled measure has no room") }
+    }
+
+    // invariant: Top processes says its memory column in one unit.
+    func testTopProcessesSayMemoryInOneUnit() throws {
+        let page = try Page.decode(Data(#"{"schema":"station.page/v1","id":"menubar.activity","sections":[{"id":"processes","title":"Top processes","columns":[{"key":"name","kind":"text"},{"key":"what","kind":"text"},{"key":"cpu","kind":"percent"},{"key":"memory","kind":"size"}],"items":[{"row":{"id":"1","label":"tart","cells":[{"kind":"none"},{"kind":"percent","n":180},{"kind":"size","n":4402341478}]}},{"row":{"id":"2","label":"WindowServer","cells":[{"kind":"none"},{"kind":"percent","n":40},{"kind":"size","n":644245094}]}},{"row":{"id":"3","label":"idle","cells":[{"kind":"none"},{"kind":"percent","n":10},{"kind":"none"}]}}]}]}"#.utf8))
+        let top = try XCTUnwrap(page.section("processes"))
+        XCTAssertEqual(ActivityPage.memory(top), ["1": "4.4 GB", "2": "0.6 GB"])
     }
 }

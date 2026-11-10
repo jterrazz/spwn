@@ -1,5 +1,5 @@
 import AppKit
-import StationKit
+@testable import StationKit
 import SwiftUI
 import XCTest
 
@@ -126,5 +126,20 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(calls.all, [
             ["/usr/bin/osascript", "-e", #"tell application "Terminal" to do script "'/u/bin/station' 'ports' '--on' 'mac-mini'""#, "-e", #"tell application "Terminal" to activate"#],
         ])
+    }
+}
+
+@MainActor
+final class PortsNeedTests: XCTestCase {
+    // invariant: SPEC §10.2 Ports: a port that needs you is said in red on
+    // top, even when nothing is reachable outside Tailscale undeclared: a
+    // public port declared whose tunnel is not seen.
+    func testPortsSayWhatNeedsYouOnTop() throws {
+        let page = try Page.decode(Data(#"{"schema":"station.page/v1","id":"menubar.ports","sections":[{"id":"public","title":"Public: reachable from anywhere else","columns":[{"key":"machine","kind":"text"},{"key":"port","kind":"port"},{"key":"class","kind":"text"},{"key":"what","kind":"text"},{"key":"bind","kind":"list"},{"key":"declared","kind":"text"}],"items":[{"row":{"id":"infra:443","mark":"attention","label":"infra","cells":[{"kind":"port","n":443},{"kind":"text","text":"public"},{"kind":"text","text":"nginx"},{"kind":"list","items":[]},{"kind":"text","text":"declared, but no tunnel seen on infra"}],"reason":"degraded"}},{"row":{"id":"infra:80","mark":"ok","label":"infra","cells":[{"kind":"port","n":80},{"kind":"text","text":"public"},{"kind":"text","text":"nginx"},{"kind":"list","items":[]},{"kind":"text","text":"tunnel seen"}]}}]}]}"#.utf8))
+        let needs = PortsPage.needing(page)
+        XCTAssertEqual(needs.map(\.title), ["infra\(Token.Glyph.sep)443"])
+        XCTAssertEqual(needs.map(\.words), ["nginx\(Token.Glyph.sep)declared, but no tunnel seen on infra"])
+        let reachable = try Page.decode(Data(#"{"schema":"station.page/v1","id":"menubar.ports","sections":[{"id":"needs-you","title":"Needs you: reachable outside Tailscale, not declared public","items":[{"row":{"id":"n","mark":"broken","label":"mac-mini","cells":[]}}]},{"id":"public","items":[{"row":{"id":"a","mark":"attention","label":"infra","cells":[]}}]}]}"#.utf8))
+        XCTAssertEqual(PortsPage.needing(reachable).count, 0)
     }
 }
