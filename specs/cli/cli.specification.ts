@@ -46,7 +46,11 @@ if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
     renameSync(building, STATION_BIN);
 }
 
-// invariant: no run reaches the real machine. HOME is the run's own directory, PATH
+// invariant: no run reaches the real machine. HOME is the run's own directory, and
+// the variables that would move its folders, name a credential or describe the
+// owner's terminal (XDG_*_HOME, GOENV, MISE_*, GH_TOKEN, GITHUB_TOKEN, TERM,
+// TERM_PROGRAM, COLORTERM) are unset unless a document states them, so the CI
+// runner's XDG_CONFIG_HOME never becomes one folder of preferences every run shares; PATH
 // holds only the fixture's stubs and STATION_SYSTEM_DIRS adds no system directory, so
 // an unstubbed tool is "not found" alike on a Mac and on the Linux CI runner;
 // STATION_SYSTEM_ROOT reads /Applications, /opt/homebrew, /Library and /usr/local under
@@ -84,8 +88,15 @@ const worlds = {
 
 export const { cleanup, cli } = await specification.cli(STATION_BIN, {
     defaults: {
+        COLORTERM: null,
         COLUMNS: '80',
+        GH_TOKEN: null,
+        GITHUB_TOKEN: null,
+        GOENV: null,
         HOME: '$WORKDIR',
+        MISE_CONFIG_DIR: null,
+        MISE_DATA_DIR: null,
+        MISE_GLOBAL_CONFIG_FILE: null,
         NO_COLOR: '1',
         PATH: '$WORKDIR/bin',
         STATION_GITHUB_API_URL: 'http://127.0.0.1:9',
@@ -94,16 +105,22 @@ export const { cleanup, cli } = await specification.cli(STATION_BIN, {
         STATION_POWER_STUB: '$WORKDIR/power',
         STATION_SYSTEM_DIRS: '',
         STATION_SYSTEM_ROOT: '$WORKDIR/root',
+        TERM: null,
+        TERM_PROGRAM: null,
         TZ: 'UTC',
+        XDG_CACHE_HOME: null,
+        XDG_CONFIG_HOME: null,
+        XDG_DATA_HOME: null,
+        XDG_STATE_HOME: null,
     },
     // value: a document that drives the TUI runs `terminal "$STATION"`, the binary on a
-    // pseudo-terminal its fixture's driver opens, since a run is never given a TTY; one
-    // that installs runs `$INSTALL_SH` from a local file through its one test seam.
+    // pseudo-terminal its fixture's driver opens, since a run is never given a TTY, and
+    // names it a 256-colour terminal that draws true colour; one that installs runs `$INSTALL_SH` from a local file through its one test seam.
     env: {
         ...worlds,
         engine: { STATION: STATION_BIN },
         install: { INSTALL_SH: resolve(REPO_ROOT, 'scripts/install.sh'), STATION: STATION_BIN },
-        terminal: { STATION: STATION_BIN, TERM: 'xterm-256color' },
+        terminal: { COLORTERM: 'truecolor', STATION: STATION_BIN, TERM: 'xterm-256color' },
     },
     serve: {
         github: {
