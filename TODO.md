@@ -118,10 +118,20 @@ gap ids wait for a design before they are stories (STORIES.md, "Gaps").
 the take-back of a copy at its term is where it would be told. Each starts
 as a lot of its own once the owner asks for it.
 
-## Long-running agents
-Hermes and OpenClaw as long-running VMs on an always-on Mac. Not designed: the
-owner still starts them by hand. Their gateway rows were dropped from the
-Overview until that design, which may be a machine kind of its own.
+## Permanent agents, and what each machine holds of them
+The owner's question (2026-11-10): Herdr runs the agents, so every machine
+that carries Herdr (the app on the owner's MacBook, herdr-core on the Mac
+mini and in each VM) potentially runs its own permanent agents, with their
+own runtime, sessions and state. That opens what one machine knows of
+another's agents, and how the differences between machines are seen and
+reconciled: which agents run where, which sessions and memory they keep,
+which accounts each machine holds or was lent (accounts diverge the same
+way). The menu bar is where these differences are seen (All machines,
+Agents, Accounts), and a Machinefile may one day declare a machine's
+permanent agents. Not designed; decided with the owner before any lot.
+Hermes and OpenClaw, which the owner still starts by hand on an always-on
+Mac, are the first cases; their gateway rows were dropped from the Overview
+until this design, which may be a machine kind of its own.
 
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches
