@@ -51,6 +51,7 @@ Docker's ports), whatever the Tailscale policy says; the Ports section shows
 each as Public when it is.
 
 ## Smaller follow-ups
+- A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
 - Memory soak: a Linux VM 8 h under load, the Mac's RSS of the VM process.
 - `machines edit <vm> --permanent`: turn a throwaway workspace permanent (rewrite its record; the engine reads it).
