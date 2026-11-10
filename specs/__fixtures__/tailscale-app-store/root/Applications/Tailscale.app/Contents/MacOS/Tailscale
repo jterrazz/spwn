@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # The Tailscale app's CLI as the specs need it, one body for its three places
 # (on PATH, the Standalone app's /usr/local/bin/tailscale, the App Store
 # bundle's executable): every call is recorded in $HOME/.calls under the name
@@ -16,7 +16,8 @@
 # an output it is given already exists and is not a regular file ("-" is
 # stdout). The App Store bundle's executable
 # fails as the real one does when its caller set none of TERM, SHLVL and
-# TERM_PROGRAM (this shell sets SHLVL to 1 and TERM to dumb when it found none).
+# TERM_PROGRAM (bash, on every host, sets SHLVL to 1 when it found none, and an
+# unset TERM reads dumb).
 answers="$HOME/answers/tailscale"
 case "$0" in
     */usr/local/bin/tailscale) name=tailscale-standalone ;;

@@ -18,14 +18,13 @@ runs:
           machines  station.machines.list/v1  schema generated_at machine findings  array
           images  station.images.list/v1  schema generated_at machine findings  array
           engine  station.engine.read/v1  schema generated_at machine findings  array
-    - command: 'apps --json > apps.json; /usr/bin/head -3 apps.json; /usr/bin/tail -c 2 apps.json | /usr/bin/od -An -tx1 | /usr/bin/tr -d " "; /usr/bin/grep -c "$(printf "\033")" apps.json; /usr/bin/grep -c "◌" apps.json; /usr/bin/jq -c .machine apps.json'
+    - command: 'apps --json > apps.json; /usr/bin/head -3 apps.json; /usr/bin/tail -c 2 apps.json | /usr/bin/od -An -tx1 | /usr/bin/tr -d " \n"; echo; /usr/bin/grep -c "$(printf "\033")" apps.json; /usr/bin/grep -c "◌" apps.json; /usr/bin/jq -c .machine apps.json'
       exit: 0
       stdout: |
           {
             "schema": "station.apps.list/v1",
             "generated_at": "{{iso8601}}",
           7d0a
-
           0
           0
           {"name":"jterrazz-macbook-pro","label":"This Mac","kind":"mac","on":null,"this_mac":true}

@@ -4,7 +4,8 @@
 # 9 days ago and security responses off.
 case "$*" in
     "-extract LastSuccessfulDate raw -o - "*)
-        if [ -e "$HOME/.off" ]; then /bin/date -u -v-9d +%Y-%m-%dT%H:%M:%SZ; else /bin/date -u -v-1H +%Y-%m-%dT%H:%M:%SZ; fi ;;
+        if [ -e "$HOME/.off" ]; then ago=$((9 * 86400)); else ago=3600; fi
+        /usr/bin/perl -MPOSIX -e 'print strftime("%Y-%m-%dT%H:%M:%SZ", gmtime(time - $ARGV[0])), "\n"' "$ago" ;;
     "-extract RecommendedUpdates raw -o - "*) echo 0 ;;
     "-extract CriticalUpdateInstall raw -o - "*) if [ -e "$HOME/.off" ]; then echo false; else echo true; fi ;;
     *) echo "stub ${0##*/}: unexpected invocation: $*" >&2; exit 97 ;;

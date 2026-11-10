@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ●	go	1.25.3	mise	already installed
-    - command: '--version >/dev/null; /usr/bin/cut -d" " -f2- .local/state/station/logs/apps.log'
-      exit: 1
-      stderr: |
-          cut: .local/state/station/logs/apps.log: No such file or directory
+    - command: '--version >/dev/null; /bin/test -e .local/state/station/logs/apps.log || echo "no apps.log"'
+      exit: 0
+      stdout: |
+          no apps.log

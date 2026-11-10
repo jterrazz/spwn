@@ -2,11 +2,11 @@ description: 'a second hello rewrites the Mac''s block alone, the owner''s line 
 fixture: ./__fixtures__/vm/
 env: engine
 runs:
-    - command: '--version >/dev/null; for keys in ''"ssh-ed25519 AAAA1 a@macbook","ssh-ed25519 AAAA2 b@mini"'' ''"ssh-ed25519 AAAA2 b@mini"''; do echo "{\"v\":1,\"type\":\"hello\",\"host\":\"macbook\",\"vm\":\"api\",\"public_host\":\"macbook.tail1234.ts.net\",\"keys\":[$keys],\"env\":{},\"ignored\":[22],\"min_port\":1024}" | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest > /dev/null; done; /bin/cat vm/.ssh/authorized_keys; /usr/bin/stat -f %Lp vm/.ssh/authorized_keys 2>/dev/null || /usr/bin/stat -c %a vm/.ssh/authorized_keys'
+    - command: '--version >/dev/null; for keys in ''"ssh-ed25519 AAAA1 a@macbook","ssh-ed25519 AAAA2 b@mini"'' ''"ssh-ed25519 AAAA2 b@mini"''; do echo "{\"v\":1,\"type\":\"hello\",\"host\":\"macbook\",\"vm\":\"api\",\"public_host\":\"macbook.tail1234.ts.net\",\"keys\":[$keys],\"env\":{},\"ignored\":[22],\"min_port\":1024}" | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest > /dev/null; done; /bin/cat vm/.ssh/authorized_keys; /bin/ls -l vm/.ssh/authorized_keys | /usr/bin/cut -c1-10'
       exit: 0
       stdout: |
           ssh-ed25519 AAAAOWNER owner@laptop
           # >>> station hosts >>>
           ssh-ed25519 AAAA2 b@mini
           # <<< station hosts <<<
-          600
+          -rw-------

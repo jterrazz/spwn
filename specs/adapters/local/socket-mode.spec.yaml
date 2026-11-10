@@ -1,13 +1,14 @@
 description: 'the engine answers v2 frames, its hello naming page revision 4, on one 0600 unix socket, never TCP'
 fixture:
     - ../../__fixtures__/vms/
+    - ../../__fixtures__/socket-client/
     - ../../__fixtures__/engine-vm/
 env: engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41400-41419"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/stat -f %Lp .local/state/station/engine.sock 2>/dev/null || /usr/bin/stat -c %a .local/state/station/engine.sock; printf ''{"v":2,"id":"1","call":"engine.hello"}\n{"v":2,"id":"2","call":"nope"}\n{"v":1,"id":"3","op":"ping"}\n'' | /usr/bin/nc -U .local/state/station/engine.sock | /usr/bin/jq -c ''[.id, (.out.version != null), (.out.executable == $ENV.STATION), .out.page, ((.out.calls // []) | index("machines.create-workspace") != null), .error.code, (.error.hint != null)]''; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41400-41419"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /bin/ls -l .local/state/station/engine.sock | /usr/bin/cut -c1-10; printf ''{"v":2,"id":"1","call":"engine.hello"}\n{"v":2,"id":"2","call":"nope"}\n{"v":1,"id":"3","op":"ping"}\n'' | socket .local/state/station/engine.sock | /usr/bin/jq -c ''[.id, (.out.version != null), (.out.executable == $ENV.STATION), .out.page, ((.out.calls // []) | index("machines.create-workspace") != null), .error.code, (.error.hint != null)]''; kill $d; wait $d'
       exit: 0
       stdout: |
-          600
+          srw-------
           ["1",true,true,4,true,null,false]
           ["2",false,false,null,false,"call.unknown",true]
           ["3",false,false,null,false,"call.bad-frame",true]

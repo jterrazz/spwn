@@ -23,7 +23,7 @@ runs:
           see ┏━ This Mac ━
           send q
       exit: 0
-    - command: '--version >/dev/null; terminal --size 85x34 "$STATION" | /usr/bin/sed -n "4,14p" | /usr/bin/cut -c25-'
+    - command: '--version >/dev/null; terminal --size 85x34 "$STATION" | /usr/bin/sed -n "4,14p" | /usr/bin/perl -CS -lne ''print substr($_, 24)'''
       stdin: |
           see mac-mini         1
           send \x1b

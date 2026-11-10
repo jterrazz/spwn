@@ -1,10 +1,11 @@
 description: 'a socket file nobody answers is replaced'
 fixture:
     - ../../__fixtures__/vms/
+    - ../../__fixtures__/socket-client/
     - ../../__fixtures__/engine-vm/
 env: engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41440-41459"}/'' .config/station/preferences.json; /bin/mkdir -p .local/state/station; : > .local/state/station/engine.sock; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; printf ''{"v":2,"id":"1","call":"engine.hello"}\n'' | /usr/bin/nc -U .local/state/station/engine.sock | /usr/bin/jq -c ''.out.pid > 0''; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41440-41459"}/'' .config/station/preferences.json; /bin/mkdir -p .local/state/station; : > .local/state/station/engine.sock; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; printf ''{"v":2,"id":"1","call":"engine.hello"}\n'' | socket .local/state/station/engine.sock | /usr/bin/jq -c ''.out.pid > 0''; kill $d; wait $d'
       exit: 0
       stdout: |
           true

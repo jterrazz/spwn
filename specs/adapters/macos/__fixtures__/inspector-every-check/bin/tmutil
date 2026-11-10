@@ -5,7 +5,8 @@ case "$*" in
     latestbackup)
         if [ -e "$HOME/.no-destination" ]; then echo 'Failed to mount backup destination, error: Error Domain=com.apple.backupd.ErrorDomain Code=17 "Failed to mount destination."'; exit 0; fi
         if [ -e "$HOME/.off" ]; then echo "No machine directory found for host." >&2; exit 1; fi
-        echo "/Volumes/Backups of Mac/$(/bin/date -v-2d -v-1H +%Y-%m-%d-%H%M%S).backup/$(/bin/date -v-2d -v-1H +%Y-%m-%d-%H%M%S).backup" ;;
+        at=$(/usr/bin/perl -MPOSIX -e 'print strftime("%Y-%m-%d-%H%M%S", localtime(time - 49 * 3600))')
+        echo "/Volumes/Backups of Mac/$at.backup/$at.backup" ;;
     destinationinfo)
         if [ -e "$HOME/.no-destination" ]; then echo "tmutil: No destinations configured."; exit 0; fi
         echo "Name          : Backups of Mac" ;;
