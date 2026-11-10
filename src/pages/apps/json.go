@@ -88,8 +88,8 @@ func AppObject(r apps.Report) AppStatusJSON {
 		Managed:  r.Managed,
 		Provides: append([]string{}, r.App.Provides...),
 		Detail:   detail,
-		// invariant: kept byte for byte, though no app is the bootstrap's
-		// since init installs none: every row reads exploration.
+		// value: the field status/v1's readers still parse; no app comes
+		// with init, which installs none, so every row reads exploration.
 		Use: "exploration",
 	}
 }
