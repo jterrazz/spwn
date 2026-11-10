@@ -58,11 +58,16 @@ func portsFailure(err error) (*fail.Error, bool) {
 
 func controlFailure(err error) (*fail.Error, bool) {
 	var notInstalled *enginecalls.NotInstalledError
+	var noJobs *enginecalls.NoJobManagerError
 	var stuck *enginecalls.StuckError
 	var boot *enginecalls.BootError
 	switch {
 	case errors.As(err, &notInstalled):
 		return failed(notInstalled.Error(), "station engine start", err), true
+	case errors.As(err, &noJobs):
+		// invariant: never the start that just failed: the job manager
+		// is the system's, found on the search path station runs with.
+		return failed(noJobs.Error(), "macOS keeps it in /bin: check the PATH station runs with", err), true
 	case errors.As(err, &stuck):
 		return failed(stuck.Error(), "station machines delete "+stuck.VM, err), true
 	case errors.As(err, &boot):

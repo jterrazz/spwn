@@ -1,0 +1,10 @@
+description: 'without launchctl on the search path, engine start says what is missing, never itself'
+env: engine
+runs:
+    - command: 'engine start </dev/null'
+      exit: 1
+      stderr: |
+          Error: the engine needs launchd: launchctl is not found
+          Hint: macOS keeps it in /bin: check the PATH station runs with
+      files:
+          Library/LaunchAgents/com.jterrazz.station.engine.plist: absent

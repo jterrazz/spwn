@@ -13,6 +13,16 @@ type NotInstalledError struct{}
 
 func (*NotInstalledError) Error() string { return "the engine is not installed" }
 
+type NoJobManagerError struct {
+	// value: the job manager the engine runs under, and its command, as
+	// the Mac's adapter names them.
+	Manager, Command string
+}
+
+func (e *NoJobManagerError) Error() string {
+	return "the engine needs " + e.Manager + ": " + e.Command + " is not found"
+}
+
 type StuckError struct{ VM string }
 
 func (e *StuckError) Error() string { return e.VM + " did not stop; the engine keeps running" }

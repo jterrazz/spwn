@@ -331,7 +331,8 @@ func (i engineInstaller) env() map[string]string {
 func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) {
 	jobs := i.m.jobs(0)
 	if !jobs.Present() {
-		return engine.Installed{}, &enginecalls.NotInstalledError{}
+		names := jobs.Names()
+		return engine.Installed{}, &enginecalls.NoJobManagerError{Manager: names.Manager, Command: names.Command}
 	}
 	if _, err := i.machines.MigrateAgents(ctx); err != nil {
 		return engine.Installed{}, err
