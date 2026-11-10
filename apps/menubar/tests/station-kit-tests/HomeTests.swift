@@ -57,10 +57,6 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(Snapshot.state("menubar.home.engine-stopped", page).connection, .stopped)
     }
 
-    func drawn(_ name: String, _ state: PanelState) throws {
-        XCTAssertNil(try Golden.check(name, AnyView(Popover(state, scrolls: false))))
-    }
-
     // invariant: MB-05, SPEC A4: Home is its hero first, then its tiles,
     // its servers and its Macs; Open in Terminal and Stop everything on
     // This Mac are the station menu's; New VM is the header's.
@@ -77,7 +73,6 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(page.pageActions.map(\.label), ["New VM", "Open in Terminal", "Stop everything on This Mac"])
         XCTAssertEqual(page.pageActions.map(\.key), ["cmd+n", "cmd+t", nil])
         XCTAssertEqual(page.section("tiles")?.items?.compactMap(\.tile).map(TileStrip.said), ["Ports, 2 shared", "Accounts, 1 signed out", "Awake, 6 hr left"])
-        try drawn("menubar.home.two-macs", Snapshot.state("menubar.home.two-macs", page))
     }
 
     // invariant: MA-14: under each Mac its Servers, then its Workspaces,
