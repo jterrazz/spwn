@@ -32,6 +32,8 @@ const (
 	WhyFailing   Why = "failing"
 )
 
+const Interrupted = "interrupted (Ctrl-C)"
+
 type Outcome struct {
 	Name   string
 	Verb   string

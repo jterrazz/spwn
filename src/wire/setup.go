@@ -25,6 +25,8 @@ import (
 	setupcalls "github.com/jterrazz/studio-station/src/setup/calls"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 	setupcmd "github.com/jterrazz/studio-station/src/surface/cli/setup"
+	"github.com/jterrazz/studio-station/src/surface/cli/words"
+	"github.com/jterrazz/studio-station/src/ui/token"
 )
 
 func setupCommand(env kit.Env, m machine) *cobra.Command {
@@ -120,12 +122,23 @@ func (s systemApps) Install(ctx context.Context, names []string) error {
 	if err != nil {
 		return err
 	}
+	// invariant: every Broken app of the batch is reported, and an interrupt
+	// is the interrupt, never a failed install.
+	failure := &setup.AppsFailedError{Interrupted: ctx.Err() != nil}
 	for _, o := range outcomes {
-		if o.Result == catalog.StateBroken {
-			return errors.New(o.Name + ": " + o.Detail)
+		if o.Result != catalog.StateBroken {
+			continue
 		}
+		detail := o.Detail
+		if failure.Interrupted {
+			detail = apps.Interrupted + token.Sep + words.SetupResumes
+		}
+		failure.Failed = append(failure.Failed, setup.AppFailure{Name: o.Name, Detail: detail})
 	}
-	return nil
+	if len(failure.Failed) == 0 && !failure.Interrupted {
+		return nil
+	}
+	return failure
 }
 
 type allMachinesRegistrar struct {

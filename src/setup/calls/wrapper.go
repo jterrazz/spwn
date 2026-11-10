@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"errors"
 	"path"
 	"strings"
 
@@ -19,7 +20,25 @@ type Installer interface {
 	RemoveFormula(ctx context.Context, formula string) error
 }
 
-func (s *Provisioner) apps(ctx context.Context, interactive bool) (setup.Step, error) {
+func (s *Provisioner) apps(ctx context.Context, interactive bool) ([]setup.Step, error) {
+	step, err := s.appsStep(ctx, interactive)
+	var batch *setup.AppsFailedError
+	if !errors.As(err, &batch) {
+		return []setup.Step{step}, err
+	}
+	// invariant: every app of a failed batch gets its own row; an interrupt
+	// is no failure of the step, so it travels as itself.
+	rows := make([]setup.Step, 0, len(batch.Failed))
+	for _, f := range batch.Failed {
+		rows = append(rows, setup.Step{Name: f.Name, State: catalog.StateBroken, Detail: f.Detail})
+	}
+	if batch.Interrupted {
+		return rows, batch
+	}
+	return rows, &setup.StepFailedError{Step: stepApps, Cause: batch}
+}
+
+func (s *Provisioner) appsStep(ctx context.Context, interactive bool) (setup.Step, error) {
 	step := setup.Step{Name: stepApps, State: catalog.StateOK}
 	var done []string
 	if s.o.Installer != nil {

@@ -1,9 +1,12 @@
 package calls
 
 import (
+	"context"
+	"errors"
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/catalog"
 )
 
@@ -11,6 +14,11 @@ import (
 // and only there (SPEC §12.3); the outcome says, in station's words, what
 // failed and where the tool's output is kept.
 func (s *Shelf) failed(verb string, list []catalog.App, cause error) string {
+	// invariant: an interrupt is worded as one, and its cause is not the
+	// installer's output, so the log keeps nothing of it.
+	if errors.Is(cause, context.Canceled) {
+		return apps.Interrupted
+	}
 	words := "the " + verb + " failed"
 	if s.o.Log == "" || s.keep(verb, list, cause) != nil {
 		return words

@@ -1,6 +1,10 @@
 package setup
 
-import "errors"
+import (
+	"context"
+	"errors"
+	"strings"
+)
 
 var (
 	ErrNameOnVM = errors.New("a VM's name is given when it is created")
@@ -25,6 +29,30 @@ type StepFailedError struct {
 
 func (e *StepFailedError) Error() string { return "setup step " + e.Step + ": " + e.Cause.Error() }
 func (e *StepFailedError) Unwrap() error { return e.Cause }
+
+type AppFailure struct{ Name, Detail string }
+
+type AppsFailedError struct {
+	Failed []AppFailure
+	// value: the run was interrupted (Ctrl-C), not broken: the error is then
+	// context.Canceled for whoever asks errors.Is.
+	Interrupted bool
+}
+
+func (e *AppsFailedError) Error() string {
+	parts := make([]string, 0, len(e.Failed))
+	for _, f := range e.Failed {
+		parts = append(parts, f.Name+": "+f.Detail)
+	}
+	return strings.Join(parts, "; ")
+}
+
+func (e *AppsFailedError) Unwrap() error {
+	if e.Interrupted {
+		return context.Canceled
+	}
+	return nil
+}
 
 type DifferentContentError struct{ Path string }
 

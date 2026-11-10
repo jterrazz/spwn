@@ -191,10 +191,13 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 		steps = append(steps, engine)
 	}
 	if relocateErr == nil {
-		var apps setup.Step
+		var apps []setup.Step
 		apps, appsErr = s.apps(ctx, r.Interactive)
-		steps = append(steps, apps)
-		if appsErr == nil {
+		steps = append(steps, apps...)
+		// invariant: an app that failed skips only what needs it (a setting
+		// requiring it is not due while it is absent), never the whole step;
+		// an interrupt skips the rest, since the run is over.
+		if ctx.Err() == nil {
 			var set []setup.Step
 			set, settingsErr = s.settings(ctx)
 			steps = append(steps, set...)
