@@ -83,3 +83,25 @@ func TestHomesCleanUpForgetsAFinishedAgentByItsOwnName(t *testing.T) {
 		return false
 	})
 }
+
+// invariant: a Mac page's Clean up lists the finished agents its throwaways
+// ran, as Home's does: the feed reads the fleet's agents for a Mac too.
+func TestAMacsCleanUpListsTheFinishedAgentOfItsThrowaway(t *testing.T) {
+	ended := time.Date(2026, 11, 7, 10, 12, 0, 0, time.UTC)
+	done := machines.VM{Name: "agent-7f", Mac: thisMac, Lifetime: machines.Throwaway, State: machines.Running, Guest: "connected", Agent: &machines.AgentView{State: machines.AgentFinished}}
+	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{done}, asked: map[string][]string{}, activity: map[string]uint64{},
+		agents: []agents.Agent{{Name: "agent-7f", VM: "agent-7f", Mac: thisMac, App: "claudecode", State: agents.Finished, Ended: ended, Reason: "tests pass"}}}
+	until(t, watchWith(t, w, newSteps(), engine.FeedInput{Subject: thisMac}), "This Mac's Clean up with its finished agent", func(p page.Page) bool {
+		for _, a := range p.Actions {
+			if a.ID != "cleanup" || a.Form == nil {
+				continue
+			}
+			for _, f := range a.Form.Fields {
+				if f.Label == "Finished agents" && len(f.Options) == 1 && f.Options[0].Value == "agent-7f" {
+					return true
+				}
+			}
+		}
+		return false
+	})
+}
