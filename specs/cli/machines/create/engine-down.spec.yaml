@@ -1,12 +1,14 @@
-description: 'with the engine down create refuses before anything is made'
+description: 'with the engine stopped, its job kept, create refuses before anything is made and starts nothing'
 fixture: ../../../__fixtures__/vms/
 runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Library/LaunchAgents && /usr/bin/touch Library/LaunchAgents/com.jterrazz.station.engine.plist'
+      exit: 0
     - command: 'machines create'
       exit: 1
       stderr: |
-          Error: the engine is not installed on This Mac
+          Error: the engine is stopped on This Mac
           Hint: station engine start
-    - command: '--version >/dev/null; /usr/bin/grep -c ''tart clone'' .calls'
+    - command: '--version >/dev/null; /usr/bin/grep -c -e ''tart clone'' -e launchctl .calls'
       exit: 1
       stdout: |
           0

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
 	"github.com/jterrazz/studio-station/src/machines"
@@ -47,7 +48,26 @@ func (h *Hypervisor) Name() string {
 	return h.name
 }
 
-func (h *Hypervisor) Installed() bool { return h.thisMac().Hypervisor != "none" }
+func (h *Hypervisor) Installed() bool {
+	// invariant: a Mac of no hypervisor has one once the catalogue's item
+	// for it is installed in the world, as the real one lands on the path.
+	m := h.thisMac()
+	if m.Hypervisor != "none" {
+		return true
+	}
+	for _, a := range catalog.Apps {
+		if a.Name != catalog.HypervisorApp {
+			continue
+		}
+		i, ok := a.InstallOn(catalog.Mac)
+		if !ok || m.Apps[i.Method()] == nil {
+			return false
+		}
+		_, held := m.Apps[i.Method()].Installed[i.Key()]
+		return held
+	}
+	return false
+}
 
 func (h *Hypervisor) Version(context.Context) (string, error) { return "1.0.0", nil }
 

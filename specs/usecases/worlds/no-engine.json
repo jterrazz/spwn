@@ -1,0 +1,62 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "jterrazz-macbook-pro",
+    "user": "jterrazz",
+    "registry": {
+        "linux": "2026.11.03"
+    },
+    "macs": {
+        "jterrazz-macbook-pro": {
+            "preferences": {
+                "here": "jterrazz-macbook-pro",
+                "vm_user": "admin"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            },
+            "images": ["ghcr.io/jterrazz/station-linux:1"],
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            },
+            "vms": {
+                "station-image-linux-2026.11.01": {
+                    "disk": true,
+                    "size": {
+                        "CPUs": 0,
+                        "Memory": 0,
+                        "Disk": 4000000000
+                    }
+                }
+            },
+            "stores": {
+                "images": [
+                    {
+                        "name": "linux",
+                        "version": "2026.11.01",
+                        "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+                        "station": "v3.0.0",
+                        "recipe_sha": "",
+                        "built_at": "2026-11-01T08:00:00Z",
+                        "size_gb": 4
+                    }
+                ]
+            }
+        }
+    }
+}

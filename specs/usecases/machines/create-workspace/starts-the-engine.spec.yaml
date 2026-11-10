@@ -1,0 +1,21 @@
+description: 'on a Mac whose engine was never installed, the first create installs and starts it, then the VM'
+env: no-engine
+runs:
+    - command: 'machines create'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	expo	8081	{{url}}
+          ●	vite	5173	{{url}}
+          ◐	ports	Tailscale is signed out on This Mac: ports are local only
+          ●	linux-1	Created	Throwaway · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["com.jterrazz.station.engine"]
+    - command: 'engine --json | /usr/bin/jq -r .engine.state'
+      exit: 0
+      stdout: |
+          running

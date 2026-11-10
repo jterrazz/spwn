@@ -20,6 +20,7 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
+	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/machines/adapter/macos"
@@ -59,23 +60,32 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 	return machinescalls.New(macSystem{m.sys}, m.hypervisor(), machinescalls.Prefs{Name: m.stores.name(), Macs: m.stores.macs(), VMUser: m.stores.vmUser()}, m.stores.machines, macNodes{tailnet: m.tailnet()}, allMachinesImages{images: m.images()}, machinesEngine{m.macEngine()}, reservationReleaser{m: m}, machinescalls.Options{
 		ThisMachine: m.kind,
 		KnownHosts:  knownHosts, Logs: filepath.Join(m.paths.State, "logs"),
-		User:      m.sys.Env.User(),
-		Version:   m.stationVersion(),
-		Ask:       m.askAllMachines,
-		GuestPort: m.guestPort(),
-		Jobs:      m.jobs(0),
-		Unlocker:  m.unlocker(knownHosts),
-		Answers:   m.answers,
-		SSHConfig: m.sshConfig(knownHosts),
-		Hardware:  m.hardware,
-		Laptop:    m.profile.Caps.Lid,
-		Asleep:    m.asleep,
-		LAN:       m.lanAddress,
-		Uptime:    m.stores.uptime,
-		Waker:     m.waker(),
-		Terminals: m.multiplexer(),
-		AgentsOf:  farAgents{m}.Held,
+		User:        m.sys.Env.User(),
+		Version:     m.stationVersion(),
+		Ask:         m.askAllMachines,
+		GuestPort:   m.guestPort(),
+		Jobs:        m.jobs(0),
+		Unlocker:    m.unlocker(knownHosts),
+		Answers:     m.answers,
+		SSHConfig:   m.sshConfig(knownHosts),
+		Hardware:    m.hardware,
+		Laptop:      m.profile.Caps.Lid,
+		Asleep:      m.asleep,
+		LAN:         m.lanAddress,
+		Uptime:      m.stores.uptime,
+		Waker:       m.waker(),
+		Terminals:   m.multiplexer(),
+		AgentsOf:    farAgents{m}.Held,
+		StartEngine: m.startEngine,
 	})
+}
+
+// value: engine start's own use case, run for a call that needs the engine
+// on a Mac that never installed it.
+func (m machine) startEngine(ctx context.Context) error {
+	d := enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: m.profile.Kind}
+	_, err := enginecalls.Start.Run(ctx, d, enginecalls.StartIn{}, nil)
+	return err
 }
 
 func (m machine) waker() contract.Waker {

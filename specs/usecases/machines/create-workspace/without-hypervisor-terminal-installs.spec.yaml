@@ -1,0 +1,32 @@
+description: 'on a terminal, create without tart offers it; yes installs tart, starts the engine, makes the VM'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - no-engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].hypervisor = "none"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 120x30 "$STATION" machines create'
+      stdin: |
+          see Install tart now?
+          send y
+          scrollback
+      exit: 0
+      stdout: |
+          ○ tart is required by machines · station apps install tart
+          ┃ Install tart now?
+          ┃
+          ●       tart    1.0.0   shell
+          ●       tart-launcher                   ~/.local/bin/tart
+          ●       Running
+          ●       Has an address  192.168.64.5
+          ●       SSH answers
+          ●       expo    8081    {{url}}
+          ●       vite    5173    {{url}}
+          ◐       ports   Tailscale is signed out on This Mac: ports are local only
+          ●       linux-1 Created Throwaway · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [(.jobs // {} | keys), (.vms | keys)]'' world.json'
+      exit: 0
+      stdout: |
+          [["com.jterrazz.station.engine"],["linux-1","station-image-linux-2026.11.01"]]

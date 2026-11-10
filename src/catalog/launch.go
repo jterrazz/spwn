@@ -42,7 +42,7 @@ const (
 )
 
 func EnginePlist(home string) string {
-	// value: the one engine's launchd agent: setup writes it, a stopped engine
+	// value: the one engine's launchd agent: its first start writes it, a stopped engine
 	// keeps it, so its presence tells "stopped" from "not installed" (R9.D3).
 	return agentPlist(home, EngineLabel)
 }

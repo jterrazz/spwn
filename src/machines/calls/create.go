@@ -133,14 +133,27 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 }
 
 func (s *Machinist) EngineUp(ctx context.Context) error {
-	installed := s.h.Exists(catalog.EnginePlist(s.h.Home()))
-	down := &model.EngineDownError{Mac: "This Mac", Installed: installed}
+	// invariant: the engine comes to a Mac with its hypervisor the first
+	// time a call needs it: an engine that does not answer and whose job was
+	// never installed is installed and started here, then asked again; an
+	// engine the owner stopped stays stopped, refused with its start.
 	if s.engineAPI == nil {
-		return down
+		return &model.EngineDownError{Mac: "This Mac", Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
+	}
+	_, err := s.engineAPI.Ping(ctx)
+	if !errors.Is(err, model.ErrEngineDown) {
+		return err
+	}
+	installed := s.h.Exists(catalog.EnginePlist(s.h.Home()))
+	if installed || s.o.StartEngine == nil || !s.engine.Installed() {
+		return &model.EngineDownError{Mac: "This Mac", Installed: installed}
+	}
+	if err := s.o.StartEngine(ctx); err != nil {
+		return err
 	}
 	if _, err := s.engineAPI.Ping(ctx); err != nil {
 		if errors.Is(err, model.ErrEngineDown) {
-			return down
+			return &model.EngineDownError{Mac: "This Mac", Installed: true}
 		}
 		return err
 	}

@@ -29,6 +29,6 @@ station settings apply ghostty-dotfiles zed-dotfiles hushlogin
 station overview
 ```
 
-An app whose method needs a manager is installed with it, named in the same command: Homebrew for a cask, its installer asking your password once. `station engine start` installs the engine at login the first time ([Machines](../reference/machines.md#the-engine)); the VMs need it, and tart. Open the Tailscale app once and log in: station only reads it. A setting that needs values (a password, a token) opens a form on a terminal ([Settings](../reference/settings.md)). A Mac stays tidy: dev work lives in VMs ([Machines](../reference/machines.md)), and Claude Code reaches them with a shared token ([Accounts](../reference/accounts.md#claude-in-a-vm)).
+An app whose method needs a manager is installed with it, named in the same command: Homebrew for a cask, its installer asking your password once. The VMs need tart and the engine: a VM command without tart offers to install it, and the first one installs the engine at login ([Machines](../reference/machines.md#the-engine)). Open the Tailscale app once and log in: station only reads it. A setting that needs values (a password, a token) opens a form on a terminal ([Settings](../reference/settings.md)). A Mac stays tidy: dev work lives in VMs ([Machines](../reference/machines.md)), and Claude Code reaches them with a shared token ([Accounts](../reference/accounts.md#claude-in-a-vm)).
 
 Every command is in [Commands](../reference/commands.md); every file written is in [Footprint](../reference/footprint.md).

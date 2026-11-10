@@ -15,7 +15,7 @@ The bootstrap and the content split. `station init [--name <name>]` makes a mach
 
 ## Consequences
 
-- The install is three steps with no sudo, and is safe on a machine without Homebrew; a fresh Mac that wants the engine types `station engine start`.
+- The install is three steps with no sudo, and is safe on a machine without Homebrew; the engine comes with the first VM command on a Mac with tart, or `station engine start`.
 - The eager System list, setup's apps and settings steps and its engine step are gone; the Tailscale App Store wrapper is the setting `tailscale-cli`, named by the `tailscale` app's `then`, and the superseded formula goes with `apps install tailscale`.
 - A Mac that relied on `setup` to apply settings or install apps now does it by name until the Machinefile lands.
 - The word `setup` is retired from the interface; it survives as the family's package name and as `station.status/v1`'s `setup` key, kept byte for byte.

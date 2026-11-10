@@ -48,6 +48,9 @@ type Options struct {
 	// value: the name of every agent a running workspace holds, finished
 	// ones too; none when it does not answer, nil reads none.
 	AgentsOf func(ctx context.Context, vm string) []string
+	// value: installs this Mac's engine job and starts it, as engine start
+	// does; nil installs none.
+	StartEngine func(ctx context.Context) error
 }
 
 type Multiplexer interface {
