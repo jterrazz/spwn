@@ -43,7 +43,7 @@ build: ## Build the binary, stamped with the version git describes
 	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH)\n"
 
 build-linux: ## Build the linux/arm64 binary a VM image carries
-	@GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./src/cmd/station
+	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./src/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(LINUX_PATH)\n"
 
 lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode over Go, typescript check over the rest
@@ -117,7 +117,7 @@ e2e-machine: build build-linux ## The machine specs on a real VM of this host: K
 	@specs/machine/run.sh $(KIND) $(LABEL)
 
 e2e-binaries: build-linux ## The two binaries the machine tiers carry (darwin/arm64 and linux/arm64, no cgo, as the release builds them), cross-built where Go is, to copy to the host
-	@GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./src/cmd/station
+	@CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./src/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH) and $(LINUX_PATH) for the machine tiers\n"
 
 # hazard: macOS kills (SIGKILL) a signed binary rewritten in place once it has run, so
