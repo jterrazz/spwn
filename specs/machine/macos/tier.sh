@@ -3,8 +3,20 @@
 # method, every setting, the shell block, Activity, then free and erase on a clone.
 # Sourced by run.sh.
 
+# invariant: Apple runs two macOS VMs at once at most, so another running
+# macOS VM is refused and a running Linux one is not; the 8 GB tier 3's VM
+# boots with must be free beside the running VMs, macOS keeping 4 GB.
 running=$(tart list --format json 2>/dev/null | jq -r '.[] | select(.State == "running" or .Running == true) | .Name')
-[ -z "$running" ] || fail "a VM is running ($running): tier 3 runs one macOS VM at 8 GB with no other VM"
+held=0
+macos=""
+for vm in $running; do
+  info=$(tart get "$vm" --format json 2>/dev/null) || continue
+  [ "$(jq -r '.OS' <<< "$info")" = darwin ] && macos="$macos $vm"
+  held=$((held + $(jq -r '.Memory // 0' <<< "$info")))
+done
+[ -z "$macos" ] || fail "a macOS VM is running ($macos ): tier 3 runs one of its own, and Apple runs two at most"
+free_mb=$(($(sysctl -n hw.memsize) / 1048576 - 4096 - held))
+[ "$free_mb" -ge 8192 ] || fail "not enough memory for tier 3's 8 GB VM: $free_mb MB left beside the running VMs"
 
 run_id="$$"
 made=()
