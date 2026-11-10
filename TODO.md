@@ -17,9 +17,8 @@ work in workspaces.
 - **Layers**: `base`, then one per role (the owner's Mac, an always-on Mac, a
   Linux workspace, a macOS workspace, a server), then one machine's overrides.
   The last layer wins, and the app shows where each line comes from.
-- **Where they live**: a git repository of the owner's, so history is the
-  undo. The engine reads it from one path, and every Mac's engine reads the
-  same commit.
+- **Where they live**: open. Not a git repository of their own (the owner
+  declined, 2026-11-10); the engine reads them from one path.
 - **Plan, then apply**: `station plan` prints the difference between the
   blueprint and the machine (to install, to set, extra), and `station apply`
   does it, idempotent and check-first like `setup`. Removing what a blueprint
@@ -28,9 +27,6 @@ work in workspaces.
   missing, 1 extra" on the machine's card, with Apply.
 - **Images**: a workspace role's blueprint is baked into its image by the
   recipe, so a new VM is ready at boot instead of installing on first start.
-- **Capture**: `station blueprint capture` writes a blueprint from a machine
-  as it stands, so the first file comes from the old MacBook's inventory (its
-  Brewfile and `apps.md`, in the migration folder of 2026-11-10).
 - **The minimal host**: the owner's Mac keeps station, tart, Tailscale, Claude
   Code, git, gh, gpg, Ghostty and Herdr, and lets Claude iterate on station
   from the host. Everything else installs in workspaces.
@@ -63,11 +59,16 @@ branch past GitHub's 2 GB push limit; their history was dropped on
 2026-11-10. A golden is compressed or drawn at 1x before it is committed, so
 one story's update stays in kilobytes. Starts at the next golden change.
 
-## Choose the secret manager
-Bitwarden Secrets Manager or 1Password service accounts, as a second adapter of
-`accounts/contract.Vault`. It becomes the home of the secrets shared with a VM
-beyond `session:*` (`operator:*` tokens scoped per VM). Starts when a VM first
-needs a token that is not a browser session.
+## A password manager of station's own
+The owner's idea (2026-11-10): rather than adopt Bitwarden or 1Password, station
+carries its own password manager, a second adapter of `accounts/contract.Vault`,
+so sharing credentials between agents, VMs and Macs is one gesture of the app:
+a credential is shared with a VM or an agent for a term, scoped
+(`operator:*` tokens per VM, beyond `session:*`), and taken back. A blueprint
+names a credential by its reference in this vault. Not designed: the
+encryption at rest, the unlock, the sync between Macs and the recovery are
+decided with the owner before any lot. Starts when a VM first needs a token
+that is not a browser session.
 
 ## The macOS VM and the iPhone (on the MacBook M5 Pro, from 2026-11-07)
 A `macos` image beside `linux`: pull `macos-tahoe-xcode:27`,
