@@ -2,6 +2,46 @@
 
 Decided with the owner and left for later, each with what starts it.
 
+## Blueprints: each machine's install, declared (the next major project)
+The owner's goal (2026-11-10): a folder of configuration files says what
+every machine of the fleet installs, the MacBook, the Mac mini and each kind of
+VM, the way an Ansible playbook declares a host, and the app edits the same
+files visually. "blueprint" is the working word: `profile` and `recipe` are
+taken (glossary). It starts on the new MacBook, which stays minimal, with the
+work in workspaces.
+
+- **What a blueprint holds**: catalogue ids only (apps, settings with their
+  non-secret values, dotfiles, the image a workspace starts from). A secret is
+  named by its vault reference, never written. The catalogue stays the module
+  library; a blueprint adds no install logic.
+- **Layers**: `base`, then one per role (the owner's Mac, an always-on Mac, a
+  Linux workspace, a macOS workspace, a server), then one machine's overrides.
+  The last layer wins, and the app shows where each line comes from.
+- **Where they live**: a git repository of the owner's, so history is the
+  undo. The engine reads it from one path, and every Mac's engine reads the
+  same commit.
+- **Plan, then apply**: `station plan` prints the difference between the
+  blueprint and the machine (to install, to set, extra), and `station apply`
+  does it, idempotent and check-first like `setup`. Removing what a blueprint
+  does not list is a separate flag, never the default.
+- **Drift**: the engine compares on its own and the menu bar shows "3 apps
+  missing, 1 extra" on the machine's card, with Apply.
+- **Images**: a workspace role's blueprint is baked into its image by the
+  recipe, so a new VM is ready at boot instead of installing on first start.
+- **Capture**: `station blueprint capture` writes a blueprint from a machine
+  as it stands, so the first file comes from the old MacBook's inventory (its
+  Brewfile and `apps.md`, in the migration folder of 2026-11-10).
+- **The minimal host**: the owner's Mac keeps station, tart, Tailscale, Claude
+  Code, git, gh, gpg, Ghostty and Herdr, and lets Claude iterate on station
+  from the host. Everything else installs in workspaces.
+- **The visual side**: a Blueprints page per role, with the catalogue as
+  toggles and values in forms. It writes the files, which stay the source of
+  truth, and it is designed with the owner (prototype, then stories) before any
+  lot.
+
+It replaces the idea of `station apps install --all`. Starts once the new
+MacBook runs station v3 and the owner opens the design.
+
 ## The next minor release: the v2 words go
 The hidden aliases (`status`, `start`, `stop`, `tools`, `secrets`, `config`,
 `storage`, `run`, `probe`, `--always-on`) and `station.status/v1` are kept for
