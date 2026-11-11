@@ -1,0 +1,8 @@
+{
+    "group": "needs",
+    "heightNote": "the page header is a Mac page's, 4 pt shorter than the prototype's",
+    "id": "needs.catalog-refused",
+    "note": "A file of the owner's catalog is refused: its row names the file and its line, and the built-in items are read meanwhile.",
+    "pages": ["pages/machines.needs.catalog-refused.needs.json"],
+    "schema": "station.story/v1"
+}

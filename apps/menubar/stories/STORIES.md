@@ -14,7 +14,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 
 - **Menu bar and panel shell** (5): `menubar.count`, `menubar.down`, `menubar.restarting`, `menubar.fine`, `menubar.open`
 - **All machines (home)** (20): `home.needs`, `home.hover`, `home.keyboard`, `home.one-need.wait`, `home.one-need.lease`, `home.many-needs`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.agent-creating`, `home.agent-born`, `home.agents-folded`, `home.agents-unfolded`
-- **Needs you (fleet list)** (4): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`
+- **Needs you (fleet list)** (5): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`, `needs.catalog-refused`
 - **A Mac** (22): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.needs-unfolded`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
 - **A workspace** (10): `workspace.agents`, `workspace.agents.finished`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.waiting.accounts`, `workspace.stopped`, `workspace.started`, `workspace.hook-missing`
 - **An agent** (8): `agent.working`, `agent.remote`, `agent.waiting`, `agent.waiting.pr-opened`, `agent.waiting.reply`, `agent.waiting.replied`, `agent.waiting.merged`, `agent.finished`
@@ -348,6 +348,17 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "All machines" → back; "Review" → push(vm:review-bot); "Extend" → extend(s2); "How to" → howto(firewall); "Sign in" → signin(thismac:npm); "Show" → goUpkeep(thismac)
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: #panel: height 310px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear; #hud: CSS hud 2600 ms linear (esc)
+
+### `needs.catalog-refused`
+
+![needs.catalog-refused](stories/needs.catalog-refused.png) ![needs.catalog-refused light](stories/needs.catalog-refused.light.png)
+
+- **Capture**: [dark](stories/needs.catalog-refused.png), [light](stories/needs.catalog-refused.light.png)
+- **Shows**: A file of the owner's catalog is refused: the upkeep row "A file of yours is refused on macbook-pro · 1 file refused" with its warning glyph and its verb Show; unfolded, it names the file's problem (its line and the unknown key) and the file to fix, saying the built-in items are read meanwhile.
+- **Data**: needs() with a refused catalog file (its worded problem and its path)
+- **Interactions**: "All machines" → back; "Review" → push(vm:review-bot); "Extend" → extend(s2); "How to" → howto(firewall); "Sign in" → signin(thismac:npm); "Show" → goUpkeep(thismac)
+- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
+- **Leaves**: #panel: height 342px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .fwrap.morph: CSS morph 340 ms linear (esc)
 
 ## A Mac
 
