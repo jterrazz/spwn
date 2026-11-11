@@ -21,6 +21,8 @@ Library/HTTPStorages/com.apple.*
 Library/HomeKit
 Library/DataDeliveryServices
 Library/Sharing/**
+Library/Application Support/DiskImages
+Library/Application Support/DiskImages/**
 Library/**/*.sb-*-*
 # sshd keeps one agent socket per session of the suite under ~/.ssh/agent.
 .ssh/agent
