@@ -17,7 +17,8 @@
 #   sheets and contrast table (capture/measure.py) land in
 #   .artifacts/e2e/menubar-<label>/capture/. STATION_CAPTURE_SET picks the
 #   shots (walls,behave,trial by default; sweep, a11y and old drive.py names),
-#   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame.
+#   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
+#   the home story served (home.exposed by default).
 set -uo pipefail
 
 label=${1:-}

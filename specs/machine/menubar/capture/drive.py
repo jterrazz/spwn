@@ -25,7 +25,10 @@ SCHEMES = ["dark", "light"]
 TINTS = [0.5, 0.65, 0.8, 0.9]
 APP = "~/station/.artifacts/menubar/Station.app"
 CAPTURE = "~/station/specs/machine/menubar/capture"
-PAGE = "~/station/apps/menubar/stories/pages/machines.home.exposed.menubar.json"
+# value: STATION_CAPTURE_PAGE names the home story served, home.exposed by
+# default; home.empty is shorter than the cap on any screen.
+STORY = os.environ.get("STATION_CAPTURE_PAGE", "home.exposed")
+PAGE = f"~/station/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
 # places it: its right edge under the item's, 6 pt under the menu bar.
 DROP, MARGIN, WIDTH = 6, 8, 340
@@ -102,6 +105,7 @@ class Rig:
                 if screen:
                     self.screen = self.frame(screen)
                 return line
+        self.say(f"   no item frame in 90 s; app: {self.ssh('pgrep -lx StationMenuBar; tail -5 ~/cap/app.log ~/cap/app.out 2>&1').strip()}")
         return None
 
     def last(self, word):
@@ -191,7 +195,7 @@ class Rig:
         self.vnc.keyPress("esc")
         time.sleep(1)
         closed = None if old_item else bool(self.last("closed"))
-        meta = {"name": name, "scheme": scheme, "wall": wall, "env": env, "reduce": reduce, "contrast": contrast,
+        meta = {"name": name, "story": STORY, "scheme": scheme, "wall": wall, "env": env, "reduce": reduce, "contrast": contrast,
                 "a11y_read": read, "item": item, "window": window, "esc_closed": closed}
         self.say(f"-- {name}: {json.dumps(meta)}")
         return meta
@@ -260,7 +264,11 @@ def main():
         old_item = dict(zip("xywh", map(float, sys.argv[7].split(","))))
     if "behave" in sets:
         rig.appearance("dark")
-        item = rig.frame(rig.launch(frames))
+        line = rig.launch(frames)
+        if not line:
+            rig.say("FAIL behave: the app logged no item frame")
+            sys.exit(1)
+        item = rig.frame(line)
         rig.set_wall("dark", item)
         behave = rig.behave(item)
         json.dump(behave, open(os.path.join(out, "behave.json"), "w"), indent=1)
