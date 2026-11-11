@@ -1,0 +1,3 @@
+#!/bin/sh
+# A command in a folder only the owner's item names: found there, it is installed.
+echo "thing 1.0"

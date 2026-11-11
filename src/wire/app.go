@@ -71,17 +71,22 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	if session != nil {
 		world = session.thisMac()
 	}
-	cat, loaded := catalog.Builtin()
+	builtin, loaded := catalog.Builtin()
 	if loaded != nil {
 		writer.Failure(kit.Translate(loaded, ""))
 		return int(fail.ExitFailure)
 	}
-	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
-	if layered := thisMac.layerCatalog(); layered != nil {
-		worded := kit.Translate(layered, "")
+	// invariant: the owner's items are layered before the search is built,
+	// so the folders an owner's item lands its commands in (`path:`) are
+	// searched as a built-in item's are.
+	unsearched := local.New(env, nil, nil, nil)
+	cat, broken := layerCatalog(userSource(world, unsearched.FS, pathsOf(unsearched.Env.Home(), vars).Prefs), builtin)
+	if broken != nil {
+		worded := kit.Translate(broken, "")
 		writer.Failure(worded)
 		return int(fail.ExitOf(worded))
 	}
+	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
@@ -313,27 +318,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	if world != nil {
 		h = world.system(raw)
 	}
-	home := h.Env.Home()
-	root := func(name, fallback string) string {
-		if dir := vars[name]; filepath.IsAbs(dir) {
-			return dir
-		}
-		return filepath.Join(home, fallback)
-	}
-	roots := setup.Roots{
-		Prefs: root("XDG_CONFIG_HOME", ".config"),
-		Data:  root("XDG_DATA_HOME", filepath.Join(".local", "share")),
-		State: root("XDG_STATE_HOME", filepath.Join(".local", "state")),
-		Cache: root("XDG_CACHE_HOME", ".cache"),
-	}
-	paths := setup.Paths{
-		Prefs: filepath.Join(roots.Prefs, "station"),
-		Data:  filepath.Join(roots.Data, "station"),
-		State: filepath.Join(roots.State, "station"),
-		Cache: filepath.Join(roots.Cache, "station"),
-		Bin:   filepath.Join(home, ".local", "bin"),
-		Roots: roots,
-	}
+	paths := pathsOf(h.Env.Home(), vars)
 	st := newStores(h.FS, paths)
 	if world != nil {
 		world.stores(st)
@@ -368,6 +353,31 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	m.kind = legacyKind(m.profile)
 	m.where = page.Context{Machine: name, Kind: string(m.profile.Kind), Registered: registered != ""}
 	return m
+}
+
+// value: station's folders under a home, each moved by its XDG variable
+// when that is an absolute path.
+func pathsOf(home string, vars map[string]string) setup.Paths {
+	root := func(name, fallback string) string {
+		if dir := vars[name]; filepath.IsAbs(dir) {
+			return dir
+		}
+		return filepath.Join(home, fallback)
+	}
+	roots := setup.Roots{
+		Prefs: root("XDG_CONFIG_HOME", ".config"),
+		Data:  root("XDG_DATA_HOME", filepath.Join(".local", "share")),
+		State: root("XDG_STATE_HOME", filepath.Join(".local", "state")),
+		Cache: root("XDG_CACHE_HOME", ".cache"),
+	}
+	return setup.Paths{
+		Prefs: filepath.Join(roots.Prefs, "station"),
+		Data:  filepath.Join(roots.Data, "station"),
+		State: filepath.Join(roots.State, "station"),
+		Cache: filepath.Join(roots.Cache, "station"),
+		Bin:   filepath.Join(home, ".local", "bin"),
+		Roots: roots,
+	}
 }
 
 // value: the name the fleet shows this machine by: the one setup gave it, else

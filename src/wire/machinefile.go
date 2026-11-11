@@ -13,17 +13,22 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/git"
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
+	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/surface/cli/explain"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
 
 // value: the owner's files, ~/.config/station/{catalog,machinefiles}; in
 // a world, its Mac's station files.
-func (m machine) userSource() machinefilecontract.Source {
-	if m.world != nil {
-		return m.world.userSource()
+func userSource(world *worldMac, fsys local.FS, prefs string) machinefilecontract.Source {
+	if world != nil {
+		return world.userSource()
 	}
-	return files.New(m.sys.FS, machinefilecontract.FileLinks, filepath.Join(m.paths.Prefs, "catalog"), filepath.Join(m.paths.Prefs, "machinefiles"), machinefile.User, "~/.config/station")
+	return files.New(fsys, machinefilecontract.FileLinks, filepath.Join(prefs, "catalog"), filepath.Join(prefs, "machinefiles"), machinefile.User, "~/.config/station")
+}
+
+func (m machine) userSource() machinefilecontract.Source {
+	return userSource(m.world, m.sys.FS, m.paths.Prefs)
 }
 
 func builtinSource() machinefilecontract.Source {
@@ -46,26 +51,26 @@ func (m machine) machinefileSources() []machinefilecontract.Source {
 }
 
 // invariant: the catalog every command reads is the owner's items over
-// the built-in ones, a same-name item replacing it whole; a file of the
-// owner's the strict decoder refuses stops the command with its line.
-func (m *machine) layerCatalog() error {
-	user, err := m.userSource().Read(context.Background())
+// the built-in ones, a same-name item replacing it whole. A file of the
+// owner's the strict decoder refuses is returned worded at its line, and
+// stops the command.
+func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (catalog.Catalog, error) {
+	tree, err := user.Read(context.Background())
 	if err != nil {
-		return err
+		return builtin, err
 	}
-	if len(user.Files) == 0 {
-		return nil
+	if len(tree.Files) == 0 {
+		return builtin, nil
 	}
-	builtin, err := builtinSource().Read(context.Background())
+	embedded, err := builtinSource().Read(context.Background())
 	if err != nil {
-		return err
+		return builtin, err
 	}
-	c, err := machinefile.CatalogOf([]machinefile.Tree{user, builtin})
+	c, err := machinefile.CatalogOf([]machinefile.Tree{tree, embedded})
 	if err != nil {
-		return machinefilecalls.Worded(err)
+		return builtin, machinefilecalls.Worded(err)
 	}
-	m.cat = c
-	return nil
+	return c, nil
 }
 
 func (m machine) machinefileDeps() machinefilecalls.Deps {
