@@ -1,0 +1,10 @@
+description: 'herdr-core where Herdr was never opened: herdr-app installs, then the step says open it once'
+env: two-macs
+runs:
+    - command: 'world unopened jterrazz-macbook-pro herdr-app'
+      exit: 0
+    - command: 'apps install herdr-core'
+      exit: 0
+      stdout: |
+          ●	herdr-app	1.0.0	cask	required by herdr-core
+          ◐	herdr-core		provided-by	open Herdr once, then station apps install herdr-core

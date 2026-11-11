@@ -129,6 +129,9 @@ type Mac struct {
 	// value: each installer's state, by method; a method absent here has its
 	// manager installed and holds nothing.
 	Apps map[catalog.Method]*Manager `json:"apps,omitempty"`
+	// value: the apps never opened on this Mac: a command one of them brings
+	// at its first launch (Herdr.app's hc) is absent until then.
+	Unopened []string `json:"unopened,omitempty"`
 	// value: the counters that move, read by the meter.
 	Meter *Meter `json:"meter,omitempty"`
 	// value: the volume and the files on it, by absolute path.

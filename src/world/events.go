@@ -60,6 +60,7 @@ func events() []event {
 		{"address", []string{"<vm>", "<ip>"}, address},
 		{"slow", []string{"<machine>", "<duration>"}, slow},
 		{"reads", []string{"<mac>", "<fact>", "<value>"}, reads},
+		{"unopened", []string{"<mac>", "<app>"}, unopened},
 		{"certificate", []string{"<mac>", "pending|issued"}, certificate},
 		{"admin", []string{"on|off"}, admin},
 		{"agent-prompt", []string{"<vm>", "<session>", "<prompt>", "[<folder>]"}, agentEvent(agents.Prompted, agentPrompt)},
@@ -286,6 +287,15 @@ func reads(w *World, args []string) error {
 	case strings.HasSuffix(value, " pending"):
 		m.Facts[catalog.Fact(args[1])] = settings.Fact{State: catalog.StateDegraded, Value: value}
 	}
+	return nil
+}
+
+func unopened(w *World, args []string) error {
+	m, err := w.known(args[0])
+	if err != nil {
+		return err
+	}
+	m.Unopened = append(m.Unopened, args[1])
 	return nil
 }
 

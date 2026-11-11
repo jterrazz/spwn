@@ -42,7 +42,7 @@ func (p *ProvidedBy) Install(_ context.Context, installs []catalog.Install, _ co
 		}
 		for _, name := range v.Commands {
 			if _, found := p.run.LookPath(name); !found {
-				return errors.New(name + " did not come with " + v.Item)
+				return &apps.NotYetProvidedError{Item: v.Item, Command: name}
 			}
 		}
 	}

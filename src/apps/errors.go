@@ -87,6 +87,15 @@ func (e *SignedOutError) Error() string {
 	return e.Store + " did not answer in " + strconv.Itoa(int(e.Waited.Seconds())) + " s, as when it is signed out: " + e.Hint
 }
 
+// value: the item that provides a command is installed and the command is
+// not there yet: it comes when that item is first opened.
+
+type NotYetProvidedError struct{ Item, Command string }
+
+func (e *NotYetProvidedError) Error() string {
+	return e.Command + " did not come with " + e.Item + " yet"
+}
+
 type NotReversibleError struct{ App string }
 
 func (e *NotReversibleError) Error() string { return e.App + " cannot be uninstalled by station" }

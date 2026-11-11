@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"maps"
+	"slices"
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
@@ -163,7 +164,23 @@ func updated(s *world.Manager, k string) {
 }
 
 func (f *Installer) Install(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {
+	if err := f.unopened(installs); err != nil {
+		return err
+	}
 	return f.run(ctx, "Install", installs, installed)
+}
+
+// invariant: a command another item brings at its first launch is absent
+// while that item was never opened on this Mac, as on a fresh one.
+func (f *Installer) unopened(installs []catalog.Install) error {
+	f.w.Lock()
+	defer f.w.Unlock()
+	for _, i := range installs {
+		if by, ok := i.(catalog.ProvidedByInstall); ok && slices.Contains(f.w.Mac(f.mac).Unopened, by.Item) && len(by.Commands) > 0 {
+			return &apps.NotYetProvidedError{Item: by.Item, Command: by.Commands[0]}
+		}
+	}
+	return nil
 }
 
 func (f *Installer) Update(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {

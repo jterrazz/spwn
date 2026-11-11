@@ -413,9 +413,12 @@ func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, op verbOf) 
 	o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
 	err := op(s.installer(t), ctx, []catalog.Install{s.install(t)}, s.logs([]catalog.App{t}))
 	var signedOut *apps.SignedOutError
+	var notYet *apps.NotYetProvidedError
 	switch {
 	case errors.As(err, &signedOut):
 		o.Result, o.Detail = catalog.StateBroken, signedOut.Error()
+	case errors.As(err, &notYet):
+		o.Result, o.Why, o.Detail = catalog.StateDegraded, apps.WhyPartial, s.firstOpen(t, notYet)
 	case err != nil:
 		words, why := s.failed(verb, []catalog.App{t}, err)
 		o.Detail, o.Log = words(t.Name)
@@ -541,4 +544,14 @@ func settled(s catalog.State) bool { return s == catalog.StateOK || s == catalog
 
 func sameName(t catalog.App) func(catalog.App) bool {
 	return func(o catalog.App) bool { return o.Name == t.Name }
+}
+
+// invariant: a command its provider brings at first launch is a next step,
+// never a failure: the owner opens the provider once, then asks again.
+func (s *Shelf) firstOpen(t catalog.App, e *apps.NotYetProvidedError) string {
+	again := "station apps install " + t.Name
+	if by, ok := s.byName[e.Item]; ok && by.Bundle != "" {
+		return "open " + by.Bundle + " once, then " + again
+	}
+	return e.Error() + ": open " + e.Item + " once, then " + again
 }
