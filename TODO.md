@@ -183,6 +183,7 @@ tree; and whether it is a blueprint's volume. Starts when the push loop
 becomes the bottleneck.
 
 ## Smaller follow-ups
+- A VM's record is written without the engine's lock by four calls of `src/machines/calls/` (`agents.go:107`, `edit.go:68`, `vms.go:76` and `vms.go:99`, each `writeRecord`), so one can race the engine's own write as a create did before b440a36a. Found by the L4.1 re-verify (2026-11-11); starts with the next change to those calls.
 - A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
 - Memory soak: a Linux VM 8 h under load, the Mac's RSS of the VM process.
