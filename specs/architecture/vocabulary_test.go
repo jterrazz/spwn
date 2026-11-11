@@ -349,13 +349,16 @@ func swiftTexts(root string) ([]corpusText, error) {
 // value: the keys of a catalog item whose value is a command line station
 // runs, another program's words like the Args of a Go step.
 func catalogArgv() []string {
-	return []string{"run", "args", "command", "reload", "upgrade", "env", "url"}
+	return []string{"run", "args", "command", "reload", "upgrade", "env", "url", "check", "undo"}
 }
 
 // invariant: a catalog item says its words in its values, as its Go literal
-// did before it was a file: every scalar but a command line and another
-// program's text, read as the catalog's own folder so the catalog alone may
-// still name OrbStack.
+// did before it was a file, and in its comments: every scalar but a command
+// line and another program's text, and every comment, read as the catalog's
+// own folder so the catalog alone may still name OrbStack.
+// value: the marks a YAML comment opens its lines with.
+var yamlComment = regexp.MustCompile(`(?m)^\s*#\s?`)
+
 func catalogTexts(root string) ([]corpusText, error) {
 	var out []corpusText
 	var failed error
@@ -365,8 +368,16 @@ func catalogTexts(root string) ([]corpusText, error) {
 			failed = fmt.Errorf("%s: %w", rel, err)
 			return
 		}
+		said := func(n *yaml.Node) {
+			for _, c := range []string{n.HeadComment, n.LineComment, n.FootComment} {
+				if c != "" {
+					out = append(out, corpusText{"src/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(yamlComment.ReplaceAllString(c, ""), "")})
+				}
+			}
+		}
 		var read func(n *yaml.Node, argv bool)
 		read = func(n *yaml.Node, argv bool) {
+			said(n)
 			switch n.Kind {
 			case yaml.ScalarNode:
 				if !argv && !foreignShape.MatchString(n.Value) {
@@ -374,6 +385,7 @@ func catalogTexts(root string) ([]corpusText, error) {
 				}
 			case yaml.MappingNode:
 				for i := 0; i+1 < len(n.Content); i += 2 {
+					said(n.Content[i])
 					read(n.Content[i+1], argv || slices.Contains(catalogArgv(), n.Content[i].Value))
 				}
 			default:
@@ -494,7 +506,7 @@ func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
-	item := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\nmethods:\n    - os: macos\n      script: {run: daemon --tools}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
+	item := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\n# outside: the host keeps it\nmethods:\n    - os: macos\n      script: {run: daemon --tools, check: daemon --version}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
 	if err := os.WriteFile(filepath.Join(dir, "orb.yaml"), []byte(item), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -509,10 +521,11 @@ func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
 	}
 	want := []string{
 		`src/catalog/items/system-utilities/orb.yaml:4 src/catalog says "daemon", a word SPEC §2.2 retired`,
-		`src/catalog/items/system-utilities/orb.yaml:9 src/catalog says "storage", a word SPEC §2.2 retired`,
+		`src/catalog/items/system-utilities/orb.yaml:6 src/catalog says "host", a word SPEC §2.2 retired`,
+		`src/catalog/items/system-utilities/orb.yaml:10 src/catalog says "storage", a word SPEC §2.2 retired`,
 	}
 	if !slices.Equal(got, want) {
-		t.Errorf("the rule reports %v, want %v: a description and a note are read, a run line is not, and the catalog may name OrbStack", got, want)
+		t.Errorf("the rule reports %v, want %v: a description, a note and a comment are read, a run line and a check are not, and the catalog may name OrbStack", got, want)
 	}
 }
 
