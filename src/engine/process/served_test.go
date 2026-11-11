@@ -266,3 +266,23 @@ func TestAShareBeforeTheTickOfAModeSwitchIsServedInTheModeServed(t *testing.T) {
 		})
 	}
 }
+
+// invariant: a release unshares station's entry only while the tailnet
+// carries it from the released port of the Mac: an entry the owner put on
+// its Funnel port by hand, over station's, stays.
+func TestAReleaseLeavesAnEntryTheOwnerPutOnItsFunnelPort(t *testing.T) {
+	yes := true
+	rights := catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}
+	h, _, tn, _ := restartedOver(t, ports.Reservation{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, By: ports.ByRights, HTTP: &yes}, ports.HTTPSPort, &rights)
+	ctx := t.Context()
+	h.d.listen(ctx, "api", 3000, "0.0.0.0", "node")
+	tn.mu.Lock()
+	tn.entries = []ports.Share{{Port: 443, Path: "/", Reserved: 9000, Scheme: ports.SchemeHTTPS, Target: "http://127.0.0.1:9000"}}
+	tn.mu.Unlock()
+	if _, err := h.d.release(ctx, "api", 3000); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := tn.dump(), "443/<-9000 funnel=true"; got != want {
+		t.Errorf("tailnet after the release = %q, want the owner's %q", got, want)
+	}
+}

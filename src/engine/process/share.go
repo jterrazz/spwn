@@ -300,27 +300,30 @@ func (d *Engine) rewriteLocked(ctx context.Context, i int, next ports.Reservatio
 // invariant: the one way a reservation's entry leaves the tailnet: at its
 // end, and before any change to what it serves, a switch of the HTTPS mode
 // included. While Serve is on, the entry it makes in mode goes, whether
-// this engine served it or found it at start; one this engine did not
-// serve goes only when the tailnet's entry is carried from its port of the
-// Mac, never another's. The caller holds d.mu.
+// this engine served it or found it at start, never an entry at its port
+// and path carried from another port of the Mac: one the owner put there
+// by hand stays. One this engine did not serve goes only when the tailnet is
+// read and carries it from its port of the Mac. The caller holds d.mu.
 func (d *Engine) unshareLocked(ctx context.Context, l ports.Reservation, mode string, served bool) {
 	if !d.self.On {
 		return
 	}
 	want := ports.ShareOf(l, mode)
-	if !served {
-		shared, err := d.tn.Shared(ctx)
-		if err != nil || !slices.ContainsFunc(shared, func(e ports.Share) bool { return carries(e, want) }) {
-			return
-		}
+	shared, err := d.tn.Shared(ctx)
+	if err != nil && !served {
+		return
+	}
+	carried := slices.ContainsFunc(shared, func(e ports.Share) bool { return at(e, want) && ports.CarriedFrom(e) == want.Reserved })
+	replaced := slices.ContainsFunc(shared, func(e ports.Share) bool { return at(e, want) && ports.CarriedFrom(e) != want.Reserved })
+	if !served && !carried || served && replaced && !carried {
+		return
 	}
 	_ = d.tn.Unshare(ctx, want)
 }
 
-// value: whether a tailnet entry is want, at its port and path, carried
-// from its port of the Mac.
-func carries(e, want ports.Share) bool {
-	return e.Port == want.Port && e.Mounted() == want.Mounted() && (!want.Mounted() || e.Path == want.Path) && ports.CarriedFrom(e) == want.Reserved
+// value: whether a tailnet entry answers at want's port and path.
+func at(e, want ports.Share) bool {
+	return e.Port == want.Port && e.Mounted() == want.Mounted() && (!want.Mounted() || e.Path == want.Path)
 }
 
 // value: the HTTPS mode this Mac's shares are served in: the one last
