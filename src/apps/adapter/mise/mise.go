@@ -102,8 +102,9 @@ func (m *Mise) each(ctx context.Context, installs []catalog.Install, logs contra
 func Pinned(home string) []string {
 	// invariant: mise reads no config at or above home but its global one, the
 	// file `use --global` and `unuse --global` write, so a shim answers with the
-	// global version.
-	return []string{"MISE_CEILING_PATHS=" + home}
+	// global version; and no shim nor `mise x` installs a missing runtime by
+	// itself, so a read installs nothing.
+	return []string{"MISE_CEILING_PATHS=" + home, "MISE_AUTO_INSTALL=false", "MISE_EXEC_AUTO_INSTALL=false", "MISE_NOT_FOUND_AUTO_INSTALL=false"}
 }
 
 func (m *Mise) ShimsFirst(home string, vars map[string]string) []string {

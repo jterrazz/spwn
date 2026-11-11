@@ -3,6 +3,7 @@ package mise_test
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strings"
 	"testing"
 
@@ -67,5 +68,16 @@ func TestARuntimeDeclaredButNotInstalledIsNotListed(t *testing.T) {
 
 	if err != nil || got["node"] != "24.11.0" || len(got) != 1 {
 		t.Fatalf("inventory %v %v", got, err)
+	}
+}
+
+func TestAManagerCommandInstallsNoRuntimeByItself(t *testing.T) {
+	// invariant: a shim run from a folder that pins a runtime mise lacks
+	// installs it unless told not to, so a read would install one.
+	pinned := mise.Pinned("/home/u")
+	for _, kv := range []string{"MISE_CEILING_PATHS=/home/u", "MISE_AUTO_INSTALL=false", "MISE_EXEC_AUTO_INSTALL=false", "MISE_NOT_FOUND_AUTO_INSTALL=false"} {
+		if !slices.Contains(pinned, kv) {
+			t.Errorf("a manager command runs without %s", kv)
+		}
 	}
 }
