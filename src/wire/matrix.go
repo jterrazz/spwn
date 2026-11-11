@@ -44,7 +44,7 @@ func (f settingsAllMachines) Read(ctx context.Context, refs []coremachine.Ref) m
 			out[by[name]] = settingscalls.Answer{Why: kit.Translate(a.Err, "settings").Message}
 			continue
 		}
-		out[by[name]] = settingscalls.Answer{Rows: a.Value}
+		out[by[name]] = settingscalls.Answer{Rows: settings.Known(a.Value, f.m.cat.Setting)}
 	}
 	return out
 }

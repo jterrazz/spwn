@@ -77,6 +77,23 @@ type Row struct {
 	Fix             finding.Fix
 }
 
+func Known(rows []Row, local func(string) (catalog.Setting, bool)) []Row {
+	// invariant: a row a far station judged carries its item as that station
+	// reads it; one from an older station, whose wire has none, is shown with
+	// this station's item of the same name, and one it does not know keeps
+	// its name alone.
+	out := slices.Clone(rows)
+	for i, r := range out {
+		if r.Group == Checked || r.Item.Name != "" {
+			continue
+		}
+		if it, ok := local(r.Name); ok {
+			out[i].Item = it
+		}
+	}
+	return out
+}
+
 func GroupOf(it catalog.Setting) Group {
 	if it.Category == catalog.CategoryHeadless {
 		return AlwaysOnMac

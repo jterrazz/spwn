@@ -75,3 +75,24 @@ func TestJudgeSetNamesWhereASettingLivesWhenItIsNotForThisMachine(t *testing.T) 
 		}
 	}
 }
+
+func TestARowFromAnOlderStationIsShownWithThisStationsItem(t *testing.T) {
+	local := func(name string) (catalog.Setting, bool) {
+		if name == "hushlogin" {
+			return catalog.Setting{Name: "hushlogin", Description: "Silence the terminal login message"}, true
+		}
+		return catalog.Setting{}, false
+	}
+	far := []settings.Row{
+		{Name: "hushlogin", State: settings.StateApplied},
+		{Name: "dns", Item: catalog.Setting{Name: "dns", Description: "its own words"}},
+		{Name: "gone", State: settings.StateApplied},
+	}
+	got := settings.Known(far, local)
+	if got[0].Item.Description != "Silence the terminal login message" || got[1].Item.Description != "its own words" || got[2].Item.Name != "" {
+		t.Errorf("rows filled as %+v", got)
+	}
+	if far[0].Item.Name != "" {
+		t.Error("the rows given were changed")
+	}
+}
