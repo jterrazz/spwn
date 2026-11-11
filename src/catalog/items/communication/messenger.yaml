@@ -5,6 +5,6 @@ description: Facebook Messenger
 bundle: Messenger
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       script:
           hint: no current source

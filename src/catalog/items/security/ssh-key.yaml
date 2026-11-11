@@ -8,7 +8,7 @@ sets:
     - { key: ~/.ssh/config, value: the Keychain stanza }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: ssh-key
 writes:
     - path: ~/.ssh/id_ed25519

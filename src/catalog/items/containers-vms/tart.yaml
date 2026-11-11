@@ -4,12 +4,12 @@ name: tart
 description: "Virtual machines on Apple silicon: the engine of station's VMs"
 provides: [tart]
 then: [tart-launcher]
-version:
+version-read:
     args: [tart, --version]
     pattern: ^(\S+)
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       script:
           run: d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"
 disk:
@@ -27,7 +27,7 @@ disk:
     installed: ['{data}/station/tart', ~/.local/bin/tart]
     free:
         - run: [tart, prune, --entries=caches, --older-than=0]
-          needs: tart
+          uses: tart
         - delete: [~/Library/Caches/com.github.cirruslabs.tart/*]
     no-erase: "station's data are VMs and images: station machines delete <vm>, station images delete <image>"
     misplaced:

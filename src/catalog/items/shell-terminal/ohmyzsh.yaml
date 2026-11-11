@@ -2,7 +2,7 @@ item: station.catalog/v1
 kind: app
 name: ohmyzsh
 description: Oh My Zsh shell framework
-version:
+version-read:
     args: [git, -C, ~/.oh-my-zsh, rev-parse, --short, HEAD]
     pattern: ^(\S+)
     path: ~/.oh-my-zsh

@@ -36,6 +36,16 @@ type NeedsTerminalError struct{ Item string }
 
 func (e *NeedsTerminalError) Error() string { return e.Item + " needs a terminal" }
 
-type UnhandledError struct{ Item string }
+type UnhandledError struct {
+	Item string
+	// value: the builtin a newer catalog named, which this station does not
+	// carry; empty for an effect it knows and no Applier writes.
+	Builtin string
+}
 
-func (e *UnhandledError) Error() string { return "no handler for setting \"" + e.Item + "\"" }
+func (e *UnhandledError) Error() string {
+	if e.Builtin != "" {
+		return "this station does not know " + e.Builtin + ": update station"
+	}
+	return "no handler for setting \"" + e.Item + "\""
+}

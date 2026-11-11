@@ -12,7 +12,7 @@ sets:
     - { key: Remote Login, value: 'on' }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: sshd
 writes:
     - path: /System/Library/LaunchDaemons/ssh.plist

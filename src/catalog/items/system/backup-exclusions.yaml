@@ -5,7 +5,7 @@ description: Keep ~/.cache and station's VMs out of Time Machine
 reversible: true
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: backup-exclusions
 writes:
     - path: '{cache}'

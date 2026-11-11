@@ -16,7 +16,7 @@ sets:
     - { key: share list, value: holds it }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: claude-token
 writes:
     - path: '{config}/studio-os'

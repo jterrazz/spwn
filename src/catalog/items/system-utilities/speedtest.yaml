@@ -5,7 +5,7 @@ description: Internet speed test
 bundle: Speedtest
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1153157709
           name: Speedtest

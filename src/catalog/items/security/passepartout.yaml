@@ -5,7 +5,7 @@ description: VPN client
 bundle: Passepartout
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1433648537
           name: Passepartout

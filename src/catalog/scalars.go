@@ -16,6 +16,9 @@ func (r *Roles) UnmarshalYAML(n *yaml.Node) error {
 	if err := n.Decode(&list); err != nil {
 		return err
 	}
+	if len(list) == 0 {
+		return errNoMachine
+	}
 	*r = list
 	return nil
 }
@@ -24,6 +27,8 @@ func (Roles) JSONSchema() map[string]any {
 	one := map[string]any{"type": "string", "enum": MachineRole("").Enum()}
 	return map[string]any{"oneOf": []any{one, map[string]any{"type": "array", "items": one, "minItems": 1}}}
 }
+
+var errNoMachine = errors.New("machine lists no kind of machine")
 
 var errNotScalar = errors.New("a value is a string, an integer or a boolean")
 

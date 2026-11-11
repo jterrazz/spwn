@@ -21,6 +21,6 @@ disk:
           level: kept
     free:
         - run: [pulumi, plugin, rm, --all, --yes]
-          needs: pulumi
+          uses: pulumi
     erase:
         - delete: [~/.pulumi/workspaces/*]

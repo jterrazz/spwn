@@ -9,7 +9,7 @@ sets:
     - { key: womp, value: '1' }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: restart-after-power-cut
 writes:
     - path: /Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist

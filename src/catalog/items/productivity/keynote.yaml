@@ -5,7 +5,7 @@ description: Apple presentations
 bundle: Keynote
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 361285480
           name: Keynote

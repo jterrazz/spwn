@@ -348,7 +348,7 @@ func (m *worldMac) listeners() portscontract.Listeners {
 // no world runs a procedure of the real machine.
 func (m *worldMac) procedureAppliers() []settingscontract.Applier {
 	var out []settingscontract.Applier
-	for _, name := range catalog.Procedure("").Enum() {
+	for _, name := range catalog.Procedures() {
 		if p := catalog.Procedure(name); p != catalog.ProcNeverSleeps {
 			out = append(out, settingsfake.ApplierOf(m.run.w, m.name, p.Kind()))
 		}

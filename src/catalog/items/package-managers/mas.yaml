@@ -2,6 +2,8 @@ item: station.catalog/v1
 kind: manager
 name: mas
 description: Mac App Store command line
+manages: [mas]
+priority: { macos: 2 }
 provides: [mas]
 methods:
     - os: macos

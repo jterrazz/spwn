@@ -5,7 +5,7 @@ description: Professional video editor
 bundle: Final Cut Pro
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 424389933
           name: Final Cut Pro

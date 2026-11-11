@@ -5,7 +5,7 @@ description: Internet radio and stream player
 bundle: Broadcasts
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1469995354
           name: Broadcasts

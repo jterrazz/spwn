@@ -5,7 +5,7 @@ description: Workspace for notes and docs
 bundle: Notion
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: notion
 disk:
     paths:

@@ -2,6 +2,7 @@ item: station.catalog/v1
 kind: manager
 name: uv
 description: Fast Python package and project manager
+manages: [uv]
 provides: [uv]
 methods:
     - os: macos
@@ -17,5 +18,5 @@ disk:
     installed: ['{data}/uv/tools', '{data}/uv/python']
     free:
         - run: [uv, cache, clean]
-          needs: uv
+          uses: uv
     no-erase: 'what uv installs is apps: station apps remove <app>'

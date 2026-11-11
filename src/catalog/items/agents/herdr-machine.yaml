@@ -8,5 +8,5 @@ sets:
     - { key: herdr-core, value: 'every workspace a machine, by its name' }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mux-machines: {}

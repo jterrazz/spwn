@@ -2,6 +2,7 @@ item: station.catalog/v1
 kind: manager
 name: mise
 description: 'Polyglot runtime manager: node, go, python, bun, rust, java'
+manages: [mise]
 provides: [mise]
 methods:
     - os: macos
@@ -36,9 +37,9 @@ disk:
     installed: ['{data}/mise/installs', '{data}/mise/shims']
     free:
         - run: [mise, cache, clear]
-          needs: mise
+          uses: mise
         - run: [mise, prune, --tools, --yes]
-          needs: mise
+          uses: mise
         - delete: [~/Library/Caches/mise/*, ~/Library/Caches/sigstore-rust/*]
           os: macos
         - delete: ['{cache}/mise/*', '{cache}/sigstore-rust/*']

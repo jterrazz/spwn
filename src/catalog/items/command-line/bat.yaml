@@ -17,5 +17,5 @@ disk:
           level: cache
     free:
         - run: [bat, cache, --clear]
-          needs: bat
+          uses: bat
     no-erase: 'nothing to erase: keys and logins are kept'

@@ -5,7 +5,7 @@ description: Apple word processor
 bundle: Pages
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 361309726
           name: Pages

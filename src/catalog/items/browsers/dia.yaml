@@ -5,6 +5,6 @@ description: The Browser Company's AI-first browser
 bundle: Dia
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       script:
           hint: download it from its website

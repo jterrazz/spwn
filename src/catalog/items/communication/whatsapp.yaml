@@ -5,5 +5,5 @@ description: Messaging app
 bundle: WhatsApp
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: whatsapp

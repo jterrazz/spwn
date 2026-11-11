@@ -5,7 +5,7 @@ description: Ad blocker for Safari
 bundle: AdGuard for Safari
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1440147259
           name: AdGuard for Safari

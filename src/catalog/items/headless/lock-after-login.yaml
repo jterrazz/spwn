@@ -9,7 +9,7 @@ sets:
     - { key: loaded, value: 'yes' }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: lock-after-login
 writes:
     - path: /Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist

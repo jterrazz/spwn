@@ -54,7 +54,7 @@ disk:
           note: Go's telemetry mode and counters
     free:
         - run: [go, clean, -cache, -modcache]
-          needs: go
+          uses: go
         - delete:
               - ~/Library/Caches/go-build/*
               - ~/Library/Caches/gopls/*
@@ -83,6 +83,6 @@ disk:
           free:
               - run: [go, clean, -modcache]
                 env: [GOMODCACHE=~/go/pkg/mod, GOFLAGS=-modcacherw]
-                needs: go
+                uses: go
               - delete: [~/go/pkg/mod]
                 prune: [~/go/pkg, ~/go/bin, ~/go]

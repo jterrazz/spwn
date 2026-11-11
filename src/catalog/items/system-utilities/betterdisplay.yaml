@@ -5,5 +5,5 @@ description: Flexible HiDPI scaling and display management
 bundle: BetterDisplay
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: betterdisplay

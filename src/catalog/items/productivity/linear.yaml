@@ -5,5 +5,5 @@ description: Project management
 bundle: Linear
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: linear-linear

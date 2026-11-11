@@ -5,5 +5,5 @@ description: Remote GUI recovery for headless Macs
 bundle: Jump Desktop Connect
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: jump-desktop-connect

@@ -5,7 +5,7 @@ description: Desktop app that keeps coding agents running in the background
 bundle: Herdr
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: herdr-app
 disk:
     paths:

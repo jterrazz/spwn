@@ -5,5 +5,5 @@ description: OpenAI ChatGPT desktop app
 bundle: ChatGPT
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: chatgpt

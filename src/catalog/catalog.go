@@ -151,6 +151,9 @@ func whole(items []placed, files map[string]string) error {
 			return &FileError{File: files[p.item.Name], Problem: err.Error()}
 		}
 	}
+	if err := managers(items, files); err != nil {
+		return err
+	}
 	renamed := map[string]string{}
 	for _, p := range items {
 		it := p.item
@@ -170,6 +173,9 @@ func judged(it Item, owner owners, renamed map[string]string) string {
 			return fmt.Sprintf("%s and %s are both renamed from %q", prev, it.Name, old)
 		}
 		renamed[old] = it.Name
+	}
+	if d := it.Deprecated; d != nil && d.Use != "" && owner[d.Use] != "app" && owner[d.Use] != "setting" {
+		return fmt.Sprintf("%s says to use %q, which is no item", it.Name, d.Use)
 	}
 	for _, a := range it.After {
 		if owner[a] != "app" && owner[a] != "setting" {
@@ -200,6 +206,39 @@ func judged(it Item, owner owners, renamed map[string]string) string {
 		}
 	}
 	return ""
+}
+
+// invariant: a method key has one manager, and a system's priority one
+// manager at each rank, so the order a system installs by is declared once.
+func managers(items []placed, files map[string]string) error {
+	by := map[ManagerKey]string{}
+	type slot struct {
+		system string
+		at     int
+	}
+	at := map[slot]string{}
+	for _, p := range items {
+		it := p.item
+		for _, k := range it.Manages {
+			if prev, ok := by[k]; ok {
+				return &FileError{File: files[it.Name], Problem: fmt.Sprintf("%s and %s both manage %s", prev, it.Name, k)}
+			}
+			by[k] = it.Name
+		}
+		if it.Priority == nil {
+			continue
+		}
+		for _, s := range []slot{{"macos", it.Priority.MacOS}, {"ubuntu", it.Priority.Ubuntu}, {"debian", it.Priority.Debian}} {
+			if s.at == 0 {
+				continue
+			}
+			if prev, ok := at[s]; ok {
+				return &FileError{File: files[it.Name], Problem: fmt.Sprintf("%s and %s both stand at %d on %s", prev, it.Name, s.at, s.system)}
+			}
+			at[s] = it.Name
+		}
+	}
+	return nil
 }
 
 // value: what each name of the catalog names: an app, a setting, a checked

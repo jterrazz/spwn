@@ -2,9 +2,10 @@ item: station.catalog/v1
 kind: app
 name: xcode
 description: Apple development IDE
+needs: [license]
 provides: [xcodebuild]
 bundle: Xcode
-version:
+version-read:
     args: [xcodebuild, -version]
     pattern: ^Xcode (\S+)
 methods:
@@ -29,10 +30,10 @@ disk:
               - ~/Library/Developer/Xcode/DerivedData/*
               - ~/Library/Developer/Xcode/iOS DeviceSupport/*
         - run: [xcrun, simctl, delete, unavailable]
-          needs: xcrun
+          uses: xcrun
     erase:
         - run: [xcrun, simctl, shutdown, all]
-          needs: xcrun
+          uses: xcrun
         - run: [xcrun, simctl, erase, all]
-          needs: xcrun
+          uses: xcrun
     quit: Xcode

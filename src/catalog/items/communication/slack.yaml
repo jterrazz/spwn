@@ -5,5 +5,5 @@ description: Team communication
 bundle: Slack
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: slack

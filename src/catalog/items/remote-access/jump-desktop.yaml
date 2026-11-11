@@ -5,5 +5,5 @@ description: Jump Desktop viewer/client app
 bundle: Jump Desktop
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: jump-desktop

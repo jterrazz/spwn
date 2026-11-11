@@ -5,5 +5,5 @@ description: Whisper-based dictation app
 bundle: TypeWhisper
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: typewhisper

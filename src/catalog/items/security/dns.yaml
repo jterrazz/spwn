@@ -7,7 +7,7 @@ sets:
     - { key: encrypted DNS, value: Quad9 DoH }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: dns
 writes:
     - path: '{state}/station/dns/quad9-dns.mobileconfig'

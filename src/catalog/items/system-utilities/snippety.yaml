@@ -5,7 +5,7 @@ description: Code snippet manager
 bundle: Snippety
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1530751461
           name: Snippety

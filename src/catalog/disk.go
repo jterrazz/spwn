@@ -36,11 +36,13 @@ type Stored struct {
 }
 
 type Action struct {
-	Run    []string      `yaml:"run,omitempty"`
-	Env    []string      `yaml:"env,omitempty"`
-	Delete []string      `yaml:"delete,omitempty"`
-	Prune  []string      `yaml:"prune,omitempty"`
-	Needs  string        `yaml:"needs,omitempty"`
+	Run    []string `yaml:"run,omitempty"`
+	Env    []string `yaml:"env,omitempty"`
+	Delete []string `yaml:"delete,omitempty"`
+	Prune  []string `yaml:"prune,omitempty"`
+	// value: the command the action runs with, which must be on the
+	// search path for it to run.
+	Needs  string        `yaml:"uses,omitempty"`
 	Exists string        `yaml:"exists,omitempty"`
 	Placed Selector      `yaml:",inline" json:"-"`
 	On     []MachineKind `yaml:"-"`

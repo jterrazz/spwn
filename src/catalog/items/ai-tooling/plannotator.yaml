@@ -3,7 +3,7 @@ kind: app
 name: plannotator
 description: Review AI agent plans and code before committing
 provides: [plannotator]
-version:
+version-read:
     args: [plannotator, --version]
     pattern: (\d+\.\d+\S*)
 methods:

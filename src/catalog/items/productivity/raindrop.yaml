@@ -5,7 +5,7 @@ description: Bookmark manager
 bundle: Save to Raindrop.io
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1549370672
           name: Save to Raindrop.io

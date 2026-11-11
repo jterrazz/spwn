@@ -5,7 +5,7 @@ description: Apple spreadsheets
 bundle: Numbers
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 361304891
           name: Numbers

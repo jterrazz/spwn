@@ -5,5 +5,5 @@ description: Password manager
 bundle: Bitwarden
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: bitwarden

@@ -5,7 +5,7 @@ description: Knowledge base and note-taking
 bundle: Obsidian
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: obsidian
 disk:
     paths:

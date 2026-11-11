@@ -8,7 +8,7 @@ live:
     process: ollama
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: ollama-app
 disk:
     paths:

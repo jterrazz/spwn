@@ -7,5 +7,5 @@ provides: [hc]
 # setting of its Mac copies it in (`hc machine add --install`).
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       provided-by: herdr-app

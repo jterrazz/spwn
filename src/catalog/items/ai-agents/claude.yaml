@@ -3,7 +3,7 @@ kind: app
 name: claude
 description: Claude Code CLI for agentic coding
 provides: [claude]
-version:
+version-read:
     args: [claude, --version]
     pattern: ^(\S+)
 methods:

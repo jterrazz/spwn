@@ -3,7 +3,7 @@ kind: app
 name: git
 description: Distributed version control system, from xcode-select
 provides: [git]
-version:
+version-read:
     args: [git, --version]
     pattern: git version (\S+)
 methods:

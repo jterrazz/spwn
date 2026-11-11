@@ -20,11 +20,11 @@ func (s Selector) kinds() []MachineKind {
 	if s.Arch == ArchAMD64 {
 		return nil
 	}
-	if len(s.Kind) == 0 {
+	if len(s.Machine) == 0 {
 		return all
 	}
-	computer := slices.Contains(s.Kind, RoleComputer)
-	vm := slices.Contains(s.Kind, RoleWorkspace) || slices.Contains(s.Kind, RoleServer)
+	computer := slices.Contains(s.Machine, RoleComputer)
+	vm := slices.Contains(s.Machine, RoleWorkspace) || slices.Contains(s.Machine, RoleServer)
 	kept := make([]MachineKind, 0, len(all))
 	for _, k := range all {
 		if k == Mac && computer || k != Mac && vm {
@@ -35,7 +35,7 @@ func (s Selector) kinds() []MachineKind {
 }
 
 func (s Selector) zero() bool {
-	return s.OS == "" && s.Family == "" && s.Version == "" && s.Arch == "" && len(s.Kind) == 0
+	return s.OS == "" && s.Family == "" && s.Version == "" && s.Arch == "" && len(s.Machine) == 0
 }
 
 func selectedKinds(s Selector) []MachineKind {

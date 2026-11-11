@@ -2,6 +2,7 @@ item: station.catalog/v1
 kind: manager
 name: node
 description: JavaScript runtime built on Chrome's V8 engine
+manages: [npm]
 provides: [node, npm, npx]
 methods:
     - os: any
@@ -17,7 +18,7 @@ disk:
           note: may hold registry tokens
     free:
         - run: [npm, cache, clean, --force]
-          needs: npm
+          uses: npm
         - delete: ['{cache}/npm/*']
     no-erase: "npm's globals are apps: station apps remove <app>"
     relocate:
@@ -28,6 +29,6 @@ disk:
         - path: ~/.npm
           free:
               - run: [npm, cache, clean, --force, --cache, ~/.npm]
-                needs: npm
+                uses: npm
               - delete: [~/.npm/_npx, ~/.npm/_logs, ~/.npm/_cacache]
                 prune: [~/.npm]

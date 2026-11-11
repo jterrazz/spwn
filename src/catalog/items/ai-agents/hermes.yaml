@@ -3,12 +3,12 @@ kind: app
 name: hermes
 description: Self-improving AI agent with persistent memory
 provides: [hermes]
-version:
+version-read:
     args: [hermes, --version]
     pattern: (\d+\.\d+\S*)
 methods:
     - os: macos
-      kind: [workspace, server]
+      machine: [workspace, server]
       script:
           url: https://hermes-agent.nousresearch.com/install.sh
           args: [--skip-setup]

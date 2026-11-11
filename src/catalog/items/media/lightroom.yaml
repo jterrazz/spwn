@@ -5,7 +5,7 @@ description: Adobe photo editor
 bundle: Adobe Lightroom
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1451544217
           name: Adobe Lightroom

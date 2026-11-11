@@ -6,7 +6,7 @@ provides: [browser-use]
 requires: [uv]
 methods:
     - os: macos
-      kind: [workspace, server]
+      machine: [workspace, server]
       uv: browser-use
     - family: linux
       mise:

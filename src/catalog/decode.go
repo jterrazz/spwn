@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -51,18 +52,20 @@ func Decode(file string, body []byte) (Item, error) {
 	if err := dec.Decode(&root); err != nil {
 		return Item{}, &FileError{File: file, Problem: yamlProblem(err)}
 	}
-	var more yaml.Node
-	if err := dec.Decode(&more); !errors.Is(err, io.EOF) {
-		return Item{}, &FileError{File: file, Problem: "holds more than one document"}
-	}
-	if err := plainYAML(file, &root); err != nil {
-		return Item{}, err
-	}
+	// invariant: the schema is judged first, so a file of a newer one says
+	// `update station` before any refusal of what this station reads.
 	doc := root.Content[0]
 	if doc.Kind != yaml.MappingNode {
 		return Item{}, &FileError{File: file, Line: doc.Line, Problem: "is not a mapping of keys"}
 	}
 	if err := schemaOf(file, doc); err != nil {
+		return Item{}, err
+	}
+	var more yaml.Node
+	if err := dec.Decode(&more); !errors.Is(err, io.EOF) {
+		return Item{}, &FileError{File: file, Problem: "holds more than one document"}
+	}
+	if err := plainYAML(file, &root); err != nil {
 		return Item{}, err
 	}
 	var it Item
@@ -155,6 +158,20 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 	if it.Kind == KindSetting && len(it.Requires) > 1 {
 		return refused(file, doc, "requires", "a setting requires one app; name alternatives in requires-one-of")
 	}
+	if len(it.Requires) > 0 && len(it.RequiresOneOf) > 0 {
+		return refused(file, doc, "requires-one-of", "requires and requires-one-of, one of them")
+	}
+	if it.Deprecated != nil && it.Deprecated.Why == "" {
+		return refused(file, doc, "deprecated", "deprecated says why")
+	}
+	if problem := checkManages(it); problem != "" {
+		return refused(file, doc, "manages", problem)
+	}
+	for _, p := range it.Ports {
+		if p.Port < 1 || p.Port > 65535 || p.Label == "" {
+			return refused(file, doc, "ports", fmt.Sprintf("port %d: a port from 1 to 65535, and its label", p.Port))
+		}
+	}
 	if it.Phase != "" && !known(it.Phase) {
 		return refused(file, doc, "phase", fmt.Sprintf("phase %q is none of %s", it.Phase, strings.Join(it.Phase.Enum(), ", ")))
 	}
@@ -184,11 +201,11 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 	if len(it.Methods) == 0 {
 		return refused(file, doc, "methods", "has no method")
 	}
-	if it.Kind == KindSetting && len(it.Methods) > 1 {
-		return refused(file, doc, "methods", "a setting has one method in "+Schema)
-	}
 	for i, m := range it.Methods {
 		if problem := checkMethod(it, m); problem != "" {
+			return refused(file, doc, "methods", fmt.Sprintf("method %d: %s", i+1, problem))
+		}
+		if problem := references(reflect.ValueOf(m), it.Options); problem != "" {
 			return refused(file, doc, "methods", fmt.Sprintf("method %d: %s", i+1, problem))
 		}
 	}
@@ -222,6 +239,7 @@ func foreignKey(it Item) string {
 		{"replaces", it.Replaces != ""}, {"provides", len(it.Provides) > 0}, {"then", len(it.Then) > 0},
 		{"bundle", it.Bundle != ""}, {"version", it.Version != nil}, {"supersedes", it.Supersedes != ""},
 		{"accepts", len(it.Accepts) > 0}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
+		{"ports", len(it.Ports) > 0},
 	}
 	setting := []key{
 		{"help", it.Help != ""}, {"requires-one-of", len(it.RequiresOneOf) > 0},
@@ -231,6 +249,9 @@ func foreignKey(it Item) string {
 	foreign := setting
 	if it.Kind == KindSetting {
 		foreign = app
+	}
+	if it.Kind != KindManager {
+		foreign = append(foreign, key{"manages", len(it.Manages) > 0}, key{"priority", it.Priority != nil})
 	}
 	for _, k := range foreign {
 		if k.set {
@@ -243,7 +264,7 @@ func foreignKey(it Item) string {
 func (m MethodSpec) appKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
-		"brew": m.Brew != "", "cask": m.Cask != "", "mas": m.Mas != nil, "apt": m.Apt != "", "npm": m.Npm != "", "uv": m.Uv != "",
+		"brew": m.Brew != "", "cask": m.Cask != "", "mas": m.Mas != nil, "apt": m.Apt != nil, "npm": m.Npm != "", "uv": m.Uv != "",
 		"bun": m.Bun != "", "mise": m.Mise != nil, "github-release": m.GitHubRelease != nil, "script": m.Script != nil,
 		"skill": m.Skill != nil, "provided-by": m.ProvidedBy != "",
 	} {
@@ -293,7 +314,7 @@ func checkSelector(s Selector, method bool) string {
 	case s.Version != "" && !versionRange.MatchString(s.Version):
 		return fmt.Sprintf("version %q is no range (`>=24.04`, `>=14, <27`)", s.Version)
 	}
-	for _, k := range s.Kind {
+	for _, k := range s.Machine {
 		if !known(k) {
 			return fmt.Sprintf("kind %q is none of %s", k, strings.Join(k.Enum(), ", "))
 		}
@@ -318,7 +339,7 @@ func checkMethod(it Item, m MethodSpec) string {
 	if problem := m.checkOverrides(it.Kind); problem != "" {
 		return problem
 	}
-	if problem := m.checkManager(it); problem != "" {
+	if problem := m.checkManager(); problem != "" {
 		return problem
 	}
 	if it.Kind == KindSetting {
@@ -327,7 +348,7 @@ func checkMethod(it Item, m MethodSpec) string {
 	if m.ProvidedBy != "" && len(it.Provides) == 0 && len(m.Provides) == 0 {
 		return "an app " + m.ProvidedBy + " provides names its commands in provides"
 	}
-	if m.Apt != "" && m.Family == "" && m.OS != OSUbuntu && m.OS != OSDebian {
+	if m.Apt != nil && m.Family != FamilyDebian && m.OS != OSUbuntu && m.OS != OSDebian {
 		return "apt runs on the debian family"
 	}
 	if install := m.install(nil); install != nil {
@@ -358,10 +379,15 @@ func (m MethodSpec) checkOverrides(kind Kind) string {
 			return "path " + p + " is not absolute"
 		}
 	}
+	for _, n := range m.Needs {
+		if !known(n) {
+			return fmt.Sprintf("need %q is none of %s", n, strings.Join(n.Enum(), ", "))
+		}
+	}
 	return ""
 }
 
-func (m MethodSpec) checkManager(it Item) string {
+func (m MethodSpec) checkManager() string {
 	switch {
 	case m.Mas != nil && (m.Mas.ID <= 0 || m.Mas.Name == ""):
 		return "mas names the App Store id and name"
@@ -377,10 +403,12 @@ func (m MethodSpec) checkManager(it Item) string {
 		return "file touches one path or copies files, one of them"
 	case m.File != nil && m.File.Touch != "" && len(m.File.Reload) > 0:
 		return "a touched file reloads nothing"
-	case m.Builtin != "" && !known(m.Builtin):
-		return fmt.Sprintf("builtin %q is no procedure station knows", m.Builtin)
+	case m.Apt != nil && len(m.Apt.Packages) == 0:
+		return "apt names its packages"
+	case m.File != nil && m.File.Mode != "" && !known(m.File.Mode):
+		return fmt.Sprintf("file's mode %q is none of %s", m.File.Mode, strings.Join(m.File.Mode.Enum(), ", "))
 	case m.MacOSDefaults != nil:
-		return m.MacOSDefaults.check(m.Selector, it.Options)
+		return m.MacOSDefaults.check(m.Selector)
 	}
 	return ""
 }
@@ -399,7 +427,7 @@ func (s ScriptMethod) check(upgrade string) string {
 	return ""
 }
 
-func (d MacOSDefaults) check(s Selector, options []Option) string {
+func (d MacOSDefaults) check(s Selector) string {
 	if s.OS != OSMacOS {
 		return "macos-defaults is for os: macos"
 	}
@@ -410,10 +438,8 @@ func (d MacOSDefaults) check(s Selector, options []Option) string {
 		switch {
 		case !known(k.Type):
 			return fmt.Sprintf("key %s's type %q is none of %s", k.Key, k.Type, strings.Join(k.Type.Enum(), ", "))
-		case (k.Value == nil) == (k.Option == ""):
-			return "key " + k.Key + " has a value or an option, one of them"
-		case k.Option != "" && !hasOption(options, k.Option):
-			return "key " + k.Key + " reads the option " + k.Option + ", which the item has not"
+		case k.Key == "":
+			return "a key of macos-defaults names its key"
 		}
 	}
 	return ""
@@ -436,6 +462,8 @@ func checkOption(o Option) string {
 		return "min is above max"
 	case o.Secret && o.Type != OptionString:
 		return "a secret is a string"
+	case o.Type == OptionBoolean && len(o.Examples) > 0:
+		return "a boolean has a default, no examples"
 	}
 	values := slices.Clone(o.Examples)
 	if o.Default != nil {
@@ -504,6 +532,61 @@ func checkDisk(d Disk) string {
 		if !known(r.File) {
 			return fmt.Sprintf("relocate's file %q is none of %s", r.File, strings.Join(r.File.Enum(), ", "))
 		}
+	}
+	return ""
+}
+
+// invariant: a manager names the method keys it installs by, and only a
+// manager does; a priority is a rank, from 1.
+func checkManages(it Item) string {
+	for _, k := range it.Manages {
+		if !known(k) {
+			return fmt.Sprintf("%q is none of %s", k, strings.Join(k.Enum(), ", "))
+		}
+	}
+	if p := it.Priority; p != nil {
+		if p.MacOS < 0 || p.Ubuntu < 0 || p.Debian < 0 {
+			return "a priority is a rank, from 1"
+		}
+		if len(it.Manages) == 0 {
+			return "a manager with a priority names what it manages"
+		}
+	}
+	return ""
+}
+
+// value: a reference inside a value: `${option.<name>}` is an option's
+// value. The braces without a dollar (`{cache}`, `{os}`) are station's own
+// placeholders, and a shell's `${HOME}` stays the shell's.
+var reference = regexp.MustCompile(`\$\{option\.([^}]*)\}`)
+
+// invariant: every `${option.<name>}` inside a method's values names an
+// option of the item; one that names none is refused at decode.
+func references(v reflect.Value, options []Option) string {
+	switch v.Kind() {
+	case reflect.String:
+		for _, m := range reference.FindAllStringSubmatch(v.String(), -1) {
+			if !hasOption(options, m[1]) {
+				return m[0] + " names no option of the item"
+			}
+		}
+	case reflect.Pointer:
+		if !v.IsNil() {
+			return references(v.Elem(), options)
+		}
+	case reflect.Slice:
+		for i := range v.Len() {
+			if problem := references(v.Index(i), options); problem != "" {
+				return problem
+			}
+		}
+	case reflect.Struct:
+		for i := range v.NumField() {
+			if problem := references(v.Field(i), options); problem != "" {
+				return problem
+			}
+		}
+	default:
 	}
 	return ""
 }

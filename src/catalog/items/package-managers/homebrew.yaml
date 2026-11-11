@@ -2,9 +2,11 @@ item: station.catalog/v1
 kind: manager
 name: homebrew
 description: macOS package manager
+manages: [brew, cask]
+priority: { macos: 1 }
 provides: [brew]
 needs: [sudo]
-version:
+version-read:
     args: [brew, --version]
     pattern: ^Homebrew (\S+)
 methods:
@@ -23,6 +25,6 @@ disk:
     installed: [/opt/homebrew]
     free:
         - run: [brew, cleanup, --prune=all]
-          needs: brew
+          uses: brew
         - delete: [~/Library/Caches/Homebrew/*]
     no-erase: "Homebrew's data are its formulae: station apps remove <app>"

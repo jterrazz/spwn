@@ -5,7 +5,7 @@ description: Voice and text chat
 bundle: Discord
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: discord
 disk:
     paths:

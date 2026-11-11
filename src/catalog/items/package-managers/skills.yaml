@@ -2,6 +2,7 @@ item: station.catalog/v1
 kind: manager
 name: skills
 description: Agent skills package manager
+manages: [skill]
 provides: [skills]
 requires: [bun]
 methods:

@@ -5,7 +5,7 @@ description: Professional music making
 bundle: Logic Pro
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 634148309
           name: Logic Pro

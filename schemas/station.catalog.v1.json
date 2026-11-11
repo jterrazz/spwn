@@ -32,7 +32,7 @@
           ],
           "type": "string"
         },
-        "kind": {
+        "machine": {
           "oneOf": [
             {
               "enum": [
@@ -56,9 +56,6 @@
             }
           ]
         },
-        "needs": {
-          "type": "string"
-        },
         "os": {
           "enum": [
             "macos",
@@ -79,6 +76,9 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "uses": {
+          "type": "string"
         },
         "version": {
           "type": "string"
@@ -101,13 +101,28 @@
       ],
       "type": "object"
     },
+    "AptMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "packages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "packages"
+      ],
+      "type": "object"
+    },
     "Copy": {
       "additionalProperties": false,
       "properties": {
         "from": {
           "type": "string"
         },
-        "mode": {
+        "permissions": {
           "type": "integer"
         },
         "to": {
@@ -146,9 +161,6 @@
         "key": {
           "type": "string"
         },
-        "option": {
-          "type": "string"
-        },
         "type": {
           "enum": [
             "string",
@@ -168,7 +180,23 @@
       },
       "required": [
         "key",
-        "type"
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "Deprecation": {
+      "additionalProperties": false,
+      "properties": {
+        "use": {
+          "type": "string"
+        },
+        "why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "why"
       ],
       "type": "object"
     },
@@ -240,6 +268,13 @@
             "$ref": "#/$defs/Copy"
           },
           "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "file",
+            "block"
+          ],
+          "type": "string"
         },
         "reload": {
           "items": {
@@ -367,7 +402,7 @@
           "$ref": "#/$defs/AgentHooks"
         },
         "apt": {
-          "type": "string"
+          "$ref": "#/$defs/AptMethod"
         },
         "arch": {
           "enum": [
@@ -380,23 +415,6 @@
           "type": "string"
         },
         "builtin": {
-          "enum": [
-            "git-signing",
-            "ssh-key",
-            "github-login",
-            "spotlight-exclude",
-            "dns",
-            "dock-reset",
-            "dock-spacer",
-            "autologin",
-            "restart-after-power-cut",
-            "never-sleeps",
-            "lock-after-login",
-            "sshd",
-            "claude-token",
-            "backup-exclusions",
-            "tailscale-cli"
-          ],
           "type": "string"
         },
         "bun": {
@@ -421,7 +439,7 @@
         "github-release": {
           "$ref": "#/$defs/GitHubReleaseMethod"
         },
-        "kind": {
+        "machine": {
           "oneOf": [
             {
               "enum": [
@@ -456,6 +474,18 @@
         },
         "mux-machines": {
           "$ref": "#/$defs/MuxMachines"
+        },
+        "needs": {
+          "items": {
+            "enum": [
+              "sudo",
+              "terminal",
+              "license",
+              "app-store-login"
+            ],
+            "type": "string"
+          },
+          "type": "array"
         },
         "npm": {
           "type": "string"
@@ -661,6 +691,37 @@
       ],
       "type": "object"
     },
+    "PortHint": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "port",
+        "label"
+      ],
+      "type": "object"
+    },
+    "Priority": {
+      "additionalProperties": false,
+      "properties": {
+        "debian": {
+          "type": "integer"
+        },
+        "macos": {
+          "type": "integer"
+        },
+        "ubuntu": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
     "Relocation": {
       "additionalProperties": false,
       "properties": {
@@ -768,7 +829,16 @@
           ],
           "type": "string"
         },
-        "kind": {
+        "level": {
+          "enum": [
+            "cache",
+            "data",
+            "settings",
+            "kept"
+          ],
+          "type": "string"
+        },
+        "machine": {
           "oneOf": [
             {
               "enum": [
@@ -791,15 +861,6 @@
               "type": "array"
             }
           ]
-        },
-        "level": {
-          "enum": [
-            "cache",
-            "data",
-            "settings",
-            "kept"
-          ],
-          "type": "string"
         },
         "memos": {
           "items": {
@@ -926,7 +987,7 @@
       "$ref": "#/$defs/Declares"
     },
     "deprecated": {
-      "type": "string"
+      "$ref": "#/$defs/Deprecation"
     },
     "description": {
       "type": "string"
@@ -953,6 +1014,24 @@
     },
     "live": {
       "$ref": "#/$defs/Liveness"
+    },
+    "manages": {
+      "items": {
+        "enum": [
+          "brew",
+          "cask",
+          "mas",
+          "apt",
+          "npm",
+          "uv",
+          "bun",
+          "mise",
+          "github-release",
+          "skill"
+        ],
+        "type": "string"
+      },
+      "type": "array"
     },
     "methods": {
       "items": {
@@ -988,6 +1067,15 @@
         "apply"
       ],
       "type": "string"
+    },
+    "ports": {
+      "items": {
+        "$ref": "#/$defs/PortHint"
+      },
+      "type": "array"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority"
     },
     "provides": {
       "items": {
@@ -1037,7 +1125,7 @@
       },
       "type": "array"
     },
-    "version": {
+    "version-read": {
       "$ref": "#/$defs/VersionRead"
     },
     "writes": {

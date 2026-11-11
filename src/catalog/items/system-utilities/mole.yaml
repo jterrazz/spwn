@@ -5,7 +5,7 @@ description: Tidy, uninstall, analyze, and optimize macOS from the terminal
 provides: [mo]
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       brew: mole
 disk:
     paths:

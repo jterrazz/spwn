@@ -5,7 +5,7 @@ description: Picture-in-Picture for Safari
 bundle: PiPifier
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 1160374471
           name: PiPifier

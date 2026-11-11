@@ -16,7 +16,7 @@ sets:
     - { key: /etc/kcpassword, value: present }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: autologin
 writes:
     - path: /etc/kcpassword

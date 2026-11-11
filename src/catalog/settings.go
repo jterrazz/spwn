@@ -60,7 +60,7 @@ type Dotfiles struct {
 type Copy struct {
 	From string      `yaml:"from"`
 	To   string      `yaml:"to"`
-	Mode fs.FileMode `yaml:"mode,omitempty"`
+	Mode fs.FileMode `yaml:"permissions,omitempty"`
 }
 
 type GitAliases struct {
@@ -120,7 +120,10 @@ func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p
 
 func (p Procedure) Name() string { return string(p) }
 
-func (Procedure) Enum() []string {
+func Procedures() []string {
+	// value: the procedures this station carries. A builtin a newer catalog
+	// names and this list lacks decodes, and its apply is refused with
+	// `update station`.
 	return []string{
 		string(ProcGitSigning), string(ProcSSHKey), string(ProcGitHubLogin), string(ProcSpotlight), string(ProcDNS),
 		string(ProcDockReset), string(ProcDockSpacer), string(ProcAutologin), string(ProcRestartAfterPowerCut),
@@ -198,3 +201,12 @@ func GitShortcutLine(alias string) string { return GitShortcutsGroup + " " + ali
 const ContainerShortcutsWas = "docker"
 
 const ContainerSource = "docker"
+
+func (p Procedure) Known() bool {
+	for _, k := range Procedures() {
+		if k == string(p) {
+			return true
+		}
+	}
+	return false
+}

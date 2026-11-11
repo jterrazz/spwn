@@ -25,11 +25,11 @@ disk:
           os: macos
     free:
         - run: [pnpm, store, prune]
-          needs: pnpm
+          uses: pnpm
           exists: ~/Library/pnpm/store
           os: macos
         - run: [pnpm, store, prune]
-          needs: pnpm
+          uses: pnpm
           exists: '{data}/pnpm/store'
           family: linux
         - delete: [~/Library/pnpm/store/*]

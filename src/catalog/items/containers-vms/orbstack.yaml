@@ -6,7 +6,7 @@ provides: [orb]
 bundle: OrbStack
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: orbstack
 disk:
     paths:

@@ -5,7 +5,7 @@ description: Anthropic Claude desktop app
 bundle: Claude
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: claude
 disk:
     paths:

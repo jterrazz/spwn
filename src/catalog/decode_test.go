@@ -57,7 +57,7 @@ func TestAnAnchorAnAliasOrAMergeKeyIsRefused(t *testing.T) {
 func TestAYAML11ScalarIsRefusedForItsTwoReadings(t *testing.T) {
 	setting := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nreversible: yes\nmethods:\n    - os: any\n      builtin: dns\n"
 	refusedFor(t, setting, `"yes" reads differently in YAML 1.1`)
-	copied := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: b, mode: 0755}\n"
+	copied := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: b, permissions: 0755}\n"
 	refusedFor(t, copied, `"0755" reads differently in YAML 1.1`)
 	if err := decoded(t, strings.Replace(copied, "0755", "0o755", 1)); err != nil {
 		t.Errorf("a YAML 1.2 octal is refused: %v", err)
@@ -74,53 +74,69 @@ func TestANewerSchemaIsRefusedWithUpdateStation(t *testing.T) {
 		t.Errorf("a v2 item decoded with %v, want a refusal ending update station", err)
 	}
 	refusedFor(t, strings.Replace(gh, "station.catalog/v1", "station.machinefile/v1", 1), `names the schema "station.machinefile/v1"`)
+	ahead := strings.Replace(strings.Replace(gh, "station.catalog/v1", "station.catalog/v2", 1), "provides: [gh]", "provides: &c [gh]\ntint: blue", 1)
+	if err := decoded(t, ahead); !errors.As(err, &newer) {
+		t.Errorf("a v2 item with keys v1 refuses decoded with %v, want update station first", err)
+	}
 	refusedFor(t, strings.Replace(gh, "item: station.catalog/v1\n", "", 1), "names no schema")
 }
 
 func TestAnItemIsJudgedAlone(t *testing.T) {
 	for body, want := range map[string]string{
-		strings.Replace(gh, "name: gh", "name: hub", 1):                                                    `names "hub", its file "gh"`,
-		strings.Replace(gh, "kind: app", "kind: tool", 1):                                                  `kind "tool" is none of`,
-		strings.Replace(gh, "provides: [gh]", "options: []\nguided: true", 1):                              "`guided` is not a key of a app",
-		strings.Replace(gh, "brew: gh", "brew: gh\n      cask: gh", 1):                                     "names 2 managers (brew, cask), not one",
-		strings.Replace(gh, "os: macos", "family: linux", 1):                                               "brew does not run on linux",
-		strings.Replace(gh, "os: macos", "os: macos\n      family: linux", 1):                              "names an os and a family",
-		strings.Replace(gh, "    - os: macos\n", "    - kind: computer\n", 1):                              "names no os nor family",
-		strings.Replace(gh, "os: macos", "os: macos\n      kind: [computer, desk]", 1):                     `kind "desk" is none of`,
-		strings.Replace(gh, "os: macos", "os: macos\n      arch: x86", 1):                                  `arch "x86" is none of`,
-		strings.Replace(gh, "os: macos", "os: any\n      version: '>=14'", 1):                              "a version range is of one os",
-		strings.Replace(gh, "os: macos", "os: macos\n      version: 'fourteen'", 1):                        `version "fourteen" is no range`,
-		strings.Replace(gh, "os: macos", "os: macos\n      pin: tag", 1):                                   `pin "tag" is none of`,
-		strings.Replace(gh, "brew: gh", "apt: gh", 1):                                                      "apt runs on the debian family",
-		strings.Replace(gh, "brew: gh", "github-release: {repo: gh, asset: gh}", 1):                        "github-release names its repo",
-		strings.Replace(gh, "brew: gh", "script: {run: a, url: b}", 1):                                     "a run line or a url, one of them",
-		strings.Replace(gh, "brew: gh", "script: {check: gh}", 1):                                          "or says the owner's way in its hint",
-		strings.Replace(gh, "brew: gh", "script: {hint: download it, undo: rm gh}", 1):                     "has a hint, no check, undo or upgrade",
-		strings.Replace(gh, "brew: gh", "upgrade: gh up\n      script: {run: a}", 1):                       "a run line takes no args, env or upgrade",
-		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nphase: later", 1):                           `phase "later" is none of`,
-		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nafter-apply: [restart-gh]", 1):              `"restart-gh" is none of`,
-		strings.Replace(gh, "provides: [gh]", "provides: [gh]\naccepts: [play-store]", 1):                  `source "play-store" is none of`,
-		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nrenamed-from: [gh]", 1):                     "not renamed from its own name",
-		strings.Replace(gh, "os: macos", "os: windows", 1):                                                 `os "windows" is none of`,
-		strings.Replace(gh, "brew: gh", "builtin: dns", 1):                                                 "`builtin` is no method of a app",
-		strings.Replace(strings.Replace(gh, "provides: [gh]\n", "", 1), "brew: gh", "provided-by: git", 1): "an app git provides names its commands in provides",
-		strings.Replace(gh, "brew: gh", "bun: gh\n      trusted: true", 1):                                 "`trusted` is for a brew or a cask",
-		strings.Replace(gh, "    - os: macos\n      brew: gh\n", "", 1) + "    []\n":                       "has no method",
+		strings.Replace(gh, "name: gh", "name: hub", 1):                                                               `names "hub", its file "gh"`,
+		strings.Replace(gh, "kind: app", "kind: tool", 1):                                                             `kind "tool" is none of`,
+		strings.Replace(gh, "provides: [gh]", "options: []\nguided: true", 1):                                         "`guided` is not a key of a app",
+		strings.Replace(gh, "brew: gh", "brew: gh\n      cask: gh", 1):                                                "names 2 managers (brew, cask), not one",
+		strings.Replace(gh, "os: macos", "family: linux", 1):                                                          "brew does not run on linux",
+		strings.Replace(gh, "os: macos", "os: macos\n      family: linux", 1):                                         "names an os and a family",
+		strings.Replace(gh, "    - os: macos\n", "    - machine: computer\n", 1):                                      "names no os nor family",
+		strings.Replace(gh, "os: macos", "os: macos\n      machine: [computer, desk]", 1):                             `kind "desk" is none of`,
+		strings.Replace(gh, "os: macos", "os: macos\n      machine: []", 1):                                           "machine lists no kind of machine",
+		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - family: linux\n      apt: {packages: [gh]}", 1): "apt runs on the debian family",
+		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      apt: {packages: []}", 1):      "apt names its packages",
+		strings.Replace(gh, "brew: gh", "needs: [root]\n      brew: gh", 1):                                           `need "root" is none of`,
+		strings.Replace(gh, "brew: gh", "script: {run: 'gh --host ${option.host}'}", 1):                               "${option.host} names no option of the item",
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 0, label: GH}]", 1):                     "port 0: a port from 1 to 65535",
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nmanages: [brew]", 1):                                   "`manages` is not a key of a app",
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\ndeprecated: {use: hub}", 1):                            "deprecated says why",
+		strings.Replace(gh, "os: macos", "os: macos\n      arch: x86", 1):                                             `arch "x86" is none of`,
+		strings.Replace(gh, "os: macos", "os: any\n      version: '>=14'", 1):                                         "a version range is of one os",
+		strings.Replace(gh, "os: macos", "os: macos\n      version: 'fourteen'", 1):                                   `version "fourteen" is no range`,
+		strings.Replace(gh, "os: macos", "os: macos\n      pin: tag", 1):                                              `pin "tag" is none of`,
+		strings.Replace(gh, "brew: gh", "apt: {packages: [gh]}", 1):                                                   "apt runs on the debian family",
+		strings.Replace(gh, "brew: gh", "github-release: {repo: gh, asset: gh}", 1):                                   "github-release names its repo",
+		strings.Replace(gh, "brew: gh", "script: {run: a, url: b}", 1):                                                "a run line or a url, one of them",
+		strings.Replace(gh, "brew: gh", "script: {check: gh}", 1):                                                     "or says the owner's way in its hint",
+		strings.Replace(gh, "brew: gh", "script: {hint: download it, undo: rm gh}", 1):                                "has a hint, no check, undo or upgrade",
+		strings.Replace(gh, "brew: gh", "upgrade: gh up\n      script: {run: a}", 1):                                  "a run line takes no args, env or upgrade",
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nphase: later", 1):                                      `phase "later" is none of`,
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nafter-apply: [restart-gh]", 1):                         `"restart-gh" is none of`,
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\naccepts: [play-store]", 1):                             `source "play-store" is none of`,
+		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nrenamed-from: [gh]", 1):                                "not renamed from its own name",
+		strings.Replace(gh, "os: macos", "os: windows", 1):                                                            `os "windows" is none of`,
+		strings.Replace(gh, "brew: gh", "builtin: dns", 1):                                                            "`builtin` is no method of a app",
+		strings.Replace(strings.Replace(gh, "provides: [gh]\n", "", 1), "brew: gh", "provided-by: git", 1):            "an app git provides names its commands in provides",
+		strings.Replace(gh, "brew: gh", "bun: gh\n      trusted: true", 1):                                            "`trusted` is for a brew or a cask",
+		strings.Replace(gh, "    - os: macos\n      brew: gh\n", "", 1) + "    []\n":                                  "has no method",
 	} {
 		refusedFor(t, body, want)
 	}
 	setting := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nbundle: GH\nmethods:\n    - os: any\n      builtin: dns\n"
 	refusedFor(t, setting, "`bundle` is not a key of a setting")
-	refusedFor(t, strings.Replace(setting, "bundle: GH\n", "", 1)+"    - os: macos\n      builtin: dns\n", "a setting has one method")
+	if err := decoded(t, strings.Replace(setting, "bundle: GH\n", "", 1)+"    - os: macos\n      builtin: dns\n"); err != nil {
+		t.Errorf("a setting with a method per system is refused: %v", err)
+	}
+	refusedFor(t, strings.Replace(setting, "bundle: GH", "requires: [gh]\nrequires-one-of: [gh, hub]", 1), "requires and requires-one-of, one of them")
 	refusedFor(t, strings.Replace(setting, "bundle: GH", "needs: [root]", 1), `need "root" is none of`)
-	refusedFor(t, strings.Replace(strings.Replace(setting, "bundle: GH\n", "", 1), "builtin: dns", "builtin: nope", 1), `builtin "nope" is no procedure`)
+	if err := decoded(t, strings.Replace(strings.Replace(setting, "bundle: GH\n", "", 1), "builtin: dns", "builtin: nope", 1)); err != nil {
+		t.Errorf("a builtin a newer station carries is refused at decode: %v", err)
+	}
 	defaults := strings.Replace(strings.Replace(setting, "bundle: GH\n", "options:\n    - {name: size, label: Size, type: integer, min: 16, max: 128, default: 48}\n", 1),
-		"    - os: any\n      builtin: dns\n", "    - os: macos\n      macos-defaults:\n          domain: com.apple.dock\n          keys: [{key: tilesize, type: integer, option: size}]\n", 1)
+		"    - os: any\n      builtin: dns\n", "    - os: macos\n      macos-defaults:\n          domain: com.apple.dock\n          keys: [{key: tilesize, type: integer, value: '${option.size}'}]\n", 1)
 	if err := decoded(t, defaults); err != nil {
 		t.Errorf("a macos-defaults setting reading its option is refused: %v", err)
 	}
-	refusedFor(t, strings.Replace(defaults, "option: size", "option: width", 1), "reads the option width, which the item has not")
-	refusedFor(t, strings.Replace(defaults, "option: size", "value: 48, option: size", 1), "has a value or an option, one of them")
+	refusedFor(t, strings.Replace(defaults, "option.size", "option.width", 1), "${option.width} names no option of the item")
 	refusedFor(t, strings.Replace(defaults, "os: macos", "os: any", 1), "macos-defaults is for os: macos")
 	refusedFor(t, defaults+"writes: [{path: ~/x, level: settings, os: macos, family: linux}]\n", "~/x: names an os and a family")
 }
@@ -139,6 +155,7 @@ func TestAnOptionIsJudgedByItsType(t *testing.T) {
 		"{name: a, label: A, type: integer, min: 9, max: 1}":              "min is above max",
 		"{name: a, label: A, type: integer, max: 9, examples: [12]}":      "12 is out of its bounds",
 		"{name: a, label: A, type: integer, default: many}":               `"many" is no integer`,
+		"{name: a, label: A, type: boolean, examples: [true]}":            "a boolean has a default, no examples",
 	} {
 		refusedFor(t, option(o), "option a: "+want)
 	}
@@ -166,37 +183,41 @@ after: [tmux]
 then: [github-login]
 phase: image
 renamed-from: [hub]
-deprecated: take the GitHub app
+deprecated: {why: the GitHub app does it, use: git}
+ports: [{port: 8080, label: gh webhook}]
+version-read: {args: [gh, --version], pattern: "gh version (\\S+)"}
 bundle: GitHub
 accepts: [app-store]
 needs: [sudo, license, app-store-login]
 after-apply: [restart-dock, logout]
 options:
     - {name: host, label: Host, type: string, default: github.com, examples: [ghe.example.com]}
+    - {name: verbose, label: Verbose, type: boolean, default: false}
 methods:
     - os: macos
       version: '>=14, <27'
       arch: arm64
-      kind: computer
+      machine: computer
       pin: none
       brew: gh
     - os: ubuntu
-      kind: [workspace, server]
+      machine: [workspace, server]
       provides: [gh]
       upgrade: gh extension upgrade --all
       pin: version
-      apt: gh
+      needs: [sudo]
+      apt: {packages: [gh]}
     - family: linux
       arch: arm64
       github-release: {repo: cli/cli, asset: 'gh_*_linux_{arch}.tar.gz', checksums: gh_checksums.txt}
     - os: any
-      script: {check: command -v gh, run: curl -fsSL gh.sh | sh, undo: rm ~/.local/bin/gh}
+      script: {check: command -v gh, run: 'curl -fsSL gh.sh | GH_HOST=${option.host} sh', undo: rm ~/.local/bin/gh}
 `
 	it, err := catalog.Decode("items/git/gh.yaml", []byte(full))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if it.Methods[1].Kind[1] != catalog.RoleServer || it.Methods[0].Kind[0] != catalog.RoleComputer || it.Methods[2].GitHubRelease.Repo != "cli/cli" {
+	if it.Methods[1].Machine[1] != catalog.RoleServer || it.Methods[0].Machine[0] != catalog.RoleComputer || it.Methods[2].GitHubRelease.Repo != "cli/cli" {
 		t.Errorf("decoded %+v", it.Methods)
 	}
 }
@@ -204,7 +225,7 @@ methods:
 // invariant: a method of a manager this station runs no installer for is
 // none: the next one serves, so a newer file still installs where it can.
 func TestAMethodThisStationCannotRunGivesWayToTheNext(t *testing.T) {
-	body := strings.Replace(gh, "    - os: macos\n      brew: gh\n", "    - os: ubuntu\n      apt: gh\n    - family: linux\n      mise: {name: gh, version: latest}\n    - os: macos\n      kind: computer\n      brew: gh\n", 1)
+	body := strings.Replace(gh, "    - os: macos\n      brew: gh\n", "    - os: ubuntu\n      apt: {packages: [gh]}\n    - family: linux\n      mise: {name: gh, version: latest}\n    - os: macos\n      machine: computer\n      brew: gh\n", 1)
 	c, err := catalogOf(map[string]string{"git/gh.yaml": body})
 	if err != nil {
 		t.Fatal(err)
@@ -226,6 +247,10 @@ func catalogOf(files map[string]string) (catalog.Catalog, error) {
 	return catalog.Load(fsys, "items")
 }
 
+func manager(name, manages, at string) string {
+	return "item: station.catalog/v1\nkind: manager\nname: " + name + "\ndescription: d\nmanages: " + manages + "\npriority: {macos: " + at + "}\nmethods:\n    - os: macos\n      script: {url: https://x.sh}\n"
+}
+
 func TestTheItemsAreJudgedTogether(t *testing.T) {
 	dns := "item: station.catalog/v1\nkind: setting\nname: dns\ndescription: d\nrequires: [gpg]\nmethods:\n    - os: any\n      builtin: dns\n"
 	for files, want := range map[*map[string]string]string{
@@ -238,6 +263,9 @@ func TestTheItemsAreJudgedTogether(t *testing.T) {
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "renamed-from: [dns]", 1), "security/dns.yaml": strings.Replace(dns, "requires: [gpg]\n", "", 1)}: `gh is renamed from "dns", which names an item still`,
 		{"git/gh.yaml": gh, "security/gh.yaml": strings.Replace(dns, "name: dns", "name: gh", 1)}:                                                               `"gh" names both a app and a setting`,
 		{"git/gh.yml": gh}: "is no item file",
+		{"package-managers/brew.yaml": manager("brew", "[brew, cask]", "1"), "package-managers/tap.yaml": manager("tap", "[cask]", "2")}: "brew and tap both manage cask",
+		{"package-managers/brew.yaml": manager("brew", "[brew]", "1"), "package-managers/mas.yaml": manager("mas", "[mas]", "1")}:        "brew and mas both stand at 1 on macos",
+		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "deprecated: {why: gone, use: hub}", 1)}:                                   `gh says to use "hub", which is no item`,
 	} {
 		if _, err := catalogOf(*files); err == nil || !strings.Contains(err.Error(), want) {
 			t.Errorf("loaded with %v, want %q", err, want)

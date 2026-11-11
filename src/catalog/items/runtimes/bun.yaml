@@ -2,6 +2,7 @@ item: station.catalog/v1
 kind: manager
 name: bun
 description: Fast JavaScript runtime and package manager
+manages: [bun]
 provides: [bun]
 methods:
     - os: any
@@ -20,7 +21,7 @@ disk:
     installed: ['{data}/bun/install/global', '{data}/bun/bin']
     free:
         - run: [bun, pm, cache, rm]
-          needs: bun
+          uses: bun
         - delete: [~/Library/Caches/bun/*]
           os: macos
     no-erase: "bun's globals are apps: station apps remove <app>"

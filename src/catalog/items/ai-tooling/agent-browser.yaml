@@ -6,7 +6,7 @@ provides: [agent-browser]
 requires: [bun]
 methods:
     - os: macos
-      kind: [workspace, server]
+      machine: [workspace, server]
       bun: agent-browser
     - family: linux
       bun: agent-browser

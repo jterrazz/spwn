@@ -5,7 +5,7 @@ description: Apple video compression
 bundle: Compressor
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       mas:
           id: 424390742
           name: Compressor

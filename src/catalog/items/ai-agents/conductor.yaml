@@ -5,5 +5,5 @@ description: Runs parallel AI coding agents in git worktrees
 bundle: Conductor
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: conductor

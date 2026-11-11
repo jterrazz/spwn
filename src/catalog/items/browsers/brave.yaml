@@ -5,5 +5,5 @@ description: Privacy-focused web browser
 bundle: Brave Browser
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       cask: brave-browser

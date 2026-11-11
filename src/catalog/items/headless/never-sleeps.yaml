@@ -7,7 +7,7 @@ sets:
     - { key: never sleeps, value: held by the engine }
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: never-sleeps
 writes:
     - path: '{config}/station/preferences.json'

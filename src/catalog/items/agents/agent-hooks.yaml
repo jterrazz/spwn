@@ -6,7 +6,7 @@ requires-one-of: [claude, codex]
 reversible: true
 methods:
     - os: any
-      kind: [workspace, server]
+      machine: [workspace, server]
       agent-hooks:
           apps: [claude, codex]
 writes:

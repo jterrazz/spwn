@@ -3,7 +3,7 @@ kind: app
 name: docker
 description: Container engine, inside the Linux VM
 provides: [docker]
-version:
+version-read:
     args: [docker, --version]
     pattern: Docker version ([^,\s]+)
 methods:
@@ -17,13 +17,13 @@ disk:
     size: docker-system-df
     free:
         - run: [docker, container, prune, -f]
-          needs: docker
+          uses: docker
         - run: [docker, image, prune, -f]
-          needs: docker
+          uses: docker
         - run: [docker, volume, prune, -f]
-          needs: docker
+          uses: docker
         - run: [docker, network, prune, -f]
-          needs: docker
+          uses: docker
         - run: [docker, builder, prune, -f]
-          needs: docker
+          uses: docker
     no-erase: dreset, the Docker shortcuts

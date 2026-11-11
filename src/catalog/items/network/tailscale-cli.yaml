@@ -6,5 +6,5 @@ requires: [tailscale]
 reversible: true
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       builtin: tailscale-cli

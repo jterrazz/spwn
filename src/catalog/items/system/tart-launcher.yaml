@@ -4,9 +4,9 @@ name: tart-launcher
 description: "The tart launcher: Tart's home is station's VMs folder"
 methods:
     - os: macos
-      kind: computer
+      machine: computer
       file:
           copy:
               - from: tart/tart
                 to: ~/.local/bin/tart
-                mode: 0o755
+                permissions: 0o755

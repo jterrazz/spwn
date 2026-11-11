@@ -14,6 +14,6 @@ disk:
           level: cache
     free:
         - run: [pod, cache, clean, --all]
-          needs: pod
+          uses: pod
         - delete: [~/.cocoapods/repos/*]
     no-erase: 'nothing to erase: keys and logins are kept'

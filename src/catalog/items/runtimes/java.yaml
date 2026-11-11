@@ -3,7 +3,7 @@ kind: app
 name: java
 description: Java Development Kit (Temurin)
 provides: [java]
-version:
+version-read:
     args: [java, -version]
     pattern: version "([^"]+)"
 methods:

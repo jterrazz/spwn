@@ -3,11 +3,11 @@ kind: app
 name: playwright-browsers
 description: Chromium runtime for website specs (@jterrazz/test)
 requires: [node]
-version:
+version-read:
     path: ~/Library/Caches/ms-playwright/chromium*
 methods:
     - os: macos
-      kind: [workspace, server]
+      machine: [workspace, server]
       script:
           run: npx playwright install chromium
     - family: linux

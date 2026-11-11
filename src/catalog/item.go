@@ -76,21 +76,21 @@ func (MachineRole) Enum() []string {
 	return []string{string(RoleComputer), string(RoleWorkspace), string(RoleServer)}
 }
 
-// value: a selector's `kind`: one machine kind, or a list of them.
+// value: a selector's `machine`: one machine kind, or a list of them.
 
 type Roles []MachineRole
 
 // value: which machines a method or a disk row is for. Every key narrows,
 // an absent one keeps all: `os` or `family` the system, `version` a range of
-// its versions (`>=24.04`, `>=14, <27`), `arch` its processor, `kind` what
-// the machine is.
+// its versions (`>=24.04`, `>=14, <27`), `arch` its processor, `machine`
+// what the machine is.
 
 type Selector struct {
 	OS      OS     `yaml:"os,omitempty"`
 	Family  Family `yaml:"family,omitempty"`
 	Version string `yaml:"version,omitempty"`
 	Arch    Arch   `yaml:"arch,omitempty"`
-	Kind    Roles  `yaml:"kind,omitempty"`
+	Machine Roles  `yaml:"machine,omitempty"`
 }
 
 // value: what an item needs from the owner, grouped at the head of a plan:
@@ -123,6 +123,41 @@ const (
 
 func (Phase) Enum() []string {
 	return []string{string(PhaseImage), string(PhaseBoot), string(PhaseApply)}
+}
+
+// value: a method key a manager item installs by, the one its methods
+// name: homebrew manages brew and cask.
+
+type ManagerKey string
+
+func (ManagerKey) Enum() []string {
+	return []string{"brew", "cask", "mas", "apt", "npm", "uv", "bun", "mise", "github-release", "skill"}
+}
+
+// value: where a manager stands in its system's default priority, lowest
+// first: the first manager of the list that has a method for an item
+// installs it, unless a Machinefile says `prefer:`. A system's order is
+// these numbers across the manager items, each number one manager's.
+
+type Priority struct {
+	MacOS  int `yaml:"macos,omitempty"`
+	Ubuntu int `yaml:"ubuntu,omitempty"`
+	Debian int `yaml:"debian,omitempty"`
+}
+
+// value: an app's port and what serves on it, a label a listening port is
+// shown with ("probably Vite"), never a decision.
+
+type PortHint struct {
+	Port  int    `yaml:"port"`
+	Label string `yaml:"label"`
+}
+
+// value: why an item goes, and the item to take instead.
+
+type Deprecation struct {
+	Why string `yaml:"why"`
+	Use string `yaml:"use,omitempty"`
 }
 
 // value: what has to happen once an item is applied for it to take: a
@@ -195,11 +230,15 @@ type Item struct {
 	Phase Phase    `yaml:"phase,omitempty"`
 	// value: the names it had before, so a Machinefile that lists one still
 	// finds it.
-	RenamedFrom []string `yaml:"renamed-from,omitempty"`
-	// value: why the item goes, and what to take instead.
-	Deprecated string       `yaml:"deprecated,omitempty"`
+	RenamedFrom []string     `yaml:"renamed-from,omitempty"`
+	Deprecated  *Deprecation `yaml:"deprecated,omitempty"`
+	// value: a manager's method keys, and its place in each system's
+	// default priority.
+	Manages    []ManagerKey `yaml:"manages,omitempty"`
+	Priority   *Priority    `yaml:"priority,omitempty"`
+	Ports      []PortHint   `yaml:"ports,omitempty"`
 	Bundle     string       `yaml:"bundle,omitempty"`
-	Version    *VersionRead `yaml:"version,omitempty"`
+	Version    *VersionRead `yaml:"version-read,omitempty"`
 	Supersedes string       `yaml:"supersedes,omitempty"`
 	Accepts    []Source     `yaml:"accepts,omitempty"`
 	Live       *Liveness    `yaml:"live,omitempty"`
@@ -259,12 +298,16 @@ type MethodSpec struct {
 	Upgrade string `yaml:"upgrade,omitempty"`
 	// value: what this method can pin, where it differs from its manager's.
 	Pin Pin `yaml:"pin,omitempty"`
+	// value: what this method alone asks of the owner (apt's sudo on a
+	// Linux computer, mas's App Store login); the item's needs are every
+	// method's.
+	Needs []Need `yaml:"needs,omitempty"`
 	// value: a brew or cask from a third-party tap the owner trusts.
 	Trusted       bool                 `yaml:"trusted,omitempty"`
 	Brew          string               `yaml:"brew,omitempty"`
 	Cask          string               `yaml:"cask,omitempty"`
 	Mas           *MasMethod           `yaml:"mas,omitempty"`
-	Apt           string               `yaml:"apt,omitempty"`
+	Apt           *AptMethod           `yaml:"apt,omitempty"`
 	Npm           string               `yaml:"npm,omitempty"`
 	Uv            string               `yaml:"uv,omitempty"`
 	Bun           string               `yaml:"bun,omitempty"`
@@ -285,6 +328,10 @@ type MethodSpec struct {
 type MasMethod struct {
 	ID   int    `yaml:"id"`
 	Name string `yaml:"name"`
+}
+
+type AptMethod struct {
+	Packages []string `yaml:"packages"`
 }
 
 type MiseMethod struct {
@@ -326,10 +373,24 @@ type SkillMethod struct {
 	Name string `yaml:"name"`
 }
 
+// value: how a file method writes a file: `file`, the whole file (a backup
+// and a diff in the plan), or `block`, station's delimited block in a file
+// the owner keeps.
+
+type WriteMode string
+
+const (
+	WriteFile  WriteMode = "file"
+	WriteBlock WriteMode = "block"
+)
+
+func (WriteMode) Enum() []string { return []string{string(WriteFile), string(WriteBlock)} }
+
 type FileMethod struct {
-	Touch  string   `yaml:"touch,omitempty"`
-	Copy   []Copy   `yaml:"copy,omitempty"`
-	Reload []string `yaml:"reload,omitempty"`
+	Touch  string    `yaml:"touch,omitempty"`
+	Copy   []Copy    `yaml:"copy,omitempty"`
+	Mode   WriteMode `yaml:"mode,omitempty"`
+	Reload []string  `yaml:"reload,omitempty"`
 }
 
 // value: keys of one macOS defaults domain, the `defaults` command's: check
@@ -342,14 +403,13 @@ type MacOSDefaults struct {
 	Keys    []DefaultKey `yaml:"keys"`
 }
 
-// value: one key, its type in defaults' words, and its value: written out,
-// or the item's option of that name.
+// value: one key, its type in defaults' words, and its value, written out
+// or an option's (`${option.size}`).
 
 type DefaultKey struct {
-	Key    string       `yaml:"key"`
-	Type   DefaultType  `yaml:"type"`
-	Value  *OptionValue `yaml:"value,omitempty"`
-	Option string       `yaml:"option,omitempty"`
+	Key   string      `yaml:"key"`
+	Type  DefaultType `yaml:"type"`
+	Value OptionValue `yaml:"value"`
 }
 
 type DefaultType string
