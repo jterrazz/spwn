@@ -1,21 +1,114 @@
 name: Publish
-run-name: Publish ${{ github.ref_name }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'Dry run' || 'Release' }} ${{ github.ref_name }}
 
 on:
     push:
         tags:
             - 'v*'
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: Build and upload the darwin artifacts, with no release
+                type: boolean
+                default: true
 
 permissions:
     contents: write
 
 jobs:
-    publish:
-        name: Publish
+    # value: linux alone, since a cross-built darwin binary has no cgo and so no
+    # IOKit; the darwin job below builds it on a Mac, and attach adds it.
+    release:
+        name: Release
+        if: github.event_name == 'push' || (!inputs.dry_run && github.ref_type == 'tag')
         uses: jterrazz/studio-actions/.github/workflows/publish-go.yaml@main
         with:
             binary-name: station
             build-path: ./src/cmd/station
             go-version-file: go.mod
             ldflags: -X github.com/jterrazz/studio-station/src/wire.version={tag}
-            targets: 'darwin/arm64,darwin/amd64,linux/arm64,linux/amd64'
+            targets: 'linux/arm64,linux/amd64'
+
+    darwin:
+        name: Darwin
+        runs-on: macos-26
+        steps:
+            - name: Check out
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  fetch-depth: 0
+
+            - name: Select Xcode
+              run: |
+                  set -euo pipefail
+                  xcode=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+                  sudo xcode-select -s "$xcode"
+                  xcodebuild -version
+                  swift --version
+
+            - name: Set up Go
+              uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+              with:
+                  go-version-file: go.mod
+
+            - name: Build the binaries with cgo
+              env:
+                  LDFLAGS: -X github.com/jterrazz/studio-station/src/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+              run: |
+                  set -euo pipefail
+                  dist="$RUNNER_TEMP/dist"
+                  mkdir -p "$dist"
+                  sdk=$(xcrun --sdk macosx --show-sdk-path)
+                  for arch in arm64 amd64; do
+                      case "$arch" in arm64) target=arm64 ;; amd64) target=x86_64 ;; esac
+                      CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk" \
+                          go build -ldflags "$LDFLAGS" -o "$dist/station-darwin-$arch" ./src/cmd/station
+                      # invariant: a darwin asset without cgo has no IOKit, so it is never released.
+                      go version -m "$dist/station-darwin-$arch" | grep -q 'CGO_ENABLED=1'
+                      lipo -archs "$dist/station-darwin-$arch"
+                  done
+                  "$dist/station-darwin-arm64" --version
+
+            - name: Build Station.app
+              run: |
+                  set -euo pipefail
+                  make menubar
+                  ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/dist/Station.app.zip"
+                  codesign -dv .artifacts/menubar/Station.app
+
+            - name: Write the darwin checksums
+              run: cd "$RUNNER_TEMP/dist" && shasum -a 256 station-darwin-arm64 station-darwin-amd64 Station.app.zip > checksums-darwin.txt
+
+            - name: Upload the artifacts
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              with:
+                  name: station-darwin
+                  path: ${{ runner.temp }}/dist/*
+                  if-no-files-found: error
+
+    # invariant: the darwin assets keep the names scripts/install.sh asks for, and
+    # their lines join the one checksums.txt it verifies against.
+    attach:
+        name: Attach darwin
+        needs: [release, darwin]
+        runs-on: ubuntu-26.04-arm
+        steps:
+            - name: Download the artifacts
+              uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: station-darwin
+                  path: ${{ runner.temp }}/darwin
+
+            - name: Add them to the release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.ref_name }}
+              run: |
+                  set -euo pipefail
+                  cd "$RUNNER_TEMP/darwin"
+                  gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern checksums.txt --output linux.txt
+                  awk '$2 !~ /^(station-darwin-|Station\.app\.zip$)/' linux.txt > checksums.txt
+                  cat checksums-darwin.txt >> checksums.txt
+                  cat checksums.txt
+                  gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+                      station-darwin-arm64 station-darwin-amd64 Station.app.zip checksums.txt
