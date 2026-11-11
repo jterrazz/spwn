@@ -7,9 +7,8 @@ runs:
     - command: '--version >/dev/null; "$STATION" apps install tailscale </dev/null'
       exit: 1
       stdout: |
-          ✗	tailscale		cask	the install failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	tailscale		cask	~/.local/state/station/logs/tailscale.log
       stderr: |
-          Error: tailscale-app: the download failed
           Error: 1 of 1 apps failed
           Hint: station apps install tailscale
       files:

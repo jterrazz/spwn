@@ -7,7 +7,7 @@ runs:
     - command: 'apps update --method brew'
       exit: 1
       stdout: |
-          ✗	bat		brew	the update failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	bat		brew	~/.local/state/station/logs/bat.log
       stderr: |
           Error: 1 of 1 apps failed
           Hint: re-run it: station apps update bat

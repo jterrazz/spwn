@@ -480,11 +480,21 @@ type Spinner struct {
 
 func Steps(o IO) *Spinner { return &Spinner{io: o, stop: func() {}} }
 
-func (s *Spinner) Step(task, _ string) {
+func (s *Spinner) Step(task, detail string) {
 	// value: a call's Progress on the CLI: each step's label is the one
-	// spinner line, replacing the last.
+	// spinner line, replacing the last; a step that asks the owner is a line
+	// of its own instead, under which its prompt waits.
 	s.stop()
-	s.stop = s.io.Wait(task)
+	why := strings.Split(detail, "\n")
+	if detail == "" {
+		why = nil
+	}
+	if len(why) > 0 && why[0] == call.Asks {
+		s.stop = func() {}
+		s.io.out.Ahead(append([]string{task}, words.Reasons(why[1:])...)...)
+		return
+	}
+	s.stop = s.io.Wait(output.Said(append([]string{task}, words.Reasons(why)...)...))
 }
 
 func (*Spinner) Done(string, error) {}

@@ -1,4 +1,4 @@
-description: 'a failed install stays in the Progress strip with its keys until x dismisses it'
+description: 'a failed install stays in the Progress strip with its keys until dismissed; l opens its log'
 fixture:
     - ../../__fixtures__/terminal/
     - ../__fixtures__/opener/
@@ -6,42 +6,7 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: '--version >/dev/null; terminal --size 110x34 "$STATION"'
-      stdin: |
-          see Engine running
-          send ]]
-          see Apps · This Mac
-          send /keynote
-          see (/keynote)
-          send \r
-          settle
-          send j
-          see i install
-          send i
-          see ✗ Installing keynote failed: keynote needs mas, which is not installed  i install mas  x dismiss
-          send ]
-          see Settings · This Mac
-          see ✗ Installing keynote failed
-          send \t\t
-          see i install mas  x dismiss  ? keys
-          send x
-          gone Installing keynote failed
-          send [
-          see All machines › This Mac › Apps
-          settle
-          send i
-          see ✗ Installing keynote failed
-          send \t\t
-          send i
-          gone Installing keynote failed
-          see ✓ Ran station apps install mas
-          send q
-      exit: 0
-    - command: 'apps mas | /usr/bin/head -1'
-      exit: 0
-      stdout: |
-          ●	mas	1.0.0	brew
-    - command: 'world fault Installer.Install'
+    - command: 'world fault Installer.Install 2 times'
       exit: 0
     - command: '--version >/dev/null; terminal --size 110x34 "$STATION"'
       stdin: |
@@ -54,13 +19,32 @@ runs:
           settle
           see i install
           send i
-          see ✗ Installing claude failed: the install failed: its output is…  i install claude  l log  x dismiss
+          see ✗ Installing claude failed: ~/.local/state/station/logs/claud…  i install claude  l log  x dismiss
+          send ]
+          see Settings · This Mac
+          see ✗ Installing claude failed
+          send \t\t
+          see i install claude  l log  x dismiss  ? keys
+          send x
+          gone Installing claude failed
+          send [
+          see All machines › This Mac › Apps
+          settle
+          send i
+          see ✗ Installing claude failed
           send \t\t
           send l
           file opened
+          send i
+          gone Installing claude failed
+          see ✓ Ran station apps install claude
           send q
       exit: 0
+    - command: 'apps claude | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	claude	1.0.0	script
     - command: '--version >/dev/null; /bin/cat opened'
       exit: 0
       stdout: |
-          open ~/.local/state/station/logs/apps.log
+          open ~/.local/state/station/logs/claude.log

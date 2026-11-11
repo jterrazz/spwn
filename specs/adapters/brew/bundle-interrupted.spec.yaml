@@ -11,4 +11,5 @@ runs:
           scrollback
       exit: 130
       stdout: |
+          ▸ Installing homebrew · asks your password once
           ^C

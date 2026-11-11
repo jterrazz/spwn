@@ -32,8 +32,13 @@
             "label": "Known to station, with a step left",
             "cells": [
               {
-                "kind": "text",
-                "text": "1 step left"
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "1 step left"
+                  }
+                ]
               }
             ]
           }
@@ -152,12 +157,13 @@
   ],
   "hints": [
     {
-      "command": "station apps install <app>",
-      "text": "one app, and what it requires"
+      "command": "exec zsh",
+      "external": true,
+      "text": "so this shell reads the station block"
     },
     {
-      "command": "station settings apply <setting>",
-      "text": "one setting"
+      "command": "station apps install <app>",
+      "text": "one app, and what it requires"
     }
   ]
 }

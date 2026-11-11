@@ -37,6 +37,8 @@ type Progress interface {
 	Done(task string, err error)
 }
 
+const Asks = "asks" // value: the first line of a step's detail, whose lines are why it runs, when the step hands the terminal to a program which asks the owner (sudo's password): a surface says the step once, as a line, and draws nothing over the prompt.
+
 type Call[D, In, Out any] struct {
 	Name string
 	// invariant: empty for a call of no per-machine section, which its

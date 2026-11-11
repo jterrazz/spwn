@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"sort"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/page"
@@ -88,6 +89,25 @@ func (w *Writer) Wait(label string) func() {
 		stop()
 		w.waiting = nil
 	}
+}
+
+func Said(parts ...string) string {
+	// value: words said as one line, each part apart by the separator.
+	return strings.TrimSuffix(tty.NoteLine(parts...), "\n")
+}
+
+func (w *Writer) Ahead(parts ...string) {
+	// value: a step said once before a program asks the owner on the
+	// terminal (`▸ Installing homebrew · … · asks your password once`), so
+	// its prompt has a line of its own; a pipe hears nothing of it.
+	// invariant: the line is for whoever sits at the terminal, so NO_COLOR
+	// keeps it, its glyph and words without color.
+	if !w.stderr.IsTerminal {
+		return
+	}
+	c := Detect(w.stderr, w.env, false)
+	w.settle()
+	_, _ = io.WriteString(w.colored(w.stderr, c), tty.AheadLine(tty.NoteLine(parts...), c.Mode == TTY, c.Dark))
 }
 
 func (w *Writer) settle() {

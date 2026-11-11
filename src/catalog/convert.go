@@ -81,7 +81,7 @@ func (it Item) app(category Category) App {
 	t := App{
 		Name: it.Name, Kind: it.Kind, Description: it.Description, Category: category, Replaces: it.Replaces,
 		Supersedes: it.Supersedes, AppStore: it.AppStore, Provides: it.Provides, Bundle: it.Bundle,
-		Requires: it.Requires, Then: it.Then,
+		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
 	for _, m := range it.Methods {
 		t.Installs = append(t.Installs, LivesOn{Kinds: m.kinds(), Install: m.install(it.Provides)})

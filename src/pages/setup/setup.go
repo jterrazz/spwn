@@ -13,23 +13,26 @@ func Outcome(report setup.Report, thisMac page.Context) page.Page {
 	// invariant: init ends on what it made known, then on the empty state of
 	// what the machine carries: no Machinefile applies yet, so apps and
 	// settings come one at a time, and the next steps say how.
-	rows := make([]page.Row, 0, len(report.Steps))
+	r := pages.Run{Command: "init", Columns: Columns(), Empty: "steps"}
 	for _, step := range report.Steps {
-		r := pages.Done(step.Name, step.State, step.Detail)
-		r.Cells = []page.Value{page.Text(step.Detail)}
-		r.Detail = page.Text(step.Log)
-		rows = append(rows, r)
+		r.Steps = append(r.Steps, pages.RunStep{ID: step.Name, State: step.State, Cells: []page.Value{page.Text(step.Detail)}, Detail: step.Log})
 	}
 	if len(report.Steps) == 0 {
-		return pages.Outcome("init", thisMac, Columns(), rows, "steps")
+		return pages.RunPage(r, thisMac)
 	}
-	p := pages.Outcome("init", thisMac, Columns(), rows, "steps", machinefile())
-	p.Sections = append([]page.Section{summary(report)}, p.Sections...)
-	p.Hints = []page.Hint{
+	r.Head, r.Extra = head(report), []page.Section{machinefile()}
+	r.Next = []page.Hint{
 		{Command: "station apps install <app>", Text: "one app, and what it requires"},
 		{Command: "station settings apply <setting>", Text: "one setting"},
 	}
-	return page.Seal(p)
+	// invariant: a shell opened before its block was written reads it only
+	// once restarted, so that comes first, in place of the setting.
+	for _, step := range report.Steps {
+		if step.Name == "zshrc" && step.Changed {
+			r.Next = []page.Hint{{Command: "exec zsh", Text: "so this shell reads the station block", External: true}, r.Next[0]}
+		}
+	}
+	return pages.RunPage(r, thisMac)
 }
 
 // value: what this machine carries: none until a Machinefile applies.
@@ -37,7 +40,7 @@ func machinefile() page.Section {
 	return page.Section{ID: "machinefile", Title: "Machinefile", Fold: page.Open, Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: "none yet: apps and settings come one at a time"}}}}
 }
 
-func summary(report setup.Report) page.Section {
+func head(report setup.Report) *pages.RunHead {
 	changed, failed, open := 0, 0, 0
 	for _, step := range report.Steps {
 		switch {
@@ -49,17 +52,16 @@ func summary(report setup.Report) page.Section {
 			changed++
 		}
 	}
-	label, mark, words := "Known to station", page.OK, "nothing to change"
+	h := &pages.RunHead{Label: "Known to station", Mark: page.OK, Words: []string{"nothing to change"}}
 	switch {
 	case failed > 0:
-		label, mark, words = "Not known to station yet", page.Broken, steps(failed)+" failed"
+		h.Label, h.Mark, h.Words = "Not known to station yet", page.Broken, []string{steps(failed) + " failed"}
 	case open > 0:
-		label, mark, words = "Known to station, with a step left", page.Attention, steps(open)+" left"
+		h.Label, h.Mark, h.Words = "Known to station, with a step left", page.Attention, []string{steps(open) + " left"}
 	case changed > 0:
-		words = steps(changed) + " changed"
+		h.Words = []string{steps(changed) + " changed"}
 	}
-	row := page.Row{ID: "summary/init", Label: label, Mark: mark, Cells: []page.Value{page.Text(words)}}
-	return page.Section{ID: "summary", Title: "Summary", Role: page.Summary, Fold: page.Open, Uncounted: true, Columns: []page.Column{{Key: "area", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 60}}, Items: []page.Item{{Row: &row}}}
+	return h
 }
 
 func steps(n int) string {

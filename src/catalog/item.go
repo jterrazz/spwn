@@ -45,8 +45,8 @@ const (
 
 func (Only) Enum() []string { return []string{string(OnlyMac), string(OnlyVM)} }
 
-// value: what a setting needs from the owner when it applies: the one root
-// line typed, or a terminal to ask at.
+// value: what an item needs from the owner: a setting, the one root line
+// typed or a terminal to ask at; an app's install, the password sudo asks.
 
 type Need string
 

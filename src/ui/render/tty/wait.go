@@ -31,6 +31,16 @@ func NowLine(command string, colored, dark bool) string {
 	return line
 }
 
+func AheadLine(label string, colored, dark bool) string {
+	// value: a step said before a program asks on the terminal, its `▸`
+	// Muted; without color, the glyph and words alone.
+	line := token.New(dark).Muted.Render(token.Cursor) + atom.Spaces(1) + label
+	if !colored {
+		return ansi.Strip(line)
+	}
+	return line
+}
+
 func FindingLine(m page.Mark, parts ...string) string {
 	return atom.Glyph(m) + atom.Spaces(1) + strings.Join(parts, token.Sep) + "\n"
 }

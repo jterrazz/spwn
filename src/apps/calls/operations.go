@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/call"
 )
 
 const (
@@ -16,7 +18,7 @@ const (
 	verbUpdate    = "update"
 )
 
-func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outcome, error) {
+func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progress) ([]apps.Outcome, error) {
 	requested, err := s.Find(r.Names)
 	if err != nil {
 		return nil, err
@@ -63,6 +65,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 		if len(ready) == 0 {
 			continue
 		}
+		s.announce(p, ready, requiredBy)
 		var done []apps.Outcome
 		if _, ok := s.lined(ready[0]); ok {
 			done = s.bundle(ctx, verbInstall, ready, false)
@@ -84,6 +87,9 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 			o.Steps = append(o.Steps, s.supersede(ctx, t)...)
 		}
 		o.RequiredBy = requiredBy[t.Name]
+		if o.Result == catalog.StateOK && o.Detail != apps.AlreadyInstalled {
+			o.Path = t.Path
+		}
 		result = append(result, *o)
 	}
 	return s.held(ctx, result), nil
@@ -149,6 +155,44 @@ func (s *Shelf) requiredFor(ctx context.Context, t catalog.App) []string {
 		deps = append(deps, app)
 	}
 	return deps
+}
+
+func (s *Shelf) announce(p call.Progress, batch []catalog.App, requiredBy map[string][]string) {
+	// invariant: a step is said before it runs, with why it runs. One that
+	// hands the terminal to a program which may ask the owner is said as a
+	// line of its own, which no spinner draws over while a prompt waits: an
+	// install that needs the password, and every curl installer, whose
+	// script may read /dev/tty whatever its stdin is.
+	if p == nil {
+		return
+	}
+	asks := false
+	names := make([]string, 0, len(batch))
+	var by []string
+	var needs []catalog.Need
+	for _, t := range batch {
+		names = append(names, t.Name)
+		for _, r := range requiredBy[t.Name] {
+			if !slices.Contains(by, r) {
+				by = append(by, r)
+			}
+		}
+		needs = append(needs, t.Needs...)
+		asks = asks || len(t.Needs) > 0 || s.install(t).Method() == catalog.MethodScript
+	}
+	slices.Sort(needs)
+	needs = slices.Compact(needs)
+	var why []string
+	if asks {
+		why = append(why, call.Asks)
+	}
+	if len(by) > 0 {
+		why = append(why, apps.ReasonRequiredBy+strings.Join(by, ", "))
+	}
+	for _, n := range needs {
+		why = append(why, apps.ReasonNeeds+string(n))
+	}
+	p.Step("Installing "+strings.Join(names, ", "), strings.Join(why, "\n"))
 }
 
 // invariant: a superseded formula goes only once the app replacing it is

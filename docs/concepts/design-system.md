@@ -8,6 +8,7 @@ Everything `station` shows, in a terminal, a pipe or the TUI, comes from one pal
 | The marks         | The glyphs and what each says                        |
 | Typography        | Margins, rows, columns and empty states              |
 | Header and footer | What frames every document                           |
+| A run             | How an install, init and apply speak as they work    |
 | Pipe and JSON     | The record format a script reads, written once       |
 | The TUI           | The shell, its focus, its widths and the loading law |
 | Graphs            | The sparklines and bars of Activity                  |
@@ -45,17 +46,17 @@ The same tokens colour Fang's help and the forms that ask a setting's values.
 
 Beside the marks, a few glyphs carry structure, never a state:
 
-| Glyph            | Means                                                                          |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `→`              | a next step, at the foot of a page                                             |
-| `✓`              | a step passed, a row ticked for a group action, a toast's success              |
-| `+` / `-`        | a folded / unfolded group in the TUI                                           |
-| `▸`              | the current entry of the sidebar, and the step that runs in the Progress strip |
-| `◇`              | All machines, in the TUI's tree                                                |
-| `⏻`, `⚡`        | a Mac kept awake, a battery charging                                           |
-| `›`              | between the levels of the breadcrumb, and before a text you type               |
-| `├─`, `└─`       | a Mac's VMs under it                                                           |
-| `▁▂▃▄▅▆▇█`, `█░` | a sparkline, a bar ([Graphs](#graphs))                                         |
+| Glyph            | Means                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `→`              | a next step, at the foot of a page                                                                       |
+| `✓`              | a step passed, a row ticked for a group action, a toast's success                                        |
+| `+` / `-`        | a folded / unfolded group in the TUI                                                                     |
+| `▸`              | the current entry of the sidebar, the step that runs in the Progress strip, and a CLI step that asks you |
+| `◇`              | All machines, in the TUI's tree                                                                          |
+| `⏻`, `⚡`        | a Mac kept awake, a battery charging                                                                     |
+| `›`              | between the levels of the breadcrumb, and before a text you type                                         |
+| `├─`, `└─`       | a Mac's VMs under it                                                                                     |
+| `▁▂▃▄▅▆▇█`, `█░` | a sparkline, a bar ([Graphs](#graphs))                                                                   |
 
 The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinforces it. `◌` (Muted) marks a row whose read has not answered yet, on a terminal and in the TUI only: a pipe, `NO_COLOR` and `--json` wait for every read, so they never carry it. `⊘` and `?` are Muted, `–` Subtle, each always followed by its word (`page.OffHere`, `page.NotForThisMachine`, `page.NotKnown`); the families draw them as they take their v3 words. Every glyph station prints is a token of `src/ui/token/glyphs.go` (`token.Glyphs`), and the layer test refuses one in any other Go literal of a migrated package. Folding in the TUI uses `+` and `-` before a group title; the cursor is a background, not a glyph.
 
@@ -73,6 +74,16 @@ The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinfor
 ## Header and footer
 
 A CLI page has no header: its first line says where it is (`This Mac · …`, `On mac-mini:`). The TUI draws its own header (UI-SPEC). The footer is a blank line, then the next steps, one per line, each prefixed `→ `, their words after the command at one column for the page.
+
+## A run
+
+An install, `init`, and later `apply` print one page, built by `pages.RunPage` from the steps of the run: the line that sums it up (`✓ Installed 2 apps on This Mac · 1m 12s`, `✗ 1 app failed to install on This Mac`, `✓ Known to station · 3 steps changed`), then each step with its mark, its cells and why it ran before what befell it (`● homebrew  5.0.1  script  required by gh`), then at most two next steps.
+
+While it runs, the terminal's stderr says each step and why, as the spinner's label (`Installing gh · required by …`). A step whose program may ask you on the terminal (an install that needs sudo's password, and every curl installer) is a Muted `▸` line of its own instead, kept with `NO_COLOR` as the glyph and words alone, `▸ Installing homebrew · required by gh · asks your password once`, and no spinner draws over the prompt under it; a pipe hears neither.
+
+A program's own words (a curl installer, `brew bundle`, Homebrew's installer) never reach the terminal: they are appended to the log of each app the step serves, `~/.local/state/station/logs/<app>.log`, and a failure prints only that path (`the install failed: its output is in ~/.local/state/station/logs/claude.log`). An interruption keeps its own words, `interrupted (Ctrl-C)`, and nothing is printed after it.
+
+`install.sh` speaks in the same voice, two lines of its own (`Installing station for darwin/arm64`, `● station v3.1.0 in ~/.local/bin`) or one `✗` line on failure, then hands the terminal to `init`.
 
 ## Instant reads
 

@@ -8,7 +8,7 @@ runs:
       stdin: |
           see Name this machine
           send \r
-          see one setting
+          see what it requires
           screen
       exit: 0
       stdout: |
@@ -23,8 +23,8 @@ runs:
             ● relocate  bunfig, go env, mise settings, npmrc
           Machinefile  none yet: apps and settings come one at a time
 
-          → station apps install <app>        one app, and what it requires
-          → station settings apply <setting>  one setting
+          → exec zsh                    so this shell reads the station block
+          → station apps install <app>  one app, and what it requires
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
       exit: 0
       stdout: |

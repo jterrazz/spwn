@@ -1,0 +1,16 @@
+description: 'on a terminal, without colour too, Homebrew is said first with a ▸ line and runs INTERACTIVE'
+fixture:
+    - ../__fixtures__/script-installers/
+    - ../../__fixtures__/terminal/
+env: terminal
+runs:
+    - command: '--version >/dev/null; NO_COLOR=1 terminal --size 100x20 "$STATION" apps install homebrew'
+      stdin: |
+          scrollback
+      exit: 0
+      stdout: |
+          ▸ Installing homebrew · asks your password once
+          ●       homebrew                script
+      files:
+          .local/state/station/logs/homebrew.log:
+              contains: 'INTERACTIVE=1 NONINTERACTIVE='

@@ -214,7 +214,7 @@ func foreignKey(it Item) string {
 		{"app-store", it.AppStore}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
 	}
 	setting := []key{
-		{"help", it.Help != ""}, {"requires-one-of", len(it.RequiresOneOf) > 0}, {"needs", len(it.Needs) > 0},
+		{"help", it.Help != ""}, {"requires-one-of", len(it.RequiresOneOf) > 0},
 		{"guided", it.Guided}, {"reversible", it.Reversible}, {"run-once", it.RunOnce}, {"options", len(it.Options) > 0},
 		{"declares", it.Declares != nil}, {"sets", len(it.Sets) > 0}, {"writes", len(it.Writes) > 0},
 	}

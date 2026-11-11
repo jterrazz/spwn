@@ -2,7 +2,6 @@ package calls
 
 import (
 	"context"
-	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -23,8 +22,7 @@ var Install = call.Call[Deps, InstallIn, []apps.Outcome]{
 		if err := d.Apps.CheckInstall(ctx, in.Names); err != nil {
 			return nil, coded(err)
 		}
-		step(p, "Installing "+strings.Join(in.Names, ", "))
-		out, err := d.Apps.Install(ctx, apps.InstallRequest{Names: in.Names, Interactive: in.Interactive})
+		out, err := d.Apps.Install(ctx, apps.InstallRequest{Names: in.Names, Interactive: in.Interactive}, p)
 		return interrupted(ctx, out, err)
 	},
 }

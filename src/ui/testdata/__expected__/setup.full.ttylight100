@@ -7,5 +7,5 @@
   [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mrelocate[m  [38;2;76;79;105mbunfig, go env, mise settings, npmrc[m
 [1;38;2;76;79;105mMachinefile[m  [38;2;108;111;133mnone yet: apps and settings come one at a time[m
 
-[38;2;108;111;133m→ [m[38;2;76;79;105mstation apps install <app>[m        [38;2;108;111;133mone app, and what it requires[m
-[38;2;108;111;133m→ [m[38;2;76;79;105mstation settings apply <setting>[m  [38;2;108;111;133mone setting[m
+[38;2;108;111;133m→ [m[38;2;76;79;105mexec zsh[m                    [38;2;108;111;133mso this shell reads the station block[m
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation apps install <app>[m  [38;2;108;111;133mone app, and what it requires[m

@@ -144,12 +144,13 @@
   ],
   "hints": [
     {
-      "command": "station apps install <app>",
-      "text": "one app, and what it requires"
+      "command": "exec zsh",
+      "external": true,
+      "text": "so this shell reads the station block"
     },
     {
-      "command": "station settings apply <setting>",
-      "text": "one setting"
+      "command": "station apps install <app>",
+      "text": "one app, and what it requires"
     }
   ]
 }

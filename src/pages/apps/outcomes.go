@@ -2,6 +2,7 @@ package apps
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
@@ -19,42 +20,48 @@ type Run struct {
 func Outcomes(verb string, outcomes []apps.Outcome, run Run, thisMac page.Context) page.Page {
 	// invariant: an outcome opens with what changed, counted, on which
 	// machine and in how long (`Installed 2 apps on This Mac · 9s`), then
-	// each app with the version and the method that now hold it.
-	rows := make([]page.Row, 0, len(outcomes))
+	// each app with the version and the method that now hold it and why it
+	// came (`required by gh`), then what to do next.
+	steps := make([]pages.RunStep, 0, len(outcomes))
 	changed, failed := 0, 0
+	var landed []string
 	for _, o := range outcomes {
-		row := pages.Done(o.Name, o.Result, o.Detail)
-		row.Cells = []page.Value{page.Version(o.Version), page.Texts(string(o.Method))}
-		rows = append(rows, row)
+		steps = append(steps, pages.RunStep{ID: o.Name, State: o.Result, Cells: []page.Value{page.Version(o.Version), page.Texts(string(o.Method))}, Why: o.Reasons, Detail: o.Detail, Log: o.Log})
 		switch {
 		case o.Result == catalog.StateBroken:
 			failed++
 		case o.Result == catalog.StateOK && o.Detail != apps.AlreadyInstalled:
 			changed++
 		}
+		if len(o.Path) > 0 {
+			landed = append(landed, o.Name)
+		}
 		for _, s := range o.Steps {
-			step := pages.Done(o.Name+"/"+s.Item, s.Result, s.Detail)
-			step.Label = s.Item
-			rows = append(rows, step)
+			steps = append(steps, pages.RunStep{ID: o.Name + "/" + s.Item, Label: s.Item, State: s.Result, Detail: s.Detail})
 		}
 	}
-	p := pages.Outcome("apps "+verb, thisMac, Columns(), rows, "apps to "+verb)
-	if changed == 0 {
-		return p
+	r := pages.Run{Command: "apps " + verb, Columns: Columns(), Steps: steps, Empty: "apps to " + verb}
+	if len(landed) > 0 && run.On == "" {
+		r.Next = []page.Hint{{Command: "exec zsh", Text: "so this shell finds what " + strings.Join(landed, ", ") + " installed", External: true}}
 	}
-	head := page.Row{ID: "summary/" + verb, Label: done(verb) + " " + plural(changed, "app") + where(verb, run.On, thisMac), Mark: page.OK}
 	var words []string
-	if failed > 0 {
-		head.Mark = page.Broken
-		words = append(words, strconv.Itoa(failed)+" failed")
+	switch {
+	case changed > 0:
+		r.Head = &pages.RunHead{Label: done(verb) + " " + plural(changed, "app") + where(verb, run.On, thisMac), Mark: page.OK}
+		if failed > 0 {
+			r.Head.Mark = page.Broken
+			words = append(words, strconv.Itoa(failed)+" failed")
+		}
+	case failed > 0:
+		r.Head = &pages.RunHead{Label: plural(failed, "app") + " failed to " + verb + where(verb, run.On, thisMac), Mark: page.Broken}
+	default:
+		return pages.RunPage(r, thisMac)
 	}
 	if took := run.Took.Round(time.Second); took > 0 {
 		words = append(words, pages.Term(took))
 	}
-	head.Cells = []page.Value{page.Texts(words...)}
-	summary := page.Section{ID: "summary", Title: "Summary", Role: page.Summary, Fold: page.Open, Uncounted: true, Columns: []page.Column{{Key: "area", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 60}}, Items: []page.Item{{Row: &head}}}
-	p.Sections = append([]page.Section{summary}, p.Sections...)
-	return page.Seal(p)
+	r.Head.Words = words
+	return pages.RunPage(r, thisMac)
 }
 
 func done(verb string) string {

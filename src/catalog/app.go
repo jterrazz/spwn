@@ -58,9 +58,12 @@ type App struct {
 	Bundle   string
 	Version  VersionRead
 	Requires []string
-	Then     []string
-	Live     Liveness
-	Disk     Disk
+	// value: what its install asks of the owner, said before it runs (the
+	// item key `needs:`).
+	Needs []Need
+	Then  []string
+	Live  Liveness
+	Disk  Disk
 }
 
 // invariant: which machine kinds accept a method is the `kinds` column of the

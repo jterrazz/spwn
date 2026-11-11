@@ -48,12 +48,18 @@ type Outcome struct {
 	// value: why it ended broken, when the reason is typed rather than
 	// worded in Detail.
 	Why Why
-	// value: the log that keeps its installer's words, as the owner reads
-	// it (`~/.local/state/station/logs/<app>.log`), set when the verb failed.
-	Log string
 	// value: the apps of the run that require it, for an app the run brought
 	// in; none for an app named.
 	RequiredBy []string
+	// value: why it came, in the words of the binary that prints it, filled
+	// from RequiredBy there.
+	Reasons []string
+	// value: the log that keeps its installer's words, as the owner reads
+	// it (`~/.local/state/station/logs/<app>.log`), set when the verb failed.
+	Log string
+	// value: the folders its install just put on station's search path,
+	// which a shell opened before it does not search.
+	Path []string
 }
 
 type Step struct {
@@ -73,3 +79,10 @@ type UpgradeRequest struct {
 	All   bool
 	Via   []catalog.Manager
 }
+
+// invariant: a step's progress detail is typed lines, worded by the binary
+// that prints them: `required-by gh, ghostty`, then `needs sudo` per need.
+const (
+	ReasonRequiredBy = "required-by "
+	ReasonNeeds      = "needs "
+)

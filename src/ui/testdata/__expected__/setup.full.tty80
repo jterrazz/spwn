@@ -7,5 +7,5 @@ Changes
   ● relocate  bunfig, go env, mise settings, npmrc
 Machinefile  none yet: apps and settings come one at a time
 
-→ station apps install <app>        one app, and what it requires
-→ station settings apply <setting>  one setting
+→ exec zsh                    so this shell reads the station block
+→ station apps install <app>  one app, and what it requires

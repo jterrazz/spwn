@@ -8,7 +8,7 @@ runs:
       stdout: |
           ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
-          ✗	node		mise	the update failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	node		mise	~/.local/state/station/logs/node.log
       stderr: |
           Error: 1 of 3 apps failed
           Hint: re-run it: station apps update node

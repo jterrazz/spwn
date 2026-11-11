@@ -1,0 +1,24 @@
+description: 'a failed install names only its app''s own log, and that log says why'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world fault Installer.Install 1 times'
+      exit: 0
+    - command: '--version >/dev/null; NO_COLOR= terminal --size 100x30 "$STATION" apps install claude'
+      stdin: |
+          scrollback
+      exit: 1
+      stdout: |
+          ▸ Installing claude
+          ✗ 1 app failed to install on This Mac
+
+          Changes
+            ✗ claude  script  ~/.local/state/station/logs/claude.log
+          Error: 1 of 1 apps failed
+          Hint: station apps install claude
+      files:
+          .local/state/station/logs/claude.log:
+              contains: 'install claude: '

@@ -8,8 +8,6 @@ runs:
       exit: 0
       stdout: |
           ●	xcode	26.1	mas
-      stderr: |
-          ==> Downloading Xcode (26.1)
       files:
           .calls:
               contains:

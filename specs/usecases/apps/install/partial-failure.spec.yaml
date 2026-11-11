@@ -6,7 +6,7 @@ runs:
     - command: 'apps install claude ripgrep'
       exit: 1
       stdout: |
-          ✗	claude		script	the install failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	claude		script	~/.local/state/station/logs/claude.log
           ●	ripgrep	1.0.0	brew
       stderr: |
           Error: 1 of 2 apps failed
