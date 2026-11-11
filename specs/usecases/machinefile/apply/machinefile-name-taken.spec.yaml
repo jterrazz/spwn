@@ -1,0 +1,60 @@
+description: 'a file named by its path never replaces your Machinefile of that name; the same words bind it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+      exit: 0
+    - command: 'apply --machinefile downloads/laptop.yaml'
+      exit: 2
+      stdout: |
+          # To install
+          ○	fd	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+      stderr: |
+          Error: machinefiles/laptop.yaml already holds another laptop: station never replaces your Machinefile
+          Hint: edit that file, or remove it to copy downloads/laptop.yaml instead
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.machinefile, .files["machinefiles/laptop.yaml"]]'' world.json'
+      exit: 0
+      stdout: |
+          [null,"machinefile: station.machinefile/v1\nname: laptop\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"]
+    - command: 'apps fd'
+      exit: 0
+      stdout: |
+          ○	fd		brew	station apps install fd
+          # Detail
+          method	brew
+          version
+          lives on	every machine
+          category	Command line
+          what	Fast find alternative
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply --machinefile downloads/laptop.yaml'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.machinefile'' world.json'
+      exit: 0
+      stdout: |
+          {"name":"laptop"}

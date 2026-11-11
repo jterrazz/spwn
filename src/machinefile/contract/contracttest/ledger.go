@@ -63,15 +63,29 @@ func Owned(t *testing.T, subject OwnedSubject) {
 			t.Errorf("Read of no file = %v; want not found", err)
 		}
 	})
-	t.Run("a Machinefile kept is read back by the owner's source", func(t *testing.T) {
+	t.Run("a Machinefile kept is read back by the owner's source, and kept again the same changes nothing", func(t *testing.T) {
 		o, src := subject(t, "", "")
-		for _, body := range []string{"old\n", "new\n"} {
-			if err := o.Keep(ctx, "laptop", []byte(body)); err != nil {
+		for range 2 {
+			if err := o.Keep(ctx, "laptop", []byte("old\n")); err != nil {
 				t.Fatal(err)
 			}
 		}
 		tree, err := src.Read(ctx)
-		if err != nil || len(tree.Files) != 1 || tree.Files[0].Path != "machinefiles/laptop.yaml" || string(tree.Files[0].Body) != "new\n" {
+		if err != nil || len(tree.Files) != 1 || tree.Files[0].Path != "machinefiles/laptop.yaml" || string(tree.Files[0].Body) != "old\n" {
+			t.Errorf("read back %+v, %v", tree.Files, err)
+		}
+	})
+	t.Run("other bytes over a Machinefile kept are refused, and the owner's file stays", func(t *testing.T) {
+		o, src := subject(t, "", "")
+		if err := o.Keep(ctx, "laptop", []byte("mine\n")); err != nil {
+			t.Fatal(err)
+		}
+		var kept *contract.KeptError
+		if err := o.Keep(ctx, "laptop", []byte("theirs\n")); !errors.As(err, &kept) || kept.Name != "laptop" {
+			t.Errorf("Keep over another = %v; want a KeptError of laptop", err)
+		}
+		tree, err := src.Read(ctx)
+		if err != nil || len(tree.Files) != 1 || string(tree.Files[0].Body) != "mine\n" {
 			t.Errorf("read back %+v, %v", tree.Files, err)
 		}
 	})

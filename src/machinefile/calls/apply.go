@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
@@ -14,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
+	"github.com/jterrazz/studio-station/src/machinefile/contract"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
 )
 
@@ -21,7 +23,14 @@ const (
 	// value: an apply off a terminal whose plan asks the owner something (a
 	// password, a license, a sign-in, a question): it changes nothing.
 	NeedsTerminal fail.Code = "machinefile.needs-terminal"
+	// value: a Machinefile named by its path whose name the owner's folder
+	// already holds with other bytes: it is never replaced.
+	NameTaken fail.Code = "machinefile.name-taken"
 )
+
+// value: how long the read past an interrupt may take: the owner asked to
+// stop, so it is short.
+const rereadBudget = 5 * time.Second
 
 type ApplyIn struct {
 	// value: the Machinefile, by its name or its path, which this machine
@@ -38,23 +47,27 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// value: the plan carried out: each item installed by apps.install or
 	// set by settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
-	Errors: []fail.Code{NotFound, NeedsTerminal, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
 		// invariant: everything is judged before any effect: the
-		// Machinefile, the needs a run off a terminal cannot answer, the
-		// removal's confirmation. Then the machine is bound, so an
-		// interrupted run is resumed by a bare `station apply`.
+		// Machinefile, the needs a run off a terminal cannot answer (with
+		// --remove, those of each extra it uninstalls), the removal's
+		// confirmation, a copy that would replace the owner's file. Then
+		// the machine is bound, so an interrupted run is resumed by a bare
+		// `station apply`.
 		plan, err := judged(ctx, d, in.Machinefile)
 		if err != nil {
 			return machinefile.Applied{}, err
 		}
 		out := machinefile.Applied{Plan: plan}
-		if asked := plan.Interactive(); !in.Interactive && len(asked) > 0 {
+		if asked := plan.Interactive(in.Remove); !in.Interactive && len(asked) > 0 {
 			return out, refusedOffTerminal(asked)
 		}
 		var extra []string
 		for _, e := range plan.Extra {
-			extra = append(extra, e.Item)
+			if e.Takes() {
+				extra = append(extra, e.Step.Item)
+			}
 		}
 		if in.Remove && len(extra) > 0 {
 			if err := confirm.Require(confirm.For(confirm.Remove, d.Kind), strings.Join(extra, ", "), in.Confirm); err != nil {
@@ -77,14 +90,19 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			done := r.line(ctx, l)
 			r.ended[l.Step.Item] = done.State
+			if done.Reason == machinefile.NotRun {
+				r.ended[l.Step.Item] = catalog.StateBroken
+			}
 			out.Done = append(out.Done, done)
 		}
 		if err := ctx.Err(); err != nil {
+			out.Interrupted = true
 			return out, err
 		}
 		if in.Remove {
 			out.Removed = r.remove(ctx, plan.Extra)
 		}
+		out.Interrupted = ctx.Err() != nil
 		return out, ctx.Err()
 	},
 }
@@ -111,7 +129,11 @@ func bind(ctx context.Context, d Deps, asked, name string) error {
 		if err != nil {
 			return err
 		}
-		if err := d.Owned.Keep(ctx, name, tree.Files[0].Body); err != nil {
+		var kept *contract.KeptError
+		switch err := d.Owned.Keep(ctx, name, tree.Files[0].Body); {
+		case errors.As(err, &kept):
+			return fail.New(fail.Refused, NameTaken, asked, map[string]string{"name": kept.Name, "path": kept.Path})
+		case err != nil:
 			return err
 		}
 	}
@@ -127,15 +149,16 @@ type run struct {
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
-	// invariant: a line whose step waits on one that failed fails without
-	// running, naming it; every other branch goes on.
+	// invariant: a line whose step waits on one that failed is not run,
+	// naming it, and what waits on it is not run either; every other
+	// branch goes on.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Version: l.Seen.Version, Detail: l.Seen.Detail}
 	if !l.Acts() {
 		return done
 	}
 	for _, w := range l.Step.Waits {
 		if r.ended[w] == catalog.StateBroken {
-			done.State, done.Detail = catalog.StateBroken, "requires "+w+", which failed"
+			done.Reason, done.Detail = machinefile.NotRun, "requires "+w+", which did not install"
 			return done
 		}
 	}
@@ -146,12 +169,11 @@ func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
 }
 
 func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
+	// invariant: what finished is in the ledger before the interrupt is
+	// read, so an item installed just before Ctrl-C is station's to take
+	// back like any other.
 	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive}, r.p)
-	switch {
-	case ctx.Err() != nil:
-		done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
-		return done
-	case err != nil:
+	if err != nil && ctx.Err() == nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
 	}
@@ -171,6 +193,28 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 			done.Reason, done.Detail = machinefile.Interrupted, ""
 		}
 	}
+	if ctx.Err() != nil && !done.Installed {
+		done = r.finished(ctx, l, done)
+	}
+	return done
+}
+
+// invariant: an install interrupted hands back nothing of what it did, so
+// the item is read again, past the interrupt: one that reads there by its
+// method finished just before it, and is recorded like any other.
+func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
+	done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
+	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
+	defer cancel()
+	seen, err := observe(past, r.d, appscalls.ListIn{Fresh: true})
+	now := seen[l.Step.Item]
+	if err != nil || now.Condition != machinefile.Present || now.Method != l.Step.Method {
+		return done
+	}
+	if r.d.Ledger.Put(past, machinefile.Installed{Item: l.Step.Item, Method: now.Method, Machinefile: r.name, At: r.d.Now().UTC()}) != nil {
+		return done
+	}
+	done.State, done.Version, done.Reason, done.Installed = catalog.StateOK, now.Version, "", true
 	return done
 }
 
@@ -242,32 +286,70 @@ func masked(words string, secrets map[string]string) string {
 }
 
 // invariant: only what the ledger says station installed is removed, by
-// the method that installed it; an extra already gone leaves the ledger.
-func (r *run) remove(ctx context.Context, extra []machinefile.Installed) []machinefile.Done {
+// the method that installed it, and only while it reads there by that
+// method; an extra already gone leaves the ledger alone; one present
+// another way since, or that station cannot uninstall (a script's
+// install, the App Store's), is said and kept, and the ledger lets it go,
+// so no later run fails on it again. A read that did not answer keeps its
+// record for the next run.
+func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
 	var out []machinefile.Done
 	for _, e := range extra {
-		line := machinefile.Line{Step: machinefile.Step{Item: e.Item, Kind: catalog.KindApp, Method: e.Method}, Seen: machinefile.Seen{Condition: machinefile.Extra}, Action: machinefile.Remove}
-		done := machinefile.Done{Line: line, State: catalog.StateOK}
-		outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Remove, appscalls.RemoveIn{Names: []string{e.Item}, Confirm: confirm.Yes}, nil)
-		var refused *fail.Error
+		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
 		switch {
-		case ctx.Err() != nil:
-			done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
-			return append(out, done)
-		case errors.As(err, &refused) && refused.Code == appscalls.NotInstalled:
-			done.Detail = "already gone"
-		case err != nil:
-			done.State, done.Detail = catalog.StateBroken, err.Error()
-		}
-		for _, o := range outcomes {
-			done.State, done.Detail, done.Log = o.Result, o.Detail, o.Log
-		}
-		if done.State == catalog.StateOK {
-			if err := r.d.Ledger.Delete(ctx, e.Item); err != nil {
-				done.State, done.Detail = catalog.StateBroken, err.Error()
+		case e.Action != machinefile.Remove && (e.Seen.Condition == machinefile.Unknown || e.Seen.Condition == machinefile.Changed):
+			done.Detail = "reads " + strings.ReplaceAll(string(e.Seen.Condition), "-", " ") + ": kept, judged again next run"
+			out = append(out, done)
+			continue
+		case e.Action != machinefile.Remove:
+			done.Detail = "present another way since station installed it: kept, and yours"
+		case !e.Takes():
+			done.State, done.Detail = catalog.StateAbsent, "already gone"
+		default:
+			if ctx.Err() != nil {
+				done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
+				return append(out, done)
 			}
+			done = r.uninstall(ctx, e, done)
+			if done.Reason == machinefile.Interrupted || done.State == catalog.StateBroken {
+				out = append(out, done)
+				if done.Reason == machinefile.Interrupted {
+					return out
+				}
+				continue
+			}
+		}
+		if err := r.d.Ledger.Delete(ctx, e.Step.Item); err != nil {
+			done.State, done.Detail = catalog.StateBroken, err.Error()
 		}
 		out = append(out, done)
 	}
 	return out
+}
+
+func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machinefile.Done) machinefile.Done {
+	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Remove, appscalls.RemoveIn{Names: []string{e.Step.Item}, Confirm: confirm.Yes}, nil)
+	var (
+		refused      *fail.Error
+		irreversible *apps.NotReversibleError
+		fromAppStore *apps.AppStoreError
+	)
+	switch {
+	case ctx.Err() != nil:
+		done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
+		return done
+	case errors.As(err, &irreversible), errors.As(err, &fromAppStore):
+		done.Line.Action, done.Detail = machinefile.Leave, "station cannot uninstall it: kept, remove it by hand"
+		return done
+	case errors.As(err, &refused) && refused.Code == appscalls.NotInstalled:
+		done.State, done.Detail = catalog.StateAbsent, "already gone"
+		return done
+	case err != nil:
+		done.State, done.Detail = catalog.StateBroken, err.Error()
+		return done
+	}
+	for _, o := range outcomes {
+		done.State, done.Version, done.Detail, done.Log = o.Result, "", o.Detail, o.Log
+	}
+	return done
 }

@@ -1,0 +1,35 @@
+description: 'a step whose requirement did not install is not run, naming it; every other step goes on'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [starship, fd]
+          settings: { starship-dotfiles: {} }
+      exit: 0
+    - command: 'world fault Bundler.Bundle 1 times'
+      exit: 0
+    - command: 'apply'
+      exit: 1
+      stdout: |
+          # To install
+          ○	starship	brew
+          ○	fd	brew
+          # To set
+          ○	starship-dotfiles	file
+          # To adopt
+          ?	homebrew	script	the manager of starship · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of starship · adopted · on PATH, not managed by script
+          ✗	starship		brew	~/.local/state/station/logs/starship.log
+          ●	fd	10.3.0	brew
+          ○	starship-dotfiles		file	not run · requires starship, which did not install
+      stderr: |
+          Error: 1 of 4 items failed
+          Hint: station apply
+    - command: 'settings | /usr/bin/grep starship-dotfiles'
+      exit: 0
+      stdout: |
+          ○	starship-dotfiles	not applied · needs starship	station apps install starship

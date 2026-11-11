@@ -2,7 +2,6 @@ package machinefile
 
 import (
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -43,11 +42,13 @@ const (
 )
 
 // value: what an item reads on the machine, as its family read it: its
-// condition, its state, the version there and the words of its read.
+// condition, its state, the method that holds it, the version there and
+// the words of its read.
 
 type Seen struct {
 	Condition Condition
 	State     catalog.State
+	Method    string
 	Version   string
 	Detail    string
 }
@@ -72,6 +73,16 @@ type Installed struct {
 	At          time.Time `json:"at"`
 }
 
+// value: an install of the ledger the Machinefile lists no longer, as a
+// line: its step is the item by the ledger's method, with what its removal
+// asks of the owner and the extras it waits on, what it reads now, and
+// what `apply --remove` does with it: remove it, or leave it.
+
+type ExtraLine struct {
+	Line
+	Installed Installed
+}
+
 // value: what the plan asks of the owner, grouped by need, with the items
 // that ask it.
 
@@ -82,26 +93,24 @@ type Asked struct {
 
 // value: a Machinefile against the machine: what it asks of the owner,
 // each line in the order apply runs it, what station installed that it
-// lists no longer, what is skipped, and what has to happen once it is
-// applied, each once.
+// lists no longer, in the order `apply --remove` takes it back, what is
+// skipped, and what has to happen once it is applied, each once.
 
 type Plan struct {
 	Name     string
 	Needs    []Asked
 	Lines    []Line
-	Extra    []Installed
+	Extra    []ExtraLine
 	Skipped  []Skip
 	Restarts []catalog.AfterApply
 }
 
-func Judge(r Resolved, seen map[string]Seen, ledger []Installed) Plan {
+func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed) Plan {
 	// invariant: an item's action follows from what it reads: absent is
 	// installed or set, present kept, present by another way adopted and
 	// never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
-	// (the owner's to decide); an item of another phase is left to it. What
-	// the ledger holds that the Machinefile lists no longer is extra, and
-	// only that is ever removed.
+	// (the owner's to decide); an item of another phase is left to it.
 	p := Plan{Name: r.Name, Skipped: r.Skipped}
 	listed := map[string]bool{}
 	for _, s := range r.Steps {
@@ -116,22 +125,14 @@ func Judge(r Resolved, seen map[string]Seen, ledger []Installed) Plan {
 		}
 		p.Lines = append(p.Lines, l)
 	}
+	var extra []Installed
 	for _, in := range ledger {
-		if !listed[in.Item] {
-			p.Extra = append(p.Extra, in)
+		if in.Machinefile == r.Name && !listed[in.Item] {
+			extra = append(extra, in)
 		}
 	}
-	for _, need := range catalog.NeedSudo.Enum() {
-		var items []string
-		for _, l := range p.Lines {
-			if l.Acts() && slices.Contains(l.Step.Needs, catalog.Need(need)) {
-				items = append(items, l.Step.Item)
-			}
-		}
-		if len(items) > 0 {
-			p.Needs = append(p.Needs, Asked{Need: catalog.Need(need), Items: items})
-		}
-	}
+	p.Extra = extras(r.System, cat, seen, extra)
+	p.Needs = p.Interactive(false)
 	for _, l := range p.Lines {
 		if !l.Acts() {
 			continue
@@ -143,6 +144,99 @@ func Judge(r Resolved, seen map[string]Seen, ledger []Installed) Plan {
 		}
 	}
 	return p
+}
+
+// invariant: only what the ledger says station installed for this
+// Machinefile is extra, and of it only what reads present or outdated by
+// the method that installed it is removed: an extra already gone is
+// removed from the ledger alone, and one present another way since (put
+// back by hand, held by another method) is the owner's and left. The
+// extras run in reverse dependency order: what another extra waits on
+// (its manager, what it requires) is taken back after it.
+func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
+	out := make([]ExtraLine, 0, len(extra))
+	for _, in := range extra {
+		s := ExtraLine{Installed: in, Line: Line{Step: Step{Item: in.Item, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}, Seen: seen[in.Item]}}
+		if s.Seen.Condition == "" {
+			s.Seen.Condition = Unknown
+		}
+		s.Action = Leave
+		switch s.Seen.Condition {
+		case Present, Outdated:
+			if s.Seen.Method == in.Method {
+				s.Action = Remove
+			}
+		case Absent:
+			s.Action = Remove
+		case Changed, NotManaged, Extra, Unknown:
+		}
+		if it, ok := cat.Item(in.Item); ok {
+			s.Step.Needs = removalNeeds(it.Item, in.Method, sys)
+			s.Step.Waits = slices.Clone(it.Item.Requires)
+			if owner, ok := managerOf(cat, in.Method); ok && owner != in.Item {
+				s.Step.Waits = append(s.Step.Waits, owner)
+			}
+		}
+		out = append(out, s)
+	}
+	return reversed(out)
+}
+
+// value: what removing an item by a method asks of the owner: the item's
+// needs and the method's own (a cask's sudo); an extra already gone asks
+// nothing, and Plan.Interactive judges that.
+func removalNeeds(it catalog.Item, method string, sys catalog.System) []catalog.Need {
+	needs := slices.Clone(it.Needs)
+	for _, m := range it.Methods {
+		if m.Key() == method && m.Matches(sys) {
+			return append(needs, m.Needs...)
+		}
+	}
+	return needs
+}
+
+func managerOf(cat catalog.Catalog, method string) (string, bool) {
+	for _, it := range cat.Items {
+		if slices.Contains(it.Item.Manages, catalog.ManagerKey(method)) {
+			return it.Item.Name, true
+		}
+	}
+	return "", false
+}
+
+// invariant: a stable order: the first extra (by name) that no remaining
+// extra waits on runs next; a loop, which the catalog's own refusal of a
+// cycle rules out, keeps the rest in name order.
+func reversed(extra []ExtraLine) []ExtraLine {
+	var out []ExtraLine
+	left := slices.Clone(extra)
+	for len(left) > 0 {
+		next := slices.IndexFunc(left, func(s ExtraLine) bool {
+			return !slices.ContainsFunc(left, func(o ExtraLine) bool { return slices.Contains(o.Step.Waits, s.Step.Item) })
+		})
+		if next < 0 {
+			return append(out, left...)
+		}
+		out = append(out, left[next])
+		left = slices.Delete(left, next, next+1)
+	}
+	return out
+}
+
+func asked(lines []Line) []Asked {
+	var out []Asked
+	for _, need := range catalog.NeedSudo.Enum() {
+		var items []string
+		for _, l := range lines {
+			if slices.Contains(l.Step.Needs, catalog.Need(need)) && !slices.Contains(items, l.Step.Item) {
+				items = append(items, l.Step.Item)
+			}
+		}
+		if len(items) > 0 {
+			out = append(out, Asked{Need: catalog.Need(need), Items: items})
+		}
+	}
+	return out
 }
 
 func actionOf(s Step, seen Seen) Action {
@@ -175,6 +269,13 @@ func (l Line) Acts() bool {
 	return l.Action == Install || l.Action == Set
 }
 
+func (s ExtraLine) Takes() bool {
+	// value: whether `apply --remove` uninstalls the extra: it reads there
+	// by the method that installed it; one already gone only leaves the
+	// ledger.
+	return s.Action == Remove && s.Seen.Condition != Absent
+}
+
 func (p Plan) Of(a Action) []Line {
 	// value: the lines of an action, in the order apply runs them.
 	var out []Line
@@ -189,26 +290,31 @@ func (p Plan) Of(a Action) []Line {
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
 	// set, no extra to remove.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && len(p.Extra) == 0
+	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, func(s ExtraLine) bool { return s.Action == Remove })
 }
 
-func (p Plan) Interactive() []Asked {
+func (p Plan) Interactive(remove bool) []Asked {
 	// value: the needs a run off a terminal cannot answer: every need asks
-	// the owner something (a password, a license, a sign-in, a question).
-	return p.Needs
-}
-
-func Shown(v catalog.OptionValue) string {
-	// value: an option value as a plan shows it: a `vault:` reference stays
-	// the reference, never what it names.
-	if ref, ok := strings.CutPrefix(string(v), catalog.VaultPrefix); ok {
-		return catalog.VaultPrefix + ref
+	// the owner something (a password, a license, a sign-in, a question):
+	// those of each install and setting set, and with --remove those of
+	// each extra it uninstalls.
+	var lines []Line
+	for _, l := range p.Lines {
+		if l.Acts() {
+			lines = append(lines, l)
+		}
 	}
-	return string(v)
+	for _, s := range p.Extra {
+		if remove && s.Takes() {
+			lines = append(lines, s.Line)
+		}
+	}
+	return asked(lines)
 }
 
 // value: why a line of a run ended as it did, when its words are the
-// surface's: the run was interrupted at it, or stopped before it.
+// surface's: the run was interrupted at it, or stopped before it (the
+// rest of an interrupted run, a step whose requirement failed).
 
 type Reason string
 
@@ -232,12 +338,14 @@ type Done struct {
 }
 
 // value: a Machinefile applied: its plan, each line as it ended in the
-// order it ran, each extra removed, and the Machinefile bound when the run
-// bound one.
+// order it ran, each extra removed or left, the Machinefile bound when the
+// run bound one, and whether it was interrupted (an item may have finished
+// just before).
 
 type Applied struct {
-	Plan    Plan
-	Done    []Done
-	Removed []Done
-	Bound   string
+	Plan        Plan
+	Done        []Done
+	Removed     []Done
+	Bound       string
+	Interrupted bool
 }

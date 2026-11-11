@@ -20,7 +20,16 @@ type Owned interface {
 	// path that holds no file answers an error wrapping fs.ErrNotExist.
 	Read(ctx context.Context, path string) ([]byte, error)
 	// invariant: a Machinefile kept in the owner's folder as
-	// machinefiles/<name>.yaml, read back by the owner's source; keeping it
-	// again replaces it.
+	// machinefiles/<name>.yaml, read back by the owner's source; keeping
+	// the same bytes again changes nothing, and other bytes over a file
+	// already there are refused with *KeptError, the owner's file left as
+	// it is.
 	Keep(ctx context.Context, name string, body []byte) error
 }
+
+// value: a Machinefile of the owner's folder holding other bytes than the
+// file named by its path: where it is.
+
+type KeptError struct{ Name, Path string }
+
+func (e *KeptError) Error() string { return e.Path + " already holds another " + e.Name }

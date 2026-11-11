@@ -76,9 +76,13 @@ func (o Owned) Keep(_ context.Context, name string, body []byte) error {
 	o.w.Lock()
 	defer o.w.Unlock()
 	m := o.w.Mac(o.mac)
+	at := "machinefiles/" + name + ".yaml"
+	if there, ok := m.Files[at]; ok && there != string(body) {
+		return &contract.KeptError{Name: name, Path: at}
+	}
 	if m.Files == nil {
 		m.Files = map[string]string{}
 	}
-	m.Files["machinefiles/"+name+".yaml"] = string(body)
+	m.Files[at] = string(body)
 	return nil
 }

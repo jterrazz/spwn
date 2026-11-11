@@ -141,36 +141,46 @@ The resolution is pure: it reads files and the catalog, never the machine. It in
 
 ## plan, apply, drift
 
-A machine carries one Machinefile: `station init --machinefile <name|path>` or `station apply --machinefile <name|path>` binds it, in `preferences.json`'s `machinefile` group ([Preferences](preferences.md)), and a bare `plan`, `apply`, `drift` or `explain` reads it. A Machinefile named by its file is copied into `~/.config/station/machinefiles/<name>.yaml`, under the name it says, and the machine is bound to that name, never to the path: every later read finds it in the user layer, wherever the file came from ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)).
+A machine carries one Machinefile: `station init --machinefile <name|path>` or `station apply --machinefile <name|path>` binds it, in `preferences.json`'s `machinefile` group ([Preferences](preferences.md)), and a bare `plan`, `apply`, `drift` or `explain` reads it. A Machinefile named by its file is copied into `~/.config/station/machinefiles/<name>.yaml`, under the name it says, and the machine is bound to that name, never to the path: every later read finds it in the user layer, wherever the file came from ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)). The copy never replaces your own: the same words copy nothing, and other words under a name the folder already holds are refused before any effect (`edit that file, or remove it to copy <path> instead`). Until it is copied, the file is shown where you named it.
 
 - **plan** reads each step through its family (an app through apps' inventory, a setting through settings' judge), then says what it asks of you, once per need (`asks your password once`), what it installs, sets and adopts, what it leaves as it is, what is extra, and what has to happen once applied, each once. An app present by another way than its method is adopted, never installed again; a setting changed by hand since station set it is left as it is (`station settings diff` shows how); an app that no longer answers (`git --version` failing once a macOS update took its developer kit) is installed again; a step of the `image` or `boot` phase is left to it.
-- **apply** prints the plan, then carries it out one step at a time, through `apps install` and `settings apply`: a step whose requirement failed fails without running, every other one goes on; an interruption says `station apply resumes`, which the next `station apply` does, from the plan read again; off a terminal, a plan that asks you anything is refused before any step. A `vault:` value is read from the vault only to hand its setting the secret, and is shown as the reference everywhere.
+- **apply** prints the plan, then carries it out one step at a time, through `apps install` and `settings apply`: a step whose requirement did not install is not run, naming it, every other one goes on; an interruption says `station apply resumes`, which the next `station apply` does, from the plan read again, an item that finished just before it being kept and in the ledger; off a terminal, a plan that asks you anything is refused before any step. A `vault:` value is read from the vault only to hand its setting the secret, and is shown as the reference everywhere.
 - **drift** is the plan read as conditions: `present`, `absent`, `outdated`, `changed`, `not managed`, `extra`, `unknown`. It never acts.
 
-What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: each app, its method, the Machinefile that listed it and when. An app the ledger holds that the Machinefile lists no longer is extra, and `apply --remove` removes it, and only it, asking on a terminal and needing `--yes` off one: what was there before station, adopted, or installed by `station apps install`, is never removed. Settings are not in the ledger; `station settings off` turns one off.
+What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: each app, its method, the Machinefile that listed it and when. Two applies at once take its lock in turn (`ledger.json.lock`), and each change is written whole, so neither loses the other's record. An app the ledger holds for this Machinefile that it lists no longer is extra (one installed for another Machinefile is not); what was there before station, adopted, or installed by `station apps install`, is never in the ledger, so never removed. Settings are not in the ledger; `station settings off` turns one off.
+
+`apply --remove` asks on a terminal and needs `--yes` off one; off a terminal, an extra whose uninstall asks your password is refused before any step, as a plan's need is. It then takes the extras back, what another one waits on (its manager, what it requires) after it, and each as `plan` says:
+
+| An extra that reads                                 | `plan` says                       | `apply --remove`                                                       |
+| --------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------- |
+| there by the method that installed it               | `listed no longer`                | uninstalls it by that method, then forgets it                          |
+| not there                                           | `already gone`                    | forgets it                                                             |
+| there another way since (put back by hand)          | `present another way since: kept` | keeps it, yours now, and forgets it                                    |
+| there, but station cannot uninstall it (a script's) | `listed no longer`                | `station cannot uninstall it: kept, remove it by hand`, and forgets it |
+| failing, or not readable now                        | `reads <condition>: kept`         | keeps it, and its record for the next run                              |
 
 ## The hard cases
 
-| Case                                    | Where                                                                      |
-| --------------------------------------- | -------------------------------------------------------------------------- |
-| 1. Per-system upgrade                   | the item's method (`upgrade`), never a Machinefile                         |
-| 2. A package renamed per distro         | the item's method (`provides`, `apt.packages`)                             |
-| 3. Versions and arch                    | `machine.system`, matched by the selector and its version range            |
-| 4. No method for the system             | a plan error, unless `optional: true`                                      |
-| 5. Several managers                     | the system's priority, `prefer`, an app's `manager`                        |
-| 6. A version a manager cannot pin       | `version`, refused with the method that can                                |
-| 10. A dependency cycle                  | refused, printed around its loop                                           |
-| 12. The format changes between stations | `station.machinefile/v1`, `update station` for a newer one                 |
-| 13. Fixing an item locally              | `~/.config/station/catalog/`, the user layer; `explain` says which applies |
-| 5. Already present by another way       | adopted by the plan, never installed again                                 |
-| 7. Installed outside station            | `not managed` in drift; `apply --remove` never removes it (the ledger)     |
-| 8. Interactive installs                 | `needs`, said at the head of the plan; refused off a terminal              |
-| 9. A restart needed                     | `after-apply`, said once at the end of the plan and of the run             |
-| 11. Interruption, partial failure       | one step at a time; independent steps go on; `station apply resumes`       |
-| 14. Secrets                             | a `vault:` reference, read only to hand the setting its value              |
-| 15. A dotfile edited by hand            | `changed` in drift, left as it is by apply                                 |
-| 16. A macOS update breaks an app        | `changed` in drift, installed again by apply                               |
-| 17, 18, 19                              | the lockfile and upgrade                                                   |
+| Case                                    | Where                                                                                             |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 1. Per-system upgrade                   | the item's method (`upgrade`), never a Machinefile                                                |
+| 2. A package renamed per distro         | the item's method (`provides`, `apt.packages`)                                                    |
+| 3. Versions and arch                    | `machine.system`, matched by the selector and its version range                                   |
+| 4. No method for the system             | a plan error, unless `optional: true`                                                             |
+| 5. Several managers                     | the system's priority, `prefer`, an app's `manager`                                               |
+| 6. A version a manager cannot pin       | `version`, refused with the method that can                                                       |
+| 10. A dependency cycle                  | refused, printed around its loop                                                                  |
+| 12. The format changes between stations | `station.machinefile/v1`, `update station` for a newer one                                        |
+| 13. Fixing an item locally              | `~/.config/station/catalog/`, the user layer; `explain` says which applies                        |
+| 5. Already present by another way       | adopted by the plan, never installed again                                                        |
+| 7. Installed outside station            | `not managed` in drift; `apply --remove` never removes it (the ledger)                            |
+| 8. Interactive installs                 | `needs`, said at the head of the plan; refused off a terminal                                     |
+| 9. A restart needed                     | `after-apply`, said once at the end of the plan and of the run                                    |
+| 11. Interruption, partial failure       | one step at a time; what waits on a failure is not run, the rest goes on; `station apply resumes` |
+| 14. Secrets                             | a `vault:` reference, read only to hand the setting its value                                     |
+| 15. A dotfile edited by hand            | `changed` in drift, left as it is by apply                                                        |
+| 16. A macOS update breaks an app        | `changed` in drift, installed again by apply                                                      |
+| 17, 18, 19                              | the lockfile and upgrade                                                                          |
 
 ## What is read today
 

@@ -20,6 +20,7 @@ type Deps struct {
 
 type Apps interface {
 	Watch(ctx context.Context) <-chan []apps.Report
+	Forget()
 	CheckInstall(ctx context.Context, names []string) error
 	Install(ctx context.Context, r apps.InstallRequest, p call.Progress) ([]apps.Outcome, error)
 	CheckUninstall(names []string) error

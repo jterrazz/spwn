@@ -10,11 +10,18 @@ import (
 	"github.com/jterrazz/studio-station/src/core/section"
 )
 
-type ListIn struct{}
+type ListIn struct {
+	// value: the run's shared reading of the apps dropped first, so they
+	// are read again: what an interrupted install did is seen.
+	Fresh bool
+}
 
 var List = call.Watch[Deps, ListIn, []apps.Report]{
 	Name: "apps.list", Section: section.Apps, Where: call.AtTarget, Applies: apps.Applies,
-	Run: func(ctx context.Context, d Deps, _ ListIn, _ call.Progress) (<-chan call.Update[[]apps.Report], error) {
+	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) (<-chan call.Update[[]apps.Report], error) {
+		if in.Fresh {
+			d.Apps.Forget()
+		}
 		return call.Updates(ctx, d.Apps.Watch(ctx)), nil
 	},
 }

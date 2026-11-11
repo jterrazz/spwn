@@ -1,0 +1,41 @@
+description: 'apply --remove forgets an extra gone, keeps one put back by hand, skips one of another Machinefile'
+fixture: ../__fixtures__/rg-by-hand/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{item: "fd", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {item: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}, {item: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
+          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
+          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since: kept
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ○	fd		brew	already gone
+          ◐	ripgrep		brew	present another way since station installed it: kept, and yours
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+      exit: 0
+      stdout: |
+          ["bat"]
+    - command: 'apps ripgrep | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ?	ripgrep		brew	on PATH, not managed by brew

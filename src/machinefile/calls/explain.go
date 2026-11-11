@@ -125,13 +125,20 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 	if mf.Name == "" {
 		return "", nil, Worded(&machinefile.RefusedFileError{Format: "machinefile", Err: &catalog.FileError{File: asked, Problem: "names no Machinefile: a file named by its path says its name"}})
 	}
-	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + ".yaml", Body: body}}}, nil
+	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + ".yaml", Body: body, At: asked}}}, nil
 }
 
 func resolve(ctx context.Context, d Deps, asked string) (machinefile.Resolved, error) {
+	r, _, err := resolveIn(ctx, d, asked)
+	return r, err
+}
+
+// value: the Machinefile resolved, with the catalog it was resolved
+// against, which judges what the ledger holds that it lists no longer.
+func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved, catalog.Catalog, error) {
 	name, path, err := named(ctx, d, asked)
 	if err != nil {
-		return machinefile.Resolved{}, err
+		return machinefile.Resolved{}, catalog.Catalog{}, err
 	}
 	var trees []machinefile.Tree
 	if path != nil {
@@ -140,16 +147,16 @@ func resolve(ctx context.Context, d Deps, asked string) (machinefile.Resolved, e
 	for _, s := range d.Sources() {
 		t, read := s.Read(ctx)
 		if read != nil {
-			return machinefile.Resolved{}, Worded(read)
+			return machinefile.Resolved{}, catalog.Catalog{}, Worded(read)
 		}
 		trees = append(trees, t)
 	}
 	lib, err := machinefile.Load(trees)
 	if err != nil {
-		return machinefile.Resolved{}, Worded(err)
+		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
 	}
 	r, err := machinefile.Resolve(lib, name, d.Machine)
-	return r, Worded(err)
+	return r, lib.Catalog, Worded(err)
 }
 
 func All(d Deps) []call.Handler {

@@ -356,6 +356,7 @@
       "confirm": "remove",
       "errors": [
         "confirm.yes-needed",
+        "machinefile.name-taken",
         "machinefile.needs-terminal",
         "machinefile.not-found"
       ],

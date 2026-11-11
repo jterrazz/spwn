@@ -38,6 +38,9 @@ type Tree struct {
 type File struct {
 	Path string
 	Body []byte
+	// value: where a reader finds the file when it is not under its tree's
+	// root: a Machinefile named by its own path, read where it is.
+	At string
 }
 
 const (
@@ -84,7 +87,12 @@ func refusedFile(format string, err error) error {
 	return err
 }
 
-func (t Tree) display(p string) string { return t.Root + "/" + p }
+func (t Tree) display(f File) string {
+	if f.At != "" {
+		return f.At
+	}
+	return t.Root + "/" + f.Path
+}
 
 // invariant: a source's folders hold its YAML files and whatever else sits
 // beside them (a README, a lockfile a later station writes): only a
@@ -111,9 +119,9 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 			}
 			folder, name, ok := strings.Cut(rest, "/")
 			if !ok || strings.Contains(name, "/") || !strings.HasSuffix(name, ".yaml") {
-				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f.Path), Problem: "is no item file: an item is catalog/<category>/<name>.yaml"})
+				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f), Problem: "is no item file: an item is catalog/<category>/<name>.yaml"})
 			}
-			p, err := catalog.Read(t.display(f.Path), folder, string(t.Layer), f.Body)
+			p, err := catalog.Read(t.display(f), folder, string(t.Layer), f.Body)
 			if err != nil {
 				return catalog.Catalog{}, refusedFile(catalogDir, err)
 			}
@@ -140,7 +148,7 @@ func Load(trees []Tree) (Library, error) {
 			if !read(rest) {
 				continue
 			}
-			file := t.display(f.Path)
+			file := t.display(f)
 			if strings.Contains(rest, "/") || !strings.HasSuffix(rest, ".yaml") {
 				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "is no Machinefile: a Machinefile is machinefiles/<name>.yaml"})
 			}

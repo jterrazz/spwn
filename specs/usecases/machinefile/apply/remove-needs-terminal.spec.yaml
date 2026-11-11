@@ -1,0 +1,41 @@
+description: 'off a terminal, an extra whose uninstall asks your password refuses apply --remove first'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/system-utilities/corp-vpn.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: corp-vpn
+          description: A VPN client whose package asks your password
+          methods:
+              - os: macos
+                cask: corp-vpn
+                needs: [sudo]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "corp-vpn", method: "cask", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 2
+      stdout: |
+          # To install
+          ○	fd	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	corp-vpn	cask	installed by station for jterrazz-macbook-pro, listed no longer · asks your password once
+      stderr: |
+          Error: corp-vpn asks your password: apply asks it on a terminal, and this run has none
+          Hint: run station apply on a terminal
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	corp-vpn	"'
+      exit: 0
+      stdout: |
+          ○	fd		brew	station apps install fd
+          ●	corp-vpn	4.2.0	cask

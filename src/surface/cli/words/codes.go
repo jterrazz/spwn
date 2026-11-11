@@ -115,6 +115,9 @@ func Codes() map[fail.Code]Wording {
 			}
 			return "no Machinefile named " + e.Subject, "give this machine one: station init --machinefile <name>"
 		},
+		machinefilecalls.NameTaken: func(e *fail.Error) (string, string) {
+			return e.Detail["path"] + " already holds another " + e.Detail["name"] + ": station never replaces your Machinefile", "edit that file, or remove it to copy " + e.Subject + " instead"
+		},
 		machinefilecalls.NeedsTerminal: func(e *fail.Error) (string, string) {
 			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": apply asks it on a terminal, and this run has none", "run station apply on a terminal"
 		},

@@ -1,0 +1,51 @@
+description: 'an extra station cannot uninstall, a script install, is said and kept, and no later run fails on it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "claude", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	claude	script	installed by station for jterrazz-macbook-pro, listed no longer
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ●	claude	2.0.14	script	station cannot uninstall it: kept, remove it by hand
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+    - command: 'apps claude'
+      exit: 0
+      stdout: |
+          ●	claude	2.0.14	script
+          # Detail
+          method	script
+          version	2.0.14
+          lives on	every machine
+          category	AI Agents
+          what	Claude Code CLI for agentic coding
+          keeps	~/.claude/cache
+          keeps	~/.claude/shell-snapshots
+          keeps	~/.claude/paste-cache
+          keeps	~/.claude/debug
+          keeps	~/Library/Caches/claude-cli-nodejs
+          keeps	{state}/claude
+          keeps	~/.claude/projects
+          keeps	~/.claude/history.jsonl
+          keeps	~/.claude/file-history
+          keeps	~/.claude/settings.json
+          keeps	~/.claude.json

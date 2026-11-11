@@ -27,6 +27,11 @@ type ExtraJSON struct {
 	Item        string `json:"item"`
 	Method      string `json:"method"`
 	Machinefile string `json:"machinefile"`
+	// value: what the item reads now, and what `apply --remove` does with
+	// it: `remove` (an extra already gone only leaves the ledger) or
+	// `leave` (present another way since, or not readable now).
+	Condition string `json:"condition"`
+	Action    string `json:"action"`
 }
 
 type PlanJSON struct {
@@ -45,7 +50,7 @@ func lineJSON(l machinefile.Line, result, detail string) LineJSON {
 		if out.Values == nil {
 			out.Values = map[string]string{}
 		}
-		out.Values[k] = machinefile.Shown(v)
+		out.Values[k] = string(v)
 	}
 	return out
 }
@@ -61,7 +66,7 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 		out.Lines = append(out.Lines, lineJSON(l, "", l.Seen.Detail))
 	}
 	for _, e := range p.Extra {
-		out.Extra = append(out.Extra, ExtraJSON{Item: e.Item, Method: e.Method, Machinefile: e.Machinefile})
+		out.Extra = append(out.Extra, ExtraJSON{Item: e.Step.Item, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Action)})
 	}
 	for _, r := range p.Restarts {
 		out.AfterApply = append(out.AfterApply, string(r))

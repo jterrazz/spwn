@@ -84,7 +84,19 @@ func (f *Installer) Manager() contract.Manager {
 }
 
 func (f *Installer) Can() contract.Abilities {
-	return contract.Abilities{Install: true, Update: true, Remove: true, UpdateAll: true}
+	// invariant: what the real adapter of its method can do: a script's
+	// install updates but is never removed, a shell line or a command
+	// another item provides only installs, an app bundle is the owner's.
+	switch f.method {
+	case catalog.MethodScript:
+		return contract.Abilities{Install: true, Update: true, UpdateAll: true}
+	case catalog.MethodShell, catalog.MethodProvidedBy:
+		return contract.Abilities{Install: true}
+	case catalog.MethodApp:
+		return contract.Abilities{}
+	default:
+		return contract.Abilities{Install: true, Update: true, Remove: true, UpdateAll: true}
+	}
 }
 
 func (f *Installer) Ready(context.Context) error {

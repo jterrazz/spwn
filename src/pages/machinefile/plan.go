@@ -59,7 +59,7 @@ func values(s machinefile.Step) []string {
 	slices.Sort(keys)
 	out := make([]string, 0, len(keys))
 	for _, k := range keys {
-		out = append(out, k+" "+machinefile.Shown(s.Values[k]))
+		out = append(out, k+" "+string(s.Values[k]))
 	}
 	return out
 }
@@ -120,10 +120,29 @@ func restartsSection(r []catalog.AfterApply) []page.Section {
 	return []page.Section{section("after-apply", "Once applied", rows)}
 }
 
-func extraRows(p machinefile.Plan) []page.Row {
+// value: what `apply --remove` does with an extra, in the owner's words.
+func fate(e machinefile.ExtraLine) string {
+	switch {
+	case e.Takes():
+		return "listed no longer"
+	case e.Action == machinefile.Remove:
+		return "already gone"
+	case e.Seen.Condition == machinefile.NotManaged || e.Seen.Condition == machinefile.Present || e.Seen.Condition == machinefile.Outdated:
+		return "present another way since: kept"
+	}
+	return "reads " + condition(e.Seen.Condition) + ": kept"
+}
+
+func extraRows(p machinefile.Plan, lead ...string) []page.Row {
 	rows := make([]page.Row, 0, len(p.Extra))
 	for _, e := range p.Extra {
-		rows = append(rows, page.Row{ID: e.Item, Label: e.Item, Mark: page.NotKnown, Cells: []page.Value{page.Texts(e.Method)}, Detail: page.Text("installed by station for " + e.Machinefile + ", listed no longer")})
+		words := append(slices.Clone(lead), "installed by station for "+e.Installed.Machinefile+", "+fate(e))
+		if e.Takes() {
+			for _, n := range e.Step.Needs {
+				words = append(words, asks(n))
+			}
+		}
+		rows = append(rows, page.Row{ID: e.Step.Item, Label: e.Step.Item, Mark: page.NotKnown, Cells: []page.Value{page.Texts(e.Step.Method)}, Detail: page.Texts(words...)})
 	}
 	return rows
 }
@@ -180,7 +199,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	case !p.Calm():
 		mark = page.Absent
 		hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
-		if len(p.Extra) > 0 {
+		if slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove }) {
 			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "also removes what is extra"})
 		}
 	case len(words) == 0:
@@ -205,8 +224,7 @@ func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
 			drifted++
 		}
 	}
-	for _, r := range extraRows(p) {
-		r.Detail = page.Texts(condition(machinefile.Extra), r.Detail.Text)
+	for _, r := range extraRows(p, condition(machinefile.Extra)) {
 		rows = append(rows, r)
 		drifted++
 	}
@@ -234,7 +252,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 	// then each extra removed, what has to happen once applied, each once,
 	// and what to do next.
 	steps := make([]pages.RunStep, 0, len(done)+len(removed))
-	changed, failed, interrupted := 0, 0, false
+	changed, failed, interrupted := 0, 0, a.Interrupted
 	for _, d := range append(slices.Clone(done), removed...) {
 		detail := d.Detail
 		var said []string
@@ -244,7 +262,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		if d.Line.Action == machinefile.Adopt {
 			said = append(said, "adopted")
 		}
-		if d.Line.Action == machinefile.Remove {
+		if d.Line.Action == machinefile.Remove && d.State == catalog.StateOK {
 			said = append(said, "removed")
 		}
 		said = append(said, values(d.Line.Step)...)

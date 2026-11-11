@@ -88,6 +88,9 @@ func worded(list []machinefile.Done) []pagemachinefile.Worded {
 		if d.Reason != "" {
 			w.Words = kit.ApplyWords(d.Reason == machinefile.Interrupted)
 		}
+		if d.Reason == machinefile.NotRun && d.Detail != "" {
+			w.Words[len(w.Words)-1] = d.Detail
+		}
 		out = append(out, w)
 	}
 	return out

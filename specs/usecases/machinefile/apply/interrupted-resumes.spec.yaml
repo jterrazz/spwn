@@ -31,12 +31,12 @@ runs:
                       on PATH, not managed by script
 
           → station apply  carries it out
-          ✗ jterrazz-macbook-pro interrupted
+          ✗ jterrazz-macbook-pro interrupted · 1 changed
 
           Changes
-            ◐ homebrew  5.0.1  script  the manager of fd · adopted …
-            ✗ fd               brew    interrupted (Ctrl-C) · station apply resumes
-            ○ eza              brew    not run · station apply resumes
+            ◐ homebrew  5.0.1   script  the manager of fd · adopted …
+            ● fd        10.3.0  brew
+            ○ eza               brew    not run · station apply resumes
 
           → station apply  resumes
     - command: 'apply'

@@ -42,11 +42,11 @@ var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
 }
 
 func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error) {
-	r, err := resolve(ctx, d, asked)
+	r, cat, err := resolveIn(ctx, d, asked)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
-	seen, err := observe(ctx, d)
+	seen, err := observe(ctx, d, appscalls.ListIn{})
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
@@ -54,15 +54,15 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
-	return machinefile.Judge(r, seen, ledger), nil
+	return machinefile.Judge(r, cat, seen, ledger), nil
 }
 
 // invariant: what each item reads is its family's own read, the one
 // `station apps` and `station settings` print: apps' inventory and
 // settings' judge, through this machine's calls.
-func observe(ctx context.Context, d Deps) (map[string]machinefile.Seen, error) {
+func observe(ctx context.Context, d Deps, in appscalls.ListIn) (map[string]machinefile.Seen, error) {
 	self := machine.Ref{}
-	reports, err := call.Read(ctx, d.Calls, self, appscalls.List, appscalls.ListIn{}, nil)
+	reports, err := call.Read(ctx, d.Calls, self, appscalls.List, in, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func observe(ctx context.Context, d Deps) (map[string]machinefile.Seen, error) {
 }
 
 func appSeen(r apps.Report) machinefile.Seen {
-	s := machinefile.Seen{State: r.State, Version: r.Version, Detail: r.Detail}
+	s := machinefile.Seen{State: r.State, Method: string(r.Method), Version: r.Version, Detail: r.Detail}
 	switch apps.StateOf(r) {
 	case apps.OK:
 		s.Condition = machinefile.Present
