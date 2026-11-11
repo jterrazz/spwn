@@ -58,7 +58,10 @@ The hidden aliases (`status`, `start`, `stop`, `tools`, `secrets`, `config`,
 `storage`, `run`, `probe`, `--always-on`), v3.0's `apps update --method` and
 `station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
 minor removes them (the `method` a v3.0 station's update need names, which the
-menu bar still reads, goes with `--method`), with the `machines supervise` retirement shim and the
+menu bar still reads, and that every fix of an update waiting still carries in
+v3.0's word, goes with `--method`, and with them v3.0's manager words,
+`catalog.OlderManager`, which an apps.update to an older peer is written in),
+with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`, `lend_list`), once
 `studio doctor` reads `station.overview.read/v1`.
 
@@ -202,3 +205,7 @@ becomes the bottleneck.
 - A version asked of an `npm`, `uv` or `bun` method is refused as unpinnable ([ADR-038](docs/decisions/038-an-app-is-carried-by-one-method-the-one-its-plan-shows.md)), since their installs carry none. A small lot: each install passes its version (`npm i -g <pkg>@<v>`, `uv tool install <pkg>==<v>`, `bun add -g <pkg>@<v>`), and the refusal goes for that method.
 - The fake installer lists what a `script` or `shell` install put, while the real adapters keep no list, so a story over the fakes can read a script's app as held where a machine reads it present another way. Starts with a fakes-fidelity lot: the fakes of `src/apps/adapter/fake/` list only what their real adapter lists.
 - Apply passes `apps.install` the method its step chose, not the install, so an item with two methods of the same manager split by a selector `version` range may install by the other one (ADR-038). Starts with the first such item: apply passes the install's key too.
+- `apps update --manager cask` updates Homebrew's formulae too, since a manager key reaches every key its item installs by (ADR-038), while its help says "update every app of a manager" and the key names casks. Found by the L3.1 verify (2026-11-11). Starts with the owner's call: the help says that `brew` and `cask` both mean Homebrew, or a key reaches only its own method.
+- No built-in item has two methods on one system yet: adoption by another method and `apps move` are proved over the test item `twin` alone (`src/wire/method_test.go`). Starts with the first such item (an app by cask or by mas, a runtime by mise or by apt): its stories over the real catalog.
+- The apps place an app by kind, so a method whose selector names an OS version (`version: '>=15'`) is placed on every version of that OS, while the resolution judges the range (ADR-038). Starts with the first such selector: the shelf places by the machine's system, as the resolution does.
+- A v3.0 station prints a fix as every arg a flag, so a v3.1 peer's update waiting shows there as `station apps update --manager brew --method brew`, a command v3.0 has no `--manager` for. Found by the L3.1 fix round (2026-11-11); goes with the next minor, when no v3.0 reads a peer.
