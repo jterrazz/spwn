@@ -31,6 +31,14 @@ func quiet() []string {
 // would remove with them, and never what they alone pulled in.
 func keep() []string { return []string{"-o", "APT::Get::AutomaticRemove=false"} }
 
+// invariant: what station parses of apt is read in apt's own words,
+// whatever language the machine speaks: `Installed:`, `Candidate:`, `Remv`.
+func read(name string, args ...string) local.Cmd {
+	c := local.Command(name, args...)
+	c.Env = []string{"LC_ALL=C"}
+	return c
+}
+
 type Apt struct {
 	run local.Runner
 	// value: the run has a terminal, where sudo may ask its password; off
@@ -63,7 +71,7 @@ func (a *Apt) Inventory(ctx context.Context) (map[string]string, error) {
 	if err := a.Ready(ctx); err != nil {
 		return nil, err
 	}
-	out, err := a.run.Output(ctx, local.Command(query, "-W", "-f", `${Package}\t${Version}\t${db:Status-Abbrev}\n`))
+	out, err := a.run.Output(ctx, read(query, "-W", "-f", `${Package}\t${Version}\t${db:Status-Abbrev}\n`))
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +108,7 @@ func (a *Apt) Outdated(ctx context.Context, keys []string) (map[string]apps.Curr
 	if len(named) == 0 {
 		return out, nil
 	}
-	read, err := a.run.Output(ctx, local.Command(policy, slices.Concat([]string{"policy", "--"}, named)...))
+	read, err := a.run.Output(ctx, read(policy, slices.Concat([]string{"policy", "--"}, named)...))
 	if err == nil && read.ExitCode == 0 {
 		candidates(read.Stdout, keys, out)
 	}
@@ -158,7 +166,7 @@ func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contr
 	if err != nil {
 		return err
 	}
-	sim, err := a.run.Output(ctx, local.Command(command, slices.Concat([]string{"-s", "remove"}, keep(), []string{"--"}, names)...))
+	sim, err := a.run.Output(ctx, read(command, slices.Concat([]string{"-s", "remove"}, keep(), []string{"--"}, names)...))
 	if err != nil {
 		return err
 	}

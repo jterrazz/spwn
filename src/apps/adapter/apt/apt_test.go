@@ -254,3 +254,29 @@ func TestEveryArgvEndsItsOptionsBeforeThePackages(t *testing.T) {
 		}
 	}
 }
+
+func TestAptIsReadInItsOwnWords(t *testing.T) {
+	var reads []local.Cmd
+	d := &dpkg{held: map[string]string{"bat": "1.0"}}
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		if c.Name != "sudo" {
+			reads = append(reads, c)
+		}
+		return d.play(c)
+	}, "apt-get", "dpkg-query", "apt-cache", "sudo")
+	a := apt.New(run, false)
+	ctx := context.Background()
+
+	_, _ = a.Inventory(ctx)
+	_, _ = a.Outdated(ctx, []string{"bat"})
+	_ = a.Remove(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
+
+	if len(reads) != 3 {
+		t.Fatalf("read %d times; want dpkg-query, apt-cache policy, apt-get -s remove", len(reads))
+	}
+	for _, c := range reads {
+		if !slices.Contains(c.Env, "LC_ALL=C") {
+			t.Errorf("%s %q read in the machine's language (%q); want LC_ALL=C", c.Name, c.Args, c.Env)
+		}
+	}
+}
