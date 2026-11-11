@@ -110,7 +110,7 @@ func TestAnItemIsJudgedAlone(t *testing.T) {
 		strings.Replace(gh, "os: macos", "os: macos\n      version: '>=15,,<27'", 1):                                   `version ">=15,,<27" is no range`,
 		strings.Replace(gh, "os: macos", "os: macos\n      pin: tag", 1):                                               `pin "tag" is none of`,
 		strings.Replace(gh, "brew: gh", "apt: {packages: [gh]}", 1):                                                    "apt runs on the debian family",
-		strings.Replace(gh, "brew: gh", "github-release: {repo: gh, asset: gh}", 1):                                    "github-release names its repo",
+		strings.Replace(gh, "brew: gh", "github-release: {repo: gh, asset: gh}", 1):                                    `"gh" is no repo`,
 		strings.Replace(gh, "brew: gh", "script: {run: a, url: b}", 1):                                                 "a run line or a url, one of them",
 		strings.Replace(gh, "brew: gh", "script: {check: gh}", 1):                                                      "or says the owner's way in its hint",
 		strings.Replace(gh, "brew: gh", "script: {hint: download it, undo: rm gh}", 1):                                 "has a hint, no check, undo or upgrade",

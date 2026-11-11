@@ -213,6 +213,11 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 			return refused(file, doc, "accepts", fmt.Sprintf("source %q is none of %s", a, strings.Join(a.Enum(), ", ")))
 		}
 	}
+	for _, c := range it.Provides {
+		if err := CheckCommand(c); err != nil {
+			return refused(file, doc, "provides", err.Error())
+		}
+	}
 	for _, n := range it.Needs {
 		if !known(n) {
 			return refused(file, doc, "needs", fmt.Sprintf("need %q is none of %s", n, strings.Join(n.Enum(), ", ")))
@@ -378,6 +383,9 @@ func checkMethod(it Item, m MethodSpec) string {
 	if m.ProvidedBy != "" && len(it.Provides) == 0 && len(m.Provides) == 0 {
 		return "an app " + m.ProvidedBy + " provides names its commands in provides"
 	}
+	if m.GitHubRelease != nil && len(it.Provides) == 0 && len(m.Provides) == 0 {
+		return "a release lands the commands its app names in provides"
+	}
 	if m.Apt != nil && m.Family != FamilyDebian && m.OS != OSUbuntu && m.OS != OSDebian {
 		return "apt runs on the debian family"
 	}
@@ -412,6 +420,11 @@ func (m MethodSpec) checkOverrides(kind Kind) string {
 			return "path " + p + " is not absolute"
 		}
 	}
+	for _, c := range m.Provides {
+		if err := CheckCommand(c); err != nil {
+			return err.Error()
+		}
+	}
 	for _, n := range m.Needs {
 		if !known(n) {
 			return fmt.Sprintf("need %q is none of %s", n, strings.Join(n.Enum(), ", "))
@@ -428,7 +441,7 @@ func (m MethodSpec) checkManager() string {
 		return "mise names what it installs and its version"
 	case m.Skill != nil && (m.Skill.Repo == "" || m.Skill.Name == ""):
 		return "skill names a repo and the skill's name"
-	case m.GitHubRelease != nil && (!strings.Contains(m.GitHubRelease.Repo, "/") || m.GitHubRelease.Asset == ""):
+	case m.GitHubRelease != nil && (m.GitHubRelease.Repo == "" || m.GitHubRelease.Asset == ""):
 		return "github-release names its repo (`owner/name`) and its asset's pattern"
 	case m.Script != nil:
 		return m.Script.check(m.Upgrade)
@@ -442,6 +455,18 @@ func (m MethodSpec) checkManager() string {
 		return fmt.Sprintf("file's mode %q is none of %s", m.File.Mode, strings.Join(m.File.Mode.Enum(), ", "))
 	case m.MacOSDefaults != nil:
 		return m.MacOSDefaults.check(m.Selector)
+	}
+	if m.GitHubRelease != nil {
+		if err := CheckRepo(m.GitHubRelease.Repo); err != nil {
+			return err.Error()
+		}
+	}
+	if m.Apt != nil {
+		for _, p := range m.Apt.Packages {
+			if err := CheckPackage(p); err != nil {
+				return err.Error()
+			}
+		}
 	}
 	return ""
 }
