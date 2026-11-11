@@ -55,12 +55,17 @@ class Rig:
             raise RuntimeError(f"{cmd}: {r.returncode} {r.stderr.strip()}")
         return r.stdout
 
+    # hazard: launchctl asuser keeps sudo's root; the second sudo runs the
+    # command as admin, in admin's GUI session, so a default it writes is
+    # admin's and the app runs as the owner would.
     def gui(self, cmd, check=False):
-        return self.ssh(f"sudo -n launchctl asuser $(id -u) {cmd}", check)
+        return self.ssh(f"sudo -n launchctl asuser $(id -u) sudo -n -u admin {cmd}", check)
 
     def setup(self):
         revision = re.search(r"pageRevision = (\d+)", open(os.path.join(self.repo, "apps/menubar/sources/station-kit/page/Page.swift"), encoding="utf-8").read()).group(1)
         self.ssh("mkdir -p ~/cap ~/.local/state/station; pkill -f replay.py; true")
+        self.ssh("printf 'tell application \"Terminal\" to quit\\n' > ~/cap/quit.scpt")
+        self.gui("osascript ~/cap/quit.scpt")
         self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
         self.wake()
 

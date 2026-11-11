@@ -95,9 +95,9 @@ tart clone "$base" "$vm" >> "$log" 2>&1 || fail "clone $base"
 tart set "$vm" --memory 8192 >> "$log" 2>&1 || fail "size $vm"
 # value: STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display, since the
 # icon goldens are drawn at the screen's scale.
-# value: the capture reads M1's scenes at 2x on a 1024 x 768 pt screen, as
-# the play rig did.
-[ $capture -eq 0 ] || STATION_VM_DISPLAY=${STATION_VM_DISPLAY:-1024x768pt}
+# value: the capture reads M1's scenes at 2x on a 1440 x 900 pt screen, where
+# the whole home.exposed panel fits under its cap.
+[ $capture -eq 0 ] || STATION_VM_DISPLAY=${STATION_VM_DISPLAY:-1440x900pt}
 [ -z "${STATION_VM_DISPLAY:-}" ] || tart set "$vm" --display "$STATION_VM_DISPLAY" >> "$log" 2>&1 || fail "display $vm"
 vnc_flag=()
 [ $capture -eq 0 ] || vnc_flag=(--vnc-experimental)
