@@ -9,10 +9,11 @@ import (
 	"github.com/jterrazz/studio-station/src/setup"
 )
 
-func Outcome(report setup.Report, thisMac page.Context) page.Page {
-	// invariant: init ends on what it made known, then on the empty state of
-	// what the machine carries: no Machinefile is applied by init alone, and
-	// the next steps say how to bind one, or to take one app at a time.
+func Outcome(report setup.Report, thisMac page.Context, machinefile string) page.Page {
+	// invariant: init ends on what it made known, then on what the machine
+	// carries: the Machinefile named, applied next, which binds it; with none
+	// named, none, and the next steps say how to bind one, or to take one
+	// app at a time.
 	r := pages.Run{Command: "init", Columns: Columns(), Empty: "steps"}
 	for _, step := range report.Steps {
 		r.Steps = append(r.Steps, pages.RunStep{ID: step.Name, State: step.State, Cells: []page.Value{page.Text(step.Detail)}, Detail: step.Log})
@@ -20,10 +21,13 @@ func Outcome(report setup.Report, thisMac page.Context) page.Page {
 	if len(report.Steps) == 0 {
 		return pages.RunPage(r, thisMac)
 	}
-	r.Head, r.Extra = head(report), []page.Section{machinefile()}
+	r.Head, r.Extra = head(report), []page.Section{carried(machinefile)}
 	r.Next = []page.Hint{
 		{Command: "station init --machinefile <name>", Text: "binds a Machinefile, then applies it"},
 		{Command: "station apps install <app>", Text: "one app, and what it requires"},
+	}
+	if machinefile != "" {
+		r.Next = r.Next[1:]
 	}
 	// invariant: a shell opened before its block was written reads it only
 	// once restarted, so that comes first, in place of the setting.
@@ -35,9 +39,14 @@ func Outcome(report setup.Report, thisMac page.Context) page.Page {
 	return pages.RunPage(r, thisMac)
 }
 
-// value: what this machine carries: none until a Machinefile is bound.
-func machinefile() page.Section {
-	return page.Section{ID: "machinefile", Title: "Machinefile", Fold: page.Open, Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: "none bound by init: init --machinefile binds one"}}}}
+// value: what this machine carries: the Machinefile named, as named, which
+// the apply below binds; none until one is.
+func carried(machinefile string) page.Section {
+	text := "none bound by init: init --machinefile binds one"
+	if machinefile != "" {
+		text = machinefile + ": applied below, which binds it"
+	}
+	return page.Section{ID: "machinefile", Title: "Machinefile", Fold: page.Open, Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: text}}}}
 }
 
 func head(report setup.Report) *pages.RunHead {

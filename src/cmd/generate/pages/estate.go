@@ -489,10 +489,10 @@ func setupReport() setup.Report {
 
 func setups() []Fixture {
 	return states("setup",
-		pending(pagesetup.Outcome(setupReport(), thisMacContext())),
-		pagesetup.Outcome(setup.Report{}, thisMacContext()),
+		pending(pagesetup.Outcome(setupReport(), thisMacContext(), "")),
+		pagesetup.Outcome(setup.Report{}, thisMacContext(), ""),
 		failure("outcome", "setup", "a VM is named by its Mac", "station init on its Mac"),
-		pagesetup.Outcome(setupReport(), thisMacContext()))
+		pagesetup.Outcome(setupReport(), thisMacContext(), ""))
 }
 
 func runs() []Fixture {

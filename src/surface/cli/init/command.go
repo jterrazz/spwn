@@ -44,7 +44,7 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 			}
 			report, err := call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Interactive: io.Interactive}, nil)
 			if len(report.Steps) > 0 {
-				if answerErr := io.Page(pagesetup.Outcome(report, d.ThisMachine), nil); answerErr != nil {
+				if answerErr := io.Page(pagesetup.Outcome(report, d.ThisMachine, in.Machinefile), nil); answerErr != nil {
 					return answerErr
 				}
 			}

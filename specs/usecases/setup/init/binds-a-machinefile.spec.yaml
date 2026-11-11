@@ -17,7 +17,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart
           # Machinefile
-          	none bound by init: init --machinefile binds one
+          	downloads/laptop.yaml: applied below, which binds it
           # To install
           ○	fd	brew
           # To adopt
