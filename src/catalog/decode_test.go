@@ -105,6 +105,8 @@ func TestAnItemIsJudgedAlone(t *testing.T) {
 		strings.Replace(gh, "os: macos", "os: macos\n      arch: x86", 1):                                              `arch "x86" is none of`,
 		strings.Replace(gh, "os: macos", "os: any\n      version: '>=14'", 1):                                          "a version range is of one os",
 		strings.Replace(gh, "os: macos", "os: macos\n      version: 'fourteen'", 1):                                    `version "fourteen" is no range`,
+		strings.Replace(gh, "os: macos", "os: macos\n      version: '>=15,'", 1):                                       `version ">=15," is no range`,
+		strings.Replace(gh, "os: macos", "os: macos\n      version: '>=15,,<27'", 1):                                   `version ">=15,,<27" is no range`,
 		strings.Replace(gh, "os: macos", "os: macos\n      pin: tag", 1):                                               `pin "tag" is none of`,
 		strings.Replace(gh, "brew: gh", "apt: {packages: [gh]}", 1):                                                    "apt runs on the debian family",
 		strings.Replace(gh, "brew: gh", "github-release: {repo: gh, asset: gh}", 1):                                    "github-release names its repo",
