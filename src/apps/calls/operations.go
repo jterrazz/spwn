@@ -559,7 +559,7 @@ func (s *Shelf) statesWithRequirements(ctx context.Context, list []catalog.App) 
 // its bundle is in /Applications.
 func (s *Shelf) ownInstall(t catalog.App, listings map[catalog.Method]listing) bool {
 	own := s.install(t)
-	_, listed := listings[own.Method()].keys[own.Key()]
+	_, listed := listedAll(listings[own.Method()].keys, own)
 	return listed || s.bundled(t)
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
+	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -40,13 +42,19 @@ func read(name string, args ...string) local.Cmd {
 }
 
 type Apt struct {
-	run local.Runner
+	run   local.Runner
+	files local.FS
+	// value: station's folder of the packages its installs added, one
+	// empty file per package.
+	store string
 	// value: the run has a terminal, where sudo may ask its password; off
 	// one, sudo never asks and fails where it would.
 	terminal bool
 }
 
-func New(run local.Runner, terminal bool) *Apt { return &Apt{run: run, terminal: terminal} }
+func New(run local.Runner, files local.FS, store string, terminal bool) *Apt {
+	return &Apt{run: run, files: files, store: store, terminal: terminal}
+}
 
 func (a *Apt) Method() catalog.Method { return catalog.MethodApt }
 
@@ -136,18 +144,41 @@ func candidates(policy string, keys []string, out map[string]apps.Currency) {
 }
 
 func (a *Apt) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	names, err := packages(installs, true)
+	// invariant: a package the install adds is recorded station's, by a
+	// file of its name; one dpkg held before it is the owner's, and only
+	// an app's own package of those is ever removed with it.
+	names, asked, err := packages(installs, true)
+	if err != nil {
+		return err
+	}
+	before, err := a.Inventory(ctx)
 	if err != nil {
 		return err
 	}
 	if err := a.refresh(ctx, logs); err != nil {
 		return err
 	}
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...)
+	if err := a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...); err != nil {
+		return err
+	}
+	if err := a.files.MkdirAll(a.store, 0o755); err != nil {
+		return err
+	}
+	for _, v := range asked {
+		for _, p := range v.Packages {
+			if _, had := before[p]; had {
+				continue
+			}
+			if err := a.files.WriteFile(path.Join(a.store, p), nil, 0o644); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	names, err := packages(installs, false)
+	names, _, err := packages(installs, false)
 	if err != nil {
 		return err
 	}
@@ -158,13 +189,23 @@ func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contr
 }
 
 func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	// invariant: apt removes every package that depends on one it
-	// removes, so a removal that would take any package it was not asked
-	// for is refused before it runs: what station reads it installed is
-	// all it takes back.
-	names, err := packages(installs, false)
+	// invariant: a removal takes back each app's own package, the one its
+	// key names, and of its other packages those station's install added
+	// alone: one the owner had before stays. apt removes every package
+	// that depends on one it removes, so a removal that would take any
+	// package it was not asked for is refused before it runs.
+	_, asked, err := packages(installs, false)
 	if err != nil {
 		return err
+	}
+	var names []string
+	for _, v := range asked {
+		names = append(names, v.Packages[0])
+		for _, p := range v.Packages[1:] {
+			if _, absent := a.files.Stat(path.Join(a.store, p)); absent == nil {
+				names = append(names, p)
+			}
+		}
 	}
 	sim, err := a.run.Output(ctx, read(command, slices.Concat([]string{"-s", "remove"}, keep(), []string{"--"}, names)...))
 	if err != nil {
@@ -182,7 +223,15 @@ func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contr
 	if len(also) > 0 {
 		return &TakesMoreError{Asked: names, Also: also}
 	}
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...)
+	if err := a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...); err != nil {
+		return err
+	}
+	for _, p := range names {
+		if err := a.files.Remove(path.Join(a.store, p)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	return nil
 }
 
 func (a *Apt) refresh(ctx context.Context, logs contract.Logs) error {
@@ -211,28 +260,30 @@ func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) erro
 // invariant: apt takes an argument opening with `-` as an option, and
 // runs as root: every name is checked by the catalog's rule before an
 // argv carries it, and every argv ends its options with `--` before them.
-func packages(installs []catalog.Install, pinned bool) ([]string, error) {
+func packages(installs []catalog.Install, pinned bool) ([]string, []catalog.AptInstall, error) {
 	var names []string
+	var asked []catalog.AptInstall
 	for _, i := range installs {
 		v, ok := i.(catalog.AptInstall)
 		if !ok {
-			return nil, errors.New(i.Key() + " is not an apt package")
+			return nil, nil, errors.New(i.Key() + " is not an apt package")
 		}
 		for _, p := range v.Packages {
 			if err := catalog.CheckPackage(p); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
+		asked = append(asked, v)
 		at := len(names)
 		names = append(names, v.Packages...)
 		if pinned && v.Version != "" {
 			if err := catalog.CheckPackageVersion(v.Version); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			names[at] += "=" + v.Version
 		}
 	}
-	return names, nil
+	return names, asked, nil
 }
 
 type TakesMoreError struct {

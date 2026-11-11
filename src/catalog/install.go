@@ -159,6 +159,15 @@ func (AppInstall) isInstall()           {}
 func (SkillInstall) isInstall()         {}
 func (ProvidedByInstall) isInstall()    {}
 
+func Keys(in Install) []string {
+	// value: the keys its method lists an install by, every one of which
+	// holds it: each package of an apt app, else its one key.
+	if a, ok := in.(AptInstall); ok {
+		return a.Packages
+	}
+	return []string{in.Key()}
+}
+
 func Pinned(in Install, version string) (Install, bool) {
 	// value: the install at the version asked, where it carries one to its
 	// manager: a runtime of mise's, apt's package version, a release's tag;

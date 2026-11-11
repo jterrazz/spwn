@@ -126,3 +126,14 @@ func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
 		}
 	}
 }
+
+func TestStateAnAppOfSeveralPackagesIsHeldOnlyWhileAllAre(t *testing.T) {
+	app := catalog.App{Name: "foo", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.AptInstall{Packages: []string{"foo", "libfoo"}}}}}
+
+	if got := reportOf(t, app, &fake.State{Installed: map[string]string{"foo": "1.0"}}, machine{}); got.State != catalog.StateAbsent {
+		t.Errorf("foo without libfoo reads %+v; want absent", got)
+	}
+	if got := reportOf(t, app, &fake.State{Installed: map[string]string{"foo": "1.0", "libfoo": "2.0"}}, machine{}); got.State != catalog.StateOK || got.Version != "1.0" {
+		t.Errorf("foo with libfoo reads %+v; want ok at foo's version", got)
+	}
+}

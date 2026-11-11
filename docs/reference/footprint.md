@@ -51,6 +51,14 @@ The keychain entry `station` holds nothing since round 5: `station init` removes
 
 ## Apps
 
+### apt
+
+| Path                         | Group         | Note                                                                                                                |
+| ---------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `~/.local/share/station/apt` | never touched | one empty file per package station's install added beside an app's own, the only such packages a removal takes back |
+
+Erase: none (what it installed is apps: station apps remove <app>).
+
 ### cocoapods
 
 | Path                         | Group       | Note |

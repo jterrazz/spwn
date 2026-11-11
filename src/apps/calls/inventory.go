@@ -188,7 +188,7 @@ func (s *Shelf) list(ctx context.Context, m catalog.Method, list []catalog.App) 
 	var held []string
 	for _, t := range list {
 		for _, i := range t.InstallsOn(s.o.ThisMachine) {
-			if _, ok := keys[i.Key()]; ok && i.Method() == m && !slices.Contains(held, i.Key()) {
+			if _, ok := listedAll(keys, i); ok && i.Method() == m && !slices.Contains(held, i.Key()) {
 				held = append(held, i.Key())
 			}
 		}
@@ -217,7 +217,7 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 		r.State, r.Detail, r.Why = catalog.StateUnknown, cmp.Or(manager.Name, string(m))+" did not answer", apps.WhyLate
 		return r
 	}
-	if version, ok := l.keys[i.Key()]; ok {
+	if version, ok := listedAll(l.keys, i); ok {
 		r.State, r.Version, r.Managed = catalog.StateOK, version, true
 		r.Holds, r.HoldsUnread = s.holds(t, listings)
 		// invariant: an inconclusive currency leaves the app ok, never outdated.
@@ -271,7 +271,7 @@ func (s *Shelf) heldOtherwise(t catalog.App, listings map[catalog.Method]listing
 		return nil, false
 	}
 	for _, in := range all[1:] {
-		if _, ok := listings[in.Method()].keys[in.Key()]; ok {
+		if _, ok := listedAll(listings[in.Method()].keys, in); ok {
 			return in, true
 		}
 	}
@@ -328,8 +328,19 @@ func listedOld(t catalog.App, listings map[catalog.Method]listing) bool {
 	if !ok {
 		return false
 	}
-	_, listed := listings[old.Method()].keys[old.Key()]
+	_, listed := listedAll(listings[old.Method()].keys, old)
 	return listed
+}
+
+// invariant: an install is listed when every key it is listed by is, so
+// an app of several packages is held only while all of them are.
+func listedAll(keys map[string]string, in catalog.Install) (string, bool) {
+	for _, k := range catalog.Keys(in) {
+		if _, ok := keys[k]; !ok {
+			return "", false
+		}
+	}
+	return keys[in.Key()], true
 }
 
 func (s *Shelf) readInstalled(ctx context.Context, t catalog.App, r apps.Report) apps.Report {

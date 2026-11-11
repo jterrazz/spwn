@@ -9,3 +9,9 @@ methods:
     - family: debian
       needs: [sudo]
       apt: { packages: [apt] }
+disk:
+    paths:
+        - path: '{data}/station/apt'
+          level: kept
+          note: one empty file per package station's install added beside an app's own, the only such packages a removal takes back
+    no-erase: 'what it installed is apps: station apps remove <app>'

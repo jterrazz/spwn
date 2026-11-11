@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/apps/contract/contracttest"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/platform/local"
+	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 )
 
 // value: dpkg's database as these tests play it: each installed package
@@ -73,7 +74,13 @@ func cmpOr(a, b string) string {
 }
 
 func played(d *dpkg) *apt.Apt {
-	return apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), false)
+	return aptOf(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), false)
+}
+
+const aptStore = "/home/u/.local/share/station/apt"
+
+func aptOf(run local.Runner, terminal bool) *apt.Apt {
+	return apt.New(run, localtest.NewFS(), aptStore, terminal)
 }
 
 func TestInstaller(t *testing.T) {
@@ -86,7 +93,7 @@ func TestInstaller(t *testing.T) {
 		if seed.Absent {
 			names = []string{"sudo"}
 		}
-		return apt.New(local.Played(d.play, names...), false)
+		return aptOf(local.Played(d.play, names...), false)
 	})
 }
 
@@ -135,7 +142,7 @@ func TestEveryRunIsRootAndAsksNothing(t *testing.T) {
 
 func TestOnATerminalSudoMayAskItsPassword(t *testing.T) {
 	d := &dpkg{held: map[string]string{}}
-	a := apt.New(local.Played(d.play, "apt-get", "dpkg-query", "sudo"), true)
+	a := aptOf(local.Played(d.play, "apt-get", "dpkg-query", "sudo"), true)
 
 	if err := a.Install(context.Background(), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil); err != nil {
 		t.Fatal(err)
@@ -187,7 +194,7 @@ func TestOutdatedReadsTheCandidateAgainstWhatIsInstalled(t *testing.T) {
 	policy := "tree:\n  Installed: 1:2.43.0-1\n  Candidate: 1:2.43.0-2\n  Version table:\n     1:2.43.0-2 500\njq:\n  Installed: 1.7.1\n  Candidate: 1.7.1\nfd-find:\n  Installed: (none)\n  Candidate: 9.0.0\n"
 	run := local.Played(func(local.Cmd) (local.Output, error) { return local.Output{Stdout: policy}, nil }, "apt-cache")
 
-	got, err := apt.New(run, false).Outdated(context.Background(), []string{"tree", "jq", "fd-find"})
+	got, err := aptOf(run, false).Outdated(context.Background(), []string{"tree", "jq", "fd-find"})
 
 	want := map[string]apps.Currency{
 		"tree":    {Verdict: apps.Behind, Newest: "1:2.43.0-2"},
@@ -264,7 +271,7 @@ func TestAptIsReadInItsOwnWords(t *testing.T) {
 		}
 		return d.play(c)
 	}, "apt-get", "dpkg-query", "apt-cache", "sudo")
-	a := apt.New(run, false)
+	a := aptOf(run, false)
 	ctx := context.Background()
 
 	_, _ = a.Inventory(ctx)
@@ -278,5 +285,24 @@ func TestAptIsReadInItsOwnWords(t *testing.T) {
 		if !slices.Contains(c.Env, "LC_ALL=C") {
 			t.Errorf("%s %q read in the machine's language (%q); want LC_ALL=C", c.Name, c.Args, c.Env)
 		}
+	}
+}
+
+func TestARemovalKeepsAPackageTheOwnerHadBefore(t *testing.T) {
+	// invariant: of an app's packages beside its own, a removal takes back
+	// those station's install added, never one the owner had before it.
+	d := &dpkg{held: map[string]string{"libfoo-dev": "1.0"}}
+	a := played(d)
+	ctx := context.Background()
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "libfoo-dev", "foo-data"}}}
+
+	if err := a.Install(ctx, foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.Remove(ctx, foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, kept := d.held["libfoo-dev"]; !kept || len(d.held) != 1 {
+		t.Errorf("held %v after the removal; want libfoo-dev alone, the owner's", d.held)
 	}
 }
