@@ -21,20 +21,20 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 	if err != nil {
 		return nil, err
 	}
-	states := s.statesWithRequirements(ctx, requested)
-	requested = s.withProviders(requested, states)
-	inRequest := map[string]bool{}
-	for _, t := range requested {
-		inRequest[t.Name] = true
+	run, requiredBy, err := s.withRequirements(ctx, requested)
+	if err != nil {
+		return nil, err
 	}
-	for _, t := range requested {
-		for _, dep := range s.requirements(t) {
-			if !inRequest[dep] && !settled(states[dep]) {
-				return nil, &apps.NeedsError{App: t.Name, Needs: dep}
-			}
-		}
+	inRun := map[string]bool{}
+	for _, t := range run {
+		inRun[t.Name] = true
 	}
-	ordered := s.topological(requested)
+	states := s.states(ctx, run)
+	deps := map[string][]string{}
+	for _, t := range run {
+		deps[t.Name] = s.requiredFor(ctx, t)
+	}
+	ordered := s.topological(run, deps)
 	outcomes := map[string]*apps.Outcome{}
 	var pending []catalog.App
 	for _, t := range ordered {
@@ -47,14 +47,14 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 	for len(pending) > 0 {
 		var batch []catalog.App
 		if _, ok := s.lined(pending[0]); ok {
-			batch = s.bundleBatch(pending, inRequest, outcomes)
+			batch = s.bundleBatch(pending, inRun, outcomes, deps)
 		} else {
 			batch = []catalog.App{pending[0]}
 		}
 		pending = slices.DeleteFunc(pending, func(t catalog.App) bool { return slices.ContainsFunc(batch, sameName(t)) })
 		var ready []catalog.App
 		for _, t := range batch {
-			if dep := s.failedRequirement(t, outcomes); dep != "" {
+			if dep := s.failedRequirement(deps[t.Name], outcomes); dep != "" {
 				outcomes[t.Name] = &apps.Outcome{Name: t.Name, Verb: verbInstall, Result: catalog.StateBroken, Detail: "requires " + dep + ", which failed"}
 				continue
 			}
@@ -77,16 +77,78 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 			outcomes[o.Name] = &o
 		}
 	}
+	result := make([]apps.Outcome, 0, len(ordered))
 	for _, t := range ordered {
-		if o := outcomes[t.Name]; o.Result == catalog.StateOK {
+		o := outcomes[t.Name]
+		if o.Result == catalog.StateOK {
 			o.Steps = append(o.Steps, s.supersede(ctx, t)...)
 		}
-	}
-	result := make([]apps.Outcome, 0, len(ordered))
-	for _, t := range requested {
-		result = append(result, *outcomes[t.Name])
+		o.RequiredBy = requiredBy[t.Name]
+		result = append(result, *o)
 	}
 	return s.held(ctx, result), nil
+}
+
+// invariant: an app comes with what it requires: each requirement missing
+// here (an app it names, its method's manager) joins the run, named by the
+// apps that require it. One the catalogue does not know, or this machine
+// cannot carry, refuses the run before anything is installed, in the words
+// of asking it by name (`no app named "y"`, `y lives on Macs only`).
+func (s *Shelf) withRequirements(ctx context.Context, requested []catalog.App) ([]catalog.App, map[string][]string, error) {
+	states := s.statesWithRequirements(ctx, requested)
+	run := slices.Clone(requested)
+	inRun := map[string]bool{}
+	for _, t := range requested {
+		inRun[t.Name] = true
+	}
+	requiredBy := map[string][]string{}
+	for i := 0; i < len(run); i++ {
+		t := run[i]
+		for _, dep := range s.requiredFor(ctx, t) {
+			if inRun[dep] {
+				if requiredBy[dep] != nil && !slices.Contains(requiredBy[dep], t.Name) {
+					requiredBy[dep] = append(requiredBy[dep], t.Name)
+				}
+				continue
+			}
+			if settled(states[dep]) {
+				continue
+			}
+			d, ok := s.byName[dep]
+			if !ok {
+				return nil, nil, &apps.UnknownError{Name: dep}
+			}
+			if _, placed := d.InstallOn(s.o.ThisMachine); !placed {
+				return nil, nil, &apps.ElsewhereError{App: dep, Kinds: d.LivesOn()}
+			}
+			if !s.installer(d).Can().Install {
+				return nil, nil, &apps.ManualInstallError{App: d.Name, Hint: s.install(d).Key()}
+			}
+			if _, read := states[dep]; !read {
+				for name, state := range s.statesWithRequirements(ctx, []catalog.App{d}) {
+					states[name] = state
+				}
+				if settled(states[dep]) {
+					continue
+				}
+			}
+			inRun[dep] = true
+			requiredBy[dep] = []string{t.Name}
+			run = append(run, d)
+		}
+	}
+	return run, requiredBy, nil
+}
+
+// value: what an app's install cannot run without: its requirements, and its
+// method's manager while that manager is missing.
+func (s *Shelf) requiredFor(ctx context.Context, t catalog.App) []string {
+	deps := s.requirements(t)
+	inst := s.installer(t)
+	if app := inst.Manager().App; app != "" && app != t.Name && !slices.Contains(deps, app) && errors.Is(inst.Ready(ctx), contract.ErrMissing) {
+		deps = append(deps, app)
+	}
+	return deps
 }
 
 // invariant: a superseded formula goes only once the app replacing it is
@@ -219,14 +281,14 @@ func (s *Shelf) held(ctx context.Context, outcomes []apps.Outcome) []apps.Outcom
 	return outcomes
 }
 
-func (s *Shelf) bundleBatch(pending []catalog.App, inRequest map[string]bool, done map[string]*apps.Outcome) []catalog.App {
+func (s *Shelf) bundleBatch(pending []catalog.App, inRequest map[string]bool, done map[string]*apps.Outcome, deps map[string][]string) []catalog.App {
 	var batch []catalog.App
 	for _, t := range pending {
 		if !s.isLined(t) {
 			continue
 		}
 		ready := true
-		for _, dep := range s.requirements(t) {
+		for _, dep := range deps[t.Name] {
 			if inRequest[dep] && done[dep] == nil && !slices.ContainsFunc(batch, func(b catalog.App) bool { return b.Name == dep }) {
 				ready = false
 			}
@@ -335,24 +397,6 @@ func (s *Shelf) then(ctx context.Context, t catalog.App, interactive bool) []app
 	return steps
 }
 
-// invariant: an app another item provides requires that item, and an install
-// of it installs that item first, reported as its own outcome; one already
-// there is left alone.
-func (s *Shelf) withProviders(list []catalog.App, states map[string]catalog.State) []catalog.App {
-	var out []catalog.App
-	for _, t := range list {
-		if by, ok := s.install(t).(catalog.ProvidedByInstall); ok && !settled(states[by.Item]) && !slices.ContainsFunc(list, sameName(catalog.App{Name: by.Item})) {
-			if p, placed := s.byName[by.Item]; placed && !slices.ContainsFunc(out, sameName(p)) {
-				if _, lives := p.InstallOn(s.o.ThisMachine); lives {
-					out = append(out, p)
-				}
-			}
-		}
-		out = append(out, t)
-	}
-	return out
-}
-
 func (s *Shelf) requirements(t catalog.App) []string {
 	reqs := slices.Clone(t.Requires)
 	if by, ok := s.install(t).(catalog.ProvidedByInstall); ok && !slices.Contains(reqs, by.Item) {
@@ -364,8 +408,8 @@ func (s *Shelf) requirements(t catalog.App) []string {
 	return reqs
 }
 
-func (s *Shelf) failedRequirement(t catalog.App, outcomes map[string]*apps.Outcome) string {
-	for _, dep := range s.requirements(t) {
+func (s *Shelf) failedRequirement(deps []string, outcomes map[string]*apps.Outcome) string {
+	for _, dep := range deps {
 		if o := outcomes[dep]; o != nil && o.Result == catalog.StateBroken {
 			return dep
 		}
@@ -373,7 +417,7 @@ func (s *Shelf) failedRequirement(t catalog.App, outcomes map[string]*apps.Outco
 	return ""
 }
 
-func (s *Shelf) topological(list []catalog.App) []catalog.App {
+func (s *Shelf) topological(list []catalog.App, deps map[string][]string) []catalog.App {
 	inRequest := map[string]catalog.App{}
 	for _, t := range list {
 		inRequest[t.Name] = t
@@ -386,7 +430,7 @@ func (s *Shelf) topological(list []catalog.App) []catalog.App {
 			return
 		}
 		visited[t.Name] = true
-		for _, dep := range s.requirements(t) {
+		for _, dep := range deps[t.Name] {
 			if d, ok := inRequest[dep]; ok {
 				visit(d)
 			}

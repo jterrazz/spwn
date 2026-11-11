@@ -1,0 +1,30 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "jterrazz-macbook-pro",
+    "macs": {
+        "jterrazz-macbook-pro": {
+            "preferences": {
+                "name": "jterrazz-macbook-pro"
+            },
+            "apps": {
+                "brew": {
+                    "absent": true
+                },
+                "cask": {
+                    "absent": true
+                },
+                "script": {
+                    "lands": {
+                        "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh": [
+                            "brew",
+                            "cask"
+                        ]
+                    },
+                    "offers": {
+                        "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh": "5.0.1"
+                    }
+                }
+            }
+        }
+    }
+}

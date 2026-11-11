@@ -11,10 +11,6 @@ type UnknownError struct{ Name string }
 
 func (e *UnknownError) Error() string { return "no app named \"" + e.Name + "\"" }
 
-type NeedsError struct{ App, Needs string }
-
-func (e *NeedsError) Error() string { return e.App + " needs " + e.Needs + ", which is not installed" }
-
 type ElsewhereError struct {
 	App   string
 	Kinds []catalog.MachineKind

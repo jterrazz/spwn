@@ -91,19 +91,9 @@ func (s *Shelf) CheckInstall(ctx context.Context, names []string) error {
 	if err != nil {
 		return err
 	}
-	asked := map[string]bool{}
 	for _, t := range found {
-		asked[t.Name] = true
-	}
-	for _, t := range found {
-		inst := s.installer(t)
-		if !inst.Can().Install {
+		if !s.installer(t).Can().Install {
 			return &apps.ManualInstallError{App: t.Name, Hint: s.install(t).Key()}
-		}
-		// invariant: an app whose method's manager is missing is refused,
-		// naming the app that brings it, unless that app is asked too.
-		if app := inst.Manager().App; !asked[app] && errors.Is(inst.Ready(ctx), contract.ErrMissing) {
-			return &apps.NeedsError{App: t.Name, Needs: app}
 		}
 	}
 	return nil

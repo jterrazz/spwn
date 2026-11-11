@@ -20,6 +20,9 @@ import (
 )
 
 type World struct {
+	// value: the catalogue app that brings each method's manager, as the real
+	// adapters name it; set by the wiring, never read from a file.
+	Managers map[catalog.Method]string `json:"-"`
 	// invariant: every fake over the world holds this lock while it reads
 	// or writes it, as the engine's goroutines and a command share it.
 	mu sync.Mutex
@@ -174,6 +177,9 @@ type Manager struct {
 	Behind map[string]string `json:"behind,omitempty"`
 	// value: the version an install of a key brings.
 	Offers map[string]string `json:"offers,omitempty"`
+	// value: the methods an install of a key brings, their manager present
+	// from then on: Homebrew's script lands brew and cask.
+	Lands map[string][]catalog.Method `json:"lands,omitempty"`
 }
 
 type Meter struct {

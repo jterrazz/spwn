@@ -141,3 +141,36 @@ func TestTheLinuxImageKernelWritesItsConsoleWhereTheHostReadsIt(t *testing.T) {
 		}
 	}
 }
+
+func TestARequirementLivesWhereItsAppDoes(t *testing.T) {
+	// invariant: an install brings what its app requires, so a requirement
+	// lives on every kind of machine its app lives on.
+	c := builtin(t)
+	byName := map[string]catalog.App{}
+	for _, a := range c.Apps {
+		byName[a.Name] = a
+	}
+	for _, a := range c.Apps {
+		for _, r := range a.Requires {
+			for _, kind := range kinds() {
+				_, placed := a.InstallOn(kind)
+				_, carried := byName[r].InstallOn(kind)
+				if placed && !carried {
+					t.Errorf("%s lives on %s, where its requirement %s does not", a.Name, kind, r)
+				}
+			}
+		}
+	}
+}
+
+func kinds() []catalog.MachineKind {
+	var out []catalog.MachineKind
+	for _, ks := range catalog.MethodKinds {
+		for _, k := range ks {
+			if !slices.Contains(out, k) {
+				out = append(out, k)
+			}
+		}
+	}
+	return out
+}

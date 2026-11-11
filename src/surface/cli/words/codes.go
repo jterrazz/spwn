@@ -120,9 +120,6 @@ func Codes() map[fail.Code]Wording {
 			}
 			return e.Subject + " lives on " + e.Detail["lives"], hint
 		},
-		appscalls.Needs: func(e *fail.Error) (string, string) {
-			return e.Subject + " needs " + e.Detail["needs"] + ", which is not installed", "station apps install " + e.Detail["needs"]
-		},
 		appscalls.NotInstalled: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not installed", "station apps install " + e.Subject
 		},

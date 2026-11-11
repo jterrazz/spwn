@@ -1,0 +1,13 @@
+description: 'an app whose method''s manager is missing brings it: mas joins the run first, required by keynote'
+env: two-macs
+runs:
+    - command: 'apps install keynote'
+      exit: 0
+      stdout: |
+          ●	mas	1.0.0	brew	required by keynote
+          ●	keynote	1.0.0	mas
+    - command: 'apps | /usr/bin/grep -e "^.	mas	" -e "^.	keynote	"'
+      exit: 0
+      stdout: |
+          ●	mas	1.0.0	brew
+          ●	keynote	1.0.0	mas

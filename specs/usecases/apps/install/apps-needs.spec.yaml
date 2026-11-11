@@ -1,8 +1,0 @@
-description: 'an app whose method''s installer is missing names the app that brings it, exit 1, nothing run'
-env: two-macs
-runs:
-    - command: 'apps install keynote'
-      exit: 1
-      stderr: |
-          Error: keynote needs mas, which is not installed
-          Hint: station apps install mas

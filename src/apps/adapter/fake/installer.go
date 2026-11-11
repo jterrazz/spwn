@@ -77,7 +77,9 @@ func manager(w *world.World, mac string, m catalog.Method) *world.Manager {
 func (f *Installer) Method() catalog.Method { return f.method }
 
 func (f *Installer) Manager() contract.Manager {
-	return contract.Manager{Name: string(f.method), App: string(f.method)}
+	// invariant: a manager names the catalogue app that brings it, the one
+	// the real adapter names (World.Managers), else its method's name.
+	return contract.Manager{Name: string(f.method), App: managerApp(f.w, f.method)}
 }
 
 func (f *Installer) Can() contract.Abilities {
@@ -130,6 +132,9 @@ func (f *Installer) run(ctx context.Context, verb string, installs []catalog.Ins
 			break
 		}
 		apply(f.manager(), i.Key())
+		if verb == "Install" {
+			land(f.w, f.mac, f.manager(), i.Key())
+		}
 	}
 	f.w.Unlock()
 	return wait(ctx, held)
@@ -221,6 +226,30 @@ func (b *Bundler) apply(lines []string, update, first bool) error {
 			return contract.ErrMissing
 		}
 		apply(s, key)
+		if !update {
+			land(b.w, b.mac, s, key)
+		}
 	}
 	return nil
+}
+
+// invariant: an install that brings a manager makes it present, as the real
+// command then answers: the methods its key lands, and the method whose
+// manager is the app of that name (mas installed by the bundle).
+func managerApp(w *world.World, m catalog.Method) string {
+	if app := w.Managers[m]; app != "" {
+		return app
+	}
+	return string(m)
+}
+
+func land(w *world.World, mac string, by *world.Manager, key string) {
+	for _, m := range by.Lands[key] {
+		manager(w, mac, m).Absent = false
+	}
+	for m, s := range w.Mac(mac).Apps {
+		if s.Absent && managerApp(w, m) == key {
+			s.Absent = false
+		}
+	}
 }

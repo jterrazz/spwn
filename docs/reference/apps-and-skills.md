@@ -33,7 +33,7 @@ A file is read strictly: an unknown key, an anchor, an alias or a merge key, or 
 
 An app asked for on a machine it does not live on is refused with exit 2, `dia lives on Macs only`, the hint the command with `--on`.
 
-An app's state is one of OK (the method's manager lists it, current), Update available (its manager says a newer version exists), Failed, Not installed, Not managed (found on PATH or in `/Applications` but not installed by its method: `ghostty.app in /Applications, not installed by cask`) or Not known (the manager did not answer). `Requires` orders an install and refuses one whose method's manager is missing (`keynote needs mas, which is not installed`).
+An app's state is one of OK (the method's manager lists it, current), Update available (its manager says a newer version exists), Failed, Not installed, Not managed (found on PATH or in `/Applications` but not installed by its method: `ghostty.app in /Applications, not installed by cask`) or Not known (the manager did not answer). `Requires` orders an install and brings what is missing into it, the method's manager too (`apps install keynote` installs mas first, `● mas  required by keynote`); a requirement the catalogue does not know, or this machine cannot carry, refuses the install before anything runs, in the words of asking it by name (`no app named "y"`, `y lives on Macs only`). The catalogue's tests hold that a requirement, and a method's manager, live wherever their app does.
 
 ## Methods
 

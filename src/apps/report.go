@@ -51,6 +51,9 @@ type Outcome struct {
 	// value: the log that keeps its installer's words, as the owner reads
 	// it (`~/.local/state/station/logs/<app>.log`), set when the verb failed.
 	Log string
+	// value: the apps of the run that require it, for an app the run brought
+	// in; none for an app named.
+	RequiredBy []string
 }
 
 type Step struct {

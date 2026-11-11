@@ -142,7 +142,6 @@
       "where": "at-target",
       "errors": [
         "apps.lives-elsewhere",
-        "apps.needs",
         "apps.unknown"
       ],
       "in": "InstallIn"

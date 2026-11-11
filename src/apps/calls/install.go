@@ -18,7 +18,7 @@ type InstallIn struct {
 
 var Install = call.Call[Deps, InstallIn, []apps.Outcome]{
 	Name: "apps.install", Section: section.Apps, Where: call.AtTarget, Applies: apps.Applies,
-	Errors: []fail.Code{Unknown, Elsewhere, Needs},
+	Errors: []fail.Code{Unknown, Elsewhere},
 	Run: func(ctx context.Context, d Deps, in InstallIn, p call.Progress) ([]apps.Outcome, error) {
 		if err := d.Apps.CheckInstall(ctx, in.Names); err != nil {
 			return nil, coded(err)
