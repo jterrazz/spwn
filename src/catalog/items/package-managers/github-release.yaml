@@ -1,0 +1,18 @@
+item: station.catalog/v1
+kind: manager
+name: github-release
+description: Commands from a project's GitHub releases, fetched and checked by station itself
+manages: [github-release]
+priority: { macos: 3, ubuntu: 2, debian: 2 }
+provides: [station]
+methods:
+    # invariant: station is this manager, and the running binary its own
+    # release: held at its version, never installed, updated or removed by it.
+    - os: any
+      github-release: { repo: jterrazz/studio-station, asset: 'station-{os}-{arch}' }
+disk:
+    paths:
+        - path: '{data}/station/releases'
+          level: kept
+          note: what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there
+    no-erase: 'what it installed is apps: station apps remove <app>'

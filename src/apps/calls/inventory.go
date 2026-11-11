@@ -1,6 +1,7 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"path"
@@ -213,7 +214,7 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	case l.unlisted:
 		return s.readInstalled(ctx, t, r)
 	case l.failed:
-		r.State, r.Detail, r.Why = catalog.StateUnknown, manager.Name+" did not answer", apps.WhyLate
+		r.State, r.Detail, r.Why = catalog.StateUnknown, cmp.Or(manager.Name, string(m))+" did not answer", apps.WhyLate
 		return r
 	}
 	if version, ok := l.keys[i.Key()]; ok {

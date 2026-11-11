@@ -348,13 +348,16 @@ type MiseMethod struct {
 }
 
 // value: a command from a GitHub release: the repository, the asset's name
-// pattern (`{os}` and `{arch}` the machine's), and the asset of checksums
-// when the release ships one under another name than the default.
+// pattern (`{os}` and `{arch}` the machine's: `linux` or `darwin`, `arm64`
+// or `amd64`), the asset of checksums when the release ships one under a
+// name station does not look for, and, for a release that ships no
+// checksum at all, why it is installed unverified.
 
 type GitHubReleaseMethod struct {
-	Repo      string `yaml:"repo"`
-	Asset     string `yaml:"asset"`
-	Checksums string `yaml:"checksums,omitempty"`
+	Repo       string `yaml:"repo"`
+	Asset      string `yaml:"asset"`
+	Checksums  string `yaml:"checksums,omitempty"`
+	Unverified string `yaml:"unverified,omitempty"`
 }
 
 // value: the escape hatch: `check` is the shell line whose exit 0 says it is

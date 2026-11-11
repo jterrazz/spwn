@@ -40,6 +40,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **apt**: Debian and Ubuntu's package manager
 - **cocoapods**: Dependency manager for iOS and macOS projects
+- **github-release**: Commands from a project's GitHub releases, fetched and checked by station itself
 - **homebrew**: macOS package manager
 - **mas**: Mac App Store command line
 - **mise**: Polyglot runtime manager: node, go, python, bun, rust, java

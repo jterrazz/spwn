@@ -13,8 +13,8 @@ version-read:
             ~/Applications/Station.app/Contents/Info.plist,
         ]
 methods:
-    # hazard: github-release has no installer yet, so the latest release's zip is
-    # fetched here, refused unless checksums.txt vouches for it, and put where
+    # hazard: github-release lands commands, not an app bundle, so the latest
+    # release's zip is fetched here, refused unless checksums.txt vouches for it, and put where
     # `make menubar-install` puts it, the old bundle kept until the new one is
     # renamed over it; curl sets no quarantine on the ad hoc signature.
     - os: macos

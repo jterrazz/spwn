@@ -5,6 +5,6 @@ runs:
       exit: 0
       stdout: |
           # Not installed	67 ○
-          # OK	1 ●
+          # OK	2 ●
           ●	node	22.11.0	mise
           # Not for this machine

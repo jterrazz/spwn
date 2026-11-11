@@ -233,23 +233,6 @@ methods:
 	}
 }
 
-// invariant: a method of a manager this station runs no installer for is
-// none: the next one serves, so a newer file still installs where it can.
-func TestAMethodThisStationCannotRunGivesWayToTheNext(t *testing.T) {
-	body := strings.Replace(gh, "    - os: macos\n      brew: gh\n", "    - family: linux\n      github-release: {repo: cli/cli, asset: gh}\n    - family: linux\n      mise: {name: gh, version: latest}\n    - os: macos\n      machine: computer\n      brew: gh\n", 1)
-	c, err := catalogOf(map[string]string{"git/gh.yaml": body})
-	if err != nil {
-		t.Fatal(err)
-	}
-	app, _ := c.App("gh")
-	if linux, _ := app.InstallOn(catalog.Linux); linux.Method() != catalog.MethodMise {
-		t.Errorf("on linux gh installs by %v, want mise", linux)
-	}
-	if _, ok := app.InstallOn(catalog.MacOS); ok {
-		t.Error("gh lives on a macOS VM, want a computer only")
-	}
-}
-
 func catalogOf(files map[string]string) (catalog.Catalog, error) {
 	fsys := fstest.MapFS{}
 	for name, body := range files {

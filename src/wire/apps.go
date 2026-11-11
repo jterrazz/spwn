@@ -18,6 +18,7 @@ import (
 	"github.com/jterrazz/studio-station/src/apps/adapter/apt"
 	"github.com/jterrazz/studio-station/src/apps/adapter/brew"
 	"github.com/jterrazz/studio-station/src/apps/adapter/bun"
+	"github.com/jterrazz/studio-station/src/apps/adapter/githubrelease"
 	"github.com/jterrazz/studio-station/src/apps/adapter/mas"
 	"github.com/jterrazz/studio-station/src/apps/adapter/mise"
 	"github.com/jterrazz/studio-station/src/apps/adapter/npm"
@@ -122,9 +123,17 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 			Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
 		}),
 		script.New(run, terminal), shell.New(run), app.New(), providedby.New(run),
+		githubrelease.New(githubrelease.Options{
+			FS: m.sys.FS, Net: m.sys.Net,
+			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
+			Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
+			OS:     m.sys.Env.GOOS(), Arch: m.sys.Env.GOARCH(),
+			Bin: m.paths.Bin, Store: filepath.Join(m.paths.Data, "releases"),
+		}),
 	} {
 		registry[i.Method()] = i
 	}
+	var bundler contract.Bundler = bundle
 	if m.world != nil {
 		// invariant: a world's installers are its fakes, one per method the
 		// real registry has, each lined when the real one rides the bundle.
@@ -135,9 +144,21 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 			registry[method] = m.world.installer(method, lined)
 		}
 		m.world.managers(managers)
-		return registry, m.world.bundler()
+		bundler = m.world.bundler()
 	}
-	return registry, bundle
+	registry[catalog.MethodGitHubRelease] = githubrelease.Own(registry[catalog.MethodGitHubRelease], githubrelease.Held{Key: own(m.cat, m.kind)})
+	return registry, bundler
+}
+
+// value: the key station's own release is held by, the one the catalog's
+// github-release manager installs by here: the running binary came from it.
+func own(cat catalog.Catalog, kind catalog.MachineKind) string {
+	if t, ok := cat.App(string(catalog.MethodGitHubRelease)); ok {
+		if in, ok := t.InstallOn(kind); ok {
+			return in.Key()
+		}
+	}
+	return ""
 }
 
 // invariant: a Then item that asks values or a terminal is skipped off one, as a

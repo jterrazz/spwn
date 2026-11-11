@@ -15,13 +15,6 @@ func (m MethodSpec) Method() string {
 	return m.Key()
 }
 
-func (m MethodSpec) Runs(k Kind) bool {
-	// value: whether station runs this method for an item of that kind: a
-	// setting's every method, an app's or a manager's only the ones it has
-	// an installer for (github-release waits for its own).
-	return k == KindSetting || m.install(nil) != nil
-}
-
 // value: a method's standing in the order one system tries an item's
 // methods: listed by prefer (its place there), ranked by its manager on
 // that system (its rank), any other manager, then a method no manager
@@ -108,7 +101,7 @@ func (c Catalog) placed(it Item) []LivesOn {
 	for _, k := range []MachineKind{Mac, Linux, MacOS} {
 		var on []MethodSpec
 		for _, m := range it.Methods {
-			if m.Runs(it.Kind) && slices.Contains(m.kinds(), k) {
+			if slices.Contains(m.kinds(), k) {
 				on = append(on, m)
 			}
 		}

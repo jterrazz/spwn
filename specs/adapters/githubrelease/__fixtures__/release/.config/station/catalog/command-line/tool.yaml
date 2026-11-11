@@ -1,0 +1,8 @@
+item: station.catalog/v1
+kind: app
+name: tool
+description: A command from its project's releases
+provides: [tool]
+methods:
+    - os: any
+      github-release: { repo: acme/tool, asset: 'tool-{arch}' }

@@ -6,7 +6,7 @@ runs:
     - command: 'overview --json > o.json; "$STATION" apps --json | /usr/bin/jq -c ''[.apps | group_by(.state)[] | {(.[0].state): length}] | add'' > a.json; /usr/bin/jq -c ''.sections[] | select(.id == "apps") | .counts'' o.json | /usr/bin/cmp - a.json && /bin/cat a.json'
       exit: 0
       stdout: |
-          {"not-installed":105,"ok":5,"update-available":3}
+          {"not-installed":105,"ok":6,"update-available":3}
     - command: 'overview --json > o.json; "$STATION" accounts --json | /usr/bin/jq -c ''[.accounts[] | select(.state == "signed-in")] | length''; /usr/bin/jq -c ''.sections[] | select(.id == "accounts") | .counts["signed-in"]'' o.json'
       exit: 0
       stdout: |

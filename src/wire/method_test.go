@@ -258,7 +258,7 @@ func entries(cat catalog.Catalog, a catalog.App, kind catalog.MachineKind) []str
 	it, _ := cat.Item(a.Name)
 	for _, m := range it.Item.Methods {
 		key := m.Key()
-		if !slices.Contains(catalog.ManagerKey("").Enum(), key) || !m.Runs(it.Item.Kind) {
+		if !slices.Contains(catalog.ManagerKey("").Enum(), key) {
 			continue
 		}
 		if _, ok := a.InstallBy(kind, catalog.Method(m.Method())); !ok {

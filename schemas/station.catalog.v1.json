@@ -334,6 +334,9 @@
         },
         "repo": {
           "type": "string"
+        },
+        "unverified": {
+          "type": "string"
         }
       },
       "required": [

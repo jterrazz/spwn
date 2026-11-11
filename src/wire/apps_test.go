@@ -155,6 +155,11 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 		}
 	}
 	for method, i := range registry {
+		// value: a release station fetches itself, handed no Runner: it
+		// runs no command for the environment to reach.
+		if method == catalog.MethodGitHubRelease {
+			continue
+		}
 		if i.Can().Remove && !removed[method] {
 			t.Errorf("%s: no removal ran a command, so the test reads nothing of it", method)
 		}

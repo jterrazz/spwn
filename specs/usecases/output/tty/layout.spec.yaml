@@ -21,7 +21,7 @@ runs:
             {warn ◐} {bold Firewall: off}           System Settings > Network > Firewall
             4 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
-          {bold Apps}        {good ●} 5 ok · {warn ◐} 3 updates · {muted ○} 105 not installed
+          {bold Apps}        {good ●} 6 ok · {warn ◐} 3 updates · {muted ○} 105 not installed
           {bold Settings}    set by station · {muted ○} 0 of 19 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
@@ -37,7 +37,7 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 113 apps for this Mac · 3 updates · 105 not installed
+          This Mac · 114 apps for this Mac · 3 updates · 105 not installed
 
           Updates
             ◐ node     22.11.0 → 24.11.0  mise  update available
@@ -47,7 +47,7 @@ runs:
             ◐ gh       2.97.0 → 2.98.0    brew  update available
               → station apps update gh
           Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
-          OK             ● 5 · mise, go, bat, jq, lazygit
+          OK             ● 6 · github-release, mise, go, bat, jq, lazygit
           Not for this machine  8 apps live on other machines
 
           → station apps update            the 3 updates

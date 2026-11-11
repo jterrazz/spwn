@@ -10,9 +10,9 @@ runs:
       exit: 2
       stderr: |
           Error: unknown manager "nope"
-          Hint: --to takes apt, brew, cask, mas, mise, skill, uv, bun, npm
+          Hint: --to takes apt, github-release, brew, cask, mas, mise, skill, uv, bun, npm
     - command: 'apps move jq'
       exit: 2
       stderr: |
           Error: give the manager it moves to
-          Hint: --to takes apt, brew, cask, mas, mise, skill, uv, bun, npm
+          Hint: --to takes apt, github-release, brew, cask, mas, mise, skill, uv, bun, npm

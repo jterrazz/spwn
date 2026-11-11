@@ -73,18 +73,19 @@ type App struct {
 // the dispatch that runs it can never disagree.
 
 var MethodKinds = map[Method][]MachineKind{
-	MethodBrew:   {Mac, MacOS},
-	MethodCask:   {Mac, MacOS},
-	MethodMas:    {Mac, MacOS},
-	MethodApp:    {Mac, MacOS},
-	MethodNpm:    {Mac, MacOS},
-	MethodUv:     {Mac, MacOS},
-	MethodBun:    {Mac, Linux, MacOS},
-	MethodMise:   {Mac, Linux, MacOS},
-	MethodApt:    {Linux},
-	MethodScript: {Mac, Linux, MacOS},
-	MethodShell:  {Mac, Linux, MacOS},
-	MethodSkill:  {Mac, Linux, MacOS},
+	MethodBrew:          {Mac, MacOS},
+	MethodCask:          {Mac, MacOS},
+	MethodMas:           {Mac, MacOS},
+	MethodApp:           {Mac, MacOS},
+	MethodNpm:           {Mac, MacOS},
+	MethodUv:            {Mac, MacOS},
+	MethodBun:           {Mac, Linux, MacOS},
+	MethodMise:          {Mac, Linux, MacOS},
+	MethodApt:           {Linux},
+	MethodGitHubRelease: {Mac, Linux, MacOS},
+	MethodScript:        {Mac, Linux, MacOS},
+	MethodShell:         {Mac, Linux, MacOS},
+	MethodSkill:         {Mac, Linux, MacOS},
 	// invariant: a command another item brings lives wherever that item does.
 	MethodProvidedBy: {Mac, Linux, MacOS},
 }

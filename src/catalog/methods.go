@@ -19,7 +19,8 @@ func (m MethodSpec) Key() string {
 func (m MethodSpec) Pins() bool {
 	// value: whether this method installs the version a Machinefile asks:
 	// never under `pin: none`; else whether its install carries a version
-	// to its manager (mise's, apt's), whatever `pin` claims.
+	// to its manager (mise's, apt's, a release's tag), whatever `pin`
+	// claims.
 	if m.Pin == PinNone {
 		return false
 	}

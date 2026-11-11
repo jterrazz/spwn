@@ -10,7 +10,7 @@ runs:
       exit: 2
       stderr: |
           Error: unknown manager "nope"
-          Hint: --manager takes apt, brew, cask, mas, mise, skill, uv, bun, npm
+          Hint: --manager takes apt, github-release, brew, cask, mas, mise, skill, uv, bun, npm
     - command: 'apps update --manager'
       exit: 2
       stderr: |

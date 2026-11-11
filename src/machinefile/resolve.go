@@ -445,7 +445,7 @@ func (p *planner) skippedFor(it catalog.Placed, manager catalog.ManagerKey) stri
 	}
 	var has []string
 	for _, m := range it.Item.Methods {
-		if m.Matches(p.sys) && m.Runs(it.Item.Kind) && !slices.Contains(has, m.Key()) {
+		if m.Matches(p.sys) && !slices.Contains(has, m.Key()) {
 			has = append(has, m.Key())
 		}
 	}
@@ -471,7 +471,7 @@ func (p *planner) system() string {
 func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version, why, where string) (Step, error) {
 	var matching []catalog.MethodSpec
 	for _, m := range it.Item.Methods {
-		if m.Matches(p.sys) && m.Runs(it.Item.Kind) && (manager == "" || m.Key() == string(manager)) {
+		if m.Matches(p.sys) && (manager == "" || m.Key() == string(manager)) {
 			matching = append(matching, m)
 		}
 	}

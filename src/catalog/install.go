@@ -8,18 +8,21 @@ import (
 type Method string
 
 const (
-	MethodBrew   Method = "brew"
-	MethodCask   Method = "cask"
-	MethodMas    Method = "mas"
-	MethodNpm    Method = "npm"
-	MethodUv     Method = "uv"
-	MethodBun    Method = "bun"
-	MethodMise   Method = "mise"
-	MethodApt    Method = "apt"
-	MethodScript Method = "script"
-	MethodShell  Method = "shell"
-	MethodApp    Method = "app"
-	MethodSkill  Method = "skill"
+	MethodBrew Method = "brew"
+	MethodCask Method = "cask"
+	MethodMas  Method = "mas"
+	MethodNpm  Method = "npm"
+	MethodUv   Method = "uv"
+	MethodBun  Method = "bun"
+	MethodMise Method = "mise"
+	MethodApt  Method = "apt"
+	// invariant: station itself fetches the release's asset, and installs
+	// only what a checksum vouches for, never as root.
+	MethodGitHubRelease Method = "github-release"
+	MethodScript        Method = "script"
+	MethodShell         Method = "shell"
+	MethodApp           Method = "app"
+	MethodSkill         Method = "skill"
 	// invariant: the command comes with another item's install: installing it
 	// installs that item, and its presence is its own provides.
 	MethodProvidedBy Method = "provided-by"
@@ -54,6 +57,21 @@ type BunInstall struct{ Package, Name string }
 
 type MiseInstall struct{ App, Version string }
 
+type GitHubReleaseInstall struct {
+	Repo  string
+	Asset string
+	// value: the asset of checksums the method names; empty, the release's
+	// own are looked for.
+	Checksums string
+	// value: why the asset is installed with no checksum to vouch for it;
+	// empty, an asset no checksum vouches for is refused.
+	Unverified string
+	// value: the release's tag; empty, the latest release.
+	Tag string
+	// value: the commands it puts on the search path, found in the asset.
+	Commands []string
+}
+
 type AptInstall struct {
 	Packages []string
 	// value: the version asked of the first package, the one its key names;
@@ -85,19 +103,20 @@ type ProvidedByInstall struct {
 	Commands []string
 }
 
-func (BrewInstall) Method() Method       { return MethodBrew }
-func (CaskInstall) Method() Method       { return MethodCask }
-func (MasInstall) Method() Method        { return MethodMas }
-func (NpmInstall) Method() Method        { return MethodNpm }
-func (UvInstall) Method() Method         { return MethodUv }
-func (BunInstall) Method() Method        { return MethodBun }
-func (MiseInstall) Method() Method       { return MethodMise }
-func (AptInstall) Method() Method        { return MethodApt }
-func (ScriptInstall) Method() Method     { return MethodScript }
-func (ShellInstall) Method() Method      { return MethodShell }
-func (AppInstall) Method() Method        { return MethodApp }
-func (SkillInstall) Method() Method      { return MethodSkill }
-func (ProvidedByInstall) Method() Method { return MethodProvidedBy }
+func (BrewInstall) Method() Method          { return MethodBrew }
+func (CaskInstall) Method() Method          { return MethodCask }
+func (MasInstall) Method() Method           { return MethodMas }
+func (NpmInstall) Method() Method           { return MethodNpm }
+func (UvInstall) Method() Method            { return MethodUv }
+func (BunInstall) Method() Method           { return MethodBun }
+func (MiseInstall) Method() Method          { return MethodMise }
+func (AptInstall) Method() Method           { return MethodApt }
+func (GitHubReleaseInstall) Method() Method { return MethodGitHubRelease }
+func (ScriptInstall) Method() Method        { return MethodScript }
+func (ShellInstall) Method() Method         { return MethodShell }
+func (AppInstall) Method() Method           { return MethodApp }
+func (SkillInstall) Method() Method         { return MethodSkill }
+func (ProvidedByInstall) Method() Method    { return MethodProvidedBy }
 
 func (i BrewInstall) Key() string { return lastSegment(i.Formula) }
 func (i CaskInstall) Key() string { return lastSegment(i.Token) }
@@ -116,38 +135,43 @@ func (i BunInstall) Key() string {
 	return i.Package
 }
 
-func (i MiseInstall) Key() string       { return i.App }
-func (i AptInstall) Key() string        { return i.Packages[0] }
-func (i ScriptInstall) Key() string     { return i.URL }
-func (i ShellInstall) Key() string      { return i.Line }
-func (i AppInstall) Key() string        { return i.Hint }
-func (i SkillInstall) Key() string      { return i.Skill }
-func (i ProvidedByInstall) Key() string { return i.Item }
+func (i MiseInstall) Key() string          { return i.App }
+func (i AptInstall) Key() string           { return i.Packages[0] }
+func (i GitHubReleaseInstall) Key() string { return i.Repo }
+func (i ScriptInstall) Key() string        { return i.URL }
+func (i ShellInstall) Key() string         { return i.Line }
+func (i AppInstall) Key() string           { return i.Hint }
+func (i SkillInstall) Key() string         { return i.Skill }
+func (i ProvidedByInstall) Key() string    { return i.Item }
 
-func (BrewInstall) isInstall()       {}
-func (CaskInstall) isInstall()       {}
-func (MasInstall) isInstall()        {}
-func (NpmInstall) isInstall()        {}
-func (UvInstall) isInstall()         {}
-func (BunInstall) isInstall()        {}
-func (MiseInstall) isInstall()       {}
-func (AptInstall) isInstall()        {}
-func (ScriptInstall) isInstall()     {}
-func (ShellInstall) isInstall()      {}
-func (AppInstall) isInstall()        {}
-func (SkillInstall) isInstall()      {}
-func (ProvidedByInstall) isInstall() {}
+func (BrewInstall) isInstall()          {}
+func (CaskInstall) isInstall()          {}
+func (MasInstall) isInstall()           {}
+func (NpmInstall) isInstall()           {}
+func (UvInstall) isInstall()            {}
+func (BunInstall) isInstall()           {}
+func (MiseInstall) isInstall()          {}
+func (AptInstall) isInstall()           {}
+func (GitHubReleaseInstall) isInstall() {}
+func (ScriptInstall) isInstall()        {}
+func (ShellInstall) isInstall()         {}
+func (AppInstall) isInstall()           {}
+func (SkillInstall) isInstall()         {}
+func (ProvidedByInstall) isInstall()    {}
 
 func Pinned(in Install, version string) (Install, bool) {
 	// value: the install at the version asked, where it carries one to its
-	// manager: a runtime of mise's, apt's package version; any other
-	// carries none.
+	// manager: a runtime of mise's, apt's package version, a release's tag;
+	// any other carries none.
 	switch m := in.(type) {
 	case MiseInstall:
 		m.Version = version
 		return m, true
 	case AptInstall:
 		m.Version = version
+		return m, true
+	case GitHubReleaseInstall:
+		m.Tag = version
 		return m, true
 	}
 	return nil, false
@@ -161,6 +185,8 @@ func VersionOf(in Install) string {
 		return m.Version
 	case AptInstall:
 		return m.Version
+	case GitHubReleaseInstall:
+		return m.Tag
 	}
 	return ""
 }

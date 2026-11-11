@@ -76,8 +76,6 @@ func diskOn(d Disk) Disk {
 }
 
 // invariant: checkMethod let through exactly one app manager key.
-// A github-release method, which this station runs no installer for, is
-// none: the next method serves.
 func (m MethodSpec) install(provides []string) Install {
 	if len(m.Provides) > 0 {
 		provides = m.Provides
@@ -101,6 +99,9 @@ func (m MethodSpec) install(provides []string) Install {
 		return MiseInstall{App: m.Mise.Name, Version: m.Mise.Version}
 	case m.Apt != nil:
 		return AptInstall{Packages: m.Apt.Packages}
+	case m.GitHubRelease != nil:
+		g := m.GitHubRelease
+		return GitHubReleaseInstall{Repo: g.Repo, Asset: g.Asset, Checksums: g.Checksums, Unverified: g.Unverified, Commands: provides}
 	case m.Script != nil && m.Script.Run != "":
 		return ShellInstall{Line: m.Script.Run}
 	case m.Script != nil && m.Script.URL != "":
@@ -143,9 +144,6 @@ func (it Item) app(category Category) App {
 		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
 	for _, m := range it.Methods {
-		if !m.Runs(it.Kind) {
-			continue
-		}
 		for _, p := range m.Path {
 			if !slices.Contains(t.Path, p) {
 				t.Path = append(t.Path, p)
