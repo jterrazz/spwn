@@ -1,0 +1,42 @@
+description: 'an install that finished just before ctrl-c is recorded by the method that holds it'
+fixture:
+    - ../../__fixtures__/homebrew/
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [tart]
+      exit: 0
+    - command: 'world hold Installer.Install'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply'
+      stdin: |
+          see Installing tart
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          jterrazz-macbook-pro · 1 to install
+
+          To install  ○ tart · script
+
+          → station apply  carries it out
+          ✗ jterrazz-macbook-pro interrupted · 1 changed
+
+          Changes  ● tart · 1.0.0 · script
+
+          → station apply  resumes
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'
+      exit: 0
+      stdout: |
+          [["tart","shell"]]
+    - command: 'apps tart | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	tart	1.0.0	shell

@@ -28,9 +28,10 @@ const (
 	NameTaken fail.Code = "machinefile.name-taken"
 )
 
-// value: how long the read past an interrupt may take: the owner asked to
-// stop, so it is short.
-const rereadBudget = 5 * time.Second
+// value: how long the read past an interrupt waits for the interrupted
+// item's own answer: the owner asked to stop, so it is short, and an
+// overrun leaves the item unrecorded, which only keeps it from removal.
+const rereadBudget = 15 * time.Second
 
 type ApplyIn struct {
 	// value: the Machinefile, by its name or its path, which this machine
@@ -200,15 +201,16 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 }
 
 // invariant: an install interrupted hands back nothing of what it did, so
-// the item is read again, past the interrupt: one that reads there by its
-// method finished just before it, and is recorded like any other.
+// the item alone is read again, past the interrupt: one that reads there
+// by its method (the one apps.install chose here, whatever Machinefile key
+// chose the item) finished just before it, and is recorded by that method
+// like any other.
 func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
 	done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
 	defer cancel()
-	seen, err := observe(past, r.d, appscalls.ListIn{Fresh: true})
-	now := seen[l.Step.Item]
-	if err != nil || now.Condition != machinefile.Present || now.Method != l.Step.Method {
+	now, ok := reread(past, r.d, l.Step.Item)
+	if !ok || (now.Condition != machinefile.Present && now.Condition != machinefile.Outdated) {
 		return done
 	}
 	if r.d.Ledger.Put(past, machinefile.Installed{Item: l.Step.Item, Method: now.Method, Machinefile: r.name, At: r.d.Now().UTC()}) != nil {
@@ -216,6 +218,26 @@ func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile
 	}
 	done.State, done.Version, done.Reason, done.Installed = catalog.StateOK, now.Version, "", true
 	return done
+}
+
+// value: what one app reads once its own method answered, the rest of the
+// inventory left unread; false when the read failed or did not answer.
+func reread(ctx context.Context, d Deps, item string) (machinefile.Seen, bool) {
+	updates, err := call.Follow(ctx, d.Calls, machine.Ref{}, appscalls.List, appscalls.ListIn{Fresh: true}, nil)
+	if err != nil {
+		return machinefile.Seen{}, false
+	}
+	for u := range updates {
+		if u.Err != nil {
+			return machinefile.Seen{}, false
+		}
+		for _, report := range u.Value {
+			if report.App.Name == item && !report.Pending {
+				return appSeen(report), true
+			}
+		}
+	}
+	return machinefile.Seen{}, false
 }
 
 func (r *run) set(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
