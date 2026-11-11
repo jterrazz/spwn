@@ -42,7 +42,7 @@ func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
 		return machinefile.Tree{}, &contract.UnavailableError{Source: s.src.Name, Commit: s.src.Commit, Cause: err}
 	}
 	root := s.src.Name + "@" + s.src.Commit[:7]
-	files, err := contract.ReadFolders(s.fs, filepath.Join(s.dir, "catalog"), filepath.Join(s.dir, "machinefiles"))
+	files, err := contract.ReadFolders(s.fs, contract.NoLinks, filepath.Join(s.dir, "catalog"), filepath.Join(s.dir, "machinefiles"))
 	return machinefile.Tree{Layer: machinefile.Shared, Root: root, Files: files}, err
 }
 

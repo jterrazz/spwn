@@ -23,11 +23,11 @@ func (m machine) userSource() machinefilecontract.Source {
 	if m.world != nil {
 		return m.world.userSource()
 	}
-	return files.New(m.sys.FS, filepath.Join(m.paths.Prefs, "catalog"), filepath.Join(m.paths.Prefs, "machinefiles"), machinefile.User, "~/.config/station")
+	return files.New(m.sys.FS, machinefilecontract.FileLinks, filepath.Join(m.paths.Prefs, "catalog"), filepath.Join(m.paths.Prefs, "machinefiles"), machinefile.User, "~/.config/station")
 }
 
 func builtinSource() machinefilecontract.Source {
-	return files.New(files.Embedded{FS: catalog.BuiltinFiles()}, "items", "machinefiles", machinefile.Builtin, "built-in")
+	return files.New(files.Embedded{FS: catalog.BuiltinFiles()}, machinefilecontract.NoLinks, "items", "machinefiles", machinefile.Builtin, "built-in")
 }
 
 // invariant: the sources strongest first: the owner's, the shared source
