@@ -245,3 +245,133 @@ func TestAServedEntryGoesWhenTheTailnetCannotBeRead(t *testing.T) {
 		t.Errorf("tailnet after the release = %s, want no entry", got)
 	}
 }
+
+// invariant: the port of the Mac an owed entry carries from is given to no
+// share while the tailnet cannot be read, though the last reading, made
+// before that entry was served, does not list it.
+func TestAnOwedPortIsGivenToNoShareWhileTheTailnetIsUnread(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "db", Lifetime: model.Persistent})
+	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
+	h.d.tn = tn
+	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
+		if vm == "db" {
+			return rightsTo(catalog.AudienceLocal, 5432)(ctx, vm)
+		}
+		return rightsTo(catalog.AudiencePublic, 3000)(ctx, vm)
+	}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	for _, v := range h.d.vms {
+		v.state = engine.StateRunning
+	}
+	h.d.mu.Unlock()
+	h.d.reconcileServe(ctx)
+	h.d.listen(ctx, "api", 3000, "0.0.0.0", "node")
+	if got := tn.dump(); got != "443<-40000 funnel=true" {
+		t.Fatalf("tailnet after api's share = %s, want 443 funneled from 40000", got)
+	}
+	tn.failShared, tn.failUnshare = 3, 1
+	if _, err := h.d.release(ctx, "api", 3000); err != nil {
+		t.Fatal(err)
+	}
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	if got := reservedPort(h, "db", 5432); got == 0 || got == 40000 {
+		t.Errorf("db reserved %d, want a port the owed Funnel entry does not carry", got)
+	}
+}
+
+// invariant: a share an owed entry held, a private path on a port that
+// entry still funnels, is served at the tick that removes the entry.
+func TestAShareAnOwedEntryHeldIsServedAtTheTickThatRemovesIt(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "pub", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: "port"}}
+	h.d.st.Ports = pol
+	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
+	h.d.tn = tn
+	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
+		if vm == "pub" {
+			return rightsTo(catalog.AudiencePublic, 3000)(ctx, vm)
+		}
+		return rightsTo(catalog.AudiencePrivate, 5173)(ctx, vm)
+	}
+	h.d.o.Ports = []catalog.ItemPort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}, {PortHint: catalog.PortHint{Port: 3000, HTTP: true}}}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.reconcileServe(ctx)
+	h.d.tickShares(ctx)
+	h.d.loadRights(ctx, "api")
+	h.d.loadRights(ctx, "pub")
+	h.d.mu.Lock()
+	for _, vm := range []string{"api", "pub"} {
+		if v := h.d.vms[vm]; v != nil {
+			v.state = engine.StateRunning
+		}
+	}
+	h.d.mu.Unlock()
+	h.d.listen(ctx, "api", 5173, "0.0.0.0", "vite")
+	h.d.listen(ctx, "pub", 3000, "0.0.0.0", "node")
+	if got := tn.dump(); got != "40000<-40000 funnel=false; 443<-40001 funnel=true" {
+		t.Fatalf("tailnet in port mode = %s", got)
+	}
+	tn.failUnshare = 2
+	pol.g = &ports.PortsGroup{HTTPS: "path"}
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	api := h.d.svcs[key("api", 5173)]
+	held := !api.served
+	h.d.mu.Unlock()
+	if !held {
+		t.Fatalf("api served while 443 still funnels the owed entry: %s", tn.dump())
+	}
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	served := api.served
+	h.d.mu.Unlock()
+	if got := tn.dump(); !served || got != "443/api/5173<-40000 funnel=false; 8443<-40002 funnel=true" {
+		t.Errorf("after the tick that removed the owed entries: api served %v, tailnet %s; want api's path served and 443 unfunneled", served, got)
+	}
+}
+
+// invariant: Serve turned off and on again reads the tailnet again: a
+// reconciliation that cannot read it then is tried again at the next tick.
+func TestServeTurnedOnAgainReconcilesUntilTheTailnetIsRead(t *testing.T) {
+	h := newHarness(t)
+	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
+	h.d.tn = tn
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.reconcileServe(ctx)
+	tn.mu.Lock()
+	tn.sharing.On = false
+	tn.mu.Unlock()
+	h.d.refreshSelf(ctx)
+	stale := funneledFrom40000()
+	tn.mu.Lock()
+	tn.entries, tn.funnel, tn.sharing.On = stale.entries, stale.funnel, true
+	tn.mu.Unlock()
+	tn.failShared = 1
+	h.d.refreshSelf(ctx)
+	h.d.tickShares(ctx)
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after the tick = %s, want the stale entry gone", got)
+	}
+}
+
+// invariant: the last reading of the tailnet stands while it cannot be
+// read: a port an entry the owner made carries from is given to no share.
+func TestThePortOfAnEntryLastReadIsGivenToNoShareWhileTheTailnetIsUnread(t *testing.T) {
+	h, tn, _ := staleFunnel(t, 0)
+	tn.mu.Lock()
+	tn.entries = []ports.Share{{Port: 9000, Reserved: 40000, Scheme: ports.SchemeTCP, Target: "tcp://127.0.0.1:40000"}}
+	tn.funnel = nil
+	tn.mu.Unlock()
+	ctx := t.Context()
+	h.d.reconcileServe(ctx)
+	tn.failShared = 2
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	if got := reservedPort(h, "db", 5432); got == 0 || got == 40000 {
+		t.Errorf("db reserved %d, want a port the owner's entry, as last read, does not carry", got)
+	}
+}
