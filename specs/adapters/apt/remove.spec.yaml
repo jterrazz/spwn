@@ -12,5 +12,5 @@ runs:
       files:
           .calls:
               contains:
-                  - 'apt-get -s remove -o APT::Get::AutomaticRemove=false jq'
-                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false jq'
+                  - 'apt-get -s remove -o APT::Get::AutomaticRemove=false -- jq'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false -- jq'

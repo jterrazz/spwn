@@ -7,7 +7,7 @@ touch "$db"
 if [ "$1" = -s ]; then
     shift 2
     for p in "$@"; do
-        case "$p" in -o | APT::*) continue ;; esac
+        case "$p" in -o | APT::* | --) continue ;; esac
         echo "Remv $p [1.0]"
         /usr/bin/awk -F'\t' -v p="$p" '$1 == p { print "Remv " $2 " [1.0]" }' "$HOME/depends" 2>/dev/null
     done
@@ -27,7 +27,7 @@ upgrade=0
 for p in "$@"; do
     case "$p" in
         --only-upgrade) upgrade=1 ;;
-        -o | APT::*) ;;
+        -o | APT::* | --) ;;
         *)
             name="${p%%=*}"
             version="${p#*=}"

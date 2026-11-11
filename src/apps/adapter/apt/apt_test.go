@@ -37,7 +37,7 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 		return local.Output{Stdout: out.String()}, nil
 	case c.Name == "apt-get" && strings.HasPrefix(args, "-s remove "):
 		var out strings.Builder
-		for _, p := range c.Args[4:] {
+		for _, p := range c.Args[slices.Index(c.Args, "--")+1:] {
 			out.WriteString("Remv " + p + " [" + d.held[p] + "]\n")
 			for _, by := range d.depends[p] {
 				out.WriteString("Remv " + by + " [1]\n")
@@ -128,7 +128,7 @@ func TestEveryRunIsRootAndAsksNothing(t *testing.T) {
 			t.Errorf("ran %q; want every change as root, asking nothing", c)
 		}
 	}
-	if !slices.Contains(d.calls, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false bat") {
+	if !slices.Contains(d.calls, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false -- bat") {
 		t.Errorf("ran %q; want the removal never to autoremove", d.calls)
 	}
 }
@@ -200,6 +200,57 @@ func TestOutdatedReadsTheCandidateAgainstWhatIsInstalled(t *testing.T) {
 	for k, v := range want {
 		if got[k] != v {
 			t.Errorf("%s reads %+v; want %+v", k, got[k], v)
+		}
+	}
+}
+
+func TestAHostileNameNeverReachesApt(t *testing.T) {
+	// invariant: a package or a version that is no name by the catalog's
+	// rule is refused before anything runs, as root or not.
+	type verb func(*apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error
+	install := func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Install }
+	all := []verb{install, func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Update },
+		func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Remove }}
+	type hostile struct {
+		in    catalog.AptInstall
+		verbs []verb
+	}
+	cases := make([]hostile, 0, 2*len(contracttest.HostilePackages())+len(contracttest.HostileVersions()))
+	for _, p := range contracttest.HostilePackages() {
+		cases = append(cases, hostile{catalog.AptInstall{Packages: []string{p}}, all}, hostile{catalog.AptInstall{Packages: []string{"jq", p}}, all})
+	}
+	for _, v := range contracttest.HostileVersions() {
+		cases = append(cases, hostile{catalog.AptInstall{Packages: []string{"jq"}, Version: v}, []verb{install}})
+	}
+	for _, c := range cases {
+		for _, v := range c.verbs {
+			d := &dpkg{held: map[string]string{"jq": "1.0"}}
+			err := v(played(d))(context.Background(), []catalog.Install{c.in}, nil)
+			var name *catalog.NameError
+			if !errors.As(err, &name) || len(d.calls) > 0 {
+				t.Errorf("%q (%q) gave %v and ran %q; want it refused, nothing run", c.in.Packages, c.in.Version, err, d.calls)
+			}
+		}
+	}
+}
+
+func TestEveryArgvEndsItsOptionsBeforeThePackages(t *testing.T) {
+	d := &dpkg{held: map[string]string{"bat": "1.0"}}
+	a := played(d)
+	ctx := context.Background()
+	bat := []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}
+	for _, run := range []func() error{
+		func() error { return a.Install(ctx, bat, nil) },
+		func() error { return a.Update(ctx, bat, nil) },
+		func() error { return a.Remove(ctx, bat, nil) },
+	} {
+		if err := run(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, c := range d.calls {
+		if strings.HasSuffix(c, " bat") && !strings.HasSuffix(c, " -- bat") {
+			t.Errorf("ran %q; want `--` before the packages", c)
 		}
 	}
 }

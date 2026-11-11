@@ -91,7 +91,16 @@ func (a *Apt) Outdated(ctx context.Context, keys []string) (map[string]apps.Curr
 	for _, k := range keys {
 		out[k] = apps.Currency{Verdict: apps.Unknown}
 	}
-	read, err := a.run.Output(ctx, local.Command(policy, append([]string{"policy"}, keys...)...))
+	var named []string
+	for _, k := range keys {
+		if catalog.CheckPackage(k) == nil {
+			named = append(named, k)
+		}
+	}
+	if len(named) == 0 {
+		return out, nil
+	}
+	read, err := a.run.Output(ctx, local.Command(policy, slices.Concat([]string{"policy", "--"}, named)...))
 	if err == nil && read.ExitCode == 0 {
 		candidates(read.Stdout, keys, out)
 	}
@@ -119,34 +128,25 @@ func candidates(policy string, keys []string, out map[string]apps.Currency) {
 }
 
 func (a *Apt) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	var names []string
-	for _, i := range installs {
-		v, ok := i.(catalog.AptInstall)
-		if !ok {
-			return errors.New(i.Key() + " is not an apt package")
-		}
-		for n, p := range v.Packages {
-			if n == 0 && v.Version != "" {
-				p += "=" + v.Version
-			}
-			names = append(names, p)
-		}
-	}
-	if err := a.refresh(ctx, logs); err != nil {
-		return err
-	}
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install"}, names)...)
-}
-
-func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	names, err := packages(installs)
+	names, err := packages(installs, true)
 	if err != nil {
 		return err
 	}
 	if err := a.refresh(ctx, logs); err != nil {
 		return err
 	}
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--only-upgrade"}, names)...)
+	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...)
+}
+
+func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	names, err := packages(installs, false)
+	if err != nil {
+		return err
+	}
+	if err := a.refresh(ctx, logs); err != nil {
+		return err
+	}
+	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--only-upgrade", "--"}, names)...)
 }
 
 func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
@@ -154,11 +154,11 @@ func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contr
 	// removes, so a removal that would take any package it was not asked
 	// for is refused before it runs: what station reads it installed is
 	// all it takes back.
-	names, err := packages(installs)
+	names, err := packages(installs, false)
 	if err != nil {
 		return err
 	}
-	sim, err := a.run.Output(ctx, local.Command(command, slices.Concat([]string{"-s", "remove"}, keep(), names)...))
+	sim, err := a.run.Output(ctx, local.Command(command, slices.Concat([]string{"-s", "remove"}, keep(), []string{"--"}, names)...))
 	if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contr
 	if len(also) > 0 {
 		return &TakesMoreError{Asked: names, Also: also}
 	}
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), names)...)
+	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...)
 }
 
 func (a *Apt) refresh(ctx context.Context, logs contract.Logs) error {
@@ -200,14 +200,29 @@ func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) erro
 	return nil
 }
 
-func packages(installs []catalog.Install) ([]string, error) {
+// invariant: apt takes an argument opening with `-` as an option, and
+// runs as root: every name is checked by the catalog's rule before an
+// argv carries it, and every argv ends its options with `--` before them.
+func packages(installs []catalog.Install, pinned bool) ([]string, error) {
 	var names []string
 	for _, i := range installs {
 		v, ok := i.(catalog.AptInstall)
 		if !ok {
 			return nil, errors.New(i.Key() + " is not an apt package")
 		}
+		for _, p := range v.Packages {
+			if err := catalog.CheckPackage(p); err != nil {
+				return nil, err
+			}
+		}
+		at := len(names)
 		names = append(names, v.Packages...)
+		if pinned && v.Version != "" {
+			if err := catalog.CheckPackageVersion(v.Version); err != nil {
+				return nil, err
+			}
+			names[at] += "=" + v.Version
+		}
 	}
 	return names, nil
 }

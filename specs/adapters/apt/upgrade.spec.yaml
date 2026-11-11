@@ -16,7 +16,7 @@ runs:
       files:
           .calls:
               contains:
-                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install --only-upgrade jq'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install --only-upgrade -- jq'
     - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | "\(.state) \(.installed)"'''
       exit: 0
       stdout: |

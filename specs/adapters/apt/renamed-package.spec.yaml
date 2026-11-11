@@ -11,7 +11,7 @@ runs:
       files:
           .calls:
               contains:
-                  - 'apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install fd-find'
+                  - 'apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install -- fd-find'
     - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "fd") | "\(.state) \(.method)"'''
       exit: 0
       stdout: |
