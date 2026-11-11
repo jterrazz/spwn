@@ -52,11 +52,7 @@ func updating(in UpdateIn) string {
 	case len(in.Names) > 0:
 		return strings.Join(in.Names, ", ")
 	case len(in.Method) > 0:
-		methods := make([]string, 0, len(in.Method))
-		for _, m := range in.Method {
-			methods = append(methods, string(m))
-		}
-		return "the " + strings.Join(methods, ", ") + " apps"
+		return "the " + strings.Join(in.Method, ", ") + " apps"
 	}
 	return "the apps with an update"
 }

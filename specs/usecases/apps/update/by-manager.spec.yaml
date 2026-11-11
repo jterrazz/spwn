@@ -1,7 +1,7 @@
-description: 'station apps update --method brew updates the brew and cask rows that wait, never another method''s'
+description: 'station apps update --manager brew updates the brew and cask rows that wait, never another manager''s'
 env: two-macs
 runs:
-    - command: 'apps update --method brew'
+    - command: 'apps update --manager brew'
       exit: 0
       stdout: |
           ●	ghostty	1.2.1	cask

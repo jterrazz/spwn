@@ -88,10 +88,11 @@ func TestHomeDrawsAMacsServersThenItsWorkspaces(t *testing.T) {
 }
 
 // invariant: MB-16: each update line's Update all updates what it counts,
-// its manager's updates, never the other line's too.
+// its manager's updates, never the other line's too, the line of a v3.0
+// station, which names its manager `method`, alike.
 func TestEachUpdateLineUpdatesItsOwnManager(t *testing.T) {
 	needs := []overview.Need{
-		{Section: "apps", Subject: "tools", Text: "1 tools update waiting", Call: CallUpdate, Args: map[string]string{"method": "tools"}},
+		{Section: "apps", Subject: "tools", Text: "1 tools update waiting", Call: CallUpdate, Args: map[string]string{"manager": "tools"}},
 		{Section: "apps", Subject: "pkgs", Text: "2 pkgs updates waiting", Call: CallUpdate, Args: map[string]string{"method": "pkgs"}},
 	}
 	p := Page(Reading{Home: &overview.Summary{Needs: needs}}, page.Context{})

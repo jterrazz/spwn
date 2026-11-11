@@ -55,9 +55,10 @@ MacBook runs station v3 and the owner opens the design.
 
 ## The next minor release: the v2 words go
 The hidden aliases (`status`, `start`, `stop`, `tools`, `secrets`, `config`,
-`storage`, `run`, `probe`, `--always-on`) and `station.status/v1` are kept for
-one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
-minor removes them, with the `machines supervise` retirement shim and the
+`storage`, `run`, `probe`, `--always-on`), v3.0's `apps update --method` and
+`station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
+minor removes them (the `method` a v3.0 station's update need names, which the
+menu bar still reads, goes with `--method`), with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`, `lend_list`), once
 `studio doctor` reads `station.overview.read/v1`.
 

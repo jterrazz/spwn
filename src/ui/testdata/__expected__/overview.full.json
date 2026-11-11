@@ -80,7 +80,7 @@
             "cells": [
               {
                 "kind": "text",
-                "text": "station apps update --method brew"
+                "text": "station apps update --manager brew"
               }
             ],
             "reason": "degraded"
@@ -376,7 +376,7 @@
   ],
   "hints": [
     {
-      "command": "station apps update --method brew"
+      "command": "station apps update --manager brew"
     }
   ],
   "actions": [

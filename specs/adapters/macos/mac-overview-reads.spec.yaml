@@ -27,7 +27,7 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''.environment.updates | map([.name, .state, .value, .detail])'''
       exit: 0
       stdout: |
-          [["macos","degraded","1 pending","softwareupdate -l"],["brew","degraded","3 outdated","station apps update --method brew"]]
+          [["macos","degraded","1 pending","softwareupdate -l"],["brew","degraded","3 outdated","station apps update --manager brew"]]
     - command: 'status --json | /usr/bin/jq -c ''.environment.ports | map([.pid, .name, .port])'''
       exit: 0
       stdout: |

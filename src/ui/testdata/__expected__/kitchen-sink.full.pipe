@@ -12,13 +12,13 @@
 ●	url	https://jterrazz-macbook-pro.tail1234.ts.net:40001
 ●	identity	admin@jterrazz.com
 ●	file	/Applications/Tailscale.app/Contents/MacOS/Tailscale
-●	command	station apps update --method brew
+●	command	station apps update --manager brew
 ●	list	brew · system
 ●	switch	on	3
 ●	sip	off
 ◐	unknown	?		no answer in 2s
 # Marks
-◐	outdated	attention	120 outdated · station apps update --method brew
+◐	outdated	attention	120 outdated · station apps update --manager brew
 ◐	misplaced	attention	misplaced · station disk move ~/.bun
 ◐	unreachable	attention	unreachable
 ◐	mismatch	attention	station v2.0.0-240, This Mac v2.0.0-242

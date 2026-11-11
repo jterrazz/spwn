@@ -1,6 +1,7 @@
 package menubar
 
 import (
+	"cmp"
 	"github.com/jterrazz/studio-station/src/agents"
 	"slices"
 	"strconv"
@@ -348,8 +349,10 @@ func updateAll(needs page.Section, home *overview.Summary) []page.Action {
 		}
 		run := &page.Run{Call: CallUpdate}
 		switch {
-		case n.Args["method"] != "":
-			run.In = map[string]string{"Method": `["` + n.Args["method"] + `"]`}
+		case cmp.Or(n.Args["manager"], n.Args["method"]) != "":
+			// outside: a v3.0 station names the manager `method`; read
+			// until the hidden `--method` goes.
+			run.In = map[string]string{"Method": `["` + cmp.Or(n.Args["manager"], n.Args["method"]) + `"]`}
 		case n.Args["name"] != "":
 			run.In = map[string]string{"Names": `["` + n.Args["name"] + `"]`}
 		}

@@ -18,9 +18,9 @@ runs:
             ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2
               station background remove com.jterrazz.brain.x-snapshot
             ◐ 1 mise update waiting
-              station apps update --method mise
+              station apps update --manager mise
             ◐ 2 brew updates waiting
-              station apps update --method brew
+              station apps update --manager brew
             ◐ Firewall: off
               System Settings > Network > Firewall
             4 more: station overview --all

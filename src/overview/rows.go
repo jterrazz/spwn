@@ -34,7 +34,7 @@ func AppUpdates(name string, behind int, missing, failed bool) Check {
 	case failed:
 		return Check{Name: name, State: catalog.StateUnknown}
 	case behind > 0:
-		return Check{Name: name, State: catalog.StateDegraded, Value: strconv.Itoa(behind) + " outdated", Detail: "station apps update --method " + name}
+		return Check{Name: name, State: catalog.StateDegraded, Value: strconv.Itoa(behind) + " outdated", Detail: "station apps update --manager " + name}
 	}
 	return Check{Name: name, State: catalog.StateOK, Value: "all current"}
 }

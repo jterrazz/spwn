@@ -1,9 +1,9 @@
 package apps
 
 import (
+	"cmp"
 	"strconv"
 
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
@@ -14,15 +14,15 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 	// waiting need a look, one line per manager, in the order its first app
 	// is listed, fixed by updating that manager's apps.
 	var out []finding.Finding
-	waiting := map[catalog.Manager]int{}
-	var order []catalog.Manager
+	waiting := map[string]int{}
+	var order []string
 	for _, r := range reports {
 		switch StateOf(r) {
 		case Failed:
 			out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.Broken, Subject: r.App.Name,
 				Text: r.App.Name + " failed", Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"name": r.App.Name}}})
 		case UpdateAvailable:
-			manager := ManagerOf(r.Method)
+			manager := cmp.Or(r.Manager, string(r.Method))
 			if waiting[manager] == 0 {
 				order = append(order, manager)
 			}
@@ -31,25 +31,12 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 		}
 	}
 	for _, manager := range order {
-		text := strconv.Itoa(waiting[manager]) + " " + string(manager) + " updates waiting"
+		text := strconv.Itoa(waiting[manager]) + " " + manager + " updates waiting"
 		if waiting[manager] == 1 {
-			text = "1 " + string(manager) + " update waiting"
+			text = "1 " + manager + " update waiting"
 		}
-		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: string(manager),
-			Text: text, Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"method": string(manager)}}})
+		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: manager,
+			Text: text, Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"manager": manager}}})
 	}
 	return out
-}
-
-func ManagerOf(method catalog.Method) catalog.Manager {
-	// value: the manager whose update brings a method's apps; a method no
-	// manager lists is its own.
-	for _, m := range catalog.Managers {
-		for _, held := range m.Methods {
-			if held == method {
-				return m.Manager
-			}
-		}
-	}
-	return catalog.Manager(method)
 }

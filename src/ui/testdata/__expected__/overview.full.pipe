@@ -1,7 +1,7 @@
 # Needs you
 ✗	npm sign-in expired	npm login
 ✗	1 background task failing	station background
-◐	122 brew updates waiting	station apps update --method brew
+◐	122 brew updates waiting	station apps update --manager brew
 ◐	Firewall off	System Settings > Network > Firewall
 ◐	~/.tart is misplaced	station disk move ~/.tart
 	Activity	CPU 34% · memory 12.4 of 16 GB · 388 GB free · in 2.1 MB/s

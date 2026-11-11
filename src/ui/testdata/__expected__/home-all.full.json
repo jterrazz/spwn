@@ -86,7 +86,7 @@
             },
             "reason": "degraded",
             "hint": {
-              "command": "station apps update --method brew"
+              "command": "station apps update --manager brew"
             }
           }
         },
@@ -713,7 +713,7 @@
             },
             "reason": "degraded",
             "hint": {
-              "command": "station apps update --method brew"
+              "command": "station apps update --manager brew"
             }
           }
         },

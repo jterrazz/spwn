@@ -25,7 +25,7 @@ runs:
           ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
       stderr: |
-          → now: station apps update --method=brew
+          → now: station apps update --manager=brew
     - command: 'tools --json | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |

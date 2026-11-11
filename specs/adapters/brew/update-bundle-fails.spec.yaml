@@ -4,7 +4,7 @@ fixture:
     - ./__fixtures__/bat-installed/
     - ./__fixtures__/bundle-fails/
 runs:
-    - command: 'apps update --method brew'
+    - command: 'apps update --manager brew'
       exit: 1
       stdout: |
           ✗	bat		brew	~/.local/state/station/logs/bat.log

@@ -12,7 +12,7 @@ runs:
     - command: 'overview --json | /usr/bin/jq -c ''.findings[] | select(.subject == "brew") | .fix'''
       exit: 0
       stdout: |
-          {"call":"apps.update","args":{"method":"brew"},"command":null,"path":null}
+          {"call":"apps.update","args":{"manager":"brew"},"command":null,"path":null}
     - command: 'overview --json | /usr/bin/jq -c ''.sections[] | [.id, .counts]'''
       exit: 0
       stdout: |

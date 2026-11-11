@@ -1,4 +1,4 @@
-description: '--method skills re-adds the skills whose folder changed upstream, and nothing else'
+description: '--manager skill re-adds the skills whose folder changed upstream, and nothing else'
 fixture:
     - ../../__fixtures__/stubs/
     - ../__fixtures__/skills-cli/
@@ -6,7 +6,7 @@ fixture:
 serve:
     - github
 runs:
-    - command: 'apps update --method skills'
+    - command: 'apps update --manager skill'
       exit: 0
       stdout: |
           ●	shadcn		skill

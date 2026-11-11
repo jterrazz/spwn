@@ -44,17 +44,17 @@ func appsCommand(env kit.Env, m machine) *cobra.Command {
 	names := placedNames(appsOf(env, m))
 	return appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where, Apps: m.cat.Apps}, env,
 		appsinstall.Command(appsinstall.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
-		appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
+		appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now, Managers: m.cat.ManagerKeys()}, env),
 		appsremove.Command(appsremove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 		appsmove.Command(appsmove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now, Managers: m.cat.ManagerKeys()}, env),
 	)
 }
 
 // invariant: station tools and its verbs are the hidden v2 words of station
-// apps for one release (SPEC §4.3); upgrade's --via is update's --method.
+// apps for one release (SPEC §4.3); upgrade's --via is update's --manager.
 func appsAlias(env kit.Env, m machine) *cobra.Command {
 	names := placedNames(appsOf(env, m))
-	update := appsupdate.Via(appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now}, env))
+	update := appsupdate.Via(appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now, Managers: m.cat.ManagerKeys()}, env))
 	return kit.Alias("tools", appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where, Apps: m.cat.Apps}, env,
 		kit.Alias("install", appsinstall.Command(appsinstall.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "install"),
 		kit.Alias("uninstall", appsremove.Command(appsremove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "remove"),

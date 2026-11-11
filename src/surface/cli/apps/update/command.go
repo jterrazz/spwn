@@ -24,21 +24,28 @@ import (
 type Deps struct {
 	ThisMachine page.Context
 	Now         func() time.Time
+	// value: the keys the catalog's managers install by, in its order.
+	Managers []string
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "update [<app...>]",
 		Short:   "Update apps; bare, every one with an update available",
-		Example: "  station apps update\n  station apps update gh lazygit\n  station apps update --method " + managerNames()[0] + "\n  station apps update --all-machines",
+		Example: "  station apps update\n  station apps update gh lazygit\n  station apps update --manager " + first(d.Managers) + "\n  station apps update --all-machines",
 		Args:    cobra.ArbitraryArgs,
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringArrayVar(&in.Method, "method", nil, "update every app of a method: "+strings.Join(managerNames(), ", "))
+			f.StringArrayVar(&in.Manager, "manager", nil, "update every app of a manager: "+strings.Join(d.Managers, ", "))
+			f.StringArrayVar(&in.Method, "method", nil, "--manager")
+			_ = f.MarkHidden("method")
 			f.BoolVar(&in.AllMachines, "all-machines", false, "on every Mac and workspace; servers are skipped")
 		},
-		Bind: bind,
+		Bind: binder(d.Managers),
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			req := appscalls.UpdateIn{Names: in.Names, Method: managers(in.Method)}
+			if len(in.Method) > 0 {
+				env.Out.Now(nowWords(in))
+			}
+			req := appscalls.UpdateIn{Names: in.Names, Method: in.Manager}
 			if in.AllMachines {
 				return everyMachine(ctx, env, d, req, io)
 			}
@@ -122,14 +129,21 @@ func partial(outcomes []apps.Outcome, repair string) error {
 }
 
 func Via(cmd *cobra.Command) *cobra.Command {
-	// value: update as the hidden v2 upgrade takes it: --via is --method.
+	// value: update as the hidden v2 upgrade takes it: --via is --manager.
 	cmd.Flags().SetNormalizeFunc(func(_ *pflag.FlagSet, name string) pflag.NormalizedName {
 		if name == "via" {
-			name = "method"
+			name = "manager"
 		}
 		return pflag.NormalizedName(name)
 	})
 	return cmd
+}
+
+func first(list []string) string {
+	if len(list) == 0 {
+		return ""
+	}
+	return list[0]
 }
 
 func ran(env kit.Env, took time.Duration) pageapps.Run {

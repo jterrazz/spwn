@@ -90,7 +90,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 			it(row("url", page.OK, page.URL("https://jterrazz-macbook-pro.tail1234.ts.net:40001"))),
 			it(row("identity", page.OK, page.Identity("admin@jterrazz.com"))),
 			it(row("file", page.OK, page.Path("/Applications/Tailscale.app/Contents/MacOS/Tailscale"))),
-			it(row("command", page.OK, page.Command("station apps update --method brew"))),
+			it(row("command", page.OK, page.Command("station apps update --manager brew"))),
 			it(row("list", page.OK, page.Texts("brew", "system"))),
 			it(row("switch", page.OK, page.On(), page.Count(3, ""))),
 			it(row("sip", page.OK, page.Off())),
@@ -105,7 +105,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		detail string
 		hint   string
 	}{
-		{page.Outdated, page.Attention, "120 outdated", "station apps update --method brew"},
+		{page.Outdated, page.Attention, "120 outdated", "station apps update --manager brew"},
 		{page.Misplaced, page.Attention, "misplaced", "station disk move ~/.bun"},
 		{page.Unreachable, page.Attention, "unreachable", ""},
 		{page.Mismatch, page.Attention, "station v2.0.0-240, This Mac v2.0.0-242", ""},
@@ -185,7 +185,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 	}
 	todo := page.Section{
 		ID: "actions", Title: "To do", Role: page.Actions,
-		Items: []page.Item{it(page.Row{ID: "marks/outdated", Mark: page.Attention, Label: "brew", Reason: page.Outdated, Detail: page.Count(120, "outdated"), Hint: page.Cmd("station apps update --method brew")})},
+		Items: []page.Item{it(page.Row{ID: "marks/outdated", Mark: page.Attention, Label: "brew", Reason: page.Outdated, Detail: page.Count(120, "outdated"), Hint: page.Cmd("station apps update --manager brew")})},
 	}
 	summary := page.Section{
 		ID: "summary", Title: "Summary", Role: page.Summary,

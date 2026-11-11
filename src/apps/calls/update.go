@@ -12,8 +12,18 @@ import (
 
 type UpdateIn struct {
 	// value: no name and no method updates every Update available row.
-	Names  []string
-	Method []catalog.Manager
+	Names []string
+	// value: manager keys, as `--manager` takes them; the field keeps its
+	// v3 name so an older station reads it.
+	Method []string
+}
+
+func keys(words []string) []catalog.ManagerKey {
+	out := make([]catalog.ManagerKey, 0, len(words))
+	for _, w := range words {
+		out = append(out, catalog.ManagerKey(w))
+	}
+	return out
 }
 
 var Update = call.Call[Deps, UpdateIn, []apps.Outcome]{
@@ -26,7 +36,7 @@ var Update = call.Call[Deps, UpdateIn, []apps.Outcome]{
 			}
 		}
 		step(p, "Updating "+updating(in))
-		out, err := d.Apps.Upgrade(ctx, apps.UpgradeRequest{Names: in.Names, All: len(in.Names) == 0 && len(in.Method) == 0, Via: in.Method})
+		out, err := d.Apps.Upgrade(ctx, apps.UpgradeRequest{Names: in.Names, All: len(in.Names) == 0 && len(in.Method) == 0, Via: keys(in.Method)})
 		return interrupted(ctx, out, err)
 	},
 }

@@ -204,7 +204,7 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	i := s.install(t)
 	m := i.Method()
 	manager := s.installer(t).Manager()
-	r := apps.Report{App: t, Method: m, State: catalog.StateAbsent, Irreversible: s.uninstallable(t) != nil}
+	r := apps.Report{App: t, Method: m, Manager: s.managerKey(m), State: catalog.StateAbsent, Irreversible: s.uninstallable(t) != nil}
 	l := listings[m]
 	switch {
 	case l.unlisted && s.bundled(t):
@@ -393,6 +393,17 @@ func (s *Shelf) present(ctx context.Context, t catalog.App, r *apps.Report) bool
 		return true
 	}
 	return false
+}
+
+// value: the key a method's apps are updated by: the first its manager
+// item installs by, else the method's own.
+func (s *Shelf) managerKey(m catalog.Method) string {
+	if owner, ok := s.cat.Manager(string(m)); ok {
+		if it, ok := s.cat.Item(owner); ok && len(it.Item.Manages) > 0 {
+			return string(it.Item.Manages[0])
+		}
+	}
+	return string(m)
 }
 
 func (s *Shelf) provided(t catalog.App) bool {

@@ -1,5 +1,5 @@
 To do
-  ◐ brew  120 outdated  → station apps update --method brew
+  ◐ brew  120 outdated  → station apps update --manager brew
 Summary
   ✗ Marks  4 broken
 Values  40000-40999
@@ -17,14 +17,14 @@ Values  40000-40999
   ● url       https://jterrazz-macbook-pro.tail1234.ts.net:40001
   ● identity  admin@jterrazz.com
   ● file      /Applications/…/Tailscale
-  ● command   → station apps update --method brew
+  ● command   → station apps update --manager brew
   ● list      brew · system
   ● switch    on                                                              3
   ● sip       off
   ◐ unknown   ?  no answer in 2s
 Marks
   ◐ outdated              attention                   120 outdated
-    → station apps update --method brew
+    → station apps update --manager brew
   ◐ misplaced             attention                   misplaced
     → station disk move ~/.bun
   ◐ unreachable           attention                   unreachable

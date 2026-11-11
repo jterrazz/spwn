@@ -10,7 +10,7 @@
 ●	sip	off
 ●	gatekeeper	on
 ◐	macos	2 pending	checked 22m ago
-◐	brew	120 outdated	station apps update --method brew
+◐	brew	120 outdated	station apps update --manager brew
 ●	Tailscale	Running · jterrazz-macbook-pro.tail1234.ts.net · 100.98.133.14
 # Workspace
 ●	disk	27.9 GB	reclaimable: station disk free

@@ -36,7 +36,7 @@ func overviewOf(needs bool) overview.Summary {
 		s.Needs = []overview.Need{
 			{Section: "accounts", Subject: "npm", Broken: true, Text: "npm sign-in expired", Command: "npm login"},
 			{Section: "background", Subject: "com.jterrazz.brain.x-snapshot", Broken: true, Text: "1 background task failing", Command: "station background"},
-			{Section: "apps", Subject: "brew", Text: "122 brew updates waiting", Call: "apps.update", Args: map[string]string{"method": "brew"}},
+			{Section: "apps", Subject: "brew", Text: "122 brew updates waiting", Call: "apps.update", Args: map[string]string{"manager": "brew"}},
 			{Section: "settings", Subject: "firewall", Text: "Firewall off", Path: "System Settings > Network > Firewall"},
 			{Section: "disk", Subject: misplaced, Text: misplaced + " is misplaced", Call: "disk.move", Args: map[string]string{"path": misplaced}},
 		}

@@ -3,7 +3,7 @@
     [38;2;108;111;133m→ [m[38;2;76;79;105mlaunchctl bootout gui/501/com.jterrazz.brain.x-snapshot &&[m
       [38;2;76;79;105mrm ~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mengine[m                   [38;2;108;111;133mnot installed[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation engine start[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mbrew[m                     [38;2;108;111;133m120 outdated[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update --method brew[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mbrew[m                     [38;2;108;111;133m120 outdated[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update --manager brew[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmisplaced[m                [38;2;108;111;133m2 misplaced folders · 80.5 GB[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation disk move ~/.tart[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mpnpm[m                     [38;2;108;111;133mupdate available[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update pnpm[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mbetter-ui[m                [38;2;108;111;133mupdate available[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update better-ui[m

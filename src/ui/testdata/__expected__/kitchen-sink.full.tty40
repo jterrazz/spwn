@@ -1,6 +1,6 @@
 To do
   ◐ brew  120 outdated
-    → station apps update --method brew
+    → station apps update --manager brew
 Summary
   ✗ Marks  4 broken
 Values  40000-40999
@@ -18,14 +18,14 @@ Values  40000-40999
   ● url       https://jt…
   ● identity  admin@jter…
   ● file      /Appl…scale
-  ● command   → station apps update --method brew
+  ● command   → station apps update --manager brew
   ● list      brew …
   ● switch    on                      3
   ● sip       off
   ◐ unknown   ?  no answer in 2s
 Marks
   ◐ outdated              attention
-    → station apps update --method brew
+    → station apps update --manager brew
   ◐ misplaced             attention
     → station disk move ~/.bun
   ◐ unreachable           attention

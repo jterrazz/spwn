@@ -16,8 +16,8 @@ runs:
             {bad ✗} {bold npm sign-in expired}     npm login
             {bad ✗} {bold com.jterrazz.brain.x-snapshot is failing, last exit 2}
               station background remove com.jterrazz.brain.x-snapshot
-            {warn ◐} {bold 1 mise update waiting}   station apps update --method mise
-            {warn ◐} {bold 2 brew updates waiting}  station apps update --method brew
+            {warn ◐} {bold 1 mise update waiting}   station apps update --manager mise
+            {warn ◐} {bold 2 brew updates waiting}  station apps update --manager brew
             {warn ◐} {bold Firewall: off}           System Settings > Network > Firewall
             4 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free

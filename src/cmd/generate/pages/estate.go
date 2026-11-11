@@ -80,7 +80,7 @@ func snapshot() pagehome.Overview {
 			},
 			Updates: []overview.Check{
 				check("macos", catalog.StateDegraded, "2 pending", "checked 22m ago"),
-				check("brew", catalog.StateDegraded, "120 outdated", "station apps update --method brew"),
+				check("brew", catalog.StateDegraded, "120 outdated", "station apps update --manager brew"),
 			},
 		},
 		Workspace: pagehome.Workspace{

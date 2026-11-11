@@ -236,10 +236,11 @@ func (s *Shelf) Uninstall(ctx context.Context, names []string) ([]apps.Outcome, 
 
 func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error) {
 	via := map[catalog.Method]bool{}
-	for _, mm := range catalog.Managers {
-		if slices.Contains(r.Via, mm.Manager) {
-			for _, m := range mm.Methods {
-				via[m] = true
+	for _, k := range r.Via {
+		owner, _ := s.cat.Manager(string(k))
+		if it, ok := s.cat.Item(owner); ok {
+			for _, m := range it.Item.Manages {
+				via[catalog.Method(m)] = true
 			}
 		}
 	}

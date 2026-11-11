@@ -3,7 +3,7 @@
 [1;38;2;76;79;105mNeeds you[m
   [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mnpm sign-in expired[m        [38;2;76;79;105mnpm login[m
   [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105m1 background task failing[m  [38;2;76;79;105mstation background[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105m122 brew updates waiting[m   [38;2;76;79;105mstation apps update --method brew[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105m122 brew updates waiting[m   [38;2;76;79;105mstation apps update --manager brew[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mFirewall off[m               [38;2;76;79;105mSystem Settings > Network > Firewall[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105m~/.tart is misplaced[m       [38;2;76;79;105mstation disk move ~/.tart[m
 [38;2;156;160;176m[m[1;38;2;76;79;105mActivity[m    [38;2;76;79;105mCPU 34% · memory 12.4 of 16 GB · 388 GB free · in 2.1 MB/s[m
@@ -16,4 +16,4 @@
 [38;2;156;160;176m[m[1;38;2;76;79;105mAwake[m       [38;2;64;160;43m●[m[38;2;76;79;105m until 18:00[m
 [38;2;156;160;176m[m[1;38;2;76;79;105mVMs[m         [38;2;64;160;43m●[m[38;2;76;79;105m linux-1 running · [m[38;2;108;111;133m○[m[38;2;76;79;105m api stopped[m
 
-[38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update --method brew[m
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update --manager brew[m

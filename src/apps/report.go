@@ -3,8 +3,11 @@ package apps
 import "github.com/jterrazz/studio-station/src/catalog"
 
 type Report struct {
-	App     catalog.App
-	Method  catalog.Method
+	App    catalog.App
+	Method catalog.Method
+	// value: the key `apps update --manager` reaches its method by: the
+	// first its manager item installs by (cask's is brew), else its own.
+	Manager string
 	State   catalog.State
 	Version string
 	// value: the version an update would bring, when the method names it.
@@ -90,7 +93,9 @@ type InstallRequest struct {
 type UpgradeRequest struct {
 	Names []string
 	All   bool
-	Via   []catalog.Manager
+	// value: the manager keys whose managers' apps are updated, each
+	// reaching every key its manager item manages (brew reaches cask).
+	Via []catalog.ManagerKey
 }
 
 // invariant: a step's progress detail is typed lines, worded by the binary
