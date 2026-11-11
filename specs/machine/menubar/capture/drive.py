@@ -53,9 +53,15 @@ class Rig:
         self.log.flush()
 
     def ssh(self, cmd, check=False):
-        argv = ["ssh", "-n", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
+        # hazard: the Mac's own ssh config and agent are not read: an agent
+        # holding many keys spends the guest's auth tries before this run's
+        # key, and every call came back empty (runs cap5, cap6, fix1).
+        argv = ["ssh", "-n", "-F", "/dev/null", "-o", "IdentitiesOnly=yes", "-o", "IdentityAgent=none",
+                "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
                 "-o", "BatchMode=yes", "-i", self.key, f"admin@{self.ip}", cmd]
         r = subprocess.run(argv, capture_output=True, text=True, timeout=300)
+        if r.returncode == 255:
+            raise RuntimeError(f"ssh admin@{self.ip}: {r.stderr.strip()}")
         if check and r.returncode != 0:
             raise RuntimeError(f"{cmd}: {r.returncode} {r.stderr.strip()}")
         return r.stdout
@@ -68,7 +74,7 @@ class Rig:
 
     def setup(self):
         revision = re.search(r"pageRevision = (\d+)", open(os.path.join(self.repo, "apps/menubar/sources/station-kit/page/Page.swift"), encoding="utf-8").read()).group(1)
-        self.ssh("mkdir -p ~/cap ~/.local/state/station; pkill -f replay.py; true")
+        self.ssh("mkdir -p ~/cap ~/.local/state/station; pkill -f '[r]eplay.py'; true")
         self.ssh("printf 'tell application \"Terminal\" to quit\\n' > ~/cap/quit.scpt")
         self.gui("osascript ~/cap/quit.scpt")
         self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
