@@ -3,13 +3,17 @@ package wire
 import (
 	"context"
 	"slices"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	appsfake "github.com/jterrazz/studio-station/src/apps/adapter/fake"
+	"github.com/jterrazz/studio-station/src/apps/adapter/mise"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 	"github.com/jterrazz/studio-station/src/world"
 )
@@ -115,3 +119,77 @@ func TestInstallBringsWhatTheCatalogLinksAndNoMore(t *testing.T) {
 		t.Errorf("the run was %v; want [%s]: node is there, and nothing else is linked", ran, app.Name)
 	}
 }
+
+func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
+	// invariant: a manager answers for the owner's global tools wherever
+	// station was started: a project folder that pins another runtime would
+	// otherwise pick which manager lists what that runtime holds, while its
+	// removal takes back the global one.
+	run := &everywhere{}
+	system := localtest.Mac(localtest.NewRunner(t), localtest.NewFS(), localtest.Env{HomeDir: "/home/u", OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
+	system.Run = run
+	m := machine{sys: system, vars: map[string]string{}}
+	registry, _ := installers(m, false)
+	cat, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	appsMachine{managing(m)}.RunBriefly(ctx, "true", nil, time.Second)
+	if len(run.calls) != 1 {
+		t.Fatalf("an app's version read ran %d commands; want 1", len(run.calls))
+	}
+	removed := map[catalog.Method]bool{}
+	for _, a := range cat.Apps {
+		for _, k := range []catalog.MachineKind{catalog.MacOS, catalog.Linux} {
+			in, ok := a.InstallOn(k)
+			if !ok || removed[in.Method()] || !registry[in.Method()].Can().Remove {
+				continue
+			}
+			i := registry[in.Method()]
+			_, _ = i.Inventory(ctx)
+			_ = i.Install(ctx, []catalog.Install{in}, nil)
+			before := len(run.calls)
+			_ = i.Remove(ctx, []catalog.Install{in}, nil)
+			removed[in.Method()] = len(run.calls) > before
+		}
+	}
+	for method, i := range registry {
+		if i.Can().Remove && !removed[method] {
+			t.Errorf("%s: no removal ran a command, so the test reads nothing of it", method)
+		}
+	}
+	for _, c := range run.calls {
+		argv := c.Name + " " + strings.Join(c.Args, " ")
+		if c.Dir != "/home/u" {
+			t.Errorf("%s runs from %q; want the home folder", argv, c.Dir)
+		}
+		for _, kv := range mise.Pinned("/home/u") {
+			if !slices.Contains(c.Env, kv) {
+				t.Errorf("%s runs without %s", argv, kv)
+			}
+		}
+	}
+}
+
+type everywhere struct{ calls []local.Cmd }
+
+func (e *everywhere) Output(_ context.Context, c local.Cmd) (local.Output, error) {
+	e.calls = append(e.calls, c)
+	return local.Output{Stdout: "{}"}, nil
+}
+
+func (e *everywhere) Attach(ctx context.Context, c local.Cmd, _ local.Stream) (local.Attached, error) {
+	_, err := e.Output(ctx, c)
+	return local.Attached{}, err
+}
+
+func (e *everywhere) Start(c local.Cmd, _ string) (int, error) {
+	e.calls = append(e.calls, c)
+	return 0, nil
+}
+
+func (e *everywhere) LookPath(name string) (string, bool) { return "/bin/" + name, true }
+func (e *everywhere) Alive(int) bool                      { return false }
+func (e *everywhere) Signal(int, local.Sig) error         { return nil }
+func (e *everywhere) Reap(string) int                     { return 0 }

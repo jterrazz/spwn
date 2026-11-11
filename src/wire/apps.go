@@ -77,7 +77,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		ask = env.Prompt
 	}
 	registry, bundler := installers(m, env.Interactive)
-	return appscalls.NewShelf(appsMachine{m.sys}, m.cat, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
+	return appscalls.NewShelf(appsMachine{managing(m)}, m.cat, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
 		Pool:        m.pool,
 		ThisMachine: m.kind,
 		Root:        m.systemRoot(),
@@ -88,8 +88,20 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 	})
 }
 
+// invariant: every command station runs for apps, a manager's read, install or
+// removal and an app's version read, runs from the owner's home with mise
+// pinned to its global file, never from the folder station was started in: a
+// project there that pins another node would pick which npm lists what node
+// holds, while `mise unuse --global node` takes back the global one.
+func managing(m machine) local.System {
+	sys := m.sys
+	home := sys.Env.Home()
+	sys.Run = local.Anchored(sys.Run, home, mise.Pinned(home)...)
+	return sys
+}
+
 func installers(m machine, terminal bool) (contract.Installers, contract.Bundler) {
-	run := m.sys.Run
+	run := managing(m).Run
 	runtimes := mise.New(run)
 	bundle := brew.New(run, func() []string { return runtimes.ShimsFirst(m.sys.Env.Home(), m.vars) })
 	registry := contract.Installers{}

@@ -99,6 +99,13 @@ func (m *Mise) each(ctx context.Context, installs []catalog.Install, logs contra
 	return nil
 }
 
+func Pinned(home string) []string {
+	// invariant: mise reads no config at or above home but its global one, the
+	// file `use --global` and `unuse --global` write, so a shim answers with the
+	// global version.
+	return []string{"MISE_CEILING_PATHS=" + home}
+}
+
 func (m *Mise) ShimsFirst(home string, vars map[string]string) []string {
 	// invariant: a bundle runs with mise's shims first once mise is installed,
 	// so a formula's post-install finds the runtimes it pins; the shims live in

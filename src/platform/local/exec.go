@@ -83,6 +83,36 @@ func (p played) Alive(int) bool        { return false }
 func (p played) Signal(int, Sig) error { return errors.ErrUnsupported }
 func (p played) Reap(string) int       { return 0 }
 
+func Anchored(r Runner, dir string, env ...string) Runner {
+	// value: a Runner whose commands run from dir, unless one names its own
+	// folder, with env before their own, so a command's own Env still wins.
+	return anchored{Runner: r, dir: dir, env: env}
+}
+
+type anchored struct {
+	Runner
+	dir string
+	env []string
+}
+
+func (a anchored) at(c Cmd) Cmd {
+	if c.Dir == "" {
+		c.Dir = a.dir
+	}
+	c.Env = append(append([]string{}, a.env...), c.Env...)
+	return c
+}
+
+func (a anchored) Output(ctx context.Context, c Cmd) (Output, error) {
+	return a.Runner.Output(ctx, a.at(c))
+}
+
+func (a anchored) Attach(ctx context.Context, c Cmd, out Stream) (Attached, error) {
+	return a.Runner.Attach(ctx, a.at(c), out)
+}
+
+func (a anchored) Start(c Cmd, logPath string) (int, error) { return a.Runner.Start(a.at(c), logPath) }
+
 func Read(ctx context.Context, r Runner, c Cmd) (string, bool) {
 	// value: a read: the trimmed stdout, ok only when the command ran and
 	// exited 0.
