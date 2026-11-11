@@ -103,11 +103,11 @@ func TestTheReadAndTheRemovalAddressTheFolderOfTheGlobalNode(t *testing.T) {
 		ran = append(ran, strings.Join(c.Args, " "))
 		return local.Output{Stdout: `{"dependencies":{"typescript":{"version":"5.9.3"}}}`}, nil
 	}, "npm")
-	where := func(_ context.Context, runtime string) (string, error) {
+	where := func(_ context.Context, runtime string) ([]string, error) {
 		if runtime != "node" {
-			return "", nil
+			return nil, nil
 		}
-		return "/home/u/node/24.22.2", nil
+		return []string{"/home/u/node/24.22.2"}, nil
 	}
 	n := npm.New(run, nil, where)
 
@@ -124,9 +124,64 @@ func TestAGlobalNodeThatDoesNotReadLeavesThePackagesUnread(t *testing.T) {
 	run := local.Played(func(local.Cmd) (local.Output, error) {
 		return local.Output{Stdout: `{"dependencies":{}}`}, nil
 	}, "npm")
-	unread := func(context.Context, string) (string, error) { return "", errors.New("the manager did not answer") }
+	unread := func(context.Context, string) ([]string, error) { return nil, errors.New("the manager did not answer") }
 
 	if got, err := npm.New(run, nil, unread).Inventory(context.Background()); err == nil {
 		t.Fatalf("inventory %v; want the global node's read to fail it", got)
+	}
+}
+
+func TestEveryGlobalNodeIsReadAndRemovedFrom(t *testing.T) {
+	// invariant: the manager's removal takes back every version it holds
+	// globally, so a package of the owner's on any of them is held, and
+	// station's own package is gone from each.
+	held := map[string]string{
+		"/home/u/node/22.1.0":  `{"dependencies":{"typescript":{"version":"5.9.3"}}}`,
+		"/home/u/node/24.22.2": `{"dependencies":{"typescript":{"version":"5.9.3"},"owner-pkg":{"version":"1.0.0"}}}`,
+	}
+	var removed []string
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		args := strings.Join(c.Args, " ")
+		for folder, doc := range held {
+			switch args {
+			case "ls -g --depth=0 --json --prefix " + folder:
+				return local.Output{Stdout: doc}, nil
+			case "uninstall -g --prefix " + folder + " typescript":
+				removed = append(removed, folder)
+				return local.Output{}, nil
+			}
+		}
+		return local.Output{ExitCode: 97}, nil
+	}, "npm")
+	where := func(context.Context, string) ([]string, error) {
+		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
+	}
+	n := npm.New(run, nil, where)
+
+	got, err := n.Inventory(context.Background())
+	if err != nil || got["owner-pkg"] != "1.0.0" || got["typescript"] != "5.9.3" || len(got) != 2 {
+		t.Errorf("inventory %v %v; want the packages of both nodes", got, err)
+	}
+	if err := n.Remove(context.Background(), []catalog.Install{catalog.NpmInstall{Package: "typescript"}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}; !slices.Equal(removed, want) {
+		t.Errorf("typescript removed from %q; want %q", removed, want)
+	}
+}
+
+func TestAGlobalNodeWhoseListDoesNotReadLeavesThePackagesUnread(t *testing.T) {
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		if strings.HasSuffix(strings.Join(c.Args, " "), "/home/u/node/24.22.2") {
+			return local.Output{ExitCode: 1, Stdout: "npm error"}, nil
+		}
+		return local.Output{Stdout: `{"dependencies":{}}`}, nil
+	}, "npm")
+	where := func(context.Context, string) ([]string, error) {
+		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
+	}
+
+	if got, err := npm.New(run, nil, where).Inventory(context.Background()); err == nil {
+		t.Fatalf("inventory %v; want the second node's list to fail it", got)
 	}
 }

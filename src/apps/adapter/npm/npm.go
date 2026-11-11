@@ -22,12 +22,12 @@ const (
 type Npm struct {
 	run    local.Runner
 	bundle contract.Bundler
-	where  func(ctx context.Context, runtime string) (string, error)
+	where  func(ctx context.Context, runtime string) ([]string, error)
 }
 
-func New(run local.Runner, bundle contract.Bundler, where func(ctx context.Context, runtime string) (string, error)) *Npm {
-	// value: where names the folder of the global version of a runtime its
-	// manager holds, empty when it holds none; nil reads npm's own prefix.
+func New(run local.Runner, bundle contract.Bundler, where func(ctx context.Context, runtime string) ([]string, error)) *Npm {
+	// value: where names the folders of every global version of a runtime
+	// its manager holds, none when it holds none; nil reads npm's own prefix.
 	return &Npm{run: run, bundle: bundle, where: where}
 }
 
@@ -49,16 +49,32 @@ func (n *Npm) Ready(context.Context) error {
 }
 
 func (n *Npm) Inventory(ctx context.Context) (map[string]string, error) {
-	// outside: `npm ls -g` exits 1 on an extraneous or missing peer while its
-	// JSON still lists every global package, so its exit code is not read.
 	if err := n.Ready(ctx); err != nil {
 		return nil, err
 	}
-	global, err := n.global(ctx)
+	folders, err := n.global(ctx)
 	if err != nil {
 		return nil, err
 	}
-	out, err := n.run.Output(ctx, local.Command(command, append([]string{"ls", "-g", "--depth=0", "--json"}, global...)...))
+	list := map[string]string{}
+	for _, folder := range folders {
+		listed, err := n.list(ctx, folder)
+		if err != nil {
+			return nil, err
+		}
+		for name, version := range listed {
+			if _, seen := list[name]; !seen {
+				list[name] = version
+			}
+		}
+	}
+	return list, nil
+}
+
+func (n *Npm) list(ctx context.Context, folder []string) (map[string]string, error) {
+	// outside: `npm ls -g` exits 1 on an extraneous or missing peer while its
+	// JSON still lists every global package, so its exit code is not read.
+	out, err := n.run.Output(ctx, local.Command(command, append([]string{"ls", "-g", "--depth=0", "--json"}, folder...)...))
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +112,7 @@ func (n *Npm) Update(ctx context.Context, installs []catalog.Install, logs contr
 }
 
 func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	global, err := n.global(ctx)
+	folders, err := n.global(ctx)
 	if err != nil {
 		return err
 	}
@@ -105,27 +121,38 @@ func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contr
 		if !ok {
 			return errors.New(i.Key() + " is not an npm package")
 		}
-		c := local.Command(command, append(append([]string{"uninstall", "-g"}, global...), v.Package)...)
-		c.Logs = logs
-		if err := local.Attach(ctx, n.run, c); err != nil {
-			return err
+		for _, folder := range folders {
+			c := local.Command(command, append(append([]string{"uninstall", "-g"}, folder...), v.Package)...)
+			c.Logs = logs
+			if err := local.Attach(ctx, n.run, c); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func (n *Npm) global(ctx context.Context) ([]string, error) {
-	// invariant: what is read and what is removed are the packages of the
-	// node its manager holds globally, the one that manager's removal takes
-	// back, named by its folder, so no PATH, folder or variable picks another.
+func (n *Npm) global(ctx context.Context) ([][]string, error) {
+	// invariant: what is read and what is removed are the packages of every
+	// node its manager holds globally, all of which that manager's removal
+	// takes back, each named by its folder, so no PATH, folder or variable
+	// picks another and no version of them goes unread; with none, npm's
+	// own prefix.
 	if n.where == nil {
-		return nil, nil
+		return [][]string{nil}, nil
 	}
-	folder, err := n.where(ctx, n.Manager().App)
-	if err != nil || folder == "" {
+	folders, err := n.where(ctx, n.Manager().App)
+	if err != nil {
 		return nil, err
 	}
-	return []string{"--prefix", folder}, nil
+	if len(folders) == 0 {
+		return [][]string{nil}, nil
+	}
+	out := make([][]string, 0, len(folders))
+	for _, f := range folders {
+		out = append(out, []string{"--prefix", f})
+	}
+	return out, nil
 }
 
 func (n *Npm) lines(installs []catalog.Install) []string {

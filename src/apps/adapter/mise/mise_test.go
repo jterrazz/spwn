@@ -114,19 +114,24 @@ func TestTheShimsMoveWithMisesDataFolder(t *testing.T) {
 	}
 }
 
-func TestWhereIsTheFolderOfTheVersionHeldGlobally(t *testing.T) {
+func TestWhereIsTheFolderOfEveryVersionHeldGlobally(t *testing.T) {
+	// invariant: `unuse --global` takes back every version the global file
+	// names, so each installed one is named, in mise's order.
 	run := local.Played(func(local.Cmd) (local.Output, error) {
-		return local.Output{Stdout: `{"node":[{"version":"24.22.2","install_path":"/home/u/.local/share/mise/installs/node/24.22.2","installed":true}]}`}, nil
+		return local.Output{Stdout: `{"node":[{"version":"22.1.0","install_path":"/n/22.1.0","installed":true},{"version":"23.0.0","install_path":"/n/23.0.0","installed":false},{"version":"24.22.2","install_path":"/n/24.22.2","installed":true}]}`}, nil
 	}, "mise")
 	m := mise.New(run)
 
-	if got, err := m.Where(context.Background(), "node"); err != nil || got != "/home/u/.local/share/mise/installs/node/24.22.2" {
-		t.Errorf("node is at %q (%v); want its global version's folder", got, err)
+	if got, err := m.Where(context.Background(), "node"); err != nil || !slices.Equal(got, []string{"/n/22.1.0", "/n/24.22.2"}) {
+		t.Errorf("node is at %q (%v); want both installed global versions' folders", got, err)
 	}
-	if got, err := m.Where(context.Background(), "python"); err != nil || got != "" {
+	if got, err := m.Inventory(context.Background()); err != nil || got["node"] != "22.1.0" {
+		t.Errorf("inventory %v (%v); want node at its first installed version", got, err)
+	}
+	if got, err := m.Where(context.Background(), "python"); err != nil || len(got) != 0 {
 		t.Errorf("python is at %q (%v); want none, mise holds no python", got, err)
 	}
-	if got, err := mise.New(local.Played(nil)).Where(context.Background(), "node"); err != nil || got != "" {
+	if got, err := mise.New(local.Played(nil)).Where(context.Background(), "node"); err != nil || len(got) != 0 {
 		t.Errorf("node is at %q (%v) with no mise; want none", got, err)
 	}
 }

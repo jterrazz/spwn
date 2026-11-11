@@ -44,21 +44,28 @@ func (m *Mise) Inventory(ctx context.Context) (map[string]string, error) {
 		return nil, err
 	}
 	list := map[string]string{}
-	for name, v := range held {
-		list[name] = v.Version
+	for name, versions := range held {
+		list[name] = versions[0].Version
 	}
 	return list, nil
 }
 
-func (m *Mise) Where(ctx context.Context, runtime string) (string, error) {
-	// value: the folder of the version of runtime mise holds globally, the
-	// one `unuse --global` takes back; empty when mise is missing or holds
-	// none.
+func (m *Mise) Where(ctx context.Context, runtime string) ([]string, error) {
+	// value: the folders of every version of runtime mise holds globally,
+	// all of which `unuse --global` takes back; none when mise is missing
+	// or holds none.
 	if _, ok := m.run.LookPath(command); !ok {
-		return "", nil
+		return nil, nil
 	}
 	held, err := m.global(ctx)
-	return held[runtime].Path, err
+	if err != nil {
+		return nil, err
+	}
+	var folders []string
+	for _, v := range held[runtime] {
+		folders = append(folders, v.Path)
+	}
+	return folders, nil
 }
 
 type version struct {
@@ -67,7 +74,9 @@ type version struct {
 	Installed bool   `json:"installed"`
 }
 
-func (m *Mise) global(ctx context.Context) (map[string]version, error) {
+// value: every installed version of each tool the global file names, in
+// the order mise lists them.
+func (m *Mise) global(ctx context.Context) (map[string][]version, error) {
 	if err := m.Ready(ctx); err != nil {
 		return nil, err
 	}
@@ -82,12 +91,11 @@ func (m *Mise) global(ctx context.Context) (map[string]version, error) {
 	if err := json.Unmarshal([]byte(out.Stdout), &doc); err != nil {
 		return nil, err
 	}
-	held := map[string]version{}
+	held := map[string][]version{}
 	for name, versions := range doc {
 		for _, v := range versions {
 			if v.Installed {
-				held[name] = v
-				break
+				held[name] = append(held[name], v)
 			}
 		}
 	}

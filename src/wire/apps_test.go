@@ -206,8 +206,9 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	// invariant: a shell where the runtime manager is activated puts a
 	// project's install folder first on PATH, so a package manager found
 	// there would list what that runtime holds, while the runtime's removal
-	// takes back the global one: the lookup, every command's PATH and the
-	// folder the packages are read and removed in are the global one's.
+	// takes back every global one: the lookup and every command's PATH are
+	// the global ones', and the packages are read and removed in each of
+	// their folders.
 	home := "/home/u"
 	data := home + "/" + catalog.AppData
 	project := data + "/installs/node/22.1.0/bin"
@@ -225,10 +226,12 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	runtime, packages := installsOf(t, cat, registry, "node")
 	runtimes, pkgs := registry[runtime.Method()], registry[packages.Method()]
 	rt, pm := runtimes.Manager().Name, pkgs.Manager().Name
-	global := data + "/installs/node/24.22.2"
+	older, global := data+"/installs/node/20.0.0", data+"/installs/node/24.22.2"
 	run.Programs = []string{project + "/" + pm, shims + "/" + pm, "/usr/bin/" + rt}
-	run.On(rt, "ls", "--global", "--json").Reply(local.Output{Stdout: `{"node":[{"version":"24.22.2","install_path":"` + global + `","installed":true}]}`})
+	run.On(rt, "ls", "--global", "--json").Reply(local.Output{Stdout: `{"node":[{"version":"20.0.0","install_path":"` + older + `","installed":true},{"version":"24.22.2","install_path":"` + global + `","installed":true}]}`})
+	run.On(pm, "ls", "-g", "--depth=0", "--json", "--prefix", older).Reply(local.Output{Stdout: `{"dependencies":{}}`})
 	run.On(pm, "ls", "-g", "--depth=0", "--json", "--prefix", global).Reply(local.Output{Stdout: `{"dependencies":{"owner-pkg":{"version":"1.0.0"}}}`})
+	run.On(pm, "uninstall", "-g", "--prefix", older, packages.Key())
 	run.On(pm, "uninstall", "-g", "--prefix", global, packages.Key())
 	run.On(rt, "unuse", "--global", runtime.Key())
 	ctx := context.Background()
@@ -237,13 +240,13 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 		t.Errorf("%s is looked up at %q; want the shim %s", pm, found, shims+"/"+pm)
 	}
 	if held, err := pkgs.Inventory(ctx); err != nil || len(held) != 1 {
-		t.Errorf("%s lists %v (%v); want the global node's package", pm, held, err)
+		t.Errorf("%s lists %v (%v); want the package of the second global node", pm, held, err)
 	}
 	_ = pkgs.Remove(ctx, []catalog.Install{packages}, nil)
 	_ = runtimes.Remove(ctx, []catalog.Install{runtime}, nil)
 
-	if len(run.Calls) != 5 {
-		t.Fatalf("ran %d commands; want each read of the global node, the read of its packages and the two removals", len(run.Calls))
+	if len(run.Calls) != 7 {
+		t.Fatalf("ran %d commands; want each read of the global nodes, the read and the removal of the package in each, and the runtime's removal", len(run.Calls))
 	}
 	for _, c := range run.Calls {
 		argv := c.Name + " " + strings.Join(c.Args, " ")
