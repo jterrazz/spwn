@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/platform/local"
+	"github.com/jterrazz/studio-station/src/ports"
 )
 
 const budget = 5 * time.Second
@@ -24,7 +25,7 @@ func (e *Ephemeral) Range(ctx context.Context) (from, to int, ok bool) {
 	// to `sysctl -n net.inet.ip.portrange.first` and `.last`, one number each.
 	from, fromOK := e.read(ctx, "net.inet.ip.portrange.first")
 	to, toOK := e.read(ctx, "net.inet.ip.portrange.last")
-	return from, to, fromOK && toOK && from <= to
+	return from, to, fromOK && toOK && ports.PlausibleEphemeral(from, to)
 }
 
 func (e *Ephemeral) read(ctx context.Context, name string) (int, bool) {

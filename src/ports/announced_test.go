@@ -26,8 +26,9 @@ func TestTheDiffOfTwoSnapshotsIsListenAndUnlisten(t *testing.T) {
 }
 
 // invariant: a socket in the guest's ephemeral range is marked, never
-// dropped, so an owner's share still finds it; a loopback one and a
-// container's published port are not.
+// dropped, so an owner's share still finds it, whatever it binds; below the
+// range a loopback socket is not marked, and neither is a container's
+// published port.
 func TestAnEphemeralListenerIsMarkedQuiet(t *testing.T) {
 	got := MarkQuiet([]Announced{
 		{Port: 3000, IP: "0.0.0.0", Source: BySocket}, {Port: 5173, IP: "127.0.0.1", Source: BySocket}, {Port: 8000, IP: "::1", Source: BySocket},

@@ -63,7 +63,7 @@ func TestProcnetReadsTheRangeOfOutgoingPorts(t *testing.T) {
 	if from, to, ok := read(fstest.MapFS{"proc/sys/net/ipv4/ip_local_port_range": file("15000\t30000\n")}); !ok || from != 15000 || to != 30000 {
 		t.Fatalf("range %d-%d %v", from, to, ok)
 	}
-	for _, bad := range []string{"", "1", "9 x", "9000 8000"} {
+	for _, bad := range []string{"", "1", "9 x", "9000 8000", "1024 65535", "9999 60999", "32768 70000"} {
 		if _, _, ok := read(fstest.MapFS{"proc/sys/net/ipv4/ip_local_port_range": file(bad)}); ok {
 			t.Errorf("%q read as a range", bad)
 		}

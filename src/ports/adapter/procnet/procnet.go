@@ -44,7 +44,7 @@ func (p *Procnet) Range(context.Context) (from, to int, ok bool) {
 	}
 	from, fromErr := strconv.Atoi(f[0])
 	to, toErr := strconv.Atoi(f[1])
-	return from, to, fromErr == nil && toErr == nil && from <= to
+	return from, to, fromErr == nil && toErr == nil && ports.PlausibleEphemeral(from, to)
 }
 
 func parse(tables ...[]byte) (out []ports.Listener, inodes []string) {

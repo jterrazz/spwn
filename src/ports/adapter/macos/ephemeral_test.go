@@ -22,6 +22,9 @@ func TestTheRangeIsBothEndsTheKernelAnswers(t *testing.T) {
 	if !ok || from != 49152 || to != 65535 {
 		t.Fatalf("range %d-%d %v", from, to, ok)
 	}
+	if _, _, ok := New(answers{"net.inet.ip.portrange.first": "1024\n", "net.inet.ip.portrange.last": "65535\n"}).Range(context.Background()); ok {
+		t.Fatal("a range that starts among the services read as the outgoing ports")
+	}
 	if _, _, ok := New(answers{"net.inet.ip.portrange.first": "49152\n"}).Range(context.Background()); ok {
 		t.Fatal("one end alone read as a range")
 	}

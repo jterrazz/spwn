@@ -34,6 +34,13 @@ const (
 	MacOSEphemeralFrom, MacOSEphemeralTo = 49152, 65535
 )
 
+// invariant: a range a system reports is read only when it is the span of
+// an outgoing connections' ports: from 10000 up, inside the ports, else a
+// system under test or a misread would hide every service from the host.
+func PlausibleEphemeral(from, to int) bool {
+	return from >= 10000 && from <= to && to <= 65535
+}
+
 func MarkQuiet(ls []Announced, from, to int) []Announced {
 	// invariant: a socket on a port of the guest's ephemeral range is the
 	// guest's own business, never a service: it is marked, not dropped, so an
