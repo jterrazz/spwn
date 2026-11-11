@@ -1,0 +1,19 @@
+description: 'a port of the guest ephemeral range is never announced, and the owner share still reaches it'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:45000" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep -e "	45000	" -e "	3000	"'
+      exit: 0
+      stdout: |
+          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
+    - command: 'ports share linux-1 45000'
+      exit: 0
+      stdout: |
+          https://jterrazz-macbook-pro.tail1234.ts.net:40003
+    - command: 'ports | /usr/bin/grep -e "	45000	"'
+      exit: 0
+      stdout: |
+          ●	linux-1	45000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40003	shared	node

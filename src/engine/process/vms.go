@@ -630,10 +630,12 @@ type guestMessage struct {
 	Port    int                  `json:"port"`
 	IP      string               `json:"ip"`
 	Process string               `json:"process"`
+	Quiet   bool                 `json:"quiet"`
 	Ports   []struct {
 		Port    int    `json:"port"`
 		IP      string `json:"ip"`
 		Process string `json:"process"`
+		Quiet   bool   `json:"quiet"`
 	} `json:"ports"`
 	Agents []agents.Agent `json:"agents"`
 }
@@ -653,17 +655,30 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 	case "snapshot":
 		seen := map[int]bool{}
 		heard := make([]ports.Listener, 0, len(m.Ports))
+		quiet := map[int]ports.Listener{}
 		for _, p := range m.Ports {
+			l := ports.Listener{Port: p.Port, Bind: p.IP, Process: p.Process}
+			if p.Quiet && !d.reserved(name, p.Port) {
+				quiet[p.Port] = l
+				continue
+			}
 			seen[p.Port] = true
-			heard = append(heard, ports.Listener{Port: p.Port, Bind: p.IP, Process: p.Process})
+			heard = append(heard, l)
 			d.listen(ctx, name, p.Port, p.IP, p.Process)
 		}
+		d.setQuiet(name, quiet)
 		d.hear(name, heard)
 		d.unlistenExcept(name, seen)
 	case "listen":
-		d.hear(name, append(d.heardOf(name), ports.Listener{Port: m.Port, Bind: m.IP, Process: m.Process}))
+		l := ports.Listener{Port: m.Port, Bind: m.IP, Process: m.Process}
+		if m.Quiet && !d.reserved(name, m.Port) {
+			d.keepQuiet(name, l)
+			return
+		}
+		d.hear(name, append(d.heardOf(name), l))
 		d.listen(ctx, name, m.Port, m.IP, m.Process)
 	case "unlisten":
+		d.dropQuiet(name, m.Port)
 		d.hear(name, slices.DeleteFunc(d.heardOf(name), func(l ports.Listener) bool { return l.Port == m.Port }))
 		d.unlisten(name, m.Port)
 	case "agents":

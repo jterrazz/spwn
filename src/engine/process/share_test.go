@@ -470,3 +470,39 @@ func TestAFullVMsRefusedListenersLeaveNothingWhenTheyGo(t *testing.T) {
 		t.Errorf("%d services kept, want the one shared", len(h.d.svcs))
 	}
 }
+
+// invariant: a listener its guest marks quiet is never heard nor shared by
+// itself, and the owner's reservation shares it at the next tick.
+func TestAQuietListenerIsSharedOnlyOnceTheOwnerReservesIt(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.tn = &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, nil
+	}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.vms["api"].state = engine.StateRunning
+	h.d.mu.Unlock()
+	snapshot := `{"type":"snapshot","ports":[{"port":3000,"ip":"0.0.0.0","process":"node"},{"port":5173,"ip":"127.0.0.1","process":"vite"},{"port":45000,"ip":"0.0.0.0","process":"node","quiet":true}]}`
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(snapshot))
+	if heard := h.d.heardOf("api"); len(heard) != 2 {
+		t.Fatalf("heard %+v, want the plain and the loopback listener, not the quiet one", heard)
+	}
+	h.d.mu.Lock()
+	shared := len(h.d.svcs)
+	h.d.mu.Unlock()
+	if shared != 2 {
+		t.Fatalf("%d services, want the plain and the loopback listener's", shared)
+	}
+	if _, err := h.d.guestRequest(ctx, "api", guestMessage{Op: "reserve", Port: 45000}); err != nil {
+		t.Fatal(err)
+	}
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	defer h.d.mu.Unlock()
+	if s := h.d.svcs[key("api", 45000)]; s == nil || s.st.Phase != ports.PhaseShared {
+		t.Errorf("port 45000 service = %+v, want shared once reserved", s)
+	}
+}

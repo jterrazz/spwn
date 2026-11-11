@@ -57,3 +57,18 @@ func TestProcnetReadsAddressesInHostByteOrder(t *testing.T) {
 		t.Fatalf("Read =\n%+v\nwant\n%+v", got, want)
 	}
 }
+
+func TestProcnetReadsTheRangeOfOutgoingPorts(t *testing.T) {
+	read := func(fsys fstest.MapFS) (int, int, bool) { return New(proc{fsys}, "/").Range(context.Background()) }
+	if from, to, ok := read(fstest.MapFS{"proc/sys/net/ipv4/ip_local_port_range": file("15000\t30000\n")}); !ok || from != 15000 || to != 30000 {
+		t.Fatalf("range %d-%d %v", from, to, ok)
+	}
+	for _, bad := range []string{"", "1", "9 x", "9000 8000"} {
+		if _, _, ok := read(fstest.MapFS{"proc/sys/net/ipv4/ip_local_port_range": file(bad)}); ok {
+			t.Errorf("%q read as a range", bad)
+		}
+	}
+	if _, _, ok := read(fstest.MapFS{}); ok {
+		t.Error("a missing file read as a range")
+	}
+}

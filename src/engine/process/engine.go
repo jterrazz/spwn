@@ -143,6 +143,8 @@ type Engine struct {
 	// value: every address each running VM listens on, as its guest
 	// reported it, shared or not.
 	heard map[string][]ports.Listener
+	// value: what each VM's guest marked quiet, by port, never listed.
+	quiet map[string]map[int]ports.Listener
 	// value: what each VM that stopped was last heard listening on, until
 	// its guest reports again or the VM is forgotten.
 	lastHeard map[string][]ports.Listener
@@ -220,7 +222,7 @@ func New(h Mac, hv Hypervisor, guests Guests, m Machines, tn Tailnet, st Stores,
 	if o.GuestPort == 0 {
 		o.GuestPort = catalog.GuestSSH
 	}
-	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, rights: map[string]ports.Rights{}, takeBackFailed: map[string]time.Time{}}
+	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, quiet: map[string]map[int]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, rights: map[string]ports.Rights{}, takeBackFailed: map[string]time.Time{}}
 	d.awakeJob = d.newAwake()
 	if o.Notifier != nil {
 		d.notifier = o.Notifier(d.logf)

@@ -32,8 +32,11 @@ const (
 type Options struct {
 	// value: the guest's own state folder and the services' env file.
 	State, PortsEnv string
-	Kind            catalog.MachineKind
-	Version         string
+	// value: the range of this system's outgoing connections' ports; nil
+	// takes the default of the kind.
+	Ephemeral Ephemeral
+	Kind      catalog.MachineKind
+	Version   string
 	// value: what the host's `accounts` request is answered with: this VM's
 	// providers, parsed into identities and scopes, never a token.
 	Accounts func(ctx context.Context, keys []string) any
@@ -91,6 +94,8 @@ type session struct {
 	mu      sync.Mutex
 	hello   Hello
 	ready   bool
+	from    int
+	to      int
 	last    []ports.Announced
 	held    []ports.Announced
 	pending map[string]chan message
@@ -158,8 +163,9 @@ func (g *session) handle(ctx context.Context, m message) {
 		_ = g.s.writeFiles(m.Hello)
 		if !g.ready {
 			g.ready = true
+			g.from, g.to = g.s.ephemeral(ctx)
 			g.send(map[string]any{"v": 1, "type": "ready", "guest_version": g.s.o.Version, "kind": string(g.s.o.Kind)})
-			g.last = g.s.scan(ctx, g.hello, &g.held, true)
+			g.last = g.s.scan(ctx, g.hello, &g.held, true, g.from, g.to)
 			g.send(map[string]any{"v": 1, "type": "snapshot", "ports": g.last})
 			go g.watch(ctx)
 			g.report(ctx)
@@ -221,7 +227,7 @@ func (g *session) watch(ctx context.Context) {
 		if g.s.h.Clock.Sleep(ctx, scanEvery) != nil {
 			return
 		}
-		now := g.s.scan(ctx, g.hello, &g.held, tick%containersEach == 0)
+		now := g.s.scan(ctx, g.hello, &g.held, tick%containersEach == 0, g.from, g.to)
 		if tick%snapshotEach == 0 {
 			g.send(map[string]any{"v": 1, "type": "snapshot", "ports": now})
 		} else {
@@ -245,7 +251,7 @@ func (g *session) watch(ctx context.Context) {
 // last answer is merged into every scan between, so a container's port keeps
 // its name and never flaps (its socket is the container engine's proxy, or
 // none without the proxy).
-func (s *Agent) scan(ctx context.Context, h Hello, held *[]ports.Announced, refresh bool) []ports.Announced {
+func (s *Agent) scan(ctx context.Context, h Hello, held *[]ports.Announced, refresh bool, from, to int) []ports.Announced {
 	var found []ports.Announced
 	if s.o.Listeners != nil {
 		if ls, err := s.o.Listeners.Read(ctx); err == nil {
@@ -258,7 +264,7 @@ func (s *Agent) scan(ctx context.Context, h Hello, held *[]ports.Announced, refr
 		}
 	}
 	found = ports.MergeAnnounced(found, *held)
-	return ports.FilterAnnounced(found, h.MinPort, h.Ignored)
+	return ports.MarkQuiet(ports.FilterAnnounced(found, h.MinPort, h.Ignored), from, to)
 }
 
 func (s *Agent) writeFiles(h Hello) error {

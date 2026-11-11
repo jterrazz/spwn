@@ -22,6 +22,28 @@ type Announced struct {
 	Process string `json:"process"`
 	PID     int    `json:"pid"`
 	Source  string `json:"source"`
+	// value: the listener sits in the guest's ephemeral range: the host does
+	// not list it, nor judge it, until an owner shares it.
+	Quiet bool `json:"quiet,omitempty"`
+}
+
+// value: the range a guest's system hands its outgoing connections' ports
+// from, as the kind reads it when the guest cannot.
+const (
+	LinuxEphemeralFrom, LinuxEphemeralTo = 32768, 60999
+	MacOSEphemeralFrom, MacOSEphemeralTo = 49152, 65535
+)
+
+func MarkQuiet(ls []Announced, from, to int) []Announced {
+	// invariant: a socket on a port of the guest's ephemeral range is the
+	// guest's own business, never a service: it is marked, not dropped, so an
+	// owner's `ports share` still reaches it.
+	out := make([]Announced, len(ls))
+	for i, l := range ls {
+		l.Quiet = l.Source == BySocket && l.Port >= from && l.Port <= to
+		out[i] = l
+	}
+	return out
 }
 
 type Announcement struct {
@@ -95,7 +117,7 @@ func DiffAnnounced(before, after []Announced) []Announcement {
 	now := map[int]bool{}
 	for _, l := range after {
 		now[l.Port] = true
-		if old, ok := was[l.Port]; !ok || old.IP != l.IP || old.Process != l.Process || old.Source != l.Source {
+		if old, ok := was[l.Port]; !ok || old.IP != l.IP || old.Process != l.Process || old.Source != l.Source || old.Quiet != l.Quiet {
 			listen := l
 			out = append(out, Announcement{Listen: &listen})
 		}

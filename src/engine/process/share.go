@@ -161,6 +161,7 @@ func (d *Engine) unlistenExcept(vm string, seen map[int]bool) {
 }
 
 func (d *Engine) tickShares(ctx context.Context) {
+	d.hearReserved(ctx)
 	// invariant: every reserved port ticks, listened on in this engine's
 	// life or not, so one idle past its days is released, and one served
 	// that its VM says nothing listens on is unshared.
@@ -357,6 +358,7 @@ func (d *Engine) vmStopped(ctx context.Context, vm string) {
 		d.lastHeard[vm] = ls
 	}
 	delete(d.heard, vm)
+	delete(d.quiet, vm)
 	for _, s := range d.svcs {
 		if s.vm == vm && (s.st.Phase == ports.PhaseNotAllowed || s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0) {
 			delete(d.svcs, key(s.vm, s.port))

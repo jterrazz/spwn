@@ -34,6 +34,19 @@ func (p *Procnet) Read(context.Context) ([]ports.Listener, error) {
 	return ls, nil
 }
 
+func (p *Procnet) Range(context.Context) (from, to int, ok bool) {
+	// outside: Linux writes the range as "32768\t60999" in
+	// /proc/sys/net/ipv4/ip_local_port_range.
+	data, err := p.proc.ReadFile(p.at("/proc/sys/net/ipv4/ip_local_port_range"))
+	f := strings.Fields(string(data))
+	if err != nil || len(f) != 2 {
+		return 0, 0, false
+	}
+	from, fromErr := strconv.Atoi(f[0])
+	to, toErr := strconv.Atoi(f[1])
+	return from, to, fromErr == nil && toErr == nil && from <= to
+}
+
 func parse(tables ...[]byte) (out []ports.Listener, inodes []string) {
 	// invariant: /proc/net/tcp's local address is the address in host byte
 	// order (little-endian on arm64): 0100007F is 127.0.0.1; an IPv6 address is

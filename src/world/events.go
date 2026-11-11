@@ -343,6 +343,27 @@ func (w *World) Listening(machine string) []ports.Listener {
 	return *at
 }
 
+func (w *World) Reported(machine string) []ports.Announced {
+	// invariant: a guest reports a port once: a container's published port is
+	// named by its container, over the proxy its engine may run on it; a
+	// socket's is marked quiet as a Linux guest marks it. The caller holds the
+	// world's lock.
+	listening, containers := w.Listening(machine), w.Containers(machine)
+	found := make([]ports.Announced, 0, len(listening))
+	for _, l := range listening {
+		if !slices.ContainsFunc(containers, func(k Container) bool { return slices.Contains(k.Shared, l.Port) }) {
+			found = append(found, ports.Announced{Port: l.Port, IP: l.Bind, Process: l.Process, Source: ports.BySocket})
+		}
+	}
+	found = ports.MarkQuiet(found, ports.LinuxEphemeralFrom, ports.LinuxEphemeralTo)
+	for _, k := range containers {
+		for _, port := range k.Shared {
+			found = append(found, ports.Announced{Port: port, IP: "0.0.0.0", Process: k.Name, Source: ports.ByContainer})
+		}
+	}
+	return found
+}
+
 func (w *World) Containers(vm string) []Container {
 	v, err := w.vm(vm)
 	if err != nil {

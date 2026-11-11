@@ -24,3 +24,19 @@ func TestTheDiffOfTwoSnapshotsIsListenAndUnlisten(t *testing.T) {
 		t.Fatalf("filter %+v", kept)
 	}
 }
+
+// invariant: a socket in the guest's ephemeral range is marked, never
+// dropped, so an owner's share still finds it; a loopback one and a
+// container's published port are not.
+func TestAnEphemeralListenerIsMarkedQuiet(t *testing.T) {
+	got := MarkQuiet([]Announced{
+		{Port: 3000, IP: "0.0.0.0", Source: BySocket}, {Port: 5173, IP: "127.0.0.1", Source: BySocket}, {Port: 8000, IP: "::1", Source: BySocket},
+		{Port: 45000, IP: "0.0.0.0", Source: BySocket}, {Port: 45001, IP: "0.0.0.0", Source: ByContainer}, {Port: 45002, IP: "127.0.0.1", Source: BySocket},
+	}, 32768, 60999)
+	want := []bool{false, false, false, true, false, true}
+	for i, l := range got {
+		if l.Quiet != want[i] {
+			t.Errorf("port %d is %v, want %v", l.Port, l.Quiet, want[i])
+		}
+	}
+}

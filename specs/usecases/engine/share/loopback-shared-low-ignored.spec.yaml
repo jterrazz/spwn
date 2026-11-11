@@ -1,4 +1,4 @@
-description: 'a program bound to loopback inside the VM is shared; 80 and 22 are never shared'
+description: 'a loopback program is shared by an explicit share only; 80 and 22 are never shared'
 env: two-macs
 runs:
     - command: 'world listen linux-1 127.0.0.1:3000 node'
@@ -10,10 +10,17 @@ runs:
     - command: 'ports | /usr/bin/grep -e "	3000	" -e "	80	" -e "	22	"'
       exit: 0
       stdout: |
-          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
           ●	linux-1	22	private		behind jterrazz-macbook-pro, not shared	SSH
           ●	linux-1	80	private		behind jterrazz-macbook-pro, not shared	nginx
+    - command: 'ports share linux-1 3000'
+      exit: 0
+      stdout: |
+          https://jterrazz-macbook-pro.tail1234.ts.net:40000
+    - command: 'ports | /usr/bin/grep -e "	3000	"'
+      exit: 0
+      stdout: |
+          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[["linux-1",5173,40001],["linux-1",7000,40002],["linux-1",3000,40000]],"shared":[40001,40002,40000]}
+          {"reserved":[["linux-1",3000,40000],["linux-1",5173,40001],["linux-1",7000,40002]],"shared":[40001,40002,40000]}

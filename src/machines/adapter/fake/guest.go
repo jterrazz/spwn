@@ -186,30 +186,12 @@ func (c *guest) serve(ctx context.Context, cmd contract.GuestCommand) (contract.
 	return contract.GuestResult{}, nil
 }
 
-type reported struct {
-	Port    int    `json:"port"`
-	IP      string `json:"ip"`
-	Process string `json:"process"`
-}
-
 // invariant: a guest reports a port once: a container's published port is
 // named by its container, over the proxy its engine may run on it.
 func (c *guest) snapshot() []byte {
 	c.w.Lock()
-	listening := c.w.Listening(c.name)
-	containers := c.w.Containers(c.name)
+	found := c.w.Reported(c.name)
 	c.w.Unlock()
-	found := make([]reported, 0, len(listening))
-	for _, l := range listening {
-		if !slices.ContainsFunc(containers, func(k world.Container) bool { return slices.Contains(k.Shared, l.Port) }) {
-			found = append(found, reported{Port: l.Port, IP: l.Bind, Process: l.Process})
-		}
-	}
-	for _, k := range containers {
-		for _, port := range k.Shared {
-			found = append(found, reported{Port: port, IP: "0.0.0.0", Process: k.Name})
-		}
-	}
 	line, err := json.Marshal(map[string]any{"v": 1, "type": "snapshot", "ports": found})
 	if err != nil {
 		return nil

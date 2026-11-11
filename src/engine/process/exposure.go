@@ -47,6 +47,59 @@ func (d *Engine) reheardLocked() bool {
 	return false
 }
 
+// invariant: a listener its guest marks quiet (in the guest's ephemeral
+// range) is kept here, neither heard nor judged, so never shared by itself,
+// until an owner's reservation names its port: then the next tick hears it
+// as any other.
+func (d *Engine) reserved(vm string, port int) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.reservationIndex(vm, port) >= 0
+}
+
+func (d *Engine) setQuiet(vm string, ls map[int]ports.Listener) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.quiet[vm] = ls
+}
+
+func (d *Engine) keepQuiet(vm string, l ports.Listener) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.quiet[vm] == nil {
+		d.quiet[vm] = map[int]ports.Listener{}
+	}
+	d.quiet[vm][l.Port] = l
+}
+
+func (d *Engine) dropQuiet(vm string, port int) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	delete(d.quiet[vm], port)
+}
+
+func (d *Engine) hearReserved(ctx context.Context) {
+	type found struct {
+		vm string
+		l  ports.Listener
+	}
+	var now []found
+	d.mu.Lock()
+	for _, r := range d.reservations {
+		if l, ok := d.quiet[r.VM][r.GuestPort]; ok {
+			now = append(now, found{r.VM, l})
+			delete(d.quiet[r.VM], r.GuestPort)
+		}
+	}
+	d.mu.Unlock()
+	for _, f := range now {
+		if heard := d.heardOf(f.vm); !slices.ContainsFunc(heard, func(h ports.Listener) bool { return h.Port == f.l.Port }) {
+			d.hear(f.vm, append(heard, f.l))
+		}
+		d.listen(ctx, f.vm, f.l.Port, f.l.Bind, f.l.Process)
+	}
+}
+
 func (d *Engine) heardOf(vm string) []ports.Listener {
 	d.mu.Lock()
 	defer d.mu.Unlock()
