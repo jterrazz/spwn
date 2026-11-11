@@ -125,7 +125,7 @@
                         },
                         {
                           "kind": "text",
-                          "text": "permanent"
+                          "text": "persistent"
                         }
                       ]
                     },
@@ -166,7 +166,7 @@
                         },
                         {
                           "kind": "text",
-                          "text": "throwaway"
+                          "text": "ephemeral"
                         }
                       ]
                     },

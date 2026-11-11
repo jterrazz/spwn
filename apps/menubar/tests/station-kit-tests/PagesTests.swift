@@ -44,7 +44,7 @@ final class PagesTests: XCTestCase {
     func testPagesLayout() throws {
         let linux = try Tree.page("menubar.vm.linux-1")
         XCTAssertEqual(linux.sections?.compactMap(\.id), ["summary", "agents", "gauges", "ports", "footnote", "private", "shared", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
-        XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["throwaway", "on This Mac", "no agent running"])
+        XCTAssertEqual(linux.section("summary")?.caption.map { $0.compactMap(\.text) }, ["ephemeral", "on This Mac", "no agent running"])
         XCTAssertEqual(linux.pageActions.map(\.label), ["Stop", "Delete", "New agent", "Open in Terminal", "Copy ssh linux-1"])
         let infra = try Tree.page("menubar.vm.infra")
         XCTAssertEqual(infra.sections?.compactMap(\.id), ["summary", "health", "gauges", "ports", "tooling", "window-6m", "window-1h", "window-24h", "memory", "processes", "measured"])
@@ -72,9 +72,9 @@ final class PagesTests: XCTestCase {
         XCTAssertEqual(started, [])
     }
 
-    // invariant: SPEC A5: Delete… on linux-1, a throwaway, asks yes or no;
+    // invariant: SPEC A5: Delete… on linux-1, an ephemeral workspace, asks yes or no;
     // its yes sends the name the delete call checks.
-    func testThrowawayDeleteAsksYesOrNoAndSendsItsName() async throws {
+    func testEphemeralDeleteAsksYesOrNoAndSendsItsName() async throws {
         let delete = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("delete"))
         let confirm = try XCTUnwrap(delete.confirm)
         XCTAssertNil(confirm.type)

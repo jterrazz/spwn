@@ -702,15 +702,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -923,15 +923,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1133,15 +1133,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1348,15 +1348,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1864,15 +1864,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -2085,15 +2085,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",

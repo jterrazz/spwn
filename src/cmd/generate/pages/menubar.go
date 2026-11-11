@@ -64,8 +64,8 @@ const (
 // This Mac with linux-1 (running, two ports shared) and api (stopped), the
 // mini with infra, a healthy server.
 func twoMacs() model.AllMachines {
-	linux1 := sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Throwaway, State: model.Running, SizeGB: 20, IP: "192.168.64.5", Guest: "connected", CreatedAt: built}, 4, 4)
-	api := sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Permanent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8)
+	linux1 := sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", Guest: "connected", CreatedAt: built}, 4, 4)
+	api := sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8)
 	infra := sized(model.VM{Name: "infra", Image: "linux", Version: "3", Mac: miniName, Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Guest: "connected", Want: "running",
 		Check: "https://infra:6443/readyz", Device: "infra", CreatedAt: built, CheckStatus: model.CheckStatus{State: model.CheckPassing, At: keepAwakeNow.Add(-40 * time.Second), Answer: "200"}}, 8, 24)
 	infra.Resources.DiskBytes = 80 * gb
@@ -178,7 +178,7 @@ func linux1Page() pagemenubar.Machine {
 		{Section: "settings", Parts: []overview.Part{overview.Count(catalog.StateDegraded, 2, "need a look", "attention")}},
 		{Section: "disk", Parts: []overview.Part{{Word: "2.4 of 20 GB"}}},
 	}}
-	shares := accounts.Report{Now: keepAwakeNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{{Name: "linux-1", Kind: accounts.KindVM, Lifetime: "throwaway", Running: true, Accounts: []accounts.Account{
+	shares := accounts.Report{Now: keepAwakeNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{{Name: "linux-1", Kind: accounts.KindVM, Lifetime: "ephemeral", Running: true, Accounts: []accounts.Account{
 		{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Origin: accounts.OriginShared, Scopes: []string{"read only"}, Shared: &accounts.Loan{Name: "github", At: keepAwakeNow.Add(-8 * time.Hour), Until: keepAwakeNow.Add(4 * time.Hour)}},
 		{Provider: catalog.ProviderClaude, State: catalog.StateOK, Origin: accounts.OriginShared, Shared: &accounts.Loan{Name: catalog.ClaudeTokenName, At: keepAwakeNow, Until: keepAwakeNow.Add(12 * time.Hour)}},
 	}}}}

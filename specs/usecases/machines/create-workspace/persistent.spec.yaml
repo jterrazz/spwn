@@ -1,0 +1,11 @@
+description: '--persistent makes a workspace kept until deleted, in the outcome and in its record'
+env: two-macs
+runs:
+    - command: 'machines create api-2 --persistent | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	api-2	Created	Persistent · 4 CPU · 4 GB · 20 GB
+    - command: 'machines --this-mac | /usr/bin/grep api-2'
+      exit: 0
+      stdout: |
+          ●	api-2	Workspace	jterrazz-macbook-pro	Running · persistent	4 CPU	4 GB

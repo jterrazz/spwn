@@ -32,7 +32,7 @@ const (
 	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
-	// value: delete the throwaways whose agent finished, in one question.
+	// value: delete the ephemeral workspaces whose agent finished, in one question.
 	Cleanup Action = "cleanup"
 )
 
@@ -74,7 +74,7 @@ func For(a Action, k machine.Kind) Level {
 type Fact string
 
 const (
-	Throwaway   Fact = "throwaway"
+	Ephemeral   Fact = "ephemeral"
 	Healthy     Fact = "healthy"
 	HostsServer Fact = "hosts-server"
 )
@@ -82,12 +82,12 @@ const (
 func Of(a Action, k machine.Kind, facts ...Fact) Level {
 	// invariant: SPEC A5: the menu bar's alert asks at the level its facts
 	// grade, facts the page that asks it knows beyond the machine's kind: a
-	// throwaway's delete yes or no, a healthy server's restart yes
+	// ephemeral's delete yes or no, a healthy server's restart yes
 	// or no (an outage), a Mac hosting a server its name typed to restart.
 	// With no fact, the level is the call's own, For's.
 	has := func(f Fact) bool { return slices.Contains(facts, f) }
 	switch {
-	case a == Delete && k == machine.Workspace && has(Throwaway):
+	case a == Delete && k == machine.Workspace && has(Ephemeral):
 		return YesNo
 	case a == Restart && k == machine.Server && has(Healthy):
 		return YesNo

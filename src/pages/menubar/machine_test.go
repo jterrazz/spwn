@@ -27,9 +27,9 @@ const (
 func macFleet() *model.AllMachines {
 	server := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, Want: "running", Resources: model.Resources{MemoryBytes: 24 << 30},
 		BootAt: macNow.Add(-12 * 24 * time.Hour), CheckStatus: model.CheckStatus{State: model.CheckPassing}}
-	waits := model.VM{Name: "review-bot", Lifetime: model.Permanent, State: model.Running, Resources: model.Resources{MemoryBytes: 4 << 30},
+	waits := model.VM{Name: "review-bot", Lifetime: model.Persistent, State: model.Running, Resources: model.Resources{MemoryBytes: 4 << 30},
 		Agent: &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: macNow.Add(-6 * time.Minute)}}
-	works := model.VM{Name: "linux-3", Lifetime: model.Throwaway, State: model.Running, Resources: model.Resources{MemoryBytes: 8 << 30},
+	works := model.VM{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running, Resources: model.Resources{MemoryBytes: 8 << 30},
 		Agent: &model.AgentView{State: "working", Task: "refresh the auth token"}}
 	return &model.AllMachines{Read: macNow, Macs: []model.MacView{
 		{Name: proMac, User: "jterrazz", ThisMac: true, Reachable: true, Answered: macNow, Laptop: true, Hardware: coremachine.Hardware{Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 << 30}},
@@ -136,9 +136,9 @@ func TestAMacsNeedsAreItsOwnRedFirstThreeBeforeTheFold(t *testing.T) {
 func TestAMacsVMsListTheWorkingFirstAndEachOpensItsPage(t *testing.T) {
 	p := macPageOf(t, proMac, func(m *Machine) {
 		m.All.Macs[0].VMs = []model.VM{
-			{Name: "agent-7f", Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Reason: "tests pass"}},
-			{Name: "api", Lifetime: model.Permanent, State: model.Stopped},
-			{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running,
+			{Name: "agent-7f", Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Reason: "tests pass"}},
+			{Name: "api", Lifetime: model.Persistent, State: model.Stopped},
+			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running,
 				Agent: &model.AgentView{State: "working", Task: "builds the landing page", Step: []string{"running tests", "41/58 pass"}}},
 		}
 	})
@@ -238,7 +238,7 @@ func TestAMacWithNoVMOffersTheFirstInItsCard(t *testing.T) {
 // birth bar with its step; once ready it lands with its check.
 func TestAVMBeingCreatedShowsItsBirthThenLands(t *testing.T) {
 	born := func(edit func(*model.VM)) page.Row {
-		vm := model.VM{Name: "linux-4", Lifetime: model.Throwaway, State: model.Creating, Resources: model.Resources{MemoryBytes: 8 << 30}}
+		vm := model.VM{Name: "linux-4", Lifetime: model.Ephemeral, State: model.Creating, Resources: model.Resources{MemoryBytes: 8 << 30}}
 		edit(&vm)
 		p := macPageOf(t, miniMac, func(m *Machine) { m.All.Macs[1].VMs = append(m.All.Macs[1].VMs, vm) })
 		items := sectionOf(p, SectionVMs).Items

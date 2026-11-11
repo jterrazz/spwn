@@ -8,7 +8,7 @@ runs:
     - command: 'machines create --image macos --network bridged --memory 2G | /usr/bin/tail -1'
       exit: 0
       stdout: |
-          ●	macos-2	Created	Throwaway · 4 CPU · 2 GB · 80 GB
+          ●	macos-2	Created	Ephemeral · 4 CPU · 2 GB · 80 GB
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].vms["macos-2"].kept | [.image, .network] | @tsv'' world.json'
       exit: 0
       stdout: |

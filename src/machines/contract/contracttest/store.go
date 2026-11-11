@@ -14,7 +14,7 @@ import (
 
 func vmRecord(name string) machines.Record {
 	return machines.Record{
-		Name: name, Image: "linux", Version: "2026.11.01", Lifetime: machines.Permanent, Want: "running",
+		Name: name, Image: "linux", Version: "2026.11.01", Lifetime: machines.Persistent, Want: "running",
 		Env: map[string]string{"PORT": "40001"}, CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 50 << 30,
 		CreatedAt: time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC),
 	}

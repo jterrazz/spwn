@@ -10,7 +10,7 @@ runs:
           ●	expo	8081	http://127.0.0.1:{{port}}
           ●	vite	5173	http://127.0.0.1:{{port}}
           ◐	ports	Tailscale is signed out on This Mac: ports are local only
-          ●	linux-2	Created	Throwaway · 4 CPU · 4 GB · 20 GB
+          ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-2") | [.profile, .guest_port, .host_port]], env: .vms["linux-2"].kept.env}'' world.json'
       exit: 0
       stdout: |

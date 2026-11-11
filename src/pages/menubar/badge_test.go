@@ -32,7 +32,7 @@ func TestTheStatusItemCountsWhatNeedsYouAndSaysItsOneSignal(t *testing.T) {
 		}
 		return &accounts.AllMachines{Now: now, Macs: []accounts.MacAccounts{mac}}
 	}
-	waiting := model.VM{Name: "review-bot", Lifetime: model.Permanent, State: model.Running, Agent: &model.AgentView{State: "waiting", Ask: "PR #42 is ready"}}
+	waiting := model.VM{Name: "review-bot", Lifetime: model.Persistent, State: model.Running, Agent: &model.AgentView{State: "waiting", Ask: "PR #42 is ready"}}
 	upkeep := &overview.Summary{Needs: []overview.Need{{Section: "apps", Subject: "updates", Text: "2 app updates"}, {Section: "settings", Subject: "firewall", Text: "Firewall: off"}}}
 	cases := []struct {
 		name string

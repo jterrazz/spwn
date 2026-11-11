@@ -1,4 +1,4 @@
-description: 'a throwaway whose station does not answer is kept, its agent not started, with how to start it'
+description: 'an ephemeral workspace that is silent is kept, its agent not started, and how to start it is said'
 env: two-macs
 runs:
     - command: 'agents start "Build the landing page" --new'
@@ -9,4 +9,4 @@ runs:
     - command: 'machines --this-mac | /usr/bin/grep linux-2'
       exit: 0
       stdout: |
-          ●	linux-2	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	4 GB
+          ●	linux-2	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	4 GB

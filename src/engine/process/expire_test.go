@@ -87,8 +87,8 @@ type sharing struct {
 func newSharing(t *testing.T, held map[string][]accounts.Share) sharing {
 	t.Helper()
 	h := newHarness(t,
-		model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning},
-		model.VMRecord{Name: "web", Lifetime: model.Permanent, Want: model.WantRunning},
+		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},
+		model.VMRecord{Name: "web", Lifetime: model.Persistent, Want: model.WantRunning},
 	)
 	s := sharing{harness: h, shares: &fakeShares{held: held, expires: make(chan expired, 8)}, told: &toldNotifier{}}
 	h.d.o.AccountShares, h.d.notifier = s.shares, s.told

@@ -13,7 +13,7 @@ runs:
       exit: 0
       stdout: |
           ✗	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine stopped
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · permanent	4 CPU	8 GB
-          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · throwaway	4 CPU	8 GB
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · ephemeral	4 CPU	8 GB
           # Needs you
           ✗	This Mac	has its engine stopped	station engine start

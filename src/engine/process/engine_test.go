@@ -153,9 +153,9 @@ func cancelled(t *testing.T) context.Context {
 
 func TestAtStartADeadRunLeavesEveryWorkspaceStoppedAndRunsNone(t *testing.T) {
 	h := newHarness(t,
-		model.VMRecord{Name: "t", Lifetime: model.Throwaway},
-		model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning},
-		model.VMRecord{Name: "off", Lifetime: model.Permanent, Want: model.WantStopped},
+		model.VMRecord{Name: "t", Lifetime: model.Ephemeral},
+		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},
+		model.VMRecord{Name: "off", Lifetime: model.Persistent, Want: model.WantStopped},
 	)
 	h.d.adopt(cancelled(t))
 	for _, vm := range []string{"t", "api", "off"} {
@@ -169,7 +169,7 @@ func TestAtStartADeadRunLeavesEveryWorkspaceStoppedAndRunsNone(t *testing.T) {
 }
 
 func TestAtStartALiveRunIsAdoptedNeverRunAgain(t *testing.T) {
-	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning})
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
 	h.hv.outlived("api")
 	h.d.adopt(cancelled(t))
 	if got := h.state("api"); got != engine.StateRunning || h.runs() != 0 {
@@ -178,7 +178,7 @@ func TestAtStartALiveRunIsAdoptedNeverRunAgain(t *testing.T) {
 }
 
 func TestAThirdRebootWithinAMinuteStopsTheVMAsALoop(t *testing.T) {
-	h := newHarness(t, model.VMRecord{Name: "t", Lifetime: model.Throwaway})
+	h := newHarness(t, model.VMRecord{Name: "t", Lifetime: model.Ephemeral})
 	ctx := cancelled(t)
 	v, _ := h.d.find("t")
 	_ = h.d.start(ctx, v)
@@ -196,7 +196,7 @@ func TestAThirdRebootWithinAMinuteStopsTheVMAsALoop(t *testing.T) {
 }
 
 func TestARunWhoseGuestNeverConnectsAnswersGuestTimeoutAfterAMinute(t *testing.T) {
-	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning})
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
 	h.hv.outlived("api")
 	v, _ := h.d.find("api")
 	v.run, _ = h.hv.Adopt(t.Context(), "api")
@@ -214,8 +214,8 @@ func TestARunWhoseGuestNeverConnectsAnswersGuestTimeoutAfterAMinute(t *testing.T
 
 func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	h := newHarness(t,
-		model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning},
-		model.VMRecord{Name: "web", Lifetime: model.Permanent, Want: model.WantRunning},
+		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},
+		model.VMRecord{Name: "web", Lifetime: model.Persistent, Want: model.WantRunning},
 	)
 	h.m.stuck = map[string]bool{"api": true}
 	for _, name := range []string{"api", "web"} {
@@ -224,8 +224,8 @@ func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	}
 	got := h.d.stopAll(t.Context())
 	want := []engine.Stopped{
-		{Name: "api", Lifetime: "permanent", Result: engine.ResultFailed, Detail: "the engine still runs it"},
-		{Name: "web", Lifetime: "permanent", Result: engine.ResultStopped},
+		{Name: "api", Lifetime: "persistent", Result: engine.ResultFailed, Detail: "the engine still runs it"},
+		{Name: "web", Lifetime: "persistent", Result: engine.ResultStopped},
 	}
 	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
 		t.Errorf("stop_all answered %+v, want %+v", got, want)

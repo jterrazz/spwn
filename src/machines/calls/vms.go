@@ -77,7 +77,7 @@ func (s *Machinist) KeepAgents(name string, agents []string) error {
 }
 
 func (s *Machinist) Stop(ctx context.Context, name string) error {
-	// invariant: a stop keeps the workspace, throwaway or permanent (SP-5), and
+	// invariant: a stop keeps the workspace, ephemeral or persistent (SP-5), and
 	// like every action it is refused while the engine is stopped.
 	if err := s.CheckStop(name); err != nil {
 		return err

@@ -13,7 +13,7 @@ final class AlertTests: XCTestCase {
     // invariant: SPEC A5: the level is the engine's, drawn as it comes: a
     // typed alert names what to type, a yes or no one names nothing.
     func testEachAlertAsksAtTheLevelTheEngineGraded() throws {
-        let typed = ["alert.stop-server", "alert.stop-server.typed", "alert.delete-server", "alert.delete-vm.permanent", "alert.restart-mac"]
+        let typed = ["alert.stop-server", "alert.stop-server.typed", "alert.delete-server", "alert.delete-vm.persistent", "alert.restart-mac"]
         let asked = try Stories.load(root: Tree.stories).filter { $0.group == .alert }.map(\.id)
         XCTAssertEqual(asked.count, 16)
         for id in asked {
@@ -26,7 +26,7 @@ final class AlertTests: XCTestCase {
     // name is typed whole.
     func testTheRedButtonIsNeverTheDefaultAndATypedOneWaitsForItsName() throws {
         XCTAssertTrue(AlertCard.yesIsDefault(try confirm("alert.restart-server")))
-        for id in ["alert.stop-server", "alert.delete-vm.throwaway", "alert.stop-agent", "alert.forget-mac"] {
+        for id in ["alert.stop-server", "alert.delete-vm.ephemeral", "alert.stop-agent", "alert.forget-mac"] {
             XCTAssertFalse(AlertCard.yesIsDefault(try confirm(id)), id)
         }
         let stop = try confirm("alert.stop-server")

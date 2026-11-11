@@ -1,4 +1,4 @@
-description: 'a throwaway VM whose run ended without a poweroff shows stale, with its delete'
+description: 'an ephemeral VM whose run ended without a poweroff shows stale, with its delete'
 fixture:
     - ../../__fixtures__/vms/
     - ./__fixtures__/vm-t/
@@ -8,7 +8,7 @@ runs:
       exit: 0
       stdout: |
           ✗	x	Mac	x	Engine not installed
-          ○	t	Workspace	x	Stopped · throwaway	4 CPU	8 GB
+          ○	t	Workspace	x	Stopped · ephemeral	4 CPU	8 GB
           # Needs you
           ✗	This Mac	has no engine installed	station engine start
     - command: 'machines --this-mac --json | /usr/bin/jq -r ''.macs[0].vms[0] | .name + " " + .state'''

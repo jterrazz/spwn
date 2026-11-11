@@ -235,7 +235,7 @@ func entries() map[string]entry {
 			return asked("Add a Mac"+ellipsis, []Field{{Label: "Mac", Note: "its name on " + catalog.TailnetProduct}}, one(gesture.V("Add", "Adding", "Added"), func(a string) []string { return []string{"machines", "add", a} }))
 		}},
 		"machines.cleanup": {kinds: mac(), item: func(t, _ Target) Item {
-			return run("Delete the finished throwaways on "+t.Label, words(t, "machines", "cleanup"), gesture.V("Delete", "Deleting", "Deleted"), "the finished throwaways on "+t.Label)
+			return run("Delete the finished ephemeral workspaces on "+t.Label, words(t, "machines", "cleanup"), gesture.V("Delete", "Deleting", "Deleted"), "the finished ephemeral workspaces on "+t.Label)
 		}},
 		"machines.create-server": {kinds: allMachines(), item: func(_, _ Target) Item {
 			return Item{Label: "New server" + ellipsis, Create: machine.Server}

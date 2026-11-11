@@ -16,7 +16,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "permanent",
+          "text": "persistent",
           "pri": 1
         },
         {
@@ -209,7 +209,7 @@
       "items": [
         {
           "note": {
-            "text": "Permanent: kept until you delete it; never paused."
+            "text": "Persistent: kept until you delete it; never paused."
           }
         }
       ],

@@ -9,4 +9,4 @@ runs:
       exit: 0
       stdout: |
           ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          	linux-4	Workspace	jterrazz-macbook-pro	Creating · throwaway	4 CPU	8 GB	booting
+          	linux-4	Workspace	jterrazz-macbook-pro	Creating · ephemeral	4 CPU	8 GB	booting

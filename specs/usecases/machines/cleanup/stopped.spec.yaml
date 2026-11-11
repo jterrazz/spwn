@@ -1,4 +1,4 @@
-description: 'a throwaway stopped by its owner goes in a cleanup; a permanent one stopped is kept'
+description: 'an ephemeral workspace stopped by its owner goes in a cleanup; a persistent one stopped is kept'
 env: two-macs
 runs:
     - command: 'machines stop linux-1 --yes'
@@ -13,4 +13,4 @@ runs:
       exit: 0
       stdout: |
           ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · permanent	4 CPU	8 GB
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB

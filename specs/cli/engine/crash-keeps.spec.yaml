@@ -1,4 +1,4 @@
-description: 'a throwaway run that ends with an error keeps the VM, stale'
+description: 'an ephemeral run that ends with an error keeps the VM, stale'
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/

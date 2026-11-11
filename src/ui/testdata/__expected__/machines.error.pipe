@@ -1,6 +1,6 @@
 ✗	macbook	Mac	macbook	Engine stopped
-○	api	Workspace	macbook	Stopped · permanent	4 CPU	8 GB
-●	linux-1	Workspace	macbook	Running · throwaway	4 CPU	4 GB
+○	api	Workspace	macbook	Stopped · persistent	4 CPU	8 GB
+●	linux-1	Workspace	macbook	Running · ephemeral	4 CPU	4 GB
 ✗	mac-mini	Mac	mac-mini	Unreachable
 # Needs you
 ✗	This Mac	has its engine stopped	station engine start

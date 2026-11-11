@@ -37,7 +37,7 @@ func needsWorlds() []World {
 func twoMoreAgents(f *Scene) {
 	mini := &f.All.Macs[1]
 	for _, w := range []struct{ name, task, ip string }{{"linux-5", "migrates the db schema", "192.168.64.10"}, {"linux-6", "writes the changelog", "192.168.64.11"}} {
-		vm := sceneVM(w.name, miniMac, model.Throwaway, model.Running, 2, 4, w.ip)
+		vm := sceneVM(w.name, miniMac, model.Ephemeral, model.Running, 2, 4, w.ip)
 		vm.Agent = &model.AgentView{State: "working", Task: w.task}
 		mini.VMs = append(mini.VMs, vm)
 	}

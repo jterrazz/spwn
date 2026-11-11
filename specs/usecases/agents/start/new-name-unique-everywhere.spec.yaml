@@ -1,4 +1,4 @@
-description: '--new makes its throwaway under a name no agent of any machine holds, and gives the agent that name'
+description: '--new makes an ephemeral workspace under a name no agent anywhere holds, and gives it to the agent'
 env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-3"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
@@ -11,7 +11,7 @@ runs:
     - command: 'agents start "Build the landing page" --new'
       exit: 0
       stdout: |
-          ●	linux-3	starts on linux-3, a new throwaway · claudecode · Build the landing page
+          ●	linux-3	starts on linux-3, a new ephemeral workspace · claudecode · Build the landing page
     - command: 'agents'
       exit: 0
       stdout: |

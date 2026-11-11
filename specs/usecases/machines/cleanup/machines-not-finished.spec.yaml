@@ -1,4 +1,4 @@
-description: 'a throwaway whose agent still works stays and is named; naming it is refused'
+description: 'an ephemeral workspace whose agent still works stays and is named; naming it is refused'
 env: two-macs
 runs:
     - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'
@@ -15,9 +15,9 @@ runs:
     - command: 'machines cleanup linux-1 --yes'
       exit: 2
       stderr: |
-          Error: linux-1 stays: only a throwaway that is stopped, or whose agent finished, is deleted by a cleanup
+          Error: linux-1 stays: only an ephemeral workspace that is stopped, or whose agent finished, is deleted by a cleanup
           Hint: station machines cleanup
     - command: 'machines | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	8 GB
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB

@@ -156,7 +156,7 @@ type AllMachines struct {
 
 type CreateRequest struct {
 	Image, Name string
-	// value: a workspace's, throwaway or permanent; a server's is always on.
+	// value: a workspace's, ephemeral or persistent; a server's is always on.
 	Lifetime Lifetime
 	Network  string
 	Size     Resources

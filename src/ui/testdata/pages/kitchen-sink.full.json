@@ -980,7 +980,7 @@
                     "cells": [
                       {
                         "kind": "text",
-                        "text": "permanent"
+                        "text": "persistent"
                       },
                       {
                         "kind": "text",
@@ -1037,7 +1037,7 @@
                   "cells": [
                     {
                       "kind": "text",
-                      "text": "permanent"
+                      "text": "persistent"
                     },
                     {
                       "kind": "text",

@@ -465,8 +465,8 @@ func CreateForm(lifetime string, macs []MacChoice) page.Form {
 	var f page.Form
 	if lifetime == "" {
 		f.Fields = append(f.Fields, page.Field{Key: "lifetime", Label: "Will it last?", Kind: page.FieldSelect, Options: []page.Option{
-			{Value: "throwaway", Label: "Throwaway: deleted when it powers off from inside"},
-			{Value: "permanent", Label: "Permanent: kept until you delete it"},
+			{Value: "ephemeral", Label: "Ephemeral: deleted when it powers off from inside"},
+			{Value: "persistent", Label: "Persistent: kept until you delete it"},
 		}})
 	}
 	if len(macs) >= 2 {

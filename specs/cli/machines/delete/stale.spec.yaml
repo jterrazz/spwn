@@ -1,4 +1,4 @@
-description: 'a stale throwaway VM is deleted by its verb: the VM goes from tart, with no tailnet call'
+description: 'a stale ephemeral VM is deleted by its verb: the VM goes from tart, with no tailnet call'
 fixture:
     - ../../../__fixtures__/vms/
     - ../__fixtures__/vm-t/

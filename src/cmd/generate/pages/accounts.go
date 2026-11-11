@@ -41,7 +41,7 @@ func entryAccount() accounts.Account {
 func accountsReport() accounts.Report {
 	return accounts.Report{Now: accountsNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{
 		macAccounts(),
-		{Name: "linux-1", Kind: accounts.KindVM, Lifetime: "throwaway", Running: true, Guest: accounts.GuestConnected, Accounts: []accounts.Account{
+		{Name: "linux-1", Kind: accounts.KindVM, Lifetime: "ephemeral", Running: true, Guest: accounts.GuestConnected, Accounts: []accounts.Account{
 			{Provider: catalog.ProviderGitHub, State: catalog.StateAbsent, Reason: accounts.ReasonUnset, Detail: "not logged in", Hint: "ssh linux-1 gh auth login"},
 			{Provider: catalog.ProviderNPM, State: catalog.StateAbsent, Reason: accounts.ReasonMissing, Detail: "npm not on PATH"},
 			shared(catalog.ProviderClaude, catalog.ClaudeTokenName, 11*time.Hour+40*time.Minute, catalog.StateOK, "", ""),
@@ -49,7 +49,7 @@ func accountsReport() accounts.Report {
 			{Provider: catalog.ProviderSSH, State: catalog.StateAbsent, Reason: accounts.ReasonUnset, Detail: "no key in the agent"},
 			entryAccount(),
 		}},
-		{Name: "api", Kind: accounts.KindVM, Lifetime: "permanent", Running: true, Guest: accounts.GuestConnected, Accounts: []accounts.Account{
+		{Name: "api", Kind: accounts.KindVM, Lifetime: "persistent", Running: true, Guest: accounts.GuestConnected, Accounts: []accounts.Account{
 			shared(catalog.ProviderClaude, catalog.ClaudeTokenName, 42*time.Minute, catalog.StateDegraded, accounts.ReasonExpiring, "station accounts share claude --with api"),
 			entryAccount(),
 		}},

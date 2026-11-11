@@ -199,8 +199,8 @@ func (s vmSheet) workspace(h model.MacView, id string) []page.Action {
 		Note:    answer(vm) + answerSep + "shares {" + keyShare + ": and |no account}[ for " + answer(keyShareFor) + "]",
 		Fields: []page.Field{
 			s.kind(h, id),
-			{Key: lifetime, Label: "Lifetime", Kind: page.FieldSegmented, Default: string(model.Throwaway), Options: []page.Option{
-				{Value: string(model.Throwaway), Label: "Throwaway"}, {Value: string(model.Permanent), Label: "Permanent"},
+			{Key: lifetime, Label: "Lifetime", Kind: page.FieldSegmented, Default: string(model.Ephemeral), Options: []page.Option{
+				{Value: string(model.Ephemeral), Label: "Ephemeral"}, {Value: string(model.Persistent), Label: "Persistent"},
 			}},
 			system(image), s.memory(h, memory), s.sharing(h), s.name(vm, "Generated, editable"),
 		}}

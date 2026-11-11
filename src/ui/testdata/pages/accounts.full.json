@@ -429,7 +429,7 @@
               "cells": [
                 {
                   "kind": "text",
-                  "text": "throwaway"
+                  "text": "ephemeral"
                 }
               ],
               "detail": {
@@ -654,7 +654,7 @@
               "cells": [
                 {
                   "kind": "text",
-                  "text": "permanent"
+                  "text": "persistent"
                 }
               ],
               "detail": {

@@ -22,8 +22,8 @@
  Machines  2 ●  1 ◐  1 ○  1 ✗
    ◐ This Mac       Mac        awake until 18:00
    └─   Workspaces
-      ├─ ● linux-1  Workspace  Throwaway · 2 ports shared
-      └─ ○ api      Workspace  Permanent · Stopped
+      ├─ ● linux-1  Workspace  Ephemeral · 2 ports shared
+      └─ ○ api      Workspace  Persistent · Stopped
    ✗ mac-mini       Mac        never sleeps · 1 needs you
    └─   Servers
       └─ ● infra    Server     Always on · healthy · up 12 d · 0 restarts

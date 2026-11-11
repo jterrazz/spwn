@@ -4,12 +4,12 @@ runs:
     - command: 'agents start "Build the landing page"'
       exit: 2
       stderr: |
-          Error: an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)
+          Error: an agent starts on a running workspace (--on <workspace>) or on a new ephemeral workspace (--new)
           Hint: station agents start "<task>" --on <workspace>
     - command: 'agents start "Build the landing page" --new --on linux-1'
       exit: 2
       stderr: |
-          Error: an agent starts on a workspace (--on) or on a new throwaway (--new), not both
+          Error: an agent starts on a workspace (--on) or on a new ephemeral workspace (--new), not both
           Hint: station agents start "<task>" --new
     - command: 'machines --this-mac | /usr/bin/grep -c linux-2'
       exit: 1

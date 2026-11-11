@@ -18,16 +18,16 @@ func TestAfterRunKeepsEveryVMAStopDidNotDeclare(t *testing.T) {
 		now      time.Time
 		want     Action
 	}{
-		{name: "the declared poweroff wins over the run's exit code", lifetime: Throwaway, end: RunEnd{Reason: GuestPoweroff, ExitCode: 1}, now: at(0), want: ActDelete},
-		{name: "a permanent workspace's declared poweroff keeps it stopped", lifetime: Permanent, end: poweroff, now: at(0), want: ActStopped},
-		{name: "a throwaway crash keeps it stale", lifetime: Throwaway, end: RunEnd{Reason: Crashed, ExitCode: 137}, now: at(0), want: ActStale},
-		{name: "a throwaway run whose end nobody can read keeps it stale", lifetime: Throwaway, end: RunEnd{Reason: Unknown, ExitCode: -1}, now: at(0), want: ActStale},
-		{name: "a permanent crash keeps it stale: a workspace never restarts by itself", lifetime: Permanent, end: RunEnd{Reason: Crashed, ExitCode: 137}, now: at(0), want: ActStale},
-		{name: "a second reboot within the window still runs", lifetime: Throwaway, end: reboot, reruns: []time.Time{at(0)}, now: at(10), want: ActRerun},
-		{name: "a third reboot within the window is a loop", lifetime: Throwaway, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(20), want: ActBroken},
-		{name: "a permanent reboot loop is stopped too", lifetime: Permanent, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(20), want: ActBroken},
-		{name: "reboots older than the window are forgotten", lifetime: Throwaway, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(65), want: ActRerun},
-		{name: "the window is a strict 60 seconds", lifetime: Throwaway, end: reboot, reruns: []time.Time{at(0), at(30)}, now: at(60), want: ActRerun},
+		{name: "the declared poweroff wins over the run's exit code", lifetime: Ephemeral, end: RunEnd{Reason: GuestPoweroff, ExitCode: 1}, now: at(0), want: ActDelete},
+		{name: "a persistent workspace's declared poweroff keeps it stopped", lifetime: Persistent, end: poweroff, now: at(0), want: ActStopped},
+		{name: "an ephemeral crash keeps it stale", lifetime: Ephemeral, end: RunEnd{Reason: Crashed, ExitCode: 137}, now: at(0), want: ActStale},
+		{name: "an ephemeral run whose end nobody can read keeps it stale", lifetime: Ephemeral, end: RunEnd{Reason: Unknown, ExitCode: -1}, now: at(0), want: ActStale},
+		{name: "a persistent crash keeps it stale: a workspace never restarts by itself", lifetime: Persistent, end: RunEnd{Reason: Crashed, ExitCode: 137}, now: at(0), want: ActStale},
+		{name: "a second reboot within the window still runs", lifetime: Ephemeral, end: reboot, reruns: []time.Time{at(0)}, now: at(10), want: ActRerun},
+		{name: "a third reboot within the window is a loop", lifetime: Ephemeral, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(20), want: ActBroken},
+		{name: "a persistent reboot loop is stopped too", lifetime: Persistent, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(20), want: ActBroken},
+		{name: "reboots older than the window are forgotten", lifetime: Ephemeral, end: reboot, reruns: []time.Time{at(0), at(10)}, now: at(65), want: ActRerun},
+		{name: "the window is a strict 60 seconds", lifetime: Ephemeral, end: reboot, reruns: []time.Time{at(0), at(30)}, now: at(60), want: ActRerun},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			if got, _ := AfterRun(c.lifetime, c.end, c.reruns, c.now); got != c.want {
@@ -64,12 +64,12 @@ func TestAnEngineThatStartsAdoptsRunsAndBootsOnlyServers(t *testing.T) {
 		got        Convergence
 	}{
 		{AlwaysOn, true, true, Adopt},
-		{Throwaway, true, true, Adopt},
+		{Ephemeral, true, true, Adopt},
 		{AlwaysOn, true, false, Boot},
 		{AlwaysOn, false, false, Stay},
-		{Throwaway, true, false, EndedWithItsMac},
-		{Permanent, true, false, EndedWithItsMac},
-		{Permanent, false, false, Stay},
+		{Ephemeral, true, false, EndedWithItsMac},
+		{Persistent, true, false, EndedWithItsMac},
+		{Persistent, false, false, Stay},
 	} {
 		if got := Converge(c.lifetime, c.want, c.live); got != c.got {
 			t.Errorf("Converge(%s, wanted running %v, live %v) = %d, want %d", c.lifetime, c.want, c.live, got, c.got)

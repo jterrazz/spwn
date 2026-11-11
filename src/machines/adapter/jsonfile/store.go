@@ -15,7 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/src/machines/contract"
 )
 
-const Version = 1
+const Version = 2
 
 type Files interface {
 	ReadFile(path string) ([]byte, error)
@@ -115,7 +115,7 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Agents: r.Agents,
+		Birth: r.Birth, Agents: r.Agents, V: Version,
 	}, "", "  ")
 	if err != nil {
 		return err
@@ -166,6 +166,11 @@ func (s *Store) Delete(_ context.Context, name string) error {
 }
 
 func (s *Store) Migrate(context.Context) error {
+	// invariant: version 2 writes the lifetime as ephemeral or persistent,
+	// where version 1 wrote throwaway or permanent (or v2's words); a record
+	// written before it is rewritten in today's words, its shares kept as
+	// they are; a record at version 2, or one that cannot be read, is left
+	// as it is.
 	entries, err := s.files.ReadDir(s.dir)
 	if err != nil {
 		return store.OnlyNewer(err)
@@ -174,8 +179,20 @@ func (s *Store) Migrate(context.Context) error {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
-		_, err = s.read(path.Join(s.dir, e.Name()))
+		at := path.Join(s.dir, e.Name())
+		f, err := s.read(at)
 		if store.OnlyNewer(err) != nil {
+			return err
+		}
+		if err != nil || f.V >= Version {
+			continue
+		}
+		f.V = Version
+		data, err := json.MarshalIndent(f, "", "  ")
+		if err != nil {
+			return err
+		}
+		if err := s.files.WriteFile(at, append(data, '\n'), 0o600); err != nil {
 			return err
 		}
 	}

@@ -12,7 +12,7 @@ import (
 	pagemachines "github.com/jterrazz/studio-station/src/pages/machines"
 )
 
-// value: what one Mac gives Clean up: its empty throwaways, its finished
+// value: what one Mac gives Clean up: its empty ephemeral workspaces, its finished
 // agents by their own names, and the VMs that stay because an agent lives
 // there or they run.
 type cleanupOf struct {
@@ -51,17 +51,17 @@ func cleanupsOf(macs []model.MacView, as []agents.Agent) []cleanupOf {
 
 func (c cleanupOf) any() bool { return len(c.gone) > 0 || len(c.finished) > 0 }
 
-// invariant: SPEC A5 Clean up (A2): finished agents and empty throwaways
+// invariant: SPEC A5 Clean up (A2): finished agents and empty ephemeral workspaces
 // apart, each checked: an agent is forgotten and its workspace stays; a
-// throwaway goes with its disk, its ports and the accounts lent to it, and
+// ephemeral goes with its disk, its ports and the accounts lent to it, and
 // checking it checks the finished agents that ran in it; every finished
 // agent has its own forget, which the client makes only while the agent is
-// checked and its throwaway is not; the note names
+// checked and its ephemeral workspace is not; the note names
 // what stays. The button is worded from what is checked, red once a
-// throwaway is. One Mac's, or every Mac's when scoped to none.
+// ephemeral is. One Mac's, or every Mac's when scoped to none.
 func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Time, scoped bool) page.Action {
 	agentsField := page.Field{Key: "Agent", Label: "Finished agents", Kind: page.FieldMulti, Note: "each is forgotten; its workspace stays", Follows: "VMs"}
-	vmsField := page.Field{Key: "VMs", Label: "Empty throwaways", Kind: page.FieldMulti, Note: "no live agent; each goes with its disk, its ports and the accounts lent to it"}
+	vmsField := page.Field{Key: "VMs", Label: "Empty ephemeral workspaces", Kind: page.FieldMulti, Note: "no live agent; each goes with its disk, its ports and the accounts lent to it"}
 	var runs []page.Run
 	var live, running []string
 	waiting := false
@@ -119,12 +119,12 @@ func cleanupSheet(id string, all model.AllMachines, of []cleanupOf, now time.Tim
 	}
 	var primary []page.Primary
 	for k := len(vmsField.Options); k >= 1; k-- {
-		primary = append(primary, page.Primary{When: &page.When{Key: "VMs", Count: k}, Label: "Delete " + counted(k, "throwaway", "throwaways"), Danger: true})
+		primary = append(primary, page.Primary{When: &page.When{Key: "VMs", Count: k}, Label: "Delete " + counted(k, "ephemeral workspace", "ephemeral workspaces"), Danger: true})
 	}
 	for k := len(agentsField.Options); k >= 1; k-- {
 		primary = append(primary, page.Primary{When: &page.When{Key: "Agent", Count: k}, Label: "Forget " + counted(k, "agent", "agents")})
 	}
-	title, sub := "Clean up", "Finished agents and empty throwaways."
+	title, sub := "Clean up", "Finished agents and empty ephemeral workspaces."
 	if scoped && len(of) == 1 {
 		title = "Clean up on " + model.Label(all, of[0].mac)
 	}
@@ -150,7 +150,7 @@ func values(opts []page.Option, own bool) string {
 }
 
 // value: the note naming what stays: the VMs a live agent is in, said
-// working while none of them waits, then the throwaways still running.
+// working while none of them waits, then the ephemeral workspaces still running.
 func stays(live []string, waiting bool, running []string) string {
 	agent := "a working agent"
 	if waiting {

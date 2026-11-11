@@ -10,7 +10,7 @@ final class TidyTests: XCTestCase {
                 ? #"{"row":{"id":"\#(name)","mark":"absent","label":"\#(name)","cells":[{"kind":"text","text":"Workspace"},{"kind":"list","items":[{"kind":"text","text":"\#(lifetime)"},{"kind":"text","text":"Stopped"}]}],"reason":"stopped"}}"#
                 : #"{"row":{"id":"\#(name)","mark":"ok","label":"\#(name)","cells":[{"kind":"text","text":"Workspace"},{"kind":"list","items":[{"kind":"text","text":"\#(lifetime)"}]}]}}"#
         }
-        let json = #"{"schema":"station.page/v1","id":"menubar","sections":[{"id":"machines","title":"Machines","items":[{"group":{"head":{"id":"jterrazz-macbook-pro","mark":"ok","label":"This Mac","cells":[{"kind":"text","text":"Mac"}]},"items":[{"group":{"head":{"id":"jterrazz-macbook-pro/workspaces","label":"Workspaces"},"items":[\#(extra)\#(vm("linux-1", "Throwaway", linux)),\#(vm("api", "Permanent", api))]}}]}},{"group":{"head":{"id":"jterrazz-mac-mini","mark":"ok","label":"mac-mini","cells":[{"kind":"text","text":"Mac"}]},"items":[{"group":{"head":{"id":"jterrazz-mac-mini/workspaces","label":"Workspaces"},"items":[\#(vm("web", "Permanent", "running"))]}},{"group":{"head":{"id":"jterrazz-mac-mini/servers","label":"Servers"},"items":[{"row":{"id":"infra","mark":"ok","label":"infra","cells":[{"kind":"text","text":"Server"},{"kind":"list","items":[{"kind":"text","text":"Always on"}]}]}}]}}]}}]}]}"#
+        let json = #"{"schema":"station.page/v1","id":"menubar","sections":[{"id":"machines","title":"Machines","items":[{"group":{"head":{"id":"jterrazz-macbook-pro","mark":"ok","label":"This Mac","cells":[{"kind":"text","text":"Mac"}]},"items":[{"group":{"head":{"id":"jterrazz-macbook-pro/workspaces","label":"Workspaces"},"items":[\#(extra)\#(vm("linux-1", "Ephemeral", linux)),\#(vm("api", "Persistent", api))]}}]}},{"group":{"head":{"id":"jterrazz-mac-mini","mark":"ok","label":"mac-mini","cells":[{"kind":"text","text":"Mac"}]},"items":[{"group":{"head":{"id":"jterrazz-mac-mini/workspaces","label":"Workspaces"},"items":[\#(vm("web", "Persistent", "running"))]}},{"group":{"head":{"id":"jterrazz-mac-mini/servers","label":"Servers"},"items":[{"row":{"id":"infra","mark":"ok","label":"infra","cells":[{"kind":"text","text":"Server"},{"kind":"list","items":[{"kind":"text","text":"Always on"}]}]}}]}}]}}]}]}"#
         return try Page.decode(Data(json.utf8))
     }
 
@@ -52,7 +52,7 @@ final class TidyTests: XCTestCase {
         let rows = HomeKeys.rows(tree.lines())
         let api = try XCTUnwrap(rows.first { $0.id == "api" })
         XCTAssertEqual(api.mark, .pending)
-        XCTAssertEqual(MachineRow(row: api, symbol: "", kinds: false, open: { _ in }).words, "Permanent\(Token.Glyph.sep)Stopping")
+        XCTAssertEqual(MachineRow(row: api, symbol: "", kinds: false, open: { _ in }).words, "Persistent\(Token.Glyph.sep)Stopping")
         let linux = try XCTUnwrap(rows.first { $0.id == "linux-1" })
         XCTAssertEqual(linux.mark, .absent)
     }

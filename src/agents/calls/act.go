@@ -178,7 +178,7 @@ type StartIn struct {
 	// value: the running workspace a Mac starts it on; inside a workspace,
 	// the workspace itself, whatever name its Mac knows it by.
 	On string `json:",omitempty"`
-	// value: a new throwaway it starts on, made first; a Mac asks exactly one
+	// value: a new ephemeral workspace it starts on, made first; a Mac asks exactly one
 	// of On and New.
 	New *New `json:",omitempty"`
 	// value: the folder it works in, inside the VM; empty is the terminal's
@@ -187,7 +187,7 @@ type StartIn struct {
 }
 
 type New struct {
-	// value: the Mac the throwaway is made on; empty is the one asked.
+	// value: the Mac the ephemeral workspace is made on; empty is the one asked.
 	Mac   string `json:",omitempty"`
 	Image string `json:",omitempty"`
 	CPUs  int    `json:",omitempty"`
@@ -204,7 +204,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 	Errors: []fail.Code{UnknownApp, BadName, NameTaken, NoWhere},
 	Run: func(ctx context.Context, d Deps, in StartIn, p call.Progress) (agents.Agent, error) {
 		// invariant: SPEC B5.22: a Mac starts an agent on the running workspace
-		// On names, or on the throwaway New makes first, its name unique on
+		// On names, or on the ephemeral workspace New makes first, its name unique on
 		// every machine; inside a workspace it starts on the workspace itself.
 		if d.Kind == machine.Computer {
 			return d.startFromMac(ctx, in, p)
@@ -221,7 +221,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 
 // invariant: SPEC B5.22: a name is judged against every machine's before
 // anything is made: an agent's anywhere, or another workspace's own; the
-// throwaway New asks is made only then, and its agent started on it once
+// ephemeral New asks is made only then, and its agent started on it once
 // it answers.
 func (d Deps) startFromMac(ctx context.Context, in StartIn, p call.Progress) (agents.Agent, error) {
 	switch {
@@ -265,7 +265,7 @@ func (d Deps) startFromMac(ctx context.Context, in StartIn, p call.Progress) (ag
 	return a, err
 }
 
-// value: the throwaway made for the agent, by its name, on the Mac New
+// value: the ephemeral workspace made for the agent, by its name, on the Mac New
 // asks; its steps said as they run.
 func (d Deps) create(ctx context.Context, in StartIn, p call.Progress) (string, error) {
 	size, err := machines.ParseResources(in.New.CPUs, in.New.Memory, in.New.Disk)
@@ -273,7 +273,7 @@ func (d Deps) create(ctx context.Context, in StartIn, p call.Progress) (string, 
 		return "", err
 	}
 	created, err := call.Invoke(ctx, d.Calls, machine.Ref{Name: in.New.Mac}, machinescalls.CreateWorkspace, machinescalls.CreateIn{
-		Request: machines.CreateRequest{Image: cmp.Or(in.New.Image, "linux"), Name: in.Name, Lifetime: machines.Throwaway, Size: size},
+		Request: machines.CreateRequest{Image: cmp.Or(in.New.Image, "linux"), Name: in.Name, Lifetime: machines.Ephemeral, Size: size},
 		Confirm: in.New.Confirm,
 	}, p)
 	if err != nil {

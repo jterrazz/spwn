@@ -50,7 +50,7 @@ func actionOf(p page.Page, id string) page.Action {
 }
 
 func agent(name, state, task string) model.VM {
-	return model.VM{Name: name, Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: state, Task: task}}
+	return model.VM{Name: name, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: state, Task: task}}
 }
 
 func rowWords(s page.Section) []string {

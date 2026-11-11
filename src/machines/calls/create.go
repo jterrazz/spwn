@@ -68,8 +68,8 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	case server:
 		r.Lifetime = model.AlwaysOn
 	case r.Lifetime == "":
-		r.Lifetime = model.Throwaway
-	case r.Lifetime != model.Throwaway && r.Lifetime != model.Permanent:
+		r.Lifetime = model.Ephemeral
+	case r.Lifetime != model.Ephemeral && r.Lifetime != model.Persistent:
 		return r, &model.BadLifetimeError{Value: string(r.Lifetime)}
 	}
 	switch {
@@ -251,7 +251,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second),
 	}
 	want := ""
-	if r.Lifetime == model.Permanent || server {
+	if r.Lifetime == model.Persistent || server {
 		want = model.WantRunning
 	}
 	made := &made{}

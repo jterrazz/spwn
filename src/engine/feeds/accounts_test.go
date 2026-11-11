@@ -21,7 +21,7 @@ const air = "jterrazz-macbook-air"
 
 func twoMacsSignedIn() *world {
 	now := newSteps().Now()
-	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Permanent, State: machines.Running, Guest: "connected"}
+	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Persistent, State: machines.Running, Guest: "connected"}
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		added: []machines.MacView{{Name: air}},
 		signedIn: map[string]accounts.Report{
@@ -170,7 +170,7 @@ func TestAWorkspacesAccountsAreTheCopiesItsMacSharedWithIt(t *testing.T) {
 		t.Errorf("linux-1's copies are %q with %v, want its two, then Lend an account", s.Title, rowIDs(p, "shared"))
 	}
 	w := twoMacsSignedIn()
-	w.beside = []machines.VM{{Name: "review-bot", Mac: mini, Lifetime: machines.Throwaway, State: machines.Running}}
+	w.beside = []machines.VM{{Name: "review-bot", Mac: mini, Lifetime: machines.Ephemeral, State: machines.Running}}
 	bot := watchAccounts(t, w, "review-bot")
 	if s := bot.Sections; len(s) != 2 || s[1].Title != "Lent to review-bot" || s[1].Items[0].Empty == nil || s[1].Items[0].Empty.Text != "No account lent to review-bot" {
 		t.Errorf("review-bot's accounts are %+v, want none shared, said so", s)

@@ -36,20 +36,20 @@ func fleetOfTwo() model.AllMachines {
 	working := &model.AgentView{State: "working"}
 	return model.AllMachines{Macs: []model.MacView{
 		{Name: "pro", ThisMac: true, Reachable: true, VMs: []model.VM{
-			{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running, Agent: working},
-			{Name: "agent-7f", Lifetime: model.Throwaway, State: model.Running, Agent: finished, SizeGB: 12},
-			{Name: "docs", Lifetime: model.Permanent, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Ended: sheetNow.Add(-time.Hour)}},
+			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running, Agent: working},
+			{Name: "agent-7f", Lifetime: model.Ephemeral, State: model.Running, Agent: finished, SizeGB: 12},
+			{Name: "docs", Lifetime: model.Persistent, State: model.Running, Agent: &model.AgentView{State: model.AgentFinished, Ended: sheetNow.Add(-time.Hour)}},
 		}},
 		{Name: "mini", Reachable: true, VMs: []model.VM{
-			{Name: "old", Lifetime: model.Throwaway, State: model.Stopped, SizeGB: 8},
+			{Name: "old", Lifetime: model.Ephemeral, State: model.Stopped, SizeGB: 8},
 			{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running},
 		}},
-		{Name: "air", Reachable: true, Asleep: true, VMs: []model.VM{{Name: "away", Lifetime: model.Throwaway, State: model.Running}}},
+		{Name: "air", Reachable: true, Asleep: true, VMs: []model.VM{{Name: "away", Lifetime: model.Ephemeral, State: model.Running}}},
 	}}
 }
 
 // value: the fleet's agents, each named apart from its VM as the New agent
-// sheet names them: a finished one on a throwaway, one finished beside a
+// sheet names them: a finished one on an ephemeral workspace, one finished beside a
 // working one, one on a workspace, one on another Mac.
 func sheetAgents() []agents.Agent {
 	done := func(name, vm, mac string) agents.Agent {
@@ -73,12 +73,12 @@ func fieldOf(a page.Action, key string) page.Field {
 	return page.Field{}
 }
 
-// invariant: SPEC A5 Clean up across every Mac: the empty throwaways of
+// invariant: SPEC A5 Clean up across every Mac: the empty ephemeral workspaces of
 // each Mac deleted on that Mac, every finished agent listed and forgotten
-// by its own name in its own VM, the one a throwaway carries too, should
-// the owner keep the throwaway; the button worded from what is checked,
-// red once a throwaway is; the note names what an agent still works in.
-func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
+// by its own name in its own VM, the one an ephemeral workspace carries too, should
+// the owner keep the ephemeral workspace; the button worded from what is checked,
+// red once an ephemeral workspace is; the note names what an agent still works in.
+func TestCleanUpDeletesEachMacsEphemeralsAndForgetsTheAgentsLeft(t *testing.T) {
 	all := fleetOfTwo()
 	a := cleanupSheet(ActionCleanup, all, cleanupsOf(all.Macs, sheetAgents()), sheetNow, false)
 	calls := make([]string, 0, 1+len(a.Run.And))
@@ -97,13 +97,13 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 	}
 	finished, vms := fieldOf(a, "Agent"), fieldOf(a, "VMs")
 	if finished.Follows != "VMs" || finished.Options[0].Of != "agent-7f" || finished.Options[1].Of != "" || finished.Default != "docs-bot,docs,infra-2" {
-		t.Errorf("the finished agents %+v: changelog-bot goes with its throwaway, the others are checked on their own", finished)
+		t.Errorf("the finished agents %+v: changelog-bot goes with its ephemeral workspace, the others are checked on their own", finished)
 	}
 	if o := finished.Options[1]; o.Label != "docs-bot" || o.Note != "on linux-1{sep}finished 12 min ago{sep}tests pass" {
 		t.Errorf("the agent beside a working one is listed as %+v", o)
 	}
 	if vms.Default != "agent-7f,old" || vms.Options[1].Note != "mini{sep}stopped{sep}8 GB disk" {
-		t.Errorf("the throwaways %+v", vms)
+		t.Errorf("the ephemeral workspaces %+v", vms)
 	}
 	if note := fieldOf(a, "stays").Note; note != "linux-1 has a working agent, so it stays. away is still running, so it stays." {
 		t.Errorf("the note says %q", note)
@@ -115,13 +115,13 @@ func TestCleanUpDeletesEachMacsThrowawaysAndForgetsTheAgentsLeft(t *testing.T) {
 			t.Errorf("%q is red: %v", p.Label, p.Danger)
 		}
 	}
-	if want := []string{"Delete 2 throwaways", "Delete 1 throwaway", "Forget 4 agents", "Forget 3 agents", "Forget 2 agents", "Forget 1 agent"}; !slices.Equal(words, want) {
+	if want := []string{"Delete 2 ephemeral workspaces", "Delete 1 ephemeral workspace", "Forget 4 agents", "Forget 3 agents", "Forget 2 agents", "Forget 1 agent"}; !slices.Equal(words, want) {
 		t.Errorf("the button says %q, want %q", words, want)
 	}
 }
 
 // invariant: SPEC A5 Clean up on one Mac: its title names the Mac, its
-// throwaways say no Mac, and it deletes and forgets on that Mac alone.
+// ephemeral workspaces say no Mac, and it deletes and forgets on that Mac alone.
 func TestCleanUpOnAMacStaysOnThatMac(t *testing.T) {
 	all := fleetOfTwo()
 	a := cleanupSheet(ActionCleanup+":mini", all, cleanupsOf(all.Macs[1:2], sheetAgents()), sheetNow, true)
@@ -157,8 +157,8 @@ func TestLendAnAccountOffersEachWorkspaceTheAccountsOfItsMac(t *testing.T) {
 	out := accounts.Account{Provider: catalog.ProviderClaude, State: catalog.StateAbsent}
 	all := accounts.AllMachines{Now: sheetNow, Macs: []accounts.MacAccounts{mac("pro", true, in), mac("mini", false, in, out)}}
 	machines := model.AllMachines{Macs: []model.MacView{
-		{Name: "pro", ThisMac: true, VMs: []model.VM{{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running}}},
-		{Name: "mini", Reachable: true, VMs: []model.VM{{Name: "linux-3", Lifetime: model.Throwaway, State: model.Running}, {Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
+		{Name: "pro", ThisMac: true, VMs: []model.VM{{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running}}},
+		{Name: "mini", Reachable: true, VMs: []model.VM{{Name: "linux-3", Lifetime: model.Ephemeral, State: model.Running}, {Name: "infra", Lifetime: model.AlwaysOn, State: model.Running}}},
 	}}
 	b := accountsBody{now: all, hosts: all, self: "pro", of: AccountsOf{Machines: &machines}}
 	sheets := b.loanSheets()
@@ -214,8 +214,8 @@ func TestTheAddMacHintCopiesTheCommandThatAddsTheMac(t *testing.T) {
 }
 
 // invariant: a Mac's VMs come from the engine by name; a sheet picks live
-// work first and a question names it first, a finished throwaway last.
-func TestAFinishedThrowawayIsNeverWhatASheetPicksFirst(t *testing.T) {
+// work first and a question names it first, a finished ephemeral workspace last.
+func TestAFinishedEphemeralIsNeverWhatASheetPicksFirst(t *testing.T) {
 	fleet := fleetOfTwo()
 	this := &fleet.Macs[0]
 	this.VMs[0], this.VMs[1] = this.VMs[1], this.VMs[0]

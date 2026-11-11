@@ -32,7 +32,7 @@ final class NewVMSheetTests: XCTestCase {
         let (_, answers) = try sheet()
         let options = try XCTUnwrap(answers.field("Options"))
         let share = try XCTUnwrap(answers.field("Sharing"))
-        XCTAssertEqual(answers.fill(options.summary), "Throwaway · Linux · 8 GB")
+        XCTAssertEqual(answers.fill(options.summary), "Ephemeral · Linux · 8 GB")
         XCTAssertEqual(answers.fill(options.note ?? ""), "linux-2 · shares GitHub and Claude for 4 hr")
         XCTAssertEqual(answers.fill(share.summary), "GitHub, Claude for 4 hr")
         var none = answers
@@ -73,9 +73,9 @@ final class NewVMSheetTests: XCTestCase {
         let engine = try FakeEngine("mb-sheet-create")
         engine.serveOnce(Data(#"{"v":2,"id":"1","out":{"VM":{"Name":"linux-2"}}}"#.utf8) + [0x0A], thenClose: false)
         defer { engine.stop() }
-        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(action, answers: ["Request.Lifetime": "permanent", "Share": "claude", "Options": Answers.open])
+        let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(action, answers: ["Request.Lifetime": "persistent", "Share": "claude", "Options": Answers.open])
         XCTAssertNil(status)
-        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"linux","Lifetime":"permanent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}},"Share":["claude"],"ShareFor":14400000000000},"v":2}"#])
+        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}},"Share":["claude"],"ShareFor":14400000000000},"v":2}"#])
     }
 
     func testCreateAndOpenInTerminalOpensItOnceMade() async throws {

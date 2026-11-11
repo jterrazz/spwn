@@ -16,7 +16,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "throwaway",
+          "text": "ephemeral",
           "pri": 1
         },
         {
@@ -246,7 +246,7 @@
       "items": [
         {
           "note": {
-            "text": "Throwaway: deleted when it powers off from inside; never paused."
+            "text": "Ephemeral: deleted when it powers off from inside; never paused."
           }
         }
       ],

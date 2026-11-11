@@ -27,8 +27,8 @@ runs:
       exit: 0
       stdout: |
           ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · permanent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	8 GB
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
           ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
           ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
     - command: 'machines infra | /usr/bin/grep Check'

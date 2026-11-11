@@ -370,7 +370,7 @@ func (d *Engine) opStop(ctx context.Context, vm string, want bool) error {
 }
 
 // invariant: halt ends a VM's run and keeps its disk; want also keeps the
-// wish stopped, so a permanent VM stays stopped when the engine starts again.
+// wish stopped, so a persistent VM stays stopped when the engine starts again.
 func (d *Engine) halt(ctx context.Context, v *vmState, want bool) error {
 	vm := v.rec.Name
 	if want {
@@ -759,7 +759,7 @@ func joinPort(ip string, port int) string {
 
 // invariant: a VM's profile environment is rendered at each of its runs from
 // Serve's state read then, never at an adoption, so it holds for the whole of a run
-// and a permanent VM picks up the public URLs at its first start after Serve
+// and a persistent VM picks up the public URLs at its first start after Serve
 // turns on.
 func (d *Engine) renderEnv(v *vmState) {
 	p := d.policy()

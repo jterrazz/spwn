@@ -16,7 +16,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "throwaway",
+          "text": "ephemeral",
           "pri": 1
         },
         {
@@ -330,7 +330,7 @@
       "items": [
         {
           "note": {
-            "text": "Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps."
+            "text": "Ephemeral: deleted when it powers off from inside; pauses when This Mac sleeps."
           }
         }
       ],

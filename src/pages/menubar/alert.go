@@ -12,7 +12,7 @@ import (
 // value: the facts an alert's level is graded by, by the words of the
 // engine's confirmation rule (confirm.Fact).
 const (
-	FactThrowaway   = "throwaway"
+	FactEphemeral   = "ephemeral"
 	FactHealthy     = "healthy"
 	FactHostsServer = "hosts-server"
 )
@@ -159,8 +159,8 @@ func stopWorkspace(vm model.VM, on string, live []string, shared int) alert {
 		says = append(says, counted(shared, "shared port", "shared ports")+" "+pluralVerb(shared, "stops", "stop")+" answering until it starts again.")
 	}
 	a := alert{Gesture: "stop", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Stop " + vm.Name + " on " + on + "?", Says: says, Verb: "Stop " + vm.Name}
-	if vm.Lifetime == model.Throwaway {
-		a.Facts = []string{FactThrowaway}
+	if vm.Lifetime == model.Ephemeral {
+		a.Facts = []string{FactEphemeral}
 	}
 	return a
 }
@@ -183,8 +183,8 @@ func deleteWorkspace(vm model.VM, live []string, shared, loans int) alert {
 	}
 	says = append(says, "This can't be undone. It goes with "+and(goes)+".")
 	a := alert{Gesture: "delete", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: says, Verb: "Delete " + vm.Name, Danger: true}
-	if vm.Lifetime == model.Throwaway {
-		a.Facts = []string{FactThrowaway}
+	if vm.Lifetime == model.Ephemeral {
+		a.Facts = []string{FactEphemeral}
 	}
 	return a
 }

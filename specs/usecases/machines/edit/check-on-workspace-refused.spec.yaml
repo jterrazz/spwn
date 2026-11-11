@@ -9,4 +9,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].kept | {lifetime, check}'' world.json'
       exit: 0
       stdout: |
-          {"lifetime":"throwaway","check":null}
+          {"lifetime":"ephemeral","check":null}

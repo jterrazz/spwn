@@ -1,0 +1,12 @@
+description: 'a server is always on: --persistent is refused before anything is made'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --persistent'
+      exit: 2
+      stderr: |
+          Error: a server is always on: --persistent is for workspaces
+          Hint: station machines create infra-2 --server
+    - command: 'machines --this-mac | /usr/bin/grep -c infra-2'
+      exit: 1
+      stdout: |
+          0

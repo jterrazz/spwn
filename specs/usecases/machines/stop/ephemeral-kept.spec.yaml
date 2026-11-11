@@ -1,0 +1,13 @@
+description: 'a stop from station keeps an ephemeral workspace, stopped with its disk; it starts again (SP-5)'
+env: two-macs
+runs:
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · ephemeral	4 CPU	8 GB

@@ -1,4 +1,4 @@
-description: 'a deleted throwaway in use: the next command says so, runs on This Mac, clears the choice'
+description: 'a deleted ephemeral workspace in use: the next command says so, runs on This Mac, clears the choice'
 env:
     - two-macs
     - engine

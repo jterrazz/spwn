@@ -18,7 +18,7 @@ import (
 func apiPage(t *testing.T, state model.VMState) page.Page {
 	t.Helper()
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
-		{Name: "api", Lifetime: model.Permanent, State: state},
+		{Name: "api", Lifetime: model.Persistent, State: state},
 	}}}}
 	return MachinePage(Machine{Name: "api", All: fleet, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 }
@@ -54,7 +54,7 @@ func TestAStoppedWorkspaceStartsAndSharesNothing(t *testing.T) {
 func TestASharedAccountSaysNoInternalScope(t *testing.T) {
 	now := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
-		{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running},
+		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
 	report := &accounts.Report{Machines: []accounts.Machine{{Name: "linux-1", Accounts: []accounts.Account{
 		{Provider: "github", Scopes: []string{"session:github", "read only"}, Shared: &accounts.Loan{Until: now.Add(4 * time.Hour)}},
@@ -75,8 +75,8 @@ func TestASharedAccountSaysNoInternalScope(t *testing.T) {
 // invariant: Home lists a Mac's running workspaces before its stopped ones.
 func TestHomeListsRunningWorkspacesFirst(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
-		{Name: "api", Lifetime: model.Permanent, State: model.Stopped},
-		{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running},
+		{Name: "api", Lifetime: model.Persistent, State: model.Stopped},
+		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
 	s := Tree(fleet, nil, func(model.MacView) page.Value { return page.None() })
 	vms := s.Items[0].Group.Items[0].Group.Items

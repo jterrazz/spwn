@@ -171,7 +171,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
 		},
 		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
-			return e.Subject + " stays: only a throwaway that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"
+			return e.Subject + " stays: only an ephemeral workspace that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"
 		},
 		agentscalls.UnknownAgent: func(e *fail.Error) (string, string) {
 			return "no agent named \"" + e.Subject + "\"", "station agents"
@@ -210,11 +210,11 @@ func Codes() map[fail.Code]Wording {
 		agentscalls.NoWhere: func(e *fail.Error) (string, string) {
 			switch e.Detail["both"] {
 			case "inside":
-				return "an agent started inside a workspace runs on it: --new makes a throwaway from a Mac", "station agents start \"<task>\""
+				return "an agent started inside a workspace runs on it: --new makes an ephemeral workspace from a Mac", "station agents start \"<task>\""
 			case "both":
-				return "an agent starts on a workspace (--on) or on a new throwaway (--new), not both", "station agents start \"<task>\" --new"
+				return "an agent starts on a workspace (--on) or on a new ephemeral workspace (--new), not both", "station agents start \"<task>\" --new"
 			}
-			return "an agent starts on a running workspace (--on <workspace>) or on a new throwaway (--new)", "station agents start \"<task>\" --on <workspace>"
+			return "an agent starts on a running workspace (--on <workspace>) or on a new ephemeral workspace (--new)", "station agents start \"<task>\" --on <workspace>"
 		},
 		agentscalls.Ambiguous: func(e *fail.Error) (string, string) {
 			on := strings.Split(e.Detail["on"], ", ")

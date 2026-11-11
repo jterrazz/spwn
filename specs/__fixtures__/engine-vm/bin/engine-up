@@ -1,6 +1,6 @@
 #!/bin/sh
 # Starts the document's station engine (its stderr in engine.log, its pid in .engine.pid),
-# starts each permanent VM its record does not want stopped (a workspace never starts by
+# starts each persistent VM its record does not want stopped (a workspace never starts by
 # itself, as v2's engine started a lasting one), and waits
 # until a VM answers SSH (its guest is connected), as a spec that lends needs the engine.
 "$STATION" engine run 2>> "$HOME/engine.log" &
@@ -12,7 +12,7 @@ while [ ! -S "$HOME/.local/state/station/engine.sock" ] && [ $n -lt 50 ]; do
 done
 for record in "$HOME"/.local/state/station/vms/*.json; do
     [ -f "$record" ] || continue
-    /usr/bin/grep -q -E '"lifetime": *"(lasting|permanent)"' "$record" || continue
+    /usr/bin/grep -q -E '"lifetime": *"(lasting|permanent|persistent)"' "$record" || continue
     /usr/bin/grep -q '"want": *"stopped"' "$record" && continue
     vm=${record##*/}
     "$STATION" machines start "${vm%.json}" > /dev/null 2>> "$HOME/engine.log"

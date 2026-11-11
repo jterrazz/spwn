@@ -1,6 +1,6 @@
 ●	macbook	Mac	macbook	Engine running
-○	api	Workspace	macbook	Stopped · permanent	4 CPU	8 GB
-●	linux-1	Workspace	macbook	Running · throwaway	4 CPU	4 GB
+○	api	Workspace	macbook	Stopped · persistent	4 CPU	8 GB
+●	linux-1	Workspace	macbook	Running · ephemeral	4 CPU	4 GB
 ◐	mac-mini	Mac	mac-mini	Engine running · runs v2.0.0-248
 # Needs you
 ◐	mac-mini	runs v2.0.0-248	update station there (scripts/install.sh)

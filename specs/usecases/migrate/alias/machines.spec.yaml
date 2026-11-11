@@ -4,9 +4,9 @@ runs:
     - command: 'machines create box --lifetime lasting | /usr/bin/tail -1'
       exit: 0
       stdout: |
-          ●	box	Created	Permanent · 4 CPU · 4 GB · 20 GB
+          ●	box	Created	Persistent · 4 CPU · 4 GB · 20 GB
       stderr: |
-          → now: station machines create box --permanent
+          → now: station machines create box --persistent
     - command: 'machines create infra-2 --always-on --on mac-mini | /usr/bin/grep infra-2'
       exit: 0
       stdout: |

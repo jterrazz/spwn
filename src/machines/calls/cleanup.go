@@ -16,14 +16,14 @@ import (
 const NotFinished fail.Code = "machines.not-finished"
 
 type CleanupIn struct {
-	// value: the throwaways to delete, by name; none is every one of this
+	// value: the ephemeral workspaces to delete, by name; none is every one of this
 	// Mac's that may go.
 	VMs     []string
 	Confirm string
 }
 
 var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
-	// invariant: SPEC B5.9: one yes or no deletes every throwaway asked for,
+	// invariant: SPEC B5.9: one yes or no deletes every ephemeral workspace asked for,
 	// each one the VM delete it would be alone, with its disk, its ports and
 	// its shared accounts; a VM that may not go is refused before any goes,
 	// and the question comes back with every candidate and what it loses.

@@ -1,8 +1,8 @@
  4 machines · 2 running · 1 stopped · 2 need you
-     MACHINE     KIND       STATE                CPU    MEMORY
+     MACHINE     KIND       STATE                 CPU    MEMORY
    ✗ This Mac    Mac        Engine stopped
-   ├─ ○ api      Workspace  Stopped · permanent  4 CPU  8 GB
-   └─ ● linux-1  Workspace  Running · throwaway  4 CPU  4 GB
+   ├─ ○ api      Workspace  Stopped · persistent  4 CPU  8 GB
+   └─ ● linux-1  Workspace  Running · ephemeral   4 CPU  4 GB
    ✗ mac-mini    Mac        Unreachable
 
  Needs you

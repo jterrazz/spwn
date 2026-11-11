@@ -1147,7 +1147,7 @@
         {
           "row": {
             "id": "cleanup:macbook-pro",
-            "label": "Clean up throwaways on This Mac",
+            "label": "Clean up ephemeral workspaces on This Mac",
             "cells": [
               {
                 "kind": "list",
@@ -1158,7 +1158,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "throwaway"
+                    "text": "ephemeral"
                   },
                   {
                     "kind": "text",
@@ -2183,15 +2183,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -2415,15 +2415,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -3130,15 +3130,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -3688,15 +3688,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -4237,15 +4237,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -4466,15 +4466,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",

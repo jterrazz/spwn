@@ -3,12 +3,12 @@ package machines
 import "time"
 
 type Cleaned struct {
-	// value: SPEC B5.9: every throwaway that may go, with what goes with it;
+	// value: SPEC B5.9: every ephemeral workspace that may go, with what goes with it;
 	// the confirmation lists their losses, the clean-up sheet draws them.
 	Candidates []Candidate
 	Deleted    []string
 	// value: what stays: the Mac's running VMs whose agent has not
-	// finished, and its throwaways still running.
+	// finished, and its ephemeral workspaces still running.
 	Kept []string
 }
 
@@ -29,14 +29,14 @@ type Candidate struct {
 }
 
 func Cleanup(vms []VM) (gone, kept []VM) {
-	// invariant: SPEC B5.9: a throwaway that is stopped, or whose agent
+	// invariant: SPEC B5.9: an ephemeral workspace that is stopped, or whose agent
 	// finished, may go; a running VM an agent still works in, and a
-	// throwaway still running, stay, and are named.
+	// ephemeral still running, stay, and are named.
 	for _, vm := range vms {
 		switch {
-		case vm.Lifetime == Throwaway && (vm.State == Stopped || vm.Finished()):
+		case vm.Lifetime == Ephemeral && (vm.State == Stopped || vm.Finished()):
 			gone = append(gone, vm)
-		case vm.State == Running && (vm.Lifetime == Throwaway || vm.Agent != nil && !vm.Finished()):
+		case vm.State == Running && (vm.Lifetime == Ephemeral || vm.Agent != nil && !vm.Finished()):
 			kept = append(kept, vm)
 		}
 	}

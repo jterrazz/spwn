@@ -1,0 +1,13 @@
+description: 'the v3 --permanent still runs for one release as --persistent, and names the new words on stderr'
+env: two-macs
+runs:
+    - command: 'machines create api-3 --permanent | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	api-3	Created	Persistent · 4 CPU · 4 GB · 20 GB
+      stderr: |
+          → now: station machines create api-3 --persistent
+    - command: 'machines --this-mac | /usr/bin/grep api-3'
+      exit: 0
+      stdout: |
+          ●	api-3	Workspace	jterrazz-macbook-pro	Running · persistent	4 CPU	4 GB

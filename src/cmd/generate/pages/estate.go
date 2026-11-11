@@ -298,8 +298,8 @@ func allMachines() model.AllMachines {
 	return model.AllMachines{Macs: []model.MacView{
 		{Name: "macbook", User: "jterrazz", StationVersion: "v2.0.0-250", ThisMac: true, Reachable: true, Engine: model.EngineView{Known: true, Running: true, Version: "v2.0.0-250"}, Node: model.Node{Online: true, IP: "100.98.133.14"},
 			VMs: []model.VM{
-				sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Throwaway, State: model.Running, SizeGB: 20, IP: "192.168.64.5", CreatedAt: built}, 4, 4),
-				sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Permanent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8),
+				sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", CreatedAt: built}, 4, 4),
+				sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8),
 			}},
 		{Name: "mac-mini", User: "jterrazz", StationVersion: "v2.0.0-248", Reachable: true, Engine: model.EngineView{Known: true, Running: true, Version: "v2.0.0-248"}, Node: model.Node{Online: true, IP: "100.98.133.20"}},
 	}}

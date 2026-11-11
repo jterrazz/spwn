@@ -1,7 +1,7 @@
 {
     "group": "sheet",
     "id": "sheet.cleanup.mac",
-    "note": "Clean up on This Mac from agent-7f's row: agent-7f finished and its empty throwaway, both checked, the agent carried by its throwaway; linux-1 stays; the red Delete 1 throwaway.",
+    "note": "Clean up on This Mac from agent-7f's row: agent-7f finished and its empty ephemeral workspace, both checked, the agent carried by its ephemeral workspace; linux-1 stays; the red Delete 1 ephemeral workspace.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

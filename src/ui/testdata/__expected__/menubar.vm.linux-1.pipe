@@ -4,7 +4,7 @@
 # Ports
 ●	Vite		linux-1:5173
 ●	Port 7000		linux-1:7000
-	Throwaway: deleted when it powers off from inside; pauses when This Mac sleeps.
+	Ephemeral: deleted when it powers off from inside; pauses when This Mac sleeps.
 # Private
 ●	Vite		linux-1:5173
 ●	Port 7000		linux-1:7000

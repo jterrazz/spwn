@@ -14,7 +14,7 @@ import (
 const cleanupEmpty = "Nothing finished to delete on "
 
 func Cleaned(out model.Cleaned, mac string, thisMac page.Context) page.Page {
-	// value: SPEC B5.9: each throwaway deleted, then what stays named.
+	// value: SPEC B5.9: each ephemeral workspace deleted, then what stays named.
 	rows := make([]page.Row, 0, len(out.Deleted))
 	for _, name := range out.Deleted {
 		rows = append(rows, done(name, catalog.StateOK, "deleted", "with its disk, its ports and its shared accounts"))
@@ -42,13 +42,13 @@ func Stays(kept []string) page.Value {
 }
 
 func CleanupConfirm(cands []model.Candidate) page.Confirm {
-	// value: SPEC B5.9: the y/n of a cleanup names every throwaway it
+	// value: SPEC B5.9: the y/n of a cleanup names every ephemeral workspace it
 	// deletes and lists what goes with each one.
 	lines := make([]page.Value, 0, len(cands))
 	for _, c := range cands {
 		lines = append(lines, page.Texts(append([]string{c.Name}, append(idle(c), "goes with "+losses(c))...)...))
 	}
-	return page.Confirm{Question: "Delete " + throwaways(cands) + "?", Lines: lines, Danger: true, Yes: "Delete"}
+	return page.Confirm{Question: "Delete " + ephemerals(cands) + "?", Lines: lines, Danger: true, Yes: "Delete"}
 }
 
 func CleanupRefused(cands []model.Candidate) page.Value {
@@ -61,7 +61,7 @@ func CleanupRefused(cands []model.Candidate) page.Value {
 	for _, c := range cands {
 		parts = append(parts, c.Name+" goes with "+losses(c))
 	}
-	return page.Text("refusing to delete " + throwaways(cands) + " without --yes: " + strings.Join(parts, "; "))
+	return page.Text("refusing to delete " + ephemerals(cands) + " without --yes: " + strings.Join(parts, "; "))
 }
 
 func idle(c model.Candidate) []string {
@@ -86,7 +86,7 @@ func ago(d time.Duration) string {
 }
 
 func losses(c model.Candidate) string {
-	// value: SPEC A5: what a throwaway's delete takes with it, "its disk
+	// value: SPEC A5: what an ephemeral workspace's delete takes with it, "its disk
 	// (12 GB)", "2 shared ports", "2 shared accounts", joined with "and".
 	disk := "its disk"
 	if c.DiskBytes > 0 {
@@ -105,11 +105,11 @@ func losses(c model.Candidate) string {
 	return strings.Join(parts[:len(parts)-1], ", ") + " and " + parts[len(parts)-1]
 }
 
-func throwaways(cands []model.Candidate) string {
+func ephemerals(cands []model.Candidate) string {
 	if len(cands) == 1 {
 		return cands[0].Name
 	}
-	return strconv.Itoa(len(cands)) + " throwaways"
+	return strconv.Itoa(len(cands)) + " ephemeral workspaces"
 }
 
 func counted(n int, noun string) string {

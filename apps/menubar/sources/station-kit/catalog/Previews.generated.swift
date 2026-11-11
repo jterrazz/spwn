@@ -30,9 +30,9 @@ import SwiftUI
 
 #Preview("alert.delete-vm.agents") { StoryStage(Stories["alert.delete-vm.agents"]) }
 
-#Preview("alert.delete-vm.permanent") { StoryStage(Stories["alert.delete-vm.permanent"]) }
+#Preview("alert.delete-vm.ephemeral") { StoryStage(Stories["alert.delete-vm.ephemeral"]) }
 
-#Preview("alert.delete-vm.throwaway") { StoryStage(Stories["alert.delete-vm.throwaway"]) }
+#Preview("alert.delete-vm.persistent") { StoryStage(Stories["alert.delete-vm.persistent"]) }
 
 #Preview("alert.forget-mac") { StoryStage(Stories["alert.forget-mac"]) }
 

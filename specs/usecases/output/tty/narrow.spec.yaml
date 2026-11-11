@@ -128,9 +128,9 @@ runs:
       stdout: |
           5 machines · 4 running · 1 stopped · nothing needs you
 
-              MACHINE     STATE                CPU    MEMORY
+              MACHINE     STATE                 CPU    MEMORY
             ● This Mac    Engine running
-            ├─ ○ api      Stopped · permanent  4 CPU  8 GB
-            └─ ● linux-1  Running · throwaway  4 CPU  8 GB
+            ├─ ○ api      Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1  Running · ephemeral   4 CPU  8 GB
             ● mac-mini    Engine running
-            └─ ● infra    Running · always on  8 CPU  24 GB
+            └─ ● infra    Running · always on   8 CPU  24 GB

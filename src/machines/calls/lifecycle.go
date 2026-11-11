@@ -56,7 +56,7 @@ type StopOut struct {
 }
 
 var Stop = call.Call[Deps, StopIn, StopOut]{
-	// invariant: a stop keeps the VM, throwaway, permanent or always on
+	// invariant: a stop keeps the VM, ephemeral, persistent or always on
 	// (SP-5); a workspace asks yes or no first, a server its name typed, and
 	// the rule is checked here, on the VM's own Mac, whoever sent the call.
 	// One already stopped asks nothing.

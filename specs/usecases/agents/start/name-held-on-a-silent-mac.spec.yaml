@@ -1,7 +1,7 @@
 description: 'a silent Mac still holds its workspaces and their agents: no new agent takes their names'
 env: mini-offline
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.macs["jterrazz-mac-mini"].vms += [{name: "review", lifetime: "permanent", cpus: 4, memory_bytes: 8589934592, agents: ["docs-bot"]}]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.macs["jterrazz-mac-mini"].vms += [{name: "review", lifetime: "persistent", cpus: 4, memory_bytes: 8589934592, agents: ["docs-bot"]}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'agents start "Write the changelog" --on linux-1 --name docs-bot'
       exit: 2

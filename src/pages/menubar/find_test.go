@@ -45,13 +45,13 @@ func findFleet() FindReading {
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing}
 	all := model.AllMachines{Macs: []model.MacView{
 		{Name: findPro, User: "jterrazz", ThisMac: true, Reachable: true, Laptop: true, Hardware: machine.Hardware{Memory: 48 * gib}, VMs: []model.VM{
-			vm("linux-1", findPro, model.Throwaway, 8, &model.AgentView{State: "working"}),
-			vm("agent-7f", findPro, model.Throwaway, 8, &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-12 * time.Minute), Reason: "tests pass"}),
+			vm("linux-1", findPro, model.Ephemeral, 8, &model.AgentView{State: "working"}),
+			vm("agent-7f", findPro, model.Ephemeral, 8, &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-12 * time.Minute), Reason: "tests pass"}),
 		}},
 		{Name: findMini, User: "jterrazz", Reachable: true, Hardware: machine.Hardware{Memory: 64 * gib}, VMs: []model.VM{
 			infra,
-			vm("linux-3", findMini, model.Throwaway, 8, &model.AgentView{State: "working"}),
-			vm("review-bot", findMini, model.Permanent, 4, &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: findNow.Add(-6 * time.Minute)}),
+			vm("linux-3", findMini, model.Ephemeral, 8, &model.AgentView{State: "working"}),
+			vm("review-bot", findMini, model.Persistent, 4, &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: findNow.Add(-6 * time.Minute)}),
 		}},
 		{Name: findAir, User: "jterrazz", Laptop: true, Answered: findNow.Add(-2 * time.Hour)},
 	}}
@@ -179,7 +179,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 			{"New VM on This Mac", "28 GB free", "New VM", "cmd+n", ""},
 			{"New VM on mac-mini", "24 GB free", "New VM", "", ""},
 			{"Restart infra", "asks first", "Restart", "", ""},
-			{"Clean up throwaways on This Mac", "", "Clean up", "", ""},
+			{"Clean up ephemeral workspaces on This Mac", "", "Clean up", "", ""},
 		}},
 	}
 	for _, c := range cases {
@@ -292,22 +292,22 @@ func TestFindGivesNewVMToTheRoomiestMac(t *testing.T) {
 	}
 }
 
-// invariant: an asleep Mac offers no clean-up, finished throwaways or not.
+// invariant: an asleep Mac offers no clean-up, finished ephemeral workspaces or not.
 func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
 	r := findFleet()
-	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Throwaway, State: model.Running,
+	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Ephemeral, State: model.Running,
 		Agent: &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-3 * time.Hour)}}}
 	p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
 	if row := findRow(p, FindActions, "cleanup:"+findAir); row != nil {
 		t.Errorf("the asleep macbook-air offers %+v, want no clean-up", row)
 	}
 	if row := findRow(p, FindActions, "cleanup:"+findPro); row == nil {
-		t.Errorf("This Mac lost its clean-up, want Clean up throwaways on This Mac")
+		t.Errorf("This Mac lost its clean-up, want Clean up ephemeral workspaces on This Mac")
 	}
 }
 
 // invariant: an action that asks first carries its question, which the app
-// draws as the label's ellipsis: "Restart infra…" and "Clean up throwaways
+// draws as the label's ellipsis: "Restart infra…" and "Clean up ephemeral workspaces
 // on This Mac…" in the prototype.
 func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
 	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"})

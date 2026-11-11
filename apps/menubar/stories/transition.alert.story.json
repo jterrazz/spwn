@@ -1,7 +1,7 @@
 {
     "freeze": 0.35,
     "group": "transition",
-    "heightNote": "the page under it is agent-7f's v4 workspace page (P9), taller than the prototype's finished throwaway; the alert is the prototype's",
+    "heightNote": "the page under it is agent-7f's v4 workspace page (P9), taller than the prototype's finished ephemeral workspace; the alert is the prototype's",
     "id": "transition.alert",
     "note": "Delete agent-7f? scales from 1.08 to 1 with opacity at the panel's centre, the scrim fading in.",
     "pages": ["pages/machines.machine.agent-7f.json"],

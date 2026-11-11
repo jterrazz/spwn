@@ -1,4 +1,4 @@
-description: 'a stopped permanent VM is named, with the verb that starts it'
+description: 'a stopped persistent VM is named, with the verb that starts it'
 fixture:
     - ../../../__fixtures__/vms/
     - ../../../__fixtures__/vm-api/

@@ -621,7 +621,7 @@
             ],
             "summary": {
               "kind": "text",
-              "text": "NAT, throwaway"
+              "text": "NAT, ephemeral"
             }
           },
           {

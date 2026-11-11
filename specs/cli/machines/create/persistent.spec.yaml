@@ -1,0 +1,23 @@
+description: 'a persistent workspace: its record wants it running behind its Mac, and the engine runs it'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ../../../__fixtures__/engine-vm/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41020-41039"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	127.0.0.1
+          ●	SSH answers
+          ●	expo	8081	https://macbook.tail1234.ts.net:41020
+          ●	vite	5173	https://macbook.tail1234.ts.net:41021
+          ●	api	Created	Persistent · 4 CPU · 4 GB · 20 GB
+      files:
+          .local/state/station/vms/api.json:
+              contains:
+                  - '"lifetime": "persistent"'
+                  - '"want": "running"'
+                  - '"network": "nat"'
+          Library/LaunchAgents/com.jterrazz.station.vm.api.plist: absent

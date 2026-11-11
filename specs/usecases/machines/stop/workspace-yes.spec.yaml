@@ -19,4 +19,4 @@ runs:
     - command: 'machines | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
-          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · throwaway	4 CPU	8 GB
+          ○	linux-1	Workspace	jterrazz-macbook-pro	Stopped · ephemeral	4 CPU	8 GB

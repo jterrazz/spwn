@@ -4,7 +4,7 @@ runs:
     - command: 'machines create | /usr/bin/tail -1'
       exit: 0
       stdout: |
-          ●	linux-2	Created	Throwaway · 4 CPU · 4 GB · 20 GB
+          ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
       files:
           world.json:
               contains: '"folders": []'

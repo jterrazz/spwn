@@ -394,7 +394,7 @@ func (f finder) actions() []entry {
 	// shortening the term it holds, and the one that follows its agent at
 	// work; New VM on each awake Mac, the roomiest first and on ⌘N; each
 	// server's restart, asking first while it is healthy; each Mac's
-	// clean-up of its finished throwaways.
+	// clean-up of its finished ephemeral workspaces.
 	out := f.awake()
 	roomiest := model.Roomiest(*f.r.All)
 	if roomiest == "" {
@@ -523,8 +523,8 @@ func (f finder) cleanup(h model.MacView) (entry, bool) {
 	c := pagemachines.CleanupConfirm(cands)
 	verb := page.Action{ID: "cleanup:" + h.Name, Label: VerbCleanUp, Mutates: true, Confirm: &c,
 		Run: &page.Run{Call: CallCleanup, In: map[string]string{"Confirm": yes}, Target: macTarget(h.Name, f.self)}}
-	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up throwaways on " + f.mac(h.Name), Glyph: symbol("trash", "")}
-	return entry{row: row, tags: []string{"delete", "throwaway", "finished"}, verb: verb}, true
+	row := page.Row{ID: "cleanup:" + h.Name, Label: "Clean up ephemeral workspaces on " + f.mac(h.Name), Glyph: symbol("trash", "")}
+	return entry{row: row, tags: []string{"delete", "ephemeral", "finished"}, verb: verb}, true
 }
 
 func (f finder) verbs(p *page.Page) page.Section {

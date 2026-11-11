@@ -1,4 +1,4 @@
-description: 'a throwaway whose agent finished goes in one yes, with its disk, its ports and its shared accounts'
+description: 'an ephemeral workspace whose agent finished goes in one yes, with its disk, ports and accounts'
 env: two-macs
 runs:
     - command: 'world agent-prompt linux-1 s-1 "Fix the flaky e2e test"'

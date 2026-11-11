@@ -195,7 +195,7 @@ func lifetimeWord(l model.Lifetime) string {
 }
 
 func Lifetime(l model.Lifetime) page.Value {
-	// value: a VM's lifetime as a page says it (`Always on`, `Throwaway`).
+	// value: a VM's lifetime as a page says it (`Always on`, `Ephemeral`).
 	return page.Text(titled(lifetimeWord(l)))
 }
 

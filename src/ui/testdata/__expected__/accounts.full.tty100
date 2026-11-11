@@ -11,7 +11,7 @@ Accounts
   ├─ ● git                Jean-Baptiste T…  own     admin@jterrazz.com
   ├─ ● ssh                6 keys            own
   └─ ● Docker             deploy            own     registry.jterrazz.com              osxkeychain
-  ● linux-1               throwaway  guest connected
+  ● linux-1               ephemeral  guest connected
   ├─ ● Claude             admin@jterrazz.…  shared  operator:claude:oauth-token        11h 40m left
   ├─ ● git                Jean-Baptiste T…  own     admin@jterrazz.com
   ├─ ● entry              1 SSH key         own     jterrazz-macbook-pro               SHA256:76MC…
@@ -19,7 +19,7 @@ Accounts
      ├─ ○ GitHub          not logged in  → ssh linux-1 gh auth login
      ├─ ○ npm             npm not on PATH
      └─ ○ ssh             no key in the agent
-  ◐ api                   permanent  guest connected
+  ◐ api                   persistent  guest connected
   ├─ ◐ Claude             admin@jterrazz.…  shared  operator:claude:oauth-token        42m left
        → station accounts share claude --with api
   └─ ● entry              1 SSH key         own     jterrazz-macbook-pro               SHA256:76MC…

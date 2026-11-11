@@ -125,7 +125,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &notVM):
 		return usage(notVM.Error(), notAVMHint(notVM)), true
 	case errors.As(err, &badLifetime):
-		return usage(badLifetime.Error(), "station machines create --permanent"), true
+		return usage(badLifetime.Error(), "station machines create --persistent"), true
 	case errors.As(err, &unknownImage):
 		return usage(unknownImage.Error(), "station images for the images"), true
 	case errors.As(err, &noImage) && noImage.Fetched:
@@ -173,7 +173,7 @@ func pipeFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &closed):
 		return failed(closed.Error(), "station machines "+closed.Name, err), true
 	case errors.As(err, &running):
-		return failed(running.Error(), "stop the permanent VMs and delete the throwaway ones (station machines), then station engine start", err), true
+		return failed(running.Error(), "stop the persistent VMs and delete the ephemeral ones (station machines), then station engine start", err), true
 	}
 	return nil, false
 }

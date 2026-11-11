@@ -1,10 +1,10 @@
 All machines
-  ● macbook     Mac        This Mac  online   100.98.133.14  2 VMs
-  ├─ ● linux-1  throwaway            running  192.168.64.5   4 cpus · 4 GB · 42.9 GB
+  ● macbook     Mac         This Mac  online   100.98.133.14  2 VMs
+  ├─ ● linux-1  ephemeral             running  192.168.64.5   4 cpus · 4 GB · 42.9 GB
   │  ├─ 5173 → 40001  https://jterrazz-macbook-pro.tail1234.ts.net:40001  node
   │  └─ 5432 → 40002  postgres
-  └─ ○ api      permanent            stopped  -              4 cpus · 8 GB · 42.9 GB
-  ◐ mac-mini    Mac                  online   100.98.133.20  0 VMs
+  └─ ○ api      persistent            stopped  -              4 cpus · 8 GB · 42.9 GB
+  ◐ mac-mini    Mac                   online   100.98.133.20  0 VMs
     station v2.0.0-248, This Mac v2.0.0-250
      no VMs  → station machines create --on mac-mini
 Images

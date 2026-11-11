@@ -4,4 +4,4 @@ runs:
     - command: 'machines create box --on jterrazz-mac-mini | /usr/bin/tail -1'
       exit: 0
       stdout: |
-          ●	box	Created	Throwaway · 4 CPU · 4 GB · 20 GB
+          ●	box	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

@@ -16,7 +16,7 @@
       "caption": [
         {
           "kind": "text",
-          "text": "permanent",
+          "text": "persistent",
           "pri": 1
         },
         {
@@ -182,7 +182,7 @@
       "items": [
         {
           "note": {
-            "text": "Permanent: kept until you delete it; pauses when This Mac sleeps."
+            "text": "Persistent: kept until you delete it; pauses when This Mac sleeps."
           }
         }
       ],

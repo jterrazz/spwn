@@ -1,7 +1,7 @@
 {
     "group": "sheet",
     "id": "sheet.cleanup.all",
-    "note": "Clean up across every Mac: the same lists, each throwaway naming its Mac, the note naming every VM an agent still works in.",
+    "note": "Clean up across every Mac: the same lists, each ephemeral workspace naming its Mac, the note naming every VM an agent still works in.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

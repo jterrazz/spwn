@@ -1,4 +1,4 @@
-description: 'a throwaway VM''s reboot runs it again on a fresh console, its poweroff then deletes it'
+description: 'an ephemeral VM''s reboot runs it again on a fresh console, its poweroff then deletes it'
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/

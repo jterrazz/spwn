@@ -10,12 +10,12 @@ import (
 
 func controlPages() []Fixture {
 	stopped := engine.StopReport{Engine: engine.EngineHalted, Awake: engine.AwakeEnded, Sharing: true, VMs: []engine.Stopped{
-		{Name: "linux-1", Lifetime: "throwaway", Result: engine.ResultStopped},
-		{Name: "api", Lifetime: "permanent", Result: engine.ResultStopped},
+		{Name: "linux-1", Lifetime: "ephemeral", Result: engine.ResultStopped},
+		{Name: "api", Lifetime: "persistent", Result: engine.ResultStopped},
 	}}
 	stuck := engine.StopReport{Engine: engine.EngineKept, VMs: []engine.Stopped{
-		{Name: "linux-1", Lifetime: "throwaway", Result: engine.ResultStopped},
-		{Name: "api", Lifetime: "permanent", Result: engine.ResultFailed, Detail: catalog.HypervisorApp + " stop exited 1"},
+		{Name: "linux-1", Lifetime: "ephemeral", Result: engine.ResultStopped},
+		{Name: "api", Lifetime: "persistent", Result: engine.ResultFailed, Detail: catalog.HypervisorApp + " stop exited 1"},
 	}}
 	started := engine.StartReport{Version: "v3.1.0", PID: 812}
 	until := time.Date(2026, 11, 3, 18, 0, 0, 0, time.UTC)

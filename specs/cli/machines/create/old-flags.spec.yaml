@@ -1,4 +1,4 @@
-description: 'the round-1 throwaway flag is gone: the lifetime is an option with a value'
+description: 'the round-1 ephemeral flag is gone: the lifetime is an option with a value'
 fixture: ../../../__fixtures__/vms/
 runs:
     - command: 'machines create --temporary'

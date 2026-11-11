@@ -8,13 +8,13 @@
 ●	git	Jean-Baptiste Terrazzoni	own		admin@jterrazz.com
 ●	ssh	6 keys	own			admin@jterrazz.com · station-image · station-e2e · deploy · old-rsa · github-actions
 ●	docker	deploy	own	registry.jterrazz.com	osxkeychain
-●	linux-1	throwaway				guest connected
+●	linux-1	ephemeral				guest connected
 ●	claude	admin@jterrazz.com	shared	operator:claude:oauth-token	2026-11-03T22:10:00Z
 ●	git	Jean-Baptiste Terrazzoni	own		admin@jterrazz.com
 ●	entry	1 SSH key	own	jterrazz-macbook-pro	SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4
 ○	github				not logged in	ssh linux-1 gh auth login
 ○	npm				npm not on PATH
 ○	ssh				no key in the agent
-◐	api	permanent				guest connected
+◐	api	persistent				guest connected
 ◐	claude	admin@jterrazz.com	shared	operator:claude:oauth-token	2026-11-03T11:12:00Z	station accounts share claude --with api
 ●	entry	1 SSH key	own	jterrazz-macbook-pro	SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4

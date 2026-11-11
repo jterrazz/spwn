@@ -27,7 +27,7 @@ type heroWorld struct {
 
 func newHeroWorld() *heroWorld {
 	infra := model.VM{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running, BootAt: heroNow.Add(-12 * 24 * time.Hour)}
-	linux1 := model.VM{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: "working"}}
+	linux1 := model.VM{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}}
 	return &heroWorld{r: Reading{Now: heroNow, Zone: time.UTC, Ports: &ports.AllMachines{}, Accounts: &accounts.AllMachines{Now: heroNow},
 		All: &model.AllMachines{Read: heroNow, Macs: []model.MacView{
 			{Name: heroPro, ThisMac: true, Reachable: true, Answered: heroNow, Hardware: hardware(48), VMs: []model.VM{linux1}},
@@ -38,7 +38,7 @@ func newHeroWorld() *heroWorld {
 func (w *heroWorld) mini() *model.MacView { return &w.r.All.Macs[1] }
 
 func (w *heroWorld) waiting(name, ask string, since time.Duration) *heroWorld {
-	w.mini().VMs = append(w.mini().VMs, model.VM{Name: name, Lifetime: model.Permanent, State: model.Running,
+	w.mini().VMs = append(w.mini().VMs, model.VM{Name: name, Lifetime: model.Persistent, State: model.Running,
 		Agent: &model.AgentView{State: "waiting", Ask: ask, Since: heroNow.Add(-since)}})
 	return w
 }

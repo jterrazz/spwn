@@ -20,7 +20,7 @@ func TestAServerIsDownWhenTheMenuBarSaysSo(t *testing.T) {
 		{"broken", VM{Lifetime: AlwaysOn, State: Broken}, true},
 		{"stopped on purpose", VM{Lifetime: AlwaysOn, State: Stopped, Want: "stopped"}, false},
 		{"running", VM{Lifetime: AlwaysOn, State: Running, Want: "running"}, false},
-		{"a workspace stopped, wanted running", VM{Lifetime: Permanent, State: Stopped, Want: "running", Restarts: looping}, false},
+		{"a workspace stopped, wanted running", VM{Lifetime: Persistent, State: Stopped, Want: "running", Restarts: looping}, false},
 	}
 	for _, c := range cases {
 		if got := Down(c.vm); got != c.down {

@@ -9,8 +9,8 @@ import (
 type Lifetime string
 
 const (
-	Throwaway Lifetime = "throwaway"
-	Permanent Lifetime = "permanent"
+	Ephemeral  Lifetime = "ephemeral"
+	Persistent Lifetime = "persistent"
 	// value: a server's: it starts with its Mac and is never thrown away.
 	AlwaysOn Lifetime = "always-on"
 )
@@ -32,14 +32,16 @@ func (l Lifetime) Word() string {
 }
 
 func (l *Lifetime) UnmarshalText(text []byte) error {
-	// value: alias of v2's lifetime words, read once and written in v3's.
-	// invariant: a record station v2 wrote reads in v3's words: temporary
-	// is throwaway, lasting is permanent; the next write keeps the new word.
+	// value: alias of the lifetime words of v2 (temporary, lasting) and of
+	// v3 (throwaway, permanent), read for one release and written in
+	// ephemeral and persistent.
+	// invariant: a record or a request of an older station reads in today's
+	// words; the next write keeps the new word.
 	switch v := Lifetime(text); v {
-	case "temporary":
-		*l = Throwaway
-	case "lasting":
-		*l = Permanent
+	case "temporary", "throwaway":
+		*l = Ephemeral
+	case "lasting", "permanent":
+		*l = Persistent
 	default:
 		*l = v
 	}
@@ -99,7 +101,7 @@ func BrokenDetail() string { return "rebooting in a loop" }
 
 func AfterRun(l Lifetime, end RunEnd, reruns []time.Time, now time.Time) (Action, []time.Time) {
 	// invariant: a workspace never restarts by itself (SP-4). A poweroff its
-	// guest declared deletes a throwaway one and stops a permanent one; a
+	// guest declared deletes an ephemeral one and stops a persistent one; a
 	// reboot from inside runs it again, and the third boot within 60 s that
 	// ends in a reboot is a loop, stopped (SPEC §7.3); a crash or
 	// an end nobody can read keeps it, stale, for the owner to start or delete.
@@ -108,11 +110,11 @@ func AfterRun(l Lifetime, end RunEnd, reruns []time.Time, now time.Time) (Action
 	switch end.Reason {
 	case GuestPoweroff:
 		switch l {
-		case Throwaway:
+		case Ephemeral:
 			return ActDelete, reruns
 		case AlwaysOn:
 			return ActPoweredOff, reruns
-		case Permanent:
+		case Persistent:
 		}
 		return ActStopped, reruns
 	case GuestReboot:

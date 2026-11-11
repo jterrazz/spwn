@@ -5,13 +5,13 @@ runs:
       exit: 0
       stdout: |
           ●	macbook-pro	Mac	macbook-pro	Engine running
-          ●	agent-7f	Workspace	macbook-pro	Running · throwaway	4 CPU	8 GB
-          ○	api	Workspace	macbook-pro	Stopped · permanent	4 CPU	8 GB
-          ●	linux-1	Workspace	macbook-pro	Running · throwaway	4 CPU	8 GB
+          ●	agent-7f	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
           ●	mac-mini	Mac	mac-mini	Engine running
           ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
-          ●	linux-3	Workspace	mac-mini	Running · throwaway	4 CPU	8 GB
-          ●	review-bot	Workspace	mac-mini	Running · permanent	2 CPU	4 GB
+          ●	linux-3	Workspace	mac-mini	Running · ephemeral	4 CPU	8 GB
+          ●	review-bot	Workspace	mac-mini	Running · persistent	2 CPU	4 GB
           ○	macbook-air	Mac	macbook-air	Asleep · last answer 08:30
     - command: 'agents | /usr/bin/cut -f1,2,4 | /usr/bin/tail -n +2'
       exit: 0

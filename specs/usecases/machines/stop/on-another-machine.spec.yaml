@@ -19,4 +19,4 @@ runs:
           	On mac-mini:
           ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running
           ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
-          ○	ci-1	Workspace	jterrazz-mac-mini	Stopped · throwaway	4 CPU	8 GB
+          ○	ci-1	Workspace	jterrazz-mac-mini	Stopped · ephemeral	4 CPU	8 GB

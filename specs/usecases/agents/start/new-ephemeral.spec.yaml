@@ -1,4 +1,4 @@
-description: '--new makes the agent a throwaway of its own first, and it takes its name; the VM keeps no task'
+description: '--new makes an ephemeral workspace first, and the agent takes its name; the VM keeps no task'
 env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-2"] = {self: {kind: "workspace", system: {OS: "linux"}}}'' world.json > w.json && /bin/mv w.json world.json'
@@ -6,7 +6,7 @@ runs:
     - command: 'agents start "Build the landing page" --new'
       exit: 0
       stdout: |
-          ●	linux-2	starts on linux-2, a new throwaway · claudecode · Build the landing page
+          ●	linux-2	starts on linux-2, a new ephemeral workspace · claudecode · Build the landing page
     - command: 'agents'
       exit: 0
       stdout: |
@@ -15,4 +15,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-2"] | {kept: .kept.lifetime, task: .kept.task, opened: .agents.opened, typed: .agents.typed}'' world.json'
       exit: 0
       stdout: |
-          {"kept":"throwaway","task":null,"opened":["claudecode"],"typed":["Build the landing page"]}
+          {"kept":"ephemeral","task":null,"opened":["claudecode"],"typed":["Build the landing page"]}

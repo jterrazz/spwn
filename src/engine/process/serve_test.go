@@ -148,7 +148,7 @@ func TestServeIsReadEveryThirtyTicksAndOnlyServesWhileOn(t *testing.T) {
 
 func TestARunRendersTheProfileEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	kept := map[string]string{"EXPO_PACKAGER_PROXY_URL": "http://127.0.0.1:40000"}
-	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning, Env: kept})
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning, Env: kept})
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
 	yes := true
 	expo := catalog.Profile{Name: "expo", Port: 8081, HTTP: true, Env: []catalog.ProfileEnv{{Name: "EXPO_PACKAGER_PROXY_URL", Value: "{url}"}}}
@@ -263,7 +263,7 @@ func TestACertificateNeverIssuedIsCutAtItsBudgetAndSaysSo(t *testing.T) {
 }
 
 func TestAnEngineThatStopsLeavesItsRunningVMsPortsSharedOnTheTailnet(t *testing.T) {
-	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning})
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
 	h.hv.outlived("api")
 	tn := &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
 	h.d.tn = tn

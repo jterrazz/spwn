@@ -749,7 +749,7 @@
                             "items": [
                               {
                                 "kind": "text",
-                                "text": "Throwaway"
+                                "text": "Ephemeral"
                               },
                               {
                                 "kind": "count",
@@ -776,7 +776,7 @@
                             "items": [
                               {
                                 "kind": "text",
-                                "text": "Throwaway"
+                                "text": "Ephemeral"
                               },
                               {
                                 "kind": "text",
@@ -802,7 +802,7 @@
                             "items": [
                               {
                                 "kind": "text",
-                                "text": "Permanent"
+                                "text": "Persistent"
                               },
                               {
                                 "kind": "text",
@@ -897,7 +897,7 @@
                             "items": [
                               {
                                 "kind": "text",
-                                "text": "Throwaway"
+                                "text": "Ephemeral"
                               },
                               {
                                 "kind": "text",
@@ -923,7 +923,7 @@
                             "items": [
                               {
                                 "kind": "text",
-                                "text": "Permanent"
+                                "text": "Persistent"
                               },
                               {
                                 "kind": "text",
@@ -1054,15 +1054,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1281,15 +1281,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1504,15 +1504,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -1732,15 +1732,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -2289,15 +2289,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -2523,15 +2523,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -3289,7 +3289,7 @@
           },
           {
             "key": "VMs",
-            "label": "Empty throwaways",
+            "label": "Empty ephemeral workspaces",
             "kind": "multiselect",
             "options": [
               {
@@ -3307,14 +3307,14 @@
             "note": "linux-1 has a working agent, so it stays."
           }
         ],
-        "subtitle": "Finished agents and empty throwaways.",
+        "subtitle": "Finished agents and empty ephemeral workspaces.",
         "primary": [
           {
             "when": {
               "key": "VMs",
               "count": 1
             },
-            "label": "Delete 1 throwaway",
+            "label": "Delete 1 ephemeral workspace",
             "danger": true
           },
           {
@@ -3372,7 +3372,7 @@
           },
           {
             "key": "VMs",
-            "label": "Empty throwaways",
+            "label": "Empty ephemeral workspaces",
             "kind": "multiselect",
             "options": [
               {
@@ -3390,14 +3390,14 @@
             "note": "linux-1, linux-3 and review-bot have a live agent, so they stay."
           }
         ],
-        "subtitle": "Finished agents and empty throwaways.",
+        "subtitle": "Finished agents and empty ephemeral workspaces.",
         "primary": [
           {
             "when": {
               "key": "VMs",
               "count": 1
             },
-            "label": "Delete 1 throwaway",
+            "label": "Delete 1 ephemeral workspace",
             "danger": true
           },
           {
@@ -3567,15 +3567,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",
@@ -4010,15 +4010,15 @@
                 "kind": "segmented",
                 "options": [
                   {
-                    "value": "throwaway",
-                    "label": "Throwaway"
+                    "value": "ephemeral",
+                    "label": "Ephemeral"
                   },
                   {
-                    "value": "permanent",
-                    "label": "Permanent"
+                    "value": "persistent",
+                    "label": "Persistent"
                   }
                 ],
-                "default": "throwaway"
+                "default": "ephemeral"
               },
               {
                 "key": "Request.Image",

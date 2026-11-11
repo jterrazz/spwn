@@ -1,11 +1,11 @@
 All machines
-  ◐ macbook     Mac        This Mac  online       100.98.133.14
+  ◐ macbook     Mac         This Mac  online       100.98.133.14
     engine stopped  → station engine start
-  ├─ ● linux-1  throwaway            running      192.168.64.5
+  ├─ ● linux-1  ephemeral             running      192.168.64.5
   │  ├─ 5173 → 40001  https://jterrazz-macbook-pro.tail1234.ts.net:40001  node
   │  └─ 5432 → 40002  postgres
-  └─ ○ api      permanent            stopped      -
-  ◐ mac-mini    Mac                  unreachable  100.98.133.20
+  └─ ○ api      persistent            stopped      -
+  ◐ mac-mini    Mac                   unreachable  100.98.133.20
 Images
            version       size  on
   ● linux  2026.11.01  4.0 GB  jterrazz-macbook-pro  linux-1 · api

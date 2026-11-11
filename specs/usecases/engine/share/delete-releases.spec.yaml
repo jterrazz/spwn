@@ -1,4 +1,4 @@
-description: 'deleting a throwaway releases its reserved ports and removes its shares from Tailscale'
+description: 'deleting an ephemeral workspace releases its reserved ports and removes its shares from Tailscale'
 env: two-macs
 runs:
     - command: 'machines delete linux-1 --confirm=linux-1'

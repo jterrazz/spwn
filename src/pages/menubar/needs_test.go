@@ -29,14 +29,14 @@ var needsNow = time.Date(2026, 11, 7, 14, 10, 0, 0, time.UTC)
 func needsFleet() NeedsReading {
 	infra := model.VM{Name: "infra", Mac: needsMini, Lifetime: model.AlwaysOn, State: model.Stopped, Want: "running", Cause: "out of memory",
 		Restarts: model.Restarts{Count: 5, Streak: 5, Looping: true}, CheckStatus: model.CheckStatus{State: model.CheckFailing, Since: needsNow.Add(-8 * time.Minute)}}
-	bot := model.VM{Name: "review-bot", Mac: needsMini, Lifetime: model.Permanent, State: model.Running,
+	bot := model.VM{Name: "review-bot", Mac: needsMini, Lifetime: model.Persistent, State: model.Running,
 		Agent: &model.AgentView{State: "waiting", Ask: "PR #42 is ready", Since: needsNow.Add(-6 * time.Minute)}}
 	all := model.AllMachines{Macs: []model.MacView{
 		{Name: needsPro, ThisMac: true, Reachable: true, VMs: []model.VM{
-			{Name: "linux-1", Mac: needsPro, Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: "working"}},
+			{Name: "linux-1", Mac: needsPro, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}},
 		}},
 		{Name: needsMini, Reachable: true, VMs: []model.VM{infra, bot,
-			{Name: "linux-3", Mac: needsMini, Lifetime: model.Throwaway, State: model.Running, Agent: &model.AgentView{State: "working"}},
+			{Name: "linux-3", Mac: needsMini, Lifetime: model.Ephemeral, State: model.Running, Agent: &model.AgentView{State: "working"}},
 		}},
 	}}
 	exposed := ports.AllMachines{Macs: []ports.MacPorts{{Name: needsPro, ThisMac: true, Reachable: true, Ports: []ports.Port{

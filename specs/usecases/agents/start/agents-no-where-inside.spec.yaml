@@ -4,7 +4,7 @@ runs:
     - command: 'agents start "Build the landing page" --new'
       exit: 2
       stderr: |
-          Error: an agent started inside a workspace runs on it: --new makes a throwaway from a Mac
+          Error: an agent started inside a workspace runs on it: --new makes an ephemeral workspace from a Mac
           Hint: station agents start "<task>"
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["linux-1"].agents'' world.json'
       exit: 0

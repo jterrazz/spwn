@@ -13,11 +13,11 @@ runs:
           see ▸ Kind          ← Workspace →   Workspace · Server
           see   Name          linux-2
           see   On            ← This Mac →   This Mac · mac-mini
-          see   Lifetime      ← Throwaway →   Throwaway · Permanent
+          see   Lifetime      ← Ephemeral →   Ephemeral · Persistent
           send \t\t\t
           see ▸ Lifetime
           send \x1b[C
-          see ← Permanent →
+          see ← Persistent →
           send \t
           send \x7f
           send 2
@@ -30,4 +30,4 @@ runs:
     - command: 'machines | /usr/bin/grep linux-2'
       exit: 0
       stdout: |
-          ●	linux-2	Workspace	jterrazz-macbook-pro	Running · permanent	2 CPU	4 GB
+          ●	linux-2	Workspace	jterrazz-macbook-pro	Running · persistent	2 CPU	4 GB

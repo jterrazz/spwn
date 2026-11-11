@@ -29,7 +29,7 @@ type Input struct {
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "cleanup [<vm>...]",
-		Short:   "Delete the throwaways whose agent finished, or that are stopped",
+		Short:   "Delete the ephemeral workspaces whose agent finished, or that are stopped",
 		Example: "  station machines cleanup --yes\n  station machines cleanup agent-7f --yes --on mac-mini",
 		Args:    cobra.ArbitraryArgs,
 		Bind: func(in *Input, args []string) error {

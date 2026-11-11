@@ -19,8 +19,8 @@ func sized(vm VM, memory int64) VM {
 
 func TestAMacsFreeMemoryIsWhatNoVMReserves(t *testing.T) {
 	infra := sized(VM{Name: "infra", Lifetime: AlwaysOn, Want: WantRunning, State: Running}, 24*gb)
-	linux := sized(VM{Name: "linux-3", Lifetime: Throwaway, State: Running}, 8*gb)
-	api := sized(VM{Name: "api", Lifetime: Permanent, Want: WantRunning, State: Stopped}, 8*gb)
+	linux := sized(VM{Name: "linux-3", Lifetime: Ephemeral, State: Running}, 8*gb)
+	api := sized(VM{Name: "api", Lifetime: Persistent, Want: WantRunning, State: Stopped}, 8*gb)
 	c, ok := CapacityOf(mini(linux, infra, api))
 	if !ok {
 		t.Fatal("a Mac that says its memory has a capacity")

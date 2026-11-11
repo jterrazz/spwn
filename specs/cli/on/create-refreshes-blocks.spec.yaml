@@ -1,14 +1,14 @@
 description: 'a VM created on another Mac with --on gets its ssh block on This Mac as soon as the create returns'
 fixture: ./__fixtures__/create-on-y/
 runs:
-    - command: 'machines create --permanent --on y'
+    - command: 'machines create --persistent --on y'
       exit: 0
       stdout: |
           	On y:
           ●	Running
           ●	Has an address
           ●	SSH answers
-          ●	linux-1	Created	Permanent · 4 CPU · 4 GB · 50 GB
+          ●	linux-1	Created	Persistent · 4 CPU · 4 GB · 50 GB
       files:
           .ssh/config:
               contains:

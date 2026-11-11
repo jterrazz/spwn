@@ -96,7 +96,7 @@ final class HomeTests: XCTestCase {
         XCTAssertEqual(infra.cells?.first?.text, "Server")
         XCTAssertEqual(infra.mark, .ok)
         XCTAssertEqual(texts(infra.cells?.last?.items).prefix(2), ["Always on", "healthy"])
-        XCTAssertEqual(texts(macs[0].items?.first?.group?.items?.last?.row?.cells?.last?.items), ["Permanent", "Stopped"])
+        XCTAssertEqual(texts(macs[0].items?.first?.group?.items?.last?.row?.cells?.last?.items), ["Persistent", "Stopped"])
     }
 
     // invariant: AP-23: Needs you's `2 app updates` carries Update all,

@@ -36,7 +36,9 @@ type Deps struct {
 
 type Input struct {
 	Image, Name, Memory, Disk, Network, Check string
-	Permanent, Server                         bool
+	Persistent, Server                        bool
+	// value: v3's --permanent, kept hidden for one release: --persistent.
+	Permanent bool
 	// value: v3's --task and --agent, gone with A2: a create that names
 	// them is refused, pointed to station agents start.
 	Task  string
@@ -54,9 +56,9 @@ type Input struct {
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:   "create [<name>]",
-		Short: "Make a workspace on this Mac, throwaway or --permanent; or a server, always on, with --server",
+		Short: "Make a workspace on this Mac, ephemeral or --persistent; or a server, always on, with --server",
 		Example: "  station machines create\n" +
-			"  station machines create api --permanent --memory 12G\n" +
+			"  station machines create api --persistent --memory 12G\n" +
 			"  station machines create infra --server --check https://infra:6443/readyz --on mac-mini",
 		Args: cobra.MaximumNArgs(1),
 		Asks: true,
@@ -65,7 +67,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		},
 		Refuse: func(in *Input) error { return d.NotBuilt(in.request.Image) },
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.BoolVar(&in.Permanent, "permanent", false, "kept until you delete it; without it, deleted when it powers off from inside")
+			f.BoolVar(&in.Permanent, "permanent", false, "--persistent")
+			f.BoolVar(&in.Persistent, "persistent", false, "kept until you delete it; without it, deleted when it powers off from inside")
 			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by station (default 4 CPU, 8G, 50G)")
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
 			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
@@ -77,7 +80,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Task, "task", "", "gone: station agents start \"<task>\" --new")
 			f.BoolVar(&in.Agent, "agent", false, "gone: station agents start \"<task>\" --new")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
-			f.StringVar(&in.Lifetime, "lifetime", "", "throwaway or permanent (--permanent)")
+			f.StringVar(&in.Lifetime, "lifetime", "", "ephemeral or persistent (--persistent)")
+			_ = f.MarkHidden("permanent")
 			_ = f.MarkHidden("name")
 			_ = f.MarkHidden("lifetime")
 			_ = f.MarkHidden("always-on")
@@ -92,13 +96,17 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.Task != "" || in.Agent {
 				return &machines.KindRuleError{Why: "station machines create makes the VM only: an agent is started on it", Fix: taskWords(in)}
 			}
+			if in.Permanent {
+				in.Persistent = true
+				env.Out.Now(nowWords(in))
+			}
 			if in.AlwaysOn {
 				in.Server = true
 				env.Out.Now(serverWords(in))
 			}
-			if in.Server && (in.Permanent || in.Lifetime != "") {
-				flag := "permanent"
-				if !in.Permanent {
+			if in.Server && (in.Persistent || in.Lifetime != "") {
+				flag := "persistent"
+				if !in.Persistent {
 					flag = "lifetime"
 				}
 				return &machines.ServerLifetimeError{Name: cmp.Or(in.Name, "<name>"), Flag: flag}
@@ -107,15 +115,15 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			lifetime := machines.Throwaway
-			if in.Permanent {
-				lifetime = machines.Permanent
+			lifetime := machines.Ephemeral
+			if in.Persistent {
+				lifetime = machines.Persistent
 			}
 			if in.Lifetime != "" {
 				var old machines.Lifetime
 				_ = old.UnmarshalText([]byte(in.Lifetime))
 				lifetime = old
-				if old == machines.Permanent {
+				if old == machines.Persistent {
 					env.Out.Now(nowWords(in))
 				}
 			}
@@ -189,13 +197,14 @@ func serverWords(in *Input) string {
 	return words + " --server"
 }
 
-// value: the v3 words of a create written with v2's --lifetime lasting.
+// value: the words of a create written with v2's --lifetime lasting or
+// v3's --permanent.
 func nowWords(in *Input) string {
 	words := "station machines create"
 	if in.Name != "" {
 		words += " " + in.Name
 	}
-	return words + " --permanent"
+	return words + " --persistent"
 }
 
 func ask(ctx context.Context, d Deps, in *Input) error {

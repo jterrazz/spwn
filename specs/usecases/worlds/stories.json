@@ -548,7 +548,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "3",
-                        "lifetime": "throwaway",
+                        "lifetime": "ephemeral",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z"
                     },
@@ -619,7 +619,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "3",
-                        "lifetime": "permanent",
+                        "lifetime": "persistent",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z"
                     },
@@ -1060,7 +1060,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "3",
-                        "lifetime": "throwaway",
+                        "lifetime": "ephemeral",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z"
                     },
@@ -1127,7 +1127,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "3",
-                        "lifetime": "permanent",
+                        "lifetime": "persistent",
                         "want": "stopped",
                         "created_at": "2026-11-02T10:30:00Z"
                     },
@@ -1142,7 +1142,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "3",
-                        "lifetime": "throwaway",
+                        "lifetime": "ephemeral",
                         "want": "running",
                         "created_at": "2026-11-02T10:30:00Z"
                     },

@@ -23,7 +23,7 @@ runs:
           see Memory        8G_
           send \r
           see Edited linux-1: it applies when it next starts
-          run "$STATION" machines | /usr/bin/grep -q "^●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	6 CPU	8 GB"
+          run "$STATION" machines | /usr/bin/grep -q "^●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	6 CPU	8 GB"
           send c
           see Copied ssh admin@linux-1
           run /usr/bin/grep -qx 'ssh admin@linux-1' clipboard

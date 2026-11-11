@@ -1,9 +1,9 @@
 import SwiftUI
 
 // invariant: SPEC A5 Clean up (A2): the finished agents, then the empty
-// throwaways, each checked, an agent its throwaway carries checked and
+// ephemeral workspaces, each checked, an agent its ephemeral workspace carries checked and
 // dimmed; the note naming what stays; Cancel, then the button worded
-// from what is checked, red once a throwaway is.
+// from what is checked, red once an ephemeral workspace is.
 public struct CleanupSheet: View {
     let sheet: SheetForm
 

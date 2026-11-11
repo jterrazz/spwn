@@ -5,7 +5,7 @@ fixture:
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42140-42159"}/'' .config/station/preferences.json; echo 2 > vm/boot-seconds; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --permanent --name api > /dev/null; "$STATION" machines --json | /usr/bin/jq -r ".macs[0].vms[0].health.ssh"; /usr/bin/grep -c "station hosts" vm/.ssh/authorized_keys; /usr/bin/grep -c STATION_PUBLIC_HOST vm/.config/station/services.env; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42140-42159"}/'' .config/station/preferences.json; echo 2 > vm/boot-seconds; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null; "$STATION" machines --json | /usr/bin/jq -r ".macs[0].vms[0].health.ssh"; /usr/bin/grep -c "station hosts" vm/.ssh/authorized_keys; /usr/bin/grep -c STATION_PUBLIC_HOST vm/.config/station/services.env; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
       exit: 0
       stdout: |
           true

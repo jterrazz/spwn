@@ -90,7 +90,7 @@ final class FindTests: XCTestCase {
     func testOneLetterAddsNoVerbs() throws {
         let groups = try index().results(query: "l", recent: [])
         XCTAssertFalse(groups.flatMap(\.entries).contains { $0.group == FindIndex.verbs })
-        XCTAssertEqual(groups.first { $0.id == FindIndex.actions }?.entries.map(\.title), ["Awake until linux-1 ends", "Clean up throwaways on This Mac"])
+        XCTAssertEqual(groups.first { $0.id == FindIndex.actions }?.entries.map(\.title), ["Awake until linux-1 ends", "Clean up ephemeral workspaces on This Mac"])
     }
 
     // invariant: the keys never leave the lines drawn; typing starts over

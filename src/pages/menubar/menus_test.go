@@ -86,7 +86,7 @@ func TestAMacsMenuOffersWhatThatMacTakes(t *testing.T) {
 		t.Fatalf("mac-mini's menu %q", got)
 	}
 	working := func(m *Machine) {
-		m.All.Macs[0].VMs = []model.VM{{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running}}
+		m.All.Macs[0].VMs = []model.VM{{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running}}
 	}
 	if got := pageMenu(macPageOf(t, proMac, working)); !slices.Equal(got, []string{"This Mac", "Open in Terminal", "-", "Stop everything... (red)"}) {
 		t.Fatalf("This Mac's menu %q", got)

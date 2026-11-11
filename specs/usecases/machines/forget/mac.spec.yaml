@@ -22,8 +22,8 @@ runs:
       exit: 0
       stdout: |
           ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
-          ○	api	Workspace	jterrazz-macbook-pro	Stopped · permanent	4 CPU	8 GB
-          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · throwaway	4 CPU	8 GB
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].ssh.blocks | keys'' world.json'
       exit: 0
       stdout: |

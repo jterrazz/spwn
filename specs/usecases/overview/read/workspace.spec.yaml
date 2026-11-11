@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           On linux-1:
-          linux-1 · Workspace on This Mac · Throwaway · up 2 h
+          linux-1 · Workspace on This Mac · Ephemeral · up 2 h
 
           Activity  memory 1.1 of 4 GB · 12.4 GB free
           Apps      ● 1 ok · ○ 63 not installed

@@ -1,4 +1,4 @@
-description: 'a throwaway VM''s declared poweroff deletes it and releases its reserved ports'
+description: 'an ephemeral VM''s declared poweroff deletes it and releases its reserved ports'
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/

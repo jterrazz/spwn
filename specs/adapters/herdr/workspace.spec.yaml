@@ -6,7 +6,7 @@ fixture:
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42900-42919"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --permanent --name linux-1 > /dev/null; /bin/cat .hc-machines; "$STATION" machines delete linux-1 --confirm=linux-1; c=$?; kill $d; wait $d; /usr/bin/grep "^hc machine" .calls; exit $c'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42900-42919"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name linux-1 > /dev/null; /bin/cat .hc-machines; "$STATION" machines delete linux-1 --confirm=linux-1; c=$?; kill $d; wait $d; /usr/bin/grep "^hc machine" .calls; exit $c'
       exit: 0
       stdout: |
           linux-1

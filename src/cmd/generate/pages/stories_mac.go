@@ -97,7 +97,7 @@ func miniSilentFor(d time.Duration) func(*Scene) {
 }
 
 func linux4() model.VM {
-	vm := sceneVM("linux-4", miniMac, model.Throwaway, model.Creating, 4, 8, "")
+	vm := sceneVM("linux-4", miniMac, model.Ephemeral, model.Creating, 4, 8, "")
 	vm.Agent = &model.AgentView{State: "working", Task: "fix the flaky e2e test"}
 	return vm
 }

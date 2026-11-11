@@ -30,7 +30,7 @@ func TestEachGestureAsksWhatItsKindNeeds(t *testing.T) {
 		{"delete an image", confirm.DeleteImage, machine.Computer, confirm.YesNo},
 		{"erase an app's data", confirm.Erase, machine.Computer, confirm.TypeName},
 		{"build the image a create needs", confirm.BuildImage, machine.Workspace, confirm.YesNo},
-		{"delete the throwaways whose agent finished", confirm.Cleanup, machine.Computer, confirm.YesNo},
+		{"delete the ephemeral workspaces whose agent finished", confirm.Cleanup, machine.Computer, confirm.YesNo},
 	} {
 		if got := confirm.For(c.action, c.kind); got != c.want {
 			t.Errorf("%s asks %s, want %s", c.gesture, got, c.want)
@@ -83,10 +83,10 @@ func TestTheMenuBarAsksAtTheLevelItsFactsGrade(t *testing.T) {
 		{"a down server restarts at once", confirm.Restart, machine.Server, nil, confirm.None},
 		{"alert.stop-server", confirm.Stop, machine.Server, []confirm.Fact{confirm.Healthy}, confirm.TypeName},
 		{"alert.delete-server", confirm.Delete, machine.Server, nil, confirm.TypeName},
-		{"alert.stop-vm", confirm.Stop, machine.Workspace, []confirm.Fact{confirm.Throwaway}, confirm.YesNo},
+		{"alert.stop-vm", confirm.Stop, machine.Workspace, []confirm.Fact{confirm.Ephemeral}, confirm.YesNo},
 		{"alert.stop-agent", confirm.StopAgent, machine.Workspace, nil, confirm.YesNo},
-		{"alert.delete-vm.throwaway", confirm.Delete, machine.Workspace, []confirm.Fact{confirm.Throwaway}, confirm.YesNo},
-		{"alert.delete-vm.permanent", confirm.Delete, machine.Workspace, nil, confirm.TypeName},
+		{"alert.delete-vm.ephemeral", confirm.Delete, machine.Workspace, []confirm.Fact{confirm.Ephemeral}, confirm.YesNo},
+		{"alert.delete-vm.persistent", confirm.Delete, machine.Workspace, nil, confirm.TypeName},
 		{"alert.stop-all", confirm.StopEngine, machine.Computer, nil, confirm.YesNo},
 		{"alert.restart-mac", confirm.RestartMac, machine.Computer, []confirm.Fact{confirm.HostsServer}, confirm.TypeName},
 		{"a Mac hosting no server restarts on yes", confirm.RestartMac, machine.Computer, nil, confirm.YesNo},

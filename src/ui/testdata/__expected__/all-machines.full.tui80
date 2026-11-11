@@ -1,10 +1,10 @@
  All machines  2 ●  1 ◐  1 ○
-   ● macbook     Mac        This Mac  online   100.98.133.14
-   ├─ ● linux-1  throwaway            running  192.168.64.5
+   ● macbook     Mac         This Mac  online   100.98.133.14
+   ├─ ● linux-1  ephemeral             running  192.168.64.5
    │  ├─ 5173 → 40001  https://jterrazz-macbook-pro.tail1234.ts.net:40001  node
    │  └─ 5432 → 40002  postgres
-   └─ ○ api      permanent            stopped  -
-   ◐ mac-mini    Mac                  online   100.98.133.20
+   └─ ○ api      persistent            stopped  -
+   ◐ mac-mini    Mac                   online   100.98.133.20
      station v2.0.0-248, This Mac v2.0.0-250
       no VMs  → station machines create --on mac-mini
 

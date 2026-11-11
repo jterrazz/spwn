@@ -30,7 +30,7 @@ func setupFailure(err error) (*fail.Error, bool) {
 		case errors.As(err, &different):
 			hint = "keep one of the two files, then run station init again"
 		case errors.As(err, &busy):
-			hint = "stop the permanent VMs and delete the throwaway ones (station machines), then station init"
+			hint = "stop the persistent VMs and delete the ephemeral ones (station machines), then station init"
 		case errors.As(err, &exists):
 			hint = exists.Path + " already exists: move one of them by hand"
 		case errors.As(err, &cross):

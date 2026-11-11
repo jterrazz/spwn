@@ -15,7 +15,7 @@ runs:
           station.machines.create-workspace/v1
           linux-2
           x
-          throwaway
+          ephemeral
           2026.11.07
           4294967296
           127.0.0.1

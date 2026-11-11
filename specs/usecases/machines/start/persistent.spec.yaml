@@ -1,0 +1,13 @@
+description: 'a stopped persistent workspace starts once its guest answers, and its record wants it running'
+env: two-macs
+runs:
+    - command: 'machines start api'
+      exit: 0
+      stdout: |
+          ●	api	started
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ●	api	Workspace	jterrazz-macbook-pro	Running · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB

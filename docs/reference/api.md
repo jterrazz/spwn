@@ -26,7 +26,7 @@ The engine listens on no TCP port, and the reserved ports' forwarders bind `127.
 A frame (`remote/api.Frame`) carries `v` (2) and `id`. A request carries `hello`, `call` or `watch`, with its `target` (`{name, on}`: the machine, and the Mac a VM runs on) and its `in`; its answers carry the same `id`: `progress` frames (`{task, detail, done, error}`), then one `out` or one `error` for a call, `out` frames then `done` for a watch. The first frame of a connection is `hello`: the far binary's version and the calls it serves, so a call it does not serve is `far-too-old` before it is sent; with them, the `kind` of the machine that answers (`computer`, `workspace` or `server`), where `mac`, the word of a station that predates `computer`, is read as `computer` and never written. The calls of one connection are answered in the order they came.
 
 ```text
-→ {"v":2,"id":"7","call":"machines.create-workspace","in":{"Request":{"Image":"linux","Lifetime":"throwaway"}}}
+→ {"v":2,"id":"7","call":"machines.create-workspace","in":{"Request":{"Image":"linux","Lifetime":"ephemeral"}}}
 ← {"v":2,"id":"7","progress":{"task":"Booting linux-1"}}
 ← {"v":2,"id":"7","out":{"VM":{"Name":"linux-1"}}}
 → {"v":2,"id":"8","call":"engine.stop","in":{"Confirm":"inf"}}

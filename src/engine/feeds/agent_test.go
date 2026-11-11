@@ -15,7 +15,7 @@ import (
 )
 
 func agentWorld() *world {
-	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Throwaway, State: machines.Running, Guest: "connected"}
+	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Ephemeral, State: machines.Running, Guest: "connected"}
 	at := time.Date(2026, 11, 7, 10, 24, 0, 0, time.UTC)
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		agents: []agents.Agent{
@@ -84,11 +84,11 @@ func TestHomesCleanUpForgetsAFinishedAgentByItsOwnName(t *testing.T) {
 	})
 }
 
-// invariant: a Mac page's Clean up lists the finished agents its throwaways
+// invariant: a Mac page's Clean up lists the finished agents its ephemeral workspaces
 // ran, as Home's does: the feed reads the fleet's agents for a Mac too.
-func TestAMacsCleanUpListsTheFinishedAgentOfItsThrowaway(t *testing.T) {
+func TestAMacsCleanUpListsTheFinishedAgentOfItsEphemeral(t *testing.T) {
 	ended := time.Date(2026, 11, 7, 10, 12, 0, 0, time.UTC)
-	done := machines.VM{Name: "agent-7f", Mac: thisMac, Lifetime: machines.Throwaway, State: machines.Running, Guest: "connected", Agent: &machines.AgentView{State: machines.AgentFinished}}
+	done := machines.VM{Name: "agent-7f", Mac: thisMac, Lifetime: machines.Ephemeral, State: machines.Running, Guest: "connected", Agent: &machines.AgentView{State: machines.AgentFinished}}
 	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{done}, asked: map[string][]string{}, activity: map[string]uint64{},
 		agents: []agents.Agent{{Name: "agent-7f", VM: "agent-7f", Mac: thisMac, App: "claudecode", State: agents.Finished, Ended: ended, Reason: "tests pass"}}}
 	until(t, watchWith(t, w, newSteps(), engine.FeedInput{Subject: thisMac}), "This Mac's Clean up with its finished agent", func(p page.Page) bool {

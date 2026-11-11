@@ -415,7 +415,7 @@ func shared(p page.Page) []string {
 }
 
 func TestAnAccountTakenBackLeavesLinux1sPageOnceTheCallReturns(t *testing.T) {
-	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Permanent, State: machines.Running, Guest: "connected"}
+	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Persistent, State: machines.Running, Guest: "connected"}
 	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, lent: lentTo("linux-1", catalog.ProviderGitHub, catalog.ProviderClaude), asked: map[string][]string{}, activity: map[string]uint64{}}
 	refresh := make(chan struct{}, 1)
 	pages := watchWith(t, w, newSteps(), engine.FeedInput{Subject: "linux-1", Refresh: refresh})
@@ -435,7 +435,7 @@ func TestAnAccountTakenBackLeavesLinux1sPageOnceTheCallReturns(t *testing.T) {
 }
 
 func TestAWorkspaceStartedOnThisMacReachesItsPageWhenTheEngineMoves(t *testing.T) {
-	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Permanent, State: machines.Stopped}
+	linux := machines.VM{Name: "linux-1", Mac: thisMac, Lifetime: machines.Persistent, State: machines.Stopped}
 	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{}}
 	changed := make(chan struct{}, 1)
 	pages := watchWith(t, w, newSteps(), engine.FeedInput{Subject: "linux-1", Changed: changed})
@@ -463,7 +463,7 @@ func TestAWorkspaceCreatedFromTheMenuBarAppearsInHomeWhenTheEngineMoves(t *testi
 	pages := o.Feed()(ctx, in)
 	until(t, pages, "every Mac", func(p page.Page) bool { return row(p, "machines", mini) != nil })
 	w.mu.Lock()
-	w.here = []machines.VM{{Name: "linux-2", Mac: thisMac, Lifetime: machines.Permanent, State: machines.Running, Guest: "connected"}}
+	w.here = []machines.VM{{Name: "linux-2", Mac: thisMac, Lifetime: machines.Persistent, State: machines.Running, Guest: "connected"}}
 	w.mu.Unlock()
 	changed <- struct{}{}
 	p := until(t, pages, "linux-2 in Home", func(p page.Page) bool { return row(p, "machines", "linux-2") != nil })
@@ -484,7 +484,7 @@ func TestAWorkspaceCreatedFromTheMenuBarAppearsInHomeOnceTheCallReturns(t *testi
 			in.Awake = nothing(in.Awake)
 			pages := o.Feed()(ctx, in)
 			until(t, pages, "every Mac", func(p page.Page) bool { return row(p, "machines", mini) != nil })
-			created := machines.VM{Name: "linux-2", Mac: on, Lifetime: machines.Permanent, State: machines.Running, Guest: "connected"}
+			created := machines.VM{Name: "linux-2", Mac: on, Lifetime: machines.Persistent, State: machines.Running, Guest: "connected"}
 			w.mu.Lock()
 			if on == thisMac {
 				w.here = []machines.VM{created}

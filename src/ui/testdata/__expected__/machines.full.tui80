@@ -1,8 +1,8 @@
  4 machines · 3 running · 1 stopped · 1 needs you
      MACHINE     KIND       STATE                             CPU    MEMORY
    ● This Mac    Mac        Engine running
-   ├─ ○ api      Workspace  Stopped · permanent               4 CPU  8 GB
-   └─ ● linux-1  Workspace  Running · throwaway               4 CPU  4 GB
+   ├─ ○ api      Workspace  Stopped · persistent              4 CPU  8 GB
+   └─ ● linux-1  Workspace  Running · ephemeral               4 CPU  4 GB
    ◐ mac-mini    Mac        Engine running · runs v2.0.0-248
       No VMs yet
 

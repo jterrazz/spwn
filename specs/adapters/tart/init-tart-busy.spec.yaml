@@ -14,7 +14,7 @@ runs:
           	none yet: apps and settings come one at a time
       stderr: |
           Error: init step relocate: tart is running: its files cannot move under it
-          Hint: stop the permanent VMs and delete the throwaway ones (station machines), then station init
+          Hint: stop the persistent VMs and delete the ephemeral ones (station machines), then station init
       files:
           .tart/vms/station-image-linux-2026.11.01/config.json: exists
           .local/share/station/vms: absent

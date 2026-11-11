@@ -1,11 +1,11 @@
  All machines  1 ●  2 ◐  1 ○
-   ◐ macbook     Mac        This Mac  online       100.98.133.14  2 VMs
+   ◐ macbook     Mac         This Mac  online       100.98.133.14  2 VMs
      engine stopped  → station engine start
-   ├─ ● linux-1  throwaway            running      192.168.64.5   4 cpus · 4 GB · 42.9 GB
+   ├─ ● linux-1  ephemeral             running      192.168.64.5   4 cpus · 4 GB · 42.9 GB
    │  ├─ 5173 → 40001  https://jterrazz-macbook-pro.tail1234.ts.net:40001  node
    │  └─ 5432 → 40002  postgres
-   └─ ○ api      permanent            stopped      -              4 cpus · 8 GB · 42.9 GB
-   ◐ mac-mini    Mac                  unreachable  100.98.133.20  -
+   └─ ○ api      persistent            stopped      -              4 cpus · 8 GB · 42.9 GB
+   ◐ mac-mini    Mac                   unreachable  100.98.133.20  -
 
  Images  2 ●  2 ○
             version       size  on

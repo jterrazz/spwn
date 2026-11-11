@@ -62,7 +62,7 @@ type CreateIn struct {
 }
 
 var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
-	// invariant: a workspace, throwaway or permanent; always on is a server's.
+	// invariant: a workspace, ephemeral or persistent; always on is a server's.
 	Name: "machines.create-workspace", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
 	Errors: []fail.Code{confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {

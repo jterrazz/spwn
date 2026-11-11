@@ -39,7 +39,7 @@ public struct Answers: Equatable, Sendable {
     }
 
     // value: an option checked because the answer it goes with is checked
-    // in the field it follows (a finished agent with its throwaway).
+    // in the field it follows (a finished agent with its ephemeral workspace).
     public func follows(_ f: Field, _ o: Option) -> Bool {
         guard let key = f.follows, let of = o.of, let leader = field(key), leader.key != f.key else { return false }
         return picked(leader).contains(of)
@@ -152,7 +152,7 @@ public struct Answers: Equatable, Sendable {
     // value: the answers the call is sent: each field shown and holding
     // something, never a swap, a disclosure or a field hidden; a
     // multiselect never sends what its leader carries (an agent goes with
-    // its throwaway, not by a call of its own).
+    // its ephemeral workspace, not by a call of its own).
     public var sent: [String: String] {
         var out: [String: String] = [:]
         for f in fields where f.swaps != true && f.kind != "disclosure" && applies(f) {

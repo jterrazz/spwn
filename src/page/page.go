@@ -544,7 +544,7 @@ type Form struct {
 type Primary struct {
 	When  *When  `json:"when,omitempty"`
 	Label string `json:"label,omitempty"`
-	// value: the wording is red: what it runs deletes (Delete 1 throwaway).
+	// value: the wording is red: what it runs deletes (Delete 1 ephemeral workspace).
 	Danger bool `json:"danger,omitempty"`
 }
 
@@ -588,7 +588,7 @@ type Field struct {
 	TakenHud string   `json:"taken_hud,omitempty"`
 	// value: the field whose answers carry some of this one's: an option
 	// whose Of is checked there is checked too, and dimmed (a finished
-	// agent goes with the throwaway it ran in).
+	// agent goes with the ephemeral workspace it ran in).
 	Follows string `json:"follows,omitempty"`
 	// value: a command field's command, the owner's to run, copied.
 	Hint *Hint `json:"hint,omitempty"`

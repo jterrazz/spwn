@@ -77,19 +77,19 @@ func sceneMachines() model.AllMachines {
 	infra.Want, infra.Check, infra.Device = "running", "https://infra:6443/readyz", "infra"
 	infra.BootAt = storyNow.Add(-12 * 24 * time.Hour)
 	infra.CheckStatus = model.CheckStatus{State: model.CheckPassing, At: storyNow.Add(-40 * time.Second), Answer: "200"}
-	linux1 := sceneVM("linux-1", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.5")
+	linux1 := sceneVM("linux-1", proName, model.Ephemeral, model.Running, 4, 8, "192.168.64.5")
 	linux1.Agent = &model.AgentView{State: "working", Task: "fix the flaky e2e test"}
-	agent7f := sceneVM("agent-7f", proName, model.Throwaway, model.Running, 4, 8, "192.168.64.6")
+	agent7f := sceneVM("agent-7f", proName, model.Ephemeral, model.Running, 4, 8, "192.168.64.6")
 	agent7f.Agent = &model.AgentView{State: model.AgentFinished, Task: "write the changelog", Ended: storyNow.Add(-12 * time.Minute), Reason: "tests pass"}
-	linux3 := sceneVM("linux-3", miniMac, model.Throwaway, model.Running, 4, 8, "192.168.64.8")
+	linux3 := sceneVM("linux-3", miniMac, model.Ephemeral, model.Running, 4, 8, "192.168.64.8")
 	linux3.Agent = &model.AgentView{State: "working", Task: "refresh the auth token"}
-	bot := sceneVM("review-bot", miniMac, model.Permanent, model.Running, 2, 4, "192.168.64.9")
+	bot := sceneVM("review-bot", miniMac, model.Persistent, model.Running, 2, 4, "192.168.64.9")
 	bot.Agent = &model.AgentView{State: "waiting", Task: "fixes the token refresh", Ask: "PR #42 is ready", Since: storyNow.Add(-6 * time.Minute)}
 	return model.AllMachines{Read: storyNow, Macs: []model.MacView{
 		{Name: proName, User: "jterrazz", StationVersion: stationVer, ThisMac: true, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.14"}, VMs: []model.VM{
 			linux1,
 			agent7f,
-			sceneVM("api", proName, model.Permanent, model.Stopped, 4, 8, ""),
+			sceneVM("api", proName, model.Persistent, model.Stopped, 4, 8, ""),
 		}},
 		{Name: miniMac, User: "jterrazz", StationVersion: stationVer, Reachable: true, Answered: storyNow, Engine: engine, Node: model.Node{Online: true, IP: "100.98.133.20"}, LAN: "192.168.1.20", VMs: []model.VM{
 			infra,
@@ -214,9 +214,9 @@ func sceneAccounts() accounts.Report {
 			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
 			own(catalog.ProviderClaude, []string{"admin@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
 		}},
-		vm("linux-1", "throwaway", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute, "Max plan"), loan(catalog.ProviderGitHub, "session:github", 4*time.Hour, "read only")),
-		vm("linux-3", "throwaway", loan(catalog.ProviderGitHub, "github", 6*time.Hour)),
-		vm("review-bot", "permanent", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 9*time.Hour)),
+		vm("linux-1", "ephemeral", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 24*time.Minute, "Max plan"), loan(catalog.ProviderGitHub, "session:github", 4*time.Hour, "read only")),
+		vm("linux-3", "ephemeral", loan(catalog.ProviderGitHub, "github", 6*time.Hour)),
+		vm("review-bot", "persistent", loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 9*time.Hour)),
 	}}
 }
 

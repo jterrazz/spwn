@@ -175,7 +175,7 @@ becomes the bottleneck.
 - A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
 - Memory soak: a Linux VM 8 h under load, the Mac's RSS of the VM process.
-- `machines edit <vm> --permanent`: turn a throwaway workspace permanent (rewrite its record; the engine reads it).
+- `machines edit <vm> --persistent`: turn an ephemeral workspace persistent (rewrite its record; the engine reads it).
 - HTTPS mode: if a Mac's `tailscale serve` refuses arbitrary https ports, the default of the `ports` group's `https` becomes `path`.
 - Remove the old Tailscale leftovers by hand when wanted: the `tag:station-vm` tag owner, the VM-join OAuth client, each Mac's userspace node (admin console), `brew uninstall tailscale` (the formula; the app replaces it).
 - The poweroff intent over a FIFO instead of a console file, if the macOS guest's console differs.

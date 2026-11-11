@@ -32,7 +32,7 @@
                     "kept": {
                         "image": "linux",
                         "version": "2026.11.01",
-                        "lifetime": "throwaway",
+                        "lifetime": "ephemeral",
                         "created_at": "2026-11-04T10:00:00Z",
                         "birth": {
                             "progress": 400,

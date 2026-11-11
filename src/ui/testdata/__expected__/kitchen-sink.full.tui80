@@ -66,10 +66,10 @@
 
  All machines  3 ●  1 ○
    ● jterrazz-mac-mini  Mac
-   ├─ ● linux-1         permanent
+   ├─ ● linux-1         persistent
    │  ├─ 8081 → 40002   https://jterrazz-mac-mini.ts.net:40002  vite
    │  └─ ● web          server
-   └─ ○ linux-2         permanent
+   └─ ○ linux-2         persistent
 
  Disk  2 ●
      app         data   kept

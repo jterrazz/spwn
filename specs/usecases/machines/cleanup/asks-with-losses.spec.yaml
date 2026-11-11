@@ -1,4 +1,4 @@
-description: 'a cleanup on a terminal names each throwaway, its idle time and what goes with it, then asks once'
+description: 'a cleanup on a terminal names each ephemeral workspace, its idle time and its losses, then asks'
 fixture:
     - ../../../__fixtures__/terminal/
 env:

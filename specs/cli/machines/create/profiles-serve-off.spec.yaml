@@ -5,7 +5,7 @@ fixture:
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42280-42299"}/'' .config/station/preferences.json; : > answers/tailscale/status.serve-off; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --permanent --name api | /usr/bin/grep "Serve is off"; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; /bin/rm answers/tailscale/status.serve-off; "$STATION" machines stop api --yes > /dev/null; "$STATION" machines start api > /dev/null; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42280-42299"}/'' .config/station/preferences.json; : > answers/tailscale/status.serve-off; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api | /usr/bin/grep "Serve is off"; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; /bin/rm answers/tailscale/status.serve-off; "$STATION" machines stop api --yes > /dev/null; "$STATION" machines start api > /dev/null; /usr/bin/grep -E "EXPO|VITE|STATION" vm/.config/station/services.env; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
       exit: 0
       stdout: |
           ◐	ports	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console

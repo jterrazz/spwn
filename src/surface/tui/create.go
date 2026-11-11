@@ -15,8 +15,8 @@ import (
 const (
 	workspaceKind = "Workspace"
 	serverKind    = "Server"
-	throwaway     = "Throwaway"
-	permanent     = "Permanent"
+	ephemeral     = "Ephemeral"
+	persistent    = "Persistent"
 )
 
 func (s shell) create() (tea.Model, tea.Cmd) { return s.createForm(machine.Workspace) }
@@ -72,7 +72,7 @@ func (s shell) createForm(kind machine.Kind) (tea.Model, tea.Cmd) {
 		}
 		f.Fields = []screen.Field{{Label: "Kind", Value: k, Options: []string{workspaceKind, serverKind}}, {Label: "Name", Value: name}, {Label: "On", Value: macs[0], Options: macs}}
 		if k == workspaceKind {
-			f.Fields = append(f.Fields, screen.Field{Label: "Lifetime", Value: throwaway, Options: []string{throwaway, permanent}})
+			f.Fields = append(f.Fields, screen.Field{Label: "Lifetime", Value: ephemeral, Options: []string{ephemeral, persistent}})
 		} else {
 			f.Fields = append(f.Fields, screen.Field{Label: "Health check", Note: "a URL or host:port; none: it only has to run"})
 		}
@@ -118,8 +118,8 @@ func (s shell) created(f *screen.Form, a []string) gesture.Gesture {
 		if c := answer("Health check"); c != "" {
 			words = append(words, "--check", c)
 		}
-	} else if answer("Lifetime") == permanent {
-		words = append(words, "--permanent")
+	} else if answer("Lifetime") == persistent {
+		words = append(words, "--persistent")
 	}
 	for _, x := range [][2]string{{"CPUs", "--cpus"}, {"Memory", "--memory"}, {"Disk", "--disk"}} {
 		if v := answer(x[0]); v != "" {

@@ -1,4 +1,4 @@
-linux-1  throwaway · on This Mac · no agent running
+linux-1  ephemeral · on This Mac · no agent running
 
 Agents
   No agent on linux-1
@@ -7,7 +7,7 @@ Ports  2
   ● Vite       linux-1:5173
   ● Port 7000  linux-1:7000
 Life
-  Throwaway: deleted when it powers off from inside; pauses when This Mac
+  Ephemeral: deleted when it powers off from inside; pauses when This Mac
   sleeps.
 Private  2
   ● Vite       linux-1:5173

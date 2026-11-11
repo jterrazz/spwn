@@ -158,11 +158,11 @@
                       },
                       {
                         "kind": "text",
-                        "text": "throwaway"
+                        "text": "ephemeral"
                       },
                       {
                         "kind": "text",
-                        "text": "throwaway"
+                        "text": "ephemeral"
                       },
                       {
                         "kind": "none"
@@ -276,11 +276,11 @@
                     },
                     {
                       "kind": "text",
-                      "text": "permanent"
+                      "text": "persistent"
                     },
                     {
                       "kind": "text",
-                      "text": "permanent"
+                      "text": "persistent"
                     },
                     {
                       "kind": "none"

@@ -1,7 +1,7 @@
 # All machines
 ●	macbook	mac			online	100.98.133.14	2 VMs
-●	linux-1	workspace	macbook	throwaway	running	192.168.64.5	4 cpus · 4 GB · 42.9 GB
-○	api	workspace	macbook	permanent	stopped	-	4 cpus · 8 GB · 42.9 GB
+●	linux-1	workspace	macbook	ephemeral	running	192.168.64.5	4 cpus · 4 GB · 42.9 GB
+○	api	workspace	macbook	persistent	stopped	-	4 cpus · 8 GB · 42.9 GB
 ◐	mac-mini	mac			online	100.98.133.20	station v2.0.0-248, This Mac v2.0.0-250
 # Images
 ●	linux	2026.11.01	4.0 GB	jterrazz-macbook-pro	linux-1 · api

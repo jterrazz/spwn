@@ -15,4 +15,4 @@ runs:
     - command: 'machines --json | /usr/bin/jq -r ''.macs[1].vms[0] | [.name, .state, .lifetime, .ip] | join(" ")'''
       exit: 0
       stdout: |
-          w running permanent 
+          w running persistent 

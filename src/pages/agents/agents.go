@@ -121,12 +121,12 @@ func Merged(a agents.Agent, thisMachine page.Context) page.Page {
 }
 
 func Started(a agents.Agent, onNew bool, thisMachine page.Context) page.Page {
-	// invariant: an agent started is said by its name, the throwaway made
+	// invariant: an agent started is said by its name, the ephemeral workspace made
 	// for it, and its app, then its task, or that it waits for a first
 	// prompt.
 	said := []string{"starts", string(a.App)}
 	if onNew {
-		said[0] = "starts on " + a.VM + ", a new throwaway"
+		said[0] = "starts on " + a.VM + ", a new ephemeral workspace"
 	}
 	if a.Folder != "" {
 		said = append(said, "in "+a.Folder)

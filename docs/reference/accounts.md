@@ -61,7 +61,7 @@ A VM cannot open a browser on your Mac to log in, so the Mac shares it a token.
 
 `station accounts take-back claude --from <vm>`, the share's end and `machines delete` remove the VM's copy; `station settings off claude-token` deletes the Mac's and takes the name off the share list. Revoke the token itself at claude.ai.
 
-The alternative is a bound login: run `claude /login` inside a permanent workspace. The login lives and dies with that VM and is never shared.
+The alternative is a bound login: run `claude /login` inside a persistent workspace. The login lives and dies with that VM and is never shared.
 
 ## Accounts
 

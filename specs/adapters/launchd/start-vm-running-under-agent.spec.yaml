@@ -8,6 +8,6 @@ runs:
       exit: 1
       stderr: |
           Error: api still runs under its round-3 agent
-          Hint: stop the permanent VMs and delete the throwaway ones (station machines), then station engine start
+          Hint: stop the persistent VMs and delete the ephemeral ones (station machines), then station engine start
       files:
           Library/LaunchAgents/com.jterrazz.station.vm.api.plist: exists

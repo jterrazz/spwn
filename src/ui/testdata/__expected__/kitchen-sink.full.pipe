@@ -44,9 +44,9 @@
 ?	not-known	does not answer
 # All machines
 ●	jterrazz-mac-mini	Mac	jterrazz-mac-mini
-●	linux-1	permanent	jterrazz-mac-mini
+●	linux-1	persistent	jterrazz-mac-mini
 ●	web	server	jterrazz-mac-mini
-○	linux-2	permanent	jterrazz-mac-mini
+○	linux-2	persistent	jterrazz-mac-mini
 # Disk
 ●	station	data 275 B · kept 546 B
 ●	tart	data 73.3 GB

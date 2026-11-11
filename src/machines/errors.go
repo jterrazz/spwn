@@ -54,7 +54,7 @@ func (e *BadCheckError) Error() string {
 type BadLifetimeError struct{ Value string }
 
 func (e *BadLifetimeError) Error() string {
-	return "unknown lifetime \"" + e.Value + "\": throwaway or permanent"
+	return "unknown lifetime \"" + e.Value + "\": ephemeral or persistent"
 }
 
 type UnknownImageError struct{ Image string }

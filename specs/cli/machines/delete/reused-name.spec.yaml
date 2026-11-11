@@ -16,7 +16,7 @@ runs:
           ●	api	deleted
       files:
           .local/state/station/known_hosts/api: absent
-    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --permanent --name api | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api | /usr/bin/tail -1 | /usr/bin/cut -f2; kill $d; wait $d'
       exit: 0
       stdout: |
           api

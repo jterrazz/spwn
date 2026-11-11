@@ -1,8 +1,8 @@
 {
     "group": "alert",
     "heightNote": "the page under it is api's stopped page (workspace.stopped), its facts on their own line; the alert fits it, so the panel keeps its height",
-    "id": "alert.delete-vm.permanent",
-    "note": "Delete api? A permanent workspace asks its name typed: it goes with its disk.",
+    "id": "alert.delete-vm.persistent",
+    "note": "Delete api? A persistent workspace asks its name typed: it goes with its disk.",
     "pages": ["pages/machines.machine.api.json"],
     "schema": "station.story/v1",
     "ui": {

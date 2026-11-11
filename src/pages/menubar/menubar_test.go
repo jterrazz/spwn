@@ -17,7 +17,7 @@ func TestStopEverythingOnThisMacSaysItsServerIsSkipped(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{
 		{Name: "jterrazz-macbook-pro", ThisMac: true, VMs: []model.VM{
 			{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running},
-			{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running},
+			{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 		}},
 		{Name: "jterrazz-mac-mini", VMs: []model.VM{{Name: "db", Lifetime: model.AlwaysOn, State: model.Running}}},
 	}}
@@ -62,7 +62,7 @@ func TestUpdateAllLeavesNeedsYouAndTheBadgeNeverCountedIt(t *testing.T) {
 func TestHomeDrawsAMacsServersThenItsWorkspaces(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{
 		{Name: "jterrazz-mac-mini", ThisMac: true, Reachable: true, VMs: []model.VM{
-			{Name: "build", Lifetime: model.Throwaway, State: model.Running},
+			{Name: "build", Lifetime: model.Ephemeral, State: model.Running},
 			{Name: "infra", Lifetime: model.AlwaysOn, State: model.Running},
 		}},
 	}}

@@ -52,7 +52,7 @@ func TestAStoppedWorkspaceShowsNoActivity(t *testing.T) {
 	}
 	read := func(state model.VMState) (page.Section, bool) {
 		fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, Reachable: true, VMs: []model.VM{
-			{Name: "linux-1", Lifetime: model.Throwaway, State: state},
+			{Name: "linux-1", Lifetime: model.Ephemeral, State: state},
 		}}}}
 		p := MachinePage(Machine{Name: "linux-1", All: fleet, Samples: samples, Asks: func(string, machine.Kind, ...string) string { return LevelYesNo }})
 		for _, s := range p.Sections {
@@ -74,7 +74,7 @@ func TestAStoppedWorkspaceShowsNoActivity(t *testing.T) {
 // engine again off as a command, never inside the sentence.
 func TestStopEverythingSetsItsCommandOffAsACommand(t *testing.T) {
 	fleet := &model.AllMachines{Macs: []model.MacView{{Name: "jterrazz-macbook-pro", ThisMac: true, VMs: []model.VM{
-		{Name: "linux-1", Lifetime: model.Throwaway, State: model.Running},
+		{Name: "linux-1", Lifetime: model.Ephemeral, State: model.Running},
 	}}}}
 	lines := stopAll(Reading{All: fleet}).Confirm.Lines
 	last := lines[len(lines)-1]

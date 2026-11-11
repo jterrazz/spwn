@@ -270,9 +270,9 @@ func vmGauges(m Machine, vm model.VM) page.Section {
 // value: what a workspace's life means, and whether it pauses when its
 // Mac sleeps.
 func footnote(m Machine, vm model.VM, label string) page.Section {
-	life := "Permanent: kept until you delete it"
-	if vm.Lifetime == model.Throwaway {
-		life = "Throwaway: deleted when it powers off from inside"
+	life := "Persistent: kept until you delete it"
+	if vm.Lifetime == model.Ephemeral {
+		life = "Ephemeral: deleted when it powers off from inside"
 	}
 	sleeps := "pauses when " + label + " sleeps"
 	if m.Awake != nil && m.Awake.Mode() == awake.NeverSleeps {

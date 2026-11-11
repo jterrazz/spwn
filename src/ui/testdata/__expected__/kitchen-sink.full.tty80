@@ -60,10 +60,10 @@ Marks
   ? not-known             does not answer
 All machines
   ● jterrazz-mac-mini  Mac
-  ├─ ● linux-1         permanent
+  ├─ ● linux-1         persistent
   │  ├─ 8081 → 40002   https://jterrazz-mac-mini.ts.net:40002  vite
   │  └─ ● web          server
-  └─ ○ linux-2         permanent
+  └─ ○ linux-2         persistent
 Disk
     app         data   kept
   ● station    275 B  546 B

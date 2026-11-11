@@ -11,8 +11,8 @@
    ├─ ◌ git
    ├─ ◌ ssh
    └─ ◌ Docker
-   ◌ linux-1               throwaway
+   ◌ linux-1               ephemeral
    └─ ● Claude             admin@jterrazz.com  shared  11h 40m left
-   ◌ api                   permanent
+   ◌ api                   persistent
    └─ ◐ Claude             admin@jterrazz.com  shared  42m left
         → station accounts share claude --with api
