@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -252,5 +253,154 @@ func TestAPrivateShareOnAFunneledPortIsRefused(t *testing.T) {
 	err := h.d.heldOutside(t.Context(), ports.Share{Port: 40001, Reserved: 40001, Scheme: ports.SchemeHTTPS})
 	if want := "port 40001 is funneled by an entry station did not make: a private share on it would be public"; err == nil || err.Error() != want {
 		t.Errorf("held = %v, want %q", err, want)
+	}
+}
+
+// value: a kept tailnet that already holds the entry l makes in this
+// HTTPS mode, as an engine restarted finds it.
+func holding(l ports.Reservation, mode string) *keptTailnet {
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	e := ports.ShareOf(l, mode)
+	e.Target = "http://127.0.0.1:" + strconv.Itoa(l.MacPort)
+	tn.entries = []ports.Share{e}
+	tn.funnel = map[int]bool{}
+	if e.Public() {
+		tn.funnel[e.Port] = true
+	}
+	return tn
+}
+
+// invariant: every path that drops a reservation unshares the entry it
+// made while Serve is on, in the mode it was served in, whether this
+// engine served it or found it at start.
+func TestEveryPathThatDropsAReservationUnsharesItsEntry(t *testing.T) {
+	yes := true
+	public := catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}, {From: 5000, To: 5000}, {From: 8080, To: 8080}}, To: catalog.AudiencePublic}
+	private := catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}
+	for _, c := range []struct {
+		name   string
+		mode   string
+		rights catalog.PortRights
+		l      ports.Reservation
+		drop   func(context.Context, harness, *heldPolicy, *catalog.PortRights)
+	}{
+		{"a release", ports.HTTPSPort, private, ports.Reservation{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes},
+			func(ctx context.Context, h harness, _ *heldPolicy, _ *catalog.PortRights) {
+				if _, err := h.d.release(ctx, "api", 5173); err != nil {
+					t.Fatal(err)
+				}
+			}},
+		{"an idle release", ports.HTTPSPort, public, ports.Reservation{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, By: ports.ByRights, HTTP: &yes},
+			func(ctx context.Context, h harness, _ *heldPolicy, _ *catalog.PortRights) {
+				h.d.mu.Lock()
+				old := h.clock.At.Add(-8 * 24 * time.Hour)
+				h.d.reservations[0].ReservedAt, h.d.reservations[0].LastSeenAt = old, old
+				h.d.mu.Unlock()
+				h.d.tickShares(ctx)
+			}},
+		{"a narrowing", ports.HTTPSPath, private, ports.Reservation{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes},
+			func(ctx context.Context, h harness, _ *heldPolicy, r *catalog.PortRights) {
+				*r = catalog.PortRights{}
+				h.d.loadRights(ctx, "api")
+			}},
+		{"a VM's delete", ports.HTTPSPort, public, ports.Reservation{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, By: ports.ByRights, HTTP: &yes},
+			func(ctx context.Context, h harness, _ *heldPolicy, _ *catalog.PortRights) {
+				if err := h.d.opDelete(ctx, "api"); err != nil {
+					t.Fatal(err)
+				}
+			}},
+		{"a mode switch", ports.HTTPSPort, public, ports.Reservation{VM: "api", GuestPort: 8080, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 10000, By: ports.ByRights, HTTP: &yes},
+			func(ctx context.Context, h harness, pol *heldPolicy, _ *catalog.PortRights) {
+				pol.g = &ports.PortsGroup{HTTPS: ports.HTTPSPath}
+				h.d.tickShares(ctx)
+			}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+			pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: c.mode}}
+			h.d.st.Ports = pol
+			tn := holding(c.l, c.mode)
+			h.d.tn = tn
+			rights := c.rights
+			h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return &rights, nil }
+			ctx := t.Context()
+			h.d.refreshSelf(ctx)
+			h.d.adopt(ctx)
+			h.d.mu.Lock()
+			h.d.servedMode = c.mode
+			h.d.reservations = []ports.Reservation{c.l}
+			h.d.mu.Unlock()
+			h.d.loadRights(ctx, "api")
+			c.drop(ctx, h, pol, &rights)
+			h.d.mu.Lock()
+			left := len(h.d.reservations)
+			h.d.mu.Unlock()
+			if left != 0 {
+				t.Fatalf("%d reservation(s) left, want the drop", left)
+			}
+			if got := tn.dump(); got != "" {
+				t.Errorf("tailnet after %s = %s, want no entry", c.name, got)
+			}
+		})
+	}
+}
+
+// invariant: an engine restarted after a public share's reservation
+// passed its idle days unfunnels it at its first tick, so the next
+// reservation given its port of the Mac is not on the internet.
+func TestAnIdleReleaseAtTheFirstTickAfterARestartUnfunnelsItsPort(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "web", Lifetime: model.Persistent})
+	tn := funneledFrom40000()
+	h.d.tn = tn
+	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, error) {
+		if vm == "web" {
+			return &catalog.PortRights{Open: catalog.PortSet{{From: 5432, To: 5432}}, To: catalog.AudienceLocal}, nil
+		}
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, nil
+	}
+	ctx := t.Context()
+	yes := true
+	old := h.clock.At.Add(-8 * 24 * time.Hour)
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, By: ports.ByRights, HTTP: &yes, ReservedAt: old, LastSeenAt: old}}
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.reconcileServe(ctx)
+	h.d.tickShares(ctx)
+	h.d.loadRights(ctx, "web")
+	h.d.mu.Lock()
+	w := h.d.svcOf("web", 5432)
+	w.st.Phase = ports.PhaseShared
+	h.d.share(ctx, w)
+	h.d.mu.Unlock()
+	if got := tn.dump(); strings.Contains(got, "<-40000") {
+		t.Errorf("tailnet = %s, want no entry from 40000, now web:5432's (to: local)", got)
+	}
+}
+
+// invariant: a release between an HTTPS mode switch and the tick that
+// judges it unshares the entry in the mode it was served in.
+func TestAReleaseBeforeTheTickOfAModeSwitchUnsharesTheModeItWasServedIn(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: ports.HTTPSPort}}
+	h.d.st.Ports = pol
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	h.d.tn = tn
+	ctx := t.Context()
+	yes := true
+	h.d.refreshSelf(ctx)
+	h.d.mu.Lock()
+	h.d.servedMode = ports.HTTPSPort
+	h.d.rights["api"] = ports.Rights{PortRights: catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}}
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes}}
+	s := h.d.svcOf("api", 5173)
+	s.st.Phase = ports.PhaseShared
+	h.d.share(ctx, s)
+	h.d.mu.Unlock()
+	pol.g = &ports.PortsGroup{HTTPS: ports.HTTPSPath}
+	if _, err := h.d.release(ctx, "api", 5173); err != nil {
+		t.Fatal(err)
+	}
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after the release = %s, want no entry", got)
 	}
 }
