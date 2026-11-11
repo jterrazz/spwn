@@ -224,6 +224,11 @@ in_vm "$brew_path $station settings --json" > "$work/settings-0.json" || fail "s
 jq -r '.settings[] | select(.group == "set") | "\(.name) \(.state)"' "$work/settings-0.json" > "$work/settings-set.txt"
 [ -s "$work/settings-set.txt" ] || fail "settings --json lists no Set by station setting"
 while read -r name state; do
+  # value: a setting that is for VMs only (agent-hooks) is refused on a Mac, by design.
+  if [ "$state" = not-for-this-machine ]; then
+    say "   $name: not for this machine, left alone"
+    continue
+  fi
   if grep -qx "$name" "$suite/macos/settings-asked.txt"; then
     say "   $name: asks values on a terminal, left to the owner"
     continue
