@@ -341,9 +341,25 @@ func exitOf(ctx context.Context, err error) (int, error) {
 	}
 	var exit *exec.ExitError
 	if errors.As(err, &exit) {
+		if interrupted(exit) {
+			return -1, context.Canceled
+		}
 		return exit.ExitCode(), nil
 	}
 	return -1, err
+}
+
+// invariant: a child that Ctrl-C ended is an interruption, whether or not
+// station's own handler has cancelled the context yet: the terminal tells the
+// whole foreground group at once, so the child's exit can be reaped before the
+// handler's goroutine runs, and that exit is never a failure of the command.
+// The child either died of SIGINT or, as a shell does, said so with 128+SIGINT.
+func interrupted(exit *exec.ExitError) bool {
+	status, ok := exit.Sys().(syscall.WaitStatus)
+	if !ok {
+		return false
+	}
+	return status.Signaled() && status.Signal() == syscall.SIGINT || status.Exited() && status.ExitStatus() == 128+int(syscall.SIGINT)
 }
 
 func (r *runner) Start(c Cmd, logPath string) (int, error) {

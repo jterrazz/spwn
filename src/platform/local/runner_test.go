@@ -66,3 +66,19 @@ func TestACommandThatAnswersInTimeMayThenTakeItsTime(t *testing.T) {
 		t.Fatalf("an answering command was stopped: %v %+v %q", err, ran, said.String())
 	}
 }
+
+func TestAChildThatCtrlCEndedIsAnInterruptionBeforeAnyContextIsCancelled(t *testing.T) {
+	var said bytes.Buffer
+	r := &runner{dirs: []string{"/bin"}, stdout: &said, stderr: &said}
+
+	for name, script := range map[string]string{"signaled": "kill -INT $$; sleep 5", "said 130": "exit 130"} {
+		ran, err := r.Attach(context.Background(), Cmd{Name: "sh", Args: []string{"-c", script}}, ToStderr)
+		if !errors.Is(err, context.Canceled) || ran.ExitCode != -1 {
+			t.Fatalf("%s: a Ctrl-C'd child ended as %v %+v", name, err, ran)
+		}
+	}
+	ran, err := r.Attach(context.Background(), Cmd{Name: "sh", Args: []string{"-c", "exit 3"}}, ToStderr)
+	if err != nil || ran.ExitCode != 3 {
+		t.Fatalf("an ordinary failure must stay one: %v %+v", err, ran)
+	}
+}
