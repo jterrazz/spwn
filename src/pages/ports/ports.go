@@ -121,6 +121,7 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 			notes = append(notes, page.Item{Note: &page.Note{Text: reserved(h, thisMac)}})
 		}
 	}
+	red, public, private, local = capped(red), capped(public), capped(private), capped(local)
 	var out []page.Section
 	if len(red) > 0 {
 		out = append(out, page.Section{ID: "needs-you", Title: "Needs you: " + catalog.ReachableOutside + ", not declared public", PipeCounts: true, Columns: exposedColumns(), Items: red})
@@ -142,6 +143,15 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 		out = append(out, page.Section{ID: "ranges", Title: "Reserved ports", Role: page.Banner, Uncounted: true, Columns: Columns(), Items: notes})
 	}
 	return out
+}
+
+// invariant: a list shows catalog.PortRowsShown rows and one line for the
+// rest, so a VM with thousands of listeners never prints thousands of rows.
+func capped(items []page.Item) []page.Item {
+	if len(items) <= catalog.PortRowsShown {
+		return items
+	}
+	return append(slices.Clone(items[:catalog.PortRowsShown]), page.Item{Note: &page.Note{Text: catalog.MoreRows(len(items) - catalog.PortRowsShown)}})
 }
 
 func NotSharedRow(n ports.NotShared) page.Row {

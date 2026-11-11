@@ -138,6 +138,8 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		slices.SortStableFunc(private[mark:], func(a, b page.Item) int { return cmp.Compare(machineOf(a), machineOf(b)) })
 	}
 	b.Exposed, b.Public, b.Private = len(exposed), len(public), len(private)
+	heardCount := len(listening)
+	exposed, public, private, listening = capped(exposed), capped(public), capped(private), capped(listening)
 	if len(exposed) > 0 {
 		b.act(declarePublic(ports.Listing{AllMachines: f}))
 		b.Sections = append(b.Sections, page.Section{ID: SectionExposed, Title: "Exposed", Card: page.CardExposed,
@@ -162,7 +164,7 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 	}
 	b.Sections = append(b.Sections, priv)
 	if sc.VM == "" && len(listening) > 0 {
-		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(len(listening))}, Columns: columns(), Items: listening})
+		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(heardCount)}, Columns: columns(), Items: listening})
 	}
 	return b
 }
@@ -186,6 +188,15 @@ func machineOf(it page.Item) string {
 func signaled(v page.Value, s page.Signal) page.Value {
 	v.Signal = s
 	return v
+}
+
+// invariant: a list shows catalog.PortRowsShown rows and one line for the
+// rest, so a VM with thousands of listeners never draws thousands of rows.
+func capped(items []page.Item) []page.Item {
+	if len(items) <= catalog.PortRowsShown {
+		return items
+	}
+	return append(slices.Clone(items[:catalog.PortRowsShown]), page.Item{Empty: &page.Empty{Text: catalog.MoreRows(len(items) - catalog.PortRowsShown)}})
 }
 
 func count(n int) page.Value { return page.Text(strconv.Itoa(n)) }

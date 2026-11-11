@@ -38,6 +38,12 @@ var WorkspaceRights = PortRights{Open: PortSet{{From: SystemPorts, To: 65535}}, 
 
 var FunnelPorts = [PublicPorts]int{443, 8443, 10000}
 
+// value: the most rows a list of ports shows: the rest is one line, "N more".
+
+const PortRowsShown = 40
+
+func MoreRows(n int) string { return strconv.Itoa(n) + " more" }
+
 // value: the one line that tells a VM's listeners no reservation holds and
 // a refusal kept from sharing.
 

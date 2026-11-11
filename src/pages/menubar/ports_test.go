@@ -359,3 +359,35 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("an empty card %+v", items)
 	}
 }
+
+// invariant: what a full VM refuses is one line with its count, and a list
+// of thousands of listeners shows catalog.PortRowsShown rows and "N more".
+func TestAFullVMAndAThousandListenersStayBounded(t *testing.T) {
+	linux1 := coremachine.Ref{Name: "linux-1", On: proMac}
+	heard := make([]ports.Port, 0, 2006)
+	for i := range 2006 {
+		heard = append(heard, ports.Port{Machine: linux1, Port: 3000 + i, Process: "node", Binds: []string{"0.0.0.0"}, Reach: ports.Tailnet})
+	}
+	f := ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Reachable: true, HTTPS: ports.HTTPSOff, Ports: heard,
+		NotShared: []ports.NotShared{{VM: "linux-1", Count: 1986, Detail: "linux-1 has 20 shared ports, the most a VM may"}}}}}
+	p := fleetPorts(t, f, PortsOf{})
+	listening := sectionOf(p, SectionListening)
+	var rows int
+	for _, it := range listening.Items {
+		if it.Row != nil {
+			rows++
+		}
+	}
+	if rows != catalog.PortRowsShown {
+		t.Fatalf("%d rows drawn, want %d", rows, catalog.PortRowsShown)
+	}
+	if last := listening.Items[len(listening.Items)-1]; last.Empty == nil || last.Empty.Text != catalog.MoreRows(2006-catalog.PortRowsShown) {
+		t.Fatalf("last item %+v, want the line of the rest", last)
+	}
+	if listening.Caption[0].Text != "2006" {
+		t.Fatalf("caption %v, want the whole count", listening.Caption)
+	}
+	if row := rowsOf(p, SectionPrivate)[0]; row.Label != "1986 ports not shared" || words(row.Detail) != "linux-1 has 20 shared ports, the most a VM may" {
+		t.Fatalf("row %+v", row)
+	}
+}
