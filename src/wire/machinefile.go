@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"path/filepath"
+	"slices"
 
 	"github.com/spf13/cobra"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/git"
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
+	"github.com/jterrazz/studio-station/src/output"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/surface/cli/explain"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
@@ -52,8 +54,8 @@ func (m machine) machinefileSources() []machinefilecontract.Source {
 
 // invariant: the catalog every command reads is the owner's items over
 // the built-in ones, a same-name item replacing it whole. A file of the
-// owner's the strict decoder refuses is returned worded at its line, and
-// stops the command.
+// owner's the strict decoder refuses leaves the built-in catalog, and is
+// returned worded at its line for the gate to judge.
 func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (catalog.Catalog, error) {
 	tree, err := user.Read(context.Background())
 	if err != nil {
@@ -71,6 +73,50 @@ func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (cat
 		return builtin, machinefilecalls.Worded(err)
 	}
 	return c, nil
+}
+
+// value: the commands that read no catalog, by their word under the root:
+// help, the shell's completion, the engine (the menu bar's, which must
+// keep answering whatever file the owner broke, and its start and stop)
+// and a world's own events.
+func catalogFree() []string {
+	return []string{"help", "completion", cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd, "engine", "start", "stop", "world"}
+}
+
+// invariant: an owner's item file refused stops every command that reads
+// the catalog, at its file and line; a command that reads none runs on
+// the built-in items, and so do --version and --help, which cobra answers
+// before any command runs: each says the file is refused on stderr, once.
+// The returned func says it after the run when nothing else did.
+func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reported func()) {
+	if broken == nil {
+		return func() {}
+	}
+	worded := kit.Translate(broken, "")
+	said := false
+	say := func() {
+		if !said {
+			said = true
+			out.Note(worded.Message, "this run reads the built-in items")
+		}
+	}
+	pre := root.PersistentPreRunE
+	root.PersistentPreRunE = func(c *cobra.Command, args []string) error {
+		top := c
+		for top.HasParent() && top.Parent() != root {
+			top = top.Parent()
+		}
+		if top == root || !slices.Contains(catalogFree(), top.Name()) {
+			said = true
+			return worded
+		}
+		say()
+		if pre == nil {
+			return nil
+		}
+		return pre(c, args)
+	}
+	return say
 }
 
 func (m machine) machinefileDeps() machinefilecalls.Deps {

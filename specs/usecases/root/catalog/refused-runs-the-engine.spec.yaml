@@ -1,0 +1,47 @@
+description: 'a refused owner''s item leaves --version, help and the engine running; what reads the catalog stops'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: x
+          tint: blue
+          methods:
+              - { os: macos, brew: jq }
+      exit: 0
+    - command: '--version >/dev/null'
+      exit: 0
+      stderr: |
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item · this run reads the built-in items
+    - command: 'help apps >/dev/null'
+      exit: 0
+      stderr: |
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item · this run reads the built-in items
+    - command: 'engine'
+      exit: 0
+      stdout: |
+          ●	engine	running · {{string}} · up 3 d · 1 VM
+      stderr: |
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item · this run reads the built-in items
+    - command: 'apps'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item
+          Hint: fix that line: station never rewrites an item file
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: x
+          methods:
+              - { os: macos, brew: jq }
+      exit: 0
+      stderr: |
+          ~/.config/station/catalog/command-line/jq.yaml: unmarshal errors: line 5: field tint not found in type catalog.Item · this run reads the built-in items
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | .name'''
+      exit: 0
+      stdout: |
+          jq

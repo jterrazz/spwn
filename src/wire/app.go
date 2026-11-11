@@ -81,11 +81,6 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	// searched as a built-in item's are.
 	unsearched := local.New(env, nil, nil, nil)
 	cat, broken := layerCatalog(userSource(world, unsearched.FS, pathsOf(unsearched.Env.Home(), vars).Prefs), builtin)
-	if broken != nil {
-		worded := kit.Translate(broken, "")
-		writer.Failure(worded)
-		return int(fail.ExitOf(worded))
-	}
 	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
 	kenv := kit.Env{
 		Out:         writer,
@@ -155,6 +150,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		commands = append(commands, session.command())
 	}
 	root := cli.NewRoot(kenv, tuiOpener(kenv, thisMac, vars["NO_COLOR"] != ""), overviewCommand(kenv, thisMac), commands...)
+	reported := gateCatalog(root, writer, broken)
 	root.SetArgs(args)
 	root.SetIn(stdin)
 	root.SetOut(stdout)
@@ -174,6 +170,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		fang.WithNotifySignal(os.Interrupt, syscall.SIGTERM),
 	)
 	thisMac.pool.Close()
+	reported()
 	if session != nil {
 		if closed := session.close(context.Background()); closed != nil && err == nil {
 			err = closed

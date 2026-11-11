@@ -21,7 +21,7 @@ The format is [Machinefiles](../reference/machinefiles.md).
 
 ## Consequences
 
-- The user catalog is read by every command: an owner's item replaces the built-in one whole, and a file the strict decoder refuses stops every command at its line, as a broken `preferences.json` does.
+- The user catalog is read by every command: an owner's item replaces the built-in one whole, and a file the strict decoder refuses stops every command that reads the catalog at its line, as a broken `preferences.json` does; `--version`, help and the engine run on the built-in items and say the file is refused, so the menu bar keeps its engine.
 - The shared source is remote code (a `script` method runs on the machine): it is read only at a whole commit, never a branch, and only the owner moves the pin. Until the lockfile holds it (L2.4), the pin is in `preferences.json`; only the Machinefile's calls read the shared source, every other command reads the user and built-in catalog.
 - `station-linux` and `station-macos` are built in, so a machine with no shared source can extend one; the owner's own Machinefiles live in the shared source, never in the binary.
 - The choices a Machinefile carries leave their command flags and preferences in the lots that read them (settings Off here, the ports' range, a VM's resources); until each lands, both exist and the old one is what runs.
