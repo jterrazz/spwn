@@ -1,0 +1,7 @@
+machinefile: station.machinefile/v1
+name: e2e-apply
+description: The tier-3 case init-then-apply's Machinefile
+machine: { kind: computer, system: { os: macos } }
+apps: [homebrew, jq, ghostty]
+settings:
+    hushlogin: {}

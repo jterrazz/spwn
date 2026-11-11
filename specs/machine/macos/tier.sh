@@ -136,7 +136,7 @@ say "$(sed 's/^/   init: /' <<< "$init")"
 for row in name zshrc layout; do
   grep -q "^●	$row" <<< "$init" || fail "init shows no ● $row step"
 done
-grep -qE "^	?none yet" <<< "$init" || fail "init ends on no empty Machinefile"
+grep -qE "^	?none bound by init" <<< "$init" || fail "init ends on no empty Machinefile"
 in_vm 'test -e ~/Library/LaunchAgents/com.jterrazz.station.engine.plist' && fail "init installed the engine"
 while read -r app; do
   case "$app" in '' | '#'*) continue ;; esac
@@ -365,4 +365,53 @@ out=$(in_vm "$bare_path $station apps install homebrew </dev/null" 2>&1)
 say "   second run: $(tr '\n' ' ' <<< "$out" | cut -c1-160)"
 grep -q 'already installed' <<< "$out" || miss "a second run does not find the Homebrew the first installed"
 [ "$(in_vm 'stat -f %m /opt/homebrew/bin/brew')" = "$first" ] || miss "a second run ran Homebrew's installer again"
+case_pass
+
+# value: a Machinefile applied on a bare Mac: install.sh, then init --machinefile on a
+# terminal (script gives it one), interrupted by SIGINT while the cask installs, then a
+# bare apply that resumes it, drift with every item present, and the footprint test.
+case_begin init-then-apply SU-12
+tart stop "$bare" >> "$log" 2>&1 || true
+applied="station-e2e-macos-$run_id-apply"
+made+=("$applied")
+tart clone ghcr.io/cirruslabs/macos-tahoe-base:latest "$applied" >> "$log" 2>&1 || fail "clone the raw base"
+tart set "$applied" --memory 8192 >> "$log" 2>&1 || fail "size $applied"
+ip=$(boot "$applied") || fail "boot $applied"
+in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
+in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/scripts/install.sh" "$user@$ip:/tmp/station-e2e/install.sh" || fail "copy install.sh"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/test-machinefile.yaml" "$user@$ip:/tmp/station-e2e/test-machinefile.yaml" || fail "copy the test Machinefile"
+fp="$work/home-apply"
+mkdir -p "$fp"
+steps=()
+n=0
+listing > "$fp/0-before.txt"
+step "install.sh" "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null"
+# invariant: apply asks Homebrew's password, so it runs on a terminal: script(1)
+# gives it one; the run is interrupted once the cask's install has started.
+in_vm "(yes '' | script -q /tmp/station-e2e/first.log $station init --machinefile /tmp/station-e2e/test-machinefile.yaml > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
+waited=0
+until in_vm 'pgrep -f "cask.*ghostty|install.*ghostty" > /dev/null'; do
+  waited=$((waited + 5))
+  [ $waited -lt 1200 ] || fail "the cask's install never started"
+  sleep 5
+done
+in_vm 'pkill -INT -f "station init --machinefile"' || fail "interrupt the apply"
+until in_vm 'test -s /tmp/station-e2e/first.exit'; do sleep 2; done
+n=$((n + 1))
+listing > "$fp/$n.txt"
+steps+=("$n:init --machinefile, interrupted")
+say "   interrupted run: $(in_vm 'tr -d "\r" < /tmp/station-e2e/first.log | grep -E "interrupted|not run" | head -3' | tr '\n' ' ')"
+[ "$(in_vm 'cat /tmp/station-e2e/first.exit')" = 130 ] || miss "the interrupted apply exited $(in_vm 'cat /tmp/station-e2e/first.exit'), not 130"
+in_vm 'grep -q "station apply resumes" /tmp/station-e2e/first.log' || miss "the interrupted apply did not say station apply resumes"
+in_vm 'grep -q "e2e-apply" ~/.config/station/preferences.json' || miss "init --machinefile bound no Machinefile"
+step "apply resumes" "yes '' | script -q /tmp/station-e2e/second.log $station apply > /dev/null"
+drift=$(in_vm "$station drift --json")
+say "   drift: $(jq -c '[.lines[] | [.item, .condition]]' <<< "$drift")"
+[ "$(jq '[.lines[] | select(.condition != "present")] | length' <<< "$drift")" = 0 ] || miss "drift is not clean after the resumed apply"
+in_vm 'cat ~/.local/state/station/ledger.json' > "$fp/ledger.json" || miss "apply kept no ledger"
+[ "$(jq -r '[.installed[].item] | sort | join(" ")' "$fp/ledger.json")" = "ghostty homebrew jq" ] || miss "the ledger holds other than what apply installed"
+in_vm "$station disk --json" > "$fp/disk.json" || fail "disk --json"
+footprint "$fp" "$fp/disk.json" "$suite/macos/os-noise.txt" || fail "the footprint test"
 case_pass
