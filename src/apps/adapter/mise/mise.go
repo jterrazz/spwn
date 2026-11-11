@@ -155,10 +155,7 @@ func Environment(home string, vars map[string]string, moved ...string) []string 
 	// a version named in the environment, `mise activate`'s session and the
 	// moved variables another manager names (npm's prefix) are left out,
 	// since each moves what is read away from what is removed.
-	data := vars["MISE_DATA_DIR"]
-	if data == "" {
-		data = path.Join(home, ".local", "share", command)
-	}
+	data := dataDir(home, vars)
 	shims := path.Join(data, "shims")
 	versions := []string{path.Join(data, "installs"), path.Join(or(vars["NVM_DIR"], path.Join(home, ".nvm")), "versions"), path.Join(or(vars["ASDF_DATA_DIR"], path.Join(home, ".asdf")), "installs")}
 	search := []string{shims}
@@ -177,6 +174,20 @@ func Environment(home string, vars map[string]string, moved ...string) []string 
 	}
 	slices.Sort(env)
 	return append(env, pins...)
+}
+
+func Kept(home string, vars map[string]string) []string {
+	// value: the folders mise keeps its runtimes and their shims in: a
+	// command found there is mise's, which its own listing reads.
+	data := dataDir(home, vars)
+	return []string{path.Join(data, "installs"), path.Join(data, "shims")}
+}
+
+func dataDir(home string, vars map[string]string) string {
+	if data := vars["MISE_DATA_DIR"]; data != "" {
+		return data
+	}
+	return path.Join(home, ".local", "share", command)
 }
 
 func moves(name string) bool {

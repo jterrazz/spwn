@@ -87,6 +87,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		Bundler:     bundler,
 		VMs:         m.machines(env.Interactive),
 		Logs:        filepath.Join(m.paths.State, "logs"),
+		Kept:        mise.Kept(m.sys.Env.Home(), m.vars),
 	})
 }
 

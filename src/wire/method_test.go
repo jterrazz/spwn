@@ -9,10 +9,12 @@ import (
 
 	"github.com/jterrazz/studio-station/src/apps"
 	appsfake "github.com/jterrazz/studio-station/src/apps/adapter/fake"
+	"github.com/jterrazz/studio-station/src/apps/adapter/mise"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/machinefile"
+	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 	"github.com/jterrazz/studio-station/src/world"
 )
@@ -30,6 +32,9 @@ func systems() map[catalog.MachineKind]string {
 // another's, so a plan may choose either and the machine may hold either.
 const twin = "item: station.catalog/v1\nkind: app\nname: twin\ndescription: two ways\nprovides: [twin]\nmethods:\n    - { os: macos, skill: { repo: owner/twin, name: twin } }\n    - { os: macos, cask: twin }\n"
 
+// value: an item the owner may have another way, read by its version.
+const probed = "item: station.catalog/v1\nkind: app\nname: probed\ndescription: read by its version\nprovides: [probed]\nversion-read: { args: [probed, --version], pattern: '^probed (\\S+)' }\nmethods:\n    - { os: macos, cask: probed }\n"
+
 type bench struct {
 	w     *world.World
 	shelf *appscalls.Shelf
@@ -39,8 +44,9 @@ type bench struct {
 
 // value: a machine of that kind whose every manager is there and holds
 // nothing, the shelf over its fakes, and the library of the built-in
-// catalog under the twin and a Machinefile `m` that lists entry.
-func benchOf(t *testing.T, kind catalog.MachineKind, entry string) bench {
+// catalog under the twin and a Machinefile `m` that lists entry; each edit
+// sets the machine's runner and the shelf's options before it is built.
+func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func(*localtest.Runner, *appscalls.ShelfOptions)) bench {
 	t.Helper()
 	builtin, err := builtinSource().Read(context.Background())
 	if err != nil {
@@ -48,8 +54,9 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string) bench {
 	}
 	user := machinefile.Tree{Layer: machinefile.User, Root: "~/.config/station"}
 	files := map[string]string{
-		"machinefiles/m.yaml":            "machinefile: station.machinefile/v1\nname: m\nmachine: " + systems()[kind] + "\napps: [" + entry + "]\n",
-		"catalog/command-line/twin.yaml": twin,
+		"machinefiles/m.yaml":              "machinefile: station.machinefile/v1\nname: m\nmachine: " + systems()[kind] + "\napps: [" + entry + "]\n",
+		"catalog/command-line/twin.yaml":   twin,
+		"catalog/command-line/probed.yaml": probed,
 	}
 	for p, body := range files {
 		user.Files = append(user.Files, machinefile.File{Path: p, Body: []byte(body)})
@@ -58,7 +65,8 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string) bench {
 	if err != nil {
 		t.Fatal(err)
 	}
-	system := localtest.Mac(localtest.NewRunner(t), localtest.NewFS(), localtest.Env{HomeDir: "/home/u", OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
+	runner := localtest.NewRunner(t)
+	system := localtest.Mac(runner, localtest.NewFS(), localtest.Env{HomeDir: "/home/u", OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
 	adapters, _ := installers(machine{sys: system, vars: map[string]string{}}, false)
 	w := &world.World{ThisMac: "here", Managers: map[catalog.Method]world.Named{}}
 	w.Mac("here").Apps = map[catalog.Method]*world.Manager{}
@@ -69,7 +77,11 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string) bench {
 		_, lined := adapter.(contract.Lined)
 		registry[method] = appsfake.InstallerOf(w, "here", method, lined)
 	}
-	shelf := appscalls.NewShelf(waiting{appsMachine{h: system, run: system.Run}}, lib.Catalog, nil, appscalls.ShelfOptions{ThisMachine: kind, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "here")})
+	options := appscalls.ShelfOptions{ThisMachine: kind, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "here")}
+	for _, edit := range edits {
+		edit(runner, &options)
+	}
+	shelf := appscalls.NewShelf(waiting{appsMachine{h: system, run: system.Run}}, lib.Catalog, nil, options)
 	return bench{w: w, shelf: shelf, cat: lib.Catalog, lib: lib}
 }
 
@@ -295,5 +307,38 @@ func TestAMoveHandsTheAppToTheMethodAskedOnEveryPath(t *testing.T) {
 		if string(row.Method) != c.to || step.Method != c.to || line.Action != machinefile.Keep {
 			t.Errorf("%s: reads by %s, the plan asks %s and %s it", about, row.Method, step.Method, line.Action)
 		}
+	}
+}
+
+func TestACommandInAManagersOwnFolderIsNoCopyPresentAnotherWay(t *testing.T) {
+	// invariant: a command found in a manager's own folder (mise's shims
+	// and installs) is that manager's, read by its listing: one no listing
+	// holds is absent, so a Machinefile's global copy is installed, never
+	// adopted from a shim or a project's runtime.
+	kept := mise.Kept("/home/u", map[string]string{})
+	for _, dir := range kept {
+		where := dir + "/probed/2/bin/probed"
+		b := benchOf(t, catalog.Mac, "probed", func(r *localtest.Runner, o *appscalls.ShelfOptions) {
+			r.Paths["probed"] = where
+			o.Kept = kept
+		})
+		if row := b.row(t, "probed"); row.State != catalog.StateAbsent {
+			t.Errorf("%s: probed reads %s (%s), want absent", where, row.State, row.Detail)
+		}
+	}
+}
+
+func TestTheVersionReadRunsTheCopyTheLookupFound(t *testing.T) {
+	// invariant: the version is read from the binary the lookup found on
+	// the owner's PATH, never from another one station's search finds.
+	var runner *localtest.Runner
+	b := benchOf(t, catalog.Mac, "probed", func(r *localtest.Runner, _ *appscalls.ShelfOptions) {
+		r.Paths["probed"] = "/opt/elsewhere/probed"
+		r.On("/opt/elsewhere/probed", "--version").Reply(local.Output{Stdout: "probed 2.1.0\n"})
+		runner = r
+	})
+	row := b.row(t, "probed")
+	if row.Version != "2.1.0" || !slices.ContainsFunc(runner.Calls, func(c local.Cmd) bool { return c.Name == "/opt/elsewhere/probed" }) {
+		t.Errorf("read %q by %v; want 2.1.0 from /opt/elsewhere/probed", row.Version, runner.Calls)
 	}
 }

@@ -369,7 +369,7 @@ func (s *Shelf) present(ctx context.Context, t catalog.App, r *apps.Report) bool
 	}
 	for _, name := range t.Provides {
 		where, ok := s.m.LookPath(name)
-		if !ok {
+		if !ok || s.kept(where) {
 			continue
 		}
 		// hazard: stock macOS ships /usr/bin shims (java, python3, xcodebuild, git)
@@ -391,6 +391,15 @@ func (s *Shelf) present(ctx context.Context, t catalog.App, r *apps.Report) bool
 			}
 		}
 		return true
+	}
+	return false
+}
+
+func (s *Shelf) kept(where string) bool {
+	for _, dir := range s.o.Kept {
+		if strings.HasPrefix(where, dir+"/") {
+			return true
+		}
 	}
 	return false
 }
@@ -432,11 +441,18 @@ func (s *Shelf) fromAppStore(t catalog.App) bool {
 }
 
 func (s *Shelf) readVersion(ctx context.Context, p catalog.VersionRead) (version string, code int, ran bool) {
+	// invariant: the version read runs the binary the lookup found, so it
+	// answers for that copy and never for another one station's own search
+	// would find first (macOS's /usr/bin stub against a shim).
 	args := make([]string, 0, len(p.Args)-1)
 	for _, a := range p.Args[1:] {
 		args = append(args, s.home(a))
 	}
-	text, code, ran := s.m.RunBriefly(ctx, p.Args[0], args, versionBudget)
+	name := p.Args[0]
+	if where, ok := s.m.LookPath(name); ok {
+		name = where
+	}
+	text, code, ran := s.m.RunBriefly(ctx, name, args, versionBudget)
 	if !ran {
 		return "", 0, false
 	}

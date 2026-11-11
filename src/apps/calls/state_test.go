@@ -58,7 +58,7 @@ func reportOf(t *testing.T, app catalog.App, manager *fake.State, m machine) app
 }
 
 func java(output string, code int) machine {
-	return machine{paths: map[string]string{"java": "/usr/bin/java"}, probes: map[string]probed{"java -version": {output, code}}}
+	return machine{paths: map[string]string{"java": "/usr/bin/java"}, probes: map[string]probed{"/usr/bin/java -version": {output, code}}}
 }
 
 var javaApp = catalog.App{Name: "java", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac, catalog.Linux, catalog.MacOS}, Install: catalog.CaskInstall{Token: "temurin"}}}, Provides: []string{"java"}, Version: catalog.VersionRead{Args: []string{"java", "-version"}, Pattern: `version "([^"]+)"`}}
