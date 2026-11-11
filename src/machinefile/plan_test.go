@@ -165,6 +165,8 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 		{"absent, its manager missing", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg", Lacks: "manager"}, machinefile.KeptManagerMissing, machinefile.KeptManagerMissing},
 		{"already gone", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg"}, machinefile.Gone, machinefile.Gone},
 		{"there another way", machinefile.Seen{Condition: machinefile.NotManaged, Method: "script"}, machinefile.KeptAnotherWay, machinefile.KeptAnotherWay},
+		{"there, a manager holding a package of yours", machinefile.Seen{Condition: machinefile.Present, Method: "pkg", Holds: []string{"typescript"}}, machinefile.KeptHolding, machinefile.KeptRequired},
+		{"there, a manager whose packages do not read", machinefile.Seen{Condition: machinefile.Present, Method: "pkg", HoldsUnread: true}, machinefile.KeptHolding, machinefile.KeptRequired},
 		{"unread", machinefile.Seen{Condition: machinefile.Unknown, Method: "pkg"}, machinefile.KeptUnread, machinefile.KeptUnread},
 	} {
 		for _, needed := range []bool{false, true} {

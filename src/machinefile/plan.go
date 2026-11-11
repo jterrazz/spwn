@@ -2,6 +2,7 @@ package machinefile
 
 import (
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -44,7 +45,9 @@ const (
 // value: what an item reads on the machine, as its family read it: its
 // condition, its state, the method that holds it, the version there, the
 // words of its read, the manager its method lacks here, when that
-// manager is not installed, and whether station cannot uninstall it here.
+// manager is not installed, whether station cannot uninstall it here,
+// and for a manager, the owner's packages it holds (what no app of the
+// catalog installs) and whether their list did not answer.
 
 type Seen struct {
 	Condition    Condition
@@ -54,7 +57,11 @@ type Seen struct {
 	Detail       string
 	Lacks        string
 	Irreversible bool
+	Holds        []string
+	HoldsUnread  bool
 }
+
+func (s Seen) holding() bool { return len(s.Holds) > 0 || s.HoldsUnread }
 
 // value: one line of a plan: the step resolved, what it reads now, and
 // what apply does with it.
@@ -164,8 +171,9 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 // the method that installed it is removed, whoever put it back there: an
 // extra already gone is removed from the ledger alone, one held by another
 // method is the owner's and left, one station cannot uninstall here is
-// left and never asks anything, and one whose manager is missing here is
-// left for a later run to judge. The extras run in reverse dependency
+// left and never asks anything, a manager that holds packages of the
+// owner's, or whose packages do not read, is left with them, and one
+// whose manager is missing here is left for a later run to judge. The extras run in reverse dependency
 // order: what another extra leans on (what it requires, its provider, its
 // manager) is taken back after it.
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
@@ -178,7 +186,7 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 		s.Action = Leave
 		switch s.Seen.Condition {
 		case Present, Outdated:
-			if s.Seen.Method == in.Method && !s.Seen.Irreversible {
+			if s.Seen.Method == in.Method && !s.Seen.Irreversible && !s.Seen.holding() {
 				s.Action = Remove
 			}
 		case Absent:
@@ -203,9 +211,10 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 // by it, or its method's manager is it) is kept while that app is not
 // taken back with it, whoever installed that app; an app whose read did
 // not answer may be there, so it keeps what it needs too, and an extra
-// station cannot uninstall here stays, so it keeps what it needs as well.
-// What needs an extra that stays there by station's method is said, the
-// one station cannot uninstall included, so its record is kept.
+// station cannot uninstall here, or a manager that holds the owner's
+// packages, stays, so it keeps what it needs as well. What needs an extra
+// that stays there by station's method is said, those two included, so
+// its record is kept.
 func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
 	taken := map[string]bool{}
 	for _, s := range extra {
@@ -221,7 +230,7 @@ func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, ext
 		}
 	}
 	for i := range extra {
-		if s := &extra[i]; held[s.Step.Item] || s.Fate() == KeptIrreversible {
+		if s := &extra[i]; held[s.Step.Item] || s.Fate() == KeptIrreversible || s.Fate() == KeptHolding {
 			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Item)
 		}
 	}
@@ -345,9 +354,10 @@ func (s ExtraLine) Takes() bool {
 
 // value: what `apply --remove` does with an extra: takes it back, lets
 // go of its record as already gone, or keeps it there, because an app
-// there still needs it, station cannot uninstall it here, its manager is
-// missing here, it is there by another way than its method, or its read
-// did not answer.
+// there still needs it, station cannot uninstall it here, it is a manager
+// that holds packages of the owner's (or whose packages do not read), its
+// manager is missing here, it is there by another way than its method, or
+// its read did not answer.
 
 type Fate string
 
@@ -356,6 +366,7 @@ const (
 	Gone               Fate = "gone"
 	KeptRequired       Fate = "kept-required"
 	KeptIrreversible   Fate = "kept-irreversible"
+	KeptHolding        Fate = "kept-holding"
 	KeptManagerMissing Fate = "kept-manager-missing"
 	KeptAnotherWay     Fate = "kept-another-way"
 	KeptUnread         Fate = "kept-unread"
@@ -375,8 +386,12 @@ func (s ExtraLine) Fate() Fate {
 	}
 	switch s.Seen.Condition {
 	case Present, Outdated:
-		if s.Seen.Method == s.Installed.Method && s.Seen.Irreversible {
+		switch {
+		case s.Seen.Method != s.Installed.Method:
+		case s.Seen.Irreversible:
 			return KeptIrreversible
+		case s.Seen.holding():
+			return KeptHolding
 		}
 		return KeptAnotherWay
 	case NotManaged:
@@ -384,6 +399,19 @@ func (s ExtraLine) Fate() Fate {
 	case Absent, Changed, Extra, Unknown:
 	}
 	return KeptUnread
+}
+
+func (s ExtraLine) Holding() string {
+	// value: the words of a manager kept for what it holds, the same in the
+	// plan and in the run.
+	switch n := len(s.Seen.Holds); n {
+	case 0:
+		return "what it holds does not read"
+	case 1:
+		return "holds 1 package of yours"
+	default:
+		return "holds " + strconv.Itoa(n) + " packages of yours"
+	}
 }
 
 func (p Plan) Of(a Action) []Line {

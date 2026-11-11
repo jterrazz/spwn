@@ -2,6 +2,7 @@ package calls_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -85,5 +86,43 @@ func TestStateAShimThatAnswersIsDegraded(t *testing.T) {
 
 	if got.State != catalog.StateDegraded || got.Version != "21.0.5" || got.Detail != "on PATH, not managed by cask" {
 		t.Fatalf("report %+v", got)
+	}
+}
+
+func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
+	// invariant: what a manager's methods list beyond the catalog's own
+	// apps is the owner's, by key; a list that cannot be read is unread.
+	manager := catalog.App{Name: "casks", Kind: catalog.KindManager, Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.ScriptInstall{URL: "https://example.com/install.sh"}}}}
+	tool := catalog.App{Name: "tool", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "tool"}}}}
+	cat := catalog.Catalog{
+		Apps:  []catalog.App{manager, tool},
+		Items: []catalog.Placed{{Item: catalog.Item{Name: "casks", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{catalog.ManagerKey(catalog.MethodCask)}}}, {Item: catalog.Item{Name: "tool"}}},
+	}
+	for _, c := range []struct {
+		casks  *fake.State
+		held   []string
+		unread bool
+	}{
+		{&fake.State{Installed: map[string]string{"tool": "1.0.0", "editor": "2.0.0", "browser": "3.0.0"}}, []string{"browser", "editor"}, false},
+		{&fake.State{Installed: map[string]string{"tool": "1.0.0"}}, nil, false},
+		{&fake.State{Absent: true}, nil, true},
+	} {
+		installers := contract.Installers{
+			catalog.MethodScript: fake.New(catalog.MethodScript, &fake.State{Installed: map[string]string{"https://example.com/install.sh": "1.0.0"}}),
+			catalog.MethodCask:   fake.New(catalog.MethodCask, c.casks),
+		}
+		m := machine{}
+		reports, err := calls.NewShelf(m, cat, nil, calls.ShelfOptions{ThisMachine: catalog.Mac, Root: "/", Installers: installers, Pool: lanes.NewPool(context.Background(), m, 16, 1)}).Inventory(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, r := range reports {
+			if r.App.Name == "tool" && (len(r.Holds) > 0 || r.HoldsUnread) {
+				t.Errorf("an app that manages nothing holds %v, unread %v", r.Holds, r.HoldsUnread)
+			}
+			if r.App.Name == "casks" && (!slices.Equal(r.Holds, c.held) || r.HoldsUnread != c.unread) {
+				t.Errorf("the manager holds %v, unread %v; want %v, unread %v", r.Holds, r.HoldsUnread, c.held, c.unread)
+			}
+		}
 	}
 }

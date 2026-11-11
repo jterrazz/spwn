@@ -16,6 +16,11 @@ type Report struct {
 	// value: station cannot uninstall it here: its method removes nothing,
 	// or the App Store installed it.
 	Irreversible bool
+	// value: for a manager there, what its methods hold that no app of the
+	// catalog placed here installs, by key: the owner's own packages; and
+	// whether a list of them did not answer, so what it holds is unknown.
+	Holds       []string
+	HoldsUnread bool
 	// value: why the state is not ok, in a word a page can judge; Needs names
 	// the catalogue tool whose absence explains it.
 	Why   Why

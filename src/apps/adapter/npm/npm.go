@@ -57,10 +57,16 @@ func (n *Npm) Inventory(ctx context.Context) (map[string]string, error) {
 	}
 	list := map[string]string{}
 	for name, d := range doc.Dependencies {
-		list[name] = d.Version
+		if !bundled(name) {
+			list[name] = d.Version
+		}
 	}
 	return list, nil
 }
+
+// outside: node's own install lays npm and corepack in its global prefix,
+// so `npm ls -g` lists them beside what was installed there.
+func bundled(name string) bool { return name == command || name == "corepack" }
 
 func (n *Npm) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
 	return nil, nil

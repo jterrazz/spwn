@@ -1,0 +1,41 @@
+description: 'a runtime station installed that holds a package of yours is kept, and taken back once it holds none'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.mise = {installed: {"node": "24.11.0"}} | .macs["linux-1"].apps.npm = {installed: {"typescript": "5.9.3"}} | .macs["linux-1"].stores.ledger = [{item: "node", method: "mise", machinefile: "linux-1", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mise	script	the manager of jq
+          ○	jq	mise
+          # Extra
+          ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mise	script	the manager of jq
+          ○	jq	mise
+          # Extra
+          ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
+          ●	mise	1.0.0	script	the manager of jq
+          ●	jq	1.0.0	mise
+          ●	node	24.11.0	mise	holds 1 package of yours: kept, judged again next run
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.npm.installed = {}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	node	mise	installed by station for linux-1, listed no longer
+          ●	mise	1.0.0	script	the manager of jq
+          ●	jq	1.0.0	mise
+          ●	node		mise	removed

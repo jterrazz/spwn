@@ -317,9 +317,10 @@ func masked(words string, secrets map[string]string) string {
 // method; an extra already gone leaves the ledger alone; one held by
 // another method since, or that station cannot uninstall (a script's
 // install, the App Store's), is said and kept, and the ledger lets it go,
-// so no later run fails on it again. One another app still needs, one
-// whose manager is missing here, and a read that did not answer keep
-// their record for the next run. An extra the run did not take back (its
+// so no later run fails on it again. One another app still needs, a
+// manager that holds packages of the owner's, one whose manager is
+// missing here, and a read that did not answer keep their record for the
+// next run. An extra the run did not take back (its
 // uninstall failed or was refused) is still there, so what it leans on
 // is kept with its record, and so on down.
 func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
@@ -334,6 +335,10 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 			continue
 		case machinefile.KeptManagerMissing:
 			done.Detail = "its manager " + e.Seen.Lacks + " is missing: kept, judged again next run"
+			out = append(out, done)
+			continue
+		case machinefile.KeptHolding:
+			done.Detail = e.Holding() + ": kept, judged again next run"
 			out = append(out, done)
 			continue
 		case machinefile.KeptUnread:

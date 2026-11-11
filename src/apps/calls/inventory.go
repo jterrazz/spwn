@@ -135,6 +135,9 @@ func (s *Shelf) needed(list []catalog.App) map[catalog.Method]bool {
 	needed := map[catalog.Method]bool{}
 	for _, t := range list {
 		needed[s.install(t).Method()] = true
+		for _, m := range s.managed(t) {
+			needed[m] = true
+		}
 		if old, ok := t.Superseded(); ok {
 			needed[old.Method()] = true
 		}
@@ -213,6 +216,7 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	}
 	if version, ok := l.keys[i.Key()]; ok {
 		r.State, r.Version, r.Managed = catalog.StateOK, version, true
+		r.Holds, r.HoldsUnread = s.holds(t, listings)
 		// invariant: an inconclusive currency leaves the app ok, never outdated.
 		switch l.currency[i.Key()].Verdict {
 		case apps.Unknown:
@@ -248,6 +252,49 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 		r.Detail, r.Why, r.Needs = manager.Name+" not installed", apps.WhyMissing, manager.App
 	}
 	return r
+}
+
+// invariant: a manager holds what each method it manages lists that no
+// app of the catalog placed here installs by that method: the owner's own
+// packages. A list that did not answer, or that its method keeps none
+// of, leaves what it holds unread.
+func (s *Shelf) holds(t catalog.App, listings map[catalog.Method]listing) (held []string, unread bool) {
+	for _, m := range s.managed(t) {
+		l, ok := listings[m]
+		if !ok || l.keys == nil {
+			unread = true
+			continue
+		}
+		ours := map[string]bool{}
+		for _, p := range s.Placed() {
+			if i := s.install(p); i.Method() == m {
+				ours[i.Key()] = true
+			}
+		}
+		for key := range l.keys {
+			if !ours[key] {
+				held = append(held, key)
+			}
+		}
+	}
+	slices.Sort(held)
+	return held, unread
+}
+
+// value: the methods a manager manages that this machine has an installer
+// of; none for an app that manages nothing.
+func (s *Shelf) managed(t catalog.App) []catalog.Method {
+	it, ok := s.cat.Item(t.Name)
+	if !ok || it.Item.Kind != catalog.KindManager {
+		return nil
+	}
+	var out []catalog.Method
+	for _, key := range it.Item.Manages {
+		if _, wired := s.o.Installers[catalog.Method(key)]; wired {
+			out = append(out, catalog.Method(key))
+		}
+	}
+	return out
 }
 
 func listedOld(t catalog.App, listings map[catalog.Method]listing) bool {

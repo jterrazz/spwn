@@ -80,3 +80,15 @@ func TestAListingThatExitsOneStillListsEveryPackage(t *testing.T) {
 		t.Fatalf("inventory %v %v", got, err)
 	}
 }
+
+func TestTheListingLeavesOutWhatNodeItselfLays(t *testing.T) {
+	run := local.Played(func(local.Cmd) (local.Output, error) {
+		return local.Output{Stdout: `{"dependencies":{"corepack":{"version":"0.34.0"},"npm":{"version":"11.6.2"},"typescript":{"version":"5.9.3"}}}`}, nil
+	}, "npm")
+
+	got, err := npm.New(run, nil).Inventory(context.Background())
+
+	if err != nil || len(got) != 1 || got["typescript"] != "5.9.3" {
+		t.Fatalf("inventory %v %v; want typescript alone", got, err)
+	}
+}

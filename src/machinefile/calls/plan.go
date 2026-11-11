@@ -94,7 +94,7 @@ func observe(ctx context.Context, d Deps, in appscalls.ListIn) (map[string]machi
 }
 
 func appSeen(r apps.Report) machinefile.Seen {
-	s := machinefile.Seen{State: r.State, Method: string(r.Method), Version: r.Version, Detail: r.Detail, Irreversible: r.Irreversible}
+	s := machinefile.Seen{State: r.State, Method: string(r.Method), Version: r.Version, Detail: r.Detail, Irreversible: r.Irreversible, Holds: r.Holds, HoldsUnread: r.HoldsUnread}
 	if r.Why == apps.WhyMissing {
 		s.Lacks = r.Needs
 	}

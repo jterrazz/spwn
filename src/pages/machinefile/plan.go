@@ -131,6 +131,8 @@ func fate(e machinefile.ExtraLine) string {
 		return "already gone"
 	case machinefile.KeptIrreversible:
 		return "station cannot uninstall it: kept, remove it by hand if you want"
+	case machinefile.KeptHolding:
+		return e.Holding() + ": kept"
 	case machinefile.KeptManagerMissing:
 		return "its manager " + e.Seen.Lacks + " is missing: kept"
 	case machinefile.KeptAnotherWay:

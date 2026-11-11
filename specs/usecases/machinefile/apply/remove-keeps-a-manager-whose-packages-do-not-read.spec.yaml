@@ -1,0 +1,23 @@
+description: 'a runtime station installed whose packages cannot be listed is kept: what it holds may be yours'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.mise = {installed: {"node": "24.11.0"}} | .macs["linux-1"].apps.npm = {absent: true} | .macs["linux-1"].stores.ledger = [{item: "node", method: "mise", machinefile: "linux-1", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mise	script	the manager of jq
+          ○	jq	mise
+          # Extra
+          ?	node	mise	installed by station for linux-1, what it holds does not read: kept
+          ●	mise	1.0.0	script	the manager of jq
+          ●	jq	1.0.0	mise
+          ●	node	24.11.0	mise	what it holds does not read: kept, judged again next run
