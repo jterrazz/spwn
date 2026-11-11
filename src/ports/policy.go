@@ -35,7 +35,10 @@ func PolicyOf(s *PortsGroup) Policy {
 	if lo, hi, ok := strings.Cut(s.Range, "-"); ok {
 		l, errL := strconv.Atoi(strings.TrimSpace(lo))
 		h, errH := strconv.Atoi(strings.TrimSpace(hi))
-		if errL == nil && errH == nil && l > 0 && h >= l && h < 65536 {
+		// invariant: a range never covers a Funnel port: a private share
+		// served on one would be on the internet while it is funneled.
+		covers := slices.ContainsFunc(catalog.FunnelPorts[:], func(f int) bool { return f >= l && f <= h })
+		if errL == nil && errH == nil && l > 0 && h >= l && h < 65536 && !covers {
 			p.Low, p.High = l, h
 		}
 	}

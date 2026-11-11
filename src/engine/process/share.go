@@ -564,18 +564,15 @@ func (d *Engine) funnelTakenLocked(l ports.Reservation) error {
 
 // invariant: station never replaces a tailnet entry it did not make: a
 // public share is refused while its Funnel port serves another target,
-// or is funneled with none of station's; a private path is refused while
-// its port is funneled, for Funnel opens every path of a port. The
-// tailnet unread refuses both. The caller holds d.mu.
+// or is funneled with none of station's; a private share, a path or a
+// port, is refused while its port is funneled, for Funnel opens every
+// path of a port. The tailnet unread refuses both. The caller holds d.mu.
 func (d *Engine) heldOutside(ctx context.Context, want ports.Share) error {
-	if !want.Public() && !want.Mounted() {
-		return nil
-	}
 	funneled, err := d.tn.Funneled(ctx)
 	if err != nil {
 		return err
 	}
-	if want.Mounted() {
+	if !want.Public() {
 		if slices.Contains(funneled, want.Port) {
 			return &ports.FunnelHeld{Port: want.Port, Private: true}
 		}

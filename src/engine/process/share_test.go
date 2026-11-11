@@ -240,3 +240,17 @@ func TestAFunnelPortHeldByStationsOwnEntryNamesIt(t *testing.T) {
 		t.Errorf("held = %v, want %q", err, want)
 	}
 }
+
+// invariant: a private share on a port of the Mac is refused while that
+// port is funneled by an entry station did not make: Funnel would put it
+// on the internet.
+func TestAPrivateShareOnAFunneledPortIsRefused(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	tn.funnel = map[int]bool{40001: true}
+	h.d.tn = tn
+	err := h.d.heldOutside(t.Context(), ports.Share{Port: 40001, Reserved: 40001, Scheme: ports.SchemeHTTPS})
+	if want := "port 40001 is funneled by an entry station did not make: a private share on it would be public"; err == nil || err.Error() != want {
+		t.Errorf("held = %v, want %q", err, want)
+	}
+}

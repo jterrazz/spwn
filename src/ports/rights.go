@@ -166,8 +166,8 @@ func (e *NoFunnelPort) Error() string {
 
 type FunnelHeld struct {
 	Port int
-	// value: the share refused is a private path, which a funneled port
-	// would put on the internet.
+	// value: the share refused is private, a path or a port, which a
+	// funneled port would put on the internet.
 	Private bool
 	// value: the port of this Mac the entry that holds it is carried from,
 	// when it is of station's range: an entry station made, still there.
@@ -180,7 +180,7 @@ func (e *FunnelHeld) Error() string {
 	// station made for another share that still holds it.
 	switch {
 	case e.Private:
-		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry station did not make: a private path on it would be public"
+		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry station did not make: a private share on it would be public"
 	case e.From != 0:
 		return "Funnel port " + strconv.Itoa(e.Port) + " still serves station's entry from port " + strconv.Itoa(e.From) + " of this Mac"
 	}
