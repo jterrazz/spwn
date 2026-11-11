@@ -224,6 +224,8 @@ import SwiftUI
 
 #Preview("needs.all") { StoryStage(Stories["needs.all"]) }
 
+#Preview("needs.catalog-refused") { StoryStage(Stories["needs.catalog-refused"]) }
+
 #Preview("needs.empty") { StoryStage(Stories["needs.empty"]) }
 
 #Preview("needs.updated") { StoryStage(Stories["needs.updated"]) }
