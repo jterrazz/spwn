@@ -194,9 +194,12 @@ public enum Token {
     public enum Glass {
         public static let window: CGFloat = 24
 
-        // value: the live panel's glass tint, which brings the system glass
-        // to the density the still renders' plate draws (ADR-036).
-        public static func tint(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.rgba(16, 16, 20, 0.80) : Token.rgba(250, 250, 252, 0.80) }
+        // value: the live panel's glass tint, the plate's colour at the
+        // lowest alpha of the capture rig's sweep (run cap3, 2026-11-11:
+        // 0.5, 0.65, 0.8, 0.9) whose second tone holds 4.5:1 over M1's
+        // three wallpapers in both schemes: 0.65, worst 4.90 dark over the
+        // light wallpaper, where 0.5 read 4.42 (ADR-036).
+        public static func tint(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.rgba(16, 16, 20, 0.65) : Token.rgba(250, 250, 252, 0.65) }
 
         public static func pane(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.hex(0x222328).opacity(0.58) : Token.hex(0xF6F7FB).opacity(0.62) }
         public static func sheen(_ scheme: ColorScheme) -> [Color] {
