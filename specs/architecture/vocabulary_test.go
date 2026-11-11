@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"go.yaml.in/yaml/v3"
 )
 
 // value: the words of SPEC §2.2 that the code and the docs keep for their
@@ -344,10 +346,54 @@ func swiftTexts(root string) ([]corpusText, error) {
 	return out, err
 }
 
+// value: the keys of a catalog item whose value is a command line station
+// runs, another program's words like the Args of a Go step.
+func catalogArgv() []string {
+	return []string{"run", "args", "command", "reload", "upgrade", "env", "url"}
+}
+
+// invariant: a catalog item says its words in its values, as its Go literal
+// did before it was a file: every scalar but a command line and another
+// program's text, read as the catalog's own folder so the catalog alone may
+// still name OrbStack.
+func catalogTexts(root string) ([]corpusText, error) {
+	var out []corpusText
+	var failed error
+	err := walk(root, "src/catalog/items", func(rel string) bool { return strings.HasSuffix(rel, ".yaml") }, func(rel, body string) {
+		var doc yaml.Node
+		if err := yaml.Unmarshal([]byte(body), &doc); err != nil {
+			failed = fmt.Errorf("%s: %w", rel, err)
+			return
+		}
+		var read func(n *yaml.Node, argv bool)
+		read = func(n *yaml.Node, argv bool) {
+			switch n.Kind {
+			case yaml.ScalarNode:
+				if !argv && !foreignShape.MatchString(n.Value) {
+					out = append(out, corpusText{"src/catalog", fmt.Sprintf("%s:%d", rel, n.Line), inlineCodeRe.ReplaceAllString(n.Value, "")})
+				}
+			case yaml.MappingNode:
+				for i := 0; i+1 < len(n.Content); i += 2 {
+					read(n.Content[i+1], argv || slices.Contains(catalogArgv(), n.Content[i].Value))
+				}
+			default:
+				for _, c := range n.Content {
+					read(c, argv)
+				}
+			}
+		}
+		read(&doc, false)
+	})
+	if err == nil {
+		err = failed
+	}
+	return out, err
+}
+
 func vocabularyTexts(t *testing.T, w *world) []corpusText {
 	t.Helper()
 	out := sourceTexts(w)
-	for _, read := range []func(string) ([]corpusText, error){docTexts, specTexts, swiftTexts} {
+	for _, read := range []func(string) ([]corpusText, error){docTexts, specTexts, swiftTexts, catalogTexts} {
 		texts, err := read(w.root)
 		if err != nil {
 			t.Fatal(err)
@@ -357,9 +403,9 @@ func vocabularyTexts(t *testing.T, w *world) []corpusText {
 	return out
 }
 
-// invariant: OrbStack may stay a catalogue app (SPEC §2.2): the catalogue
-// names it, and so does the footprint `make generate` projects from it;
-// nothing else does.
+// invariant: OrbStack may stay a catalog app (SPEC §2.2): the catalog names
+// it, in its Go and its items, and so does the footprint `make generate`
+// projects from it; nothing else does.
 func catalogueApp(c corpusText, word string) bool {
 	return word == "OrbStack" && (c.dir == "src/catalog" || strings.HasPrefix(c.at, "docs/reference/footprint.md:"))
 }
@@ -439,6 +485,34 @@ func TestVocabularyBites(t *testing.T) {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasPrefix(f.where, want) }) {
 			t.Errorf("the vocabulary rule did not report %s, which says a retired word", want)
 		}
+	}
+}
+
+func TestVocabularyReadsTheCatalogsItems(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "src", "catalog", "items", "system-utilities")
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	item := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\nmethods:\n    - os: macos\n      script: {run: daemon --tools}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
+	if err := os.WriteFile(filepath.Join(dir, "orb.yaml"), []byte(item), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	texts, err := catalogTexts(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := ruleVocabulary(texts)
+	got := make([]string, 0, len(found))
+	for _, f := range found {
+		got = append(got, f.where+" "+f.what)
+	}
+	want := []string{
+		`src/catalog/items/system-utilities/orb.yaml:4 src/catalog says "daemon", a word SPEC §2.2 retired`,
+		`src/catalog/items/system-utilities/orb.yaml:9 src/catalog says "storage", a word SPEC §2.2 retired`,
+	}
+	if !slices.Equal(got, want) {
+		t.Errorf("the rule reports %v, want %v: a description and a note are read, a run line is not, and the catalog may name OrbStack", got, want)
 	}
 }
 
