@@ -17,6 +17,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	portscalls "github.com/jterrazz/studio-station/src/ports/calls"
@@ -29,7 +30,7 @@ func allCalls(t *testing.T) *call.Registry {
 	t.Helper()
 	registry, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), appscalls.All(appscalls.Deps{}), awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}),
-		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
+		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}), agentscalls.All(agentscalls.Deps{}),
 	)

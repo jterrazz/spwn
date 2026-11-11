@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "machinefile",
+  "command": "explain",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "no Machinefile named jterrazz-macbook-pro",
+    "hint": "station explain --machinefile <name>"
+  }
+}

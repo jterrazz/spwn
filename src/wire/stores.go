@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/store"
 	imagesjsonfile "github.com/jterrazz/studio-station/src/images/adapter/jsonfile"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
+	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	machinesjsonfile "github.com/jterrazz/studio-station/src/machines/adapter/jsonfile"
 	machinescontract "github.com/jterrazz/studio-station/src/machines/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
@@ -30,7 +31,7 @@ func preferenceGroups() []string {
 	return []string{
 		setupcontract.GroupName, machinescontract.GroupMacs, machinescontract.GroupVMUser,
 		accountscontract.GroupShareList, accountscontract.GroupV2ShareList, setupcontract.GroupUserEmail, setupcontract.GroupUserName,
-		portscontract.GroupPorts, settingscontract.GroupOffHere, awakecontract.GroupNeverSleeps,
+		portscontract.GroupPorts, settingscontract.GroupOffHere, awakecontract.GroupNeverSleeps, machinefilecontract.GroupSource,
 	}
 }
 

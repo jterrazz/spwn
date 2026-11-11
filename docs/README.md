@@ -38,6 +38,7 @@
 | [Activity](reference/activity.md)                 | What a machine is doing, where each value comes from, the history and its graphs              |
 | [Awake](reference/awake.md)                       | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                               |
 | [The catalog's item format](reference/catalog.md) | Every key of an item file, the selector, the methods, options, an example per method          |
+| [Machinefiles](reference/machinefiles.md)         | What a machine carries: every key, the overlay, sources and layers, the resolution, `explain` |
 | [Settings](reference/settings.md)                 | Every setting station applies, the Checked group, how a setting asks its values               |
 | [Preferences](reference/preferences.md)           | `preferences.json`, its groups and their owners, the environment variables                    |
 | [Apps and skills](reference/apps-and-skills.md)   | The catalog, the method table, mise, skills as apps, the toolbelt                             |
@@ -83,5 +84,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [030 init makes a machine known; apply carries its Machinefile](decisions/030-init-makes-a-machine-known-apply-carries-its-machinefile.md) (Proposed)
 - [031 The catalog defines, the Machinefile chooses](decisions/031-the-catalog-defines-the-machinefile-chooses.md) (Proposed)
 - [032 The words of a VM's lifetime and network](decisions/032-the-words-of-a-vms-lifetime-and-network.md) (Proposed)
+- [033 A machine is declared by its Machinefile](decisions/033-a-machine-is-declared-by-its-machinefile.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

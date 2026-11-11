@@ -1,0 +1,44 @@
+{
+  "schema": "station.page/v1",
+  "id": "machinefile",
+  "command": "explain --machinefile studio-linux",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "values",
+      "title": "studio-linux",
+      "columns": [
+        {
+          "key": "key",
+          "kind": "listing",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "layer",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "from",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "studio-linux carries nothing yet"
+          }
+        }
+      ]
+    }
+  ]
+}

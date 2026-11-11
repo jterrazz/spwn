@@ -33,6 +33,7 @@ func main() {
 	stories := flag.String("stories", storiesDir, "the folder the story worlds' pages are written to")
 	world := flag.String("world", pages.PlayWorldPath, "the stories' machines as an engine world, the play rig's, rewritten whole")
 	schema := flag.String("schema", schemaPath, "the JSON Schema of an item file of the catalog, rewritten whole")
+	machinefiles := flag.String("machinefile-schema", machinefileSchemaPath, "the JSON Schema of a Machinefile, rewritten whole")
 	flag.Parse()
 	current, err := os.ReadFile(*path)
 	if err != nil {
@@ -75,6 +76,9 @@ func main() {
 		panic(err)
 	}
 	if err := os.WriteFile(*schema, catalogSchema(), 0o600); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(*machinefiles, machinefileSchema(), 0o600); err != nil {
 		panic(err)
 	}
 }

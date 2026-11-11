@@ -48,6 +48,14 @@ type World struct {
 	// value: the commands that follow run with admin rights, on This Mac's
 	// own terminal.
 	Admin bool `json:"admin,omitempty"`
+	// value: the repositories a shared source is read from, by URL.
+	Sources map[string]*Repository `json:"sources,omitempty"`
+}
+
+// value: a repository's files at each of its commits, by slash path.
+
+type Repository struct {
+	Commits map[string]map[string]string `json:"commits"`
 }
 
 type Fault struct {

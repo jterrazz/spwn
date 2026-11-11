@@ -11,6 +11,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	portscalls "github.com/jterrazz/studio-station/src/ports/calls"
@@ -25,7 +26,7 @@ func calls() []byte {
 	registry, err := call.NewRegistry(
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
 		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), agentscalls.All(agentscalls.Deps{}),
-		imagescalls.All(imagescalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
+		imagescalls.All(imagescalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}),
 	)
 	if err != nil {

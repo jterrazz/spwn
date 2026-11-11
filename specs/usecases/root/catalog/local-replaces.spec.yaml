@@ -1,0 +1,17 @@
+description: 'an owner''s item replaces the built-in one whole in every command: jq lives everywhere'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: JSON, the owner's way
+          provides: [jq]
+          methods:
+              - { os: any, mise: { name: jq, version: latest } }
+      exit: 0
+    - command: 'apps --json | /usr/bin/jq -c ''[.. | objects | select(.name? == "jq")][0]'''
+      exit: 0
+      stdout: |
+          {"name":"jq","category":"Command line","method":"mise","state":"not-installed","installed":null,"lives_on":"every-machine","provides":["jq"],"detail":""}

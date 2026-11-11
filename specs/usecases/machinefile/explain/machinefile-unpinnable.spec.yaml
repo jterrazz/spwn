@@ -1,0 +1,40 @@
+description: 'a version its method cannot pin is refused naming the manager that can, which then pins it'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: Command-line JSON processor
+          provides: [jq]
+          methods:
+              - { os: macos, brew: jq }
+              - { os: any, mise: { name: jq, version: latest } }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: jq, version: '1.7' }]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: jq 1.7: brew cannot pin a version
+          Hint: mise can: { name: jq, version: "1.7", manager: mise }
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: jq, version: '1.7', manager: mise }]
+      exit: 0
+    - command: 'explain apps.jq'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	apps.jq	1.7	user	jterrazz-macbook-pro
+          	apps.jq.method	mise	user	jq
+          	apps.jq.because	its one method for macos	user	jq

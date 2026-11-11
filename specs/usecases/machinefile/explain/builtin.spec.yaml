@@ -1,0 +1,30 @@
+description: 'a built-in Machinefile explained: every value built-in, git skipped where it has no method'
+env: two-macs
+runs:
+    - command: 'explain --machinefile station-linux'
+      exit: 0
+      stdout: |
+          # station-linux
+          	machine.kind	workspace	built-in	station-linux
+          	machine.system.os	ubuntu	built-in	station-linux
+          	machine.system.version	24.04	built-in	station-linux
+          	machine.system.arch	arm64	built-in	station-linux
+          	vm.lifetime	persistent	built-in	station-linux
+          	vm.resources.cpus	4	built-in	station-linux
+          	vm.resources.memory	4G	built-in	station-linux
+          	vm.resources.disk	20G	built-in	station-linux
+          	vm.network	nat	built-in	station-linux
+          	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	station-linux
+          	apps.mise	listed	built-in	station-linux
+          	apps.mise.method	script	built-in	mise
+          	apps.mise.because	its one method for ubuntu 24.04	built-in	mise
+          	apps.ohmyzsh	listed	built-in	station-linux
+          	apps.ohmyzsh.method	script	built-in	ohmyzsh
+          	apps.ohmyzsh.because	its one method for ubuntu 24.04	built-in	ohmyzsh
+          	settings.git-shortcuts	listed	built-in	station-linux
+          	settings.git-shortcuts.method	git-aliases	built-in	git-shortcuts
+          	settings.git-shortcuts.because	its one method for ubuntu 24.04	built-in	git-shortcuts
+          	settings.hushlogin	listed	built-in	station-linux
+          	settings.hushlogin.method	file	built-in	hushlogin
+          	settings.hushlogin.because	its one method for ubuntu 24.04	built-in	hushlogin
+          	apps.git	optional, no method for ubuntu 24.04	built-in	station-linux

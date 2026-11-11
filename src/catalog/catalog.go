@@ -15,15 +15,48 @@ type Catalog struct {
 	Settings []Setting
 	Images   []Image
 	Profiles []Profile
+	// value: every item as its file says it, and the layer it was read
+	// from, in the lists' order: what the Machinefile's resolution reads.
+	Items []Placed
 }
 
-// invariant: the built-in items are embedded, so the binary reads no file of
-// the clone: src/catalog/items/<category>/<name>.yaml, one file an item.
+// invariant: the built-in items and Machinefiles are embedded, so the
+// binary reads no file of the clone: src/catalog/items/<category>/<name>.yaml,
+// one file an item, and src/catalog/machinefiles/<name>.yaml.
 //
-//go:embed items
+//go:embed items machinefiles
 var builtin embed.FS
 
+// value: the layer every built-in file stands in, the weakest.
+
+const BuiltinLayer = "built-in"
+
 func Builtin() (Catalog, error) { return Load(builtin, "items") }
+
+func BuiltinFiles() fs.FS {
+	// value: the embedded files: items/ holds the catalog's, machinefiles/ the
+	// built-in Machinefiles.
+	return builtin
+}
+
+// value: an item, the file it was read from, its category folder and the
+// layer it stands in.
+
+type Placed struct {
+	Item   Item
+	Folder string
+	File   string
+	Layer  string
+}
+
+func (c Catalog) Item(name string) (Placed, bool) {
+	for _, p := range c.Items {
+		if p.Item.Name == name {
+			return p, true
+		}
+	}
+	return Placed{}, false
+}
 
 func (c Catalog) App(name string) (App, bool) {
 	for _, t := range c.Apps {
@@ -43,60 +76,95 @@ func (c Catalog) Setting(name string) (Setting, bool) {
 	return Setting{}, false
 }
 
-type placed struct {
-	item   Item
-	folder string
-}
-
 func Load(fsys fs.FS, root string) (Catalog, error) {
-	folders, err := fs.ReadDir(fsys, root)
+	items, err := Items(fsys, root, BuiltinLayer)
 	if err != nil {
 		return Catalog{}, err
 	}
-	var items []placed
+	return Assemble(items)
+}
+
+func Items(fsys fs.FS, root, layer string) ([]Placed, error) {
+	// value: the items of one tree, `<root>/<category>/<name>.yaml`, each
+	// decoded strictly, in the layer named.
+	folders, err := fs.ReadDir(fsys, root)
+	if err != nil {
+		return nil, err
+	}
+	var items []Placed
 	for _, folder := range folders {
 		if !folder.IsDir() {
-			return Catalog{}, &FileError{File: path.Join(root, folder.Name()), Problem: "is no category folder"}
+			return nil, &FileError{File: path.Join(root, folder.Name()), Problem: "is no category folder"}
 		}
 		files, err := fs.ReadDir(fsys, path.Join(root, folder.Name()))
 		if err != nil {
-			return Catalog{}, err
+			return nil, err
 		}
 		for _, f := range files {
 			file := path.Join(root, folder.Name(), f.Name())
 			if f.IsDir() || !strings.HasSuffix(f.Name(), ".yaml") {
-				return Catalog{}, &FileError{File: file, Problem: "is no item file: an item is <name>.yaml"}
+				return nil, &FileError{File: file, Problem: "is no item file: an item is <name>.yaml"}
 			}
 			body, err := fs.ReadFile(fsys, file)
 			if err != nil {
-				return Catalog{}, err
+				return nil, err
 			}
-			it, err := Decode(file, body)
+			p, err := Read(file, folder.Name(), layer, body)
 			if err != nil {
-				return Catalog{}, err
+				return nil, err
 			}
-			items = append(items, placed{item: it, folder: folder.Name()})
+			items = append(items, p)
 		}
 	}
+	return items, nil
+}
+
+func Read(file, folder, layer string, body []byte) (Placed, error) {
+	// value: one item file read, in its folder and layer.
+	it, err := Decode(file, body)
+	if err != nil {
+		return Placed{}, err
+	}
+	return Placed{Item: it, Folder: folder, File: file, Layer: layer}, nil
+}
+
+func Over(layers ...[]Placed) []Placed {
+	// invariant: the layers strongest first; an item of a stronger layer
+	// replaces a same-name one of a weaker layer whole, never merged.
+	var out []Placed
+	seen := map[string]bool{}
+	for _, layer := range layers {
+		for _, p := range layer {
+			if !seen[p.Item.Name] {
+				seen[p.Item.Name] = true
+				out = append(out, p)
+			}
+		}
+	}
+	return out
+}
+
+func Assemble(items []Placed) (Catalog, error) {
+	// value: the catalog of the items given, judged whole.
+	items = slices.Clone(items)
 	slices.SortFunc(items, byCategory)
-	c := Catalog{Images: builtinImages, Profiles: builtinProfiles}
+	c := Catalog{Images: builtinImages, Profiles: builtinProfiles, Items: items}
 	files := map[string]string{}
 	for _, p := range items {
-		file := path.Join(root, p.folder, p.item.Name+".yaml")
-		files[p.item.Name] = file
-		if p.item.Kind == KindSetting {
-			category, ok := settingCategory(p.folder)
+		files[p.Item.Name] = p.File
+		if p.Item.Kind == KindSetting {
+			category, ok := settingCategory(p.Folder)
 			if !ok {
-				return Catalog{}, &FileError{File: file, Problem: "folder " + p.folder + " is no category of settings"}
+				return Catalog{}, &FileError{File: p.File, Problem: "folder " + p.Folder + " is no category of settings"}
 			}
-			c.Settings = append(c.Settings, p.item.setting(category))
+			c.Settings = append(c.Settings, p.Item.setting(category))
 			continue
 		}
-		category, ok := appCategory(p.folder)
+		category, ok := appCategory(p.Folder)
 		if !ok {
-			return Catalog{}, &FileError{File: file, Problem: "folder " + p.folder + " is no category of apps"}
+			return Catalog{}, &FileError{File: p.File, Problem: "folder " + p.Folder + " is no category of apps"}
 		}
-		c.Apps = append(c.Apps, p.item.app(category))
+		c.Apps = append(c.Apps, p.Item.app(category))
 	}
 	if err := whole(items, files); err != nil {
 		return Catalog{}, err
@@ -107,19 +175,19 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 // invariant: the apps and managers stand before the settings, each by
 // category, in the order of the categories' tables, then by name; a folder
 // that is no category sorts last, refused by the load.
-func byCategory(a, b placed) int {
-	if (a.item.Kind == KindSetting) != (b.item.Kind == KindSetting) {
-		if a.item.Kind == KindSetting {
+func byCategory(a, b Placed) int {
+	if (a.Item.Kind == KindSetting) != (b.Item.Kind == KindSetting) {
+		if a.Item.Kind == KindSetting {
 			return 1
 		}
 		return -1
 	}
-	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.item.Name, b.item.Name))
+	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.Item.Name, b.Item.Name))
 }
 
-func (p placed) rank() int {
+func (p Placed) rank() int {
 	folders := make([]string, 0, len(Categories))
-	if p.item.Kind == KindSetting {
+	if p.Item.Kind == KindSetting {
 		for _, c := range SettingCategories {
 			folders = append(folders, c.Folder())
 		}
@@ -128,7 +196,7 @@ func (p placed) rank() int {
 			folders = append(folders, c.Folder())
 		}
 	}
-	if i := slices.Index(folders, p.folder); i >= 0 {
+	if i := slices.Index(folders, p.Folder); i >= 0 {
 		return i
 	}
 	return len(folders)
@@ -137,18 +205,18 @@ func (p placed) rank() int {
 // invariant: the items judged together, each refusal naming the file that
 // says it: each name is one item's, and every name an item gives (requires,
 // after, then, provided-by, renamed-from) is an item of the right kind.
-func whole(items []placed, files map[string]string) error {
+func whole(items []Placed, files map[string]string) error {
 	owner := owners{}
 	for _, it := range CheckedSettings {
 		owner[it.Name] = "checked setting"
 	}
 	for _, p := range items {
 		what := "app"
-		if p.item.Kind == KindSetting {
+		if p.Item.Kind == KindSetting {
 			what = "setting"
 		}
-		if err := owner.claim(p.item.Name, what); err != nil {
-			return &FileError{File: files[p.item.Name], Problem: err.Error()}
+		if err := owner.claim(p.Item.Name, what); err != nil {
+			return &FileError{File: files[p.Item.Name], Problem: err.Error()}
 		}
 	}
 	if err := managers(items, files); err != nil {
@@ -156,7 +224,7 @@ func whole(items []placed, files map[string]string) error {
 	}
 	renamed := map[string]string{}
 	for _, p := range items {
-		it := p.item
+		it := p.Item
 		if problem := judged(it, owner, renamed); problem != "" {
 			return &FileError{File: files[it.Name], Problem: problem}
 		}
@@ -210,7 +278,7 @@ func judged(it Item, owner owners, renamed map[string]string) string {
 
 // invariant: a method key has one manager, and a system's priority one
 // manager at each rank, so the order a system installs by is declared once.
-func managers(items []placed, files map[string]string) error {
+func managers(items []Placed, files map[string]string) error {
 	by := map[ManagerKey]string{}
 	type slot struct {
 		system string
@@ -218,7 +286,7 @@ func managers(items []placed, files map[string]string) error {
 	}
 	at := map[slot]string{}
 	for _, p := range items {
-		it := p.item
+		it := p.Item
 		for _, k := range it.Manages {
 			if prev, ok := by[k]; ok {
 				return &FileError{File: files[it.Name], Problem: fmt.Sprintf("%s and %s both manage %s", prev, it.Name, k)}

@@ -1,0 +1,415 @@
+{
+  "$defs": {
+    "AccountShare": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "for": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "account"
+      ],
+      "type": "object"
+    },
+    "AccountsSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "keep": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "share": {
+          "items": {
+            "$ref": "#/$defs/AccountShare"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "ImageSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "bake": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "from": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MachineSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "computer",
+            "workspace",
+            "server"
+          ],
+          "type": "string"
+        },
+        "system": {
+          "$ref": "#/$defs/SystemSpec"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "PortRights": {
+      "additionalProperties": false,
+      "properties": {
+        "except": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "open": {
+          "oneOf": [
+            {
+              "type": [
+                "integer",
+                "string"
+              ]
+            },
+            {
+              "items": {
+                "type": [
+                  "integer",
+                  "string"
+                ]
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "to": {
+          "enum": [
+            "local",
+            "private",
+            "public"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Resources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpus": {
+          "type": "integer"
+        },
+        "disk": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SystemSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "VMSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/ImageSpec"
+        },
+        "lifetime": {
+          "enum": [
+            "persistent",
+            "ephemeral"
+          ],
+          "type": "string"
+        },
+        "network": {
+          "enum": [
+            "nat",
+            "bridged"
+          ],
+          "type": "string"
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/schemas/station.machinefile.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One Machinefile: what a machine carries (machine, vm, extends, prefer, apps, settings, accounts, ports), or its overlay \u003cname\u003e.local.yaml (overrides). Written by make generate from src/catalog; station alone checks what needs the catalog. The format is docs/reference/machinefiles.md.",
+  "properties": {
+    "accounts": {
+      "$ref": "#/$defs/AccountsSpec"
+    },
+    "apps": {
+      "oneOf": [
+        {
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "manager": {
+                    "enum": [
+                      "brew",
+                      "cask",
+                      "mas",
+                      "apt",
+                      "npm",
+                      "uv",
+                      "bun",
+                      "mise",
+                      "github-release",
+                      "skill"
+                    ],
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "optional": {
+                    "type": "boolean"
+                  },
+                  "options": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "integer",
+                        "boolean"
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "add": {
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "manager": {
+                        "enum": [
+                          "brew",
+                          "cask",
+                          "mas",
+                          "apt",
+                          "npm",
+                          "uv",
+                          "bun",
+                          "mise",
+                          "github-release",
+                          "skill"
+                        ],
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "optional": {
+                        "type": "boolean"
+                      },
+                      "options": {
+                        "additionalProperties": {
+                          "type": [
+                            "string",
+                            "integer",
+                            "boolean"
+                          ]
+                        },
+                        "type": "object"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "remove": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "extends": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "machine": {
+      "$ref": "#/$defs/MachineSpec"
+    },
+    "machinefile": {
+      "const": "station.machinefile/v1"
+    },
+    "name": {
+      "type": "string"
+    },
+    "overrides": {
+      "type": "string"
+    },
+    "ports": {
+      "$ref": "#/$defs/PortRights"
+    },
+    "prefer": {
+      "items": {
+        "enum": [
+          "brew",
+          "cask",
+          "mas",
+          "apt",
+          "npm",
+          "uv",
+          "bun",
+          "mise",
+          "github-release",
+          "skill"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "settings": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        },
+        "properties": {
+          "from": {
+            "enum": [
+              "computer"
+            ],
+            "type": "string"
+          },
+          "optional": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "properties": {
+        "remove": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "set": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            },
+            "properties": {
+              "from": {
+                "enum": [
+                  "computer"
+                ],
+                "type": "string"
+              },
+              "optional": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "vm": {
+      "$ref": "#/$defs/VMSpec"
+    }
+  },
+  "required": [
+    "machinefile"
+  ],
+  "title": "station.machinefile/v1",
+  "type": "object"
+}

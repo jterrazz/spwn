@@ -52,6 +52,8 @@ import (
 	"github.com/jterrazz/studio-station/src/engine/process"
 	imagesfake "github.com/jterrazz/studio-station/src/images/adapter/fake"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
+	machinefilefake "github.com/jterrazz/studio-station/src/machinefile/adapter/fake"
+	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	machinesfake "github.com/jterrazz/studio-station/src/machines/adapter/fake"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
@@ -326,6 +328,12 @@ func (m *worldMac) files() *diskfake.Usage         { return diskfake.UsageOf(m.r
 func (m *worldMac) tailnet() portscontract.Tailnet { return portsfake.TailnetOf(m.run.w, m.name) }
 func (m *worldMac) funnel() funnel.Funnel          { return portsfake.TailnetOf(m.run.w, m.name) }
 func (m *worldMac) bundler() appscontract.Bundler  { return appsfake.BundlerOf(m.run.w, m.name) }
+func (m *worldMac) userSource() machinefilecontract.Source {
+	return machinefilefake.UserOf(m.run.w, m.name)
+}
+func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefilecontract.Source {
+	return machinefilefake.SharedOf(m.run.w, src)
+}
 
 func (m *worldMac) managers(apps map[catalog.Method]string) { m.run.w.Managers = apps }
 func (m *worldMac) vault() accountscontract.Vault           { return accountsfake.NewVault(m.run.w, m.name) }

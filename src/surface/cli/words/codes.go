@@ -18,6 +18,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/ports"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
@@ -104,6 +105,65 @@ func Codes() map[fail.Code]Wording {
 		},
 		enginecalls.StartFailed: func(e *fail.Error) (string, string) {
 			return "the engine did not start: " + e.Detail["last"], "station engine"
+		},
+		machinefilecalls.NotFound: func(e *fail.Error) (string, string) {
+			if by := e.Detail["by"]; by != "" {
+				return by + " extends " + e.Subject + ", which no source holds", "station explain --machinefile " + by
+			}
+			return "no Machinefile named " + e.Subject, "name one: station explain --machinefile <name>"
+		},
+		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
+			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile"
+		},
+		machinefilecalls.NewerSchema: func(e *fail.Error) (string, string) {
+			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
+		},
+		machinefilecalls.CatalogInvalid: func(e *fail.Error) (string, string) {
+			return e.Detail["problem"], "fix that line: station never rewrites an item file"
+		},
+		machinefilecalls.CatalogNewer: func(e *fail.Error) (string, string) {
+			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
+		},
+		machinefilecalls.Mixin: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a mixin (it says no machine): it is extended, never applied", "extend it from a Machinefile that says its machine"
+		},
+		machinefilecalls.VMOnComputer: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a computer, and " + e.Detail["file"] + " says vm: vm is a workspace's or a server's", "remove vm, or say kind: workspace or server"
+		},
+		machinefilecalls.Cycle: func(e *fail.Error) (string, string) {
+			return "a cycle in " + e.Detail["of"] + ": " + e.Subject, "break it: one of them must not need the other"
+		},
+		machinefilecalls.NoMethod: func(e *fail.Error) (string, string) {
+			by := ""
+			if m := e.Detail["manager"]; m != "" {
+				by = " by " + m
+			}
+			return e.Subject + " has no method" + by + " for " + e.Detail["system"] + " (" + e.Detail["why"] + ")", "list it as { name: " + e.Subject + ", optional: true } to skip it there"
+		},
+		machinefilecalls.Unpinnable: func(e *fail.Error) (string, string) {
+			said := e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version"
+			if alt := e.Detail["alternative"]; alt != "" {
+				return said, alt + " can: { name: " + e.Subject + ", version: \"" + e.Detail["version"] + "\", manager: " + alt + " }"
+			}
+			return said, "no method of " + e.Subject + " for this system pins one: drop its version"
+		},
+		machinefilecalls.UnknownItem: func(e *fail.Error) (string, string) {
+			if is := e.Detail["is"]; is != "" {
+				return e.Subject + " is " + is + " (" + e.Detail["by"] + ")", "station explain"
+			}
+			return "the catalog has no item " + e.Subject + " (" + e.Detail["by"] + ")", "station apps"
+		},
+		machinefilecalls.BadValue: func(e *fail.Error) (string, string) {
+			if k := e.Detail["key"]; k != "" {
+				return e.Subject + "'s " + k + ": " + e.Detail["problem"], "station explain"
+			}
+			return e.Subject + ": " + e.Detail["problem"], "station explain"
+		},
+		machinefilecalls.UnknownKey: func(e *fail.Error) (string, string) {
+			return e.Detail["name"] + " says nothing of " + e.Subject, "station explain --machinefile " + e.Detail["name"]
+		},
+		machinefilecalls.Unavailable: func(e *fail.Error) (string, string) {
+			return "the source " + e.Subject + " cannot be read at " + e.Detail["commit"] + ": " + e.Detail["cause"], "check its url and commit in ~/.config/station/preferences.json"
 		},
 		imagescalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no image \"" + e.Subject + "\"", "station images"

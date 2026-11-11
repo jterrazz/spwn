@@ -350,6 +350,29 @@
       "in": "UpdateIn"
     },
     {
+      "name": "machinefile.explain",
+      "schema": "station.machinefile.explain/v1",
+      "where": "at-target",
+      "errors": [
+        "catalog.invalid",
+        "catalog.newer-schema",
+        "machinefile.bad-value",
+        "machinefile.cycle",
+        "machinefile.invalid",
+        "machinefile.mixin",
+        "machinefile.newer-schema",
+        "machinefile.no-method",
+        "machinefile.not-found",
+        "machinefile.source-unavailable",
+        "machinefile.unknown-item",
+        "machinefile.unknown-key",
+        "machinefile.unpinnable",
+        "machinefile.vm-on-a-computer"
+      ],
+      "in": "ExplainIn",
+      "out": "ExplainOut"
+    },
+    {
       "name": "machines.add",
       "schema": "station.machines.add/v1",
       "where": "in-process",

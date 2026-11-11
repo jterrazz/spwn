@@ -1,0 +1,18 @@
+description: 'explain --on another Mac reads that Mac''s Machinefile with its sources'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [tart]
+      exit: 0
+    - command: 'explain apps --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # jterrazz-mac-mini
+          	apps.tart	listed	user	jterrazz-mac-mini
+          	apps.tart.method	script	built-in	tart
+          	apps.tart.because	its one method for macos	built-in	tart

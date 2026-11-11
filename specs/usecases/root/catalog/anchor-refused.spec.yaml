@@ -1,0 +1,17 @@
+description: 'an item file of the owner''s with an anchor is refused: a value is written out'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: &d x
+          methods:
+              - { os: macos, brew: jq }
+      exit: 0
+    - command: 'apps'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/catalog/command-line/jq.yaml:4: an anchor (&d): write the value out
+          Hint: fix that line: station never rewrites an item file

@@ -54,7 +54,7 @@ func importTable() map[string][]string {
 	return map[string][]string{
 		"cmd/station":                {"wire", "os"},
 		"cmd/generate":               append([]string{"catalog", "disk", "cmd/generate/pages", "page", "ui/render/json", "os", "flag", std}, calls...),
-		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "core/machine", "catalog", "ui/token", std},
+		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "core/machine", "catalog", "ui/token", std},
 		"wire":                       {"*", fang, cobra, "os", "os/signal", "syscall", "runtime/debug", "net/netip", std},
 		"surface/cli":                {"surface/cli/kit", cobra, std},
 		"surface/cli/kit":            append([]string{"output", "page", "core/fail", "surface/cli/words", "core/store", "engine", "catalog", "testing", cobra, pflag, std}, calls...),
@@ -67,7 +67,7 @@ func importTable() map[string][]string {
 		"catalog":                    {"embed", yamlPkg, std},
 		"page":                       {std},
 		"pages":                      {"page", "catalog", std},
-		"pages/*":                    {"page", "pages", "pages/*", "core/call/lanes", "core/finding", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "catalog", std},
+		"pages/*":                    {"page", "pages", "pages/*", "core/call/lanes", "core/finding", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "catalog", std},
 		"ui/token":                   {lip, term, std},
 		"ui/atom":                    {"ui/token", "page", lip, qr, bubble + "/spinner", std},
 		"ui/molecule":                {"ui/atom", "ui/token", "page", lip, std},

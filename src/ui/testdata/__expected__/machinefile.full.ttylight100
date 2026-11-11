@@ -1,0 +1,7 @@
+[1;38;2;76;79;105mstudio-linux[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mmachine.kind[m       [38;2;76;79;105mworkspace[m                             [38;2;76;79;105mbuilt-in[m  [38;2;76;79;105mstation-linux[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mmachine.system.os[m  [38;2;76;79;105mubuntu[m                                [38;2;76;79;105mbuilt-in[m  [38;2;76;79;105mstation-linux[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mvm.resources.cpus[m  [38;2;76;79;105m8[m                                     [38;2;76;79;105muser[m      [38;2;76;79;105mstudio-linux[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mapps.jq[m            [38;2;76;79;105mlisted[m                                [38;2;76;79;105muser[m      [38;2;76;79;105mstudio-linux[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mapps.jq.method[m     [38;2;76;79;105mgithub-release[m                        [38;2;76;79;105muser[m      [38;2;76;79;105mjq[m
+  [38;2;156;160;176m[m  [1;38;2;76;79;105mapps.git[m           [38;2;76;79;105moptional, no method for ubuntu 24.04[m  [38;2;76;79;105mbuilt-in[m  [38;2;76;79;105mstation-linux[m

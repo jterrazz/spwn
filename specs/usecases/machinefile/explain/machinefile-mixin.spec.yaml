@@ -1,0 +1,14 @@
+description: 'a mixin says no machine: it is extended, never applied'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-base
+          apps: [git]
+      exit: 0
+    - command: 'explain --machinefile jterrazz-base'
+      exit: 2
+      stderr: |
+          Error: jterrazz-base is a mixin (it says no machine): it is extended, never applied
+          Hint: extend it from a Machinefile that says its machine

@@ -9,7 +9,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 | On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake` |
 | A Mac's images and engine | `images`, `engine`                                                                             |
 | This terminal             | `use`                                                                                          |
-| Station itself            | `init`, `--version`, `help`                                                                    |
+| Station itself            | `init`, `explain`, `--version`, `help`                                                         |
 | Hidden aliases            | The v2 words that still run, for one release                                                   |
 | Plumbing                  | The hidden commands the machine runs for itself                                                |
 | Exit codes                | What 0, 1, 2 and 130 mean                                                                      |
@@ -218,11 +218,14 @@ station use # the machine this terminal uses, and since when
 
 ```sh
 station init [--name <name>]
+station explain [<key>] [--machinefile <name>]
 station --version
 station help [command]
 ```
 
 `init` makes this machine known to station, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station init --name <name>`), writes the one managed block of `~/.zshrc`, moves `~/.studio/` to the XDG folders and brings every store to its version, and writes the apps' own files (`relocate`). It installs no app, runs no package manager and asks no password; the engine comes with the first VM command on a Mac with tart, or `station engine start`. On a terminal it opens on a line that sums it up and ends on the empty state of what the machine carries (`Machinefile  none yet: apps and settings come one at a time`), then at most two next steps: `exec zsh` when it wrote the block, `station apps install <app>`, `station settings apply <setting>`. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
+
+`explain` resolves the Machinefile named after the machine, or `--machinefile <name>`, against the catalog, and prints each value with its layer (`user`, `shared`, `built-in`, `overlay`, `this machine`) and the Machinefile or item that says it; a key (`vm`, `apps.jq`) explains itself and every key under it. Every refusal of the resolution exits 2 with its own words: no Machinefile of that name, a file refused at its line, a newer schema (`update station`), a mixin, `vm` on a computer, a cycle, an item with no method for the system or a version its method cannot pin, an item the catalog does not hold, a value that is none of the item's options, a key it says nothing of; a shared source that cannot be read at its commit exits 1. `--json` prints `station.machinefile.explain/v1`. The format is [Machinefiles](machinefiles.md).
 
 ## Hidden aliases
 

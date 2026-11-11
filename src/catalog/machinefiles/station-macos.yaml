@@ -1,0 +1,15 @@
+machinefile: station.machinefile/v1
+name: station-macos
+description: A macOS workspace with Homebrew, git and zsh
+machine:
+    kind: workspace
+    system: { os: macos, arch: arm64 }
+vm:
+    lifetime: persistent
+    resources: { cpus: 4, memory: 8G, disk: 80G }
+    network: bridged
+    image: { from: 'ghcr.io/cirruslabs/macos-tahoe-base:latest' }
+apps: [homebrew, git, ohmyzsh]
+settings:
+    git-shortcuts: {}
+    hushlogin: {}

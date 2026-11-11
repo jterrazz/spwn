@@ -1,0 +1,32 @@
+description: 'the shared source is read at its pinned commit, and the owner''s same-name file replaces it'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git", commit: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}} | .sources = {"https://example.com/studio.git": {commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/jterrazz-macbook-pro.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'explain apps'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	apps.homebrew	the manager of gh	built-in	gh
+          	apps.homebrew.method	script	built-in	homebrew
+          	apps.homebrew.because	its one method for macos	built-in	homebrew
+          	apps.gh	listed	shared	jterrazz-macbook-pro
+          	apps.gh.method	brew	built-in	gh
+          	apps.gh.because	its one method for macos	built-in	gh
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'explain apps'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	apps.homebrew	the manager of jq	built-in	jq
+          	apps.homebrew.method	script	built-in	homebrew
+          	apps.homebrew.because	its one method for macos	built-in	homebrew
+          	apps.jq	listed	user	jterrazz-macbook-pro
+          	apps.jq.method	brew	built-in	jq
+          	apps.jq.because	its one method for macos	built-in	jq

@@ -1,0 +1,13 @@
+description: 'a key the Machinefile says nothing of is refused'
+env: two-macs
+runs:
+    - command: 'explain vm.network --machinefile station-macos'
+      exit: 0
+      stdout: |
+          # station-macos
+          	vm.network	bridged	built-in	station-macos
+    - command: 'explain ports --machinefile station-macos'
+      exit: 2
+      stderr: |
+          Error: station-macos says nothing of ports
+          Hint: station explain --machinefile station-macos

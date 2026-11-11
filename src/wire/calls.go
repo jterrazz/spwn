@@ -24,6 +24,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	portscalls "github.com/jterrazz/studio-station/src/ports/calls"
@@ -61,6 +62,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind}),
 		enginecalls.All(enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m, machines: m.machines(false)}, Kind: kind}),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
+		machinefilecalls.All(m.machinefileDeps()),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Agents: farAgents{m}, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
 		portscalls.All(portscalls.Deps{Ports: m.portsOf(env), Tailnet: m.tailnetStatus(), Kind: kind,
 			Declarations: m.stores.declarations, Routes: m.routes(), Far: farPorts{m}, Prefs: m.stores.ports()}),

@@ -18,6 +18,7 @@ runs:
           engine
           use
           init
+          explain
           agents
           help
     - command: 'completion zsh | /usr/bin/grep -c "compdef _station station"'

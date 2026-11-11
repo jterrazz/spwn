@@ -1,0 +1,21 @@
+description: 'a cycle of extends is printed around its loop'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-base
+          extends: [jterrazz-macbook-pro]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          extends: [jterrazz-base]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: a cycle in extends: jterrazz-macbook-pro extends jterrazz-base extends jterrazz-macbook-pro
+          Hint: break it: one of them must not need the other

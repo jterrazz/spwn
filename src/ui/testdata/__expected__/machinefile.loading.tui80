@@ -1,0 +1,7 @@
+ studio-linux  6 ◌
+   ◌ machine.kind
+   ◌ machine.system.os
+   ◌ vm.resources.cpus
+   ◌ apps.jq
+   ◌ apps.jq.method
+   ◌ apps.git

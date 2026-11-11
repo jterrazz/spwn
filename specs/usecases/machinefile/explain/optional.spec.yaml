@@ -1,0 +1,15 @@
+description: 'an optional app with no method for the system is skipped and says so; a required one stops the plan'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [{ name: ghostty, optional: true }]
+      exit: 0
+    - command: 'explain apps --machinefile studio-linux'
+      exit: 0
+      stdout: |
+          # studio-linux
+          	apps.ghostty	optional, no method for ubuntu 24.04	user	studio-linux

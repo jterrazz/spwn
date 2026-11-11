@@ -22,6 +22,7 @@ import (
 	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/engine/process"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
+	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/ports"
@@ -78,12 +79,16 @@ func (*worldMac) budgets() lanes.Clock                                   { retur
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
 func (*worldMac) identities() accountscontract.Identities                { return nil }
 func (*worldMac) secretSource() accountscontract.SecretSource            { return nil }
-func (*worldMac) notifier() process.Notifier                             { return nil }
-func (*worldMac) checks() contract.CheckRunner                           { return nil }
-func (*worldMac) engineFrom(func() *process.Engine)                      {}
-func (*worldMac) macs() remotecontract.EndpointDialer                    { return nil }
-func (*worldMac) stopMarks() engine.StopMarks                            { return nil }
-func (*worldMac) engineVersion() string                                  { return "" }
-func (*worldMac) absent(string) bool                                     { return false }
-func (*worldMac) stationVersion() string                                 { return "" }
-func (*worldMac) engineStarted() time.Time                               { return time.Time{} }
+func (*worldMac) userSource() machinefilecontract.Source                 { return nil }
+func (*worldMac) sharedSource(machinefilecontract.SharedSource) machinefilecontract.Source {
+	return nil
+}
+func (*worldMac) notifier() process.Notifier          { return nil }
+func (*worldMac) checks() contract.CheckRunner        { return nil }
+func (*worldMac) engineFrom(func() *process.Engine)   {}
+func (*worldMac) macs() remotecontract.EndpointDialer { return nil }
+func (*worldMac) stopMarks() engine.StopMarks         { return nil }
+func (*worldMac) engineVersion() string               { return "" }
+func (*worldMac) absent(string) bool                  { return false }
+func (*worldMac) stationVersion() string              { return "" }
+func (*worldMac) engineStarted() time.Time            { return time.Time{} }

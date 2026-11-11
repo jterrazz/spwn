@@ -77,6 +77,11 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		return int(fail.ExitFailure)
 	}
 	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
+	if layered := thisMac.layerCatalog(); layered != nil {
+		worded := kit.Translate(layered, "")
+		writer.Failure(worded)
+		return int(fail.ExitOf(worded))
+	}
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
@@ -127,7 +132,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		useCommand(kenv, thisMac),
 	)
 	commands = append(commands, initCommands(kenv, thisMac)...)
-	commands = append(commands,
+	commands = append(commands, explainCommand(kenv, thisMac),
 		statusCommand(kenv, thisMac),
 		appsAlias(kenv, thisMac),
 		storageAlias(kenv, thisMac),

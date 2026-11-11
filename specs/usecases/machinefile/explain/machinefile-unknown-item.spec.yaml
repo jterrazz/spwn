@@ -1,0 +1,27 @@
+description: 'an app the catalog lacks, or a setting listed as an app, is refused naming the file'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [nope]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: the catalog has no item nope (jterrazz-macbook-pro)
+          Hint: station apps
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [hushlogin]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: hushlogin is a setting: list it under settings (jterrazz-macbook-pro)
+          Hint: station explain

@@ -31,10 +31,12 @@ func (e *FileError) Error() string {
 
 type NewerSchemaError struct {
 	File, Schema string
+	// value: the version of that format this station reads.
+	Reads string
 }
 
 func (e *NewerSchemaError) Error() string {
-	return e.File + " is " + e.Schema + ", newer than this station reads (" + Schema + "): update station"
+	return e.File + " is " + e.Schema + ", newer than this station reads (" + e.Reads + "): update station"
 }
 
 // invariant: YAML 1.1 reads these plain scalars as booleans and octals where
@@ -44,41 +46,65 @@ var (
 	yaml11Bool  = regexp.MustCompile(`^(?:y|Y|yes|Yes|YES|n|N|no|No|NO|on|On|ON|off|Off|OFF)$`)
 	yaml11Octal = regexp.MustCompile(`^[-+]?0[0-9_]+$`)
 	yaml11Sexa  = regexp.MustCompile(`^[-+]?\d[0-9_]*(?::[0-5]?\d)+(?:\.[0-9_]*)?$`)
-	schemaID    = regexp.MustCompile(`^` + regexp.QuoteMeta(SchemaFamily) + `/v([1-9][0-9]*)$`)
+)
+
+// value: a file format station reads strictly: the key its first line names
+// the schema by, the schema this station reads, and the family its versions
+// share.
+type format struct {
+	key, schema, family string
+}
+
+var (
+	items        = format{key: "item", schema: Schema, family: SchemaFamily}
+	machinefiles = format{key: "machinefile", schema: MachinefileSchema, family: MachinefileFamily}
 )
 
 func Decode(file string, body []byte) (Item, error) {
-	var root yaml.Node
-	dec := yaml.NewDecoder(bytes.NewReader(body))
-	if err := dec.Decode(&root); err != nil {
-		return Item{}, &FileError{File: file, Problem: yamlProblem(err)}
-	}
-	// invariant: the schema is judged first, so a file of a newer one says
-	// `update station` before any refusal of what this station reads.
-	doc := root.Content[0]
-	if doc.Kind != yaml.MappingNode {
-		return Item{}, &FileError{File: file, Line: doc.Line, Problem: "is not a mapping of keys"}
-	}
-	if err := schemaOf(file, doc); err != nil {
-		return Item{}, err
-	}
-	var more yaml.Node
-	if err := dec.Decode(&more); !errors.Is(err, io.EOF) {
-		return Item{}, &FileError{File: file, Problem: "holds more than one document"}
-	}
-	if err := plainYAML(file, &root); err != nil {
-		return Item{}, err
-	}
 	var it Item
-	strict := yaml.NewDecoder(bytes.NewReader(body))
-	strict.KnownFields(true)
-	if err := strict.Decode(&it); err != nil {
-		return Item{}, &FileError{File: file, Problem: yamlProblem(err)}
+	doc, err := strict(file, body, items, &it)
+	if err != nil {
+		return Item{}, err
 	}
 	if err := checkItem(file, doc, it); err != nil {
 		return Item{}, err
 	}
 	return it, nil
+}
+
+// invariant: one strict read for every format: the schema is judged first,
+// so a file of a newer one says `update station` before any refusal of what
+// this station reads; then one document, no anchor, alias, merge key nor
+// YAML 1.1 scalar, and every key known.
+func strict(file string, body []byte, f format, v any) (*yaml.Node, error) {
+	var root yaml.Node
+	dec := yaml.NewDecoder(bytes.NewReader(body))
+	if err := dec.Decode(&root); err != nil {
+		if errors.Is(err, io.EOF) {
+			return nil, &FileError{File: file, Problem: "is empty: its first key is `" + f.key + ": " + f.schema + "`"}
+		}
+		return nil, &FileError{File: file, Problem: yamlProblem(err)}
+	}
+	doc := root.Content[0]
+	if doc.Kind != yaml.MappingNode {
+		return nil, &FileError{File: file, Line: doc.Line, Problem: "is not a mapping of keys"}
+	}
+	if err := schemaOf(file, doc, f); err != nil {
+		return nil, err
+	}
+	var more yaml.Node
+	if err := dec.Decode(&more); !errors.Is(err, io.EOF) {
+		return nil, &FileError{File: file, Problem: "holds more than one document"}
+	}
+	if err := plainYAML(file, &root); err != nil {
+		return nil, err
+	}
+	decoder := yaml.NewDecoder(bytes.NewReader(body))
+	decoder.KnownFields(true)
+	if err := decoder.Decode(v); err != nil {
+		return nil, &FileError{File: file, Problem: yamlProblem(err)}
+	}
+	return doc, nil
 }
 
 func yamlProblem(err error) string {
@@ -109,18 +135,18 @@ func plainYAML(file string, n *yaml.Node) error {
 	return nil
 }
 
-func schemaOf(file string, doc *yaml.Node) error {
-	key, value := entry(doc, "item")
+func schemaOf(file string, doc *yaml.Node, f format) error {
+	key, value := entry(doc, f.key)
 	if value == nil {
-		return &FileError{File: file, Line: doc.Line, Problem: "names no schema: its first key is `item: " + Schema + "`"}
+		return &FileError{File: file, Line: doc.Line, Problem: "names no schema: its first key is `" + f.key + ": " + f.schema + "`"}
 	}
-	if value.Value == Schema {
+	if value.Value == f.schema {
 		return nil
 	}
-	if m := schemaID.FindStringSubmatch(value.Value); m != nil {
-		return &NewerSchemaError{File: file, Schema: value.Value}
+	if regexp.MustCompile(`^` + regexp.QuoteMeta(f.family) + `/v([1-9][0-9]*)$`).MatchString(value.Value) {
+		return &NewerSchemaError{File: file, Schema: value.Value, Reads: f.schema}
 	}
-	return &FileError{File: file, Line: key.Line, Problem: fmt.Sprintf("names the schema %q, not %s", value.Value, Schema)}
+	return &FileError{File: file, Line: key.Line, Problem: fmt.Sprintf("names the schema %q, not %s", value.Value, f.schema)}
 }
 
 func entry(doc *yaml.Node, key string) (k, v *yaml.Node) {

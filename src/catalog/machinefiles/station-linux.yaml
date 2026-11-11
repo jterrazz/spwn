@@ -1,0 +1,18 @@
+machinefile: station.machinefile/v1
+name: station-linux
+description: A Linux workspace with the runtime manager, git and zsh
+machine:
+    kind: workspace
+    system: { os: ubuntu, version: '24.04', arch: arm64 }
+vm:
+    lifetime: persistent
+    resources: { cpus: 4, memory: 4G, disk: 20G }
+    network: nat
+    image: { from: 'ghcr.io/cirruslabs/ubuntu:24.04' }
+apps:
+    - mise
+    - { name: git, optional: true }
+    - ohmyzsh
+settings:
+    git-shortcuts: {}
+    hushlogin: {}

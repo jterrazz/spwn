@@ -15,7 +15,7 @@ An item of the catalog is one YAML file in the schema `station.catalog/v1`: what
 
 ## The file
 
-The built-in items are embedded in the binary, `src/catalog/items/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `item: station.catalog/v1`.
+The built-in items are embedded in the binary, `src/catalog/items/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `item: station.catalog/v1`. The owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's are layers above them: a same-name item replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-layers)), and an owner's file refused stops every command at its line.
 
 A file is read strictly, so a typo is a refusal with its line, never a silent default:
 
@@ -313,10 +313,10 @@ The format is whole now, so a file a newer station writes in v1 decodes in this 
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                                                           |
 | `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                     |
-| `manages`, `priority`                                                                   | the manager choice and `prefer:`                                                                           |
+| `manages`, `priority`                                                                   | the Machinefile's resolution and `explain` read them now; `apps install` does not yet                      |
 | `ports`                                                                                 | the Ports section: labels, and a shared port's `http` and `env`, which tables in `src/catalog/` give today |
-| the selector's `version`                                                                | the Machinefile's resolution, against a machine                                                            |
-| `pin`, `upgrade` on a method other than a `script`'s `url`                              | the lockfile and `station upgrade`                                                                         |
+| the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet       |
+| `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`       |
 | a method's `provides`                                                                   | presence, which reads the item's today                                                                     |
 | `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                             |
 | a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                     |

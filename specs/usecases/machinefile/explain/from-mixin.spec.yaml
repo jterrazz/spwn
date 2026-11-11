@@ -1,0 +1,43 @@
+description: 'a Machinefile that extends a mixin takes its values, its own win, and its overlay adds and removes'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-base
+          apps: [git, jq]
+          accounts: { keep: [github] }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          extends: [jterrazz-base]
+          apps: [gh]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.local.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          overrides: jterrazz-macbook-pro
+          apps: { add: [lazygit], remove: [jq] }
+      exit: 0
+    - command: 'explain'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	machine.kind	computer	user	jterrazz-macbook-pro
+          	machine.system.os	macos	user	jterrazz-macbook-pro
+          	apps.git	listed	user	jterrazz-base
+          	apps.git.method	script	built-in	git
+          	apps.git.because	its one method for macos	built-in	git
+          	apps.homebrew	the manager of gh	built-in	gh
+          	apps.homebrew.method	script	built-in	homebrew
+          	apps.homebrew.because	its one method for macos	built-in	homebrew
+          	apps.gh	listed	user	jterrazz-macbook-pro
+          	apps.gh.method	brew	built-in	gh
+          	apps.gh.because	its one method for macos	built-in	gh
+          	apps.lazygit	listed	overlay	jterrazz-macbook-pro
+          	apps.lazygit.method	brew	built-in	lazygit
+          	apps.lazygit.because	its one method for macos	built-in	lazygit
+          	accounts.keep.github	kept	user	jterrazz-base

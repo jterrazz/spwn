@@ -10,7 +10,10 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 )
 
-const schemaPath = "schemas/station.catalog.v1.json"
+const (
+	schemaPath            = "schemas/station.catalog.v1.json"
+	machinefileSchemaPath = "schemas/station.machinefile.v1.json"
+)
 
 type enumerated interface{ Enum() []string }
 
@@ -18,21 +21,31 @@ type enumerated interface{ Enum() []string }
 // schema itself (a kind written as one word or a list).
 type schematic interface{ JSONSchema() map[string]any }
 
-// invariant: the JSON Schema of an item file is projected from the Go types
-// the decoder reads, so an editor's check and station's own refusal agree: a
+// invariant: the JSON Schema of a file is projected from the Go types the
+// decoder reads, so an editor's check and station's own refusal agree: a
 // key without omitempty is required, every struct refuses a key it does not
 // name, and a type with an Enum lists its values.
 func catalogSchema() []byte {
+	return projected(reflect.TypeFor[catalog.Item](), "item", catalog.Schema, schemaPath,
+		"One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
+}
+
+func machinefileSchema() []byte {
+	return projected(reflect.TypeFor[catalog.Machinefile](), "machinefile", catalog.MachinefileSchema, machinefileSchemaPath,
+		"One Machinefile: what a machine carries (machine, vm, extends, prefer, apps, settings, accounts, ports), or its overlay <name>.local.yaml (overrides). Written by make generate from src/catalog; station alone checks what needs the catalog. The format is docs/reference/machinefiles.md.")
+}
+
+func projected(t reflect.Type, key, schema, at, description string) []byte {
 	defs := map[string]any{}
-	root := objectOf(reflect.TypeFor[catalog.Item](), defs)
+	root := objectOf(t, defs)
 	if props, ok := root["properties"].(map[string]any); ok {
-		props["item"] = map[string]any{"const": catalog.Schema}
+		props[key] = map[string]any{"const": schema}
 	}
 	doc := map[string]any{
 		"$schema":     "https://json-schema.org/draft/2020-12/schema",
-		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + schemaPath,
-		"title":       catalog.Schema,
-		"description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
+		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + at,
+		"title":       schema,
+		"description": description,
 		"$defs":       defs,
 	}
 	for k, v := range root {
@@ -101,5 +114,5 @@ func schemaOf(t reflect.Type, defs map[string]any) map[string]any {
 		}
 		return map[string]any{"$ref": "#/$defs/" + t.Name()}
 	}
-	panic("the catalog's schema has no JSON type for " + t.String())
+	panic("a schema has no JSON type for " + t.String())
 }
