@@ -593,6 +593,12 @@ func (s *Shelf) Move(ctx context.Context, name string, to catalog.Method, p call
 	}
 	t := found[0]
 	if _, err = s.by(found, to, ""); err != nil {
+		var none *apps.NoMethodError
+		if errors.As(err, &none) {
+			if was := s.reports(ctx, found)[0]; was.Managed {
+				none.Held = was.Method
+			}
+		}
 		return nil, err
 	}
 	was := s.reports(ctx, found)[0]

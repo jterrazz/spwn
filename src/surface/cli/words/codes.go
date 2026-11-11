@@ -203,8 +203,16 @@ func Codes() map[fail.Code]Wording {
 			if e.Detail["has"] == "" {
 				return e.Subject + " has no method " + e.Detail["method"] + " here", "station apps " + e.Subject
 			}
-			first, _, _ := strings.Cut(e.Detail["has"], ", ")
-			return e.Subject + " has no method " + e.Detail["method"] + " here, only " + e.Detail["has"], "station apps move " + e.Subject + " --to " + first
+			said := e.Subject + " has no method " + e.Detail["method"] + " here, only " + e.Detail["has"]
+			for _, other := range strings.Split(e.Detail["has"], ", ") {
+				if other != e.Detail["held"] {
+					return said, "station apps move " + e.Subject + " --to " + other
+				}
+			}
+			return said, "station apps " + e.Subject
+		},
+		appscalls.Unpinnable: func(e *fail.Error) (string, string) {
+			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version", "ask " + e.Subject + " with no version, or by a method that pins one"
 		},
 		accountscalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no account named \"" + e.Subject + "\"", "station accounts"

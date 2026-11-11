@@ -5,7 +5,7 @@ runs:
       exit: 2
       stderr: |
           Error: jq has no method mise here, only brew
-          Hint: station apps move jq --to brew
+          Hint: station apps jq
     - command: 'apps move jq --to nope'
       exit: 2
       stderr: |

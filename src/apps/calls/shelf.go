@@ -3,7 +3,6 @@ package calls
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slices"
 	"sort"
 
@@ -185,7 +184,7 @@ func (s *Shelf) by(found []catalog.App, method catalog.Method, version string) (
 		if version != "" {
 			pinned, ok := catalog.Pinned(in, version)
 			if !ok {
-				return nil, fmt.Errorf("%s cannot install %s at %s", in.Method(), t.Name, version)
+				return nil, &apps.UnpinnableError{App: t.Name, Method: in.Method(), Version: version}
 			}
 			in = pinned
 		}

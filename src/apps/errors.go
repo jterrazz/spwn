@@ -113,12 +113,26 @@ type NoUpgradePathError struct{ App string }
 func (e *NoUpgradePathError) Error() string { return e.App + " has no upgrade path" }
 
 // value: an app asked by a method it has none of on this machine, with the
-// methods it has here.
+// methods it has here and, for a move, the one that holds it.
 
 type NoMethodError struct {
 	App    string
 	Method catalog.Method
 	Has    []catalog.Method
+	Held   catalog.Method
 }
 
 func (e *NoMethodError) Error() string { return e.App + " has no method " + string(e.Method) + " here" }
+
+// value: an app asked at a version by a method whose install carries none
+// to its manager.
+
+type UnpinnableError struct {
+	App     string
+	Method  catalog.Method
+	Version string
+}
+
+func (e *UnpinnableError) Error() string {
+	return string(e.Method) + " cannot install " + e.App + " at " + e.Version
+}

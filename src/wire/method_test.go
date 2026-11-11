@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	corefake "github.com/jterrazz/studio-station/src/core/adapter/fake"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
+	"github.com/jterrazz/studio-station/src/core/fail"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
 	mffake "github.com/jterrazz/studio-station/src/machinefile/adapter/fake"
@@ -383,6 +385,30 @@ func TestAMethodAskedThatTheAppHasNoneOfHereIsRefused(t *testing.T) {
 	_, err := b.shelf.Install(context.Background(), apps.InstallRequest{Names: []string{"twin"}, Method: catalog.MethodShell}, nil)
 	if err == nil || !strings.Contains(err.Error(), "no method shell") {
 		t.Errorf("installed twin by shell: %v", err)
+	}
+}
+
+func TestAVersionAMethodCannotPinIsACodedRefusal(t *testing.T) {
+	// invariant: a version asked of a method whose install carries none
+	// is refused with its code, the words the binary that prints it says.
+	b := benchOf(t, catalog.Mac, "twin")
+	_, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{"twin"}, Method: "cask", Version: "1.2.3"}, nil)
+	var refused *fail.Error
+	if !errors.As(err, &refused) || refused.Code != appscalls.Unpinnable || refused.Detail["method"] != "cask" || refused.Detail["version"] != "1.2.3" {
+		t.Errorf("installed twin at 1.2.3 by cask: %v", err)
+	}
+}
+
+func TestAMoveToAMethodTheAppHasNoneOfNamesTheOneThatHoldsIt(t *testing.T) {
+	// invariant: a move refused for a method the app has none of here
+	// names the method that holds it, so its hint never asks a move to
+	// where the app already is.
+	b := benchOf(t, catalog.Mac, "probed")
+	b.w.Mac("here").Apps[catalog.MethodCask].Installed["probed"] = "1.0.0"
+	_, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, appscalls.Move, appscalls.MoveIn{Name: "probed", To: "skill"}, nil)
+	var refused *fail.Error
+	if !errors.As(err, &refused) || refused.Code != appscalls.NoMethod || refused.Detail["held"] != "cask" {
+		t.Errorf("moved probed to skill: %v", err)
 	}
 }
 

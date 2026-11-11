@@ -15,6 +15,7 @@ const (
 	Elsewhere    fail.Code = "apps.lives-elsewhere"
 	NotInstalled fail.Code = "apps.not-installed"
 	NoMethod     fail.Code = "apps.no-method"
+	Unpinnable   fail.Code = "apps.unpinnable"
 )
 
 func coded(err error) error {
@@ -24,6 +25,7 @@ func coded(err error) error {
 	var elsewhere *apps.ElsewhereError
 	var absent *apps.NotInstalledError
 	var none *apps.NoMethodError
+	var unpinnable *apps.UnpinnableError
 	switch {
 	case errors.As(err, &unknown):
 		return fail.New(fail.NotFound, Unknown, unknown.Name, nil)
@@ -36,7 +38,9 @@ func coded(err error) error {
 		for _, m := range none.Has {
 			has = append(has, string(m))
 		}
-		return fail.New(fail.Refused, NoMethod, none.App, map[string]string{"method": string(none.Method), "has": strings.Join(has, ", ")})
+		return fail.New(fail.Refused, NoMethod, none.App, map[string]string{"method": string(none.Method), "has": strings.Join(has, ", "), "held": string(none.Held)})
+	case errors.As(err, &unpinnable):
+		return fail.New(fail.Refused, Unpinnable, unpinnable.App, map[string]string{"method": string(unpinnable.Method), "version": unpinnable.Version})
 	}
 	return err
 }
