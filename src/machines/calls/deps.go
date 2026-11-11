@@ -15,6 +15,8 @@ type Deps struct {
 	// owner confirmed.
 	Images ImageBuilds
 	Kind   machine.Kind
+	// value: this Mac's system, which a confirmation's words call it by.
+	OS machine.OS
 	// value: this Mac reports a battery: a server made here stops whenever
 	// it sleeps.
 	Laptop bool

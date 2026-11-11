@@ -387,7 +387,7 @@ var Stop = call.Call[Deps, StopIn, agents.Agent]{
 		if err != nil {
 			return a, err
 		}
-		if err := confirm.Ask(confirm.StopAgent, machine.Workspace, a.Name, in.Confirm); err != nil {
+		if err := confirm.Ask(confirm.StopAgent, machine.Workspace, machine.Linux, a.Name, in.Confirm); err != nil {
 			return a, err
 		}
 		if a.Terminal != "" {

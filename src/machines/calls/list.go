@@ -69,7 +69,7 @@ var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 		r := in.Request
 		r.Server = false
 		if image := missingImage(ctx, d, r); image != "" {
-			if err := confirm.Ask(confirm.BuildImage, d.Kind, image, in.Confirm); err != nil {
+			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
 				return machines.Created{}, err
 			}
 			if err := build(ctx, d, image, p); err != nil {
@@ -98,7 +98,7 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
 		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check}
 		if image := missingImage(ctx, d, r); image != "" {
-			if err := confirm.Ask(confirm.BuildImage, d.Kind, image, in.Confirm); err != nil {
+			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
 				return machines.Created{}, err
 			}
 			if err := build(ctx, d, image, p); err != nil {

@@ -73,7 +73,7 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 		if running, err := d.Machines.Running(ctx, in.VM); err != nil || !running {
 			return StopOut{Already: err == nil, Kind: kind}, err
 		}
-		if err := naming(confirm.Ask(confirm.Stop, kind, in.VM, in.Confirm), live(ctx, d, in.VM)); err != nil {
+		if err := naming(confirm.Ask(confirm.Stop, kind, "", in.VM, in.Confirm), live(ctx, d, in.VM)); err != nil {
 			return StopOut{Kind: kind}, err
 		}
 		stopped, warned := stopAgents(ctx, d, in.VM, "its workspace stopped")
@@ -106,7 +106,7 @@ var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 		if running {
 			named = live(ctx, d, in.VM)
 		}
-		if err := naming(confirm.Ask(confirm.Delete, d.Machines.LifetimeOf(in.VM).Kind(), in.VM, in.Confirm), named); err != nil {
+		if err := naming(confirm.Ask(confirm.Delete, d.Machines.LifetimeOf(in.VM).Kind(), "", in.VM, in.Confirm), named); err != nil {
 			return machines.DeleteReport{}, err
 		}
 		if err := d.Machines.EngineUp(ctx); err != nil {

@@ -120,13 +120,18 @@ func Require(l Level, name, given string) error {
 	}
 }
 
-func Ask(a Action, k machine.Kind, name, given string) error {
-	// value: Require for the gesture a on a machine of kind k, its refusal
-	// naming both, so its words can say what was not done.
+func Ask(a Action, k machine.Kind, os machine.OS, name, given string) error {
+	// value: Require for the gesture a on a machine of kind k whose system
+	// is os, its refusal naming all three, so its words can say what was
+	// not done and call the machine by its word (a Linux computer is no
+	// Mac).
 	err := Require(For(a, k), name, given)
 	var e *fail.Error
 	if errors.As(err, &e) {
 		e.Detail["action"], e.Detail["kind"] = string(a), string(k)
+		if os != "" {
+			e.Detail["os"] = string(os)
+		}
 		if given == Yes {
 			e.Detail["by"] = "yes"
 		}
