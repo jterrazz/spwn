@@ -88,7 +88,7 @@ func (f *keptTailnet) Funneled(context.Context) ([]int, error) {
 func (f *keptTailnet) dump() string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	var out []string
+	out := make([]string, 0, len(f.entries))
 	for _, e := range f.entries {
 		out = append(out, strconv.Itoa(e.Port)+e.Path+"<-"+strconv.Itoa(e.Reserved)+" funnel="+strconv.FormatBool(f.funnel[e.Port]))
 	}
