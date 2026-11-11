@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: tmux-dotfiles
-order: 30
 description: The tmux settings
 requires: [tmux]
 methods:

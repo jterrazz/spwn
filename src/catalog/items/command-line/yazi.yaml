@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: yazi
-order: 190
 description: Terminal file manager
 replaces: Finder in the terminal
 provides: [yazi]
 methods:
     - os: macos
       brew: yazi
-    - os: linux
+    - family: linux
       mise:
           name: yazi
           version: latest

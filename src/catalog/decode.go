@@ -149,23 +149,36 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 	if it.Description == "" {
 		return refused(file, doc, "description", "has no description")
 	}
-	if it.Order < 0 {
-		return refused(file, doc, "order", "has a negative order")
-	}
 	if key := foreignKey(it); key != "" {
 		return refused(file, doc, key, "`"+key+"` is not a key of a "+string(it.Kind))
 	}
 	if it.Kind == KindSetting && len(it.Requires) > 1 {
 		return refused(file, doc, "requires", "a setting requires one app; name alternatives in requires-one-of")
 	}
+	if it.Phase != "" && !known(it.Phase) {
+		return refused(file, doc, "phase", fmt.Sprintf("phase %q is none of %s", it.Phase, strings.Join(it.Phase.Enum(), ", ")))
+	}
+	if slices.Contains(it.RenamedFrom, it.Name) {
+		return refused(file, doc, "renamed-from", "an item is not renamed from its own name")
+	}
+	for _, a := range it.Accepts {
+		if !known(a) {
+			return refused(file, doc, "accepts", fmt.Sprintf("source %q is none of %s", a, strings.Join(a.Enum(), ", ")))
+		}
+	}
 	for _, n := range it.Needs {
 		if !known(n) {
 			return refused(file, doc, "needs", fmt.Sprintf("need %q is none of %s", n, strings.Join(n.Enum(), ", ")))
 		}
 	}
+	for _, a := range it.AfterApply {
+		if !known(a) {
+			return refused(file, doc, "after-apply", fmt.Sprintf("%q is none of %s", a, strings.Join(a.Enum(), ", ")))
+		}
+	}
 	for _, o := range it.Options {
-		if !known(o.Type) {
-			return refused(file, doc, "options", fmt.Sprintf("option %s's type %q is none of %s", o.Name, o.Type, strings.Join(o.Type.Enum(), ", ")))
+		if problem := checkOption(o); problem != "" {
+			return refused(file, doc, "options", "option "+o.Name+": "+problem)
 		}
 	}
 	if len(it.Methods) == 0 {
@@ -175,11 +188,8 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 		return refused(file, doc, "methods", "a setting has one method in "+Schema)
 	}
 	for i, m := range it.Methods {
-		if problem := checkMethod(it.Kind, m); problem != "" {
+		if problem := checkMethod(it, m); problem != "" {
 			return refused(file, doc, "methods", fmt.Sprintf("method %d: %s", i+1, problem))
-		}
-		if m.ProvidedBy != "" && len(it.Provides) == 0 {
-			return refused(file, doc, "methods", fmt.Sprintf("method %d: an app %s provides names its commands in provides", i+1, m.ProvidedBy))
 		}
 	}
 	if problem := checkStored(it.Writes); problem != "" {
@@ -202,7 +212,7 @@ func refused(file string, doc *yaml.Node, key, problem string) error {
 }
 
 // invariant: a key belongs to the kinds that read it: an app's disk row is
-// no key of a setting, a setting's options none of an app's.
+// no key of a setting, a setting's writes none of an app's.
 func foreignKey(it Item) string {
 	type key struct {
 		name string
@@ -211,11 +221,11 @@ func foreignKey(it Item) string {
 	app := []key{
 		{"replaces", it.Replaces != ""}, {"provides", len(it.Provides) > 0}, {"then", len(it.Then) > 0},
 		{"bundle", it.Bundle != ""}, {"version", it.Version != nil}, {"supersedes", it.Supersedes != ""},
-		{"app-store", it.AppStore}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
+		{"accepts", len(it.Accepts) > 0}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
 	}
 	setting := []key{
 		{"help", it.Help != ""}, {"requires-one-of", len(it.RequiresOneOf) > 0},
-		{"guided", it.Guided}, {"reversible", it.Reversible}, {"run-once", it.RunOnce}, {"options", len(it.Options) > 0},
+		{"guided", it.Guided}, {"reversible", it.Reversible}, {"run-once", it.RunOnce},
 		{"declares", it.Declares != nil}, {"sets", len(it.Sets) > 0}, {"writes", len(it.Writes) > 0},
 	}
 	foreign := setting
@@ -233,9 +243,9 @@ func foreignKey(it Item) string {
 func (m MethodSpec) appKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
-		"brew": m.Brew != "", "cask": m.Cask != "", "mas": m.Mas != nil, "npm": m.Npm != "", "uv": m.Uv != "",
-		"bun": m.Bun != "", "mise": m.Mise != nil, "script": m.Script != nil, "skill": m.Skill != nil,
-		"provided-by": m.ProvidedBy != "", "manual": m.Manual != "",
+		"brew": m.Brew != "", "cask": m.Cask != "", "mas": m.Mas != nil, "apt": m.Apt != "", "npm": m.Npm != "", "uv": m.Uv != "",
+		"bun": m.Bun != "", "mise": m.Mise != nil, "github-release": m.GitHubRelease != nil, "script": m.Script != nil,
+		"skill": m.Skill != nil, "provided-by": m.ProvidedBy != "",
 	} {
 		if set {
 			keys = append(keys, key)
@@ -248,7 +258,7 @@ func (m MethodSpec) appKeys() []string {
 func (m MethodSpec) settingKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
-		"file": m.File != nil, "builtin": m.Builtin != "", "git-aliases": m.GitAliases != nil,
+		"file": m.File != nil, "builtin": m.Builtin != "", "macos-defaults": m.MacOSDefaults != nil, "git-aliases": m.GitAliases != nil,
 		"zsh-functions": m.ZshFunctions != nil, "agent-hooks": m.AgentHooks != nil, "mux-machines": m.MuxMachines != nil,
 	} {
 		if set {
@@ -259,45 +269,68 @@ func (m MethodSpec) settingKeys() []string {
 	return keys
 }
 
-func checkMethod(kind Kind, m MethodSpec) string {
-	if !known(m.OS) {
-		return fmt.Sprintf("os %q is none of %s", m.OS, strings.Join(m.OS.Enum(), ", "))
+// value: a version range: comparisons joined by commas, `>=24.04`,
+// `>=14, <27`, `15`.
+var versionRange = regexp.MustCompile(`^(?:>=|<=|>|<|=)?\d+(?:\.\d+)*(?:, ?(?:>=|<=|>|<|=)?\d+(?:\.\d+)*)*$`)
+
+// invariant: a method names its system by `os` or `family`, one of them; a
+// disk row may name none (every machine). A version range is a version of
+// one os.
+func checkSelector(s Selector, method bool) string {
+	switch {
+	case s.OS != "" && s.Family != "":
+		return "names an os and a family: one of them"
+	case method && s.OS == "" && s.Family == "":
+		return "names no os nor family (`os: any` is every system)"
+	case s.OS != "" && !known(s.OS):
+		return fmt.Sprintf("os %q is none of %s", s.OS, strings.Join(s.OS.Enum(), ", "))
+	case s.Family != "" && !known(s.Family):
+		return fmt.Sprintf("family %q is none of %s", s.Family, strings.Join(s.Family.Enum(), ", "))
+	case s.Arch != "" && !known(s.Arch):
+		return fmt.Sprintf("arch %q is none of %s", s.Arch, strings.Join(s.Arch.Enum(), ", "))
+	case s.Version != "" && (s.OS == "" || s.OS == OSAny):
+		return "a version range is of one os"
+	case s.Version != "" && !versionRange.MatchString(s.Version):
+		return fmt.Sprintf("version %q is no range (`>=24.04`, `>=14, <27`)", s.Version)
 	}
-	if m.Only != "" && !known(m.Only) {
-		return fmt.Sprintf("only %q is none of %s", m.Only, strings.Join(m.Only.Enum(), ", "))
+	for _, k := range s.Kind {
+		if !known(k) {
+			return fmt.Sprintf("kind %q is none of %s", k, strings.Join(k.Enum(), ", "))
+		}
 	}
-	if m.OS == OSLinux && m.Only == OnlyMac {
-		return "a Mac runs no linux"
+	return ""
+}
+
+func checkMethod(it Item, m MethodSpec) string {
+	if problem := checkSelector(m.Selector, true); problem != "" {
+		return problem
 	}
 	own, other := m.appKeys(), m.settingKeys()
-	if kind == KindSetting {
+	if it.Kind == KindSetting {
 		own, other = other, own
 	}
 	if len(other) > 0 {
-		return "`" + other[0] + "` is no method of a " + string(kind)
+		return "`" + other[0] + "` is no method of a " + string(it.Kind)
 	}
 	if len(own) != 1 {
 		return fmt.Sprintf("names %d managers (%s), not one", len(own), strings.Join(own, ", "))
 	}
-	if m.Trusted && m.Brew == "" && m.Cask == "" {
-		return "`trusted` is for a brew or a cask"
-	}
-	if m.Package != "" && m.Bun == "" {
-		return "`package` is for a bun install"
-	}
-	if kind == KindSetting && len(m.Path) > 0 {
-		return "`path` is for an app's method"
-	}
-	for _, p := range m.Path {
-		if !strings.HasPrefix(p, "/") {
-			return "path " + p + " is not absolute"
-		}
-	}
-	if problem := m.checkManager(); problem != "" {
+	if problem := m.checkOverrides(it.Kind); problem != "" {
 		return problem
 	}
-	if kind != KindSetting {
-		install := m.install(nil)
+	if problem := m.checkManager(it); problem != "" {
+		return problem
+	}
+	if it.Kind == KindSetting {
+		return ""
+	}
+	if m.ProvidedBy != "" && len(it.Provides) == 0 && len(m.Provides) == 0 {
+		return "an app " + m.ProvidedBy + " provides names its commands in provides"
+	}
+	if m.Apt != "" && m.Family == "" && m.OS != OSUbuntu && m.OS != OSDebian {
+		return "apt runs on the debian family"
+	}
+	if install := m.install(nil); install != nil {
 		for _, k := range m.kinds() {
 			if !slices.Contains(MethodKinds[install.Method()], k) {
 				return fmt.Sprintf("%s does not run on %s", install.Method(), k)
@@ -307,7 +340,28 @@ func checkMethod(kind Kind, m MethodSpec) string {
 	return ""
 }
 
-func (m MethodSpec) checkManager() string {
+// invariant: the keys that change what a method's manager does by default
+// are an app's, and each its own manager's where it says so.
+func (m MethodSpec) checkOverrides(kind Kind) string {
+	switch {
+	case m.Trusted && m.Brew == "" && m.Cask == "":
+		return "`trusted` is for a brew or a cask"
+	case m.Package != "" && m.Bun == "":
+		return "`package` is for a bun install"
+	case kind == KindSetting && (len(m.Path) > 0 || len(m.Provides) > 0 || m.Upgrade != "" || m.Pin != ""):
+		return "`path`, `provides`, `upgrade` and `pin` are for an app's method"
+	case m.Pin != "" && !known(m.Pin):
+		return fmt.Sprintf("pin %q is none of %s", m.Pin, strings.Join(m.Pin.Enum(), ", "))
+	}
+	for _, p := range m.Path {
+		if !strings.HasPrefix(p, "/") {
+			return "path " + p + " is not absolute"
+		}
+	}
+	return ""
+}
+
+func (m MethodSpec) checkManager(it Item) string {
 	switch {
 	case m.Mas != nil && (m.Mas.ID <= 0 || m.Mas.Name == ""):
 		return "mas names the App Store id and name"
@@ -315,16 +369,105 @@ func (m MethodSpec) checkManager() string {
 		return "mise names what it installs and its version"
 	case m.Skill != nil && (m.Skill.Repo == "" || m.Skill.Name == ""):
 		return "skill names a repo and the skill's name"
-	case m.Script != nil && (m.Script.URL == "") == (m.Script.Run == ""):
-		return "script is a url or a run line, one of them"
-	case m.Script != nil && m.Script.Run != "" && (len(m.Script.Args) > 0 || len(m.Script.Env) > 0 || m.Script.Upgrade != ""):
-		return "a run line takes no args, env or upgrade"
+	case m.GitHubRelease != nil && (!strings.Contains(m.GitHubRelease.Repo, "/") || m.GitHubRelease.Asset == ""):
+		return "github-release names its repo (`owner/name`) and its asset's pattern"
+	case m.Script != nil:
+		return m.Script.check(m.Upgrade)
 	case m.File != nil && (m.File.Touch == "") == (len(m.File.Copy) == 0):
 		return "file touches one path or copies files, one of them"
 	case m.File != nil && m.File.Touch != "" && len(m.File.Reload) > 0:
 		return "a touched file reloads nothing"
 	case m.Builtin != "" && !known(m.Builtin):
 		return fmt.Sprintf("builtin %q is no procedure station knows", m.Builtin)
+	case m.MacOSDefaults != nil:
+		return m.MacOSDefaults.check(m.Selector, it.Options)
+	}
+	return ""
+}
+
+func (s ScriptMethod) check(upgrade string) string {
+	switch {
+	case s.Run != "" && s.URL != "":
+		return "script installs by a run line or a url, one of them"
+	case s.Run == "" && s.URL == "" && s.Hint == "":
+		return "script installs by a run line or a url, or says the owner's way in its hint"
+	case s.Run == "" && s.URL == "" && (s.Check != "" || s.Undo != "" || upgrade != ""):
+		return "a script the owner installs has a hint, no check, undo or upgrade"
+	case s.Run != "" && (len(s.Args) > 0 || len(s.Env) > 0 || upgrade != ""):
+		return "a run line takes no args, env or upgrade"
+	}
+	return ""
+}
+
+func (d MacOSDefaults) check(s Selector, options []Option) string {
+	if s.OS != OSMacOS {
+		return "macos-defaults is for os: macos"
+	}
+	if d.Domain == "" || len(d.Keys) == 0 {
+		return "macos-defaults names its domain and its keys"
+	}
+	for _, k := range d.Keys {
+		switch {
+		case !known(k.Type):
+			return fmt.Sprintf("key %s's type %q is none of %s", k.Key, k.Type, strings.Join(k.Type.Enum(), ", "))
+		case (k.Value == nil) == (k.Option == ""):
+			return "key " + k.Key + " has a value or an option, one of them"
+		case k.Option != "" && !hasOption(options, k.Option):
+			return "key " + k.Key + " reads the option " + k.Option + ", which the item has not"
+		}
+	}
+	return ""
+}
+
+// invariant: an option's keys are its type's: values for an enum, bounds
+// for an integer, secret for a string; its default and examples are values
+// of its type.
+func checkOption(o Option) string {
+	switch {
+	case o.Name == "":
+		return "has no name"
+	case !known(o.Type):
+		return fmt.Sprintf("type %q is none of %s", o.Type, strings.Join(o.Type.Enum(), ", "))
+	case (o.Type == OptionEnum) != (len(o.Values) > 0):
+		return "an enum lists its values, and only an enum"
+	case (o.Min != nil || o.Max != nil) && o.Type != OptionInteger:
+		return "min and max bound an integer"
+	case o.Min != nil && o.Max != nil && *o.Min > *o.Max:
+		return "min is above max"
+	case o.Secret && o.Type != OptionString:
+		return "a secret is a string"
+	}
+	values := slices.Clone(o.Examples)
+	if o.Default != nil {
+		values = append(values, *o.Default)
+	}
+	for _, v := range values {
+		if problem := o.fits(string(v)); problem != "" {
+			return problem
+		}
+	}
+	return ""
+}
+
+func (o Option) fits(v string) string {
+	switch o.Type {
+	case OptionInteger:
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Sprintf("%q is no integer", v)
+		}
+		if o.Min != nil && n < *o.Min || o.Max != nil && n > *o.Max {
+			return fmt.Sprintf("%d is out of its bounds", n)
+		}
+	case OptionBoolean:
+		if v != "true" && v != "false" {
+			return fmt.Sprintf("%q is no boolean", v)
+		}
+	case OptionEnum:
+		if !slices.Contains(o.Values, v) {
+			return fmt.Sprintf("%q is none of its values", v)
+		}
+	case OptionString:
 	}
 	return ""
 }
@@ -334,17 +477,8 @@ func checkStored(paths []Stored) string {
 		if !known(p.Level) {
 			return fmt.Sprintf("%s's level %q is none of %s", p.Path, p.Level, strings.Join(p.Level.Enum(), ", "))
 		}
-		if problem := checkOn(p.On); problem != "" {
-			return problem
-		}
-	}
-	return ""
-}
-
-func checkOn(on []MachineKind) string {
-	for _, k := range on {
-		if !known(k) {
-			return fmt.Sprintf("on %q is none of %s", k, strings.Join(k.Enum(), ", "))
+		if problem := checkSelector(p.Placed, false); problem != "" {
+			return p.Path + ": " + problem
 		}
 	}
 	return ""
@@ -362,7 +496,7 @@ func checkDisk(d Disk) string {
 		actions = append(actions, m.Free...)
 	}
 	for _, a := range actions {
-		if problem := checkOn(a.On); problem != "" {
+		if problem := checkSelector(a.Placed, false); problem != "" {
 			return problem
 		}
 	}
@@ -372,4 +506,13 @@ func checkDisk(d Disk) string {
 		}
 	}
 	return ""
+}
+
+func hasOption(options []Option, name string) bool {
+	for _, o := range options {
+		if o.Name == name {
+			return true
+		}
+	}
+	return false
 }

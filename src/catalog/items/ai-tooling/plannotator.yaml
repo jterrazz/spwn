@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: plannotator
-order: 660
 description: Review AI agent plans and code before committing
 provides: [plannotator]
 version:

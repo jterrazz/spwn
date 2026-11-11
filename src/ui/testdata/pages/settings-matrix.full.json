@@ -73,72 +73,6 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/ghostty-dotfiles",
-            "mark": "attention",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ghostty-dotfiles"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff ghostty-dotfiles"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-macbook-pro/github-login",
-            "mark": "attention",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "github-login"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff github-login"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-macbook-pro/dock-reset",
-            "mark": "attention",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "dock-reset"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff dock-reset"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "jterrazz-macbook-pro/git-shortcuts",
             "mark": "attention",
             "label": "jterrazz-macbook-pro",
@@ -156,6 +90,72 @@
             "reason": "differs",
             "hint": {
               "command": "station settings diff git-shortcuts"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/claude-token",
+            "mark": "attention",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "claude-token"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff claude-token"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/ssh-key",
+            "mark": "attention",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ssh-key"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff ssh-key"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/tart-launcher",
+            "mark": "attention",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tart-launcher"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -221,72 +221,6 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/ghostty-dotfiles",
-            "mark": "attention",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ghostty-dotfiles"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff ghostty-dotfiles --on jterrazz-mac-mini"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-mac-mini/github-login",
-            "mark": "attention",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "github-login"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff github-login --on jterrazz-mac-mini"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-mac-mini/dock-reset",
-            "mark": "attention",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "dock-reset"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff dock-reset --on jterrazz-mac-mini"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "jterrazz-mac-mini/git-shortcuts",
             "mark": "attention",
             "label": "jterrazz-mac-mini",
@@ -304,6 +238,72 @@
             "reason": "differs",
             "hint": {
               "command": "station settings diff git-shortcuts --on jterrazz-mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/claude-token",
+            "mark": "attention",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "claude-token"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff claude-token --on jterrazz-mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/ssh-key",
+            "mark": "attention",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ssh-key"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff ssh-key --on jterrazz-mac-mini"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/tart-launcher",
+            "mark": "attention",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tart-launcher"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tart-launcher --on jterrazz-mac-mini"
             }
           }
         },
@@ -369,72 +369,6 @@
         },
         {
           "row": {
-            "id": "linux-1/ghostty-dotfiles",
-            "mark": "attention",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "ghostty-dotfiles"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff ghostty-dotfiles --on linux-1"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1/github-login",
-            "mark": "attention",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "github-login"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff github-login --on linux-1"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1/dock-reset",
-            "mark": "attention",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "dock-reset"
-              },
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff dock-reset --on linux-1"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "linux-1/git-shortcuts",
             "mark": "attention",
             "label": "linux-1",
@@ -457,14 +391,14 @@
         },
         {
           "row": {
-            "id": "api/ghostty-dotfiles",
+            "id": "linux-1/claude-token",
             "mark": "attention",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "ghostty-dotfiles"
+                "text": "claude-token"
               },
               {
                 "kind": "text",
@@ -473,20 +407,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station machines start api"
+              "command": "station settings diff claude-token --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "api/github-login",
+            "id": "linux-1/ssh-key",
             "mark": "attention",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "github-login"
+                "text": "ssh-key"
               },
               {
                 "kind": "text",
@@ -495,20 +429,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station machines start api"
+              "command": "station settings diff ssh-key --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "api/dock-reset",
+            "id": "linux-1/tart-launcher",
             "mark": "attention",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "dock-reset"
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -517,7 +451,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station machines start api"
+              "command": "station settings diff tart-launcher --on linux-1"
             }
           }
         },
@@ -531,6 +465,72 @@
               {
                 "kind": "text",
                 "text": "git-shortcuts"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/claude-token",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "claude-token"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/ssh-key",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "ssh-key"
+              },
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station machines start api"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/tart-launcher",
+            "mark": "attention",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -747,99 +747,99 @@
       "items": [
         {
           "row": {
-            "id": "ghostty-dotfiles",
-            "mark": "attention",
-            "label": "ghostty-dotfiles",
-            "cells": [
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "text": "0/4"
-              }
-            ],
-            "reason": "differs"
-          }
-        },
-        {
-          "row": {
-            "id": "github-login",
-            "mark": "attention",
-            "label": "github-login",
-            "cells": [
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "text": "0/4"
-              }
-            ],
-            "reason": "differs"
-          }
-        },
-        {
-          "row": {
-            "id": "dock-reset",
-            "mark": "attention",
-            "label": "dock-reset",
-            "cells": [
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "label": "attention"
-              },
-              {
-                "kind": "text",
-                "text": "0/4"
-              }
-            ],
-            "reason": "differs"
-          }
-        },
-        {
-          "row": {
             "id": "git-shortcuts",
             "mark": "attention",
             "label": "git-shortcuts",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "claude-token",
+            "mark": "attention",
+            "label": "claude-token",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "ssh-key",
+            "mark": "attention",
+            "label": "ssh-key",
+            "cells": [
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "label": "attention"
+              },
+              {
+                "kind": "text",
+                "text": "0/4"
+              }
+            ],
+            "reason": "differs"
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "attention",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -1122,31 +1122,31 @@
       "label": "apply across",
       "on": "row",
       "rows": [
-        "hushlogin",
+        "docker-shortcuts",
+        "git-shortcuts",
         "ghostty-dotfiles",
-        "tmux-dotfiles",
+        "hushlogin",
         "starship-dotfiles",
+        "tmux-dotfiles",
+        "claude-token",
+        "dns",
         "git-signing",
-        "ssh-key",
         "github-login",
         "spotlight-exclude",
-        "dns",
-        "claude-token",
+        "ssh-key",
         "zed-dotfiles",
+        "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "autologin",
-        "restart-after-power-cut",
-        "never-sleeps",
-        "lock-after-login",
-        "sshd",
-        "backup-exclusions",
-        "tailscale-cli",
         "tart-launcher",
-        "git-shortcuts",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli",
         "agent-hooks",
-        "herdr-machine",
-        "docker-shortcuts"
+        "herdr-machine"
       ],
       "priority": 1,
       "mutates": true
@@ -1156,31 +1156,31 @@
       "label": "open on that machine",
       "on": "row",
       "rows": [
-        "hushlogin",
+        "docker-shortcuts",
+        "git-shortcuts",
         "ghostty-dotfiles",
-        "tmux-dotfiles",
+        "hushlogin",
         "starship-dotfiles",
+        "tmux-dotfiles",
+        "claude-token",
+        "dns",
         "git-signing",
-        "ssh-key",
         "github-login",
         "spotlight-exclude",
-        "dns",
-        "claude-token",
+        "ssh-key",
         "zed-dotfiles",
+        "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "autologin",
-        "restart-after-power-cut",
-        "never-sleeps",
-        "lock-after-login",
-        "sshd",
-        "backup-exclusions",
-        "tailscale-cli",
         "tart-launcher",
-        "git-shortcuts",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli",
         "agent-hooks",
         "herdr-machine",
-        "docker-shortcuts",
         "filevault",
         "firewall",
         "sip",

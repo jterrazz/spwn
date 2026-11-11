@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"reflect"
 	"slices"
 	"strings"
@@ -12,6 +13,10 @@ import (
 const schemaPath = "schemas/station.catalog.v1.json"
 
 type enumerated interface{ Enum() []string }
+
+// value: a type the decoder reads by its own UnmarshalYAML, which says its
+// schema itself (a kind written as one word or a list).
+type schematic interface{ JSONSchema() map[string]any }
 
 // invariant: the JSON Schema of an item file is projected from the Go types
 // the decoder reads, so an editor's check and station's own refusal agree: a
@@ -27,7 +32,7 @@ func catalogSchema() []byte {
 		"$schema":     "https://json-schema.org/draft/2020-12/schema",
 		"$id":         "https://github.com/jterrazz/studio-station/blob/main/" + schemaPath,
 		"title":       catalog.Schema,
-		"description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key.",
+		"description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
 		"$defs":       defs,
 	}
 	for k, v := range root {
@@ -45,6 +50,15 @@ func objectOf(t reflect.Type, defs map[string]any) map[string]any {
 	required := []string{}
 	for f := range t.Fields() {
 		name, opts, _ := strings.Cut(f.Tag.Get("yaml"), ",")
+		if name == "" && opts == "inline" {
+			inlined := objectOf(f.Type, defs)
+			inner, _ := inlined["properties"].(map[string]any)
+			maps.Copy(props, inner)
+			if req, ok := inlined["required"].([]string); ok {
+				required = append(required, req...)
+			}
+			continue
+		}
 		if name == "" || name == "-" {
 			continue
 		}
@@ -61,6 +75,9 @@ func objectOf(t reflect.Type, defs map[string]any) map[string]any {
 }
 
 func schemaOf(t reflect.Type, defs map[string]any) map[string]any {
+	if s, ok := reflect.Zero(t).Interface().(schematic); ok && t.Kind() != reflect.Pointer {
+		return s.JSONSchema()
+	}
 	if e, ok := reflect.Zero(t).Interface().(enumerated); ok && t.Kind() == reflect.String {
 		return map[string]any{"type": "string", "enum": e.Enum()}
 	}

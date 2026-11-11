@@ -4,26 +4,26 @@ runs:
     - command: 'settings apply'
       exit: 0
       stdout: |
+          ●	docker-shortcuts	zsh block: dclean, dclean-images, dreset added
+          ●	git-shortcuts	~/.gitconfig [alias]: written
           ●	hushlogin	~/.hushlogin: created
-          ●	spotlight-exclude	spotlight-exclude: applied
           ●	dns	dns: applied
+          ●	spotlight-exclude	spotlight-exclude: applied
+          ●	backup-exclusions	backup-exclusions: applied
           ●	dock-reset	dock-reset: applied
           ●	dock-spacer	dock-spacer: applied
-          ●	backup-exclusions	backup-exclusions: applied
           ●	tart-launcher	~/.local/bin/tart: written
-          ●	git-shortcuts	~/.gitconfig [alias]: written
-          ●	docker-shortcuts	zsh block: dclean, dclean-images, dreset added
     - command: 'settings | /usr/bin/grep -E ''^#|○'''
       exit: 0
       stdout: |
           # Set by station	9 ●	10 ○
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
-          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
-          ○	git-signing	not applied · needs gpg	station apps install gpg
-          ○	ssh-key	not applied	station settings apply ssh-key
-          ○	github-login	not applied · needs gh	station apps install gh
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	claude-token	not applied	station settings apply claude-token
+          ○	git-signing	not applied · needs gpg	station apps install gpg
+          ○	github-login	not applied · needs gh	station apps install gh
+          ○	ssh-key	not applied	station settings apply ssh-key
           ○	zed-dotfiles	not applied · needs zed	station apps install zed
           ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
           ○	herdr-machine	not applied · needs herdr-core	station apps install herdr-core

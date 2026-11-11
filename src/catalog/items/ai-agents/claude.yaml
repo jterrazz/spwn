@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: claude
-order: 490
 description: Claude Code CLI for agentic coding
 provides: [claude]
 version:
@@ -23,7 +22,7 @@ disk:
           level: cache
         - path: ~/Library/Caches/claude-cli-nodejs
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{state}/claude'
           level: cache
         - path: ~/.claude/projects

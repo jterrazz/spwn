@@ -23,10 +23,10 @@ Needs a look
   ◌ api
 Machines  ◌ 5 · This Mac, mac-mini, linux-1, api, infra
 Set by station
-  ◌ ghostty-dotfiles
-  ◌ github-login
-  ◌ dock-reset
   ◌ git-shortcuts
+  ◌ claude-token
+  ◌ ssh-key
+  ◌ tart-launcher
   ◌ 16 more
 Always-on Mac
   ◌ 5 settings

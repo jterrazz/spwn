@@ -46,7 +46,7 @@ runs:
               → station apps update ghostty
             ◐ gh       2.97.0 → 2.98.0    brew  update available
               → station apps update gh
-          Not installed  ○ 101 · homebrew, mas, uv, cocoapods, pnpm, skills, bun, java, …
+          Not installed  ○ 101 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
           OK             ● 5 · mise, go, bat, jq, lazygit
           Not for this machine  7 apps live on other machines
 
@@ -61,7 +61,7 @@ runs:
 
           Needs a look
             ◐ firewall  off  → System Settings > Network > Firewall
-          Set by station  ○ 19 · hushlogin, ghostty-dotfiles, tmux-dotfiles, …
+          Set by station  ○ 19 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
           Always-on Mac   ○ 5 · for a Mac that hosts servers
           Checked         ● 8  ◐ 1 · firewall, filevault, sip, automatic-updates, …
           – 1 not for this machine · VMs only

@@ -9,5 +9,5 @@ runs:
       exit: 0
       stdout: |
           frontend-design ok  skill Agent skills
-          shadcn update-available outdated skill Agent skills
           last30days not-installed skills not installed skill Agent skills
+          shadcn update-available outdated skill Agent skills

@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: frontend-design
-order: 990
 description: Distinctive, polished frontend interfaces
 methods:
     - os: any

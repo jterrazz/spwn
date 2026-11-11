@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: qmd
-order: 580
 description: Local semantic search over markdown
 replaces: grep over markdown notes
 provides: [qmd]

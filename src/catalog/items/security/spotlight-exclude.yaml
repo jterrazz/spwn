@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: spotlight-exclude
-order: 80
 description: Exclude ~/Developer from Spotlight (guided, opens Settings)
 guided: true
 sets:

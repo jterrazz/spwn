@@ -2,26 +2,26 @@
    ● This Mac  20 set by station here · 9 checked · nothing needs a look
 
  Set by station  20 ◌
-   ◌ hushlogin
+   ◌ docker-shortcuts
+   ◌ git-shortcuts
    ◌ ghostty-dotfiles
-   ◌ tmux-dotfiles
+   ◌ hushlogin
    ◌ starship-dotfiles
+   ◌ tmux-dotfiles
+   ◌ claude-token
+   ◌ dns
    ◌ git-signing
-   ◌ ssh-key
    ◌ github-login
    ◌ spotlight-exclude
-   ◌ dns
-   ◌ claude-token
+   ◌ ssh-key
    ◌ zed-dotfiles
+   ◌ backup-exclusions
    ◌ dock-reset
    ◌ dock-spacer
-   ◌ backup-exclusions
-   ◌ tailscale-cli
    ◌ tart-launcher
-   ◌ git-shortcuts
+   ◌ tailscale-cli
    ◌ agent-hooks
    ◌ herdr-machine
-   ◌ docker-shortcuts
 
  Always-on Mac
    ○ Always-on Mac  5 · for a Mac that hosts servers

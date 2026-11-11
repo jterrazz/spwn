@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: sshd
-order: 180
 description: macOS Remote Login (sshd)
 needs: [sudo]
 reversible: true
@@ -13,7 +12,7 @@ sets:
     - { key: Remote Login, value: 'on' }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: sshd
 writes:
     - path: /System/Library/LaunchDaemons/ssh.plist

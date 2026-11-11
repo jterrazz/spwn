@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: chatgpt
-order: 670
 description: OpenAI ChatGPT desktop app
 bundle: ChatGPT
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: chatgpt

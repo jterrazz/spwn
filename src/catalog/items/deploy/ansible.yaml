@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: ansible
-order: 450
 description: Agentless IT automation and configuration management
 provides: [ansible]
 methods:
     - os: macos
       brew: ansible
-    - os: linux
+    - family: linux
       mise:
           name: pipx:ansible
           version: latest

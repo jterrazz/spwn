@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: xcode
-order: 360
 description: Apple development IDE
 provides: [xcodebuild]
 bundle: Xcode

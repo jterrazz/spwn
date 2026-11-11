@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: raindrop
-order: 820
 description: Bookmark manager
 bundle: Save to Raindrop.io
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 1549370672
           name: Save to Raindrop.io

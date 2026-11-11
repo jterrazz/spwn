@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: herdr-core
-order: 565
 description: "Herdr's agent engine, the hc command station drives"
 provides: [hc]
 # outside: on a Linux workspace no method installs hc yet: the herdr-machine
 # setting of its Mac copies it in (`hc machine add --install`).
 methods:
     - os: macos
-      only: mac
+      kind: computer
       provided-by: herdr-app

@@ -36,6 +36,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | The settings and the Checked group                   | `docs/reference/settings.md`        |
 | `preferences.json`, the environment variables        | `docs/reference/preferences.md`     |
 | Apps, methods, skills, the toolbelt                  | `docs/reference/apps-and-skills.md` |
+| Every key of a catalog item file                     | `docs/reference/catalog.md`         |
 | VM images and their recipe                           | `docs/reference/images.md`          |
 | The shell block, the embedded dotfiles               | `docs/reference/dotfiles.md`        |
 | `station.api/v2`, `calls.json`, the engine's calls   | `docs/reference/api.md`             |

@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: manager
 name: node
-order: 100
 description: JavaScript runtime built on Chrome's V8 engine
 provides: [node, npm, npx]
 methods:

@@ -16,17 +16,17 @@ Modern replacements are on every machine; prefer them over the defaults:
 | Instead of                            | Use                                                          |
 | ------------------------------------- | ------------------------------------------------------------ |
 | cd (jumping around)                   | `zoxide`: Smarter cd command                                 |
-| Finder in the terminal                | `yazi`: Terminal file manager                                |
 | cat (for humans)                      | `bat`: Cat clone with syntax highlighting                    |
+| diff                                  | `difftastic`: Structural diff                                |
 | du -sh                                | `dust`: Intuitive disk usage viewer                          |
 | ls                                    | `eza`: Modern ls replacement                                 |
 | find                                  | `fd`: Fast find alternative                                  |
 | grep (what agents and editors call)   | `ripgrep`: Fast grep, the rg agents and editors shell out to |
-| grep -r                               | `tgrep`: Trigram-indexed grep for large codebases            |
 | sed (simple replaces)                 | `sd`: Intuitive sed alternative                              |
-| diff                                  | `difftastic`: Structural diff                                |
-| raw git porcelain (interactive)       | `lazygit`: Terminal UI for git                               |
+| grep -r                               | `tgrep`: Trigram-indexed grep for large codebases            |
+| Finder in the terminal                | `yazi`: Terminal file manager                                |
 | raw GitHub API / web UI               | `gh`: GitHub CLI for repository management                   |
+| raw git porcelain (interactive)       | `lazygit`: Terminal UI for git                               |
 | grep over markdown notes              | `qmd`: Local semantic search over markdown                   |
 | raw dev commands (token-heavy output) | `rtk`: Token-optimized CLI proxy for agents                  |
 
@@ -38,20 +38,20 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 ### Package Managers
 
-- **homebrew**: macOS package manager
-- **mise**: Polyglot runtime manager: node, go, python, bun, rust, java
-- **mas**: Mac App Store command line
-- **uv**: Fast Python package and project manager
 - **cocoapods**: Dependency manager for iOS and macOS projects
+- **homebrew**: macOS package manager
+- **mas**: Mac App Store command line
+- **mise**: Polyglot runtime manager: node, go, python, bun, rust, java
 - **pnpm**: Fast, disk space efficient Node package manager
 - **skills**: Agent skills package manager
+- **uv**: Fast Python package and project manager
 
 ### Runtimes
 
 - **bun**: Fast JavaScript runtime and package manager
 - **go**: Compiled systems programming language by Google
-- **node**: JavaScript runtime built on Chrome's V8 engine
 - **java**: Java Development Kit (Temurin)
+- **node**: JavaScript runtime built on Chrome's V8 engine
 - **python**: Python programming language runtime
 - **rust**: Systems programming language for safety and speed
 
@@ -59,47 +59,47 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **ghostty**: GPU-accelerated terminal emulator
 - **ohmyzsh**: Oh My Zsh shell framework
-- **tmux**: Terminal multiplexer for persistent sessions
 - **starship**: Cross-shell prompt (path, git branch/status, versions)
+- **tmux**: Terminal multiplexer for persistent sessions
 - **zoxide**: Smarter cd command
 
 ### Command line
 
-- **yazi**: Terminal file manager
 - **bat**: Cat clone with syntax highlighting
+- **difftastic**: Structural diff
 - **dust**: Intuitive disk usage viewer
 - **eza**: Modern ls replacement
 - **fd**: Fast find alternative
-- **ripgrep**: Fast grep, the rg agents and editors shell out to
-- **tgrep**: Trigram-indexed grep for large codebases
-- **sd**: Intuitive sed alternative
-- **difftastic**: Structural diff
 - **jq**: Command-line JSON processor
+- **ripgrep**: Fast grep, the rg agents and editors shell out to
+- **sd**: Intuitive sed alternative
+- **tgrep**: Trigram-indexed grep for large codebases
+- **yazi**: Terminal file manager
 
 ### Git
 
+- **gh**: GitHub CLI for repository management
 - **git**: Distributed version control system, from xcode-select
 - **gpg**: GNU Privacy Guard for encryption and signing
 - **lazygit**: Terminal UI for git
-- **gh**: GitHub CLI for repository management
 
 ### Editors & IDEs
 
-- **zed**: Zed code editor
-- **cursor**: AI-powered code editor
 - **android-studio**: Android development IDE
+- **cursor**: AI-powered code editor
 - **xcode**: Apple development IDE
 - **xcodegen**: Generates Xcode projects from a spec
+- **zed**: Zed code editor
 
 ### Containers & VMs
 
-- **tart**: Virtual machines on Apple silicon: the engine of station's VMs
 - **docker**: Container engine, inside the Linux VM
-- **orbstack**: Docker and Linux machines on the Mac, for exploration on a Mac
-- **lens**: Kubernetes IDE for managing clusters
-- **kubectl**: Kubernetes command line
 - **helm**: Kubernetes package manager
 - **helmfile**: Declarative deployments of Helm charts
+- **kubectl**: Kubernetes command line
+- **lens**: Kubernetes IDE for managing clusters
+- **orbstack**: Docker and Linux machines on the Mac, for exploration on a Mac
+- **tart**: Virtual machines on Apple silicon: the engine of station's VMs
 
 ### Deploy
 
@@ -112,26 +112,26 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **claude**: Claude Code CLI for agentic coding
 - **codex**: OpenAI's CLI coding agent
-- **gemini**: Google's CLI coding agent
-- **opencode**: Open-source AI coding agent CLI
-- **hermes**: Self-improving AI agent with persistent memory
 - **conductor**: Runs parallel AI coding agents in git worktrees
+- **gemini**: Google's CLI coding agent
 - **herdr**: Agent multiplexer that lives in your terminal
 - **herdr-app**: Desktop app that keeps coding agents running in the background
 - **herdr-core**: Herdr's agent engine, the hc command station drives
+- **hermes**: Self-improving AI agent with persistent memory
+- **opencode**: Open-source AI coding agent CLI
 
 ### AI Tooling
 
+- **agent-browser**: Browser automation CLI for AI agents
+- **browser-use**: AI agent library for browser automation
+- **inferrs**: TurboQuant LLM inference server
+- **markitdown**: Convert files to Markdown for LLMs
 - **ollama**: Run large language models locally, on the Mac's GPU
+- **plannotator**: Review AI agent plans and code before committing
+- **playwright-browsers**: Chromium runtime for website specs (@jterrazz/test)
+- **playwright-mcp**: Browser automation for AI agents via MCP
 - **qmd**: Local semantic search over markdown
 - **rtk**: Token-optimized CLI proxy for agents
-- **browser-use**: AI agent library for browser automation
-- **markitdown**: Convert files to Markdown for LLMs
-- **playwright-mcp**: Browser automation for AI agents via MCP
-- **playwright-browsers**: Chromium runtime for website specs (@jterrazz/test)
-- **inferrs**: TurboQuant LLM inference server
-- **agent-browser**: Browser automation CLI for AI agents
-- **plannotator**: Review AI agent plans and code before committing
 
 ### AI Apps
 
@@ -147,17 +147,17 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### Communication
 
 - **discord**: Voice and text chat
+- **messenger**: Facebook Messenger
 - **slack**: Team communication
 - **whatsapp**: Messaging app
-- **messenger**: Facebook Messenger
 
 ### Productivity
 
+- **keynote**: Apple presentations
 - **linear**: Project management
 - **notion**: Workspace for notes and docs
-- **obsidian**: Knowledge base and note-taking
-- **keynote**: Apple presentations
 - **numbers**: Apple spreadsheets
+- **obsidian**: Knowledge base and note-taking
 - **pages**: Apple word processor
 - **raindrop**: Bookmark manager
 
@@ -171,41 +171,41 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 ### Remote Access
 
-- **jump-desktop-connect**: Remote GUI recovery for headless Macs
 - **jump-desktop**: Jump Desktop viewer/client app
+- **jump-desktop-connect**: Remote GUI recovery for headless Macs
 - **tailscale**: The Tailscale app: each Mac is a node, and station reads it
 
 ### Security
 
-- **bitwarden**: Password manager
 - **adguard**: Ad blocker for Safari
+- **bitwarden**: Password manager
 - **passepartout**: VPN client
 
 ### System Utilities
 
-- **mole**: Tidy, uninstall, analyze, and optimize macOS from the terminal
 - **betterdisplay**: Flexible HiDPI scaling and display management
+- **mole**: Tidy, uninstall, analyze, and optimize macOS from the terminal
 - **pipifier**: Picture-in-Picture for Safari
 - **snippety**: Code snippet manager
 - **speedtest**: Internet speed test
 
 ### Agent skills
 
-- **frontend-design**: Distinctive, polished frontend interfaces
-- **upgrading-expo**: Upgrade an Expo app across SDK versions
-- **modern-web-guidance**: Chrome's current web platform guidance
-- **chrome-extensions**: Chrome extension authoring
-- **better-interface**: Interface polish
-- **better-accessibility**: Accessibility review and fixes
-- **better-layout**: Layout and spacing craft
-- **better-writing**: Interface copy
-- **better-typography**: Typography craft
-- **better-colors**: Color craft
-- **better-ui**: UI review across the better-* skills
-- **shadcn**: shadcn/ui components and patterns
-- **last30days**: Research what happened in the last 30 days
-- **qmd-skill**: Drive qmd, the local markdown search
 - **agent-browser-skill**: Drive agent-browser, the browser automation CLI
+- **better-accessibility**: Accessibility review and fixes
+- **better-colors**: Color craft
+- **better-interface**: Interface polish
+- **better-layout**: Layout and spacing craft
+- **better-typography**: Typography craft
+- **better-ui**: UI review across the better-* skills
+- **better-writing**: Interface copy
+- **chrome-extensions**: Chrome extension authoring
+- **frontend-design**: Distinctive, polished frontend interfaces
+- **last30days**: Research what happened in the last 30 days
+- **modern-web-guidance**: Chrome's current web platform guidance
+- **qmd-skill**: Drive qmd, the local markdown search
+- **shadcn**: shadcn/ui components and patterns
+- **upgrading-expo**: Upgrade an Expo app across SDK versions
 - **vercel-react-best-practices**: React and Next.js performance practices
 - **vercel-react-native-skills**: React Native practices
 

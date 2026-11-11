@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: gpg
-order: 300
 description: GNU Privacy Guard for encryption and signing
 provides: [gpg]
 then: [git-signing]

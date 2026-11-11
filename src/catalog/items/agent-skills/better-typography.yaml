@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: better-typography
-order: 1070
 description: Typography craft
 methods:
     - os: any

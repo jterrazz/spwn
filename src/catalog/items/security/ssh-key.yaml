@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: ssh-key
-order: 60
 description: An ed25519 SSH key, kept in the Keychain
 needs: [terminal]
 sets:
@@ -9,7 +8,7 @@ sets:
     - { key: ~/.ssh/config, value: the Keychain stanza }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: ssh-key
 writes:
     - path: ~/.ssh/id_ed25519

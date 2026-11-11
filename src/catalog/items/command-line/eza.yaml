@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: eza
-order: 220
 description: Modern ls replacement
 replaces: ls
 provides: [eza]
 methods:
     - os: macos
       brew: eza
-    - os: linux
+    - family: linux
       mise:
           name: eza
           version: latest

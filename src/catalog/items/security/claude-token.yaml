@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: claude-token
-order: 100
 description: The Claude Code subscription token a VM may borrow
 help: run `claude setup-token` and paste the token
 reversible: true
@@ -9,14 +8,15 @@ options:
     - name: token
       label: Claude Code token
       help: run `claude setup-token` and paste the token
-      type: password
+      type: string
+      secret: true
       required: true
 sets:
     - { key: token, value: kept by the studio credential store }
     - { key: share list, value: holds it }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: claude-token
 writes:
     - path: '{config}/studio-os'

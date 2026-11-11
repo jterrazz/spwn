@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: lens
-order: 410
 description: Kubernetes IDE for managing clusters
 bundle: Lens
 methods:

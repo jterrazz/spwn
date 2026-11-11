@@ -60,10 +60,10 @@ runs:
           send j
           send \x20
           send i
-          see Installing uv · 1/2
+          see Installing cocoapods · 1/2
           send ]
           see Settings · This Mac
-          see Installing uv · 1/2
+          see Installing cocoapods · 1/2
           send q
           see 1 call still runs here: quit anyway?
           send y

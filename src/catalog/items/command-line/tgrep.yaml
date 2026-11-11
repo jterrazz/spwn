@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: tgrep
-order: 250
 description: Trigram-indexed grep for large codebases
 replaces: grep -r
 provides: [tgrep]

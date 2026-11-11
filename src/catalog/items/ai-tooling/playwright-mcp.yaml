@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: playwright-mcp
-order: 620
 description: Browser automation for AI agents via MCP
 requires: [node]
 methods:
     - os: macos
-      only: vm
+      kind: [workspace, server]
       npm: '@playwright/mcp'
-    - os: linux
+    - family: linux
       mise:
           name: npm:@playwright/mcp
           version: latest

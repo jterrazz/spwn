@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: pipifier
-order: 960
 description: Picture-in-Picture for Safari
 bundle: PiPifier
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 1160374471
           name: PiPifier

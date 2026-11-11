@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: pnpm
-order: 60
 description: Fast, disk space efficient Node package manager
 provides: [pnpm]
 methods:
     - os: macos
       brew: pnpm
-    - os: linux
+    - family: linux
       mise:
           name: pnpm
           version: latest
@@ -15,26 +14,26 @@ disk:
     paths:
         - path: ~/Library/pnpm/store
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{data}/pnpm/store'
           level: cache
-          'on': [linux]
+          family: linux
         - path: '{state}/pnpm'
           level: cache
         - path: ~/Library/Preferences/pnpm
           level: settings
-          'on': [mac, macos]
+          os: macos
     free:
         - run: [pnpm, store, prune]
           needs: pnpm
           exists: ~/Library/pnpm/store
-          'on': [mac, macos]
+          os: macos
         - run: [pnpm, store, prune]
           needs: pnpm
           exists: '{data}/pnpm/store'
-          'on': [linux]
+          family: linux
         - delete: [~/Library/pnpm/store/*]
-          'on': [mac, macos]
+          os: macos
         - delete: ['{data}/pnpm/store/*']
-          'on': [linux]
+          family: linux
     no-erase: 'nothing to erase: keys and logins are kept'

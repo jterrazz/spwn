@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: setting
 name: never-sleeps
-order: 160
 description: 'Never sleeps: the engine keeps this Mac awake, its servers with it'
 reversible: true
 sets:
     - { key: never sleeps, value: held by the engine }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: never-sleeps
 writes:
     - path: '{config}/station/preferences.json'

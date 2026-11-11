@@ -1,17 +1,16 @@
 item: station.catalog/v1
 kind: app
 name: playwright-browsers
-order: 630
 description: Chromium runtime for website specs (@jterrazz/test)
 requires: [node]
 version:
     path: ~/Library/Caches/ms-playwright/chromium*
 methods:
     - os: macos
-      only: vm
+      kind: [workspace, server]
       script:
           run: npx playwright install chromium
-    - os: linux
+    - family: linux
       script:
           run: npx playwright install chromium
 disk:

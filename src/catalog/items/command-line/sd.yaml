@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: sd
-order: 260
 description: Intuitive sed alternative
 replaces: sed (simple replaces)
 provides: [sd]
 methods:
     - os: macos
       brew: sd
-    - os: linux
+    - family: linux
       mise:
           name: sd
           version: latest

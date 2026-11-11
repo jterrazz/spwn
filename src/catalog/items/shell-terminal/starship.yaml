@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: starship
-order: 170
 description: Cross-shell prompt (path, git branch/status, versions)
 provides: [starship]
 then: [starship-dotfiles]
 methods:
     - os: macos
       brew: starship
-    - os: linux
+    - family: linux
       mise:
           name: starship
           version: latest

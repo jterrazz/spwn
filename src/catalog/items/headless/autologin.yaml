@@ -1,14 +1,14 @@
 item: station.catalog/v1
 kind: setting
 name: autologin
-order: 140
 description: GUI auto-login for jterrazz.agent (FileVault-aware)
 needs: [sudo, terminal]
 reversible: true
 options:
     - name: password
       label: Password of jterrazz.agent
-      type: password
+      type: string
+      secret: true
       required: true
       default-env: AGENT_PASSWORD
 sets:
@@ -16,7 +16,7 @@ sets:
     - { key: /etc/kcpassword, value: present }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: autologin
 writes:
     - path: /etc/kcpassword

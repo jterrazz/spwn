@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: git
-order: 290
 description: Distributed version control system, from xcode-select
 provides: [git]
 version:

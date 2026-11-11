@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: better-interface
-order: 1030
 description: Interface polish
 methods:
     - os: any

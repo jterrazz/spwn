@@ -10,5 +10,5 @@ runs:
       exit: 0
       stdout: |
           codex ok 0.154.0
-          qmd ok github:tobi/qmd#e428df7
           markitdown ok 0.1.7
+          qmd ok github:tobi/qmd#e428df7

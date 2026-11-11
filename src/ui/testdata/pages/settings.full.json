@@ -74,60 +74,6 @@
       "items": [
         {
           "row": {
-            "id": "ghostty-dotfiles",
-            "mark": "attention",
-            "label": "ghostty-dotfiles",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff ghostty-dotfiles",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "github-login",
-            "mark": "attention",
-            "label": "github-login",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff github-login",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "dock-reset",
-            "mark": "attention",
-            "label": "dock-reset",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff dock-reset",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "git-shortcuts",
             "mark": "attention",
             "label": "git-shortcuts",
@@ -140,6 +86,60 @@
             "reason": "differs",
             "hint": {
               "command": "station settings diff git-shortcuts",
+              "key": "d"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "claude-token",
+            "mark": "attention",
+            "label": "claude-token",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff claude-token",
+              "key": "d"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ssh-key",
+            "mark": "attention",
+            "label": "ssh-key",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff ssh-key",
+              "key": "d"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "attention",
+            "label": "tart-launcher",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tart-launcher",
               "key": "d"
             }
           }
@@ -221,60 +221,6 @@
       "items": [
         {
           "row": {
-            "id": "ghostty-dotfiles",
-            "mark": "attention",
-            "label": "ghostty-dotfiles",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff ghostty-dotfiles",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "github-login",
-            "mark": "attention",
-            "label": "github-login",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff github-login",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "dock-reset",
-            "mark": "attention",
-            "label": "dock-reset",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "changed since 2 d ago"
-              }
-            ],
-            "reason": "differs",
-            "hint": {
-              "command": "station settings diff dock-reset",
-              "key": "d"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "git-shortcuts",
             "mark": "attention",
             "label": "git-shortcuts",
@@ -293,143 +239,131 @@
         },
         {
           "row": {
-            "id": "tmux-dotfiles",
-            "mark": "absent",
-            "label": "tmux-dotfiles",
+            "id": "claude-token",
+            "mark": "attention",
+            "label": "claude-token",
             "cells": [
               {
                 "kind": "text",
-                "text": "not applied"
+                "text": "changed since 2 d ago"
               }
             ],
+            "reason": "differs",
             "hint": {
-              "command": "station settings apply tmux-dotfiles",
-              "key": "a"
+              "command": "station settings diff claude-token",
+              "key": "d"
             }
-          }
-        },
-        {
-          "row": {
-            "id": "spotlight-exclude",
-            "mark": "absent",
-            "label": "spotlight-exclude",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "not applied"
-              }
-            ],
-            "hint": {
-              "command": "station settings apply spotlight-exclude",
-              "key": "a"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "dock-spacer",
-            "mark": "absent",
-            "label": "dock-spacer",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "not applied"
-              }
-            ],
-            "hint": {
-              "command": "station settings apply dock-spacer",
-              "key": "a"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "agent-hooks",
-            "mark": "absent",
-            "label": "agent-hooks",
-            "cells": [
-              {
-                "kind": "text",
-                "text": "not applied"
-              }
-            ],
-            "hint": {
-              "command": "station settings apply agent-hooks",
-              "key": "a"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "hushlogin",
-            "mark": "ok",
-            "label": "hushlogin",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "applied"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "~/.hushlogin"
-                  }
-                ]
-              }
-            ]
           }
         },
         {
           "row": {
             "id": "ssh-key",
-            "mark": "ok",
+            "mark": "attention",
             "label": "ssh-key",
             "cells": [
               {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "applied"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "~/.ssh-key"
-                  }
-                ]
+                "kind": "text",
+                "text": "changed since 2 d ago"
               }
-            ]
-          }
-        },
-        {
-          "row": {
-            "id": "zed-dotfiles",
-            "mark": "ok",
-            "label": "zed-dotfiles",
-            "cells": [
-              {
-                "kind": "list",
-                "items": [
-                  {
-                    "kind": "text",
-                    "text": "applied"
-                  },
-                  {
-                    "kind": "text",
-                    "text": "~/.zed-dotfiles"
-                  }
-                ]
-              }
-            ]
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff ssh-key",
+              "key": "d"
+            }
           }
         },
         {
           "row": {
             "id": "tart-launcher",
-            "mark": "ok",
+            "mark": "attention",
             "label": "tart-launcher",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "changed since 2 d ago"
+              }
+            ],
+            "reason": "differs",
+            "hint": {
+              "command": "station settings diff tart-launcher",
+              "key": "d"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ghostty-dotfiles",
+            "mark": "absent",
+            "label": "ghostty-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply ghostty-dotfiles",
+              "key": "a"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "absent",
+            "label": "dns",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply dns",
+              "key": "a"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "zed-dotfiles",
+            "mark": "absent",
+            "label": "zed-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply zed-dotfiles",
+              "key": "a"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "absent",
+            "label": "tailscale-cli",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply tailscale-cli",
+              "key": "a"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "docker-shortcuts",
+            "mark": "ok",
+            "label": "docker-shortcuts",
             "cells": [
               {
                 "kind": "list",
@@ -440,7 +374,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.tart-launcher"
+                    "text": "~/.docker-shortcuts"
                   }
                 ]
               }
@@ -449,9 +383,75 @@
         },
         {
           "row": {
-            "id": "starship-dotfiles",
+            "id": "tmux-dotfiles",
+            "mark": "ok",
+            "label": "tmux-dotfiles",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.tmux-dotfiles"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "spotlight-exclude",
+            "mark": "ok",
+            "label": "spotlight-exclude",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.spotlight-exclude"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "dock-spacer",
+            "mark": "ok",
+            "label": "dock-spacer",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.dock-spacer"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "hushlogin",
             "mark": "off-here",
-            "label": "starship-dotfiles",
+            "label": "hushlogin",
             "cells": [
               {
                 "kind": "text",
@@ -462,9 +462,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "git-signing",
             "mark": "off-here",
-            "label": "dns",
+            "label": "git-signing",
             "cells": [
               {
                 "kind": "text",
@@ -488,9 +488,9 @@
         },
         {
           "row": {
-            "id": "herdr-machine",
+            "id": "agent-hooks",
             "mark": "off-here",
-            "label": "herdr-machine",
+            "label": "agent-hooks",
             "cells": [
               {
                 "kind": "text",

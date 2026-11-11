@@ -2,45 +2,45 @@
    ● 34 settings on 4 machines  20 need a look · infra is a server: not checked
 
  Needs a look  20 ◐
-   ◐ This Mac  ghostty-dotfiles  changed since 2 d ago
-     → station settings diff ghostty-dotfiles
-   ◐ This Mac  github-login      changed since 2 d ago
-     → station settings diff github-login
-   ◐ This Mac  dock-reset        changed since 2 d ago
-     → station settings diff dock-reset
-   ◐ This Mac  git-shortcuts     changed since 2 d ago
+   ◐ This Mac  git-shortcuts  changed since 2 d ago
      → station settings diff git-shortcuts
-   ◐ This Mac  firewall          off
+   ◐ This Mac  claude-token   changed since 2 d ago
+     → station settings diff claude-token
+   ◐ This Mac  ssh-key        changed since 2 d ago
+     → station settings diff ssh-key
+   ◐ This Mac  tart-launcher  changed since 2 d ago
+     → station settings diff tart-launcher
+   ◐ This Mac  firewall       off
      → System Settings > Network > Firewall
-   ◐ This Mac  screen-lock       locks after 10 min · expected 5 min
+   ◐ This Mac  screen-lock    locks after 10 min · expected 5 min
      → System Settings > Lock Screen
-   ◐ mac-mini  ghostty-dotfiles  changed since 2 d ago
-     → station settings diff ghostty-dotfiles --on jterrazz-mac-mini
-   ◐ mac-mini  github-login      changed since 2 d ago
-     → station settings diff github-login --on jterrazz-mac-mini
-   ◐ mac-mini  dock-reset        changed since 2 d ago
-     → station settings diff dock-reset --on jterrazz-mac-mini
-   ◐ mac-mini  git-shortcuts     changed since 2 d ago
+   ◐ mac-mini  git-shortcuts  changed since 2 d ago
      → station settings diff git-shortcuts --on jterrazz-mac-mini
-   ◐ mac-mini  firewall          off
+   ◐ mac-mini  claude-token   changed since 2 d ago
+     → station settings diff claude-token --on jterrazz-mac-mini
+   ◐ mac-mini  ssh-key        changed since 2 d ago
+     → station settings diff ssh-key --on jterrazz-mac-mini
+   ◐ mac-mini  tart-launcher  changed since 2 d ago
+     → station settings diff tart-launcher --on jterrazz-mac-mini
+   ◐ mac-mini  firewall       off
      → System Settings > Network > Firewall
-   ◐ mac-mini  screen-lock       locks after 10 min · expected 5 min
+   ◐ mac-mini  screen-lock    locks after 10 min · expected 5 min
      → System Settings > Lock Screen
-   ◐ linux-1   ghostty-dotfiles  changed since 2 d ago
-     → station settings diff ghostty-dotfiles --on linux-1
-   ◐ linux-1   github-login      changed since 2 d ago
-     → station settings diff github-login --on linux-1
-   ◐ linux-1   dock-reset        changed since 2 d ago
-     → station settings diff dock-reset --on linux-1
-   ◐ linux-1   git-shortcuts     changed since 2 d ago
+   ◐ linux-1   git-shortcuts  changed since 2 d ago
      → station settings diff git-shortcuts --on linux-1
-   ◐ api       ghostty-dotfiles  changed since 2 d ago
+   ◐ linux-1   claude-token   changed since 2 d ago
+     → station settings diff claude-token --on linux-1
+   ◐ linux-1   ssh-key        changed since 2 d ago
+     → station settings diff ssh-key --on linux-1
+   ◐ linux-1   tart-launcher  changed since 2 d ago
+     → station settings diff tart-launcher --on linux-1
+   ◐ api       git-shortcuts  changed since 2 d ago
      → station machines start api
-   ◐ api       github-login      changed since 2 d ago
+   ◐ api       claude-token   changed since 2 d ago
      → station machines start api
-   ◐ api       dock-reset        changed since 2 d ago
+   ◐ api       ssh-key        changed since 2 d ago
      → station machines start api
-   ◐ api       git-shortcuts     changed since 2 d ago
+   ◐ api       tart-launcher  changed since 2 d ago
      → station machines start api
 
  Machines  3 ●  1 ○  1 –
@@ -51,12 +51,12 @@
    – infra     Server     not checked: station does not manage its settings
 
  Set by station
-                       This Mac  mac-mini  linux-1  api     OK
-   ◐ ghostty-dotfiles  ◐         ◐         ◐        ◐       0/4
-   ◐ github-login      ◐         ◐         ◐        ◐       0/4
-   ◐ dock-reset        ◐         ◐         ◐        ◐       0/4
-   ◐ git-shortcuts     ◐         ◐         ◐        ◐       0/4
-   ○ 16 more           ○ 4/12    ○ 4/12    ○ 4/12   ○ 4/12  16/48
+                    This Mac  mac-mini  linux-1  api     OK
+   ◐ git-shortcuts  ◐         ◐         ◐        ◐       0/4
+   ◐ claude-token   ◐         ◐         ◐        ◐       0/4
+   ◐ ssh-key        ◐         ◐         ◐        ◐       0/4
+   ◐ tart-launcher  ◐         ◐         ◐        ◐       0/4
+   ○ 16 more        ○ 4/12    ○ 4/12    ○ 4/12   ○ 4/12  16/48
 
  Always-on Mac
                  This Mac  mac-mini  linux-1  api  OK

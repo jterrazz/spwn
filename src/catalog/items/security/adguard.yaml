@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: adguard
-order: 920
 description: Ad blocker for Safari
 bundle: AdGuard for Safari
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 1440147259
           name: AdGuard for Safari

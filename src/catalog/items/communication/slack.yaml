@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: slack
-order: 730
 description: Team communication
 bundle: Slack
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: slack

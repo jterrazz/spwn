@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: setting
 name: dns
-order: 90
 description: Encrypted DNS via Quad9 (DoH)
 guided: true
 sets:
     - { key: encrypted DNS, value: Quad9 DoH }
 methods:
     - os: macos
-      only: mac
+      kind: computer
       builtin: dns
 writes:
     - path: '{state}/station/dns/quad9-dns.mobileconfig'

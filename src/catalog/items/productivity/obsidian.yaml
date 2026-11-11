@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: obsidian
-order: 780
 description: Knowledge base and note-taking
 bundle: Obsidian
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: obsidian
 disk:
     paths:

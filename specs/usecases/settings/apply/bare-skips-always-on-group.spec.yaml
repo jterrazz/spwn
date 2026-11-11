@@ -16,6 +16,6 @@ runs:
       stdout: |
           # Always-on Mac	5 ○
           ○	autologin	not applied	station settings apply autologin
-          ○	restart-after-power-cut	not applied	station settings apply restart-after-power-cut
-          ○	never-sleeps	not applied	station settings apply never-sleeps
           ○	lock-after-login	not applied	station settings apply lock-after-login
+          ○	never-sleeps	not applied	station settings apply never-sleeps
+          ○	restart-after-power-cut	not applied	station settings apply restart-after-power-cut

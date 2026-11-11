@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: setting
 name: agent-hooks
-order: 230
 description: 'The agent hook: station sees what Claude Code and Codex do, and what they wait for'
 requires-one-of: [claude, codex]
 reversible: true
 methods:
     - os: any
-      only: vm
+      kind: [workspace, server]
       agent-hooks:
           apps: [claude, codex]
 writes:

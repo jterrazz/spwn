@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: git-shortcuts
-order: 220
 description: 'Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup'
 reversible: true
 methods:

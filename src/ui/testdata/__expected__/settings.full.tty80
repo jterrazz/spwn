@@ -1,19 +1,19 @@
 This Mac · 16 set by station here · 9 checked · 6 need a look
 
 Needs a look
-  ◐ ghostty-dotfiles  changed since 2 d ago
-    → station settings diff ghostty-dotfiles
-  ◐ github-login      changed since 2 d ago
-    → station settings diff github-login
-  ◐ dock-reset        changed since 2 d ago
-    → station settings diff dock-reset
-  ◐ git-shortcuts     changed since 2 d ago
+  ◐ git-shortcuts  changed since 2 d ago
     → station settings diff git-shortcuts
-  ◐ firewall          off
+  ◐ claude-token   changed since 2 d ago
+    → station settings diff claude-token
+  ◐ ssh-key        changed since 2 d ago
+    → station settings diff ssh-key
+  ◐ tart-launcher  changed since 2 d ago
+    → station settings diff tart-launcher
+  ◐ firewall       off
     → System Settings > Network > Firewall
-  ◐ screen-lock       locks after 10 min · expected 5 min
+  ◐ screen-lock    locks after 10 min · expected 5 min
     → System Settings > Lock Screen
-Set by station  ● 4  ◐ 4  ○ 4  ⊘ 4 · ghostty-dotfiles, github-login, …
+Set by station  ● 4  ◐ 4  ○ 4  ⊘ 4 · git-shortcuts, claude-token, ssh-key, …
 Always-on Mac   ○ 5 · for a Mac that hosts servers
 Checked         ● 5  ◐ 2  ⊘ 1  ? 1 · firewall, screen-lock, time-machine, …
 – 4 not for this machine · VMs only

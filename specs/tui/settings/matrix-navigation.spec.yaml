@@ -12,7 +12,7 @@ runs:
           settle
           send ]]
           see This Mac  mac-mini  linux-1  api  OK
-          see ○ hushlogin               [○]        ○         ○        ?    0/3
+          see ○ docker-shortcuts        [○]        ○         ○        ?    0/3
           send F
           see Settings · All machines · only what needs a look
           gone hushlogin

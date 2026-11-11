@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: herdr-app
-order: 560
 description: Desktop app that keeps coding agents running in the background
 bundle: Herdr
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: herdr-app
 disk:
     paths:

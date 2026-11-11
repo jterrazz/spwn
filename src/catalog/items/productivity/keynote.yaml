@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: keynote
-order: 790
 description: Apple presentations
 bundle: Keynote
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 361285480
           name: Keynote

@@ -25,11 +25,14 @@ func (Level) Enum() []string {
 }
 
 type Stored struct {
-	Path  string        `yaml:"path"`
-	Level Level         `yaml:"level"`
-	On    []MachineKind `yaml:"on,omitempty"`
-	Note  string        `yaml:"note,omitempty"`
-	Memos []string      `yaml:"memos,omitempty"`
+	Path  string `yaml:"path"`
+	Level Level  `yaml:"level"`
+	// value: the machines the row is for, as the file selects them; On is
+	// what the catalog's load makes of it, every machine when empty.
+	Placed Selector      `yaml:",inline" json:"-"`
+	On     []MachineKind `yaml:"-"`
+	Note   string        `yaml:"note,omitempty"`
+	Memos  []string      `yaml:"memos,omitempty"`
 }
 
 type Action struct {
@@ -39,7 +42,8 @@ type Action struct {
 	Prune  []string      `yaml:"prune,omitempty"`
 	Needs  string        `yaml:"needs,omitempty"`
 	Exists string        `yaml:"exists,omitempty"`
-	On     []MachineKind `yaml:"on,omitempty"`
+	Placed Selector      `yaml:",inline" json:"-"`
+	On     []MachineKind `yaml:"-"`
 }
 
 type AppFile string

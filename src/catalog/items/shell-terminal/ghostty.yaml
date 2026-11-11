@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: ghostty
-order: 140
 description: GPU-accelerated terminal emulator
 then: [ghostty-dotfiles]
 bundle: Ghostty
@@ -14,10 +13,10 @@ disk:
           level: cache
         - path: ~/Library/HTTPStorages/com.mitchellh.ghostty
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: ~/Library/WebKit/com.mitchellh.ghostty
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{state}/ghostty'
           level: data
         - path: '{config}/ghostty'

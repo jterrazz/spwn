@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: mole
-order: 940
 description: Tidy, uninstall, analyze, and optimize macOS from the terminal
 provides: [mo]
 methods:
     - os: macos
-      only: mac
+      kind: computer
       brew: mole
 disk:
     paths:
@@ -14,7 +13,7 @@ disk:
           level: cache
         - path: ~/Library/Logs/mole
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{config}/mole'
           level: settings
     free:

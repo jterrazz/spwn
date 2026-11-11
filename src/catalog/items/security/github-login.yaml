@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: github-login
-order: 70
 description: The GitHub CLI logged in over SSH
 requires: [gh]
 needs: [terminal]

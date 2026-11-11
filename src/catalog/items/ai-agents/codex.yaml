@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: codex
-order: 500
 description: OpenAI's CLI coding agent
 provides: [codex]
 requires: [bun]
 methods:
     - os: macos
       bun: '@openai/codex'
-    - os: linux
+    - family: linux
       mise:
           name: codex
           version: latest

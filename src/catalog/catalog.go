@@ -77,10 +77,12 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 			items = append(items, placed{item: it, folder: folder.Name()})
 		}
 	}
-	slices.SortStableFunc(items, byOrder)
+	slices.SortFunc(items, byCategory)
 	c := Catalog{Images: builtinImages}
+	files := map[string]string{}
 	for _, p := range items {
 		file := path.Join(root, p.folder, p.item.Name+".yaml")
+		files[p.item.Name] = file
 		if p.item.Kind == KindSetting {
 			category, ok := settingCategory(p.folder)
 			if !ok {
@@ -95,67 +97,108 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 		}
 		c.Apps = append(c.Apps, p.item.app(category))
 	}
-	if err := c.whole(); err != nil {
+	if err := whole(items, files); err != nil {
 		return Catalog{}, err
 	}
 	return c, nil
 }
 
-// invariant: an ordered item comes before every unordered one, then by its
-// order, then by name.
-func byOrder(a, b placed) int {
-	if (a.item.Order == 0) != (b.item.Order == 0) {
-		if a.item.Order == 0 {
+// invariant: the apps and managers stand before the settings, each by
+// category, in the order of the categories' tables, then by name; a folder
+// that is no category sorts last, refused by the load.
+func byCategory(a, b placed) int {
+	if (a.item.Kind == KindSetting) != (b.item.Kind == KindSetting) {
+		if a.item.Kind == KindSetting {
 			return 1
 		}
 		return -1
 	}
-	return cmp.Or(cmp.Compare(a.item.Order, b.item.Order), cmp.Compare(a.item.Name, b.item.Name))
+	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.item.Name, b.item.Name))
 }
 
-// invariant: the items judged together: each name is one item's, and every
-// name an item gives (requires, then, provided-by) is an item of the right
-// kind.
-func (c Catalog) whole() error {
+func (p placed) rank() int {
+	folders := make([]string, 0, len(Categories))
+	if p.item.Kind == KindSetting {
+		for _, c := range SettingCategories {
+			folders = append(folders, c.Folder())
+		}
+	} else {
+		for _, c := range Categories {
+			folders = append(folders, c.Folder())
+		}
+	}
+	if i := slices.Index(folders, p.folder); i >= 0 {
+		return i
+	}
+	return len(folders)
+}
+
+// invariant: the items judged together, each refusal naming the file that
+// says it: each name is one item's, and every name an item gives (requires,
+// after, then, provided-by, renamed-from) is an item of the right kind.
+func whole(items []placed, files map[string]string) error {
 	owner := owners{}
 	for _, it := range CheckedSettings {
 		owner[it.Name] = "checked setting"
 	}
-	for _, t := range c.Apps {
-		if err := owner.claim(t.Name, "app"); err != nil {
-			return err
+	for _, p := range items {
+		what := "app"
+		if p.item.Kind == KindSetting {
+			what = "setting"
+		}
+		if err := owner.claim(p.item.Name, what); err != nil {
+			return &FileError{File: files[p.item.Name], Problem: err.Error()}
 		}
 	}
-	for _, it := range c.Settings {
-		if err := owner.claim(it.Name, "setting"); err != nil {
-			return err
-		}
-	}
-	for _, t := range c.Apps {
-		for _, r := range t.Requires {
-			if owner[r] != "app" {
-				return fmt.Errorf("catalog: %s requires %q, which is no app", t.Name, r)
-			}
-		}
-		for _, then := range t.Then {
-			if owner[then] != "setting" {
-				return fmt.Errorf("catalog: %s proposes %q, which is no setting", t.Name, then)
-			}
-		}
-		for _, p := range t.Installs {
-			if by, ok := p.Install.(ProvidedByInstall); ok && owner[by.Item] != "app" {
-				return fmt.Errorf("catalog: %s is provided by %q, which is no app", t.Name, by.Item)
-			}
-		}
-	}
-	for _, it := range c.Settings {
-		for _, r := range it.Needs() {
-			if owner[r] != "app" {
-				return fmt.Errorf("catalog: setting %s requires %q, which is no app", it.Name, r)
-			}
+	renamed := map[string]string{}
+	for _, p := range items {
+		it := p.item
+		if problem := judged(it, owner, renamed); problem != "" {
+			return &FileError{File: files[it.Name], Problem: problem}
 		}
 	}
 	return nil
+}
+
+func judged(it Item, owner owners, renamed map[string]string) string {
+	for _, old := range it.RenamedFrom {
+		if owner[old] != "" {
+			return fmt.Sprintf("%s is renamed from %q, which names an item still", it.Name, old)
+		}
+		if prev, ok := renamed[old]; ok {
+			return fmt.Sprintf("%s and %s are both renamed from %q", prev, it.Name, old)
+		}
+		renamed[old] = it.Name
+	}
+	for _, a := range it.After {
+		if owner[a] != "app" && owner[a] != "setting" {
+			return fmt.Sprintf("%s comes after %q, which is no item", it.Name, a)
+		}
+	}
+	if it.Kind == KindSetting {
+		for _, r := range slices.Concat(it.Requires, it.RequiresOneOf) {
+			if owner[r] != "app" {
+				return fmt.Sprintf("setting %s requires %q, which is no app", it.Name, r)
+			}
+		}
+		return ""
+	}
+	for _, r := range it.Requires {
+		if owner[r] != "app" {
+			return fmt.Sprintf("%s requires %q, which is no app", it.Name, r)
+		}
+	}
+	for _, then := range it.Then {
+		if owner[then] != "setting" {
+			return fmt.Sprintf("%s proposes %q, which is no setting", it.Name, then)
+		}
+	}
+	for _, m := range it.Methods {
+		if m.ProvidedBy != "" && owner[m.ProvidedBy] != "app" {
+			return fmt.Sprintf("%s is provided by %q, which is no app", it.Name, m.ProvidedBy)
+		}
+	}
+	return ""
 }
 
 // value: what each name of the catalog names: an app, a setting, a checked
@@ -164,7 +207,7 @@ type owners map[string]string
 
 func (o owners) claim(name, what string) error {
 	if prev, ok := o[name]; ok {
-		return fmt.Errorf("catalog: %q names both a %s and a %s", name, prev, what)
+		return fmt.Errorf("%q names both a %s and a %s", name, prev, what)
 	}
 	o[name] = what
 	return nil

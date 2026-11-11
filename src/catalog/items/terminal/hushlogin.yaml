@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: hushlogin
-order: 10
 description: Silence the terminal login message
 methods:
     - os: any

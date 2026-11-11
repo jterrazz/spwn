@@ -1,10 +1,10 @@
 item: station.catalog/v1
 kind: app
 name: messenger
-order: 750
 description: Facebook Messenger
 bundle: Messenger
 methods:
     - os: macos
-      only: mac
-      manual: no current source
+      kind: computer
+      script:
+          hint: no current source

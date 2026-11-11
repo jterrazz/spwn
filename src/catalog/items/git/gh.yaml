@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: gh
-order: 320
 description: GitHub CLI for repository management
 replaces: raw GitHub API / web UI
 provides: [gh]
@@ -9,7 +8,7 @@ then: [github-login]
 methods:
     - os: macos
       brew: gh
-    - os: linux
+    - family: linux
       mise:
           name: gh
           version: latest

@@ -46,6 +46,8 @@ const (
 	EffectZshFunctions EffectKind = "zsh-functions"
 	EffectAgentHooks   EffectKind = "agent-hooks"
 	EffectMuxMachines  EffectKind = "mux-machines"
+	// value: no Applier writes it yet: applied, it is refused as unhandled.
+	EffectMacOSDefaults EffectKind = "macos-defaults"
 )
 
 type Touch struct{ Path string }
@@ -106,12 +108,13 @@ const (
 	ProcTailscaleCLI         Procedure = "tailscale-cli"
 )
 
-func (Touch) Kind() EffectKind        { return EffectTouch }
-func (Dotfiles) Kind() EffectKind     { return EffectDotfile }
-func (GitAliases) Kind() EffectKind   { return EffectGitAliases }
-func (ZshFunctions) Kind() EffectKind { return EffectZshFunctions }
-func (AgentHooks) Kind() EffectKind   { return EffectAgentHooks }
-func (MuxMachines) Kind() EffectKind  { return EffectMuxMachines }
+func (Touch) Kind() EffectKind         { return EffectTouch }
+func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
+func (GitAliases) Kind() EffectKind    { return EffectGitAliases }
+func (ZshFunctions) Kind() EffectKind  { return EffectZshFunctions }
+func (AgentHooks) Kind() EffectKind    { return EffectAgentHooks }
+func (MuxMachines) Kind() EffectKind   { return EffectMuxMachines }
+func (MacOSDefaults) Kind() EffectKind { return EffectMacOSDefaults }
 
 func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p)) }
 

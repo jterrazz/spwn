@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: android-studio
-order: 350
 description: Android development IDE
 bundle: Android Studio
 methods:

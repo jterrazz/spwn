@@ -5,13 +5,13 @@ runs:
       exit: 0
       stdout: |
           # Set by station	7 ○
-          ○	hushlogin	not applied	station settings apply hushlogin
-          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
-          ○	starship-dotfiles	not applied · needs starship	station apps install starship
-          ○	github-login	not applied · needs gh	station apps install gh
-          ○	git-shortcuts	not applied	station settings apply git-shortcuts
-          ○	agent-hooks	not applied · needs claude or codex	station apps install claude
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
+          ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	hushlogin	not applied	station settings apply hushlogin
+          ○	starship-dotfiles	not applied · needs starship	station apps install starship
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	github-login	not applied · needs gh	station apps install gh
+          ○	agent-hooks	not applied · needs claude or codex	station apps install claude
           # Checked
           –	9 checked	not for this machine · Mac only
           # Not for this machine

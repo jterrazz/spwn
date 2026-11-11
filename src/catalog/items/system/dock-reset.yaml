@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: dock-reset
-order: 120
 description: Put the Dock back to the system defaults
 run-once: true
 sets:

@@ -14,9 +14,9 @@ runs:
           ●	ghostty	400 MB freed
           ●	starship	100 MB freed
           ●	gh	100 MB freed
-          ●	zed	300 MB freed
           ●	cursor	200 MB freed
           ●	xcode	5.8 GB freed
+          ●	zed	300 MB freed
           ●	helm	100 MB freed
           ●	claude	300 MB freed
           ●	codex	100 MB freed

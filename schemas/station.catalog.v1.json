@@ -3,6 +3,13 @@
     "Action": {
       "additionalProperties": false,
       "properties": {
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
         "delete": {
           "items": {
             "type": "string"
@@ -18,19 +25,48 @@
         "exists": {
           "type": "string"
         },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "kind": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
         "needs": {
           "type": "string"
         },
-        "on": {
-          "items": {
-            "enum": [
-              "mac",
-              "linux",
-              "macos"
-            ],
-            "type": "string"
-          },
-          "type": "array"
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
         },
         "prune": {
           "items": {
@@ -43,6 +79,9 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "version": {
+          "type": "string"
         }
       },
       "type": "object"
@@ -98,6 +137,38 @@
         "port",
         "via",
         "label"
+      ],
+      "type": "object"
+    },
+    "DefaultKey": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "option": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "float",
+            "boolean"
+          ],
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "type"
       ],
       "type": "object"
     },
@@ -217,6 +288,25 @@
       ],
       "type": "object"
     },
+    "GitHubReleaseMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string"
+        },
+        "checksums": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "asset"
+      ],
+      "type": "object"
+    },
     "Liveness": {
       "additionalProperties": false,
       "properties": {
@@ -230,6 +320,28 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "MacOSDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "$ref": "#/$defs/DefaultKey"
+          },
+          "type": "array"
+        },
+        "this-mac": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "domain",
+        "keys"
+      ],
       "type": "object"
     },
     "MasMethod": {
@@ -253,6 +365,16 @@
       "properties": {
         "agent-hooks": {
           "$ref": "#/$defs/AgentHooks"
+        },
+        "apt": {
+          "type": "string"
+        },
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
         },
         "brew": {
           "type": "string"
@@ -283,14 +405,48 @@
         "cask": {
           "type": "string"
         },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
         "file": {
           "$ref": "#/$defs/FileMethod"
         },
         "git-aliases": {
           "$ref": "#/$defs/GitAliases"
         },
-        "manual": {
-          "type": "string"
+        "github-release": {
+          "$ref": "#/$defs/GitHubReleaseMethod"
+        },
+        "kind": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
+        "macos-defaults": {
+          "$ref": "#/$defs/MacOSDefaults"
         },
         "mas": {
           "$ref": "#/$defs/MasMethod"
@@ -304,17 +460,11 @@
         "npm": {
           "type": "string"
         },
-        "only": {
-          "enum": [
-            "mac",
-            "vm"
-          ],
-          "type": "string"
-        },
         "os": {
           "enum": [
             "macos",
-            "linux",
+            "ubuntu",
+            "debian",
             "any"
           ],
           "type": "string"
@@ -328,8 +478,21 @@
           },
           "type": "array"
         },
+        "pin": {
+          "enum": [
+            "none",
+            "version"
+          ],
+          "type": "string"
+        },
         "provided-by": {
           "type": "string"
+        },
+        "provides": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "script": {
           "$ref": "#/$defs/ScriptMethod"
@@ -340,16 +503,19 @@
         "trusted": {
           "type": "boolean"
         },
+        "upgrade": {
+          "type": "string"
+        },
         "uv": {
+          "type": "string"
+        },
+        "version": {
           "type": "string"
         },
         "zsh-functions": {
           "$ref": "#/$defs/ZshFunctions"
         }
       },
-      "required": [
-        "os"
-      ],
       "type": "object"
     },
     "MiseMethod": {
@@ -431,8 +597,25 @@
     "Option": {
       "additionalProperties": false,
       "properties": {
+        "default": {
+          "type": [
+            "string",
+            "integer",
+            "boolean"
+          ]
+        },
         "default-env": {
           "type": "string"
+        },
+        "examples": {
+          "items": {
+            "type": [
+              "string",
+              "integer",
+              "boolean"
+            ]
+          },
+          "type": "array"
         },
         "help": {
           "type": "string"
@@ -440,18 +623,27 @@
         "label": {
           "type": "string"
         },
+        "max": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
+        },
         "name": {
           "type": "string"
         },
         "required": {
           "type": "boolean"
         },
+        "secret": {
+          "type": "boolean"
+        },
         "type": {
           "enum": [
-            "text",
-            "password",
-            "select",
-            "confirm"
+            "string",
+            "integer",
+            "boolean",
+            "enum"
           ],
           "type": "string"
         },
@@ -507,11 +699,17 @@
           },
           "type": "array"
         },
+        "check": {
+          "type": "string"
+        },
         "env": {
           "items": {
             "type": "string"
           },
           "type": "array"
+        },
+        "hint": {
+          "type": "string"
         },
         "off-terminal": {
           "items": {
@@ -528,7 +726,7 @@
         "run": {
           "type": "string"
         },
-        "upgrade": {
+        "undo": {
           "type": "string"
         },
         "url": {
@@ -556,6 +754,44 @@
     "Stored": {
       "additionalProperties": false,
       "properties": {
+        "arch": {
+          "enum": [
+            "arm64",
+            "amd64"
+          ],
+          "type": "string"
+        },
+        "family": {
+          "enum": [
+            "linux",
+            "debian"
+          ],
+          "type": "string"
+        },
+        "kind": {
+          "oneOf": [
+            {
+              "enum": [
+                "computer",
+                "workspace",
+                "server"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "enum": [
+                  "computer",
+                  "workspace",
+                  "server"
+                ],
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          ]
+        },
         "level": {
           "enum": [
             "cache",
@@ -574,18 +810,19 @@
         "note": {
           "type": "string"
         },
-        "on": {
-          "items": {
-            "enum": [
-              "mac",
-              "linux",
-              "macos"
-            ],
-            "type": "string"
-          },
-          "type": "array"
+        "os": {
+          "enum": [
+            "macos",
+            "ubuntu",
+            "debian",
+            "any"
+          ],
+          "type": "string"
         },
         "path": {
+          "type": "string"
+        },
+        "version": {
           "type": "string"
         }
       },
@@ -652,16 +889,44 @@
   "$id": "https://github.com/jterrazz/studio-station/blob/main/schemas/station.catalog.v1.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key.",
+  "description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from src/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
   "properties": {
-    "app-store": {
-      "type": "boolean"
+    "accepts": {
+      "items": {
+        "enum": [
+          "app-store"
+        ],
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "after": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "after-apply": {
+      "items": {
+        "enum": [
+          "restart-dock",
+          "restart-finder",
+          "restart-menu-bar",
+          "logout",
+          "reboot"
+        ],
+        "type": "string"
+      },
+      "type": "array"
     },
     "bundle": {
       "type": "string"
     },
     "declares": {
       "$ref": "#/$defs/Declares"
+    },
+    "deprecated": {
+      "type": "string"
     },
     "description": {
       "type": "string"
@@ -702,7 +967,9 @@
       "items": {
         "enum": [
           "sudo",
-          "terminal"
+          "terminal",
+          "license",
+          "app-store-login"
         ],
         "type": "string"
       },
@@ -714,10 +981,21 @@
       },
       "type": "array"
     },
-    "order": {
-      "type": "integer"
+    "phase": {
+      "enum": [
+        "image",
+        "boot",
+        "apply"
+      ],
+      "type": "string"
     },
     "provides": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "renamed-from": {
       "items": {
         "type": "string"
       },

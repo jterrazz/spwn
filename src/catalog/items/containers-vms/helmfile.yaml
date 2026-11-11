@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: helmfile
-order: 440
 description: Declarative deployments of Helm charts
 provides: [helmfile]
 methods:
     - os: macos
       brew: helmfile
-    - os: linux
+    - family: linux
       mise:
           name: helmfile
           version: latest

@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: bat
-order: 200
 description: Cat clone with syntax highlighting
 replaces: cat (for humans)
 provides: [bat]
 methods:
     - os: macos
       brew: bat
-    - os: linux
+    - family: linux
       mise:
           name: bat
           version: latest

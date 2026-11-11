@@ -12,6 +12,6 @@ runs:
       stdout: |
           This Mac · 109 apps for this Mac · 3 updates · 101 not installed
           Updates
-          Not installed  ○ 101 · homebrew, mas, uv, cocoapods, pnpm, skills, bun, java, python, rust, …
+          Not installed  ○ 101 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, python, rust, …
           OK             ● 5 · mise, go, bat, jq, lazygit
           Not for this machine  7 apps live on other machines

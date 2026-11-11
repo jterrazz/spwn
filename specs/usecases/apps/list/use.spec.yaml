@@ -13,5 +13,5 @@ runs:
           android-studio cask
           xcode mas
           xcodegen brew
-          orbstack cask
           lens cask
+          orbstack cask

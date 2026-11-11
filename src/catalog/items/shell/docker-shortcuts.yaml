@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: docker-shortcuts
-order: 250
 description: 'Docker shortcuts: dclean, dclean-images, dreset, each asks first'
 reversible: true
 methods:

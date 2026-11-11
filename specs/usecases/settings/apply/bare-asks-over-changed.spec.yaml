@@ -22,15 +22,15 @@ runs:
           ┃ Apply every setting not applied or changed since? A setting changed since is
           ┃ overwritten: yours is lost
           ┃
+          ●       docker-shortcuts        zsh block: dclean, dclean-images, dreset added
+          ●       git-shortcuts   ~/.gitconfig [alias]: written
           ●       hushlogin       ~/.hushlogin: created
-          ●       spotlight-exclude       spotlight-exclude: applied
           ●       dns     dns: applied
+          ●       spotlight-exclude       spotlight-exclude: applied
+          ●       backup-exclusions       backup-exclusions: applied
           ●       dock-reset      dock-reset: applied
           ●       dock-spacer     dock-spacer: applied
-          ●       backup-exclusions       backup-exclusions: applied
           ●       tart-launcher   ~/.local/bin/tart: written
-          ●       git-shortcuts   ~/.gitconfig [alias]: written
-          ●       docker-shortcuts        zsh block: dclean, dclean-images, dreset added
     - command: 'settings tart-launcher --json | /usr/bin/jq -r .setting.state'
       exit: 0
       stdout: |

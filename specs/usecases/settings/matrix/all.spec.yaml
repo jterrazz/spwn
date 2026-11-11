@@ -16,9 +16,9 @@ runs:
       stdout: |
           # Always-on Mac
           ●	autologin	○	●	–	?	1/1
-          ●	restart-after-power-cut	○	●	–	?	1/1
-          ●	never-sleeps	○	●	–	?	1/1
           ○	lock-after-login	○	○	–	?	0/1
+          ●	never-sleeps	○	●	–	?	1/1
+          ●	restart-after-power-cut	○	●	–	?	1/1
           ○	sshd	○	○	–	?	0/1
           # Checked
     - command: 'settings --all-machines --all | /usr/bin/grep -c "^[^#].*	[0-9]*/[0-9]*$"'

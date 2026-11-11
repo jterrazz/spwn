@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: notion
-order: 770
 description: Workspace for notes and docs
 bundle: Notion
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: notion
 disk:
     paths:

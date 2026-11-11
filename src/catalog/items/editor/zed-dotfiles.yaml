@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: zed-dotfiles
-order: 110
 description: The Zed settings and its formatter settings
 requires: [zed]
 methods:

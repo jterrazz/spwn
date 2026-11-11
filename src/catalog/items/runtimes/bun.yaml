@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: manager
 name: bun
-order: 80
 description: Fast JavaScript runtime and package manager
 provides: [bun]
 methods:
@@ -15,7 +14,7 @@ disk:
           level: cache
         - path: ~/Library/Caches/bun
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: ~/.bunfig.toml
           level: settings
     installed: ['{data}/bun/install/global', '{data}/bun/bin']
@@ -23,7 +22,7 @@ disk:
         - run: [bun, pm, cache, rm]
           needs: bun
         - delete: [~/Library/Caches/bun/*]
-          'on': [mac, macos]
+          os: macos
     no-erase: "bun's globals are apps: station apps remove <app>"
     relocate:
         - file: bunfig

@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: manager
 name: homebrew
-order: 10
 description: macOS package manager
 provides: [brew]
 needs: [sudo]

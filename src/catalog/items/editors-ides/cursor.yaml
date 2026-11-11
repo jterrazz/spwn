@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: cursor
-order: 340
 description: AI-powered code editor
 bundle: Cursor
 methods:

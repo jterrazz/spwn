@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: pulumi
-order: 470
 description: Infrastructure as code using real programming languages
 provides: [pulumi]
 methods:
     - os: macos
       trusted: true
       brew: pulumi/tap/pulumi
-    - os: linux
+    - family: linux
       mise:
           name: pulumi
           version: latest

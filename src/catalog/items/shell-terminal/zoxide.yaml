@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: zoxide
-order: 180
 description: Smarter cd command
 replaces: cd (jumping around)
 provides: [zoxide]
 methods:
     - os: macos
       brew: zoxide
-    - os: linux
+    - family: linux
       mise:
           name: zoxide
           version: latest
@@ -16,9 +15,9 @@ disk:
     paths:
         - path: ~/Library/Application Support/zoxide/db.zo
           level: data
-          'on': [mac, macos]
+          os: macos
         - path: '{data}/zoxide/db.zo'
           level: data
-          'on': [linux]
+          family: linux
     erase:
         - delete: [~/Library/Application Support/zoxide/db.zo, '{data}/zoxide/db.zo']

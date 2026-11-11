@@ -1,10 +1,10 @@
 item: station.catalog/v1
 kind: app
 name: dia
-order: 710
 description: The Browser Company's AI-first browser
 bundle: Dia
 methods:
     - os: macos
-      only: mac
-      manual: download it from its website
+      kind: computer
+      script:
+          hint: download it from its website

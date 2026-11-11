@@ -1,42 +1,48 @@
 item: station.catalog/v1
 kind: app
 name: tailscale
-order: 900
 description: 'The Tailscale app: each Mac is a node, and station reads it'
 provides: [tailscale]
 then: [tailscale-cli]
 bundle: Tailscale
 supersedes: tailscale
-app-store: true
+accepts: [app-store]
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: tailscale-app
 disk:
     paths:
         - path: ~/Library/Containers/io.tailscale.ipn.macos*
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
           note: the App Store app's login
         - path: ~/Library/Containers/io.tailscale.ipn.macsys*
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
           note: the Standalone app's login
         - path: ~/Library/Containers/Tailscale
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
         - path: ~/Library/Group Containers/*io.tailscale.ipn.macos
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
         - path: ~/Library/Group Containers/*io.tailscale.ipn.macsys
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
         - path: ~/Library/Group Containers/group.*.io.tailscale.shared
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
         - path: ~/Library/Application Scripts/*io.tailscale.*
           level: kept
-          'on': [mac]
+          os: macos
+          kind: computer
     installed:
         - /Applications/Tailscale.app
         - /usr/local/bin/tailscale

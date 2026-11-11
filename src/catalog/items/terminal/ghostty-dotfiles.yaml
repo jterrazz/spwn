@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: ghostty-dotfiles
-order: 20
 description: The Ghostty settings and its Catppuccin themes
 requires: [ghostty]
 methods:

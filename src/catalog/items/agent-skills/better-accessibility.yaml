@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: better-accessibility
-order: 1040
 description: Accessibility review and fixes
 methods:
     - os: any

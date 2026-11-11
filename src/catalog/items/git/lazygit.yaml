@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: lazygit
-order: 310
 description: Terminal UI for git
 replaces: raw git porcelain (interactive)
 provides: [lazygit]
 methods:
     - os: macos
       brew: lazygit
-    - os: linux
+    - family: linux
       mise:
           name: lazygit
           version: latest
@@ -16,6 +15,6 @@ disk:
     paths:
         - path: ~/Library/Application Support/lazygit/state.yml
           level: data
-          'on': [mac, macos]
+          os: macos
     erase:
         - delete: [~/Library/Application Support/lazygit/state.yml]

@@ -31,10 +31,10 @@
    ◌ infra
 
  Set by station  5 ◌
-   ◌ ghostty-dotfiles
-   ◌ github-login
-   ◌ dock-reset
    ◌ git-shortcuts
+   ◌ claude-token
+   ◌ ssh-key
+   ◌ tart-launcher
    ◌ 16 more
 
  Always-on Mac  1 ◌

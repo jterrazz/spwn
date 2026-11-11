@@ -73,9 +73,19 @@
       "items": [
         {
           "row": {
-            "id": "hushlogin",
+            "id": "docker-shortcuts",
             "mark": "pending",
-            "label": "hushlogin",
+            "label": "docker-shortcuts",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-shortcuts",
+            "mark": "pending",
+            "label": "git-shortcuts",
             "detail": {
               "kind": "pending"
             }
@@ -93,9 +103,9 @@
         },
         {
           "row": {
-            "id": "tmux-dotfiles",
+            "id": "hushlogin",
             "mark": "pending",
-            "label": "tmux-dotfiles",
+            "label": "hushlogin",
             "detail": {
               "kind": "pending"
             }
@@ -113,9 +123,9 @@
         },
         {
           "row": {
-            "id": "git-signing",
+            "id": "tmux-dotfiles",
             "mark": "pending",
-            "label": "git-signing",
+            "label": "tmux-dotfiles",
             "detail": {
               "kind": "pending"
             }
@@ -123,9 +133,29 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "claude-token",
             "mark": "pending",
-            "label": "ssh-key",
+            "label": "claude-token",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "dns",
+            "mark": "pending",
+            "label": "dns",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "git-signing",
+            "mark": "pending",
+            "label": "git-signing",
             "detail": {
               "kind": "pending"
             }
@@ -153,19 +183,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "ssh-key",
             "mark": "pending",
-            "label": "dns",
-            "detail": {
-              "kind": "pending"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "claude-token",
-            "mark": "pending",
-            "label": "claude-token",
+            "label": "ssh-key",
             "detail": {
               "kind": "pending"
             }
@@ -176,6 +196,16 @@
             "id": "zed-dotfiles",
             "mark": "pending",
             "label": "zed-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "backup-exclusions",
+            "mark": "pending",
+            "label": "backup-exclusions",
             "detail": {
               "kind": "pending"
             }
@@ -203,26 +233,6 @@
         },
         {
           "row": {
-            "id": "backup-exclusions",
-            "mark": "pending",
-            "label": "backup-exclusions",
-            "detail": {
-              "kind": "pending"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "tailscale-cli",
-            "mark": "pending",
-            "label": "tailscale-cli",
-            "detail": {
-              "kind": "pending"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "tart-launcher",
             "mark": "pending",
             "label": "tart-launcher",
@@ -233,9 +243,9 @@
         },
         {
           "row": {
-            "id": "git-shortcuts",
+            "id": "tailscale-cli",
             "mark": "pending",
-            "label": "git-shortcuts",
+            "label": "tailscale-cli",
             "detail": {
               "kind": "pending"
             }
@@ -256,16 +266,6 @@
             "id": "herdr-machine",
             "mark": "pending",
             "label": "herdr-machine",
-            "detail": {
-              "kind": "pending"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "docker-shortcuts",
-            "mark": "pending",
-            "label": "docker-shortcuts",
             "detail": {
               "kind": "pending"
             }

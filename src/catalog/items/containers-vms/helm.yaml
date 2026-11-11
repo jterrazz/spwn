@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: helm
-order: 430
 description: Kubernetes package manager
 provides: [helm]
 methods:
     - os: macos
       brew: helm
-    - os: linux
+    - family: linux
       mise:
           name: helm
           version: latest
@@ -15,11 +14,11 @@ disk:
     paths:
         - path: ~/Library/Caches/helm
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: ~/Library/Preferences/helm
           level: settings
-          'on': [mac, macos]
+          os: macos
     free:
         - delete: [~/Library/Caches/helm/*]
-          'on': [mac, macos]
+          os: macos
     no-erase: 'nothing to erase: keys and logins are kept'

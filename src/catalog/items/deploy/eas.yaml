@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: eas
-order: 460
 description: Expo's EAS CLI for app builds
 provides: [eas]
 requires: [bun]

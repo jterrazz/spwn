@@ -2,33 +2,86 @@ package catalog
 
 import "slices"
 
-// invariant: a method's selector is the kinds of machine it is placed on, in
-// the order Mac, Linux, macOS VM: `os: macos` is a Mac and a macOS VM, `only`
-// keeps the Mac itself or the VMs.
-func (m MethodSpec) kinds() []MachineKind {
+// invariant: a selector is the kinds of machine it is for, in the order
+// Mac, Linux, macOS VM. Station's Linux machines are Ubuntu VMs and all of
+// its machines arm64, so `os: debian`, a Linux computer and `arch: amd64`
+// match none of them; a version range is judged by the resolution
+// against a machine's system, and here keeps every version.
+func (s Selector) kinds() []MachineKind {
 	var all []MachineKind
-	switch m.OS {
-	case OSMacOS:
-		all = []MachineKind{Mac, MacOS}
-	case OSLinux:
+	switch {
+	case s.Family != "" || s.OS == OSUbuntu:
 		all = []MachineKind{Linux}
-	case OSAny:
+	case s.OS == OSMacOS:
+		all = []MachineKind{Mac, MacOS}
+	case s.OS == OSAny, s.OS == "":
 		all = []MachineKind{Mac, Linux, MacOS}
 	}
-	switch m.Only {
-	case OnlyMac:
-		return slices.DeleteFunc(all, notMac)
-	case OnlyVM:
-		return slices.DeleteFunc(all, isMac)
+	if s.Arch == ArchAMD64 {
+		return nil
 	}
-	return all
+	if len(s.Kind) == 0 {
+		return all
+	}
+	computer := slices.Contains(s.Kind, RoleComputer)
+	vm := slices.Contains(s.Kind, RoleWorkspace) || slices.Contains(s.Kind, RoleServer)
+	kept := make([]MachineKind, 0, len(all))
+	for _, k := range all {
+		if k == Mac && computer || k != Mac && vm {
+			kept = append(kept, k)
+		}
+	}
+	return kept
 }
 
-func isMac(k MachineKind) bool  { return k == Mac }
-func notMac(k MachineKind) bool { return k != Mac }
+func (s Selector) zero() bool {
+	return s.OS == "" && s.Family == "" && s.Version == "" && s.Arch == "" && len(s.Kind) == 0
+}
+
+func selectedKinds(s Selector) []MachineKind {
+	if s.zero() {
+		return nil
+	}
+	return s.kinds()
+}
+
+// invariant: a disk row with no selector is on every machine (On empty);
+// one with a selector is on its kinds. The selector is the file's words, On
+// the model's: a converted row keeps On alone, as one built in Go does.
+func storedOn(rows []Stored) []Stored {
+	out := slices.Clone(rows)
+	for i := range out {
+		out[i].On, out[i].Placed = selectedKinds(out[i].Placed), Selector{}
+	}
+	return out
+}
+
+func actionsOn(rows []Action) []Action {
+	out := slices.Clone(rows)
+	for i := range out {
+		out[i].On, out[i].Placed = selectedKinds(out[i].Placed), Selector{}
+	}
+	return out
+}
+
+func diskOn(d Disk) Disk {
+	d.Paths = storedOn(d.Paths)
+	d.Free = actionsOn(d.Free)
+	d.Erase = actionsOn(d.Erase)
+	d.Misplaced = slices.Clone(d.Misplaced)
+	for i := range d.Misplaced {
+		d.Misplaced[i].Free = actionsOn(d.Misplaced[i].Free)
+	}
+	return d
+}
 
 // invariant: checkMethod let through exactly one app manager key.
+// A method of a manager this station runs no installer for (apt,
+// github-release) is none: the next method serves.
 func (m MethodSpec) install(provides []string) Install {
+	if len(m.Provides) > 0 {
+		provides = m.Provides
+	}
 	switch {
 	case m.Brew != "":
 		return BrewInstall{Formula: m.Brew, Trusted: m.Trusted}
@@ -48,14 +101,16 @@ func (m MethodSpec) install(provides []string) Install {
 		return MiseInstall{App: m.Mise.Name, Version: m.Mise.Version}
 	case m.Script != nil && m.Script.Run != "":
 		return ShellInstall{Line: m.Script.Run}
+	case m.Script != nil && m.Script.URL != "":
+		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Upgrade: m.Upgrade, OnTerminal: m.Script.OnTerminal, OffTerminal: m.Script.OffTerminal}
 	case m.Script != nil:
-		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Upgrade: m.Script.Upgrade, OnTerminal: m.Script.OnTerminal, OffTerminal: m.Script.OffTerminal}
+		return AppInstall{Hint: m.Script.Hint}
 	case m.Skill != nil:
 		return SkillInstall{Repo: m.Skill.Repo, Skill: m.Skill.Name}
 	case m.ProvidedBy != "":
 		return ProvidedByInstall{Item: m.ProvidedBy, Commands: provides}
 	}
-	return AppInstall{Hint: m.Manual}
+	return nil
 }
 
 // invariant: checkMethod let through exactly one setting key.
@@ -73,6 +128,8 @@ func (m MethodSpec) effect() Effect {
 		return *m.AgentHooks
 	case m.MuxMachines != nil:
 		return MuxMachines{}
+	case m.MacOSDefaults != nil:
+		return *m.MacOSDefaults
 	}
 	return m.Builtin
 }
@@ -80,11 +137,15 @@ func (m MethodSpec) effect() Effect {
 func (it Item) app(category Category) App {
 	t := App{
 		Name: it.Name, Kind: it.Kind, Description: it.Description, Category: category, Replaces: it.Replaces,
-		Supersedes: it.Supersedes, AppStore: it.AppStore, Provides: it.Provides, Bundle: it.Bundle,
+		Supersedes: it.Supersedes, AppStore: slices.Contains(it.Accepts, SourceAppStore), Provides: it.Provides, Bundle: it.Bundle,
 		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
 	for _, m := range it.Methods {
-		t.Installs = append(t.Installs, LivesOn{Kinds: m.kinds(), Install: m.install(it.Provides)})
+		install := m.install(it.Provides)
+		if install == nil {
+			continue
+		}
+		t.Installs = append(t.Installs, LivesOn{Kinds: m.kinds(), Install: install})
 		for _, p := range m.Path {
 			if !slices.Contains(t.Path, p) {
 				t.Path = append(t.Path, p)
@@ -98,7 +159,7 @@ func (it Item) app(category Category) App {
 		t.Live = *it.Live
 	}
 	if it.Disk != nil {
-		t.Disk = *it.Disk
+		t.Disk = diskOn(*it.Disk)
 	}
 	return t
 }
@@ -107,7 +168,7 @@ func (it Item) setting(category SettingCategory) Setting {
 	s := Setting{
 		Name: it.Name, Description: it.Description, Help: it.Help, Declares: it.Declares, Category: category,
 		Interactive: slices.Contains(it.Needs, NeedTerminal), NeedsRoot: slices.Contains(it.Needs, NeedSudo),
-		Guided: it.Guided, Reversible: it.Reversible, RunOnce: it.RunOnce, Writes: it.Writes, Sets: it.Sets,
+		Guided: it.Guided, Reversible: it.Reversible, RunOnce: it.RunOnce, Writes: storedOn(it.Writes), Sets: it.Sets,
 	}
 	switch {
 	case len(it.Requires) > 0:
@@ -120,11 +181,29 @@ func (it Item) setting(category SettingCategory) Setting {
 	}
 	for _, o := range it.Options {
 		s.Inputs = append(s.Inputs, Input{
-			Name: o.Name, Label: o.Label, Help: o.Help, Kind: InputKind(slices.Index(o.Type.Enum(), string(o.Type))),
+			Name: o.Name, Label: o.Label, Help: o.Help, Kind: o.input(),
 			Options: o.Values, DefaultEnv: o.DefaultEnv, Required: o.Required,
 		})
 	}
 	s.Kinds = it.Methods[0].kinds()
 	s.Effect = it.Methods[0].effect()
 	return s
+}
+
+// invariant: a form asks an option by its type: a secret string hidden as
+// it is typed, an enum as a choice, a boolean as a yes or no, an integer
+// and any other string as text.
+func (o Option) input() InputKind {
+	switch o.Type {
+	case OptionString:
+		if o.Secret {
+			return InputPassword
+		}
+	case OptionEnum:
+		return InputSelect
+	case OptionBoolean:
+		return InputConfirm
+	case OptionInteger:
+	}
+	return InputText
 }

@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: betterdisplay
-order: 950
 description: Flexible HiDPI scaling and display management
 bundle: BetterDisplay
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: betterdisplay

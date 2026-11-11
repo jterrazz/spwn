@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: last30days
-order: 1110
 description: Research what happened in the last 30 days
 methods:
     - os: any

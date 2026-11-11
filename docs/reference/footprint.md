@@ -47,6 +47,15 @@ The keychain entry `station` holds nothing since round 5: `station init` removes
 
 ## Apps
 
+### cocoapods
+
+| Path                         | Group       | Note |
+| ---------------------------- | ----------- | ---- |
+| `~/Library/Caches/CocoaPods` | can rebuild |      |
+| `~/.cocoapods/repos`         | can rebuild |      |
+
+Free: `pod cache clean --all`, delete `~/.cocoapods/repos/*`. Erase: none (nothing to erase: keys and logins are kept).
+
 ### homebrew
 
 | Path                        | Group       | Note                             |
@@ -73,25 +82,6 @@ Free: `brew cleanup --prune=all`, delete `~/Library/Caches/Homebrew/*`. Erase: n
 
 Free: `mise cache clear`, `mise prune --tools --yes`, delete `~/Library/Caches/mise/*`, delete `~/Library/Caches/sigstore-rust/*`, delete `~/.cache/mise/*`, delete `~/.cache/sigstore-rust/*`. Erase: none (runtimes are apps: station apps remove <runtime>).
 
-### uv
-
-| Path                       | Group       | Note                             |
-| -------------------------- | ----------- | -------------------------------- |
-| `~/.cache/uv`              | can rebuild |                                  |
-| `~/.local/share/uv/tools`  | installed   | removed by `station apps remove` |
-| `~/.local/share/uv/python` | installed   | removed by `station apps remove` |
-
-Free: `uv cache clean`. Erase: none (what uv installs is apps: station apps remove <app>).
-
-### cocoapods
-
-| Path                         | Group       | Note |
-| ---------------------------- | ----------- | ---- |
-| `~/Library/Caches/CocoaPods` | can rebuild |      |
-| `~/.cocoapods/repos`         | can rebuild |      |
-
-Free: `pod cache clean --all`, delete `~/.cocoapods/repos/*`. Erase: none (nothing to erase: keys and logins are kept).
-
 ### pnpm
 
 | Path                         | Group         | Note  |
@@ -112,6 +102,16 @@ Free: `pnpm store prune` when `~/Library/pnpm/store` exists, `pnpm store prune` 
 | `~/.claude/skills`           | installed     | removed by `station apps remove` |
 
 Erase: none (skills are apps: station apps remove <skill>).
+
+### uv
+
+| Path                       | Group       | Note                             |
+| -------------------------- | ----------- | -------------------------------- |
+| `~/.cache/uv`              | can rebuild |                                  |
+| `~/.local/share/uv/tools`  | installed   | removed by `station apps remove` |
+| `~/.local/share/uv/python` | installed   | removed by `station apps remove` |
+
+Free: `uv cache clean`. Erase: none (what uv installs is apps: station apps remove <app>).
 
 ### bun
 
@@ -201,14 +201,6 @@ Free: delete `~/.cache/ghostty/*`, delete `~/Library/HTTPStorages/com.mitchellh.
 
 Free: delete `~/.oh-my-zsh/cache/*`, delete `~/.zcompdump*`. Erase: none (nothing to erase: keys and logins are kept).
 
-### tmux
-
-| Path           | Group         | Note |
-| -------------- | ------------- | ---- |
-| `~/.tmux.conf` | never touched |      |
-
-Erase: none (nothing to erase: keys and logins are kept).
-
 ### starship
 
 | Path                      | Group         | Note |
@@ -217,6 +209,14 @@ Erase: none (nothing to erase: keys and logins are kept).
 | `~/.config/starship.toml` | never touched |      |
 
 Free: delete `~/.cache/starship/*`. Erase: none (nothing to erase: keys and logins are kept).
+
+### tmux
+
+| Path           | Group         | Note |
+| -------------- | ------------- | ---- |
+| `~/.tmux.conf` | never touched |      |
+
+Erase: none (nothing to erase: keys and logins are kept).
 
 ### zoxide
 
@@ -227,6 +227,14 @@ Free: delete `~/.cache/starship/*`. Erase: none (nothing to erase: keys and logi
 
 Erase: delete `~/Library/Application Support/zoxide/db.zo`, delete `~/.local/share/zoxide/db.zo`.
 
+### bat
+
+| Path           | Group       | Note |
+| -------------- | ----------- | ---- |
+| `~/.cache/bat` | can rebuild |      |
+
+Free: `bat cache --clear`. Erase: none (nothing to erase: keys and logins are kept).
+
 ### yazi
 
 | Path                  | Group         | Note |
@@ -236,13 +244,16 @@ Erase: delete `~/Library/Application Support/zoxide/db.zo`, delete `~/.local/sha
 
 Erase: delete `~/.local/state/yazi/*`.
 
-### bat
+### gh
 
-| Path           | Group       | Note |
-| -------------- | ----------- | ---- |
-| `~/.cache/bat` | can rebuild |      |
+| Path                      | Group         | Note                                                                   |
+| ------------------------- | ------------- | ---------------------------------------------------------------------- |
+| `~/.cache/gh`             | can rebuild   |                                                                        |
+| `~/.local/state/gh`       | your data     |                                                                        |
+| `~/.config/gh/config.yml` | never touched |                                                                        |
+| `~/.config/gh/hosts.yml`  | never touched | the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied) |
 
-Free: `bat cache --clear`. Erase: none (nothing to erase: keys and logins are kept).
+Free: delete `~/.cache/gh/*`. Erase: delete `~/.local/state/gh/*`.
 
 ### git
 
@@ -268,16 +279,43 @@ Erase: none (nothing to erase: keys and logins are kept).
 
 Erase: delete `~/Library/Application Support/lazygit/state.yml`.
 
-### gh
+### android-studio
 
-| Path                      | Group         | Note                                                                   |
-| ------------------------- | ------------- | ---------------------------------------------------------------------- |
-| `~/.cache/gh`             | can rebuild   |                                                                        |
-| `~/.local/state/gh`       | your data     |                                                                        |
-| `~/.config/gh/config.yml` | never touched |                                                                        |
-| `~/.config/gh/hosts.yml`  | never touched | the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied) |
+| Path                               | Group       | Note                             |
+| ---------------------------------- | ----------- | -------------------------------- |
+| `~/.gradle/caches`                 | can rebuild |                                  |
+| `~/.gradle/wrapper/dists`          | can rebuild |                                  |
+| `~/.android/avd`                   | your data   |                                  |
+| `/Applications/Android Studio.app` | installed   | removed by `station apps remove` |
 
-Free: delete `~/.cache/gh/*`. Erase: delete `~/.local/state/gh/*`.
+Free: delete `~/.gradle/caches/*`, delete `~/.gradle/wrapper/dists/*`. Erase: delete `~/.android/avd/*`. An erase refuses while `studio` runs.
+
+### cursor
+
+| Path                                                        | Group         | Note |
+| ----------------------------------------------------------- | ------------- | ---- |
+| `~/Library/Application Support/Cursor/CachedExtensionVSIXs` | can rebuild   |      |
+| `~/Library/Application Support/Cursor/logs`                 | can rebuild   |      |
+| `~/Library/Application Support/Cursor/GPUCache`             | can rebuild   |      |
+| `~/Library/Application Support/Cursor/DawnCache`            | can rebuild   |      |
+| `~/Library/Application Support/Cursor/User/globalStorage`   | your data     |      |
+| `~/Library/Application Support/Cursor/User/History`         | your data     |      |
+| `~/Library/Application Support/Cursor/User/settings.json`   | never touched |      |
+
+Free: delete `~/Library/Application Support/Cursor/CachedExtensionVSIXs/*`, delete `~/Library/Application Support/Cursor/logs/*`, delete `~/Library/Application Support/Cursor/GPUCache/*`, delete `~/Library/Application Support/Cursor/DawnCache/*`. Erase: delete `~/Library/Application Support/Cursor/User/globalStorage/*`, delete `~/Library/Application Support/Cursor/User/History/*`. An erase refuses while `Cursor` runs.
+
+### xcode
+
+| Path                                          | Group       | Note                             |
+| --------------------------------------------- | ----------- | -------------------------------- |
+| `~/Library/Developer/Xcode/DerivedData`       | can rebuild |                                  |
+| `~/Library/Developer/Xcode/iOS DeviceSupport` | can rebuild |                                  |
+| `~/Library/Developer/CoreSimulator/Devices`   | your data   | every simulator device           |
+| `~/Library/Developer/Xcode/Archives`          | your data   |                                  |
+| `/Applications/Xcode.app`                     | installed   | removed by `station apps remove` |
+| `/Library/Developer/CoreSimulator`            | installed   | removed by `station apps remove` |
+
+Free: delete `~/Library/Developer/Xcode/DerivedData/*`, delete `~/Library/Developer/Xcode/iOS DeviceSupport/*`, `xcrun simctl delete unavailable`. Erase: `xcrun simctl shutdown all`, `xcrun simctl erase all`. An erase refuses while `Xcode` runs.
 
 ### zed
 
@@ -294,43 +332,41 @@ Free: delete `~/.cache/gh/*`. Erase: delete `~/.local/state/gh/*`.
 
 Free: delete `~/Library/Application Support/Zed/languages/*`, delete `~/Library/Application Support/Zed/external_agents/*`, delete `~/Library/Application Support/Zed/prettier/*`, delete `~/Library/Application Support/Zed/node/*`, delete `~/Library/Logs/Zed/*`. Erase: delete `~/Library/Application Support/Zed/db/*`, delete `~/Library/Application Support/Zed/extensions/*`. An erase refuses while `zed` runs.
 
-### cursor
+### docker
 
-| Path                                                        | Group         | Note |
-| ----------------------------------------------------------- | ------------- | ---- |
-| `~/Library/Application Support/Cursor/CachedExtensionVSIXs` | can rebuild   |      |
-| `~/Library/Application Support/Cursor/logs`                 | can rebuild   |      |
-| `~/Library/Application Support/Cursor/GPUCache`             | can rebuild   |      |
-| `~/Library/Application Support/Cursor/DawnCache`            | can rebuild   |      |
-| `~/Library/Application Support/Cursor/User/globalStorage`   | your data     |      |
-| `~/Library/Application Support/Cursor/User/History`         | your data     |      |
-| `~/Library/Application Support/Cursor/User/settings.json`   | never touched |      |
+| Path        | Group         | Note |
+| ----------- | ------------- | ---- |
+| `~/.docker` | never touched |      |
 
-Free: delete `~/Library/Application Support/Cursor/CachedExtensionVSIXs/*`, delete `~/Library/Application Support/Cursor/logs/*`, delete `~/Library/Application Support/Cursor/GPUCache/*`, delete `~/Library/Application Support/Cursor/DawnCache/*`. Erase: delete `~/Library/Application Support/Cursor/User/globalStorage/*`, delete `~/Library/Application Support/Cursor/User/History/*`. An erase refuses while `Cursor` runs.
+Free: `docker container prune -f`, `docker image prune -f`, `docker volume prune -f`, `docker network prune -f`, `docker builder prune -f`. Erase: none (dreset, the Docker shortcuts).
 
-### android-studio
+### helm
 
-| Path                               | Group       | Note                             |
-| ---------------------------------- | ----------- | -------------------------------- |
-| `~/.gradle/caches`                 | can rebuild |                                  |
-| `~/.gradle/wrapper/dists`          | can rebuild |                                  |
-| `~/.android/avd`                   | your data   |                                  |
-| `/Applications/Android Studio.app` | installed   | removed by `station apps remove` |
+| Path                         | Group         | Note  |
+| ---------------------------- | ------------- | ----- |
+| `~/Library/Caches/helm`      | can rebuild   | macOS |
+| `~/Library/Preferences/helm` | never touched | macOS |
 
-Free: delete `~/.gradle/caches/*`, delete `~/.gradle/wrapper/dists/*`. Erase: delete `~/.android/avd/*`. An erase refuses while `studio` runs.
+Free: delete `~/Library/Caches/helm/*`. Erase: none (nothing to erase: keys and logins are kept).
 
-### xcode
+### kubectl
 
-| Path                                          | Group       | Note                             |
-| --------------------------------------------- | ----------- | -------------------------------- |
-| `~/Library/Developer/Xcode/DerivedData`       | can rebuild |                                  |
-| `~/Library/Developer/Xcode/iOS DeviceSupport` | can rebuild |                                  |
-| `~/Library/Developer/CoreSimulator/Devices`   | your data   | every simulator device           |
-| `~/Library/Developer/Xcode/Archives`          | your data   |                                  |
-| `/Applications/Xcode.app`                     | installed   | removed by `station apps remove` |
-| `/Library/Developer/CoreSimulator`            | installed   | removed by `station apps remove` |
+| Path             | Group         | Note |
+| ---------------- | ------------- | ---- |
+| `~/.kube/cache`  | can rebuild   |      |
+| `~/.kube/config` | never touched |      |
 
-Free: delete `~/Library/Developer/Xcode/DerivedData/*`, delete `~/Library/Developer/Xcode/iOS DeviceSupport/*`, `xcrun simctl delete unavailable`. Erase: `xcrun simctl shutdown all`, `xcrun simctl erase all`. An erase refuses while `Xcode` runs.
+Free: delete `~/.kube/cache/*`. Erase: none (nothing to erase: keys and logins are kept).
+
+### orbstack
+
+| Path                                                 | Group         | Note                             |
+| ---------------------------------------------------- | ------------- | -------------------------------- |
+| `~/Library/Group Containers/HUAQ24HBR6.dev.orbstack` | your data     |                                  |
+| `~/.orbstack`                                        | never touched |                                  |
+| `/Applications/OrbStack.app`                         | installed     | removed by `station apps remove` |
+
+Erase: none (OrbStack erases its own data, in its Settings).
 
 ### tart
 
@@ -346,42 +382,6 @@ Free: delete `~/Library/Developer/Xcode/DerivedData/*`, delete `~/Library/Develo
 | `~/.local/opt`                                | misplaced   | `station disk move ~/.local/opt` moves `~/.local/opt/tart.app` to `~/.local/share/station/tart/tart.app`, `~/.local/opt/LICENSE` to `~/.local/share/station/tart/LICENSE` |
 
 Free: `tart prune --entries=caches --older-than=0`, delete `~/Library/Caches/com.github.cirruslabs.tart/*`. Erase: none (station's data are VMs and images: station machines delete <vm>, station images delete <image>).
-
-### docker
-
-| Path        | Group         | Note |
-| ----------- | ------------- | ---- |
-| `~/.docker` | never touched |      |
-
-Free: `docker container prune -f`, `docker image prune -f`, `docker volume prune -f`, `docker network prune -f`, `docker builder prune -f`. Erase: none (dreset, the Docker shortcuts).
-
-### orbstack
-
-| Path                                                 | Group         | Note                             |
-| ---------------------------------------------------- | ------------- | -------------------------------- |
-| `~/Library/Group Containers/HUAQ24HBR6.dev.orbstack` | your data     |                                  |
-| `~/.orbstack`                                        | never touched |                                  |
-| `/Applications/OrbStack.app`                         | installed     | removed by `station apps remove` |
-
-Erase: none (OrbStack erases its own data, in its Settings).
-
-### kubectl
-
-| Path             | Group         | Note |
-| ---------------- | ------------- | ---- |
-| `~/.kube/cache`  | can rebuild   |      |
-| `~/.kube/config` | never touched |      |
-
-Free: delete `~/.kube/cache/*`. Erase: none (nothing to erase: keys and logins are kept).
-
-### helm
-
-| Path                         | Group         | Note  |
-| ---------------------------- | ------------- | ----- |
-| `~/Library/Caches/helm`      | can rebuild   | macOS |
-| `~/Library/Preferences/helm` | never touched | macOS |
-
-Free: delete `~/Library/Caches/helm/*`. Erase: none (nothing to erase: keys and logins are kept).
 
 ### ansible
 
@@ -465,16 +465,14 @@ Free: delete `~/.codex/cache/*`, delete `~/.codex/logs_2.sqlite`, delete `~/.cac
 
 Erase: none (gemini keeps its login beside its data: erase it by hand).
 
-### opencode
+### herdr-app
 
-| Path                      | Group         | Note |
-| ------------------------- | ------------- | ---- |
-| `~/.cache/opencode`       | can rebuild   |      |
-| `~/.local/share/opencode` | your data     |      |
-| `~/.local/state/opencode` | your data     |      |
-| `~/.config/opencode`      | never touched |      |
+| Path                        | Group         | Note |
+| --------------------------- | ------------- | ---- |
+| `~/.local/state/herdr-core` | your data     |      |
+| `~/.config/herdr-app`       | never touched |      |
 
-Free: delete `~/.cache/opencode/*`. Erase: delete `~/.local/share/opencode/*`, delete `~/.local/state/opencode/*`.
+Erase: delete `~/.local/state/herdr-core/*`. An erase refuses while `Herdr` runs.
 
 ### hermes
 
@@ -487,14 +485,24 @@ Free: delete `~/.cache/opencode/*`. Erase: delete `~/.local/share/opencode/*`, d
 
 Erase: delete `~/.hermes/checkpoints/*`, delete `~/.hermes/sessions/*`, delete `~/.hermes/state.db`.
 
-### herdr-app
+### opencode
 
-| Path                        | Group         | Note |
-| --------------------------- | ------------- | ---- |
-| `~/.local/state/herdr-core` | your data     |      |
-| `~/.config/herdr-app`       | never touched |      |
+| Path                      | Group         | Note |
+| ------------------------- | ------------- | ---- |
+| `~/.cache/opencode`       | can rebuild   |      |
+| `~/.local/share/opencode` | your data     |      |
+| `~/.local/state/opencode` | your data     |      |
+| `~/.config/opencode`      | never touched |      |
 
-Erase: delete `~/.local/state/herdr-core/*`. An erase refuses while `Herdr` runs.
+Free: delete `~/.cache/opencode/*`. Erase: delete `~/.local/share/opencode/*`, delete `~/.local/state/opencode/*`.
+
+### agent-browser
+
+| Path                        | Group     | Note                             |
+| --------------------------- | --------- | -------------------------------- |
+| `~/.agent-browser/browsers` | installed | removed by `station apps remove` |
+
+Erase: none (the browsers are the app: station apps remove agent-browser).
 
 ### ollama
 
@@ -504,6 +512,15 @@ Erase: delete `~/.local/state/herdr-core/*`. An erase refuses while `Herdr` runs
 | `~/.ollama/models` | your data   |      |
 
 Free: delete `~/.ollama/logs/*`. Erase: delete `~/.ollama/models/*`. An erase refuses while `ollama` runs.
+
+### playwright-browsers
+
+| Path                             | Group     | Note                             |
+| -------------------------------- | --------- | -------------------------------- |
+| `~/Library/Caches/ms-playwright` | installed | removed by `station apps remove` |
+| `~/.cache/ms-playwright`         | installed | removed by `station apps remove` |
+
+Erase: none (the browsers are the app: station apps remove playwright-browsers).
 
 ### qmd
 
@@ -520,23 +537,6 @@ Free: delete `~/.cache/qmd/*`. Erase: none (nothing to erase: keys and logins ar
 | `~/Library/Application Support/rtk` | your data | macOS; the gain history |
 
 Erase: delete `~/Library/Application Support/rtk/*`.
-
-### playwright-browsers
-
-| Path                             | Group     | Note                             |
-| -------------------------------- | --------- | -------------------------------- |
-| `~/Library/Caches/ms-playwright` | installed | removed by `station apps remove` |
-| `~/.cache/ms-playwright`         | installed | removed by `station apps remove` |
-
-Erase: none (the browsers are the app: station apps remove playwright-browsers).
-
-### agent-browser
-
-| Path                        | Group     | Note                             |
-| --------------------------- | --------- | -------------------------------- |
-| `~/.agent-browser/browsers` | installed | removed by `station apps remove` |
-
-Erase: none (the browsers are the app: station apps remove agent-browser).
 
 ### claude-desktop
 
@@ -606,39 +606,39 @@ Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (not
 
 | Setting                 | Path                                                                            | Group         | Note                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| hushlogin               | `~/.hushlogin`                                                                  | never touched |                                                                          |
+| docker-shortcuts        | `~/.config/station/zsh/docker-shortcuts.zsh`                                    | never touched | the functions station's zsh block defines                                |
+| git-shortcuts           | `~/.gitconfig`                                                                  | never touched | station's `[alias]` block                                                |
 | ghostty-dotfiles        | `~/.config/ghostty/config`                                                      | never touched | the embedded `ghostty/config`                                            |
 | ghostty-dotfiles        | `~/.config/ghostty/themes/catppuccin-espresso-blur`                             | never touched | the embedded `ghostty/themes/catppuccin-espresso-blur`                   |
 | ghostty-dotfiles        | `~/.config/ghostty/themes/catppuccin-latte-blur`                                | never touched | the embedded `ghostty/themes/catppuccin-latte-blur`                      |
-| tmux-dotfiles           | `~/.tmux.conf`                                                                  | never touched | the embedded `tmux/tmux.conf`                                            |
+| hushlogin               | `~/.hushlogin`                                                                  | never touched |                                                                          |
 | starship-dotfiles       | `~/.config/starship.toml`                                                       | never touched | the embedded `starship/starship.toml`                                    |
+| tmux-dotfiles           | `~/.tmux.conf`                                                                  | never touched | the embedded `tmux/tmux.conf`                                            |
+| claude-token            | `~/.config/studio-os`                                                           | never touched | `operator:claude:oauth-token` in the OS credential store                 |
+| dns                     | `~/.local/state/station/dns/quad9-dns.mobileconfig`                             | never touched | installed as the profile `com.jterrazz.dns.quad9`                        |
 | git-signing             | `~/.gnupg`                                                                      | never touched |                                                                          |
 | git-signing             | `~/.gitconfig`                                                                  | never touched | `git config --global` user.signingkey, commit.gpgsign                    |
+| github-login            | `~/.config/gh/hosts.yml`                                                        | never touched | gh's login                                                               |
+| spotlight-exclude       | `/System/Volumes/Data/.Spotlight-V100`                                          | never touched | the Spotlight privacy list, through System Settings                      |
 | ssh-key                 | `~/.ssh/id_ed25519`                                                             | never touched |                                                                          |
 | ssh-key                 | `~/.ssh/id_ed25519.pub`                                                         | never touched |                                                                          |
 | ssh-key                 | `~/.ssh/config`                                                                 | never touched | the `Host *` stanza: `UseKeychain yes`, `IdentityFile ~/.ssh/id_ed25519` |
-| github-login            | `~/.config/gh/hosts.yml`                                                        | never touched | gh's login                                                               |
-| spotlight-exclude       | `/System/Volumes/Data/.Spotlight-V100`                                          | never touched | the Spotlight privacy list, through System Settings                      |
-| dns                     | `~/.local/state/station/dns/quad9-dns.mobileconfig`                             | never touched | installed as the profile `com.jterrazz.dns.quad9`                        |
-| claude-token            | `~/.config/studio-os`                                                           | never touched | `operator:claude:oauth-token` in the OS credential store                 |
 | zed-dotfiles            | `~/.config/zed/settings.json`                                                   | never touched | the embedded `zed/settings.json`                                         |
 | zed-dotfiles            | `~/.config/zed/.oxfmtrc.json`                                                   | never touched | the embedded `zed/.oxfmtrc.json`                                         |
-| dock-reset              | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults                                                |
-| dock-spacer             | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults: a spacer tile                                 |
-| autologin               | `/etc/kcpassword`                                                               | never touched | the agent user's login password, obfuscated                              |
-| autologin               | `/Library/Preferences/com.apple.loginwindow`                                    | never touched | `autoLoginUser` in `com.apple.loginwindow`                               |
-| restart-after-power-cut | `/Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist`      | never touched | pmset: autorestart, wake for network                                     |
-| never-sleeps            | `~/.config/station/preferences.json`                                            | never touched | `never_sleeps`, the engine holds an idle-sleep assertion while it is set |
-| lock-after-login        | `/Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist` | never touched | the agent user's `lock-after-login.plist`                                |
-| lock-after-login        | `/Users/jterrazz.agent/.openclaw/logs`                                          | can rebuild   | its logs                                                                 |
-| sshd                    | `/System/Library/LaunchDaemons/ssh.plist`                                       | never touched | Remote Login, through systemsetup                                        |
 | backup-exclusions       | `~/.cache`                                                                      | never touched | a sticky Time Machine exclusion (`tmutil addexclusion`)                  |
 | backup-exclusions       | `~/.local/share/station/vms`                                                    | never touched | a sticky Time Machine exclusion (`tmutil addexclusion`)                  |
+| dock-reset              | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults                                                |
+| dock-spacer             | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults: a spacer tile                                 |
 | tart-launcher           | `~/.local/bin/tart`                                                             | never touched | the embedded `tart/tart`                                                 |
-| git-shortcuts           | `~/.gitconfig`                                                                  | never touched | station's `[alias]` block                                                |
+| autologin               | `/etc/kcpassword`                                                               | never touched | the agent user's login password, obfuscated                              |
+| autologin               | `/Library/Preferences/com.apple.loginwindow`                                    | never touched | `autoLoginUser` in `com.apple.loginwindow`                               |
+| lock-after-login        | `/Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist` | never touched | the agent user's `lock-after-login.plist`                                |
+| lock-after-login        | `/Users/jterrazz.agent/.openclaw/logs`                                          | can rebuild   | its logs                                                                 |
+| never-sleeps            | `~/.config/station/preferences.json`                                            | never touched | `never_sleeps`, the engine holds an idle-sleep assertion while it is set |
+| restart-after-power-cut | `/Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist`      | never touched | pmset: autorestart, wake for network                                     |
+| sshd                    | `/System/Library/LaunchDaemons/ssh.plist`                                       | never touched | Remote Login, through systemsetup                                        |
 | agent-hooks             | `~/.claude/settings.json`                                                       | never touched | station's hook under `hooks`, every other key the owner's                |
 | agent-hooks             | `~/.codex/config.toml`                                                          | never touched | `notify`, unless the owner set it to another program                     |
-| docker-shortcuts        | `~/.config/station/zsh/docker-shortcuts.zsh`                                    | never touched | the functions station's zsh block defines                                |
 
 ## Home-root exceptions
 

@@ -7,5 +7,5 @@ runs:
       exit: 0
       stdout: |
           frontend-design ok currency unknown skill Agent skills
-          shadcn ok currency unknown skill Agent skills
           last30days not-installed skills not installed skill Agent skills
+          shadcn ok currency unknown skill Agent skills

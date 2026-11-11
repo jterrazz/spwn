@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: rust
-order: 130
 description: Systems programming language for safety and speed
 provides: [rustc, cargo]
 methods:

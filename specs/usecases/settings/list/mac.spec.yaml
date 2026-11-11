@@ -5,25 +5,25 @@ runs:
       exit: 0
       stdout: |
           # Set by station	19 ○
-          ○	hushlogin	not applied	station settings apply hushlogin
+          ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
+          ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
-          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	hushlogin	not applied	station settings apply hushlogin
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
+          ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	claude-token	not applied	station settings apply claude-token
+          ○	dns	not applied	station settings apply dns
           ○	git-signing	not applied · needs gpg	station apps install gpg
-          ○	ssh-key	not applied	station settings apply ssh-key
           ○	github-login	not applied · needs gh	station apps install gh
           ○	spotlight-exclude	not applied	station settings apply spotlight-exclude
-          ○	dns	not applied	station settings apply dns
-          ○	claude-token	not applied	station settings apply claude-token
+          ○	ssh-key	not applied	station settings apply ssh-key
           ○	zed-dotfiles	not applied · needs zed	station apps install zed
+          ○	backup-exclusions	not applied	station settings apply backup-exclusions
           ○	dock-reset	not applied	station settings apply dock-reset
           ○	dock-spacer	not applied	station settings apply dock-spacer
-          ○	backup-exclusions	not applied	station settings apply backup-exclusions
-          ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
           ○	tart-launcher	not applied	station settings apply tart-launcher
-          ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
           ○	herdr-machine	not applied · needs herdr-core	station apps install herdr-core
-          ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐

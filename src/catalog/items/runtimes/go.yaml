@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: go
-order: 90
 description: Compiled systems programming language by Google
 provides: [go]
 methods:
@@ -13,26 +12,26 @@ disk:
     paths:
         - path: ~/Library/Caches/go-build
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{cache}/go-build'
           level: cache
-          'on': [linux]
+          family: linux
         - path: '{cache}/go/mod'
           level: cache
         - path: ~/Library/Caches/gopls
           level: cache
-          'on': [mac, macos]
+          os: macos
           note: gopls's index
         - path: '{cache}/gopls'
           level: cache
-          'on': [linux]
+          family: linux
           note: gopls's index
         - path: ~/Library/Caches/goimports
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{cache}/goimports'
           level: cache
-          'on': [linux]
+          family: linux
         - path: '{data}/go/bin/*'
           level: data
           note: what go install put there
@@ -41,17 +40,17 @@ disk:
           note: the checksum database's state
         - path: ~/Library/Application Support/go/env
           level: settings
-          'on': [mac, macos]
+          os: macos
         - path: '{config}/go/env'
           level: settings
-          'on': [linux]
+          family: linux
         - path: ~/Library/Application Support/go/telemetry
           level: settings
-          'on': [mac, macos]
+          os: macos
           note: Go's telemetry mode and counters
         - path: '{config}/go/telemetry'
           level: settings
-          'on': [linux]
+          family: linux
           note: Go's telemetry mode and counters
     free:
         - run: [go, clean, -cache, -modcache]
@@ -60,9 +59,9 @@ disk:
               - ~/Library/Caches/go-build/*
               - ~/Library/Caches/gopls/*
               - ~/Library/Caches/goimports/*
-          'on': [mac, macos]
+          os: macos
         - delete: ['{cache}/go-build/*', '{cache}/gopls/*', '{cache}/goimports/*']
-          'on': [linux]
+          family: linux
     erase:
         - delete: ['{data}/go/bin/*', '{data}/go/pkg/*']
     relocate:

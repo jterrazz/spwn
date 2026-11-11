@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: typewhisper
-order: 690
 description: Whisper-based dictation app
 bundle: TypeWhisper
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: typewhisper

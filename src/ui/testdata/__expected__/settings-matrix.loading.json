@@ -66,64 +66,64 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/ghostty-dotfiles",
-            "mark": "pending",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-macbook-pro/github-login",
-            "mark": "pending",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-macbook-pro/dock-reset",
-            "mark": "pending",
-            "label": "jterrazz-macbook-pro",
-            "short": "This Mac",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "jterrazz-macbook-pro/git-shortcuts",
+            "mark": "pending",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/claude-token",
+            "mark": "pending",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/ssh-key",
+            "mark": "pending",
+            "label": "jterrazz-macbook-pro",
+            "short": "This Mac",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/tart-launcher",
             "mark": "pending",
             "label": "jterrazz-macbook-pro",
             "short": "This Mac",
@@ -180,64 +180,64 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/ghostty-dotfiles",
-            "mark": "pending",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-mac-mini/github-login",
-            "mark": "pending",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-mac-mini/dock-reset",
-            "mark": "pending",
-            "label": "jterrazz-mac-mini",
-            "short": "mac-mini",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "jterrazz-mac-mini/git-shortcuts",
+            "mark": "pending",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/claude-token",
+            "mark": "pending",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/ssh-key",
+            "mark": "pending",
+            "label": "jterrazz-mac-mini",
+            "short": "mac-mini",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/tart-launcher",
             "mark": "pending",
             "label": "jterrazz-mac-mini",
             "short": "mac-mini",
@@ -294,63 +294,6 @@
         },
         {
           "row": {
-            "id": "linux-1/ghostty-dotfiles",
-            "mark": "pending",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1/github-login",
-            "mark": "pending",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "linux-1/dock-reset",
-            "mark": "pending",
-            "label": "linux-1",
-            "short": "linux-1",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "linux-1/git-shortcuts",
             "mark": "pending",
             "label": "linux-1",
@@ -370,10 +313,10 @@
         },
         {
           "row": {
-            "id": "api/ghostty-dotfiles",
+            "id": "linux-1/claude-token",
             "mark": "pending",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "pending"
@@ -389,10 +332,10 @@
         },
         {
           "row": {
-            "id": "api/github-login",
+            "id": "linux-1/ssh-key",
             "mark": "pending",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "pending"
@@ -408,10 +351,10 @@
         },
         {
           "row": {
-            "id": "api/dock-reset",
+            "id": "linux-1/tart-launcher",
             "mark": "pending",
-            "label": "api",
-            "short": "api",
+            "label": "linux-1",
+            "short": "linux-1",
             "cells": [
               {
                 "kind": "pending"
@@ -428,6 +371,63 @@
         {
           "row": {
             "id": "api/git-shortcuts",
+            "mark": "pending",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/claude-token",
+            "mark": "pending",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/ssh-key",
+            "mark": "pending",
+            "label": "api",
+            "short": "api",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "api/tart-launcher",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -620,90 +620,90 @@
       "items": [
         {
           "row": {
-            "id": "ghostty-dotfiles",
-            "mark": "pending",
-            "label": "ghostty-dotfiles",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "github-login",
-            "mark": "pending",
-            "label": "github-login",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "dock-reset",
-            "mark": "pending",
-            "label": "dock-reset",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
             "id": "git-shortcuts",
             "mark": "pending",
             "label": "git-shortcuts",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "claude-token",
+            "mark": "pending",
+            "label": "claude-token",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "ssh-key",
+            "mark": "pending",
+            "label": "ssh-key",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tart-launcher",
+            "mark": "pending",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "pending"
@@ -983,31 +983,31 @@
       "label": "apply across",
       "on": "row",
       "rows": [
-        "hushlogin",
+        "docker-shortcuts",
+        "git-shortcuts",
         "ghostty-dotfiles",
-        "tmux-dotfiles",
+        "hushlogin",
         "starship-dotfiles",
+        "tmux-dotfiles",
+        "claude-token",
+        "dns",
         "git-signing",
-        "ssh-key",
         "github-login",
         "spotlight-exclude",
-        "dns",
-        "claude-token",
+        "ssh-key",
         "zed-dotfiles",
+        "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "autologin",
-        "restart-after-power-cut",
-        "never-sleeps",
-        "lock-after-login",
-        "sshd",
-        "backup-exclusions",
-        "tailscale-cli",
         "tart-launcher",
-        "git-shortcuts",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli",
         "agent-hooks",
-        "herdr-machine",
-        "docker-shortcuts"
+        "herdr-machine"
       ],
       "priority": 1,
       "mutates": true
@@ -1017,31 +1017,31 @@
       "label": "open on that machine",
       "on": "row",
       "rows": [
-        "hushlogin",
+        "docker-shortcuts",
+        "git-shortcuts",
         "ghostty-dotfiles",
-        "tmux-dotfiles",
+        "hushlogin",
         "starship-dotfiles",
+        "tmux-dotfiles",
+        "claude-token",
+        "dns",
         "git-signing",
-        "ssh-key",
         "github-login",
         "spotlight-exclude",
-        "dns",
-        "claude-token",
+        "ssh-key",
         "zed-dotfiles",
+        "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "autologin",
-        "restart-after-power-cut",
-        "never-sleeps",
-        "lock-after-login",
-        "sshd",
-        "backup-exclusions",
-        "tailscale-cli",
         "tart-launcher",
-        "git-shortcuts",
+        "autologin",
+        "lock-after-login",
+        "never-sleeps",
+        "restart-after-power-cut",
+        "sshd",
+        "tailscale-cli",
         "agent-hooks",
         "herdr-machine",
-        "docker-shortcuts",
         "filevault",
         "firewall",
         "sip",

@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: passepartout
-order: 930
 description: VPN client
 bundle: Passepartout
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 1433648537
           name: Passepartout

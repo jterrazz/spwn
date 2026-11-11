@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: java
-order: 110
 description: Java Development Kit (Temurin)
 provides: [java]
 version:

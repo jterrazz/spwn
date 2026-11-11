@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: vercel-react-best-practices
-order: 1140
 description: React and Next.js performance practices
 methods:
     - os: any

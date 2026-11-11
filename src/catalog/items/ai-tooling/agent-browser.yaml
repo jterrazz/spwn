@@ -1,15 +1,14 @@
 item: station.catalog/v1
 kind: app
 name: agent-browser
-order: 650
 description: Browser automation CLI for AI agents
 provides: [agent-browser]
 requires: [bun]
 methods:
     - os: macos
-      only: vm
+      kind: [workspace, server]
       bun: agent-browser
-    - os: linux
+    - family: linux
       bun: agent-browser
 disk:
     installed: [~/.agent-browser/browsers]

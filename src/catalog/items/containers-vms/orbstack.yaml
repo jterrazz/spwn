@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: orbstack
-order: 400
 description: Docker and Linux machines on the Mac, for exploration on a Mac
 provides: [orb]
 bundle: OrbStack
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: orbstack
 disk:
     paths:

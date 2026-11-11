@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: setting
 name: dock-spacer
-order: 130
 description: Add a small spacer tile to the dock
 run-once: true
 sets:

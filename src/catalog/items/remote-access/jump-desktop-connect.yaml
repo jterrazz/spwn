@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: jump-desktop-connect
-order: 880
 description: Remote GUI recovery for headless Macs
 bundle: Jump Desktop Connect
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: jump-desktop-connect

@@ -52,7 +52,7 @@ runs:
               → station apps update ghostty
             ◐ gh       2.97.0 → 2.98.0    brew  update available
               → station apps update gh
-          Not installed  ○ 101 · homebrew, mas, uv, cocoapods, …
+          Not installed  ○ 101 · cocoapods, homebrew, mas, pnpm, …
           OK             ● 5 · mise, go, bat, jq, lazygit
           Not for this machine  7 apps live on other machines
 

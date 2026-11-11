@@ -1,10 +1,9 @@
 item: station.catalog/v1
 kind: app
 name: conductor
-order: 540
 description: Runs parallel AI coding agents in git worktrees
 bundle: Conductor
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: conductor

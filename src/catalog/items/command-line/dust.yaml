@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: dust
-order: 210
 description: Intuitive disk usage viewer
 replaces: du -sh
 provides: [dust]
 methods:
     - os: macos
       brew: dust
-    - os: linux
+    - family: linux
       mise:
           name: dust
           version: latest

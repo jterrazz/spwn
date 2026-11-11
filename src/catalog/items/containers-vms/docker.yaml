@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: docker
-order: 390
 description: Container engine, inside the Linux VM
 provides: [docker]
 version:
     args: [docker, --version]
     pattern: Docker version ([^,\s]+)
 methods:
-    - os: linux
+    - family: linux
       script:
           url: https://get.docker.com
 disk:

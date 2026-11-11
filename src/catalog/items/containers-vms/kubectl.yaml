@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: kubectl
-order: 420
 description: Kubernetes command line
 provides: [kubectl]
 methods:
     - os: macos
       brew: kubectl
-    - os: linux
+    - family: linux
       mise:
           name: kubectl
           version: latest

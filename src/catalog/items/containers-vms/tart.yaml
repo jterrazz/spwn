@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: tart
-order: 380
 description: "Virtual machines on Apple silicon: the engine of station's VMs"
 provides: [tart]
 then: [tart-launcher]
@@ -10,7 +9,7 @@ version:
     pattern: ^(\S+)
 methods:
     - os: macos
-      only: mac
+      kind: computer
       script:
           run: d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"
 disk:

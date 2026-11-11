@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: python
-order: 120
 description: Python programming language runtime
 provides: [python3]
 version:
@@ -16,10 +15,10 @@ disk:
     paths:
         - path: ~/Library/Caches/pip
           level: cache
-          'on': [mac, macos]
+          os: macos
         - path: '{cache}/pip'
           level: cache
-          'on': [linux]
+          family: linux
     free:
         - run: [pip3, cache, purge]
           needs: pip3

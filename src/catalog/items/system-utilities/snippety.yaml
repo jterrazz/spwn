@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: snippety
-order: 970
 description: Code snippet manager
 bundle: Snippety
 methods:
     - os: macos
-      only: mac
+      kind: computer
       mas:
           id: 1530751461
           name: Snippety

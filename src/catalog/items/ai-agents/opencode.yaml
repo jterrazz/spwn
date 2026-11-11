@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: opencode
-order: 520
 description: Open-source AI coding agent CLI
 provides: [opencode]
 methods:
     - os: macos
       brew: opencode
-    - os: linux
+    - family: linux
       mise:
           name: opencode
           version: latest

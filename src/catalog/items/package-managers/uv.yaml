@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: manager
 name: uv
-order: 40
 description: Fast Python package and project manager
 provides: [uv]
 methods:
     - os: macos
       brew: uv
-    - os: linux
+    - family: linux
       mise:
           name: uv
           version: latest

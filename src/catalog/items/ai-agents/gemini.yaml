@@ -1,13 +1,12 @@
 item: station.catalog/v1
 kind: app
 name: gemini
-order: 510
 description: Google's CLI coding agent
 provides: [gemini]
 methods:
     - os: macos
       brew: gemini-cli
-    - os: linux
+    - family: linux
       mise:
           name: gemini
           version: latest

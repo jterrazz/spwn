@@ -1,14 +1,13 @@
 item: station.catalog/v1
 kind: app
 name: terraform
-order: 480
 description: Infrastructure as code provisioning
 provides: [terraform]
 methods:
     - os: macos
       trusted: true
       brew: hashicorp/tap/terraform
-    - os: linux
+    - family: linux
       mise:
           name: terraform
           version: latest

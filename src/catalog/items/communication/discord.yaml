@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: discord
-order: 720
 description: Voice and text chat
 bundle: Discord
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: discord
 disk:
     paths:

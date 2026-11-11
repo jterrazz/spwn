@@ -1,12 +1,11 @@
 item: station.catalog/v1
 kind: app
 name: claude-desktop
-order: 680
 description: Anthropic Claude desktop app
 bundle: Claude
 methods:
     - os: macos
-      only: mac
+      kind: computer
       cask: claude
 disk:
     paths:

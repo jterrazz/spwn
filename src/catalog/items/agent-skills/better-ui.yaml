@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: better-ui
-order: 1090
 description: UI review across the better-* skills
 methods:
     - os: any

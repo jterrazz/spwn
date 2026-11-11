@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: upgrading-expo
-order: 1000
 description: Upgrade an Expo app across SDK versions
 methods:
     - os: any

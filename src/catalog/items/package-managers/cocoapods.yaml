@@ -1,7 +1,6 @@
 item: station.catalog/v1
 kind: app
 name: cocoapods
-order: 50
 description: Dependency manager for iOS and macOS projects
 provides: [pod]
 methods:

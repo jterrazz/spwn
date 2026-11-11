@@ -12,24 +12,23 @@ An app is installed content: software or an agent skill (v2 had its own word for
 
 ## The catalog
 
-An app is one item file, `src/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1` ([`schemas/station.catalog.v1.json`](../../schemas/station.catalog.v1.json), which an editor checks the file against): its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os: macos | linux | any`, `only: mac | vm`) and exactly one manager key, the first method that matches the machine winning:
+An app is one item file, `src/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`: its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os`, `family`, `version`, `arch`, `kind`) and exactly one manager key, the first method that matches the machine winning. Every key of the format, and how strictly a file is read, is [The catalog's item format](catalog.md):
 
 ```yaml
 item: station.catalog/v1
 kind: app
 name: gh
-order: 320
 description: GitHub CLI for repository management
 provides: [gh]
 then: [github-login]
 methods:
     - os: macos
       brew: gh
-    - os: linux
+    - family: linux
       mise: { name: gh, version: latest }
 ```
 
-A file is read strictly: an unknown key, an anchor, an alias or a merge key, or a scalar YAML 1.1 reads otherwise (`yes`, `0755`) is refused with its line, and a file of a newer schema with `update station`. `order` says where the item stands in the lists. Where it lives, the kinds of machine it may be on (`mac`, `linux`, `macos`), is derived from its methods' selectors, so it cannot disagree with them; `station apps --json` says it as `lives_on` (`every-machine`, `mac-only`, `vms-only`). Dev apps live in VMs: Xcode, CocoaPods, XcodeGen, Android Studio and Lens are placed `macos` only and install nowhere until the macOS VM exists ([TODO](../../TODO.md)); Ollama stays on Macs for the GPU; Docker lives in the Linux VM.
+The lists stand by category, then by name. Where it lives, the kinds of machine it may be on (`mac`, `linux`, `macos`), is derived from its methods' selectors, so it cannot disagree with them; `station apps --json` says it as `lives_on` (`every-machine`, `mac-only`, `vms-only`). Dev apps live in VMs: Xcode, CocoaPods, XcodeGen, Android Studio and Lens are placed `macos` only and install nowhere until the macOS VM exists ([TODO](../../TODO.md)); Ollama stays on Macs for the GPU; Docker lives in the Linux VM.
 
 An app asked for on a machine it does not live on is refused with exit 2, `dia lives on Macs only`, the hint the command with `--on`.
 
@@ -47,7 +46,7 @@ One registry, `Installers` in `src/apps/contract/`, holds an installer per metho
 | `bun`             | `bun install -g`                                                   | `bun remove -g`                                  | `bun update -g`                  | all        |
 | `mise`            | `mise use --global <tool>@<version>`                               | `mise unuse --global`                            | `mise upgrade`                   | all        |
 | `script`, `shell` | the vendor's installer                                             | not reversible                                   | rerun the script; none for shell | all        |
-| `app`             | manual: the refusal names how                                      | not reversible                                   | none                             | Mac, macos |
+| `app`             | a `script` with a `hint` alone: the refusal names how              | not reversible                                   | none                             | Mac, macos |
 | `skill`           | `skills add <repo> -g -y --skill <name> --agent claude-code codex` | `skills remove -g -y <name>`                     | the install again                | all        |
 | `provided-by`     | the item that provides it, first; then its commands are looked up  | not reversible: remove the item that provides it | none                             | all        |
 
@@ -61,7 +60,7 @@ An App Store app is installed by mas itself, outside the bundle: signed out, the
 
 ## Superseded installs and App Store copies
 
-A catalog app can name the formula it `supersedes`: with the formula alone the app is `? formula installed, app absent`, and once the app itself is OK `station apps install <app>` uninstalls the formula (`● tailscale formula  uninstalled: the app replaces it`). An `app-store` app whose bundle carries the App Store's receipt (`Contents/_MASReceipt`) is present through that copy, Not managed, detail `app-store`: `apps install` says it is already installed, `apps update` leaves it to the App Store (`○ the App Store updates it` when named), and `apps remove` refuses it (`Hint: remove it from /Applications`). Tailscale is both ([The tailnet](machines.md#tailscale)).
+A catalog app can name the formula it `supersedes`: with the formula alone the app is `? formula installed, app absent`, and once the app itself is OK `station apps install <app>` uninstalls the formula (`● tailscale formula  uninstalled: the app replaces it`). An app that `accepts: [app-store]` and whose bundle carries the App Store's receipt (`Contents/_MASReceipt`) is present through that copy, Not managed, detail `app-store`: `apps install` says it is already installed, `apps update` leaves it to the App Store (`○ the App Store updates it` when named), and `apps remove` refuses it (`Hint: remove it from /Applications`). Tailscale is both ([The tailnet](machines.md#tailscale)).
 
 ## Runtimes
 
