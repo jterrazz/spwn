@@ -3,6 +3,7 @@ package local
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -11,7 +12,11 @@ import (
 	"time"
 )
 
-type network struct{}
+type network struct {
+	// value: the most an answer's body is read to, so one that streams
+	// without end fails rather than fills the memory.
+	most int64
+}
 
 func (network) Dial(ctx context.Context, addr string, port int, timeout time.Duration) bool {
 	d := net.Dialer{Timeout: timeout}
@@ -27,7 +32,7 @@ func (n network) Get(ctx context.Context, url string, header map[string]string) 
 	return n.do(ctx, http.MethodGet, url, header, nil)
 }
 
-func (network) do(ctx context.Context, method, url string, header map[string]string, payload []byte) (status int, body []byte, err error) {
+func (n network) do(ctx context.Context, method, url string, header map[string]string, payload []byte) (status int, body []byte, err error) {
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(payload))
 	if err != nil {
 		return 0, nil, err
@@ -41,7 +46,10 @@ func (network) do(ctx context.Context, method, url string, header map[string]str
 		return 0, nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
-	body, err = io.ReadAll(resp.Body)
+	body, err = io.ReadAll(io.LimitReader(resp.Body, n.most+1))
+	if err == nil && int64(len(body)) > n.most {
+		return resp.StatusCode, nil, fmt.Errorf("%s answered past %d MiB", url, n.most>>20)
+	}
 	return resp.StatusCode, body, err
 }
 

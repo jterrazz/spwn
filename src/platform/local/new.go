@@ -42,7 +42,7 @@ func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, searc
 		Run:     &runner{env: env, dirs: searched(vars["PATH"], system, landing), system: system, landing: landing, stdin: stdin, stdout: stdout, stderr: stderr},
 		FS:      disk{},
 		Env:     identity{vars: vars},
-		Net:     network{},
+		Net:     network{most: 512 << 20},
 		Sockets: sockets{},
 		Clock:   clock{},
 	}

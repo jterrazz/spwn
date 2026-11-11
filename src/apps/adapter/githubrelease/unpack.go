@@ -10,12 +10,16 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"slices"
 	"strings"
 )
 
-// value: the largest command an asset may hold, so an archive that
+// value: what an asset may hold: each command at most, and its archive
+// read through at most, all its files together, so an archive that
 // inflates without end is refused rather than read.
-const most = 512 << 20
+type bounds struct{ command, archive int64 }
+
+var within = bounds{command: 512 << 20, archive: 2 << 30}
 
 type entry struct {
 	name       string
@@ -24,11 +28,16 @@ type entry struct {
 }
 
 // invariant: each command is the one regular file of the asset by that
-// name (the executable one, where several are), else the asset itself
-// when it is no archive and lands one command; nothing else of the asset
-// is written.
+// name (the executable one, where several are), and a runnable one; else
+// the asset itself when it is no archive, nor a compressed file, and lands
+// one command. Only those files are read into memory, and nothing else of
+// the asset is written.
 func unpack(asset string, body []byte, cmds []string) (map[string][]byte, error) {
-	entries, archive, err := entries(asset, body)
+	return unpackWithin(asset, body, cmds, within)
+}
+
+func unpackWithin(asset string, body []byte, cmds []string, b bounds) (map[string][]byte, error) {
+	entries, archive, err := entries(asset, body, cmds, b)
 	if err != nil {
 		return nil, err
 	}
@@ -47,28 +56,26 @@ func unpack(asset string, body []byte, cmds []string) (map[string][]byte, error)
 				found = append(found, e)
 			}
 		}
-		if len(found) > 1 {
-			var run []entry
-			for _, e := range found {
-				if e.executable {
-					run = append(run, e)
-				}
+		var run []entry
+		for _, e := range found {
+			if e.executable {
+				run = append(run, e)
 			}
-			found = run
 		}
-		switch len(found) {
-		case 0:
+		switch {
+		case len(found) == 0:
 			return nil, fmt.Errorf("%s holds no %s", asset, cmd)
-		case 1:
-			out[cmd] = found[0].data
-		default:
-			return nil, fmt.Errorf("%s holds %d files named %s", asset, len(found), cmd)
+		case len(run) == 0:
+			return nil, fmt.Errorf("%s holds %s, but no runnable one", asset, cmd)
+		case len(run) > 1:
+			return nil, fmt.Errorf("%s holds %d files named %s", asset, len(run), cmd)
 		}
+		out[cmd] = run[0].data
 	}
 	return out, nil
 }
 
-func entries(asset string, body []byte) ([]entry, bool, error) {
+func entries(asset string, body []byte, cmds []string, b bounds) ([]entry, bool, error) {
 	lower := strings.ToLower(asset)
 	switch {
 	case strings.HasSuffix(lower, ".tar.gz"), strings.HasSuffix(lower, ".tgz"):
@@ -76,19 +83,21 @@ func entries(asset string, body []byte) ([]entry, bool, error) {
 		if err != nil {
 			return nil, true, fmt.Errorf("%s: %w", asset, err)
 		}
-		es, err := untar(z)
+		es, err := untar(z, cmds, b)
 		return es, true, wrap(asset, err)
 	case strings.HasSuffix(lower, ".tar.bz2"), strings.HasSuffix(lower, ".tbz"):
-		es, err := untar(bzip2.NewReader(bytes.NewReader(body)))
+		es, err := untar(bzip2.NewReader(bytes.NewReader(body)), cmds, b)
 		return es, true, wrap(asset, err)
 	case strings.HasSuffix(lower, ".tar"):
-		es, err := untar(bytes.NewReader(body))
+		es, err := untar(bytes.NewReader(body), cmds, b)
 		return es, true, wrap(asset, err)
 	case strings.HasSuffix(lower, ".zip"):
-		es, err := unzip(body)
+		es, err := unzip(body, cmds, b)
 		return es, true, wrap(asset, err)
 	case strings.HasSuffix(lower, ".tar.xz"), strings.HasSuffix(lower, ".txz"), strings.HasSuffix(lower, ".tar.zst"), strings.HasSuffix(lower, ".7z"), strings.HasSuffix(lower, ".deb"), strings.HasSuffix(lower, ".rpm"), strings.HasSuffix(lower, ".dmg"), strings.HasSuffix(lower, ".pkg"):
 		return nil, true, fmt.Errorf("%s is an archive station does not open: its method names a .tar.gz, .zip or bare asset", asset)
+	case strings.HasSuffix(lower, ".gz"), strings.HasSuffix(lower, ".bz2"), strings.HasSuffix(lower, ".xz"), strings.HasSuffix(lower, ".zst"), strings.HasSuffix(lower, ".lz4"), strings.HasSuffix(lower, ".z"):
+		return nil, true, fmt.Errorf("%s is a compressed file, no command: its method names a .tar.gz, .zip or bare asset", asset)
 	}
 	return nil, false, nil
 }
@@ -100,9 +109,33 @@ func wrap(asset string, err error) error {
 	return nil
 }
 
-func untar(r io.Reader) ([]entry, error) {
+// value: a reader that fails past its bound, where a plain limit would end
+// the archive quietly.
+type capped struct {
+	r    io.Reader
+	left int64
+	most int64
+}
+
+func (c *capped) Read(p []byte) (int, error) {
+	if c.left <= 0 {
+		var one [1]byte
+		if n, err := c.r.Read(one[:]); n == 0 && errors.Is(err, io.EOF) {
+			return 0, io.EOF
+		}
+		return 0, fmt.Errorf("an archive past %d MiB", c.most>>20)
+	}
+	if int64(len(p)) > c.left {
+		p = p[:c.left]
+	}
+	n, err := c.r.Read(p)
+	c.left -= int64(n)
+	return n, err
+}
+
+func untar(r io.Reader, cmds []string, b bounds) ([]entry, error) {
 	var out []entry
-	t := tar.NewReader(r)
+	t := tar.NewReader(&capped{r: r, left: b.archive, most: b.archive})
 	for {
 		h, err := t.Next()
 		if errors.Is(err, io.EOF) {
@@ -111,10 +144,10 @@ func untar(r io.Reader) ([]entry, error) {
 		if err != nil {
 			return nil, err
 		}
-		if h.Typeflag != tar.TypeReg {
+		if h.Typeflag != tar.TypeReg || !slices.Contains(cmds, path.Base(h.Name)) {
 			continue
 		}
-		data, err := bounded(t)
+		data, err := bounded(t, b.command)
 		if err != nil {
 			return nil, err
 		}
@@ -122,21 +155,21 @@ func untar(r io.Reader) ([]entry, error) {
 	}
 }
 
-func unzip(body []byte) ([]entry, error) {
+func unzip(body []byte, cmds []string, b bounds) ([]entry, error) {
 	z, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
 	if err != nil {
 		return nil, err
 	}
 	var out []entry
 	for _, f := range z.File {
-		if !f.Mode().IsRegular() {
+		if !f.Mode().IsRegular() || !slices.Contains(cmds, path.Base(f.Name)) {
 			continue
 		}
 		r, err := f.Open()
 		if err != nil {
 			return nil, err
 		}
-		data, err := bounded(r)
+		data, err := bounded(r, b.command)
 		_ = r.Close()
 		if err != nil {
 			return nil, err
@@ -146,13 +179,13 @@ func unzip(body []byte) ([]entry, error) {
 	return out, nil
 }
 
-func bounded(r io.Reader) ([]byte, error) {
+func bounded(r io.Reader, most int64) ([]byte, error) {
 	data, err := io.ReadAll(io.LimitReader(r, most+1))
 	if err != nil {
 		return nil, err
 	}
-	if len(data) > most {
-		return nil, errors.New("a file past 512 MiB")
+	if int64(len(data)) > most {
+		return nil, fmt.Errorf("a file past %d MiB", most>>20)
 	}
 	return data, nil
 }
