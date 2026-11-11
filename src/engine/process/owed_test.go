@@ -232,6 +232,26 @@ func TestATailnetNeverReadGivesOutNoPortUntilATickReadsIt(t *testing.T) {
 	}
 }
 
+// invariant: a reservation kept across a restart whose share was refused
+// while the tailnet was never read is shared at the tick that reads it.
+func TestAKeptReservationRefusedUnreadIsSharedAtTheTickThatReadsTheTailnet(t *testing.T) {
+	no := false
+	h, tn, _ := staleFunnel(t, 1000, ports.Reservation{VM: "db", GuestPort: 5432, MacPort: 40001, To: catalog.AudienceLocal, By: ports.ByRights, HTTP: &no})
+	ctx := t.Context()
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	tn.failShared = 0
+	for range 5 {
+		h.d.tickShares(ctx)
+	}
+	h.d.mu.Lock()
+	s := h.d.svcs[key("db", 5432)]
+	phase, listeners := s.st.Phase, len(s.listeners)
+	h.d.mu.Unlock()
+	if phase != ports.PhaseShared || listeners == 0 {
+		t.Errorf("kept reservation after the ticks that read the tailnet: phase=%s listeners=%d, want shared", phase, listeners)
+	}
+}
+
 // invariant: an entry this engine served goes at its release even when the
 // tailnet cannot be read, never left for a later tick.
 func TestAServedEntryGoesWhenTheTailnetCannotBeRead(t *testing.T) {

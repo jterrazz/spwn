@@ -203,7 +203,7 @@ func (d *Engine) retryLocked(ctx context.Context) {
 		switch {
 		case i >= 0 && s.st.Phase == ports.PhaseShared && !s.served && len(s.listeners) > 0:
 			d.expose(ctx, s, d.reservations[i])
-		case i < 0 && s.st.Phase == ports.PhaseRefused && s.unread:
+		case s.st.Phase == ports.PhaseRefused && s.unread:
 			s.st.Phase = ports.PhaseNone
 			var acts []ports.Action
 			s.st, acts = ports.Next(s.st, ports.EvListen, d.h.Now())
