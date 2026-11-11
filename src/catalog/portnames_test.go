@@ -41,7 +41,7 @@ func TestEveryPortIsNamedOnceAndEveryProfileHasItsName(t *testing.T) {
 		}
 		seen[s.Port] = true
 	}
-	for _, p := range catalog.Profiles {
+	for _, p := range builtin(t).Profiles {
 		if !seen[p.Port] {
 			t.Errorf("profile %s: port %d has no name", p.Name, p.Port)
 		}

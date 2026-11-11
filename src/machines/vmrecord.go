@@ -15,12 +15,12 @@ const (
 	Bridged     = "bridged"
 )
 
-func ProfileEnv(reserved []Reserved) map[string]string {
+func ProfileEnv(profiles []catalog.Profile, reserved []Reserved) map[string]string {
 	env := map[string]string{}
 	publicName := ""
 	for _, r := range reserved {
 		publicName = r.PublicName
-		for _, p := range catalog.Profiles {
+		for _, p := range profiles {
 			if p.Name != r.Profile {
 				continue
 			}

@@ -766,7 +766,7 @@ func (d *Engine) renderEnv(v *vmState) {
 	d.mu.Lock()
 	e := d.exposureLocked()
 	var reserved []model.Reserved
-	for _, pr := range catalog.Profiles {
+	for _, pr := range d.o.Profiles {
 		if l, i := ports.Find(d.reservations, v.rec.Name, pr.Port); i >= 0 {
 			view := ports.ViewOf(l, e, p.HTTPS, ports.PhaseWaiting)
 			reserved = append(reserved, model.Reserved{GuestPort: l.GuestPort, MacPort: l.MacPort, Profile: pr.Name, URL: view.URLs.Public, PublicName: e.PublicName})
@@ -777,7 +777,7 @@ func (d *Engine) renderEnv(v *vmState) {
 	if len(reserved) == 0 {
 		return
 	}
-	env := model.ProfileEnv(reserved)
+	env := model.ProfileEnv(d.o.Profiles, reserved)
 	if maps.Equal(env, rec.Env) {
 		return
 	}

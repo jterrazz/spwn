@@ -64,8 +64,8 @@ func (p Policy) Stopped(vm string, port int) bool {
 	return slices.Contains(p.NotShared, vm+":"+strconv.Itoa(port))
 }
 
-func ProfileOf(port int) (catalog.Profile, bool) {
-	for _, pr := range catalog.Profiles {
+func ProfileOf(profiles []catalog.Profile, port int) (catalog.Profile, bool) {
+	for _, pr := range profiles {
 		if pr.Port == port {
 			return pr, true
 		}

@@ -14,6 +14,7 @@ type Catalog struct {
 	Apps     []App
 	Settings []Setting
 	Images   []Image
+	Profiles []Profile
 }
 
 // invariant: the built-in items are embedded, so the binary reads no file of
@@ -78,7 +79,7 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 		}
 	}
 	slices.SortFunc(items, byCategory)
-	c := Catalog{Images: builtinImages}
+	c := Catalog{Images: builtinImages, Profiles: builtinProfiles}
 	files := map[string]string{}
 	for _, p := range items {
 		file := path.Join(root, p.folder, p.item.Name+".yaml")

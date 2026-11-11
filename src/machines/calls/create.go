@@ -381,14 +381,14 @@ func (s *Machinist) unhealthy(ctx context.Context, name string, cause error) err
 }
 
 func (s *Machinist) reserveProfiles(ctx context.Context, name string) (reserved []model.Reserved, env map[string]string, err error) {
-	for _, p := range catalog.Profiles {
+	for _, p := range s.o.Profiles {
 		got, err := s.engineAPI.Reserve(ctx, name, p.Port, p.Name)
 		if err != nil {
 			return nil, nil, err
 		}
 		reserved = append(reserved, got)
 	}
-	return reserved, model.ProfileEnv(reserved), nil
+	return reserved, model.ProfileEnv(s.o.Profiles, reserved), nil
 }
 
 type made struct{ vm, record, reservations, undone bool }

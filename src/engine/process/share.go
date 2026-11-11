@@ -245,7 +245,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 		}
 		l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
 		l.LastSeenAt = l.ReservedAt
-		if pr, ok := ports.ProfileOf(s.port); ok {
+		if pr, ok := ports.ProfileOf(d.o.Profiles, s.port); ok {
 			l.HTTP = &pr.HTTP
 		}
 		d.reservations = append(d.reservations, l)
@@ -505,7 +505,7 @@ func (d *Engine) reserve(ctx context.Context, vm string, port int, pinned bool, 
 	if i := d.reservationIndex(vm, port); i < 0 {
 		l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
 		l.Pinned, l.Profile = pinned, profile
-		if pr, ok := ports.ProfileOf(port); ok && profile != "" {
+		if pr, ok := ports.ProfileOf(d.o.Profiles, port); ok && profile != "" {
 			l.HTTP = &pr.HTTP
 		}
 		d.reservations = append(d.reservations, l)

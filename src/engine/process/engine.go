@@ -64,11 +64,14 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
-	Version     string
-	Page        int
-	PID         int
-	Tick        time.Duration
-	GuestPort   int
+	// value: the dev-server profiles the catalog knows: a reserved port's
+	// HTTP, a VM's environment.
+	Profiles  []catalog.Profile
+	Version   string
+	Page      int
+	PID       int
+	Tick      time.Duration
+	GuestPort int
 	// value: this Mac's power, whose sessions the daemon holds; nil is none.
 	Power awakecontract.Power
 	// value: the never_sleeps preference, read at start and every 30 ticks.

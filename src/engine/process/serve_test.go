@@ -151,7 +151,9 @@ func TestARunRendersTheProfileEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Permanent, Want: model.WantRunning, Env: kept})
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
 	yes := true
-	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: catalog.Profiles[0].Port, MacPort: 40000, HTTP: &yes, Pinned: true, Profile: catalog.Profiles[0].Name}}
+	expo := catalog.Profile{Name: "expo", Port: 8081, HTTP: true, Env: []catalog.ProfileEnv{{Name: "EXPO_PACKAGER_PROXY_URL", Value: "{url}"}}}
+	h.d.o.Profiles = []catalog.Profile{expo}
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: expo.Port, MacPort: 40000, HTTP: &yes, Pinned: true, Profile: expo.Name}}
 	h.d.refreshSelf(t.Context())
 	h.hv.outlived("api")
 	ctx := cancelled(t)

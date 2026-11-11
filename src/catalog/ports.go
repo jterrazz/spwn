@@ -27,7 +27,8 @@ type Profile struct {
 	Note string
 }
 
-var Profiles = []Profile{
+// value: the built-in dev-server profiles, which a Catalog carries.
+var builtinProfiles = []Profile{
 	{Name: "expo", Port: 8081, HTTP: true, Env: []ProfileEnv{{Name: "EXPO_PACKAGER_PROXY_URL", Value: "{url}"}}},
 	{Name: "vite", Port: 5173, HTTP: true, Env: []ProfileEnv{{Name: "__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS", Value: "{host}"}}},
 }
