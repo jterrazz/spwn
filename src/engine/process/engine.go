@@ -195,6 +195,9 @@ type Engine struct {
 	everRead   bool
 	reconciled bool
 	unreadSaid bool
+	// value: whether Begin is still running: no share is made until the
+	// start's reconciliation has run.
+	starting bool
 }
 
 type Stores struct {
@@ -307,6 +310,19 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 		return err
 	}
 	d.note, d.life = note, ctx
+	// invariant: no guest is heard as a share until the start's adoption,
+	// reconciliation and sweep have run: an entry of another HTTPS mode, still
+	// on the tailnet, is replaced first, never judged as another's and its port
+	// of the Mac given out. A share refused meanwhile is made again at the
+	// first tick.
+	d.mu.Lock()
+	d.starting = true
+	d.mu.Unlock()
+	defer func() {
+		d.mu.Lock()
+		d.starting, d.retry = false, true
+		d.mu.Unlock()
+	}()
 	d.awakeJob.ClearClamshell()
 	if d.awake != nil {
 		d.awakeJob.Restore(*d.awake)

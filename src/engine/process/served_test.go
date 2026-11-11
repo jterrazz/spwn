@@ -343,3 +343,49 @@ func TestAPublicShareJudgedAheadOfTheModeTickIsServedAtIt(t *testing.T) {
 		t.Errorf("after the tick: pub served %v, tailnet %s; want 443 funneled from pub's 40001 and api's port its own", served, got)
 	}
 }
+
+type hearsAtFirstRead struct {
+	*keptTailnet
+	hear func()
+	done bool
+}
+
+func (f *hearsAtFirstRead) Shared(ctx context.Context) ([]ports.Share, error) {
+	if !f.done {
+		f.done = true
+		f.hear()
+	}
+	return f.keptTailnet.Shared(ctx)
+}
+
+// invariant: a guest heard before the start's reconciliation has replaced
+// the entries of the old HTTPS mode keeps its reservation on its port of
+// the Mac: the old entry is neither judged another's nor its port given
+// out, and the share is made at the first tick, in the mode of the start.
+func TestAGuestHeardBeforeTheStartsReconciliationKeepsItsPortThroughAModeSwitch(t *testing.T) {
+	yes := true
+	rights := catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}
+	l := ports.Reservation{VM: "api", GuestPort: 5173, MacPort: 40001, By: ports.ByRights, HTTP: &yes}
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.st.Ports = &heldPolicy{g: &ports.PortsGroup{HTTPS: ports.HTTPSOff}}
+	tn := &hearsAtFirstRead{keptTailnet: holding(l, ports.HTTPSPort)}
+	tn.hear = func() {
+		h.d.mu.Lock()
+		h.d.vms["api"].state = engine.StateRunning
+		h.d.mu.Unlock()
+		h.d.listen(t.Context(), "api", 5173, "0.0.0.0", "node")
+	}
+	h.d.tn = tn
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) { return &rights, nil }
+	h.d.st.Reservations = &memReservations{all: []ports.Reservation{l}}
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	h.d.tickShares(t.Context())
+	if got := reservedPort(h, "api", 5173); got != 40001 {
+		t.Errorf("api:5173 reserved %d, want 40001", got)
+	}
+	if got := tn.dump(); got != "40001<-40001 funnel=false" {
+		t.Errorf("tailnet = %s, want the entry at 40001", got)
+	}
+}

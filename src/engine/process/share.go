@@ -40,6 +40,8 @@ type svc struct {
 
 type unreadError struct{ err error }
 
+var errStarting = &unreadError{err: errors.New("the engine is starting")}
+
 func (e *unreadError) Error() string {
 	return "the tailnet's entries could not be read: " + e.err.Error()
 }
@@ -479,6 +481,10 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	refuse := func(err error) {
 		var unread *unreadError
 		s.st.Phase, s.refused, s.detail, s.unread = ports.PhaseRefused, true, err.Error(), errors.As(err, &unread)
+	}
+	if d.starting {
+		refuse(errStarting)
+		return
 	}
 	i := d.reservationIndex(s.vm, s.port)
 	if i < 0 {
