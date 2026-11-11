@@ -5,22 +5,31 @@
 # invariant: every VM this run makes is named station-e2e-menubar-<label> and is
 # stopped and deleted by the trap, whatever happens; only the base survives, a cache
 # like tier 3's image. The VM runs headless: nothing opens a window on the Mac.
-# usage: run.sh <label> [--update-goldens]
+# usage: run.sh <label> [--update-goldens | --capture]
 #   the log is .artifacts/e2e/menubar-<label>.log; what the run wrote under
 #   apps/menubar (an .actual.png, or with --update-goldens the rewritten goldens and
 #   INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
 #   STATION_XCODE_IMAGE picks another image (default below, pinned by digest);
 #   STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display.
+#   --capture builds Station.app instead of the gate and reads its live panel
+#   back over the Mac's VNC framebuffer (capture/drive.py), over a fake engine
+#   serving home.exposed, on M1's three wallpapers; the captures, compare
+#   sheets and contrast table (capture/measure.py) land in
+#   .artifacts/e2e/menubar-<label>/capture/. STATION_CAPTURE_SET picks the
+#   shots (walls,behave,trial by default; sweep, a11y and old drive.py names),
+#   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame.
 set -uo pipefail
 
 label=${1:-}
 update=0
+capture=0
 case "${2:-}" in
   "") ;;
   --update-goldens) update=1 ;;
+  --capture) capture=1 ;;
   *) label="" ;;
 esac
-[ -n "$label" ] || { echo "usage: specs/machine/menubar/run.sh <label> [--update-goldens]" >&2; exit 2; }
+[ -n "$label" ] || { echo "usage: specs/machine/menubar/run.sh <label> [--update-goldens | --capture]" >&2; exit 2; }
 
 repo=$(cd "$(dirname "$0")/../../.." && pwd)
 suite="$repo/specs/machine"
@@ -86,8 +95,13 @@ tart clone "$base" "$vm" >> "$log" 2>&1 || fail "clone $base"
 tart set "$vm" --memory 8192 >> "$log" 2>&1 || fail "size $vm"
 # value: STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display, since the
 # icon goldens are drawn at the screen's scale.
+# value: the capture reads M1's scenes at 2x on a 1024 x 768 pt screen, as
+# the play rig did.
+[ $capture -eq 0 ] || STATION_VM_DISPLAY=${STATION_VM_DISPLAY:-1024x768pt}
 [ -z "${STATION_VM_DISPLAY:-}" ] || tart set "$vm" --display "$STATION_VM_DISPLAY" >> "$log" 2>&1 || fail "display $vm"
-tart run --no-graphics "$vm" >> "$work/tart.log" 2>&1 &
+vnc_flag=()
+[ $capture -eq 0 ] || vnc_flag=(--vnc-experimental)
+tart run --no-graphics ${vnc_flag[@]+"${vnc_flag[@]}"} "$vm" >> "$work/tart.log" 2>&1 &
 tart_pid=$!
 ip=$(tart ip "$vm" --wait 180) || fail "no address for $vm"
 
@@ -118,6 +132,28 @@ GIT_SSH_COMMAND="ssh ${ssh_opts[*]} -i $ssh_key" \
   git -C "$repo" push -q "$user@$ip:station" "HEAD:refs/heads/run" >> "$log" 2>&1 || fail "git push into the VM"
 in_vm 'cd ~/station && git checkout -q run' || fail "checkout in the VM"
 say "-- pushed $(git -C "$repo" rev-parse --short HEAD)"
+
+if [ $capture -eq 1 ]; then
+  # invariant: the VNC server is the Mac's Virtualization framebuffer, read
+  # by vncdotool in a venv the runs share; nothing opens on the Mac.
+  url=$(grep -o 'vnc://[^ ]*' "$work/tart.log" | head -1)
+  [ -n "$url" ] || fail "no vnc:// line in $work/tart.log"
+  venv="$out/menubar-venv"
+  [ -x "$venv/bin/python" ] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q vncdotool pillow numpy scipy; } >> "$log" 2>&1 || fail "the capture's venv"
+  t=$SECONDS
+  in_vm "zsh -lc 'cd ~/station && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
+  say "-- built Station.app in $((SECONDS - t)) s"
+  shots="$work/capture"
+  "$venv/bin/python" -I "$suite/menubar/capture/drive.py" "$ip" "$ssh_key" "$url" "$repo" "$shots" \
+    "${STATION_CAPTURE_SET:-walls,behave,trial}" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
+  code=${PIPESTATUS[0]}
+  in_vm 'cat ~/cap/replay.log' >> "$log" 2>&1
+  "$venv/bin/python" -I "$suite/menubar/capture/measure.py" "$shots" "$repo/apps/menubar/tests/station-kit-tests/testdata/stories" \
+    ${STATION_CAPTURE_M1:+"$STATION_CAPTURE_M1"} 2>&1 | tee -a "$log"
+  [ $code -eq 0 ] || fail "capture: drive.py exit $code"
+  say "PASS capture: $shots"
+  exit 0
+fi
 
 t=$SECONDS
 # value: a login shell for the PATH Xcode and brew give; the gate runs with the
