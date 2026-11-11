@@ -25,6 +25,7 @@ Until a VM records the Machinefile it was made from, the engine reads the one na
 - A public range is refused at decode, and a Funnel port is held by one share at a time.
 - A removal the tailnet fails is owed and tried again at each tick, and the port of the Mac its entry carries from is given to no reservation until it goes: a failed `tailscale serve` never leaves a stale Funnel entry carrying another share to the internet.
 - A port of the Mac a tailnet entry carries from is given to, and bound for, no reservation whose entry it is not, read before each share; while Serve is on and the tailnet was never read no port is given out, and a reconciliation that cannot read it is tried again at each tick: a VM deleted while its engine was down leaves no Funnel entry carrying the next share.
+- An owner's own tailnet entry carried from a station range port moves that reservation off it and holds the port back until the owner removes the entry.
 - A rights file edited takes effect at the VM's next run, or at the next engine that adopts it running, as its env does; a narrowed right closes what it no longer allows then.
 - A non-default `min_port` or `ignored_ports` is not carried: the owner writes it as the VM's rights.
 - A Mac taken back to a station older than this decision does not know a Funnel entry as its own: a public share that engine releases leaves its Funnel entry on the tailnet, until the next start of an engine of this decision removes it, as an entry no reservation justifies.
