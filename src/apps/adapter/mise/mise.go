@@ -117,7 +117,9 @@ func (m *Mise) Update(ctx context.Context, installs []catalog.Install, logs cont
 }
 
 func (m *Mise) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	return m.each(ctx, installs, logs, func(v catalog.MiseInstall) local.Cmd { return local.Command(command, "unuse", "--global", v.App) })
+	return m.each(ctx, installs, logs, func(v catalog.MiseInstall) local.Cmd {
+		return local.Command(command, "unuse", "--global", "--no-prune", v.App)
+	})
 }
 
 func (m *Mise) each(ctx context.Context, installs []catalog.Install, logs contract.Logs, argv func(catalog.MiseInstall) local.Cmd) error {

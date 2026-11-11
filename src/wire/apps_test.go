@@ -233,7 +233,7 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	run.On(pm, "ls", "-g", "--depth=0", "--json", "--prefix", global).Reply(local.Output{Stdout: `{"dependencies":{"owner-pkg":{"version":"1.0.0"}}}`})
 	run.On(pm, "uninstall", "-g", "--prefix", older, packages.Key())
 	run.On(pm, "uninstall", "-g", "--prefix", global, packages.Key())
-	run.On(rt, "unuse", "--global", runtime.Key())
+	run.On(rt, "unuse", "--global", "--no-prune", runtime.Key())
 	ctx := context.Background()
 
 	if found, _ := managing(m).Run.LookPath(pm); found != shims+"/"+pm {

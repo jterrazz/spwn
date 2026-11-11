@@ -37,8 +37,8 @@ func (r *runtimes) play(c local.Cmd) (local.Output, error) {
 		tool, version, _ := strings.Cut(strings.TrimPrefix(args, "use --global "), "@")
 		r.pinned[tool] = version
 	case strings.HasPrefix(args, "upgrade "):
-	case strings.HasPrefix(args, "unuse --global "):
-		delete(r.pinned, strings.TrimPrefix(args, "unuse --global "))
+	case strings.HasPrefix(args, "unuse --global --no-prune "):
+		delete(r.pinned, strings.TrimPrefix(args, "unuse --global --no-prune "))
 	default:
 		return local.Output{ExitCode: 97}, nil
 	}
