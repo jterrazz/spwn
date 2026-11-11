@@ -250,3 +250,24 @@ func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
 		t.Errorf("skipped %+v, want fd skipped naming its script", r.Skipped)
 	}
 }
+
+func TestAnItemProvidedByAnotherBringsItInFirst(t *testing.T) {
+	// invariant: provided-by is a link like requires: its provider is
+	// resolved into the plan and runs before it.
+	provided := map[string]string{
+		"catalog/ai-agents/core.yaml":    "item: station.catalog/v1\nkind: app\nname: core\ndescription: the engine\nprovides: [engine]\nmethods:\n    - { os: any, provided-by: desktop }\n",
+		"catalog/ai-agents/desktop.yaml": "item: station.catalog/v1\nkind: app\nname: desktop\ndescription: the app\nmethods:\n    - { os: any, script: { run: 'true' } }\n",
+	}
+	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[core]")}, provided)
+	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	order := make([]string, 0, len(r.Steps))
+	for _, s := range r.Steps {
+		order = append(order, s.Item+" "+s.Why)
+	}
+	if want := []string{"desktop the provider of core", "core listed"}; !slices.Equal(order, want) {
+		t.Errorf("steps %q; want %q", order, want)
+	}
+}

@@ -93,3 +93,25 @@ func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
 		t.Errorf("kept %v; want %v (own is needed by a setting alone)", kept, want)
 	}
 }
+
+func TestJudgeKeepsTheProviderOfAListedApp(t *testing.T) {
+	// invariant: an app provided by an extra leans on it like on what it
+	// requires: the provider stays while that app is there.
+	cat := catalog.Catalog{Items: []catalog.Placed{
+		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Item{Name: "desktop"}),
+		placed(catalog.Item{Name: "core", Methods: []catalog.MethodSpec{{ProvidedBy: "desktop"}}}),
+	}}
+	ledger := []machinefile.Installed{{Item: "desktop", Method: "pkg", Machinefile: "laptop"}}
+	seen := map[string]machinefile.Seen{
+		"manager": {Condition: machinefile.Present, Method: "script"},
+		"desktop": {Condition: machinefile.Present, Method: "pkg"},
+		"core":    {Condition: machinefile.Present, Method: "provided-by"},
+	}
+	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{{Item: "core", Kind: catalog.KindApp, Method: "provided-by", Phase: catalog.PhaseApply}}}
+	for _, e := range machinefile.Judge(r, cat, seen, ledger).Extra {
+		if e.Takes() || !slices.Equal(e.RequiredBy, []string{"core"}) {
+			t.Errorf("%s: takes %v, required by %v; want kept, required by [core]", e.Step.Item, e.Takes(), e.RequiredBy)
+		}
+	}
+}

@@ -1,0 +1,45 @@
+description: 'an app provided by another brings its provider in as listed, so apply --remove never takes it back'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [herdr-core]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	herdr-app	cask	the provider of herdr-core
+          ○	herdr-core	provided-by
+          # To adopt
+          ?	homebrew	script	the manager of herdr-app · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of herdr-app · adopted · on PATH, not managed by script
+          ●	herdr-app	1.0.0	cask	the provider of herdr-core
+          ●	herdr-core	1.0.0	provided-by
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'
+      exit: 0
+      stdout: |
+          [["herdr-app","cask"],["herdr-core","provided-by"]]
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of herdr-app · on PATH, not managed by script
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of herdr-app · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of herdr-app · adopted · on PATH, not managed by script
+          ●	herdr-app	1.0.0	cask	the provider of herdr-core
+          ●	herdr-core	1.0.0	provided-by
+    - command: 'apps | /usr/bin/grep -e "herdr"'
+      exit: 0
+      stdout: |
+          ○	herdr		brew	station apps install herdr
+          ●	herdr-app	1.0.0	cask
+          ●	herdr-core	1.0.0	provided-by

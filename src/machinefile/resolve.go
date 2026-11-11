@@ -559,10 +559,10 @@ func (p *planner) because(m catalog.MethodSpec, of int) string {
 	return "first of its methods for " + p.system()
 }
 
-// invariant: an item of the plan brings in what it requires and the
-// manager its method installs by, each resolved like a listed one; a
-// setting's requires-one-of is met by any one the plan holds, else by its
-// first.
+// invariant: an item of the plan brings in every item it leans on, each
+// resolved like a listed one: what it requires, its method's provider and
+// its method's manager; a setting's requires-one-of is met by any one the
+// plan holds, else by its first.
 func (p *planner) implied() error {
 	// invariant: a step brought in is itself judged: the walk goes on while
 	// the plan grows.
@@ -570,26 +570,15 @@ func (p *planner) implied() error {
 		s := p.steps[next]
 		next++
 		it, _ := p.cat.Item(s.Item)
-		needs := slices.Clone(it.Item.Requires)
-		if len(it.Item.RequiresOneOf) > 0 && !slices.ContainsFunc(it.Item.RequiresOneOf, p.holds) {
-			needs = append(needs, it.Item.RequiresOneOf[0])
-		}
-		if owner, ok := p.manager(s.Method); ok && owner.Item.Name != s.Item {
-			needs = append(needs, owner.Item.Name)
-		}
-		for _, n := range needs {
-			if p.holds(n) {
+		for _, l := range p.cat.Links(it.Item, s.Method, p.sys) {
+			if slices.ContainsFunc(l.Items, p.holds) {
 				continue
 			}
-			why := "required by " + s.Item
-			if owner, ok := p.manager(s.Method); ok && owner.Item.Name == n {
-				why = "the manager of " + s.Item
-			}
-			dep, err := p.item(n, Origin{Name: s.Item}, "", catalog.KindApp)
+			dep, err := p.item(l.Items[0], Origin{Name: s.Item}, "", catalog.KindApp)
 			if err != nil {
 				return err
 			}
-			step, err := p.choose(dep, "", "", why, "")
+			step, err := p.choose(dep, "", "", broughtBy(l.Kind, s.Item), "")
 			if err != nil {
 				return err
 			}
@@ -598,6 +587,17 @@ func (p *planner) implied() error {
 		}
 	}
 	return nil
+}
+
+func broughtBy(k catalog.LinkKind, item string) string {
+	switch k {
+	case catalog.LinkManager:
+		return "the manager of " + item
+	case catalog.LinkProvidedBy:
+		return "the provider of " + item
+	case catalog.LinkRequires, catalog.LinkRequiresOneOf:
+	}
+	return "required by " + item
 }
 
 func (p *planner) holds(name string) bool { _, ok := p.at[name]; return ok }
@@ -609,9 +609,9 @@ func (p *planner) ordered() ([]Step, error) {
 	deps := make([][]int, len(p.steps))
 	for i, s := range p.steps {
 		it, _ := p.cat.Item(s.Item)
-		before := slices.Concat(it.Item.Requires, it.Item.RequiresOneOf, it.Item.After)
-		if owner, ok := p.manager(s.Method); ok {
-			before = append(before, owner.Item.Name)
+		before := slices.Clone(it.Item.After)
+		for _, l := range p.cat.Links(it.Item, s.Method, p.sys) {
+			before = append(before, l.Items...)
 		}
 		for _, b := range before {
 			if j, ok := p.at[b]; ok && j != i && !slices.Contains(deps[i], j) {

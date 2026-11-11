@@ -83,8 +83,9 @@ type Installed struct {
 type ExtraLine struct {
 	Line
 	Installed Installed
-	// value: the apps there that still need it (what requires it, what its
-	// manager installed), when they keep it: none of them is taken back.
+	// value: the apps there that still need it (what requires it, what it
+	// provides, what it manages), when they keep it: none of them is taken
+	// back.
 	RequiredBy []string
 }
 
@@ -161,8 +162,8 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 // extra already gone is removed from the ledger alone, one held by another
 // method is the owner's and left, and one whose manager is missing here
 // is left for a later run to judge. The extras run in reverse dependency
-// order: what another extra waits on (its manager, what it requires) is
-// taken back after it.
+// order: what another extra leans on (what it requires, its provider, its
+// manager) is taken back after it.
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
 	out := make([]ExtraLine, 0, len(extra))
 	for _, in := range extra {
@@ -182,21 +183,21 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 		}
 		if it, ok := cat.Item(in.Item); ok {
 			s.Step.Needs = removalNeeds(it.Item, in.Method, sys)
-			s.Step.Waits = slices.Clone(it.Item.Requires)
-			if owner, ok := managerOf(cat, in.Method); ok && owner != in.Item {
-				s.Step.Waits = append(s.Step.Waits, owner)
+			for _, l := range cat.Links(it.Item, in.Method, sys) {
+				s.Step.Waits = append(s.Step.Waits, l.Items...)
 			}
 		}
 		out = append(out, s)
 	}
-	return reversed(required(cat, seen, out))
+	return reversed(required(sys, cat, seen, out))
 }
 
-// invariant: an extra another app there still needs (it requires it, or
-// was installed by it as its manager) is kept while that app is not taken
-// back with it, whoever installed that app; an app whose read did not
-// answer may be there, so it keeps what it needs too.
-func required(cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
+// invariant: an extra another app there still needs (it leans on it by
+// any link the resolution follows: it requires it, its method is provided
+// by it, or its method's manager is it) is kept while that app is not
+// taken back with it, whoever installed that app; an app whose read did
+// not answer may be there, so it keeps what it needs too.
+func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
 	taken := map[string]bool{}
 	for _, s := range extra {
 		taken[s.Step.Item] = s.Takes()
@@ -205,28 +206,30 @@ func required(cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []Ex
 	for kept := true; kept; {
 		kept = false
 		for _, s := range extra {
-			if taken[s.Step.Item] && len(needing(cat, seen, taken, s.Step.Item)) > 0 {
+			if taken[s.Step.Item] && len(needing(sys, cat, seen, taken, s.Step.Item)) > 0 {
 				taken[s.Step.Item], held[s.Step.Item], kept = false, true, true
 			}
 		}
 	}
 	for i := range extra {
 		if s := &extra[i]; held[s.Step.Item] {
-			s.Action, s.RequiredBy = Leave, needing(cat, seen, taken, s.Step.Item)
+			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Item)
 		}
 	}
 	return extra
 }
 
-func needing(cat catalog.Catalog, seen map[string]Seen, taken map[string]bool, item string) []string {
+// invariant: an app leans by the method that holds it as the inventory
+// reads it; an app with no row of the inventory does not live on this
+// machine, and a setting's requirement holds no app.
+func needing(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, taken map[string]bool, item string) []string {
 	var out []string
 	for _, it := range cat.Items {
 		name := it.Item.Name
 		if name == item || taken[name] || it.Item.Kind == catalog.KindSetting || !there(seen[name]) {
 			continue
 		}
-		manager, _ := managerOf(cat, seen[name].Method)
-		if slices.Contains(it.Item.Requires, item) || slices.Contains(it.Item.RequiresOneOf, item) || manager == item {
+		if slices.ContainsFunc(cat.Links(it.Item, seen[name].Method, sys), func(l catalog.Link) bool { return l.Names(item) }) {
 			out = append(out, name)
 		}
 	}
@@ -253,15 +256,6 @@ func removalNeeds(it catalog.Item, method string, sys catalog.System) []catalog.
 		}
 	}
 	return needs
-}
-
-func managerOf(cat catalog.Catalog, method string) (string, bool) {
-	for _, it := range cat.Items {
-		if slices.Contains(it.Item.Manages, catalog.ManagerKey(method)) {
-			return it.Item.Name, true
-		}
-	}
-	return "", false
 }
 
 // invariant: a stable order: the first extra (by name) that no remaining
