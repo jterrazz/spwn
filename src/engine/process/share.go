@@ -198,7 +198,7 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 		if i < 0 || !s.served || d.reservations[i].Audience() != catalog.AudiencePrivate {
 			continue
 		}
-		_ = d.tn.Unshare(ctx, ports.ShareOf(d.reservations[i], was))
+		d.unshareLocked(ctx, d.reservations[i], was, true)
 		s.served = false
 		private = append(private, s)
 	}
@@ -258,11 +258,8 @@ func (d *Engine) releaseVM(ctx context.Context, vm string) {
 
 // invariant: every path that drops a reservation comes through here: a
 // release, an idle release, a narrowing, a VM's delete, a mode switch that
-// leaves it no Funnel port. Its listeners close and, while Serve is on, its
-// entry goes in the mode it was served in, whether this engine served it or
-// found it at start; one this engine did not serve goes only when the
-// tailnet's entry is carried from its port of the Mac, never another's.
-// The caller holds d.mu.
+// leaves it no Funnel port. Its listeners close and its entry goes through
+// unshareLocked. The caller holds d.mu.
 func (d *Engine) dropLocked(ctx context.Context, vm string, port int) {
 	i := d.reservationIndex(vm, port)
 	if i < 0 {
@@ -274,30 +271,62 @@ func (d *Engine) dropLocked(ctx context.Context, vm string, port int) {
 	if s != nil {
 		d.unpublish(ctx, s)
 	}
-	if !served && d.self.On && d.carriesLocked(ctx, l) {
-		_ = d.tn.Unshare(ctx, d.servedShareLocked(l))
+	if !served {
+		d.unshareLocked(ctx, l, d.servedModeLocked(), false)
 	}
 	d.reservations = append(d.reservations[:i:i], d.reservations[i+1:]...)
 	d.saveReservations()
 }
 
-// value: the entry a reservation's share holds on the tailnet, in the
-// HTTPS mode last served in; the caller holds d.mu.
-func (d *Engine) servedShareLocked(l ports.Reservation) ports.Share {
-	return ports.ShareOf(l, cmp.Or(d.servedMode, d.policy().HTTPS))
+// invariant: every change to a kept reservation comes through here, and
+// one that changes the entry it serves (its port of the Mac, its scheme,
+// its audience, its Funnel port) unshares the old entry through
+// unshareLocked before it changes, its service left unserved for the
+// caller to share again. The caller holds d.mu.
+func (d *Engine) rewriteLocked(ctx context.Context, i int, next ports.Reservation) {
+	old := d.reservations[i]
+	mode := d.servedModeLocked()
+	if ports.ShareOf(old, mode) != ports.ShareOf(next, mode) {
+		s := d.svcs[key(old.VM, old.GuestPort)]
+		d.unshareLocked(ctx, old, mode, s != nil && s.served)
+		if s != nil {
+			s.served = false
+		}
+	}
+	d.reservations[i] = next
+	d.saveReservations()
 }
 
-// value: whether the tailnet holds the entry of a reservation, carried from
-// its port of the Mac; a tailnet unread holds none. The caller holds d.mu.
-func (d *Engine) carriesLocked(ctx context.Context, l ports.Reservation) bool {
-	shared, err := d.tn.Shared(ctx)
-	if err != nil {
-		return false
+// invariant: the one way a reservation's entry leaves the tailnet: at its
+// end, and before any change to what it serves, a switch of the HTTPS mode
+// included. While Serve is on, the entry it makes in mode goes, whether
+// this engine served it or found it at start; one this engine did not
+// serve goes only when the tailnet's entry is carried from its port of the
+// Mac, never another's. The caller holds d.mu.
+func (d *Engine) unshareLocked(ctx context.Context, l ports.Reservation, mode string, served bool) {
+	if !d.self.On {
+		return
 	}
-	want := d.servedShareLocked(l)
-	return slices.ContainsFunc(shared, func(e ports.Share) bool {
-		return e.Port == want.Port && e.Mounted() == want.Mounted() && (!want.Mounted() || e.Path == want.Path) && ports.CarriedFrom(e) == l.MacPort
-	})
+	want := ports.ShareOf(l, mode)
+	if !served {
+		shared, err := d.tn.Shared(ctx)
+		if err != nil || !slices.ContainsFunc(shared, func(e ports.Share) bool { return carries(e, want) }) {
+			return
+		}
+	}
+	_ = d.tn.Unshare(ctx, want)
+}
+
+// value: whether a tailnet entry is want, at its port and path, carried
+// from its port of the Mac.
+func carries(e, want ports.Share) bool {
+	return e.Port == want.Port && e.Mounted() == want.Mounted() && (!want.Mounted() || e.Path == want.Path) && ports.CarriedFrom(e) == want.Reserved
+}
+
+// value: the HTTPS mode this Mac's shares are served in: the one last
+// served in, the preference's before any; the caller holds d.mu.
+func (d *Engine) servedModeLocked() string {
+	return cmp.Or(d.servedMode, d.policy().HTTPS)
 }
 
 // invariant: publication binds 127.0.0.1 only, never the tailnet ip or a
@@ -329,8 +358,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 			return
 		}
 		reservation.MacPort = moved.MacPort
-		d.reservations[i] = reservation
-		d.saveReservations()
+		d.rewriteLocked(ctx, i, reservation)
 		if held, err = d.h.ListenLoopback(reservation.MacPort); err != nil {
 			s.detail = err.Error()
 			return
@@ -342,8 +370,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	if reservation.HTTP == nil {
 		http := d.detectHTTP(ctx, s)
 		reservation.HTTP = &http
-		d.reservations[i] = reservation
-		d.saveReservations()
+		d.rewriteLocked(ctx, i, reservation)
 	}
 	d.expose(ctx, s, reservation, p.HTTPS)
 }
@@ -391,16 +418,18 @@ func (d *Engine) unserveAll() {
 }
 
 func (d *Engine) unpublish(ctx context.Context, s *svc) {
+	d.closeLocked(s)
+	if i := d.reservationIndex(s.vm, s.port); i >= 0 && s.served {
+		d.unshareLocked(ctx, d.reservations[i], d.servedModeLocked(), true)
+	}
+	s.served, s.serveNote = false, ""
+}
+
+func (d *Engine) closeLocked(s *svc) {
 	for _, l := range s.listeners {
 		_ = l.Close()
 	}
 	s.listeners = nil
-	if s.served && d.self.On {
-		if i := d.reservationIndex(s.vm, s.port); i >= 0 {
-			_ = d.tn.Unshare(ctx, d.servedShareLocked(d.reservations[i]))
-		}
-	}
-	s.served, s.serveNote = false, ""
 }
 
 func (d *Engine) clientOf(vm string) Guest {
@@ -658,10 +687,10 @@ func (d *Engine) judgeLocked(ctx context.Context, vm string, r ports.Rights, htt
 		live := s != nil && len(s.listeners) > 0
 		if keep {
 			if s != nil {
-				d.unpublish(ctx, s)
+				d.closeLocked(s)
+				s.serveNote = ""
 			}
-			d.reservations[d.reservationIndex(vm, l.GuestPort)] = want
-			d.saveReservations()
+			d.rewriteLocked(ctx, d.reservationIndex(vm, l.GuestPort), want)
 			if live {
 				d.share(ctx, s)
 			}
@@ -699,8 +728,7 @@ func (d *Engine) reserve(ctx context.Context, vm string, port int, by string) (p
 		d.saveReservations()
 	} else if by == ports.ByOwner && !l.Owned() {
 		l.By = ports.ByOwner
-		d.reservations[i] = l
-		d.saveReservations()
+		d.rewriteLocked(ctx, i, l)
 	}
 	s := d.svcs[key(vm, port)]
 	if s != nil && (s.st.Phase == ports.PhaseRefused || s.st.Phase == ports.PhaseNotAllowed || s.refused) {
