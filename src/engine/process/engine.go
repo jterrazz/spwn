@@ -179,6 +179,13 @@ type Engine struct {
 	shareMu        sync.Mutex
 	sharesAt       time.Time
 	takeBackFailed map[string]time.Time
+
+	// value: the entries station owes the tailnet a removal of: an unshare
+	// that failed, or that could not read whether its entry was there.
+	owed []ports.Share
+	// value: whether the tick tries again the shares the tailnet left
+	// unserved: an entry owed went, or the tailnet was read again.
+	retry bool
 }
 
 type Stores struct {

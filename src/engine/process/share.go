@@ -158,6 +158,7 @@ func (d *Engine) tickShares(ctx context.Context) {
 	mode := d.policy().HTTPS
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	d.payOwedLocked(ctx)
 	d.serveInModeLocked(ctx, mode)
 	now := d.h.Now()
 	for _, l := range slices.Clone(d.reservations) {
@@ -172,6 +173,78 @@ func (d *Engine) tickShares(ctx context.Context) {
 			d.unpublish(ctx, s)
 		}
 	}
+	d.retryLocked(ctx)
+}
+
+// invariant: a share the tailnet left unserved is served again at the tick
+// after what held it went, never at every tick. The caller holds d.mu.
+func (d *Engine) retryLocked(ctx context.Context) {
+	if !d.retry {
+		return
+	}
+	d.retry = false
+	for _, s := range d.svcs {
+		i := d.reservationIndex(s.vm, s.port)
+		if i >= 0 && s.st.Phase == ports.PhaseShared && !s.served && len(s.listeners) > 0 {
+			d.expose(ctx, s, d.reservations[i])
+		}
+	}
+}
+
+// invariant: an entry station owes a removal goes at the next tick that
+// reads the tailnet, while it answers at its port and path carried from
+// the same port of the Mac and no reservation justifies it; one gone or
+// replaced meanwhile is owed no more. The caller holds d.mu.
+func (d *Engine) payOwedLocked(ctx context.Context) {
+	if len(d.owed) == 0 || !d.self.On {
+		return
+	}
+	shared, err := d.tn.Shared(ctx)
+	if err != nil {
+		return
+	}
+	mode := d.servedModeLocked()
+	var still []ports.Share
+	for _, o := range d.owed {
+		there := slices.ContainsFunc(shared, func(e ports.Share) bool {
+			return at(e, o) && ports.CarriedFrom(e) == o.Reserved && !d.justifiedLocked(e, mode)
+		})
+		if there && d.tn.Unshare(ctx, o) != nil {
+			still = append(still, o)
+			continue
+		}
+		d.retry = true
+	}
+	d.owed = still
+}
+
+// value: whether a reservation kept makes the tailnet entry e in mode; the
+// caller holds d.mu.
+func (d *Engine) justifiedLocked(e ports.Share, mode string) bool {
+	return slices.ContainsFunc(d.reservations, func(l ports.Reservation) bool { return justifies(l, e, mode) })
+}
+
+// invariant: an entry is owed once, and said once in the engine's log. The
+// caller holds d.mu.
+func (d *Engine) oweLocked(s ports.Share) {
+	if d.owesLocked(s) {
+		return
+	}
+	d.owed = append(d.owed, s)
+	d.logf("tailnet", "the entry of port "+strconv.Itoa(s.Port)+s.Path+" from port "+strconv.Itoa(s.Reserved)+" of this Mac is not removed yet: tried again at each tick")
+}
+
+// value: whether station owes the tailnet the removal of an entry at e's
+// port and path, carried from e's port of the Mac; the caller holds d.mu.
+func (d *Engine) owesLocked(e ports.Share) bool {
+	from := cmp.Or(ports.CarriedFrom(e), e.Reserved)
+	return slices.ContainsFunc(d.owed, func(o ports.Share) bool { return at(e, o) && o.Reserved == from })
+}
+
+// value: whether a port of the Mac carries an entry station owes a removal,
+// so no reservation is given it; the caller holds d.mu.
+func (d *Engine) owedFromLocked(macPort int) bool {
+	return slices.ContainsFunc(d.owed, func(o ports.Share) bool { return o.Reserved == macPort })
 }
 
 // invariant: HTTPS links turned on or off on this Mac serve every served
@@ -303,7 +376,9 @@ func (d *Engine) rewriteLocked(ctx context.Context, i int, next ports.Reservatio
 // this engine served it or found it at start, never an entry at its port
 // and path carried from another port of the Mac: one the owner put there
 // by hand stays. One this engine did not serve goes only when the tailnet is
-// read and carries it from its port of the Mac. The caller holds d.mu.
+// read and carries it from its port of the Mac. An unshare that fails, or
+// that cannot read the tailnet for an entry it did not serve, is owed, and
+// tried again at each tick. The caller holds d.mu.
 func (d *Engine) unshareLocked(ctx context.Context, l ports.Reservation, mode string, served bool) {
 	if !d.self.On {
 		return
@@ -311,6 +386,7 @@ func (d *Engine) unshareLocked(ctx context.Context, l ports.Reservation, mode st
 	want := ports.ShareOf(l, mode)
 	shared, err := d.tn.Shared(ctx)
 	if err != nil && !served {
+		d.oweLocked(want)
 		return
 	}
 	carried := slices.ContainsFunc(shared, func(e ports.Share) bool { return at(e, want) && ports.CarriedFrom(e) == want.Reserved })
@@ -318,7 +394,9 @@ func (d *Engine) unshareLocked(ctx context.Context, l ports.Reservation, mode st
 	if !served && !carried || served && replaced && !carried {
 		return
 	}
-	_ = d.tn.Unshare(ctx, want)
+	if d.tn.Unshare(ctx, want) != nil {
+		d.oweLocked(want)
+	}
 }
 
 // value: whether a tailnet entry answers at want's port and path.
@@ -355,7 +433,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	if err != nil {
 		was := reservation.MacPort
 		others := append(append([]ports.Reservation(nil), d.reservations[:i]...), d.reservations[i+1:]...)
-		moved, allocErr := ports.Reserve(p, others, s.vm, s.port, func(hp int) bool { return hp == was || d.busy(hp) })
+		moved, allocErr := ports.Reserve(p, others, s.vm, s.port, func(hp int) bool { return hp == was || d.owedFromLocked(hp) || d.busy(hp) })
 		if allocErr != nil {
 			s.st.Phase, s.refused, s.detail = ports.PhaseRefused, true, allocErr.Error()
 			return
@@ -596,7 +674,7 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 // mode leaves none for it. by is who makes it, ports.ByOwner or
 // ports.ByRights. The caller holds d.mu.
 func (d *Engine) reserveLocked(p ports.Policy, vm string, port int, r ports.Rights, by string) (ports.Reservation, error) {
-	l, err := ports.Reserve(p, d.reservations, vm, port, d.busy)
+	l, err := ports.Reserve(p, d.reservations, vm, port, func(hp int) bool { return d.owedFromLocked(hp) || d.busy(hp) })
 	if err != nil || d.reservationIndex(vm, port) >= 0 {
 		return l, err
 	}
@@ -632,9 +710,10 @@ func (d *Engine) funnelTakenLocked(l ports.Reservation) error {
 
 // invariant: station never replaces a tailnet entry it did not make: a
 // public share is refused while its Funnel port serves another target,
-// or is funneled with none of station's; a private share, a path or a
-// port, is refused while its port is funneled, for Funnel opens every
-// path of a port. The tailnet unread refuses both. The caller holds d.mu.
+// or is funneled with none of station's; one station owes a removal at
+// the same port and path it replaces. A private share, a path or a port,
+// is refused while its port is funneled, for Funnel opens every path of a
+// port. The tailnet unread refuses both. The caller holds d.mu.
 func (d *Engine) heldOutside(ctx context.Context, want ports.Share) error {
 	funneled, err := d.tn.Funneled(ctx)
 	if err != nil {
@@ -655,7 +734,7 @@ func (d *Engine) heldOutside(ctx context.Context, want ports.Share) error {
 		if e.Port != want.Port {
 			continue
 		}
-		if from := ports.CarriedFrom(e); from != want.Reserved {
+		if from := ports.CarriedFrom(e); from != want.Reserved && (!at(e, want) || !d.owesLocked(e)) {
 			held := &ports.FunnelHeld{Port: want.Port}
 			if d.policy().InRange(from) {
 				held.From = from
@@ -800,7 +879,7 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 				continue
 			}
 			if !justified(e) {
-				_ = d.tn.Unshare(ctx, e)
+				d.remove(ctx, e)
 				continue
 			}
 			d.servedBefore(ports.CarriedFrom(e))
@@ -809,19 +888,31 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 				continue
 			}
 			if !justified(e) {
-				_ = d.tn.Unshare(ctx, e)
+				d.remove(ctx, e)
 				continue
 			}
 			d.servedBefore(ports.CarriedFrom(e))
 		case p.InRange(e.Port):
 			if !justified(e) {
 				e.Path = ""
-				_ = d.tn.Unshare(ctx, e)
+				d.remove(ctx, e)
 				continue
 			}
 			d.servedBefore(e.Port)
 		}
 	}
+}
+
+// invariant: an entry the reconciliation finds unjustified and fails to
+// remove is owed, as from the port of the Mac it is carried from.
+func (d *Engine) remove(ctx context.Context, e ports.Share) {
+	if d.tn.Unshare(ctx, e) == nil {
+		return
+	}
+	e.Reserved = ports.CarriedFrom(e)
+	d.mu.Lock()
+	d.oweLocked(e)
+	d.mu.Unlock()
 }
 
 // value: whether a tailnet entry is the share a reservation makes in this
