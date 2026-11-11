@@ -1,6 +1,6 @@
 # ADR-036: The menu bar owns its panel, and the panel's one background is a tinted glass
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

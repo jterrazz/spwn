@@ -1,6 +1,6 @@
 # ADR-037: The TUI is retired; the CLI is the one terminal surface
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

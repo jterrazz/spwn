@@ -1,6 +1,6 @@
 # ADR-032: The words of a VM's lifetime and network
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 Amends [ADR-017](017-servers-and-workspaces.md): its kind `mac` and its lifetime words Throwaway and `--permanent`. The Machinefile's `vm:` block ([ADR-030](030-init-makes-a-machine-known-apply-carries-its-machinefile.md), [ADR-031](031-the-catalog-defines-the-machinefile-chooses.md)) is written in these words, so the code, the CLI, the JSON and the pages take them before the Machinefile lands.

@@ -1,6 +1,6 @@
 # ADR-033: A machine is declared by its Machinefile
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

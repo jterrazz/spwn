@@ -1,6 +1,6 @@
 # ADR-031: The catalog defines, the Machinefile chooses
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

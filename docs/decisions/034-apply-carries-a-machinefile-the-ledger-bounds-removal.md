@@ -1,6 +1,6 @@
 # ADR-034: Apply carries a Machinefile; the ledger bounds removal
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

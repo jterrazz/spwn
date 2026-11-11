@@ -1,6 +1,6 @@
 # ADR-030: init makes a machine known; apply carries its Machinefile
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-10
 
 Supersedes, once accepted, the "one bootstrap verb" of [ADR-009](009-one-bootstrap-verb-and-no-values-in-argv.md); its rule of no values in argv stands.
