@@ -21,6 +21,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     private var outside: Any?
     private var anchor = CGPoint.zero
     private var placing = false
+    private var pending: CGSize?
 
     init(content: @escaping () -> AnyView, opened: @escaping () -> Void, closed: @escaping () -> Void, report: ((String) -> Void)? = nil) {
         self.content = content
@@ -107,8 +108,17 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     // reports only the height its spring ends at (the capture's trial,
     // ADR-036), so the window moves there itself, on the same curve, and
     // snaps under Reduce Motion as the content does.
+    // hazard: a size the content asks while the window is being moved
+    // (its layout runs inside setFrame) is held and placed right after,
+    // never dropped: dropped, the window kept the cap's height around a
+    // shorter content (the owner's capture, 2026-11-11).
     func fit(_ size: CGSize) {
-        guard !placing, size.width > 0, size.height > 0 else { return }
+        guard size.width > 0, size.height > 0 else { return }
+        report?("content w=\(size.width) h=\(size.height)")
+        guard !placing else {
+            pending = size
+            return
+        }
         placing = true
         let frame = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
         if shown, frame != panel.frame, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
@@ -123,6 +133,10 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         }
         placing = false
         report?("window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
+        if let next = pending {
+            pending = nil
+            fit(next)
+        }
     }
 
     func windowDidResignKey(_: Notification) { hide() }
