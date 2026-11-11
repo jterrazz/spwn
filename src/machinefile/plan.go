@@ -223,9 +223,10 @@ func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, ext
 	return extra
 }
 
-// invariant: an app leans by the method that holds it as the inventory
-// reads it; an app with no row of the inventory does not live on this
-// machine, and a setting's requirement holds no app.
+// invariant: an app leans by its method as the inventory reads it, the
+// one apps chose here, even for an app present another way; an app with
+// no row of the inventory does not live on this machine, so holds
+// nothing, and a setting's requirement holds no app.
 func needing(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, taken map[string]bool, item string) []string {
 	var out []string
 	for _, it := range cat.Items {
