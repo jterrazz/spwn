@@ -1,16 +1,13 @@
 package cli
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
 
-func NewRoot(env kit.Env, openTUI func(context.Context) error, overview *cobra.Command, children ...*cobra.Command) *cobra.Command {
-	// invariant: bare station is the TUI on a terminal, else overview, which
-	// it prints piped or with --all or --json (SPEC §4.2).
+func NewRoot(env kit.Env, overview *cobra.Command, children ...*cobra.Command) *cobra.Command {
+	// invariant: bare station is overview, with its --all and --json.
 	root := &cobra.Command{
 		Use:   "station",
 		Short: "Set up and run this Mac, its VMs and your other Macs",
@@ -19,12 +16,6 @@ func NewRoot(env kit.Env, openTUI func(context.Context) error, overview *cobra.C
 	root.Flags().BoolVar(&all, "all", false, "print the overview with every section unfolded")
 	root.Flags().BoolVar(&json, "json", false, "print the overview as JSON")
 	root.RunE = func(c *cobra.Command, _ []string) error {
-		if handled, err := kit.Delegates(env, c); handled {
-			return err
-		}
-		if env.Screen && !all && !json {
-			return openTUI(c.Context())
-		}
 		for name, on := range map[string]bool{"all": all, "json": json} {
 			if on {
 				if err := overview.Flags().Set(name, "true"); err != nil {

@@ -1,0 +1,26 @@
+description: 'station on a terminal prints what overview prints, its next steps with it; --all unfolds it, and nothing opens a screen'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x80 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" > bare.txt'
+      stdin: |
+          scrollback
+      exit: 0
+    - command: '--version >/dev/null; terminal --size 100x80 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" overview > overview.txt'
+      stdin: |
+          scrollback
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/cmp bare.txt overview.txt; /usr/bin/grep -c "more: station overview --all" bare.txt; /usr/bin/grep -c "^→ station " bare.txt'
+      exit: 0
+      stdout: |
+          1
+          2
+    - command: '--version >/dev/null; terminal --size 100x80 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" --all | /usr/bin/grep -c "more: station overview --all"'
+      stdin: |
+          scrollback
+      exit: 1
+      stdout: |
+          0

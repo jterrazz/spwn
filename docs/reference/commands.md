@@ -16,7 +16,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 
 ## Rules
 
-- Bare `station` opens the TUI on a terminal; piped, or with `--all` or `--json`, it prints `station overview`, exit 0.
+- Bare `station` prints `station overview`, with its `--all` and `--json`, exit 0: this machine at a glance, then the next steps as commands.
 - A bare noun lists (`apps`, `settings`, `disk`, `machines`, `ports`, `images`, `accounts`). A verb whose argument is missing is refused, its hint the command with it: `station apps install` hints `station apps install <app>`.
 - An existing thing is a positional (`machines stop api`); a new thing is described by options (`machines create api --persistent`).
 - One verb per meaning, the [Glossary](../concepts/glossary.md#the-verbs)'s: `apps` install, update, remove; `settings` apply, diff, off; `disk` free, erase, move; a VM create, start, stop, restart, edit, delete. The only other words are the [hidden aliases](#hidden-aliases).

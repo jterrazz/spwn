@@ -62,13 +62,6 @@ func (e Env) Target() machine.Ref {
 
 func (e Env) Far() bool { return e.Target() != e.Self }
 
-func Delegates(env Env, c *cobra.Command) (bool, error) {
-	if !env.Far() || env.Screen {
-		return false, nil
-	}
-	return true, Menu(env, c)
-}
-
 const (
 	// value: alias of v2's `station daemon`, the engine run under its old
 	// name for one release.

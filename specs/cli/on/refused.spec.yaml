@@ -1,4 +1,4 @@
-description: '--on is refused where no call is sent, and a bare station --on is the menu off a terminal'
+description: '--on is refused where no call is sent, and a bare station --on reads that machine'
 fixture: ../../__fixtures__/far-mac/
 runs:
     - command: 'shell zsh --on x'
@@ -43,11 +43,10 @@ runs:
       stderr: |
           Error: --on does not apply to "help"
           Hint: run it on x itself: ssh x
-    - command: '--on x 2> menu.txt </dev/null || echo "station exited $?"'
+    - command: '--on x 2> err.txt </dev/null || echo "station exited $?"'
       exit: 0
       stdout: |
-          station exited 2
+          station exited 1
       files:
-          menu.txt:
-              contains: '    apps '
-          .calls: absent
+          err.txt:
+              contains: 'station is not installed on x'

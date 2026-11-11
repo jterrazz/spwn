@@ -29,7 +29,6 @@ type Env struct {
 	Out         *output.Writer
 	Prompt      Asker
 	Interactive bool
-	Screen      bool
 	On          *On
 	Use         Uses
 	Stdin       io.Reader

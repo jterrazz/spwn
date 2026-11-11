@@ -52,11 +52,9 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	inTTY, outTTY, errTTY := token.IsTerminal(stdin), token.IsTerminal(stdout), token.IsTerminal(stderr)
 	session, opened := openWorld(vars, slices.Contains(args, "--page"))
 	dark := true
-	if inTTY && outTTY && len(args) > 0 {
+	if inTTY && outTTY {
 		// hazard: the background query writes an OSC request and reads the reply
-		// on stdin, so it runs only when both ends are a terminal that answers; bare
-		// `station` opens the TUI, which asks itself, and a key typed early must
-		// reach it rather than be swallowed as the reply.
+		// on stdin, so it runs only when both ends are a terminal that answers.
 		dark = token.DetectDark(stdin, stdout)
 	}
 	writer := output.NewWriter(
@@ -87,7 +85,6 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
 		Interactive: inTTY && errTTY,
-		Screen:      inTTY && outTTY,
 		On:          &kit.On{ThisMachine: thisMac.thisMac(), Known: thisMac.known},
 		Use:         thisMac.uses(),
 		Stdin:       frameIn,
@@ -152,7 +149,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	if session != nil {
 		commands = append(commands, session.command())
 	}
-	root := cli.NewRoot(kenv, tuiOpener(kenv, thisMac, vars["NO_COLOR"] != ""), overviewCommand(kenv, thisMac), commands...)
+	root := cli.NewRoot(kenv, overviewCommand(kenv, thisMac), commands...)
 	reported := gateCatalog(root, writer, broken)
 	root.SetArgs(args)
 	root.SetIn(stdin)
