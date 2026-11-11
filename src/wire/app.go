@@ -21,6 +21,7 @@ import (
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine/process"
 	"github.com/jterrazz/studio-station/src/output"
+	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/platform/darwin"
 	"github.com/jterrazz/studio-station/src/platform/local"
@@ -96,6 +97,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		Now:         thisMac.sys.Clock.Now,
 		Locate:      thisMac.locate,
 	}
+	thisMac.refused = refusalOf(broken)
 	router := thisMac.router(kenv)
 	defer router.Close()
 	kenv.Calls = router
@@ -301,7 +303,9 @@ type machine struct {
 	sys       local.System
 	powerPort awakecontract.Power
 	// value: the catalog this run reads, built once.
-	cat     catalog.Catalog
+	cat catalog.Catalog
+	// value: the owner's file this run refused, for Needs you; nil when none.
+	refused *overviewcalls.Refusal
 	profile coremachine.Profile
 	vars    map[string]string
 	kind    catalog.MachineKind

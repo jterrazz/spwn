@@ -20,6 +20,11 @@ import (
 
 const ReadBudget = defaultBudget
 
+// value: an owner's file the strict decoder refused: what it says, at its
+// file and line, and the file the owner fixes.
+
+type Refusal struct{ Text, File string }
+
 type ThisMac struct {
 	Kind catalog.MachineKind
 	// value: what the process knows of this machine without asking it.
@@ -39,6 +44,9 @@ type Deps[App, Item, Misplaced any] struct {
 	Pool *lanes.Pool
 	// value: the catalog this run reads: which settings need root.
 	Catalog catalog.Catalog
+	// value: the owner's file this run refused, when one was: this run
+	// reads the built-in items, and says so in Needs you.
+	Refused *Refusal
 	// value: the Router the Overview reads each section of this machine
 	// through, and the machine's kind, which decides its sections.
 	Calls   call.Router

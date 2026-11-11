@@ -47,6 +47,10 @@ const (
 	EngineNone Engine = ""
 )
 
+// value: the subject of the Needs-you line an owner's refused file is.
+
+const RefusedSubject = "catalog"
+
 type Need struct {
 	// value: one Needs-you line, a section's finding as the pages draw it.
 	Machine  string

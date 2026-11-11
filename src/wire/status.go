@@ -58,6 +58,7 @@ func statusDeps(env kit.Env, m machine) overviewcalls.Sections {
 	d := overviewcalls.Sections{
 		Pool:    m.pool,
 		Catalog: m.cat,
+		Refused: m.refused,
 		Clock:   h.Clock,
 		ThisMac: overviewcalls.ThisMac{
 			Kind: m.kind, Hostname: h.Env.Hostname(), OS: h.Env.GOOS(), Arch: h.Env.GOARCH(), User: h.Env.User(), Shell: h.Env.Shell(),

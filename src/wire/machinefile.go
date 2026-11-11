@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"slices"
 
@@ -15,6 +16,7 @@ import (
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/output"
+	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/surface/cli/explain"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
@@ -73,6 +75,21 @@ func layerCatalog(user machinefilecontract.Source, builtin catalog.Catalog) (cat
 		return builtin, machinefilecalls.Worded(err)
 	}
 	return c, nil
+}
+
+// value: the owner's file refused, as Needs you says it: the worded
+// problem at its file and line, and the file to fix (the owner's catalog
+// folder when the refusal names none).
+func refusalOf(broken error) *overviewcalls.Refusal {
+	if broken == nil {
+		return nil
+	}
+	file := "~/.config/station/catalog"
+	var named *catalog.FileError
+	if errors.As(broken, &named) {
+		file = named.File
+	}
+	return &overviewcalls.Refusal{Text: kit.Translate(broken, "").Message, File: file}
 }
 
 // value: the commands that read no catalog, by their word under the root:

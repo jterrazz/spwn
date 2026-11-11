@@ -31,6 +31,7 @@ func needsWorlds() []World {
 		home("machines.home.awake-off", awakeOff),
 		needs("machines.needs.five", sharesEndingSoon),
 		needs("machines.needs.updated", updatesInstalled),
+		needs("machines.needs.catalog-refused", catalogRefused),
 	}
 }
 
@@ -61,6 +62,13 @@ func sharesEndingSoon(f *Scene) {
 			f.Accounts.Machines[i].Accounts = []accounts.Account{loan(catalog.ProviderClaude, catalog.ClaudeTokenName, 12*time.Minute), loan(catalog.ProviderGitHub, "github", 12*time.Minute)}
 		}
 	}
+}
+
+// value: the owner's item file refused: the run reads the built-in items,
+// and Needs you names the file and its line.
+func catalogRefused(f *Scene) {
+	f.Home.Needs = append(f.Home.Needs, overview.Need{Machine: f.Home.Head.Name, Section: "overview", Broken: true, Severity: "broken",
+		Subject: overview.RefusedSubject, Text: "~/.config/station/catalog/apps/jq.yaml:3: unknown key `vesion`", Path: "~/.config/station/catalog/apps/jq.yaml"})
 }
 
 func updatesInstalled(f *Scene) {

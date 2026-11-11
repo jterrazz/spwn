@@ -134,7 +134,7 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 		var all *machines.AllMachines
 		var readiness []overview.Check
 		send := func() bool {
-			sum := summarize(head, ids, got, reading, all)
+			sum := summarize(head, ids, got, reading, all, r.d.Refused)
 			sum.Readiness = readiness
 			select {
 			case out <- sum:
@@ -169,8 +169,15 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 	return out
 }
 
-func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines) overview.Summary {
+func summarize(head overview.Head, ids []section.ID, got map[section.ID]answer, reading *engine.Reading, all *machines.AllMachines, refused *Refusal) overview.Summary {
 	state, own := engineOf(head, reading)
+	if refused != nil {
+		// invariant: a file of the owner's refused is never silent where the
+		// engine answers: it is a need, with the file to fix, while the run
+		// reads the built-in items.
+		own = append(own, finding.Finding{Machine: machine.Ref{Name: head.Name}, Section: section.Overview, Severity: finding.Broken, Subject: overview.RefusedSubject,
+			Text: refused.Text, Fix: finding.Fix{Path: refused.File}})
+	}
 	var vms []overview.VM
 	if all != nil {
 		var found []finding.Finding

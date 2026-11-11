@@ -8,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
 	model "github.com/jterrazz/studio-station/src/machines"
@@ -229,5 +230,20 @@ func TestUpkeepIsNeverCountedAmongWhatNeedsYou(t *testing.T) {
 				t.Errorf("Upkeep is counted: uncounted %v, counts %v", s.Uncounted, s.Counts)
 			}
 		}
+	}
+}
+
+func TestARefusedFileOfTheOwnerIsUpkeepNamingItsFileAndLine(t *testing.T) {
+	r := needsFleet()
+	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.RefusedSubject,
+		Text: "~/.config/station/catalog/apps/jq.yaml:3: unknown key", Path: "~/.config/station/catalog/apps/jq.yaml"}}
+	_, upkeep := needsOf(r, needsPro)
+	if len(upkeep) != 1 {
+		t.Fatalf("upkeep %d items, want the refused file alone", len(upkeep))
+	}
+	n := upkeep[0]
+	if n.Hero != "A file of yours is refused on This Mac" || n.Verb.Label != VerbShow ||
+		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: station reads the built-in items meanwhile"}) {
+		t.Errorf("the refused file says %q, %q, %q", n.Hero, n.Verb.Label, n.Detail)
 	}
 }

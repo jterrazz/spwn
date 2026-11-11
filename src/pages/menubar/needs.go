@@ -288,6 +288,13 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 		case section.Disk:
 			row(n.Text+" on "+label, n.Text, VerbShow)
 			item.Glyph = symbol("internaldrive", page.SignalWaits)
+		case section.Overview:
+			if n.Subject != overview.RefusedSubject {
+				continue
+			}
+			row("A file of yours is refused on "+label, "1 file refused", VerbShow)
+			item.Glyph = symbol("exclamationmark.triangle", page.SignalFailing)
+			item.Detail = []string{n.Text, "fix " + n.Path + ": station reads the built-in items meanwhile"}
 		default:
 			continue
 		}
