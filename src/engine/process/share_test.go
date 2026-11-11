@@ -506,3 +506,33 @@ func TestAQuietListenerIsSharedOnlyOnceTheOwnerReservesIt(t *testing.T) {
 		t.Errorf("port 45000 service = %+v, want shared once reserved", s)
 	}
 }
+
+// invariant: the quiet listeners a VM is told with are those present now:
+// one count per VM, gone when the guest says they are, or the VM stops.
+func TestAVMsQuietListenersAreCountedWhilePresentOnly(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.vms["api"].state = engine.StateRunning
+	h.d.mu.Unlock()
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"snapshot","ports":[{"port":45000,"ip":"0.0.0.0","process":"node","quiet":true},{"port":45001,"ip":"127.0.0.1","process":"node","quiet":true}]}`))
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"listen","port":45002,"ip":"0.0.0.0","process":"node","quiet":true}`))
+	if got := h.d.macPorts("").Quiet; len(got) != 1 || got[0].VM != "api" || got[0].Count != 3 {
+		t.Fatalf("quiet = %+v, want api's 3 as one line", got)
+	}
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"unlisten","port":45002}`))
+	if got := h.d.macPorts("").Quiet; len(got) != 1 || got[0].Count != 2 {
+		t.Fatalf("quiet = %+v after one went, want 2", got)
+	}
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"snapshot","ports":[]}`))
+	if got := h.d.macPorts("").Quiet; len(got) != 0 {
+		t.Fatalf("quiet = %+v after a snapshot of none, want none", got)
+	}
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"listen","port":45003,"ip":"0.0.0.0","process":"node","quiet":true}`))
+	h.d.vmStopped(ctx, "api")
+	if got := h.d.macPorts("").Quiet; len(got) != 0 {
+		t.Fatalf("quiet = %+v after the VM stopped, want none", got)
+	}
+}

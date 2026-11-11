@@ -50,6 +50,22 @@ func Seal(p Page) Page {
 	return p
 }
 
+func Tallied(items []Item) []Tally {
+	// value: the tally of a set of items: what Seal gives a section, for a
+	// section that shows only some of the rows it sums up.
+	counts := map[Mark]int{}
+	for _, it := range items {
+		tally(it, counts)
+	}
+	var out []Tally
+	for _, m := range Marks() {
+		if counts[m] > 0 {
+			out = append(out, Tally{Mark: m, N: counts[m]})
+		}
+	}
+	return out
+}
+
 func tally(it Item, counts map[Mark]int) (pending bool) {
 	switch {
 	case it.Row != nil:

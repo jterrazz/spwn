@@ -14,6 +14,7 @@ func portsWorlds() []World {
 		{Name: "machines.ports.https", Edit: macs().then(portsAsHeard, httpsLinksOn(miniMac)), Pages: []string{mini}},
 		{Name: "machines.ports.exposed", Edit: macs().then(portsAsHeard, airPlayOnEvery), Pages: []string{"ports"}},
 		{Name: "machines.ports.down", Edit: macs().then(portsAsHeard, infraDown), Pages: []string{"ports"}},
+		{Name: "machines.ports.quiet", Edit: macs().then(portsAsHeard, quietOnLinux1), Pages: []string{"ports", "machine.linux-1"}},
 		{Name: "machines.ports.shared", Edit: macs().then(portsAsHeard, astroJustShared), Pages: []string{"machine.linux-1"}},
 	}
 }
@@ -51,6 +52,12 @@ func httpsLinksOn(mac string) func(*Scene) {
 			}
 		}
 	}
+}
+
+// value: ports.quiet: linux-1 listens on 3 ports of its system's temporary
+// range, told as one line.
+func quietOnLinux1(f *Scene) {
+	f.Ports.Macs[0].Quiet = []ports.Quiet{{VM: "linux-1", Count: 3}}
 }
 
 // value: ports.shared-new: linux-1's Astro shared two seconds ago, its

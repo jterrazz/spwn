@@ -119,6 +119,12 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 					Label: catalog.NotSharedWords(n.Count), Detail: page.Text(n.Detail)}})
 			}
 		}
+		for _, q := range h.Quiet {
+			if sc.holds(h, q.VM) {
+				private = append(private, page.Item{Row: &page.Row{ID: q.VM + ":quiet", Mark: page.Attention, Reason: page.Waiting,
+					Label: catalog.QuietWords(q.Count), Detail: page.Text(catalog.QuietHow(q.VM))}})
+			}
+		}
 		for _, p := range h.Ports {
 			if !sc.holds(h, p.Machine.Name) {
 				continue
@@ -139,20 +145,30 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 	}
 	b.Exposed, b.Public, b.Private = len(exposed), len(public), len(private)
 	heardCount := len(listening)
+	wholeExposed, wholePublic, wholePrivate := page.Tallied(exposed), page.Tallied(public), page.Tallied(private)
+	if sc.VM != "" {
+		wholePrivate = page.Tallied(slices.Concat(private, listening))
+	}
+	wholeListening := page.Tallied(listening)
+	shown := func(all []page.Item) bool { return len(all) > catalog.PortRowsShown }
+	tallied := shown(private) || sc.VM != "" && shown(listening)
+	exposedCapped, publicCapped, listeningCapped := shown(exposed), shown(public), shown(listening)
 	exposed, public, private, listening = capped(exposed), capped(public), capped(private), capped(listening)
 	if len(exposed) > 0 {
 		b.act(declarePublic(ports.Listing{AllMachines: f}))
 		b.Sections = append(b.Sections, page.Section{ID: SectionExposed, Title: "Exposed", Card: page.CardExposed,
-			Caption: []page.Value{signaled(page.Text(catalog.ReachableOutside), page.SignalFailing)}, Columns: columns(), Items: exposed})
+			Caption: []page.Value{signaled(page.Text(catalog.ReachableOutside), page.SignalFailing)}, Columns: columns(), Items: exposed,
+			Uncounted: exposedCapped, Counts: whole(exposedCapped, wholeExposed)})
 	}
 	if len(public) > 0 || sc.VM == "" {
 		if len(public) == 0 {
 			public = []page.Item{{Empty: &page.Empty{Text: "Nothing public."}}}
 		}
-		b.Sections = append(b.Sections, page.Section{ID: SectionPublic, Title: TitlePublic, Glance: page.Texts(TitlePublic, "from outside").Items, Caption: []page.Value{count(b.Public)}, Columns: columns(), Items: public})
+		b.Sections = append(b.Sections, page.Section{ID: SectionPublic, Title: TitlePublic, Glance: page.Texts(TitlePublic, "from outside").Items, Caption: []page.Value{count(b.Public)}, Columns: columns(), Items: public,
+			Uncounted: publicCapped, Counts: whole(publicCapped, wholePublic)})
 	}
 	priv := page.Section{ID: SectionPrivate, Title: TitlePrivate, Glance: page.Texts(TitlePrivate, "on your tailnet").Items, Caption: []page.Value{count(b.Private)}, Columns: columns(), Items: private,
-		About: &page.About{Label: catalog.AboutPrivateLinks, Text: catalog.PrivateLinksAre}}
+		About: &page.About{Label: catalog.AboutPrivateLinks, Text: catalog.PrivateLinksAre}, Uncounted: tallied, Counts: whole(tallied, wholePrivate)}
 	switch {
 	case sc.VM != "" && len(private) > 0 && len(listening) > 0:
 		priv.Items = append(priv.Items, page.Item{Group: &page.Group{Head: page.Row{ID: SectionListening, Label: TitleListening}, Items: listening}})
@@ -164,7 +180,8 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 	}
 	b.Sections = append(b.Sections, priv)
 	if sc.VM == "" && len(listening) > 0 {
-		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(heardCount)}, Columns: columns(), Items: listening})
+		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(heardCount)}, Columns: columns(), Items: listening,
+			Uncounted: listeningCapped, Counts: whole(listeningCapped, wholeListening)})
 	}
 	return b
 }
@@ -188,6 +205,15 @@ func machineOf(it page.Item) string {
 func signaled(v page.Value, s page.Signal) page.Value {
 	v.Signal = s
 	return v
+}
+
+// invariant: a section whose rows are capped keeps the tally of them all,
+// so its counts never read the rows drawn alone.
+func whole(capped bool, all []page.Tally) []page.Tally {
+	if capped {
+		return all
+	}
+	return nil
 }
 
 // invariant: a list shows catalog.PortRowsShown rows and one line for the

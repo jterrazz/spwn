@@ -391,3 +391,31 @@ func TestAFullVMAndAThousandListenersStayBounded(t *testing.T) {
 		t.Fatalf("row %+v", row)
 	}
 }
+
+// invariant: a capped section keeps the tally of every row it sums up.
+func TestACappedCardKeepsTheTallyOfItsWholeCount(t *testing.T) {
+	linux1 := coremachine.Ref{Name: "linux-1", On: proMac}
+	heard := make([]ports.Port, 0, 120)
+	for i := range 60 {
+		heard = append(heard,
+			ports.Port{Machine: linux1, Port: 3000 + i, Process: "node", Binds: []string{"0.0.0.0"}, Reach: ports.Outside},
+			ports.Port{Machine: linux1, Port: 4000 + i, Process: "node", Binds: []string{"0.0.0.0"}, Reach: ports.Outside, Declared: &ports.Declaration{Machine: "linux-1", Port: 4000 + i, Via: catalog.RouteLAN}})
+	}
+	f := ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Reachable: true, HTTPS: ports.HTTPSOff, Ports: heard}}}
+	p := fleetPorts(t, f, PortsOf{})
+	for _, id := range []string{SectionExposed, SectionPublic} {
+		s := sectionOf(p, id)
+		if s == nil || len(s.Counts) != 1 || s.Counts[0].N != 60 {
+			t.Errorf("%s counts %+v, want the whole 60", id, s)
+		}
+	}
+}
+
+func TestAVMsQuietListenersAreOneLineOfItsCard(t *testing.T) {
+	f := ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Reachable: true, HTTPS: ports.HTTPSOff, Quiet: []ports.Quiet{{VM: "linux-1", Count: 3}}}}}
+	p := fleetPorts(t, f, PortsOf{})
+	rows := rowsOf(p, SectionPrivate)
+	if len(rows) != 1 || rows[0].Label != "3 listeners on ports the system keeps for itself" || words(rows[0].Detail) != "station ports share linux-1 <port> to share one" {
+		t.Fatalf("rows %+v", rows)
+	}
+}

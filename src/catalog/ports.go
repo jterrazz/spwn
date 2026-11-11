@@ -54,6 +54,18 @@ func NotSharedWords(n int) string {
 	return strconv.Itoa(n) + " ports not shared"
 }
 
+// value: the one line that tells a VM's listeners on the
+// ports its system keeps for itself, which nothing shares by itself, and how to share one.
+
+func QuietWords(n int) string {
+	if n == 1 {
+		return "1 listener on a port the system keeps for itself"
+	}
+	return strconv.Itoa(n) + " listeners on ports the system keeps for itself"
+}
+
+func QuietHow(vm string) string { return "station ports share " + vm + " <port> to share one" }
+
 const TailnetProduct = "Tailscale" // value: the product that carries a share, as the owner reads its name.
 
 const ServeRow = "Tailscale Serve" // value: the row that says whether the tailnet serves this host's VMs.

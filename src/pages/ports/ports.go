@@ -100,6 +100,10 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 			row := NotSharedRow(n)
 			private = append(private, page.Item{Row: &row})
 		}
+		for _, q := range h.Quiet {
+			row := QuietRow(q)
+			private = append(private, page.Item{Row: &row})
+		}
 		for _, p := range h.Ports {
 			switch {
 			case p.Red():
@@ -121,20 +125,19 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 			notes = append(notes, page.Item{Note: &page.Note{Text: reserved(h, thisMac)}})
 		}
 	}
-	red, public, private, local = capped(red), capped(public), capped(private), capped(local)
 	var out []page.Section
 	if len(red) > 0 {
-		out = append(out, page.Section{ID: "needs-you", Title: "Needs you: " + catalog.ReachableOutside + ", not declared public", PipeCounts: true, Columns: exposedColumns(), Items: red})
+		out = append(out, kept(page.Section{ID: "needs-you", Title: "Needs you: " + catalog.ReachableOutside + ", not declared public", PipeCounts: true, Columns: exposedColumns()}, red))
 	}
 	if len(public) > 0 {
-		out = append(out, page.Section{ID: "public", Title: "Public: reachable from anywhere else, internet or LAN, declared", PipeCounts: true, Columns: exposedColumns(), Items: public})
+		out = append(out, kept(page.Section{ID: "public", Title: "Public: reachable from anywhere else, internet or LAN, declared", PipeCounts: true, Columns: exposedColumns()}, public))
 	}
 	if len(private) == 0 {
 		private = append(private, page.Item{Empty: &page.Empty{Noun: "shared ports", Hint: page.Cmd("station machines create")}})
 	}
-	out = append(out, page.Section{ID: "private", Title: "Private: shared with you on " + catalog.TailnetProduct, PipeCounts: true, Columns: Columns(), Items: private})
+	out = append(out, kept(page.Section{ID: "private", Title: "Private: shared with you on " + catalog.TailnetProduct, PipeCounts: true, Columns: Columns()}, private))
 	if all && len(local) > 0 {
-		out = append(out, page.Section{ID: "local-only", Title: "Listens on its machine only", PipeCounts: true, Columns: exposedColumns(), Items: local})
+		out = append(out, kept(page.Section{ID: "local-only", Title: "Listens on its machine only", PipeCounts: true, Columns: exposedColumns()}, local))
 	}
 	if !all && len(local) > 0 {
 		notes = append(notes, page.Item{Note: &page.Note{Text: localOnly(len(local))}})
@@ -143,6 +146,16 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 		out = append(out, page.Section{ID: "ranges", Title: "Reserved ports", Role: page.Banner, Uncounted: true, Columns: Columns(), Items: notes})
 	}
 	return out
+}
+
+// invariant: a section shows catalog.PortRowsShown rows and keeps the
+// count of them all, so its tally never reads the rows shown alone.
+func kept(s page.Section, all []page.Item) page.Section {
+	s.Items = capped(all)
+	if len(all) > catalog.PortRowsShown {
+		s.Uncounted, s.Counts = true, page.Tallied(all)
+	}
+	return s
 }
 
 // invariant: a list shows catalog.PortRowsShown rows and one line for the
@@ -157,6 +170,11 @@ func capped(items []page.Item) []page.Item {
 func NotSharedRow(n ports.NotShared) page.Row {
 	return page.Row{ID: n.VM + ":not-shared", Label: n.VM, Mark: page.Attention, Reason: page.Waiting,
 		Cells: []page.Value{page.None(), page.Text(ClassPrivate), page.None(), page.Texts(catalog.NotSharedWords(n.Count), n.Detail), page.None()}}
+}
+
+func QuietRow(q ports.Quiet) page.Row {
+	return page.Row{ID: q.VM + ":quiet", Label: q.VM, Mark: page.Attention, Reason: page.Waiting,
+		Cells: []page.Value{page.None(), page.Text(ClassPrivate), page.None(), page.Texts(catalog.QuietWords(q.Count), catalog.QuietHow(q.VM)), page.None()}}
 }
 
 func localOnly(n int) string {

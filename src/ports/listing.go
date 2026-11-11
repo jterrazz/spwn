@@ -76,6 +76,10 @@ type MacPorts struct {
 	// kept from sharing (the VM at its most, the range taken), one count
 	// per VM: they are never told port by port.
 	NotShared []NotShared `json:"not_shared,omitempty"`
+	// value: the listeners of each VM on ports the system keeps for itself,
+	// present now, one count per VM: never shared by themselves, never told
+	// port by port.
+	Quiet []Quiet `json:"quiet,omitempty"`
 	// value: what listens on each VM of this Mac, as its engine heard it.
 	Listening []Machine `json:"listening,omitempty"`
 	// value: every port this Mac and its VMs listen on, in its two classes.
@@ -86,6 +90,11 @@ type NotShared struct {
 	VM     string `json:"vm"`
 	Count  int    `json:"count"`
 	Detail string `json:"detail"`
+}
+
+type Quiet struct {
+	VM    string `json:"vm"`
+	Count int    `json:"count"`
 }
 
 type Range struct {

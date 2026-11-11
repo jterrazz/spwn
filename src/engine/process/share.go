@@ -749,6 +749,12 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 		out.NotShared = append(out.NotShared, *n)
 	}
 	sort.Slice(out.NotShared, func(i, j int) bool { return out.NotShared[i].VM < out.NotShared[j].VM })
+	for name, heard := range d.quiet {
+		if len(heard) > 0 && (vm == "" || name == vm) {
+			out.Quiet = append(out.Quiet, ports.Quiet{VM: name, Count: len(heard)})
+		}
+	}
+	sort.Slice(out.Quiet, func(i, j int) bool { return out.Quiet[i].VM < out.Quiet[j].VM })
 	sort.Slice(out.Shared, func(i, j int) bool {
 		a, b := out.Shared[i], out.Shared[j]
 		if a.VM != b.VM {
