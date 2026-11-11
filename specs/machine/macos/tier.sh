@@ -190,19 +190,19 @@ while read -r app method kind; do
   [ -z "$kind" ] || pin="STATION_MACHINE_KIND=$kind"
   if [ "$method" = mas ]; then
     in_vm "$brew_path $station apps install mas </dev/null" >> "$log" 2>&1 || miss "apps install mas exited $?"
-    out=$(perl -e 'alarm 120; exec @ARGV' ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $brew_path $mise_path $station apps install $app </dev/null" 2>&1)
+    reply=$(perl -e 'alarm 120; exec @ARGV' ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $brew_path $mise_path $station apps install $app </dev/null" 2>&1)
     code=$?
-    [ $code -ne 142 ] || { in_vm 'sudo -n pkill -f "mas install"; pkill -f "station apps install"' || true; out="no answer in 120 s"; }
-    say "   mas $app: exit $code: $(tr '\n' ' ' <<< "$out" | cut -c1-200)"
-    [ $code -ne 0 ] && [ $code -ne 142 ] && grep -qi 'app store\|sign' <<< "$out" || miss "mas $app signed out gave no sign-in hint ($out)"
+    [ $code -ne 142 ] || { in_vm 'sudo -n pkill -f "mas install"; pkill -f "station apps install"' || true; reply="no answer in 120 s"; }
+    say "   mas $app: exit $code: $(tr '\n' ' ' <<< "$reply" | cut -c1-200)"
+    [ $code -ne 0 ] && [ $code -ne 142 ] && grep -qi 'app store\|sign' <<< "$reply" || miss "mas $app signed out gave no sign-in hint ($reply)"
     continue
   fi
   for verb in install update remove; do
     if [ "$verb" = remove ] && [ "$method" = script ]; then
-      out=$(in_vm "$brew_path $mise_path $station apps remove $app --yes </dev/null" 2>&1)
+      reply=$(in_vm "$brew_path $mise_path $station apps remove $app --yes </dev/null" 2>&1)
       code=$?
-      say "   script $app: remove exit $code: $(tr '\n' ' ' <<< "$out" | cut -c1-160)"
-      [ $code -ne 0 ] && grep -q 'remove it by hand' <<< "$out" || miss "script $app: remove gave no by-hand hint"
+      say "   script $app: remove exit $code: $(tr '\n' ' ' <<< "$reply" | cut -c1-160)"
+      [ $code -ne 0 ] && grep -q 'remove it by hand' <<< "$reply" || miss "script $app: remove gave no by-hand hint"
       break
     fi
     flag=""
@@ -361,9 +361,9 @@ in_vm "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install
 in_vm "$bare_path $station apps install homebrew jq </dev/null" >> "$log" 2>&1 || miss "apps install homebrew jq exited $?: the manager installed in this run was not found in it"
 in_vm 'test -x /opt/homebrew/bin/jq' || miss "no jq under /opt/homebrew after the install"
 first=$(in_vm 'stat -f %m /opt/homebrew/bin/brew')
-out=$(in_vm "$bare_path $station apps install homebrew </dev/null" 2>&1)
-say "   second run: $(tr '\n' ' ' <<< "$out" | cut -c1-160)"
-grep -q 'already installed' <<< "$out" || miss "a second run does not find the Homebrew the first installed"
+reply=$(in_vm "$bare_path $station apps install homebrew </dev/null" 2>&1)
+say "   second run: $(tr '\n' ' ' <<< "$reply" | cut -c1-160)"
+grep -q 'already installed' <<< "$reply" || miss "a second run does not find the Homebrew the first installed"
 [ "$(in_vm 'stat -f %m /opt/homebrew/bin/brew')" = "$first" ] || miss "a second run ran Homebrew's installer again"
 case_pass
 
@@ -396,6 +396,7 @@ password="{ while :; do echo admin; sleep 3; done; }"
 # shell script(1) runs writes its own pid, then becomes station, so SIGINT reaches
 # station alone, never script(1), whose arguments name the same command.
 in_vm "($password | script -q /tmp/station-e2e/first.log sh -c 'echo \$\$ > /tmp/station-e2e/station.pid; exec $station init --machinefile /tmp/station-e2e/e2e-apply.yaml' > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
+# hazard: $out is run.sh's artifacts folder and every case shares one shell, so a case keeps its captured output in another name, or this copy lands in a path made of that output.
 # value: the transcript is the only witness of an apply that ends early: it is copied
 # to the host's artifacts before the VM is deleted, and its tail rides every failure.
 first_log() {
