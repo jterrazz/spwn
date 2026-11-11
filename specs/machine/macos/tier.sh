@@ -123,9 +123,14 @@ in_vm 'mkdir -p /tmp/station-e2e/watch && for c in brew sudo; do real=$(PATH=/op
 began=$(date +%s)
 step "install.sh" 'PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:$PATH STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null'
 say "   install.sh and init took $(($(date +%s) - began)) s"
-if in_vm 'grep -E "^(brew|sudo) " /tmp/station-e2e/.calls 2>/dev/null'; then
+# value: the seam's verdict is said in the log with what it recorded, so a pass
+# is read there, not inferred from a silence.
+seam=$(in_vm 'grep -E "^(brew|sudo) " /tmp/station-e2e/.calls 2>/dev/null')
+if [ -n "$seam" ]; then
+  say "$(sed 's/^/   seam: /' <<< "$seam")"
   fail "init ran brew or sudo"
 fi
+say "   seam: install.sh and init ran no brew and no sudo"
 init=$(in_vm "PATH=/tmp/station-e2e/watch:/opt/homebrew/bin:\$PATH $station init </dev/null")
 say "$(sed 's/^/   init: /' <<< "$init")"
 for row in name zshrc layout; do
@@ -153,6 +158,9 @@ case_pass
 
 
 case_begin shell-block-native-calls SU-11
+# value: init applies no setting (a setting comes from its own gesture, later the
+# Machinefile), so the shortcuts the login shell is probed for are applied first.
+step "settings apply docker-shortcuts" "$brew_path $station settings apply docker-shortcuts </dev/null"
 login=$(in_vm "zsh -lic 'command -v station; print -r -- \$PATH; node --version; go version; whence -w _station dclean gst; print -r -- \${STATION_TERMINAL:-unset}'" 2> /dev/null)
 say "$(sed 's/^/   login: /' <<< "$login")"
 grep -q '/.local/bin/station$' <<< "$login" || fail "a login shell finds no station in ~/.local/bin"
