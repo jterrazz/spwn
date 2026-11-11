@@ -3,7 +3,24 @@
 # the footprint test. Sourced by run.sh, never run alone.
 
 say() { printf '%s\n' "$*" | tee -a "$log"; }
-fail() { say "FAIL ${current:-setup} $*"; exit 1; }
+# value: a failure inside a case ends that case and the tier goes on to the next one, so
+# one run names every case that fails; the tier then exits 1. A failure outside a case
+# is the tier's setup (the VM, the binary, the engine): every later case would prove
+# nothing, so it aborts the whole tier at once.
+fail() {
+  if [ -z "${current:-}" ]; then
+    say "FAIL setup $*"
+    exit 1
+  fi
+  say "FAIL $current $*"
+  failed+=("$current")
+  missed=()
+  current=""
+  # hazard: `continue` with a count past the nesting ends the innermost loop of the
+  # caller's loops, whatever the function depth: run_tier's loop, so the case's own
+  # `while read` loops and functions are left behind.
+  continue 1000
+}
 
 # invariant: every case says its name and the use cases it proves on its first line
 # and PASS on its last, so the log reads as the list of what this tier proved.
@@ -41,6 +58,20 @@ case_pass() {
 }
 passed=()
 failed=()
+
+# value: run_tier <tier.sh> sources what comes before its first case_begin as the setup,
+# then evals each case alone, so a fail inside one reaches the next case.
+run_tier() {
+  local tier_file=$1 tier_chunk tier_dir
+  tier_dir=$(mktemp -d) || fail "no scratch folder to split $tier_file"
+  awk -v d="$tier_dir" '/^case_begin / { n++ } { f = sprintf("%s/%03d", d, n); print > f }' "$tier_file"
+  . "$tier_dir/000"
+  for tier_chunk in "$tier_dir"/[0-9][0-9][0-9]; do
+    [ "$tier_chunk" != "$tier_dir/000" ] || continue
+    eval "$(cat "$tier_chunk")"
+  done
+  rm -rf "$tier_dir"
+}
 
 ssh_opts=(-F /dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes
   -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR

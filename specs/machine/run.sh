@@ -48,6 +48,6 @@ trap cleanup EXIT
 trap 'exit 130' INT TERM
 
 say "== tier $([ "$kind" = linux ] && echo 2 || echo 3): $kind, $(cd "$repo" && git describe --always --dirty 2>/dev/null)"
-. "$suite/$kind/tier.sh"
+run_tier "$suite/$kind/tier.sh"
 [ ${#failed[@]} -eq 0 ] || exit 1
 say "PASS tier $([ "$kind" = linux ] && echo 2 || echo 3): $kind"
