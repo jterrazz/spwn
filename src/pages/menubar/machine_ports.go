@@ -113,6 +113,12 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 			}
 			private = append(private, b.sharedRow(s, p.Answer, h, sc))
 		}
+		for _, n := range h.NotShared {
+			if sc.holds(h, n.VM) {
+				private = append(private, page.Item{Row: &page.Row{ID: n.VM + ":not-shared", Mark: page.Attention, Reason: page.Waiting,
+					Label: catalog.NotSharedWords(n.Count), Detail: page.Text(n.Detail)}})
+			}
+		}
 		for _, p := range h.Ports {
 			if !sc.holds(h, p.Machine.Name) {
 				continue

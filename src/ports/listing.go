@@ -72,10 +72,20 @@ type MacPorts struct {
 	HTTPS      string       `json:"https"`
 	Range      *Range       `json:"range,omitempty"`
 	Shared     []SharedPort `json:"shared"`
+	// value: the listeners of a VM that no reservation holds and a refusal
+	// kept from sharing (the VM at its most, the range taken), one count
+	// per VM: they are never told port by port.
+	NotShared []NotShared `json:"not_shared,omitempty"`
 	// value: what listens on each VM of this Mac, as its engine heard it.
 	Listening []Machine `json:"listening,omitempty"`
 	// value: every port this Mac and its VMs listen on, in its two classes.
 	Ports []Port `json:"ports,omitempty"`
+}
+
+type NotShared struct {
+	VM     string `json:"vm"`
+	Count  int    `json:"count"`
+	Detail string `json:"detail"`
 }
 
 type Range struct {

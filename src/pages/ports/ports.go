@@ -96,6 +96,10 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 			shared[row.ID] = true
 			private = append(private, page.Item{Row: &row})
 		}
+		for _, n := range h.NotShared {
+			row := NotSharedRow(n)
+			private = append(private, page.Item{Row: &row})
+		}
 		for _, p := range h.Ports {
 			switch {
 			case p.Red():
@@ -138,6 +142,11 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 		out = append(out, page.Section{ID: "ranges", Title: "Reserved ports", Role: page.Banner, Uncounted: true, Columns: Columns(), Items: notes})
 	}
 	return out
+}
+
+func NotSharedRow(n ports.NotShared) page.Row {
+	return page.Row{ID: n.VM + ":not-shared", Label: n.VM, Mark: page.Attention, Reason: page.Waiting,
+		Cells: []page.Value{page.None(), page.Text(ClassPrivate), page.None(), page.Texts(catalog.NotSharedWords(n.Count), n.Detail), page.None()}}
 }
 
 func localOnly(n int) string {

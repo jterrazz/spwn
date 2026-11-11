@@ -138,7 +138,7 @@ func (d *Engine) unlisten(vm string, port int) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if s, ok := d.svcs[key(vm, port)]; ok {
-		if s.st.Phase == ports.PhaseNotAllowed {
+		if s.st.Phase == ports.PhaseNotAllowed || s.st.Phase == ports.PhaseRefused && d.reservationIndex(vm, port) < 0 {
 			delete(d.svcs, key(vm, port))
 			return
 		}
@@ -358,7 +358,7 @@ func (d *Engine) vmStopped(ctx context.Context, vm string) {
 	}
 	delete(d.heard, vm)
 	for _, s := range d.svcs {
-		if s.vm == vm && s.st.Phase == ports.PhaseNotAllowed {
+		if s.vm == vm && (s.st.Phase == ports.PhaseNotAllowed || s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0) {
 			delete(d.svcs, key(s.vm, s.port))
 			continue
 		}
@@ -725,14 +725,28 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 			out.Shared = append(out.Shared, d.view(l, d.svcs[key(l.VM, l.GuestPort)], p.HTTPS))
 		}
 	}
+	refused := map[string]*ports.NotShared{}
+	firstPort := map[string]int{}
 	for _, s := range d.svcs {
 		if s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0 && (vm == "" || s.vm == vm) {
-			out.Shared = append(out.Shared, ports.SharedPort{VM: s.vm, GuestPort: s.port, State: ports.PhaseRefused, Process: s.process, Detail: ports.JoinDetail(s.detail, off)})
+			n := refused[s.vm]
+			if n == nil {
+				n = &ports.NotShared{VM: s.vm}
+				refused[s.vm] = n
+			}
+			n.Count++
+			if first, seen := firstPort[s.vm]; !seen || s.port < first {
+				firstPort[s.vm], n.Detail = s.port, ports.JoinDetail(s.detail, off)
+			}
 		}
 		if s.st.Phase == ports.PhaseNotAllowed && (vm == "" || s.vm == vm) {
 			out.Shared = append(out.Shared, ports.Hinted(ports.SharedPort{VM: s.vm, GuestPort: s.port, State: ports.PhaseNotAllowed, Process: s.process, Bind: s.ip, Detail: s.detail}, d.o.Ports))
 		}
 	}
+	for _, n := range refused {
+		out.NotShared = append(out.NotShared, *n)
+	}
+	sort.Slice(out.NotShared, func(i, j int) bool { return out.NotShared[i].VM < out.NotShared[j].VM })
 	sort.Slice(out.Shared, func(i, j int) bool {
 		a, b := out.Shared[i], out.Shared[j]
 		if a.VM != b.VM {

@@ -38,6 +38,16 @@ var WorkspaceRights = PortRights{Open: PortSet{{From: SystemPorts, To: 65535}}, 
 
 var FunnelPorts = [PublicPorts]int{443, 8443, 10000}
 
+// value: the one line that tells a VM's listeners no reservation holds and
+// a refusal kept from sharing.
+
+func NotSharedWords(n int) string {
+	if n == 1 {
+		return "1 port not shared"
+	}
+	return strconv.Itoa(n) + " ports not shared"
+}
+
 const TailnetProduct = "Tailscale" // value: the product that carries a share, as the owner reads its name.
 
 const ServeRow = "Tailscale Serve" // value: the row that says whether the tailnet serves this host's VMs.

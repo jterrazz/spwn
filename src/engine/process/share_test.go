@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/engine"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/ports"
 )
@@ -431,5 +432,41 @@ func TestAPathEntryOfADeletedVMGoesWhenServeTurnsOn(t *testing.T) {
 	h.d.refreshSelf(ctx)
 	if got := tn.dump(); got != "" {
 		t.Errorf("tailnet after Serve on = %s, want no entry", got)
+	}
+}
+
+// invariant: what a VM at its most refuses is told as one count, and goes
+// with the listeners: a thousand ports that come and go leave none.
+func TestAFullVMsRefusedListenersLeaveNothingWhenTheyGo(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.st.Ports = &heldPolicy{g: &ports.PortsGroup{MaxPerVM: 1}}
+	h.d.tn = &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 9000, To: 9999}}, To: catalog.AudiencePrivate}, nil
+	}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.vms["api"].state = engine.StateRunning
+	h.d.mu.Unlock()
+	h.d.listen(ctx, "api", 9000, "0.0.0.0", "node")
+	for port := 9001; port < 9101; port++ {
+		h.d.listen(ctx, "api", port, "0.0.0.0", "node")
+	}
+	got := h.d.macPorts("").NotShared
+	if len(got) != 1 || got[0].VM != "api" || got[0].Count != 100 || got[0].Detail == "" {
+		t.Fatalf("not shared = %+v, want api's 100 as one line", got)
+	}
+	for port := 9001; port < 9101; port++ {
+		h.d.unlisten("api", port)
+	}
+	if got := h.d.macPorts("").NotShared; len(got) != 0 {
+		t.Errorf("not shared = %+v after the listeners went, want none", got)
+	}
+	h.d.mu.Lock()
+	defer h.d.mu.Unlock()
+	if len(h.d.svcs) != 1 {
+		t.Errorf("%d services kept, want the one shared", len(h.d.svcs))
 	}
 }

@@ -1,12 +1,13 @@
-description: 'a 21st port on linux-1 waits, with the cause and the fix, neither reserved nor shared'
+description: 'a 21st port on linux-1 is told in one line with its cause, neither reserved nor shared'
 env: range-full
 runs:
     - command: 'world listen linux-1 "*:9100" node'
       exit: 0
-    - command: 'ports | /usr/bin/grep 9100'
+    - command: 'ports | /usr/bin/grep -e 9100 -e "not shared ·"'
       exit: 0
       stdout: |
-          ◐	linux-1	9100	private		waiting · linux-1 has 20 shared ports, the most a VM may	node	station ports stop-sharing linux-1 <port>
+          ◐	linux-1		private		1 port not shared · linux-1 has 20 shared ports, the most a VM may
+          ●	linux-1	9100	private		behind jterrazz-macbook-pro, not shared	node
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: (.stores.reservations | length), nine: [.stores.reservations[] | select(.guest_port == 9100)], shared: (.tailnet.shares | length)}'' world.json'
       exit: 0
       stdout: |

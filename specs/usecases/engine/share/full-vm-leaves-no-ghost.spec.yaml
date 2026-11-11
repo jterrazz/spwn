@@ -1,0 +1,27 @@
+description: 'a full VM keeps one line for what it refuses, and that line goes with the listeners'
+env: range-full
+runs:
+    - command: 'world listen linux-1 "*:9100" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:9101" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:9102" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "not shared ·"'
+      exit: 0
+      stdout: |
+          ◐	linux-1		private		3 ports not shared · linux-1 has 20 shared ports, the most a VM may
+    - command: 'world unlisten linux-1 9100'
+      exit: 0
+    - command: 'world unlisten linux-1 9101'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "not shared ·"'
+      exit: 0
+      stdout: |
+          ◐	linux-1		private		1 port not shared · linux-1 has 20 shared ports, the most a VM may
+    - command: 'world unlisten linux-1 9102'
+      exit: 0
+    - command: 'ports | /usr/bin/grep -c "not shared ·" || true'
+      exit: 0
+      stdout: |
+          0
