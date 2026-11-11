@@ -723,13 +723,23 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 		switch {
 		case e.Mounted():
 			parts := strings.Split(strings.Trim(e.Path, "/"), "/")
-			if e.Port == 443 && len(parts) >= 2 && vms[parts[0]] && !justified(e) {
-				_ = d.tn.Unshare(ctx, e)
+			if e.Port != 443 || len(parts) < 2 || !vms[parts[0]] {
+				continue
 			}
+			if !justified(e) {
+				_ = d.tn.Unshare(ctx, e)
+				continue
+			}
+			d.servedBefore(ports.CarriedFrom(e))
 		case e.Public():
-			if p.InRange(ports.CarriedFrom(e)) && !justified(e) {
-				_ = d.tn.Unshare(ctx, e)
+			if !p.InRange(ports.CarriedFrom(e)) {
+				continue
 			}
+			if !justified(e) {
+				_ = d.tn.Unshare(ctx, e)
+				continue
+			}
+			d.servedBefore(ports.CarriedFrom(e))
 		case p.InRange(e.Port):
 			if !justified(e) {
 				e.Path = ""
@@ -760,7 +770,9 @@ func justifies(l ports.Reservation, e ports.Share, httpsMode string) bool {
 }
 
 // invariant: a reserved port the tailnet already serves when the engine
-// starts is served until its VM says it no longer listens there.
+// starts, by any entry it justifies (a private port, a path, a Funnel
+// port), is served until its VM says it no longer listens there, so a
+// release, a stop or a judge removes that entry.
 func (d *Engine) servedBefore(macPort int) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
