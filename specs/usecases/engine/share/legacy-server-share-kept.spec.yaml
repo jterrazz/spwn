@@ -1,0 +1,17 @@
+description: 'a server share made before reservations said who made them is the owner''s: a restart keeps it'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-mac-mini"].stores.reservations = [{vm:"infra",guest_port:8080,host_port:40000,http:true,reserved_at:"2026-11-04T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world listen infra "*:8080" nginx'
+      exit: 0
+    - command: 'world engine-crash jterrazz-mac-mini'
+      exit: 0
+    - command: 'ports --on jterrazz-mac-mini | /usr/bin/grep infra'
+      exit: 0
+      stdout: |
+          ●	infra	8080	private	https://jterrazz-mac-mini.tail1234.ts.net:40000	shared	nginx
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[["infra",8080,40000,null,null]],"shared":[[40000,"/",40000,"private"]]}

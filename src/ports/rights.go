@@ -15,6 +15,9 @@ import (
 type Rights struct {
 	catalog.PortRights
 	Refused string
+	// value: the machine is a server, whose reservations made before they
+	// said who made them are the owner's.
+	Server bool
 }
 
 func RightsOf(said *catalog.PortRights, server bool) Rights {
@@ -22,9 +25,9 @@ func RightsOf(said *catalog.PortRights, server bool) Rights {
 	// workspace catalog.WorkspaceRights, today's sharing, and a server none.
 	switch {
 	case said != nil:
-		return Rights{PortRights: *said}
+		return Rights{PortRights: *said, Server: server}
 	case server:
-		return Rights{}
+		return Rights{Server: true}
 	}
 	return Rights{PortRights: catalog.WorkspaceRights}
 }
@@ -84,7 +87,16 @@ func (r Rights) Judge(l Reservation, httpsMode string) (Reservation, bool) {
 	// now: one the rights made that they no longer allow is not kept, nor a
 	// public one no Funnel port is left for; one the owner made is kept,
 	// private when the rights do not give it their audience. A kept one
-	// takes the audience and Funnel port the rights give it today.
+	// takes the audience and Funnel port the rights give it today. One
+	// made before reservations said who made them is the owner's on a
+	// server, which only `ports share` shared then, and the rights' on a
+	// workspace.
+	if l.By == "" {
+		l.By = ByRights
+		if r.Server {
+			l.By = ByOwner
+		}
+	}
 	allowed := r.Allows(l.GuestPort)
 	if !allowed && !l.Owned() {
 		return l, false

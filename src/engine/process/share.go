@@ -273,7 +273,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	s.detail, s.serveNote, s.refused = "", "", false
 	i := d.reservationIndex(s.vm, s.port)
 	if i < 0 {
-		l, err := d.reserveLocked(p, s.vm, s.port, d.rights[s.vm], "")
+		l, err := d.reserveLocked(p, s.vm, s.port, d.rights[s.vm], ports.ByRights)
 		if err != nil {
 			s.st.Phase, s.refused, s.detail = ports.PhaseRefused, true, err.Error()
 			return
@@ -525,8 +525,8 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 // invariant: a port is reserved with the audience its VM's rights give it,
 // and one the owner shares outside them is private; a public one takes its
 // Funnel port, refused while another VM's share holds it, or when the HTTPS
-// mode leaves none for it. by is who makes it (ports.ByOwner, or empty for
-// the rights). The caller holds d.mu.
+// mode leaves none for it. by is who makes it, ports.ByOwner or
+// ports.ByRights. The caller holds d.mu.
 func (d *Engine) reserveLocked(p ports.Policy, vm string, port int, r ports.Rights, by string) (ports.Reservation, error) {
 	l, err := ports.Reserve(p, d.reservations, vm, port, d.busy)
 	if err != nil || d.reservationIndex(vm, port) >= 0 {

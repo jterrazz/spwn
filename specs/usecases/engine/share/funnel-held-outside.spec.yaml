@@ -19,4 +19,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[[3000,40000,"public",null]],"shared":[[443,"/",0,"public"]],"funnel":[443]}
+          {"reserved":[[3000,40000,"public","rights"]],"shared":[[443,"/",0,"public"]],"funnel":[443]}

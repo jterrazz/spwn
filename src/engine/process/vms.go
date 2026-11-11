@@ -780,7 +780,7 @@ func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 		}
 		l, i := ports.Find(d.reservations, v.rec.Name, h.Port)
 		if i < 0 {
-			reserved, err := d.reserveLocked(p, v.rec.Name, h.Port, r, "")
+			reserved, err := d.reserveLocked(p, v.rec.Name, h.Port, r, ports.ByRights)
 			if err != nil {
 				continue
 			}

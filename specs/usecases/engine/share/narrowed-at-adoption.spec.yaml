@@ -15,7 +15,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[[3000,40000,"public",null],[3001,40001,"public",null]],"shared":[[443,"/",40000,"public"],[8443,"/",40001,"public"]],"funnel":[443,8443]}
+          {"reserved":[[3000,40000,"public","rights"],[3001,40001,"public","rights"]],"shared":[[443,"/",40000,"public"],[8443,"/",40001,"public"]],"funnel":[443,8443]}
     - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -35,4 +35,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[[3000,40000,null,null]],"shared":[[40000,"/",40000,"private"]],"funnel":null}
+          {"reserved":[[3000,40000,null,"rights"]],"shared":[[40000,"/",40000,"private"]],"funnel":null}

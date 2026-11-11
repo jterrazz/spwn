@@ -21,9 +21,11 @@ type Reservation struct {
 	// value: the Funnel port a public one is shared on.
 	PublicPort int `json:"public_port,omitempty"`
 	// value: who made it: ByOwner, the owner's own share (`station ports
-	// share`, or a guest's); empty, its VM's rights, which judge it again
-	// at each run of the VM and each adoption, and every reservation made
-	// before this key.
+	// share` on a Mac); ByRights, its VM's rights (a port that listened
+	// inside them, an item's port, a guest's share), which judge it again
+	// at each run of the VM and each adoption. Empty, made before this
+	// key, it is read as the owner's on a server, the rights' on a
+	// workspace (Rights.Judge).
 	By         string    `json:"by,omitempty"`
 	HTTP       *bool     `json:"http,omitempty"`
 	ReservedAt time.Time `json:"reserved_at"`
@@ -34,7 +36,10 @@ func (r Reservation) Key() string { return r.VM + ":" + strconv.Itoa(r.GuestPort
 
 func (r Reservation) Audience() catalog.Audience { return cmp.Or(r.To, catalog.AudiencePrivate) }
 
-const ByOwner = "owner" // value: the maker of a reservation the owner shared, as its `by` says it.
+const (
+	ByOwner  = "owner"  // value: the maker of a reservation the owner shared, as its `by` says it.
+	ByRights = "rights" // value: the maker of a reservation its VM's rights made, as its `by` says it.
+)
 
 func (r Reservation) Owned() bool { return r.By == ByOwner }
 

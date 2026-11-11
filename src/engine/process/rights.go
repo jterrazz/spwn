@@ -25,7 +25,7 @@ func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 		said, err := d.o.Rights(ctx, vm)
 		switch {
 		case err != nil:
-			r = ports.Rights{Refused: err.Error()}
+			r = ports.Rights{Refused: err.Error(), Server: server}
 		case said != nil:
 			r = ports.RightsOf(said, server)
 		}
