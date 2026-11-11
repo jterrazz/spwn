@@ -19,7 +19,11 @@ const (
 )
 
 func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progress) ([]apps.Outcome, error) {
-	requested, err := s.Find(r.Names)
+	found, err := s.Find(r.Names)
+	if err != nil {
+		return nil, err
+	}
+	requested, err := s.by(found, r.Method, r.Version)
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +32,10 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progr
 		return nil, err
 	}
 	inRun := map[string]bool{}
+	ran := map[string]catalog.App{}
 	for _, t := range run {
 		inRun[t.Name] = true
+		ran[t.Name] = t
 	}
 	states := s.states(ctx, run)
 	deps := map[string][]string{}
@@ -92,7 +98,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progr
 		}
 		result = append(result, *o)
 	}
-	return s.held(ctx, result), nil
+	return s.held(ctx, result, ran), nil
 }
 
 // invariant: an app comes with what it requires: each requirement missing
@@ -212,52 +218,63 @@ func (s *Shelf) Uninstall(ctx context.Context, names []string) ([]apps.Outcome, 
 	if err != nil {
 		return nil, err
 	}
-	states := s.states(ctx, requested)
-	for _, t := range requested {
-		if !settled(states[t.Name]) {
-			return nil, &apps.NotInstalledError{App: t.Name}
+	reports := s.reports(ctx, requested)
+	for _, r := range reports {
+		if !settled(r.State) {
+			return nil, &apps.NotInstalledError{App: r.App.Name}
 		}
 	}
 	out := make([]apps.Outcome, 0, len(requested))
-	for _, t := range requested {
-		o := s.run(ctx, verbUninstall, t, contract.Installer.Remove)
-		o.Method = s.install(t).Method()
+	for i, t := range requested {
+		held := s.holding(t, reports[i])
+		o := s.run(ctx, verbUninstall, held, contract.Installer.Remove)
+		o.Method = s.install(held).Method()
 		out = append(out, o)
 	}
 	return out, nil
 }
 
 func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error) {
-	var candidates []catalog.App
+	via := map[catalog.Method]bool{}
+	for _, mm := range catalog.Managers {
+		if slices.Contains(r.Via, mm.Manager) {
+			for _, m := range mm.Methods {
+				via[m] = true
+			}
+		}
+	}
+	reaches := func(in catalog.Install) bool {
+		can := s.o.Installers[in.Method()].Can()
+		if len(r.Via) > 0 {
+			return via[in.Method()] && can.Update
+		}
+		return can.UpdateAll && can.Update
+	}
+	var asked []catalog.App
 	if len(r.Names) > 0 {
 		found, err := s.Find(r.Names)
 		if err != nil {
 			return nil, err
 		}
-		candidates = found
+		asked = found
 	} else {
-		via := map[catalog.Method]bool{}
-		for _, mm := range catalog.Managers {
-			if slices.Contains(r.Via, mm.Manager) {
-				for _, m := range mm.Methods {
-					via[m] = true
-				}
-			}
-		}
 		for _, t := range s.Placed() {
-			can := s.installer(t).Can()
-			reached := can.UpdateAll
-			if len(r.Via) > 0 {
-				reached = via[s.install(t).Method()]
-			}
-			if reached && can.Update {
-				candidates = append(candidates, t)
+			if slices.ContainsFunc(t.InstallsOn(s.o.ThisMachine), reaches) {
+				asked = append(asked, t)
 			}
 		}
 	}
 	reports := map[string]apps.Report{}
-	for _, rep := range s.reports(ctx, candidates) {
+	var candidates []catalog.App
+	for i, rep := range s.reports(ctx, asked) {
 		reports[rep.App.Name] = rep
+		if t := s.holding(asked[i], rep); len(r.Names) > 0 || reaches(s.install(t)) {
+			candidates = append(candidates, t)
+		}
+	}
+	ran := map[string]catalog.App{}
+	for _, t := range candidates {
+		ran[t.Name] = t
 	}
 	var outcomes []apps.Outcome
 	var bundled, single []catalog.App
@@ -285,15 +302,16 @@ func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outc
 	for _, t := range single {
 		outcomes = append(outcomes, s.run(ctx, verbUpdate, t, contract.Installer.Update))
 	}
-	return s.held(ctx, outcomes), nil
+	return s.held(ctx, outcomes, ran), nil
 }
 
-func (s *Shelf) held(ctx context.Context, outcomes []apps.Outcome) []apps.Outcome {
-	// invariant: an outcome names the method that holds its app and the
-	// version the method lists once the verb has run, read once per method.
+func (s *Shelf) held(ctx context.Context, outcomes []apps.Outcome, ran map[string]catalog.App) []apps.Outcome {
+	// invariant: an outcome names the method that holds its app, the one
+	// the run installed or updated it by, and the version that method
+	// lists once the verb has run, read once per method.
 	versions := map[catalog.Method]map[string]string{}
 	for i := range outcomes {
-		t, ok := s.byName[outcomes[i].Name]
+		t, ok := ran[outcomes[i].Name]
 		if !ok {
 			continue
 		}

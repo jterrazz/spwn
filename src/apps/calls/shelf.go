@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"sort"
 
@@ -83,13 +84,16 @@ func (s *Shelf) Find(names []string) ([]catalog.App, error) {
 	return found, nil
 }
 
-func (s *Shelf) CheckInstall(ctx context.Context, names []string) error {
-	found, err := s.Find(names)
+func (s *Shelf) CheckInstall(ctx context.Context, r apps.InstallRequest) error {
+	found, err := s.Find(r.Names)
 	var livesOn *apps.ElsewhereError
 	if errors.As(err, &livesOn) {
 		livesOn.VM = s.runningVM(ctx, livesOn.Kinds)
 	}
 	if err != nil {
+		return err
+	}
+	if found, err = s.by(found, r.Method, r.Version); err != nil {
 		return err
 	}
 	for _, t := range found {
@@ -139,6 +143,60 @@ func (s *Shelf) CheckUpgrade(names []string) error {
 func (s *Shelf) install(t catalog.App) catalog.Install {
 	i, _ := t.InstallOn(s.o.ThisMachine)
 	return i
+}
+
+// value: the app as one install of it carries it, every verb of the shelf
+// then running and reading it by that install alone.
+func (s *Shelf) as(t catalog.App, in catalog.Install) catalog.App {
+	t.Installs = []catalog.LivesOn{{Kinds: []catalog.MachineKind{s.o.ThisMachine}, Install: in}}
+	return t
+}
+
+// invariant: an app is run by the method that holds it here, the one its
+// row of the inventory names, so an update or a removal reaches the copy
+// that is there, whichever of its methods installed it.
+func (s *Shelf) holding(t catalog.App, r apps.Report) catalog.App {
+	if in, ok := t.InstallBy(s.o.ThisMachine, r.Method); ok && in.Method() != s.install(t).Method() {
+		return s.as(t, in)
+	}
+	return t
+}
+
+// value: the apps asked, each by the method a request names, at the
+// version it names; none named, as this machine carries them.
+func (s *Shelf) by(found []catalog.App, method catalog.Method, version string) ([]catalog.App, error) {
+	if method == "" && version == "" {
+		return found, nil
+	}
+	out := make([]catalog.App, 0, len(found))
+	for _, t := range found {
+		in := s.install(t)
+		if method != "" {
+			var ok bool
+			if in, ok = t.InstallBy(s.o.ThisMachine, method); !ok {
+				return nil, &apps.NoMethodError{App: t.Name, Method: method, Has: s.methods(t)}
+			}
+		}
+		if version != "" {
+			pinned, ok := catalog.Pinned(in, version)
+			if !ok {
+				return nil, fmt.Errorf("%s cannot install %s at %s", in.Method(), t.Name, version)
+			}
+			in = pinned
+		}
+		out = append(out, s.as(t, in))
+	}
+	return out, nil
+}
+
+func (s *Shelf) methods(t catalog.App) []catalog.Method {
+	var out []catalog.Method
+	for _, in := range t.InstallsOn(s.o.ThisMachine) {
+		if !slices.Contains(out, in.Method()) {
+			out = append(out, in.Method())
+		}
+	}
+	return out
 }
 
 // invariant: the registry wire builds holds an installer for every method

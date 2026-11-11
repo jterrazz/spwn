@@ -111,3 +111,14 @@ func (e *AppStoreError) Error() string { return e.App + " is the App Store's ins
 type NoUpgradePathError struct{ App string }
 
 func (e *NoUpgradePathError) Error() string { return e.App + " has no upgrade path" }
+
+// value: an app asked by a method it has none of on this machine, with the
+// methods it has here.
+
+type NoMethodError struct {
+	App    string
+	Method catalog.Method
+	Has    []catalog.Method
+}
+
+func (e *NoMethodError) Error() string { return e.App + " has no method " + string(e.Method) + " here" }

@@ -1,0 +1,45 @@
+description: 'an app another of its managers holds is adopted by that one, never installed again'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: Lightweight JSON processor
+          provides: [jq]
+          methods:
+              - { os: macos, brew: jq }
+              - { os: macos, mise: { name: jq, version: latest } }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: jq, manager: mise }]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of mise · on PATH, not managed by script
+          ●	jq	brew
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of mise · on PATH, not managed by script
+          ●	jq	brew
+          ◐	homebrew	5.0.1	script	the manager of mise · adopted · on PATH, not managed by script
+          ●	mise	2026.10.1	brew	the manager of jq
+          ●	jq	1.8.1	brew	adopted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].apps.mise.installed.jq, (.macs["jterrazz-macbook-pro"].stores.ledger // [] | map(.item))]'' world.json'
+      exit: 0
+      stdout: |
+          [null,[]]
+    - command: 'apps jq | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	jq	1.8.1	brew

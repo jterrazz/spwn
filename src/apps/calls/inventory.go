@@ -134,7 +134,9 @@ func (s *Shelf) reportsEach(ctx context.Context, list []catalog.App, listings ma
 func (s *Shelf) needed(list []catalog.App) map[catalog.Method]bool {
 	needed := map[catalog.Method]bool{}
 	for _, t := range list {
-		needed[s.install(t).Method()] = true
+		for _, in := range t.InstallsOn(s.o.ThisMachine) {
+			needed[in.Method()] = true
+		}
 		for _, m := range s.managed(t) {
 			needed[m] = true
 		}
@@ -184,8 +186,8 @@ func (s *Shelf) list(ctx context.Context, m catalog.Method, list []catalog.App) 
 	l.keys = keys
 	var held []string
 	for _, t := range list {
-		if i := s.install(t); i.Method() == m {
-			if _, ok := keys[i.Key()]; ok {
+		for _, i := range t.InstallsOn(s.o.ThisMachine) {
+			if _, ok := keys[i.Key()]; ok && i.Method() == m && !slices.Contains(held, i.Key()) {
 				held = append(held, i.Key())
 			}
 		}
@@ -228,6 +230,11 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 		}
 		return r
 	}
+	if other, ok := s.heldOtherwise(t, listings); ok {
+		held := s.report(ctx, s.as(t, other), listings)
+		held.App = t
+		return held
+	}
 	if s.fromAppStore(t) {
 		r.State, r.Detail = catalog.StateOK, DetailAppStore
 		return r
@@ -254,10 +261,28 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	return r
 }
 
+// invariant: an app that another of its methods here lists is held by
+// that method, adopted as it is: read, updated and removed by it, never
+// installed again by the first.
+func (s *Shelf) heldOtherwise(t catalog.App, listings map[catalog.Method]listing) (catalog.Install, bool) {
+	all := t.InstallsOn(s.o.ThisMachine)
+	if len(all) < 2 {
+		return nil, false
+	}
+	for _, in := range all[1:] {
+		if _, ok := listings[in.Method()].keys[in.Key()]; ok {
+			return in, true
+		}
+	}
+	return nil, false
+}
+
 // invariant: a manager holds what each method it manages lists that no
-// app of the catalog placed here installs by that method: the owner's own
-// packages. A list that did not answer, or that its method keeps none
-// of, leaves what it holds unread.
+// app of the catalog placed here installs by that method by default: the
+// owner's own packages. A key a catalog app's other method lists may be
+// the owner's own install by hand, so it counts as held too, and keeps the
+// manager. A list that did not answer, or that its method keeps none of,
+// leaves what it holds unread.
 func (s *Shelf) holds(t catalog.App, listings map[catalog.Method]listing) (held []string, unread bool) {
 	for _, m := range s.managed(t) {
 		l, ok := listings[m]

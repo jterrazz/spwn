@@ -80,6 +80,11 @@ type Step struct {
 type InstallRequest struct {
 	Names       []string
 	Interactive bool
+	// value: the method the apps are installed by and the version asked,
+	// a Machinefile's step's; empty, the method this machine carries them
+	// by, at its manager's version.
+	Method  catalog.Method
+	Version string
 }
 
 type UpgradeRequest struct {

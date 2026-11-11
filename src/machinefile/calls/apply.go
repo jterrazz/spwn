@@ -45,8 +45,9 @@ type ApplyIn struct {
 }
 
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
-	// value: the plan carried out: each item installed by apps.install or
-	// set by settings.apply, one at a time in the plan's order.
+	// value: the plan carried out: each item installed by apps.install,
+	// by the method and at the version its step chose, or set by
+	// settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
@@ -173,7 +174,7 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 	// invariant: what finished is in the ledger before the interrupt is
 	// read, so an item installed just before Ctrl-C is station's to take
 	// back like any other.
-	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive}, r.p)
+	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.Version}, r.p)
 	if err != nil && ctx.Err() == nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
@@ -205,9 +206,8 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 // invariant: an install interrupted hands back nothing of what it did, so
 // when no outcome of the item came back, or only its interrupt, the apps
 // are read again past the interrupt, until the item's own row answers:
-// one that reads there by its method (the one apps.install chose here,
-// whatever Machinefile key chose the item) finished just before it, and
-// is recorded by that method like any other.
+// one that reads there finished just before it, and is recorded by the
+// method that holds it, the one the plan chose and apps.install ran.
 func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
 	done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)

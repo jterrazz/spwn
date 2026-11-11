@@ -316,7 +316,7 @@ The format is whole now, so a file a newer station writes in v1 decodes in this 
 | `ports`                                                                                 | the engine: a reserved port's `http`, a VM's env at each run, a row's label ([Ports](ports.md#what-an-item-sets)) |
 | the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet              |
 | `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`              |
-| a version asked of `npm`, `uv` or `bun`                                                 | their installs, which carry no version yet: until then such a version is refused as unpinnable                    |
+| a version asked of `npm`, `uv` or `bun`, a `pin: version` on a method station runs      | the installs, of which only mise's carries a version yet: until then such a version is refused as unpinnable      |
 | a method's `provides`                                                                   | presence, which reads the item's today                                                                            |
 | `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                                    |
 | a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                            |

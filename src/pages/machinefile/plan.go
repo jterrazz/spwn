@@ -65,7 +65,7 @@ func values(s machinefile.Step) []string {
 }
 
 func lineRow(l machinefile.Line, words ...string) page.Row {
-	row := page.Row{ID: l.Step.Item, Label: l.Step.Item, Mark: pages.MarkOf(l.Seen.State), Cells: []page.Value{page.Texts(l.Step.Method)}}
+	row := page.Row{ID: l.Step.Item, Label: l.Step.Item, Mark: pages.MarkOf(l.Seen.State), Cells: []page.Value{page.Texts(l.Method())}}
 	if l.Seen.Condition == machinefile.NotManaged {
 		row.Mark = page.NotKnown
 	}
@@ -285,7 +285,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		if len(d.Words) > 0 {
 			said, detail = append(said, d.Words[:len(d.Words)-1]...), d.Words[len(d.Words)-1]
 		}
-		steps = append(steps, pages.RunStep{ID: d.Line.Step.Item, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(d.Line.Step.Method)}, Why: said, Detail: detail, Log: d.Log})
+		steps = append(steps, pages.RunStep{ID: d.Line.Step.Item, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(d.Line.Method())}, Why: said, Detail: detail, Log: d.Log})
 		switch {
 		case d.Reason == machinefile.Interrupted:
 			interrupted = true

@@ -46,7 +46,7 @@ type PlanJSON struct {
 }
 
 func lineJSON(l machinefile.Line, result, detail string) LineJSON {
-	out := LineJSON{Item: l.Step.Item, Kind: string(l.Step.Kind), Method: l.Step.Method, Condition: string(l.Seen.Condition), Action: string(l.Action), Result: result, Detail: detail}
+	out := LineJSON{Item: l.Step.Item, Kind: string(l.Step.Kind), Method: l.Method(), Condition: string(l.Seen.Condition), Action: string(l.Action), Result: result, Detail: detail}
 	for k, v := range l.Step.Values {
 		if out.Values == nil {
 			out.Values = map[string]string{}

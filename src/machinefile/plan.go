@@ -123,8 +123,8 @@ type Plan struct {
 
 func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed, passwordless bool) Plan {
 	// invariant: an item's action follows from what it reads: absent is
-	// installed or set, present kept, present by another way adopted and
-	// never reinstalled, an app that no longer answers installed again, a
+	// installed or set, present by its method kept, present by another of
+	// its methods or another way adopted and never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
 	// (the owner's to decide); an item of another phase is left to it. An
 	// item skipped on this system is still listed, so never extra.
@@ -333,10 +333,23 @@ func actionOf(s Step, seen Seen) Action {
 	case NotManaged:
 		return Adopt
 	case Present, Outdated:
+		if s.Kind != catalog.KindSetting && seen.Method != "" && seen.Method != s.Method {
+			return Adopt
+		}
 		return Keep
 	case Extra, Unknown:
 	}
 	return Leave
+}
+
+func (l Line) Method() string {
+	// value: the method the line is carried by, as the plan and the run
+	// show it: the one its step chose, or, for an app adopted from another
+	// of its methods, the one that holds it.
+	if l.Action == Adopt && (l.Seen.Condition == Present || l.Seen.Condition == Outdated) {
+		return l.Seen.Method
+	}
+	return l.Step.Method
 }
 
 func (l Line) Acts() bool {

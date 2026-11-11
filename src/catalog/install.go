@@ -127,6 +127,25 @@ func (AppInstall) isInstall()        {}
 func (SkillInstall) isInstall()      {}
 func (ProvidedByInstall) isInstall() {}
 
+func Pinned(in Install, version string) (Install, bool) {
+	// value: the install at the version asked, where it carries one to its
+	// manager: a runtime of mise's; any other carries none.
+	if m, ok := in.(MiseInstall); ok {
+		m.Version = version
+		return m, true
+	}
+	return nil, false
+}
+
+func VersionOf(in Install) string {
+	// value: the version an install carries to its manager, empty where
+	// it carries none.
+	if m, ok := in.(MiseInstall); ok {
+		return m.Version
+	}
+	return ""
+}
+
 func lastSegment(name string) string {
 	return name[strings.LastIndex(name, "/")+1:]
 }

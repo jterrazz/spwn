@@ -37,7 +37,7 @@ kind: app
 name: fd
 description: find
 methods:
-    - { os: macos, cask: fd, pin: version }
+    - { os: macos, cask: fd }
     - { os: macos, version: '>=26', skill: { repo: owner/fd, name: fd } }
     - { os: ubuntu, script: { run: 'true' } }
 `,

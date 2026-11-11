@@ -182,7 +182,24 @@ func (f *Installer) Install(ctx context.Context, installs []catalog.Install, _ c
 	if err := f.unopened(installs); err != nil {
 		return err
 	}
-	return f.run(ctx, "Install", installs, installed)
+	if err := f.run(ctx, "Install", installs, installed); err != nil {
+		return err
+	}
+	f.pin(installs)
+	return nil
+}
+
+// invariant: an install that carries a version holds that version, as
+// the real adapter's global use of it leaves it; a channel (latest, lts,
+// stable) holds whatever the world offers.
+func (f *Installer) pin(installs []catalog.Install) {
+	f.w.Lock()
+	defer f.w.Unlock()
+	for _, i := range installs {
+		if v := catalog.VersionOf(i); v != "" && strings.ContainsAny(v[:1], "0123456789") {
+			f.manager().Installed[i.Key()] = v
+		}
+	}
 }
 
 // invariant: a command another item brings at its first launch is absent

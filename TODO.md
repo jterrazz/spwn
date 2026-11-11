@@ -45,17 +45,6 @@ work in workspaces.
   studio-os's `apps/herdr` install, so one of the two owns it; and whether
   moving a checkout's sessions and memory to its new path (done by hand on
   2026-11-10) is a station gesture.
-- **apply installs the Machinefile's choice (for the manager lots, L3.x)**:
-  the resolution chooses an item's method (an entry's `manager`, the
-  system's priority) and its version, and `explain` prints them, but
-  `machinefile.apply` hands `apps.install` the name alone (`InstallIn` has no
-  method or version), and the shelf installs by the first method of the
-  catalogue that fits this machine (`Shelf.install`, `InstallOn`). So a
-  `{ name: node, manager: mise, version: 22 }` is installed however the
-  catalogue would, unpinned, and the plan's `method` column can name another
-  manager than the one that runs. `apps.install` takes the step's method and
-  version, and apply passes them, once the manager lots give apt and
-  github-release an installer (L2.3's re-verify, 2026-11-11).
 - **git's identity**: no setting writes `user.name` and `user.email`; Accounts
   only reports them unset, and `git-signing` reads them from the preferences
   without writing them. The new MacBook's were set by hand (2026-11-10); a
