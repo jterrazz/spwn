@@ -199,6 +199,13 @@ func Codes() map[fail.Code]Wording {
 		appscalls.NotInstalled: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not installed", "station apps install " + e.Subject
 		},
+		appscalls.NoMethod: func(e *fail.Error) (string, string) {
+			if e.Detail["has"] == "" {
+				return e.Subject + " has no method " + e.Detail["method"] + " here", "station apps " + e.Subject
+			}
+			first, _, _ := strings.Cut(e.Detail["has"], ", ")
+			return e.Subject + " has no method " + e.Detail["method"] + " here, only " + e.Detail["has"], "station apps move " + e.Subject + " --to " + first
+		},
 		accountscalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no account named \"" + e.Subject + "\"", "station accounts"
 		},

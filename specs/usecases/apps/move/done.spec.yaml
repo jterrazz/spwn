@@ -1,0 +1,31 @@
+description: 'a move installs the app by the manager asked, then uninstalls the copy the old one held'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: jq
+          description: Lightweight JSON processor
+          provides: [jq]
+          methods:
+              - { os: macos, brew: jq }
+              - { os: macos, mise: { name: jq, version: latest } }
+      exit: 0
+    - command: 'apps move jq --to mise'
+      exit: 0
+      stdout: |
+          ●	jq	1.0.0	mise	moved from brew
+          ●	brew copy			uninstalled
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].apps | [.brew.installed.jq, .mise.installed.jq]'' world.json'
+      exit: 0
+      stdout: |
+          [null,"1.0.0"]
+    - command: 'apps jq | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	jq	1.0.0	mise
+    - command: 'apps move jq --to mise'
+      exit: 0
+      stdout: |
+          ●	jq	1.0.0	mise	already installed by mise

@@ -1,0 +1,19 @@
+description: 'moving an app that is not installed is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/fd.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: fd
+          description: A simple, fast alternative to find
+          provides: [fd]
+          methods:
+              - { os: macos, brew: fd }
+              - { os: macos, mise: { name: fd, version: latest } }
+      exit: 0
+    - command: 'apps move fd --to mise'
+      exit: 2
+      stderr: |
+          Error: fd is not installed
+          Hint: station apps install fd

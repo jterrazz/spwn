@@ -1,5 +1,5 @@
 description: 'drift reads each item as a condition, an app there by another way not managed'
-fixture: ../__fixtures__/rg-by-hand/
+fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

@@ -33,6 +33,7 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
 	appscmd "github.com/jterrazz/studio-station/src/surface/cli/apps"
 	appsinstall "github.com/jterrazz/studio-station/src/surface/cli/apps/install"
+	appsmove "github.com/jterrazz/studio-station/src/surface/cli/apps/move"
 	appsremove "github.com/jterrazz/studio-station/src/surface/cli/apps/remove"
 	appsupdate "github.com/jterrazz/studio-station/src/surface/cli/apps/update"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
@@ -45,6 +46,7 @@ func appsCommand(env kit.Env, m machine) *cobra.Command {
 		appsinstall.Command(appsinstall.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 		appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 		appsremove.Command(appsremove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
+		appsmove.Command(appsmove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now, Managers: m.cat.ManagerKeys()}, env),
 	)
 }
 

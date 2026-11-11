@@ -14,6 +14,7 @@ const (
 	Unknown      fail.Code = "apps.unknown"
 	Elsewhere    fail.Code = "apps.lives-elsewhere"
 	NotInstalled fail.Code = "apps.not-installed"
+	NoMethod     fail.Code = "apps.no-method"
 )
 
 func coded(err error) error {
@@ -22,6 +23,7 @@ func coded(err error) error {
 	var unknown *apps.UnknownError
 	var elsewhere *apps.ElsewhereError
 	var absent *apps.NotInstalledError
+	var none *apps.NoMethodError
 	switch {
 	case errors.As(err, &unknown):
 		return fail.New(fail.NotFound, Unknown, unknown.Name, nil)
@@ -29,6 +31,12 @@ func coded(err error) error {
 		return fail.New(fail.Refused, Elsewhere, elsewhere.App, map[string]string{"lives": apps.LivesOn(elsewhere.Kinds), "vm": elsewhere.VM})
 	case errors.As(err, &absent):
 		return fail.New(fail.Refused, NotInstalled, absent.App, nil)
+	case errors.As(err, &none):
+		has := make([]string, 0, len(none.Has))
+		for _, m := range none.Has {
+			has = append(has, string(m))
+		}
+		return fail.New(fail.Refused, NoMethod, none.App, map[string]string{"method": string(none.Method), "has": strings.Join(has, ", ")})
 	}
 	return err
 }

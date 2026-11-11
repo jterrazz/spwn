@@ -73,6 +73,8 @@ func done(verb string) string {
 		return "Updated"
 	case "remove":
 		return "Removed"
+	case "move":
+		return "Moved"
 	}
 	return verb
 }

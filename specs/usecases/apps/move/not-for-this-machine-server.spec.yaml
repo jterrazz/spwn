@@ -1,0 +1,8 @@
+description: 'moving on a server is refused: station does not manage a server''s apps'
+env: two-macs
+runs:
+    - command: 'apps move jq --to brew --on infra'
+      exit: 2
+      stderr: |
+          Error: infra is a server: station does not manage its apps
+          Hint: manage it with your own tooling: ssh infra

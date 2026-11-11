@@ -569,3 +569,65 @@ func (s *Shelf) firstOpen(t catalog.App, e *apps.NotYetProvidedError) string {
 	}
 	return e.Error() + ": open " + e.Item + " once, then " + again
 }
+
+const verbMove = "move"
+
+func (s *Shelf) Move(ctx context.Context, name string, to catalog.Method, p call.Progress) ([]apps.Outcome, error) {
+	// invariant: a move installs the app by the method asked before it
+	// uninstalls the copy another method holds, and uninstalls it only
+	// once that install is in: a failed install leaves the old copy as it
+	// was. A copy no method of the catalog holds (on PATH by hand) is the
+	// owner's, kept; one its method cannot uninstall is kept and said.
+	found, err := s.Find([]string{name})
+	if err != nil {
+		return nil, err
+	}
+	t := found[0]
+	if _, err = s.by(found, to, ""); err != nil {
+		return nil, err
+	}
+	was := s.reports(ctx, found)[0]
+	if !settled(was.State) {
+		return nil, &apps.NotInstalledError{App: name}
+	}
+	if was.Managed && was.Method == to {
+		return s.held(ctx, []apps.Outcome{{Name: name, Verb: verbMove, Result: catalog.StateOK, Detail: "already installed by " + string(to)}}, map[string]catalog.App{name: s.holding(t, was)}), nil
+	}
+	out, err := s.Install(ctx, apps.InstallRequest{Names: []string{name}, Method: to}, p)
+	if err != nil {
+		return out, err
+	}
+	for i := range out {
+		if out[i].Name != name {
+			continue
+		}
+		out[i].Verb = verbMove
+		if out[i].Result != catalog.StateOK {
+			return out, nil
+		}
+		out[i].Detail = "moved from " + string(was.Method)
+		if !was.Managed {
+			out[i].Detail = "installed by " + string(to)
+		}
+		out[i].Steps = append(out[i].Steps, s.leave(ctx, t, was))
+	}
+	return out, nil
+}
+
+func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.Step {
+	old := s.holding(t, was)
+	step := apps.Step{Item: string(was.Method) + " copy", Result: catalog.StateOK}
+	switch {
+	case !was.Managed:
+		step.Item, step.Detail = "copy on PATH", "kept: it is yours, installed by none of its methods"
+	case s.uninstallable(old) != nil:
+		step.Detail = "kept: station cannot uninstall it"
+	default:
+		o := s.run(ctx, verbUninstall, old, contract.Installer.Remove)
+		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why
+		if o.Result != catalog.StateOK {
+			step.Detail = o.Detail
+		}
+	}
+	return step
+}

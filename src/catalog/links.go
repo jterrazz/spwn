@@ -67,6 +67,18 @@ func (c Catalog) links(name string, requires, oneOf []string, by, method string)
 	return out
 }
 
+func (c Catalog) ManagerKeys() []string {
+	// value: every method key a manager item of the catalog installs by,
+	// in the catalog's order: the words `--to` and `--manager` take.
+	var out []string
+	for _, p := range c.Items {
+		for _, k := range p.Item.Manages {
+			out = append(out, string(k))
+		}
+	}
+	return out
+}
+
 func (c Catalog) Manager(method string) (string, bool) {
 	// value: the item that manages a method key, when one does.
 	for _, p := range c.Items {

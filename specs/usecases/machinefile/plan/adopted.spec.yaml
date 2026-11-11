@@ -1,5 +1,5 @@
 description: 'an app already there by another way than its method is adopted, never installed again'
-fixture: ../__fixtures__/rg-by-hand/
+fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

@@ -27,8 +27,9 @@ type Apps interface {
 	Uninstall(ctx context.Context, names []string) ([]apps.Outcome, error)
 	CheckUpgrade(names []string) error
 	Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error)
+	Move(ctx context.Context, name string, to catalog.Method, p call.Progress) ([]apps.Outcome, error)
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.BindWatch(List, d), call.Bind(Show, d), call.Bind(Install, d), call.Bind(Update, d), call.Bind(Remove, d)}
+	return []call.Handler{call.BindWatch(List, d), call.Bind(Show, d), call.Bind(Install, d), call.Bind(Update, d), call.Bind(Remove, d), call.Bind(Move, d)}
 }

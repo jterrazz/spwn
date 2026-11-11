@@ -1,0 +1,18 @@
+description: 'a move to a manager the app has no method by here, an unknown manager or none is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'apps move jq --to mise'
+      exit: 2
+      stderr: |
+          Error: jq has no method mise here, only brew
+          Hint: station apps move jq --to brew
+    - command: 'apps move jq --to nope'
+      exit: 2
+      stderr: |
+          Error: unknown manager "nope"
+          Hint: --to takes brew, cask, mas, mise, skill, uv, bun, npm
+    - command: 'apps move jq'
+      exit: 2
+      stderr: |
+          Error: give the manager it moves to
+          Hint: --to takes brew, cask, mas, mise, skill, uv, bun, npm

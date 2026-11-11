@@ -1,0 +1,10 @@
+description: 'station apps move node --to mise --on linux-1 answers inside the workspace: it is already there'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'apps move node --to mise --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	node	22.11.0	mise	already installed by mise

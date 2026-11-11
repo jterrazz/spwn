@@ -1,5 +1,5 @@
 description: 'apply --remove keeps an extra whose manager is missing here, and its record'
-fixture: ../__fixtures__/rg-by-hand/
+fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

@@ -268,3 +268,32 @@ func TestAKeyAnotherMethodListsIsHeldByThatManager(t *testing.T) {
 		t.Errorf("%s holds %v; want the copy its method lists counted as yours", owner, row.Holds)
 	}
 }
+
+func TestAMoveHandsTheAppToTheMethodAskedOnEveryPath(t *testing.T) {
+	// invariant: once moved, the app is held by the method asked alone:
+	// the outcome, the read after it and the plan that asks that method
+	// name it, and the copy of the method it left is gone.
+	ctx := context.Background()
+	for _, c := range []struct{ item, from, to, entry string }{
+		{"twin", "skill", "cask", "twin"}, {"twin", "cask", "skill", "{ name: twin, manager: skill }"},
+	} {
+		about := c.item + " " + c.from + " to " + c.to
+		b := benchOf(t, catalog.Mac, c.entry)
+		b.w.Mac("here").Apps[catalog.Method(c.from)].Installed[c.item] = "1.0.0"
+		out, err := b.shelf.Move(ctx, c.item, catalog.Method(c.to), nil)
+		if err != nil {
+			t.Fatalf("%s: %v", about, err)
+		}
+		o := outcomeOf(t, out, c.item)
+		if string(o.Method) != c.to || !b.holds(catalog.Method(c.to), c.item) || b.holds(catalog.Method(c.from), c.item) {
+			t.Errorf("%s: moved to %s; held by %s %v, by %s %v", about, o.Method, c.to, b.holds(catalog.Method(c.to), c.item), c.from, b.holds(catalog.Method(c.from), c.item))
+		}
+		row := b.row(t, c.item)
+		step := b.step(t, c.item)
+		seen := map[string]machinefile.Seen{c.item: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
+		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false).Lines[0]
+		if string(row.Method) != c.to || step.Method != c.to || line.Action != machinefile.Keep {
+			t.Errorf("%s: reads by %s, the plan asks %s and %s it", about, row.Method, step.Method, line.Action)
+		}
+	}
+}

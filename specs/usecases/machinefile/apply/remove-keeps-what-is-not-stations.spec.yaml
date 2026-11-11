@@ -1,5 +1,5 @@
 description: 'apply --remove forgets an extra gone, keeps one held another way, skips one of another Machinefile'
-fixture: ../__fixtures__/rg-by-hand/
+fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'

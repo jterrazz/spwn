@@ -155,6 +155,19 @@
       "watch": true
     },
     {
+      "name": "apps.move",
+      "schema": "station.apps.move/v1",
+      "section": "apps",
+      "where": "at-target",
+      "errors": [
+        "apps.lives-elsewhere",
+        "apps.no-method",
+        "apps.not-installed",
+        "apps.unknown"
+      ],
+      "in": "MoveIn"
+    },
+    {
       "name": "apps.remove",
       "schema": "station.apps.remove/v1",
       "section": "apps",
