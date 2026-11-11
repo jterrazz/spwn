@@ -20,7 +20,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | ---------------------------------------------------- | ----------------------------------- |
 | A fresh machine: install, init                       | `docs/start/getting-started.md`     |
 | The families, contracts, Router, engine, world       | `docs/concepts/architecture.md`     |
-| Palette, marks, pipe format, the TUI, graphs         | `docs/concepts/design-system.md`    |
+| Palette, marks, pipe format, graphs                  | `docs/concepts/design-system.md`    |
 | What a word means                                    | `docs/concepts/glossary.md`         |
 | Building, and which folder a change opens            | `docs/guides/develop.md`            |
 | The three tiers, use cases over a world, the stubs   | `docs/guides/test.md`               |

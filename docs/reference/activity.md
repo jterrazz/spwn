@@ -7,7 +7,7 @@
 | What it shows         | The measures, the busiest processes, the findings |
 | Where each comes from | The one owner of each fact                        |
 | The history           | What the engine keeps, how often, for how long    |
-| Graphs                | What the TUI and the menu bar draw                |
+| Graphs                | What the menu bar draws                           |
 
 ## What it shows
 
@@ -33,11 +33,11 @@ A measure the Meter could not count is `?`, never a zero. A read calls no third-
 
 ## The history
 
-The engine's `sample` job keeps it, in memory only, for This Mac and every VM it runs: a point every 2 s while a surface watches the machine (the TUI's Activity, the menu bar's, `station activity` itself through `engine.watch`), every 60 s otherwise, 24 hours kept. The rates `station activity` prints are the mean of the last 10 s of it; a CPU busy for 10 minutes, swap growing, and what else must last to be a finding are read from it. An engine restart starts it again from nothing. `--json --history` prints the 24 h series in 60 s points.
+The engine's `sample` job keeps it, in memory only, for This Mac and every VM it runs: a point every 2 s while a surface watches the machine (the menu bar's, `station activity` itself through `engine.watch`), every 60 s otherwise, 24 hours kept. The rates `station activity` prints are the mean of the last 10 s of it; a CPU busy for 10 minutes, swap growing, and what else must last to be a finding are read from it. An engine restart starts it again from nothing. `--json --history` prints the 24 h series in 60 s points.
 
 ## Graphs
 
-The TUI's Activity screen draws a sparkline (`▁▂▃▄▅▆▇█`) per measure from the history (CPU, memory, swap, disk read and write, network in and out, each point 0 to 100 of its own scale) and a bar for the disk's free space; a measure with no points has no graph, never a flat line of zeros. Its window is its own (`--graph 6m`, a flag no help shows). The menu bar's machine page draws a machine's Activity over 6 min, an hour or a day: the CPU as a line over 6 min and as bars over the hour and the day, the network as sent over received mirrored, the memory now as a bar; a pointer over a chart reads the value of that point and when it was. The window picked is remembered per machine, an hour until one is picked. What its page carries is the [API](api.md)'s. The CLI prints values only. How they are drawn is the [Design system](../concepts/design-system.md#graphs)'s.
+The menu bar's machine page draws a machine's Activity over 6 min, an hour or a day: the CPU as a line over 6 min and as bars over the hour and the day, the network as sent over received mirrored, the memory now as a bar; a pointer over a chart reads the value of that point and when it was. The window picked is remembered per machine, an hour until one is picked. What its page carries is the [API](api.md)'s. The CLI prints values only. How they are drawn is the [Design system](../concepts/design-system.md#graphs)'s.
 
 ## Related
 

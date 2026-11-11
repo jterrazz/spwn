@@ -1,6 +1,6 @@
 # Architecture
 
-`station` is one Go binary whose tree names what it does: one top-level package per family (`machines`, `apps`, `settings`, `ports`, `awake`...), and inside each the same four parts, its model, its contracts, its calls and its adapters. A surface (the CLI, the TUI, the engine's server, the menu bar through it) turns a gesture into a call, the Router decides on which machine the call runs, and a pure page function turns its result into what is printed. The architecture test holds the tree and the direction of every import ([ADR-014](../decisions/014-families-and-contracts.md)).
+`station` is one Go binary whose tree names what it does: one top-level package per family (`machines`, `apps`, `settings`, `ports`, `awake`...), and inside each the same four parts, its model, its contracts, its calls and its adapters. A surface (the CLI, the engine's server, the menu bar through it) turns a gesture into a call, the Router decides on which machine the call runs, and a pure page function turns its result into what is printed. The architecture test holds the tree and the direction of every import ([ADR-014](../decisions/014-families-and-contracts.md)).
 
 | Section                    | Answers                                                           |
 | -------------------------- | ----------------------------------------------------------------- |
@@ -75,11 +75,10 @@ The data, the presentation and the surfaces:
              (machinefiles/<name>.yaml) and their strict decoder, images, dotfiles, recipes
   page/      the page language: sections, rows, values, marks, reasons, actions; station.page/v1
   pages/     one package per page: a family's result to a page, pure
-  ui/        token, atom, molecule, organism, template; render/ (tty, pipe, json, tui); help/
+  ui/        token, atom, molecule, organism, template; render/ (tty, pipe, json); help/
   output/    the only place that knows a terminal: picks the form, prints the one error block
   surface/
     cli/     the cobra tree, one folder per noun and verb; kit/; words/ (every code's words)
-    tui/     the Bubble Tea app and its screens/
   world/     the fake world: data only, and its closed list of events
   wire/      the composition root: adapters, stores, the Profile, the Registry, the Router, Fang
   cmd/       station/ (process entry: argv, environment, streams, once), generate/ (the compiler)
@@ -176,9 +175,9 @@ An event is the one channel the `Notifier` and the menu bar read, a `notice` of 
 4. The leaf invokes `apps.install` through the Router. The target is this machine (`--on` and `station use` change it), so the call runs in this process, past the gate. The call orders the dependencies, runs each method's installer from the `Installers` registry, and reads the inventory back.
 5. A call that confirms decides it in its own `Run` (`confirm.Require`); when it refuses with `needs-confirmation`, kit answers: `--yes`, the leaf's question on a terminal, or a refusal, then invokes it once more with the answer. No surface decides whether to ask.
 6. The leaf hands the result to its page function (`pages/apps`), which returns a `page.Page`, and to its JSON document for `--json`.
-7. `output` prints it in the form the stream allows: tty with colour, pipe as tab-separated records, json (`station.<call>/v1`), or the page itself as `station.page/v1` under the hidden `--page` (what the TUI renders). `NO_COLOR` degrades a terminal to the pipe form.
+7. `output` prints it in the form the stream allows: tty with colour, pipe as tab-separated records, json (`station.<call>/v1`), or the page itself as `station.page/v1` under the hidden `--page` (what the specs read). `NO_COLOR` degrades a terminal to the pipe form.
 
-Multi-step behaviour (install then configure, restart then wait) lives in the call, so a CLI leaf, a TUI key and a menu-bar click make the same one call.
+Multi-step behaviour (install then configure, restart then wait) lives in the call, so a CLI leaf and a menu-bar click make the same one call.
 
 ## Who may import whom
 
@@ -197,7 +196,6 @@ The rules are Go tests under [`specs/architecture/`](../../specs/architecture/);
 | `no-outbound-literals`                                                   | `outbound_test.go`                                     | a machine's read calls no third-party server                                                                                                                                                    |
 | `no-remote-reexec`, `engine-no-tcp`                                      | `remote_test.go`, `tcp_test.go`                        | no command is executed again on another machine to read its text; the engine listens on no TCP port                                                                                             |
 | `no-sudo-literal`, `no-subprocess-in-sample`, `fixtures-carry-no-secret` | `sudo_test.go`, `sample_test.go`, `fixtures_test.go`   | station runs no root line on your Mac (a fix names the command for you; a plan's `sudo -k -n true` asks nothing and runs only `true`); the sample job runs no program; no fixture holds a token |
-| `tui-loading-law`                                                        | `tui_test.go`                                          | the TUI's reads run only inside a command, never in a view                                                                                                                                      |
 | `coverage`                                                               | `coverage_test.go`                                     | every call tells a story of each outcome it declares under `specs/usecases/`                                                                                                                    |
 | `spec-build-never-ships`                                                 | `release_test.go`                                      | the release binary links no world and no fake; the spec build links every family's fake                                                                                                         |
 | the words                                                                | `banned_test.go`, `vocabulary_test.go`, `help_test.go` | the retired words never come back in a page, a help line or an error word                                                                                                                       |

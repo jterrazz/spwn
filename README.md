@@ -18,7 +18,7 @@ The binary lives at `~/.local/bin/station`; its files follow the XDG folders. Th
 ## What it does
 
 ```sh
-station                 # on a terminal: the TUI (the machines, then the sections of the one you pick)
+station                 # the same as station overview, what needs you first, then each section
 
 # Machines
 station machines        # All machines: every Mac, its servers and its workspaces; create, start, stop, delete

@@ -1,6 +1,6 @@
 # The API
 
-`station.api/v2` is how every caller reaches a call on another process or another machine: the CLI and the TUI reach this Mac's engine with it, the menu bar does, a Mac reaches another Mac's engine with it over ssh, and an engine reaches the guest inside each VM with it ([ADR-016](../decisions/016-api-v2-and-remote-by-api.md)). Where a call runs is [Architecture](../concepts/architecture.md#the-router)'s.
+`station.api/v2` is how every caller reaches a call on another process or another machine: the CLI reaches this Mac's engine with it, the menu bar does, a Mac reaches another Mac's engine with it over ssh, and an engine reaches the guest inside each VM with it ([ADR-016](../decisions/016-api-v2-and-remote-by-api.md)). Where a call runs is [Architecture](../concepts/architecture.md#the-router)'s.
 
 | Section                | Answers                                                    |
 | ---------------------- | ---------------------------------------------------------- |

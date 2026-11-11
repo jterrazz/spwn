@@ -21,7 +21,7 @@
 | Page                                         | Answers                                                                                       |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [Architecture](concepts/architecture.md)     | The families and the hexagon in each, the contracts, the Router, the engine, the fake world   |
-| [Design system](concepts/design-system.md)   | The palette, the marks, the pipe format, the TUI, Activity's graphs                           |
+| [Design system](concepts/design-system.md)   | The palette, the marks, the pipe format, Activity's graphs                                    |
 | [Glossary](concepts/glossary.md)             | The one word for each concept, the words rejected, the words of the code                      |
 | [The stack](concepts/stack.md)               | How `@jterrazz` projects compose: packages, naming, required files; shipped as `studio-stack` |
 | [Repo structure](concepts/repo-structure.md) | Where knowledge lives in every `@jterrazz` repository; shipped as `studio-repo-structure`     |
@@ -87,5 +87,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [033 A machine is declared by its Machinefile](decisions/033-a-machine-is-declared-by-its-machinefile.md) (Proposed)
 - [035 A port is a right with an audience](decisions/035-a-port-is-a-right-with-an-audience.md) (Proposed)
 - [036 The menu bar owns its panel, and the panel's one background is a tinted glass](decisions/036-the-menu-bar-owns-its-glass-panel.md) (Proposed)
+- [037 The TUI is retired; the CLI is the one terminal surface](decisions/037-the-tui-is-retired.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
