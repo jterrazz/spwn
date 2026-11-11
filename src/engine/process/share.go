@@ -216,7 +216,7 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 		if i < 0 || s.served || d.svcs[key(s.vm, s.port)] != s || d.reservations[i].Audience() != catalog.AudiencePrivate {
 			continue
 		}
-		d.expose(ctx, s, d.reservations[i], mode)
+		d.expose(ctx, s, d.reservations[i])
 	}
 }
 
@@ -372,18 +372,20 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 		reservation.HTTP = &http
 		d.rewriteLocked(ctx, i, reservation)
 	}
-	d.expose(ctx, s, reservation, p.HTTPS)
+	d.expose(ctx, s, reservation)
 }
 
 // invariant: with Serve off no serve runs: the app would block waiting for the
 // admin; a serve refused while Serve is on leaves the service local, its
-// public URL unchanged, and says the tailnet's own line.
-func (d *Engine) expose(ctx context.Context, s *svc, reservation ports.Reservation, httpsMode string) {
+// public URL unchanged, and says the tailnet's own line. A share is served
+// in the mode last served in, never the preference's ahead of the tick
+// that judges a switch, so it is unshared in the mode it was served in.
+func (d *Engine) expose(ctx context.Context, s *svc, reservation ports.Reservation) {
 	s.serveNote = ""
 	if !d.self.On || reservation.Audience() == catalog.AudienceLocal {
 		return
 	}
-	want := ports.ShareOf(reservation, httpsMode)
+	want := ports.ShareOf(reservation, d.servedModeLocked())
 	if err := d.heldOutside(ctx, want); err != nil {
 		s.serveNote = "serve: " + err.Error()
 		return
@@ -399,12 +401,11 @@ func (d *Engine) expose(ctx context.Context, s *svc, reservation ports.Reservati
 }
 
 func (d *Engine) serveAll(ctx context.Context) {
-	p := d.policy()
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	for _, s := range d.svcs {
 		if i := d.reservationIndex(s.vm, s.port); i >= 0 && s.st.Phase == ports.PhaseShared && len(s.listeners) > 0 {
-			d.expose(ctx, s, d.reservations[i], p.HTTPS)
+			d.expose(ctx, s, d.reservations[i])
 		}
 	}
 }

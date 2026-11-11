@@ -217,3 +217,52 @@ func TestAShareMovedOffABusyPortLeavesNothingOnTheOldOne(t *testing.T) {
 		t.Errorf("tailnet = %s, want no entry", got)
 	}
 }
+
+// invariant: a share made between a switch of the HTTPS mode and the tick
+// that judges it is served in the mode last served in, so a release before
+// that tick removes it, and the tick moves it to the new mode.
+func TestAShareBeforeTheTickOfAModeSwitchIsServedInTheModeServed(t *testing.T) {
+	yes := true
+	for _, c := range []struct {
+		name  string
+		then  func(context.Context, harness)
+		after string
+	}{
+		{"released before the tick", func(ctx context.Context, h harness) {
+			if _, err := h.d.release(ctx, "api", 5173); err != nil {
+				t.Fatal(err)
+			}
+			h.d.tickShares(ctx)
+		}, ""},
+		{"kept to the tick", func(ctx context.Context, h harness) { h.d.tickShares(ctx) }, "443/api/5173<-40000 funnel=false"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+			pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: ports.HTTPSPort}}
+			h.d.st.Ports = pol
+			tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+			h.d.tn = tn
+			ctx := t.Context()
+			h.d.refreshSelf(ctx)
+			h.d.mu.Lock()
+			h.d.servedMode = ports.HTTPSPort
+			h.d.rights["api"] = ports.Rights{PortRights: catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}}
+			h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes, ReservedAt: h.clock.At, LastSeenAt: h.clock.At}}
+			h.d.mu.Unlock()
+			h.d.tickShares(ctx)
+			pol.g = &ports.PortsGroup{HTTPS: ports.HTTPSPath}
+			h.d.mu.Lock()
+			s := h.d.svcOf("api", 5173)
+			s.st.Phase = ports.PhaseShared
+			h.d.share(ctx, s)
+			h.d.mu.Unlock()
+			if got, want := tn.dump(), "40000<-40000 funnel=false"; got != want {
+				t.Errorf("tailnet before the tick = %q, want %q", got, want)
+			}
+			c.then(ctx, h)
+			if got := tn.dump(); got != c.after {
+				t.Errorf("tailnet %s = %q, want %q", c.name, got, c.after)
+			}
+		})
+	}
+}
