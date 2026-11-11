@@ -31,7 +31,7 @@ func (s *Self) Read(ctx context.Context) (machine.Ref, machine.Kind, machine.Sys
 	// under a hypervisor, and a Mac otherwise: anything but a clear "1" is a Mac,
 	// a missing or failing sysctl included, so a sandbox with no system tool
 	// still answers a kind.
-	kind := machine.Mac
+	kind := machine.Computer
 	out, err := s.run.Output(ctx, local.Cmd{Name: "sysctl", Args: []string{"-n", "kern.hv_vmm_present"}, Timeout: sysctlWait})
 	if err == nil && out.ExitCode == 0 && strings.TrimSpace(out.Stdout) == "1" {
 		kind = machine.Workspace

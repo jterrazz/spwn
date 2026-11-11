@@ -226,14 +226,14 @@ func activitySubject(subject string) (name string, window time.Duration) {
 // its guest's history.
 func (o Menubar) activityOf(ctx context.Context, name string) (machine.Ref, pageactivity.View, activitycalls.ReadIn) {
 	if name == "" || name == o.ThisMachine.Machine {
-		return machine.Ref{}, pageactivity.View{Name: o.ThisMachine.Machine, Label: "This Mac", Kind: string(machine.Mac), ThisMac: true}, activitycalls.ReadIn{}
+		return machine.Ref{}, pageactivity.View{Name: o.ThisMachine.Machine, Label: "This Mac", Kind: string(machine.Computer), ThisMac: true}, activitycalls.ReadIn{}
 	}
 	mac, isVM := "", false
 	if o.Live != nil {
 		mac, isVM = o.Live.macOf(ctx, name)
 	}
 	if !isVM {
-		return machine.Ref{Name: name}, pageactivity.View{Name: name, Label: name, Kind: string(machine.Mac)}, activitycalls.ReadIn{}
+		return machine.Ref{Name: name}, pageactivity.View{Name: name, Label: name, Kind: string(machine.Computer)}, activitycalls.ReadIn{}
 	}
 	at := machine.Ref{Name: mac}
 	if mac == o.ThisMachine.Machine {

@@ -78,11 +78,11 @@ func (s shell) choiceLine(n node, tree bool) string {
 		return ui.AllMachinesMark + " " + allMachines
 	}
 	lead := ""
-	if tree && n.kind != machine.Mac {
+	if tree && n.kind != machine.Computer {
 		lead = "  "
 	}
 	line := lead + ui.Glyph(n.mark) + " " + n.label
-	if n.kind == machine.Mac {
+	if n.kind == machine.Computer {
 		return line + "  Mac"
 	}
 	return line + "  " + strings.Join(n.facts, ui.Sep)

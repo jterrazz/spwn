@@ -13,7 +13,7 @@ func fromAMac(p machine.Profile) machine.Verdict {
 	// invariant: the matrix is read from a Mac: the one kind that reaches
 	// every other machine.
 	if !p.Caps.Engine {
-		return machine.No(p.Ref.Name + " is a " + string(p.Kind) + ": the settings of every machine are read from a Mac")
+		return machine.No(p.Ref.Name + " is a " + p.Kind.Word() + ": the settings of every machine are read from a Mac")
 	}
 	return machine.Yes
 }

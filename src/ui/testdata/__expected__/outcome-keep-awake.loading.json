@@ -3,7 +3,7 @@
   "id": "outcome",
   "command": "awake",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "loading",
   "sections": [

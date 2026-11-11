@@ -3,7 +3,7 @@
   "id": "overview",
   "command": "overview",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "failed",
   "error": {

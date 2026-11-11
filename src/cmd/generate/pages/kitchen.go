@@ -192,7 +192,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		Items: []page.Item{it(page.Row{ID: "marks", Mark: page.Broken, Label: "Marks", Reason: page.Failing, Detail: page.Count(4, "broken")})},
 	}
 	p := page.Page{
-		ID: "home", Command: "status", Context: page.Context{Machine: "jterrazz-macbook-pro", Kind: "mac", Registered: true},
+		ID: "home", Command: "status", Context: page.Context{Machine: "jterrazz-macbook-pro", Kind: "computer", Registered: true},
 		Strip: &page.Strip{
 			CPU: page.Percent(340), Spark: []int{3, 10, 25, 40, 60, 80, 100, 50, 34, 20, 10, 5, 0, 15, 30, 34},
 			Memory: page.Ratio(12400000000, 17200000000), Battery: page.Percent(1000), Awake: page.Texts("awake", "3h 12m"),

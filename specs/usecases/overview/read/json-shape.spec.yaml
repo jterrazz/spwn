@@ -4,7 +4,7 @@ runs:
     - command: 'overview --json | /usr/bin/jq -c ''[.schema, .machine, .engine]'''
       exit: 0
       stdout: |
-          ["station.overview.read/v1",{"name":"jterrazz-macbook-pro","label":"This Mac","kind":"mac","on":null,"this_mac":true},"running"]
+          ["station.overview.read/v1",{"name":"jterrazz-macbook-pro","label":"This Mac","kind":"computer","on":null,"this_mac":true},"running"]
     - command: 'overview --json | /usr/bin/jq -c ''[.findings[].fix | [.call, .command, .path] | map(select(. != null)) | length] | unique'''
       exit: 0
       stdout: |

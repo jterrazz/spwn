@@ -47,7 +47,7 @@ func NewReader(pool *lanes.Pool, ids contract.Identities, p ReaderPorts, o Reade
 
 func (s *Reader) where() string {
 	if s.o.ThisMachine == catalog.Mac {
-		return accounts.KindMac
+		return accounts.KindComputer
 	}
 	return accounts.KindVM
 }
@@ -55,7 +55,7 @@ func (s *Reader) where() string {
 func (s *Reader) providers() []catalog.Provider {
 	var out []catalog.Provider
 	for _, p := range catalog.Providers {
-		if s.where() == accounts.KindMac && !p.Mac || s.where() == accounts.KindVM && !p.VM {
+		if s.where() == accounts.KindComputer && !p.Mac || s.where() == accounts.KindVM && !p.VM {
 			continue
 		}
 		if !s.ids.Offers(p) {
@@ -135,7 +135,7 @@ func (s *Reader) Read(ctx context.Context, withVMs bool) <-chan accounts.Report 
 	}
 	frame := accounts.Report{Machines: []accounts.Machine{thisMac}, Now: now}
 	var vms []accounts.VM
-	if s.where() == accounts.KindMac && s.p.VMs != nil {
+	if s.where() == accounts.KindComputer && s.p.VMs != nil {
 		vms, _ = s.p.VMs(ctx)
 		slices.SortStableFunc(vms, func(a, b accounts.VM) int {
 			if a.Running != b.Running {

@@ -53,7 +53,7 @@ func readingsAt(now time.Time, memory, disk, free int64) []activity.Reading {
 
 var Levels pagemenubar.Levels // value: the confirmation rule the machine pages draw, set by the generator that owns the calls (confirm.For).
 
-func menubarHere() page.Context { return page.Context{Machine: thisMacName, Kind: "mac"} }
+func menubarHere() page.Context { return page.Context{Machine: thisMacName, Kind: "computer"} }
 
 const (
 	thisMacName = "jterrazz-macbook-pro"
@@ -215,7 +215,7 @@ func miniSummary(offline bool) overview.Summary {
 	ready := func(name, value string) overview.Check {
 		return overview.Check{Name: name, State: catalog.StateOK, Value: value}
 	}
-	s := overview.Summary{Head: overview.Head{Name: miniName, Kind: coremachine.Mac}, Engine: overview.EngineRunning,
+	s := overview.Summary{Head: overview.Head{Name: miniName, Kind: coremachine.Computer}, Engine: overview.EngineRunning,
 		Needs: []overview.Need{{Machine: miniName, Section: "ports", Broken: true, Subject: "5000", Text: "port 5000 is reachable outside Tailscale", Command: "station ports --on mac-mini"}},
 		Readiness: []overview.Check{
 			ready(model.ItemRestartsAfterPowerCut, "applied"), ready(model.ItemNeverSleeps, "applied"), ready(model.ItemLogsIn, "applied"),

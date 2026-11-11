@@ -224,10 +224,10 @@ func body(v View) Body {
 		b.Disk.Free, b.Disk.Total = ptr(s.DiskFree), ptr(s.DiskTotal)
 	}
 	b.Network = &NetworkJSON{In: rate(r.Rates.NetIn), Out: rate(r.Rates.NetOut), ReceivedSince: s.NetIn, SentSince: s.NetOut}
-	if s.Thermal != activity.ThermalUnknown && v.Kind == mac {
+	if s.Thermal != activity.ThermalUnknown && v.Kind == computer {
 		b.Thermal = &ThermalJSON{Level: lowerFirst(activity.Thermal(s.Thermal))}
 	}
-	if bat := s.Battery; bat != nil && v.Kind == mac {
+	if bat := s.Battery; bat != nil && v.Kind == computer {
 		b.Battery = &BatteryJSON{Percent: bat.Percent, State: activity.BatteryState(*bat)}
 		if bat.Health > 0 {
 			b.Battery.Health = ptr(bat.Health)

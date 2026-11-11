@@ -19,7 +19,7 @@ const Version = "v3.1.0"
 var (
 	// value: the far machine of every case: a Mac with jq to install, which
 	// asks before it forgets, and two snapshots of its activity.
-	Mini = machine.Profile{Ref: machine.Ref{Name: "mac-mini"}, Kind: machine.Mac, System: machine.System{OS: machine.MacOS}}
+	Mini = machine.Profile{Ref: machine.Ref{Name: "mac-mini"}, Kind: machine.Computer, System: machine.System{OS: machine.MacOS}}
 )
 
 type InstallIn struct{ App string }
@@ -49,7 +49,7 @@ func Far() *call.Registry {
 		call.Bind(call.Call[struct{}, ForgetIn, struct{}]{
 			Name: "apps.forget", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Forget,
 			Run: func(_ context.Context, _ struct{}, in ForgetIn, _ call.Progress) (struct{}, error) {
-				return struct{}{}, confirm.Require(confirm.For(confirm.Forget, machine.Mac), in.App, in.Confirm)
+				return struct{}{}, confirm.Require(confirm.For(confirm.Forget, machine.Computer), in.App, in.Confirm)
 			},
 		}, struct{}{}),
 		call.BindWatch(call.Watch[struct{}, struct{}, Sample]{

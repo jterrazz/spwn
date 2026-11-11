@@ -151,7 +151,7 @@ func head(m accounts.Machine, rows []page.Row) page.Row {
 	switch m.Kind {
 	case accounts.KindVM:
 		kind = m.Lifetime
-	case accounts.KindMac:
+	case accounts.KindComputer:
 		kind = "Mac"
 	}
 	cells := []page.Value{page.Text(kind)}
@@ -226,7 +226,7 @@ func Section(r accounts.Report) page.Section {
 	case stopped(r):
 		d := engineRow(r.Engine)
 		s.Items = append(s.Items, page.Item{Row: &d})
-	case vms == 0 && len(r.Machines) > 0 && r.Machines[0].Kind == accounts.KindMac:
+	case vms == 0 && len(r.Machines) > 0 && r.Machines[0].Kind == accounts.KindComputer:
 		s.Items = append(s.Items, page.Item{Note: &page.Note{Text: "no VMs: accounts shared with a VM appear here"}})
 	}
 	return s
@@ -238,7 +238,7 @@ func stopped(r accounts.Report) bool {
 
 func Page(r accounts.Report, thisMac page.Context) page.Page {
 	p := page.Page{ID: "accounts", Command: "accounts", Context: thisMac, Sections: []page.Section{firstLine(r, thisMac), Section(r)}}
-	if len(r.Machines) == 1 && r.Machines[0].Kind == accounts.KindMac && !stopped(r) {
+	if len(r.Machines) == 1 && r.Machines[0].Kind == accounts.KindComputer && !stopped(r) {
 		p.Hints = []page.Hint{*page.Cmd("station machines create")}
 	}
 	p.Actions = Actions()
@@ -258,7 +258,7 @@ func Actions() []page.Action {
 func firstLine(r accounts.Report, thisMac page.Context) page.Section {
 	r = r.Resolved()
 	label := "This Mac"
-	if thisMac.Machine != "" && thisMac.Kind != string(accounts.KindMac) {
+	if thisMac.Machine != "" && thisMac.Kind != string(accounts.KindComputer) {
 		label = thisMac.Machine
 	}
 	var words []string

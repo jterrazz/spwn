@@ -55,11 +55,11 @@ var List = call.Call[Deps, ListIn, []agents.Agent]{
 		// with its VM and its Mac; with On, the agents of that workspace, read
 		// inside it: as its journal holds them, by session, then those its
 		// multiplexer alone sees, each named.
-		if d.Kind == machine.Mac && in.On == "" {
+		if d.Kind == machine.Computer && in.On == "" {
 			out, _, err := everyMachine(ctx, d.Calls, in)
 			return out, err
 		}
-		if d.Kind == machine.Mac {
+		if d.Kind == machine.Computer {
 			if in.On == d.Machine {
 				return nil, d.notAWorkspace("agents.list")
 			}
@@ -206,7 +206,7 @@ var Start = call.Call[Deps, StartIn, agents.Agent]{
 		// invariant: SPEC B5.22: a Mac starts an agent on the running workspace
 		// On names, or on the throwaway New makes first, its name unique on
 		// every machine; inside a workspace it starts on the workspace itself.
-		if d.Kind == machine.Mac {
+		if d.Kind == machine.Computer {
 			return d.startFromMac(ctx, in, p)
 		}
 		switch {

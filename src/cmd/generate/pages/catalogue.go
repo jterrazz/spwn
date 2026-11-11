@@ -7,7 +7,7 @@ import (
 	pageapps "github.com/jterrazz/studio-station/src/pages/apps"
 )
 
-func thisMacContext() page.Context { return page.Context{Kind: "mac"} }
+func thisMacContext() page.Context { return page.Context{Kind: "computer"} }
 
 type app struct {
 	name     string

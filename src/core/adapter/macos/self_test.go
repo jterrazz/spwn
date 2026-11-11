@@ -43,7 +43,7 @@ func TestTheMacOSSelfKeepsTheContract(t *testing.T) {
 
 func TestAMacWhoseSysctlFailsIsStillAMac(t *testing.T) {
 	_, kind, _, _, err := on(sysctl{err: local.ErrNotFound}, "mac-mini").Read(context.Background())
-	if err != nil || kind != machine.Mac {
+	if err != nil || kind != machine.Computer {
 		t.Fatalf("kind %q, %v; want a Mac", kind, err)
 	}
 }

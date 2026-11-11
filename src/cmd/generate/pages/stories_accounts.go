@@ -53,7 +53,7 @@ func everyMacSignedIn(f *Scene) {
 				own(catalog.ProviderDocker, []string{"jterrazz"}, nil, "", ""))
 		}
 	}
-	f.Accounts.Machines = append(f.Accounts.Machines, accounts.Machine{Name: miniMac, Kind: accounts.KindMac, Accounts: []accounts.Account{
+	f.Accounts.Machines = append(f.Accounts.Machines, accounts.Machine{Name: miniMac, Kind: accounts.KindComputer, Accounts: []accounts.Account{
 		own(catalog.ProviderGitHub, []string{"jterrazz-bot"}, []string{"repo"}, "", "github.com"),
 		own(catalog.ProviderClaude, []string{"admin@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
 		own(catalog.ProviderTailscale, []string{"tail3e9a.ts.net"}, nil, "", ""),

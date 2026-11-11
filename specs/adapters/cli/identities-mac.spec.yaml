@@ -20,7 +20,7 @@ runs:
     - command: 'accounts --json | /usr/bin/jq -c ''[.schema, .machine.kind, (.accounts[]|select(.name=="github")|[.who, .scope])]'''
       exit: 0
       stdout: |
-          ["station.accounts.list/v1","mac",["jterrazz","gist, read:org, repo, workflow"]]
+          ["station.accounts.list/v1","computer",["jterrazz","gist, read:org, repo, workflow"]]
     - command: 'accounts --page | /usr/bin/jq -r ''[.schema, .id]|@tsv'''
       exit: 0
       stdout: |

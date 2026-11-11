@@ -198,7 +198,7 @@ func (s shell) answer(msg answered) (tea.Model, tea.Cmd) {
 			}
 		}
 		for _, n := range s.nodes {
-			if n.kind == machine.Mac && !n.thisMac {
+			if n.kind == machine.Computer && !n.thisMac {
 				var cmd tea.Cmd
 				s, cmd = s.ask(s.key(n, section.Overview), s.words(n, section.Overview))
 				cmds = append(cmds, cmd)
@@ -359,7 +359,7 @@ func (s shell) back() (tea.Model, tea.Cmd) {
 	switch {
 	case n.all():
 		return s, nil
-	case n.kind == machine.Mac:
+	case n.kind == machine.Computer:
 		return s.open("")
 	default:
 		return s.open(n.mac)
@@ -636,7 +636,7 @@ func (s shell) entries() []entry {
 	var kind machine.Kind
 	vms := s.nodes[1:]
 	for i, n := range vms {
-		if n.kind == machine.Mac {
+		if n.kind == machine.Computer {
 			e := entry{Entry: ui.Entry{Label: n.label, Mark: n.mark}, machine: n.name}
 			if c, ok := s.needs(n); ok && c > 0 {
 				e.Badge, e.Tone = strconv.Itoa(c), page.Unjudged
@@ -812,7 +812,7 @@ func (s shell) header() ui.Header {
 		}
 	}
 	h := ui.Header{Mark: n.mark}
-	if n.kind == machine.Mac {
+	if n.kind == machine.Computer {
 		h.Parts = []string{n.label, n.name}
 		if n.engine != "" {
 			h.Parts = append(h.Parts, n.engine)

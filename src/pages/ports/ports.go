@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/pages"
 	"github.com/jterrazz/studio-station/src/ports"
@@ -376,7 +377,7 @@ func whose(f ports.AllMachines, thisMac page.Context) string {
 		return "Every Mac"
 	case len(f.Macs) == 1 && thisMac.Machine != "" && f.Macs[0].Name != thisMac.Machine:
 		return page.MacName(f.Macs[0].Name, thisMac.Machine)
-	case thisMac.Machine != "" && thisMac.Kind != string(catalog.Mac):
+	case thisMac.Machine != "" && thisMac.Kind != string(machine.Computer):
 		return thisMac.Machine
 	}
 	return "This Mac"

@@ -32,7 +32,7 @@ func TestAVMsRunIsMeasuredOnItsMacByTheProcessThatHoldsItsGuest(t *testing.T) {
 	now := time.Date(2026, 11, 6, 4, 0, 0, 0, time.UTC)
 	d := Deps{
 		Meter: processes{4100: {CPU: 0, Memory: 1 << 20}, 4242: {CPU: 18, Memory: 15 << 30}},
-		Name:  "jterrazz-mac-mini", Kind: machine.Mac, Now: func() time.Time { return now },
+		Name:  "jterrazz-mac-mini", Kind: machine.Computer, Now: func() time.Time { return now },
 		Runs: func(context.Context) ([]activity.VMRun, error) {
 			return []activity.VMRun{{VM: "infra", Holder: 4242}}, nil
 		},
@@ -49,7 +49,7 @@ func TestAVMsRunIsMeasuredOnItsMacByTheProcessThatHoldsItsGuest(t *testing.T) {
 func TestAMacsSampleCarriesEachVMItRunsAsTheProcessOfItsGuest(t *testing.T) {
 	d := Deps{
 		Meter: processes{4242: {CPU: 18, Memory: 15 << 30}},
-		Name:  "jterrazz-mac-mini", Kind: machine.Mac,
+		Name:  "jterrazz-mac-mini", Kind: machine.Computer,
 		Runs: func(context.Context) ([]activity.VMRun, error) {
 			return []activity.VMRun{{VM: "infra", Holder: 4242}, {VM: "booting"}, {VM: "gone", Holder: 9}}, nil
 		},
@@ -73,7 +73,7 @@ func TestTheDaysChartIsFoldedFromTheHistoryItsEngineKeeps(t *testing.T) {
 		points = append(points, activity.Sample{At: now.Add(time.Duration(i-120) * time.Minute), CPUBusy: uint64(i * 300), CPUTotal: uint64(i * 1000)})
 	}
 	d := Deps{
-		Meter: processes{}, Name: "jterrazz-mac-mini", Kind: machine.Mac, Now: func() time.Time { return now },
+		Meter: processes{}, Name: "jterrazz-mac-mini", Kind: machine.Computer, Now: func() time.Time { return now },
 		Kept: func(context.Context, string) (activity.Kept, time.Time, bool, error) {
 			return activity.Kept{Series: activity.SeriesOf(nil, points)}, now.Add(-3 * time.Hour), true, nil
 		},

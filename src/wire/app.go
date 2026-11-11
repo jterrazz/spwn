@@ -361,7 +361,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	name := thisMacName(registered, h.Env.Hostname())
 	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, m.providers)
 	m.kind = legacyKind(m.profile)
-	m.where = page.Context{Machine: name, Kind: string(m.kind), Registered: registered != ""}
+	m.where = page.Context{Machine: name, Kind: string(m.profile.Kind), Registered: registered != ""}
 	return m
 }
 

@@ -26,7 +26,7 @@ func (s shell) create() (tea.Model, tea.Cmd) { return s.createForm(machine.Works
 func (s shell) createOn() node {
 	n := s.current()
 	switch {
-	case n.kind == machine.Mac:
+	case n.kind == machine.Computer:
 		return n
 	case n.all():
 	default:
@@ -60,7 +60,7 @@ func (s shell) createForm(kind machine.Kind) (tea.Model, tea.Cmd) {
 	on := s.createOn()
 	macs := []string{on.label}
 	for _, x := range s.nodes {
-		if x.kind == machine.Mac && x.name != on.name {
+		if x.kind == machine.Computer && x.name != on.name {
 			macs = append(macs, x.label)
 		}
 	}
@@ -131,7 +131,7 @@ func (s shell) created(f *screen.Form, a []string) gesture.Gesture {
 	}
 	on := answer("On")
 	for _, x := range s.nodes {
-		if x.kind == machine.Mac && x.label == on && !x.thisMac {
+		if x.kind == machine.Computer && x.label == on && !x.thisMac {
 			words = append(words, "--on", x.name)
 		}
 	}

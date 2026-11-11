@@ -23,8 +23,8 @@ func references() []reference {
 	laptop := mac
 	laptop.Battery, laptop.Lid, laptop.Thermal = true, true, true
 	return []reference{
-		{"laptop", machine.Profile{Kind: machine.Mac, System: machine.System{OS: machine.MacOS}, Caps: laptop}},
-		{"desktop", machine.Profile{Kind: machine.Mac, System: machine.System{OS: machine.MacOS}, Caps: mac}},
+		{"laptop", machine.Profile{Kind: machine.Computer, System: machine.System{OS: machine.MacOS}, Caps: laptop}},
+		{"desktop", machine.Profile{Kind: machine.Computer, System: machine.System{OS: machine.MacOS}, Caps: mac}},
 		{"workspace", machine.Profile{Kind: machine.Workspace, System: machine.System{OS: machine.Linux}, Caps: machine.Capabilities{Jobs: true}}},
 		{"server", machine.Profile{Kind: machine.Server, System: machine.System{OS: machine.Linux}}},
 	}

@@ -50,7 +50,7 @@ type agentsEverywhere struct {
 	env kit.Env
 }
 
-func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind == coremachine.Mac }
+func (f agentsEverywhere) onThisMac() bool { return !f.env.Far() && f.env.Kind == coremachine.Computer }
 
 // invariant: SPEC B5.22: on a Mac an agent is found among every machine's by
 // its name, with --on or inside a workspace among that workspace's; a name

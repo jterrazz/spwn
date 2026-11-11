@@ -154,7 +154,7 @@ func keptOf(ctx context.Context, api engineAPI, name string) (activity.Kept, tim
 // Mac its thermal and battery from Power: a VM's are its Mac's.
 func (m machine) activityDeps(meter activitycontract.Meter) activitycalls.Deps {
 	d := activitycalls.Deps{Meter: meter, Volume: m.disk(), Name: m.profile.Ref.Name, Kind: m.profile.Kind, Sleep: m.sys.Clock.Sleep, Now: m.sys.Clock.Now}
-	if m.profile.Kind == coremachine.Mac {
+	if m.profile.Kind == coremachine.Computer {
 		d.Kept = engineKept(m.engineAPI())
 		d.Runs = engineRuns(m.engineAPI())
 	}

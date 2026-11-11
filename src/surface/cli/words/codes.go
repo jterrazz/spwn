@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
 	"github.com/jterrazz/studio-station/src/core/fail"
+	"github.com/jterrazz/studio-station/src/core/machine"
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
@@ -52,7 +53,7 @@ func Codes() map[fail.Code]Wording {
 	all := map[fail.Code]Wording{
 		confirm.Needed: func(e *fail.Error) (string, string) {
 			if doing, _, ok := typedGesture(e.Detail["action"]); ok && e.Detail["by"] == "yes" {
-				return doing + " a " + e.Detail["kind"] + " needs its name", "--confirm=" + e.Subject
+				return doing + " a " + machine.Kind(e.Detail["kind"]).Word() + " needs its name", "--confirm=" + e.Subject
 			}
 			return "refusing without the name typed: " + e.Subject + agentsFirst(e), "in a script: --confirm=" + e.Subject
 		},
@@ -76,7 +77,7 @@ func Codes() map[fail.Code]Wording {
 			if why := e.Detail["why"]; why != "" {
 				return why, "run station overview for what " + e.Subject + " has"
 			}
-			return e.Subject + " is a " + e.Detail["kind"] + ": station does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
+			return e.Subject + " is a " + machine.Kind(e.Detail["kind"]).Word() + ": station does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
 		},
 		call.NeedMissing: func(e *fail.Error) (string, string) {
 			return e.Subject + " is required by " + NeededBy(e.Detail["call"]), NeedFix(e.Subject, e.Detail["item"])

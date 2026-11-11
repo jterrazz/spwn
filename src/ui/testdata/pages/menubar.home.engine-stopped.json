@@ -4,7 +4,7 @@
   "command": "menubar",
   "context": {
     "machine": "jterrazz-macbook-pro",
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

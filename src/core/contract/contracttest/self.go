@@ -15,7 +15,7 @@ type Scene struct {
 	OS   machine.OS
 }
 
-func Mac() Scene { return Scene{Name: "mac-mini", Kind: machine.Mac, OS: machine.MacOS} }
+func Mac() Scene { return Scene{Name: "mac-mini", Kind: machine.Computer, OS: machine.MacOS} }
 
 func MacOSWorkspace() Scene {
 	return Scene{Name: "dev", Kind: machine.Workspace, OS: machine.MacOS}

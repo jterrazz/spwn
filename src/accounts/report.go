@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	KindMac = "mac"
-	KindVM  = "vm"
+	KindComputer = "computer"
+	KindVM       = "vm"
 )
 
 type Account struct {
@@ -68,7 +68,7 @@ func (r Report) Clone() Report {
 func (r Report) Resolved() Report {
 	// value: a shared copy is the Mac's right, so its identity is the Mac's
 	// for that provider once the Mac's read has answered.
-	if len(r.Machines) == 0 || r.Machines[0].Kind != KindMac {
+	if len(r.Machines) == 0 || r.Machines[0].Kind != KindComputer {
 		return r
 	}
 	mac := map[string][]string{}

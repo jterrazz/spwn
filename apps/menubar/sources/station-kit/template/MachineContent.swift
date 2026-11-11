@@ -15,7 +15,7 @@ struct MachineContent: View {
 
     var head: Section? { page.section("machine") }
     var server: Bool { page.context?.kind == "server" }
-    var mac: Bool { page.context?.kind == "mac" }
+    var mac: Bool { page.context?.kind == "computer" }
 
     // value: where a machine's Ports opens: its own Mac's (vision panel g),
     // where a server's ports are shared too.

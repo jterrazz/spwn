@@ -28,9 +28,9 @@ func (s shell) target(n node) palette.Target {
 	if mac, ok := find(s.nodes, n.mac); ok && n.mac != "" {
 		t.MacHere, t.MacLabel = mac.thisMac, mac.label
 	}
-	if n.kind == machine.Mac {
+	if n.kind == machine.Computer {
 		for _, v := range s.nodes {
-			if v.mac == n.name && v.kind != machine.Mac {
+			if v.mac == n.name && v.kind != machine.Computer {
 				t.VMs = append(t.VMs, s.target(v))
 			}
 		}
@@ -54,7 +54,7 @@ func (s shell) offered() []palette.Item {
 	t := ts[min(s.pal.target, len(ts)-1)]
 	var macs []palette.Target
 	for _, x := range ts {
-		if x.Kind == machine.Mac {
+		if x.Kind == machine.Computer {
 			macs = append(macs, x)
 		}
 	}

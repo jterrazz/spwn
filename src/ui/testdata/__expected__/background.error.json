@@ -3,7 +3,7 @@
   "id": "background",
   "command": "background",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "failed",
   "error": {

@@ -216,7 +216,7 @@ func macPage(m Machine, h model.MacView) page.Page {
 	// nothing; an asleep Mac has no segment and says so; a Mac not heard
 	// from carries home's stale marking.
 	label := model.Label(*m.All, h)
-	p := page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: h.Name, Kind: string(machine.Mac)}}
+	p := page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: h.Name, Kind: string(machine.Computer)}}
 	p.Header = &page.Header{Back: "All machines", Glyph: page.Glyph{Kind: lid(h)}}
 	stale := model.Unheard(h, m.All.Read)
 	p.Sections = []page.Section{{ID: SectionSummary, Title: label, Role: page.Summary, Caption: facts(m, h)}}

@@ -3,7 +3,7 @@
   "id": "settings",
   "command": "settings --all-machines",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

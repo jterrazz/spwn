@@ -19,8 +19,8 @@ import (
 func paletteTargets() map[string][]palette.Target {
 	ws := palette.Target{Name: "linux-1", Label: "linux-1", Kind: machine.Workspace, Mac: "this-mac", MacHere: true, Sections: section.For(machine.Workspace)}
 	sv := palette.Target{Name: "infra", Label: "infra", Kind: machine.Server, Mac: "this-mac", MacHere: true, Sections: section.For(machine.Server)}
-	here := palette.Target{Name: "this-mac", Label: "This Mac", Kind: machine.Mac, ThisMachine: true, Sections: section.For(machine.Mac), VMs: []palette.Target{ws, sv}}
-	other := palette.Target{Name: "mac-mini", Label: "mac-mini", Kind: machine.Mac, Sections: section.For(machine.Mac)}
+	here := palette.Target{Name: "this-mac", Label: "This Mac", Kind: machine.Computer, ThisMachine: true, Sections: section.For(machine.Computer), VMs: []palette.Target{ws, sv}}
+	other := palette.Target{Name: "mac-mini", Label: "mac-mini", Kind: machine.Computer, Sections: section.For(machine.Computer)}
 	return map[string][]palette.Target{"laptop": {here, other}, "desktop": {here, other}, "workspace": {ws}, "server": {sv}}
 }
 

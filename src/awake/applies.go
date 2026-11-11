@@ -10,7 +10,7 @@ var Applies = machine.All(followsItsMac, section.Shown(section.Awake), engined)
 func followsItsMac(p machine.Profile) machine.Verdict {
 	// invariant: a VM sleeps when its Mac does: it is never listed nor
 	// targeted, its Mac is.
-	if p.Kind == machine.Mac {
+	if p.Kind == machine.Computer {
 		return machine.Yes
 	}
 	fix := "station awake"

@@ -13,7 +13,7 @@ var AddsMacs = machine.All(reachesMacs)
 
 func reachesMacs(p machine.Profile) machine.Verdict {
 	if !p.Caps.Engine {
-		return machine.No(p.Ref.Name + " is a " + string(p.Kind) + ": Macs are added from a Mac")
+		return machine.No(p.Ref.Name + " is a " + p.Kind.Word() + ": Macs are added from a Mac")
 	}
 	return machine.Yes
 }

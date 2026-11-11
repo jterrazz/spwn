@@ -130,7 +130,7 @@ func scenePorts() ports.AllMachines {
 
 func proSummary() overview.Summary {
 	return overview.Summary{
-		Head:   overview.Head{Name: proName, Kind: coremachine.Mac, ThisMac: true, Up: 3 * 24 * time.Hour},
+		Head:   overview.Head{Name: proName, Kind: coremachine.Computer, ThisMac: true, Up: 3 * 24 * time.Hour},
 		Engine: overview.EngineRunning,
 		Needs: []overview.Need{
 			{Section: "accounts", Subject: "npm", Broken: true, Text: "npm signed out", Command: "npm login"},
@@ -156,7 +156,7 @@ func miniOverview() overview.Summary {
 	ready := func(name, value string) overview.Check {
 		return overview.Check{Name: name, State: catalog.StateOK, Value: value}
 	}
-	return overview.Summary{Head: overview.Head{Name: miniMac, Kind: coremachine.Mac, Up: 21 * 24 * time.Hour}, Engine: overview.EngineRunning,
+	return overview.Summary{Head: overview.Head{Name: miniMac, Kind: coremachine.Computer, Up: 21 * 24 * time.Hour}, Engine: overview.EngineRunning,
 		Readiness: []overview.Check{
 			ready(model.ItemRestartsAfterPowerCut, "applied"), ready(model.ItemNeverSleeps, "applied"), ready(model.ItemLogsIn, "applied"),
 			ready(model.ItemDiskUnlock, "no password at boot"), ready(model.ItemPlannedRestarts, "supported"), ready(model.ItemEngineAtLogin, "installed"),
@@ -209,7 +209,7 @@ func sceneAccounts() accounts.Report {
 		return accounts.Machine{Name: name, Kind: accounts.KindVM, Lifetime: life, Running: true, Guest: accounts.GuestConnected, Accounts: loans}
 	}
 	return accounts.Report{Now: storyNow, Engine: accounts.EngineRunning, Machines: []accounts.Machine{
-		{Name: proName, Kind: accounts.KindMac, ThisMac: true, Accounts: []accounts.Account{
+		{Name: proName, Kind: accounts.KindComputer, ThisMac: true, Accounts: []accounts.Account{
 			own(catalog.ProviderGitHub, []string{"jterrazz"}, []string{"repo", "workflow"}, "", "github.com"),
 			{Provider: catalog.ProviderNPM, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Origin: accounts.OriginOwn, Identity: []string{"?"}, Detail: "signed out of registry.npmjs.org", Hint: "npm login"},
 			own(catalog.ProviderClaude, []string{"admin@jterrazz.com"}, []string{"max"}, "", "claude.ai"),
@@ -347,7 +347,7 @@ func (f Scene) mac(name string) (model.MacView, bool) {
 }
 
 func (f Scene) draw() []Fixture {
-	thisMac := page.Context{Machine: proName, Kind: "mac"}
+	thisMac := page.Context{Machine: proName, Kind: "computer"}
 	r := f.reading()
 	out := []Fixture{
 		{Name: "menubar", Page: pagemenubar.Page(r, thisMac)},

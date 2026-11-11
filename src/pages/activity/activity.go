@@ -13,7 +13,7 @@ import (
 const Schema = "station.activity.read/v1"
 
 const (
-	mac       = "mac"
+	computer  = "computer"
 	workspace = "workspace"
 	server    = "server"
 )
@@ -25,7 +25,7 @@ type View struct {
 	Label string
 	// value: the name a terminal shows of a Mac its records name whole.
 	Short string
-	// value: "mac", "workspace" or "server".
+	// value: "computer", "workspace" or "server".
 	Kind    string
 	Mac     string
 	On      string
@@ -65,7 +65,7 @@ func cell(id, label string, v page.Value) page.Item {
 func head(v View) []string {
 	r := v.Report
 	var words []string
-	if v.Kind != mac {
+	if v.Kind != computer {
 		words = append(words, kindWord(v.Kind))
 	}
 	switch run := r.Last.Run; {
@@ -159,7 +159,7 @@ func seen(v View) []seenFinding {
 	out := make([]seenFinding, 0, len(v.Report.Findings))
 	for _, f := range v.Report.Findings {
 		n := seenFinding{Severity: string(f.Severity), Section: string(f.Section), Subject: f.Subject, Text: f.Text, Fix: f.Fix.Command}
-		if v.Kind != mac || !v.ThisMac {
+		if v.Kind != computer || !v.ThisMac {
 			if !strings.HasPrefix(n.Text, v.Name+" ") {
 				n.Text = v.Name + ": " + lowerFirst(n.Text)
 			}
@@ -218,7 +218,7 @@ func values(v View) []page.Item {
 		row("network", "Network", page.Unjudged, "in "+rate(r.Rates.NetIn), "out "+rate(r.Rates.NetOut)),
 		row("network-total", "Network total", page.Unjudged, "received "+activity.Bytes(s.NetIn), "sent "+activity.Bytes(s.NetOut)+" since boot"),
 	)
-	if s.Thermal != activity.ThermalUnknown && v.Kind == mac {
+	if s.Thermal != activity.ThermalUnknown && v.Kind == computer {
 		mark := page.OK
 		switch {
 		case s.Thermal >= activity.ThermalCritical:
@@ -232,7 +232,7 @@ func values(v View) []page.Item {
 		}
 		out = append(out, page.Item{Row: &t})
 	}
-	if b := s.Battery; b != nil && v.Kind == mac {
+	if b := s.Battery; b != nil && v.Kind == computer {
 		words := []string{strconv.Itoa(b.Percent) + " %", activity.BatteryState(*b)}
 		if b.Health > 0 {
 			words = append(words, "health "+strconv.Itoa(b.Health)+" %")

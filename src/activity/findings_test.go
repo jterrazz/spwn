@@ -46,7 +46,7 @@ func lines(fs []finding.Finding) []line {
 
 func TestACalmMachineNeedsNothing(t *testing.T) {
 	s := series(2*time.Second, 400, func(int, *activity.Sample) {})
-	if got := activity.Findings(here, machine.Mac, s); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, s); len(got) != 0 {
 		t.Errorf("Findings() = %+v; want none", got)
 	}
 }
@@ -61,10 +61,10 @@ func TestADiskAlmostFullNeedsALookUnderTenPercentAndIsBrokenUnderFive(t *testing
 		free int64
 		want []line
 	}{
-		{here, machine.Mac, 8e9, []line{{finding.NeedsALook, "disk", "station disk"}}},
+		{here, machine.Computer, 8e9, []line{{finding.NeedsALook, "disk", "station disk"}}},
 		{linux1, machine.Workspace, 4e9, []line{{finding.Broken, "disk", "station disk --on linux-1"}}},
 		{infra, machine.Server, 4e9, []line{{finding.Broken, "disk", "station machines edit infra --disk <size> --on jterrazz-mac-mini"}}},
-		{here, machine.Mac, 11e9, []line{}},
+		{here, machine.Computer, 11e9, []line{}},
 	}
 	for _, c := range cases {
 		if got := lines(activity.Findings(c.m, c.kind, free(c.free))); !slices.Equal(got, c.want) {
@@ -84,10 +84,10 @@ func TestMemoryPressureIsBrokenOnceCriticalForAMinute(t *testing.T) {
 	held := series(2*time.Second, 100, critical(69))
 	brief := series(2*time.Second, 100, critical(70))
 
-	if got := lines(activity.Findings(here, machine.Mac, held)); !slices.Equal(got, []line{{finding.Broken, "memory", "station activity"}}) {
+	if got := lines(activity.Findings(here, machine.Computer, held)); !slices.Equal(got, []line{{finding.Broken, "memory", "station activity"}}) {
 		t.Errorf("critical for 60 s: Findings() = %v; want memory broken", got)
 	}
-	if got := activity.Findings(here, machine.Mac, brief); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, brief); len(got) != 0 {
 		t.Errorf("critical for 58 s: Findings() = %v; want none", got)
 	}
 }
@@ -113,7 +113,7 @@ func TestRunningHotNeedsALookWhenSeriousAndIsBrokenWhenCritical(t *testing.T) {
 		activity.ThermalUnknown:  {},
 	} {
 		s := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Thermal = level })
-		if got := lines(activity.Findings(here, machine.Mac, s)); !slices.Equal(got, want) {
+		if got := lines(activity.Findings(here, machine.Computer, s)); !slices.Equal(got, want) {
 			t.Errorf("thermal %d: Findings() = %v; want %v", level, got, want)
 		}
 	}
@@ -123,10 +123,10 @@ func TestABatteryAtTwentyPercentOnBatteryNeedsALook(t *testing.T) {
 	low := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 20, OnBattery: true} })
 	charging := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 12, Charging: true} })
 
-	if got := lines(activity.Findings(here, machine.Mac, low)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", "plug in"}}) {
+	if got := lines(activity.Findings(here, machine.Computer, low)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", "plug in"}}) {
 		t.Errorf("20 %% on battery: Findings() = %v; want battery low", got)
 	}
-	if got := activity.Findings(here, machine.Mac, charging); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, charging); len(got) != 0 {
 		t.Errorf("12 %% charging: Findings() = %v; want none", got)
 	}
 }

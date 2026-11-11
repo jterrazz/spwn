@@ -4,7 +4,7 @@
   "command": "menubar",
   "context": {
     "machine": "mac-mini",
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

@@ -365,7 +365,7 @@ func imageLists() []Fixture {
 }
 
 func thisMacImages() page.Context {
-	return page.Context{Kind: "mac", Machine: "jterrazz-macbook-pro", Registered: true}
+	return page.Context{Kind: "computer", Machine: "jterrazz-macbook-pro", Registered: true}
 }
 
 func tailnetStatus() ports.Status {
@@ -402,7 +402,7 @@ func stoppedPorts() ports.AllMachines {
 	return f
 }
 
-func thisMacPorts() page.Context { return page.Context{Kind: "mac", Machine: "macbook"} }
+func thisMacPorts() page.Context { return page.Context{Kind: "computer", Machine: "macbook"} }
 
 func portLists() []Fixture {
 	return states("ports",

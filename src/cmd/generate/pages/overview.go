@@ -14,7 +14,7 @@ import (
 // it runs.
 func overviewOf(needs bool) overview.Summary {
 	s := overview.Summary{
-		Head:   overview.Head{Name: "jterrazz-macbook-pro", Kind: machine.Mac, ThisMac: true, Up: 3 * 24 * time.Hour},
+		Head:   overview.Head{Name: "jterrazz-macbook-pro", Kind: machine.Computer, ThisMac: true, Up: 3 * 24 * time.Hour},
 		Engine: overview.EngineRunning,
 		Lines: []overview.Line{
 			{Section: "activity", Parts: []overview.Part{{Word: "CPU 34%"}, {Word: "memory 12.4 of 16 GB"}, {Bytes: 388_000_000_000, Word: "free"}, {Word: "in 2.1 MB/s"}}},

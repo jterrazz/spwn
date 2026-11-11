@@ -14,7 +14,7 @@ struct MachinePage: View {
         let id = page.context?.machine ?? ""
         switch (page.id, page.context?.kind) {
         case (PageID.agent, _): return AnyView(AgentPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(id))
-        case (PageID.machine, "mac"): return AnyView(MacPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(id))
+        case (PageID.machine, "computer"): return AnyView(MacPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(id))
         case (PageID.machine, "server"): return AnyView(ServerPage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(id))
         case (PageID.machine, "workspace"): return AnyView(WorkspacePage(page: page, state: state, handlers: handlers, scrolls: scrolls).id(id))
         default: return nil

@@ -35,7 +35,7 @@ type Head struct {
 	Up time.Duration
 }
 
-func (h Head) Mac() bool    { return h.Kind == machine.Mac }
+func (h Head) Mac() bool    { return h.Kind == machine.Computer }
 func (h Head) Server() bool { return h.Kind == machine.Server }
 
 type Engine string

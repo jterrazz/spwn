@@ -34,7 +34,7 @@ func TestAMacOSWorkspaceShowsNoThermalNorBatteryOfItsOwn(t *testing.T) {
 	if b := Contract(vm, time.Unix(1_800_000_000, 0)); b.Thermal != nil || b.Battery != nil {
 		t.Errorf("Contract(macOS workspace) thermal = %+v, battery = %+v; want both null", b.Thermal, b.Battery)
 	}
-	here := hot(mac)
+	here := hot(computer)
 	here.ThisMac = true
 	if got := lines(Page(here, page.Context{})); !got["thermal"] || !got["battery"] {
 		t.Errorf("Page(this Mac) lines = %v; want its Thermal and Battery", got)

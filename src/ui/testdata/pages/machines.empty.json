@@ -3,7 +3,7 @@
   "id": "machines",
   "command": "machines",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

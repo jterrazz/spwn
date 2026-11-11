@@ -35,7 +35,7 @@ func (n node) heading() string {
 	switch n.kind {
 	case "":
 		return "ALL MACHINES"
-	case machine.Mac:
+	case machine.Computer:
 		return strings.ToUpper(n.label)
 	default:
 		return strings.ToUpper(n.label) + ui.Sep + strings.ToUpper(string(n.kind))
@@ -44,7 +44,7 @@ func (n node) heading() string {
 
 func tree(thisMac page.Context, p *page.Page) []node {
 	nodes := []node{{label: allMachines}}
-	this := node{name: thisMac.Machine, label: "This Mac", kind: machine.Mac, mark: page.Awaiting, thisMac: true}
+	this := node{name: thisMac.Machine, label: "This Mac", kind: machine.Computer, mark: page.Awaiting, thisMac: true}
 	if p == nil {
 		return append(nodes, this)
 	}
@@ -54,7 +54,7 @@ func tree(thisMac page.Context, p *page.Page) []node {
 				continue
 			}
 			h := it.Group.Head
-			mac := node{name: h.ID, label: cmp.Or(h.Short, h.Label), kind: machine.Mac, mark: h.Mark, thisMac: h.ID == thisMac.Machine, reason: h.Reason}
+			mac := node{name: h.ID, label: cmp.Or(h.Short, h.Label), kind: machine.Computer, mark: h.Mark, thisMac: h.ID == thisMac.Machine, reason: h.Reason}
 			mac.engine = ui.Plain(column(s, h, "state"))
 			if mac.engine == engineStopped {
 				mac.mark = page.Attention

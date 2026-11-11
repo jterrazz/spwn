@@ -65,7 +65,7 @@ func HeldEverywhere(ctx context.Context, r call.Router) (agents.Held, error) {
 // machine's, read across them from a Mac, asked of its Mac inside a
 // workspace.
 func (d Deps) held(ctx context.Context) (agents.Held, error) {
-	if d.Kind == machine.Mac {
+	if d.Kind == machine.Computer {
 		return HeldEverywhere(ctx, d.Calls)
 	}
 	if d.Held == nil {

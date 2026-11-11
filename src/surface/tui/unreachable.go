@@ -16,7 +16,7 @@ import (
 // own Overview could not be read (SPEC §9.10).
 func (s shell) unanswered() (node, bool) {
 	n := s.current()
-	if n.kind != machine.Mac || n.thisMac || n.reason != page.Unreachable || s.section() != section.Overview {
+	if n.kind != machine.Computer || n.thisMac || n.reason != page.Unreachable || s.section() != section.Overview {
 		return node{}, false
 	}
 	r := s.reads[s.key(n, section.Overview)]

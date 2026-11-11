@@ -3,7 +3,7 @@
   "id": "outcome",
   "command": "settings apply",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

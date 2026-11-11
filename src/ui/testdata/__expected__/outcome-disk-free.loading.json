@@ -3,7 +3,7 @@
   "id": "outcome",
   "command": "disk free",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "loading",
   "sections": [

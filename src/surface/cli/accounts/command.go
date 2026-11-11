@@ -107,7 +107,7 @@ func everyMachine(ctx context.Context, env kit.Env, io kit.IO) error {
 	}
 	var blocks []pageaccounts.MachineBlock
 	for _, h := range list.All.Macs {
-		mac := pageaccounts.MachineBlock{Name: h.Name, Label: page.MacName(h.Name, env.Self.Name), Kind: string(machine.Mac), ThisMac: h.ThisMac}
+		mac := pageaccounts.MachineBlock{Name: h.Name, Label: page.MacName(h.Name, env.Self.Name), Kind: string(machine.Computer), ThisMac: h.ThisMac}
 		if !h.Reachable && !h.ThisMac {
 			mac.Mark, mac.Reason, mac.State, mac.Fault = page.Broken, page.Unreachable, "does not answer", pageaccounts.Fault{Type: string(fail.Unreachable)}
 			blocks = append(blocks, mac)

@@ -82,7 +82,7 @@ func (s shell) list(key string) ui.List {
 		}
 	}
 	for _, n := range s.nodes {
-		if p, ok := s.page(n, section.Overview); ok && n.kind == machine.Mac {
+		if p, ok := s.page(n, section.Overview); ok && n.kind == machine.Computer {
 			in.Overviews[n.name] = p
 		}
 	}

@@ -18,7 +18,7 @@ func opened(t *testing.T, w *world, feed func(feeds.Menubar) engine.Feed, ready 
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}, Report: func(awake.View) *awake.Report { return nil }}
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}, Report: func(awake.View) *awake.Report { return nil }}
 	in := engine.FeedInput{Changed: make(chan struct{}), Refresh: make(chan struct{})}
 	in.Awake = nothing(in.Awake)
 	return until(t, feed(o)(ctx, in), "every Mac read", ready)

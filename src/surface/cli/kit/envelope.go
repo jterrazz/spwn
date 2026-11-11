@@ -22,18 +22,18 @@ func (e Env) envelope(ctx context.Context) *output.Envelope {
 	if target == e.Self {
 		kind := e.Kind
 		if kind == "" {
-			kind = machine.Mac
+			kind = machine.Computer
 		}
-		out.Machine = output.Machine{Name: e.Self.Name, Label: e.Self.Name, Kind: string(kind), ThisMac: kind == machine.Mac}
-		if kind == machine.Mac {
+		out.Machine = output.Machine{Name: e.Self.Name, Label: e.Self.Name, Kind: string(kind), ThisMac: kind == machine.Computer}
+		if kind == machine.Computer {
 			out.Machine.Label = page.MacName(e.Self.Name, e.Self.Name)
 		}
 		return out
 	}
-	out.Machine = output.Machine{Name: target.Name, Label: target.Name, Kind: string(machine.Mac)}
+	out.Machine = output.Machine{Name: target.Name, Label: target.Name, Kind: string(machine.Computer)}
 	if e.Locate != nil {
 		if ref, ok := e.Locate(target.Name); ok && ref.On == "" {
-			out.Machine = output.Machine{Name: ref.Name, Label: page.MacName(ref.Name, e.Self.Name), Kind: string(machine.Mac)}
+			out.Machine = output.Machine{Name: ref.Name, Label: page.MacName(ref.Name, e.Self.Name), Kind: string(machine.Computer)}
 			return out
 		}
 	}
@@ -54,7 +54,7 @@ func (e Env) named(ctx context.Context, target machine.Ref, in machinescalls.Lis
 	}
 	for _, h := range list.All.Macs {
 		if h.Name == target.Name || page.MacName(h.Name, e.Self.Name) == target.Name {
-			return output.Machine{Name: h.Name, Label: page.MacName(h.Name, e.Self.Name), Kind: string(machine.Mac), ThisMac: h.ThisMac}, true
+			return output.Machine{Name: h.Name, Label: page.MacName(h.Name, e.Self.Name), Kind: string(machine.Computer), ThisMac: h.ThisMac}, true
 		}
 		for _, vm := range h.VMs {
 			if vm.Name == target.Name {

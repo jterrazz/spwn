@@ -20,7 +20,7 @@ type Deps struct {
 func At(env kit.Env) machine.Ref {
 	// value: where a command asks agents.list and agents.start: on a Mac this
 	// Mac, which reaches every machine; inside a workspace its target.
-	if env.Kind == machine.Mac {
+	if env.Kind == machine.Computer {
 		return env.Self
 	}
 	return env.Target()
@@ -51,7 +51,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if env.Far() || env.Kind != machine.Mac {
+			if env.Far() || env.Kind != machine.Computer {
 				return io.Page(pageagents.List(kept, d.ThisMachine), kept)
 			}
 			return io.Page(pageagents.AllMachines(kept, d.ThisMachine, env.Now()), kept)

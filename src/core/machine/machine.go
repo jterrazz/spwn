@@ -1,12 +1,40 @@
 package machine
 
+import "encoding/json"
+
 type Kind string
 
 const (
-	Mac       Kind = "mac"
+	Computer  Kind = "computer"
 	Server    Kind = "server"
 	Workspace Kind = "workspace"
 )
+
+// value: the word a Mac of an older station says for a Computer, in its
+// stores and on the wire; read for one release, never written.
+const olderComputer = "mac"
+
+func (k *Kind) UnmarshalJSON(b []byte) error {
+	var word string
+	if err := json.Unmarshal(b, &word); err != nil {
+		return err
+	}
+	if word == olderComputer {
+		word = string(Computer)
+	}
+	*k = Kind(word)
+	return nil
+}
+
+func (k Kind) Word() string {
+	// value: the word a sentence calls a kind by: a computer is a Mac, since
+	// every computer station knows runs macOS; a workspace and a server are
+	// called by their own names.
+	if k == Computer {
+		return "Mac"
+	}
+	return string(k)
+}
 
 type OS string
 

@@ -32,7 +32,7 @@ func For(k machine.Kind) []ID {
 	// invariant: the table of SPEC §3.2. Images is an All machines section, and
 	// a workspace's Background still needs its job manager (background's rule).
 	switch k {
-	case machine.Mac:
+	case machine.Computer:
 		return []ID{Overview, Activity, Apps, Settings, Disk, Ports, Accounts, Background, Awake}
 	case machine.Workspace:
 		return []ID{Overview, Activity, Apps, Settings, Disk, Ports, Accounts, Background}
@@ -69,7 +69,7 @@ func Shown(id ID) machine.Applies {
 		if p.Kind == machine.Server {
 			return machine.Verdict{Why: p.Ref.Name + " is a server: station does not manage its " + noun(id), Fix: "manage it with your own tooling: ssh " + p.Ref.Name}
 		}
-		return machine.No(p.Ref.Name + " is a " + string(p.Kind) + ": it has no " + noun(id) + " section")
+		return machine.No(p.Ref.Name + " is a " + p.Kind.Word() + ": it has no " + noun(id) + " section")
 	}
 }
 

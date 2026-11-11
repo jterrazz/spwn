@@ -6,5 +6,5 @@ runs:
     - command: 'agents stop linux-1 --yes --on jterrazz-mac-mini'
       exit: 2
       stderr: |
-          Error: jterrazz-mac-mini is a mac: agents are recorded inside the workspace they work in
+          Error: jterrazz-mac-mini is a Mac: agents are recorded inside the workspace they work in
           Hint: run station overview for what jterrazz-mac-mini has

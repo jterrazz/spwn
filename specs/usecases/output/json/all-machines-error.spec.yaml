@@ -6,12 +6,12 @@ runs:
       stdout: |
           "station.accounts.list/v1"
           "This Mac"
-          ["This Mac","mac",null,8,null]
+          ["This Mac","computer",null,8,null]
           ["api","workspace","jterrazz-macbook-pro",0,{"type":"refused","code":"account.vm-stopped","message":"api is stopped"}]
           ["linux-1","workspace","jterrazz-macbook-pro",2,null]
-          ["mac-mini","mac",null,0,{"type":"unreachable","code":null,"message":"does not answer"}]
+          ["mac-mini","computer",null,0,{"type":"unreachable","code":null,"message":"does not answer"}]
           []
-    - command: 'activity --all-machines --json | /usr/bin/jq -c ''.machines[] | select(.machine.this_mac | not) | select(.machine.kind == "mac") | [.machine.label, .error]'''
+    - command: 'activity --all-machines --json | /usr/bin/jq -c ''.machines[] | select(.machine.this_mac | not) | select(.machine.kind == "computer") | [.machine.label, .error]'''
       exit: 0
       stdout: |
           ["mac-mini",{"type":"unreachable","code":null,"message":"does not answer"}]

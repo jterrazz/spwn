@@ -3,7 +3,7 @@
   "id": "accounts",
   "command": "accounts",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

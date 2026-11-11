@@ -4,7 +4,7 @@
   "command": "status",
   "context": {
     "machine": "jterrazz-macbook-pro",
-    "kind": "mac",
+    "kind": "computer",
     "registered": true
   },
   "state": "ready",

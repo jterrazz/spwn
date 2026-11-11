@@ -7,6 +7,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/pages"
 )
@@ -88,7 +89,7 @@ func where(verb, on string, thisMac page.Context) string {
 }
 
 func machineLabel(thisMac page.Context) string {
-	if thisMac.Kind == string(catalog.Mac) || thisMac.Machine == "" {
+	if thisMac.Kind == string(machine.Computer) || thisMac.Machine == "" {
 		return "This Mac"
 	}
 	return thisMac.Machine

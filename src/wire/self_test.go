@@ -23,7 +23,7 @@ func TestALaptopAndADesktopDifferByWhatTheirPowerReports(t *testing.T) {
 	if desktop.Caps.Battery || desktop.Caps.Lid || !desktop.Caps.Thermal || !desktop.Caps.Engine {
 		t.Errorf("the desktop's capabilities: %+v", desktop.Caps)
 	}
-	if laptop.Kind != coremachine.Mac || legacyKind(laptop) != catalog.Mac || laptop.Ref.Name != "macbook" {
+	if laptop.Kind != coremachine.Computer || legacyKind(laptop) != catalog.Mac || laptop.Ref.Name != "macbook" {
 		t.Errorf("the laptop's profile: %+v", laptop)
 	}
 }

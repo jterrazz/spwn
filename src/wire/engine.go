@@ -85,7 +85,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Seen: func() []enginejobs.Seen {
 			running := d.Running()
 			seen := make([]enginejobs.Seen, 0, 1+len(running))
-			seen = append(seen, enginejobs.Seen{Ref: coremachine.Ref{Name: m.profile.Ref.Name}, Kind: coremachine.Mac})
+			seen = append(seen, enginejobs.Seen{Ref: coremachine.Ref{Name: m.profile.Ref.Name}, Kind: coremachine.Computer})
 			for _, r := range running {
 				seen = append(seen, enginejobs.Seen{Ref: coremachine.Ref{Name: r.Name, On: m.profile.Ref.Name}, Kind: r.Lifetime.Kind(), PID: r.PID, Guest: r.Guest})
 			}

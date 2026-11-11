@@ -76,7 +76,7 @@ func macs(views []View) page.Section {
 	var items []page.Item
 	for _, v := range views {
 		s := v.Report.Last.Sample
-		if v.Kind != mac || v.Silent != "" || v.Report.Silent {
+		if v.Kind != computer || v.Silent != "" || v.Report.Silent {
 			continue
 		}
 		r := page.Row{ID: v.Name, Label: v.Label, Short: v.Short, Mark: page.NotKnown, Cells: []page.Value{page.Text("?"), page.None()}}

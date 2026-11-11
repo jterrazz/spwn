@@ -136,7 +136,7 @@ func findRow(p page.Page, section, id string) *page.Row {
 // listeners, the sections of each awake Mac and of every machine, and the
 // actions available now, each with its verb, its key and its alternate.
 func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
-	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"})
 	if err := page.Check(p); err != nil {
 		t.Fatalf("the Find index fails its checks: %v", err)
 	}
@@ -214,7 +214,7 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 // invariant: SPEC A6 [find.down]: while infra is down Find leads with
 // Restart infra, run at once, and says since when it is down.
 func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
-	p := Find(findFleetDown(), page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(findFleetDown(), page.Context{Machine: findPro, Kind: "computer"})
 	if err := page.Check(p); err != nil {
 		t.Fatalf("the Find index fails its checks: %v", err)
 	}
@@ -265,7 +265,7 @@ func TestFindIsLoadingUntilTheMachinesAreRead(t *testing.T) {
 func TestFindExtendsAwakeWhenMoreThanFourHoursAreLeft(t *testing.T) {
 	r := findFleet()
 	r.Awake.Session.Until = time.Date(2026, 11, 7, 21, 0, 0, 0, time.UTC)
-	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
 	if got := entries(t, p, FindActions)[0]; got.title != "Extend awake to 01:00" {
 		t.Errorf("Find's awake action reads %q, want Extend awake to 01:00", got.title)
 	}
@@ -280,7 +280,7 @@ func TestFindExtendsAwakeWhenMoreThanFourHoursAreLeft(t *testing.T) {
 func TestFindGivesNewVMToTheRoomiestMac(t *testing.T) {
 	r := findFleet()
 	r.All.Macs[0].Hardware.Memory = 24 * gib
-	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
 	var got []findSaid
 	for _, e := range entries(t, p, FindActions) {
 		if strings.HasPrefix(e.title, "New VM") {
@@ -297,7 +297,7 @@ func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
 	r := findFleet()
 	r.All.Macs[2].VMs = []model.VM{{Name: "agent-9a", Mac: findAir, Lifetime: model.Throwaway, State: model.Running,
 		Agent: &model.AgentView{State: model.AgentFinished, Ended: findNow.Add(-3 * time.Hour)}}}
-	p := Find(r, page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
 	if row := findRow(p, FindActions, "cleanup:"+findAir); row != nil {
 		t.Errorf("the asleep macbook-air offers %+v, want no clean-up", row)
 	}
@@ -310,7 +310,7 @@ func TestFindOffersNoCleanUpOnAnAsleepMac(t *testing.T) {
 // draws as the label's ellipsis: "Restart infra…" and "Clean up throwaways
 // on This Mac…" in the prototype.
 func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
-	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"})
 	actions := map[string]page.Action{}
 	for _, a := range p.Actions {
 		actions[a.ID] = a
@@ -331,7 +331,7 @@ func TestFindsActionsThatAskFirstCarryTheirQuestion(t *testing.T) {
 // its agent at work ends, which follows that run, and offers it no more
 // once the keep-awake already follows it.
 func TestFindKeepsThisMacAwakeUntilItsAgentAtWorkEnds(t *testing.T) {
-	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"})
+	p := Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"})
 	row := findRow(p, FindActions, "awake-run:linux-1")
 	if row == nil || row.Label != "Awake until linux-1 ends" {
 		t.Fatalf("Find's actions lack Awake until linux-1 ends: %+v", row)
@@ -343,7 +343,7 @@ func TestFindKeepsThisMacAwakeUntilItsAgentAtWorkEnds(t *testing.T) {
 	}
 	r := findFleet()
 	r.Awake.Session.Run = "linux-1"
-	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindActions, "awake-run:linux-1"); row != nil {
+	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "computer"}), FindActions, "awake-run:linux-1"); row != nil {
 		t.Errorf("a keep-awake that follows linux-1 is offered again: %+v", row)
 	}
 }
@@ -353,7 +353,7 @@ func TestFindKeepsThisMacAwakeUntilItsAgentAtWorkEnds(t *testing.T) {
 func TestFindSaysAPublicListenersAddressThenPublic(t *testing.T) {
 	r := findFleet()
 	r.Ports.Macs[1].Ports = append(r.Ports.Macs[1].Ports, ports.Port{Machine: machine.Ref{Name: "infra", On: findMini}, Port: 443, Process: "nginx", Reach: ports.Outside})
-	row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindPorts, "listening:infra:443")
+	row := findRow(Find(r, page.Context{Machine: findPro, Kind: "computer"}), FindPorts, "listening:infra:443")
 	if row == nil || words(row.Detail) != "infra:443 | public" {
 		t.Errorf("infra's public listener %+v, want infra:443, then public", row)
 	}
@@ -364,7 +364,7 @@ func TestFindSaysAPublicListenersAddressThenPublic(t *testing.T) {
 func TestFindOffersNoShareOfAListenerOnItsVMsLoopback(t *testing.T) {
 	r := findFleet()
 	r.Ports.Macs[1].Ports = append(r.Ports.Macs[1].Ports, ports.Port{Machine: machine.Ref{Name: "linux-3", On: findMini}, Port: 20241, Process: "connector", Reach: ports.ThisMachine})
-	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "mac"}), FindPorts, "listening:linux-3:20241"); row != nil {
+	if row := findRow(Find(r, page.Context{Machine: findPro, Kind: "computer"}), FindPorts, "listening:linux-3:20241"); row != nil {
 		t.Errorf("linux-3's loopback listener %+v, want no entry", row)
 	}
 }
@@ -372,7 +372,7 @@ func TestFindOffersNoShareOfAListenerOnItsVMsLoopback(t *testing.T) {
 // invariant: SPEC 2-9: Needs you is a section of Find, so every need and
 // the upkeep are reached when the hero lists the needs whole.
 func TestFindOpensNeedsYou(t *testing.T) {
-	row := findRow(Find(findFleet(), page.Context{Machine: findPro, Kind: "mac"}), FindSections, "needs")
+	row := findRow(Find(findFleet(), page.Context{Machine: findPro, Kind: "computer"}), FindSections, "needs")
 	if row == nil || row.Nav != NeedsID {
 		t.Errorf("the Needs you entry %+v, want it to open %s", row, NeedsID)
 	}

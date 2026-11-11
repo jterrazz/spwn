@@ -3,7 +3,7 @@
   "id": "activity",
   "command": "activity",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "loading",
   "sections": [

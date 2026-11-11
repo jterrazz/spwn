@@ -22,7 +22,7 @@ func thisMacActivity() pageactivity.View {
 	}
 	r := activity.Report{Source: activity.FromEngine, Since: at.Add(-3 * time.Hour), Last: activity.Reading{Sample: last, Top: top}, Window: activity.RateWindow,
 		Rates: activity.Rates{CPU: 34, DiskRead: 4.1e6, DiskWrite: 1.3e6, NetIn: 2.1e6, NetOut: 210e3}}
-	return pageactivity.View{Name: "jterrazz-macbook-pro", Label: "This Mac", Kind: "mac", ThisMac: true, Report: r}
+	return pageactivity.View{Name: "jterrazz-macbook-pro", Label: "This Mac", Kind: "computer", ThisMac: true, Report: r}
 }
 
 func activityPages() []Fixture {

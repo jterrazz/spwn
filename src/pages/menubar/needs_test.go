@@ -50,14 +50,14 @@ func needsFleet() NeedsReading {
 		{Name: needsPro, ThisMac: true, Shares: []accounts.Shared{share(catalog.ProviderClaude, "linux-1", 24*time.Minute), share(catalog.ProviderGitHub, "linux-1", 4*time.Hour)}},
 		{Name: needsMini, Shares: []accounts.Shared{share(catalog.ProviderGitHub, "linux-3", 9*time.Minute)}},
 	}}
-	home := overview.Summary{Head: overview.Head{Name: needsPro, Kind: machine.Mac, ThisMac: true}, Needs: []overview.Need{
+	home := overview.Summary{Head: overview.Head{Name: needsPro, Kind: machine.Computer, ThisMac: true}, Needs: []overview.Need{
 		{Section: section.Apps, Subject: "tool-a", Text: "2 tool-a updates waiting", Call: CallUpdate},
 		{Section: section.Accounts, Subject: catalog.ProviderCloudflare, Broken: true, Text: "signed out"},
 		{Section: section.Background, Subject: "com.example.socket", Broken: true, Text: "com.example.socket is failing, last exit 78", Command: "station background"},
 		{Section: section.Apps, Subject: "tool-b", Text: "2 tool-b updates waiting", Call: CallUpdate},
 		{Section: section.Settings, Subject: "firewall", Text: "Firewall off", Path: "System Settings > Network > Firewall"},
 	}}
-	mini := overview.Summary{Head: overview.Head{Name: needsMini, Kind: machine.Mac}}
+	mini := overview.Summary{Head: overview.Head{Name: needsMini, Kind: machine.Computer}}
 	return NeedsReading{Now: needsNow, Zone: time.UTC, All: &all, Ports: &exposed, Accounts: &shares, Overviews: []overview.Summary{home, mini}}
 }
 
@@ -137,7 +137,7 @@ func TestUpkeepListsTheFirewallThenTheFailingItemThenTheSignInThenTheUpdatesAsOn
 // menubar.needs:<Mac> those of the Mac and its VMs, its own in its own
 // words; with nothing, one empty card. Each page passes page.Check.
 func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T) {
-	here := page.Context{Machine: needsPro, Kind: "mac"}
+	here := page.Context{Machine: needsPro, Kind: "computer"}
 	rows := func(p page.Page, id string) []string {
 		var out []string
 		for _, s := range p.Sections {
@@ -193,7 +193,7 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 // invariant: SPEC B5.7, B5.18: a failing login item is shown from the
 // fleet's list, which opens its Mac; only the Mac's own page copies its fix.
 func TestAFailingLoginItemIsShownFromTheFleetAndItsFixCopiedOnItsMac(t *testing.T) {
-	here := page.Context{Machine: needsPro, Kind: "mac"}
+	here := page.Context{Machine: needsPro, Kind: "computer"}
 	verb := func(p page.Page) page.Action {
 		for _, a := range p.Actions {
 			if strings.Contains(a.ID, "/background/") {
@@ -217,7 +217,7 @@ func TestAFailingLoginItemIsShownFromTheFleetAndItsFixCopiedOnItsMac(t *testing.
 }
 
 func TestUpkeepIsNeverCountedAmongWhatNeedsYou(t *testing.T) {
-	p := NeedsPage(needsFleet(), "", page.Context{Machine: needsPro, Kind: "mac"})
+	p := NeedsPage(needsFleet(), "", page.Context{Machine: needsPro, Kind: "computer"})
 	for _, s := range p.Sections {
 		switch s.ID {
 		case SectionNeeds:

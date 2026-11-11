@@ -25,7 +25,7 @@ func twoMacsSignedIn() *world {
 	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, here: []machines.VM{linux}, asked: map[string][]string{}, activity: map[string]uint64{},
 		added: []machines.MacView{{Name: air}},
 		signedIn: map[string]accounts.Report{
-			thisMac: {Machines: []accounts.Machine{{Name: thisMac, Kind: accounts.KindMac, ThisMac: true, Accounts: []accounts.Account{
+			thisMac: {Machines: []accounts.Machine{{Name: thisMac, Kind: accounts.KindComputer, ThisMac: true, Accounts: []accounts.Account{
 				{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Identity: []string{"jterrazz"}, Scopes: []string{"repo", "workflow"}},
 				{Provider: catalog.ProviderCloudflare, State: catalog.StateBroken, Reason: accounts.ReasonRefused, Identity: []string{accounts.Unknown}, Hint: "station settings apply cloudflare-login"},
 				{Provider: catalog.ProviderClaude, State: catalog.StateOK, Identity: []string{"admin@jterrazz.com"}, Scopes: []string{"max"}},
@@ -34,7 +34,7 @@ func twoMacsSignedIn() *world {
 				{Account: catalog.ProviderGitHub, VM: "linux-1", At: now.Add(-8 * time.Hour), Until: now.Add(4 * time.Hour)},
 				{Account: catalog.ProviderClaude, VM: "linux-1", At: now.Add(-3*time.Hour - 38*time.Minute), Until: now.Add(22 * time.Minute)},
 			}},
-			mini: {Machines: []accounts.Machine{{Name: mini, Kind: accounts.KindMac, Accounts: []accounts.Account{
+			mini: {Machines: []accounts.Machine{{Name: mini, Kind: accounts.KindComputer, Accounts: []accounts.Account{
 				{Provider: catalog.ProviderGitHub, State: catalog.StateOK, Identity: []string{"jterrazz-bot"}, Scopes: []string{"repo"}},
 				{Provider: catalog.ProviderClaude, State: catalog.StateOK, Scopes: []string{"max"}},
 			}}}},
@@ -45,7 +45,7 @@ func watchAccounts(t *testing.T, w *world, subject string) page.Page {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	pages := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}}.Accounts()(ctx, engine.FeedInput{Subject: subject})
+	pages := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}}.Accounts()(ctx, engine.FeedInput{Subject: subject})
 	return until(t, pages, "the accounts read", func(p page.Page) bool { return p.State != page.Loading })
 }
 
@@ -181,7 +181,7 @@ func TestTheStatusItemCountsACopySharedForLessThan30MinMore(t *testing.T) {
 	w := twoMacsSignedIn()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}, Report: func(awake.View) *awake.Report { return nil }}
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}, Report: func(awake.View) *awake.Report { return nil }}
 	in := engine.FeedInput{}
 	in.Awake = nothing(in.Awake)
 	p := until(t, o.Feed()(ctx, in), "the badge", func(p page.Page) bool { return p.Badge != nil })
@@ -196,7 +196,7 @@ func TestHomeSaysACopysLastMinutesAtTheEnginesClock(t *testing.T) {
 	w := twoMacsSignedIn()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}, Report: func(awake.View) *awake.Report { return nil }}
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}, Report: func(awake.View) *awake.Report { return nil }}
 	in := engine.FeedInput{}
 	in.Awake = nothing(in.Awake)
 	p := until(t, o.Feed()(ctx, in), "the hero", func(p page.Page) bool { return p.Badge != nil })

@@ -14,7 +14,7 @@ func ShareNeeds() []machine.Need {
 
 var SharedFrom machine.Applies = func(p machine.Profile) machine.Verdict {
 	// invariant: a share is a Mac's: its accounts are copied into its own VMs.
-	if p.Kind == machine.Mac {
+	if p.Kind == machine.Computer {
 		return machine.Yes
 	}
 	return machine.No("accounts are shared from a Mac")

@@ -75,12 +75,12 @@ type entry struct {
 
 func keyed(k string) func(machine.Kind) string { return func(machine.Kind) string { return k } }
 
-func mac() []machine.Kind { return []machine.Kind{machine.Mac} }
+func mac() []machine.Kind { return []machine.Kind{machine.Computer} }
 
-func allMachines() []machine.Kind { return []machine.Kind{"", machine.Mac} }
+func allMachines() []machine.Kind { return []machine.Kind{"", machine.Computer} }
 
 func words(t Target, w ...string) []string {
-	if t.Kind == machine.Mac && t.ThisMachine || t.Kind == "" {
+	if t.Kind == machine.Computer && t.ThisMachine || t.Kind == "" {
 		return w
 	}
 	return append(w, "--on", t.Name)
@@ -260,7 +260,7 @@ func entries() map[string]entry {
 		"machines.forget": {kinds: mac(), subject: otherMac, item: func(_, m Target) Item {
 			return run("Forget "+m.Label, []string{"machines", "forget", m.Name}, gesture.V("Forget", "Forgetting", "Forgot"), m.Label)
 		}},
-		"machines.list": {kinds: []machine.Kind{"", machine.Mac, machine.Workspace, machine.Server}, item: func(_, _ Target) Item { return open(Target{}, section.Overview, "Open All machines") }},
+		"machines.list": {kinds: []machine.Kind{"", machine.Computer, machine.Workspace, machine.Server}, item: func(_, _ Target) Item { return open(Target{}, section.Overview, "Open All machines") }},
 		"machines.log": {subject: vm, item: func(_, v Target) Item {
 			return Item{Label: "Show the log of " + named(v), Gesture: gesture.Gesture{Read: vmWords(v, "machines", "log", v.Name)}}
 		}},
@@ -337,10 +337,10 @@ func entries() map[string]entry {
 		"settings.show": {key: keyed("enter"), item: func(t, _ Target) Item {
 			return asked("Show a setting"+ellipsis, field("Setting"), shown(func(a string) []string { return words(t, "settings", a) }))
 		}},
-		"setup.init": {kinds: []machine.Kind{machine.Mac, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
+		"setup.init": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
 			return terminal("Run init in a new terminal", words(t, "init")...)
 		}},
-		"settings.zsh-block": {kinds: []machine.Kind{machine.Mac, machine.Workspace, machine.Server}, item: func(_, _ Target) Item {
+		"settings.zsh-block": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(_, _ Target) Item {
 			return terminal("Print the shell block in a new terminal", "shell", "zsh")
 		}},
 	}
@@ -381,13 +381,13 @@ func Offer(metas []call.Meta, t Target, macs []Target) []Item {
 		case none:
 			subjects = []Target{t}
 		case vm:
-			if t.Kind == machine.Mac {
+			if t.Kind == machine.Computer {
 				subjects = t.VMs
 			} else if t.Kind != "" {
 				subjects = []Target{t}
 			}
 		case otherMac:
-			if t.Kind == machine.Mac && !t.ThisMachine {
+			if t.Kind == machine.Computer && !t.ThisMachine {
 				subjects = []Target{t}
 			}
 			if t.Kind == "" {
@@ -400,7 +400,7 @@ func Offer(metas []call.Meta, t Target, macs []Target) []Item {
 			if e.key != nil {
 				it.Key = e.key(s.Kind)
 			}
-			if m.Confirm != "" && (m.Confirm != confirm.RestartMac || s.Kind == machine.Mac) {
+			if m.Confirm != "" && (m.Confirm != confirm.RestartMac || s.Kind == machine.Computer) {
 				switch confirm.For(m.Confirm, s.Kind) {
 				case confirm.TypeName:
 					it.Confirm = "type " + s.Name

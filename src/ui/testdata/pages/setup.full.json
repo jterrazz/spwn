@@ -3,7 +3,7 @@
   "id": "outcome",
   "command": "init",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

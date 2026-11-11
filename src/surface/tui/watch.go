@@ -31,7 +31,7 @@ func (s shell) watched() []string {
 	}
 	var out []string
 	for _, x := range s.nodes[1:] {
-		mine := x.thisMac || (x.kind != machine.Mac && x.mac == s.deps.ThisMachine.Machine)
+		mine := x.thisMac || (x.kind != machine.Computer && x.mac == s.deps.ThisMachine.Machine)
 		if mine && (n.all() || x.name == n.name) {
 			out = append(out, x.name)
 		}

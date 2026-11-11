@@ -43,7 +43,7 @@ func TestTwentyIdleVMsAreSampledOnceAMinuteEach(t *testing.T) {
 	c := &clock{now: time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)}
 	guests := &machines{clock: c, asked: map[string]int{}}
 	seen := make([]Seen, 0, 21)
-	seen = append(seen, Seen{Ref: machine.Ref{Name: "mac"}, Kind: machine.Mac})
+	seen = append(seen, Seen{Ref: machine.Ref{Name: "mac"}, Kind: machine.Computer})
 	for i := range 20 {
 		seen = append(seen, Seen{Ref: machine.Ref{Name: "vm-" + strconv.Itoa(i), On: "mac"}, Kind: machine.Workspace, PID: 1000 + i, Guest: true})
 	}
@@ -137,7 +137,7 @@ func (h *hung) Invoke(ctx context.Context, target machine.Ref, name string, in, 
 func TestTwentyHungGuestsCostATickOneBudgetNotTwenty(t *testing.T) {
 	c := &clock{now: time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)}
 	seen := make([]Seen, 0, 21)
-	seen = append(seen, Seen{Ref: machine.Ref{Name: "mac"}, Kind: machine.Mac})
+	seen = append(seen, Seen{Ref: machine.Ref{Name: "mac"}, Kind: machine.Computer})
 	for i := range 20 {
 		seen = append(seen, Seen{Ref: machine.Ref{Name: "vm-" + strconv.Itoa(i), On: "mac"}, Kind: machine.Workspace, Guest: true})
 	}

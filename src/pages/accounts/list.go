@@ -38,7 +38,7 @@ func kindWord(kind string) string {
 	if kind == model.KindVM {
 		return "workspace"
 	}
-	return "mac"
+	return "computer"
 }
 
 func ownRecords(m model.Machine) []page.Item {

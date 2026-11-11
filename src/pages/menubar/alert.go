@@ -205,12 +205,12 @@ func stopEveryWorkspace(label string, thisMac bool, running []string, servers in
 	if servers > 0 {
 		says = append(says, "Servers keep running.")
 	}
-	return alert{Gesture: "stop-engine", Kind: machine.Mac, Name: label, Question: "Stop every workspace on " + label + "?", Says: says,
+	return alert{Gesture: "stop-engine", Kind: machine.Computer, Name: label, Question: "Stop every workspace on " + label + "?", Says: says,
 		Verb: "Stop " + counted(len(running), "workspace", "workspaces"), Danger: true}
 }
 
 func restartMac(label string, servers []string) alert {
-	a := alert{Gesture: "restart-mac", Kind: machine.Mac, Name: label, Question: "Restart " + label + "?",
+	a := alert{Gesture: "restart-mac", Kind: machine.Computer, Name: label, Question: "Restart " + label + "?",
 		Says: []string{"Its VMs pause while it restarts, about 2 min."}, Verb: "Restart " + label, Danger: true}
 	if len(servers) > 0 {
 		a.Facts = []string{FactHostsServer}
@@ -220,7 +220,7 @@ func restartMac(label string, servers []string) alert {
 }
 
 func forgetMac(label string) alert {
-	return alert{Gesture: "forget", Kind: machine.Mac, Name: label, Question: "Forget " + label + "?",
+	return alert{Gesture: "forget", Kind: machine.Computer, Name: label, Question: "Forget " + label + "?",
 		Says: []string{"Its VMs keep running; station stops showing it. You can add it again."}, Verb: "Forget " + label, Danger: true}
 }
 
@@ -235,7 +235,7 @@ func stopShare(vm, port string) alert {
 }
 
 func letSleep(label string, servers []string) alert {
-	a := alert{Gesture: "off-here", Kind: machine.Mac, Name: label, Question: "Let " + label + " sleep?",
+	a := alert{Gesture: "off-here", Kind: machine.Computer, Name: label, Question: "Let " + label + " sleep?",
 		Says: []string{"Its VMs pause while it sleeps."}, Verb: "Let it sleep", Danger: len(servers) > 0}
 	if len(servers) > 0 {
 		a.Facts = []string{FactHostsServer}

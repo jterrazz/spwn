@@ -2,7 +2,7 @@
   "schema": "station.page/v1",
   "id": "all-machines",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "loading",
   "sections": [

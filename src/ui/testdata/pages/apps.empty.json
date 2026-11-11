@@ -3,7 +3,7 @@
   "id": "apps",
   "command": "apps",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

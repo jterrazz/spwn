@@ -19,7 +19,7 @@ func watchNeeds(t *testing.T, w *world, subject string) page.Page {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	pages := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "mac"}}.Needs()(ctx, engine.FeedInput{Subject: subject})
+	pages := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac, Kind: "computer"}}.Needs()(ctx, engine.FeedInput{Subject: subject})
 	return until(t, pages, "the needs read", func(p page.Page) bool { return p.State != page.Loading })
 }
 

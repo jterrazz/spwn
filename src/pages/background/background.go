@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/jterrazz/studio-station/src/background"
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/page"
@@ -102,7 +101,7 @@ func summary(tasks []background.Task, thisMac page.Context) page.Section {
 		mark = page.Attention
 	}
 	label := "This Mac"
-	if thisMac.Kind != string(catalog.Mac) && thisMac.Machine != "" {
+	if thisMac.Kind != string(machine.Computer) && thisMac.Machine != "" {
 		label = thisMac.Machine
 	}
 	row := page.Row{ID: "summary/background", Label: label, Mark: mark, Cells: []page.Value{page.Texts(words...)}}

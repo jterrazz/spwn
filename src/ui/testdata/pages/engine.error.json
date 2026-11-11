@@ -3,7 +3,7 @@
   "id": "engine",
   "command": "engine",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "failed",
   "error": {

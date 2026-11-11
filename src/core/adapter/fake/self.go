@@ -35,7 +35,7 @@ func (s *Self) Read(context.Context) (machine.Ref, machine.Kind, machine.System,
 	}
 	kind, sys := self.Kind, self.System
 	if kind == "" {
-		kind = machine.Mac
+		kind = machine.Computer
 	}
 	if sys.OS == "" {
 		sys.OS = machine.MacOS

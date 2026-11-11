@@ -27,10 +27,10 @@ runs:
           7d0a
           0
           0
-          {"name":"jterrazz-macbook-pro","label":"This Mac","kind":"mac","on":null,"this_mac":true}
+          {"name":"jterrazz-macbook-pro","label":"This Mac","kind":"computer","on":null,"this_mac":true}
     - command: '--version >/dev/null; for on in linux-1 mac-mini infra; do "$STATION" ports --on $on --json | /usr/bin/jq -c .machine; done'
       exit: 0
       stdout: |
           {"name":"linux-1","label":"linux-1","kind":"workspace","on":"jterrazz-macbook-pro","this_mac":false}
-          {"name":"jterrazz-mac-mini","label":"mac-mini","kind":"mac","on":null,"this_mac":false}
+          {"name":"jterrazz-mac-mini","label":"mac-mini","kind":"computer","on":null,"this_mac":false}
           {"name":"infra","label":"infra","kind":"server","on":"jterrazz-mac-mini","this_mac":false}

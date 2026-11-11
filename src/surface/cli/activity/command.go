@@ -75,7 +75,7 @@ type read struct {
 }
 
 func mac(ctx context.Context, env kit.Env, ref machine.Ref, label string, how read) (pageactivity.View, error) {
-	v := pageactivity.View{Name: ref.Name, Label: label, Kind: string(machine.Mac), ThisMac: ref == env.Self, Graph: how.graph}
+	v := pageactivity.View{Name: ref.Name, Label: label, Kind: string(machine.Computer), ThisMac: ref == env.Self, Graph: how.graph}
 	if v.ThisMac {
 		v.Label = "This Mac"
 	}
@@ -163,7 +163,7 @@ func every(ctx context.Context, d Deps, env kit.Env) ([]pageactivity.View, error
 			ref = env.Self
 		}
 		if !h.Reachable && !h.ThisMac {
-			views = append(views, pageactivity.View{Name: h.Name, Label: d.Label(h.Name), Kind: string(machine.Mac), Silent: "does not answer", SilentType: string(fail.Unreachable)})
+			views = append(views, pageactivity.View{Name: h.Name, Label: d.Label(h.Name), Kind: string(machine.Computer), Silent: "does not answer", SilentType: string(fail.Unreachable)})
 			continue
 		}
 		v, err := mac(ctx, env, ref, d.Label(h.Name), read{})

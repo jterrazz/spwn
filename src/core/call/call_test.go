@@ -27,7 +27,7 @@ type listIn struct{ Prefix string }
 type listOut struct{ Apps []string }
 
 var (
-	laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Mac, Caps: machine.Capabilities{Battery: true, Lid: true, Engine: true}}
+	laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer, Caps: machine.Capabilities{Battery: true, Lid: true, Engine: true}}
 	infra  = machine.Profile{Ref: machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}, Kind: machine.Server}
 	linux1 = machine.Profile{Ref: machine.Ref{Name: "linux-1", On: "jterrazz-macbook-pro"}, Kind: machine.Workspace, System: machine.System{OS: machine.Linux}}
 )
@@ -58,7 +58,7 @@ var remove = call.Call[deps, removeIn, struct{}]{
 	Name: "apps.remove", Section: section.Apps, Where: call.AtTarget, Applies: appsSection, Confirm: confirm.Remove,
 	Errors: []fail.Code{confirm.YesNeeded},
 	Run: func(_ context.Context, d deps, in removeIn, _ call.Progress) (struct{}, error) {
-		if err := confirm.Require(confirm.For(confirm.Remove, machine.Mac), in.App, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.For(confirm.Remove, machine.Computer), in.App, in.Confirm); err != nil {
 			return struct{}{}, err
 		}
 		delete(d.installed, in.App)

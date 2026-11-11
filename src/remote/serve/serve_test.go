@@ -53,7 +53,7 @@ type steps struct{ seen []string }
 func (s *steps) Step(task, _ string)       { s.seen = append(s.seen, task) }
 func (s *steps) Done(task string, _ error) { s.seen = append(s.seen, task+" done") }
 
-var laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Mac}
+var laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer}
 
 func server(t *testing.T) serve.Server {
 	t.Helper()

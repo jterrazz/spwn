@@ -330,8 +330,8 @@ func TestEveryCodeWordedRaised(t *testing.T) { judge(t, "EveryCodeWordedRaised")
 // Mac, a workspace, a server.
 func referenceProfiles() []machine.Profile {
 	return []machine.Profile{
-		{Ref: machine.Ref{Name: "laptop"}, Kind: machine.Mac, System: machine.System{OS: machine.MacOS}, Caps: machine.Capabilities{Battery: true, Lid: true, Jobs: true, Engine: true}},
-		{Ref: machine.Ref{Name: "desktop"}, Kind: machine.Mac, System: machine.System{OS: machine.MacOS}, Caps: machine.Capabilities{Jobs: true, Engine: true}},
+		{Ref: machine.Ref{Name: "laptop"}, Kind: machine.Computer, System: machine.System{OS: machine.MacOS}, Caps: machine.Capabilities{Battery: true, Lid: true, Jobs: true, Engine: true}},
+		{Ref: machine.Ref{Name: "desktop"}, Kind: machine.Computer, System: machine.System{OS: machine.MacOS}, Caps: machine.Capabilities{Jobs: true, Engine: true}},
 		{Ref: machine.Ref{Name: "workspace", On: "laptop"}, Kind: machine.Workspace, System: machine.System{OS: machine.Linux}},
 		{Ref: machine.Ref{Name: "server", On: "desktop"}, Kind: machine.Server, System: machine.System{OS: machine.Linux}},
 	}

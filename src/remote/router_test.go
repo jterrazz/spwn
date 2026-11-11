@@ -24,7 +24,7 @@ type installOut struct {
 }
 
 var (
-	laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Mac, System: machine.System{OS: machine.MacOS}}
+	laptop = machine.Profile{Ref: machine.Ref{Name: "jterrazz-macbook-pro"}, Kind: machine.Computer, System: machine.System{OS: machine.MacOS}}
 	infra  = machine.Profile{Ref: machine.Ref{Name: "infra", On: "jterrazz-mac-mini"}, Kind: machine.Server, System: machine.System{OS: machine.Linux}}
 	linux1 = machine.Profile{Ref: machine.Ref{Name: "linux-1", On: "jterrazz-macbook-pro"}, Kind: machine.Workspace, System: machine.System{OS: machine.Linux}}
 )

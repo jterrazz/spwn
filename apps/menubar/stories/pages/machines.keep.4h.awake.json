@@ -4,7 +4,7 @@
   "command": "awake",
   "context": {
     "machine": "macbook-pro",
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "ready",
   "sections": [

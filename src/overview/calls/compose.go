@@ -99,7 +99,7 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 		}
 	}
 	var reading *engine.Reading
-	if kind == machine.Mac {
+	if kind == machine.Computer {
 		// invariant: the engine is read before the sections, so a section
 		// that is the engine's reads it already answering, or says it waits.
 		if out, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, enginecalls.Read, enginecalls.ReadIn{}, nil); err == nil {
@@ -114,7 +114,7 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 		}()
 	}
 	left := len(ids)
-	if kind == machine.Mac {
+	if kind == machine.Computer {
 		left++
 		go func() {
 			out, err := call.Read(ctx, r.d.Calls, machine.Ref{}, machinescalls.List, machinescalls.ListIn{ThisMac: true, Unwritten: true}, nil)

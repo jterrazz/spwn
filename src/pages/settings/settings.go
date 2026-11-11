@@ -299,7 +299,7 @@ func firstLine(rows []settings.Row, look int, thisMac page.Context) page.Section
 		}
 	}
 	label := "This Mac"
-	if thisMac.Machine != "" && thisMac.Kind != string(catalog.Mac) {
+	if thisMac.Machine != "" && thisMac.Kind != string(machine.Computer) {
 		label = thisMac.Machine
 	}
 	words := []string{strconv.Itoa(set) + " set by station here"}

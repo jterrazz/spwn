@@ -18,7 +18,7 @@ func homeOf(t *testing.T, w *heroWorld) page.Page {
 	for i := range w.r.All.Macs {
 		w.r.All.Macs[i].User = "jterrazz"
 	}
-	return Page(w.r, page.Context{Machine: heroPro, Kind: "mac"})
+	return Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
 }
 
 func homeSection(t *testing.T, p page.Page, id string) page.Section {

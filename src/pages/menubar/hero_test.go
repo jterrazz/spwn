@@ -78,7 +78,7 @@ type heroSaid struct {
 
 func said(t *testing.T, w *heroWorld) (heroSaid, page.Page) {
 	t.Helper()
-	p := Page(w.r, page.Context{Machine: heroPro, Kind: "mac"})
+	p := Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
 	if len(p.Sections) == 0 || p.Sections[0].ID != SectionHero {
 		t.Fatalf("the page leads with %q, not the hero", p.Sections[0].ID)
 	}
@@ -204,7 +204,7 @@ func TestAnEmptyFleetIsTheEmptyStateWithNewVM(t *testing.T) {
 	w := newHeroWorld()
 	w.r.All.Macs = w.r.All.Macs[:1]
 	w.r.All.Macs[0].VMs = nil
-	p := Page(w.r, page.Context{Machine: heroPro, Kind: "mac"})
+	p := Page(w.r, page.Context{Machine: heroPro, Kind: "computer"})
 	e := p.Sections[0].Items[0].Empty
 	if e == nil || e.Text != "No VMs yet" || e.Sub != "44 GB free on This Mac" || len(e.Actions) != 1 || e.Actions[0] != ActionNewVM {
 		t.Fatalf("empty state %+v", e)

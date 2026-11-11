@@ -21,7 +21,7 @@ var List = call.Watch[Deps, ListIn, accounts.Report]{
 		// list with every update; a workspace's carries none of its own.
 		var shared []accounts.Shared
 		var list []string
-		if d.Kind == machine.Mac && d.Shares != nil {
+		if d.Kind == machine.Computer && d.Shares != nil {
 			held, err := d.Shares.Shares(ctx)
 			if err != nil {
 				return nil, err

@@ -3,7 +3,7 @@
   "id": "ssh",
   "command": "machines ssh infra",
   "context": {
-    "kind": "mac"
+    "kind": "computer"
   },
   "state": "failed",
   "error": {

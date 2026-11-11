@@ -31,7 +31,7 @@ func selfOf(h local.System, pin string) contract.Self {
 func pinned(word string) (coremachine.Kind, coremachine.OS, bool) {
 	switch catalog.MachineKind(word) {
 	case catalog.Mac:
-		return coremachine.Mac, coremachine.MacOS, true
+		return coremachine.Computer, coremachine.MacOS, true
 	case catalog.MacOS:
 		return coremachine.Workspace, coremachine.MacOS, true
 	case catalog.Linux:
@@ -53,7 +53,7 @@ func profileOf(ctx context.Context, self contract.Self, pin, name string, power 
 		_, p.Kind, p.System, p.Hardware, _ = self.Read(ctx)
 	}
 	p.Ref = coremachine.Ref{Name: name}
-	mac := p.Kind == coremachine.Mac
+	mac := p.Kind == coremachine.Computer
 	p.Caps = coremachine.Capabilities{Jobs: p.System.OS == coremachine.MacOS, Engine: mac}
 	if mac {
 		p.Caps.Provides = providers()
@@ -66,7 +66,7 @@ func profileOf(ctx context.Context, self contract.Self, pin, name string, power 
 // system, a VM is named by its system.
 func legacyKind(p coremachine.Profile) catalog.MachineKind {
 	switch {
-	case p.Kind == coremachine.Mac:
+	case p.Kind == coremachine.Computer:
 		return catalog.Mac
 	case p.System.OS == coremachine.Linux:
 		return catalog.Linux

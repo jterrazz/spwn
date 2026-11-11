@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
@@ -365,8 +364,8 @@ type MatrixRowJSON struct {
 }
 
 func contractKind(kind string) string {
-	if kind == string(catalog.Mac) {
-		return "mac"
+	if kind == string(machine.Computer) {
+		return "computer"
 	}
 	return "workspace"
 }

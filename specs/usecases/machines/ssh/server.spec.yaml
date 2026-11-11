@@ -24,7 +24,7 @@ runs:
             "machine": {
               "name": "jterrazz-macbook-pro",
               "label": "This Mac",
-              "kind": "mac",
+              "kind": "computer",
               "on": null,
               "this_mac": true
             },
