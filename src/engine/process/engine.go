@@ -186,6 +186,13 @@ type Engine struct {
 	// value: whether the tick tries again the shares the tailnet left
 	// unserved: an entry owed went, or the tailnet was read again.
 	retry bool
+	// value: the tailnet's entries as last read, whether they were ever
+	// read, and whether the reconciliation read them since Serve last
+	// turned on; its failure said once in the engine's log.
+	lastShared []ports.Share
+	everRead   bool
+	reconciled bool
+	unreadSaid bool
 }
 
 type Stores struct {

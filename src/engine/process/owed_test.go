@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -130,5 +131,103 @@ func TestAnEntryTheReconciliationFailsToRemoveGoesAtTheNextTick(t *testing.T) {
 	h.d.tickShares(ctx)
 	if got := tn.dump(); got != "" {
 		t.Errorf("tailnet after the next tick = %s, want no entry", got)
+	}
+}
+
+// value: an engine started over a tailnet that funnels 443 from 40000 for
+// a VM deleted while it was down, whose reconciliation could not read the
+// tailnet; db, local, running.
+func staleFunnel(t *testing.T, failShared int, kept ...ports.Reservation) (harness, *flakyTailnet, *[]string) {
+	t.Helper()
+	h := newHarness(t, model.VMRecord{Name: "db", Lifetime: model.Persistent})
+	tn := &flakyTailnet{keptTailnet: funneledFrom40000(), failShared: failShared}
+	h.d.tn = tn
+	h.d.o.Rights = rightsTo(catalog.AudienceLocal, 5432)
+	var log []string
+	h.d.note = func(line string) { log = append(log, line) }
+	h.d.reservations = kept
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.vms["db"].state = engine.StateRunning
+	h.d.mu.Unlock()
+	h.d.reconcileServe(ctx)
+	return h, tn, &log
+}
+
+func reservedPort(h harness, vm string, port int) int {
+	h.d.mu.Lock()
+	defer h.d.mu.Unlock()
+	l, i := ports.Find(h.d.reservations, vm, port)
+	if i < 0 {
+		return 0
+	}
+	return l.MacPort
+}
+
+// invariant: a port of the Mac a stale Funnel entry carries from is given
+// to no new share, and the reconciliation that could not read the tailnet
+// at the start reads it again at the next tick and removes the entry.
+func TestAStaleFunnelEntryCarriesNoNewShare(t *testing.T) {
+	h, tn, _ := staleFunnel(t, 1)
+	ctx := t.Context()
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	if got := reservedPort(h, "db", 5432); got == 0 || got == 40000 {
+		t.Errorf("db reserved %d, want a port the stale Funnel entry does not carry", got)
+	}
+	h.d.tickShares(ctx)
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after the next tick = %s, want the stale entry gone", got)
+	}
+}
+
+// invariant: a reservation kept on a port a tailnet entry not its own
+// carries from moves off it, and says so.
+func TestAReservationMovesOffAPortAStaleEntryCarries(t *testing.T) {
+	no := false
+	h, tn, _ := staleFunnel(t, 1, ports.Reservation{VM: "db", GuestPort: 5432, MacPort: 40000, To: catalog.AudienceLocal, By: ports.ByRights, HTTP: &no})
+	ctx := t.Context()
+	if got := tn.dump(); got != "443/<-40000 funnel=true" {
+		t.Fatalf("tailnet before the listen = %s %v, want the stale entry", got, tn.said())
+	}
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	if got := reservedPort(h, "db", 5432); got == 40000 {
+		t.Errorf("db bound 40000, which the stale Funnel entry carries to the internet: %s", tn.dump())
+	}
+	h.d.mu.Lock()
+	detail := h.d.svcs[key("db", 5432)].detail
+	h.d.mu.Unlock()
+	if detail != "reserved port 40000 was carried on the tailnet: now 40001" {
+		t.Errorf("detail = %q, want the move said", detail)
+	}
+}
+
+// invariant: while Serve is on and the tailnet was never read, no port is
+// given out; the tick that reads it removes the stale entry and shares the
+// port refused meanwhile, the failed reads said once in the engine's log.
+func TestATailnetNeverReadGivesOutNoPortUntilATickReadsIt(t *testing.T) {
+	h, tn, log := staleFunnel(t, 3)
+	ctx := t.Context()
+	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
+	if got := reservedPort(h, "db", 5432); got != 0 {
+		t.Fatalf("db reserved %d while the tailnet was never read, want none", got)
+	}
+	h.d.tickShares(ctx)
+	h.d.tickShares(ctx)
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after the tick that read it = %s, want the stale entry gone", got)
+	}
+	if got := reservedPort(h, "db", 5432); got == 0 {
+		t.Errorf("db is not reserved after the tick that read the tailnet")
+	}
+	said := 0
+	for _, l := range *log {
+		if strings.Contains(l, "could not be read") {
+			said++
+		}
+	}
+	if said != 1 {
+		t.Errorf("the failed reads were said %d times, want once: %v", said, *log)
 	}
 }
