@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io/fs"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/apps/adapter/githubrelease"
@@ -125,5 +126,47 @@ func TestARecordThatDoesNotReadLeavesTheOthersHeld(t *testing.T) {
 	var bad *githubrelease.RecordError
 	if err := r.Remove(context.Background(), []catalog.Install{catalog.GitHubReleaseInstall{Repo: "acme/broken"}}, nil); !errors.As(err, &bad) {
 		t.Errorf("removal of the broken record's release gave %v; want the record named", err)
+	}
+}
+
+// value: a file system where a name may be a link, as the disk's is: a
+// write through it reaches the file it names, a removal takes the link.
+type linked struct {
+	*localtest.FS
+	links map[string]string
+}
+
+func (f *linked) WriteFile(p string, data []byte, perm fs.FileMode) error {
+	if to, ok := f.links[p]; ok {
+		return f.FS.WriteFile(to, data, perm)
+	}
+	return f.FS.WriteFile(p, data, perm)
+}
+
+func (f *linked) Remove(p string) error {
+	if _, ok := f.links[p]; ok {
+		delete(f.links, p)
+		return nil
+	}
+	return f.FS.Remove(p)
+}
+
+func TestALinkLeftAtTheFileWrittenFirstIsNeverFollowed(t *testing.T) {
+	files := &linked{FS: localtest.NewFS(), links: map[string]string{
+		bin + "/.tool.station-new":             "/home/u/.bashrc",
+		store + "/acme/.tool.json.station-new": "/home/u/.profile",
+	}}
+	_ = files.WriteFile("/home/u/.bashrc", []byte("the owner's"), 0o644)
+	_ = files.WriteFile("/home/u/.profile", []byte("the owner's"), 0o644)
+	n := localtest.NewNet()
+	serve(n, toolAt(t, "v2.0.0"))
+
+	if err := releases(files, n, "arm64").Install(context.Background(), []catalog.Install{tool("")}, nil); err != nil {
+		t.Fatal(err)
+	}
+	for _, kept := range []string{"/home/u/.bashrc", "/home/u/.profile"} {
+		if data, _ := files.ReadFile(kept); string(data) != "the owner's" {
+			t.Errorf("%s is %q; want the owner's, the link not followed", kept, data)
+		}
 	}
 }

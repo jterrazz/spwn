@@ -322,7 +322,12 @@ func commands(rec record) []string {
 }
 
 func (r *Releases) land(target string, data []byte, perm fs.FileMode) error {
+	// invariant: the file written before the rename is made anew, so a
+	// link left at its name is removed, never followed to what it names.
 	next := path.Join(path.Dir(target), "."+path.Base(target)+".station-new")
+	if err := r.o.FS.Remove(next); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
 	if err := r.o.FS.WriteFile(next, data, perm); err != nil {
 		return err
 	}
