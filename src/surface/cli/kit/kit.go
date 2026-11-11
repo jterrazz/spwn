@@ -59,7 +59,6 @@ type IO struct {
 	in            io.Reader
 	raw           io.Writer
 	ask           func() error
-	values        func() (map[string]string, error)
 	// value: the machine a far call ran on; its output starts with `On <it>:`.
 	on       string
 	envelope func() *output.Envelope
@@ -93,15 +92,6 @@ func (o IO) YesAnswer() string {
 }
 
 func (o IO) Streams() (io.Reader, io.Writer) { return o.in, o.raw }
-
-func (o IO) Values() (map[string]string, error) {
-	// value: the answers handed on stdin by their input's name; nil when the
-	// command was not given any, so it asks them itself or refuses.
-	if o.values == nil {
-		return nil, nil
-	}
-	return o.values()
-}
 
 func (o IO) CanLive() bool {
 	// invariant: a read goes live only on a terminal, without --json and without
@@ -192,12 +182,7 @@ type Leaf[I any] struct {
 	Live bool
 	// value: a leaf whose answer is a page also prints it as station.page/v1.
 	Pages bool
-	// value: a leaf whose form the TUI fills: with --values-on-stdin, the
-	// answers are read on stdin (io.Values), never in its words.
-	Values bool
 }
-
-const ValuesOnStdin = "values-on-stdin"
 
 func Command[I any](l Leaf[I], env Env) *cobra.Command {
 	in := new(I)
@@ -248,11 +233,6 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 	if l.Asks {
 		cmd.Flags().BoolVarP(&yes, "yes", "y", false, "do it without asking")
 	}
-	var onStdin bool
-	if l.Values {
-		cmd.Flags().BoolVar(&onStdin, ValuesOnStdin, false, "read the form's answers on stdin, as JSON")
-		_ = cmd.Flags().MarkHidden(ValuesOnStdin)
-	}
 	cmd.RunE = func(c *cobra.Command, a []string) error {
 		if l.RawArgs && len(a) > 0 && (a[0] == "-h" || a[0] == "--help") {
 			return c.Help()
@@ -272,9 +252,6 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 		}
 		if l.Plumbing {
 			o.in, o.raw = env.Stdin, env.Stdout
-		}
-		if onStdin {
-			o.values = func() (map[string]string, error) { return valuesOn(env.Stdin) }
 		}
 		err := run(c.Context(), c, l, in, a, env, o)
 		err = env.answerNeed(c.Context(), err, o, func() error { return proceed(c.Context(), c, l, in, a, env, o) })

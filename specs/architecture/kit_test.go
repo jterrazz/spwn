@@ -35,7 +35,7 @@ func ruleKit(w *world) []finding {
 			case lib(fang):
 				ok = under(f.pkg, "ui/help", "wire")
 			case lib(tea):
-				ok = under(f.pkg, "surface/tui", "surface/tui/screens/*", "ui/render/tui")
+				ok = under(f.pkg, "ui/render/tui")
 			}
 			if !ok {
 				out = append(out, finding{"kit", f.at(f.syntax.Imports[i].Pos()), fmt.Sprintf("%q may not import %q: drawing is the kit's", f.pkg, ip)})
@@ -237,45 +237,6 @@ func rulePresentation(w *world) []finding {
 	return out
 }
 
-func keyPress(f *file, e ast.Expr) bool {
-	call, ok := e.(*ast.CallExpr)
-	if !ok {
-		return false
-	}
-	sel, ok := call.Fun.(*ast.SelectorExpr)
-	if !ok || sel.Sel.Name != "String" {
-		return false
-	}
-	t := f.info.TypeOf(sel.X)
-	return t != nil && strings.HasSuffix(t.String(), "bubbletea/v2.KeyPressMsg")
-}
-
-// invariant: rule 19: a section screen binds no key of its own: its keys are
-// its page's Actions and the shell's, the two the key sheet is built from, so
-// a key cannot exist without appearing on the sheet.
-func ruleKeys(w *world) []finding {
-	var out []finding
-	for _, f := range w.files {
-		if !under(f.pkg, "surface/tui/screens/*") {
-			continue
-		}
-		ast.Inspect(f.syntax, func(n ast.Node) bool {
-			switch x := n.(type) {
-			case *ast.SwitchStmt:
-				if x.Tag != nil && keyPress(f, x.Tag) {
-					out = append(out, finding{"keys", f.at(x.Pos()), "a tab switches on a key itself, outside its page's Actions"})
-				}
-			case *ast.BinaryExpr:
-				if keyPress(f, x.X) || keyPress(f, x.Y) {
-					out = append(out, finding{"keys", f.at(x.Pos()), "a tab compares a key itself, outside its page's Actions"})
-				}
-			}
-			return true
-		})
-	}
-	return out
-}
-
 // invariant: rule 20: only page functions build pages; a tab or a leaf that
 // assembles its own bypasses the one place a page is judged.
 func ruleBuilders(w *world) []finding {
@@ -327,8 +288,6 @@ func ruleLayout(w *world) []finding {
 			switch {
 			case slices.Contains(measures, key), paddedFormat(f, call, key):
 				out = append(out, finding{"layout", f.at(call.Pos()), key + " lays out text outside the kit"})
-			case key == tea+".NewView" && f.pkg != "surface/tui":
-				out = append(out, finding{"layout", f.at(call.Pos()), "tea.NewView outside the program's View"})
 			}
 			return true
 		})

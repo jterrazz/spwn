@@ -66,40 +66,7 @@ func everyRow(v View) page.Row {
 	return r
 }
 
-// value: the section a screen's page adds of each Mac's thermal state and
-// battery, which the TUI draws under the machines.
-const (
-	Macs = "macs"
-)
-
-func macs(views []View) page.Section {
-	var items []page.Item
-	for _, v := range views {
-		s := v.Report.Last.Sample
-		if v.Kind != computer || v.Silent != "" || v.Report.Silent {
-			continue
-		}
-		r := page.Row{ID: v.Name, Label: v.Label, Short: v.Short, Mark: page.NotKnown, Cells: []page.Value{page.Text("?"), page.None()}}
-		if s.Thermal != activity.ThermalUnknown {
-			r.Mark, r.Cells[0] = page.OK, page.Text(activity.Thermal(s.Thermal))
-			switch {
-			case s.Thermal >= activity.ThermalCritical:
-				r.Mark = page.Broken
-			case s.Thermal == activity.ThermalSerious:
-				r.Mark = page.Attention
-			}
-		}
-		if b := s.Battery; b != nil {
-			r.Cells[1] = page.Text(strconv.Itoa(b.Percent) + " % " + activity.BatteryState(*b))
-		}
-		items = append(items, page.Item{Row: &r})
-	}
-	return page.Section{ID: Macs, Title: "Thermal and battery", Uncounted: true, Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "thermal", Kind: page.KindText, Keep: 100}, {Key: "battery", Kind: page.KindText, Keep: 100}}, Items: items}
-}
-
-func AllMachines(views []View, thisMac page.Context, graph bool) page.Page {
-	// value: graph is the TUI's: its screen draws each Mac's thermal state
-	// and battery, which the CLI's page leaves to each machine's own.
+func AllMachines(views []View, thisMac page.Context) page.Page {
 	p := page.Page{ID: "activity-all", Command: "activity --all-machines", Context: thisMac}
 	answering := 0
 	var kept, direct time.Duration
@@ -137,9 +104,6 @@ func AllMachines(views []View, thisMac page.Context, graph bool) page.Page {
 		p.Sections = append(p.Sections, page.Section{ID: "needs", Title: "Needs you", Uncounted: true, Columns: columns()[:1], Items: needs})
 	}
 	p.Sections = append(p.Sections, page.Section{ID: "machines", Title: "Machines", Uncounted: true, Columns: everyColumns(), Items: items})
-	if graph {
-		p.Sections = append(p.Sections, macs(views))
-	}
 	return page.Seal(p)
 }
 

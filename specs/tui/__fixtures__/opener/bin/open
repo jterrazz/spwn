@@ -1,4 +1,0 @@
-#!/bin/sh
-# open as the TUI documents need it: what it was asked to open is recorded in
-# $HOME/opened, one line per call; no app, no window, ever.
-printf 'open %s\n' "$*" >> "$HOME/opened"

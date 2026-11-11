@@ -85,8 +85,6 @@ func importTable() map[string][]string {
 		"core/adapter/fake":          {"core/*", "world", std},
 		"core/contract/contracttest": {"core/*", "testing", std},
 		"core/fail":                  {"core/finding", std},
-		"surface/tui":                append([]string{"surface/tui/screens/*", "core/section", "page", "pages", "pages/*", "ui/render/tui", "catalog", "core/fail", tea, std}, calls...),
-		"surface/tui/*":              append([]string{"surface/tui/screens/*", "core/section", "page", "pages", "pages/*", "ui/render/tui", "catalog", "core/fail", tea, std}, calls...),
 	}
 }
 
@@ -131,14 +129,14 @@ func symbolRules() []symbolRule {
 		{symbols: []string{"fmt.Print", "fmt.Println", "fmt.Printf", "log.*", "print", "println"}},
 		{symbols: []string{"fmt.Fprint", "fmt.Fprintln", "fmt.Fprintf", "io.WriteString", "io.Copy", "io.CopyN"}, owners: []string{"output", "ui/render/*", "platform/local", "cmd/generate"}},
 		{symbols: cobraWriters(), owners: []string{"surface/cli/kit", "wire"}},
-		{symbols: []string{"time.Now", "time.Since", "time.Until", "time.Sleep", "time.After", "time.Tick", "time.NewTimer", "time.NewTicker", "time.AfterFunc"}, owners: []string{"platform/local", "platform/darwin", "machines/adapter/ssh", "ui/render/tty", "surface/tui", "surface/tui/*"}},
+		{symbols: []string{"time.Now", "time.Since", "time.Until", "time.Sleep", "time.After", "time.Tick", "time.NewTimer", "time.NewTicker", "time.AfterFunc"}, owners: []string{"platform/local", "platform/darwin", "machines/adapter/ssh", "ui/render/tty"}},
 		{symbols: []string{"path/filepath.Glob", "path/filepath.Walk", "path/filepath.WalkDir", "path/filepath.EvalSymlinks", "path/filepath.Abs", "io/fs.WalkDir", "io/fs.Glob"}, owners: []string{"platform/local", "platform/local/localtest"}},
 		{symbols: paletteSymbols(), owners: []string{"ui/token"}},
 		{symbols: []string{lip + ".*"}, owners: []string{"ui/*"}},
 		{symbols: []string{bubble + "/key.*"}, owners: []string{"ui/organism", "ui/render/tty", "ui/render/tui"}},
 		{symbols: []string{bubble + "/spinner.New", module + "/src/ui/token.Spinner"}, owners: []string{"ui/atom"}},
 		{symbols: []string{bubble + "/spinner.*"}, owners: []string{"ui/atom", "ui/render/tty", "ui/render/tui"}},
-		{symbols: []string{tea + ".*", bubble + "/*"}, owners: []string{"ui/organism", "ui/render/tui", "surface/tui", "surface/tui/*"}},
+		{symbols: []string{tea + ".*", bubble + "/*"}, owners: []string{"ui/organism", "ui/render/tui"}},
 		{symbols: []string{huh + ".*"}, owners: []string{"ui/organism", "ui/render/tty", "ui/render/tui"}},
 		{symbols: []string{fang + ".*"}, owners: []string{"ui/help", "wire"}},
 		{symbols: prefixed(module+"/src/core/fail.", "Silent", "Interruption"), owners: []string{"surface/cli/kit", "wire"}},
@@ -743,14 +741,11 @@ func rules() []rule {
 		{"Levels", ruleLevels, "src/ui/atom/mutant_levels.go", "package atom\n\nimport _ \"" + module + "/src/ui/render/json\"\n", "src/ui/atom/mutant_levels.go"},
 		{"LevelsCatalog", ruleLevels, "src/ui/organism/mutant_levels.go", "package organism\n\nimport _ \"" + module + "/src/catalog\"\n", "src/ui/organism/mutant_levels.go"},
 		{"Semantic", ruleSemantic, "src/pages/apps/mutant_semantic.go", "package apps\n\nfunc Line() string { return \"\" }\n", "src/pages/apps/mutant_semantic.go"},
-		{"TUILoadingLaw", ruleTUILoading, "src/surface/tui/mutant_loading.go", "package tui\n\nimport \"context\"\n\nfunc (s shell) mutantView() string {\n\tp, _ := s.deps.Pages(context.Background(), nil)\n\treturn p.Command\n}\n", "src/surface/tui/mutant_loading.go"},
-		{"TUILoadingLawCalls", ruleTUILoading, "src/surface/tui/mutant_loading_calls.go", "package tui\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/src/core/call\"\n\t\"" + module + "/src/core/machine\"\n\tenginecalls \"" + module + "/src/engine/calls\"\n)\n\nfunc (s shell) mutantCallView() bool {\n\t_, err := call.Invoke(context.Background(), nil, machine.Ref{}, enginecalls.Read, enginecalls.ReadIn{}, nil)\n\treturn err == nil\n}\n", "src/surface/tui/mutant_loading_calls.go"},
 		{"Glyphs", ruleGlyphs, "src/surface/cli/apps/mutant_glyphs.go", "package appscmd\n\nconst mutantMark = \"\u25cf\"\n", "src/surface/cli/apps/mutant_glyphs.go"},
 		{"Presentation", rulePresentation, "src/page/mutant_presentation.go", "package page\n\ntype mutantStyled struct{ Tone int }\n", "src/page/mutant_presentation.go"},
-		{"Keys", ruleKeys, "src/surface/tui/screens/tools/mutant_keys.go", "package toolsscreen\n\nimport tea \"" + tea + "\"\n\nfunc mutantKey(k tea.KeyPressMsg) bool {\n\tswitch k.String() {\n\tcase \"z\":\n\t\treturn true\n\t}\n\treturn false\n}\n", "src/surface/tui/screens/tools/mutant_keys.go"},
-		{"Builders", ruleBuilders, "src/surface/tui/screens/tools/mutant_builders.go", "package toolsscreen\n\nimport \"" + module + "/src/page\"\n\nvar mutantSection = page.Section{Title: \"x\"}\n", "src/surface/tui/screens/tools/mutant_builders.go"},
+		{"Builders", ruleBuilders, "src/surface/cli/apps/mutant_builders.go", "package appscmd\n\nimport \"" + module + "/src/page\"\n\nvar mutantSection = page.Section{Title: \"x\"}\n", "src/surface/cli/apps/mutant_builders.go"},
 		{"Layout", ruleLayout, "src/surface/cli/apps/mutant_layout.go", "package appscmd\n\nimport \"fmt\"\n\nfunc mutantPad(x string) string { return fmt.Sprintf(\"%-20s\", x) }\n", "src/surface/cli/apps/mutant_layout.go"},
-		{"LayoutRepeat", ruleLayout, "src/surface/tui/screens/tools/mutant_layout.go", "package toolsscreen\n\nimport \"strings\"\n\nfunc mutantRule(n int) string { return strings.Repeat(\"-\", n) }\n", "src/surface/tui/screens/tools/mutant_layout.go"},
+		{"LayoutRepeat", ruleLayout, "src/surface/cli/apps/mutant_layout_repeat.go", "package appscmd\n\nimport \"strings\"\n\nfunc mutantRule(n int) string { return strings.Repeat(\"-\", n) }\n", "src/surface/cli/apps/mutant_layout_repeat.go"},
 		{"Cgo", ruleCgo, "src/awake/adapter/macos/mutant_cgo.go", "package macos\n\nimport \"C\"\n", "src/awake/adapter/macos/mutant_cgo.go"},
 		{"PowerSafe", func(w *world) []finding { return append(rulePowerSafe(w), powerRaw(w)...) }, "src/awake/mutant_safe.go", "package awake\n\nconst mutantSafe = \"pmset -a disablesleep 1\"\n", "src/awake/mutant_safe.go"},
 		{"PowerFiles", rulePowerSafe, "src/awake/adapter/macos/mutant_files.go", "package macos\n\nimport \"github.com/jterrazz/studio-station/src/platform/local\"\n\nfunc mutantWrite(files local.FS) error { return files.WriteFile(\"x\", nil, 0o600) }\n", "src/awake/adapter/macos/mutant_files.go"},
@@ -782,7 +777,6 @@ func rules() []rule {
 		{"NoModelNames", ruleNoModelNames, "src/awake/mutant_models.go", "package awake\n\nfunc mutantLaptop(model string) bool { return model == \"MacBook\" }\n", "src/awake/mutant_models.go"},
 		{"CallsGated", ruleCallsGated, "src/apps/calls/mutant_calls.go", "package calls\n\nimport \"" + module + "/src/core/call\"\n\nvar Mutant = call.Call[Deps, struct{}, struct{}]{Name: \"tools.mutant\"}\n", "src/apps/calls/mutant_calls.go"},
 		{"ConfirmInUsecase", ruleConfirmInUsecase, "src/disk/calls/mutant_confirm.go", "package calls\n\nimport (\n\t\"context\"\n\n\t\"" + module + "/src/core/call\"\n\t\"" + module + "/src/core/confirm\"\n\t\"" + module + "/src/core/machine\"\n)\n\nvar mutantErase = call.Call[Deps, struct{}, struct{}]{Name: \"storage.mutant\", Applies: machine.Anywhere, Confirm: confirm.Erase,\n\tRun: func(context.Context, Deps, struct{}, call.Progress) (struct{}, error) { return struct{}{}, nil }}\n", "src/disk/calls/mutant_confirm.go"},
-		{"ConfirmInUsecaseAnswered", ruleConfirmInUsecase, "src/surface/tui/screens/settings/mutant_answer.go", "package settingsscreen\n\nimport \"" + module + "/src/core/confirm\"\n\nvar mutantAnswer = confirm.Yes\n", "src/surface/tui/screens/settings/mutant_answer.go"},
 		{"ConfirmInUsecaseLeafAsks", ruleConfirmInUsecase, "src/surface/cli/stop/mutant_ask.go", "package stopcmd\n\nimport (\n\t\"" + module + "/src/page\"\n\t\"" + module + "/src/surface/cli/kit\"\n)\n\nfunc mutantAsk(a kit.Asker) { _, _ = a.Confirm(page.Confirm{}) }\n", "src/surface/cli/stop/mutant_ask.go"},
 		{"EveryCodeWorded", ruleEveryCodeWorded, "src/apps/mutant_code.go", "package apps\n\nimport \"" + module + "/src/core/fail\"\n\nconst mutantCode fail.Code = \"apps.mutant\"\n", "src/apps/mutant_code.go"},
 		{"EveryCodeWordedRaised", ruleEveryCodeWorded, "src/surface/cli/words/mutant_unraised.go", "package words\n\nimport \"" + module + "/src/core/fail\"\n\nconst mutantUnraised fail.Code = \"usage.needs-terminal\"\n", "src/surface/cli/words/mutant_unraised.go"},
@@ -858,7 +852,6 @@ func TestLevelsCatalog(t *testing.T) { judge(t, "LevelsCatalog") }
 func TestSemantic(t *testing.T)      { judge(t, "Semantic") }
 func TestGlyphs(t *testing.T)        { judge(t, "Glyphs") }
 func TestPresentation(t *testing.T)  { judge(t, "Presentation") }
-func TestKeys(t *testing.T)          { judge(t, "Keys") }
 func TestBuilders(t *testing.T)      { judge(t, "Builders") }
 func TestLayout(t *testing.T)        { judge(t, "Layout") }
 func TestLayoutRepeat(t *testing.T)  { judge(t, "LayoutRepeat") }

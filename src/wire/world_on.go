@@ -94,12 +94,10 @@ type worldRun struct {
 	// value: builds another Mac of the world: its registry, its engine.
 	far   func(w *worldMac) farMac
 	moved *moves
-	// value: the lock this run holds on its world file from open to close, so
-	// a command a TUI runs beside its live reads loses no write to them.
+	// value: the lock this run holds on its world file from open to close.
 	held *os.File
-	// value: the run handed its world to the commands it runs as children
-	// (the TUI), or only looks at it (a page the TUI reads): its copy is
-	// never written back.
+	// value: the run only looks at its world (--page): its copy is never
+	// written back.
 	shared bool
 }
 
@@ -127,7 +125,7 @@ type worldMac struct {
 	leave func()
 }
 
-// invariant: a run that only looks (a page the TUI reads, --page) reads the
+// invariant: a run that only looks (--page) reads the
 // world under the lock and lets go of it at once: it writes nothing back,
 // so a slow look never holds a call up, nor undoes one.
 func openWorld(vars map[string]string, look bool) (*worldRun, error) {
@@ -194,51 +192,6 @@ func unlockWorld(f *os.File) {
 	if f != nil {
 		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
 		_ = f.Close()
-	}
-}
-
-// invariant: the TUI's own process reads every page through a child, so it
-// writes its world back once, before its first child, and lets go of it.
-func (m *worldMac) handOver(ctx context.Context) error {
-	if m == nil {
-		return nil
-	}
-	err := m.run.close(ctx)
-	m.run.shared = true
-	return err
-}
-
-// invariant: a terminal UI of the world holds its watch in the world, as
-// the engine's watching, so every command run meanwhile steps its engine
-// with that watch held, and lets go of it when its screen leaves.
-func (m *worldMac) watch(machines []string) func() {
-	edit := func(change func(e *world.Engine)) {
-		held := lockWorld(m.run.path)
-		defer unlockWorld(held)
-		data, err := os.ReadFile(m.run.path)
-		if err != nil {
-			return
-		}
-		w, err := world.Decode(data)
-		if err != nil {
-			return
-		}
-		if e := w.Mac(m.name).Engine; e != nil {
-			change(e)
-		}
-		if data, err = w.Encode(); err == nil {
-			_ = os.WriteFile(m.run.path, data, 0o600)
-		}
-	}
-	edit(func(e *world.Engine) { e.Watching = append(e.Watching, machines...) })
-	return func() {
-		edit(func(e *world.Engine) {
-			for _, name := range machines {
-				if i := slices.Index(e.Watching, name); i >= 0 {
-					e.Watching = slices.Delete(e.Watching, i, i+1)
-				}
-			}
-		})
 	}
 }
 

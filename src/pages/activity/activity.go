@@ -37,7 +37,7 @@ type View struct {
 	// of the error it answered.
 	Silent                 string
 	SilentType, SilentCode string
-	// value: the window the TUI's graphs draw; zero on the CLI's page,
+	// value: the window the menu bar's graphs draw; zero on the CLI's page,
 	// which draws none (SPEC §6.4).
 	Graph time.Duration
 }

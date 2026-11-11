@@ -217,9 +217,8 @@ func decides(f *file, n *ast.SelectorExpr, asks [][2]token.Pos) string {
 // invariant: rule confirm-in-usecase (SC-07): a call that names a
 // confirmation asks it in its own Run; no surface decides one. A surface
 // neither requires a confirmation nor answers one before its call asks
-// (confirm.Yes is kit's, for --yes); a TUI screen puts a question only
-// once its call has asked it, and a CLI leaf only in its Leaf's Ask, which
-// kit calls once the call has asked.
+// (confirm.Yes is kit's, for --yes); a CLI leaf puts one only in its
+// Leaf's Ask, which kit calls once the call has asked.
 func ruleConfirmInUsecase(w *world) []finding {
 	var out []finding
 	for _, c := range callValues(w) {
@@ -317,9 +316,6 @@ func isCode(t types.Type) bool {
 
 func TestCallsGated(t *testing.T)       { judge(t, "CallsGated") }
 func TestConfirmInUsecase(t *testing.T) { judge(t, "ConfirmInUsecase") }
-func TestNoScreenAnswersAConfirmationBeforeItsCallAsks(t *testing.T) {
-	judge(t, "ConfirmInUsecaseAnswered")
-}
 func TestNoLeafPutsAQuestionOutsideItsLeafAsk(t *testing.T) {
 	judge(t, "ConfirmInUsecaseLeafAsks")
 }

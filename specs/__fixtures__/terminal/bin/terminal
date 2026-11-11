@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# A terminal for the TUI documents: runs COMMAND on a pseudo-terminal of the given size,
+# A terminal for the documents that need one: runs COMMAND on a pseudo-terminal of the given size,
 # replays what it draws on a screen of cells, and plays the steps read on stdin, one per
 # line:
 #   see TEXT    wait until the screen shows TEXT
@@ -227,7 +227,7 @@ class Screen:
             if final in "hl" and 1049 in params:
                 self.screen(final == "h")
             # invariant: the screen is a terminal with synchronized output, as
-            # the ones the TUI runs in are: a frame drawn between ?2026h and
+            # the ones a live page runs in are: a frame drawn between ?2026h and
             # ?2026l is read whole, so a step never reads a frame half drawn,
             # even of a command that never stops drawing.
             if final in "hl" and 2026 in params:

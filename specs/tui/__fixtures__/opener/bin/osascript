@@ -1,7 +1,0 @@
-#!/bin/sh
-# osascript as the TUI documents need it: each script line it was given is
-# recorded in $HOME/opened; no terminal window is ever opened.
-while [ $# -gt 0 ]; do
-    [ "$1" = "-e" ] && shift && printf 'osascript %s\n' "$1" >> "$HOME/opened"
-    shift
-done

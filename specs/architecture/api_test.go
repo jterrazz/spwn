@@ -58,8 +58,7 @@ func TestCallsJSONFresh(t *testing.T) {
 }
 
 // invariant: rule palette-covers-calls (13.3 rule 14, MB-08): every action a
-// page fixture carries (the menu bar's and the TUI's, the stories' pages,
-// the palette's entries once it lands) names a call of calls.json, or opens
+// page fixture carries (the menu bar's, the stories' pages) names a call of calls.json, or opens
 // a terminal, or copies or opens what its page gave it; nothing else runs.
 func TestPaletteCoversCalls(t *testing.T) {
 	root := repoRoot(t)

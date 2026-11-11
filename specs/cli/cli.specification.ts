@@ -113,7 +113,7 @@ export const { cleanup, cli } = await specification.cli(STATION_BIN, {
         XDG_DATA_HOME: null,
         XDG_STATE_HOME: null,
     },
-    // value: a document that drives the TUI runs `terminal "$STATION"`, the binary on a
+    // value: a document that needs a terminal runs `terminal "$STATION"`, the binary on a
     // pseudo-terminal its fixture's driver opens, since a run is never given a TTY, and
     // names it a 256-colour terminal that draws true colour; one that installs runs `$INSTALL_SH` from a local file through its one test seam.
     env: {

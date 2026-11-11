@@ -28,8 +28,6 @@ type Deps struct {
 
 type Input struct {
 	AllMachines, History bool
-	// value: the window the TUI's graphs draw; a screen's flag, never shown.
-	Graph time.Duration
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -41,8 +39,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.AllMachines, "all-machines", false, "one row per machine")
 			f.BoolVar(&in.History, "history", false, "with --json: the 24 h series the engine keeps")
-			f.DurationVar(&in.Graph, "graph", 0, "the window the TUI's graphs draw")
-			_ = f.MarkHidden("graph")
 		},
 		Read:  func(*Input) bool { return true },
 		Pages: true,
@@ -58,9 +54,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				return io.Page(pageactivity.AllMachines(views, d.ThisMachine, in.Graph > 0), pageactivity.AllMachinesContract(views, d.Now()))
+				return io.Page(pageactivity.AllMachines(views, d.ThisMachine), pageactivity.AllMachinesContract(views, d.Now()))
 			}
-			v, err := one(ctx, d, env, env.Target(), read{history: in.History, graph: in.Graph})
+			v, err := one(ctx, d, env, env.Target(), read{history: in.History})
 			if err != nil {
 				return err
 			}
@@ -69,17 +65,14 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
-type read struct {
-	history bool
-	graph   time.Duration
-}
+type read struct{ history bool }
 
 func mac(ctx context.Context, env kit.Env, ref machine.Ref, label string, how read) (pageactivity.View, error) {
-	v := pageactivity.View{Name: ref.Name, Label: label, Kind: string(machine.Computer), ThisMac: ref == env.Self, Graph: how.graph}
+	v := pageactivity.View{Name: ref.Name, Label: label, Kind: string(machine.Computer), ThisMac: ref == env.Self}
 	if v.ThisMac {
 		v.Label = "This Mac"
 	}
-	r, err := call.Read(ctx, env.Calls, ref, activitycalls.Read, activitycalls.ReadIn{History: how.history, Graph: how.graph}, nil)
+	r, err := call.Read(ctx, env.Calls, ref, activitycalls.Read, activitycalls.ReadIn{History: how.history}, nil)
 	v.Report = r
 	return v, err
 }
@@ -107,21 +100,21 @@ func vm(ctx context.Context, d Deps, env kit.Env, holder machine.Ref, name strin
 	// that its guest does not answer (the relay into it is that engine's);
 	// one it holds no last 10 s of is read inside the VM, twice 1 s apart,
 	// its series still that engine's.
-	v := pageactivity.View{Name: name, Label: name, Kind: string(kind), Mac: holder.Name, On: d.Label(holder.Name), Stopped: !running, Graph: how.graph}
+	v := pageactivity.View{Name: name, Label: name, Kind: string(kind), Mac: holder.Name, On: d.Label(holder.Name), Stopped: !running}
 	if holder == env.Self {
 		v.On = "This Mac"
 	}
 	if !running {
 		return v, nil
 	}
-	in := activitycalls.ReadIn{Of: name, Machine: machine.Ref{Name: name, On: holder.Name}, Kind: kind, History: how.history, Graph: how.graph}
+	in := activitycalls.ReadIn{Of: name, Machine: machine.Ref{Name: name, On: holder.Name}, Kind: kind, History: how.history}
 	r, err := call.Read(ctx, env.Calls, holder, activitycalls.Read, in, nil)
 	if err == nil && r.Source != activity.NotKept {
 		v.Report = r
 		return v, nil
 	}
 	kept := r
-	in.Of, in.History, in.Graph = "", false, 0
+	in.Of, in.History = "", false
 	r, err = inside(ctx, env, in)
 	if err != nil {
 		if mac, macErr := call.Read(ctx, env.Calls, holder, activitycalls.Read, activitycalls.ReadIn{Of: name, Machine: in.Machine, Kind: kind, Run: true}, nil); macErr == nil && mac.Last.Run != nil {
@@ -130,9 +123,6 @@ func vm(ctx context.Context, d Deps, env kit.Env, holder machine.Ref, name strin
 	}
 	if kept.History != nil {
 		r.Since, r.History = kept.Since, kept.History
-	}
-	if kept.Graph != nil {
-		r.Graph = kept.Graph
 	}
 	r.Findings = activity.Persisting(r.Findings, kept.Findings)
 	v.Report = r

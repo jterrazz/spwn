@@ -16,18 +16,10 @@ runs:
           page.json:0
           0
           0
-    - command: '--version >/dev/null; for t in git gh ssh-add claude npm; do /bin/cp bin/$t vm/bin/; done; /bin/mkdir -p .local/state/station/logs; "$STATION" engine run 2> .local/state/station/logs/engine.log < /dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null < /dev/null; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do "$STATION" machines --json < /dev/null | /usr/bin/grep -q ''"ssh": true'' && break; /bin/sleep 0.2; done; "$STATION" accounts > vm.txt 2> vm.err < /dev/null; "$STATION" accounts --json > vm.json 2>> vm.err < /dev/null; "$STATION" accounts --on api > on.txt 2> on.err < /dev/null; echo "on exit $?"; terminal --size 120x40 "$STATION" > tui.txt 2> tui.err; echo "tui exit $?"; kill $d; wait $d; /usr/bin/awk -F''\t'' ''$2=="api"{print $1, $3}'' vm.txt; /usr/bin/cut -f1,3 on.txt; /usr/bin/grep -c "Accounts · This Mac" tui.txt; /usr/bin/grep -c SENTINEL vm.txt vm.err vm.json on.txt on.err tui.txt tui.err vm/.calls .local/state/station/logs/engine.log; /usr/bin/jq ''[..|strings|select(test("gho_|sk-ant-|npm_|eyJ"))]|length'' vm.json'
-      stdin: |
-          see Overview · This Mac
-          send ]]]]]]
-          see Accounts · This Mac
-          see GitHub
-          screen
-          send q
+    - command: '--version >/dev/null; for t in git gh ssh-add claude npm; do /bin/cp bin/$t vm/bin/; done; /bin/mkdir -p .local/state/station/logs; "$STATION" engine run 2> .local/state/station/logs/engine.log < /dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null < /dev/null; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do "$STATION" machines --json < /dev/null | /usr/bin/grep -q ''"ssh": true'' && break; /bin/sleep 0.2; done; "$STATION" accounts > vm.txt 2> vm.err < /dev/null; "$STATION" accounts --json > vm.json 2>> vm.err < /dev/null; "$STATION" accounts --on api > on.txt 2> on.err < /dev/null; echo "on exit $?"; kill $d; wait $d; /usr/bin/awk -F''\t'' ''$2=="api"{print $1, $3}'' vm.txt; /usr/bin/cut -f1,3 on.txt; /usr/bin/grep -c SENTINEL vm.txt vm.err vm.json on.txt on.err vm/.calls .local/state/station/logs/engine.log; /usr/bin/jq ''[..|strings|select(test("gho_|sk-ant-|npm_|eyJ"))]|length'' vm.json'
       exit: 0
       stdout: |
           on exit 0
-          tui exit 0
           ●	signed in
           ●	signed in
           ●	signed in
@@ -37,14 +29,11 @@ runs:
           ●	signed in
           # Shared with VMs
 
-          1
           vm.txt:0
           vm.err:0
           vm.json:0
           on.txt:0
           on.err:0
-          tui.txt:0
-          tui.err:0
           vm/.calls:0
           .local/state/station/logs/engine.log:0
           0

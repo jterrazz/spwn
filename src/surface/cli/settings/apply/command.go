@@ -44,20 +44,15 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		},
 		Bind:     func(in *Input, args []string) error { in.Names = args; return nil },
 		Asks:     true,
-		Values:   true,
 		Confirm:  func(in *Input) string { return pagesettings.ApplyConfirm(in.Names).Question },
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			if in.AllMachines {
 				return everyMachine(ctx, env, d, in, io)
 			}
-			given, err := handed(in.Names, io)
-			if err != nil {
-				return err
-			}
 			var changes []settings.Change
-			err = io.Confirmed(func(answer string) (err error) {
-				changes, err = call.Invoke(ctx, env.Calls, env.Target(), settingscalls.Apply, settingscalls.ApplyIn{Names: in.Names, Values: given, Interactive: io.Interactive, Confirm: answer}, nil)
+			err := io.Confirmed(func(answer string) (err error) {
+				changes, err = call.Invoke(ctx, env.Calls, env.Target(), settingscalls.Apply, settingscalls.ApplyIn{Names: in.Names, Interactive: io.Interactive, Confirm: answer}, nil)
 				return err
 			})
 			if err != nil {
@@ -69,16 +64,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return partial(changes, "apply")
 		},
 	}, env)
-}
-
-// value: the answers the TUI's form handed on stdin, for the one setting
-// named; a value is never an argument (A2).
-func handed(names []string, io kit.IO) (map[string]map[string]string, error) {
-	values, err := io.Values()
-	if err != nil || values == nil || len(names) != 1 {
-		return nil, err
-	}
-	return map[string]map[string]string{names[0]: values}, nil
 }
 
 func everyMachine(ctx context.Context, env kit.Env, d Deps, in *Input, io kit.IO) error {

@@ -8,9 +8,8 @@ import (
 	"github.com/jterrazz/studio-station/src/page"
 )
 
-// value: the sections a screen's page adds when it asks for a window:
-// one line per measure with its graph, and the busiest processes one per
-// row, which the TUI sorts by CPU or by memory.
+// value: the sections a page adds when it asks for a window: one line per
+// measure with its graph, and the busiest processes one per row.
 const (
 	Graphs    = "graphs"
 	Processes = "processes"
