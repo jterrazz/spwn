@@ -224,10 +224,8 @@ func (s *Reserver) CheckPort(text string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	// invariant: a share the owner asks for may open any port but the
-	// system's (below catalog.SystemPorts) and the VM's own ssh, 22.
-	if port < catalog.SystemPorts || port == catalog.GuestSSH {
-		return 0, &ports.IgnoredPortError{Port: port}
+	if err := ports.Shareable(port); err != nil {
+		return 0, err
 	}
 	return port, nil
 }

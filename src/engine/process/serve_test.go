@@ -304,3 +304,18 @@ func TestAnEngineThatStopsLeavesItsRunningVMsPortsSharedOnTheTailnet(t *testing.
 		}
 	}
 }
+
+// invariant: a guest's own share request is checked on the engine's side,
+// as the owner's is: its ssh and the system's ports are never reserved.
+func TestAGuestCannotShareItsSSHNorASystemPort(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
+	for _, port := range []int{22, 80, 1023} {
+		if _, err := h.d.guestRequest(t.Context(), "api", guestMessage{Op: "reserve", Port: port}); err == nil {
+			t.Errorf("a guest's reserve of %d was answered, want refused", port)
+		}
+	}
+	if len(h.d.reservations) != 0 {
+		t.Errorf("reservations = %+v, want none", h.d.reservations)
+	}
+}

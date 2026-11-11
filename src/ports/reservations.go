@@ -242,6 +242,16 @@ type BadPortError struct{ Value string }
 
 func (e *BadPortError) Error() string { return "\"" + e.Value + "\" is not a port" }
 
+func Shareable(port int) error {
+	// invariant: a share the owner or a guest asks for may open any port
+	// but the system's (below catalog.SystemPorts) and the VM's own ssh,
+	// catalog.GuestSSH.
+	if port < catalog.SystemPorts || port > 65535 || port == catalog.GuestSSH {
+		return &IgnoredPortError{Port: port}
+	}
+	return nil
+}
+
 type IgnoredPortError struct{ Port int }
 
 func (e *IgnoredPortError) Error() string {

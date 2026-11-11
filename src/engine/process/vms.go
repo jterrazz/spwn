@@ -709,6 +709,11 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 	case "ports":
 		return d.surveyed(ctx, vm), nil
 	case "reserve":
+		// invariant: a guest's share is checked as the owner's is, on the
+		// engine's side: its own binary is not trusted to have done it.
+		if err := ports.Shareable(m.Port); err != nil {
+			return nil, fault("ignored_port", err.Error(), "station never shares port 22 nor a port below 1024")
+		}
 		return d.shareOf(ctx, vm, m.Port)
 	case "release":
 		return d.stopSharing(ctx, vm, m.Port)
