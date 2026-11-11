@@ -13,4 +13,4 @@ runs:
       files:
           .calls:
               equals: |
-                  skills add shadcn-ui/ui -g -y --skill shadcn --agent claude-code codex
+                  skills add -g -y --skill shadcn --agent claude-code codex -- shadcn-ui/ui

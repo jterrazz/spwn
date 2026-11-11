@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"path"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -70,10 +71,10 @@ func (a *agents) play(c local.Cmd) (local.Output, error) {
 	}
 	lock := a.read()
 	switch {
-	case len(c.Args) > 5 && c.Args[0] == "add":
-		lock[c.Args[5]] = entry{Source: c.Args[1], SourceType: "github"}
-	case len(c.Args) == 4 && c.Args[0] == "remove":
-		delete(lock, c.Args[3])
+	case len(c.Args) > 5 && c.Args[0] == "add" && c.Args[len(c.Args)-2] == "--":
+		lock[c.Args[4]] = entry{Source: c.Args[len(c.Args)-1], SourceType: "github"}
+	case len(c.Args) == 5 && c.Args[0] == "remove" && c.Args[3] == "--":
+		delete(lock, c.Args[4])
 	default:
 		return local.Output{ExitCode: 97}, nil
 	}
@@ -161,5 +162,83 @@ func TestTheLockListsASkillEvenWithoutTheCLI(t *testing.T) {
 	got, err := held(t).skills(nil).Inventory(context.Background())
 	if _, in := got["frontend-design"]; err != nil || !in {
 		t.Errorf("inventory %v %v", got, err)
+	}
+}
+
+func TestAHostileNameNeverReachesTheSkillsCLI(t *testing.T) {
+	// invariant: a repo or a skill that is no name by the catalog's rule is
+	// refused before the CLI runs; every argv ends its options before the
+	// repo, or the skill a removal names.
+	for _, in := range []catalog.SkillInstall{
+		{Repo: "--help", Skill: "x"}, {Repo: "-a/b", Skill: "x"}, {Repo: "https://evil.example/x.git", Skill: "x"}, {Repo: "../x", Skill: "x"},
+		{Repo: "anthropics/skills", Skill: "-x"}, {Repo: "anthropics/skills", Skill: "--agent"}, {Repo: "anthropics/skills", Skill: "a b"}, {Repo: "anthropics/skills", Skill: ""},
+	} {
+		for verb, run := range map[string]func(*skills.Skills) error{
+			"install": func(s *skills.Skills) error { return s.Install(context.Background(), []catalog.Install{in}, nil) },
+			"update":  func(s *skills.Skills) error { return s.Update(context.Background(), []catalog.Install{in}, nil) },
+			"remove":  func(s *skills.Skills) error { return s.Remove(context.Background(), []catalog.Install{in}, nil) },
+		} {
+			var calls []string
+			a := newAgents(t)
+			s := skills.New(skills.Options{Run: local.Played(func(c local.Cmd) (local.Output, error) {
+				calls = append(calls, strings.Join(c.Args, " "))
+				return local.Output{}, nil
+			}, "skills"), FS: a.fs, Home: a.home})
+			var name *catalog.NameError
+			if err := run(s); !errors.As(err, &name) || len(calls) > 0 {
+				t.Errorf("%s of %+v gave %v and ran %q; want it refused, nothing run", verb, in, err, calls)
+			}
+		}
+	}
+}
+
+func TestTheCLIEndsItsOptionsBeforeTheRepoAndTheName(t *testing.T) {
+	var calls []string
+	a := newAgents(t)
+	s := skills.New(skills.Options{Run: local.Played(func(c local.Cmd) (local.Output, error) {
+		calls = append(calls, strings.Join(c.Args, " "))
+		return local.Output{}, nil
+	}, "skills"), FS: a.fs, Home: a.home})
+	in := []catalog.Install{catalog.SkillInstall{Repo: "anthropics/skills", Skill: "frontend-design"}}
+
+	if err := s.Install(context.Background(), in, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Remove(context.Background(), in, nil); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"add -g -y --skill frontend-design --agent " + strings.Join(catalog.SkillAgents, " ") + " -- anthropics/skills", "remove -g -y -- frontend-design"}
+	if !slices.Equal(calls, want) {
+		t.Errorf("ran %q; want %q", calls, want)
+	}
+}
+
+type spy struct {
+	github
+	urls []string
+}
+
+func (g *spy) Get(ctx context.Context, url string, h map[string]string) (status int, body []byte, err error) {
+	g.urls = append(g.urls, url)
+	return g.github.Get(ctx, url, h)
+}
+
+func TestALockSourceOrFolderThatIsNoNameNeverJoinsTheAPIRoute(t *testing.T) {
+	// invariant: the lock file is read from disk: a source or a folder in it
+	// that is no plain name is never put in a request.
+	for name, e := range map[string]entry{
+		"a source of another route": {Source: "../../../evil/repo", SourceType: "github", SkillPath: "skills/x/SKILL.md", FolderHash: "aaa"},
+		"a source with a query":     {Source: "anthropics/skills?x=1", SourceType: "github", SkillPath: "skills/x/SKILL.md", FolderHash: "aaa"},
+		"a folder going up":         {Source: "anthropics/skills", SourceType: "github", SkillPath: "../../x/SKILL.md", FolderHash: "aaa"},
+	} {
+		a := newAgents(t)
+		a.write(map[string]entry{"x": e})
+		net := &spy{github: github{"x": "aaa"}}
+
+		got, err := a.skills(net).Outdated(context.Background(), []string{"x"})
+
+		if err != nil || got["x"].Verdict != apps.Unknown || len(net.urls) > 0 {
+			t.Errorf("%s: read %v (%v) and requested %q; want unknown, nothing requested", name, got, err, net.urls)
+		}
 	}
 }

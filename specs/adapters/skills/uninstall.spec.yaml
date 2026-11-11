@@ -11,4 +11,4 @@ runs:
       files:
           .calls:
               contains:
-                  - 'skills remove -g -y frontend-design'
+                  - 'skills remove -g -y -- frontend-design'

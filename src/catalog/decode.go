@@ -461,6 +461,14 @@ func (m MethodSpec) checkManager() string {
 			return err.Error()
 		}
 	}
+	if m.Skill != nil {
+		if err := CheckRepo(m.Skill.Repo); err != nil {
+			return err.Error()
+		}
+		if err := CheckSkill(m.Skill.Name); err != nil {
+			return err.Error()
+		}
+	}
 	if m.Apt != nil {
 		for _, p := range m.Apt.Packages {
 			if err := CheckPackage(p); err != nil {

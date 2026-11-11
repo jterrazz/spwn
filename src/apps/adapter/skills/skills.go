@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"path"
+	"slices"
 	"strings"
 	"sync"
 
@@ -104,7 +105,7 @@ func (s *Skills) Outdated(ctx context.Context, keys []string) (map[string]apps.C
 		wg.Go(func() {
 			verdict := apps.Unknown
 			folder := path.Dir(entry.SkillPath)
-			if entry.SourceType == "github" && entry.FolderHash != "" && folder != "." {
+			if entry.SourceType == "github" && entry.FolderHash != "" && folder != "." && catalog.CheckRepo(entry.Source) == nil && plain(folder) {
 				parent := path.Dir(folder)
 				if parent == "." {
 					parent = ""
@@ -123,6 +124,18 @@ func (s *Skills) Outdated(ctx context.Context, keys []string) (map[string]apps.C
 	}
 	wg.Wait()
 	return out, nil
+}
+
+// invariant: the lock is read from disk, so what it says is checked before
+// it joins an API route: its source as any repo, its folder's segments as
+// plain names of a path.
+func plain(folder string) bool {
+	for seg := range strings.SplitSeq(folder, "/") {
+		if seg == "" || seg == "." || seg == ".." || strings.ContainsAny(seg, "?#% \\") {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *Skills) fetchFolder(ctx context.Context, source, parent string) map[string]string {
@@ -161,12 +174,23 @@ func (s *Skills) Update(ctx context.Context, installs []catalog.Install, logs co
 
 func (s *Skills) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	return s.each(ctx, installs, logs, func(v catalog.SkillInstall) local.Cmd {
-		return local.Command(command, "remove", "-g", "-y", v.Skill)
+		return local.Command(command, "remove", "-g", "-y", "--", v.Skill)
 	})
 }
 
 func add(v catalog.SkillInstall) local.Cmd {
-	return local.Command(command, append([]string{"add", v.Repo, "-g", "-y", "--skill", v.Skill, "--agent"}, catalog.SkillAgents...)...)
+	return local.Command(command, slices.Concat([]string{"add", "-g", "-y", "--skill", v.Skill, "--agent"}, catalog.SkillAgents, []string{"--", v.Repo})...)
+}
+
+// invariant: the skills CLI takes an argument opening with `-` as an
+// option, so a repo and a skill's name are checked by the catalog's rule
+// before an argv carries them, and every argv ends its options with `--`
+// before the positional one.
+func checked(v catalog.SkillInstall) error {
+	if err := catalog.CheckRepo(v.Repo); err != nil {
+		return err
+	}
+	return catalog.CheckSkill(v.Skill)
 }
 
 func (s *Skills) each(ctx context.Context, installs []catalog.Install, logs contract.Logs, argv func(catalog.SkillInstall) local.Cmd) error {
@@ -174,6 +198,9 @@ func (s *Skills) each(ctx context.Context, installs []catalog.Install, logs cont
 		v, ok := i.(catalog.SkillInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not a skill")
+		}
+		if err := checked(v); err != nil {
+			return err
 		}
 		c := argv(v)
 		c.Logs = logs

@@ -40,19 +40,19 @@ The method an app is installed by is the first of its methods here in the system
 
 One registry, `Installers` in `src/apps/contract/`, holds an installer per method, each its own adapter under `src/apps/adapter/<method>/` with its commands and its parser; nothing else switches on a method. `wire` builds the registry; `src/apps/calls` asks each installer what it can do and what is behind (`Outdated`): brew reads `brew outdated --json=v2`, a pinned formula left out; a skill compares its lock with GitHub.
 
-| Method            | Install                                                            | Remove                                           | Update                           | Kinds      |
-| ----------------- | ------------------------------------------------------------------ | ------------------------------------------------ | -------------------------------- | ---------- |
-| `brew`, `cask`    | `brew bundle` (Brewfile on stdin)                                  | `brew uninstall`                                 | `brew bundle --upgrade`          | Mac, macos |
-| `mas`             | `mas install <id>`, silent 60 s: signed out                        | `mas uninstall`                                  | `mas update <id>`                | Mac, macos |
-| `npm`, `uv`       | `brew bundle`                                                      | `npm uninstall -g`, `uv tool uninstall`          | `brew bundle --upgrade`          | Mac, macos |
-| `bun`             | `bun install -g`                                                   | `bun remove -g`                                  | `bun update -g`                  | all        |
-| `mise`            | `mise use --global <tool>@<version>`                               | `mise unuse --global --no-prune`                 | `mise upgrade`                   | all        |
-| `apt`             | `apt-get update`, then `apt-get install`, as root                  | `apt-get remove`, never what it would widen to   | `apt-get install --only-upgrade` | Linux      |
-| `github-release`  | station fetches the release's asset, checked, into `~/.local/bin`  | the commands it put there, while still its own   | the install again, at the latest | all        |
-| `script`, `shell` | the vendor's installer                                             | not reversible                                   | rerun the script; none for shell | all        |
-| `app`             | a `script` with a `hint` alone: the refusal names how              | not reversible                                   | none                             | Mac, macos |
-| `skill`           | `skills add <repo> -g -y --skill <name> --agent claude-code codex` | `skills remove -g -y <name>`                     | the install again                | all        |
-| `provided-by`     | the item that provides it, first; then its commands are looked up  | not reversible: remove the item that provides it | none                             | all        |
+| Method            | Install                                                               | Remove                                           | Update                           | Kinds      |
+| ----------------- | --------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------- | ---------- |
+| `brew`, `cask`    | `brew bundle` (Brewfile on stdin)                                     | `brew uninstall`                                 | `brew bundle --upgrade`          | Mac, macos |
+| `mas`             | `mas install <id>`, silent 60 s: signed out                           | `mas uninstall`                                  | `mas update <id>`                | Mac, macos |
+| `npm`, `uv`       | `brew bundle`                                                         | `npm uninstall -g`, `uv tool uninstall`          | `brew bundle --upgrade`          | Mac, macos |
+| `bun`             | `bun install -g`                                                      | `bun remove -g`                                  | `bun update -g`                  | all        |
+| `mise`            | `mise use --global <tool>@<version>`                                  | `mise unuse --global --no-prune`                 | `mise upgrade`                   | all        |
+| `apt`             | `apt-get update`, then `apt-get install`, as root                     | `apt-get remove`, never what it would widen to   | `apt-get install --only-upgrade` | Linux      |
+| `github-release`  | station fetches the release's asset, checked, into `~/.local/bin`     | the commands it put there, while still its own   | the install again, at the latest | all        |
+| `script`, `shell` | the vendor's installer                                                | not reversible                                   | rerun the script; none for shell | all        |
+| `app`             | a `script` with a `hint` alone: the refusal names how                 | not reversible                                   | none                             | Mac, macos |
+| `skill`           | `skills add -g -y --skill <name> --agent claude-code codex -- <repo>` | `skills remove -g -y -- <name>`                  | the install again                | all        |
+| `provided-by`     | the item that provides it, first; then its commands are looked up     | not reversible: remove the item that provides it | none                             | all        |
 
 A `script` install is checked once it ran: its exit code is all the vendor's installer reports, so an install that leaves none of the commands the app provides is Failed, `installed, but brew is not found on the search path`, never OK. The search path is not frozen at the process's start: commands are looked up on disk at each call, in the folders installs land in as well (`/opt/homebrew/bin` and `/usr/local/bin`, read under the system root; `~/.local/bin`; mise's shims), and a child is given a PATH that carries them, so a Homebrew or a script installed by an earlier step of the run is the one the next step finds by name, and a later run finds it too.
 
@@ -87,6 +87,8 @@ station apps install frontend-design better-ui
 station apps frontend-design        # its category is Agent skills
 station apps remove shadcn
 ```
+
+The CLI takes an argument opening with `-` as an option, so a skill's repo and name are checked by the catalog's rule before an argv carries them (`"--help" is no repo`), and every argv ends its options with `--` before the repo, or before the name a removal gives. A source and a folder the lock file names are checked as well before the API route is built from them, a lock being read from disk.
 
 Only community skills are in the catalog. The `@jterrazz` skills are not curated here: `studio doctor` derives them from the repositories the estate declares. Two skills share a name with an app, so they carry a `-skill` suffix: `qmd-skill` and `agent-browser-skill`. A skill is installed for Claude Code (`~/.claude/skills`) and the shared `~/.agents/skills` that codex and the other universal agents read, never for every agent the skills CLI knows, which it does on a home where it detects none. Installed state is read from the `skills` lock file `~/.agents/.skill-lock.json`; currency is compared against GitHub with a 5 second budget: a folder changed upstream is Update available, and an unanswered comparison leaves the skill OK, `currency unknown`.
 

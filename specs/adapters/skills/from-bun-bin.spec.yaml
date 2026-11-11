@@ -10,4 +10,4 @@ runs:
       files:
           .calls:
               contains:
-                  - 'skills add anthropics/skills -g -y --skill frontend-design'
+                  - 'skills add -g -y --skill frontend-design'

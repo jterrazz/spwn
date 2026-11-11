@@ -22,6 +22,8 @@ func TestEachKindOfNameIsCheckedByOneRule(t *testing.T) {
 			[]string{"", "gh", "a/../../../../../tmp/x", "../x", "a/..", "a/.", "-a/b", "a/b/c", "a//b", "a/b c", "/a/b", "a/b?x=1", "a/b#x"}},
 		{catalog.CheckTag, []string{"v1.2.3", "1.4.4", "release-2024.01", "v1.0.0-rc.1", "1.0+build5", "nightly_2"},
 			[]string{"", "../../../../repos/evil/x/releases/latest", "..", "v1..2", "a/b", "/v1", "v1?x=1", "v1#x", "v1 -x", " v1", "-v1", ".v1", "v1\n", "v1%2f"}},
+		{catalog.CheckSkill, []string{"frontend-design", "last30days", "vercel-react-best-practices", "a.b_c"},
+			[]string{"", "-x", "--help", "a b", "a/b", "../x", "a..b", ".x", "x\n", "x;id"}},
 	} {
 		for _, n := range c.good {
 			if err := c.check(n); err != nil {
@@ -46,13 +48,15 @@ func TestAnItemWhoseNameEscapesItsRuleIsRefused(t *testing.T) {
 		t.Fatalf("an apt method refused: %v", err)
 	}
 	for body, want := range map[string]string{
-		strings.Replace(release, "provides: [gh]", "provides: ['../../.profile']", 1):                          `"../../.profile" is no command name`,
-		strings.Replace(release, "github-release:", "provides: ['-gh']\n      github-release:", 1):             `"-gh" is no command name`,
-		strings.Replace(release, "acme/tool", "'../../../x'", 1):                                               `"../../../x" is no repo`,
-		strings.Replace(release, "acme/tool", "'a/../../../../../tmp/x'", 1):                                   `"a/../../../../../tmp/x" is no repo`,
-		strings.Replace(release, "provides: [gh]\n", "", 1):                                                    "a release lands the commands its app names in provides",
-		strings.Replace(apt, "packages: [gh]", "packages: ['-oAPT::Update::Pre-Invoke::=id>/tmp/pwn', gh]", 1): `"-oAPT::Update::Pre-Invoke::=id>/tmp/pwn" is no package name`,
-		strings.Replace(apt, "packages: [gh]", "packages: ['jq curl']", 1):                                     `"jq curl" is no package name`,
+		strings.Replace(release, "provides: [gh]", "provides: ['../../.profile']", 1):                                                        `"../../.profile" is no command name`,
+		strings.Replace(release, "github-release:", "provides: ['-gh']\n      github-release:", 1):                                           `"-gh" is no command name`,
+		strings.Replace(release, "acme/tool", "'../../../x'", 1):                                                                             `"../../../x" is no repo`,
+		strings.Replace(release, "acme/tool", "'a/../../../../../tmp/x'", 1):                                                                 `"a/../../../../../tmp/x" is no repo`,
+		strings.Replace(release, "provides: [gh]\n", "", 1):                                                                                  "a release lands the commands its app names in provides",
+		strings.Replace(apt, "packages: [gh]", "packages: ['-oAPT::Update::Pre-Invoke::=id>/tmp/pwn', gh]", 1):                               `"-oAPT::Update::Pre-Invoke::=id>/tmp/pwn" is no package name`,
+		strings.Replace(apt, "packages: [gh]", "packages: ['jq curl']", 1):                                                                   `"jq curl" is no package name`,
+		strings.Replace(release, "github-release: {repo: acme/tool, asset: 'tool-{os}-{arch}'}", "skill: {repo: '--help', name: gh}", 1):     `"--help" is no repo`,
+		strings.Replace(release, "github-release: {repo: acme/tool, asset: 'tool-{os}-{arch}'}", "skill: {repo: acme/tool, name: '-gh'}", 1): `"-gh" is no skill name`,
 	} {
 		refusedFor(t, body, want)
 	}
