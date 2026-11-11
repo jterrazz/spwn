@@ -65,7 +65,7 @@ func (m *Meter) fill(s *activity.Sample, c darwin.Counters) {
 		s.CPUBusy += busy
 		s.CPUTotal += busy + t.Idle
 	}
-	s.CPUs, s.Load = len(c.CPUs), c.Load
+	s.CPUs, s.Load = c.Cores(), c.Load
 	m.mu.Lock()
 	m.cpus = s.CPUs
 	m.mu.Unlock()
@@ -185,7 +185,7 @@ func (m *Meter) shares(before, after darwin.Procs) map[int]float64 {
 	m.mu.Unlock()
 	if cpus == 0 {
 		if c, err := m.kernel.Counters(); err == nil {
-			cpus = len(c.CPUs)
+			cpus = c.Cores()
 		}
 	}
 	cpus = max(cpus, 1)

@@ -97,3 +97,12 @@ func TestAProcessShareIsOfTheWholeMachine(t *testing.T) {
 		t.Errorf("Top().CPU = %+v; want node 18 %% then Zed 5 %% of the 2 CPUs", top.CPU)
 	}
 }
+
+func TestACountWithoutTicksIsStillTheCPUsAndTheMemory(t *testing.T) {
+	// value: a build without cgo reads the count and the size, no per-CPU tick.
+	k := &kernel{counters: darwin.Counters{CPUs: []darwin.Ticks{}, CPUCount: 8, Memsize: 16 << 30}}
+	s, _ := New(k, clock{}).Sample(context.Background())
+	if s.CPUs != 8 || s.MemTotal != 16<<30 {
+		t.Errorf("cpus %d, memory %d", s.CPUs, s.MemTotal)
+	}
+}

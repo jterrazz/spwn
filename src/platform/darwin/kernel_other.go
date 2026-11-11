@@ -4,7 +4,7 @@ package darwin
 
 type Kernel struct{}
 
-func (Kernel) Counters() (Counters, error) { return Counters{}, errUnsupported }
+func (Kernel) Counters() (Counters, error) { return basicCounters() }
 
 func (Kernel) Processes() (Procs, error) { return Procs{}, errUnsupported }
 

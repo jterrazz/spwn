@@ -35,6 +35,8 @@ type Link struct {
 }
 
 type Counters struct {
+	// value: the logical CPUs, when no per-CPU ticks are read (a build without cgo).
+	CPUCount int           `json:"cpu_count,omitempty"`
 	CPUs     []Ticks       `json:"cpus"`
 	Load     [3]float64    `json:"load"`
 	Pages    Pages         `json:"pages"`
@@ -61,4 +63,10 @@ type Procs struct {
 	// readings tell the time between them without the wall clock.
 	At   time.Duration `json:"at"`
 	List []Proc        `json:"list"`
+}
+
+func (c Counters) Cores() int {
+	// value: the logical CPUs: the ticks read when there are some, else the count a
+	// build without cgo reads.
+	return max(len(c.CPUs), c.CPUCount)
 }
