@@ -179,7 +179,9 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 				s.Action = Remove
 			}
 		case Absent:
-			s.Action = Remove
+			if s.Seen.Lacks == "" {
+				s.Action = Remove
+			}
 		case Changed, NotManaged, Extra, Unknown:
 		}
 		if it, ok := cat.Item(in.Item); ok {

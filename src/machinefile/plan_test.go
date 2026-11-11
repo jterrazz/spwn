@@ -141,3 +141,16 @@ func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
 		t.Errorf("kept %v; want runtime, required by [browsers]", kept)
 	}
 }
+
+func TestJudgeKeepsAnExtraThatReadsAbsentWithoutItsManager(t *testing.T) {
+	// invariant: with its manager missing an extra cannot be read by its
+	// method, so absent is no proof it is gone: it keeps its record.
+	cat := catalog.Catalog{Items: []catalog.Placed{placed(catalog.Item{Name: "bar"})}}
+	ledger := []machinefile.Installed{{Item: "bar", Method: "pkg", Machinefile: "laptop"}}
+	seen := map[string]machinefile.Seen{"bar": {Condition: machinefile.Absent, State: catalog.StateAbsent, Method: "pkg", Lacks: "manager"}}
+	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger).Extra {
+		if e.Action != machinefile.Leave {
+			t.Errorf("%s: %s; want leave, its record kept", e.Step.Item, e.Action)
+		}
+	}
+}
