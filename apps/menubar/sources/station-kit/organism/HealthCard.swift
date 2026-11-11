@@ -112,7 +112,7 @@ public struct HealthCard: View {
                 if let sub = head.detail, !sub.isNone { FactsLine(sub, role: .healthSub) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            PanelButton(verb.label ?? "", look: red ? .redTint : .plain) { run(verb) }
+            PanelButton(verb.label ?? "", look: red ? .red : .plain) { run(verb) }
         }
         .frame(minHeight: Token.Metric.Health.banner)
     }

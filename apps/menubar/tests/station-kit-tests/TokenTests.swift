@@ -50,6 +50,9 @@ final class TokenTests: XCTestCase {
             XCTAssertFalse(plain.solid)
             XCTAssertEqual(ic.panel, ic.color.panelSolid)
             XCTAssertEqual(rt.panel, rt.color.panelSolid)
+            XCTAssertEqual(ic.plate, ic.color.plateSolid)
+            XCTAssertEqual(rt.plate, rt.color.plateSolid)
+            XCTAssertEqual(plain.plate, plain.color.plate)
             XCTAssertNotEqual(plain.color.hair, ic.color.hair)
             XCTAssertEqual(plain.color.t1, ic.color.t1)
         }

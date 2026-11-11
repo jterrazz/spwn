@@ -404,13 +404,21 @@ extension View {
 }
 
 extension Token {
-    // value: the v4 colour table (SPEC A1), by scheme and contrast.
+    // value: the v4 colour table (SPEC A1), by scheme and contrast, drawn
+    // the M1 way: one plate under the content (80 %, M1's 82 % in light
+    // less the 2 % a text-dense frame needs to stay glass),
+    // two text tones, cards and Find edged by a faint line, red only as a
+    // solid fill. A light card is white at 30 %, not M1's 75 %: over the
+    // 80 % plate that would show 5 % of the desk, opaque by the stories'
+    // glass rule, and its edge must stay glass under an alert's scrim too;
+    // the scrims dim a plate that already dims, so 30 % and 12 % are enough.
     public struct Colors: Sendable {
         public let panel, panelSolid, panelEdge, sheetSolid, menu: Color
-        public let card, hero, card2, hair: Color
+        public let plate, plateSolid: Color
+        public let card, hero, card2, edge, hair: Color
         public let t1, t2, t3, t4: Color
         public let q, qq, key, track: Color
-        public let accent, accentText, green, greenText, orange, orangeText, red, redText, indigo: Color
+        public let accent, accentText, green, greenText, orange, orangeText, red, redText, redFill, indigo: Color
         public let scrim, scrimFind, ring, hud: Color
 
         public func of(_ tone: Tone) -> Color {
@@ -419,7 +427,7 @@ extension Token {
             case .t2: t2
             case .t3: t3
             case .t4: t4
-            case .section: t1.opacity(Role.sectionShare)
+            case .section: t2
             case .hud: Color.white
             }
         }
@@ -433,23 +441,23 @@ extension Token {
         let ic = contrast == .increased
         let panelSolid = dark ? hex(0x2A2A2C) : hex(0xF6F6F8)
         let menu = dark ? rgba(44, 46, 56, ic ? 1 : 0.94) : rgba(246, 246, 248, ic ? 1 : 0.96)
-        let card: Color, hero: Color, card2: Color, hair: Color, t2: Color, t3: Color, q: Color, qq: Color
+        let card: Color, card2: Color, edge: Color, hair: Color, t2: Color, q: Color, qq: Color
         switch (dark, ic) {
         case (true, false):
-            card = rgba(255, 255, 255, 0.085); hero = rgba(255, 255, 255, 0.115); card2 = rgba(255, 255, 255, 0.11)
-            hair = rgba(255, 255, 255, 0.09); t2 = rgba(235, 235, 245, 0.66); t3 = rgba(235, 235, 245, 0.40)
-            q = rgba(255, 255, 255, 0.075); qq = rgba(255, 255, 255, 0.13)
+            card = rgba(255, 255, 255, 0.07); card2 = rgba(255, 255, 255, 0.11); edge = rgba(255, 255, 255, 0.11)
+            hair = rgba(255, 255, 255, 0.12); t2 = rgba(255, 255, 255, 0.72)
+            q = rgba(255, 255, 255, 0.14); qq = rgba(255, 255, 255, 0.20)
         case (true, true):
-            card = hex(0x2C2D33); hero = hex(0x34353B); card2 = hex(0x3A3B41)
-            hair = rgba(255, 255, 255, 0.30); t2 = rgba(235, 235, 245, 0.80); t3 = rgba(235, 235, 245, 0.60)
-            q = rgba(255, 255, 255, 0.14); qq = rgba(255, 255, 255, 0.22)
+            card = hex(0x2C2D33); card2 = hex(0x3A3B41); edge = rgba(255, 255, 255, 0.30)
+            hair = rgba(255, 255, 255, 0.30); t2 = rgba(255, 255, 255, 0.82)
+            q = rgba(255, 255, 255, 0.18); qq = rgba(255, 255, 255, 0.26)
         case (false, false):
-            card = rgba(255, 255, 255, 0.62); hero = rgba(255, 255, 255, 0.86); card2 = rgba(255, 255, 255, 0.85)
-            hair = rgba(0, 0, 0, 0.08); t2 = rgba(60, 60, 67, 0.80); t3 = rgba(60, 60, 67, 0.52)
-            q = rgba(0, 0, 0, 0.05); qq = rgba(0, 0, 0, 0.085)
+            card = rgba(255, 255, 255, 0.30); card2 = rgba(255, 255, 255, 0.34); edge = rgba(0, 0, 0, 0.08)
+            hair = rgba(0, 0, 0, 0.10); t2 = rgba(0, 0, 0, 0.62)
+            q = rgba(0, 0, 0, 0.065); qq = rgba(0, 0, 0, 0.10)
         case (false, true):
-            card = hex(0xFFFFFF); hero = hex(0xFFFFFF); card2 = hex(0xF2F2F5)
-            hair = rgba(0, 0, 0, 0.28); t2 = rgba(40, 40, 45, 0.86); t3 = rgba(40, 40, 45, 0.66)
+            card = hex(0xFFFFFF); card2 = hex(0xF2F2F5); edge = rgba(0, 0, 0, 0.28)
+            hair = rgba(0, 0, 0, 0.28); t2 = rgba(0, 0, 0, 0.74)
             q = rgba(0, 0, 0, 0.08); qq = rgba(0, 0, 0, 0.14)
         }
         let pinned = dark ? accentDark : accentLight
@@ -458,18 +466,21 @@ extension Token {
             panelSolid: panelSolid,
             panelEdge: dark ? rgba(255, 255, 255, 0.20) : rgba(255, 255, 255, 0.75),
             sheetSolid: dark ? hex(0x272A35) : hex(0xF9F9FB),
-            menu: menu, card: card, hero: hero, card2: card2, hair: hair,
-            t1: dark ? rgba(255, 255, 255, 0.94) : hex(0x1D1D1F), t2: t2, t3: t3,
+            menu: menu,
+            plate: dark ? rgba(16, 16, 20, 0.80) : rgba(250, 250, 252, 0.80),
+            plateSolid: dark ? hex(0x101014) : hex(0xFAFAFC),
+            card: card, hero: card, card2: card2, edge: edge, hair: hair,
+            t1: dark ? hex(0xFFFFFF) : hex(0x000000), t2: t2, t3: t2,
             t4: dark ? rgba(235, 235, 245, 0.16) : rgba(60, 60, 67, 0.18),
             q: q, qq: qq,
-            key: dark ? rgba(255, 255, 255, 0.10) : rgba(0, 0, 0, 0.07),
+            key: dark ? rgba(255, 255, 255, 0.14) : rgba(0, 0, 0, 0.07),
             track: dark ? rgba(255, 255, 255, 0.08) : rgba(0, 0, 0, 0.07),
-            accent: accent ?? pinned, accentText: accent ?? (dark ? hex(0x409CFF) : hex(0x0063D1)),
+            accent: accent ?? pinned, accentText: accent ?? (dark ? hex(0x5AABFF) : hex(0x0062CC)),
             green: dark ? hex(0x32D74B) : hex(0x28B14C), greenText: dark ? hex(0x32D74B) : hex(0x1A7F37),
             orange: dark ? hex(0xFF9F0A) : hex(0xFF9500), orangeText: dark ? hex(0xFFB340) : hex(0xA85400),
-            red: dark ? hex(0xFF453A) : hex(0xFF3B30), redText: dark ? hex(0xFF6961) : hex(0xD70015),
+            red: dark ? hex(0xFF453A) : hex(0xFF3B30), redText: dark ? hex(0xFF6961) : hex(0xD70015), redFill: hex(0xD42A20),
             indigo: dark ? hex(0x7D7AFF) : hex(0x5856D6),
-            scrim: dark ? rgba(0, 0, 0, 0.40) : rgba(20, 20, 30, 0.22),
+            scrim: dark ? rgba(0, 0, 0, 0.30) : rgba(20, 20, 30, 0.12),
             scrimFind: dark ? rgba(0, 0, 0, 0.32) : rgba(20, 20, 30, 0.14),
             ring: dark ? rgba(46, 48, 58, 1) : rgba(246, 247, 251, 1),
             hud: Color.black)
@@ -506,8 +517,8 @@ extension Token {
         }
     }
 
-    // value: the four text tones, the section label's t1 at 82 %, and the
-    // HUD's white.
+    // value: the four text tones, of which the panel reads two (t3 is t2,
+    // the section label too), and the HUD's white.
     public enum Tone: Sendable { case t1, t2, t3, t4, section, hud }
 
     // value: a type role of SPEC A1: SF Pro, Rounded or Mono at a size and
@@ -528,8 +539,6 @@ extension Token {
         }
 
         public var font: Font { .system(size: size, weight: weight, design: design).monospacedDigit() }
-
-        static let sectionShare = 0.82
 
         public static let heroTitle = Role(17, .bold, .t1, tracking: -0.17)
         public static let pageTitle = Role(17, .bold, .t1)
@@ -593,6 +602,7 @@ extension Token {
             public static let flush: CGFloat = 4
             public static let highlight: CGFloat = 0.5
             public static let contrastStroke: CGFloat = 1
+            public static let edge: CGFloat = 1
         }
 
         public enum Row {
@@ -799,6 +809,8 @@ extension Token {
         public let palette: Palette
 
         public var panel: Color { solid ? color.panelSolid : color.panel }
+        public var plate: Color { solid ? color.plateSolid : color.plate }
+        public var cardEdge: Color { increased ? color.hair : color.edge }
 
         public func tone(_ tone: Tone) -> Color { color.of(tone) }
 

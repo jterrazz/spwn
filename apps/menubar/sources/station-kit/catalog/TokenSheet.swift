@@ -8,10 +8,10 @@ public struct TokenSheet: View {
     static func swatches(_ c: Token.Colors) -> [(String, Color)] {
         [
             ("panel", c.panel), ("panelSolid", c.panelSolid), ("panelEdge", c.panelEdge), ("sheetSolid", c.sheetSolid),
-            ("menu", c.menu), ("card", c.card), ("hero", c.hero), ("card2", c.card2), ("hair", c.hair),
+            ("menu", c.menu), ("plate", c.plate), ("plateSolid", c.plateSolid), ("card", c.card), ("hero", c.hero), ("card2", c.card2), ("edge", c.edge), ("hair", c.hair),
             ("t1", c.t1), ("t2", c.t2), ("t3", c.t3), ("t4", c.t4), ("q", c.q), ("qq", c.qq), ("key", c.key), ("track", c.track),
             ("accent", c.accent), ("accentText", c.accentText), ("green", c.green), ("greenText", c.greenText),
-            ("orange", c.orange), ("orangeText", c.orangeText), ("red", c.red), ("redText", c.redText), ("indigo", c.indigo),
+            ("orange", c.orange), ("orangeText", c.orangeText), ("red", c.red), ("redText", c.redText), ("redFill", c.redFill), ("indigo", c.indigo),
             ("scrim", c.scrim), ("scrimFind", c.scrimFind), ("ring", c.ring), ("hud", c.hud),
         ]
     }

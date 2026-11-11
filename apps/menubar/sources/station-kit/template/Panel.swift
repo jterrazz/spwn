@@ -325,17 +325,22 @@ struct EdgeFade: View {
     }
 }
 
-// invariant: live the pane paints nothing: MenuBarExtra's window is already the
-// system glass, and a second fill and rim over it doubles the background; the
-// fill, shadows and rim stand in for that glass in still (offscreen) renders only.
+// invariant: live the pane paints one fill, the plate under the content,
+// clipped to the window's shape and edged by nothing: MenuBarExtra's window
+// is already the system glass and its rim, so a rim or a second tint over it
+// doubles the background. Drawn still, the shadows, outline and rim stand in
+// for that glass under the same plate.
 struct PanelPane: ViewModifier {
     var bare = false
     @Environment(\.stationStill) private var still
     @Environment(\.stationTokens) private var tokens
 
     func body(content: Content) -> some View {
-        if bare || !still {
-            content.containerShape(RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous))
+        let shape = RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous)
+        if bare {
+            content.containerShape(shape)
+        } else if !still {
+            content.containerShape(shape).background(shape.fill(tokens.plate))
         } else {
             pane(content)
         }
@@ -347,19 +352,17 @@ struct PanelPane: ViewModifier {
         return content
             .containerShape(shape)
             .background {
-                shape.fill(tokens.panel)
+                shape.fill(tokens.plate)
                 .background {
-                    if still {
-                        ZStack {
-                            ForEach(Array(Token.Pane.shades(scheme).enumerated()), id: \.offset) { _, shade in
-                                shape.fill(Token.Pane.opaque).shadow(color: shade.color, radius: shade.radius, y: shade.y)
-                            }
+                    ZStack {
+                        ForEach(Array(Token.Pane.shades(scheme).enumerated()), id: \.offset) { _, shade in
+                            shape.fill(Token.Pane.opaque).shadow(color: shade.color, radius: shade.radius, y: shade.y)
                         }
-                        .mask { Rectangle().padding(-Token.Metric.Panel.cap).overlay { shape.blendMode(.destinationOut) }.compositingGroup() }
-                        RoundedRectangle(cornerRadius: Token.Pane.outlineRadius, style: .continuous)
-                            .strokeBorder(Token.Pane.ring(scheme), lineWidth: Token.Pane.outline)
-                            .padding(-Token.Pane.outline)
                     }
+                    .mask { Rectangle().padding(-Token.Metric.Panel.cap).overlay { shape.blendMode(.destinationOut) }.compositingGroup() }
+                    RoundedRectangle(cornerRadius: Token.Pane.outlineRadius, style: .continuous)
+                        .strokeBorder(Token.Pane.ring(scheme), lineWidth: Token.Pane.outline)
+                        .padding(-Token.Pane.outline)
                 }
             }
             .overlay {

@@ -226,6 +226,13 @@ public struct GlyphView: View {
         }
     }
 
+    // invariant: a failing mark the page names by its symbol (a shield, a
+    // triangle, an octagon) is drawn as a solid red fill, its sign knocked
+    // out white: red is only ever a fill, never a red outline on the plate.
+    public static func solid(_ glyph: Glyph) -> Bool {
+        glyph.signal == "failing" && glyph.kind?.hasPrefix("symbol:") == true
+    }
+
     public var body: some View {
         switch Self.drawn(glyph) {
         case let .chip(kind, brand): LogoChip(kind, brand)
@@ -240,7 +247,7 @@ public struct GlyphView: View {
         let m = Token.Metric.Marks.self
         return image
             .font(.system(size: m.glyph, weight: .medium))
-            .foregroundStyle(tokens.signal(glyph.signal))
+            .modifier(SignalInk(signal: glyph.signal, solid: Self.solid(glyph)))
             .opacity(glyph.signal == "done" ? m.doneShare : 1)
             .frame(width: m.glyphSlot, height: m.glyphSlot)
             .overlay(alignment: .bottomTrailing) { badge.offset(y: m.badgeDrop) }
@@ -257,6 +264,22 @@ public struct GlyphView: View {
             StatusDot(dot, signal: glyph.signal, size: m.badgeDot)
                 .padding(m.badgeRing).background(Circle().fill(tokens.color.ring))
                 .padding(-m.badgeRing)
+        }
+    }
+}
+
+// invariant: a glyph inked by its signal; solid, the fill of the symbol in
+// the signal's colour under its sign in white.
+struct SignalInk: ViewModifier {
+    let signal: String?
+    let solid: Bool
+    @Environment(\.stationTokens) private var tokens
+
+    func body(content: Content) -> some View {
+        if solid {
+            content.symbolVariant(Token.Solid.variant).symbolRenderingMode(.palette).foregroundStyle(tokens.onTint, tokens.signal(signal))
+        } else {
+            content.foregroundStyle(tokens.signal(signal))
         }
     }
 }

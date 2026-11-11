@@ -38,7 +38,7 @@ public struct TopProcesses: View {
             }
         }
         .padding(.vertical, Token.Metric.Card.flush)
-        .background(RoundedRectangle(cornerRadius: Token.Metric.Card.radius, style: .continuous).fill(tokens.color.card))
+        .modifier(CardFill(lit: false, radius: Token.Metric.Card.radius))
     }
 
     func line(_ row: Row) -> some View {

@@ -19,11 +19,11 @@ public struct FindCapsule: View {
                 Spacer(minLength: 0)
                 KeyCap(Token.FindCapsule.key)
             }
-            .foregroundStyle(tokens.color.t3)
+            .foregroundStyle(tokens.color.t2)
             .padding(.horizontal, Token.FindCapsule.padding)
             .frame(height: m.field)
             .background(shape.fill(hovering ? tokens.color.card2 : tokens.color.card))
-            .overlay { if tokens.increased { shape.strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Card.contrastStroke) } }
+            .overlay { shape.strokeBorder(tokens.cardEdge, lineWidth: Token.Metric.Card.edge) }
             .contentShape(shape)
         }
         .buttonStyle(.plain)

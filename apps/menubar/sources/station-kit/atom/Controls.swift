@@ -104,7 +104,7 @@ public struct Segmented: View {
 }
 
 public struct PanelButton: View {
-    public enum Look: Sendable { case plain, tint, soft, redTint, destructive }
+    public enum Look: Sendable { case plain, tint, soft, red, destructive }
 
     let title: String
     let symbol: String?
@@ -129,9 +129,9 @@ public struct PanelButton: View {
 
     var ink: Color {
         switch look {
-        case .tint: tokens.onTint
+        case .tint, .red: tokens.onTint
         case .soft: tokens.color.accentText
-        case .redTint, .destructive: tokens.color.redText
+        case .destructive: tokens.color.redText
         case .plain: tokens.color.t1
         }
     }
@@ -141,7 +141,7 @@ public struct PanelButton: View {
         switch look {
         case .tint: return tokens.color.accent
         case .soft: return tokens.color.accent.opacity(c.softShare)
-        case .redTint: return tokens.color.red.opacity(c.redShare)
+        case .red: return tokens.color.redFill
         case .plain, .destructive: return hovering ? tokens.color.qq : tokens.color.q
         }
     }
@@ -164,7 +164,7 @@ public struct PanelButton: View {
             .background(shape.fill(fill))
             .overlay {
                 if tokens.increased {
-                    shape.strokeBorder(look == .tint ? tokens.contrastRim : tokens.color.hair, lineWidth: c.contrastRim)
+                    shape.strokeBorder(look == .tint || look == .red ? tokens.contrastRim : tokens.color.hair, lineWidth: c.contrastRim)
                 }
             }
             .opacity(enabled ? 1 : c.disabledShare)

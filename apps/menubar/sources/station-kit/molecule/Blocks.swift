@@ -20,14 +20,15 @@ struct CardFill: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         content
             .background(shape.fill(lit ? tokens.color.card2 : tokens.color.card))
-            .overlay { if tokens.increased { shape.strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Card.contrastStroke) } }
+            .overlay { shape.strokeBorder(tokens.cardEdge, lineWidth: Token.Metric.Card.edge) }
             .animation(tokens.motion(Token.Motion.tint), value: lit)
     }
 }
 
 // invariant: a tile of the strip: its caption (its glyph, or its switch
 // when it toggles), then one number and its word in the one ramp of
-// SPEC A9 3-12, coloured only by its signal.
+// SPEC A9 3-12; its signal is the dot before the number, the number and
+// its word stay in the two text tones.
 public struct TileView: View {
     let tile: Tile
     let actions: [Action]
@@ -79,11 +80,19 @@ public struct TileView: View {
     var number: some View {
         let shown = Figure.split(tile.number.map { Format.show($0, now: now) } ?? "")
         let unit = [shown.unit, tile.word ?? ""].filter { !$0.isEmpty }.joined(separator: " ")
-        let figure = tile.signal.map(tokens.signalText) ?? tokens.tone(Token.Role.tileNumber.tone)
-        let small = tile.signal.map(tokens.signalText) ?? tokens.tone(Token.Role.tileUnit.tone)
-        return HStack(alignment: .firstTextBaseline, spacing: Token.Metric.TileParts.plusGap) {
+        let figure = tokens.tone(Token.Role.tileNumber.tone)
+        let small = tokens.tone(Token.Role.tileUnit.tone)
+        let m = Token.Metric.TileParts.self
+        return HStack(alignment: .firstTextBaseline, spacing: m.plusGap) {
+            if let signal = tile.signal {
+                Circle().fill(tokens.signal(signal))
+                    .frame(width: m.dot, height: m.dot)
+                    .alignmentGuide(.firstTextBaseline) { $0[.bottom] + m.dotLift }
+                    .padding(.trailing, m.dotGap - m.plusGap)
+            }
             Text("\(Text(verbatim: shown.figure).font(Token.Role.tileNumber.font).foregroundStyle(figure))\(Text(verbatim: unit.isEmpty ? "" : " " + unit).font(Token.Role.tileUnit.font).foregroundStyle(small))")
                 .lineLimit(1)
+                .minimumScaleFactor(tile.signal == nil ? 1 : m.fit)
             if let plus = tile.plus {
                 Text(plus).font(Token.Role.tilePlus.font).foregroundStyle(tokens.color.accentText)
             }

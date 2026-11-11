@@ -100,7 +100,7 @@ public struct Hero: View {
             .accessibilityAddTraits(.isHeader)
             if let verb {
                 if head.mark == .broken {
-                    PanelButton(verb.label ?? "", look: .redTint) { run(verb) }
+                    PanelButton(verb.label ?? "", look: .red) { run(verb) }
                 } else {
                     VerbButton(verb.label ?? "") { run(verb) }
                 }
@@ -117,7 +117,7 @@ public struct Hero: View {
         } else if let glyph = head.glyph, case let .symbol(name) = GlyphView.drawn(glyph) {
             Image(systemName: name)
                 .font(.system(size: Token.Metric.Hero.glyph, weight: .medium))
-                .foregroundStyle(tokens.signal(glyph.signal))
+                .modifier(SignalInk(signal: glyph.signal, solid: GlyphView.solid(glyph)))
                 .accessibilityHidden(true)
         }
     }
@@ -195,7 +195,7 @@ struct HeroCard: ViewModifier {
             .padding(Token.Metric.Hero.padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(shape.fill(tokens.color.hero))
-            .overlay { if tokens.increased { shape.strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Card.contrastStroke) } }
             .clipShape(shape)
+            .overlay { shape.strokeBorder(tokens.cardEdge, lineWidth: Token.Metric.Card.edge) }
     }
 }

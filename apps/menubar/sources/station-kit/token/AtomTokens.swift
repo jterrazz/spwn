@@ -69,7 +69,6 @@ extension Token.Metric.Control {
     public static let roundTopBarGlyph: CGFloat = 14
     public static let iconGlyph: CGFloat = 15
     public static let softShare = 0.15
-    public static let redShare = 0.20
     public static let disabledShare = 0.4
     public static let keyOnTintShare = 0.2
     public static let segmentedSize: CGFloat = 12
@@ -133,6 +132,11 @@ extension Token.Key {
 }
 
 extension Token {
+    // value: how a failing mark is drawn: its symbol's solid variant.
+    public enum Solid {
+        public static let variant = SymbolVariants.fill
+    }
+
     public enum Live {
         public static let tenths: Double = 10
         public static let giga: Double = 1_000_000_000

@@ -46,6 +46,14 @@ extension Token.Metric {
         public static let toggleMargin = EdgeInsets(top: -2, leading: -4, bottom: -2, trailing: 0)
         public static let plusGap: CGFloat = 4
         public static let unitGap: CGFloat = 3
+        // value: the dot a tile's signal wears before its number, 8 pt,
+        // its centre half the number's cap height over the baseline.
+        public static let dot: CGFloat = 8
+        public static let dotLift: CGFloat = 2.5
+        public static let dotGap: CGFloat = 5
+        // value: what a tile's number and word may shrink to so the dot
+        // leaves "1 signed out" whole in a tile of the strip.
+        public static let fit = 0.85
     }
 
     public enum GaugeParts {

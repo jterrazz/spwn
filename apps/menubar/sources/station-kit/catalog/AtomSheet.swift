@@ -161,7 +161,7 @@ public struct AtomSheet: View {
                 PanelButton("Open", key: "cmd+o", look: .soft)
             }
             line {
-                PanelButton("Restart", look: .redTint)
+                PanelButton("Restart", look: .red)
                 PanelButton("Delete", look: .destructive)
                 PanelButton("Create", key: "cmd+enter", look: .tint, big: true)
             }
