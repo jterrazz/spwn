@@ -24,7 +24,7 @@ runs:
       stdout: |
           station  ● This Mac · jterrazz-macbook-pro · Engine running · Awake off
            All machines › This Mac › Apps
-          ╭──────────────────────╮┏━ Apps (/node) 1/109 · This Mac ━━━━━━━━━━━━━━━━┓╭─ node ───────────────────────────╮
+          ╭──────────────────────╮┏━ Apps (/node) 1/110 · This Mac ━━━━━━━━━━━━━━━━┓╭─ node ───────────────────────────╮
           │ MACHINES             │┃ Updates  3 ◐                                   ┃│ node                  ◐ outdated │
           │ ◇ All machines       │┃   ◐ node  22.11.0 → 24.11.0  mise  update ava… ┃│   version   22.11.0 → 24.11.0    │
           │ ● This Mac         9 │┃     → station apps update node                 ┃│   method    mise                 │

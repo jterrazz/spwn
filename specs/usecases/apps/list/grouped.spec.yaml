@@ -10,8 +10,8 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 108 apps for this Mac · 3 updates · 100 not installed
+          This Mac · 109 apps for this Mac · 3 updates · 101 not installed
           Updates
-          Not installed  ○ 100 · homebrew, mas, uv, cocoapods, pnpm, skills, bun, java, python, rust, …
+          Not installed  ○ 101 · homebrew, mas, uv, cocoapods, pnpm, skills, bun, java, python, rust, …
           OK             ● 5 · mise, go, bat, jq, lazygit
           Not for this machine  7 apps live on other machines

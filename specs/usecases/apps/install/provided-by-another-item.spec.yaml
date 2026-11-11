@@ -1,0 +1,18 @@
+description: 'herdr-core comes with herdr-app: installed on a Mac, herdr-app installs first'
+env: two-macs
+runs:
+    - command: 'apps install herdr-core'
+      exit: 0
+      stdout: |
+          ●	herdr-app	1.0.0	cask
+          ●	herdr-core	1.0.0	provided-by
+    - command: 'apps herdr-core | /usr/bin/head -3'
+      exit: 0
+      stdout: |
+          ●	herdr-core	1.0.0	provided-by
+          # Detail
+          method	provided-by
+    - command: 'apps herdr-app | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	herdr-app	1.0.0	cask

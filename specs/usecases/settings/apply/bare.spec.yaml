@@ -26,7 +26,7 @@ runs:
           ○	claude-token	not applied	station settings apply claude-token
           ○	zed-dotfiles	not applied · needs zed	station apps install zed
           ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
-          ○	herdr-machine	not applied · needs herdr-app	station apps install herdr-app
+          ○	herdr-machine	not applied · needs herdr-core	station apps install herdr-core
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐

@@ -3,7 +3,7 @@ kind: setting
 name: herdr-machine
 order: 240
 description: 'Herdr reaches every workspace of this Mac: its agents show in Herdr'
-requires: [herdr-app]
+requires: [herdr-core]
 reversible: true
 sets:
     - { key: herdr-core, value: 'every workspace a machine, by its name' }

@@ -146,18 +146,22 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	)
 }
 
-// value: the app is installed here: its program is on the PATH, or its
-// bundle is in /Applications (the App Store Tailscale puts no program on
-// any PATH).
+// value: the app is installed here: its program, or a command it provides
+// (herdr-core's hc), is on the PATH, or its bundle is in /Applications (the
+// App Store Tailscale puts no program on any PATH).
 func (m machine) has(app string) bool {
 	if _, ok := m.sys.Run.LookPath(app); ok {
 		return true
 	}
-	for _, t := range m.cat.Apps {
-		if t.Name == app && t.Bundle != "" {
-			_, err := m.sys.FS.Stat(path.Join("/", m.systemRoot(), "Applications", t.Bundle+".app"))
-			return err == nil
+	t, known := m.cat.App(app)
+	for _, name := range t.Provides {
+		if _, ok := m.sys.Run.LookPath(name); ok {
+			return true
 		}
+	}
+	if known && t.Bundle != "" {
+		_, err := m.sys.FS.Stat(path.Join("/", m.systemRoot(), "Applications", t.Bundle+".app"))
+		return err == nil
 	}
 	return false
 }
