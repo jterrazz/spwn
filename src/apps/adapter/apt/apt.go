@@ -346,25 +346,35 @@ func (a *Apt) take(ctx context.Context, logs contract.Logs, names []string) erro
 
 // value: the apps that hold a package station's install added (or was
 // adding, cut short), by their catalogue names, one to a line of the
-// package's file in station's folder; none recorded is the owner's.
+// package's file in station's folder, each line ended; none recorded is
+// the owner's. A file that is empty, or not so written (a write cut
+// short), is unreadable, never read as a package no app holds.
 func (a *Apt) holders(pkg string) (held []string, recorded bool, err error) {
-	data, err := a.files.ReadFile(path.Join(a.store, pkg))
+	at := path.Join(a.store, pkg)
+	data, err := a.files.ReadFile(at)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return nil, false, nil
 	case err != nil:
 		return nil, false, err
 	}
-	for line := range strings.Lines(string(data)) {
-		if app := strings.TrimSpace(line); app != "" {
-			held = append(held, app)
+	text := string(data)
+	if !strings.HasSuffix(text, "\n") {
+		return nil, false, &RecordError{Path: at}
+	}
+	for line := range strings.Lines(text) {
+		app := strings.TrimSuffix(line, "\n")
+		if checkApp(app) != nil {
+			return nil, false, &RecordError{Path: at}
 		}
+		held = append(held, app)
 	}
 	return held, true, nil
 }
 
 // value: every package station's folder records, with its holders; a file
-// whose name is no package is no record of station's.
+// whose name is no package is no record of station's, and one any write
+// left behind (`.<package>.station-new`) neither.
 func (a *Apt) records() (map[string][]string, error) {
 	entries, err := a.files.ReadDir(a.store)
 	switch {
@@ -387,8 +397,18 @@ func (a *Apt) records() (map[string][]string, error) {
 	return out, nil
 }
 
+// invariant: a record is written whole or not at all: a new file beside
+// it, renamed over it, so a write cut short leaves the old record.
 func (a *Apt) record(pkg string, held []string) error {
-	return a.files.WriteFile(path.Join(a.store, pkg), []byte(strings.Join(held, "\n")+"\n"), 0o644)
+	target := path.Join(a.store, pkg)
+	next := path.Join(a.store, "."+pkg+".station-new")
+	if err := a.files.Remove(next); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if err := a.files.WriteFile(next, []byte(strings.Join(held, "\n")+"\n"), 0o644); err != nil {
+		return err
+	}
+	return a.files.Rename(next, target)
 }
 
 // value: the record of a package once an app let go of it: removed when
@@ -474,6 +494,12 @@ func packages(installs []catalog.Install, pinned bool) ([]string, []catalog.AptI
 		}
 	}
 	return names, asked, nil
+}
+
+type RecordError struct{ Path string }
+
+func (e *RecordError) Error() string {
+	return "station's record " + e.Path + " does not read, so which apps hold its package is unknown: nothing done"
 }
 
 type TakesMoreError struct {

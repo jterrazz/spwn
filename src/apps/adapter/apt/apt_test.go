@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
 	"slices"
 	"strings"
@@ -102,6 +103,10 @@ func serving(verb func(context.Context, contract.For, []catalog.Install, contrac
 
 func aptOf(run local.Runner, terminal bool) *apt.Apt {
 	return apt.New(run, localtest.NewFS(), aptStore, terminal)
+}
+
+func playedOn(d *dpkg, files local.FS) *apt.Apt {
+	return apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), files, aptStore, false)
 }
 
 func rooted(d *dpkg) bool {
@@ -502,5 +507,66 @@ func TestAnInstallCutShortLeavesTheRecordOfWhatItMayHaveAdded(t *testing.T) {
 	failed.fails = false
 	if holds, err := b.Holds(ctx, "y"); err != nil || holds {
 		t.Errorf("holds %v (%v) after an install that added nothing; want no record", holds, err)
+	}
+}
+
+func TestAnUnreadableRecordRefusesTheRemovalAndTheInstall(t *testing.T) {
+	// invariant: a record left empty or cut mid-line is unreadable, never a
+	// package no app holds: a removal or an install that meets it is
+	// refused before anything runs as root.
+	for name, body := range map[string]string{"empty": "", "cut": "aaa\nbb", "a blank line": "aaa\n\nbbb\n"} {
+		d := &dpkg{held: map[string]string{}}
+		files := localtest.NewFS()
+		a := playedOn(d, files)
+		ctx := context.Background()
+		aaa := []catalog.Install{catalog.AptInstall{Packages: []string{"libshared"}}}
+		if err := a.InstallFor(ctx, word("aaa"), aaa, nil); err != nil {
+			t.Fatal(err)
+		}
+		if err := files.WriteFile(aptStore+"/libshared", []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		d.calls = nil
+
+		var unreadable *apt.RecordError
+		if err := a.RemoveFor(ctx, word("aaa"), aaa, nil); !errors.As(err, &unreadable) || rooted(d) || d.held["libshared"] != "1.0" {
+			t.Errorf("%s: removal gave %v and ran %q; want it refused, libshared kept", name, err, d.calls)
+		}
+		if err := a.InstallFor(ctx, word("bbb"), aaa, nil); !errors.As(err, &unreadable) || slices.ContainsFunc(d.calls, func(c string) bool { return strings.Contains(c, " install ") }) {
+			t.Errorf("%s: install gave %v and ran %q; want it refused before apt-get install", name, err, d.calls)
+		}
+	}
+}
+
+// value: a disk that keeps every path written, so a test reads where a
+// record was written before its rename.
+type writes struct {
+	local.FS
+	paths []string
+}
+
+func (w *writes) WriteFile(p string, data []byte, perm fs.FileMode) error {
+	w.paths = append(w.paths, p)
+	return w.FS.WriteFile(p, data, perm)
+}
+
+func TestARecordIsWrittenBesideThenRenamedOverTheOld(t *testing.T) {
+	// invariant: a record is never truncated in place: each is written to a
+	// new file beside it, then renamed over it, so a write cut short leaves
+	// the old record whole.
+	files := &writes{FS: localtest.NewFS()}
+	a := playedOn(&dpkg{held: map[string]string{}}, files)
+	ctx := context.Background()
+	for _, app := range []string{"aaa", "bbb"} {
+		if err := a.InstallFor(ctx, word(app), []catalog.Install{catalog.AptInstall{Packages: []string{"libshared"}}}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if slices.Contains(files.paths, aptStore+"/libshared") || len(files.paths) != 2 {
+		t.Errorf("wrote %q; want each record written beside its file, never over it", files.paths)
+	}
+	if got, err := files.ReadFile(aptStore + "/libshared"); err != nil || string(got) != "aaa\nbbb\n" {
+		t.Errorf("record reads %q (%v); want both holders", got, err)
 	}
 }

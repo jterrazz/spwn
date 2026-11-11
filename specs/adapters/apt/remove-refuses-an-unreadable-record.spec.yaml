@@ -1,0 +1,30 @@
+description: 'a record left empty by a cut write does not read: the removal is refused, nothing taken'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/shared-first/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps install aaa bbb'
+      exit: 0
+      stdout: |
+          ●	aaa	1.0	apt
+          ●	bbb	1.0	apt
+    - command: '--version >/dev/null; : > .local/share/station/apt/foo'
+      exit: 0
+    - command: 'apps remove aaa --yes'
+      exit: 1
+      stdout: |
+          ✗	aaa		apt	~/.local/state/station/logs/aaa.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: re-run it: station apps remove aaa
+      files:
+          .local/state/station/logs/aaa.log:
+              contains:
+                  - '/.local/share/station/apt/foo does not read, so which apps hold its package is unknown: nothing done'
+    - command: '--version >/dev/null; /bin/cat dpkg.db'
+      exit: 0
+      stdout: |
+          foo	1.0
+          foo-doc	1.0
