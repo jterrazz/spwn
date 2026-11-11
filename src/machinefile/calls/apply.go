@@ -297,6 +297,10 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 	for _, e := range extra {
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
 		switch {
+		case len(e.RequiredBy) > 0:
+			done.Detail = "required by " + strings.Join(e.RequiredBy, ", ") + ": kept, judged again next run"
+			out = append(out, done)
+			continue
 		case e.Action != machinefile.Remove && (e.Seen.Condition == machinefile.Unknown || e.Seen.Condition == machinefile.Changed):
 			done.Detail = "reads " + strings.ReplaceAll(string(e.Seen.Condition), "-", " ") + ": kept, judged again next run"
 			out = append(out, done)

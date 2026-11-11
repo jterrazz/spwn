@@ -29,7 +29,8 @@ type ExtraJSON struct {
 	Machinefile string `json:"machinefile"`
 	// value: what the item reads now, and what `apply --remove` does with
 	// it: `remove` (an extra already gone only leaves the ledger) or
-	// `leave` (present another way since, or not readable now).
+	// `leave` (present another way since, needed by another app there, or
+	// not readable now).
 	Condition string `json:"condition"`
 	Action    string `json:"action"`
 }

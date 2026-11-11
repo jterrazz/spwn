@@ -1,0 +1,58 @@
+description: 'apply --remove keeps an extra another app there still needs, and its record'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, mas]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mas	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ●	mas	1.0.0	brew
+    - command: 'apps install keynote'
+      exit: 0
+      stdout: |
+          ●	keynote	1.0.0	mas
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	mas	brew	installed by station for jterrazz-macbook-pro, required by keynote: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          # Extra
+          ?	mas	brew	installed by station for jterrazz-macbook-pro, required by keynote: kept
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ●	mas	1.0.0	brew	required by keynote: kept, judged again next run
+    - command: 'apps | /usr/bin/grep -e "^.	mas	" -e "^.	keynote	"'
+      exit: 0
+      stdout: |
+          ●	mas	1.0.0	brew
+          ●	keynote	1.0.0	mas
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+      exit: 0
+      stdout: |
+          ["mas"]

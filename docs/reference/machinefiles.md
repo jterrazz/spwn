@@ -151,13 +151,14 @@ What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: e
 
 `apply --remove` asks on a terminal and needs `--yes` off one; off a terminal, an extra whose uninstall asks your password is refused before any step, as a plan's need is. It then takes the extras back, what another one waits on (its manager, what it requires) after it, and each as `plan` says:
 
-| An extra that reads                                 | `plan` says                       | `apply --remove`                                                       |
-| --------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------- |
-| there by the method that installed it               | `listed no longer`                | uninstalls it by that method, then forgets it                          |
-| not there                                           | `already gone`                    | forgets it                                                             |
-| there another way since (put back by hand)          | `present another way since: kept` | keeps it, yours now, and forgets it                                    |
-| there, but station cannot uninstall it (a script's) | `listed no longer`                | `station cannot uninstall it: kept, remove it by hand`, and forgets it |
-| failing, or not readable now                        | `reads <condition>: kept`         | keeps it, and its record for the next run                              |
+| An extra that reads                                                                                   | `plan` says                       | `apply --remove`                                                       |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------- |
+| there by the method that installed it                                                                 | `listed no longer`                | uninstalls it by that method, then forgets it                          |
+| not there                                                                                             | `already gone`                    | forgets it                                                             |
+| there another way since (put back by hand)                                                            | `present another way since: kept` | keeps it, yours now, and forgets it                                    |
+| there, but station cannot uninstall it (a script's)                                                   | `listed no longer`                | `station cannot uninstall it: kept, remove it by hand`, and forgets it |
+| failing, or not readable now                                                                          | `reads <condition>: kept`         | keeps it, and its record for the next run                              |
+| needed by another app there (it requires it, or it is that app's manager), one not taken back with it | `required by <app>: kept`         | keeps it, and its record for the next run                              |
 
 ## The hard cases
 

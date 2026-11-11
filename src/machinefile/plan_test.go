@@ -59,3 +59,37 @@ func TestJudgeKeepsAnItemSkippedOnThisSystem(t *testing.T) {
 		t.Errorf("%s is extra (%s); want none: it is still listed", e.Step.Item, e.Action)
 	}
 }
+
+func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
+	// invariant: an extra an app there still needs (what requires it, what
+	// its manager installed) is kept, unless that app is taken back too.
+	cat := catalog.Catalog{Items: []catalog.Placed{
+		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Item{Name: "lib"}),
+		placed(catalog.Item{Name: "tool", Requires: []string{"lib"}}),
+		placed(catalog.Item{Name: "own"}),
+		placed(catalog.Item{Name: "dotfiles", Kind: catalog.KindSetting, Requires: []string{"own"}}),
+	}}
+	ledger := []machinefile.Installed{
+		{Item: "manager", Method: "installer", Machinefile: "laptop"},
+		{Item: "lib", Method: "pkg", Machinefile: "laptop"},
+		{Item: "own", Method: "pkg", Machinefile: "laptop"},
+	}
+	seen := map[string]machinefile.Seen{
+		"manager":  {Condition: machinefile.Present, Method: "installer"},
+		"lib":      {Condition: machinefile.Present, Method: "pkg"},
+		"tool":     {Condition: machinefile.Unknown, Method: "pkg"},
+		"own":      {Condition: machinefile.Present, Method: "pkg"},
+		"dotfiles": {Condition: machinefile.Present},
+	}
+	kept := map[string][]string{}
+	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger).Extra {
+		if !e.Takes() {
+			kept[e.Step.Item] = e.RequiredBy
+		}
+	}
+	want := map[string][]string{"lib": {"tool"}, "manager": {"lib", "tool"}}
+	if len(kept) != len(want) || !slices.Equal(kept["lib"], want["lib"]) || !slices.Equal(kept["manager"], want["manager"]) {
+		t.Errorf("kept %v; want %v (own is needed by a setting alone)", kept, want)
+	}
+}

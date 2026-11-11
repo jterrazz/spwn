@@ -123,6 +123,8 @@ func restartsSection(r []catalog.AfterApply) []page.Section {
 // value: what `apply --remove` does with an extra, in the owner's words.
 func fate(e machinefile.ExtraLine) string {
 	switch {
+	case len(e.RequiredBy) > 0:
+		return "required by " + strings.Join(e.RequiredBy, ", ") + ": kept"
 	case e.Takes():
 		return "listed no longer"
 	case e.Action == machinefile.Remove:
