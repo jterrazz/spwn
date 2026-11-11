@@ -450,7 +450,6 @@
                         "vm": "linux-3",
                         "guest_port": 8080,
                         "host_port": 40001,
-                        "pinned": false,
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     }
@@ -1002,8 +1001,6 @@
                         "vm": "linux-1",
                         "guest_port": 5173,
                         "host_port": 40001,
-                        "profile": "vite",
-                        "pinned": true,
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     },
@@ -1011,7 +1008,6 @@
                         "vm": "linux-1",
                         "guest_port": 3000,
                         "host_port": 40002,
-                        "pinned": false,
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     }

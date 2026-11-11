@@ -18,7 +18,7 @@ import (
 
 type Engine interface {
 	MacPorts(ctx context.Context) (ports.MacPorts, error)
-	Reserve(ctx context.Context, vm string, port int, pinned bool) (ports.SharedPort, error)
+	Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error)
 	Release(ctx context.Context, vm string, port int) (ports.Reservation, error)
 }
 
@@ -42,6 +42,8 @@ type ReserverOptions struct {
 	Listening func(ctx context.Context) ([]ports.Listener, error)
 	// value: the routes a declared port is verified by; nil verifies none.
 	Routes contract.PublicRoutes
+	// value: the ports the catalog's items serve on: a row's label.
+	Ports []catalog.ItemPort
 }
 
 type Stores struct {
@@ -80,7 +82,7 @@ func (s *Reserver) offline(ctx context.Context) ports.MacPorts {
 	view := ports.MacPorts{Name: s.o.ThisMacName, ThisMac: true, Reachable: true, PublicName: e.PublicName, Serve: e.Word(), HTTPS: s.policy().HTTPS, Shared: []ports.SharedPort{}}
 	reservations, _ := s.st.Reservations.List(ctx)
 	for _, l := range reservations {
-		view.Shared = append(view.Shared, ports.ViewOf(l, e, view.HTTPS, ports.PhaseUnknown))
+		view.Shared = append(view.Shared, ports.Hinted(ports.ViewOf(l, e, view.HTTPS, ports.PhaseUnknown), s.o.Ports))
 	}
 	return view
 }
@@ -222,8 +224,10 @@ func (s *Reserver) CheckPort(text string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	if p := s.policy(); p.Ignores(port) {
-		return 0, &ports.IgnoredPortError{Port: port, MinPort: p.MinPort}
+	// invariant: a share the owner asks for may open any port but the
+	// system's (below catalog.SystemPorts) and the VM's own ssh, 22.
+	if port < catalog.SystemPorts || port == catalog.GuestSSH {
+		return 0, &ports.IgnoredPortError{Port: port}
 	}
 	return port, nil
 }
@@ -259,7 +263,7 @@ func (s *Reserver) CheckVM(ctx context.Context, vm string) (mac string, err erro
 }
 
 func (s *Reserver) Share(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
-	v, err := s.d.Reserve(ctx, vm, port, false)
+	v, err := s.d.Reserve(ctx, vm, port)
 	var down *ports.MacAwayError
 	if s.inVM() && (errors.Is(err, ports.ErrEngineDown) || errors.As(err, &down)) {
 		return ports.SharedPort{}, &ports.MacAwayError{Mac: s.o.MacName}

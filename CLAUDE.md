@@ -6,7 +6,7 @@ A Go CLI that sets up and runs a Mac, its VMs (servers and workspaces) and the o
 
 - **Families first.** `src/` is one package per family (`machines`, `apps`, `settings`, `ports`, `awake`...), each with its model, `contract/`, `calls/` and `adapter/<tech>/`; the architecture test holds the tree and every import ([`docs/concepts/architecture.md`](docs/concepts/architecture.md)).
 - **A use case is a call.** `<family>.<verb>`, reached through the Router, which runs it in this process, at its target, or in a Mac's engine; every surface makes the same call.
-- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one item file, `src/catalog/items/<category>/<name>.yaml` (`station.catalog/v1`); profiles and images are still values in `src/catalog/`.
+- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one item file, `src/catalog/items/<category>/<name>.yaml` (`station.catalog/v1`); images are still values in `src/catalog/`, and a dev server's port and env are its item's `ports`.
 - **Capabilities, never model names.** What a machine can do is its `Profile`; a section a kind does not have is refused as not for this machine.
 - **The binary is hermetic.** The catalog's items, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's items and Machinefiles (`~/.config/station/`) and the shared source are layers above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
 - **The words are the glossary's.** One word per concept ([`docs/concepts/glossary.md`](docs/concepts/glossary.md)); the retired words are refused by `specs/architecture/`.
@@ -28,7 +28,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | The tagged release, `make provision`                 | `docs/guides/release.md`            |
 | Every command and flag                               | `docs/reference/commands.md`        |
 | Macs, servers, workspaces, `--on`, `use`, the engine | `docs/reference/machines.md`        |
-| Private and Public ports, sharing, HTTPS, profiles   | `docs/reference/ports.md`           |
+| Ports: rights, audiences, sharing, HTTPS             | `docs/reference/ports.md`           |
 | Accounts, sharing with a VM, secrets                 | `docs/reference/accounts.md`        |
 | The Disk groups, free, erase, move                   | `docs/reference/disk.md`            |
 | Activity, its history and graphs                     | `docs/reference/activity.md`        |

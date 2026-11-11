@@ -13,7 +13,7 @@ import (
 )
 
 func reservation(vm string, guest, reserved int) ports.Reservation {
-	return ports.Reservation{VM: vm, GuestPort: guest, MacPort: reserved, Pinned: true, ReservedAt: time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC)}
+	return ports.Reservation{VM: vm, GuestPort: guest, MacPort: reserved, ReservedAt: time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC)}
 }
 
 func ReservationStore(t *testing.T, open func(t *testing.T) contract.ReservationStore) {

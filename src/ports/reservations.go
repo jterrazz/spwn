@@ -38,14 +38,14 @@ func (e Exposure) Word() string {
 
 func ViewOf(l Reservation, e Exposure, httpsMode string, phase Phase) SharedPort {
 	v := SharedPort{
-		VM: l.VM, GuestPort: l.GuestPort, Reserved: l.MacPort, State: phase, Pinned: l.Pinned, Profile: l.Profile,
+		VM: l.VM, GuestPort: l.GuestPort, Reserved: l.MacPort, State: phase, To: string(l.Audience()),
 		HTTP: l.HTTP != nil && *l.HTTP, URLs: URLs(l, e.PublicName, httpsMode, e.On), ReservedAt: l.ReservedAt,
 	}
 	if !l.LastSeenAt.IsZero() {
 		seen := l.LastSeenAt
 		v.LastSeenAt = &seen
 	}
-	if !e.On {
+	if !e.On && l.Audience() != catalog.AudienceLocal {
 		v.Detail = e.Off
 	}
 	return v
@@ -115,14 +115,14 @@ const (
 type State struct {
 	Phase      Phase
 	Since      time.Time
-	Pinned     bool
 	LastSeenAt time.Time
 }
 
 func Next(st State, ev Event, now time.Time) (State, []Action) {
 	// invariant: the lifecycle of one service (N5): a stop of listening unpublishes
 	// only after the grace, a re-listen inside it keeps everything; a lease outlives
-	// its listener and idles out after 7 days unless pinned.
+	// its listener and idles out after 7 days; a port not allowed is never
+	// shared by a listen.
 	switch ev {
 	case EvListen:
 		st.LastSeenAt = now
@@ -131,6 +131,8 @@ func Next(st State, ev Event, now time.Time) (State, []Action) {
 			st.Phase = PhaseShared
 			return st, nil
 		case PhaseShared:
+			return st, nil
+		case PhaseNotAllowed:
 			return st, nil
 		case PhaseNone, PhaseWaiting, PhaseRefused, PhaseGone, PhaseUnknown:
 		}
@@ -146,7 +148,7 @@ func Next(st State, ev Event, now time.Time) (State, []Action) {
 		case st.Phase == PhaseClosing && now.Sub(st.Since) >= catalog.PortPolicy.Grace:
 			st.Phase, st.Since = PhaseWaiting, now
 			return st, []Action{ActUnpublish}
-		case st.Phase == PhaseWaiting && !st.Pinned && !st.LastSeenAt.IsZero() && now.Sub(st.LastSeenAt) > catalog.PortPolicy.Idle:
+		case st.Phase == PhaseWaiting && !st.LastSeenAt.IsZero() && now.Sub(st.LastSeenAt) > catalog.PortPolicy.Idle:
 			st.Phase = PhaseGone
 			return st, []Action{ActRelease}
 		}
@@ -185,10 +187,14 @@ func URLs(l Reservation, publicName, httpsMode string, serveOn bool) URLSet {
 		u.Local = "http://" + u.Local
 	}
 	u.Public = u.Local
-	if !serveOn || publicName == "" {
+	if !serveOn || publicName == "" || l.Audience() == catalog.AudienceLocal {
 		return u
 	}
 	switch {
+	case l.Audience() == catalog.AudiencePublic && !isHTTP(l):
+		u.Public = publicName + ":" + strconv.Itoa(l.PublicPort)
+	case l.Audience() == catalog.AudiencePublic:
+		u.Public = "https://" + publicName + ":" + strconv.Itoa(l.PublicPort)
 	case !isHTTP(l):
 		u.Public = publicName + ":" + port
 	case httpsMode == HTTPSOff:
@@ -202,8 +208,16 @@ func URLs(l Reservation, publicName, httpsMode string, serveOn bool) URLSet {
 }
 
 func ShareOf(l Reservation, httpsMode string) Share {
-	s := Share{Port: l.MacPort, Reserved: l.MacPort, Scheme: SchemeHTTPS}
+	// invariant: a public share is opened on its Funnel port, https for an
+	// HTTP server and raw for any other, whatever the HTTPS mode: Funnel
+	// answers on its own ports only.
+	s := Share{Port: l.MacPort, Reserved: l.MacPort, Scheme: SchemeHTTPS, To: l.Audience()}
 	switch {
+	case s.Public():
+		s.Port = l.PublicPort
+		if !isHTTP(l) {
+			s.Scheme = SchemeTCP
+		}
 	case !isHTTP(l), httpsMode == HTTPSOff:
 		s.Scheme = SchemeTCP
 	case httpsMode == HTTPSPath:
@@ -228,7 +242,7 @@ type BadPortError struct{ Value string }
 
 func (e *BadPortError) Error() string { return "\"" + e.Value + "\" is not a port" }
 
-type IgnoredPortError struct{ Port, MinPort int }
+type IgnoredPortError struct{ Port int }
 
 func (e *IgnoredPortError) Error() string {
 	return "port " + strconv.Itoa(e.Port) + " is never shared"

@@ -7,7 +7,7 @@ runs:
           # Needs you
           ◐	Engine stopped	station engine start
           	Activity	? not measured
-          	Apps	● 0 ok · ○ 110 not installed
+          	Apps	● 0 ok · ○ 113 not installed
           	Settings	set by station · ○ 0 of 19 · checked · ● 0 of 9
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 2

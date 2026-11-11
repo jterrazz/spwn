@@ -1,4 +1,4 @@
-description: 'a reserved port idle 7 days is released, unless a profile pins it'
+description: 'a reserved port idle 7 days is released, whatever port it is'
 env: two-macs
 runs:
     - command: 'world unlisten linux-1 5173'
@@ -7,11 +7,7 @@ runs:
       exit: 0
     - command: 'world advance 169h'
       exit: 0
-    - command: 'ports | /usr/bin/grep linux-1'
-      exit: 0
-      stdout: |
-          ○	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not listening · reserved 40001		vite
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[["linux-1",5173,40001]],"shared":[]}
+          {"reserved":[],"shared":[]}

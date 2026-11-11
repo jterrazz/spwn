@@ -18,8 +18,6 @@ type Options struct {
 	ThisMachine catalog.MachineKind
 	// value: the images the catalog knows, each VM's kind read from its own.
 	Images []catalog.Image
-	// value: the dev-server profiles the catalog knows, reserved at create.
-	Profiles []catalog.Profile
 	// value: the folders of the VMs' known hosts and of their logs.
 	KnownHosts, Logs string
 	User             string
@@ -90,7 +88,9 @@ type Engine interface {
 	Ping(ctx context.Context) (version string, err error)
 	VMs(ctx context.Context) (map[string]EngineVM, error)
 	Do(ctx context.Context, op, vm string) error
-	Reserve(ctx context.Context, vm string, port int, profile string) (model.Reserved, error)
+	// value: the ports a VM's engine reserved for the env its run set, each
+	// with the item that names it.
+	EnvPorts(ctx context.Context, vm string) ([]model.Reserved, error)
 	// invariant: a command inside a VM of this Mac rides the engine's one
 	// connection to it; station reaches a VM no other way.
 	GuestExec(ctx context.Context, vm, line, stdin string) (GuestRan, error)

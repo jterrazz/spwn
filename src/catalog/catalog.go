@@ -14,7 +14,6 @@ type Catalog struct {
 	Apps     []App
 	Settings []Setting
 	Images   []Image
-	Profiles []Profile
 	// value: every item as its file says it, and the layer it was read
 	// from, in the lists' order: what the Machinefile's resolution reads.
 	Items []Placed
@@ -148,7 +147,7 @@ func Assemble(items []Placed) (Catalog, error) {
 	// value: the catalog of the items given, judged whole.
 	items = slices.Clone(items)
 	slices.SortFunc(items, byCategory)
-	c := Catalog{Images: builtinImages, Profiles: builtinProfiles, Items: items}
+	c := Catalog{Images: builtinImages, Items: items}
 	files := map[string]string{}
 	for _, p := range items {
 		files[p.Item.Name] = p.File
@@ -319,4 +318,23 @@ func (o owners) claim(name, what string) error {
 	}
 	o[name] = what
 	return nil
+}
+
+// value: a port an item serves on, and the item that says so.
+
+type ItemPort struct {
+	Item string
+	PortHint
+}
+
+func (c Catalog) Ports() []ItemPort {
+	// value: every port the catalog's items serve on, in the items' order:
+	// the label a listening port is shown with, and what sharing it sets.
+	var out []ItemPort
+	for _, p := range c.Items {
+		for _, h := range p.Item.Ports {
+			out = append(out, ItemPort{Item: p.Item.Name, PortHint: h})
+		}
+	}
+	return out
 }

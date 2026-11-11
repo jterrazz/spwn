@@ -11,5 +11,5 @@ runs:
       stdout: |
           # Updates	1 ◐
           ◐	node	22.11.0	mise	update available · station apps update node
-          # Not installed	102 ○
+          # Not installed	105 ○
           ○	cocoapods		brew	station apps install cocoapods

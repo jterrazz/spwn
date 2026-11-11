@@ -120,7 +120,7 @@ type lockable struct{ local.FS }
 func (lockable) Lock(path string) (func(), error) { return local.Exclusive(path) }
 
 func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
+	return []store.Migrator{s.prefs, s.ports(), s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }

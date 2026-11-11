@@ -8,7 +8,7 @@ import (
 func TestACreateMovesOnStepByStepToItsEnd(t *testing.T) {
 	at := time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)
 	last := 0
-	for _, step := range []string{BornCloning, BornPorts, BornBooting, BornAddress, BornSSH} {
+	for _, step := range []string{BornCloning, BornBooting, BornAddress, BornSSH} {
 		b := BirthAt(step, at)
 		if b.Progress <= last || b.Progress >= 1000 || b.Step != step {
 			t.Errorf("%q: progress %d after %d: each step moves the create on, short of done", step, b.Progress, last)

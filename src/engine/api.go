@@ -60,8 +60,6 @@ type VMIn struct {
 type ReserveIn struct {
 	VM        string `json:"vm"`
 	GuestPort int    `json:"guest_port"`
-	Pinned    bool   `json:"pinned,omitempty"`
-	Profile   string `json:"profile,omitempty"`
 }
 
 type ExecIn struct {

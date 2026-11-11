@@ -1,0 +1,9 @@
+description: 'init removes min_port and ignored_ports from the ports group and keeps its other keys'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.ports = {range: "41000-41999", max_per_vm: 5, min_port: 2000, ignored_ports: [22, 5432], https: "path"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'init > /dev/null 2>&1; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.ports'' world.json'
+      exit: 0
+      stdout: |
+          {"https":"path","max_per_vm":5,"range":"41000-41999"}

@@ -4,6 +4,9 @@ name: node
 description: JavaScript runtime built on Chrome's V8 engine
 manages: [npm]
 provides: [node, npm, npx]
+ports:
+    - port: 3000
+      label: Node or Next
 methods:
     - os: any
       mise:

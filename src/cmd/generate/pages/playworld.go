@@ -197,7 +197,7 @@ func PlayWorld(base []byte) []byte {
 		}
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
 			for _, s := range p.Shared {
-				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, Profile: s.Profile, Pinned: s.Profile != "", HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})
+				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})
 				m.Tailnet.Shares = append(m.Tailnet.Shares, ports.Share{Port: s.Reserved, Reserved: s.Reserved, Scheme: "https", Target: "http://127.0.0.1:" + strconv.Itoa(s.Reserved)})
 			}
 			for _, port := range p.Ports {

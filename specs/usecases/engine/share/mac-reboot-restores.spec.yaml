@@ -12,7 +12,8 @@ runs:
       stdout: |
           ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	vite
           ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
+          ○	linux-1	8081	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	not listening · reserved 40000		expo
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[["linux-1",5173,40001],["linux-1",7000,40002]],"shared":[40001,40002]}
+          {"reserved":[["linux-1",5173,40001],["linux-1",7000,40002],["linux-1",8081,40000]],"shared":[40001,40002]}

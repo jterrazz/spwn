@@ -33,9 +33,10 @@ type web struct {
 // value: the CLI as recorded: its status, and a serve config that `serve`
 // changes and `serve status --json` prints in the CLI's own shape.
 type cli struct {
-	mu  sync.Mutex
-	TCP map[string]tcp `json:"TCP,omitempty"`
-	Web map[string]web `json:"Web,omitempty"`
+	mu          sync.Mutex
+	TCP         map[string]tcp  `json:"TCP,omitempty"`
+	Web         map[string]web  `json:"Web,omitempty"`
+	AllowFunnel map[string]bool `json:"AllowFunnel,omitempty"`
 }
 
 func (c *cli) LookPath(name string) (string, bool) {
@@ -57,12 +58,19 @@ func (c *cli) Output(_ context.Context, cmd local.Cmd) (local.Output, error) {
 	case strings.HasPrefix(args, "serve "):
 		c.serve(cmd.Args[1:])
 		return local.Output{}, nil
+	case strings.HasPrefix(args, "funnel "):
+		port := c.serve(cmd.Args[1:])
+		if c.AllowFunnel == nil {
+			c.AllowFunnel = map[string]bool{}
+		}
+		c.AllowFunnel["jterrazz-macbook-pro.tail1234.ts.net:"+port] = cmd.Args[len(cmd.Args)-1] != "off"
+		return local.Output{}, nil
 	}
 	return local.Output{Stderr: "unexpected invocation: " + args, ExitCode: 97}, nil
 }
 
-func (c *cli) serve(args []string) {
-	var port, path, target string
+func (c *cli) serve(args []string) (port string) {
+	var path, target string
 	raw := false
 	for _, a := range args {
 		switch {
@@ -102,6 +110,7 @@ func (c *cli) serve(args []string) {
 		}
 		c.Web[host].Handlers[path] = handler{Proxy: target}
 	}
+	return port
 }
 
 type noApp struct{}
@@ -110,4 +119,11 @@ func (noApp) Stat(string) (fs.FileInfo, error) { return nil, fs.ErrNotExist }
 
 func TestTailscaleKeepsTheTailnetContract(t *testing.T) {
 	contracttest.Tailnet(t, func(*testing.T) contract.Tailnet { return New(&cli{}, noApp{}, "") })
+}
+
+func TestTailscaleKeepsTheAudienceContract(t *testing.T) {
+	contracttest.Audience(t, func(*testing.T) (contract.Audience, contract.Tailnet) {
+		tn := New(&cli{}, noApp{}, "")
+		return tn, tn
+	})
 }

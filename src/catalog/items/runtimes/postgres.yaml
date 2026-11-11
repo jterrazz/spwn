@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: app
+name: postgres
+description: Relational database server
+provides: [postgres, psql]
+ports:
+    - port: 5432
+      label: Postgres
+methods:
+    - os: any
+      mise:
+          name: postgres
+          version: latest

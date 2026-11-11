@@ -220,10 +220,10 @@ func (s *Machinist) memoryLeft(ctx context.Context) (int64, bool) {
 }
 
 func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress func(model.Step)) (model.Created, error) {
-	// invariant: the profiles' ports are reserved before the VM first runs, and
-	// their rendered variables go into the record, fixed for the VM's life; a
-	// failure after the clone and before the first run rolls every made thing
-	// back, and from the first run on the VM is kept, with what failed.
+	// invariant: a failure after the clone and before the first run rolls
+	// every made thing back, and from the first run on the VM is kept, with
+	// what failed; the ports its env names are reserved by its Mac's engine
+	// at that run, and read back once it answers.
 	r, err := s.CheckCreate(ctx, r)
 	if err != nil {
 		return model.Created{}, err
@@ -271,12 +271,21 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	// frame, its memory reserved, wanting nothing until its disk is made;
 	// each step moves its birth on, and the create's end, made or kept
 	// failing, takes it off.
+	// invariant: the env is the engine's to write, at the VM's run: each
+	// write of the create keeps the one its record holds.
+	keptEnv := func() {
+		if kept, getErr := s.recs.Get(ctx, rec.Name); getErr == nil {
+			rec.Env = kept.Env
+		}
+	}
 	born := func(step string) error {
+		keptEnv()
 		rec.Birth = model.BirthAt(step, s.h.Now())
 		return s.writeRecord(rec)
 	}
 	defer func() {
 		if made.record && !made.undone {
+			keptEnv()
 			rec.Birth = nil
 			_ = s.writeRecord(rec)
 		}
@@ -297,20 +306,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	rec.Want = want
 	if err = s.writeRecord(rec); err != nil {
 		return fail("the record", err)
-	}
-	var reserved []model.Reserved
-	var env map[string]string
-	if !server {
-		say("reserving its ports")
-		_ = born(model.BornPorts)
-		made.reservations = true
-		if reserved, env, err = s.reserveProfiles(ctx, r.Name); err != nil {
-			return fail("the reservations", err)
-		}
-		rec.Env = env
-		if err = s.writeRecord(rec); err != nil {
-			return fail("the record", err)
-		}
 	}
 	say(model.StepRunning)
 	_ = born(model.BornBooting)
@@ -333,6 +328,14 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		_ = s.SSHBlocks(ctx, allMachines)
 	}
 	_ = s.engineAPI.Do(ctx, "ready", r.Name)
+	var reserved []model.Reserved
+	var env map[string]string
+	if !server {
+		reserved, _ = s.engineAPI.EnvPorts(ctx, r.Name)
+		if kept, err := s.recs.Get(ctx, r.Name); err == nil {
+			env = kept.Env
+		}
+	}
 	// invariant: a workspace made is a machine this Mac's multiplexer
 	// reaches, by its name, over the ssh block just written; a multiplexer that
 	// cannot add it leaves the herdr-machine setting to say so.
@@ -380,26 +383,12 @@ func (s *Machinist) unhealthy(ctx context.Context, name string, cause error) err
 	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: "none after 30 s"}
 }
 
-func (s *Machinist) reserveProfiles(ctx context.Context, name string) (reserved []model.Reserved, env map[string]string, err error) {
-	for _, p := range s.o.Profiles {
-		got, err := s.engineAPI.Reserve(ctx, name, p.Port, p.Name)
-		if err != nil {
-			return nil, nil, err
-		}
-		reserved = append(reserved, got)
-	}
-	return reserved, model.ProfileEnv(s.o.Profiles, reserved), nil
-}
-
-type made struct{ vm, record, reservations, undone bool }
+type made struct{ vm, record, undone bool }
 
 // invariant: the rollback is best effort and runs every step whatever fails, so a
 // half-made VM leaves as little as it can; what it reports is the create's failure.
 func (s *Machinist) undoCreate(ctx context.Context, name string, m *made) {
 	m.undone = true
-	if m.reservations && s.rel != nil {
-		_ = s.rel.ReleaseVM(ctx, name)
-	}
 	if m.vm {
 		if s.engineState(ctx, name) == contract.DiskRunning {
 			_ = s.engine.Shutdown(ctx, name, hardStopWait)
@@ -420,8 +409,12 @@ func (s *Machinist) removeFiles(name string, record bool) {
 
 func (s *Machinist) Save(r model.VMRecord) error {
 	// invariant: a birth is the create's alone to write: a record saved by
-	// anyone else never carries one, so none outlives its create.
+	// anyone else keeps the one stored, and never writes its own, so none
+	// outlives its create.
 	r.Birth = nil
+	if kept, err := s.recs.Get(context.Background(), r.Name); err == nil {
+		r.Birth = kept.Birth
+	}
 	return s.writeRecord(r)
 }
 

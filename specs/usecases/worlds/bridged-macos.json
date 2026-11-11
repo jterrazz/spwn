@@ -166,8 +166,6 @@
                         "vm": "linux-1",
                         "guest_port": 5173,
                         "host_port": 40001,
-                        "profile": "vite",
-                        "pinned": true,
                         "http": true,
                         "reserved_at": "2026-11-04T09:00:00Z"
                     },

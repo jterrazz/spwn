@@ -20,7 +20,14 @@ func (m machine) exposure(ctx context.Context) ports.Exposure {
 	return ports.ExposureOf(ready.On, ready.DNSName)
 }
 
-func (m machine) tailnet() contract.Tailnet {
+// value: this Mac's node on the tailnet, and the Audience its shares are
+// opened to: one adapter, tailscale's, or the world's.
+type sharingNode interface {
+	contract.Tailnet
+	contract.Audience
+}
+
+func (m machine) tailnet() sharingNode {
 	if m.world != nil {
 		return m.world.tailnet()
 	}
@@ -49,7 +56,7 @@ func (t tailnetStatus) Status(ctx context.Context) (ports.Status, error) {
 	g, _ := t.m.stores.ports().Get()
 	p := ports.PolicyOf(g)
 	owns := func(s ports.Share) bool {
-		return p.InRange(s.Port) || (p.HTTPS == ports.HTTPSPath && s.Port == 443 && s.Path != "/")
+		return p.InRange(s.Port) || (p.HTTPS == ports.HTTPSPath && s.Port == 443 && s.Path != "/") || (s.Public() && p.InRange(ports.CarriedFrom(s)))
 	}
 	tn := t.m.tailnet()
 	self, err := tn.Self(ctx)

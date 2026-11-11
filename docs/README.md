@@ -32,7 +32,7 @@
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [Commands](reference/commands.md)                 | Every command and flag, the hidden aliases, the plumbing, the exit codes                      |
 | [Machines](reference/machines.md)                 | Macs, servers and workspaces, lifetimes, `--on` and `station use`, Tailscale, ssh, the engine |
-| [Ports](reference/ports.md)                       | Private and Public, reserved ports, sharing, HTTPS, profiles                                  |
+| [Ports](reference/ports.md)                       | Private and Public, rights and audiences, reserved ports, sharing, HTTPS                      |
 | [Accounts](reference/accounts.md)                 | Who is signed in, sharing an account with a VM, kept and bound secrets, Claude in a VM        |
 | [Disk](reference/disk.md)                         | The Disk groups, the relocation rule, free, erase and move                                    |
 | [Activity](reference/activity.md)                 | What a machine is doing, where each value comes from, the history and its graphs              |
@@ -85,5 +85,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [031 The catalog defines, the Machinefile chooses](decisions/031-the-catalog-defines-the-machinefile-chooses.md) (Proposed)
 - [032 The words of a VM's lifetime and network](decisions/032-the-words-of-a-vms-lifetime-and-network.md) (Proposed)
 - [033 A machine is declared by its Machinefile](decisions/033-a-machine-is-declared-by-its-machinefile.md) (Proposed)
+- [035 A port is a right with an audience](decisions/035-a-port-is-a-right-with-an-audience.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

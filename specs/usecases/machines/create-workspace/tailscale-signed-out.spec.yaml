@@ -7,11 +7,11 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	expo	8081	http://127.0.0.1:{{port}}
           ●	vite	5173	http://127.0.0.1:{{port}}
+          ●	expo	8081	http://127.0.0.1:{{port}}
           ◐	ports	Tailscale is signed out on This Mac: ports are local only
           ●	linux-2	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-2") | [.profile, .guest_port, .host_port]], env: .vms["linux-2"].kept.env}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-2") | [.guest_port, .host_port]], env: .vms["linux-2"].kept.env}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[["expo",8081,40000],["vite",5173,40003]],"env":{"EXPO_PACKAGER_PROXY_URL":"http://127.0.0.1:{{port}}","STATION_PUBLIC_HOST":"127.0.0.1","__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS":"127.0.0.1"}}
+          {"reserved":[[8081,40000],[5173,40003]],"env":{"EXPO_PACKAGER_PROXY_URL":"http://127.0.0.1:{{port}}","STATION_PUBLIC_HOST":"127.0.0.1","__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS":"127.0.0.1"}}

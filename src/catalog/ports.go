@@ -6,32 +6,37 @@ import (
 )
 
 type PortDefaults struct {
-	RangeLow, RangeHigh, MaxPerVM, MinPort int
-	Ignored                                []int
-	HTTPS                                  string
-	Idle, Grace                            time.Duration
+	RangeLow, RangeHigh, MaxPerVM int
+	HTTPS                         string
+	Idle, Grace                   time.Duration
 }
 
 var PortPolicy = PortDefaults{
-	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, MinPort: 1024,
-	Ignored: []int{22}, HTTPS: "port", Idle: 7 * 24 * time.Hour, Grace: 5 * time.Second,
+	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, HTTPS: "port", Idle: 7 * 24 * time.Hour, Grace: 5 * time.Second,
 }
 
-type ProfileEnv struct{ Name, Value string }
+// value: the lowest port that is not the system's: a VM's guest reports a
+// port below it only when the VM's rights open one there, so a VM's own
+// daemons (DNS on 53) are never flagged.
 
-type Profile struct {
-	Name string
-	Port int
-	HTTP bool
-	Env  []ProfileEnv
-	Note string
-}
+const SystemPorts = 1024
 
-// value: the built-in dev-server profiles, which a Catalog carries.
-var builtinProfiles = []Profile{
-	{Name: "expo", Port: 8081, HTTP: true, Env: []ProfileEnv{{Name: "EXPO_PACKAGER_PROXY_URL", Value: "{url}"}}},
-	{Name: "vite", Port: 5173, HTTP: true, Env: []ProfileEnv{{Name: "__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS", Value: "{host}"}}},
-}
+// value: the port a VM's sshd answers on, which carries station itself:
+// never reported, never shared.
+
+const GuestSSH = 22
+
+// value: the right of a workspace whose Machinefile says no ports: every
+// port from SystemPorts up, shared with the owner's devices. A server has
+// none: its own tooling chooses its routes.
+
+var WorkspaceRights = PortRights{Open: PortSet{{From: SystemPorts, To: 65535}}, To: AudiencePrivate}
+
+// value: the ports the internet reaches a machine on through Tailscale
+// Funnel, in the order a `to: public` right's ports are mapped onto them
+// (https://tailscale.com/kb/1223/funnel).
+
+var FunnelPorts = [PublicPorts]int{443, 8443, 10000}
 
 const TailnetProduct = "Tailscale" // value: the product that carries a share, as the owner reads its name.
 
@@ -62,7 +67,10 @@ const SignedOutDetail = TailnetProduct + " is signed out" // value: why nothing 
 
 const SignedOutLocalOnly = SignedOutDetail + " on This Mac: ports are local only"
 
-var PublicNameEnv = ProfileEnv{Name: "STATION_PUBLIC_HOST", Value: "{host}"}
+// value: the variable every VM whose shared ports set an env is given:
+// the name its ports are shared at.
+
+const PublicNameEnv = "STATION_PUBLIC_HOST"
 
 // value: the two Tailscale app variants, measured 2026-11-01: the Standalone
 // app's pkg installs the first CLI path, the App Store app only its bundle,

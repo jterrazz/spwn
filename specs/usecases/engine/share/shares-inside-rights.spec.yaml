@@ -1,0 +1,20 @@
+description: 'a port inside a workspace''s rights is shared by itself with their audience, on a port of its Mac'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: 3000-3999, to: private }
+      exit: 0
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "	3000	"'
+      exit: 0
+      stdout: |
+          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port != 5173 and .guest_port != 7000) | [.guest_port, .host_port, .to]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3000,40000,null]],"shared":[[40001,40001,"private"],[40002,40002,"private"],[40000,40000,"private"]],"funnel":null}

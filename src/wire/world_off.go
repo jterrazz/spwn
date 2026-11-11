@@ -70,7 +70,7 @@ func (*worldMac) agentSession() agentscontract.Session                   { retur
 func (*worldMac) forge() agentscontract.Forge                            { return nil }
 func (*worldMac) multiplexer() agentscontract.Multiplexer                { return nil }
 func (*worldMac) placement() (ports.VMLivesOn, bool)                     { return ports.VMLivesOn{}, false }
-func (*worldMac) tailnet() portscontract.Tailnet                         { return nil }
+func (*worldMac) tailnet() sharingNode                                   { return nil }
 func (*worldMac) funnel() funnel.Funnel                                  { return nil }
 func (*worldMac) installer(catalog.Method, bool) appscontract.Installer  { return nil }
 func (*worldMac) bundler() appscontract.Bundler                          { return nil }

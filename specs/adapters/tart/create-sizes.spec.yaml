@@ -11,8 +11,8 @@ runs:
           ●	Running
           ●	Has an address	127.0.0.1
           ●	SSH answers
-          ●	expo	8081	https://macbook.tail1234.ts.net:40000
           ●	vite	5173	https://macbook.tail1234.ts.net:40001
+          ●	expo	8081	https://macbook.tail1234.ts.net:40000
           ●	linux-1	Created	Ephemeral · 2 CPU · 8 GB · 80 GB
       files:
           .calls: { contains: 'tart set linux-1 --cpu 2 --memory 8192 --disk-size 80' }
@@ -22,8 +22,8 @@ runs:
           ●	Running
           ●	Has an address	127.0.0.1
           ●	SSH answers
-          ●	expo	8081	https://macbook.tail1234.ts.net:40002
           ●	vite	5173	https://macbook.tail1234.ts.net:40003
+          ●	expo	8081	https://macbook.tail1234.ts.net:40002
           ●	half	Created	Ephemeral · 4 CPU · 0.5 GB · 20 GB
     - command: 'machines create --memory 12X'
       exit: 2

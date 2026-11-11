@@ -13,7 +13,7 @@ runs:
           linux-1 · Workspace · up 2 h
 
           Activity  ? not measured
-          Apps      ● 1 ok · ○ 63 not installed
+          Apps      ● 1 ok · ○ 66 not installed
           Settings  set by station · ○ 0 of 7
           Disk      ● 0 B free · 0 B can rebuild
           Ports     Public 0 · Private 2
@@ -22,7 +22,7 @@ runs:
       exit: 0
       stdout: |
           	Activity	? not measured
-          	Apps	● 1 ok · ○ 63 not installed
+          	Apps	● 1 ok · ○ 66 not installed
           	Settings	set by station · ○ 0 of 7
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 2

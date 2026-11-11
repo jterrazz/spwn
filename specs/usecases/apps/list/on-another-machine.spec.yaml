@@ -4,7 +4,7 @@ runs:
     - command: 'apps --on linux-1 | /usr/bin/grep -e "^# " -e "node"'
       exit: 0
       stdout: |
-          # Not installed	63 ○
+          # Not installed	66 ○
           # OK	1 ●
           ●	node	22.11.0	mise
           # Not for this machine

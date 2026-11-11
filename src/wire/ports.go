@@ -29,7 +29,7 @@ import (
 )
 
 func (m machine) portsOf(_ kit.Env) *portscalls.Reserver {
-	o := portscalls.ReserverOptions{ThisMachine: m.kind, State: m.paths.State, ThisMacName: m.thisMac(), Ask: m.askPorts, ReleaseOn: m.releaseOn, Exposure: m.exposure,
+	o := portscalls.ReserverOptions{Ports: m.cat.Ports(), ThisMachine: m.kind, State: m.paths.State, ThisMacName: m.thisMac(), Ask: m.askPorts, ReleaseOn: m.releaseOn, Exposure: m.exposure,
 		Listening: listedOrNone(m.listeners("/").Read), Routes: m.routes(), EngineInstalled: m.engineInstalled}
 	d := portsEngine{c: m.engineAPI()}
 	if m.kind != catalog.Mac {

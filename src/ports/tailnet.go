@@ -53,7 +53,12 @@ type Share struct {
 	Scheme   string
 	// value: what the tailnet forwards to, as it reports it.
 	Target string
+	// value: who it is opened to: private on the tailnet, public on the
+	// internet (Port is then a Funnel port); empty is private.
+	To catalog.Audience `json:",omitempty"`
 }
+
+func (s Share) Public() bool { return s.To == catalog.AudiencePublic }
 
 func (s Share) Mounted() bool { return s.Path != "" && s.Path != "/" }
 

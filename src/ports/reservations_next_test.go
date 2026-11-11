@@ -27,8 +27,8 @@ func TestTheLifecycleKeepsReservationsAndIdlesOnlyUnpinnedOnes(t *testing.T) {
 	if gone, more := Next(st, EvTick, week); gone.Phase != PhaseGone || !slices.Equal(more, []Action{ActRelease}) {
 		t.Fatalf("7 idle days: %+v %v", gone, more)
 	}
-	st.Pinned = true
-	if kept, more := Next(st, EvTick, week); kept.Phase != PhaseWaiting || more != nil {
-		t.Fatalf("a pinned lease idled out: %+v %v", kept, more)
+	flagged := State{Phase: PhaseNotAllowed}
+	if kept, more := Next(flagged, EvListen, week); kept.Phase != PhaseNotAllowed || more != nil {
+		t.Fatalf("a port not allowed was shared by a listen: %+v %v", kept, more)
 	}
 }

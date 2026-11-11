@@ -10,8 +10,10 @@ const (
 	PhaseClosing Phase = "closing"
 	PhaseWaiting Phase = "waiting"
 	PhaseRefused Phase = "refused"
-	PhaseGone    Phase = "gone"
-	PhaseUnknown Phase = "unknown"
+	// value: a port that listens outside its machine's rights: not shared.
+	PhaseNotAllowed Phase = "not-allowed"
+	PhaseGone       Phase = "gone"
+	PhaseUnknown    Phase = "unknown"
 )
 
 type URLSet struct {
@@ -31,9 +33,18 @@ type SharedPort struct {
 	State     Phase  `json:"state"`
 	Process   string `json:"process"`
 	HTTP      bool   `json:"http"`
-	Pinned    bool   `json:"pinned"`
-	Profile   string `json:"profile"`
-	URLs      URLSet `json:"urls"`
+	// value: station.ports.list/v1's pinned, kept for its readers: always
+	// false, no reservation is pinned since ports are rights.
+	Pinned bool `json:"pinned"`
+	// value: station.ports.list/v1's profile: the catalog item whose env a
+	// share of this port sets (`vite`), empty for any other.
+	Profile string `json:"profile"`
+	// value: the label the catalog's items give this port ("Vite"), a hint
+	// of what probably serves it, never a decision.
+	Label string `json:"label,omitempty"`
+	// value: who it is shared with: local, private or public.
+	To   string `json:"to,omitempty"`
+	URLs URLSet `json:"urls"`
 	// value: the address it listens on inside its VM, as its guest reports it.
 	Bind       string     `json:"bind"`
 	LastSeenAt *time.Time `json:"last_seen_at"`

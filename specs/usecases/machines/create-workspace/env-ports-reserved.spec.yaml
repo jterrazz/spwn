@@ -1,0 +1,12 @@
+description: 'a create''s first run reserves its items'' env ports, and the VM''s shell exports their URLs'
+env: two-macs
+runs:
+    - command: 'machines create | /usr/bin/grep -E "vite|expo"'
+      exit: 0
+      stdout: |
+          ●	vite	5173	{{url}}
+          ●	expo	8081	{{url}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-2") | [.guest_port, .host_port]], env: .vms["linux-2"].kept.env}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[8081,40000],[5173,40003]],"env":{"EXPO_PACKAGER_PROXY_URL":"https://jterrazz-macbook-pro.tail1234.ts.net:40000","STATION_PUBLIC_HOST":"jterrazz-macbook-pro.tail1234.ts.net","__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS":"jterrazz-macbook-pro.tail1234.ts.net"}}

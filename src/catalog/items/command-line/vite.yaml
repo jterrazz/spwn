@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: vite
+description: Frontend bundler and dev server
+requires: [bun]
+provides: [vite]
+ports:
+    - port: 5173
+      label: Vite
+      http: true
+      env: { __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: '{host}' }
+methods:
+    - os: any
+      bun: vite

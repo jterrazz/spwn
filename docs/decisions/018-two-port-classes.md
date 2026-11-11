@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-06
 
+Amended by [ADR-035](035-a-port-is-a-right-with-an-audience.md): which ports are shared, and with whom, are a machine's rights.
+
 Written 2026-11-06 from the owner's round 12 decision P1 and the code that carries it.
 
 ## Context

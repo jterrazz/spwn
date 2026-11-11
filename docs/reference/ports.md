@@ -1,37 +1,38 @@
 # Ports
 
-`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. A workspace is not on the tailnet, so its Mac shares what it listens on: the Mac's engine reserves a port of its own for it, listens there on 127.0.0.1 only, and carries each connection into the VM over its one ssh connection. The tailnet reaches that port through the Tailscale app alone: `tailscale serve` shares it, https for an HTTP server and raw TCP for any other, so nothing of station listens on the tailnet. Nothing is set per port: a dev server that starts listening in a workspace is shared within seconds. A server's ports are never shared by themselves: its own tooling chooses its routes (its own Tailscale device, a tunnel), and `station ports share infra 8080` shares one on demand.
+`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. A workspace is not on the tailnet, so its Mac shares what it listens on: the Mac's engine reserves a port of its own for it, listens there on 127.0.0.1 only, and carries each connection into the VM over its one ssh connection. Which ports a VM may open, and to whom, are its [rights](#rights-and-audiences): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared. The tailnet reaches a private share through the Tailscale app alone: `tailscale serve` shares it, https for an HTTP server and raw TCP for any other, so nothing of station listens on the tailnet. A server's ports are never shared by themselves: its own tooling chooses its routes (its own Tailscale device, a tunnel), and `station ports share infra 8080` shares one on demand.
 
 | Section               | Answers                                                     |
 | --------------------- | ----------------------------------------------------------- |
 | How a port gets a URL | The guest, the reserved port, the sharing                   |
+| Rights and audiences  | What a VM may open, to whom, and what is flagged            |
 | The commands          | `ports`, `ports share`, `ports stop-sharing`, `ports https` |
 | The policy            | The `ports` group of `preferences.json`                     |
 | Serve and HTTPS       | Serve on or off, HTTPS links, the `port` and `path` modes   |
-| Profiles              | How Expo and Vite learn their public URL                    |
+| What an item sets     | How Expo and Vite learn their public URL                    |
 
 ## How a port gets a URL
 
-Inside each running VM, `station guest` (hidden, run by the Mac's [engine](machines.md#the-engine) over its ssh connection) reports every listening TCP port, loopback included, and the ports Docker maps. The VM never opens a connection to its Mac and never picks a port of the Mac. Ports below 1024 and the ignored ones (22) are never reported.
+Inside each running VM, `station guest` (hidden, run by the Mac's [engine](machines.md#the-engine) over its ssh connection) reports every listening TCP port, loopback included, and the ports Docker maps. The VM never opens a connection to its Mac and never picks a port of the Mac. Its own ssh port (22, which carries station) is never reported, nor a port below 1024 unless its rights open one there.
 
-For each reported port the engine takes a **reserved port**: the lowest free port of the range (default 40000-40999), sticky on (VM, guest port), so the same dev server gets the same URL next week. It then **shares** it: one listener of the Mac on `127.0.0.1:<host port>` (never the tailnet ip, `0.0.0.0` or `::`: station refuses to bind every interface), each connection carried by ssh `direct-tcpip` to the address the VM reported, and, while [Serve](#serve-and-https) is on, a `tailscale serve` entry that exposes that port on the tailnet. A server bound to 127.0.0.1 in the VM needs no `--host`. tailscaled carries the tailnet's bytes, so a Mac's application firewall, which drops an unsigned binary's bytes on the tailnet ip with no prompt, never stands in the way, and who may reach a shared port is the tailnet policy's, never station's.
+For each reported port its rights allow, the engine takes a **reserved port**: the lowest free port of the range (default 40000-40999), sticky on (VM, guest port), so the same dev server gets the same URL next week. It then **shares** it: one listener of the Mac on `127.0.0.1:<host port>` (never the tailnet ip, `0.0.0.0` or `::`: station refuses to bind every interface), each connection carried by ssh `direct-tcpip` to the address the VM reported, and, while [Serve](#serve-and-https) is on, the entry its audience asks: none for `local`, a `tailscale serve` entry on the tailnet for `private`, a `tailscale funnel` entry on the internet for `public`. A server bound to 127.0.0.1 in the VM needs no `--host`. tailscaled carries the tailnet's bytes, so a Mac's application firewall, which drops an unsigned binary's bytes on the tailnet ip with no prompt, never stands in the way, and who may reach a shared port is the tailnet policy's, never station's.
 
 | Event                                    | What happens                                                        |
 | ---------------------------------------- | ------------------------------------------------------------------- |
-| the port starts listening                | reserved and shared                                                 |
+| the port starts listening                | reserved and shared, inside the rights; flagged outside them        |
 | it listens in a server                   | listed, never shared by itself                                      |
 | it stops listening                       | unshared after 5 s (a restart inside them keeps it); reserved kept  |
 | a VM stops, then runs again              | unshared, then shared again on the same port of its Mac             |
 | `machines delete`, an ephemeral poweroff | released, its serve entry removed                                   |
 | `station ports stop-sharing`             | released and remembered: not shared again until a share             |
-| 7 days without listening                 | released, unless pinned by a [profile](#profiles)                   |
+| 7 days without listening                 | released                                                            |
 | the range is full, or the VM holds 20    | waiting, `◐` with the cause and the fix                             |
-| the port of the Mac is busy              | the next free port (a pinned one waits, retried every 10 s)         |
+| the port of the Mac is busy              | the next free port, and the row says so                             |
 | the Mac reboots                          | the engine shares every reserved port again as the guests report    |
 | a server goes down                       | its ports stay listed, `unreachable while infra is down`, never red |
 | a server boots again                     | its ports listed `starting` until its guest reports them            |
 
-The reserved ports live in `~/.local/state/station/leases.json`, a kept file: deleting it changes every URL. Each has two URLs, one shape each: `local` `http://127.0.0.1:<port>` (no scheme for a raw TCP server) and `public`, the one `ports share` prints and a profile exports. With Serve on, `public` is `https://<public host>:<port>` for an HTTP server or one not yet detected (per [mode](#serve-and-https)) and `<public host>:<port>` for a raw TCP one; with Serve off it is the local URL, the only one there is. `<public host>` is the Mac's MagicDNS name.
+The reserved ports live in `~/.local/state/station/leases.json`, a kept file: deleting it changes every URL. Each has two URLs, one shape each: `local` `http://127.0.0.1:<port>` (no scheme for a raw TCP server) and `public`, the one `ports share` prints and an [item's env](#what-an-item-sets) exports; a share open to `local` has the local URL alone, and one open to `public` `https://<public host>:<Funnel port>`. With Serve on, `public` is `https://<public host>:<port>` for an HTTP server or one not yet detected (per [mode](#serve-and-https)) and `<public host>:<port>` for a raw TCP one; with Serve off it is the local URL, the only one there is. `<public host>` is the Mac's MagicDNS name.
 
 ## The commands
 
@@ -46,12 +47,12 @@ station ports stop-sharing api 3000  # on a Mac; in a VM: station ports stop-sha
 
 The list begins with the Tailscale line, then every port that listens on a Mac or a VM, in the class of who reaches it, piped tab-separated, each row saying its class in words, so a `grep` of one port still tells Private from Public:
 
-| Section                     | Holds                                                                                                              | Columns                                                           |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Needs you (`✗`)             | a port reachable outside Tailscale (every interface, the LAN) that no declaration names public                     | machine, port, `needs you`, process, bind, `declared no`, the fix |
-| Public (`●` `◐`)            | a port a declaration names public, `●` when its route is seen, `◐` with what is missing when it is not             | machine, port, `public`, process, bind, the route and its proof   |
-| Private (`●` `◐` `○`)       | what is shared with you on Tailscale: a VM's reserved port, a machine's own Tailscale device                       | machine, port, `private`, URL, state, process, profile, fix       |
-| Listens on its machine only | loopback and other ports only their machine reaches; one `N more listen on their machine only` line unless `--all` | machine, port, `this machine only`, process, bind                 |
+| Section                     | Holds                                                                                                              | Columns                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Needs you (`✗`)             | a port reachable outside Tailscale (every interface, the LAN) that no declaration names public                     | machine, port, `needs you`, process, bind, `declared no`, the fix              |
+| Public (`●` `◐`)            | a port a declaration names public, `●` when its route is seen, `◐` with what is missing when it is not             | machine, port, `public`, process, bind, the route and its proof                |
+| Private (`●` `◐` `○`)       | what is shared with you on Tailscale: a VM's reserved port, a machine's own Tailscale device                       | machine, port, `private`, URL, state, process, the item whose env it sets, fix |
+| Listens on its machine only | loopback and other ports only their machine reaches; one `N more listen on their machine only` line unless `--all` | machine, port, `this machine only`, process, bind                              |
 
 A VM behind its Mac is reached through Tailscale only, so its ports are Private whatever it binds. Among the shared rows `●` is shared, `○` not listening (reserved, nothing listens), `◐` waiting (the VM shares 20 already, the range is taken), local only (Serve off, Tailscale signed out, a refused serve), `issuing certificate`, not shared while its VM is stopped or while the engine is stopped. A Mac that does not answer is one `◐` row, never a failure. In `--json` a shared port carries `shared_at`, when the owner shared it (UTC): the menu bar marks a share of the last 8 s fresh.
 
@@ -78,8 +79,10 @@ The engine's exposure job reads what listens on its Mac and its VMs at its start
 The Mac owns it, in `preferences.json`; every key is optional and only `https` has a command, [`ports https`](#serve-and-https):
 
 ```json
-"ports": { "range": "40000-40999", "max_per_vm": 20, "ignored_ports": [22], "min_port": 1024, "https": "port" }
+"ports": { "range": "40000-40999", "max_per_vm": 20, "https": "port" }
 ```
+
+`range` is the ports of the Mac station picks a reserved port from. Which ports of a VM are shared is no longer a preference: `min_port` and `ignored_ports` are its [rights](#rights-and-audiences) now, and `station init` removes them from `preferences.json`, their values not carried (a VM with no Machinefile shares as their defaults did).
 
 The engine reads the file again when it changes. [Preferences](preferences.md) has the rest of `preferences.json`.
 
@@ -105,23 +108,47 @@ tailscaled issues the Mac's certificate at the first https request, 34.5 s measu
 
 With Serve off no serve runs (one would block waiting for the admin): every reserved port is local only, every row of the Mac says `Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console`, and every public URL is the local one; `engine.log` says it once per change. Serve turning on serves every shared port at the next read.
 
-Station owns only the serve entries on its range (both kinds) or under `/<vm>/` of its VMs (`path`), and, while Serve is on, removes the ones no reserved port justifies at the engine's start and when Serve turns on; it never touches another entry.
+Station owns only the serve entries on its range (both kinds), under `/<vm>/` of its VMs (`path`), and the Funnel entries carried from its range, and, while Serve is on, removes the ones no reserved port justifies at the engine's start and when Serve turns on; it never touches another entry.
 
-## Profiles
+## Rights and audiences
 
-A server that must know its own public URL gets it from its environment. A profile, data in the catalogue, names a dev server's default port and the variables that carry the URL; at `machines create` the engine reserves every profile's port for the new VM, and the VM's shell (`station shell zsh`, from its ports' env file) exports the variables. The engine renders them at every run of the VM (create, `start`, `restart`, its own run at boot; never when it adopts a running VM) from Serve's state then, so they are fixed for a run, and a persistent VM picks up the public URLs at its first start after Serve is turned on:
+A VM's rights are the `ports` of its Machinefile ([Machinefiles](machinefiles.md)): which ports it may open, and to whom. Until a VM records the Machinefile it was made from, the engine reads the one named after it, from every source, at each run of the VM (and at its first port when the engine adopted it running):
 
-| Profile  | Guest port | Variable                                 | Value                                                   |
-| -------- | ---------- | ---------------------------------------- | ------------------------------------------------------- |
-| expo     | 8081       | `EXPO_PACKAGER_PROXY_URL`                | the public URL, `https://macbook.tail1234.ts.net:40000` |
-| vite     | 5173       | `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS` | the public name, `macbook.tail1234.ts.net`              |
-| every VM |            | `STATION_PUBLIC_HOST`                    | the public name                                         |
+```yaml
+ports: { open: 3000-3999, to: private, except: [3306] }
+```
 
-With Serve off they hold the local URL, `http://127.0.0.1:<host port>`, and the public name `127.0.0.1`, and `machines create` says so on a `◐ ports` row. So `npx expo start` in a VM writes the shared https URL into its manifests, and Vite accepts requests for the public name, with no flag. A server on another port composes its URL itself: `PORT=3000 BASE_URL=$(station ports share 3000) npm start`. Same-origin traffic (HMR websockets, relative URLs) needs nothing: it rides the same port of the Mac. A server whose setting has no environment variable gets its line here.
+| Rights                                                 | What the engine does                                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| a port inside `open`                                   | reserved, then shared with `to`: its audience                                                                       |
+| a port in `except`, or outside                         | flagged, `◐ 8443 listens, not allowed (open: 3000-3999)`, never reserved nor served; `ports share` shares it anyway |
+| a workspace whose Machinefile says no `ports`, or none | `open: 1024-65535, to: private`: today's sharing                                                                    |
+| a server whose Machinefile says no `ports`             | none: listed, never shared by itself, nothing flagged                                                               |
+| a Machinefile the decoder refuses                      | none: every port flagged with the refusal, its file and line                                                        |
+
+| Audience  | Who reaches the port                                                                                                                                                                                                                                                                                              |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `local`   | its Mac alone: the loopback listener, no serve; its link is the local one                                                                                                                                                                                                                                         |
+| `private` | your devices on the tailnet: `tailscale serve`, as [Serve and HTTPS](#serve-and-https) says                                                                                                                                                                                                                       |
+| `public`  | the internet: `tailscale funnel --bg --https=<funnel port> http://127.0.0.1:<port>` (`--tcp` for a raw server); Funnel answers on 443, 8443 and 10000 only, so `public` takes a list of at most three ports, never a range, each mapped in order onto them, and a Funnel port another VM's share holds is refused |
+
+The Audience contract (`src/ports/contract/audience.go`) carries the three; its adapters are `tailscale` and the world's `fake`. A row of a port names its label from the catalog's items' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision.
+
+## What an item sets
+
+A server that must know its own URL gets it from its environment. An item's `ports` ([Catalog](catalog.md)) names the port it serves on and the variables that carry the URL: at each run of a VM (create, `start`, `restart`, its own run at boot; never when it adopts a running VM) the engine reserves every such port inside the VM's rights, before anything listens there, and renders the variables from Serve's state then, so they are fixed for a run, and a persistent VM picks up the public URLs at its first start after Serve is turned on. The VM's shell (`station shell zsh`, from its ports' env file) exports them:
+
+| Item | Guest port | Variable                                 | Value                                                   |
+| ---- | ---------- | ---------------------------------------- | ------------------------------------------------------- |
+| expo | 8081       | `EXPO_PACKAGER_PROXY_URL`                | the public URL, `https://macbook.tail1234.ts.net:40000` |
+| vite | 5173       | `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS` | the public name, `macbook.tail1234.ts.net`              |
+| any  |            | `STATION_PUBLIC_HOST`                    | the public name, with any of them                       |
+
+With Serve off they hold the local URL, `http://127.0.0.1:<host port>`, and the public name `127.0.0.1`, and `machines create` says so on a `◐ ports` row. So `npx expo start` in a VM writes the shared https URL into its manifests, and Vite accepts requests for the public name, with no flag. A server on another port composes its URL itself: `PORT=3000 BASE_URL=$(station ports share 3000) npm start`. Same-origin traffic (HMR websockets, relative URLs) needs nothing: it rides the same port of the Mac. A server whose setting has no environment variable gets its `ports` in its item.
 
 ## Related
 
 - [Machines](machines.md): the engine, and how a VM is reached by ssh.
 - [The API](api.md): the engine's calls `ports.share` and the reservations ride.
 - [Preferences](preferences.md): `preferences.json`.
-- [Glossary](../concepts/glossary.md): port, reserved port, share, profile, public name.
+- [Glossary](../concepts/glossary.md): port, reserved port, share, right, audience, public name.

@@ -325,10 +325,10 @@ func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }
 
-func (m *worldMac) files() *diskfake.Usage         { return diskfake.UsageOf(m.run.w, m.name).At(m.home) }
-func (m *worldMac) tailnet() portscontract.Tailnet { return portsfake.TailnetOf(m.run.w, m.name) }
-func (m *worldMac) funnel() funnel.Funnel          { return portsfake.TailnetOf(m.run.w, m.name) }
-func (m *worldMac) bundler() appscontract.Bundler  { return appsfake.BundlerOf(m.run.w, m.name) }
+func (m *worldMac) files() *diskfake.Usage        { return diskfake.UsageOf(m.run.w, m.name).At(m.home) }
+func (m *worldMac) tailnet() sharingNode          { return portsfake.TailnetOf(m.run.w, m.name) }
+func (m *worldMac) funnel() funnel.Funnel         { return portsfake.TailnetOf(m.run.w, m.name) }
+func (m *worldMac) bundler() appscontract.Bundler { return appsfake.BundlerOf(m.run.w, m.name) }
 func (m *worldMac) userSource() machinefilecontract.Source {
 	return machinefilefake.UserOf(m.run.w, m.name)
 }

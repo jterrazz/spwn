@@ -8,13 +8,22 @@ import (
 	"github.com/jterrazz/studio-station/src/ports/contract/contracttest"
 )
 
+func signedIn() *Tailnet {
+	host := "jterrazz-macbook-pro.tail1234.ts.net"
+	return NewTailnet(ports.Self{
+		Node:    ports.Node{Name: "jterrazz-macbook-pro", DNSName: host, IP: "100.98.133.14", Online: true},
+		Sharing: ports.SharingState{Backend: ports.Running, On: true, DNSName: host},
+	})
+}
+
 func TestTheFakeTailnetKeepsTheContract(t *testing.T) {
-	contracttest.Tailnet(t, func(*testing.T) contract.Tailnet {
-		host := "jterrazz-macbook-pro.tail1234.ts.net"
-		return NewTailnet(ports.Self{
-			Node:    ports.Node{Name: "jterrazz-macbook-pro", DNSName: host, IP: "100.98.133.14", Online: true},
-			Sharing: ports.SharingState{Backend: ports.Running, On: true, DNSName: host},
-		})
+	contracttest.Tailnet(t, func(*testing.T) contract.Tailnet { return signedIn() })
+}
+
+func TestTheFakeAudienceKeepsTheContract(t *testing.T) {
+	contracttest.Audience(t, func(*testing.T) (contract.Audience, contract.Tailnet) {
+		tn := signedIn()
+		return tn, tn
 	})
 }
 

@@ -1,4 +1,4 @@
-description: 'with Serve off profiles export the local URL; a run after it turns on exports the public one'
+description: 'with Serve off the items'' env exports the local URL; a run after it turns on exports the public one'
 fixture:
     - ../../../__fixtures__/vms/
     - ../../../__fixtures__/engine-vm/

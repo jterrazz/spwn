@@ -36,7 +36,6 @@ import (
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	machinescontract "github.com/jterrazz/studio-station/src/machines/contract"
 	pageawake "github.com/jterrazz/studio-station/src/pages/awake"
-	portscontract "github.com/jterrazz/studio-station/src/ports/contract"
 	"github.com/jterrazz/studio-station/src/remote"
 	"github.com/jterrazz/studio-station/src/remote/api"
 	enginerun "github.com/jterrazz/studio-station/src/surface/cli/engine/run"
@@ -67,7 +66,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	}}
 	guests := engineGuests{dialer: m.guestDialer(), vms: m.machines(false)}
 	notifier := func(write func(subject, text string)) process.Notifier { return enginelog.New(write) }
-	var tailnet portscontract.Tailnet = m.tailnetCLI().Tracked(engine.ChildrenDir(m.paths.State))
+	var tailnet sharingNode = m.tailnetCLI().Tracked(engine.ChildrenDir(m.paths.State))
 	var checks machinescontract.CheckRunner = dial.Checker{}
 	if m.world != nil {
 		notifier = func(func(subject, text string)) process.Notifier { return m.world.notifier() }
@@ -96,7 +95,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
 		},
-		State: m.paths.State, ThisMachine: m.kind, Profiles: m.cat.Profiles, Version: m.engineVersion(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
+		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Version: m.engineVersion(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(),
 		NeverSleeps:   func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		AccountShares: shares, Peer: m.engineAPI(),
@@ -215,15 +214,21 @@ func (d macEngine) Do(ctx context.Context, op, vm string) error {
 	return downAs(d.c.do(ctx, engine.CallVM(op), engine.VMIn{VM: vm}, nil), model.ErrEngineDown)
 }
 
-func (d macEngine) Reserve(ctx context.Context, vm string, port int, profile string) (model.Reserved, error) {
-	var v ports.SharedPort
-	if err := d.c.do(ctx, engine.CallReserve, engine.ReserveIn{VM: vm, GuestPort: port, Pinned: true, Profile: profile}, &v); err != nil {
-		return model.Reserved{}, downAs(err, model.ErrEngineDown)
+func (d macEngine) EnvPorts(ctx context.Context, vm string) ([]model.Reserved, error) {
+	var v ports.MacPorts
+	if err := d.c.do(ctx, engine.CallPorts, nil, &v); err != nil {
+		return nil, downAs(err, model.ErrEngineDown)
 	}
-	return model.Reserved{
-		GuestPort: v.GuestPort, MacPort: v.Reserved, Profile: profile, URL: v.URLs.Public, PublicName: nameOf(v.URLs.Public),
-		Off: localOnlyBecause(v.Detail),
-	}, nil
+	var out []model.Reserved
+	for _, s := range v.Shared {
+		if s.VM == vm && s.Profile != "" && s.Reserved > 0 {
+			out = append(out, model.Reserved{
+				GuestPort: s.GuestPort, MacPort: s.Reserved, Profile: s.Profile, URL: s.URLs.Public, PublicName: nameOf(s.URLs.Public),
+				Off: localOnlyBecause(s.Detail),
+			})
+		}
+	}
+	return out, nil
 }
 
 func localOnlyBecause(detail string) string {
@@ -254,9 +259,9 @@ func (d portsEngine) MacPorts(ctx context.Context) (ports.MacPorts, error) {
 	return v, downAs(err, ports.ErrEngineDown)
 }
 
-func (d portsEngine) Reserve(ctx context.Context, vm string, port int, pinned bool) (ports.SharedPort, error) {
+func (d portsEngine) Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
 	var v ports.SharedPort
-	err := d.c.do(ctx, engine.CallReserve, engine.ReserveIn{VM: vm, GuestPort: port, Pinned: pinned}, &v)
+	err := d.c.do(ctx, engine.CallReserve, engine.ReserveIn{VM: vm, GuestPort: port}, &v)
 	return v, downAs(err, ports.ErrEngineDown)
 }
 

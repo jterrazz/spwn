@@ -50,6 +50,8 @@ type Machines interface {
 }
 
 type Tailnet interface {
+	// value: this Mac's node on the tailnet, and the Audience its shares
+	// are opened to (ports/contract.Audience): Share and Unshare.
 	Ready(ctx context.Context) (ports.SharingState, error)
 	Share(ctx context.Context, s ports.Share) (string, error)
 	Unshare(ctx context.Context, s ports.Share) error
@@ -64,9 +66,13 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
-	// value: the dev-server profiles the catalog knows: a reserved port's
-	// HTTP, a VM's environment.
-	Profiles  []catalog.Profile
+	// value: the ports the catalog's items serve on: a reserved port's HTTP
+	// and label, the env a VM's run sets.
+	Ports []catalog.ItemPort
+	// value: the ports a VM's Machinefile says it may open, read by its
+	// name; nil when it says none (or there is none), and nil Rights reads
+	// none for every VM.
+	Rights    func(ctx context.Context, vm string) (*catalog.PortRights, error)
 	Version   string
 	Page      int
 	PID       int
@@ -144,6 +150,8 @@ type Engine struct {
 	scanned      map[string][]ports.Listener
 	red          []string
 	reservations []ports.Reservation
+	// value: each VM's rights, as its last run read them.
+	rights map[string]ports.Rights
 	// value: the HTTPS mode this engine's shares were served in, as its
 	// last tick read it.
 	servedMode string
@@ -194,9 +202,9 @@ func New(h Mac, hv Hypervisor, guests Guests, m Machines, tn Tailnet, st Stores,
 		o.Tick = time.Second
 	}
 	if o.GuestPort == 0 {
-		o.GuestPort = 22
+		o.GuestPort = catalog.GuestSSH
 	}
-	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, takeBackFailed: map[string]time.Time{}}
+	d := &Engine{h: h, hv: hv, guests: guests, m: m, tn: tn, st: st, o: o, vms: map[string]*vmState{}, svcs: map[string]*svc{}, heard: map[string][]ports.Listener{}, lastHeard: map[string][]ports.Listener{}, rights: map[string]ports.Rights{}, takeBackFailed: map[string]time.Time{}}
 	d.awakeJob = d.newAwake()
 	if o.Notifier != nil {
 		d.notifier = o.Notifier(d.logf)

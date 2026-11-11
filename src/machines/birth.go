@@ -15,14 +15,13 @@ type Birth struct {
 // value: the create's steps in the owner's words, in order.
 const (
 	BornCloning = "cloning the image"
-	BornPorts   = "reserving its ports"
 	BornBooting = "booting"
 	BornAddress = "waiting for an address"
 	BornSSH     = "waiting for SSH"
 )
 
 func BirthAt(step string, at time.Time) *Birth {
-	progress := map[string]int{BornCloning: 50, BornPorts: 300, BornBooting: 400, BornAddress: 600, BornSSH: 800}[step]
+	progress := map[string]int{BornCloning: 50, BornBooting: 400, BornAddress: 600, BornSSH: 800}[step]
 	return &Birth{Progress: progress, Step: step, At: at.UTC().Truncate(time.Second)}
 }
 

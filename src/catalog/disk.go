@@ -170,7 +170,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/use/*"), "each terminal's machine (`station use`), forgotten after 7 days unused"),
 		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.engine.plist", Mac), "the one engine's launchd agent"),
 		noted(conf("{config}/station/preferences.json"), "here, hosts, vm_user, the share list, the ports policy"),
-		noted(conf("{config}/station/services.env", Linux, MacOS), "its profiles' exports, written by the guest"),
+		noted(conf("{config}/station/services.env", Linux, MacOS), "its ports' exports, written by the guest"),
 		noted(data("{state}/station/guest.json", Linux, MacOS), "the Mac that runs it"),
 		noted(data("{state}/station/guest.sock", Linux, MacOS), "the guest's socket, live while it runs"),
 		noted(data("{state}/station/agents/*.json", Linux, MacOS), "its agents' journal, one file per session, 0600: each agent's name, task, state, steps and the scrubbed words of its last message, folded from its hooks"),

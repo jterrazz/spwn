@@ -52,6 +52,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **go**: Compiled systems programming language by Google
 - **java**: Java Development Kit (Temurin)
 - **node**: JavaScript runtime built on Chrome's V8 engine
+- **postgres**: Relational database server
 - **python**: Python programming language runtime
 - **rust**: Systems programming language for safety and speed
 
@@ -68,12 +69,14 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **bat**: Cat clone with syntax highlighting
 - **difftastic**: Structural diff
 - **dust**: Intuitive disk usage viewer
+- **expo**: React Native framework and its dev server
 - **eza**: Modern ls replacement
 - **fd**: Fast find alternative
 - **jq**: Command-line JSON processor
 - **ripgrep**: Fast grep, the rg agents and editors shell out to
 - **sd**: Intuitive sed alternative
 - **tgrep**: Trigram-indexed grep for large codebases
+- **vite**: Frontend bundler and dev server
 - **yazi**: Terminal file manager
 
 ### Git

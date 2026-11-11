@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/jterrazz/studio-station/src/catalog"
 )
 
 const (
@@ -14,30 +12,6 @@ const (
 	NetworkNAT  = "nat"
 	Bridged     = "bridged"
 )
-
-func ProfileEnv(profiles []catalog.Profile, reserved []Reserved) map[string]string {
-	env := map[string]string{}
-	publicName := ""
-	for _, r := range reserved {
-		publicName = r.PublicName
-		for _, p := range profiles {
-			if p.Name != r.Profile {
-				continue
-			}
-			for _, e := range p.Env {
-				env[e.Name] = render(e.Value, r)
-			}
-		}
-	}
-	if publicName != "" {
-		env[catalog.PublicNameEnv.Name] = render(catalog.PublicNameEnv.Value, Reserved{PublicName: publicName})
-	}
-	return env
-}
-
-func render(template string, r Reserved) string {
-	return strings.NewReplacer("{url}", r.URL, "{host}", r.PublicName, "{port}", strconv.Itoa(r.MacPort)).Replace(template)
-}
 
 func ParseResources(cpus int, memory, disk string) (Resources, error) {
 	// invariant: --memory counts in binary units and --disk in decimal ones, as

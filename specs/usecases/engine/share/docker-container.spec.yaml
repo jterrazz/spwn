@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           ●	linux-1	8080	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	nginx-1
-          ●	linux-1	8081	private	https://jterrazz-macbook-pro.tail1234.ts.net:40003	shared	api-1
+          ●	linux-1	8081	private	https://jterrazz-macbook-pro.tail1234.ts.net:40003	shared	api-1	expo
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port >= 8080) | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |

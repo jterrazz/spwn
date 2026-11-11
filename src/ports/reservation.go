@@ -1,25 +1,33 @@
 package ports
 
 import (
+	"cmp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jterrazz/studio-station/src/catalog"
 )
 
 type Reservation struct {
 	// value: alias of station.leases/v1's entry, host_port included, until
 	// its store migrates to reservations.json (ARCHITECTURE §12).
-	VM         string    `json:"vm"`
-	GuestPort  int       `json:"guest_port"`
-	MacPort    int       `json:"host_port"`
-	Profile    string    `json:"profile,omitempty"`
-	Pinned     bool      `json:"pinned"`
+	VM        string `json:"vm"`
+	GuestPort int    `json:"guest_port"`
+	MacPort   int    `json:"host_port"`
+	// value: who it is shared with, as the rights said when it was
+	// reserved; empty is private, every reservation made before rights.
+	To catalog.Audience `json:"to,omitempty"`
+	// value: the Funnel port a public one is shared on.
+	PublicPort int       `json:"public_port,omitempty"`
 	HTTP       *bool     `json:"http,omitempty"`
 	ReservedAt time.Time `json:"reserved_at"`
 	LastSeenAt time.Time `json:"last_seen_at,omitzero"`
 }
 
 func (r Reservation) Key() string { return r.VM + ":" + strconv.Itoa(r.GuestPort) }
+
+func (r Reservation) Audience() catalog.Audience { return cmp.Or(r.To, catalog.AudiencePrivate) }
 
 type Declaration struct {
 	// value: a port of a machine declared public, and the route that reaches it.
@@ -51,11 +59,9 @@ func (d Declaration) Domain() (domain string, web bool) {
 }
 
 type PortsGroup struct {
-	Range        string `json:"range,omitempty"`
-	MaxPerVM     int    `json:"max_per_vm,omitempty"`
-	IgnoredPorts []int  `json:"ignored_ports,omitempty"`
-	MinPort      int    `json:"min_port,omitempty"`
-	HTTPS        string `json:"https,omitempty"`
+	Range    string `json:"range,omitempty"`
+	MaxPerVM int    `json:"max_per_vm,omitempty"`
+	HTTPS    string `json:"https,omitempty"`
 	// value: the ports the owner stopped sharing, as <vm>:<port>.
 	NotShared []string `json:"not_shared,omitempty"`
 }

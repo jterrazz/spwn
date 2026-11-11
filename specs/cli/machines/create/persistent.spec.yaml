@@ -11,8 +11,8 @@ runs:
           ●	Running
           ●	Has an address	127.0.0.1
           ●	SSH answers
-          ●	expo	8081	https://macbook.tail1234.ts.net:41020
           ●	vite	5173	https://macbook.tail1234.ts.net:41021
+          ●	expo	8081	https://macbook.tail1234.ts.net:41020
           ●	api	Created	Persistent · 4 CPU · 4 GB · 20 GB
       files:
           .local/state/station/vms/api.json:

@@ -31,19 +31,20 @@ func TestAPortIsKnownByItsSoftware(t *testing.T) {
 	}
 }
 
-// invariant: one owner per port: a port is never named twice, and every
-// profile's port has its name.
-func TestEveryPortIsNamedOnceAndEveryProfileHasItsName(t *testing.T) {
-	seen := map[int]bool{}
+// invariant: one owner per port: a port is never named twice, every port
+// an item's env is set for has its name, and an item names a port as the
+// table does.
+func TestEveryPortIsNamedOnceAndEveryItemPortAgrees(t *testing.T) {
+	seen := map[int]string{}
 	for _, s := range catalog.PortNames {
-		if _, known := catalog.KnownPortOf(s.Port, ""); known || seen[s.Port] {
+		if _, known := catalog.KnownPortOf(s.Port, ""); known || seen[s.Port] != "" {
 			t.Errorf("port %d is named twice", s.Port)
 		}
-		seen[s.Port] = true
+		seen[s.Port] = s.Name
 	}
-	for _, p := range builtin(t).Profiles {
-		if !seen[p.Port] {
-			t.Errorf("profile %s: port %d has no name", p.Name, p.Port)
+	for _, p := range builtin(t).Ports() {
+		if name, ok := seen[p.Port]; (len(p.Env) > 0 && !ok) || (ok && name != p.Label) {
+			t.Errorf("%s: port %d carries the label %q, named %q", p.Item, p.Port, p.Label, name)
 		}
 	}
 }

@@ -1,0 +1,20 @@
+description: 'a port open to public is funneled on the Funnel port its rank in the list maps it to'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: [3000, 3001], to: public }
+      exit: 0
+    - command: 'world listen linux-1 "*:3001" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep "	3001	"'
+      exit: 0
+      stdout: |
+          ●	linux-1	3001	public	https://jterrazz-macbook-pro.tail1234.ts.net:8443	shared	node
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port != 5173 and .guest_port != 7000) | [.guest_port, .host_port, .to]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3001,40000,"public"]],"shared":[[40001,40001,"private"],[40002,40002,"private"],[8443,40000,"public"]],"funnel":[8443]}

@@ -4,4 +4,4 @@ runs:
     - command: 'machines create --json | /usr/bin/jq -c "[.schema, .name, .lifetime, .cpus, .memory_bytes, .disk_bytes, .health, [.ports[] | [.guest_port, .reserved]]]"'
       exit: 0
       stdout: |
-          ["station.machines.create-workspace/v1","linux-2","ephemeral",4,4294967296,20000000000,{"running":true,"address":true,"ssh":true},[[8081,40000],[5173,40003]]]
+          ["station.machines.create-workspace/v1","linux-2","ephemeral",4,4294967296,20000000000,{"running":true,"address":true,"ssh":true},[[5173,40003],[8081,40000]]]

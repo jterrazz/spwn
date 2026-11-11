@@ -279,8 +279,13 @@ func where(s ports.Share) []string {
 }
 
 func (t *CLI) Share(ctx context.Context, s ports.Share) (string, error) {
+	// invariant: private is served (`tailscale serve`), public funneled
+	// (`tailscale funnel`, on its Funnel port), local never asked.
+	if s.To == catalog.AudienceLocal {
+		return "", nil
+	}
 	args := append(append([]string{"--bg"}, where(s)...), target(s))
-	if err := t.serve(ctx, args...); err != nil {
+	if err := t.serve(ctx, verb(s), args...); err != nil {
 		return "", err
 	}
 	t.self.mu.Lock()
@@ -298,16 +303,27 @@ func (t *CLI) Share(ctx context.Context, s ports.Share) (string, error) {
 }
 
 func (t *CLI) Unshare(ctx context.Context, s ports.Share) error {
-	return t.serve(ctx, append(where(s), "off")...)
+	if s.To == catalog.AudienceLocal {
+		return nil
+	}
+	return t.serve(ctx, verb(s), append(where(s), "off")...)
 }
 
-func (t *CLI) serve(ctx context.Context, args ...string) error {
+// value: the tailscale command that opens a share to its audience.
+func verb(s ports.Share) string {
+	if s.Public() {
+		return "funnel"
+	}
+	return "serve"
+}
+
+func (t *CLI) serve(ctx context.Context, verb string, args ...string) error {
 	// invariant: a serve that never returns (the app waits for the admin to
 	// enable Serve) is refused with the line it printed, not with the timeout.
-	out, err := t.call(ctx, queryBudget, append([]string{"serve"}, args...)...)
+	out, err := t.call(ctx, queryBudget, append([]string{verb}, args...)...)
 	if errors.Is(err, local.ErrTimeout) {
 		if detail := firstLine(out.Stderr + "\n" + out.Stdout); detail != "" {
-			return refused(detail)
+			return refused(verb, detail)
 		}
 	}
 	if err != nil {
@@ -318,12 +334,14 @@ func (t *CLI) serve(ctx context.Context, args ...string) error {
 		if detail == "" {
 			detail = "exit " + strconv.Itoa(out.ExitCode)
 		}
-		return refused(detail)
+		return refused(verb, detail)
 	}
 	return nil
 }
 
-func refused(detail string) error { return &ports.Refused{By: "tailscale serve", Detail: detail} }
+func refused(verb, detail string) error {
+	return &ports.Refused{By: "tailscale " + verb, Detail: detail}
+}
 
 func (t *CLI) Warm(ctx context.Context) error {
 	t.self.mu.Lock()
@@ -369,7 +387,7 @@ func (t *CLI) Shared(ctx context.Context) ([]ports.Share, error) {
 		return nil, err
 	}
 	if out.ExitCode != 0 {
-		return nil, refused(firstLine(out.Stderr))
+		return nil, refused("serve", firstLine(out.Stderr))
 	}
 	return parseServe([]byte(out.Stdout))
 }
@@ -380,7 +398,7 @@ func (t *CLI) Funneled(ctx context.Context) ([]int, error) {
 		return nil, err
 	}
 	if out.ExitCode != 0 {
-		return nil, refused(firstLine(out.Stderr))
+		return nil, refused("serve", firstLine(out.Stderr))
 	}
 	return parseFunnel([]byte(out.Stdout))
 }
@@ -434,6 +452,13 @@ func parseServe(data []byte) ([]ports.Share, error) {
 			s.Scheme = ports.SchemeTCP
 		}
 		shares = append(shares, s)
+	}
+	for i := range shares {
+		for addr, on := range raw.AllowFunnel {
+			if _, portText, _ := strings.Cut(addr, ":"); on && portText == strconv.Itoa(shares[i].Port) {
+				shares[i].To = catalog.AudiencePublic
+			}
+		}
 	}
 	sort.Slice(shares, func(i, j int) bool {
 		if shares[i].Port != shares[j].Port {

@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: expo
+description: React Native framework and its dev server
+requires: [bun]
+provides: [expo]
+ports:
+    - port: 8081
+      label: Expo
+      http: true
+      env: { EXPO_PACKAGER_PROXY_URL: '{url}' }
+methods:
+    - os: any
+      bun: expo

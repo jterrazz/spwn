@@ -309,18 +309,18 @@ methods:
 
 The format is whole now, so a file a newer station writes in v1 decodes in this one; some keys are declared for the lots that read them and held, unread, until then:
 
-| Key                                                                                     | Read by                                                                                                    |
-| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                                                           |
-| `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                     |
-| `manages`, `priority`                                                                   | the Machinefile's resolution and `explain` read them now; `apps install` does not yet                      |
-| `ports`                                                                                 | the Ports section: labels, and a shared port's `http` and `env`, which tables in `src/catalog/` give today |
-| the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet       |
-| `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`       |
-| a method's `provides`                                                                   | presence, which reads the item's today                                                                     |
-| `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                             |
-| a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                     |
-| an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                                                    |
-| a setting's methods after its first                                                     | the settings of each system: today it lives where its first method does                                    |
-| `apt`, `github-release`                                                                 | their installers: until then the next method serves                                                        |
-| `macos-defaults`                                                                        | its Applier: until then applying it is refused as unhandled                                                |
+| Key                                                                                     | Read by                                                                                                           |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                                                                  |
+| `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                            |
+| `manages`, `priority`                                                                   | the Machinefile's resolution and `explain` read them now; `apps install` does not yet                             |
+| `ports`                                                                                 | the engine: a reserved port's `http`, a VM's env at each run, a row's label ([Ports](ports.md#what-an-item-sets)) |
+| the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet              |
+| `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`              |
+| a method's `provides`                                                                   | presence, which reads the item's today                                                                            |
+| `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                                    |
+| a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                            |
+| an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                                                           |
+| a setting's methods after its first                                                     | the settings of each system: today it lives where its first method does                                           |
+| `apt`, `github-release`                                                                 | their installers: until then the next method serves                                                               |
+| `macos-defaults`                                                                        | its Applier: until then applying it is refused as unhandled                                                       |

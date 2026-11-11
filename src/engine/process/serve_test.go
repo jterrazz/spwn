@@ -146,14 +146,14 @@ func TestServeIsReadEveryThirtyTicksAndOnlyServesWhileOn(t *testing.T) {
 	}
 }
 
-func TestARunRendersTheProfileEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
+func TestARunRendersTheItemsEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	kept := map[string]string{"EXPO_PACKAGER_PROXY_URL": "http://127.0.0.1:40000"}
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning, Env: kept})
 	h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
 	yes := true
-	expo := catalog.Profile{Name: "expo", Port: 8081, HTTP: true, Env: []catalog.ProfileEnv{{Name: "EXPO_PACKAGER_PROXY_URL", Value: "{url}"}}}
-	h.d.o.Profiles = []catalog.Profile{expo}
-	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: expo.Port, MacPort: 40000, HTTP: &yes, Pinned: true, Profile: expo.Name}}
+	expo := catalog.ItemPort{Item: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
+	h.d.o.Ports = []catalog.ItemPort{expo}
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: expo.Port, MacPort: 40000, HTTP: &yes}}
 	h.d.refreshSelf(t.Context())
 	h.hv.outlived("api")
 	ctx := cancelled(t)
@@ -270,7 +270,7 @@ func TestAnEngineThatStopsLeavesItsRunningVMsPortsSharedOnTheTailnet(t *testing.
 	ctx := t.Context()
 	h.d.adopt(cancelled(t))
 	yes := true
-	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 5173, MacPort: 40001, HTTP: &yes, Pinned: true}}
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 5173, MacPort: 40001, HTTP: &yes}}
 	h.d.refreshSelf(ctx)
 	h.d.mu.Lock()
 	s := h.d.svcOf("api", 5173)

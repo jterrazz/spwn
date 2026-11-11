@@ -20,7 +20,6 @@ import (
 const (
 	bannerWait = 300 * time.Millisecond
 	headWait   = 2 * time.Second
-	busyRetry  = 10 * time.Second
 )
 
 type svc struct {
@@ -34,7 +33,6 @@ type svc struct {
 	detail    string
 	serveNote string
 	refused   bool
-	retryAt   time.Time
 }
 
 func key(vm string, port int) string { return vm + ":" + strconv.Itoa(port) }
@@ -70,7 +68,6 @@ func (d *Engine) svcOf(vm string, port int) *svc {
 	if !ok {
 		s = &svc{vm: vm, port: port}
 		if i := d.reservationIndex(vm, port); i >= 0 {
-			s.st.Pinned = d.reservations[i].Pinned
 			s.st.LastSeenAt = cmp.Or(d.reservations[i].LastSeenAt, d.reservations[i].ReservedAt)
 			s.st.Phase = ports.PhaseWaiting
 		}
@@ -96,23 +93,31 @@ func (d *Engine) apply(ctx context.Context, s *svc, acts []ports.Action) {
 	}
 }
 
-// invariant: a workspace's port is shared as it starts listening; a
-// server's only once the owner shares it, its tooling choosing its routes.
+// invariant: a port that starts listening inside its VM's rights is
+// shared with their audience; one outside them is flagged, never shared,
+// until the owner shares it. A server with no rights shares nothing by
+// itself, its tooling choosing its routes, and flags nothing.
 func (d *Engine) listen(ctx context.Context, vm string, port int, ip, process string) {
+	r := d.rightsOf(ctx, vm)
 	p := d.policy()
-	if p.Ignores(port) || p.Stopped(vm, port) {
+	if !r.Reported(port, d.o.GuestPort) || p.Stopped(vm, port) {
 		return
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if v := d.vms[vm]; v != nil && v.rec.Lifetime == model.AlwaysOn && d.reservationIndex(vm, port) < 0 {
+	reserved := d.reservationIndex(vm, port) >= 0
+	if v := d.vms[vm]; v != nil && v.rec.Lifetime == model.AlwaysOn && !reserved && !r.Opens() {
 		return
 	}
 	s := d.svcOf(vm, port)
 	s.ip, s.process = ip, process
+	if !reserved && !r.Allows(port) {
+		s.st.Phase, s.detail = ports.PhaseNotAllowed, ports.NotAllowed(r)
+		return
+	}
 	now := d.h.Now().UTC().Truncate(time.Second)
-	if s.st.Phase == ports.PhaseRefused {
-		s.st.Phase = ports.PhaseNone
+	if s.st.Phase == ports.PhaseRefused || s.st.Phase == ports.PhaseNotAllowed {
+		s.st.Phase, s.detail = ports.PhaseNone, ""
 	}
 	var acts []ports.Action
 	s.st, acts = ports.Next(s.st, ports.EvListen, now)
@@ -127,6 +132,10 @@ func (d *Engine) unlisten(vm string, port int) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if s, ok := d.svcs[key(vm, port)]; ok {
+		if s.st.Phase == ports.PhaseNotAllowed {
+			delete(d.svcs, key(vm, port))
+			return
+		}
 		s.st, _ = ports.Next(s.st, ports.EvUnlisten, d.h.Now())
 	}
 }
@@ -165,9 +174,6 @@ func (d *Engine) tickShares(ctx context.Context) {
 		if v := d.vms[s.vm]; s.st.Phase == ports.PhaseWaiting && s.served && (told || v == nil || v.state != engine.StateRunning) {
 			d.unpublish(ctx, s)
 		}
-		if s.st.Phase == ports.PhaseShared && len(s.listeners) == 0 && !s.retryAt.IsZero() && !now.Before(s.retryAt) {
-			d.share(ctx, s)
-		}
 	}
 }
 
@@ -182,7 +188,7 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 	}
 	for _, s := range d.svcs {
 		i := d.reservationIndex(s.vm, s.port)
-		if i < 0 || !s.served {
+		if i < 0 || !s.served || d.reservations[i].Audience() != catalog.AudiencePrivate {
 			continue
 		}
 		_ = d.tn.Unshare(ctx, ports.ShareOf(d.reservations[i], was))
@@ -199,6 +205,10 @@ func (d *Engine) vmStopped(ctx context.Context, vm string) {
 	}
 	delete(d.heard, vm)
 	for _, s := range d.svcs {
+		if s.vm == vm && s.st.Phase == ports.PhaseNotAllowed {
+			delete(d.svcs, key(s.vm, s.port))
+			continue
+		}
 		if s.vm == vm {
 			var acts []ports.Action
 			s.st, acts = ports.Next(s.st, ports.EvVMStopped, d.h.Now())
@@ -231,23 +241,18 @@ func (d *Engine) releaseVM(ctx context.Context, vm string) {
 
 // invariant: publication binds 127.0.0.1 only, never the tailnet ip or a
 // wildcard: the tailnet carries its own bytes, so no firewall stands in the
-// way; a pinned reservation never moves, an unpinned one moves off a busy port and
-// says so.
+// way; a reservation moves off a busy port and says so.
 func (d *Engine) share(ctx context.Context, s *svc) {
 	p := d.policy()
 	s.detail, s.serveNote, s.refused = "", "", false
 	i := d.reservationIndex(s.vm, s.port)
 	if i < 0 {
-		l, err := ports.Reserve(p, d.reservations, s.vm, s.port, d.busy)
+		l, err := d.reserveLocked(p, s.vm, s.port, d.rights[s.vm])
 		if err != nil {
 			s.st.Phase, s.refused, s.detail = ports.PhaseRefused, true, err.Error()
 			return
 		}
-		l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
 		l.LastSeenAt = l.ReservedAt
-		if pr, ok := ports.ProfileOf(d.o.Profiles, s.port); ok {
-			l.HTTP = &pr.HTTP
-		}
 		d.reservations = append(d.reservations, l)
 		i = len(d.reservations) - 1
 		d.saveReservations()
@@ -255,11 +260,6 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 	reservation := d.reservations[i]
 	held, err := d.h.ListenLoopback(reservation.MacPort)
 	if err != nil {
-		if reservation.Pinned {
-			s.detail, s.retryAt = "reserved port "+strconv.Itoa(reservation.MacPort)+" is busy", d.h.Now().Add(busyRetry)
-			s.refused = true
-			return
-		}
 		was := reservation.MacPort
 		others := append(append([]ports.Reservation(nil), d.reservations[:i]...), d.reservations[i+1:]...)
 		moved, allocErr := ports.Reserve(p, others, s.vm, s.port, func(hp int) bool { return hp == was || d.busy(hp) })
@@ -292,7 +292,7 @@ func (d *Engine) share(ctx context.Context, s *svc) {
 // public URL unchanged, and says the tailnet's own line.
 func (d *Engine) expose(ctx context.Context, s *svc, reservation ports.Reservation, httpsMode string) {
 	s.serveNote = ""
-	if !d.self.On {
+	if !d.self.On || reservation.Audience() == catalog.AudienceLocal {
 		return
 	}
 	if _, err := d.tn.Share(ctx, ports.ShareOf(reservation, httpsMode)); err != nil {
@@ -428,14 +428,14 @@ func (d *Engine) exposureLocked() ports.Exposure {
 }
 
 func (d *Engine) view(l ports.Reservation, s *svc, httpsMode string) ports.SharedPort {
-	v := ports.ViewOf(l, d.exposureLocked(), httpsMode, ports.PhaseWaiting)
+	v := ports.Hinted(ports.ViewOf(l, d.exposureLocked(), httpsMode, ports.PhaseWaiting), d.o.Ports)
 	if s != nil {
 		switch s.st.Phase {
 		case ports.PhaseShared, ports.PhaseClosing:
 			v.State = ports.PhaseShared
 		case ports.PhaseRefused:
 			v.State = ports.PhaseRefused
-		case ports.PhaseNone, ports.PhaseWaiting, ports.PhaseGone, ports.PhaseUnknown:
+		case ports.PhaseNone, ports.PhaseWaiting, ports.PhaseGone, ports.PhaseUnknown, ports.PhaseNotAllowed:
 		}
 		v.Process, v.Bind = s.process, s.ip
 		v.Detail = ports.JoinDetail(ports.JoinDetail(s.detail, s.serveNote), v.Detail)
@@ -477,6 +477,9 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 		if s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0 && (vm == "" || s.vm == vm) {
 			out.Shared = append(out.Shared, ports.SharedPort{VM: s.vm, GuestPort: s.port, State: ports.PhaseRefused, Process: s.process, Detail: ports.JoinDetail(s.detail, off)})
 		}
+		if s.st.Phase == ports.PhaseNotAllowed && (vm == "" || s.vm == vm) {
+			out.Shared = append(out.Shared, ports.Hinted(ports.SharedPort{VM: s.vm, GuestPort: s.port, State: ports.PhaseNotAllowed, Process: s.process, Bind: s.ip, Detail: s.detail}, d.o.Ports))
+		}
 	}
 	sort.Slice(out.Shared, func(i, j int) bool {
 		a, b := out.Shared[i], out.Shared[j]
@@ -488,37 +491,58 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 	return out
 }
 
+// invariant: a port is reserved with the audience its VM's rights give it,
+// and one the owner shares outside them is private; a public one takes its
+// Funnel port, refused while another VM's share holds it. The caller holds
+// d.mu.
+func (d *Engine) reserveLocked(p ports.Policy, vm string, port int, r ports.Rights) (ports.Reservation, error) {
+	l, err := ports.Reserve(p, d.reservations, vm, port, d.busy)
+	if err != nil || d.reservationIndex(vm, port) >= 0 {
+		return l, err
+	}
+	l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
+	if r.Allows(port) && r.Audience() != catalog.AudiencePrivate {
+		l.To, l.PublicPort = r.Audience(), r.PublicPort(port)
+	}
+	if l.To == catalog.AudiencePublic {
+		for _, o := range d.reservations {
+			if o.Audience() == catalog.AudiencePublic && o.PublicPort == l.PublicPort {
+				return ports.Reservation{}, &ports.FunnelTaken{Port: l.PublicPort, By: o.Key()}
+			}
+		}
+	}
+	if h, ok := ports.HintOf(d.o.Ports, port); ok && h.HTTP {
+		l.HTTP = &h.HTTP
+	}
+	return l, nil
+}
+
 // invariant: a Mac signed out of the tailnet refuses a share the owner asks
-// for, but a workspace's profile ports are reserved local only, so its create
-// goes on.
-func (d *Engine) reserve(ctx context.Context, vm string, port int, pinned bool, profile string) (ports.SharedPort, error) {
+// for.
+func (d *Engine) reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
 	if _, err := d.find(vm); err != nil {
 		return ports.SharedPort{}, err
 	}
+	r := d.rightsOf(ctx, vm)
 	p := d.policy()
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	l, err := ports.Reserve(p, d.reservations, vm, port, d.busy)
+	l, err := d.reserveLocked(p, vm, port, r)
 	if err != nil {
 		return ports.SharedPort{}, asOp(err)
 	}
 	if i := d.reservationIndex(vm, port); i < 0 {
-		l.ReservedAt = d.h.Now().UTC().Truncate(time.Second)
-		l.Pinned, l.Profile = pinned, profile
-		if pr, ok := ports.ProfileOf(d.o.Profiles, port); ok && profile != "" {
-			l.HTTP = &pr.HTTP
-		}
 		d.reservations = append(d.reservations, l)
 		d.saveReservations()
 	}
 	s := d.svcs[key(vm, port)]
-	if s != nil && (s.st.Phase == ports.PhaseRefused || s.refused) {
+	if s != nil && (s.st.Phase == ports.PhaseRefused || s.st.Phase == ports.PhaseNotAllowed || s.refused) {
 		s.st.Phase = ports.PhaseNone
 		var acts []ports.Action
 		s.st, acts = ports.Next(s.st, ports.EvListen, d.h.Now())
 		d.apply(ctx, s, acts)
 	}
-	if d.self.Backend != ports.Running && profile == "" {
+	if d.self.Backend != ports.Running {
 		return ports.SharedPort{}, ports.SignedOut(d.m.ThisMacName())
 	}
 	return d.view(l, s, p.HTTPS), nil
@@ -542,9 +566,10 @@ func (d *Engine) release(ctx context.Context, vm string, port int) (ports.Reserv
 }
 
 // invariant: station owns only the serve entries of its range (port mode and
-// raw TCP) or of a path /<vm>/ of this host (path mode), and removes those no
-// reservation justifies in the HTTPS mode of this Mac, both kinds; it never
-// touches another entry, and waits for Serve to be on.
+// raw TCP), of a path /<vm>/ of this host (path mode), and the Funnel
+// entries carried from its range, and removes those no reservation
+// justifies in the HTTPS mode of this Mac, every kind; it never touches
+// another entry, and waits for Serve to be on.
 func (d *Engine) reconcileServe(ctx context.Context) {
 	d.mu.Lock()
 	on := d.self.On
@@ -566,6 +591,14 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 	d.mu.Unlock()
 	for _, e := range shared {
 		switch {
+		case e.Public():
+			justified := false
+			for _, l := range reservations {
+				justified = justified || l.Audience() == catalog.AudiencePublic && l.PublicPort == e.Port
+			}
+			if !justified && p.InRange(ports.CarriedFrom(e)) {
+				_ = d.tn.Unshare(ctx, e)
+			}
 		case p.InRange(e.Port):
 			justified := false
 			for _, l := range reservations {

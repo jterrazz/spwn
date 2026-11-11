@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/jterrazz/studio-station/src/catalog"
+
 	"github.com/jterrazz/studio-station/src/ports"
 	"github.com/jterrazz/studio-station/src/world"
 )
@@ -49,6 +51,12 @@ func same(a, b ports.Share) bool {
 }
 
 func (t *Tailnet) Share(_ context.Context, s ports.Share) (string, error) {
+	// invariant: the fake Tailnet is also the fake Audience: a private share
+	// is one of its node's shares, a public one a share its Funnel opens,
+	// and a local one touches nothing.
+	if s.To == catalog.AudienceLocal {
+		return "", nil
+	}
 	t.w.Lock()
 	defer t.w.Unlock()
 	if t.w.Fails("Tailnet.Share") {
@@ -70,6 +78,9 @@ func (t *Tailnet) Share(_ context.Context, s ports.Share) (string, error) {
 		}
 	}
 	n.Shares = append(slices.DeleteFunc(n.Shares, func(o ports.Share) bool { return same(o, s) }), s)
+	if s.Public() && !slices.Contains(n.Funnel, s.Port) {
+		n.Funnel = append(n.Funnel, s.Port)
+	}
 	name := n.Self.Sharing.DNSName
 	switch {
 	case s.Scheme == ports.SchemeTCP:
@@ -85,6 +96,9 @@ func (t *Tailnet) Unshare(_ context.Context, s ports.Share) error {
 	defer t.w.Unlock()
 	if n := t.w.Mac(t.mac).Tailnet; n != nil {
 		n.Shares = slices.DeleteFunc(n.Shares, func(o ports.Share) bool { return same(o, s) })
+		if s.Public() {
+			n.Funnel = slices.DeleteFunc(n.Funnel, func(p int) bool { return p == s.Port })
+		}
 	}
 	return nil
 }

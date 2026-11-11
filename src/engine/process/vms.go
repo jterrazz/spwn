@@ -168,7 +168,7 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 		}
 	}
 	d.refreshSelf(ctx)
-	d.renderEnv(v)
+	d.renderEnv(ctx, v)
 	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: v.rec.Network == model.Bridged})
 	if err != nil {
 		return err
@@ -595,7 +595,7 @@ func (d *Engine) write(v *vmState, msg any) {
 // value: alias of hello v1, the line a guest of any version reads: its
 // keys keep the words v2 wrote.
 func (d *Engine) hello(v *vmState) {
-	p := d.policy()
+	r := d.rightsOf(context.Background(), v.rec.Name)
 	keys := d.hostKeys()
 	d.mu.Lock()
 	v.keys = strings.Join(keys, "\n")
@@ -607,7 +607,7 @@ func (d *Engine) hello(v *vmState) {
 	}
 	d.write(v, map[string]any{
 		"v": 1, "type": "hello", "host": d.m.ThisMacName(), "vm": v.rec.Name, "public_host": public,
-		"keys": keys, "env": env, "ignored": p.Ignored, "min_port": p.MinPort,
+		"keys": keys, "env": env, "ignored": []int{d.o.GuestPort}, "min_port": r.Floor(),
 	})
 }
 
@@ -709,7 +709,7 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 	case "ports":
 		return d.surveyed(ctx, vm), nil
 	case "reserve":
-		return d.shareOf(ctx, vm, m.Port, false, "")
+		return d.shareOf(ctx, vm, m.Port)
 	case "release":
 		return d.stopSharing(ctx, vm, m.Port)
 	case opAgentsHeld:
@@ -757,28 +757,43 @@ func joinPort(ip string, port int) string {
 	return ip + ":" + strconv.Itoa(port)
 }
 
-// invariant: a VM's profile environment is rendered at each of its runs from
-// Serve's state read then, never at an adoption, so it holds for the whole of a run
-// and a persistent VM picks up the public URLs at its first start after Serve
-// turns on.
-func (d *Engine) renderEnv(v *vmState) {
+// invariant: a VM's environment is rendered at each of its runs, from its
+// rights and Serve's state read then, never at an adoption, so it holds for
+// the whole of a run, and a persistent VM picks up the public URLs at its
+// first start after Serve turns on. A port an item sets an env for, inside
+// the rights, is reserved then, before anything listens, so the server
+// started on it reads its URL.
+func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
+	r := d.loadRights(ctx, v.rec.Name)
 	p := d.policy()
 	d.mu.Lock()
 	e := d.exposureLocked()
-	var reserved []model.Reserved
-	for _, pr := range d.o.Profiles {
-		if l, i := ports.Find(d.reservations, v.rec.Name, pr.Port); i >= 0 {
-			view := ports.ViewOf(l, e, p.HTTPS, ports.PhaseWaiting)
-			reserved = append(reserved, model.Reserved{GuestPort: l.GuestPort, MacPort: l.MacPort, Profile: pr.Name, URL: view.URLs.Public, PublicName: e.PublicName})
+	env := map[string]string{}
+	for _, h := range d.o.Ports {
+		if len(h.Env) == 0 || !r.Allows(h.Port) {
+			continue
 		}
+		l, i := ports.Find(d.reservations, v.rec.Name, h.Port)
+		if i < 0 {
+			reserved, err := d.reserveLocked(p, v.rec.Name, h.Port, r)
+			if err != nil {
+				continue
+			}
+			l = reserved
+			d.reservations = append(d.reservations, l)
+			d.saveReservations()
+		}
+		view := ports.ViewOf(l, e, p.HTTPS, ports.PhaseWaiting)
+		for name, value := range ports.EnvOf(h.PortHint, view.URLs.Public, e.PublicName) {
+			env[name] = value
+		}
+	}
+	if len(env) > 0 {
+		env[catalog.PublicNameEnv] = e.PublicName
 	}
 	rec := v.rec
 	d.mu.Unlock()
-	if len(reserved) == 0 {
-		return
-	}
-	env := model.ProfileEnv(d.o.Profiles, reserved)
-	if maps.Equal(env, rec.Env) {
+	if maps.Equal(env, rec.Env) || len(env) == 0 && len(rec.Env) == 0 {
 		return
 	}
 	rec.Env = env

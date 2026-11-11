@@ -303,6 +303,8 @@ func Actions(f ports.AllMachines) []page.Action {
 func stateOf(s ports.SharedPort) (page.Mark, page.Reason, page.Value, *page.Hint) {
 	reserved := "reserved " + strconv.Itoa(s.Reserved)
 	switch {
+	case s.State == ports.PhaseNotAllowed:
+		return page.Attention, page.Waiting, page.Text(s.Detail), page.Cmd("station ports share " + s.VM + " " + strconv.Itoa(s.GuestPort))
 	case s.State == ports.PhaseRefused || s.Reserved == 0:
 		return page.Attention, page.Waiting, page.Texts("waiting", s.Detail), page.Cmd("station ports stop-sharing " + s.VM + " <port>")
 	case s.State == ports.PhaseUnknown:
@@ -332,8 +334,22 @@ func Row(s ports.SharedPort) page.Row {
 	}
 	mark, reason, state, hint := stateOf(s)
 	return page.Row{ID: rowID(s.VM, s.GuestPort), Label: s.VM, Mark: mark, Reason: reason,
-		Cells:  []page.Value{port, page.Text(ClassPrivate), url, state, page.Text(s.Process)},
+		Cells:  []page.Value{port, page.Text(classOf(s)), url, state, page.Text(s.Process)},
 		Detail: page.Text(s.Profile), Hint: hint}
+}
+
+// value: who a VM's shared port reaches, in the class words: the
+// internet's for one open to public, its Mac's alone for one open to
+// local, else the owner's devices.
+func classOf(s ports.SharedPort) string {
+	switch catalog.Audience(s.To) {
+	case catalog.AudiencePublic:
+		return ClassPublic
+	case catalog.AudienceLocal:
+		return ClassLocal
+	case catalog.AudiencePrivate:
+	}
+	return ClassPrivate
 }
 
 func Link(s ports.SharedPort) page.Link {

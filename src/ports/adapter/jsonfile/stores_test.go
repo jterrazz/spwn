@@ -35,7 +35,7 @@ func TestReservationsReadAsTodaysLeases(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, _ := os.ReadFile(file)
-	want := "{\n  \"schema\": \"station.leases/v1\",\n  \"leases\": [\n    {\n      \"vm\": \"api\",\n      \"guest_port\": 3000,\n      \"host_port\": 40010,\n      \"pinned\": false,\n      \"reserved_at\": \"2026-11-01T09:00:00Z\"\n    }\n  ]\n}\n"
+	want := "{\n  \"schema\": \"station.leases/v1\",\n  \"leases\": [\n    {\n      \"vm\": \"api\",\n      \"guest_port\": 3000,\n      \"host_port\": 40010,\n      \"reserved_at\": \"2026-11-01T09:00:00Z\"\n    }\n  ]\n}\n"
 	if string(got) != want {
 		t.Errorf("leases.json =\n%s\nwant\n%s", got, want)
 	}

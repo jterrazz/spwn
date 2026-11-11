@@ -7,4 +7,4 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          # Not installed	110 ○
+          # Not installed	113 ○
