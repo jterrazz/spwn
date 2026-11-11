@@ -652,7 +652,7 @@ func (d *Engine) judgeLocked(ctx context.Context, vm string, r ports.Rights, htt
 
 // invariant: a Mac signed out of the tailnet refuses a share the owner asks
 // for.
-func (d *Engine) reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
+func (d *Engine) reserve(ctx context.Context, vm string, port int, by string) (ports.SharedPort, error) {
 	if _, err := d.find(vm); err != nil {
 		return ports.SharedPort{}, err
 	}
@@ -660,14 +660,14 @@ func (d *Engine) reserve(ctx context.Context, vm string, port int) (ports.Shared
 	p := d.policy()
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	l, err := d.reserveLocked(p, vm, port, r, ports.ByOwner)
+	l, err := d.reserveLocked(p, vm, port, r, by)
 	if err != nil {
 		return ports.SharedPort{}, asOp(err)
 	}
 	if i := d.reservationIndex(vm, port); i < 0 {
 		d.reservations = append(d.reservations, l)
 		d.saveReservations()
-	} else if !l.Owned() {
+	} else if by == ports.ByOwner && !l.Owned() {
 		l.By = ports.ByOwner
 		d.reservations[i] = l
 		d.saveReservations()

@@ -81,7 +81,15 @@ func word(e *fail.Error) (message, hint string) {
 // invariant: the engine serves its own calls and this machine's registry,
 // gated by this machine's profile and worded by this binary's table; a call
 // for another machine rides far, the run's Router.
-func (m machine) engineServer(d *process.Engine, registry *call.Registry, far call.Router) func(ctx context.Context, conn process.Stream) {
-	s := process.Server(d, process.Serving{Registry: registry, ThisMachine: m.profile, Word: word, Sleep: m.sys.Clock.Sleep, Far: far})
-	return func(ctx context.Context, conn process.Stream) { s.Conn(ctx, conn) }
+func (m machine) engineServer(d *process.Engine, registry *call.Registry, far call.Router) func(ctx context.Context, conn process.Stream, guest string) {
+	serving := process.Serving{Registry: registry, ThisMachine: m.profile, Word: word, Sleep: m.sys.Clock.Sleep, Far: far}
+	s := process.Server(d, serving)
+	return func(ctx context.Context, conn process.Stream, guest string) {
+		if guest == "" {
+			s.Conn(ctx, conn)
+			return
+		}
+		serving.Guest = guest
+		process.Server(d, serving).Conn(ctx, conn)
+	}
 }

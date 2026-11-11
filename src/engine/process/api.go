@@ -108,6 +108,10 @@ type Serving struct {
 	Sleep       func(ctx context.Context, d time.Duration) error
 	// value: the Router a call for another machine rides.
 	Far call.Router
+	// value: the VM whose guest socket this server is: its guest's calls
+	// (engine.ports, engine.reserve, engine.release) are answered as the
+	// engine answers that guest; empty serves this Mac's own.
+	Guest string
 }
 
 func Server(d *Engine, h Serving) serve.Server {
@@ -122,6 +126,13 @@ func Server(d *Engine, h Serving) serve.Server {
 	byName := map[string]call.Handler{}
 	for _, c := range calls(d, served) {
 		byName[c.Meta().Name] = c
+	}
+	if h.Guest != "" {
+		for name, op := range map[string]string{engine.CallPorts: "ports", engine.CallReserve: "reserve", engine.CallRelease: "release"} {
+			byName[name] = own(d, name, func(ctx context.Context, d *Engine, in engine.ReserveIn) (any, error) {
+				return d.guestRequest(ctx, h.Guest, guestMessage{Op: op, Port: in.GuestPort})
+			})
+		}
 	}
 	return serve.Server{
 		Calls: func(name string) (call.Handler, bool) {

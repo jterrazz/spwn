@@ -714,7 +714,13 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		if err := ports.Shareable(m.Port); err != nil {
 			return nil, fault("ignored_port", err.Error(), "station never shares port 22 nor a port below 1024")
 		}
-		return d.shareOf(ctx, vm, m.Port)
+		// invariant: a guest's share is judged by its VM's rights, never
+		// made as the owner's: one they do not open is refused, one they
+		// open takes their audience and is theirs to judge again.
+		if r := d.rightsOf(ctx, vm); !r.Allows(m.Port) {
+			return nil, fault("not_allowed", "port "+strconv.Itoa(m.Port)+" is outside the rights of "+vm+" ("+r.Said()+")", "on its Mac: station ports share "+vm+" "+strconv.Itoa(m.Port))
+		}
+		return d.shareOf(ctx, vm, m.Port, ports.ByRights)
 	case "release":
 		return d.stopSharing(ctx, vm, m.Port)
 	case opAgentsHeld:

@@ -170,7 +170,7 @@ type Engine struct {
 	settings   engine.SettingsKept
 
 	notifier Notifier
-	serve    func(ctx context.Context, conn Stream)
+	serve    func(ctx context.Context, conn Stream, guest string)
 	memory   engine.Memory
 	// value: the engine's own lifetime, from Begin: the guest sessions it
 	// holds live in it, never in the request that started a VM.
@@ -214,7 +214,12 @@ func New(h Mac, hv Hypervisor, guests Guests, m Machines, tn Tailnet, st Stores,
 	return d
 }
 
-func (d *Engine) ServeWith(serve func(ctx context.Context, conn Stream)) { d.serve = serve }
+func (d *Engine) ServeWith(serve func(ctx context.Context, conn Stream, guest string)) {
+	// value: how a connection is served: guest names the VM whose guest
+	// socket it is, its guest's calls answered as the guest's; empty, this
+	// Mac's own.
+	d.serve = serve
+}
 
 func (d *Engine) Check() error {
 	// value: the server of station.api/v2, run on each connection of the
@@ -358,10 +363,12 @@ func (d *Engine) Remember(m engine.Memory) {
 	d.memory = m
 }
 
-func (d *Engine) Serve(ctx context.Context, conn Stream) {
+func (d *Engine) Serve(ctx context.Context, conn Stream) { d.ServeGuest(ctx, conn, "") }
+
+func (d *Engine) ServeGuest(ctx context.Context, conn Stream, guest string) {
 	defer func() { _ = conn.Close() }()
 	if d.serve != nil {
-		d.serve(ctx, conn)
+		d.serve(ctx, conn, guest)
 	}
 }
 

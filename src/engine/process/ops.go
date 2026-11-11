@@ -34,7 +34,7 @@ func (d *Engine) VMs() []engine.VMView { return d.vmViews() }
 func (d *Engine) Ports(ctx context.Context, vm string) ports.MacPorts { return d.surveyed(ctx, vm) }
 
 func (d *Engine) Reserve(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
-	return d.shareOf(ctx, vm, port)
+	return d.shareOf(ctx, vm, port, ports.ByOwner)
 }
 
 func (d *Engine) Release(ctx context.Context, vm string, port int) (ports.Reservation, error) {
@@ -42,14 +42,15 @@ func (d *Engine) Release(ctx context.Context, vm string, port int) (ports.Reserv
 }
 
 // invariant: a share takes back a stop of sharing, and a stop of sharing is
-// remembered, on this Mac whoever asked: a command here or a VM's guest.
-func (d *Engine) shareOf(ctx context.Context, vm string, port int) (ports.SharedPort, error) {
+// remembered, on this Mac whoever asked: a command here or a VM's guest;
+// by is who makes it, the owner for a command, the rights for a guest.
+func (d *Engine) shareOf(ctx context.Context, vm string, port int, by string) (ports.SharedPort, error) {
 	if d.o.Remember != nil {
 		if err := d.o.Remember(vm, port, false); err != nil {
 			return ports.SharedPort{}, err
 		}
 	}
-	return d.reserve(ctx, vm, port)
+	return d.reserve(ctx, vm, port, by)
 }
 
 func (d *Engine) stopSharing(ctx context.Context, vm string, port int) (ports.Reservation, error) {

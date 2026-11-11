@@ -1,0 +1,28 @@
+description: 'a guest is never the owner: its share is refused outside its rights, and takes their audience inside'
+env: in-linux-1
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: 3000-3999, to: local, except: [3306] }
+      exit: 0
+    - command: 'ports share 3306'
+      exit: 1
+      stderr: |
+          Error: port 3306 is outside the rights of linux-1 (open: 3000-3999; except: 3306)
+          Hint: on its Mac: station ports share linux-1 3306
+    - command: 'ports share 5432'
+      exit: 1
+      stderr: |
+          Error: port 5432 is outside the rights of linux-1 (open: 3000-3999; except: 3306)
+          Hint: on its Mac: station ports share linux-1 5432
+    - command: 'ports share 3500'
+      exit: 0
+      stdout: |
+          {{url}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]]}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3500,40000,"local","rights"]],"shared":[]}

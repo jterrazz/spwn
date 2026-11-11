@@ -1044,22 +1044,23 @@ func (s worldSockets) Pipe(_ context.Context, ip string, port int, _ io.Reader, 
 var errNoSSHD = errors.New("no sshd answers at this address in the world")
 
 // invariant: inside a VM of the world, the socket its Mac's engine offers
-// there is that engine, as the guest relays it.
+// there is that engine, as the guest relays it: its guest's calls are
+// answered as the guest's, judged by the VM's rights.
 func (worldSockets) DialTCP(context.Context, string, time.Duration) (net.Conn, error) {
 	return nil, errors.New("the world dials no TCP")
 }
 
 func (s worldSockets) DialUnix(ctx context.Context, _ string, _ time.Duration) (local.Conn, error) {
-	m := s.m
+	m, guest := s.m, ""
 	if p, inside := m.placement(); inside {
-		m = m.run.mac(p.Mac)
+		m, guest = m.run.mac(p.Mac), p.VM
 	}
 	d, ok := m.up(context.WithoutCancel(ctx))
 	if !ok {
 		return nil, errEngineDown
 	}
 	near, far := net.Pipe()
-	go d.Serve(context.WithoutCancel(ctx), far)
+	go d.ServeGuest(context.WithoutCancel(ctx), far, guest)
 	return near, nil
 }
 
