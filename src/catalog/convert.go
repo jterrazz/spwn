@@ -49,7 +49,7 @@ func (m MethodSpec) install(provides []string) Install {
 	case m.Script != nil && m.Script.Run != "":
 		return ShellInstall{Line: m.Script.Run}
 	case m.Script != nil:
-		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Upgrade: m.Script.Upgrade}
+		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Upgrade: m.Script.Upgrade, OnTerminal: m.Script.OnTerminal, OffTerminal: m.Script.OffTerminal}
 	case m.Skill != nil:
 		return SkillInstall{Repo: m.Skill.Repo, Skill: m.Skill.Name}
 	case m.ProvidedBy != "":

@@ -76,7 +76,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 	if env.Interactive {
 		ask = env.Prompt
 	}
-	registry, bundler := installers(m)
+	registry, bundler := installers(m, env.Interactive)
 	return appscalls.NewShelf(appsMachine{m.sys}, m.cat.Apps, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
 		Pool:        m.pool,
 		ThisMachine: m.kind,
@@ -84,11 +84,11 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		Installers:  registry,
 		Bundler:     bundler,
 		VMs:         m.machines(env.Interactive),
-		Log:         filepath.Join(m.paths.State, "logs", "apps.log"),
+		Logs:        filepath.Join(m.paths.State, "logs"),
 	})
 }
 
-func installers(m machine) (contract.Installers, contract.Bundler) {
+func installers(m machine, terminal bool) (contract.Installers, contract.Bundler) {
 	run := m.sys.Run
 	runtimes := mise.New(run)
 	bundle := brew.New(run, func() []string { return runtimes.ShimsFirst(m.sys.Env.Home(), m.vars) })
@@ -102,7 +102,7 @@ func installers(m machine) (contract.Installers, contract.Bundler) {
 			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
 			Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
 		}),
-		script.New(run), shell.New(run), app.New(), providedby.New(run),
+		script.New(run, terminal), shell.New(run), app.New(), providedby.New(run),
 	} {
 		registry[i.Method()] = i
 	}

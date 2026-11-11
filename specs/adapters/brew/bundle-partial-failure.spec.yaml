@@ -1,4 +1,4 @@
-description: 'one bundle for two apps: bat ok, ghostty broken in our words, brew''s error in the log, exit 1'
+description: 'one bundle for two apps: bat ok, ghostty broken, brew''s words in ghostty''s own log, exit 1'
 fixture:
     - ../../__fixtures__/stubs/
     - ./__fixtures__/partial-failure/
@@ -7,13 +7,13 @@ runs:
       exit: 1
       stdout: |
           ●	bat	0.24.0	brew
-          ✗	ghostty		cask	the install failed: its output is in ~/.local/state/station/logs/apps.log
+          ✗	ghostty		cask	~/.local/state/station/logs/ghostty.log
       stderr: |
-          ==> Downloading ghostty
-          curl: (22) The requested URL returned error: 404
           Error: 1 of 2 apps failed
           Hint: station apps install ghostty
-    - command: '--version >/dev/null; /usr/bin/cut -d" " -f2- .local/state/station/logs/apps.log'
+    - command: '--version >/dev/null; /usr/bin/sed "s/^[0-9][0-9T:Z-]* //" .local/state/station/logs/ghostty.log'
       exit: 0
       stdout: |
-          install bat ghostty: brew bundle exited 1: curl: (22) The requested URL returned error: 404
+          ==> Downloading ghostty
+          curl: (22) The requested URL returned error: 404
+          install ghostty: brew bundle exited 1: curl: (22) The requested URL returned error: 404

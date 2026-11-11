@@ -9,7 +9,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -69,21 +68,23 @@ func (u *Uv) Outdated(context.Context, []string) (map[string]apps.Currency, erro
 	return nil, nil
 }
 
-func (u *Uv) Install(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return u.bundle.Bundle(ctx, u.lines(installs), false, p)
+func (u *Uv) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return u.bundle.Bundle(ctx, u.lines(installs), false, logs)
 }
 
-func (u *Uv) Update(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return u.bundle.Bundle(ctx, u.lines(installs), true, p)
+func (u *Uv) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return u.bundle.Bundle(ctx, u.lines(installs), true, logs)
 }
 
-func (u *Uv) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (u *Uv) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.UvInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not installed by uv")
 		}
-		if err := local.Attach(ctx, u.run, local.Command(command, "tool", "uninstall", v.Key())); err != nil {
+		c := local.Command(command, "tool", "uninstall", v.Key())
+		c.Logs = logs
+		if err := local.Attach(ctx, u.run, c); err != nil {
 			return err
 		}
 	}

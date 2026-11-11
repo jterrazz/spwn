@@ -35,6 +35,9 @@ type Cmd struct {
 	// word; past it the command is stopped and its run fails as ErrSilent.
 	Answer time.Duration
 	Track  string
+	// value: the files an attached command's stdout and stderr are appended
+	// to, one per item it serves, in place of the terminal; its stdin stays.
+	Logs []string
 }
 
 type Output struct {

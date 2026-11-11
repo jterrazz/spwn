@@ -7,7 +7,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -29,23 +28,25 @@ func (s *Shell) Outdated(context.Context, []string) (map[string]apps.Currency, e
 	return nil, nil
 }
 
-func (s *Shell) Install(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (s *Shell) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.ShellInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not a shell line")
 		}
-		if err := local.Attach(ctx, s.run, local.Command("bash", "-c", v.Line)); err != nil {
+		c := local.Command("bash", "-c", v.Line)
+		c.Logs = logs
+		if err := local.Attach(ctx, s.run, c); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s *Shell) Update(context.Context, []catalog.Install, call.Progress) error {
+func (s *Shell) Update(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }
 
-func (s *Shell) Remove(context.Context, []catalog.Install, call.Progress) error {
+func (s *Shell) Remove(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }

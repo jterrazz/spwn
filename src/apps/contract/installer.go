@@ -6,7 +6,6 @@ import (
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 )
 
 var (
@@ -18,6 +17,8 @@ var (
 	ErrCannot = errors.New("its method cannot do this")
 )
 
+type Logs []string // value: the files a verb appends its program's raw output to, one per app it serves (`~/.local/state/station/logs/<app>.log`); none leaves it on the terminal's stderr.
+
 type Installer interface {
 	Method() catalog.Method
 	Manager() Manager
@@ -25,9 +26,9 @@ type Installer interface {
 	Ready(ctx context.Context) error
 	Inventory(ctx context.Context) (map[string]string, error)
 	Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error)
-	Install(ctx context.Context, installs []catalog.Install, p call.Progress) error
-	Update(ctx context.Context, installs []catalog.Install, p call.Progress) error
-	Remove(ctx context.Context, installs []catalog.Install, p call.Progress) error
+	Install(ctx context.Context, installs []catalog.Install, logs Logs) error
+	Update(ctx context.Context, installs []catalog.Install, logs Logs) error
+	Remove(ctx context.Context, installs []catalog.Install, logs Logs) error
 }
 
 type Manager struct {
@@ -60,5 +61,5 @@ type Lined interface {
 type Bundler interface {
 	// value: the run's name in a verdict: "not listed after brew bundle".
 	Name() string
-	Bundle(ctx context.Context, lines []string, update bool, p call.Progress) error
+	Bundle(ctx context.Context, lines []string, update bool, logs Logs) error
 }

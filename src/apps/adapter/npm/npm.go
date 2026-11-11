@@ -8,7 +8,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -67,21 +66,23 @@ func (n *Npm) Outdated(context.Context, []string) (map[string]apps.Currency, err
 	return nil, nil
 }
 
-func (n *Npm) Install(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return n.bundle.Bundle(ctx, n.lines(installs), false, p)
+func (n *Npm) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return n.bundle.Bundle(ctx, n.lines(installs), false, logs)
 }
 
-func (n *Npm) Update(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return n.bundle.Bundle(ctx, n.lines(installs), true, p)
+func (n *Npm) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return n.bundle.Bundle(ctx, n.lines(installs), true, logs)
 }
 
-func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.NpmInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not an npm package")
 		}
-		if err := local.Attach(ctx, n.run, local.Command(command, "uninstall", "-g", v.Package)); err != nil {
+		c := local.Command(command, "uninstall", "-g", v.Package)
+		c.Logs = logs
+		if err := local.Attach(ctx, n.run, c); err != nil {
 			return err
 		}
 	}

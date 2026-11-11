@@ -177,9 +177,17 @@ func (r *runner) Attach(ctx context.Context, c Cmd, out Stream) (Attached, error
 		return Attached{}, err
 	}
 	defer cancel()
+	logs, err := appendTo(c.Logs)
+	if err != nil {
+		return Attached{}, err
+	}
+	defer logs.close()
 	stderr := &lastLine{w: r.stderr}
 	cmd.Stdout, cmd.Stderr = stderr, stderr
-	if out == ToStdout {
+	switch {
+	case len(logs.files) > 0:
+		stderr.w = logs.writer()
+	case out == ToStdout:
 		cmd.Stdout = r.stdout
 	}
 	cmd.Stdin = r.stdin
@@ -255,6 +263,41 @@ func (h *heard) Write(p []byte) (int, error) {
 		return len(p), nil
 	}
 	return h.w.Write(p)
+}
+
+type logFiles struct{ files []*os.File }
+
+// invariant: a log is appended to, never truncated, and created owner-only
+// with its folder, so a second run keeps what the first one said.
+func appendTo(paths []string) (logFiles, error) {
+	var l logFiles
+	for _, p := range paths {
+		if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
+			l.close()
+			return logFiles{}, err
+		}
+		f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+		if err != nil {
+			l.close()
+			return logFiles{}, err
+		}
+		l.files = append(l.files, f)
+	}
+	return l, nil
+}
+
+func (l logFiles) writer() io.Writer {
+	ws := make([]io.Writer, 0, len(l.files))
+	for _, f := range l.files {
+		ws = append(ws, f)
+	}
+	return io.MultiWriter(ws...)
+}
+
+func (l logFiles) close() {
+	for _, f := range l.files {
+		_ = f.Close()
+	}
 }
 
 type lastLine struct {

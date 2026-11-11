@@ -8,7 +8,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 )
 
 const (
@@ -104,8 +103,10 @@ func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 		return nil
 	}
 	step := apps.Step{Item: t.Supersedes + " formula", Result: catalog.StateOK, Detail: "uninstalled: the app replaces it"}
-	if err := s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, nil); err != nil {
-		step.Detail, step.Why = s.failed(verbUninstall, []catalog.App{t}, err)
+	if err := s.o.Installers[old.Method()].Remove(ctx, []catalog.Install{old}, s.logs([]catalog.App{t})); err != nil {
+		words, why := s.failed(verbUninstall, []catalog.App{t}, err)
+		step.Detail, _ = words(t.Name)
+		step.Why = why
 		step.Result = catalog.StateBroken
 	}
 	return []apps.Step{step}
@@ -248,8 +249,8 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 		l, _ := s.lined(t)
 		lines = append(lines, l.Line(s.install(t)))
 	}
-	failure, why := "", apps.Why("")
-	if err := s.o.Bundler.Bundle(ctx, lines, update, nil); err != nil {
+	failure, why := func(string) (string, string) { return "", "" }, apps.Why("")
+	if err := s.o.Bundler.Bundle(ctx, lines, update, s.logs(list)); err != nil {
 		failure, why = s.failed(verb, list, err)
 	}
 	out := make([]apps.Outcome, 0, len(list))
@@ -257,7 +258,8 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 		for _, t := range list {
 			o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
 			if why != "" {
-				o.Result, o.Detail, o.Why = catalog.StateBroken, failure, why
+				o.Detail, o.Log = failure(t.Name)
+				o.Result, o.Why = catalog.StateBroken, why
 			}
 			out = append(out, o)
 		}
@@ -276,7 +278,8 @@ func (s *Shelf) bundle(ctx context.Context, verb string, list []catalog.App, upd
 	for _, t := range list {
 		o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
 		if !settled(states[t.Name]) || why != "" && !s.ownInstall(t, listings) {
-			o.Result, o.Detail, o.Why = catalog.StateBroken, failure, why
+			o.Detail, o.Log = failure(t.Name)
+			o.Result, o.Why = catalog.StateBroken, why
 			if why == "" {
 				o.Detail = "not listed after " + s.o.Bundler.Name()
 			}
@@ -298,17 +301,19 @@ func (s *Shelf) landed(ctx context.Context, t catalog.App, o apps.Outcome) apps.
 	return o
 }
 
-type verbOf func(contract.Installer, context.Context, []catalog.Install, call.Progress) error
+type verbOf func(contract.Installer, context.Context, []catalog.Install, contract.Logs) error
 
 func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, op verbOf) apps.Outcome {
 	o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
-	err := op(s.installer(t), ctx, []catalog.Install{s.install(t)}, nil)
+	err := op(s.installer(t), ctx, []catalog.Install{s.install(t)}, s.logs([]catalog.App{t}))
 	var signedOut *apps.SignedOutError
 	switch {
 	case errors.As(err, &signedOut):
 		o.Result, o.Detail = catalog.StateBroken, signedOut.Error()
 	case err != nil:
-		o.Detail, o.Why = s.failed(verb, []catalog.App{t}, err)
+		words, why := s.failed(verb, []catalog.App{t}, err)
+		o.Detail, o.Log = words(t.Name)
+		o.Why = why
 		o.Result = catalog.StateBroken
 	}
 	return o

@@ -7,7 +7,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -35,7 +34,7 @@ func (*ProvidedBy) Outdated(context.Context, []string) (map[string]apps.Currency
 	return nil, nil
 }
 
-func (p *ProvidedBy) Install(_ context.Context, installs []catalog.Install, _ call.Progress) error {
+func (p *ProvidedBy) Install(_ context.Context, installs []catalog.Install, _ contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.ProvidedByInstall)
 		if !ok {
@@ -50,10 +49,10 @@ func (p *ProvidedBy) Install(_ context.Context, installs []catalog.Install, _ ca
 	return nil
 }
 
-func (*ProvidedBy) Update(context.Context, []catalog.Install, call.Progress) error {
+func (*ProvidedBy) Update(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }
 
-func (*ProvidedBy) Remove(context.Context, []catalog.Install, call.Progress) error {
+func (*ProvidedBy) Remove(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }

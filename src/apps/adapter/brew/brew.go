@@ -11,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -43,7 +42,7 @@ func (b *Brew) Casks() contract.Installer {
 
 func (b *Brew) Name() string { return bundle }
 
-func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, _ call.Progress) error {
+func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, logs contract.Logs) error {
 	// hazard: brew's own prompts (a cask's sudo) read /dev/tty, not stdin, so
 	// feeding the Brewfile on stdin (--file=-) does not steal them.
 	mode := "--no-upgrade"
@@ -52,6 +51,7 @@ func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, _ call.P
 	}
 	c := local.Command(command, "bundle", "install", mode, "--file=-")
 	c.Stdin = strings.Join(lines, "\n") + "\n"
+	c.Logs = logs
 	if b.env != nil {
 		c.Env = b.env()
 	}
@@ -119,15 +119,15 @@ func (k *kind) Outdated(ctx context.Context, keys []string) (map[string]apps.Cur
 	return currency, nil
 }
 
-func (k *kind) Install(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return k.brew.Bundle(ctx, k.lines(installs), false, p)
+func (k *kind) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return k.brew.Bundle(ctx, k.lines(installs), false, logs)
 }
 
-func (k *kind) Update(ctx context.Context, installs []catalog.Install, p call.Progress) error {
-	return k.brew.Bundle(ctx, k.lines(installs), true, p)
+func (k *kind) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return k.brew.Bundle(ctx, k.lines(installs), true, logs)
 }
 
-func (k *kind) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (k *kind) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		var c local.Cmd
 		switch v := i.(type) {
@@ -138,6 +138,7 @@ func (k *kind) Remove(ctx context.Context, installs []catalog.Install, _ call.Pr
 		default:
 			return errors.New(i.Key() + " is not installed by brew")
 		}
+		c.Logs = logs
 		if err := local.Attach(ctx, k.brew.run, c); err != nil {
 			return err
 		}

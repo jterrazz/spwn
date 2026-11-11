@@ -10,7 +10,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -52,25 +51,27 @@ func (b *Bun) Outdated(context.Context, []string) (map[string]apps.Currency, err
 	return nil, nil
 }
 
-func (b *Bun) Install(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return b.each(ctx, installs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "install", "-g", v.Package) })
+func (b *Bun) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return b.each(ctx, installs, logs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "install", "-g", v.Package) })
 }
 
-func (b *Bun) Update(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return b.each(ctx, installs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "update", "-g", v.Key()) })
+func (b *Bun) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return b.each(ctx, installs, logs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "update", "-g", v.Key()) })
 }
 
-func (b *Bun) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return b.each(ctx, installs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "remove", "-g", v.Key()) })
+func (b *Bun) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return b.each(ctx, installs, logs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "remove", "-g", v.Key()) })
 }
 
-func (b *Bun) each(ctx context.Context, installs []catalog.Install, argv func(catalog.BunInstall) local.Cmd) error {
+func (b *Bun) each(ctx context.Context, installs []catalog.Install, logs contract.Logs, argv func(catalog.BunInstall) local.Cmd) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.BunInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not a bun package")
 		}
-		if err := local.Attach(ctx, b.run, argv(v)); err != nil {
+		c := argv(v)
+		c.Logs = logs
+		if err := local.Attach(ctx, b.run, c); err != nil {
 			return err
 		}
 	}

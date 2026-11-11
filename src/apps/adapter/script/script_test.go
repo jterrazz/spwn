@@ -22,7 +22,7 @@ func TestInstaller(t *testing.T) {
 		if seed.Fails {
 			code = 1
 		}
-		return script.New(local.Played(exits(code), "bash"))
+		return script.New(local.Played(exits(code), "bash"), false)
 	})
 }
 
@@ -33,7 +33,7 @@ func TestAnInstallScriptRunsUnderBashWithTheTerminalKeptAndItsEnvironment(t *tes
 		return local.Output{}, nil
 	}, "bash")
 
-	err := script.New(run).Install(context.Background(), []catalog.Install{catalog.ScriptInstall{URL: "https://x/install.sh", Env: []string{"RUNZSH=no"}, Args: []string{"--unattended"}}}, nil)
+	err := script.New(run, false).Install(context.Background(), []catalog.Install{catalog.ScriptInstall{URL: "https://x/install.sh", Env: []string{"RUNZSH=no"}, Args: []string{"--unattended"}}}, nil)
 
 	want := []string{"-c", `script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"`, "https://x/install.sh", "--unattended"}
 	if err != nil || len(ran) != 1 || !slices.Equal(ran[0].Args, want) || !slices.Equal(ran[0].Env, []string{"RUNZSH=no"}) {

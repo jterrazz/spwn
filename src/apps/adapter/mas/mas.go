@@ -10,7 +10,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -65,25 +64,25 @@ func (m *Mas) Outdated(context.Context, []string) (map[string]apps.Currency, err
 	return nil, nil
 }
 
-func (m *Mas) Install(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (m *Mas) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	// invariant: an App Store app is installed by mas itself, not by the shared
 	// brew bundle: inside the bundle mas's output is held until it ends, so a
 	// signed-out App Store would hang the whole bundle with no word.
-	return m.each(ctx, "install", installs)
+	return m.each(ctx, "install", installs, logs)
 }
 
-func (m *Mas) Update(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return m.each(ctx, "update", installs)
+func (m *Mas) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return m.each(ctx, "update", installs, logs)
 }
 
-func (m *Mas) each(ctx context.Context, verb string, installs []catalog.Install) error {
+func (m *Mas) each(ctx context.Context, verb string, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.MasInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not an App Store app")
 		}
 		c := local.Command(command, verb, strconv.Itoa(v.ID))
-		c.Answer = m.answer
+		c.Answer, c.Logs = m.answer, logs
 		err := local.Attach(ctx, m.run, c)
 		if errors.Is(err, local.ErrSilent) {
 			return &apps.SignedOutError{Store: "the App Store", Waited: m.answer, Hint: "open the App Store and sign in"}
@@ -95,13 +94,15 @@ func (m *Mas) each(ctx context.Context, verb string, installs []catalog.Install)
 	return nil
 }
 
-func (m *Mas) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (m *Mas) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.MasInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not an App Store app")
 		}
-		if err := local.Attach(ctx, m.run, local.Command(command, "uninstall", strconv.Itoa(v.ID))); err != nil {
+		c := local.Command(command, "uninstall", strconv.Itoa(v.ID))
+		c.Logs = logs
+		if err := local.Attach(ctx, m.run, c); err != nil {
 			return err
 		}
 	}

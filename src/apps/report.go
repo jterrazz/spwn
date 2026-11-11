@@ -48,6 +48,9 @@ type Outcome struct {
 	// value: why it ended broken, when the reason is typed rather than
 	// worded in Detail.
 	Why Why
+	// value: the log that keeps its installer's words, as the owner reads
+	// it (`~/.local/state/station/logs/<app>.log`), set when the verb failed.
+	Log string
 }
 
 type Step struct {

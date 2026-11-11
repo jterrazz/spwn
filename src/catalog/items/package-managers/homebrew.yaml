@@ -12,6 +12,8 @@ methods:
       path: [/opt/homebrew/bin, /usr/local/bin]
       script:
           url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+          on-terminal: [INTERACTIVE=1]
+          off-terminal: [NONINTERACTIVE=1]
 disk:
     paths:
         - path: ~/Library/Caches/Homebrew

@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ●	go	1.25.3	mise	already installed
-    - command: '--version >/dev/null; /bin/test -e .local/state/station/logs/apps.log || echo "no apps.log"'
+    - command: '--version >/dev/null; /bin/test -e .local/state/station/logs/go.log || echo "no go.log"'
       exit: 0
       stdout: |
-          no apps.log
+          no go.log

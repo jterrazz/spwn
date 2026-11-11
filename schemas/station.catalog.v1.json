@@ -513,6 +513,18 @@
           },
           "type": "array"
         },
+        "off-terminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "on-terminal": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "run": {
           "type": "string"
         },

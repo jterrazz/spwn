@@ -1,0 +1,20 @@
+description: 'a curl installer''s words go to its app''s log, never the terminal, and it reads one RETURN'
+fixture: ../__fixtures__/script-installers/
+runs:
+    - command: 'apps install homebrew'
+      exit: 0
+      stdout: |
+          ●	homebrew		script
+      files:
+          .local/state/station/logs/homebrew.log:
+              equals: |
+                  ==> Downloading and installing https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+                  Warning: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh is a stub
+                  ==> RETURN read, INTERACTIVE= NONINTERACTIVE=1
+    - command: 'apps install ohmyzsh'
+      exit: 0
+      stdout: |
+          ●	ohmyzsh		script
+      files:
+          .local/state/station/logs/ohmyzsh.log:
+              contains: 'ohmyzsh/master/tools/install.sh is a stub'

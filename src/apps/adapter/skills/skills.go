@@ -11,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -152,16 +151,16 @@ func (s *Skills) fetchFolder(ctx context.Context, source, parent string) map[str
 	return shas
 }
 
-func (s *Skills) Install(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return s.each(ctx, installs, add)
+func (s *Skills) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return s.each(ctx, installs, logs, add)
 }
 
-func (s *Skills) Update(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return s.each(ctx, installs, add)
+func (s *Skills) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return s.each(ctx, installs, logs, add)
 }
 
-func (s *Skills) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
-	return s.each(ctx, installs, func(v catalog.SkillInstall) local.Cmd {
+func (s *Skills) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return s.each(ctx, installs, logs, func(v catalog.SkillInstall) local.Cmd {
 		return local.Command(command, "remove", "-g", "-y", v.Skill)
 	})
 }
@@ -170,13 +169,15 @@ func add(v catalog.SkillInstall) local.Cmd {
 	return local.Command(command, append([]string{"add", v.Repo, "-g", "-y", "--skill", v.Skill, "--agent"}, catalog.SkillAgents...)...)
 }
 
-func (s *Skills) each(ctx context.Context, installs []catalog.Install, argv func(catalog.SkillInstall) local.Cmd) error {
+func (s *Skills) each(ctx context.Context, installs []catalog.Install, logs contract.Logs, argv func(catalog.SkillInstall) local.Cmd) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.SkillInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not a skill")
 		}
-		if err := local.Attach(ctx, s.o.Run, argv(v)); err != nil {
+		c := argv(v)
+		c.Logs = logs
+		if err := local.Attach(ctx, s.o.Run, c); err != nil {
 			return err
 		}
 	}

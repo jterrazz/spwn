@@ -9,7 +9,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/world"
 )
 
@@ -158,15 +157,15 @@ func updated(s *world.Manager, k string) {
 	}
 }
 
-func (f *Installer) Install(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (f *Installer) Install(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {
 	return f.run(ctx, "Install", installs, installed)
 }
 
-func (f *Installer) Update(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (f *Installer) Update(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {
 	return f.run(ctx, "Update", installs, updated)
 }
 
-func (f *Installer) Remove(ctx context.Context, installs []catalog.Install, _ call.Progress) error {
+func (f *Installer) Remove(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {
 	return f.run(ctx, "Remove", installs, func(s *world.Manager, k string) { delete(s.Installed, k) })
 }
 
@@ -189,7 +188,7 @@ func BundlerOf(w *world.World, mac string) *Bundler { return &Bundler{w: w, mac:
 
 func (b *Bundler) Name() string { return "the bundle" }
 
-func (b *Bundler) Bundle(ctx context.Context, lines []string, update bool, _ call.Progress) error {
+func (b *Bundler) Bundle(ctx context.Context, lines []string, update bool, _ contract.Logs) error {
 	b.w.Lock()
 	if b.w.Fails("Bundler.Bundle") {
 		b.w.Unlock()

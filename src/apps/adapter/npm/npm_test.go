@@ -12,7 +12,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/apps/contract/contracttest"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
@@ -44,7 +43,7 @@ func (p *prefix) play(c local.Cmd) (local.Output, error) {
 
 func (p *prefix) Name() string { return "the bundle" }
 
-func (p *prefix) Bundle(_ context.Context, lines []string, _ bool, _ call.Progress) error {
+func (p *prefix) Bundle(_ context.Context, lines []string, _ bool, _ contract.Logs) error {
 	if p.fails {
 		return errors.New("the bundle exited 1")
 	}

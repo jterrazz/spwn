@@ -153,6 +153,10 @@ type ScriptMethod struct {
 	// installer that refuses to run over its own install.
 	Upgrade string `yaml:"upgrade,omitempty"`
 	Run     string `yaml:"run,omitempty"`
+	// value: the variables added when the run has a terminal, and when it
+	// has none: an installer that asks there and keeps quiet elsewhere.
+	OnTerminal  []string `yaml:"on-terminal,omitempty"`
+	OffTerminal []string `yaml:"off-terminal,omitempty"`
 }
 
 type SkillMethod struct {

@@ -11,3 +11,4 @@ methods:
     - os: any
       script:
           url: https://plannotator.ai/install.sh
+          args: [--non-interactive]

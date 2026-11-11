@@ -4,6 +4,7 @@
 # brew where the real one does, under the system root's /opt/homebrew/bin, which is
 # on no PATH; Claude's puts claude in ~/.local/bin, on no PATH either, after calling
 # brew by name as a later step of the run does; every other installer leaves nothing.
+# Each says a line on stdout and one on stderr, which station keeps in its log.
 case "$1 $2" in
     "-c script=\"\$(curl -fsSL \"\$0\")\" && exec bash -c \"\$script\" bash \"\$@\"") ;;
     *)
@@ -14,6 +15,10 @@ esac
 line='bash'
 for arg in "$@"; do line="$line [$arg]"; done
 printf '%s env RUNZSH=%s CHSH=%s KEEP_ZSHRC=%s\n' "$line" "$RUNZSH" "$CHSH" "$KEEP_ZSHRC" >> "$HOME/.calls"
+# an installer's own words, on both streams, as a real one says them while it works
+echo "==> Downloading and installing $3"
+echo "Warning: $3 is a stub" >&2
+IFS= read -r reply && echo "==> RETURN read, INTERACTIVE=$INTERACTIVE NONINTERACTIVE=$NONINTERACTIVE"
 case "$*" in
     *Homebrew/install*)
         /bin/mkdir -p "$STATION_SYSTEM_ROOT/opt/homebrew/bin"

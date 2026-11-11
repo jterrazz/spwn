@@ -60,6 +60,9 @@ type ScriptInstall struct {
 	// value: the shell line that updates what the installer put, for an installer
 	// that refuses to run over its own install; empty, an update runs the installer.
 	Upgrade string
+	// value: the variables added when the run has a terminal, and when it has
+	// none: an installer that asks there and keeps quiet elsewhere.
+	OnTerminal, OffTerminal []string
 }
 
 type ShellInstall struct{ Line string }

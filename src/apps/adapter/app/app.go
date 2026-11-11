@@ -6,7 +6,6 @@ import (
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
-	"github.com/jterrazz/studio-station/src/core/call"
 )
 
 type App struct{}
@@ -27,14 +26,14 @@ func (App) Outdated(context.Context, []string) (map[string]apps.Currency, error)
 	return nil, nil
 }
 
-func (App) Install(context.Context, []catalog.Install, call.Progress) error {
+func (App) Install(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }
 
-func (App) Update(context.Context, []catalog.Install, call.Progress) error {
+func (App) Update(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }
 
-func (App) Remove(context.Context, []catalog.Install, call.Progress) error {
+func (App) Remove(context.Context, []catalog.Install, contract.Logs) error {
 	return contract.ErrCannot
 }

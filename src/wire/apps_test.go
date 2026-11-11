@@ -10,7 +10,7 @@ import (
 func TestEveryMethodTheCatalogueKindsHasItsInstaller(t *testing.T) {
 	system := localtest.Mac(localtest.NewRunner(t), localtest.NewFS(), localtest.Env{HomeDir: "/home/u", OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
 
-	registry, _ := installers(machine{sys: system, vars: map[string]string{}})
+	registry, _ := installers(machine{sys: system, vars: map[string]string{}}, false)
 
 	for m := range catalog.MethodKinds {
 		if i, ok := registry[m]; !ok || i.Method() != m {

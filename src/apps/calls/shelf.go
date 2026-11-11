@@ -21,7 +21,8 @@ type ShelfOptions struct {
 	Installers  contract.Installers
 	Bundler     contract.Bundler
 	VMs         VMs
-	Log         string
+	// value: the folder of each app's log, `<app>.log`; empty keeps none.
+	Logs string
 }
 
 type Configurer interface {
