@@ -27,10 +27,10 @@ type entry struct {
 	data       []byte
 }
 
-// invariant: each command is the one regular file of the asset by that
-// name (the executable one, where several are), and a runnable one; else
-// the asset itself when it is no archive, nor a compressed file, and lands
-// one command. Only those files are read into memory, and nothing else of
+// invariant: each command is the one runnable regular file of the asset by
+// that name (a second one refuses the asset); else the asset itself when it
+// is no archive, nor a compressed file, and lands one command. Only the
+// runnable files a command names are read into memory, and nothing else of
 // the asset is written.
 func unpack(asset string, body []byte, cmds []string) (map[string][]byte, error) {
 	return unpackWithin(asset, body, cmds, within)
@@ -56,21 +56,17 @@ func unpackWithin(asset string, body []byte, cmds []string, b bounds) (map[strin
 				found = append(found, e)
 			}
 		}
-		var run []entry
-		for _, e := range found {
-			if e.executable {
-				run = append(run, e)
-			}
-		}
 		switch {
 		case len(found) == 0:
 			return nil, fmt.Errorf("%s holds no %s", asset, cmd)
-		case len(run) == 0:
+		case !slices.ContainsFunc(found, func(e entry) bool { return e.executable }):
 			return nil, fmt.Errorf("%s holds %s, but no runnable one", asset, cmd)
-		case len(run) > 1:
-			return nil, fmt.Errorf("%s holds %d files named %s", asset, len(run), cmd)
 		}
-		out[cmd] = run[0].data
+		for _, e := range found {
+			if e.executable {
+				out[cmd] = e.data
+			}
+		}
 	}
 	return out, nil
 }
@@ -147,12 +143,29 @@ func untar(r io.Reader, cmds []string, b bounds) ([]entry, error) {
 		if h.Typeflag != tar.TypeReg || !slices.Contains(cmds, path.Base(h.Name)) {
 			continue
 		}
-		data, err := bounded(t, b.command)
-		if err != nil {
-			return nil, err
+		e := entry{name: h.Name, executable: h.Mode&0o111 != 0}
+		if refused := admit(out, e); refused != nil {
+			return nil, refused
 		}
-		out = append(out, entry{name: h.Name, executable: h.Mode&0o111 != 0, data: data})
+		if e.executable {
+			if e.data, err = bounded(t, b.command); err != nil {
+				return nil, err
+			}
+		}
+		out = append(out, e)
 	}
+}
+
+func admit(have []entry, e entry) error {
+	if !e.executable {
+		return nil
+	}
+	for _, h := range have {
+		if h.executable && path.Base(h.name) == path.Base(e.name) {
+			return fmt.Errorf("holds more than one runnable file named %s", path.Base(e.name))
+		}
+	}
+	return nil
 }
 
 func unzip(body []byte, cmds []string, b bounds) ([]entry, error) {
@@ -161,20 +174,30 @@ func unzip(body []byte, cmds []string, b bounds) ([]entry, error) {
 		return nil, err
 	}
 	var out []entry
+	var read int64
 	for _, f := range z.File {
 		if !f.Mode().IsRegular() || !slices.Contains(cmds, path.Base(f.Name)) {
 			continue
 		}
-		r, err := f.Open()
-		if err != nil {
+		e := entry{name: f.Name, executable: f.Mode()&0o111 != 0}
+		if err := admit(out, e); err != nil {
 			return nil, err
 		}
-		data, err := bounded(r, b.command)
-		_ = r.Close()
-		if err != nil {
-			return nil, err
+		if e.executable {
+			r, err := f.Open()
+			if err != nil {
+				return nil, err
+			}
+			e.data, err = bounded(r, b.command)
+			_ = r.Close()
+			if err != nil {
+				return nil, err
+			}
+			if read += int64(len(e.data)); read > b.archive {
+				return nil, fmt.Errorf("an archive past %d MiB", b.archive>>20)
+			}
 		}
-		out = append(out, entry{name: f.Name, executable: f.Mode()&0o111 != 0, data: data})
+		out = append(out, e)
 	}
 	return out, nil
 }

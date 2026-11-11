@@ -115,3 +115,59 @@ func TestACompressedFileIsNoCommand(t *testing.T) {
 		}
 	}
 }
+
+func TestAZipIsReadThroughAtMostItsBoundToo(t *testing.T) {
+	// invariant: a zip's files together are read through at most the
+	// archive's bound, as a tar's are, the one runnable file of each command
+	// within its own.
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+	cmds := make([]string, 0, 10)
+	for i := range 10 {
+		name := "tool" + strings.Repeat("x", i)
+		cmds = append(cmds, name)
+		h := &zip.FileHeader{Name: name, Method: zip.Deflate}
+		h.SetMode(0o755)
+		f, err := w.CreateHeader(h)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := f.Write(make([]byte, 1<<20)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := unpackWithin("x.zip", buf.Bytes(), cmds, bounds{command: 1 << 20, archive: 2 << 20}); err == nil || !strings.Contains(err.Error(), "an archive past 2 MiB") {
+		t.Errorf("unpacked 10 MiB of a zip with %v; want the archive refused past its 2 MiB", err)
+	}
+	if _, err := unpackWithin("x.zip", buf.Bytes(), cmds, bounds{command: 1 << 20, archive: 10 << 20}); err != nil {
+		t.Errorf("a zip within its bound refused: %v", err)
+	}
+}
+
+func TestASecondRunnableFileOfACommandRefusesTheAsset(t *testing.T) {
+	twice := []file{{name: "a/tool", mode: 0o755, body: "A"}, {name: "b/tool", mode: 0o755, body: "B"}}
+	if _, err := unpack("x.tar.gz", tarred(t, twice), []string{"tool"}); err == nil || !strings.Contains(err.Error(), "more than one runnable file named tool") {
+		t.Errorf("a tar of two runnable tools unpacked with %v; want it refused", err)
+	}
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+	for _, f := range twice {
+		h := &zip.FileHeader{Name: f.name}
+		h.SetMode(0o755)
+		fw, err := w.CreateHeader(h)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, _ = fw.Write([]byte(f.body))
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := unpack("x.zip", buf.Bytes(), []string{"tool"}); err == nil || !strings.Contains(err.Error(), "more than one runnable file named tool") {
+		t.Errorf("a zip of two runnable tools unpacked with %v; want it refused", err)
+	}
+}
