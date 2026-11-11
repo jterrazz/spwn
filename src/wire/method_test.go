@@ -310,20 +310,42 @@ func TestAMoveHandsTheAppToTheMethodAskedOnEveryPath(t *testing.T) {
 	}
 }
 
-func TestACommandInAManagersOwnFolderIsNoCopyPresentAnotherWay(t *testing.T) {
+func TestACommandInAManagersOwnFolderIsThatManagersForTheAppsItCarries(t *testing.T) {
 	// invariant: a command found in a manager's own folder (mise's shims
-	// and installs) is that manager's, read by its listing: one no listing
-	// holds is absent, so a Machinefile's global copy is installed, never
-	// adopted from a shim or a project's runtime.
+	// and installs) is that manager's for an app it carries here, read by
+	// its listing: one its listing holds not is absent, so a Machinefile's
+	// global copy is installed, never adopted from a shim or a project's
+	// runtime. An app mise carries not here, found there, is present
+	// another way: adopted, never installed again.
 	kept := mise.Kept("/home/u", map[string]string{})
-	for _, dir := range kept {
-		where := dir + "/probed/2/bin/probed"
-		b := benchOf(t, catalog.Mac, "probed", func(r *localtest.Runner, o *appscalls.ShelfOptions) {
-			r.Paths["probed"] = where
-			o.Kept = kept
-		})
-		if row := b.row(t, "probed"); row.State != catalog.StateAbsent {
-			t.Errorf("%s: probed reads %s (%s), want absent", where, row.State, row.Detail)
+	carried := ""
+	for _, a := range benchOf(t, catalog.Mac, "").cat.Apps {
+		if in, ok := a.InstallOn(catalog.Mac); ok && kept[in.Method()] != nil && len(a.InstallsOn(catalog.Mac)) == 1 && len(a.Provides) > 0 {
+			carried = a.Name
+			break
+		}
+	}
+	if carried == "" {
+		t.Fatal("no app of the catalog carried by the kept folders' manager alone")
+	}
+	for _, dirs := range kept {
+		for _, dir := range dirs {
+			for _, c := range []struct {
+				item string
+				want apps.State
+			}{{carried, apps.NotInstalled}, {"probed", apps.NotManaged}} {
+				b := benchOf(t, catalog.Mac, c.item)
+				command := b.lib.Catalog.Apps[slices.IndexFunc(b.lib.Catalog.Apps, func(a catalog.App) bool { return a.Name == c.item })].Provides[0]
+				where := dir + "/" + c.item + "/2/bin/" + command
+				b = benchOf(t, catalog.Mac, c.item, func(r *localtest.Runner, o *appscalls.ShelfOptions) {
+					r.Paths[command] = where
+					r.On(where, "--version").Reply(local.Output{Stdout: command + " 2.0.0\n"})
+					o.Kept = kept
+				})
+				if row := b.row(t, c.item); apps.StateOf(row) != c.want {
+					t.Errorf("%s at %s reads %s (%s), want %s", c.item, where, apps.StateOf(row), row.Detail, c.want)
+				}
+			}
 		}
 	}
 }

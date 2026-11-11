@@ -24,10 +24,11 @@ type ShelfOptions struct {
 	VMs         VMs
 	// value: the folder of each app's log, `<app>.log`; empty keeps none.
 	Logs string
-	// value: the folders a manager keeps its own copies and launchers in
-	// (mise's installs and shims): a command found there is that manager's,
-	// read by its own listing, never a copy present another way.
-	Kept []string
+	// value: by method, the folders its manager keeps its own copies and
+	// launchers in (mise's installs and shims): a command found there for
+	// an app of that method here is that manager's, read by its own
+	// listing, never a copy present another way.
+	Kept map[catalog.Method][]string
 }
 
 type Configurer interface {

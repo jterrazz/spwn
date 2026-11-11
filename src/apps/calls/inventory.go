@@ -369,7 +369,7 @@ func (s *Shelf) present(ctx context.Context, t catalog.App, r *apps.Report) bool
 	}
 	for _, name := range t.Provides {
 		where, ok := s.m.LookPath(name)
-		if !ok || s.kept(where) {
+		if !ok || s.kept(t, where) {
 			continue
 		}
 		// hazard: stock macOS ships /usr/bin shims (java, python3, xcodebuild, git)
@@ -395,10 +395,16 @@ func (s *Shelf) present(ctx context.Context, t catalog.App, r *apps.Report) bool
 	return false
 }
 
-func (s *Shelf) kept(where string) bool {
-	for _, dir := range s.o.Kept {
-		if strings.HasPrefix(where, dir+"/") {
-			return true
+// invariant: a hit in a manager's own folder is that manager's only for
+// an app it carries here; any other app found there (one the owner put
+// there by `mise use -g`, one whose method moved off mise) is present
+// another way, adopted rather than installed again.
+func (s *Shelf) kept(t catalog.App, where string) bool {
+	for _, in := range t.InstallsOn(s.o.ThisMachine) {
+		for _, dir := range s.o.Kept[in.Method()] {
+			if strings.HasPrefix(where, dir+"/") {
+				return true
+			}
 		}
 	}
 	return false

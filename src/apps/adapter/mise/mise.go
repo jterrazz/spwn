@@ -176,11 +176,12 @@ func Environment(home string, vars map[string]string, moved ...string) []string 
 	return append(env, pins...)
 }
 
-func Kept(home string, vars map[string]string) []string {
-	// value: the folders mise keeps its runtimes and their shims in: a
-	// command found there is mise's, which its own listing reads.
+func Kept(home string, vars map[string]string) map[catalog.Method][]string {
+	// value: the folders mise keeps its runtimes and their shims in, by
+	// its method: a command found there for an app of mise's is mise's,
+	// which its own listing reads.
 	data := dataDir(home, vars)
-	return []string{path.Join(data, "installs"), path.Join(data, "shims")}
+	return map[catalog.Method][]string{catalog.MethodMise: {path.Join(data, "installs"), path.Join(data, "shims")}}
 }
 
 func dataDir(home string, vars map[string]string) string {
