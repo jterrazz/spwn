@@ -161,6 +161,8 @@ What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: e
 | failing, or not readable now                                                                         | `reads <condition>: kept`                | keeps it, and its record for the next run                              |
 | needed by another app there (it requires it, provides it, or manages it), one not taken back with it | `required by <app>: kept`                | keeps it, and its record for the next run                              |
 
+An extra station cannot uninstall is never counted as taken back, so what it needs is `required by` it in the plan already; an extra whose uninstall fails at the run is still there too, so each extra it leans on that comes after it is `required by <app>: kept, judged again next run`, with its record.
+
 ## The hard cases
 
 | Case                                    | Where                                                                                             |

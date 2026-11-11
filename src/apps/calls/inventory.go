@@ -199,7 +199,7 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	i := s.install(t)
 	m := i.Method()
 	manager := s.installer(t).Manager()
-	r := apps.Report{App: t, Method: m, State: catalog.StateAbsent}
+	r := apps.Report{App: t, Method: m, State: catalog.StateAbsent, Irreversible: s.uninstallable(t) != nil}
 	l := listings[m]
 	switch {
 	case l.unlisted && s.bundled(t):

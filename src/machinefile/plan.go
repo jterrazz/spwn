@@ -43,16 +43,17 @@ const (
 
 // value: what an item reads on the machine, as its family read it: its
 // condition, its state, the method that holds it, the version there, the
-// words of its read, and the manager its method lacks here, when that
-// manager is not installed.
+// words of its read, the manager its method lacks here, when that
+// manager is not installed, and whether station cannot uninstall it here.
 
 type Seen struct {
-	Condition Condition
-	State     catalog.State
-	Method    string
-	Version   string
-	Detail    string
-	Lacks     string
+	Condition    Condition
+	State        catalog.State
+	Method       string
+	Version      string
+	Detail       string
+	Lacks        string
+	Irreversible bool
 }
 
 // value: one line of a plan: the step resolved, what it reads now, and
@@ -196,11 +197,12 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 // any link the resolution follows: it requires it, its method is provided
 // by it, or its method's manager is it) is kept while that app is not
 // taken back with it, whoever installed that app; an app whose read did
-// not answer may be there, so it keeps what it needs too.
+// not answer may be there, so it keeps what it needs too, and an extra
+// station cannot uninstall here stays, so it keeps what it needs as well.
 func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
 	taken := map[string]bool{}
 	for _, s := range extra {
-		taken[s.Step.Item] = s.Takes()
+		taken[s.Step.Item] = s.Takes() && !s.Seen.Irreversible
 	}
 	held := map[string]bool{}
 	for kept := true; kept; {

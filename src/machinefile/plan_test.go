@@ -115,3 +115,29 @@ func TestJudgeKeepsTheProviderOfAListedApp(t *testing.T) {
 		}
 	}
 }
+
+func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
+	// invariant: an extra station cannot uninstall stays, so what it
+	// requires is never taken back under it.
+	cat := catalog.Catalog{Items: []catalog.Placed{
+		placed(catalog.Item{Name: "runtime"}),
+		placed(catalog.Item{Name: "browsers", Requires: []string{"runtime"}}),
+	}}
+	ledger := []machinefile.Installed{
+		{Item: "runtime", Method: "pkg", Machinefile: "laptop"},
+		{Item: "browsers", Method: "script", Machinefile: "laptop"},
+	}
+	seen := map[string]machinefile.Seen{
+		"runtime":  {Condition: machinefile.Present, Method: "pkg"},
+		"browsers": {Condition: machinefile.Present, Method: "script", Irreversible: true},
+	}
+	kept := map[string][]string{}
+	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger).Extra {
+		if !e.Takes() {
+			kept[e.Step.Item] = e.RequiredBy
+		}
+	}
+	if len(kept) != 1 || !slices.Equal(kept["runtime"], []string{"browsers"}) {
+		t.Errorf("kept %v; want runtime, required by [browsers]", kept)
+	}
+}

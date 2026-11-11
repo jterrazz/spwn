@@ -314,10 +314,14 @@ func masked(words string, secrets map[string]string) string {
 // install, the App Store's), is said and kept, and the ledger lets it go,
 // so no later run fails on it again. One another app still needs, one
 // whose manager is missing here, and a read that did not answer keep
-// their record for the next run.
+// their record for the next run. An extra the run did not take back (its
+// uninstall failed or was refused) is still there, so what it leans on
+// is kept with its record, and so on down.
 func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
 	var out []machinefile.Done
+	var stayed []machinefile.ExtraLine
 	for _, e := range extra {
+		needers := leaningOn(stayed, e.Step.Item)
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
 		switch {
 		case len(e.RequiredBy) > 0:
@@ -336,12 +340,20 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 			done.Detail = "present another way since station installed it: kept, and yours"
 		case !e.Takes():
 			done.State, done.Detail = catalog.StateAbsent, "already gone"
+		case len(needers) > 0:
+			done.Detail = "required by " + strings.Join(needers, ", ") + ": kept, judged again next run"
+			stayed = append(stayed, e)
+			out = append(out, done)
+			continue
 		default:
 			if ctx.Err() != nil {
 				done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 				return append(out, done)
 			}
 			done = r.uninstall(ctx, e, done)
+			if done.State == catalog.StateBroken || done.Line.Action == machinefile.Leave {
+				stayed = append(stayed, e)
+			}
 			if done.Reason == machinefile.Interrupted || done.State == catalog.StateBroken {
 				out = append(out, done)
 				if done.Reason == machinefile.Interrupted {
@@ -354,6 +366,16 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 			done.State, done.Detail = catalog.StateBroken, err.Error()
 		}
 		out = append(out, done)
+	}
+	return out
+}
+
+func leaningOn(stayed []machinefile.ExtraLine, item string) []string {
+	var out []string
+	for _, s := range stayed {
+		if slices.Contains(s.Step.Waits, item) {
+			out = append(out, s.Step.Item)
+		}
 	}
 	return out
 }

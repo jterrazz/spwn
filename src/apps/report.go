@@ -13,6 +13,9 @@ type Report struct {
 	Detail  string
 	Live    string
 	Pending bool
+	// value: station cannot uninstall it here: its method removes nothing,
+	// or the App Store installed it.
+	Irreversible bool
 	// value: why the state is not ok, in a word a page can judge; Needs names
 	// the catalogue tool whose absence explains it.
 	Why   Why

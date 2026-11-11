@@ -105,12 +105,19 @@ func (s *Shelf) CheckUninstall(names []string) error {
 		return err
 	}
 	for _, t := range found {
-		if !s.installer(t).Can().Remove {
-			return &apps.NotReversibleError{App: t.Name}
+		if err := s.uninstallable(t); err != nil {
+			return err
 		}
-		if s.fromAppStore(t) {
-			return &apps.AppStoreError{App: t.Name}
-		}
+	}
+	return nil
+}
+
+func (s *Shelf) uninstallable(t catalog.App) error {
+	if !s.installer(t).Can().Remove {
+		return &apps.NotReversibleError{App: t.Name}
+	}
+	if s.fromAppStore(t) {
+		return &apps.AppStoreError{App: t.Name}
 	}
 	return nil
 }
