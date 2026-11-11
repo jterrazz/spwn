@@ -15,6 +15,7 @@ const (
 	MethodUv     Method = "uv"
 	MethodBun    Method = "bun"
 	MethodMise   Method = "mise"
+	MethodApt    Method = "apt"
 	MethodScript Method = "script"
 	MethodShell  Method = "shell"
 	MethodApp    Method = "app"
@@ -53,6 +54,13 @@ type BunInstall struct{ Package, Name string }
 
 type MiseInstall struct{ App, Version string }
 
+type AptInstall struct {
+	Packages []string
+	// value: the version asked of the first package, the one its key names;
+	// empty, apt's candidate.
+	Version string
+}
+
 type ScriptInstall struct {
 	URL  string
 	Args []string
@@ -84,6 +92,7 @@ func (NpmInstall) Method() Method        { return MethodNpm }
 func (UvInstall) Method() Method         { return MethodUv }
 func (BunInstall) Method() Method        { return MethodBun }
 func (MiseInstall) Method() Method       { return MethodMise }
+func (AptInstall) Method() Method        { return MethodApt }
 func (ScriptInstall) Method() Method     { return MethodScript }
 func (ShellInstall) Method() Method      { return MethodShell }
 func (AppInstall) Method() Method        { return MethodApp }
@@ -108,6 +117,7 @@ func (i BunInstall) Key() string {
 }
 
 func (i MiseInstall) Key() string       { return i.App }
+func (i AptInstall) Key() string        { return i.Packages[0] }
 func (i ScriptInstall) Key() string     { return i.URL }
 func (i ShellInstall) Key() string      { return i.Line }
 func (i AppInstall) Key() string        { return i.Hint }
@@ -121,6 +131,7 @@ func (NpmInstall) isInstall()        {}
 func (UvInstall) isInstall()         {}
 func (BunInstall) isInstall()        {}
 func (MiseInstall) isInstall()       {}
+func (AptInstall) isInstall()        {}
 func (ScriptInstall) isInstall()     {}
 func (ShellInstall) isInstall()      {}
 func (AppInstall) isInstall()        {}
@@ -129,8 +140,13 @@ func (ProvidedByInstall) isInstall() {}
 
 func Pinned(in Install, version string) (Install, bool) {
 	// value: the install at the version asked, where it carries one to its
-	// manager: a runtime of mise's; any other carries none.
-	if m, ok := in.(MiseInstall); ok {
+	// manager: a runtime of mise's, apt's package version; any other
+	// carries none.
+	switch m := in.(type) {
+	case MiseInstall:
+		m.Version = version
+		return m, true
+	case AptInstall:
 		m.Version = version
 		return m, true
 	}
@@ -140,7 +156,10 @@ func Pinned(in Install, version string) (Install, bool) {
 func VersionOf(in Install) string {
 	// value: the version an install carries to its manager, empty where
 	// it carries none.
-	if m, ok := in.(MiseInstall); ok {
+	switch m := in.(type) {
+	case MiseInstall:
+		return m.Version
+	case AptInstall:
 		return m.Version
 	}
 	return ""

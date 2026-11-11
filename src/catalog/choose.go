@@ -18,7 +18,7 @@ func (m MethodSpec) Method() string {
 func (m MethodSpec) Runs(k Kind) bool {
 	// value: whether station runs this method for an item of that kind: a
 	// setting's every method, an app's or a manager's only the ones it has
-	// an installer for (apt and github-release wait for theirs).
+	// an installer for (github-release waits for its own).
 	return k == KindSetting || m.install(nil) != nil
 }
 

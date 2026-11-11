@@ -1,0 +1,11 @@
+item: station.catalog/v1
+kind: manager
+name: apt
+description: Debian and Ubuntu's package manager
+manages: [apt]
+priority: { ubuntu: 1, debian: 1 }
+provides: [apt-get]
+methods:
+    - family: debian
+      needs: [sudo]
+      apt: { packages: [apt] }

@@ -94,6 +94,7 @@ func TestAnItemIsJudgedAlone(t *testing.T) {
 		strings.Replace(gh, "os: macos", "os: macos\n      machine: []", 1):                                            "machine lists no kind of machine",
 		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - family: linux\n      apt: {packages: [gh]}", 1):  "apt runs on the debian family",
 		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      apt: {packages: []}", 1):       "apt names its packages",
+		strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: ubuntu\n      apt: {packages: [gh]}", 1):     "apt installs as root: its method says `needs: [sudo]`",
 		strings.Replace(gh, "brew: gh", "needs: [root]\n      brew: gh", 1):                                            `need "root" is none of`,
 		strings.Replace(gh, "brew: gh", "script: {run: 'gh --host ${option.host}'}", 1):                                "${option.host} names no option of the item",
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 0, label: GH}]", 1):                      "port 0: a port from 1 to 65535",
@@ -235,7 +236,7 @@ methods:
 // invariant: a method of a manager this station runs no installer for is
 // none: the next one serves, so a newer file still installs where it can.
 func TestAMethodThisStationCannotRunGivesWayToTheNext(t *testing.T) {
-	body := strings.Replace(gh, "    - os: macos\n      brew: gh\n", "    - os: ubuntu\n      apt: {packages: [gh]}\n    - family: linux\n      mise: {name: gh, version: latest}\n    - os: macos\n      machine: computer\n      brew: gh\n", 1)
+	body := strings.Replace(gh, "    - os: macos\n      brew: gh\n", "    - family: linux\n      github-release: {repo: cli/cli, asset: gh}\n    - family: linux\n      mise: {name: gh, version: latest}\n    - os: macos\n      machine: computer\n      brew: gh\n", 1)
 	c, err := catalogOf(map[string]string{"git/gh.yaml": body})
 	if err != nil {
 		t.Fatal(err)

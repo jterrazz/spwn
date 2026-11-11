@@ -1,0 +1,23 @@
+description: 'a newer apt candidate is an update available, applied by apt-get install --only-upgrade'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/jq-behind/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | "\(.state) \(.detail) \(.installed)"'''
+      exit: 0
+      stdout: |
+          update-available outdated 1.7.1
+    - command: 'apps update jq'
+      exit: 0
+      stdout: |
+          ●	jq	1.7.2	apt
+      files:
+          .calls:
+              contains:
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install --only-upgrade jq'
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | "\(.state) \(.installed)"'''
+      exit: 0
+      stdout: |
+          ok 1.7.2

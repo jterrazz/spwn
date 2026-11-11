@@ -56,6 +56,8 @@ func installOf(m Method, raw json.RawMessage) (Install, error) {
 		return decoded[BunInstall](raw)
 	case MethodMise:
 		return decoded[MiseInstall](raw)
+	case MethodApt:
+		return decoded[AptInstall](raw)
 	case MethodScript:
 		return decoded[ScriptInstall](raw)
 	case MethodShell:

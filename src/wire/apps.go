@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/src/apps/adapter/app"
+	"github.com/jterrazz/studio-station/src/apps/adapter/apt"
 	"github.com/jterrazz/studio-station/src/apps/adapter/brew"
 	"github.com/jterrazz/studio-station/src/apps/adapter/bun"
 	"github.com/jterrazz/studio-station/src/apps/adapter/mas"
@@ -114,7 +115,7 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 	for _, i := range []contract.Installer{
 		bundle.Formulae(), bundle.Casks(),
 		mas.New(run), npm.New(run, bundle, runtimes.Where), uv.New(run, bundle),
-		bun.New(run), runtimes,
+		bun.New(run), runtimes, apt.New(run, terminal),
 		skills.New(skills.Options{
 			Run: run, FS: m.sys.FS, Net: m.sys.Net, Home: m.sys.Env.Home(),
 			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),

@@ -6,7 +6,7 @@
 [1;38;2;76;79;105mNot installed[m  [38;2;108;111;133m○[m [38;2;76;79;105m4[m[38;2;108;111;133m · mise, mas, typewhisper, frontend-design[m
 [1;38;2;76;79;105mNot managed  [m  [38;2;108;111;133m?[m [38;2;76;79;105m5[m[38;2;108;111;133m · bun, go, java, python, chatgpt[m
 [1;38;2;76;79;105mOK           [m  [38;2;64;160;43m●[m [38;2;76;79;105m6[m[38;2;108;111;133m · homebrew, uv, cocoapods, skills, claude-desktop, modern-web-guidance[m
-[1;38;2;76;79;105mNot for this machine[m  [38;2;108;111;133m103 apps live on other machines[m
+[1;38;2;76;79;105mNot for this machine[m  [38;2;108;111;133m104 apps live on other machines[m
 
 [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps update[m            [38;2;108;111;133mthe 2 updates[m
 [38;2;108;111;133m→ [m[38;2;76;79;105mstation apps install <app...>[m  [38;2;108;111;133minstall some[m

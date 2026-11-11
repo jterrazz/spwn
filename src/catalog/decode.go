@@ -381,6 +381,9 @@ func checkMethod(it Item, m MethodSpec) string {
 	if m.Apt != nil && m.Family != FamilyDebian && m.OS != OSUbuntu && m.OS != OSDebian {
 		return "apt runs on the debian family"
 	}
+	if m.Apt != nil && !slices.Contains(m.Needs, NeedSudo) {
+		return "apt installs as root: its method says `needs: [sudo]`"
+	}
 	if install := m.install(nil); install != nil {
 		for _, k := range m.kinds() {
 			if !slices.Contains(MethodKinds[install.Method()], k) {

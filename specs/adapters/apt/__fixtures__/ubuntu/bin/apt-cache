@@ -1,0 +1,9 @@
+#!/bin/sh
+# apt-cache policy: each package's installed version (dpkg.db) and its candidate (candidates, else the installed one).
+printf 'apt-cache %s\n' "$*" >> "$HOME/.calls"
+shift
+for p in "$@"; do
+    installed=$(/usr/bin/awk -F'\t' -v p="$p" '$1 == p { print $2 }' "$HOME/dpkg.db" 2>/dev/null)
+    candidate=$(/usr/bin/awk -F'\t' -v p="$p" '$1 == p { print $2 }' "$HOME/candidates" 2>/dev/null)
+    printf '%s:\n  Installed: %s\n  Candidate: %s\n' "$p" "${installed:-(none)}" "${candidate:-${installed:-(none)}}"
+done

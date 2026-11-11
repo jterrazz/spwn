@@ -4,4 +4,4 @@ runs:
     - command: 'apps --json | /usr/bin/jq -c "{schema, elsewhere: .not_for_this_machine, gh: (.apps[] | select(.name == \"gh\"))}"'
       exit: 0
       stdout: |
-          {"schema":"station.apps.list/v1","elsewhere":7,"gh":{"name":"gh","category":"Git","method":"brew","state":"update-available","installed":"2.97.0","newest":"2.98.0","lives_on":"every-machine","provides":["gh"],"detail":"outdated"}}
+          {"schema":"station.apps.list/v1","elsewhere":8,"gh":{"name":"gh","category":"Git","method":"brew","state":"update-available","installed":"2.97.0","newest":"2.98.0","lives_on":"every-machine","provides":["gh"],"detail":"outdated"}}

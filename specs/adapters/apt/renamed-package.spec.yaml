@@ -1,0 +1,18 @@
+description: 'a package named otherwise on Debian installs by its own name (fd-find) and is read held by it'
+fixture:
+    - ./__fixtures__/ubuntu/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps install fd'
+      exit: 0
+      stdout: |
+          ●	fd	1.0	apt
+      files:
+          .calls:
+              contains:
+                  - 'apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install fd-find'
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "fd") | "\(.state) \(.method)"'''
+      exit: 0
+      stdout: |
+          ok apt

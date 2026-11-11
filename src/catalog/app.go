@@ -81,6 +81,7 @@ var MethodKinds = map[Method][]MachineKind{
 	MethodUv:     {Mac, MacOS},
 	MethodBun:    {Mac, Linux, MacOS},
 	MethodMise:   {Mac, Linux, MacOS},
+	MethodApt:    {Linux},
 	MethodScript: {Mac, Linux, MacOS},
 	MethodShell:  {Mac, Linux, MacOS},
 	MethodSkill:  {Mac, Linux, MacOS},

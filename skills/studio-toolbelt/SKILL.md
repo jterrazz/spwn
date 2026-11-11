@@ -38,6 +38,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 ### Package Managers
 
+- **apt**: Debian and Ubuntu's package manager
 - **cocoapods**: Dependency manager for iOS and macOS projects
 - **homebrew**: macOS package manager
 - **mas**: Mac App Store command line

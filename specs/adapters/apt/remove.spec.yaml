@@ -1,0 +1,16 @@
+description: 'an apt app is removed alone, never autoremoving what it pulled in'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/jq-held/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps remove jq --yes'
+      exit: 0
+      stdout: |
+          ●	jq		apt
+      files:
+          .calls:
+              contains:
+                  - 'apt-get -s remove -o APT::Get::AutomaticRemove=false jq'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false jq'

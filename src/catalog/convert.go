@@ -76,8 +76,8 @@ func diskOn(d Disk) Disk {
 }
 
 // invariant: checkMethod let through exactly one app manager key.
-// A method of a manager this station runs no installer for (apt,
-// github-release) is none: the next method serves.
+// A github-release method, which this station runs no installer for, is
+// none: the next method serves.
 func (m MethodSpec) install(provides []string) Install {
 	if len(m.Provides) > 0 {
 		provides = m.Provides
@@ -99,6 +99,8 @@ func (m MethodSpec) install(provides []string) Install {
 		return BunInstall{Package: m.Bun}
 	case m.Mise != nil:
 		return MiseInstall{App: m.Mise.Name, Version: m.Mise.Version}
+	case m.Apt != nil:
+		return AptInstall{Packages: m.Apt.Packages}
 	case m.Script != nil && m.Script.Run != "":
 		return ShellInstall{Line: m.Script.Run}
 	case m.Script != nil && m.Script.URL != "":

@@ -1,0 +1,14 @@
+#!/bin/sh
+# sudo: records its line, then runs what it was given, `env`'s assignments exported.
+printf 'sudo %s\n' "$*" >> "$HOME/.calls"
+[ "$1" = -n ] && shift
+[ "$1" = env ] && shift
+while :; do
+    case "$1" in
+        *=*) export "$1"; shift ;;
+        *) break ;;
+    esac
+done
+command="$1"
+shift
+exec "${0%/*}/$command" "$@"
