@@ -110,9 +110,13 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	// installed or set, present kept, present by another way adopted and
 	// never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
-	// (the owner's to decide); an item of another phase is left to it.
+	// (the owner's to decide); an item of another phase is left to it. An
+	// item skipped on this system is still listed, so never extra.
 	p := Plan{Name: r.Name, Skipped: r.Skipped}
 	listed := map[string]bool{}
+	for _, s := range r.Skipped {
+		listed[s.Item] = true
+	}
 	for _, s := range r.Steps {
 		listed[s.Item] = true
 		l := Line{Step: s, Seen: seen[s.Item]}

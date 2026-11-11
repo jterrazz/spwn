@@ -47,3 +47,15 @@ func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 		t.Errorf("removed %v; want %v (the manager reads present another way)", removed, want)
 	}
 }
+
+func TestJudgeKeepsAnItemSkippedOnThisSystem(t *testing.T) {
+	// invariant: an optional item the Machinefile still lists is no extra
+	// while this system skips it: no method here today is no removal.
+	cat := catalog.Catalog{Items: []catalog.Placed{placed(catalog.Item{Name: "foo"})}}
+	ledger := []machinefile.Installed{{Item: "foo", Method: "pkg", Machinefile: "laptop"}}
+	seen := map[string]machinefile.Seen{"foo": {Condition: machinefile.Present, Method: "pkg"}}
+	r := machinefile.Resolved{Name: "laptop", Skipped: []machinefile.Skip{{Item: "foo", Why: "optional, no method for macos 27"}}}
+	for _, e := range machinefile.Judge(r, cat, seen, ledger).Extra {
+		t.Errorf("%s is extra (%s); want none: it is still listed", e.Step.Item, e.Action)
+	}
+}
