@@ -40,6 +40,7 @@ class Rig:
         self.fb = self.vnc.screen.size
         self.wall = None
         self.walls = 0
+        self.screen = None
         self.log = open(os.path.join(out, "drive.log"), "a", encoding="utf-8")
 
     def say(self, line):
@@ -96,6 +97,9 @@ class Rig:
             time.sleep(1)
             line = self.last("item ")
             if line:
+                screen = self.last("screen ")
+                if screen:
+                    self.screen = self.frame(screen)
                 return line
         return None
 
@@ -107,8 +111,10 @@ class Rig:
     def frame(line):
         return {k: float(v) for k, v in re.findall(r"\b([xywh])=(-?[\d.]+)", line)}
 
+    # invariant: points map to the framebuffer by the screen's frame the
+    # app logs; a build that logs none is read at 2x.
     def scale(self, item):
-        height = round(item["y"] + item["h"])
+        height = self.screen["h"] if self.screen else self.fb[1] / 2
         return self.fb[1] / height, height
 
     def set_wall(self, kind, item):

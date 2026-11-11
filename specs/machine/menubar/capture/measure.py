@@ -22,6 +22,9 @@ TONES = {"dark": {"t1": ((255, 255, 255), 1.0), "t2": ((255, 255, 255), 0.72)},
          "light": {"t1": ((0, 0, 0), 1.0), "t2": ((0, 0, 0), 0.62)}}
 # value: a golden is the panel drawn with 24 pt of desk around it, at 2x.
 PAD = 48
+# value: Find's row at the panel's foot, 70 pt at 2x, pinned under the
+# scroll when the panel stops at its cap.
+FOOT = 140
 TARGET = 4.5
 
 
@@ -43,6 +46,16 @@ def ratio(a, b):
 def ink(rgb):
     gray = rgb.astype(np.float64).mean(axis=2) / 255
     return np.abs(gray - ndimage.median_filter(gray, size=15)) > 0.12
+
+
+def shifted(golden, shift, foot):
+    """The golden's glyph mask laid over a capture shorter by -shift: the
+    head as it is, the foot moved up with Find."""
+    mask = ink(golden)
+    out = np.zeros((golden.shape[0] + shift, golden.shape[1]), dtype=bool)
+    out[: out.shape[0] - foot] = mask[: out.shape[0] - foot]
+    out[out.shape[0] - foot :] = mask[golden.shape[0] - foot :]
+    return out
 
 
 def boxes(golden, scheme):
@@ -81,9 +94,9 @@ def boxes(golden, scheme):
     return out
 
 
-def measure(capture, golden_ink, kind, sl, scheme):
+def measure(capture, glyphs, kind, sl, scheme):
     box = capture[sl].astype(np.float64)
-    glyph = ndimage.binary_dilation(golden_ink[sl] | ink(capture)[sl], iterations=2)
+    glyph = ndimage.binary_dilation(glyphs[sl], iterations=2)
     bg = box[~glyph]
     if len(bg) < 20:
         return None
@@ -125,13 +138,22 @@ def main():
             found[scheme] = boxes(golden, scheme)
         capture = np.array(Image.open(os.path.join(out, f"{name}.png")).convert("RGB"))
         h, w = min(capture.shape[0], golden.shape[0]), min(capture.shape[1], golden.shape[1])
-        cap, gold = capture[:h, :w], golden[:h, :w]
-        golden_ink = ink(gold)
+        shift = min(capture.shape[0] - golden.shape[0], 0)
+        glyphs = (shifted(golden, shift, FOOT) if shift else ink(golden))[: capture.shape[0], : capture.shape[1]]
+        glyphs = glyphs | ink(capture)[: glyphs.shape[0], : glyphs.shape[1]]
         worst = {}
         for kind, sl in found[scheme]:
-            if sl[0].stop > h or sl[1].stop > w:
+            # invariant: a panel at its cap scrolls between a fixed head and
+            # Find, pinned to its bottom: a text in the golden's last
+            # FOOT pixels is read that far from the capture's bottom, and a
+            # text the scroll hid is not read.
+            if sl[0].start >= golden.shape[0] - FOOT:
+                sl = (slice(sl[0].start + shift, sl[0].stop + shift), sl[1])
+            elif sl[0].stop > h - FOOT:
                 continue
-            v = measure(cap, golden_ink, kind, sl, scheme)
+            if sl[1].stop > w:
+                continue
+            v = measure(capture, glyphs, kind, sl, scheme)
             if v is None:
                 continue
             at = f"y={sl[0].start // 2}pt x={sl[1].start // 2}pt"
