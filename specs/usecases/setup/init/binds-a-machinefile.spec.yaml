@@ -28,7 +28,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.machinefile, (.files | keys)]'' world.json'
       exit: 0
       stdout: |
-          [{"name":"laptop"},["downloads/laptop.yaml","machinefiles/laptop.yaml"]]
+          [{"name":"laptop"},["downloads/laptop.yaml","machinefiles/laptop.lock","machinefiles/laptop.yaml"]]
     - command: 'drift'
       exit: 0
       stdout: |
@@ -41,5 +41,6 @@ runs:
       stdout: |
           # laptop
           	apps.fd	listed	user	laptop
-          	apps.fd.method	brew	built-in	fd
-          	apps.fd.because	its one method for macos	built-in	fd
+          	apps.fd.method	brew	lock	laptop
+          	apps.fd.because	locked	lock	laptop
+          	apps.fd.locked	10.3.0	lock	laptop

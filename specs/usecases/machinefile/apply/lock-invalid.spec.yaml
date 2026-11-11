@@ -1,0 +1,23 @@
+description: 'a lock edited into another shape is refused at its file, and removing it is the way back'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.lock'
+      stdin: |
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - { name: jq }
+      exit: 0
+    - command: 'apply'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.lock: an app with no name or no method
+          Hint: remove it: the next station apply writes it anew from what is there

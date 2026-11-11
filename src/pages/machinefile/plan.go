@@ -98,6 +98,14 @@ func why(l machinefile.Line) string {
 	return l.Step.Why
 }
 
+// value: the version an install takes from the lock, as the plan says it.
+func lockedWord(l machinefile.Line) string {
+	if l.Action != machinefile.Install || l.Step.Locked == "" {
+		return ""
+	}
+	return "locked " + l.Step.Locked
+}
+
 func needsSection(p machinefile.Plan) []page.Section {
 	if len(p.Needs) == 0 {
 		return nil
@@ -175,7 +183,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	byAction := func(a machinefile.Action) []page.Row {
 		rows := make([]page.Row, 0, len(p.Lines))
 		for _, l := range p.Of(a) {
-			rows = append(rows, lineRow(l, why(l)))
+			rows = append(rows, lineRow(l, why(l), lockedWord(l)))
 		}
 		return rows
 	}

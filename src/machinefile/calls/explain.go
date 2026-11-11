@@ -25,11 +25,12 @@ type Deps struct {
 	Name    string
 	Kind    machine.Kind
 	// value: the Machinefile this machine is bound to, the ledger of what
-	// station installed, the owner's folder a path is copied into, the
-	// vault a `vault:` reference is read from, whether a line run as root
-	// asks a password here, and the clock.
+	// station installed, the lock of what it carries, the owner's folder a
+	// path is copied into, the vault a `vault:` reference is read from,
+	// whether a line run as root asks a password here, and the clock.
 	Prefs    contract.SourcePrefs
 	Ledger   contract.Ledger
+	Locks    contract.Locks
 	Owned    contract.Owned
 	Vault    Vault
 	Password contract.Password
@@ -157,12 +158,16 @@ func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved,
 	if err != nil {
 		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
 	}
-	r, err := machinefile.Resolve(lib, name, d.Machine)
+	lock := machinefile.Lock{File: d.Locks.Where(name)}
+	if lock.LockFile, _, err = d.Locks.Read(ctx, name); err != nil {
+		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
+	}
+	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
 	return r, lib.Catalog, Worded(err)
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d)}
+	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d), call.Bind(Upgrade, d)}
 }
 
 func Worded(err error) error {

@@ -1,0 +1,57 @@
+description: 'upgrade updates the managers first, then each app by the method that holds it, and says what moved'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, jq, node]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of gh · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of gh · adopted · on PATH, not managed by script
+          ◐	gh	2.97.0	brew	outdated
+          ●	jq	1.8.1	brew
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	mise	2026.10.1	brew
+          ●	node	24.11.0	mise
+          ●	gh	2.98.0	brew
+          ●	jq	1.8.1	brew
+          # Lock
+          ●	gh		2.98.0 by brew, was 2.97.0 by brew
+          ●	node		24.11.0 by mise, was 22.11.0 by mise
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
+      exit: 0
+      stdout: |+
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - name: gh
+                method: brew
+                version: 2.98.0
+              - name: jq
+                method: brew
+                version: 1.8.1
+              - name: mise
+                method: brew
+                version: 2026.10.1
+              - name: node
+                method: mise
+                version: 24.11.0
+
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	mise	2026.10.1	brew
+          ●	node	24.11.0	mise
+          ●	gh	2.98.0	brew
+          ●	jq	1.8.1	brew

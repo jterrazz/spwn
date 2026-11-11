@@ -10,8 +10,8 @@ import (
 
 // value: where a value was read: the owner's overlay, the owner's own
 // files, a shared source, station's built-in files; this machine, for a
-// system a Machinefile does not say; and the catalog, for an item a step
-// brings in.
+// system a Machinefile does not say; the catalog, for an item a step
+// brings in; and the lock, for the method and version it holds an app by.
 
 type Layer string
 
@@ -22,6 +22,7 @@ const (
 	Builtin     Layer = catalog.BuiltinLayer
 	ThisMachine Layer = "this machine"
 	Catalog     Layer = "catalog"
+	Locked      Layer = "lock"
 )
 
 // value: one source's files: its layer, the words a reader names it by

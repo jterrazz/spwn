@@ -1,0 +1,56 @@
+description: 'an app the lock holds is installed by its method at its version, and explain names the lock'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [python]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.lock'
+      stdin: |
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - { name: python, method: mise, version: 3.12.7 }
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	python	mise	locked 3.12.7
+          # To adopt
+          ?	homebrew	script	the manager of mise · on PATH, not managed by script
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	python	mise	locked 3.12.7
+          # To adopt
+          ?	homebrew	script	the manager of mise · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of mise · adopted · on PATH, not managed by script
+          ●	mise	2026.10.1	brew	the manager of python
+          ●	python	3.12.7	mise
+    - command: 'explain apps.python'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	apps.python	listed	user	jterrazz-macbook-pro
+          	apps.python.method	mise	lock	jterrazz-macbook-pro
+          	apps.python.because	locked	lock	jterrazz-macbook-pro
+          	apps.python.locked	3.12.7	lock	jterrazz-macbook-pro
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
+      exit: 0
+      stdout: |+
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - name: mise
+                method: brew
+                version: 2026.10.1
+              - name: python
+                method: mise
+                version: 3.12.7
+

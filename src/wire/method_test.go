@@ -143,7 +143,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 	deps := machinefilecalls.Deps{
 		Sources: func() []mfcontract.Source { return []mfcontract.Source{ownerFiles{files}, builtinSource()} },
 		Name:    "m", Kind: coremachine.Computer, Prefs: mfcontract.NewSourcePrefs(corefake.NewPreferences()),
-		Ledger: mffake.LedgerOf(w, "here"), Password: mffake.PasswordOf(w, "here"), Now: func() time.Time { return time.Unix(0, 0) }, Calls: calls,
+		Ledger: mffake.LedgerOf(w, "here"), Locks: mffake.LocksOf(w, "here"), Password: mffake.PasswordOf(w, "here"), Now: func() time.Time { return time.Unix(0, 0) }, Calls: calls,
 	}
 	calls.registry, err = call.NewRegistry(appscalls.All(appscalls.Deps{Apps: shelf, Known: lib.Catalog.Apps, Kind: coremachine.Computer}), machinefilecalls.All(deps))
 	if err != nil {
@@ -211,7 +211,7 @@ func (waiting) Sleep(ctx context.Context, _ time.Duration) error {
 
 func (b bench) step(t *testing.T, item string) machinefile.Step {
 	t.Helper()
-	r, err := machinefile.Resolve(b.lib, "m", machinefile.Machine{})
+	r, err := machinefile.Resolve(b.lib, "m", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}

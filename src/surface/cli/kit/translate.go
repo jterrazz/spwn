@@ -91,3 +91,11 @@ func ApplyWords(interrupted bool) []string {
 	}
 	return []string{words.ApplyNotRun, words.ApplyResumes}
 }
+
+func UpgradeWords(interrupted bool) []string {
+	// value: the words of a line of upgrade its run did not finish.
+	if interrupted {
+		return []string{words.Interrupted, words.UpgradeResumes}
+	}
+	return []string{words.ApplyNotRun, words.UpgradeResumes}
+}

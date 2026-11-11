@@ -26,6 +26,10 @@ const (
 	// value: a Machinefile named by its path whose name the owner's folder
 	// already holds with other bytes: it is never replaced.
 	NameTaken fail.Code = "machinefile.name-taken"
+	// value: the shared source is pinned at another commit than the one the
+	// lock was written from: its scripts are new code, which only `station
+	// upgrade` takes.
+	SourceMoved fail.Code = "machinefile.source-moved"
 )
 
 // value: how long the read past an interrupt waits for the interrupted
@@ -49,10 +53,11 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, SourceMoved, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
 		// invariant: everything is judged before any effect: the
-		// Machinefile, the needs a run off a terminal cannot answer (with
+		// Machinefile, the shared source the lock holds, the needs a run off
+		// a terminal cannot answer (with
 		// --remove, those of each extra it uninstalls), the removal's
 		// confirmation, a copy that would replace the owner's file. Then
 		// the machine is bound, so an interrupted run is resumed by a bare
@@ -62,8 +67,15 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		out := machinefile.Applied{Plan: plan}
+		source, err := sharedSource(d)
+		if err != nil {
+			return out, err
+		}
+		if moved := movedSource(plan.Lock, source); moved != nil {
+			return out, moved
+		}
 		if asked := plan.Interactive(in.Remove); !in.Interactive && len(asked) > 0 {
-			return out, refusedOffTerminal(asked)
+			return out, refusedOffTerminal(asked, "apply")
 		}
 		var extra []string
 		for _, e := range plan.Extra {
@@ -99,17 +111,20 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		if err := ctx.Err(); err != nil {
 			out.Interrupted = true
-			return out, err
+			return out, errors.Join(err, relock(ctx, d, plan, out.Done, source))
 		}
 		if in.Remove {
 			out.Removed = r.remove(ctx, plan.Extra)
 		}
 		out.Interrupted = ctx.Err() != nil
+		if err := relock(ctx, d, plan, out.Done, source); err != nil {
+			return out, err
+		}
 		return out, ctx.Err()
 	},
 }
 
-func refusedOffTerminal(asked []machinefile.Asked) error {
+func refusedOffTerminal(asked []machinefile.Asked, verb string) error {
 	items, needs := []string{}, make([]string, 0, len(asked))
 	for _, a := range asked {
 		needs = append(needs, string(a.Need))
@@ -119,7 +134,11 @@ func refusedOffTerminal(asked []machinefile.Asked) error {
 			}
 		}
 	}
-	return fail.New(fail.NeedsTerminal, NeedsTerminal, strings.Join(items, ", "), map[string]string{"needs": strings.Join(needs, ", ")})
+	detail := map[string]string{"needs": strings.Join(needs, ", ")}
+	if verb != "apply" {
+		detail["verb"] = verb
+	}
+	return fail.New(fail.NeedsTerminal, NeedsTerminal, strings.Join(items, ", "), detail)
 }
 
 // invariant: a Machinefile named by its path is copied into the owner's
@@ -174,7 +193,7 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 	// invariant: what finished is in the ledger before the interrupt is
 	// read, so an item installed just before Ctrl-C is station's to take
 	// back like any other.
-	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.Version}, r.p)
+	outcomes, err := call.Invoke(ctx, r.d.Calls, machine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{l.Step.Item}, Interactive: r.in.Interactive, Method: l.Step.Method, Version: l.Step.InstallVersion()}, r.p)
 	if err != nil && ctx.Err() == nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
@@ -192,7 +211,7 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 			continue
 		}
 		answered = o.Why != apps.WhyInterrupted
-		done.State, done.Version, done.Detail, done.Log, done.Installed = o.Result, o.Version, o.Detail, o.Log, fresh
+		done.State, done.Method, done.Version, done.Detail, done.Log, done.Installed = o.Result, string(o.Method), o.Version, o.Detail, o.Log, fresh
 		if !answered {
 			done.Reason, done.Detail = machinefile.Interrupted, ""
 		}
@@ -219,7 +238,7 @@ func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile
 	if r.d.Ledger.Put(past, machinefile.Installed{Item: l.Step.Item, Method: now.Method, Machinefile: r.name, At: r.d.Now().UTC()}) != nil {
 		return done
 	}
-	done.State, done.Version, done.Reason, done.Installed = catalog.StateOK, now.Version, "", true
+	done.State, done.Method, done.Version, done.Reason, done.Installed = catalog.StateOK, now.Method, now.Version, "", true
 	return done
 }
 
@@ -419,4 +438,40 @@ func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machi
 		done.State, done.Version, done.Detail, done.Log = o.Result, "", o.Detail, o.Log
 	}
 	return done
+}
+
+// value: the shared source this machine reads, as the lock records it;
+// nil when it reads none.
+func sharedSource(d Deps) (*catalog.LockSource, error) {
+	shared, ok, err := d.Prefs.Get()
+	if err != nil || !ok {
+		return nil, err
+	}
+	return &catalog.LockSource{Name: shared.Name, Commit: shared.Commit}, nil
+}
+
+// invariant: a lock written from a shared source holds its commit, and a
+// run that is not an upgrade reads only that commit: a source pinned
+// elsewhere since, or dropped, is refused before any effect.
+func movedSource(lock machinefile.Lock, now *catalog.LockSource) error {
+	was := lock.Source
+	if was == nil || (now != nil && *now == *was) {
+		return nil
+	}
+	detail := map[string]string{"locked": was.Commit, "lock": lock.File}
+	if now != nil {
+		detail["now"], detail["name"] = now.Commit, now.Name
+	}
+	return fail.New(fail.Refused, SourceMoved, was.Name, detail)
+}
+
+// invariant: the lock is written once the run ends, interrupted or not,
+// and only when it changed, so a run that changed nothing leaves the
+// file as it was.
+func relock(ctx context.Context, d Deps, p machinefile.Plan, done []machinefile.Done, source *catalog.LockSource) error {
+	now := machinefile.Relocked(p, done, source)
+	if machinefile.Diff(p.Lock.LockFile, now).Empty() {
+		return nil
+	}
+	return d.Locks.Write(context.WithoutCancel(ctx), now)
 }

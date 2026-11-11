@@ -9,7 +9,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 | On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake` |
 | A Mac's images and engine | `images`, `engine`                                                                             |
 | This terminal             | `use`                                                                                          |
-| Station itself            | `init`, `plan`, `apply`, `drift`, `explain`, `--version`, `help`                               |
+| Station itself            | `init`, `plan`, `apply`, `drift`, `upgrade`, `explain`, `--version`, `help`                    |
 | Hidden aliases            | The v2 words that still run, for one release                                                   |
 | Plumbing                  | The hidden commands the machine runs for itself                                                |
 | Exit codes                | What 0, 1, 2 and 130 mean                                                                      |
@@ -222,6 +222,7 @@ station init [--name <name>] [--machinefile <name|path>]
 station plan [--machinefile <name|path>] [--json]
 station apply [--machinefile <name|path>] [--remove] [--yes]
 station drift [--machinefile <name|path>] [--json]
+station upgrade [--machinefile <name>] [--json]
 station explain [<key>] [--machinefile <name>]
 station --version
 station help [command]
@@ -235,7 +236,11 @@ station help [command]
 
 `drift` is the plan read as conditions, one row per item: `present`, `absent`, `outdated`, `changed`, `not managed`, `extra`, `unknown`. It never acts. `--json` prints `station.machinefile.drift/v1`.
 
-`explain` resolves the Machinefile this machine is bound to (else the one named after it), or `--machinefile <name>`, against the catalog, and prints each value with its layer (`user`, `shared`, `built-in`, `overlay`, `this machine`) and the Machinefile or item that says it; a key (`vm`, `apps.jq`) explains itself and every key under it. Every refusal of the resolution exits 2 with its own words: no Machinefile of that name, a file refused at its line, a newer schema (`update station`), a mixin, `vm` on a computer, a cycle, an item with no method for the system or a version its method cannot pin, an item the catalog does not hold, a value that is none of the item's options, a key it says nothing of; a shared source that cannot be read at its commit exits 1. `--json` prints `station.machinefile.explain/v1`. The format is [Machinefiles](machinefiles.md).
+`apply` and `upgrade` write the Machinefile's lock, `~/.config/station/machinefiles/<name>.lock`, once their run ends, interrupted or not ([Machinefiles](machinefiles.md#the-lock)). `apply` installs an app the lock holds by the lock's method, at its version where that method pins one, and the plan says it (`○ python  mise  locked 3.12.7`). A lock written from a shared source holds its commit, and `apply` refuses a source pinned at another one since, before any effect, exit 2, `Hint: station upgrade takes it, then station apply`; a lock that does not decode is refused at its file, `Hint: remove it: the next station apply writes it anew from what is there`.
+
+`upgrade` updates every app the Machinefile lists that reads there by one of its methods, by that method, the managers first (homebrew's index by `brew update`, mise, node) and then the rest, each in the plan's order, then writes the lock anew and prints what moved in it (`gh  2.98.0 by brew, was 2.97.0 by brew`, the shared source's commit). An app whose version the Machinefile pins is kept, `pinned 22 by <machinefile>: kept`; a copy no method holds is yours and left as it is, and an app not there is apply's. Off a terminal, an upgrade whose updates ask you anything is refused before any effect, exit 2, `Hint: run station upgrade on a terminal`; an interruption marks the app it stopped at and each one after it, exit 130, `station upgrade resumes`. It updates neither station itself (re-run the install, [Release](../guides/release.md)) nor what the Machinefile does not list (`station apps update`). `--json` prints `station.machinefile.upgrade/v1`: each `line` as it ended, the `lock`'s moves (`app`, `was`, `now`), the `source` when it moved, and `interrupted`.
+
+`explain` resolves the Machinefile this machine is bound to (else the one named after it), or `--machinefile <name>`, against the catalog, and prints each value with its layer (`user`, `shared`, `built-in`, `overlay`, `this machine`, `lock`) and the Machinefile or item that says it; a key (`vm`, `apps.jq`) explains itself and every key under it. Every refusal of the resolution exits 2 with its own words: no Machinefile of that name, a file refused at its line, a newer schema (`update station`), a mixin, `vm` on a computer, a cycle, an item with no method for the system or a version its method cannot pin, an item the catalog does not hold, a value that is none of the item's options, a key it says nothing of; a shared source that cannot be read at its commit exits 1. `--json` prints `station.machinefile.explain/v1`. The format is [Machinefiles](machinefiles.md).
 
 ## Hidden aliases
 

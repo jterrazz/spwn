@@ -286,6 +286,8 @@ func (m *worldMac) userSource() machinefilecontract.Source {
 	return machinefilefake.UserOf(m.run.w, m.name)
 }
 func (m *worldMac) owned() machinefilecontract.Owned { return machinefilefake.OwnedOf(m.run.w, m.name) }
+
+func (m *worldMac) locks() machinefilecontract.Locks { return machinefilefake.LocksOf(m.run.w, m.name) }
 func (m *worldMac) password() machinefilecontract.Password {
 	return machinefilefake.PasswordOf(m.run.w, m.name)
 }

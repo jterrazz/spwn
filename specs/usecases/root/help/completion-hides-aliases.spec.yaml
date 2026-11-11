@@ -21,6 +21,7 @@ runs:
           plan
           apply
           drift
+          upgrade
           explain
           agents
           help

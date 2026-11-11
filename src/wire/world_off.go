@@ -81,6 +81,7 @@ func (*worldMac) identities() accountscontract.Identities                { retur
 func (*worldMac) secretSource() accountscontract.SecretSource            { return nil }
 func (*worldMac) userSource() machinefilecontract.Source                 { return nil }
 func (*worldMac) owned() machinefilecontract.Owned                       { return nil }
+func (*worldMac) locks() machinefilecontract.Locks                       { return nil }
 func (*worldMac) password() machinefilecontract.Password                 { return nil }
 func (*worldMac) sharedSource(machinefilecontract.SharedSource) machinefilecontract.Source {
 	return nil

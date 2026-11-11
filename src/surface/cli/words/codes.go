@@ -119,9 +119,20 @@ func Codes() map[fail.Code]Wording {
 			return e.Detail["path"] + " already holds another " + e.Detail["name"] + ": station never replaces your Machinefile", "edit that file, or remove it to copy " + e.Subject + " instead"
 		},
 		machinefilecalls.NeedsTerminal: func(e *fail.Error) (string, string) {
-			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": apply asks it on a terminal, and this run has none", "run station apply on a terminal"
+			verb := cmp.Or(e.Detail["verb"], "apply")
+			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station " + verb + " on a terminal"
+		},
+		machinefilecalls.SourceMoved: func(e *fail.Error) (string, string) {
+			now := "names none"
+			if e.Detail["now"] != "" {
+				now = "is at " + abbreviated(e.Detail["now"])
+			}
+			return "the shared source " + e.Subject + " " + now + ", and " + e.Detail["lock"] + " holds " + abbreviated(e.Detail["locked"]) + ": its scripts are code apply never takes unseen", "station upgrade takes it, then station apply"
 		},
 		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
+			if strings.HasSuffix(e.Subject, catalog.LockSuffix) {
+				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"
+			}
 			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile"
 		},
 		machinefilecalls.NewerSchema: func(e *fail.Error) (string, string) {
@@ -430,4 +441,12 @@ func needsWords(needs string) string {
 		}
 	}
 	return strings.Join(said, " and ")
+}
+
+// value: a commit as git abbreviates it, its first seven characters.
+func abbreviated(commit string) string {
+	if len(commit) > 7 {
+		return commit[:7]
+	}
+	return commit
 }

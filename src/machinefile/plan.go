@@ -113,6 +113,7 @@ type Asked struct {
 
 type Plan struct {
 	Name         string
+	Lock         Lock
 	Needs        []Asked
 	Lines        []Line
 	Extra        []ExtraLine
@@ -128,7 +129,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	// setting changed by hand or a read that did not answer left as it is
 	// (the owner's to decide); an item of another phase is left to it. An
 	// item skipped on this system is still listed, so never extra.
-	p := Plan{Name: r.Name, Skipped: r.Skipped, Passwordless: passwordless}
+	p := Plan{Name: r.Name, Lock: r.Lock, Skipped: r.Skipped, Passwordless: passwordless}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Item] = true
@@ -498,20 +499,24 @@ type Reason string
 const (
 	Interrupted Reason = "interrupted"
 	NotRun      Reason = "not-run"
+	// value: an upgrade keeps an app at the version its Machinefile asks.
+	Pinned Reason = "pinned"
 )
 
 // value: one line of a run: what it was, how it ended, the version and
 // the method that hold it now, its words (a failure's, the log that keeps
-// its program's own), and whether this run installed it.
+// its program's own), and whether this run installed or updated it.
 
 type Done struct {
 	Line      Line
 	State     catalog.State
+	Method    string
 	Version   string
 	Detail    string
 	Log       string
 	Reason    Reason
 	Installed bool
+	Updated   bool
 }
 
 // value: a Machinefile applied: its plan, each line as it ended in the
@@ -524,5 +529,50 @@ type Applied struct {
 	Done        []Done
 	Removed     []Done
 	Bound       string
+	Interrupted bool
+}
+
+func (p Plan) Upgrades() []Line {
+	// invariant: an upgrade reaches every app the Machinefile lists that
+	// reads there by one of its methods, the managers first and then the
+	// rest, each in the plan's order, so a manager is fresh before what it
+	// installs is updated; an app of another phase is its phase's, and a
+	// copy no method holds is the owner's.
+	var managers, rest []Line
+	for _, l := range p.Lines {
+		if l.Step.Kind == catalog.KindSetting || l.Step.Phase != catalog.PhaseApply || l.Seen.Method == "" {
+			continue
+		}
+		if l.Seen.Condition != Present && l.Seen.Condition != Outdated {
+			continue
+		}
+		if l.Step.Kind == catalog.KindManager {
+			managers = append(managers, l)
+		} else {
+			rest = append(rest, l)
+		}
+	}
+	return append(managers, rest...)
+}
+
+func (p Plan) UpgradeNeeds() []Asked {
+	// value: what an upgrade asks of the owner: the needs of each app it
+	// updates, a version the Machinefile pins being kept as it is.
+	var lines []Line
+	for _, l := range p.Upgrades() {
+		if l.Step.Version == "" {
+			lines = append(lines, l)
+		}
+	}
+	return p.asked(lines)
+}
+
+// value: an upgrade run: its plan, each app as it ended in the order it
+// ran, the lock before and after, and whether it was interrupted.
+
+type Upgraded struct {
+	Plan        Plan
+	Done        []Done
+	Lock        LockDiff
 	Interrupted bool
 }

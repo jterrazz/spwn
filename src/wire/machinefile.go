@@ -25,6 +25,7 @@ import (
 	"github.com/jterrazz/studio-station/src/surface/cli/explain"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 	"github.com/jterrazz/studio-station/src/surface/cli/plan"
+	"github.com/jterrazz/studio-station/src/surface/cli/upgrade"
 )
 
 // value: the owner's files, ~/.config/station/{catalog,machinefiles}; in
@@ -164,7 +165,7 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
-		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Owned: m.owned(), Vault: m.vault(),
+		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
 		Password: m.password(), Now: m.sys.Clock.Now, Calls: calls,
 	}
 }
@@ -187,6 +188,15 @@ func (m machine) owned() machinefilecontract.Owned {
 	return files.NewOwned(m.sys.FS, filepath.Join(m.paths.Prefs, "machinefiles"))
 }
 
+// value: the locks beside the owner's Machinefiles; in a world, its
+// Mac's station files.
+func (m machine) locks() machinefilecontract.Locks {
+	if m.world != nil {
+		return m.world.locks()
+	}
+	return files.NewLocks(m.sys.FS, filepath.Join(m.paths.Prefs, "machinefiles"), "~/.config/station/machinefiles")
+}
+
 // value: this machine as a Machinefile's selector reads it: Station's
 // Linux machines are Ubuntu.
 func machineOf(p coremachine.Profile) machinefile.Machine {
@@ -206,5 +216,6 @@ func machinefileCommands(env kit.Env, m machine) []*cobra.Command {
 		plan.Command(plan.Deps{ThisMachine: m.where}, env),
 		apply.Command(apply.Deps{ThisMachine: m.where}, env),
 		drift.Command(drift.Deps{ThisMachine: m.where}, env),
+		upgrade.Command(upgrade.Deps{ThisMachine: m.where}, env),
 	}
 }

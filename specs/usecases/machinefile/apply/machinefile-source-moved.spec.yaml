@@ -1,0 +1,35 @@
+description: 'a shared source pinned elsewhere than the lock is refused by apply, and taken by upgrade'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git", commit: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}} | .sources = {"https://example.com/studio.git": {commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/jterrazz-macbook-pro.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.lock'
+      stdin: |
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          source: { name: studio, commit: 0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f }
+          apps:
+              - { name: jq, method: brew, version: 1.8.1 }
+      exit: 0
+    - command: 'apply'
+      exit: 2
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+      stderr: |
+          Error: the shared source studio is at 1a2b3c4, and ~/.config/station/machinefiles/jterrazz-macbook-pro.lock holds 0f0f0f0: its scripts are code apply never takes unseen
+          Hint: station upgrade takes it, then station apply
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	jq	1.8.1	brew
+          # Lock
+          ●	shared source		studio@1a2b3c4, was studio@0f0f0f0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew

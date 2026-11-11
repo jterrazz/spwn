@@ -40,8 +40,11 @@ type Step struct {
 	// value: the method chosen, as its file says it.
 	Spec    catalog.MethodSpec
 	Version string
-	Phase   catalog.Phase
-	Needs   []catalog.Need
+	// value: the version the lock holds the item at, when the step is
+	// carried by the method the lock names, and the lock's file then.
+	Locked, Lock string
+	Phase        catalog.Phase
+	Needs        []catalog.Need
 	// value: what has to happen once it is applied for it to take (the
 	// Dock restarted, a logout), and the steps of the plan it waits on.
 	Restarts []catalog.AfterApply
@@ -67,6 +70,7 @@ type Skip struct {
 
 type Resolved struct {
 	Name    string
+	Lock    Lock
 	Kind    catalog.MachineRole
 	System  catalog.System
 	Files   []Origin
@@ -268,13 +272,16 @@ func mergeSettings(m *merged, s catalog.SettingList, o Origin) {
 	}
 }
 
-func Resolve(lib Library, name string, this Machine) (Resolved, error) {
+func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error) {
 	// invariant: a Machinefile resolves against the catalog and the system it
 	// says (this machine's where it says none): a mixin is never applied, a
 	// computer has no vm, each item's method is the first of its matching
 	// methods in prefer's order, then the system's priority, then the file's
 	// order; the steps run requires first, managers before what they install,
-	// `after` between two the plan holds; a cycle is refused.
+	// `after` between two the plan holds; a cycle is refused. An app the
+	// lock holds is carried by the lock's method wherever the system and
+	// the entry still allow it, at the lock's version where it meets the
+	// one asked.
 	files, err := lib.chain(name)
 	if err != nil {
 		return Resolved{}, err
@@ -295,7 +302,7 @@ func Resolve(lib Library, name string, this Machine) (Resolved, error) {
 			}
 		}
 	}
-	r := Resolved{Name: name, Kind: catalog.MachineRole(m.values["machine.kind"].Text)}
+	r := Resolved{Name: name, Lock: lock, Kind: catalog.MachineRole(m.values["machine.kind"].Text)}
 	r.System = catalog.System{
 		OS: catalog.OS(m.values["machine.system.os"].Text), Version: m.values["machine.system.version"].Text,
 		Arch: catalog.Arch(m.values["machine.system.arch"].Text), Machine: r.Kind,
@@ -306,7 +313,7 @@ func Resolve(lib Library, name string, this Machine) (Resolved, error) {
 	if r.Kind == catalog.RoleComputer && m.vm != nil {
 		return Resolved{}, &VMOnComputerError{Name: name, File: m.vm.File}
 	}
-	p := planner{cat: lib.Catalog, sys: r.System, prefer: m.prefer, at: map[string]int{}}
+	p := planner{cat: lib.Catalog, sys: r.System, prefer: m.prefer, lock: lock, at: map[string]int{}}
 	for _, b := range m.bake {
 		if _, ok := p.lookup(b.name); !ok {
 			return Resolved{}, &UnknownItemError{Name: b.name, By: b.origin.Name, At: b.origin.File}
@@ -342,6 +349,7 @@ type planner struct {
 	cat     catalog.Catalog
 	sys     catalog.System
 	prefer  []catalog.ManagerKey
+	lock    Lock
 	steps   []Step
 	at      map[string]int
 	skipped []Skip
@@ -479,7 +487,16 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 		return Step{}, &NoMethodError{Item: it.Item.Name, System: p.system(), Manager: string(manager), Why: why, At: where}
 	}
 	matching = p.cat.Ordered(matching, p.sys.OS, p.prefer)
-	chosen := matching[0]
+	chosen, because := matching[0], p.because(matching[0], len(matching))
+	locked, ok := p.lock.App(it.Item.Name)
+	if ok && it.Item.Kind != catalog.KindSetting {
+		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && (version == "" || m.Pins()) })
+		if at >= 0 {
+			chosen, because = matching[at], "locked"
+		} else {
+			ok = false
+		}
+	}
 	if version != "" && !chosen.Pins() {
 		alt := ""
 		for _, m := range matching[1:] {
@@ -491,10 +508,24 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version, Method: chosen.Key(), Alternative: alt, At: where}
 	}
 	return Step{
-		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: p.because(chosen, len(matching)), Spec: chosen,
-		Version: version, Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
+		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
+		Version: version, Locked: lockedAt(ok, version, locked.Version), Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
 		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
 	}, nil
+}
+
+func lockedAt(ok bool, asked, locked string) string {
+	if ok && Satisfies(asked, locked) {
+		return locked
+	}
+	return ""
+}
+
+func lockFile(ok bool, file string) string {
+	if ok {
+		return file
+	}
+	return ""
 }
 
 func (p *planner) because(m catalog.MethodSpec, of int) string {
@@ -667,7 +698,14 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		if s.Version != "" {
 			text = s.Version
 		}
-		out = append(out, Value{Key: key, Text: text, Origin: s.Origin}, Value{Key: key + ".method", Text: s.Method, Origin: s.Defined}, Value{Key: key + ".because", Text: s.Chosen, Origin: s.Defined})
+		chose := s.Defined
+		if s.Lock != "" {
+			chose = Origin{Name: r.Name, Layer: Locked, File: s.Lock}
+		}
+		out = append(out, Value{Key: key, Text: text, Origin: s.Origin}, Value{Key: key + ".method", Text: s.Method, Origin: chose}, Value{Key: key + ".because", Text: s.Chosen, Origin: chose})
+		if s.Locked != "" {
+			out = append(out, Value{Key: key + ".locked", Text: s.Locked, Origin: chose})
+		}
 		for _, k := range sortedNames(s.Values) {
 			out = append(out, Value{Key: key + "." + k, Text: string(s.Values[k]), Origin: s.Origin})
 		}

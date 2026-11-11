@@ -11,6 +11,8 @@ A Machinefile is one YAML file in the schema `station.machinefile/v1` that says 
 | The resolution     | How a Machinefile becomes the steps of a plan, and its errors |
 | explain            | Each value and the layer it comes from                        |
 | plan, apply, drift | The machine read against it, carried out, and its ledger      |
+| The lock           | What a machine carries of it, and what `apply` installs again |
+| upgrade            | Every app it carries updated, the managers first              |
 | The hard cases     | Where the format absorbs each of them                         |
 | What is read today | The keys declared for the lots that read them                 |
 
@@ -130,8 +132,9 @@ A Machinefile resolves into the steps of a plan, in this order:
 2. **The merge.** A later file's value replaces an earlier one's: a key of `machine` or `vm` by key, an app or a setting whole by name, `prefer`, `accounts` and `ports` whole. A Machinefile that itself says no `machine` is a mixin, refused if applied; a `computer` with `vm`, itself or from a file it extends, is refused naming that file.
 3. **The method of each item.** Its methods whose selector matches the system ([The selector](catalog.md#the-selector)); a version range is met by the system's version, never by an unknown one. Among them, prefer's keys first in its order, then the managers this system ranks by their rank (`priority`), then the other managers, then a `script`; a tie keeps the file's order; `apps install` chooses an app's method on each kind of machine by the same order. An app's `manager` keeps only that key's methods. A step names its method as station runs and records it, so a `script` that runs a line is `shell`, as `station apps` and the ledger say it.
 4. **The errors.** No method for the system stops the plan (`ghostty has no method for ubuntu 24.04`) unless the item is `optional`, which skips it and says so: an entry that asks a `manager` the item has no method by there is skipped naming the methods it has, so a mistaken pin is never a silent skip. A version the chosen method cannot pin is refused, naming the method of the item that can; an item the catalog does not hold, listed or baked into the image (`vm.image.bake`), or a setting listed as an app, is refused. A refused entry is named at its file and line (`~/.config/station/machinefiles/studio-linux.yaml:6`).
-5. **What an item brings.** Every item it leans on: its `requires`, its method's provider (`provided-by: herdr-app` brings `herdr-app`), and the manager its method installs by (`brew` brings `homebrew`), each resolved like a listed one; a setting's `requires-one-of` is met by any the plan holds, else by its first. `apps install` brings the same links of an app, by the method it installs it with here, its manager only while that manager is missing, and the manager is the one the catalog names (a missing `npm` brings `node`, never `homebrew` itself).
-6. **The order.** What an item leans on before it (what it requires, its provider, its manager), `after` between two items the plan holds; among the steps ready, the first in the plan's order runs next. A cycle of requires and after is refused, printed around its loop (`left needs right needs left`).
+5. **What the lock holds.** An app the machine's lock holds is carried by the lock's method when it is one of the matching methods (the `manager` an entry asks included), at the lock's version where that method pins one and the version meets the one asked (`22` is met by `22.11.0`); otherwise the order above chooses, and the next run writes the lock anew ([The lock](#the-lock)).
+6. **What an item brings.** Every item it leans on: its `requires`, its method's provider (`provided-by: herdr-app` brings `herdr-app`), and the manager its method installs by (`brew` brings `homebrew`), each resolved like a listed one; a setting's `requires-one-of` is met by any the plan holds, else by its first. `apps install` brings the same links of an app, by the method it installs it with here, its manager only while that manager is missing, and the manager is the one the catalog names (a missing `npm` brings `node`, never `homebrew` itself).
+7. **The order.** What an item leans on before it (what it requires, its provider, its manager), `after` between two items the plan holds; among the steps ready, the first in the plan's order runs next. A cycle of requires and after is refused, printed around its loop (`left needs right needs left`).
 
 The resolution is pure: it reads files and the catalog, never the machine. It installs nothing either: `apps`, `settings`, `accounts` and `ports` do, called by the plan.
 
@@ -166,6 +169,28 @@ What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: e
 
 An apt app station recorded adding none of the packages of (`~/.local/share/station/apt`, [Apps and skills](apps-and-skills.md)) is yours, whoever the ledger says installed it: the plan says `listed no longer`, and the run keeps it, `station cannot uninstall it: kept, and yours: remove it by hand if you want`, and forgets it. Only `station apps remove <app>`, your own word for it, takes its package.
 
+## The lock
+
+What a machine carries of its Machinefile is its lock, `~/.config/station/machinefiles/<name>.lock` beside it, in the schema `station.lock/v1`: the Machinefile's name, the shared source's commit it was read at, and each app with the method that holds it and the version there. No source reads it (only a `.yaml` file is read), it is read as strictly as a Machinefile, and one that does not decode is refused at its file: removing it is the way back, since the next `apply` writes it anew from what is there. It is station's file: written whole, its apps by name, so two locks differ only where something moved.
+
+```yaml
+lock: station.lock/v1
+machinefile: jterrazz-macbook-pro
+source: { name: studio, commit: 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d }
+apps:
+    - name: gh
+      method: brew
+      version: 2.98.0
+```
+
+`apply` and `upgrade` write it once their run ends, interrupted or not, and only when it moved. It then names, for every app the Machinefile lists that reads there by a method, that method and the version it reads, an adopted app by the method that holds it; an app the run did not bring there (it failed, was interrupted, was not run, or does not read) keeps what the lock held of it, so the next `apply` installs it as locked; a copy no method holds is yours and leaves the lock, as does an app the Machinefile lists no longer. Settings are not locked. An app the lock holds is installed by the lock's method, at its version where that method pins one (mise's runtimes; a brew formula takes its newest), and the plan says so (`○ python  mise  locked 3.12.7`), `explain apps.<app>` naming the lock as the layer of its method. A lock of another kind of machine, whose method this one has not, gives way to this machine's choice. The lock is what `apply` installs on every path: fresh, locked, upgraded, interrupted, adopted, and from another machine's lock ([ADR-041](../decisions/041-the-lock-is-what-apply-installs.md)).
+
+A lock written from a shared source holds its commit, and a run that is not an upgrade reads only that one: a source pinned at another commit since, or dropped, is refused by `apply` before any effect (`the shared source studio is at 1a2b3c4, and ... holds 0f0f0f0`), and `station upgrade` takes it, writing the new commit into the lock. A `script` method there is code, which `apply` never takes unseen.
+
+## upgrade
+
+`station upgrade` updates every app the Machinefile lists that reads there by one of its methods, by that method, the managers first and then the rest, each in the plan's order, so a manager is fresh before what it installs is updated: homebrew's own index by its `upgrade:` line, `brew update`, since station runs every bundle with `HOMEBREW_NO_AUTO_UPDATE=1` and an install never refreshes the index behind your back. An app whose version the Machinefile pins is kept at it (`pinned 22 by jterrazz-macbook-pro: kept`), a copy no method holds is yours and left as it is, an app of another phase is its phase's, and an app not there is `apply`'s. It then writes the lock anew and prints what moved in it (`gh  2.98.0 by brew, was 2.97.0 by brew`, the shared source's commit). Off a terminal, an upgrade whose updates ask you anything is refused before any effect, as `apply` is; an interruption says `station upgrade resumes`. It does not update station itself: re-running the install does ([Release](../guides/release.md#how-a-machine-takes-it)).
+
 ## The hard cases
 
 | Case                                    | Where                                                                                             |
@@ -187,7 +212,8 @@ An apt app station recorded adding none of the packages of (`~/.local/share/stat
 | 14. Secrets                             | a `vault:` reference, read only to hand the setting its value                                     |
 | 15. A dotfile edited by hand            | `changed` in drift, left as it is by apply                                                        |
 | 16. A macOS update breaks an app        | `changed` in drift, installed again by apply                                                      |
-| 17, 18, 19                              | the lockfile and upgrade                                                                          |
+| 17. An old image                        | the lock it was built from, read by `images build` (a later lot)                                  |
+| 18. Upgrade order                       | `station upgrade`: the managers first, then the rest; brew's own index refresh off during both    |
 
 ## What is read today
 

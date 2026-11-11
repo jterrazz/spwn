@@ -86,7 +86,7 @@ func machine(name, system, apps string) string {
 
 func methodOf(t *testing.T, lib machinefile.Library, name, item string) string {
 	t.Helper()
-	r, err := machinefile.Resolve(lib, name, machinefile.Machine{})
+	r, err := machinefile.Resolve(lib, name, machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 	top := machine("top", "{ os: macos, version: '26' }", "[{ name: fd, manager: cask }]") + "extends: [base]\nvm: { resources: { cpus: 8 } }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: top\napps: { add: [releases], remove: [packages] }\n"
 	lib := library(t, map[string]string{"machinefiles/top.yaml": top, "machinefiles/top.local.yaml": overlay}, map[string]string{"machinefiles/base.yaml": base})
-	r, err := machinefile.Resolve(lib, "top", machinefile.Machine{})
+	r, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +178,7 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 		{"requires", map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[left]")}, "left needs right needs left"},
 	}
 	for _, c := range cases {
-		_, err := machinefile.Resolve(library(t, c.files, nil), "a", machinefile.Machine{})
+		_, err := machinefile.Resolve(library(t, c.files, nil), "a", machinefile.Machine{}, machinefile.Lock{})
 		var cycle *machinefile.CycleError
 		if !errors.As(err, &cycle) || cycle.Said() != c.want {
 			t.Errorf("%s: %v, want the cycle %s", c.about, err, c.want)
@@ -190,7 +190,7 @@ func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 	base := machine("a", "{ os: macos }", "[]") + "accounts: { share: [{ account: claude, for: 7d }, { account: github }], keep: [github] }\nports: { open: 3000-9999, to: private, except: [22] }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { share: [{ account: claude, for: 1d }] }\nports: { open: 8080, to: local }\n"
 	lib := library(t, map[string]string{"machinefiles/a.yaml": base, "machinefiles/a.local.yaml": overlay}, nil)
-	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{})
+	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 		{"an item baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
 	}
 	for _, c := range cases {
-		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil), "a", machinefile.Machine{})
+		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
 		if err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: %v, want it saying %q", c.about, err, c.want)
 		}
@@ -242,7 +242,7 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 
 func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
 	file := machine("a", "{ os: macos }", "[{ name: fd, manager: skill, optional: true }]")
-	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": file}, nil), "a", machinefile.Machine{})
+	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": file}, nil), "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +259,7 @@ func TestAnItemProvidedByAnotherBringsItInFirst(t *testing.T) {
 		"catalog/ai-agents/desktop.yaml": "item: station.catalog/v1\nkind: app\nname: desktop\ndescription: the app\nmethods:\n    - { os: any, script: { run: 'true' } }\n",
 	}
 	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[core]")}, provided)
-	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{})
+	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
 	if err != nil {
 		t.Fatal(err)
 	}

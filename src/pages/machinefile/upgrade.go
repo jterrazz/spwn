@@ -1,0 +1,161 @@
+package machinefile
+
+import (
+	"strconv"
+
+	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/machinefile"
+	"github.com/jterrazz/studio-station/src/page"
+	"github.com/jterrazz/studio-station/src/pages"
+)
+
+// value: one app's line of the lock as the owner reads it: its version
+// and the method that holds it.
+func lockedWords(a *catalog.LockedApp) string {
+	if a.Version == "" {
+		return "by " + a.Method
+	}
+	return a.Version + " by " + a.Method
+}
+
+func lockSection(d machinefile.LockDiff) []page.Section {
+	if d.Empty() {
+		return nil
+	}
+	rows := make([]page.Row, 0, len(d.Apps)+1)
+	for _, c := range d.Apps {
+		row := page.Row{ID: "lock/" + c.App, Label: c.App, Mark: page.OK}
+		switch {
+		case c.Was == nil:
+			row.Detail = page.Text("added, " + lockedWords(c.Now))
+		case c.Now == nil:
+			row.Detail, row.Mark = page.Text("listed no longer"), page.Absent
+		default:
+			row.Detail = page.Text(lockedWords(c.Now) + ", was " + lockedWords(c.Was))
+		}
+		rows = append(rows, row)
+	}
+	if d.Source != nil {
+		rows = append(rows, page.Row{ID: "lock/source", Label: "shared source", Mark: page.OK, Detail: page.Text(short(d.Source[1]) + ", was " + short(d.Source[0]))})
+	}
+	return []page.Section{{ID: "lock", Title: "Lock", Columns: columns(), Items: itemsOf(rows)}}
+}
+
+func itemsOf(rows []page.Row) []page.Item {
+	items := make([]page.Item, 0, len(rows))
+	for i := range rows {
+		items = append(items, page.Item{Row: &rows[i]})
+	}
+	return items
+}
+
+// value: a source as `<name>@<commit>`, its commit cut to the first seven
+// characters; none, when the lock read no shared source.
+func short(source string) string {
+	if source == "" {
+		return "none"
+	}
+	if at := len(source) - 40; at > 0 && source[at-1] == '@' {
+		return source[:at+7]
+	}
+	return source
+}
+
+func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.Page {
+	// invariant: upgrade reads as every run does (pages.RunPage): the line
+	// that sums it up, each app with its mark, its version and its method
+	// in the order it ran (the managers first), a version the Machinefile
+	// pins said kept, then what the lock moved, and what to do next.
+	steps := make([]pages.RunStep, 0, len(done))
+	updated, failed, interrupted := 0, 0, u.Interrupted
+	for _, d := range done {
+		var said []string
+		detail := d.Detail
+		if d.Reason == machinefile.Pinned {
+			said = append(said, "pinned "+d.Line.Step.Version+" by "+u.Plan.Name+": kept")
+		}
+		if len(d.Words) > 0 {
+			said, detail = append(said, d.Words[:len(d.Words)-1]...), d.Words[len(d.Words)-1]
+		}
+		method := d.Method
+		if method == "" {
+			method = d.Line.Method()
+		}
+		steps = append(steps, pages.RunStep{ID: d.Line.Step.Item, State: d.State, Cells: []page.Value{page.Version(d.Version), page.Texts(method)}, Why: said, Detail: detail, Log: d.Log})
+		switch {
+		case d.Reason == machinefile.Interrupted:
+			interrupted = true
+		case d.State == catalog.StateBroken:
+			failed++
+		case d.Updated && d.State == catalog.StateOK:
+			updated++
+		}
+	}
+	r := pages.Run{Command: "upgrade", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: lockSection(u.Lock)}
+	switch {
+	case interrupted:
+		r.Head = &pages.RunHead{Label: u.Plan.Name + " interrupted", Mark: page.Broken}
+		r.Next = []page.Hint{{Command: "station upgrade", Text: "resumes"}}
+	case failed > 0:
+		r.Head = &pages.RunHead{Label: counted(failed, "of "+strconv.Itoa(len(steps))+" failed upgrading "+u.Plan.Name), Mark: page.Broken}
+		r.Next = []page.Hint{{Command: "station upgrade", Text: "tries what failed again"}}
+	default:
+		r.Head = &pages.RunHead{Label: "Upgraded " + u.Plan.Name, Mark: page.OK}
+	}
+	words := []string{counted(updated, "updated")}
+	if u.Lock.Empty() {
+		words = append(words, "lock unchanged")
+	} else {
+		words = append(words, counted(len(u.Lock.Apps), "moved in "+u.Plan.Lock.File))
+	}
+	r.Head.Words = words
+	return pages.RunPage(r, thisMac)
+}
+
+type LockChangeJSON struct {
+	App string `json:"app"`
+	// value: the app's line before and after, `<version> by <method>`;
+	// empty where the lock held none.
+	Was string `json:"was"`
+	Now string `json:"now"`
+}
+
+type UpgradedJSON struct {
+	Schema      string           `json:"schema"`
+	Machinefile string           `json:"machinefile"`
+	Lines       []LineJSON       `json:"lines"`
+	Lock        []LockChangeJSON `json:"lock"`
+	// value: the shared source before and after, `<name>@<commit>`, when
+	// the upgrade moved it.
+	Source      []string `json:"source,omitempty"`
+	Interrupted bool     `json:"interrupted"`
+}
+
+func UpgradedContract(u machinefile.Upgraded, done []Worded) UpgradedJSON {
+	// value: station.machinefile.upgrade/v1: each app as the upgrade left
+	// it, and what moved in the lock.
+	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Interrupted: u.Interrupted}
+	for _, d := range done {
+		l := lineJSON(d.Line, string(d.State), d.Detail)
+		if d.Method != "" {
+			l.Method = d.Method
+		}
+		if d.Reason == machinefile.Pinned {
+			l.Action = string(machinefile.Keep)
+		}
+		out.Lines = append(out.Lines, l)
+	}
+	said := func(a *catalog.LockedApp) string {
+		if a == nil {
+			return ""
+		}
+		return lockedWords(a)
+	}
+	for _, c := range u.Lock.Apps {
+		out.Lock = append(out.Lock, LockChangeJSON{App: c.App, Was: said(c.Was), Now: said(c.Now)})
+	}
+	if u.Lock.Source != nil {
+		out.Source = []string{u.Lock.Source[0], u.Lock.Source[1]}
+	}
+	return out
+}

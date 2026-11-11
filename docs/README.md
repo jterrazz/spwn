@@ -92,5 +92,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [038 An app is carried by one method, the one its plan shows](decisions/038-an-app-is-carried-by-one-method-the-one-its-plan-shows.md) (Proposed)
 - [039 A share is shown under its audience](decisions/039-a-share-is-shown-under-its-audience.md) (Proposed)
 - [040 apt takes back only what it names; a release installs only what a checksum vouches for](decisions/040-apt-takes-back-only-what-it-names-a-release-installs-only-what-a-checksum-vouches-for.md) (Proposed)
+- [041 The lock is what apply installs; upgrade alone moves it](decisions/041-the-lock-is-what-apply-installs.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
