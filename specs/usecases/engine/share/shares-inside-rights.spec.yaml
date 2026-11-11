@@ -14,7 +14,7 @@ runs:
       exit: 0
       stdout: |
           ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port != 5173 and .guest_port != 7000) | [.guest_port, .host_port, .to]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.guest_port, .host_port, .to]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[[3000,40000,null]],"shared":[[40001,40001,"private"],[40002,40002,"private"],[40000,40000,"private"]],"funnel":null}
+          {"reserved":[[3000,40000,null]],"shared":[[40000,40000,"private"]],"funnel":null}

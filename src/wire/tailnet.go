@@ -25,6 +25,7 @@ func (m machine) exposure(ctx context.Context) ports.Exposure {
 type sharingNode interface {
 	contract.Tailnet
 	contract.Audience
+	funnel.Funnel
 }
 
 func (m machine) tailnet() sharingNode {

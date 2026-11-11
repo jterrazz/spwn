@@ -8,9 +8,11 @@ import (
 )
 
 // invariant: a VM's rights are read from its Machinefile at each of its
-// runs, and at the first port it reports when the engine adopted it
-// running, so they hold for a run as its env does; a Machinefile that
-// cannot be read opens nothing, its rows saying why.
+// runs, and when the engine adopted it running at its first read (its
+// hello, the first port it reports, the serve reconciliation), so they
+// hold for a run as its env does; a Machinefile that cannot be read opens
+// nothing, its rows saying why. Each read judges the VM's reservations
+// again (judgeLocked).
 func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 	d.mu.Lock()
 	server := false
@@ -28,8 +30,10 @@ func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 			r = ports.RightsOf(said, server)
 		}
 	}
+	mode := d.policy().HTTPS
 	d.mu.Lock()
 	d.rights[vm] = r
+	d.judgeLocked(ctx, vm, r, mode)
 	d.mu.Unlock()
 	return r
 }

@@ -72,6 +72,18 @@ func (f *fakeTailnet) Unshare(_ context.Context, s ports.Share) error {
 	return nil
 }
 
+func (f *fakeTailnet) Funneled(context.Context) ([]int, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	var open []int
+	for _, s := range f.shared {
+		if s.Public() {
+			open = append(open, s.Port)
+		}
+	}
+	return open, nil
+}
+
 func (f *fakeTailnet) Shared(context.Context) ([]ports.Share, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()

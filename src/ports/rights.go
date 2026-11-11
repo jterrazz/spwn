@@ -53,18 +53,55 @@ func (r Rights) Floor() int {
 
 func (r Rights) Reported(port, ssh int) bool { return port != ssh && port >= r.Floor() }
 
-func (r Rights) PublicPort(port int) int {
+func (r Rights) PublicPort(port int, httpsMode string) int {
 	// value: the Funnel port a `to: public` right's port is shared on, its
-	// rank in open mapped onto catalog.FunnelPorts; 0 for any other.
+	// rank in open mapped onto FunnelPortsIn(httpsMode); 0 for any other,
+	// and for one ranked past the Funnel ports the mode leaves.
 	if r.To != catalog.AudiencePublic {
 		return 0
 	}
+	funnel := FunnelPortsIn(httpsMode)
 	for i, s := range r.Open {
-		if s.From == port && i < len(catalog.FunnelPorts) {
-			return catalog.FunnelPorts[i]
+		if s.From == port && i < len(funnel) {
+			return funnel[i]
 		}
 	}
 	return 0
+}
+
+func FunnelPortsIn(httpsMode string) []int {
+	// invariant: HTTPS links by path mount every private share on 443, and
+	// Funnel opens a port whole, every path of it: in path mode 443 is never
+	// a public port, so a private path is never on the internet.
+	if httpsMode == HTTPSPath {
+		return slices.DeleteFunc(slices.Clone(catalog.FunnelPorts[:]), func(p int) bool { return p == 443 })
+	}
+	return slices.Clone(catalog.FunnelPorts[:])
+}
+
+func (r Rights) Judge(l Reservation, httpsMode string) (Reservation, bool) {
+	// invariant: a reservation is judged by its VM's rights as they are
+	// now: one the rights made that they no longer allow is not kept, nor a
+	// public one no Funnel port is left for; one the owner made is kept,
+	// private when the rights do not give it their audience. A kept one
+	// takes the audience and Funnel port the rights give it today.
+	allowed := r.Allows(l.GuestPort)
+	if !allowed && !l.Owned() {
+		return l, false
+	}
+	l.To, l.PublicPort = "", 0
+	if !allowed || r.Audience() == catalog.AudiencePrivate {
+		return l, true
+	}
+	l.To = r.Audience()
+	if l.To != catalog.AudiencePublic {
+		return l, true
+	}
+	if l.PublicPort = r.PublicPort(l.GuestPort, httpsMode); l.PublicPort == 0 {
+		l.To = ""
+		return l, l.Owned()
+	}
+	return l, true
 }
 
 func (r Rights) Said() string {
@@ -105,6 +142,30 @@ type FunnelTaken struct {
 
 func (e *FunnelTaken) Error() string {
 	return "Funnel port " + strconv.Itoa(e.Port) + " is shared by " + e.By
+}
+
+type NoFunnelPort struct{ Port int }
+
+func (e *NoFunnelPort) Error() string {
+	// value: why a public port is not shared in path mode: 443 carries the
+	// private paths, so two Funnel ports are left.
+	return "no Funnel port is left for " + strconv.Itoa(e.Port) + ": HTTPS links by path keep 443 private, so public opens 2 ports at most"
+}
+
+type FunnelHeld struct {
+	Port int
+	// value: the share refused is a private path, which a funneled port
+	// would put on the internet.
+	Private bool
+}
+
+func (e *FunnelHeld) Error() string {
+	// value: why a share is not opened: its port serves or funnels an entry
+	// station did not make, which station never replaces nor joins.
+	if e.Private {
+		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry station did not make: a private path on it would be public"
+	}
+	return "Funnel port " + strconv.Itoa(e.Port) + " already serves an entry station did not make"
 }
 
 func HintOf(hints []catalog.ItemPort, port int) (catalog.ItemPort, bool) {

@@ -127,3 +127,20 @@ func TestTailscaleKeepsTheAudienceContract(t *testing.T) {
 		return tn, tn
 	})
 }
+
+// invariant: a path mounted on a funneled port reads as the private share
+// station opened it as, its root entry as public: the owner's own Funnel
+// on 443 never makes station's paths read as its Funnel shares.
+func TestAMountedPathOnAFunneledPortReadsPrivate(t *testing.T) {
+	shares, err := parseServe([]byte(`{"TCP":{"443":{"HTTPS":true}},"Web":{"mac.ts.net:443":{"Handlers":{"/":{"Proxy":"http://127.0.0.1:8080"},"/linux-1/5173":{"Proxy":"http://127.0.0.1:40001"}}}},"AllowFunnel":{"mac.ts.net:443":true}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, s := range shares {
+		got[s.Path] = string(s.To)
+	}
+	if got["/"] != "public" || got["/linux-1/5173"] != "" {
+		t.Errorf("audiences by path = %v, want / public and /linux-1/5173 private", got)
+	}
+}

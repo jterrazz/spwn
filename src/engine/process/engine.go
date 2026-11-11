@@ -56,6 +56,8 @@ type Tailnet interface {
 	Share(ctx context.Context, s ports.Share) (string, error)
 	Unshare(ctx context.Context, s ports.Share) error
 	Shared(ctx context.Context) ([]ports.Share, error)
+	// value: the ports this node's Funnel opens, by station or anyone.
+	Funneled(ctx context.Context) ([]int, error)
 	Warm(ctx context.Context) error
 }
 

@@ -1,0 +1,31 @@
+description: 'with HTTPS links by path, a public port is funneled on 8443 or 10000, never on 443'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.ports = {https: "path"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: [3000, 3001, 3002], to: public }
+      exit: 0
+    - command: 'ports share linux-1 5173'
+      exit: 0
+      stdout: |
+          https://jterrazz-macbook-pro.tail1234.ts.net/linux-1/5173/
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:3002" node'
+      exit: 0
+    - command: 'ports | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	3000	public	https://jterrazz-macbook-pro.tail1234.ts.net:8443	shared	node
+          ◐	linux-1	3002	private		waiting · no Funnel port is left for 3002: HTTPS links by path keep 443 private, so public opens 2 ports at most	node	station ports stop-sharing linux-1 <port>
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net/linux-1/5173/	shared	node	vite
+          ◐	linux-1	7000	private		listens, not allowed (open: 3000, 3001, 3002)	server	station ports share linux-1 7000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[5173,40000,null,"owner"],[3000,40001,"public",null]],"shared":[[443,"/linux-1/5173",40000,"private"],[8443,"/",40001,"public"]],"funnel":[8443]}

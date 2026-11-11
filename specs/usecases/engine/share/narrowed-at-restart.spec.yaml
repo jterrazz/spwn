@@ -1,0 +1,37 @@
+description: 'rights narrowed, then the VM restarted: what they no longer allow is unshared and released'
+env: two-macs
+runs:
+    - command: 'world listen linux-1 "*:3000" node'
+      exit: 0
+    - command: 'world listen linux-1 "*:3001" node'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[5173,40001,null,null],[7000,40002,null,null],[3000,40000,null,null],[3001,40003,null,null]],"shared":[[40001,"/",40001,"private"],[40002,"",40002,"private"],[40000,"/",40000,"private"],[40003,"/",40003,"private"]],"funnel":null}
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: 3000-3999, to: private, except: [3001] }
+      exit: 0
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'machines start linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	started
+    - command: 'ports | /usr/bin/grep linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
+          ◐	linux-1	3001	private		listens, not allowed (open: 3000-3999; except: 3001)	node	station ports share linux-1 3001
+          ◐	linux-1	5173	private		listens, not allowed (open: 3000-3999; except: 3001)	node	vite · station ports share linux-1 5173
+          ◐	linux-1	7000	private		listens, not allowed (open: 3000-3999; except: 3001)	server	station ports share linux-1 7000
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[3000,40000,null,null]],"shared":[[40000,"/",40000,"private"]],"funnel":null}

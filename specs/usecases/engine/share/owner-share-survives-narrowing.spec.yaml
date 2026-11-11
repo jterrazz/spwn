@@ -1,0 +1,20 @@
+description: 'a port the owner shared is kept when the rights narrow, private, and the ones the rights made go'
+env: two-macs
+runs:
+    - command: 'ports share linux-1 5173'
+      exit: 0
+      stdout: |
+          https://jterrazz-macbook-pro.tail1234.ts.net:40001
+    - command: 'world edit jterrazz-macbook-pro machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace }
+          ports: { open: 3000-3999, to: private }
+      exit: 0
+    - command: 'world engine-crash jterrazz-macbook-pro'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.vm == "linux-1") | [.guest_port, .host_port, .to, .by]], shared: [(.tailnet.shares // [])[] | [.Port, .Path, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[[5173,40001,null,"owner"]],"shared":[[40001,"/",40001,"private"]],"funnel":null}

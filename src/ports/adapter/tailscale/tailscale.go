@@ -453,7 +453,14 @@ func parseServe(data []byte) ([]ports.Share, error) {
 		}
 		shares = append(shares, s)
 	}
+	// invariant: an entry is public when Funnel is allowed on its port,
+	// but a path mounted below the root, which is how station serves a
+	// private share in path mode: it names the audience its share was
+	// opened to, and Funneled reads whether its port is on the internet.
 	for i := range shares {
+		if shares[i].Mounted() {
+			continue
+		}
 		for addr, on := range raw.AllowFunnel {
 			if _, portText, _ := strings.Cut(addr, ":"); on && portText == strconv.Itoa(shares[i].Port) {
 				shares[i].To = catalog.AudiencePublic
