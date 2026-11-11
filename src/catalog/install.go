@@ -135,8 +135,17 @@ func (i BunInstall) Key() string {
 	return i.Package
 }
 
-func (i MiseInstall) Key() string          { return i.App }
-func (i AptInstall) Key() string           { return i.Packages[0] }
+func (i MiseInstall) Key() string { return i.App }
+
+func (i AptInstall) Key() string {
+	// value: the first package of the app; none is no key, an install the
+	// decoders refuse and the installers check before they index it.
+	if len(i.Packages) == 0 {
+		return ""
+	}
+	return i.Packages[0]
+}
+
 func (i GitHubReleaseInstall) Key() string { return i.Repo }
 func (i ScriptInstall) Key() string        { return i.URL }
 func (i ShellInstall) Key() string         { return i.Line }

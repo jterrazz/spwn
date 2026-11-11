@@ -27,3 +27,20 @@ func TestEveryAppOfTheCatalogueReadsBackAsItWasSent(t *testing.T) {
 		}
 	}
 }
+
+func TestAnAptInstallOfNoPackageDoesNotCrossTheWire(t *testing.T) {
+	// invariant: a peer's apt install names a package at least, so no reader
+	// indexes an empty list; its key is none rather than a panic.
+	var p catalog.LivesOn
+	for _, body := range []string{
+		`{"Kinds":["linux"],"Method":"apt","Install":{"Packages":[]}}`,
+		`{"Kinds":["linux"],"Method":"apt","Install":{}}`,
+	} {
+		if err := json.Unmarshal([]byte(body), &p); err == nil {
+			t.Errorf("%s decoded to %+v; want it refused", body, p.Install)
+		}
+	}
+	if got := (catalog.AptInstall{}).Key(); got != "" {
+		t.Errorf("the key of no package is %q; want none", got)
+	}
+}

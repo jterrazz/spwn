@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -57,7 +58,11 @@ func installOf(m Method, raw json.RawMessage) (Install, error) {
 	case MethodMise:
 		return decoded[MiseInstall](raw)
 	case MethodApt:
-		return decoded[AptInstall](raw)
+		i, err := decoded[AptInstall](raw)
+		if v, ok := i.(AptInstall); err == nil && ok && len(v.Packages) == 0 {
+			return nil, errors.New("catalog: an apt install names no package")
+		}
+		return i, err
 	case MethodGitHubRelease:
 		return decoded[GitHubReleaseInstall](raw)
 	case MethodScript:

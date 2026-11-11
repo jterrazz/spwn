@@ -268,6 +268,9 @@ func packages(installs []catalog.Install, pinned bool) ([]string, []catalog.AptI
 		if !ok {
 			return nil, nil, errors.New(i.Key() + " is not an apt package")
 		}
+		if len(v.Packages) == 0 {
+			return nil, nil, errors.New("an apt install names no package")
+		}
 		for _, p := range v.Packages {
 			if err := catalog.CheckPackage(p); err != nil {
 				return nil, nil, err

@@ -3,6 +3,7 @@ package apt_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -304,5 +305,30 @@ func TestARemovalKeepsAPackageTheOwnerHadBefore(t *testing.T) {
 	}
 	if _, kept := d.held["libfoo-dev"]; !kept || len(d.held) != 1 {
 		t.Errorf("held %v after the removal; want libfoo-dev alone, the owner's", d.held)
+	}
+}
+
+func TestAnAptInstallOfNoPackageIsRefusedNotIndexed(t *testing.T) {
+	// invariant: an install of no package (one that crossed the wire, or was
+	// built by hand) is refused by every verb before anything runs.
+	empty := []catalog.Install{catalog.AptInstall{}}
+	for name, run := range map[string]func(*apt.Apt) error{
+		"install": func(a *apt.Apt) error { return a.Install(context.Background(), empty, nil) },
+		"update":  func(a *apt.Apt) error { return a.Update(context.Background(), empty, nil) },
+		"remove":  func(a *apt.Apt) error { return a.Remove(context.Background(), empty, nil) },
+	} {
+		d := &dpkg{held: map[string]string{}}
+		var err error
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					err = fmt.Errorf("panicked: %v", r)
+				}
+			}()
+			err = run(played(d))
+		}()
+		if err == nil || len(d.calls) > 0 || strings.Contains(err.Error(), "panicked") {
+			t.Errorf("%s of no package gave %v and ran %q; want it refused, nothing run", name, err, d.calls)
+		}
 	}
 }
