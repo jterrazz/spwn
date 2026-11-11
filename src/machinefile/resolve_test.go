@@ -3,6 +3,7 @@ package machinefile_test
 import (
 	"errors"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -182,5 +183,25 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 		if !errors.As(err, &cycle) || cycle.Said() != c.want {
 			t.Errorf("%s: %v, want the cycle %s", c.about, err, c.want)
 		}
+	}
+}
+
+func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
+	base := machine("a", "{ os: macos }", "[]") + "accounts: { share: [{ account: claude, for: 7d }, { account: github }], keep: [github] }\nports: { open: 3000-9999, to: private, except: [22] }\n"
+	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { share: [{ account: claude, for: 1d }] }\nports: { open: 8080, to: local }\n"
+	lib := library(t, map[string]string{"machinefiles/a.yaml": base, "machinefiles/a.local.yaml": overlay}, nil)
+	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, v := range r.Values {
+		if strings.HasPrefix(v.Key, "accounts.") || strings.HasPrefix(v.Key, "ports.") {
+			got = append(got, v.Key+"="+v.Text+"@"+string(v.Origin.Layer))
+		}
+	}
+	want := []string{"accounts.share.claude=1d@overlay", "ports.open=8080@overlay", "ports.to=local@overlay"}
+	if !slices.Equal(got, want) {
+		t.Errorf("read %v, want the overlay's accounts and ports alone: %v", got, want)
 	}
 }

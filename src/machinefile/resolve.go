@@ -114,8 +114,9 @@ func (m *merged) drop(prefix string) {
 
 // invariant: a Machinefile is its extends, in order, then itself, each
 // file followed by its overlay; a later file's value replaces an earlier
-// one's (an app or a setting whole, by name), a file is read once however
-// many extend it, and a cycle of extends is refused.
+// one's (an app or a setting whole, by name; accounts and ports whole), a
+// file is read once however many extend it, and a cycle of extends is
+// refused.
 func (l Library) chain(name string) ([]Placed, error) {
 	var out []Placed
 	seen := map[string]bool{}
@@ -187,6 +188,7 @@ func merge(files []Placed) merged {
 			mergeSettings(&m, *s, o)
 		}
 		if a := f.Accounts; a != nil {
+			m.drop("accounts")
 			for _, s := range a.Share {
 				m.put("accounts.share."+s.Account, cmp.Or(s.For, "shared"), o)
 			}
