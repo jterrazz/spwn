@@ -39,8 +39,7 @@ type Watching struct {
 
 func (d *Engine) Watch(ctx context.Context, machines []string, send func(any) error) error {
 	// invariant: SPEC §6.3: a machine is watched while a surface holds this
-	// watch open on it (the menu bar open, a terminal UI on its Activity or
-	// its Overview, or on All machines), and only then; a watch of pages or
+	// watch open on it (the menu bar open), and only then; a watch of pages or
 	// events alone, which the menu bar holds from its launch, never makes one.
 	held := slices.Compact(slices.Sorted(slices.Values(machines)))
 	if len(held) == 0 {

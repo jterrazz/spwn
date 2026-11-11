@@ -4,9 +4,7 @@
   ├─ ◌ api
   └─ ◌ linux-1
   ◌ mac-mini
-     No VMs yet
+     No VMs yet  → station machines create --on mac-mini
 
 Needs you
   ◌ mac-mini
-
-→ station machines create --on mac-mini

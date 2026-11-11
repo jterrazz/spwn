@@ -5,11 +5,9 @@
   [38;2;156;160;176m├─ [m[38;2;108;111;133m○[m [1;38;2;76;79;105mapi[m      [38;2;76;79;105mWorkspace[m  [38;2;76;79;105mStopped · persistent[m              [38;2;76;79;105m4 CPU[m  [38;2;76;79;105m8 GB[m
   [38;2;156;160;176m└─ [m[38;2;64;160;43m●[m [1;38;2;76;79;105mlinux-1[m  [38;2;76;79;105mWorkspace[m  [38;2;76;79;105mRunning · ephemeral[m               [38;2;76;79;105m4 CPU[m  [38;2;76;79;105m4 GB[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m    [38;2;76;79;105mMac[m        [38;2;76;79;105mEngine running · runs v2.0.0-248[m
-     [38;2;108;111;133mNo VMs yet[m
+     [38;2;108;111;133mNo VMs yet[m  [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines create --on mac-mini[m
 
 [1;38;2;76;79;105mNeeds you[m
   [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mruns v2.0.0-248[m  [38;2;76;79;105mupdate station there (scripts/install.sh)[m
 [1;38;2;76;79;105mWarnings[m
   [38;2;76;79;105mmac-mini: station v2.0.0-248, This Mac v2.0.0-250[m
-
-[38;2;108;111;133m→ [m[38;2;76;79;105mstation machines create --on mac-mini[m

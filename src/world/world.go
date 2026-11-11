@@ -284,7 +284,7 @@ type Engine struct {
 	// "closed" or "open": closed it holds its page and events watches,
 	// open it watches This Mac's activity too.
 	MenuBar string `json:"menubar,omitempty"`
-	// value: the machines a terminal UI shows the Activity of between two
+	// value: the machines whose Activity the menu bar shows between two
 	// commands.
 	Watching []string `json:"watching,omitempty"`
 }

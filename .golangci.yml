@@ -43,8 +43,8 @@ linters:
                 - performance
                 - style
             disabled-checks:
-                # outside: Bubble Tea's contract is a model passed and returned BY VALUE;
-                # the copy is the architecture, not an oversight.
+                # outside: Bubble Tea's contract, which the CLI forms use, is a model
+                # passed and returned BY VALUE; the copy is the architecture, not an oversight.
                 - hugeParam
                 # value: the catalogue is values (Tool, ConfigItem, Cleanable):
                 # ranging by index to save a copy trades the loop's meaning for its bytes.

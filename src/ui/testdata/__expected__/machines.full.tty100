@@ -5,11 +5,9 @@
   ├─ ○ api      Workspace  Stopped · persistent              4 CPU  8 GB
   └─ ● linux-1  Workspace  Running · ephemeral               4 CPU  4 GB
   ◐ mac-mini    Mac        Engine running · runs v2.0.0-248
-     No VMs yet
+     No VMs yet  → station machines create --on mac-mini
 
 Needs you
   ◐ mac-mini  runs v2.0.0-248  update station there (scripts/install.sh)
 Warnings
   mac-mini: station v2.0.0-248, This Mac v2.0.0-250
-
-→ station machines create --on mac-mini

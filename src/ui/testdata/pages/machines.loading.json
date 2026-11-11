@@ -201,7 +201,10 @@
               {
                 "empty": {
                   "noun": "VMs",
-                  "text": "No VMs yet"
+                  "text": "No VMs yet",
+                  "hint": {
+                    "command": "station machines create --on mac-mini"
+                  }
                 }
               }
             ],
@@ -264,11 +267,6 @@
         }
       ],
       "uncounted": true
-    }
-  ],
-  "hints": [
-    {
-      "command": "station machines create --on mac-mini"
     }
   ],
   "actions": [

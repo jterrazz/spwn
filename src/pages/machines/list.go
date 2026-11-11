@@ -30,7 +30,6 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 	}
 	findings := model.Needs(f)
 	items := make([]page.Item, 0, len(f.Macs))
-	var hints []page.Hint
 	for _, h := range f.Macs {
 		g := page.Group{Head: macRow(model.Label(f, h), h, thisVersion, f.Read), Fold: page.Open}
 		for _, vm := range model.Ordered(h.VMs) {
@@ -38,12 +37,11 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 			g.Items = append(g.Items, page.Item{Row: &row})
 		}
 		if len(h.VMs) == 0 && h.Reachable {
-			g.Items = append(g.Items, page.Item{Empty: &page.Empty{Noun: "VMs", Text: "No VMs yet"}})
 			create := "station machines create"
 			if !h.ThisMac {
 				create += " --on " + model.Label(f, h)
 			}
-			hints = append(hints, page.Hint{Command: create})
+			g.Items = append(g.Items, page.Item{Empty: &page.Empty{Noun: "VMs", Text: "No VMs yet", Hint: page.Cmd(create)}})
 		}
 		items = append(items, page.Item{Group: &g})
 	}
@@ -62,7 +60,7 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 		}
 		sections = append(sections, page.Section{ID: "warnings", Title: "Warnings", Role: page.Banner, Items: notes})
 	}
-	return page.Seal(page.Page{ID: "machines", Command: "machines", Context: thisMac, Sections: sections, Hints: hints, Actions: Actions()})
+	return page.Seal(page.Page{ID: "machines", Command: "machines", Context: thisMac, Sections: sections, Actions: Actions()})
 }
 
 func firstLine(c model.Counts, needs int) (string, []page.Value) {
