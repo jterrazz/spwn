@@ -1,0 +1,29 @@
+description: 'an extra station cannot uninstall that apps there need is kept with its record, asking nothing'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [claude]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh": "5.0.1", "https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "homebrew", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	homebrew	script	installed by station for jterrazz-macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	homebrew	script	installed by station for jterrazz-macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
+          ●	claude	2.0.14	script
+          ●	homebrew	5.0.1	script	required by mise, ghostty, bat, jq, gh, lazygit: kept, judged again next run
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+      exit: 0
+      stdout: |
+          ["homebrew"]

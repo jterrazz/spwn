@@ -131,26 +131,63 @@ func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
 		"runtime":  {Condition: machinefile.Present, Method: "pkg"},
 		"browsers": {Condition: machinefile.Present, Method: "script", Irreversible: true},
 	}
-	kept := map[string][]string{}
+	fates := map[string]machinefile.Fate{}
 	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger).Extra {
-		if !e.Takes() {
-			kept[e.Step.Item] = e.RequiredBy
+		fates[e.Step.Item] = e.Fate()
+		if e.Step.Item == "runtime" && !slices.Equal(e.RequiredBy, []string{"browsers"}) {
+			t.Errorf("runtime required by %v; want [browsers]", e.RequiredBy)
 		}
 	}
-	if len(kept) != 1 || !slices.Equal(kept["runtime"], []string{"browsers"}) {
-		t.Errorf("kept %v; want runtime, required by [browsers]", kept)
+	if fates["runtime"] != machinefile.KeptRequired || fates["browsers"] != machinefile.KeptIrreversible {
+		t.Errorf("fates %v; want runtime kept-required, browsers kept-irreversible", fates)
 	}
 }
 
-func TestJudgeKeepsAnExtraThatReadsAbsentWithoutItsManager(t *testing.T) {
-	// invariant: with its manager missing an extra cannot be read by its
-	// method, so absent is no proof it is gone: it keeps its record.
-	cat := catalog.Catalog{Items: []catalog.Placed{placed(catalog.Item{Name: "bar"})}}
-	ledger := []machinefile.Installed{{Item: "bar", Method: "pkg", Machinefile: "laptop"}}
-	seen := map[string]machinefile.Seen{"bar": {Condition: machinefile.Absent, State: catalog.StateAbsent, Method: "pkg", Lacks: "manager"}}
-	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger).Extra {
-		if e.Action != machinefile.Leave {
-			t.Errorf("%s: %s; want leave, its record kept", e.Step.Item, e.Action)
+func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
+	// invariant: every way an extra reads is judged at plan time, with an
+	// app there that needs it and without: one is taken back alone, asking
+	// what its removal asks; what needs one that stays there by station's
+	// method is said and keeps it, the one station cannot uninstall
+	// included; nothing else is ever asked, nor removed but its record.
+	cat := catalog.Catalog{Items: []catalog.Placed{
+		placed(catalog.Item{Name: "manager", Kind: catalog.KindManager, Manages: []catalog.ManagerKey{"pkg"}}),
+		placed(catalog.Item{Name: "lib", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Item{Name: "tool", Requires: []string{"lib"}}),
+	}}
+	ledger := []machinefile.Installed{{Item: "lib", Method: "pkg", Machinefile: "laptop"}}
+	for _, c := range []struct {
+		reads           string
+		lib             machinefile.Seen
+		alone, neededBy machinefile.Fate
+	}{
+		{"there by its method", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Taken, machinefile.KeptRequired},
+		{"there, station cannot uninstall it", machinefile.Seen{Condition: machinefile.Present, Method: "pkg", Irreversible: true}, machinefile.KeptIrreversible, machinefile.KeptRequired},
+		{"absent, its manager missing", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg", Lacks: "manager"}, machinefile.KeptManagerMissing, machinefile.KeptManagerMissing},
+		{"already gone", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg"}, machinefile.Gone, machinefile.Gone},
+		{"there another way", machinefile.Seen{Condition: machinefile.NotManaged, Method: "script"}, machinefile.KeptAnotherWay, machinefile.KeptAnotherWay},
+		{"unread", machinefile.Seen{Condition: machinefile.Unknown, Method: "pkg"}, machinefile.KeptUnread, machinefile.KeptUnread},
+	} {
+		for _, needed := range []bool{false, true} {
+			tool, want := machinefile.Seen{Condition: machinefile.Absent}, c.alone
+			if needed {
+				tool, want = machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, c.neededBy
+			}
+			seen := map[string]machinefile.Seen{"manager": {Condition: machinefile.Present, Method: "script"}, "lib": c.lib, "tool": tool}
+			p := machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger)
+			e := p.Extra[0]
+			if got := e.Fate(); got != want {
+				t.Errorf("lib %s, needed %v: %s; want %s", c.reads, needed, got, want)
+			}
+			if by := []string{"tool"}; (want == machinefile.KeptRequired) != slices.Equal(e.RequiredBy, by) {
+				t.Errorf("lib %s, needed %v: required by %v; want %v only when kept for it", c.reads, needed, e.RequiredBy, by)
+			}
+			asked := len(p.Interactive(true)) > 0
+			if asked != (want == machinefile.Taken) || len(p.Needs) > 0 {
+				t.Errorf("lib %s, needed %v: --remove asks %v, plan asks %v; want asked only when taken back", c.reads, needed, p.Interactive(true), p.Needs)
+			}
+			if removes := e.Action == machinefile.Remove; removes != (want == machinefile.Taken || want == machinefile.Gone) {
+				t.Errorf("lib %s, needed %v: %s; want remove only when taken back or gone", c.reads, needed, e.Action)
+			}
 		}
 	}
 }

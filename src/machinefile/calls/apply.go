@@ -326,31 +326,33 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 	var out []machinefile.Done
 	var stayed []machinefile.ExtraLine
 	for _, e := range extra {
-		needers := leaningOn(stayed, e.Step.Item)
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
-		switch {
-		case len(e.RequiredBy) > 0:
+		switch e.Fate() {
+		case machinefile.KeptRequired:
 			done.Detail = "required by " + strings.Join(e.RequiredBy, ", ") + ": kept, judged again next run"
 			out = append(out, done)
 			continue
-		case e.Action != machinefile.Remove && e.Seen.Lacks != "":
+		case machinefile.KeptManagerMissing:
 			done.Detail = "its manager " + e.Seen.Lacks + " is missing: kept, judged again next run"
 			out = append(out, done)
 			continue
-		case e.Action != machinefile.Remove && (e.Seen.Condition == machinefile.Unknown || e.Seen.Condition == machinefile.Changed):
+		case machinefile.KeptUnread:
 			done.Detail = "reads " + strings.ReplaceAll(string(e.Seen.Condition), "-", " ") + ": kept, judged again next run"
 			out = append(out, done)
 			continue
-		case e.Action != machinefile.Remove:
+		case machinefile.KeptIrreversible:
+			done.Detail = cannotUninstall
+		case machinefile.KeptAnotherWay:
 			done.Detail = "present another way since station installed it: kept, and yours"
-		case !e.Takes():
+		case machinefile.Gone:
 			done.State, done.Detail = catalog.StateAbsent, "already gone"
-		case len(needers) > 0:
-			done.Detail = "required by " + strings.Join(needers, ", ") + ": kept, judged again next run"
-			stayed = append(stayed, e)
-			out = append(out, done)
-			continue
-		default:
+		case machinefile.Taken:
+			if needers := leaningOn(stayed, e.Step.Item); len(needers) > 0 {
+				done.Detail = "required by " + strings.Join(needers, ", ") + ": kept, judged again next run"
+				stayed = append(stayed, e)
+				out = append(out, done)
+				continue
+			}
 			if ctx.Err() != nil {
 				done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 				return append(out, done)
@@ -375,6 +377,10 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 	return out
 }
 
+// value: the words of an extra station cannot uninstall here, kept and
+// let go of: it is the owner's from then on.
+const cannotUninstall = "station cannot uninstall it: kept, and yours: remove it by hand if you want"
+
 func leaningOn(stayed []machinefile.ExtraLine, item string) []string {
 	var out []string
 	for _, s := range stayed {
@@ -397,7 +403,7 @@ func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machi
 		done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 		return done
 	case errors.As(err, &irreversible), errors.As(err, &fromAppStore):
-		done.Line.Action, done.Detail = machinefile.Leave, "station cannot uninstall it: kept, remove it by hand"
+		done.Line.Action, done.Detail = machinefile.Leave, cannotUninstall
 		return done
 	case errors.As(err, &refused) && refused.Code == appscalls.NotInstalled:
 		done.State, done.Detail = catalog.StateAbsent, "already gone"

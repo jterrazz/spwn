@@ -161,8 +161,9 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 // Machinefile is extra, and of it only what reads present or outdated by
 // the method that installed it is removed, whoever put it back there: an
 // extra already gone is removed from the ledger alone, one held by another
-// method is the owner's and left, and one whose manager is missing here
-// is left for a later run to judge. The extras run in reverse dependency
+// method is the owner's and left, one station cannot uninstall here is
+// left and never asks anything, and one whose manager is missing here is
+// left for a later run to judge. The extras run in reverse dependency
 // order: what another extra leans on (what it requires, its provider, its
 // manager) is taken back after it.
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
@@ -175,7 +176,7 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 		s.Action = Leave
 		switch s.Seen.Condition {
 		case Present, Outdated:
-			if s.Seen.Method == in.Method {
+			if s.Seen.Method == in.Method && !s.Seen.Irreversible {
 				s.Action = Remove
 			}
 		case Absent:
@@ -201,10 +202,12 @@ func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra
 // taken back with it, whoever installed that app; an app whose read did
 // not answer may be there, so it keeps what it needs too, and an extra
 // station cannot uninstall here stays, so it keeps what it needs as well.
+// What needs an extra that stays there by station's method is said, the
+// one station cannot uninstall included, so its record is kept.
 func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []ExtraLine) []ExtraLine {
 	taken := map[string]bool{}
 	for _, s := range extra {
-		taken[s.Step.Item] = s.Takes() && !s.Seen.Irreversible
+		taken[s.Step.Item] = s.Takes()
 	}
 	held := map[string]bool{}
 	for kept := true; kept; {
@@ -216,7 +219,7 @@ func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, ext
 		}
 	}
 	for i := range extra {
-		if s := &extra[i]; held[s.Step.Item] {
+		if s := &extra[i]; held[s.Step.Item] || s.Fate() == KeptIrreversible {
 			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Item)
 		}
 	}
@@ -333,6 +336,49 @@ func (s ExtraLine) Takes() bool {
 	// by the method that installed it; one already gone only leaves the
 	// ledger.
 	return s.Action == Remove && s.Seen.Condition != Absent
+}
+
+// value: what `apply --remove` does with an extra: takes it back, lets
+// go of its record as already gone, or keeps it there, because an app
+// there still needs it, station cannot uninstall it here, its manager is
+// missing here, it is there by another way than its method, or its read
+// did not answer.
+
+type Fate string
+
+const (
+	Taken              Fate = "taken"
+	Gone               Fate = "gone"
+	KeptRequired       Fate = "kept-required"
+	KeptIrreversible   Fate = "kept-irreversible"
+	KeptManagerMissing Fate = "kept-manager-missing"
+	KeptAnotherWay     Fate = "kept-another-way"
+	KeptUnread         Fate = "kept-unread"
+)
+
+func (s ExtraLine) Fate() Fate {
+	// invariant: what needs an extra is said before why else it stays.
+	switch {
+	case len(s.RequiredBy) > 0:
+		return KeptRequired
+	case s.Takes():
+		return Taken
+	case s.Action == Remove:
+		return Gone
+	case s.Seen.Lacks != "":
+		return KeptManagerMissing
+	}
+	switch s.Seen.Condition {
+	case Present, Outdated:
+		if s.Seen.Method == s.Installed.Method && s.Seen.Irreversible {
+			return KeptIrreversible
+		}
+		return KeptAnotherWay
+	case NotManaged:
+		return KeptAnotherWay
+	case Absent, Changed, Extra, Unknown:
+	}
+	return KeptUnread
 }
 
 func (p Plan) Of(a Action) []Line {

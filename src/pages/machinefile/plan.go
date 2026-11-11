@@ -122,17 +122,20 @@ func restartsSection(r []catalog.AfterApply) []page.Section {
 
 // value: what `apply --remove` does with an extra, in the owner's words.
 func fate(e machinefile.ExtraLine) string {
-	switch {
-	case len(e.RequiredBy) > 0:
+	switch e.Fate() {
+	case machinefile.KeptRequired:
 		return "required by " + strings.Join(e.RequiredBy, ", ") + ": kept"
-	case e.Takes():
+	case machinefile.Taken:
 		return "listed no longer"
-	case e.Action == machinefile.Remove:
+	case machinefile.Gone:
 		return "already gone"
-	case e.Seen.Lacks != "":
+	case machinefile.KeptIrreversible:
+		return "station cannot uninstall it: kept, remove it by hand if you want"
+	case machinefile.KeptManagerMissing:
 		return "its manager " + e.Seen.Lacks + " is missing: kept"
-	case e.Seen.Condition == machinefile.NotManaged || e.Seen.Condition == machinefile.Present || e.Seen.Condition == machinefile.Outdated:
+	case machinefile.KeptAnotherWay:
 		return "present another way since: kept"
+	case machinefile.KeptUnread:
 	}
 	return "reads " + condition(e.Seen.Condition) + ": kept"
 }
