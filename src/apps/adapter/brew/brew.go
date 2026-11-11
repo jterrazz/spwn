@@ -17,6 +17,11 @@ import (
 const (
 	command = "brew"
 	bundle  = command + " bundle"
+	// value: brew refreshes its index before an install on its own, so a
+	// bundle would update every formula the index moved; station's
+	// installs take the index as it is, and only `station upgrade`
+	// refreshes it, through homebrew's own upgrade line (`brew update`).
+	noAutoUpdate = "HOMEBREW_NO_AUTO_UPDATE=1"
 )
 
 var manager = contract.Manager{Name: command, App: "homebrew"}
@@ -44,6 +49,7 @@ func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, logs con
 	}
 	c := local.Command(command, "bundle", "install", mode, "--file=-")
 	c.Stdin = strings.Join(lines, "\n") + "\n"
+	c.Env = []string{noAutoUpdate}
 	c.Logs = logs
 	ran, err := b.run.Attach(ctx, c, local.ToStderr)
 	switch {

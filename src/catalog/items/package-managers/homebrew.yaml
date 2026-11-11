@@ -12,6 +12,7 @@ version-read:
 methods:
     - os: macos
       path: [/opt/homebrew/bin, /usr/local/bin]
+      upgrade: brew update
       script:
           url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
           on-terminal: [INTERACTIVE=1]

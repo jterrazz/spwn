@@ -1,0 +1,15 @@
+description: 'a bundle runs with brew''s own index refresh off, so an install updates no other formula'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ../__fixtures__/bundle-batch/
+runs:
+    - command: 'apps install bat ghostty'
+      exit: 0
+      stdout: |
+          ●	bat	0.24.0	brew
+          ●	ghostty	1.2.0	cask
+          ●	ghostty-dotfiles			~/.config/ghostty/config and 2 more
+      files:
+          .brew-env:
+              equals: |
+                  HOMEBREW_NO_AUTO_UPDATE=1
