@@ -729,11 +729,12 @@ func (d *Engine) release(ctx context.Context, vm string, port int) (ports.Reserv
 }
 
 // invariant: station owns only the serve entries of its range (port mode and
-// raw TCP), of a path /<vm>/ of this host (path mode), and the Funnel
-// entries carried from its range, and removes those no reservation
-// justifies in the HTTPS mode of this Mac, every kind; a reservation its
-// VM's rights no longer allow justifies none, for they are judged first.
-// It never touches another entry, and waits for Serve to be on.
+// raw TCP), and the path entries /<vm>/<port> of 443 (path mode) and the
+// Funnel entries carried from its range, its VM known or not, and removes
+// those no reservation justifies in the HTTPS mode of this Mac, every kind;
+// a reservation its VM's rights no longer allow justifies none, for they are
+// judged first. It never touches another entry, and waits for Serve to be
+// on.
 func (d *Engine) reconcileServe(ctx context.Context) {
 	d.mu.Lock()
 	on := d.self.On
@@ -755,10 +756,6 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 	p := d.policy()
 	d.mu.Lock()
 	reservations := append([]ports.Reservation(nil), d.reservations...)
-	vms := map[string]bool{}
-	for name := range d.vms {
-		vms[name] = true
-	}
 	d.mu.Unlock()
 	justified := func(e ports.Share) bool {
 		return slices.ContainsFunc(reservations, func(l ports.Reservation) bool { return justifies(l, e, p.HTTPS) })
@@ -767,7 +764,7 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 		switch {
 		case e.Mounted():
 			parts := strings.Split(strings.Trim(e.Path, "/"), "/")
-			if e.Port != 443 || len(parts) < 2 || !vms[parts[0]] {
+			if e.Port != 443 || len(parts) < 2 || !p.InRange(ports.CarriedFrom(e)) {
 				continue
 			}
 			if !justified(e) {

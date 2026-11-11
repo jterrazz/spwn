@@ -404,3 +404,31 @@ func TestAReleaseBeforeTheTickOfAModeSwitchUnsharesTheModeItWasServedIn(t *testi
 		t.Errorf("tailnet after the release = %s, want no entry", got)
 	}
 }
+
+// invariant: a path entry carried from the range is station's whether or
+// not its VM is still known: a VM deleted while Serve is off leaves its
+// path entry, and Serve turning on removes it before the next reservation
+// on its port of the Mac rides it.
+func TestAPathEntryOfADeletedVMGoesWhenServeTurnsOn(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.st.Ports = &heldPolicy{g: &ports.PortsGroup{HTTPS: ports.HTTPSPath}}
+	yes := true
+	l := ports.Reservation{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes}
+	tn := holding(l, ports.HTTPSPath)
+	h.d.tn = tn
+	ctx := t.Context()
+	tn.turn(false)
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.reservations = []ports.Reservation{l}
+	h.d.mu.Unlock()
+	if err := h.d.opDelete(ctx, "api"); err != nil {
+		t.Fatal(err)
+	}
+	tn.turn(true)
+	h.d.refreshSelf(ctx)
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after Serve on = %s, want no entry", got)
+	}
+}
