@@ -13,14 +13,24 @@ on:
                 default: true
 
 permissions:
-    contents: write
+    contents: read
+
+# invariant: one run per ref at a time, never cancelled half way through a release.
+concurrency:
+    group: publish-${{ github.ref }}
+    cancel-in-progress: false
 
 jobs:
     # value: linux alone, since a cross-built darwin binary has no cgo and so no
-    # IOKit; the darwin job below builds it on a Mac, and attach adds it.
+    # IOKit; the darwin job builds it on a Mac, and attach adds it.
+    # invariant: the release is created only once darwin is built and checked, so a
+    # failed darwin leaves no linux-only latest release.
     release:
         name: Release
-        if: github.event_name == 'push' || (!inputs.dry_run && github.ref_type == 'tag')
+        needs: [darwin]
+        if: github.event_name == 'push' || (!inputs.dry_run && github.ref_type == 'tag' && startsWith(github.ref_name, 'v'))
+        permissions:
+            contents: write
         uses: jterrazz/studio-actions/.github/workflows/publish-go.yaml@main
         with:
             binary-name: station
@@ -53,6 +63,8 @@ jobs:
 
             - name: Build the binaries with cgo
               env:
+                  # value: the oldest macOS the binaries run on, Sonoma.
+                  MACOSX_DEPLOYMENT_TARGET: '14.0'
                   LDFLAGS: -X github.com/jterrazz/studio-station/src/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
               run: |
                   set -euo pipefail
@@ -61,11 +73,14 @@ jobs:
                   sdk=$(xcrun --sdk macosx --show-sdk-path)
                   for arch in arm64 amd64; do
                       case "$arch" in arm64) target=arm64 ;; amd64) target=x86_64 ;; esac
-                      CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk" \
+                      CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \
                           go build -ldflags "$LDFLAGS" -o "$dist/station-darwin-$arch" ./src/cmd/station
                       # invariant: a darwin asset without cgo has no IOKit, so it is never released.
                       go version -m "$dist/station-darwin-$arch" | grep -q 'CGO_ENABLED=1'
                       lipo -archs "$dist/station-darwin-$arch"
+                      minos=$(vtool -show-build "$dist/station-darwin-$arch" | awk '$1 == "minos" { print $2 }')
+                      echo "station-darwin-$arch minos $minos"
+                      [ "$minos" = "$MACOSX_DEPLOYMENT_TARGET" ]
                   done
                   "$dist/station-darwin-arm64" --version
 
@@ -75,6 +90,7 @@ jobs:
                   make menubar
                   ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/dist/Station.app.zip"
                   codesign -dv .artifacts/menubar/Station.app
+                  vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
 
             - name: Write the darwin checksums
               run: cd "$RUNNER_TEMP/dist" && shasum -a 256 station-darwin-arm64 station-darwin-amd64 Station.app.zip > checksums-darwin.txt
@@ -92,6 +108,8 @@ jobs:
         name: Attach darwin
         needs: [release, darwin]
         runs-on: ubuntu-26.04-arm
+        permissions:
+            contents: write
         steps:
             - name: Download the artifacts
               uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
