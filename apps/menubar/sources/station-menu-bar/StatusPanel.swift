@@ -1,4 +1,5 @@
 import AppKit
+import QuartzCore
 import StationKit
 import SwiftUI
 
@@ -47,6 +48,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                 guard let self, let spot = self.spot else { return }
                 self.report?("item \(Self.frame(spot))")
+                if let screen = self.item.button?.window?.screen { self.report?("screen \(Self.frame(screen.frame))") }
             }
         }
     }
@@ -98,12 +100,24 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     }
 
     // invariant: the panel's top edge stays under the item while its
-    // height follows the content's spring, so it grows downward.
+    // height follows the content's, so it grows downward. The content
+    // reports only the height its spring ends at (the capture's trial,
+    // ADR-036), so the window moves there itself, on the same curve, and
+    // snaps under Reduce Motion as the content does.
     func fit(_ size: CGSize) {
         guard !placing, size.width > 0, size.height > 0 else { return }
         placing = true
         let frame = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
-        panel.setFrame(frame, display: true)
+        if shown, frame != panel.frame, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            NSAnimationContext.runAnimationGroup { context in
+                let p = Token.Motion.smoothPoints.map { Float($0) }
+                context.duration = Token.Motion.smoothDuration
+                context.timingFunction = CAMediaTimingFunction(controlPoints: p[0], p[1], p[2], p[3])
+                panel.animator().setFrame(frame, display: true)
+            }
+        } else {
+            panel.setFrame(frame, display: true)
+        }
         placing = false
         report?("window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
     }
@@ -138,8 +152,8 @@ final class GlassPanel: NSPanel {
 
 // invariant: the window's frame is the panel's alone: the content's size
 // never pushes the window through Auto Layout (which would grow it from
-// its bottom edge), and every size the content takes, on every pass of
-// its spring, is told to the panel, which follows it with its top pinned.
+// its bottom edge), and every size the content asks, on any constraint or
+// layout pass, is told to the panel, which moves to it with its top pinned.
 final class PanelHosting: NSHostingView<AnyView> {
     var resized: ((CGSize) -> Void)?
     private var told = CGSize.zero

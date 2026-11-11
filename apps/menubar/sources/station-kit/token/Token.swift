@@ -775,13 +775,16 @@ extension Token {
     // under Reduce Motion.
     public enum Motion {
         public static let snappy = Animation.timingCurve(snappyCurve, duration: 0.20)
-        public static let smooth = Animation.timingCurve(smoothCurve, duration: 0.34)
+        public static let smooth = Animation.timingCurve(smoothCurve, duration: smoothDuration)
         public static let bouncy = Animation.spring(bouncySpring)
         public static let tint = Animation.easeOut(duration: 0.12)
         public static let sample = Animation.linear(duration: 0.2)
 
         public static let snappyCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: 0.30, y: 0.90), endControlPoint: UnitPoint(x: 0.30, y: 1))
-        public static let smoothCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: 0.32, y: 0.72), endControlPoint: UnitPoint(x: 0, y: 1))
+        public static let smoothCurve = UnitCurve.bezier(startControlPoint: UnitPoint(x: smoothPoints[0], y: smoothPoints[1]), endControlPoint: UnitPoint(x: smoothPoints[2], y: smoothPoints[3]))
+        // value: the smooth curve's control points, which the app's window
+        // also moves on, since AppKit animates it, not SwiftUI.
+        public static let smoothPoints: [Double] = [0.32, 0.72, 0, 1]
         public static let bouncySpring = Spring(duration: 0.225, bounce: 0.42)
         public static let bouncyDuration = 0.46
         public static let bouncyStops: [(at: Double, value: Double)] = [
