@@ -69,6 +69,24 @@ func (l *ledger) Delete(_ context.Context, item string) error {
 	return nil
 }
 
+func TestAnInstallThatAnsweredBeforeTheInterruptIsNotReadAgain(t *testing.T) {
+	// invariant: the read past an interrupt is for an item whose install
+	// handed back nothing; one that answered already installed is kept as
+	// it said.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	c := &calls{answer: []apps.Outcome{{Name: "tool", Result: catalog.StateOK, Detail: apps.AlreadyInstalled}}, hook: cancel}
+	r := run{d: Deps{Calls: c, Ledger: &ledger{}, Now: epoch}, name: "laptop", ended: map[string]catalog.State{}}
+	l := machinefile.Line{Step: machinefile.Step{Item: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
+	done := r.install(ctx, l, machinefile.Done{Line: l})
+	if slices.Contains(c.asked, appscalls.List.Name) {
+		t.Errorf("asked %v; want no read past the interrupt", c.asked)
+	}
+	if done.State != catalog.StateOK || done.Detail != apps.AlreadyInstalled || done.Installed {
+		t.Errorf("ended %s %q installed %v; want ok, already installed, not recorded", done.State, done.Detail, done.Installed)
+	}
+}
+
 func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 	// invariant: an extra whose uninstall failed is still there, so the
 	// extras it leans on are kept with their record.

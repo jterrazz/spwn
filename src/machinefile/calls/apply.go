@@ -178,6 +178,7 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
 	}
+	answered := false
 	for _, o := range outcomes {
 		fresh := o.Result == catalog.StateOK && o.Detail != apps.AlreadyInstalled
 		if fresh {
@@ -189,22 +190,24 @@ func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.
 		if o.Name != l.Step.Item {
 			continue
 		}
+		answered = o.Why != apps.WhyInterrupted
 		done.State, done.Version, done.Detail, done.Log, done.Installed = o.Result, o.Version, o.Detail, o.Log, fresh
-		if o.Why == apps.WhyInterrupted {
+		if !answered {
 			done.Reason, done.Detail = machinefile.Interrupted, ""
 		}
 	}
-	if ctx.Err() != nil && !done.Installed {
+	if ctx.Err() != nil && !answered {
 		done = r.finished(ctx, l, done)
 	}
 	return done
 }
 
 // invariant: an install interrupted hands back nothing of what it did, so
-// the item alone is read again, past the interrupt: one that reads there
-// by its method (the one apps.install chose here, whatever Machinefile key
-// chose the item) finished just before it, and is recorded by that method
-// like any other.
+// when no outcome of the item came back, or only its interrupt, the apps
+// are read again past the interrupt, until the item's own row answers:
+// one that reads there by its method (the one apps.install chose here,
+// whatever Machinefile key chose the item) finished just before it, and
+// is recorded by that method like any other.
 func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {
 	done.State, done.Reason, done.Detail = catalog.StateBroken, machinefile.Interrupted, ""
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
@@ -220,8 +223,10 @@ func (r *run) finished(ctx context.Context, l machinefile.Line, done machinefile
 	return done
 }
 
-// value: what one app reads once its own method answered, the rest of the
-// inventory left unread; false when the read failed or did not answer.
+// value: what one app reads in a reading started afresh (the shared one
+// dropped, every method listed again), taken at that app's first answer
+// without waiting for the others; false when the read failed or did not
+// answer.
 func reread(ctx context.Context, d Deps, item string) (machinefile.Seen, bool) {
 	updates, err := call.Follow(ctx, d.Calls, machine.Ref{}, appscalls.List, appscalls.ListIn{Fresh: true}, nil)
 	if err != nil {
