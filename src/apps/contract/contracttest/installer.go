@@ -17,11 +17,30 @@ type Seed struct {
 
 type Build func(t *testing.T, seed Seed) contract.Installer
 
+// value: the app a Holder's verbs run for here, on the owner's word, as
+// the apps model runs an install and a removal asked by name.
+var owner = contract.For{App: "sample", Word: true}
+
+func install(ctx context.Context, i contract.Installer, in catalog.Install) error {
+	if h, ok := i.(contract.Holder); ok {
+		return h.InstallFor(ctx, owner, []catalog.Install{in}, nil)
+	}
+	return i.Install(ctx, []catalog.Install{in}, nil)
+}
+
+func remove(ctx context.Context, i contract.Installer, in catalog.Install) error {
+	if h, ok := i.(contract.Holder); ok {
+		return h.RemoveFor(ctx, owner, []catalog.Install{in}, nil)
+	}
+	return i.Remove(ctx, []catalog.Install{in}, nil)
+}
+
 func Installer(t *testing.T, sample catalog.Install, build Build) {
 	// invariant: what every Installer owes the apps model, whatever runs it:
 	// what it holds is listed, what it installs or removes shows in its next
 	// list, a failed run is an error, a missing manager is not ready, and a
-	// verb it cannot do is refused, never faked.
+	// verb it cannot do is refused, never faked. A Holder installs and
+	// removes through its own verbs, for one app, on the owner's word.
 	t.Helper()
 	ctx := context.Background()
 	key := sample.Key()
@@ -56,7 +75,7 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 
 	t.Run("what it installs is listed after", func(t *testing.T) {
 		i := build(t, Seed{Installed: map[string]string{}})
-		err := i.Install(ctx, []catalog.Install{sample}, nil)
+		err := install(ctx, i, sample)
 		if !i.Can().Install {
 			if err == nil {
 				t.Errorf("an installer that cannot install said it installed %s", key)
@@ -75,7 +94,7 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 
 	t.Run("what it removes is no longer listed", func(t *testing.T) {
 		i := build(t, held())
-		err := i.Remove(ctx, []catalog.Install{sample}, nil)
+		err := remove(ctx, i, sample)
 		if !i.Can().Remove {
 			if err == nil {
 				t.Errorf("an installer that cannot remove said it removed %s", key)
@@ -108,7 +127,7 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		if !i.Can().Install {
 			t.Skip("it installs nothing")
 		}
-		if err := i.Install(ctx, []catalog.Install{sample}, nil); err == nil {
+		if err := install(ctx, i, sample); err == nil {
 			t.Errorf("a failing install of %s returned no error", key)
 		}
 	})

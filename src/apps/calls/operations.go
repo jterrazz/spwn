@@ -84,7 +84,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progr
 		if _, ok := s.lined(ready[0]); ok {
 			done = s.bundle(ctx, verbInstall, ready, false)
 		} else {
-			done = []apps.Outcome{s.landed(ctx, ready[0], s.run(ctx, verbInstall, ready[0], contract.Installer.Install))}
+			done = []apps.Outcome{s.landed(ctx, ready[0], s.run(ctx, verbInstall, ready[0], false, contract.Installer.Install))}
 		}
 		for i := range done {
 			o := done[i]
@@ -221,7 +221,11 @@ func (s *Shelf) supersede(ctx context.Context, t catalog.App) []apps.Step {
 	return []apps.Step{step}
 }
 
-func (s *Shelf) Uninstall(ctx context.Context, names []string) ([]apps.Outcome, error) {
+func (s *Shelf) Uninstall(ctx context.Context, names []string, word bool) ([]apps.Outcome, error) {
+	// invariant: without the owner's word for an app (an apply's removal,
+	// which the ledger decides), one whose method records what its installs
+	// add and recorded adding nothing for it is refused before anything
+	// runs: what is there is the owner's.
 	requested, err := s.Find(names)
 	if err != nil {
 		return nil, err
@@ -232,10 +236,16 @@ func (s *Shelf) Uninstall(ctx context.Context, names []string) ([]apps.Outcome, 
 			return nil, &apps.NotInstalledError{App: r.App.Name}
 		}
 	}
-	out := make([]apps.Outcome, 0, len(requested))
+	held := make([]catalog.App, 0, len(requested))
 	for i, t := range requested {
-		held := s.holding(t, reports[i])
-		o := s.run(ctx, verbUninstall, held, contract.Installer.Remove)
+		held = append(held, s.holding(t, reports[i]))
+		if !word && s.unrecorded(ctx, held[i]) {
+			return nil, &apps.UnrecordedError{App: t.Name}
+		}
+	}
+	out := make([]apps.Outcome, 0, len(requested))
+	for _, held := range held {
+		o := s.run(ctx, verbUninstall, held, word, contract.Installer.Remove)
 		o.Method = s.install(held).Method()
 		out = append(out, o)
 	}
@@ -309,7 +319,7 @@ func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outc
 		outcomes = append(outcomes, s.bundle(ctx, verbUpdate, bundled, true)...)
 	}
 	for _, t := range single {
-		outcomes = append(outcomes, s.run(ctx, verbUpdate, t, contract.Installer.Update))
+		outcomes = append(outcomes, s.run(ctx, verbUpdate, t, false, contract.Installer.Update))
 	}
 	return s.held(ctx, outcomes, ran), nil
 }
@@ -425,9 +435,9 @@ func (s *Shelf) landed(ctx context.Context, t catalog.App, o apps.Outcome) apps.
 
 type verbOf func(contract.Installer, context.Context, []catalog.Install, contract.Logs) error
 
-func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, op verbOf) apps.Outcome {
+func (s *Shelf) run(ctx context.Context, verb string, t catalog.App, word bool, op verbOf) apps.Outcome {
 	o := apps.Outcome{Name: t.Name, Verb: verb, Result: catalog.StateOK}
-	err := op(s.installer(t), ctx, []catalog.Install{s.install(t)}, s.logs([]catalog.App{t}))
+	err := op(s.serving(t, word), ctx, []catalog.Install{s.install(t)}, s.logs([]catalog.App{t}))
 	var signedOut *apps.SignedOutError
 	var notYet *apps.NotYetProvidedError
 	switch {
@@ -637,12 +647,50 @@ func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.
 		step.Item, step.Detail = "copy on PATH", "kept: it is yours, installed by none of its methods"
 	case s.uninstallable(old) != nil:
 		step.Detail = "kept: station cannot uninstall it"
+	case s.unrecorded(ctx, old):
+		step.Detail = "kept: yours, station added none of its packages"
 	default:
-		o := s.run(ctx, verbUninstall, old, contract.Installer.Remove)
+		o := s.run(ctx, verbUninstall, old, false, contract.Installer.Remove)
 		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why
 		if o.Result != catalog.StateOK {
 			step.Detail = o.Detail
 		}
 	}
 	return step
+}
+
+// value: an app's installer as its verbs meet it: a Holder is told the app
+// it serves, and whether the owner gave their word for it.
+func (s *Shelf) serving(t catalog.App, word bool) contract.Installer {
+	in := s.installer(t)
+	if h, ok := in.(contract.Holder); ok {
+		return serving{Installer: in, holder: h, f: contract.For{App: t.Name, Word: word}}
+	}
+	return in
+}
+
+type serving struct {
+	contract.Installer
+	holder contract.Holder
+	f      contract.For
+}
+
+func (s serving) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return s.holder.InstallFor(ctx, s.f, installs, logs)
+}
+
+func (s serving) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	return s.holder.RemoveFor(ctx, s.f, installs, logs)
+}
+
+// value: the app's method records what its installs add, and recorded
+// adding nothing for it; a record that does not read is no answer, and
+// leaves the removal to refuse it.
+func (s *Shelf) unrecorded(ctx context.Context, t catalog.App) bool {
+	h, ok := s.installer(t).(contract.Holder)
+	if !ok {
+		return false
+	}
+	holds, err := h.Holds(ctx, t.Name)
+	return err == nil && !holds
 }

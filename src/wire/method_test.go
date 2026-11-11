@@ -334,7 +334,7 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 					}
 				}
 				if can.Remove {
-					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}); err != nil || b.holds(method, in.Key()) {
+					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}, true); err != nil || b.holds(method, in.Key()) {
 						t.Errorf("%s: the removal left the %s copy (%v)", about, step.Method, err)
 					}
 				}
@@ -373,7 +373,7 @@ func TestAnAppHeldByAnotherOfItsMethodsIsAdoptedNeverInstalledAgain(t *testing.T
 		if err != nil || string(outcomeOf(t, up, c.item).Method) != c.held {
 			t.Errorf("%s: the update reached %+v (%v)", c.item, up, err)
 		}
-		gone, err := b.shelf.Uninstall(ctx, []string{c.item})
+		gone, err := b.shelf.Uninstall(ctx, []string{c.item}, true)
 		if err != nil || string(outcomeOf(t, gone, c.item).Method) != c.held || b.holds(catalog.Method(c.held), c.key) {
 			t.Errorf("%s: the removal reached %+v (%v)", c.item, gone, err)
 		}
@@ -616,5 +616,53 @@ func TestAMoveFromACopyOnPathKeepsIt(t *testing.T) {
 	o := outcomeOf(t, out, "twin")
 	if o.Result != catalog.StateOK || !b.holds(catalog.MethodSkill, "twin") || len(o.Steps) != 1 || o.Steps[0].Item != "copy on PATH" || !strings.HasPrefix(o.Steps[0].Detail, "kept") {
 		t.Errorf("moved %+v", o)
+	}
+}
+
+// value: an installer that holds what it adds by app, whose record holds
+// the app or not, keeping whom each verb was told it serves.
+type holding struct {
+	contract.Installer
+	holds bool
+	told  []contract.For
+}
+
+func (h *holding) InstallFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
+	h.told = append(h.told, f)
+	return h.Install(ctx, installs, logs)
+}
+
+func (h *holding) RemoveFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
+	h.told = append(h.told, f)
+	return h.Remove(ctx, installs, logs)
+}
+
+func (h *holding) Holds(context.Context, string) (bool, error) { return h.holds, nil }
+
+func TestAHolderIsToldTheAppAndWhetherTheOwnerGaveTheirWord(t *testing.T) {
+	// invariant: a method that holds what it adds by app is told the app
+	// each verb serves, and whether the owner asked it by name: a removal
+	// without that word of an app it recorded nothing for is refused before
+	// anything runs, and a move leaves that copy, the owner's.
+	ctx := context.Background()
+	spy := &holding{}
+	b := benchOf(t, catalog.Mac, "twin", func(_ *localtest.Runner, o *appscalls.ShelfOptions) {
+		spy.Installer = o.Installers[catalog.MethodCask]
+		o.Installers[catalog.MethodCask] = spy
+	})
+	b.w.Mac("here").Apps[catalog.MethodCask].Installed["twin"] = "1.0.0"
+
+	var unrecorded *apps.UnrecordedError
+	if _, err := b.shelf.Uninstall(ctx, []string{"twin"}, false); !errors.As(err, &unrecorded) || !b.holds(catalog.MethodCask, "twin") || len(spy.told) > 0 {
+		t.Errorf("a removal without the owner's word gave %v, told %v; want it refused, the copy kept", err, spy.told)
+	}
+	out, err := b.shelf.Move(ctx, "twin", catalog.MethodSkill, nil)
+	if o := outcomeOf(t, out, "twin"); err != nil || !b.holds(catalog.MethodCask, "twin") || len(o.Steps) != 1 || !strings.HasPrefix(o.Steps[0].Detail, "kept: yours") {
+		t.Errorf("moved %+v (%v); want the cask copy kept, the owner's", out, err)
+	}
+	b.w.Mac("here").Apps[catalog.MethodSkill].Installed = map[string]string{}
+	b.shelf.Forget()
+	if _, err := b.shelf.Uninstall(ctx, []string{"twin"}, true); err != nil || b.holds(catalog.MethodCask, "twin") || !slices.Equal(spy.told, []contract.For{{App: "twin", Word: true}}) {
+		t.Errorf("the owner's removal gave %v, told %v; want twin removed for its own name, on the word", err, spy.told)
 	}
 }

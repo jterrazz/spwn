@@ -25,6 +25,14 @@ func TestInstaller(t *testing.T) {
 	})
 }
 
+func TestHoldingInstaller(t *testing.T) {
+	build := func(_ *testing.T, s contracttest.Seed) contract.Installer {
+		return fake.InstallerOf(seeded(s, catalog.MethodApt), "mbp", catalog.MethodApt, false)
+	}
+	contracttest.Installer(t, catalog.AptInstall{Packages: []string{"fd-find"}}, build)
+	contracttest.Holder(t, catalog.AptInstall{Packages: []string{"fd-find"}}, build)
+}
+
 func TestLinedInstaller(t *testing.T) {
 	contracttest.Installer(t, catalog.CaskInstall{Token: "ghostty"}, func(_ *testing.T, s contracttest.Seed) contract.Installer {
 		return fake.InstallerOf(seeded(s, catalog.MethodCask), "mbp", catalog.MethodCask, true)

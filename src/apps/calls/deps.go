@@ -24,7 +24,7 @@ type Apps interface {
 	CheckInstall(ctx context.Context, r apps.InstallRequest) error
 	Install(ctx context.Context, r apps.InstallRequest, p call.Progress) ([]apps.Outcome, error)
 	CheckUninstall(names []string) error
-	Uninstall(ctx context.Context, names []string) ([]apps.Outcome, error)
+	Uninstall(ctx context.Context, names []string, word bool) ([]apps.Outcome, error)
 	CheckUpgrade(names []string) error
 	Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error)
 	Move(ctx context.Context, name string, to catalog.Method, p call.Progress) ([]apps.Outcome, error)

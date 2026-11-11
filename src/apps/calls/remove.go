@@ -14,6 +14,10 @@ import (
 type RemoveIn struct {
 	Names   []string
 	Confirm string
+	// value: the owner asked this removal of these apps by name, and
+	// confirmed it: only it takes a package station never recorded adding.
+	// An apply's removal, decided by the ledger, leaves it false.
+	Word bool
 }
 
 var Remove = call.Call[Deps, RemoveIn, []apps.Outcome]{
@@ -29,7 +33,7 @@ var Remove = call.Call[Deps, RemoveIn, []apps.Outcome]{
 		if err := confirm.Require(confirm.For(confirm.Remove, d.Kind), strings.Join(in.Names, ", "), in.Confirm); err != nil {
 			return nil, err
 		}
-		out, err := d.Apps.Uninstall(ctx, in.Names)
+		out, err := d.Apps.Uninstall(ctx, in.Names, in.Word)
 		return interrupted(ctx, out, err)
 	},
 }

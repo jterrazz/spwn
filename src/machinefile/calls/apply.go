@@ -316,8 +316,9 @@ func masked(words string, secrets map[string]string) string {
 // the method that installed it, and only while it reads there by that
 // method; an extra already gone leaves the ledger alone; one held by
 // another method since, or that station cannot uninstall (a script's
-// install, the App Store's), is said and kept, and the ledger lets it go,
-// so no later run fails on it again. One another app still needs, a
+// install, the App Store's, an apt app it recorded adding nothing of), is
+// said and kept, and the ledger lets it go, so no later run fails on it
+// again. One another app still needs, a
 // manager that holds packages of the owner's, one whose manager is
 // missing here, and a read that did not answer keep their record for the
 // next run. An extra the run did not take back (its
@@ -398,12 +399,13 @@ func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machi
 		refused      *fail.Error
 		irreversible *apps.NotReversibleError
 		fromAppStore *apps.AppStoreError
+		unrecorded   *apps.UnrecordedError
 	)
 	switch {
 	case ctx.Err() != nil:
 		done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 		return done
-	case errors.As(err, &irreversible), errors.As(err, &fromAppStore):
+	case errors.As(err, &irreversible), errors.As(err, &fromAppStore), errors.As(err, &unrecorded):
 		done.Line.Action, done.Detail = machinefile.Leave, machinefile.CannotUninstall
 		return done
 	case errors.As(err, &refused) && refused.Code == appscalls.NotInstalled:

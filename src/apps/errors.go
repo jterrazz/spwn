@@ -100,6 +100,12 @@ type NotReversibleError struct{ App string }
 
 func (e *NotReversibleError) Error() string { return e.App + " cannot be uninstalled by station" }
 
+type UnrecordedError struct{ App string }
+
+func (e *UnrecordedError) Error() string {
+	return "station recorded adding none of " + e.App + "'s packages: they are yours"
+}
+
 type ManualInstallError struct{ App, Hint string }
 
 func (e *ManualInstallError) Error() string { return e.App + " is installed by hand" }

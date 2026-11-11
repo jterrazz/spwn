@@ -40,10 +40,21 @@ type LinedInstaller struct {
 	*Installer
 }
 
+type HoldingInstaller struct {
+	// invariant: an installer of a method that holds what it adds by app,
+	// as apt does: a key the install adds is the app's, one the Mac held
+	// before is the owner's, and a removal takes back a key with the last
+	// app that holds it, one it never recorded only on the owner's word.
+	*Installer
+}
+
 func InstallerOf(w *world.World, mac string, m catalog.Method, lined bool) contract.Installer {
 	i := &Installer{w: w, mac: mac, method: m}
-	if lined {
+	switch {
+	case lined:
 		return LinedInstaller{i}
+	case m == catalog.MethodApt:
+		return HoldingInstaller{i}
 	}
 	return i
 }
@@ -134,6 +145,14 @@ func (f *Installer) Outdated(_ context.Context, keys []string) (map[string]apps.
 }
 
 func (f *Installer) run(ctx context.Context, verb string, installs []catalog.Install, apply func(s *world.Manager, key string)) error {
+	keys := make([]string, 0, len(installs))
+	for _, i := range installs {
+		keys = append(keys, i.Key())
+	}
+	return f.runKeys(ctx, verb, keys, apply)
+}
+
+func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, apply func(s *world.Manager, key string)) error {
 	if err := f.Ready(ctx); err != nil {
 		return err
 	}
@@ -143,13 +162,13 @@ func (f *Installer) run(ctx context.Context, verb string, installs []catalog.Ins
 		return errScripted
 	}
 	held := f.w.Holds("Installer." + verb)
-	for n, i := range installs {
+	for n, k := range keys {
 		if held && n > 0 {
 			break
 		}
-		apply(f.manager(), i.Key())
+		apply(f.manager(), k)
 		if verb == "Install" {
-			land(f.w, f.mac, f.manager(), i.Key())
+			land(f.w, f.mac, f.manager(), k)
 		}
 	}
 	f.w.Unlock()
@@ -223,6 +242,104 @@ func (f *Installer) Remove(ctx context.Context, installs []catalog.Install, _ co
 	return f.run(ctx, "Remove", installs, func(s *world.Manager, k string) { delete(s.Installed, k) })
 }
 
+var errHolds = errors.New("this method installs and removes for an app: through InstallFor and RemoveFor")
+
+func (HoldingInstaller) Install(context.Context, []catalog.Install, contract.Logs) error {
+	return errHolds
+}
+
+func (HoldingInstaller) Remove(context.Context, []catalog.Install, contract.Logs) error {
+	return errHolds
+}
+
+func (h HoldingInstaller) InstallFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
+	h.w.Lock()
+	s := h.manager()
+	var added []string
+	for _, i := range installs {
+		k := i.Key()
+		_, had := s.Installed[k]
+		held, recorded := s.Holders[k]
+		if had && !recorded {
+			continue
+		}
+		if s.Holders == nil {
+			s.Holders = map[string][]string{}
+		}
+		if !slices.Contains(held, f.App) {
+			s.Holders[k] = append(slices.Clone(held), f.App)
+		}
+		added = append(added, k)
+	}
+	h.w.Unlock()
+	err := h.Installer.Install(ctx, installs, logs)
+	h.w.Lock()
+	defer h.w.Unlock()
+	for _, k := range added {
+		if _, there := s.Installed[k]; !there {
+			letGo(s, k, f.App)
+		}
+	}
+	return err
+}
+
+func (h HoldingInstaller) RemoveFor(ctx context.Context, f contract.For, installs []catalog.Install, _ contract.Logs) error {
+	h.w.Lock()
+	s := h.manager()
+	var take []string
+	ours := false
+	for _, k := range slices.Sorted(maps.Keys(s.Holders)) {
+		if !slices.Contains(s.Holders[k], f.App) {
+			continue
+		}
+		ours = true
+		if _, there := s.Installed[k]; there && len(s.Holders[k]) == 1 {
+			take = append(take, k)
+		}
+	}
+	if !ours && !f.Word {
+		h.w.Unlock()
+		return &apps.UnrecordedError{App: f.App}
+	}
+	if !ours {
+		for _, i := range installs {
+			if _, recorded := s.Holders[i.Key()]; !recorded {
+				take = append(take, i.Key())
+			}
+		}
+	}
+	h.w.Unlock()
+	if err := h.runKeys(ctx, "Remove", take, func(s *world.Manager, k string) { delete(s.Installed, k) }); err != nil {
+		return err
+	}
+	h.w.Lock()
+	defer h.w.Unlock()
+	for k := range s.Holders {
+		letGo(s, k, f.App)
+	}
+	return nil
+}
+
+func (h HoldingInstaller) Holds(_ context.Context, app string) (bool, error) {
+	h.w.Lock()
+	defer h.w.Unlock()
+	for _, held := range h.manager().Holders {
+		if slices.Contains(held, app) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func letGo(s *world.Manager, key, app string) {
+	held := slices.DeleteFunc(slices.Clone(s.Holders[key]), func(a string) bool { return a == app })
+	if len(held) == 0 {
+		delete(s.Holders, key)
+		return
+	}
+	s.Holders[key] = held
+}
+
 func (l LinedInstaller) Line(i catalog.Install) string { return string(l.method) + " " + i.Key() }
 
 type Bundler struct {
@@ -236,6 +353,7 @@ type Bundler struct {
 var (
 	_ contract.Bundler = (*Bundler)(nil)
 	_ contract.Lined   = LinedInstaller{}
+	_ contract.Holder  = HoldingInstaller{}
 )
 
 func BundlerOf(w *world.World, mac string) *Bundler { return &Bundler{w: w, mac: mac} }

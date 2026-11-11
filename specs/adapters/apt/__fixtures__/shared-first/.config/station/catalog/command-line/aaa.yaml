@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: app
+name: aaa
+description: A tool whose package is the first of another app's too
+provides: [aaa]
+methods:
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [foo] }

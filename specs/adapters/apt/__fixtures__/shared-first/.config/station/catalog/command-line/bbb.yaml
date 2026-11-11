@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: app
+name: bbb
+description: A tool that opens with the same package as aaa, and adds its own
+provides: [bbb]
+methods:
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [foo, foo-doc] }

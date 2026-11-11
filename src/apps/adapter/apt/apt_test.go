@@ -81,22 +81,42 @@ func played(d *dpkg) *apt.Apt {
 
 const aptStore = "/home/u/.local/share/station/apt"
 
+// value: a verb for the app, on the owner's word (a removal asked by
+// name), or as an apply runs it, the ledger's alone.
+func word(app string) contract.For  { return contract.For{App: app, Word: true} }
+func apply(app string) contract.For { return contract.For{App: app} }
+
+// value: a Holder's verb as a plain one, run for one app on the owner's
+// word.
+func serving(verb func(context.Context, contract.For, []catalog.Install, contract.Logs) error) func(context.Context, []catalog.Install, contract.Logs) error {
+	return func(ctx context.Context, in []catalog.Install, logs contract.Logs) error {
+		return verb(ctx, word("app"), in, logs)
+	}
+}
+
 func aptOf(run local.Runner, terminal bool) *apt.Apt {
 	return apt.New(run, localtest.NewFS(), aptStore, terminal)
 }
 
+func rooted(d *dpkg) bool {
+	return slices.ContainsFunc(d.calls, func(c string) bool { return strings.HasPrefix(c, "sudo") })
+}
+
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.AptInstall{Packages: []string{"fd-find"}}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
-		d := &dpkg{held: map[string]string{}, fails: seed.Fails}
-		for k, v := range seed.Installed {
-			d.held[k] = v
-		}
-		names := []string{"apt-get", "dpkg-query", "apt-cache", "sudo"}
-		if seed.Absent {
-			names = []string{"sudo"}
-		}
-		return aptOf(local.Played(d.play, names...), false)
-	})
+	contracttest.Installer(t, catalog.AptInstall{Packages: []string{"fd-find"}}, built)
+	contracttest.Holder(t, catalog.AptInstall{Packages: []string{"fd-find"}}, built)
+}
+
+func built(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	d := &dpkg{held: map[string]string{}, fails: seed.Fails}
+	for k, v := range seed.Installed {
+		d.held[k] = v
+	}
+	names := []string{"apt-get", "dpkg-query", "apt-cache", "sudo"}
+	if seed.Absent {
+		names = []string{"sudo"}
+	}
+	return aptOf(local.Played(d.play, names...), false)
 }
 
 func TestAPackageRemovedWithItsConfigurationKeptIsNotHeld(t *testing.T) {
@@ -116,13 +136,13 @@ func TestEveryRunIsRootAndAsksNothing(t *testing.T) {
 	ctx := context.Background()
 	for _, run := range []func() error{
 		func() error {
-			return a.Install(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"fd-find"}}}, nil)
+			return a.InstallFor(ctx, word("fd-find"), []catalog.Install{catalog.AptInstall{Packages: []string{"fd-find"}}}, nil)
 		},
 		func() error {
 			return a.Update(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
 		},
 		func() error {
-			return a.Remove(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
+			return a.RemoveFor(ctx, word("bat"), []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
 		},
 	} {
 		if err := run(); err != nil {
@@ -146,7 +166,7 @@ func TestOnATerminalSudoMayAskItsPassword(t *testing.T) {
 	d := &dpkg{held: map[string]string{}}
 	a := aptOf(local.Played(d.play, "apt-get", "dpkg-query", "sudo"), true)
 
-	if err := a.Install(context.Background(), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil); err != nil {
+	if err := a.InstallFor(context.Background(), word("jq"), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil); err != nil {
 		t.Fatal(err)
 	}
 	for _, c := range d.calls {
@@ -161,7 +181,7 @@ func TestARemovalThatWouldTakeMoreTakesNothing(t *testing.T) {
 	// on it) is no removal station read: refused before anything runs.
 	d := &dpkg{held: map[string]string{"libfoo": "1.0", "foo-tool": "1.0"}, depends: map[string][]string{"libfoo": {"foo-tool"}}}
 
-	err := played(d).Remove(context.Background(), []catalog.Install{catalog.AptInstall{Packages: []string{"libfoo"}}}, nil)
+	err := played(d).RemoveFor(context.Background(), word("libfoo"), []catalog.Install{catalog.AptInstall{Packages: []string{"libfoo"}}}, nil)
 
 	var more *apt.TakesMoreError
 	if !errors.As(err, &more) || !slices.Equal(more.Also, []string{"foo-tool"}) {
@@ -176,7 +196,7 @@ func TestAVersionAskedIsTheFirstPackages(t *testing.T) {
 	d := &dpkg{held: map[string]string{}}
 
 	in, _ := catalog.Pinned(catalog.AptInstall{Packages: []string{"tree", "tree-extra"}}, "1:2.43.0")
-	if err := played(d).Install(context.Background(), []catalog.Install{in}, nil); err != nil {
+	if err := played(d).InstallFor(context.Background(), word("tree"), []catalog.Install{in}, nil); err != nil {
 		t.Fatal(err)
 	}
 	if d.held["tree"] != "1:2.43.0" || d.held["tree-extra"] != "1.0" {
@@ -185,7 +205,7 @@ func TestAVersionAskedIsTheFirstPackages(t *testing.T) {
 }
 
 func TestAFailedRunSaysAptsVerbAndItsLastWords(t *testing.T) {
-	err := played(&dpkg{held: map[string]string{}, fails: true}).Install(context.Background(), []catalog.Install{catalog.AptInstall{Packages: []string{"nope"}}}, nil)
+	err := played(&dpkg{held: map[string]string{}, fails: true}).InstallFor(context.Background(), word("nope"), []catalog.Install{catalog.AptInstall{Packages: []string{"nope"}}}, nil)
 
 	if err == nil || err.Error() != (&local.ExitError{Step: "apt-get update", Code: 100, LastStderr: "E: Unable to locate package"}).Error() {
 		t.Errorf("failed as %v; want apt-get's verb and last line", err)
@@ -217,9 +237,13 @@ func TestAHostileNameNeverReachesApt(t *testing.T) {
 	// invariant: a package or a version that is no name by the catalog's
 	// rule is refused before anything runs, as root or not.
 	type verb func(*apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error
-	install := func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Install }
+	install := func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error {
+		return serving(a.InstallFor)
+	}
 	all := []verb{install, func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Update },
-		func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error { return a.Remove }}
+		func(a *apt.Apt) func(context.Context, []catalog.Install, contract.Logs) error {
+			return serving(a.RemoveFor)
+		}}
 	type hostile struct {
 		in    catalog.AptInstall
 		verbs []verb
@@ -249,9 +273,9 @@ func TestEveryArgvEndsItsOptionsBeforeThePackages(t *testing.T) {
 	ctx := context.Background()
 	bat := []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}
 	for _, run := range []func() error{
-		func() error { return a.Install(ctx, bat, nil) },
+		func() error { return a.InstallFor(ctx, word("bat"), bat, nil) },
 		func() error { return a.Update(ctx, bat, nil) },
-		func() error { return a.Remove(ctx, bat, nil) },
+		func() error { return a.RemoveFor(ctx, word("bat"), bat, nil) },
 	} {
 		if err := run(); err != nil {
 			t.Fatal(err)
@@ -278,10 +302,10 @@ func TestAptIsReadInItsOwnWords(t *testing.T) {
 
 	_, _ = a.Inventory(ctx)
 	_, _ = a.Outdated(ctx, []string{"bat"})
-	_ = a.Remove(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
+	_ = a.RemoveFor(ctx, word("bat"), []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
 
-	if len(reads) != 3 {
-		t.Fatalf("read %d times; want dpkg-query, apt-cache policy, apt-get -s remove", len(reads))
+	if len(reads) != 4 {
+		t.Fatalf("read %d times; want dpkg-query, apt-cache policy, then dpkg-query and apt-get -s remove", len(reads))
 	}
 	for _, c := range reads {
 		if !slices.Contains(c.Env, "LC_ALL=C") {
@@ -298,10 +322,10 @@ func TestARemovalKeepsAPackageTheOwnerHadBefore(t *testing.T) {
 	ctx := context.Background()
 	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "libfoo-dev", "foo-data"}}}
 
-	if err := a.Install(ctx, foo, nil); err != nil {
+	if err := a.InstallFor(ctx, apply("foo"), foo, nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Remove(ctx, foo, nil); err != nil {
+	if err := a.RemoveFor(ctx, apply("foo"), foo, nil); err != nil {
 		t.Fatal(err)
 	}
 	if _, kept := d.held["libfoo-dev"]; !kept || len(d.held) != 1 {
@@ -314,9 +338,9 @@ func TestAnAptInstallOfNoPackageIsRefusedNotIndexed(t *testing.T) {
 	// built by hand) is refused by every verb before anything runs.
 	empty := []catalog.Install{catalog.AptInstall{}}
 	for name, run := range map[string]func(*apt.Apt) error{
-		"install": func(a *apt.Apt) error { return a.Install(context.Background(), empty, nil) },
+		"install": func(a *apt.Apt) error { return a.InstallFor(context.Background(), word("empty"), empty, nil) },
 		"update":  func(a *apt.Apt) error { return a.Update(context.Background(), empty, nil) },
-		"remove":  func(a *apt.Apt) error { return a.Remove(context.Background(), empty, nil) },
+		"remove":  func(a *apt.Apt) error { return a.RemoveFor(context.Background(), word("empty"), empty, nil) },
 	} {
 		d := &dpkg{held: map[string]string{}}
 		var err error
@@ -343,10 +367,10 @@ func TestARemovalKeepsTheOwnersOwnPackageWhereStationAddedOnlyTheRest(t *testing
 	ctx := context.Background()
 	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-extra"}}}
 
-	if err := a.Install(ctx, foo, nil); err != nil {
+	if err := a.InstallFor(ctx, apply("foo"), foo, nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Remove(ctx, foo, nil); err != nil {
+	if err := a.RemoveFor(ctx, apply("foo"), foo, nil); err != nil {
 		t.Fatal(err)
 	}
 	if _, kept := d.held["foo"]; !kept || len(d.held) != 1 {
@@ -362,22 +386,85 @@ func TestARemovalKeepsAPackageAnotherAppStillHolds(t *testing.T) {
 	ctx := context.Background()
 	one := []catalog.Install{catalog.AptInstall{Packages: []string{"aaa", "libshared"}}}
 	other := []catalog.Install{catalog.AptInstall{Packages: []string{"bbb", "libshared"}}}
-	for _, in := range [][]catalog.Install{one, other} {
-		if err := a.Install(ctx, in, nil); err != nil {
+	for app, in := range map[string][]catalog.Install{"aaa": one, "bbb": other} {
+		if err := a.InstallFor(ctx, apply(app), in, nil); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	if err := a.Remove(ctx, one, nil); err != nil {
+	if err := a.RemoveFor(ctx, apply("aaa"), one, nil); err != nil {
 		t.Fatal(err)
 	}
 	if want := (map[string]string{"bbb": "1.0", "libshared": "1.0"}); !maps.Equal(d.held, want) {
 		t.Errorf("held %v after removing the first app; want %v", d.held, want)
 	}
-	if err := a.Remove(ctx, other, nil); err != nil {
+	if err := a.RemoveFor(ctx, apply("bbb"), other, nil); err != nil {
 		t.Fatal(err)
 	}
 	if len(d.held) != 0 {
 		t.Errorf("held %v after removing both apps; want none", d.held)
+	}
+}
+
+func TestAnApplyTakesNothingOfAnAppStationAddedNothingOf(t *testing.T) {
+	// invariant: a removal without the owner's word for the app (an
+	// apply's) takes back only what station recorded adding: an app it
+	// added nothing of is the owner's, refused before anything runs.
+	d := &dpkg{held: map[string]string{"foo": "1.0"}}
+	a := played(d)
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}
+
+	holds, err := a.Holds(context.Background(), "foo")
+	if err != nil || holds {
+		t.Fatalf("holds %v (%v); want station holding nothing of foo", holds, err)
+	}
+	err = a.RemoveFor(context.Background(), apply("foo"), foo, nil)
+
+	var unrecorded *apps.UnrecordedError
+	if !errors.As(err, &unrecorded) || d.held["foo"] != "1.0" || rooted(d) {
+		t.Errorf("removal gave %v and ran %q; want it refused, foo kept", err, d.calls)
+	}
+}
+
+func TestARemovalTakesBackWhatTheInstallAddedWhateverTheAppListsNow(t *testing.T) {
+	// invariant: a removal reads the app's record, not its list: an app
+	// edited since its install takes back what that install added, and the
+	// owner's own package stays.
+	d := &dpkg{held: map[string]string{"foo": "1.0"}}
+	a := played(d)
+	ctx := context.Background()
+
+	if err := a.InstallFor(ctx, apply("x"), []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-extra"}}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.RemoveFor(ctx, apply("x"), []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := (map[string]string{"foo": "1.0"}); !maps.Equal(d.held, want) {
+		t.Errorf("held %v after the removal; want %v, the owner's", d.held, want)
+	}
+}
+
+func TestTwoAppsThatOpenWithOnePackageAreTwoHolders(t *testing.T) {
+	// invariant: a package is held by apps, by their catalogue names, never
+	// by a package of theirs: two apps that open with the same package each
+	// hold it.
+	d := &dpkg{held: map[string]string{}}
+	a := played(d)
+	ctx := context.Background()
+	aaa := []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}
+	bbb := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-doc"}}}
+	if err := a.InstallFor(ctx, word("aaa"), aaa, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.InstallFor(ctx, word("bbb"), bbb, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.RemoveFor(ctx, word("aaa"), aaa, nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := (map[string]string{"foo": "1.0", "foo-doc": "1.0"}); !maps.Equal(d.held, want) {
+		t.Errorf("held %v after removing aaa; want %v, bbb's", d.held, want)
 	}
 }

@@ -148,9 +148,19 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 			}
 			i := registry[in.Method()]
 			_, _ = i.Inventory(ctx)
-			_ = i.Install(ctx, []catalog.Install{in}, nil)
+			install, remove := i.Install, i.Remove
+			if h, ok := i.(contract.Holder); ok {
+				f := contract.For{App: a.Name, Word: true}
+				install = func(ctx context.Context, in []catalog.Install, logs contract.Logs) error {
+					return h.InstallFor(ctx, f, in, logs)
+				}
+				remove = func(ctx context.Context, in []catalog.Install, logs contract.Logs) error {
+					return h.RemoveFor(ctx, f, in, logs)
+				}
+			}
+			_ = install(ctx, []catalog.Install{in}, nil)
 			before := len(*run.calls)
-			_ = i.Remove(ctx, []catalog.Install{in}, nil)
+			_ = remove(ctx, []catalog.Install{in}, nil)
 			removed[in.Method()] = len(*run.calls) > before
 		}
 	}

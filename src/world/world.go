@@ -204,6 +204,9 @@ type Manager struct {
 	// value: the methods an install of a key brings, their manager present
 	// from then on: Homebrew's script lands brew and cask.
 	Lands map[string][]catalog.Method `json:"lands,omitempty"`
+	// value: for a method that holds what it adds by app (apt), the apps
+	// whose installs added each key; a key it lists none of is the owner's.
+	Holders map[string][]string `json:"holders,omitempty"`
 }
 
 type Meter struct {

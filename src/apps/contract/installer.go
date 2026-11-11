@@ -31,6 +31,29 @@ type Installer interface {
 	Remove(ctx context.Context, installs []catalog.Install, logs Logs) error
 }
 
+type For struct {
+	// value: whom a verb serves: the catalogue app it runs for, and whether
+	// the owner named that app in person.
+	App string
+	// value: the owner's own word for the app, a removal they asked of it
+	// by name and confirmed; an apply's removal, which the ledger decides,
+	// carries none.
+	Word bool
+}
+
+type Holder interface {
+	// invariant: a method that runs as root over a package database the
+	// owner also installs into by hand (apt) records each package its
+	// install adds by the app it ran for, and takes back one it never
+	// recorded adding only on the owner's word for that app. The apps model
+	// runs its installs and removals through these, never through
+	// Installer's own.
+	InstallFor(ctx context.Context, f For, installs []catalog.Install, logs Logs) error
+	RemoveFor(ctx context.Context, f For, installs []catalog.Install, logs Logs) error
+	// value: whether station recorded adding any package for the app.
+	Holds(ctx context.Context, app string) (bool, error)
+}
+
 type Manager struct {
 	// value: the manager's word in a row's detail: "brew did not answer".
 	Name string

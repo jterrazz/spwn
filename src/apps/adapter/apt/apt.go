@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"path"
 	"slices"
 	"strconv"
@@ -40,6 +41,8 @@ func read(name string, args ...string) local.Cmd {
 	c.Env = []string{"LC_ALL=C"}
 	return c
 }
+
+var _ contract.Holder = (*Apt)(nil)
 
 type Apt struct {
 	run   local.Runner
@@ -143,11 +146,23 @@ func candidates(policy string, keys []string, out map[string]apps.Currency) {
 	}
 }
 
-func (a *Apt) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+// invariant: apt installs and removes for an app, through InstallFor and
+// RemoveFor, since what it records is held by that app; its plain verbs
+// refuse, never guessing the app from a package.
+var errServes = errors.New("apt installs and removes for an app: through InstallFor and RemoveFor")
+
+func (a *Apt) Install(context.Context, []catalog.Install, contract.Logs) error { return errServes }
+
+func (a *Apt) Remove(context.Context, []catalog.Install, contract.Logs) error { return errServes }
+
+func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
 	// invariant: a package the install adds is recorded station's, held by
-	// the app that asked for it; one dpkg held before it is the owner's and
-	// stays unrecorded, unless station's own record of it is there already,
-	// where the app joins its holders.
+	// the app it ran for; one dpkg held before it is the owner's and stays
+	// unrecorded, unless station's own record of it is there already, where
+	// the app joins its holders.
+	if err := checkApp(f.App); err != nil {
+		return err
+	}
 	names, asked, err := packages(installs, true)
 	if err != nil {
 		return err
@@ -174,7 +189,7 @@ func (a *Apt) Install(ctx context.Context, installs []catalog.Install, logs cont
 			if _, had := before[p]; had && !recorded {
 				continue
 			}
-			if err := a.record(p, add(held, v.Packages[0])); err != nil {
+			if err := a.record(p, add(held, f.App)); err != nil {
 				return err
 			}
 		}
@@ -193,64 +208,80 @@ func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contr
 	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--only-upgrade", "--"}, names)...)
 }
 
-func (a *Apt) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	// invariant: a removal takes back the packages station's installs added
-	// and no other app still holds: one the owner had before stays, and one
-	// another app's install holds stays while that app does. An app none of
-	// whose packages station recorded is the owner's own, removed by the
-	// owner's word: its own package, the one its key names, alone. apt
-	// removes every package that depends on one it removes, so a removal that
-	// would take any package it was not asked for is refused before it runs.
+func (a *Apt) RemoveFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
+	// invariant: a removal takes back the packages station recorded adding
+	// for the app, whatever the app lists now, each once no other app holds
+	// it and only while dpkg holds it: one the owner had before stays, and
+	// one another app's install holds stays while that app does. An app
+	// station recorded adding nothing for is the owner's: on the owner's
+	// word for it, its removal takes the package its key names alone, unless
+	// a record names it another app's; without that word nothing of it is
+	// taken. apt removes every package that depends on one it removes, so a
+	// removal that would take any package it was not asked for is refused
+	// before it runs.
+	if err := checkApp(f.App); err != nil {
+		return err
+	}
 	_, asked, err := packages(installs, false)
 	if err != nil {
 		return err
 	}
-	held := map[string][]string{}
-	recorded := map[string]bool{}
+	records, err := a.records()
+	if err != nil {
+		return err
+	}
+	now, err := a.Inventory(ctx)
+	if err != nil {
+		return err
+	}
 	var names []string
-	for _, v := range asked {
-		key := v.Packages[0]
-		for _, p := range v.Packages {
-			if _, read := held[p]; read {
-				continue
-			}
-			h, ok, err := a.holders(p)
-			if err != nil {
-				return err
-			}
-			held[p], recorded[p] = h, ok
+	left := map[string][]string{}
+	for p, held := range records {
+		if !slices.Contains(held, f.App) {
+			continue
 		}
-		station := slices.ContainsFunc(v.Packages, func(p string) bool { return recorded[p] })
-		for _, p := range v.Packages {
-			switch {
-			case recorded[p]:
-				held[p] = drop(held[p], key)
-				if len(held[p]) == 0 && !slices.Contains(names, p) {
-					names = append(names, p)
-				}
-			case !station && p == key && !slices.Contains(names, p):
-				names = append(names, p)
+		left[p] = drop(held, f.App)
+		if _, there := now[p]; there && len(left[p]) == 0 {
+			names = append(names, p)
+		}
+	}
+	if len(left) == 0 {
+		if !f.Word {
+			return &apps.UnrecordedError{App: f.App}
+		}
+		for _, v := range asked {
+			key := v.Packages[0]
+			_, recorded := records[key]
+			if _, there := now[key]; there && !recorded && !slices.Contains(names, key) {
+				names = append(names, key)
 			}
 		}
 	}
+	slices.Sort(names)
 	if len(names) > 0 {
 		if err := a.take(ctx, logs, names); err != nil {
 			return err
 		}
 	}
-	for p, ok := range recorded {
-		if !ok {
-			continue
-		}
-		if slices.Contains(names, p) {
-			if err := a.files.Remove(path.Join(a.store, p)); err != nil && !errors.Is(err, fs.ErrNotExist) {
-				return err
-			}
-		} else if err := a.record(p, held[p]); err != nil {
+	for _, p := range slices.Sorted(maps.Keys(left)) {
+		if err := a.let(p, left[p]); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (a *Apt) Holds(_ context.Context, app string) (bool, error) {
+	records, err := a.records()
+	if err != nil {
+		return false, err
+	}
+	for _, held := range records {
+		if slices.Contains(held, app) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (a *Apt) take(ctx context.Context, logs contract.Logs, names []string) error {
@@ -273,8 +304,8 @@ func (a *Apt) take(ctx context.Context, logs contract.Logs, names []string) erro
 	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...)
 }
 
-// value: the apps that hold a package station's install added, the first
-// package of each, one to a line of the package's file in station's
+// value: the apps that hold a package station's install added, by their
+// catalogue names, one to a line of the package's file in station's
 // folder; none recorded is the owner's.
 func (a *Apt) holders(pkg string) (held []string, recorded bool, err error) {
 	data, err := a.files.ReadFile(path.Join(a.store, pkg))
@@ -285,15 +316,58 @@ func (a *Apt) holders(pkg string) (held []string, recorded bool, err error) {
 		return nil, false, err
 	}
 	for line := range strings.Lines(string(data)) {
-		if key := strings.TrimSpace(line); key != "" {
-			held = append(held, key)
+		if app := strings.TrimSpace(line); app != "" {
+			held = append(held, app)
 		}
 	}
 	return held, true, nil
 }
 
+// value: every package station's folder records, with its holders; a file
+// whose name is no package is no record of station's.
+func (a *Apt) records() (map[string][]string, error) {
+	entries, err := a.files.ReadDir(a.store)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return map[string][]string{}, nil
+	case err != nil:
+		return nil, err
+	}
+	out := map[string][]string{}
+	for _, e := range entries {
+		if e.IsDir() || catalog.CheckPackage(e.Name()) != nil {
+			continue
+		}
+		held, _, err := a.holders(e.Name())
+		if err != nil {
+			return nil, err
+		}
+		out[e.Name()] = held
+	}
+	return out, nil
+}
+
 func (a *Apt) record(pkg string, held []string) error {
 	return a.files.WriteFile(path.Join(a.store, pkg), []byte(strings.Join(held, "\n")+"\n"), 0o644)
+}
+
+// value: the record of a package once an app let go of it: removed when
+// no app holds it any longer.
+func (a *Apt) let(pkg string, held []string) error {
+	if len(held) > 0 {
+		return a.record(pkg, held)
+	}
+	if err := a.files.Remove(path.Join(a.store, pkg)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
+func checkApp(app string) error {
+	if app == "" || strings.ContainsAny(app, "\n\r") {
+		return errors.New("apt records a package by an app's name, and " + strconv.Quote(app) + " is none")
+	}
+	return nil
 }
 
 func add(held []string, key string) []string {
