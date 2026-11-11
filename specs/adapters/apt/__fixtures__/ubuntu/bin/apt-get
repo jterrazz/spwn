@@ -1,6 +1,7 @@
 #!/bin/sh
 # apt-get: simulates a removal (what depends lists comes with it), refuses a change that is not root's,
-# noninteractive and keeping changed configuration, and writes dpkg.db.
+# noninteractive and keeping changed configuration, and writes dpkg.db; while the file hang is there, an
+# install that wrote dpkg.db writes apt-hung, then waits to be interrupted.
 printf 'apt-get %s\n' "$*" >> "$HOME/.calls"
 db="$HOME/dpkg.db"
 touch "$db"
@@ -45,4 +46,8 @@ for p in "$@"; do
             ;;
     esac
 done
+if [ "$verb" = install ] && [ -f "$HOME/hang" ]; then
+    echo hung > "$HOME/apt-hung"
+    exec /bin/sleep 20
+fi
 case "$verb" in install | remove | update) ;; *) echo "stub apt-get: unexpected $verb" >&2; exit 97 ;; esac

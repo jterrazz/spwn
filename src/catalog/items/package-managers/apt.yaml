@@ -13,5 +13,5 @@ disk:
     paths:
         - path: '{data}/station/apt'
           level: kept
-          note: one file per package station's install added, naming the apps that hold it; a removal takes back a package with its last holder, and none that is not here
+          note: one file per package station's install added, or was adding when cut short, naming the apps that hold it; a removal takes back a package with its last holder, and none that is not here
     no-erase: 'what it installed is apps: station apps remove <app>'

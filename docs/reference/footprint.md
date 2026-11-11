@@ -53,9 +53,9 @@ The keychain entry `station` holds nothing since round 5: `station init` removes
 
 ### apt
 
-| Path                         | Group         | Note                                                                                                                                                       |
-| ---------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `~/.local/share/station/apt` | never touched | one file per package station's install added, naming the apps that hold it; a removal takes back a package with its last holder, and none that is not here |
+| Path                         | Group         | Note                                                                                                                                                                                     |
+| ---------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `~/.local/share/station/apt` | never touched | one file per package station's install added, or was adding when cut short, naming the apps that hold it; a removal takes back a package with its last holder, and none that is not here |
 
 Erase: none (what it installed is apps: station apps remove <app>).
 

@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
@@ -47,8 +48,9 @@ var _ contract.Holder = (*Apt)(nil)
 type Apt struct {
 	run   local.Runner
 	files local.FS
-	// value: station's folder of the packages its installs added, one file
-	// per package naming the apps that hold it.
+	// value: station's folder of the packages its installs added, or were
+	// adding when cut short, one file per package naming the apps that hold
+	// it.
 	store string
 	// value: the run has a terminal, where sudo may ask its password; off
 	// one, sudo never asks and fails where it would.
@@ -156,10 +158,13 @@ func (a *Apt) Install(context.Context, []catalog.Install, contract.Logs) error {
 func (a *Apt) Remove(context.Context, []catalog.Install, contract.Logs) error { return errServes }
 
 func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog.Install, logs contract.Logs) error {
-	// invariant: a package the install adds is recorded station's, held by
-	// the app it ran for; one dpkg held before it is the owner's and stays
-	// unrecorded, unless station's own record of it is there already, where
-	// the app joins its holders.
+	// invariant: before apt runs, each of the app's packages dpkg does not
+	// hold is recorded the app's, as what this install may add, so an
+	// install cut short leaves the record of all it may have added; one dpkg
+	// held before is the owner's and stays unrecorded, unless station's
+	// record of it is there already, where the app joins its holders. Once
+	// apt has run, interrupted or not, a package so recorded that dpkg does
+	// not hold is let go by the app.
 	if err := checkApp(f.App); err != nil {
 		return err
 	}
@@ -171,27 +176,62 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 	if err != nil {
 		return err
 	}
-	if err := a.refresh(ctx, logs); err != nil {
-		return err
-	}
-	if err := a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...); err != nil {
-		return err
-	}
-	if err := a.files.MkdirAll(a.store, 0o755); err != nil {
-		return err
-	}
+	var intent []string
+	held := map[string][]string{}
 	for _, v := range asked {
 		for _, p := range v.Packages {
-			held, recorded, err := a.holders(p)
+			if slices.Contains(intent, p) {
+				continue
+			}
+			h, recorded, err := a.holders(p)
 			if err != nil {
 				return err
 			}
 			if _, had := before[p]; had && !recorded {
 				continue
 			}
-			if err := a.record(p, add(held, f.App)); err != nil {
-				return err
-			}
+			held[p] = add(h, f.App)
+			intent = append(intent, p)
+		}
+	}
+	if err := a.refresh(ctx, logs); err != nil {
+		return err
+	}
+	if err := a.files.MkdirAll(a.store, 0o755); err != nil {
+		return err
+	}
+	for _, p := range intent {
+		if err := a.record(p, held[p]); err != nil {
+			return err
+		}
+	}
+	ran := a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...)
+	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), settleBudget)
+	defer cancel()
+	if err := a.settle(past, f.App, intent); err != nil && ran == nil {
+		return err
+	}
+	return ran
+}
+
+// value: how long the read after an install may take, past an interrupt.
+const settleBudget = 30 * time.Second
+
+func (a *Apt) settle(ctx context.Context, app string, intent []string) error {
+	now, err := a.Inventory(ctx)
+	if err != nil {
+		return err
+	}
+	for _, p := range intent {
+		if _, there := now[p]; there {
+			continue
+		}
+		held, _, err := a.holders(p)
+		if err != nil {
+			return err
+		}
+		if err := a.let(p, drop(held, app)); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -304,9 +344,9 @@ func (a *Apt) take(ctx context.Context, logs contract.Logs, names []string) erro
 	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...)
 }
 
-// value: the apps that hold a package station's install added, by their
-// catalogue names, one to a line of the package's file in station's
-// folder; none recorded is the owner's.
+// value: the apps that hold a package station's install added (or was
+// adding, cut short), by their catalogue names, one to a line of the
+// package's file in station's folder; none recorded is the owner's.
 func (a *Apt) holders(pkg string) (held []string, recorded bool, err error) {
 	data, err := a.files.ReadFile(path.Join(a.store, pkg))
 	switch {

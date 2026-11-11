@@ -24,7 +24,10 @@ type dpkg struct {
 	held    map[string]string
 	depends map[string][]string
 	fails   bool
-	calls   []string
+	// value: an install is cut short once dpkg wrote what it adds, as by
+	// ctrl-c.
+	cut   bool
+	calls []string
 }
 
 func (d *dpkg) play(c local.Cmd) (local.Output, error) {
@@ -64,6 +67,9 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 			name, version, _ := strings.Cut(p, "=")
 			d.held[name] = cmpOr(version, "1.0")
 		}
+	}
+	if d.cut && c.Args[verb] == "install" {
+		return local.Output{ExitCode: 130}, nil
 	}
 	return local.Output{}, nil
 }
@@ -466,5 +472,35 @@ func TestTwoAppsThatOpenWithOnePackageAreTwoHolders(t *testing.T) {
 	}
 	if want := (map[string]string{"foo": "1.0", "foo-doc": "1.0"}); !maps.Equal(d.held, want) {
 		t.Errorf("held %v after removing aaa; want %v, bbb's", d.held, want)
+	}
+}
+
+func TestAnInstallCutShortLeavesTheRecordOfWhatItMayHaveAdded(t *testing.T) {
+	// invariant: what an install may add is recorded before apt runs, so an
+	// install cut short once dpkg wrote leaves the record of it, and a
+	// later removal takes back that alone; a package it never added is let
+	// go once apt has run.
+	d := &dpkg{held: map[string]string{"foo": "1.0"}, cut: true}
+	a := played(d)
+	ctx := context.Background()
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-extra"}}}
+
+	if err := a.InstallFor(ctx, apply("x"), foo, nil); err == nil {
+		t.Fatal("an install cut short returned no error")
+	}
+	d.cut = false
+	if err := a.RemoveFor(ctx, apply("x"), foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := (map[string]string{"foo": "1.0"}); !maps.Equal(d.held, want) {
+		t.Errorf("held %v after the removal; want %v, the owner's", d.held, want)
+	}
+
+	failed := &dpkg{held: map[string]string{}, fails: true}
+	b := played(failed)
+	_ = b.InstallFor(ctx, apply("y"), []catalog.Install{catalog.AptInstall{Packages: []string{"bar"}}}, nil)
+	failed.fails = false
+	if holds, err := b.Holds(ctx, "y"); err != nil || holds {
+		t.Errorf("holds %v (%v) after an install that added nothing; want no record", holds, err)
 	}
 }
