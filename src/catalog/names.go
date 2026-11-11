@@ -15,10 +15,11 @@ var (
 	packageRule        = regexp.MustCompile(`^[a-z0-9][a-z0-9+.-]+(:[a-z0-9-]+)?$`)
 	packageVersionRule = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9.+~:-]*$`)
 	repoRule           = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$`)
+	tagRule            = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._+~-]*$`)
 )
 
 type NameError struct {
-	// value: the kind of name: `package name`, `package version`, `command name`, `repo`.
+	// value: the kind of name: `package name`, `package version`, `command name`, `repo`, `release tag`.
 	Kind string
 	Name string
 	// value: the rule it breaks, in the owner's words.
@@ -68,6 +69,16 @@ func CheckRepo(repo string) error {
 	_, name, _ := strings.Cut(repo, "/")
 	if !repoRule.MatchString(repo) || name == "." || name == ".." {
 		return &NameError{Kind: "repo", Name: repo, Rule: "owner/name, letters, digits and -, the name ._- too, never . or .."}
+	}
+	return nil
+}
+
+func CheckTag(tag string) error {
+	// value: a release tag a route is built of: letters, digits and `._+~-`,
+	// opening with a letter or digit, never two dots in a row; no slash, `?`,
+	// `#` nor space, so the tag stays one segment of the route.
+	if !tagRule.MatchString(tag) || strings.Contains(tag, "..") {
+		return &NameError{Kind: "release tag", Name: tag, Rule: "letters, digits and ._+~- from a letter or digit, never .., one path segment"}
 	}
 	return nil
 }

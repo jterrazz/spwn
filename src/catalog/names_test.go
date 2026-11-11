@@ -20,6 +20,8 @@ func TestEachKindOfNameIsCheckedByOneRule(t *testing.T) {
 			[]string{"", ".", "..", "../../.profile", "../tool", "/etc/passwd", "a/b", `a\b`, "-tool", "tool\x00"}},
 		{catalog.CheckRepo, []string{"acme/tool", "junegunn/fzf", "BurntSushi/ripgrep", "a/b.c_d-e"},
 			[]string{"", "gh", "a/../../../../../tmp/x", "../x", "a/..", "a/.", "-a/b", "a/b/c", "a//b", "a/b c", "/a/b", "a/b?x=1", "a/b#x"}},
+		{catalog.CheckTag, []string{"v1.2.3", "1.4.4", "release-2024.01", "v1.0.0-rc.1", "1.0+build5", "nightly_2"},
+			[]string{"", "../../../../repos/evil/x/releases/latest", "..", "v1..2", "a/b", "/v1", "v1?x=1", "v1#x", "v1 -x", " v1", "-v1", ".v1", "v1\n", "v1%2f"}},
 	} {
 		for _, n := range c.good {
 			if err := c.check(n); err != nil {

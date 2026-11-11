@@ -19,14 +19,19 @@ func bare(n *localtest.Net) {
 }
 
 func TestAHostileNameNeverBuildsAPath(t *testing.T) {
-	// invariant: a command or a repo that is no name by the catalog's rule
-	// is refused before anything is fetched, written or removed.
+	// invariant: a command, a repo or a tag that is no name by the catalog's
+	// rule is refused before anything is fetched, written or removed.
 	hostile := make([]catalog.GitHubReleaseInstall, 0, len(contracttest.HostileCommands())+len(contracttest.HostileRepos()))
 	for _, c := range contracttest.HostileCommands() {
 		hostile = append(hostile, catalog.GitHubReleaseInstall{Repo: repo, Asset: "tool-{os}-{arch}", Commands: []string{c}})
 	}
 	for _, r := range contracttest.HostileRepos() {
 		hostile = append(hostile, catalog.GitHubReleaseInstall{Repo: r, Asset: "tool-{os}-{arch}", Commands: []string{"tool"}})
+	}
+	for _, tag := range contracttest.HostileTags() {
+		if tag != "" {
+			hostile = append(hostile, catalog.GitHubReleaseInstall{Repo: repo, Asset: "tool-{os}-{arch}", Commands: []string{"tool"}, Tag: tag})
+		}
 	}
 	for _, in := range hostile {
 		files, n := localtest.NewFS(), localtest.NewNet()

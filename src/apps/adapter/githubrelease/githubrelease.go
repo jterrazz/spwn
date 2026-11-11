@@ -418,10 +418,14 @@ type asset struct {
 }
 
 func (r *Releases) release(ctx context.Context, repo, tag string) (release, error) {
-	// invariant: a tag asked is the release's tag, or that tag with a `v`
-	// before it (`1.4.4` finds `v1.4.4`); none asked, the latest release.
+	// invariant: a tag asked is checked before it joins the route, and is the
+	// release's tag, or that tag with a `v` before it (`1.4.4` finds
+	// `v1.4.4`); none asked, the latest release.
 	tries := []string{"/releases/latest"}
 	if tag != "" {
+		if err := catalog.CheckTag(tag); err != nil {
+			return release{}, err
+		}
 		tries = []string{"/releases/tags/" + tag}
 		if !strings.HasPrefix(tag, "v") {
 			tries = append(tries, "/releases/tags/v"+tag)

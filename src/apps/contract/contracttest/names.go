@@ -23,3 +23,9 @@ func HostileRepos() []string {
 	// command is, since a repo builds a route and a record's path.
 	return []string{"a/../../../../../tmp/x", "../../../x", "acme/..", "acme/x/../../y", "noslash", "-a/b", ""}
 }
+
+func HostileTags() []string {
+	// value: the tags a hostile pin asks, refused before a route is built of
+	// one: a tag is a segment of the API route the release is read at.
+	return []string{"../../../../repos/evil/x/releases/latest", "v1/../../x", "v1?x=1", "v1#x", "v1 -x", "-v1", ""}
+}
