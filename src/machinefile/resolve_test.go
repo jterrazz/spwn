@@ -205,3 +205,22 @@ func TestAccountsAndPortsAreReplacedWhole(t *testing.T) {
 		t.Errorf("read %v, want the overlay's accounts and ports alone: %v", got, want)
 	}
 }
+
+func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
+	files := map[string]string{
+		"machinefiles/a.yaml":       machine("a", "{ os: macos }", "[fd]"),
+		"machinefiles/a.lock":       "not yaml at all: [",
+		"machinefiles/README.md":    "# my machines",
+		"catalog/command-line/NOTE": "a note",
+	}
+	if got := methodOf(t, library(t, files, nil), "a", "fd"); got != "script" {
+		t.Errorf("chose %s", got)
+	}
+	for _, p := range []string{"machinefiles/b.yml", "catalog/command-line/jq.yml"} {
+		_, err := machinefile.Load([]machinefile.Tree{{Layer: machinefile.User, Root: "~/.config/station", Files: []machinefile.File{{Path: p, Body: []byte("x: 1\n")}}}})
+		var refused *machinefile.RefusedFileError
+		if !errors.As(err, &refused) {
+			t.Errorf("%s read with %v, want it refused: a .yml file was meant to be read", p, err)
+		}
+	}
+}

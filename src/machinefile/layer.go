@@ -86,6 +86,15 @@ func refusedFile(format string, err error) error {
 
 func (t Tree) display(p string) string { return t.Root + "/" + p }
 
+// invariant: a source's folders hold its YAML files and whatever else sits
+// beside them (a README, a lockfile a later station writes): only a
+// `.yaml` file is read, and a `.yml` one is refused rather than skipped,
+// since its owner meant it to be read.
+func read(p string) bool {
+	ext := path.Ext(p)
+	return ext == ".yaml" || ext == ".yml"
+}
+
 func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 	// invariant: the trees strongest first; a same-name item of a stronger
 	// layer replaces a weaker one whole, as a same-name Machinefile does.
@@ -95,6 +104,9 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 		for _, f := range t.Files {
 			rest, ok := strings.CutPrefix(f.Path, catalogDir+"/")
 			if !ok {
+				continue
+			}
+			if !read(rest) {
 				continue
 			}
 			folder, name, ok := strings.Cut(rest, "/")
@@ -123,6 +135,9 @@ func Load(trees []Tree) (Library, error) {
 		for _, f := range t.Files {
 			rest, ok := strings.CutPrefix(f.Path, machinefilesDir+"/")
 			if !ok {
+				continue
+			}
+			if !read(rest) {
 				continue
 			}
 			file := t.display(f.Path)
