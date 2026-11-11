@@ -183,6 +183,8 @@ tree; and whether it is a blueprint's volume. Starts when the push loop
 becomes the bottleneck.
 
 ## Smaller follow-ups
+- While Serve reads off because `tailscale status` failed, the tailnet may still hold station's entries, and a release or a narrowed right then leaves its entry live (`dropLocked` in `src/engine/process/share.go` unshares only while Serve is on, `refreshSelf` in `engine.go` reads a failed status as off) until Serve reads on again and the reconciliation removes it. Found by the L4.1 re-verify (2026-11-11); starts with the next change to how the engine reads Serve's state.
+- `engine.agents-held` answers every machine's held agents to any guest that asks over its socket (`guestRequest` in `src/engine/process/vms.go`), not only its own VM's. Pre-existing, found by the L4.1 re-verify (2026-11-11); starts with the next change to the guest's calls.
 - A VM's record is written without the engine's lock by four calls of `src/machines/calls/` (`agents.go:107`, `edit.go:68`, `vms.go:76` and `vms.go:99`, each `writeRecord`), so one can race the engine's own write as a create did before b440a36a. Found by the L4.1 re-verify (2026-11-11); starts with the next change to those calls.
 - A server's traffic on its card: a metrics URL a server declares (Prometheus text, read over the tailnet from its Mac), its requests per minute beside the latency ([ADR-028](docs/decisions/028-a-servers-card-shows-latency-not-traffic.md)). Starts when the owner asks for it.
 - An image registry (private ghcr) once two Macs build the same image.
