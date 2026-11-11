@@ -27,6 +27,9 @@ type Mac struct {
 	// value: that Mac's own routing, for a call addressed to one of its VMs;
 	// nil runs every call on the Mac itself.
 	Relay Relay
+	// value: what that Mac's older binary refuses to read in a call's In,
+	// before its registry decodes it; nil reads every In.
+	Refuse func(name string, in json.RawMessage) error
 }
 
 type Relay interface {
@@ -118,6 +121,9 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 		}
 		return call.Encode(out, e.word())
 	}
+	if err := e.refused(name, in); err != nil {
+		return nil, e.over(err)
+	}
 	v, err := e.m.Registry.Input(name, in)
 	if err != nil {
 		return nil, e.over(err)
@@ -159,11 +165,21 @@ func (e endpoint) stream(ctx context.Context, target machine.Ref, name string, i
 	if target.On != "" && e.m.Relay != nil {
 		return e.m.Relay.Watch(ctx, target, name, in, p)
 	}
+	if err := e.refused(name, in); err != nil {
+		return nil, err
+	}
 	v, err := e.m.Registry.Input(name, in)
 	if err != nil {
 		return nil, err
 	}
 	return e.m.Registry.Stream(ctx, e.m.Profile, name, v, p)
+}
+
+func (e endpoint) refused(name string, in json.RawMessage) error {
+	if e.m.Refuse == nil {
+		return nil
+	}
+	return e.m.Refuse(name, in)
 }
 
 func (e endpoint) Close() error {

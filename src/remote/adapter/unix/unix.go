@@ -37,6 +37,15 @@ func New(engine Engine, thisMac func() contract.Hello) Dialer {
 	return Dialer{engine: engine, thisMac: thisMac}
 }
 
+// value: the hello this Mac opens an exchange with: its version, so a
+// guest answers in the words it reads; none when the Dialer has no Hello.
+func (d Dialer) hello() *api.Hello {
+	if d.thisMac == nil {
+		return &api.Hello{}
+	}
+	return &api.Hello{Version: d.thisMac().Version}
+}
+
 func (d Dialer) Dial(context.Context, string) (contract.Endpoint, error) {
 	return endpoint(d), nil
 }
@@ -87,7 +96,7 @@ func (e endpoint) Watch(ctx context.Context, target machine.Ref, name string, in
 
 func (d Dialer) KindOf(ctx context.Context, vm string) (machine.Kind, error) {
 	// value: the kind a VM says it is, in the Hello its own station answers.
-	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: &api.Hello{}})
+	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: d.hello()})
 	stdout, code, err := d.engine.GuestExec(ctx, vm, Guest, string(hello)+"\n")
 	if err != nil {
 		return "", err
@@ -108,7 +117,7 @@ func (d Dialer) KindOf(ctx context.Context, vm string) (machine.Kind, error) {
 // binary serves no such call is too old, read again at every exchange.
 func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.Frame) ([]api.Frame, error) {
 	request.V, request.ID = api.Version, "2"
-	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: &api.Hello{}})
+	hello, _ := json.Marshal(api.Frame{V: api.Version, ID: "1", Hello: Dialer(e).hello()})
 	body, err := json.Marshal(request)
 	if err != nil {
 		return nil, err

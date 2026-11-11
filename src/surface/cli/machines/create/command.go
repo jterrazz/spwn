@@ -159,6 +159,12 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			}
 			err := io.Confirmed(func(answer string) (err error) {
 				r := in.request
+				if r.Lifetime == machines.Ephemeral {
+					// invariant: the default lifetime travels as none, which
+					// the create of every station reads as its own default,
+					// an older one's included (ADR-032).
+					r.Lifetime = ""
+				}
 				if in.Server {
 					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Confirm: answer}, steps)
 				} else {

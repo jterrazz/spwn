@@ -78,15 +78,15 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		call.Set(out, v)
 		return ran
 	}
-	l, err := r.endpoint(ctx, t, name)
-	if err != nil {
-		return r.named(t, err)
-	}
-	defer r.release(l)
 	raw, err := json.Marshal(in)
 	if err != nil {
 		return err
 	}
+	l, raw, err := r.endpoint(ctx, t, name, raw)
+	if err != nil {
+		return r.named(t, err)
+	}
+	defer r.release(l)
 	answer, err := l.ep.Invoke(ctx, t, name, raw, p)
 	if err != nil {
 		r.broke(t.Mac(), l, err)
@@ -111,14 +111,13 @@ func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in 
 	if r.local(t) {
 		return r.registry.Stream(ctx, r.thisMac, name, in, p)
 	}
-	l, err := r.endpoint(ctx, t, name)
-	if err != nil {
-		return nil, r.named(t, err)
-	}
 	raw, err := json.Marshal(in)
 	if err != nil {
-		r.release(l)
 		return nil, err
+	}
+	l, raw, err := r.endpoint(ctx, t, name, raw)
+	if err != nil {
+		return nil, r.named(t, err)
 	}
 	updates, err := l.ep.Watch(ctx, t, name, raw, p)
 	if err != nil {
@@ -182,9 +181,10 @@ func (r *Router) inEngine(name string) bool {
 	return ok && h.Meta().Where == call.InEngine
 }
 
-func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*link, error) {
+func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, json.RawMessage, error) {
 	// invariant: a call the far Hello lacks is asked again of a fresh
-	// connection, so a Mac upgraded since its connection was opened serves it.
+	// connection, so a Mac upgraded since its connection was opened serves it;
+	// the In it returns is in the words that far binary reads (ADR-032).
 	l, hello, fresh, err := r.connect(ctx, t)
 	if err == nil && !fresh && !slices.Contains(hello.Calls, name) {
 		r.drop(t.Mac(), l)
@@ -192,7 +192,7 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*lin
 		l, hello, _, err = r.connect(ctx, t)
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !slices.Contains(hello.Calls, name) {
 		r.release(l)
@@ -200,9 +200,12 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*lin
 		if r.reach.Label != nil {
 			detail["label"] = r.reach.Label(t.Mac())
 		}
-		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
+		return nil, nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
-	return l, nil
+	if api.Older(hello.Version, r.reach.Version) {
+		in = api.OlderWords(in)
+	}
+	return l, in, nil
 }
 
 func (r *Router) connect(ctx context.Context, t machine.Ref) (l *link, hello contract.Hello, fresh bool, err error) {
@@ -329,7 +332,7 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	if !ok {
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
 	}
-	l, err := r.endpoint(ctx, vm, name)
+	l, in, err := r.endpoint(ctx, vm, name, in)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +349,7 @@ func (r *Router) ServeWatch(ctx context.Context, target machine.Ref, name string
 	if !ok {
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Watch(ctx, target, name, in, p)
 	}
-	l, err := r.endpoint(ctx, vm, name)
+	l, in, err := r.endpoint(ctx, vm, name, in)
 	if err != nil {
 		return nil, err
 	}

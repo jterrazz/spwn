@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/machine"
@@ -26,6 +27,10 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 	// invariant: serves frames until the caller closes its side; each
 	// request runs on its own, its answers written whole, one line each, and
 	// the server returns once every request has answered.
+	// invariant: a caller whose hello names a version older than
+	// api.WordsSince, or names none as an older station's does, is answered
+	// in the words it reads (ADR-032) from that hello on; a caller that sends
+	// no hello is answered in today's.
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	out := &writer{w: w}
@@ -37,6 +42,9 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 		var f api.Frame
 		if err := json.Unmarshal(s.Bytes(), &f); err != nil {
 			continue
+		}
+		if f.Hello != nil {
+			out.older.Store(api.Older(f.Hello.Version, calls.Hello().Version))
 		}
 		running.Go(func() { answer(ctx, f, out, calls, word) })
 	}
@@ -97,6 +105,8 @@ func orNull(raw json.RawMessage) json.RawMessage {
 type writer struct {
 	mu sync.Mutex
 	w  io.Writer
+	// value: the caller reads only the words before api.WordsSince.
+	older atomic.Bool
 }
 
 func (w *writer) write(f api.Frame) { _ = w.frame(f) }
@@ -106,6 +116,9 @@ func (w *writer) frame(f api.Frame) error {
 	data, err := json.Marshal(f)
 	if err != nil {
 		return err
+	}
+	if w.older.Load() {
+		data = api.OlderWords(data)
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()

@@ -42,7 +42,7 @@ type late struct{ router *remote.Router }
 func (m machine) router(env kit.Env) *remote.Router {
 	var macs contract.EndpointDialer
 	if spawn, ok := m.sys.Run.(local.Spawner); ok {
-		macs = sshstdio.New(spawn)
+		macs = sshstdio.New(spawn, Version())
 	}
 	if m.world != nil {
 		macs = m.world.macs()

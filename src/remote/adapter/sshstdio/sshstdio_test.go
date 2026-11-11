@@ -80,13 +80,13 @@ func (s *ssh) Spawn(ctx context.Context, c local.Cmd) (local.Process, error) {
 func TestSSHToTheFarEngineKeepsTheEndpointContract(t *testing.T) {
 	contracttest.Endpoint(t, func(_ *testing.T, far *call.Registry, profile machine.Profile, version string) contracttest.EndpointSubject {
 		s := &ssh{far: serve.Local(far, profile, version)}
-		return contracttest.EndpointSubject{Dialer: sshstdio.New(s), Mac: profile.Ref.Name, Target: profile.Ref, Down: func() { s.down = true }}
+		return contracttest.EndpointSubject{Dialer: sshstdio.New(s, version), Mac: profile.Ref.Name, Target: profile.Ref, Down: func() { s.down = true }}
 	})
 }
 
 func TestAnotherMacIsReachedOnlyThroughItsEngineInBatchMode(t *testing.T) {
 	s := &ssh{far: serve.Local(contracttest.Far(), contracttest.Mini, contracttest.Version)}
-	ep, err := sshstdio.New(s).Dial(t.Context(), "mac-mini")
+	ep, err := sshstdio.New(s, contracttest.Version).Dial(t.Context(), "mac-mini")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestAnotherMacIsReachedOnlyThroughItsEngineInBatchMode(t *testing.T) {
 
 func TestAMacThatAnswersWithoutStationIsToldApartFromOneThatDoesNotAnswer(t *testing.T) {
 	s := &ssh{far: serve.Local(contracttest.Far(), contracttest.Mini, contracttest.Version), bare: true}
-	ep, err := sshstdio.New(s).Dial(t.Context(), "mac-mini")
+	ep, err := sshstdio.New(s, contracttest.Version).Dial(t.Context(), "mac-mini")
 	if err != nil {
 		t.Fatal(err)
 	}

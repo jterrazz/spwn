@@ -30,10 +30,12 @@ type Conn struct {
 	gone    error
 	hello   *Hello
 	ended   chan struct{}
+	// value: this binary's version, which its hello names to the far side.
+	version string
 }
 
-func NewConn(r io.Reader, w io.Writer, closer func() error, broken func(error) error) *Conn {
-	c := &Conn{w: w, close: closer, broken: broken, waiting: map[string]*pending{}, ended: make(chan struct{})}
+func NewConn(r io.Reader, w io.Writer, closer func() error, broken func(error) error, version string) *Conn {
+	c := &Conn{w: w, close: closer, broken: broken, waiting: map[string]*pending{}, ended: make(chan struct{}), version: version}
 	go c.read(r)
 	return c
 }
@@ -143,7 +145,7 @@ func (c *Conn) Hello(ctx context.Context) (Hello, error) {
 		return h, nil
 	}
 	c.mu.Unlock()
-	id, ch, err := c.send(Frame{Hello: &Hello{}})
+	id, ch, err := c.send(Frame{Hello: &Hello{Version: c.version}})
 	if err != nil {
 		return Hello{}, err
 	}

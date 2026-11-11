@@ -27,9 +27,13 @@ const (
 	attach = `'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"'`
 )
 
-type Dialer struct{ spawn local.Spawner }
+type Dialer struct {
+	spawn local.Spawner
+	// value: this binary's version, named by the hello of each connection.
+	version string
+}
 
-func New(spawn local.Spawner) Dialer { return Dialer{spawn: spawn} }
+func New(spawn local.Spawner, version string) Dialer { return Dialer{spawn: spawn, version: version} }
 
 func Argv(mac string) []string {
 	// invariant: the one command line station runs on another Mac: its
@@ -79,7 +83,7 @@ func (d Dialer) Dial(ctx context.Context, mac string) (contract.Endpoint, error)
 		}
 		return nil
 	}
-	return api.NewConn(p.Stdout(), p.Stdin(), closer, func(error) error { return end() }), nil
+	return api.NewConn(p.Stdout(), p.Stdin(), closer, func(error) error { return end() }, d.version), nil
 }
 
 func gone(mac string, cause error) error {
