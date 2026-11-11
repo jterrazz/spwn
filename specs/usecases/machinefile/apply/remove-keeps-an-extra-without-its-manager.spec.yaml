@@ -21,6 +21,7 @@ runs:
       stdout: |
           # Extra
           ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, its manager homebrew is missing: kept
+          ◐	ripgrep		brew	its manager homebrew is missing: kept, judged again next run
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
       exit: 0
       stdout: |

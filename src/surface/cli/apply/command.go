@@ -58,7 +58,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		return err
 	})
 	steps.Stop()
-	if len(out.Done) == 0 {
+	if len(out.Done) == 0 && len(out.Removed) == 0 {
 		return err
 	}
 	done, removed := worded(out.Done), worded(out.Removed)

@@ -1,0 +1,33 @@
+description: 'apply --remove on a Machinefile that lists nothing says each extra it took back'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [fd]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	fd	brew
+          # To adopt
+          ?	homebrew	script	the manager of fd · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of fd · adopted · on PATH, not managed by script
+          ●	fd	10.3.0	brew
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: []
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	fd	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ●	fd		brew	removed
