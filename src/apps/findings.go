@@ -38,8 +38,10 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 		}
 		// outside: a v3.0 station reads the manager of the fix in `method`,
 		// in its own word, so its Update all updates that manager's apps
-		// alone; carried beside `manager` until the hidden --method goes.
-		args := map[string]string{"manager": manager}
+		// alone, and one it has no manager of (apt) as a manager of none,
+		// so it updates nothing rather than every app; carried beside
+		// `manager` until the hidden --method goes.
+		args := map[string]string{"manager": manager, "method": manager}
 		if word, ok := catalog.OlderManager(manager); ok {
 			args["method"] = word
 		}
