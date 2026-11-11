@@ -22,7 +22,7 @@
 
 ## Consequences
 
-- The invariant has an enumeration test over the fake world (`src/wire/method_test.go`): every app of the catalog, on every kind of machine, for every entry a Machinefile may write of it, installs, reads back, updates and is removed by the method its step names; adoption and move are proved on every path by an item with two methods.
+- The invariant has an enumeration test over the fake world (`src/wire/method_test.go`): every app of the catalog, on every kind of machine, for every entry a Machinefile may write of it, is installed by `machinefile.apply`'s own call and recorded in the ledger by the method its step names, reads back by it, is kept by the next plan, and is updated by name, updated by its manager's bulk update and removed by it; adoption and move are proved on every path by an item with two methods.
 - A version range in a method's selector is still judged only by the resolution; the apps place an app by kind, every version kept. Apply passes the method, so the two agree on the manager; two methods of the same manager split by version range would agree on the manager only, until apply passes the install's key too (TODO, at the first such item).
 - `apps move` does not touch the ledger, which is the `machinefile` family's, and is kept so, the safe side: an app station installed for a Machinefile and moved by hand since reads held by another method, so `apply --remove` keeps it and lets its record go, as ADR-034 says of any app held another way.
 - The fake installer lists what a `script` or `shell` install put, which the real adapters keep no list of, so the enumeration test is as faithful as the fakes are there (TODO, a fakes-fidelity lot).

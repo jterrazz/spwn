@@ -13,7 +13,14 @@ import (
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	corefake "github.com/jterrazz/studio-station/src/core/adapter/fake"
+	"github.com/jterrazz/studio-station/src/core/call"
+	"github.com/jterrazz/studio-station/src/core/confirm"
+	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
+	mffake "github.com/jterrazz/studio-station/src/machinefile/adapter/fake"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
+	mfcontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 	"github.com/jterrazz/studio-station/src/world"
@@ -40,6 +47,50 @@ type bench struct {
 	shelf *appscalls.Shelf
 	cat   catalog.Catalog
 	lib   machinefile.Library
+	// value: the owner's files, which apply reads afresh at each run.
+	files map[string]string
+	calls *benchCalls
+}
+
+// value: this machine's calls as apply reaches them: apps' over the
+// bench's shelf, the machinefile family's over the owner's files, the
+// built-in source and the world's ledger; the settings read none and set
+// nothing.
+type benchCalls struct{ registry *call.Registry }
+
+func (c *benchCalls) Invoke(ctx context.Context, _ coremachine.Ref, name string, in, out any, p call.Progress) error {
+	if strings.HasPrefix(name, "settings.") {
+		return nil
+	}
+	v, err := c.registry.Run(ctx, benchProfile, name, in, p)
+	call.Set(out, v)
+	return err
+}
+
+func (c *benchCalls) Watch(ctx context.Context, _ coremachine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
+	if strings.HasPrefix(name, "settings.") {
+		none := make(chan call.Update[any])
+		close(none)
+		return none, nil
+	}
+	return c.registry.Stream(ctx, benchProfile, name, in, p)
+}
+
+var benchProfile = coremachine.Profile{Ref: coremachine.Ref{Name: "here"}, Kind: coremachine.Computer, System: coremachine.System{OS: coremachine.MacOS}}
+
+type ownerFiles struct{ files map[string]string }
+
+func (o ownerFiles) Read(context.Context) (machinefile.Tree, error) {
+	user := machinefile.Tree{Layer: machinefile.User, Root: "~/.config/station"}
+	for p, body := range o.files {
+		user.Files = append(user.Files, machinefile.File{Path: p, Body: []byte(body)})
+	}
+	slices.SortFunc(user.Files, func(a, b machinefile.File) int { return strings.Compare(a.Path, b.Path) })
+	return user, nil
+}
+
+func machinefileOf(kind catalog.MachineKind, entries ...string) string {
+	return "machinefile: station.machinefile/v1\nname: m\nmachine: " + systems()[kind] + "\napps: [" + strings.Join(entries, ", ") + "]\n"
 }
 
 // value: a machine of that kind whose every manager is there and holds
@@ -53,8 +104,12 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 		t.Fatal(err)
 	}
 	user := machinefile.Tree{Layer: machinefile.User, Root: "~/.config/station"}
+	var listed []string
+	if entry != "" {
+		listed = []string{entry}
+	}
 	files := map[string]string{
-		"machinefiles/m.yaml":              "machinefile: station.machinefile/v1\nname: m\nmachine: " + systems()[kind] + "\napps: [" + entry + "]\n",
+		"machinefiles/m.yaml":              machinefileOf(kind, listed...),
 		"catalog/command-line/twin.yaml":   twin,
 		"catalog/command-line/probed.yaml": probed,
 	}
@@ -82,7 +137,65 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 		edit(runner, &options)
 	}
 	shelf := appscalls.NewShelf(waiting{appsMachine{h: system, run: system.Run}}, lib.Catalog, nil, options)
-	return bench{w: w, shelf: shelf, cat: lib.Catalog, lib: lib}
+	calls := &benchCalls{}
+	deps := machinefilecalls.Deps{
+		Sources: func() []mfcontract.Source { return []mfcontract.Source{ownerFiles{files}, builtinSource()} },
+		Name:    "m", Kind: coremachine.Computer, Prefs: mfcontract.NewSourcePrefs(corefake.NewPreferences()),
+		Ledger: mffake.LedgerOf(w, "here"), Password: mffake.PasswordOf(w, "here"), Now: func() time.Time { return time.Unix(0, 0) }, Calls: calls,
+	}
+	calls.registry, err = call.NewRegistry(appscalls.All(appscalls.Deps{Apps: shelf, Known: lib.Catalog.Apps, Kind: coremachine.Computer}), machinefilecalls.All(deps))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return bench{w: w, shelf: shelf, cat: lib.Catalog, lib: lib, files: files, calls: calls}
+}
+
+// value: `station apply` of the Machinefile m on a terminal, with
+// --remove and its yes when remove says so.
+func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
+	t.Helper()
+	in := machinefilecalls.ApplyIn{Interactive: true, Remove: remove}
+	if remove {
+		in.Confirm = confirm.Yes
+	}
+	applied, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, machinefilecalls.Apply, in, nil)
+	if err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+	return applied
+}
+
+// value: the line of item in the plan of m as `station plan` reads it.
+func (b bench) planned(t *testing.T, item string) machinefile.Line {
+	t.Helper()
+	b.shelf.Forget()
+	p, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, machinefilecalls.Plan, machinefilecalls.PlanIn{}, nil)
+	if err != nil {
+		t.Fatalf("plan: %v", err)
+	}
+	i := slices.IndexFunc(p.Lines, func(l machinefile.Line) bool { return l.Step.Item == item })
+	if i < 0 {
+		t.Fatalf("no line %s in the plan", item)
+	}
+	return p.Lines[i]
+}
+
+func (b bench) recorded(item string) (machinefile.Installed, bool) {
+	for _, in := range b.w.Mac("here").Store().Ledger {
+		if in.Item == item {
+			return in, true
+		}
+	}
+	return machinefile.Installed{}, false
+}
+
+func doneOf(t *testing.T, done []machinefile.Done, item string) machinefile.Done {
+	t.Helper()
+	i := slices.IndexFunc(done, func(d machinefile.Done) bool { return d.Line.Step.Item == item })
+	if i < 0 {
+		t.Fatalf("no line of %s ran in %+v", item, done)
+	}
+	return done[i]
 }
 
 // value: the machine whose wait lasts until its run ends, so no read's
@@ -163,9 +276,9 @@ func entries(cat catalog.Catalog, a catalog.App, kind catalog.MachineKind) []str
 func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 	// invariant: for every app of the catalog, on every kind of machine,
 	// for every entry a Machinefile may write of it, the method its step
-	// names is the one apps.install runs at the version asked, the one the
-	// outcome (which the ledger records) and the read after it (an
-	// interrupted install's record) name, the one an update and a removal
+	// names is the one `station apply` installs it by at the version
+	// asked, the one the ledger records and the read after it names, the
+	// one a named update, a bulk update of its manager and a removal
 	// reach; and the plan then keeps it, neither installing nor adopting.
 	ctx := context.Background()
 	base := benchOf(t, catalog.Mac, "")
@@ -179,37 +292,48 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 				about := string(kind) + " " + entry
 				b := benchOf(t, kind, entry)
 				step := b.step(t, a.Name)
-				out, err := b.shelf.Install(ctx, apps.InstallRequest{Names: []string{a.Name}, Method: catalog.Method(step.Method), Version: step.Version}, nil)
-				if err != nil {
-					t.Errorf("%s: %v", about, err)
+				method := catalog.Method(step.Method)
+				in, _ := a.InstallBy(kind, method)
+				done := doneOf(t, b.apply(t, false).Done, a.Name)
+				if done.State != catalog.StateOK || !b.holds(method, in.Key()) {
+					t.Errorf("%s: the plan showed %s, apply ended %s %q and left %s without it", about, step.Method, done.State, done.Detail, step.Method)
 					continue
 				}
-				o := outcomeOf(t, out, a.Name)
-				in, _ := a.InstallBy(kind, catalog.Method(step.Method))
-				if string(o.Method) != step.Method || !b.holds(o.Method, in.Key()) {
-					t.Errorf("%s: the plan showed %s, the install ran %s", about, step.Method, o.Method)
+				if step.Version != "" && done.Version != step.Version {
+					t.Errorf("%s: asked at %s, holds %s", about, step.Version, done.Version)
 				}
-				if step.Version != "" && o.Version != step.Version {
-					t.Errorf("%s: asked at %s, holds %s", about, step.Version, o.Version)
+				if rec, ok := b.recorded(a.Name); !ok || rec.Method != step.Method {
+					t.Errorf("%s: installed by %s, recorded %+v", about, step.Method, rec)
 				}
 				row := b.row(t, a.Name)
 				if string(row.Method) != step.Method {
 					t.Errorf("%s: installed by %s, read back by %s", about, step.Method, row.Method)
 				}
-				seen := map[string]machinefile.Seen{a.Name: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
-				line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false).Lines[0]
-				if line.Action != machinefile.Keep || line.Method() != step.Method {
+				if line := b.planned(t, a.Name); line.Action != machinefile.Keep || line.Method() != step.Method {
 					t.Errorf("%s: then planned %s by %s", about, line.Action, line.Method())
 				}
-				if can := registryCan(b, o.Method); can.Update {
+				can := registryCan(b, method)
+				if can.Update {
 					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{a.Name}})
 					if err != nil || string(outcomeOf(t, up, a.Name).Method) != step.Method {
 						t.Errorf("%s: an update reached %+v (%v)", about, up, err)
 					}
 				}
-				if can := registryCan(b, o.Method); can.Remove {
-					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}); err != nil || b.holds(o.Method, in.Key()) {
-						t.Errorf("%s: the removal left the %s copy (%v)", about, o.Method, err)
+				if can.Update && can.UpdateAll {
+					b.w.Mac("here").Apps[method].Behind = map[string]string{in.Key(): "99.0.0"}
+					var via []catalog.ManagerKey
+					if _, ok := b.cat.Manager(row.Manager); ok {
+						via = []catalog.ManagerKey{catalog.ManagerKey(row.Manager)}
+					}
+					b.shelf.Forget()
+					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: via == nil, Via: via})
+					if i := slices.IndexFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }); err != nil || i < 0 || string(up[i].Method) != step.Method || b.w.Mac("here").Apps[method].Installed[in.Key()] != "99.0.0" {
+						t.Errorf("%s: the update of %v reached %+v (%v)", about, via, up, err)
+					}
+				}
+				if can.Remove {
+					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}); err != nil || b.holds(method, in.Key()) {
+						t.Errorf("%s: the removal left the %s copy (%v)", about, step.Method, err)
 					}
 				}
 			}
