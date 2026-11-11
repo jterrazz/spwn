@@ -106,7 +106,7 @@ func TestInstallBringsWhatTheCatalogLinksAndNoMore(t *testing.T) {
 		registry[method] = appsfake.InstallerOf(w, "vm", method, lined)
 	}
 	w.Mac("vm").Apps[nodeIn.Method()].Installed[nodeIn.Key()] = "22.11.0"
-	shelf := appscalls.NewShelf(appsMachine{system}, cat, nil, appscalls.ShelfOptions{ThisMachine: catalog.MacOS, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "vm")})
+	shelf := appscalls.NewShelf(appsMachine{h: system, run: system.Run}, cat, nil, appscalls.ShelfOptions{ThisMachine: catalog.MacOS, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "vm")})
 	out, err := shelf.Install(context.Background(), apps.InstallRequest{Names: []string{app.Name}}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -135,7 +135,7 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	appsMachine{managing(m)}.RunBriefly(ctx, "true", nil, time.Second)
+	appsMachineOf(m).RunBriefly(ctx, "true", nil, time.Second)
 	if len(*run.calls) != 1 {
 		t.Fatalf("an app's version read ran %d commands; want 1", len(*run.calls))
 	}
@@ -261,6 +261,37 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 		}
 		if c.Dir != home {
 			t.Errorf("%s runs from %q; want the home folder", argv, c.Dir)
+		}
+	}
+}
+
+func TestAnItemIsLookedForAndReadOnTheOwnersPath(t *testing.T) {
+	// invariant: a manager command's PATH leaves nvm's versions out, so an
+	// item looked for there would read absent, never present another way.
+	home := "/home/u"
+	own := home + "/.nvm/versions/node/v24.22.2/bin"
+	vars := map[string]string{"HOME": home, "PATH": own + ":/usr/bin"}
+	run := localtest.NewRunner(t)
+	run.Env = []string{"HOME=" + home, "PATH=" + vars["PATH"]}
+	run.Programs = []string{own + "/node"}
+	run.On("node", "--version").Reply(local.Output{Stdout: "v24.22.2"})
+	system := localtest.Mac(run, localtest.NewFS(), localtest.Env{HomeDir: home, OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
+	a := appsMachineOf(machine{sys: system, vars: vars})
+
+	if found, ok := a.LookPath("node"); !ok || found != own+"/node" {
+		t.Errorf("node is found at %q; want nvm's, on the owner's PATH", found)
+	}
+	if out, code, ran := a.RunBriefly(context.Background(), "node", []string{"--version"}, time.Second); !ran || code != 0 || out != "v24.22.2" {
+		t.Errorf("node's version read %q, exit %d, ran %v; want nvm's node's answer", out, code, ran)
+	}
+	for _, c := range run.Calls {
+		if c.Dir != home {
+			t.Errorf("%s runs from %q; want the home folder", c.Name, c.Dir)
+		}
+		for _, kv := range c.Env {
+			if v, ok := strings.CutPrefix(kv, "PATH="); ok && !strings.Contains(v, own) {
+				t.Errorf("%s runs on PATH %q, which has not nvm's node", c.Name, v)
+			}
 		}
 	}
 }
