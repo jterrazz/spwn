@@ -140,7 +140,7 @@ A `script` with neither `run` nor `url` is installed by the owner, as its `hint`
 
 ## Managers
 
-A manager item says the method keys it installs by, `manages`, each key one manager's, and where it stands in each system's default priority, `priority`, lowest first, each rank one manager's. The first manager of a system's order that has a method for an item installs it, unless a Machinefile says `prefer:`; a manager with no priority is chosen by its method alone (mise for a runtime). A `script` method has no manager and no rank: it is always tried after every manager of the system, and a `github-release` method takes the rank of the item that manages it. A `priority` ranks at least one system.
+A manager item says the method keys it installs by, `manages`, each key one manager's, and where it stands in each system's default priority, `priority`, lowest first, each rank one manager's. The first manager of a system's order that has a method for an item installs it, unless a Machinefile says `prefer:`, and the order is one: `apps install` and a Machinefile's resolution choose by it alike, so the method a machine carries an app by is the one its plan shows; a manager with no priority is chosen by its method alone (mise for a runtime). A `script` method has no manager and no rank: it is always tried after every manager of the system, and a `github-release` method takes the rank of the item that manages it. A `priority` ranks at least one system.
 
 ```yaml
 item: station.catalog/v1
@@ -313,14 +313,14 @@ The format is whole now, so a file a newer station writes in v1 decodes in this 
 | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                                                                  |
 | `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                            |
-| `manages`, `priority`                                                                   | the Machinefile's resolution and `explain` read them now; `apps install` does not yet                             |
 | `ports`                                                                                 | the engine: a reserved port's `http`, a VM's env at each run, a row's label ([Ports](ports.md#what-an-item-sets)) |
 | the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet              |
 | `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`              |
+| a version asked of `npm`, `uv` or `bun`                                                 | their installs, which carry no version yet: until then such a version is refused as unpinnable                    |
 | a method's `provides`                                                                   | presence, which reads the item's today                                                                            |
 | `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                                    |
 | a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                            |
 | an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                                                           |
 | a setting's methods after its first                                                     | the settings of each system: today it lives where its first method does                                           |
-| `apt`, `github-release`                                                                 | their installers: until then the next method serves                                                               |
+| `apt`, `github-release`                                                                 | their installers: until then neither is chosen, and the next method serves                                        |
 | `macos-defaults`                                                                        | its Applier: until then applying it is refused as unhandled                                                       |

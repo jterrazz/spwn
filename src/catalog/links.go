@@ -82,7 +82,7 @@ func (c Catalog) Manager(method string) (string, bool) {
 func providerOf(it Item, method string, sys System) string {
 	by := ""
 	for _, m := range it.Methods {
-		if m.ProvidedBy == "" || m.Key() != method {
+		if m.ProvidedBy == "" || m.Method() != method {
 			continue
 		}
 		if m.Matches(sys) {

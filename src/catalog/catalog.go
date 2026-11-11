@@ -163,7 +163,9 @@ func Assemble(items []Placed) (Catalog, error) {
 		if !ok {
 			return Catalog{}, &FileError{File: p.File, Problem: "folder " + p.Folder + " is no category of apps"}
 		}
-		c.Apps = append(c.Apps, p.Item.app(category))
+		t := p.Item.app(category)
+		t.Installs = c.placed(p.Item)
+		c.Apps = append(c.Apps, t)
 	}
 	if err := whole(items, files); err != nil {
 		return Catalog{}, err

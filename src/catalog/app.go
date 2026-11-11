@@ -1,5 +1,7 @@
 package catalog
 
+import "slices"
+
 type MachineKind string
 
 const (
@@ -109,11 +111,34 @@ func (t App) Superseded() (Install, bool) {
 }
 
 func (t App) InstallOn(k MachineKind) (Install, bool) {
+	// value: the install that kind of machine carries the app by unless
+	// it is asked another: the first of its methods there in the system's
+	// order.
+	all := t.InstallsOn(k)
+	if len(all) == 0 {
+		return nil, false
+	}
+	return all[0], true
+}
+
+func (t App) InstallsOn(k MachineKind) []Install {
+	// value: every install of the app that kind of machine can run, the
+	// one it carries by default first.
+	var out []Install
 	for _, p := range t.Installs {
-		for _, kind := range p.Kinds {
-			if kind == k {
-				return p.Install, true
-			}
+		if slices.Contains(p.Kinds, k) {
+			out = append(out, p.Install)
+		}
+	}
+	return out
+}
+
+func (t App) InstallBy(k MachineKind, m Method) (Install, bool) {
+	// value: the app's install by that method on that kind of machine,
+	// when it has one there.
+	for _, in := range t.InstallsOn(k) {
+		if in.Method() == m {
+			return in, true
 		}
 	}
 	return nil, false

@@ -10,8 +10,8 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile"
 )
 
-// value: a catalog of two managers, one ranked on Ubuntu; an app with a
-// method per system, a version range among them; and two apps that require
+// value: a catalog of two managers, one ranked on macOS; an app with
+// two methods on macOS, a version range on the ranked one, and one on Ubuntu; and two apps that require
 // each other.
 func items() map[string]string {
 	return map[string]string{
@@ -19,8 +19,8 @@ func items() map[string]string {
 kind: manager
 name: releases
 description: release assets
-manages: [github-release]
-priority: { ubuntu: 1 }
+manages: [skill]
+priority: { macos: 1 }
 methods:
     - { os: any, script: { run: 'true' } }
 `,
@@ -28,7 +28,7 @@ methods:
 kind: manager
 name: packages
 description: system packages
-manages: [apt]
+manages: [cask]
 methods:
     - { os: any, script: { run: 'true' } }
 `,
@@ -37,9 +37,9 @@ kind: app
 name: fd
 description: find
 methods:
-    - { family: debian, apt: { packages: [fd-find] } }
-    - { os: ubuntu, version: '>=24.04', github-release: { repo: sharkdp/fd, asset: 'fd-*' } }
-    - { os: macos, script: { run: 'true' } }
+    - { os: macos, cask: fd, pin: version }
+    - { os: macos, version: '>=26', skill: { repo: owner/fd, name: fd } }
+    - { os: ubuntu, script: { run: 'true' } }
 `,
 		"catalog/command-line/left.yaml": `item: station.catalog/v1
 kind: app
@@ -99,11 +99,11 @@ func methodOf(t *testing.T, lib machinefile.Library, name, item string) string {
 
 func TestAMethodIsChosenBySelectorThenPriorityThenPrefer(t *testing.T) {
 	cases := []struct{ about, file, want string }{
-		{"a version range below the system's is no match", machine("a", "{ os: ubuntu, version: '22.04' }", "[fd]"), "apt"},
-		{"a ranked manager before an unranked one, whatever the file's order", machine("a", "{ os: ubuntu, version: '24.04' }", "[fd]"), "github-release"},
-		{"prefer before the rank", machine("a", "{ os: ubuntu, version: '24.04' }", "[fd]") + "prefer: [apt]\n", "apt"},
-		{"a manager asked by the app", machine("a", "{ os: ubuntu, version: '24.04' }", "[{ name: fd, manager: apt }]"), "apt"},
-		{"another system, its own method", machine("a", "{ os: macos }", "[fd]"), "script"},
+		{"a version range below the system's is no match", machine("a", "{ os: macos, version: '25' }", "[fd]"), "cask"},
+		{"a ranked manager before an unranked one, whatever the file's order", machine("a", "{ os: macos, version: '26' }", "[fd]"), "skill"},
+		{"prefer before the rank", machine("a", "{ os: macos, version: '26' }", "[fd]") + "prefer: [cask]\n", "cask"},
+		{"a manager asked by the app", machine("a", "{ os: macos, version: '26' }", "[{ name: fd, manager: cask }]"), "cask"},
+		{"another system, its own method, named as it runs", machine("a", "{ os: ubuntu }", "[fd]"), "shell"},
 	}
 	for _, c := range cases {
 		lib := library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil)
@@ -129,7 +129,7 @@ func TestAVersionRangeReadsEachComparison(t *testing.T) {
 
 func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 	base := "machinefile: station.machinefile/v1\nname: base\napps: [packages, { name: fd, version: '1' }]\nvm: { network: nat, resources: { cpus: 2 } }\n"
-	top := machine("top", "{ os: ubuntu, version: '24.04' }", "[{ name: fd, manager: apt }]") + "extends: [base]\nvm: { resources: { cpus: 8 } }\n"
+	top := machine("top", "{ os: macos, version: '26' }", "[{ name: fd, manager: cask }]") + "extends: [base]\nvm: { resources: { cpus: 8 } }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: top\napps: { add: [releases], remove: [packages] }\n"
 	lib := library(t, map[string]string{"machinefiles/top.yaml": top, "machinefiles/top.local.yaml": overlay}, map[string]string{"machinefiles/base.yaml": base})
 	r, err := machinefile.Resolve(lib, "top", machinefile.Machine{})
@@ -160,8 +160,8 @@ func TestALaterFileReplacesAndAnOverlayAddsAndRemoves(t *testing.T) {
 func TestASameNameFileOfAStrongerLayerReplacesTheWeakerWhole(t *testing.T) {
 	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[fd]")},
 		map[string]string{"machinefiles/a.yaml": machine("a", "{ os: ubuntu, version: '24.04' }", "[left]")})
-	if got := methodOf(t, lib, "a", "fd"); got != "script" {
-		t.Errorf("the owner's a resolved fd by %s, want its macos script", got)
+	if got := methodOf(t, lib, "a", "fd"); got != "cask" {
+		t.Errorf("the owner's a resolved fd by %s, want its macos cask", got)
 	}
 }
 
@@ -213,7 +213,7 @@ func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
 		"machinefiles/README.md":    "# my machines",
 		"catalog/command-line/NOTE": "a note",
 	}
-	if got := methodOf(t, library(t, files, nil), "a", "fd"); got != "script" {
+	if got := methodOf(t, library(t, files, nil), "a", "fd"); got != "cask" {
 		t.Errorf("chose %s", got)
 	}
 	for _, p := range []string{"machinefiles/b.yml", "catalog/command-line/jq.yml"} {
@@ -229,7 +229,7 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 	cases := []struct{ about, file, want string }{
 		{"an unknown app", machine("a", "{ os: macos }", "\n    - fd\n    - nope"), "nope (~/.config/station/machinefiles/a.yaml:6)"},
 		{"a bad value", machine("a", "{ os: macos }", "[{ name: fd, options: { tint: blue } }]"), "fd's tint: no option of fd (~/.config/station/machinefiles/a.yaml:4)"},
-		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: github-release }]"), "(listed, ~/.config/station/machinefiles/a.yaml:4)"},
+		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: skill }]"), "(listed, ~/.config/station/machinefiles/a.yaml:4)"},
 		{"an item baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
 	}
 	for _, c := range cases {
@@ -241,13 +241,13 @@ func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
 }
 
 func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
-	file := machine("a", "{ os: macos }", "[{ name: fd, manager: apt, optional: true }]")
+	file := machine("a", "{ os: macos }", "[{ name: fd, manager: skill, optional: true }]")
 	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": file}, nil), "a", machinefile.Machine{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Skipped) != 1 || r.Skipped[0].Why != "optional, no method by apt for macos, where it has script" {
-		t.Errorf("skipped %+v, want fd skipped naming its script", r.Skipped)
+	if len(r.Skipped) != 1 || r.Skipped[0].Why != "optional, no method by skill for macos, where it has cask" {
+		t.Errorf("skipped %+v, want fd skipped naming its cask", r.Skipped)
 	}
 }
 

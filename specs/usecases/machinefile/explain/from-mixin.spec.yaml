@@ -29,7 +29,7 @@ runs:
           	machine.kind	computer	user	jterrazz-macbook-pro
           	machine.system.os	macos	user	jterrazz-macbook-pro
           	apps.git	listed	user	jterrazz-base
-          	apps.git.method	script	built-in	git
+          	apps.git.method	shell	built-in	git
           	apps.git.because	its one method for macos	built-in	git
           	apps.homebrew	the manager of gh	built-in	gh
           	apps.homebrew.method	script	built-in	homebrew

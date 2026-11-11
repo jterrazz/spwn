@@ -14,5 +14,5 @@ runs:
           	On mac-mini:
           # jterrazz-mac-mini
           	apps.tart	listed	user	jterrazz-mac-mini
-          	apps.tart.method	script	built-in	tart
+          	apps.tart.method	shell	built-in	tart
           	apps.tart.because	its one method for macos	built-in	tart

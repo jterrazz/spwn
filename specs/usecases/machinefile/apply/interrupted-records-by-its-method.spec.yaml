@@ -24,12 +24,12 @@ runs:
       stdout: |
           jterrazz-macbook-pro · 1 to install
 
-          To install  ○ tart · script
+          To install  ○ tart · shell
 
           → station apply  carries it out
           ✗ jterrazz-macbook-pro interrupted · 1 changed
 
-          Changes  ● tart · 1.0.0 · script
+          Changes  ● tart · 1.0.0 · shell
 
           → station apply  resumes
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'

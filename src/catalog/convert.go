@@ -141,11 +141,9 @@ func (it Item) app(category Category) App {
 		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
 	for _, m := range it.Methods {
-		install := m.install(it.Provides)
-		if install == nil {
+		if !m.Runs(it.Kind) {
 			continue
 		}
-		t.Installs = append(t.Installs, LivesOn{Kinds: m.kinds(), Install: install})
 		for _, p := range m.Path {
 			if !slices.Contains(t.Path, p) {
 				t.Path = append(t.Path, p)

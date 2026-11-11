@@ -16,9 +16,10 @@ func (m MethodSpec) Key() string {
 	return keys[0]
 }
 
-// value: the method keys whose manager installs a version asked: a
-// runtime manager, a language's package manager, apt, a release's tag.
-var pinning = map[string]bool{"mise": true, "npm": true, "uv": true, "bun": true, "apt": true, "github-release": true}
+// value: the method keys whose install carries the version asked to its
+// manager: a runtime manager's, apt's package version, a release's tag.
+// npm, uv and bun take a version once their installs carry one.
+var pinning = map[string]bool{"mise": true, "apt": true, "github-release": true}
 
 func (m MethodSpec) Pins() bool {
 	// value: whether this method installs the version a Machinefile asks: its

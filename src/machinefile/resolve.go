@@ -445,7 +445,7 @@ func (p *planner) skippedFor(it catalog.Placed, manager catalog.ManagerKey) stri
 	}
 	var has []string
 	for _, m := range it.Item.Methods {
-		if m.Matches(p.sys) && !slices.Contains(has, m.Key()) {
+		if m.Matches(p.sys) && m.Runs(it.Item.Kind) && !slices.Contains(has, m.Key()) {
 			has = append(has, m.Key())
 		}
 	}
@@ -468,65 +468,17 @@ func (p *planner) system() string {
 	return s
 }
 
-// value: a method's place in the order a system tries them: prefer's
-// listed keys first, then the managers this system ranks, by rank, then
-// the other managers, then a script; a tie keeps the file's order.
-func (p *planner) rank(m catalog.MethodSpec) (preferred, class, rank int) {
-	key := m.Key()
-	preferred = len(p.prefer)
-	if i := slices.Index(p.prefer, catalog.ManagerKey(key)); i >= 0 {
-		preferred = i
-	}
-	if owner, ok := p.manager(key); ok && owner.Item.Priority != nil {
-		if r := priorityOn(*owner.Item.Priority, p.sys.OS); r > 0 {
-			return preferred, 0, r
-		}
-	}
-	if slices.Contains(catalog.ManagerKey("").Enum(), key) {
-		return preferred, 1, 0
-	}
-	return preferred, 2, 0
-}
-
-func priorityOn(p catalog.Priority, os catalog.OS) int {
-	switch os {
-	case catalog.OSMacOS:
-		return p.MacOS
-	case catalog.OSUbuntu:
-		return p.Ubuntu
-	case catalog.OSDebian:
-		return p.Debian
-	case catalog.OSAny:
-	}
-	return 0
-}
-
-// value: the manager item that installs by a method key (homebrew for
-// brew and cask).
-func (p *planner) manager(key string) (catalog.Placed, bool) {
-	for _, it := range p.cat.Items {
-		if slices.Contains(it.Item.Manages, catalog.ManagerKey(key)) {
-			return it, true
-		}
-	}
-	return catalog.Placed{}, false
-}
-
 func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version, why, where string) (Step, error) {
 	var matching []catalog.MethodSpec
 	for _, m := range it.Item.Methods {
-		if m.Matches(p.sys) && (manager == "" || m.Key() == string(manager)) {
+		if m.Matches(p.sys) && m.Runs(it.Item.Kind) && (manager == "" || m.Key() == string(manager)) {
 			matching = append(matching, m)
 		}
 	}
 	if len(matching) == 0 {
 		return Step{}, &NoMethodError{Item: it.Item.Name, System: p.system(), Manager: string(manager), Why: why, At: where}
 	}
-	slices.SortStableFunc(matching, func(a, b catalog.MethodSpec) int {
-		ap, ac, ar := p.rank(a)
-		bp, bc, br := p.rank(b)
-		return cmp.Or(cmp.Compare(ap, bp), cmp.Compare(ac, bc), cmp.Compare(ar, br))
-	})
+	matching = p.cat.Ordered(matching, p.sys.OS, p.prefer)
 	chosen := matching[0]
 	if version != "" && !chosen.Pins() {
 		alt := ""
@@ -539,7 +491,7 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version, Method: chosen.Key(), Alternative: alt, At: where}
 	}
 	return Step{
-		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Key(), Chosen: p.because(chosen, len(matching)), Spec: chosen,
+		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: p.because(chosen, len(matching)), Spec: chosen,
 		Version: version, Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
 		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
 	}, nil
@@ -549,12 +501,12 @@ func (p *planner) because(m catalog.MethodSpec, of int) string {
 	if of == 1 {
 		return "its one method for " + p.system()
 	}
-	preferred, class, rank := p.rank(m)
+	st := p.cat.Standing(m, p.sys.OS, p.prefer)
 	switch {
-	case preferred < len(p.prefer):
+	case st.Preferred < len(p.prefer):
 		return "preferred"
-	case class == 0:
-		return "first on " + string(p.sys.OS) + " (rank " + strconv.Itoa(rank) + ")"
+	case st.Class == catalog.ClassRanked:
+		return "first on " + string(p.sys.OS) + " (rank " + strconv.Itoa(st.Rank) + ")"
 	}
 	return "first of its methods for " + p.system()
 }

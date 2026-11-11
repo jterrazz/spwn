@@ -270,7 +270,7 @@ func there(s Seen) bool {
 func removalNeeds(it catalog.Item, method string, sys catalog.System) []catalog.Need {
 	needs := slices.Clone(it.Needs)
 	for _, m := range it.Methods {
-		if m.Key() == method && m.Matches(sys) {
+		if m.Method() == method && m.Matches(sys) {
 			return append(needs, m.Needs...)
 		}
 	}
