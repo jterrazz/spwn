@@ -20,10 +20,20 @@ var commit = regexp.MustCompile(`^[0-9a-f]{40}$`)
 
 // value: what every git run of a source is given before its verb: no hook
 // of the clone, the owner's or a template's runs, and no submodule is
-// cloned or checked out, so reading a source runs no code of it.
+// cloned or checked out, so reading a source runs no code of it; and no
+// transport but https and ssh is spoken (`ext::` runs a command, `file`
+// reads any folder of the machine).
 func quiet() []string {
-	return []string{"-c", "core.hooksPath=/dev/null", "-c", "submodule.recurse=false"}
+	return []string{
+		"-c", "core.hooksPath=/dev/null", "-c", "submodule.recurse=false",
+		"-c", "protocol.allow=never", "-c", "protocol.https.allow=always", "-c", "protocol.ssh.allow=always",
+	}
 }
+
+// value: a source's url as git may be given it: `https://`, `ssh://` or
+// scp-style `user@domain:path`; the first character is never a dash, and
+// `file://`, `ext::`, a path or any other scheme is no url of a source.
+var remote = regexp.MustCompile(`^(?:https://[^\s/]|ssh://[^\s/]|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s:])`)
 
 type Source struct {
 	run local.Runner
@@ -56,6 +66,8 @@ func (s Source) checkout(ctx context.Context) error {
 	switch {
 	case !catalog.IsMachinefileName(s.src.Name):
 		return errors.New("its name " + strconv.Quote(s.src.Name) + " is no name: lower-case words joined by dashes (`studio`)")
+	case !remote.MatchString(s.src.URL):
+		return errors.New("its url " + strconv.Quote(s.src.URL) + " is no url station clones: https://, ssh:// or user@domain:path")
 	case !commit.MatchString(s.src.Commit):
 		return errors.New("its commit " + s.src.Commit + " is no commit: a source is pinned by its 40-character sha")
 	}

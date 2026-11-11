@@ -12,6 +12,6 @@ runs:
       files:
           .calls:
               equals: |
-                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false status --porcelain=v2 --branch --untracked-files=all --ignored
-                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false fetch --quiet --no-recurse-submodules -- https://example.com/studio.git ffffffffffffffffffffffffffffffffffffffff
-                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c advice.detachedHead=false checkout --quiet --detach ffffffffffffffffffffffffffffffffffffffff --
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always fetch --quiet --no-recurse-submodules -- https://example.com/studio.git ffffffffffffffffffffffffffffffffffffffff
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always -c advice.detachedHead=false checkout --quiet --detach ffffffffffffffffffffffffffffffffffffffff --

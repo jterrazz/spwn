@@ -12,4 +12,4 @@ runs:
       files:
           .calls:
               equals: |
-                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false status --porcelain=v2 --branch --untracked-files=all --ignored
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored

@@ -23,7 +23,10 @@ const (
 // value: what every git run of a source is given before its verb, then
 // its words.
 func quiet(args ...string) []string {
-	return append([]string{"-c", "core.hooksPath=/dev/null", "-c", "submodule.recurse=false"}, args...)
+	return append([]string{
+		"-c", "core.hooksPath=/dev/null", "-c", "submodule.recurse=false",
+		"-c", "protocol.allow=never", "-c", "protocol.https.allow=always", "-c", "protocol.ssh.allow=always",
+	}, args...)
 }
 
 func in(dir string, args ...string) []string {
@@ -126,5 +129,36 @@ func TestANameThatIsNoNameRunsNothing(t *testing.T) {
 func TestABranchIsNoPin(t *testing.T) {
 	if _, err := source(localtest.NewRunner(t), t.TempDir(), "studio", "main").Read(t.Context()); err == nil {
 		t.Fatal("a source read at a branch")
+	}
+}
+
+func TestAUrlThatIsNoRemoteRunsNothing(t *testing.T) {
+	for _, bad := range []string{"ext::sh -c touch% /tmp/pwned", "file:///etc", "/etc", "../x", "-x", "git://example.com/x.git", "http://example.com/x.git", ""} {
+		cache := t.TempDir()
+		src := contract.SharedSource{Name: "studio", URL: bad, Commit: pinned}
+		_, err := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context())
+		if err == nil || !strings.Contains(err.Error(), "is no url") {
+			t.Errorf("a source at %q read with %v", bad, err)
+		}
+	}
+}
+
+func TestAnHttpsSshOrShortUrlIsCloned(t *testing.T) {
+	for _, good := range []string{"https://example.com/studio.git", "ssh://git@example.com/studio.git", "git@example.com:me/studio.git"} {
+		cache := t.TempDir()
+		dir := filepath.Join(cache, "sources", "studio")
+		run := localtest.NewRunner(t)
+		clones := run.On("git", quiet("clone", "--quiet", "--no-checkout", "--", good, dir)...).Answer(func() local.Output {
+			clone(t, dir, nil)
+			return local.Output{}
+		})
+		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", pinned, "--")...).Reply(local.Output{})
+		src := contract.SharedSource{Name: "studio", URL: good, Commit: pinned}
+		if _, err := git.New(run, local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context()); err != nil {
+			t.Errorf("%s: %v", good, err)
+		}
+		if clones.Seen != 1 {
+			t.Errorf("%s cloned %d times, want once", good, clones.Seen)
+		}
 	}
 }

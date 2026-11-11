@@ -35,6 +35,9 @@ func ReadFolders(dir folders, links Links, catalogAt, machinefilesAt string) ([]
 	}
 	for _, folder := range folders {
 		if !folder.IsDir() {
+			if !meant(folder.Name()) {
+				continue
+			}
 			if refused := regular(dir, links, catalogAt, folder); refused != nil {
 				return nil, refused
 			}
@@ -58,6 +61,15 @@ func ReadFolders(dir folders, links Links, catalogAt, machinefilesAt string) ([]
 	}
 	slices.SortFunc(out, func(a, b machinefile.File) int { return strings.Compare(a.Path, b.Path) })
 	return out, nil
+}
+
+// invariant: an entry is judged (its type, its content) only when its
+// owner meant it to be read: a `.yaml` file, or a `.yml` one, which the
+// decoder refuses rather than skips. Anything else beside them, whatever
+// its type, is skipped.
+func meant(name string) bool {
+	ext := path.Ext(name)
+	return ext == ".yaml" || ext == ".yml"
 }
 
 // value: the platform's files, or an embedded tree.
@@ -96,7 +108,7 @@ func regular(dir folders, links Links, at string, e fs.DirEntry) error {
 
 func add(out []machinefile.File, dir folders, links Links, under, at string, entries []fs.DirEntry) ([]machinefile.File, error) {
 	for _, e := range entries {
-		if e.IsDir() {
+		if e.IsDir() || !meant(e.Name()) {
 			continue
 		}
 		if refused := regular(dir, links, at, e); refused != nil {
