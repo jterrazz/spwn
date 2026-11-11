@@ -1,0 +1,30 @@
+description: 'inside a Linux workspace, a runtime and an npm app are planned and applied off a terminal'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq, playwright-mcp]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mise	script	the manager of jq
+          ○	jq	mise
+          ○	node	mise	required by playwright-mcp
+          ○	playwright-mcp	mise
+    - command: 'apply --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	mise	script	the manager of jq
+          ○	jq	mise
+          ○	node	mise	required by playwright-mcp
+          ○	playwright-mcp	mise
+          ●	mise	1.0.0	script	the manager of jq
+          ●	jq	1.0.0	mise
+          ●	node	1.0.0	mise	required by playwright-mcp
+          ●	playwright-mcp	1.0.0	mise

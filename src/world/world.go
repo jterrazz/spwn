@@ -80,6 +80,9 @@ type Mac struct {
 	// value: the owner runs station as root on this Mac (sudo station), as a
 	// setting that needs root asks; station itself never runs sudo.
 	Root bool `json:"root,omitempty"`
+	// value: a line run as root asks no password on this machine, as in a
+	// VM station made, whose admin it is; the owner's Mac asks one.
+	Passwordless bool `json:"passwordless,omitempty"`
 	// value: a Mac that restarts does not answer until then.
 	Back time.Time `json:"back,omitzero"`
 	// value: the machines this Mac's multiplexer reaches, by name, and the

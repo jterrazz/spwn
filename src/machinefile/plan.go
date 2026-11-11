@@ -101,25 +101,27 @@ type Asked struct {
 // value: a Machinefile against the machine: what it asks of the owner,
 // each line in the order apply runs it, what station installed that it
 // lists no longer, in the order `apply --remove` takes it back, what is
-// skipped, and what has to happen once it is applied, each once.
+// skipped, what has to happen once it is applied, each once, and whether
+// a line run as root asks no password here, as the machine answered it.
 
 type Plan struct {
-	Name     string
-	Needs    []Asked
-	Lines    []Line
-	Extra    []ExtraLine
-	Skipped  []Skip
-	Restarts []catalog.AfterApply
+	Name         string
+	Needs        []Asked
+	Lines        []Line
+	Extra        []ExtraLine
+	Skipped      []Skip
+	Restarts     []catalog.AfterApply
+	Passwordless bool
 }
 
-func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed) Plan {
+func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed, passwordless bool) Plan {
 	// invariant: an item's action follows from what it reads: absent is
 	// installed or set, present kept, present by another way adopted and
 	// never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
 	// (the owner's to decide); an item of another phase is left to it. An
 	// item skipped on this system is still listed, so never extra.
-	p := Plan{Name: r.Name, Skipped: r.Skipped}
+	p := Plan{Name: r.Name, Skipped: r.Skipped, Passwordless: passwordless}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Item] = true
@@ -285,9 +287,12 @@ func reversed(extra []ExtraLine) []ExtraLine {
 	return out
 }
 
-func asked(lines []Line) []Asked {
+func (p Plan) asked(lines []Line) []Asked {
 	var out []Asked
 	for _, need := range catalog.NeedSudo.Enum() {
+		if !p.Asks(catalog.Need(need)) {
+			continue
+		}
 		var items []string
 		for _, l := range lines {
 			if slices.Contains(l.Step.Needs, catalog.Need(need)) && !slices.Contains(items, l.Step.Item) {
@@ -399,10 +404,10 @@ func (p Plan) Calm() bool {
 }
 
 func (p Plan) Interactive(remove bool) []Asked {
-	// value: the needs a run off a terminal cannot answer: every need asks
-	// the owner something (a password, a license, a sign-in, a question):
-	// those of each install and setting set, and with --remove those of
-	// each extra it uninstalls.
+	// value: the needs a run off a terminal cannot answer, each that asks
+	// the owner something here (a password, a license, a sign-in, a
+	// question): those of each install and setting set, and with --remove
+	// those of each extra it uninstalls.
 	var lines []Line
 	for _, l := range p.Lines {
 		if l.Acts() {
@@ -414,7 +419,13 @@ func (p Plan) Interactive(remove bool) []Asked {
 			lines = append(lines, s.Line)
 		}
 	}
-	return asked(lines)
+	return p.asked(lines)
+}
+
+func (p Plan) Asks(n catalog.Need) bool {
+	// value: whether a need asks the owner something here: every need
+	// does, but sudo where the machine answered that it asks no password.
+	return n != catalog.NeedSudo || !p.Passwordless
 }
 
 // value: why a line of a run ended as it did, when its words are the

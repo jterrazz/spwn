@@ -623,6 +623,7 @@
                     "boot": "2026-11-04T08:00:00Z"
                 }
             },
+            "passwordless": true,
             "self": {
                 "kind": "workspace",
                 "system": {
@@ -667,6 +668,7 @@
                     "boot": "2026-10-23T10:00:00Z"
                 }
             },
+            "passwordless": true,
             "self": {
                 "kind": "server",
                 "system": {

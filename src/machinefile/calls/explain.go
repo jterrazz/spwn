@@ -26,12 +26,14 @@ type Deps struct {
 	Kind    machine.Kind
 	// value: the Machinefile this machine is bound to, the ledger of what
 	// station installed, the owner's folder a path is copied into, the
-	// vault a `vault:` reference is read from, and the clock.
-	Prefs  contract.SourcePrefs
-	Ledger contract.Ledger
-	Owned  contract.Owned
-	Vault  Vault
-	Now    func() time.Time
+	// vault a `vault:` reference is read from, whether a line run as root
+	// asks a password here, and the clock.
+	Prefs    contract.SourcePrefs
+	Ledger   contract.Ledger
+	Owned    contract.Owned
+	Vault    Vault
+	Password contract.Password
+	Now      func() time.Time
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
 	Calls call.Router

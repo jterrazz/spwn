@@ -146,7 +146,9 @@ func extraRows(p machinefile.Plan, lead ...string) []page.Row {
 		words := append(slices.Clone(lead), "installed by station for "+e.Installed.Machinefile+", "+fate(e))
 		if e.Takes() {
 			for _, n := range e.Step.Needs {
-				words = append(words, asks(n))
+				if p.Asks(n) {
+					words = append(words, asks(n))
+				}
 			}
 		}
 		rows = append(rows, page.Row{ID: e.Step.Item, Label: e.Step.Item, Mark: page.NotKnown, Cells: []page.Value{page.Texts(e.Step.Method)}, Detail: page.Texts(words...)})

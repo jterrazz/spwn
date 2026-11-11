@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/files"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/git"
+	"github.com/jterrazz/studio-station/src/machinefile/adapter/sudoers"
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/output"
@@ -144,8 +145,17 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Owned: m.owned(), Vault: m.vault(),
-		Now: m.sys.Clock.Now, Calls: calls,
+		Password: m.password(), Now: m.sys.Clock.Now, Calls: calls,
 	}
+}
+
+// value: whether a line run as root asks a password here, as sudo answers
+// it; in a world, its Mac's.
+func (m machine) password() machinefilecontract.Password {
+	if m.world != nil {
+		return m.world.password()
+	}
+	return sudoers.New(m.sys.Run)
 }
 
 // value: the owner's Machinefiles folder, which a Machinefile named by its

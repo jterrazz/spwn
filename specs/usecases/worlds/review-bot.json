@@ -132,6 +132,7 @@
             }
         },
         "review-bot": {
+            "passwordless": true,
             "self": {
                 "kind": "workspace",
                 "system": {

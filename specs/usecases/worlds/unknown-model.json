@@ -686,6 +686,7 @@
             }
         },
         "linux-1": {
+            "passwordless": true,
             "self": {
                 "kind": "workspace",
                 "system": {
@@ -724,6 +725,7 @@
             }
         },
         "infra": {
+            "passwordless": true,
             "self": {
                 "kind": "server",
                 "system": {

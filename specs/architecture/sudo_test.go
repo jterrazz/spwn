@@ -11,8 +11,10 @@ import (
 // inside a VM it owns alone, as that VM's own admin (its first boot, its
 // image build, its poweroff), and on another Mac only for the planned
 // restart's fdesetup authrestart, run on the owner's explicit action, its
-// password asked by macOS at the terminal and never stored; a check never
-// runs sudo, it names the line for the owner to type (decision 17). Every
+// password asked by macOS at the terminal and never stored; a plan reads
+// whether a root line asks a password by `sudo -k -n true`, which never
+// prompts and runs only true; a check never runs sudo, it names the line
+// for the owner to type (decision 17). Every
 // such line is composed with catalog.AsRoot, every hint's in a home of
 // values: the word is spelled nowhere else.
 func ruleNoSudoLiteral(w *world) []finding {

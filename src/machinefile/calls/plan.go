@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"slices"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
@@ -41,6 +42,9 @@ var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
 	},
 }
 
+// invariant: whether a line run as root asks a password is the machine's
+// answer, read once and only for a plan a sudo need is in; a read that
+// cannot tell asks it, so a run off a terminal is refused as before.
 func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error) {
 	r, cat, err := resolveIn(ctx, d, asked)
 	if err != nil {
@@ -54,7 +58,14 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
-	return machinefile.Judge(r, cat, seen, ledger), nil
+	p := machinefile.Judge(r, cat, seen, ledger, false)
+	if !slices.ContainsFunc(p.Interactive(true), func(a machinefile.Asked) bool { return a.Need == catalog.NeedSudo }) {
+		return p, nil
+	}
+	if asked, err := d.Password.Asked(ctx); err == nil && !asked {
+		p = machinefile.Judge(r, cat, seen, ledger, true)
+	}
+	return p, nil
 }
 
 // invariant: what each item reads is its family's own read, the one

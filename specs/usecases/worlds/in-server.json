@@ -138,6 +138,7 @@
                     "boot": "2026-10-23T10:00:00Z"
                 }
             },
+            "passwordless": true,
             "self": {
                 "kind": "server",
                 "system": {

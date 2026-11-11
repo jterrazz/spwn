@@ -901,6 +901,7 @@
                     ]
                 }
             },
+            "passwordless": true,
             "self": {
                 "kind": "workspace",
                 "system": {
@@ -1010,6 +1011,7 @@
                     ]
                 }
             },
+            "passwordless": true,
             "self": {
                 "kind": "server",
                 "system": {
