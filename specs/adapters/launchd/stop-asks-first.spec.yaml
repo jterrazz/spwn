@@ -7,7 +7,7 @@ fixture:
 env: terminal
 serve: sshd
 runs:
-    - command: '--version > /dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41620-41639"}/'' .config/station/preferences.json; /bin/mkdir -p Library/LaunchAgents; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; "$STATION" engine start > /dev/null; "$STATION" machines create --name linux-1 > /dev/null; terminal --size 100x30 "$STATION" engine stop; echo "exit $?"; /usr/bin/grep -cE "^(tart (stop|delete)|launchctl bootout)" .calls; "$STATION" machines --json | /usr/bin/jq -r ''.macs[0].vms[0].state''; "$STATION" engine stop --yes > /dev/null'
+    - command: '--version > /dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "42940-42959"}/'' .config/station/preferences.json; /bin/mkdir -p Library/LaunchAgents; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; "$STATION" engine start > /dev/null; "$STATION" machines create --name linux-1 > /dev/null; terminal --size 100x30 "$STATION" engine stop; echo "exit $?"; /usr/bin/grep -cE "^(tart (stop|delete)|launchctl bootout)" .calls; "$STATION" machines --json | /usr/bin/jq -r ''.macs[0].vms[0].state''; "$STATION" engine stop --yes > /dev/null'
       stdin: |
           see Stop everything on
           see linux-1 will stop; its disk is kept
