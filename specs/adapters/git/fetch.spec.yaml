@@ -1,0 +1,17 @@
+description: 'a clone at another commit is fetched from its url, after --, and checked out at the pin'
+fixture:
+    - ./__fixtures__/stub/
+    - ./__fixtures__/source/
+env: engine
+runs:
+    - command: 'explain machine.kind --machinefile station-macos >/dev/null; /usr/bin/sed -i.bak s/1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d/ffffffffffffffffffffffffffffffffffffffff/ .config/station/preferences.json; : > .calls; "$STATION" explain machine.kind --machinefile station-macos'
+      exit: 0
+      stdout: |
+          # station-macos
+          	machine.kind	workspace	built-in	station-macos
+      files:
+          .calls:
+              equals: |
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false status --porcelain=v2 --branch --untracked-files=all --ignored
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false fetch --quiet --no-recurse-submodules -- https://example.com/studio.git ffffffffffffffffffffffffffffffffffffffff
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c advice.detachedHead=false checkout --quiet --detach ffffffffffffffffffffffffffffffffffffffff --

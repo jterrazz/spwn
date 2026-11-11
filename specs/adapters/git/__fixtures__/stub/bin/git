@@ -1,0 +1,28 @@
+#!/bin/sh
+# git as a shared source meets it: clone makes the folder, checkout moves
+# HEAD, fetch answers, status reads HEAD back and lists a file planted
+# beside the clone's own as untracked. Every call lands in .calls.
+echo "git $*" >> "$HOME/.calls"
+dir=""
+if [ "$1" = "-C" ]; then
+    dir="$2"
+    shift 2
+fi
+while [ "$1" = "-c" ]; do shift 2; done
+case "$1" in
+    clone)
+        for a; do dir="$a"; done
+        /bin/mkdir -p "$dir/.git" "$dir/machinefiles"
+        ;;
+    checkout) echo "$4" > "$dir/.git/HEAD" ;;
+    fetch) ;;
+    status)
+        echo "# branch.oid $(/bin/cat "$dir/.git/HEAD")"
+        echo "# branch.head (detached)"
+        if [ -f "$dir/planted.yaml" ]; then echo "? planted.yaml"; fi
+        ;;
+    *)
+        echo "stub git: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

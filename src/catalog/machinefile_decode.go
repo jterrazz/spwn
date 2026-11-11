@@ -18,6 +18,13 @@ const OverlaySuffix = ".local.yaml"
 // joined by dashes, `<whose>-<what>` by convention (`jterrazz-macbook-pro`).
 var machinefileName = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
+func IsMachinefileName(name string) bool {
+	// value: a name as a Machinefile is named, which a shared source's name
+	// is too: no dot, no slash, no leading dash, so it is one folder of the
+	// cache and never a flag.
+	return machinefileName.MatchString(name)
+}
+
 var (
 	sizeWord     = regexp.MustCompile(`^[1-9]\d*[MGT]$`)
 	durationWord = regexp.MustCompile(`^[1-9]\d*[mhdw]$`)

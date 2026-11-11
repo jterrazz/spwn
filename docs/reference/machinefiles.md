@@ -115,7 +115,9 @@ Files are read from three sources, strongest first:
 
 A same-name file of a stronger layer replaces a weaker one whole, an item as a Machinefile: there is no merge between layers. The `overlay` layer is the overlay above, and `this machine` is a system value a Machinefile does not say.
 
-The shared source is pinned by a whole commit (40 characters), never a branch or a tag: a clone already at it is read with nothing run, one at another commit is fetched and checked out, and a source that cannot be read stops the command with its name and its commit. A `script` method there runs on the machine, which is why the pin is the owner's to move.
+The shared source is pinned by a whole commit (40 characters), never a branch or a tag: a clone already at it is read with nothing fetched, one at another commit is fetched from its `url` and checked out, and a source that cannot be read stops the command with its name and its commit. A `script` method there runs on the machine, which is why the pin is the owner's to move.
+
+Reading a source runs no code of it. Its `name` is a Machinefile's kind of name (lower-case words joined by dashes), so its clone is one folder of the cache and never a path or a flag; its `url` is passed after `--`; git runs with no hook (`core.hooksPath=/dev/null`) and no submodule. A clone already there is trusted only untouched: one holding a change, or a file git does not track or ignores, is refused, and station clones it again once it is deleted.
 
 The built-in Machinefiles are workspaces to extend: `station-linux` (Ubuntu 24.04 arm64, `nat`, mise, git where it has a method, Oh My Zsh, the git shortcuts and `hushlogin`) and `station-macos` (macOS arm64, bridged, Homebrew, git, Oh My Zsh, the same settings).
 

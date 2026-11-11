@@ -4,6 +4,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/git"
@@ -13,10 +14,23 @@ import (
 	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 )
 
-const pinned = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
+const (
+	pinned = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
+	moved  = "ffffffffffffffffffffffffffffffffffffffff"
+	url    = "https://example.com/studio.git"
+)
 
-// value: a clone as git leaves it: the files at the commit, HEAD detached
-// at it.
+// value: what every git run of a source is given before its verb, then
+// its words.
+func quiet(args ...string) []string {
+	return append([]string{"-c", "core.hooksPath=/dev/null", "-c", "submodule.recurse=false"}, args...)
+}
+
+func in(dir string, args ...string) []string {
+	return append([]string{"-C", dir}, quiet(args...)...)
+}
+
+// value: a clone as git leaves it: the files at the commit.
 func clone(t *testing.T, dir string, held map[string]string) {
 	t.Helper()
 	held = maps.Clone(held)
@@ -34,32 +48,83 @@ func clone(t *testing.T, dir string, held map[string]string) {
 	}
 }
 
+// value: git status of a clone at a commit, and the lines of what it
+// holds beside it.
+func status(at string, held ...string) local.Output {
+	lines := append([]string{"# branch.oid " + at, "# branch.head (detached)"}, held...)
+	return local.Output{Stdout: strings.Join(lines, "\n") + "\n"}
+}
+
+func source(run local.Runner, cache, name, commit string) git.Source {
+	return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: name, URL: url, Commit: commit})
+}
+
 func TestTheSharedSourceKeepsTheContract(t *testing.T) {
 	contracttest.Source(t, func(t *testing.T, held map[string]string) contract.Source {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		run := localtest.NewRunner(t)
-		run.On("git", "clone", "--quiet", "--no-checkout", "https://example.com/studio.git", dir).Answer(func() local.Output {
+		run.On("git", quiet("clone", "--quiet", "--no-checkout", "--", url, dir)...).Answer(func() local.Output {
 			clone(t, dir, held)
 			return local.Output{}
 		})
-		run.On("git", "-C", dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", pinned).Reply(local.Output{})
-		return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git", Commit: pinned})
+		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", pinned, "--")...).Reply(local.Output{})
+		return source(run, cache, "studio", pinned)
 	})
 }
 
-func TestAClonePinnedAlreadyRunsNothing(t *testing.T) {
+func TestAnUntouchedCloneAtThePinFetchesNothing(t *testing.T) {
 	cache := t.TempDir()
-	clone(t, filepath.Join(cache, "sources", "studio"), nil)
-	src := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git", Commit: pinned})
-	if _, err := src.Read(t.Context()); err != nil {
+	dir := filepath.Join(cache, "sources", "studio")
+	clone(t, dir, nil)
+	run := localtest.NewRunner(t)
+	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
+	if _, err := source(run, cache, "studio", pinned).Read(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 }
 
+func TestACloneAtAnotherCommitIsFetchedFromItsURL(t *testing.T) {
+	cache := t.TempDir()
+	dir := filepath.Join(cache, "sources", "studio")
+	clone(t, dir, nil)
+	run := localtest.NewRunner(t)
+	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
+	fetch := run.On("git", in(dir, "fetch", "--quiet", "--no-recurse-submodules", "--", url, moved)...).Reply(local.Output{})
+	run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", moved, "--")...).Reply(local.Output{})
+	if _, err := source(run, cache, "studio", moved).Read(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if fetch.Seen != 1 {
+		t.Errorf("fetched %d times, want once", fetch.Seen)
+	}
+}
+
+func TestACloneThatHoldsChangesIsNotTrusted(t *testing.T) {
+	for _, held := range []string{"1 .M N... 100644 100644 100644 a b machinefiles/laptop.yaml", "? machinefiles/planted.yaml", "! catalog/apps/hidden.yaml"} {
+		cache := t.TempDir()
+		dir := filepath.Join(cache, "sources", "studio")
+		clone(t, dir, nil)
+		run := localtest.NewRunner(t)
+		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned, held))
+		_, err := source(run, cache, "studio", pinned).Read(t.Context())
+		if err == nil || !strings.Contains(err.Error(), "holds changes") {
+			t.Errorf("a clone holding %q read with %v", held, err)
+		}
+	}
+}
+
+func TestANameThatIsNoNameRunsNothing(t *testing.T) {
+	for _, name := range []string{"..", "../escape", "a/b", "-x", "--upload-pack=touch", "Studio", ""} {
+		_, err := source(localtest.NewRunner(t), t.TempDir(), name, pinned).Read(t.Context())
+		if err == nil || !strings.Contains(err.Error(), "is no name") {
+			t.Errorf("a source named %q read with %v", name, err)
+		}
+	}
+}
+
 func TestABranchIsNoPin(t *testing.T) {
-	src := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, t.TempDir(), contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git", Commit: "main"})
-	if _, err := src.Read(t.Context()); err == nil {
+	if _, err := source(localtest.NewRunner(t), t.TempDir(), "studio", "main").Read(t.Context()); err == nil {
 		t.Fatal("a source read at a branch")
 	}
 }
