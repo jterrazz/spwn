@@ -86,5 +86,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [032 The words of a VM's lifetime and network](decisions/032-the-words-of-a-vms-lifetime-and-network.md) (Proposed)
 - [033 A machine is declared by its Machinefile](decisions/033-a-machine-is-declared-by-its-machinefile.md) (Proposed)
 - [035 A port is a right with an audience](decisions/035-a-port-is-a-right-with-an-audience.md) (Proposed)
+- [036 The menu bar owns its panel, and the panel's one background is a tinted glass](decisions/036-the-menu-bar-owns-its-glass-panel.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
