@@ -75,7 +75,7 @@ func (r *Releases) heldTag(rec record) string {
 	}
 	matches := func(files map[string]string) bool {
 		for cmd, h := range files {
-			if r.hash(path.Join(r.o.Bin, cmd)) != h {
+			if target, err := r.command(cmd); err != nil || r.hash(target) != h {
 				return false
 			}
 		}
@@ -97,9 +97,12 @@ func (r *Releases) Inventory(context.Context) (map[string]string, error) {
 		return nil, err
 	}
 	for _, f := range files {
+		// invariant: a record that does not read, or names what is no
+		// repo or no command, holds nothing: the rest are still read, and
+		// an install or a removal of its release names it.
 		rec, err := r.readRecord(f)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		if tag := r.heldTag(rec); tag != "" {
 			held[rec.Repo] = tag
@@ -160,14 +163,21 @@ func (r *Releases) Remove(_ context.Context, installs []catalog.Install, _ contr
 			return err
 		}
 		for _, cmd := range commands(rec) {
-			target := path.Join(r.o.Bin, cmd)
+			target, bad := r.command(cmd)
+			if bad != nil {
+				return bad
+			}
 			if r.ours(rec, cmd, target) {
-				if err := r.o.FS.Remove(target); err != nil && !errors.Is(err, fs.ErrNotExist) {
-					return err
+				if gone := r.o.FS.Remove(target); gone != nil && !errors.Is(gone, fs.ErrNotExist) {
+					return gone
 				}
 			}
 		}
-		if err := r.o.FS.Remove(r.recordPath(rec.Repo)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		file, err := recordPath(r.o.Store, rec.Repo)
+		if err != nil {
+			return err
+		}
+		if err := r.o.FS.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return err
 		}
 	}
@@ -182,6 +192,14 @@ func (r *Releases) Remove(_ context.Context, installs []catalog.Install, _ contr
 // its old file, so an interruption leaves the old command or the new
 // one, never a part of either, and the record is written last.
 func (r *Releases) install(ctx context.Context, v catalog.GitHubReleaseInstall) error {
+	if err := catalog.CheckRepo(v.Repo); err != nil {
+		return err
+	}
+	for _, cmd := range v.Commands {
+		if err := catalog.CheckCommand(cmd); err != nil {
+			return err
+		}
+	}
 	rel, err := r.release(ctx, v.Repo, v.Tag)
 	if err != nil {
 		return err
@@ -225,7 +243,10 @@ func (r *Releases) install(ctx context.Context, v catalog.GitHubReleaseInstall) 
 	}
 	written := map[string]string{}
 	for cmd, data := range files {
-		target := path.Join(r.o.Bin, cmd)
+		target, err := r.command(cmd)
+		if err != nil {
+			return err
+		}
 		if _, err := r.o.FS.Stat(target); err == nil && !r.ours(rec, cmd, target) {
 			return &NotOursError{Path: target}
 		}
@@ -240,7 +261,11 @@ func (r *Releases) install(ctx context.Context, v catalog.GitHubReleaseInstall) 
 		return err
 	}
 	for cmd, data := range files {
-		if err := r.land(path.Join(r.o.Bin, cmd), data, 0o755); err != nil {
+		target, err := r.command(cmd)
+		if err != nil {
+			return err
+		}
+		if err := r.land(target, data, 0o755); err != nil {
 			return err
 		}
 	}
@@ -261,7 +286,8 @@ func (r *Releases) expand(pattern string) string {
 // value: whether every command of a release is the file its record says.
 func (r *Releases) whole(rec record, cmds []string) bool {
 	for _, cmd := range cmds {
-		if h, ok := rec.Files[cmd]; !ok || r.hash(path.Join(r.o.Bin, cmd)) != h {
+		target, err := r.command(cmd)
+		if h, ok := rec.Files[cmd]; !ok || err != nil || r.hash(target) != h {
 			return false
 		}
 	}
@@ -306,9 +332,32 @@ func (r *Releases) land(target string, data []byte, perm fs.FileMode) error {
 	return r.o.FS.Rename(next, target)
 }
 
-func (r *Releases) recordPath(repo string) string { return path.Join(r.o.Store, repo+".json") }
+// invariant: a command's path is one file of the folder on the search
+// path, and a record's one file two folders down the store: the name that
+// builds either is checked by the catalog's rule here, where the path is
+// made, whatever checked it before (the decoder, a record's read), so
+// nothing station writes or removes is outside those folders.
+func (r *Releases) command(cmd string) (string, error) {
+	if err := catalog.CheckCommand(cmd); err != nil {
+		return "", err
+	}
+	return path.Join(r.o.Bin, cmd), nil
+}
 
-func (r *Releases) record(repo string) (record, error) { return r.readRecord(r.recordPath(repo)) }
+func recordPath(store, repo string) (string, error) {
+	if err := catalog.CheckRepo(repo); err != nil {
+		return "", err
+	}
+	return path.Join(store, repo+".json"), nil
+}
+
+func (r *Releases) record(repo string) (record, error) {
+	file, err := recordPath(r.o.Store, repo)
+	if err != nil {
+		return record{}, err
+	}
+	return r.readRecord(file)
+}
 
 func (r *Releases) readRecord(file string) (record, error) {
 	data, err := r.o.FS.ReadFile(file)
@@ -316,8 +365,20 @@ func (r *Releases) readRecord(file string) (record, error) {
 		return record{}, err
 	}
 	var rec record
-	if err := json.Unmarshal(data, &rec); err != nil {
-		return record{}, fmt.Errorf("%s: %w", file, err)
+	if err = json.Unmarshal(data, &rec); err != nil {
+		return record{}, &RecordError{File: file, Err: err}
+	}
+	at, err := recordPath(r.o.Store, rec.Repo)
+	if err != nil {
+		return record{}, &RecordError{File: file, Err: err}
+	}
+	if at != file {
+		return record{}, &RecordError{File: file, Err: errors.New("it names " + rec.Repo + ", whose record is elsewhere")}
+	}
+	for _, cmd := range commands(rec) {
+		if err := catalog.CheckCommand(cmd); err != nil {
+			return record{}, &RecordError{File: file, Err: err}
+		}
 	}
 	return rec, nil
 }
@@ -327,7 +388,10 @@ func (r *Releases) writeRecord(rec record) error {
 	if err != nil {
 		return err
 	}
-	file := r.recordPath(rec.Repo)
+	file, err := recordPath(r.o.Store, rec.Repo)
+	if err != nil {
+		return err
+	}
 	if err := r.o.FS.MkdirAll(path.Dir(file), 0o755); err != nil {
 		return err
 	}

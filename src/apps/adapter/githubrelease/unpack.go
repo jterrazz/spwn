@@ -195,3 +195,14 @@ type SelfError struct{ Repo string }
 func (e *SelfError) Error() string {
 	return e.Repo + " is station's own release: its install line updates it"
 }
+
+type RecordError struct {
+	File string
+	Err  error
+}
+
+func (e *RecordError) Error() string {
+	return e.File + " is no record station reads: " + e.Err.Error() + "; nothing installed nor removed"
+}
+
+func (e *RecordError) Unwrap() error { return e.Err }
