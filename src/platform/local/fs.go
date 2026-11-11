@@ -70,3 +70,22 @@ func Erase(paths []string) error {
 	}
 	return failed
 }
+
+func Exclusive(path string) (release func(), err error) {
+	// invariant: an exclusive flock(2) on path, made when missing, held until
+	// release: a second holder, in this process or another, waits for it,
+	// and the kernel lets it go when its process ends, so a crash never
+	// leaves it held.
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
+	if err != nil {
+		return nil, err
+	}
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+		_ = f.Close()
+		return nil, err
+	}
+	return func() {
+		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+		_ = f.Close()
+	}, nil
+}

@@ -110,9 +110,14 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		declarations: portsjsonfile.NewDeclarations(files, filepath.Join(p.Prefs, "public.json")),
 		applied:      settingsjsonfile.NewApplied(files, filepath.Join(p.State, "applied")),
 		uptime:       machinesjsonfile.NewUptime(files, filepath.Join(p.State, "uptime.json")),
-		ledger:       machinefilejsonfile.NewLedger(files, filepath.Join(p.State, "ledger.json")),
+		ledger:       machinefilejsonfile.NewLedger(lockable{files}, filepath.Join(p.State, "ledger.json")),
 	}
 }
+
+// value: the machine's files with the lock a store takes around a change.
+type lockable struct{ local.FS }
+
+func (lockable) Lock(path string) (func(), error) { return local.Exclusive(path) }
 
 func (s *stores) migrators() []store.Migrator {
 	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}

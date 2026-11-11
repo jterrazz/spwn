@@ -20,9 +20,14 @@ type Files interface {
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
+	Rename(from, to string) error
+	// invariant: an exclusive lock on path, made when missing, held until
+	// release; a second holder waits for it.
+	Lock(path string) (release func(), err error)
 }
 
-// value: the ledger, one file: `~/.local/state/station/ledger.json`.
+// value: the ledger, one file: `~/.local/state/station/ledger.json`,
+// beside the lock its writers take, `ledger.json.lock`.
 
 type Ledger struct {
 	files Files
@@ -68,29 +73,55 @@ func (l *Ledger) write(list []machinefile.Installed) error {
 	if err != nil {
 		return err
 	}
-	if err := l.files.WriteFile(l.at, append(data, '\n'), 0o600); err != nil {
+	tmp := l.at + ".tmp"
+	if err := l.files.WriteFile(tmp, append(data, '\n'), 0o600); err != nil {
+		return &store.UnwritableError{Path: l.at, Cause: err}
+	}
+	if err := l.files.Rename(tmp, l.at); err != nil {
 		return &store.UnwritableError{Path: l.at, Cause: err}
 	}
 	return nil
 }
 
-func (l *Ledger) List(context.Context) ([]machinefile.Installed, error) { return l.read() }
-
-func (l *Ledger) Put(_ context.Context, in machinefile.Installed) error {
+// invariant: a record changes under the ledger's lock, read then written
+// whole to a temporary file renamed over it, so two applies at once (two
+// terminals, the menu bar's and the CLI's) never lose each other's record,
+// and a reader never sees half a file. The lock is held for one record,
+// so a second apply waits for it rather than being refused.
+func (l *Ledger) change(edit func([]machinefile.Installed) ([]machinefile.Installed, bool)) error {
+	if err := l.files.MkdirAll(path.Dir(l.at), 0o700); err != nil {
+		return &store.UnwritableError{Path: l.at, Cause: err}
+	}
+	release, err := l.files.Lock(l.at + ".lock")
+	if err != nil {
+		return &store.UnwritableError{Path: l.at, Cause: err}
+	}
+	defer release()
 	list, err := l.read()
 	if err != nil {
 		return err
 	}
-	list = slices.DeleteFunc(list, func(e machinefile.Installed) bool { return e.Item == in.Item })
-	return l.write(append(list, in))
+	list, changed := edit(list)
+	if !changed {
+		return nil
+	}
+	return l.write(list)
+}
+
+func (l *Ledger) List(context.Context) ([]machinefile.Installed, error) { return l.read() }
+
+func (l *Ledger) Put(_ context.Context, in machinefile.Installed) error {
+	return l.change(func(list []machinefile.Installed) ([]machinefile.Installed, bool) {
+		return append(slices.DeleteFunc(list, func(e machinefile.Installed) bool { return e.Item == in.Item }), in), true
+	})
 }
 
 func (l *Ledger) Delete(_ context.Context, item string) error {
-	list, err := l.read()
-	if err != nil || !slices.ContainsFunc(list, func(e machinefile.Installed) bool { return e.Item == item }) {
-		return err
-	}
-	return l.write(slices.DeleteFunc(list, func(e machinefile.Installed) bool { return e.Item == item }))
+	return l.change(func(list []machinefile.Installed) ([]machinefile.Installed, bool) {
+		of := func(e machinefile.Installed) bool { return e.Item == item }
+		held := slices.ContainsFunc(list, of)
+		return slices.DeleteFunc(list, of), held
+	})
 }
 
 func (l *Ledger) Migrate(context.Context) error {
