@@ -71,3 +71,12 @@ func TestAVMsQuietListenersAreOneLine(t *testing.T) {
 		t.Fatalf("row %+v", row)
 	}
 }
+
+// invariant: a listener outside its VM's rights reads not-allowed in
+// station.ports.list/v1, though it is never reserved.
+func TestAListenerOutsideItsRightsReadsNotAllowed(t *testing.T) {
+	got := PortObject(ports.SharedPort{VM: "ws1", GuestPort: 8443, State: ports.PhaseNotAllowed, Detail: "outside its rights"}).State
+	if got != "not-allowed" {
+		t.Fatalf("state %q, want not-allowed", got)
+	}
+}

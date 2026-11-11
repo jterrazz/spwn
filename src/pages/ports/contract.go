@@ -80,6 +80,8 @@ type ListJSON map[string]any // value: station.ports.list/v1, its node under the
 // value: the words of a port's state in station.ports.list/v1.
 func stateWord(s ports.SharedPort) string {
 	switch {
+	case s.State == ports.PhaseNotAllowed:
+		return "not-allowed"
 	case s.State == ports.PhaseRefused || s.Reserved == 0:
 		return "waiting"
 	case s.State == ports.PhaseUnknown:
