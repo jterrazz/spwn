@@ -488,3 +488,95 @@ func TestTheVersionReadRunsTheCopyTheLookupFound(t *testing.T) {
 		t.Errorf("read %q by %v; want 2.1.0 from /opt/elsewhere/probed", row.Version, runner.Calls)
 	}
 }
+
+func TestAnExtraHeldByAnotherMethodThanItsRecordIsLeftByApplyRemove(t *testing.T) {
+	// invariant: apply --remove takes back an extra only by the method
+	// its record names: one moved to another method since is the
+	// owner's, left there with its record let go (ADR-034).
+	b := benchOf(t, catalog.Mac, "{ name: twin, manager: cask }")
+	if done := doneOf(t, b.apply(t, false).Done, "twin"); done.State != catalog.StateOK {
+		t.Fatalf("twin by cask ended %s %q", done.State, done.Detail)
+	}
+	if _, err := b.shelf.Move(context.Background(), "twin", catalog.MethodSkill, nil); err != nil {
+		t.Fatal(err)
+	}
+	b.files["machinefiles/m.yaml"] = machinefileOf(catalog.Mac)
+	b.shelf.Forget()
+	left := doneOf(t, b.apply(t, true).Removed, "twin")
+	if !b.holds(catalog.MethodSkill, "twin") || left.Detail != machinefile.AnotherWay {
+		t.Errorf("apply --remove ended twin %s %q; the skill copy there: %v", left.State, left.Detail, b.holds(catalog.MethodSkill, "twin"))
+	}
+	if rec, ok := b.recorded("twin"); ok {
+		t.Errorf("the record %+v stays", rec)
+	}
+}
+
+func TestAMoveWhoseInstallDoesNotLandKeepsTheOldCopy(t *testing.T) {
+	// invariant: a move installs by the method asked before it touches
+	// the old copy, so an install that fails or is interrupted leaves the
+	// old copy where it was.
+	for _, c := range []struct{ from, to, how string }{
+		{"skill", "cask", "fails"}, {"cask", "skill", "fails"},
+		{"skill", "cask", "interrupted"}, {"cask", "skill", "interrupted"},
+	} {
+		about := c.from + " to " + c.to + " " + c.how
+		ctx, cancel := context.WithCancel(context.Background())
+		b := benchOf(t, catalog.Mac, "twin", func(_ *localtest.Runner, o *appscalls.ShelfOptions) {
+			if c.how == "interrupted" {
+				o.Installers[catalog.Method(c.to)] = interrupting{o.Installers[catalog.Method(c.to)], cancel}
+				o.Bundler = interruptingBundle{o.Bundler, cancel}
+			}
+		})
+		b.w.Mac("here").Apps[catalog.Method(c.from)].Installed["twin"] = "1.0.0"
+		if c.how == "fails" {
+			b.w.Script = []world.Fault{{Call: "Installer.Install"}, {Call: "Bundler.Bundle"}}
+		}
+		out, _ := b.shelf.Move(ctx, "twin", catalog.Method(c.to), nil)
+		cancel()
+		if i := slices.IndexFunc(out, func(o apps.Outcome) bool { return o.Name == "twin" }); i >= 0 && out[i].Result == catalog.StateOK {
+			t.Errorf("%s: moved %+v", about, out[i])
+		}
+		if !b.holds(catalog.Method(c.from), "twin") {
+			t.Errorf("%s: the %s copy is gone", about, c.from)
+		}
+	}
+}
+
+// value: an install that lands, then is caught by ctrl-c before it answers.
+type interrupting struct {
+	contract.Installer
+	cancel func()
+}
+
+func (i interrupting) Install(ctx context.Context, in []catalog.Install, logs contract.Logs) error {
+	_ = i.Installer.Install(ctx, in, logs)
+	i.cancel()
+	return ctx.Err()
+}
+
+type interruptingBundle struct {
+	contract.Bundler
+	cancel func()
+}
+
+func (b interruptingBundle) Bundle(ctx context.Context, lines []string, update bool, logs contract.Logs) error {
+	_ = b.Bundler.Bundle(ctx, lines, update, logs)
+	b.cancel()
+	return ctx.Err()
+}
+
+func TestAMoveFromACopyOnPathKeepsIt(t *testing.T) {
+	// invariant: a copy none of the app's methods holds is the owner's: a
+	// move installs by the method asked and leaves that copy, said.
+	b := benchOf(t, catalog.Mac, "twin", func(r *localtest.Runner, _ *appscalls.ShelfOptions) {
+		r.Paths["twin"] = "/opt/yours/twin"
+	})
+	out, err := b.shelf.Move(context.Background(), "twin", catalog.MethodSkill, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o := outcomeOf(t, out, "twin")
+	if o.Result != catalog.StateOK || !b.holds(catalog.MethodSkill, "twin") || len(o.Steps) != 1 || o.Steps[0].Item != "copy on PATH" || !strings.HasPrefix(o.Steps[0].Detail, "kept") {
+		t.Errorf("moved %+v", o)
+	}
+}
