@@ -42,9 +42,13 @@ type Step struct {
 	Version string
 	Phase   catalog.Phase
 	Needs   []catalog.Need
-	Why     string
-	Values  map[string]catalog.OptionValue
-	From    string
+	// value: what has to happen once it is applied for it to take (the
+	// Dock restarted, a logout), and the steps of the plan it waits on.
+	Restarts []catalog.AfterApply
+	Waits    []string
+	Why      string
+	Values   map[string]catalog.OptionValue
+	From     string
 	// value: where the step was asked (a Machinefile, or the item that
 	// brings it in), and where its item is defined.
 	Origin, Defined Origin
@@ -537,7 +541,7 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 	return Step{
 		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Key(), Chosen: p.because(chosen, len(matching)), Spec: chosen,
 		Version: version, Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
-		Why: why, Defined: itemOrigin(it),
+		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
 	}, nil
 }
 
@@ -613,6 +617,12 @@ func (p *planner) ordered() ([]Step, error) {
 			if j, ok := p.at[b]; ok && j != i && !slices.Contains(deps[i], j) {
 				deps[i] = append(deps[i], j)
 			}
+		}
+	}
+	for i := range p.steps {
+		p.steps[i].Waits = nil
+		for _, j := range deps[i] {
+			p.steps[i].Waits = append(p.steps[i].Waits, p.steps[j].Item)
 		}
 	}
 	done := make([]bool, len(p.steps))

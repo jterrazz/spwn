@@ -10,6 +10,6 @@ runs:
           ●	layout	nothing to retire
           ◐	relocate	go env is off (GOENV=off): station writes nothing
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           Library/Application Support/go: absent

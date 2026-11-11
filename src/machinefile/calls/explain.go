@@ -3,6 +3,9 @@ package calls
 import (
 	"context"
 	"errors"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
@@ -17,9 +20,26 @@ type Deps struct {
 	// source when one is named, station's built-in files.
 	Sources func() []contract.Source
 	// value: this machine, for what a Machinefile does not say, and its
-	// name, the Machinefile read when none is named.
+	// name, the Machinefile read when none is named and none is bound.
 	Machine machinefile.Machine
 	Name    string
+	Kind    machine.Kind
+	// value: the Machinefile this machine is bound to, the ledger of what
+	// station installed, the owner's folder a path is copied into, the
+	// vault a `vault:` reference is read from, and the clock.
+	Prefs  contract.SourcePrefs
+	Ledger contract.Ledger
+	Owned  contract.Owned
+	Vault  Vault
+	Now    func() time.Time
+	// value: this machine's own calls: apps and settings read and act
+	// through them, never through their adapters.
+	Calls call.Router
+}
+
+type Vault interface {
+	// value: the secret a `vault:` reference names.
+	Get(ctx context.Context, name string) ([]byte, error)
 }
 
 const (
@@ -63,11 +83,7 @@ var Explain = call.Call[Deps, ExplainIn, ExplainOut]{
 	Name: "machinefile.explain", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: append([]fail.Code{UnknownKey}, resolution()...),
 	Run: func(ctx context.Context, d Deps, in ExplainIn, _ call.Progress) (ExplainOut, error) {
-		name := in.Machinefile
-		if name == "" {
-			name = d.Name
-		}
-		r, err := resolve(ctx, d, name)
+		r, err := resolve(ctx, d, in.Machinefile)
 		if err != nil {
 			return ExplainOut{}, err
 		}
@@ -79,12 +95,52 @@ var Explain = call.Call[Deps, ExplainIn, ExplainOut]{
 	},
 }
 
-func resolve(ctx context.Context, d Deps, name string) (machinefile.Resolved, error) {
+// value: whether the owner named a Machinefile by its path rather than
+// its name: a name is lower-case words joined by dashes.
+func isPath(s string) bool { return strings.ContainsRune(s, '/') || strings.HasSuffix(s, ".yaml") }
+
+// invariant: the Machinefile read is the one named, else the one this
+// machine is bound to, else the one named after the machine. One named by
+// its path is read as the owner's file of its name, above every source.
+func named(ctx context.Context, d Deps, asked string) (name string, path *machinefile.Tree, err error) {
+	if asked == "" {
+		if asked, err = d.Prefs.Bound(); err != nil {
+			return "", nil, err
+		}
+	}
+	if asked == "" {
+		return d.Name, nil, nil
+	}
+	if !isPath(asked) {
+		return asked, nil, nil
+	}
+	body, err := d.Owned.Read(ctx, asked)
+	if err != nil {
+		return "", nil, fail.New(fail.NotFound, NotFound, asked, map[string]string{"path": "yes"})
+	}
+	mf, err := catalog.DecodeMachinefile(asked, body)
+	if err != nil {
+		return "", nil, Worded(&machinefile.RefusedFileError{Format: "machinefile", Err: err})
+	}
+	if mf.Name == "" {
+		return "", nil, Worded(&machinefile.RefusedFileError{Format: "machinefile", Err: &catalog.FileError{File: asked, Problem: "names no Machinefile: a file named by its path says its name"}})
+	}
+	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + ".yaml", Body: body}}}, nil
+}
+
+func resolve(ctx context.Context, d Deps, asked string) (machinefile.Resolved, error) {
+	name, path, err := named(ctx, d, asked)
+	if err != nil {
+		return machinefile.Resolved{}, err
+	}
 	var trees []machinefile.Tree
+	if path != nil {
+		trees = append(trees, *path)
+	}
 	for _, s := range d.Sources() {
-		t, err := s.Read(ctx)
-		if err != nil {
-			return machinefile.Resolved{}, Worded(err)
+		t, read := s.Read(ctx)
+		if read != nil {
+			return machinefile.Resolved{}, Worded(read)
 		}
 		trees = append(trees, t)
 	}
@@ -97,7 +153,7 @@ func resolve(ctx context.Context, d Deps, name string) (machinefile.Resolved, er
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Explain, d)}
+	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d)}
 }
 
 func Worded(err error) error {

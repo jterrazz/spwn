@@ -1,6 +1,6 @@
 # Getting started
 
-From a fresh Mac to a machine `station` knows: the one-line install, naming the machine, then the engine, the apps and the settings, one at a time.
+From a fresh Mac to a machine `station` knows: the one-line install, naming the machine, then what it carries: its Machinefile applied, or the apps and the settings one at a time.
 
 ## 1. Install `station`
 
@@ -10,7 +10,7 @@ curl -fsSL https://raw.githubusercontent.com/jterrazz/studio-station/main/script
 exec zsh
 ```
 
-The script reads the latest release tag, downloads `station-<os>-<arch>`, checks it against the release's `checksums.txt`, installs it to `~/.local/bin/station`, saying two lines of its own (`Installing station for darwin/arm64`, `● station v3.1.0 in ~/.local/bin`), and hands the terminal to `station init`, so init asks this Mac's name. Its own arguments go to init: `curl -fsSL … | sh -s -- --name macbook`. There is no clone: the dotfiles are in the binary. Running the script again is the upgrade.
+The script reads the latest release tag, downloads `station-<os>-<arch>`, checks it against the release's `checksums.txt`, installs it to `~/.local/bin/station`, saying two lines of its own (`Installing station for darwin/arm64`, `● station v3.1.0 in ~/.local/bin`), and hands the terminal to `station init`, so init asks this Mac's name. Its own arguments go to init: `curl -fsSL … | sh -s -- --name macbook`, or `curl -fsSL … | sh -s -- --machinefile <name>` to bind this Mac to a Machinefile and apply it at once (step 3). There is no clone: the dotfiles are in the binary. Running the script again is the upgrade.
 
 ## 2. Name this machine
 
@@ -18,9 +18,18 @@ The script reads the latest release tag, downloads `station-<os>-<arch>`, checks
 station init --name macbook
 ```
 
-`init` makes this Mac known to station: it names it, writes the managed block of `~/.zshrc`, moves an old `~/.studio/` to the XDG folders and brings station's stores to their version. It installs no app, runs no package manager and asks no password, and it ends on what the Mac carries: `Machinefile  none yet`, then the next steps. Where no terminal can be asked (a script, an ssh command without a terminal), init on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
+`init` makes this Mac known to station: it names it, writes the managed block of `~/.zshrc`, moves an old `~/.studio/` to the XDG folders and brings station's stores to their version. It installs no app, runs no package manager and asks no password, and it ends on what the Mac carries: `Machinefile  none bound by init`, then the next steps. Where no terminal can be asked (a script, an ssh command without a terminal), init on a Mac with no name yet is refused, exit 2, before any step: `--name` is how such a run names it; the install stands. It is safe to run again ([Dotfiles](../reference/dotfiles.md)).
 
-## 3. The engine, the apps, then the settings
+## 3. What it carries: its Machinefile
+
+```sh
+station init --machinefile jterrazz-macbook-pro
+station drift
+```
+
+`--machinefile` binds this Mac to a Machinefile, by its name or its file (a file is copied among yours, `~/.config/station/machinefiles/`), prints its plan, then applies it: what it asks of you first (`homebrew  asks your password once`), then each app installed and each setting set, one at a time. An app already there by another way is adopted, never installed again. Interrupted, it says `station apply resumes`, and `station apply` finishes it; `station drift` says, item by item, how the Mac differs from it since. The format is [Machinefiles](../reference/machinefiles.md).
+
+## 4. Or the engine, the apps, then the settings, one at a time
 
 ```sh
 station apps install tart tailscale

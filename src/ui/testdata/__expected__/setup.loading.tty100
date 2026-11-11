@@ -5,7 +5,7 @@ Changes
   ◌ zshrc
   ◌ layout
   ◌ relocate
-Machinefile  none yet: apps and settings come one at a time
+Machinefile  none bound by init: init --machinefile binds one
 
-→ exec zsh                    so this shell reads the station block
-→ station apps install <app>  one app, and what it requires
+→ exec zsh                           so this shell reads the station block
+→ station init --machinefile <name>  binds a Machinefile, then applies it

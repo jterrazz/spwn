@@ -13,7 +13,7 @@ runs:
           ✗	layout	cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       stderr: |
           Error: init step layout: cannot read {{workdir}}/.config/station/preferences.json: written at version 2 by a newer station, this one knows 1
           Hint: fix it, then run station init again: it resumes

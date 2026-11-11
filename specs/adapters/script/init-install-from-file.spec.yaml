@@ -22,7 +22,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .calls: absent
     - command: '--version >/dev/null; .local/bin/station --version >/dev/null && echo answers'

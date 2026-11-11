@@ -1,0 +1,9 @@
+description: 'apply of a Machinefile no source holds changes nothing and names the gesture that binds one'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'apply --machinefile nope'
+      exit: 2
+      stderr: |
+          Error: no Machinefile named nope
+          Hint: give this machine one: station init --machinefile <name>

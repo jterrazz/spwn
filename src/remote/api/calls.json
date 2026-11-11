@@ -350,6 +350,29 @@
       "in": "UpdateIn"
     },
     {
+      "name": "machinefile.apply",
+      "schema": "station.machinefile.apply/v1",
+      "where": "at-target",
+      "confirm": "remove",
+      "errors": [
+        "confirm.yes-needed",
+        "machinefile.needs-terminal",
+        "machinefile.not-found"
+      ],
+      "in": "ApplyIn",
+      "out": "Applied"
+    },
+    {
+      "name": "machinefile.drift",
+      "schema": "station.machinefile.drift/v1",
+      "where": "at-target",
+      "errors": [
+        "machinefile.not-found"
+      ],
+      "in": "PlanIn",
+      "out": "Plan"
+    },
+    {
       "name": "machinefile.explain",
       "schema": "station.machinefile.explain/v1",
       "where": "at-target",
@@ -371,6 +394,16 @@
       ],
       "in": "ExplainIn",
       "out": "ExplainOut"
+    },
+    {
+      "name": "machinefile.plan",
+      "schema": "station.machinefile.plan/v1",
+      "where": "at-target",
+      "errors": [
+        "machinefile.not-found"
+      ],
+      "in": "PlanIn",
+      "out": "Plan"
     },
     {
       "name": "machines.add",

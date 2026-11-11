@@ -1,0 +1,36 @@
+description: 'one install failing fails only what requires it: every independent item is still installed or set'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [fd, eza]
+          settings: { git-shortcuts: {} }
+      exit: 0
+    - command: 'world fault Bundler.Bundle 1 times'
+      exit: 0
+    - command: 'apply'
+      exit: 1
+      stdout: |
+          # To install
+          ○	fd	brew
+          ○	eza	brew
+          # To set
+          ○	git-shortcuts	git-aliases
+          # To adopt
+          ?	homebrew	script	the manager of fd · on PATH, not managed by script
+          ●	git-shortcuts		git-aliases	~/.gitconfig [alias]: written
+          ◐	homebrew	5.0.1	script	the manager of fd · adopted · on PATH, not managed by script
+          ✗	fd		brew	~/.local/state/station/logs/fd.log
+          ●	eza	0.23.4	brew
+      stderr: |
+          Error: 1 of 4 items failed
+          Hint: station apply
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	"'
+      exit: 0
+      stdout: |
+          ○	fd		brew	station apps install fd
+          ●	eza	0.23.4	brew

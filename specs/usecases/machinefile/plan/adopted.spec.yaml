@@ -1,0 +1,30 @@
+description: 'an app already there by another way than its method is adopted, never installed again'
+fixture: ../__fixtures__/rg-by-hand/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, ripgrep]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ?	ripgrep	brew	on PATH, not managed by brew
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ?	ripgrep	brew	on PATH, not managed by brew
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ◐	ripgrep		brew	adopted · on PATH, not managed by brew
+    - command: 'apps | /usr/bin/grep "	ripgrep	"'
+      exit: 0
+      stdout: |
+          ?	ripgrep		brew	on PATH, not managed by brew

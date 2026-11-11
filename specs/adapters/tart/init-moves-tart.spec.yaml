@@ -9,7 +9,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart, ~/.local/opt
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .local/share/station/vms/vms/station-image-linux-2026.11.01/config.json: { equals: "{\"os\":\"linux\"}\n" }
           .local/share/station/vms/cache/OCIs/ghcr.io/x/disk.img: { equals: "disk\n" }
@@ -26,7 +26,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
     - command: '--version >/dev/null; /usr/bin/grep -c -e curl -e "^tar " -e "tart pull" .calls'
       exit: 1
       stdout: |

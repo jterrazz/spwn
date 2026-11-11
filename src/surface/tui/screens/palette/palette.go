@@ -340,6 +340,15 @@ func entries() map[string]entry {
 		"machinefile.explain": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
 			return Item{Label: "Explain the Machinefile", Gesture: gesture.Gesture{Read: words(t, "explain")}}
 		}},
+		"machinefile.plan": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
+			return Item{Label: "Read the plan of the Machinefile", Gesture: gesture.Gesture{Read: words(t, "plan")}}
+		}},
+		"machinefile.drift": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
+			return Item{Label: "Read the drift from the Machinefile", Gesture: gesture.Gesture{Read: words(t, "drift")}}
+		}},
+		"machinefile.apply": {kinds: []machine.Kind{machine.Computer, machine.Workspace}, item: func(t, _ Target) Item {
+			return terminal("Apply the Machinefile in a new terminal", words(t, "apply")...)
+		}},
 		"setup.init": {kinds: []machine.Kind{machine.Computer, machine.Workspace, machine.Server}, item: func(t, _ Target) Item {
 			return terminal("Run init in a new terminal", words(t, "init")...)
 		}},

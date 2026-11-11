@@ -9,7 +9,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       stderr: |
           → now: station init --name=jterrazz-macbook-pro
           apps and settings no longer come with setup: station apps install <app>, station settings apply <setting>

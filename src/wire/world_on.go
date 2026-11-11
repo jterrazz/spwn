@@ -307,6 +307,7 @@ func (m *worldMac) stores(st *stores) {
 	st.declarations = portsfake.DeclarationsOf(w, m.name)
 	st.applied = settingsfake.AppliedOf(w, m.name)
 	st.uptime = machinesfake.UptimeOf(w, m.name)
+	st.ledger = machinefilefake.LedgerOf(w, m.name)
 }
 
 func (m *worldMac) self() corecontract.Self    { return corefake.SelfOf(m.run.w, m.name) }
@@ -331,6 +332,7 @@ func (m *worldMac) bundler() appscontract.Bundler  { return appsfake.BundlerOf(m
 func (m *worldMac) userSource() machinefilecontract.Source {
 	return machinefilefake.UserOf(m.run.w, m.name)
 }
+func (m *worldMac) owned() machinefilecontract.Owned { return machinefilefake.OwnedOf(m.run.w, m.name) }
 func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefilecontract.Source {
 	return machinefilefake.SharedOf(m.run.w, src)
 }

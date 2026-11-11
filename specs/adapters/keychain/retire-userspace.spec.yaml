@@ -14,7 +14,7 @@ runs:
           ●	layout	the VM-join client and the tailnet auth key left the keychain; revoke the OAuth client at https://login.tailscale.com/admin/settings/oauth
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .calls:
               equals: |

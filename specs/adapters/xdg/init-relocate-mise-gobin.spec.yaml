@@ -9,7 +9,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .config/mise/config.toml: { equals: "[tools]\ngo = \"1.27.3\"\n\n[settings]\ngo_set_gobin = false\nexperimental = true\n" }
     - command: 'init </dev/null'
@@ -20,4 +20,4 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one

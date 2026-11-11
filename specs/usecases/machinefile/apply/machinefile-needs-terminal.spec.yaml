@@ -1,0 +1,26 @@
+description: 'off a terminal, an apply that asks your password refuses before any change, saying why'
+env: fresh
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply'
+      exit: 2
+      stdout: |
+          # Asks you
+          ◐	homebrew		asks your password once
+          # To install
+          ○	homebrew	script	the manager of jq
+          ○	jq	brew
+      stderr: |
+          Error: homebrew asks your password: apply asks it on a terminal, and this run has none
+          Hint: run station apply on a terminal
+    - command: 'apps | /usr/bin/grep -e "	jq	" -e "	homebrew	"'
+      exit: 0
+      stdout: |
+          ○	homebrew		script	station apps install homebrew
+          ○	jq		brew	station apps install jq

@@ -1,0 +1,39 @@
+description: 'a dotfile station set and you edited by hand drifts as changed, and apply leaves your edit as it is'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          settings: { git-shortcuts: {} }
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To set
+          ○	git-shortcuts	git-aliases
+          ●	git-shortcuts		git-aliases	~/.gitconfig [alias]: written
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	git-shortcuts	git-aliases	present · ~/.gitconfig [alias]
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/-m WIP/-m mine/'' .gitconfig'
+      exit: 0
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ◐	git-shortcuts	git-aliases	changed · ~/.gitconfig [alias]
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # Left as it is
+          ◐	git-shortcuts	git-aliases	~/.gitconfig [alias]
+          ◐	git-shortcuts		git-aliases	~/.gitconfig [alias]
+    - command: '--version >/dev/null; /usr/bin/grep -c "m mine" .gitconfig'
+      exit: 0
+      stdout: |
+          1

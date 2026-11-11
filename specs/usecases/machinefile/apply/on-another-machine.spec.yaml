@@ -1,0 +1,22 @@
+description: 'apply on another Mac runs there, through its engine, and installs there'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # To install
+          ○	jq	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          	On mac-mini:
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.0.0	brew

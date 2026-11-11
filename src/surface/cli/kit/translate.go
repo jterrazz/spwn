@@ -82,3 +82,12 @@ func Worded(outcomes []apps.Outcome) []apps.Outcome {
 	// value: apps outcomes with their typed reasons worded, for a leaf's page.
 	return words.Outcomes(outcomes)
 }
+
+func ApplyWords(interrupted bool) []string {
+	// value: the words of a line of apply its run did not finish: the one
+	// it was interrupted at, or one it did not reach.
+	if interrupted {
+		return []string{words.Interrupted, words.ApplyResumes}
+	}
+	return []string{words.ApplyNotRun, words.ApplyResumes}
+}

@@ -80,6 +80,7 @@ func (*worldMac) vault() accountscontract.Vault                          { retur
 func (*worldMac) identities() accountscontract.Identities                { return nil }
 func (*worldMac) secretSource() accountscontract.SecretSource            { return nil }
 func (*worldMac) userSource() machinefilecontract.Source                 { return nil }
+func (*worldMac) owned() machinefilecontract.Owned                       { return nil }
 func (*worldMac) sharedSource(machinefilecontract.SharedSource) machinefilecontract.Source {
 	return nil
 }

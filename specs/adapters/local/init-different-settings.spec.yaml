@@ -14,7 +14,7 @@ runs:
           ✗	layout	{{workdir}}/.config/station/preferences.json already exists with different content
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       stderr: |
           Error: init step layout: {{workdir}}/.config/station/preferences.json already exists with different content
           Hint: keep one of the two files, then run station init again

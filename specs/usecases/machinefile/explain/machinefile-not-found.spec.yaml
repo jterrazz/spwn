@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: no Machinefile named jterrazz-macbook-pro
-          Hint: name one: station explain --machinefile <name>
+          Hint: give this machine one: station init --machinefile <name>

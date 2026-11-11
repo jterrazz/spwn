@@ -17,7 +17,7 @@ runs:
           ◐	layout	the userspace tailscaled stops in the background	{{workdir}}/.local/state/station/logs/setup.log
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .studio/tailscale/tailscaled.state: exists
           .local/state/station/logs/setup.log: exists

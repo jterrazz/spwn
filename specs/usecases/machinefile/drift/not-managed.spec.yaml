@@ -1,0 +1,24 @@
+description: 'drift reads each item as a condition, an app there by another way not managed'
+fixture: ../__fixtures__/rg-by-hand/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, gh, fd, ripgrep]
+      exit: 0
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	jq	brew	present
+          ◐	gh	brew	outdated
+          ○	fd	brew	absent
+          ?	ripgrep	brew	not managed · on PATH, not managed by brew
+    - command: 'drift --json | /usr/bin/jq -c "[.lines[] | [.item, .condition]]"'
+      exit: 0
+      stdout: |
+          [["homebrew","not-managed"],["jq","present"],["gh","outdated"],["fd","absent"],["ripgrep","not-managed"]]

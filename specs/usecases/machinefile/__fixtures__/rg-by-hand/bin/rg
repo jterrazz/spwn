@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "ripgrep 14.1.1"

@@ -1,0 +1,18 @@
+description: 'the drift of another Mac is read on that Mac'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'drift --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Items
+          ?	homebrew	script	not managed · on PATH, not managed by script
+          ○	jq	brew	absent

@@ -10,7 +10,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
     - command: 'init'
       exit: 0
       stdout: |
@@ -19,4 +19,4 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one

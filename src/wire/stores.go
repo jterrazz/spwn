@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/store"
 	imagesjsonfile "github.com/jterrazz/studio-station/src/images/adapter/jsonfile"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
+	machinefilejsonfile "github.com/jterrazz/studio-station/src/machinefile/adapter/jsonfile"
 	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	machinesjsonfile "github.com/jterrazz/studio-station/src/machines/adapter/jsonfile"
 	machinescontract "github.com/jterrazz/studio-station/src/machines/contract"
@@ -74,6 +75,11 @@ type uptimeStore interface {
 	store.Migrator
 }
 
+type ledgerStore interface {
+	machinefilecontract.Ledger
+	store.Migrator
+}
+
 type appliedStore interface {
 	settingscontract.AppliedStore
 	store.Migrator
@@ -90,6 +96,7 @@ type stores struct {
 	declarations declarationStore
 	applied      appliedStore
 	uptime       uptimeStore
+	ledger       ledgerStore
 }
 
 func newStores(files local.FS, p setup.Paths) *stores {
@@ -103,11 +110,12 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		declarations: portsjsonfile.NewDeclarations(files, filepath.Join(p.Prefs, "public.json")),
 		applied:      settingsjsonfile.NewApplied(files, filepath.Join(p.State, "applied")),
 		uptime:       machinesjsonfile.NewUptime(files, filepath.Join(p.State, "uptime.json")),
+		ledger:       machinefilejsonfile.NewLedger(files, filepath.Join(p.State, "ledger.json")),
 	}
 }
 
 func (s *stores) migrators() []store.Migrator {
-	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime}
+	return []store.Migrator{s.prefs, s.machines, s.images, s.shares, s.reservations, s.declarations, s.applied, s.uptime, s.ledger}
 }
 
 func (s *stores) name() setupcontract.NamePrefs         { return setupcontract.Name(s.prefs) }

@@ -179,6 +179,7 @@ var StationDisk = Disk{
 		noted(kept("{state}/station/vms/*.json"), "VM records: do not delete"),
 		noted(kept("{state}/station/images/key*"), "the only way into a fresh VM: do not delete"),
 		noted(kept("{state}/station/leases.json"), "the reserved ports of its Mac: deleting it changes every URL"),
+		noted(kept("{state}/station/ledger.json"), "what `station apply` installed, the only apps `apply --remove` takes back: deleting it makes station remove none"),
 	},
 	Installed: []string{"~/.local/bin/station"},
 	Free: []Action{remove(

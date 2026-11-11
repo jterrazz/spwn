@@ -8,7 +8,7 @@ runs:
       stdin: |
           see Name this machine
           send \r
-          see what it requires
+          see binds a Machinefile
           screen
       exit: 0
       stdout: |
@@ -21,10 +21,10 @@ runs:
             ● zshrc
             ● layout    nothing to retire
             ● relocate  bunfig, go env, mise settings, npmrc
-          Machinefile  none yet: apps and settings come one at a time
+          Machinefile  none bound by init: init --machinefile binds one
 
-          → exec zsh                    so this shell reads the station block
-          → station apps install <app>  one app, and what it requires
+          → exec zsh                           so this shell reads the station block
+          → station init --machinefile <name>  binds a Machinefile, then applies it
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.name, (.jobs // {} | keys), .engine.stopped]'' world.json; /usr/bin/grep -c "^# >>> station >>>$" .zshrc; /bin/test -f .hushlogin || echo no setting applied'
       exit: 0
       stdout: |

@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine"
 	"github.com/jterrazz/studio-station/src/images"
+	"github.com/jterrazz/studio-station/src/machinefile"
 	"github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/ports"
 	"github.com/jterrazz/studio-station/src/settings"
@@ -233,6 +234,8 @@ type Stores struct {
 	Applied      map[string]settings.Applied `json:"applied,omitempty"`
 	// value: each server's uptime record, by name.
 	Uptime map[string]machines.Uptime `json:"uptime,omitempty"`
+	// value: what station installed for a Machinefile, by item.
+	Ledger []machinefile.Installed `json:"ledger,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

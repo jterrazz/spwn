@@ -5,7 +5,7 @@ Changes
   ● zshrc     the station block
   ◐ layout    ~/.tart not moved  73 GB: move it with station init --move
   ● relocate  bunfig, go env, mise settings, npmrc
-Machinefile  none yet: apps and settings come one at a time
+Machinefile  none bound by init: init --machinefile binds one
 
-→ exec zsh                    so this shell reads the station block
-→ station apps install <app>  one app, and what it requires
+→ exec zsh                           so this shell reads the station block
+→ station init --machinefile <name>  binds a Machinefile, then applies it

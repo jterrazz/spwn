@@ -11,7 +11,7 @@ runs:
           ●	layout	nothing to retire
           ◐	relocate	GOPATH set by hand to /y; station leaves it; npm cache set by hand to /x; station leaves it
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .npmrc: { equals: "cache=/x\n" }
     - command: '--version >/dev/null; /bin/cat "Library/Application Support/go/env"'

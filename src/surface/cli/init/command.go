@@ -17,6 +17,9 @@ const SetupMoved = "apps and settings no longer come with setup: station apps in
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the plan of the Machinefile named, then its run, as `station
+	// apply --machinefile` prints them.
+	Apply func(ctx context.Context, machinefile string, io kit.IO) error
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -29,10 +32,11 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 	return kit.Leaf[Input]{
 		Use:     "init",
 		Short:   "Make this machine known to station: its name, the ~/.zshrc block, the XDG folders",
-		Example: "  station init\n  station init --name macbook",
+		Example: "  station init\n  station init --name macbook\n  station init --machinefile jterrazz-macbook-pro",
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Name, "name", "", "the name this Mac takes (asked on a terminal when omitted)")
+			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile this machine carries, by its name or its file: its plan is printed, then applied")
 		},
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			if note != "" && !io.JSON && !io.PageJSON {
@@ -44,7 +48,10 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 					return answerErr
 				}
 			}
-			return err
+			if err != nil || in.Machinefile == "" {
+				return err
+			}
+			return d.Apply(ctx, in.Machinefile, io)
 		},
 	}
 }

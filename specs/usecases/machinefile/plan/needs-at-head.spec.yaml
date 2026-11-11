@@ -1,0 +1,27 @@
+description: 'a plan opens with what it asks of you, once per need, then what it installs and sets'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd, eza]
+          settings: { git-shortcuts: {} }
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Asks you
+          ◐	homebrew		asks your password once
+          # To install
+          ○	homebrew	script	the manager of jq
+          ○	fd	brew
+          ○	eza	brew
+          # To set
+          ○	git-shortcuts	git-aliases
+    - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	"'
+      exit: 0
+      stdout: |
+          ○	eza		brew	station apps install eza
+          ○	fd		brew	station apps install fd

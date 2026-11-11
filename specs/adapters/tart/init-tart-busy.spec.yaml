@@ -11,7 +11,7 @@ runs:
           ●	layout	nothing to retire
           ✗	relocate	tart is running: its files cannot move under it
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       stderr: |
           Error: init step relocate: tart is running: its files cannot move under it
           Hint: stop the persistent VMs and delete the ephemeral ones (station machines), then station init

@@ -11,7 +11,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
     - command: '--version >/dev/null; /usr/bin/jq -S ''del(.now)'' world.json | /usr/bin/cmp - first.json && echo unchanged'
       exit: 0
       stdout: |

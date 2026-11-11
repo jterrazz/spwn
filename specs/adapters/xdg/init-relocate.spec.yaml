@@ -8,7 +8,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           Library/Application Support/go/env: { equals: "GOPATH={{workdir}}/.local/share/go\nGOMODCACHE={{workdir}}/.cache/go/mod\n" }
           .npmrc: { equals: "cache={{workdir}}/.cache/npm\n" }
@@ -22,7 +22,7 @@ runs:
           ●	layout	nothing to retire
           ●	relocate	nothing to do
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
     - command: '--version >/dev/null; /bin/cat "Library/Application Support/go/env" .npmrc'
       exit: 0
       stdout: |

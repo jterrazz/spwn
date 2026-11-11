@@ -1,0 +1,58 @@
+description: 'ctrl-c during apply says station apply resumes, and the next apply finishes from there'
+fixture:
+    - ../../__fixtures__/homebrew/
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [fd, eza]
+      exit: 0
+    - command: 'world hold Bundler.Bundle'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply'
+      stdin: |
+          see Installing fd
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          jterrazz-macbook-pro · 2 to install · 1 to adopt
+
+          To install
+            ○ fd   brew
+            ○ eza  brew
+          To adopt  ? homebrew · script · the manager of fd
+                      on PATH, not managed by script
+
+          → station apply  carries it out
+          ✗ jterrazz-macbook-pro interrupted
+
+          Changes
+            ◐ homebrew  5.0.1  script  the manager of fd · adopted …
+            ✗ fd               brew    interrupted (Ctrl-C) · station apply resumes
+            ○ eza              brew    not run · station apply resumes
+
+          → station apply  resumes
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	eza	brew
+          # To adopt
+          ?	homebrew	script	the manager of fd · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of fd · adopted · on PATH, not managed by script
+          ●	fd	10.3.0	brew
+          ●	eza	0.23.4	brew
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	fd	brew	present
+          ●	eza	brew	present

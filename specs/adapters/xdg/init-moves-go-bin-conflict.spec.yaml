@@ -11,7 +11,7 @@ runs:
           ●	layout	nothing to retire
           ◐	relocate	~/go/bin/foo already in ~/.local/share/go/bin
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .local/share/go/bin/foo: { equals: "another foo\n" }
           go/bin/foo: { equals: "foo binary\n" }

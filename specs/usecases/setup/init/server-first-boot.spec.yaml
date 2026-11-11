@@ -6,7 +6,7 @@ runs:
       stdout: |
           ●	kind	server: its own tooling keeps it, station sets nothing up
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       files:
           .zshrc: absent
           .npmrc: absent

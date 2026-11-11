@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/files"
@@ -18,8 +19,11 @@ import (
 	"github.com/jterrazz/studio-station/src/output"
 	overviewcalls "github.com/jterrazz/studio-station/src/overview/calls"
 	"github.com/jterrazz/studio-station/src/platform/local"
+	"github.com/jterrazz/studio-station/src/surface/cli/apply"
+	"github.com/jterrazz/studio-station/src/surface/cli/drift"
 	"github.com/jterrazz/studio-station/src/surface/cli/explain"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
+	"github.com/jterrazz/studio-station/src/surface/cli/plan"
 )
 
 // value: the owner's files, ~/.config/station/{catalog,machinefiles}; in
@@ -136,8 +140,21 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 	return say
 }
 
-func (m machine) machinefileDeps() machinefilecalls.Deps {
-	return machinefilecalls.Deps{Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name}
+func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
+	return machinefilecalls.Deps{
+		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
+		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Owned: m.owned(), Vault: m.vault(),
+		Now: m.sys.Clock.Now, Calls: calls,
+	}
+}
+
+// value: the owner's Machinefiles folder, which a Machinefile named by its
+// path is copied into; in a world, its Mac's station files.
+func (m machine) owned() machinefilecontract.Owned {
+	if m.world != nil {
+		return m.world.owned()
+	}
+	return files.NewOwned(m.sys.FS, filepath.Join(m.paths.Prefs, "machinefiles"))
 }
 
 // value: this machine as a Machinefile's selector reads it: Station's
@@ -152,4 +169,12 @@ func machineOf(p coremachine.Profile) machinefile.Machine {
 
 func explainCommand(env kit.Env, m machine) *cobra.Command {
 	return explain.Command(explain.Deps{ThisMachine: m.where}, env)
+}
+
+func machinefileCommands(env kit.Env, m machine) []*cobra.Command {
+	return []*cobra.Command{
+		plan.Command(plan.Deps{ThisMachine: m.where}, env),
+		apply.Command(apply.Deps{ThisMachine: m.where}, env),
+		drift.Command(drift.Deps{ThisMachine: m.where}, env),
+	}
 }

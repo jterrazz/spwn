@@ -1,0 +1,9 @@
+description: 'drift of a machine with no Machinefile names the gesture that gives it one'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'drift'
+      exit: 2
+      stderr: |
+          Error: no Machinefile named jterrazz-macbook-pro
+          Hint: give this machine one: station init --machinefile <name>

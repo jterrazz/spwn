@@ -11,7 +11,7 @@ runs:
           ●	layout	nothing to retire
           ✗	relocate	~/.local/share/station/vms already exists
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
       stderr: |
           Error: init step relocate: ~/.local/share/station/vms already exists
           Hint: ~/.local/share/station/vms already exists: move one of them by hand

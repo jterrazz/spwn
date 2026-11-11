@@ -1,3 +1,3 @@
 package initcmd
 
-type Input struct{ Name string }
+type Input struct{ Name, Machinefile string }

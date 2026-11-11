@@ -1,0 +1,19 @@
+description: 'the plan of another Mac is read on that Mac, against what it has'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # To install
+          ○	jq	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script

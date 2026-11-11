@@ -8,4 +8,4 @@
    ● relocate  bunfig, go env, mise settings, npmrc
 
  Machinefile
-   none yet: apps and settings come one at a time
+   none bound by init: init --machinefile binds one

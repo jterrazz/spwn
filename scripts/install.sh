@@ -63,7 +63,7 @@ rm -f "$HOME/.studio/bin/workstation"
 echo "● station $TAG in ~/.local/bin"
 
 # outside: ~/.local/bin may not be on PATH yet on a fresh machine, so init runs by path
-# and takes the arguments of this script (sh -s -- --name macbook). Piped from curl, init
+# and takes the arguments of this script (sh -s -- --name macbook, sh -s -- --machinefile <name>). Piped from curl, init
 # asks its questions on the terminal. With none, a Mac with no name yet is refused
 # (exit 2) with the command that names it, and the install stands.
 if [ -t 1 ] && (: </dev/tty) 2>/dev/null; then

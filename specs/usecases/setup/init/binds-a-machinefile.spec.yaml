@@ -1,0 +1,45 @@
+description: 'init --machinefile with a file copies it among yours, binds it, plans and applies it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro downloads/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+      exit: 0
+    - command: 'init --name jterrazz-macbook-pro --machinefile downloads/laptop.yaml'
+      exit: 0
+      stdout: |
+          ●	name	jterrazz-macbook-pro
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.tart
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+          # To install
+          ○	fd	brew
+          # To adopt
+          ?	homebrew	script	the manager of jq · on PATH, not managed by script
+          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	jq	1.8.1	brew
+          ●	fd	10.3.0	brew
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [.preferences.machinefile, (.files | keys)]'' world.json'
+      exit: 0
+      stdout: |
+          [{"name":"laptop"},["downloads/laptop.yaml","machinefiles/laptop.yaml"]]
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	jq	brew	present
+          ●	fd	brew	present
+    - command: 'explain apps.fd'
+      exit: 0
+      stdout: |
+          # laptop
+          	apps.fd	listed	user	laptop
+          	apps.fd.method	brew	built-in	fd
+          	apps.fd.because	its one method for macos	built-in	fd

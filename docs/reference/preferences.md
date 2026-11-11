@@ -25,6 +25,7 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
     "off_here": ["dock-spacer"],
     "never_sleeps": true,
     "machinefile": {
+        "name": "jterrazz-macbook-pro",
         "source": {
             "name": "studio",
             "url": "https://github.com/jterrazz/studio-station.git",
@@ -46,7 +47,7 @@ The file is a set of groups. Each is owned by one family and written only by tha
 | `ports`                   | `ports`       | the policy of [shared ports](ports.md#the-policy): `range`, `max_per_vm`, `ignored_ports`, `min_port`, `https`, and `not_shared`, the ports stopped sharing as `<vm>:<port>`                                                                                                                                                               | by hand; `ports stop-sharing`, `ports share`, `ports https` |
 | `off_here`                | `settings`    | the settings turned Off here on this machine                                                                                                                                                                                                                                                                                               | `settings off`, `settings apply`                            |
 | `never_sleeps`            | `awake`       | this Mac never sleeps: the engine's `awake` job holds it                                                                                                                                                                                                                                                                                   | `settings apply never-sleeps`, `settings off never-sleeps`  |
-| `machinefile`             | `machinefile` | the shared source: its `name`, its git `url`, and the whole `commit` it is read at, cloned into `~/.cache/station/sources/<name>` ([Machinefiles](machinefiles.md#sources-and-layers))                                                                                                                                                     | by hand                                                     |
+| `machinefile`             | `machinefile` | `name`, the Machinefile this machine carries, set by `station init --machinefile` and `station apply --machinefile`; `source`, the shared source: its `name`, its git `url`, and the whole `commit` it is read at, cloned into `~/.cache/station/sources/<name>` ([Machinefiles](machinefiles.md#sources-and-layers))                      | `name` by apply, `source` by hand                           |
 
 A key no group names is dropped at the next write and at `station init`. A `v` field names the version of the shape the file was written at; absent, it is version 1, and a file a newer station wrote is refused rather than read. A file that does not parse stops every command that reads it with its line, never overwritten.
 

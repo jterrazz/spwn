@@ -7,7 +7,7 @@ runs:
           ●	zshrc
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
-          	none yet: apps and settings come one at a time
+          	none bound by init: init --machinefile binds one
     - command: '--version >/dev/null; /usr/bin/grep -c "^# >>> station >>>$" .zshrc'
       exit: 0
       stdout: |

@@ -19,12 +19,15 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
 	"github.com/jterrazz/studio-station/src/setup"
 	setupcalls "github.com/jterrazz/studio-station/src/setup/calls"
+	"github.com/jterrazz/studio-station/src/surface/cli/apply"
 	initcmd "github.com/jterrazz/studio-station/src/surface/cli/init"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
 
 func initCommands(env kit.Env, m machine) []*cobra.Command {
-	d := initcmd.Deps{ThisMachine: m.where}
+	d := initcmd.Deps{ThisMachine: m.where, Apply: func(ctx context.Context, name string, io kit.IO) error {
+		return apply.Run(ctx, apply.Deps{ThisMachine: m.where}, env, apply.Input{Machinefile: name}, io)
+	}}
 	// value: setup, init's hidden word for one release.
 	retired := kit.Alias("setup", kit.Command(initcmd.Leaf(d, env, initcmd.SetupMoved), env), "init")
 	return []*cobra.Command{initcmd.Command(d, env), retired}

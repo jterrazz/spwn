@@ -1,0 +1,23 @@
+# ADR-034: Apply carries a Machinefile; the ledger bounds removal
+
+**Status:** Proposed
+**Date:** 2026-11-11
+
+## Context
+
+[ADR-033](033-a-machine-is-declared-by-its-machinefile.md) declared what a machine carries and resolved it into steps, but nothing carried them out: `init` ends on an empty state ([ADR-030](030-init-makes-a-machine-known-apply-carries-its-machinefile.md)), no machine recorded which Machinefile it carries, and nothing could tell what station had installed from what the owner had, so no removal could be safe.
+
+## Decision
+
+- **The binding.** A machine carries one Machinefile, recorded in `preferences.json`'s `machinefile` group as `name`, beside the shared source. `station init --machinefile <name|path>` and `station apply --machinefile <name|path>` bind it; `plan`, `apply`, `drift` and `explain` with no Machinefile named read the bound one, else the one named after the machine.
+- **A path is copied, never referenced.** A Machinefile named by its file is copied into the owner's folder, `~/.config/station/machinefiles/<name>.yaml`, under the name it says, and the machine is bound to that name. Every later read finds it in the user layer like any of the owner's files: a file in a download folder can go away, every read has one place to look, and `extends` and the overlay keep resolving by name. `plan --machinefile <path>` reads the file in place and copies nothing.
+- **plan, apply, drift.** `plan` reads each item through its family (apps' inventory, settings' judge, by their calls) and says, first, what it asks of the owner, once per need, then what it installs, sets, adopts and leaves, what is extra, and what has to happen once applied, each once. `drift` is the same read as conditions (present, absent, outdated, changed, not managed, extra, unknown), and never acts. `apply` carries the plan out one item at a time by `apps.install` and `settings.apply`: a failure fails only the items that wait on it, an interruption stops the run and says `station apply resumes`, an item present by another way is adopted and never installed again, a setting changed by hand is left as it is, and off a terminal a plan that asks anything (a password, a license, a question) is refused before any effect. A `vault:` value is read from the vault only to hand it to its setting, and the run's words never carry it.
+- **The ledger bounds removal.** `~/.local/state/station/ledger.json` (a store of the `machinefile` family, with its Migrator) records each app `apply` installed, its method and the Machinefile that listed it. What the ledger holds that the Machinefile lists no longer is extra; `apply --remove` removes that and only that, asking on a terminal and needing `--yes` off one. What station did not install, adopted or present before, is never removed.
+
+## Consequences
+
+- `apply` crosses families only through their calls, so the gates, the confirmation and the words of `apps.install` and `settings.apply` are those of the commands the owner already runs.
+- An app the owner installs by `station apps install` is not in the ledger, so `apply --remove` never takes it; only the Machinefile's own installs are station's to take back.
+- Settings are not in the ledger: settings keep their own record of what station applied, and turning one off stays `station settings off`.
+- `plan`, `apply` and `drift` refuse a Machinefile as `explain` does, through the same resolution; its refusals are proved once, under `explain`.
+- Accounts and ports are not read by the plan yet: the ports' rights are their own lot, and the accounts a computer keeps are only shown by `explain`.

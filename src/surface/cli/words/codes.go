@@ -110,7 +110,13 @@ func Codes() map[fail.Code]Wording {
 			if by := e.Detail["by"]; by != "" {
 				return by + " extends " + e.Subject + ", which no source holds", "station explain --machinefile " + by
 			}
-			return "no Machinefile named " + e.Subject, "name one: station explain --machinefile <name>"
+			if e.Detail["path"] != "" {
+				return "no Machinefile at " + e.Subject, "name its file by a path that holds it"
+			}
+			return "no Machinefile named " + e.Subject, "give this machine one: station init --machinefile <name>"
+		},
+		machinefilecalls.NeedsTerminal: func(e *fail.Error) (string, string) {
+			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": apply asks it on a terminal, and this run has none", "run station apply on a terminal"
 		},
 		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
 			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile"
@@ -388,4 +394,22 @@ func Codes() map[fail.Code]Wording {
 		all[code] = word
 	}
 	return all
+}
+
+// value: what a plan's needs ask, as the refusal off a terminal says them.
+func needsWords(needs string) string {
+	var said []string
+	for _, n := range strings.Split(needs, ", ") {
+		switch n {
+		case "sudo":
+			said = append(said, "asks your password")
+		case "terminal":
+			said = append(said, "asks you questions")
+		case "license":
+			said = append(said, "asks you to accept a license")
+		case "app-store-login":
+			said = append(said, "needs the App Store signed in")
+		}
+	}
+	return strings.Join(said, " and ")
 }

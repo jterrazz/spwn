@@ -135,7 +135,7 @@
       "items": [
         {
           "note": {
-            "text": "none yet: apps and settings come one at a time"
+            "text": "none bound by init: init --machinefile binds one"
           }
         }
       ],
@@ -149,8 +149,8 @@
       "text": "so this shell reads the station block"
     },
     {
-      "command": "station apps install <app>",
-      "text": "one app, and what it requires"
+      "command": "station init --machinefile <name>",
+      "text": "binds a Machinefile, then applies it"
     }
   ]
 }

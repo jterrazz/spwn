@@ -18,6 +18,9 @@ runs:
           engine
           use
           init
+          plan
+          apply
+          drift
           explain
           agents
           help

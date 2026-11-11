@@ -1,0 +1,45 @@
+description: 'two settings that each restart the Dock: the run says the restart once, after them'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/system/dock-left.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: dock-left
+          description: The Dock on the left
+          after-apply: [restart-dock]
+          methods:
+              - os: macos
+                file: { touch: ~/.dock-left }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro catalog/system/dock-small.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: dock-small
+          description: A small Dock
+          after-apply: [restart-dock]
+          methods:
+              - os: macos
+                file: { touch: ~/.dock-small }
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          settings: { dock-left: {}, dock-small: {} }
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To set
+          ○	dock-left	file
+          ○	dock-small	file
+          # Once applied
+          	the Dock restarts
+          ●	dock-left		file	~/.dock-left: created
+          ●	dock-small		file	~/.dock-small: created
+          # Once applied
+          	the Dock restarts
