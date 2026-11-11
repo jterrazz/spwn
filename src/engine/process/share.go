@@ -179,11 +179,16 @@ func (d *Engine) tickShares(ctx context.Context) {
 
 // invariant: HTTPS links turned on or off on this Mac serve every served
 // port again in the new mode at the next tick, each unshared first in the
-// mode it was served in; the caller holds d.mu.
+// mode it was served in; while Serve is off the mode last served in is
+// kept, so a switch made then is judged when Serve turns on. The caller
+// holds d.mu.
 func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
+	if !d.self.On {
+		return
+	}
 	was := d.servedMode
 	d.servedMode = mode
-	if was == "" || was == mode || !d.self.On {
+	if was == "" || was == mode {
 		return
 	}
 	// invariant: the Funnel ports move with the mode before any private

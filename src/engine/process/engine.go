@@ -154,8 +154,8 @@ type Engine struct {
 	reservations []ports.Reservation
 	// value: each VM's rights, as its last run read them.
 	rights map[string]ports.Rights
-	// value: the HTTPS mode this engine's shares were served in, as its
-	// last tick read it.
+	// value: the HTTPS mode this engine's shares were judged and served
+	// in: its start's, then each tick's while Serve is on.
 	servedMode string
 	self       ports.SharingState
 	read       bool
@@ -305,6 +305,9 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	d.mu.Unlock()
 	d.neverSleeps(d.started)
 	d.reservations, _ = d.st.Reservations.List(ctx)
+	// invariant: the reservations are judged in the mode of this start, at
+	// adoption, so a switch made before Serve is ever on is judged from it.
+	d.servedMode = d.policy().HTTPS
 	d.refreshSelf(ctx)
 	d.adopt(ctx)
 	d.sweepShares(ctx)
@@ -410,8 +413,15 @@ func (d *Engine) refreshSelf(ctx context.Context) {
 	switch {
 	case self.On && !first:
 		d.logf("tailnet", "Serve is on: every reserved port is shared")
-		d.serveAll(ctx)
+		// invariant: the HTTPS mode is judged first and the entries no
+		// reservation justifies go before any share is served, so none is
+		// served on a Funnel port the mode no longer gives it.
+		mode := d.policy().HTTPS
+		d.mu.Lock()
+		d.serveInModeLocked(ctx, mode)
+		d.mu.Unlock()
 		d.reconcileServe(ctx)
+		d.serveAll(ctx)
 	case !self.On && self.Backend != ports.Running:
 		d.logf("tailnet", catalog.SignedOutDetail+": ports are local only")
 		d.unserveAll()

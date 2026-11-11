@@ -136,7 +136,7 @@ func TestServeIsReadEveryThirtyTicksAndOnlyServesWhileOn(t *testing.T) {
 	}
 	h.d.step(ctx, serveEvery)
 	<-ready
-	want := []string{"share https 40000 from 40000", "shared", "unshare tcp 40099 from 0"}
+	want := []string{"shared", "unshare tcp 40099 from 0", "share https 40000 from 40000"}
 	if calls := tn.taken(); strings.Join(calls, "|") != strings.Join(want, "|") {
 		t.Fatalf("Serve on at the next read: calls %q, want %q", calls, want)
 	}

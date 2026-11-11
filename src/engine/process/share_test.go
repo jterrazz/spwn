@@ -13,6 +13,10 @@ import (
 	"github.com/jterrazz/studio-station/src/ports"
 )
 
+type heldPolicy struct{ g *ports.PortsGroup }
+
+func (p *heldPolicy) Get() (*ports.PortsGroup, error) { return p.g, nil }
+
 // value: a tailnet that keeps what it is told, Funnel per port as
 // tailscale keeps it: a port funneled while any entry of it remains, and
 // an https entry with no path at the root, /.
@@ -144,5 +148,46 @@ func TestARightNarrowedAfterARestartUnfunnelsItsPort(t *testing.T) {
 	h.d.mu.Unlock()
 	if got, want := tn.dump(), "40000<-40000 funnel=false"; got != want {
 		t.Errorf("tailnet = %s, want %s", got, want)
+	}
+}
+
+// invariant: an HTTPS mode switched while Serve is off is judged when Serve
+// turns on, before any share is served: path mode never funnels 443.
+func TestAModeSwitchedWhileServeIsOffIsJudgedWhenServeTurnsOn(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: "port"}}
+	h.d.st.Ports = pol
+	tn := &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
+	h.d.tn = tn
+	ctx := t.Context()
+	yes := true
+	h.d.refreshSelf(ctx)
+	h.d.mu.Lock()
+	h.d.rights["api"] = ports.Rights{PortRights: catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}}
+	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 443, HTTP: &yes}}
+	s := h.d.svcOf("api", 3000)
+	s.st.Phase = ports.PhaseShared
+	h.d.share(ctx, s)
+	h.d.mu.Unlock()
+	h.d.tickShares(ctx)
+	tn.turn(false)
+	h.d.refreshSelf(ctx)
+	pol.g = &ports.PortsGroup{HTTPS: "path"}
+	h.d.tickShares(ctx)
+	tn.taken()
+	tn.turn(true)
+	h.d.refreshSelf(ctx)
+	h.d.tickShares(ctx)
+	calls := tn.taken()
+	for _, c := range calls {
+		if strings.HasPrefix(c, "share https 443") {
+			t.Errorf("path mode funneled 443: %q", c)
+		}
+	}
+	if !slices.Contains(calls, "share https 8443 from 40000") {
+		t.Errorf("calls = %q, want 3000 shared on 8443", calls)
+	}
+	if got := h.d.reservations[0].PublicPort; got != 8443 {
+		t.Errorf("public port = %d, want 8443", got)
 	}
 }
