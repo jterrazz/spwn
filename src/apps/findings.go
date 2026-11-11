@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"strconv"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
@@ -35,8 +36,15 @@ func Findings(reports []Report, m machine.Ref) []finding.Finding {
 		if waiting[manager] == 1 {
 			text = "1 " + manager + " update waiting"
 		}
+		// outside: a v3.0 station reads the manager of the fix in `method`,
+		// in its own word, so its Update all updates that manager's apps
+		// alone; carried beside `manager` until the hidden --method goes.
+		args := map[string]string{"manager": manager}
+		if word, ok := catalog.OlderManager(manager); ok {
+			args["method"] = word
+		}
 		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: manager,
-			Text: text, Fix: finding.Fix{Call: "apps.update", Args: map[string]string{"manager": manager}}})
+			Text: text, Fix: finding.Fix{Call: "apps.update", Args: args}})
 	}
 	return out
 }

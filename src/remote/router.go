@@ -29,6 +29,11 @@ type Reach struct {
 	Version string
 	// value: a Mac's name as the owner reads it (mac-mini); nil keeps it whole.
 	Label func(mac string) string
+	// value: a call's In in the words a station older than api.WordsSince
+	// reads beyond its kinds and lifetimes, its family's own (an update's
+	// managers), and a word of it that station has none of; nil leaves
+	// the In as api.OlderWords writes it.
+	Older func(call string, in json.RawMessage) (out json.RawMessage, lacks string)
 }
 
 type Router struct {
@@ -184,7 +189,9 @@ func (r *Router) inEngine(name string) bool {
 func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, json.RawMessage, error) {
 	// invariant: a call the far Hello lacks is asked again of a fresh
 	// connection, so a Mac upgraded since its connection was opened serves it;
-	// the In it returns is in the words that far binary reads (ADR-032).
+	// the In it returns is in the words that far binary reads (ADR-032), and
+	// a manager it has no word for is refused as a call it lacks, since it
+	// would update nothing.
 	l, hello, fresh, err := r.connect(ctx, t)
 	if err == nil && !fresh && !slices.Contains(hello.Calls, name) {
 		r.drop(t.Mac(), l)
@@ -203,7 +210,18 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in js
 		return nil, nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
 	if api.Older(hello.Version, r.reach.Version) {
-		in = api.OlderWords(in)
+		var lacks string
+		if in = api.OlderWords(in); r.reach.Older != nil {
+			in, lacks = r.reach.Older(name, in)
+		}
+		if lacks != "" {
+			r.release(l)
+			detail := map[string]string{"version": hello.Version, "call": name + " --manager " + lacks}
+			if r.reach.Label != nil {
+				detail["label"] = r.reach.Label(t.Mac())
+			}
+			return nil, nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
+		}
 	}
 	return l, in, nil
 }

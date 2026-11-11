@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
 
@@ -20,10 +21,7 @@ func binder(managers []string) func(in *Input, args []string) error {
 	return func(in *Input, args []string) error {
 		in.Names = args
 		for _, v := range in.Method {
-			if v == "skills" {
-				v = "skill"
-			}
-			in.Manager = append(in.Manager, v)
+			in.Manager = append(in.Manager, catalog.ManagerOfOlder(v))
 		}
 		if len(in.Names) > 0 && len(in.Manager) > 0 {
 			return kit.Refuse("name apps or give --manager, not both", "station apps update --manager "+in.Manager[0])

@@ -412,6 +412,18 @@ func TestAMoveToAMethodTheAppHasNoneOfNamesTheOneThatHoldsIt(t *testing.T) {
 	}
 }
 
+func TestAnUpdateAskedInV30sManagerWordReachesThatManager(t *testing.T) {
+	// invariant: apps.update read from a v3.0 station, its manager in
+	// v3.0's word (`skills`), updates that manager's apps, as today's key.
+	b := benchOf(t, catalog.Mac, "twin")
+	b.w.Mac("here").Apps[catalog.MethodSkill].Installed["twin"] = "1.0.0"
+	b.w.Mac("here").Apps[catalog.MethodSkill].Behind = map[string]string{"twin": "2.0.0"}
+	out, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, appscalls.Update, appscalls.UpdateIn{Method: []string{"skills"}}, nil)
+	if err != nil || len(out) != 1 || out[0].Name != "twin" || b.w.Mac("here").Apps[catalog.MethodSkill].Installed["twin"] != "2.0.0" {
+		t.Errorf("updated %+v (%v)", out, err)
+	}
+}
+
 func TestAKeyAnotherMethodListsIsHeldByThatManager(t *testing.T) {
 	// invariant: whatever a manager's removal would take back, its holds
 	// read covers it: twin is held by its default method, so the copy the

@@ -19,9 +19,11 @@ type UpdateIn struct {
 }
 
 func keys(words []string) []catalog.ManagerKey {
+	// outside: a v3.0 station asks a manager in its own word (`skills`),
+	// read as today's key.
 	out := make([]catalog.ManagerKey, 0, len(words))
 	for _, w := range words {
-		out = append(out, catalog.ManagerKey(w))
+		out = append(out, catalog.ManagerKey(catalog.ManagerOfOlder(w)))
 	}
 	return out
 }
