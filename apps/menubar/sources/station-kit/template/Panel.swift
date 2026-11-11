@@ -325,11 +325,10 @@ struct EdgeFade: View {
     }
 }
 
-// invariant: live the pane paints one fill, the plate under the content,
-// clipped to the window's shape and edged by nothing: MenuBarExtra's window
-// is already the system glass and its rim, so a rim or a second tint over it
-// doubles the background. Drawn still, the shadows, outline and rim stand in
-// for that glass under the same plate.
+// invariant: live the pane paints nothing: the window's glass, tinted by
+// the app (ADR-036), is the panel's one background, and a fill or a rim
+// over it doubles that background. Drawn still, the plate, shadows, outline
+// and rim stand in for that tinted glass.
 struct PanelPane: ViewModifier {
     var bare = false
     @Environment(\.stationStill) private var still
@@ -337,10 +336,8 @@ struct PanelPane: ViewModifier {
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous)
-        if bare {
+        if bare || !still {
             content.containerShape(shape)
-        } else if !still {
-            content.containerShape(shape).background(shape.fill(tokens.plate))
         } else {
             pane(content)
         }

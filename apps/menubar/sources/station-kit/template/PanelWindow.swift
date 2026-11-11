@@ -1,14 +1,16 @@
 import AppKit
 
 // invariant: the panel closes as a click on its icon closes it: through
-// the status item's own button, so the menu bar extra knows it is closed
-// and the next click on the icon opens it again. A bare close of its
-// window leaves the extra thinking it is shown, and spends that click.
-// While it is shown it is the key window, so its first click acts.
+// the status item's own button, so the item knows it is closed and the
+// next click on the icon opens it again. A bare close of its window
+// leaves the item thinking it is shown, and spends that click. While it
+// is shown it is the key window, so its first click acts.
 @MainActor
 public enum PanelWindow {
+    public static let id = NSUserInterfaceItemIdentifier("station.panel")
+
     public static func panel(_ windows: [NSWindow]) -> NSWindow? {
-        windows.first { $0.isVisible && $0.className.contains("MenuBarExtra") }
+        windows.first { $0.isVisible && $0.identifier == id }
     }
 
     // value: when the panel opened is made key, in seconds: it appears

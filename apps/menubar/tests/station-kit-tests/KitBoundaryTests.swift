@@ -9,8 +9,8 @@ final class KitBoundaryTests: XCTestCase {
 
     static let forbidden = ["ProgressView", "Gauge(", "List(", "List {", "WindowGroup", "NSWindow(", "Settings {", ".buttonStyle(.bordered", ".toggleStyle(.switch)"]
     static let models = ["\"laptopcomputer", "\"macmini", "\"macbook", "\"macpro", "\"imac", "\"macstudio"]
-    // value: L50d, Apple's rules: the MenuBarExtra's window is the only
-    // glass, so no view of the kit is glass or a material.
+    // value: L50d, Apple's rules: the panel's window is the only glass,
+    // so no view of the kit is glass or a material.
     static let glass = ["glassEffect", "GlassEffectContainer", "Material", ".containerBackground", ".quinary", ".glassProminent"]
     static let glyphs: [Character] = ["→", "·", "…", "⏻", "⚡", "●", "◐", "○", "✗", "◌"]
 

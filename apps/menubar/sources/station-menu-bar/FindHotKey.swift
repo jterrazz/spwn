@@ -31,8 +31,8 @@ final class FindHotKey {
 extension Model {
     // invariant: ⌘K over an open panel opens Find in it; over a closed one,
     // Find is set first, so the panel's first frame is Find, then the
-    // status item is clicked as the owner would (a MenuBarExtra has no API
-    // to open its window).
+    // status item is clicked as the owner would, so the panel opens the one
+    // way it always does.
     func findFromAnywhere() {
         find(state.find ?? FindQuery())
         guard PanelWindow.panel(NSApp.windows) == nil else { return }

@@ -58,7 +58,10 @@ final class PanelTests: XCTestCase {
         }
     }
 
-    func testLiveThePanelPaintsOnlyItsPlateAndDrawnStillItsGlassUnderTheSamePlate() throws {
+    // invariant: live the panel paints nothing, so the window's tinted
+    // glass is its one background; drawn still, it draws that tinted glass,
+    // the plate over the stand-in's shadows and rim.
+    func testLiveThePanelPaintsNothingAndDrawnStillItsTintedGlass() throws {
         func alpha(still: Bool, below: Bool) throws -> UInt8 {
             let pane = Panel { Color.clear.frame(width: Token.Metric.Panel.width, height: 120) }.padding(60)
             let renderer = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, still))
@@ -67,29 +70,19 @@ final class PanelTests: XCTestCase {
             let y = below ? bitmap.height - 40 : bitmap.height / 2
             return bitmap.pixels[(y * bitmap.width + bitmap.width / 2) * 4 + 3]
         }
-        XCTAssertEqual(Double(try alpha(still: false, below: false)) / 255, 0.80, accuracy: 0.01)
-        XCTAssertEqual(try alpha(still: true, below: false), try alpha(still: false, below: false))
+        XCTAssertEqual(try alpha(still: false, below: false), 0)
         XCTAssertEqual(try alpha(still: false, below: true), 0)
+        XCTAssertGreaterThanOrEqual(Double(try alpha(still: true, below: false)) / 255, 0.80)
         XCTAssertGreaterThan(try alpha(still: true, below: true), 0)
     }
 
-    // invariant: live the plate is one fill to the window's edge: every
-    // pixel across the middle row and down both straight sides is the
-    // centre's, so no rim or inset edge doubles the system glass's.
-    func testLiveThePlateIsOneFillWithNoRimNorInsetEdge() throws {
+    func testLiveThePanelPaintsNoRimOnItsEdge() throws {
         for scheme in [ColorScheme.dark, .light] {
             let pane = Panel { Color.clear.frame(width: Token.Metric.Panel.width, height: 120) }
             let renderer = ImageRenderer(content: pane.stationTheme(scheme).environment(\.stationStill, false))
             renderer.scale = 2
             let bitmap = try XCTUnwrap(renderer.cgImage.flatMap(Bitmap.init))
-            func pixel(_ x: Int, _ y: Int) -> [UInt8] { Array(bitmap.pixels[((y * bitmap.width + x) * 4)..<((y * bitmap.width + x) * 4 + 4)]) }
-            let centre = pixel(bitmap.width / 2, bitmap.height / 2)
-            XCTAssertGreaterThan(centre[3], 0, "\(scheme)")
-            let corner = Int(Token.Glass.window * 2 * renderer.scale)
-            let across = (0..<bitmap.width).filter { pixel($0, bitmap.height / 2) != centre }
-            let down = (corner..<(bitmap.height - corner)).filter { pixel(0, $0) != centre || pixel(bitmap.width - 1, $0) != centre }
-            XCTAssertEqual(across, [], "\(scheme)")
-            XCTAssertEqual(down, [], "\(scheme)")
+            XCTAssertEqual(stride(from: 3, to: bitmap.pixels.count, by: 4).filter { bitmap.pixels[$0] != 0 }.count, 0, "\(scheme)")
         }
     }
 

@@ -4,7 +4,7 @@ import StationKit
 import SwiftUI
 
 // invariant: lot L06's trial, on only when Station.app is started with
-// STATION_TRIAL=1: the panel is the kit's TrialPanel, the window's height is
+// STATION_TRIAL=1: the panel is the kit's TrialPanel in the StatusPanel, the window's height is
 // sampled on every display frame while it is open, the label is redrawn at
 // STATION_TRIAL_FPS (30 unless named; 0 draws it once), and the process's own
 // CPU is reported every ten seconds. Every line goes to stderr.
@@ -14,6 +14,12 @@ final class Trial: ObservableObject {
     static let on = environment["STATION_TRIAL"] == "1"
     static let fps = Double(environment["STATION_TRIAL_FPS"] ?? "") ?? 30
     static let cycle = Double(environment["STATION_TRIAL_CYCLE"] ?? "").map { Duration.milliseconds(Int($0 * 1000)) }
+    // value: STATION_TRIAL_TINT=<alpha> sets the glass tint's alpha, with
+    // or without the trial, for the capture rig's calibration sweep; any
+    // STATION_TRIAL_ flag (STATION_TRIAL_FRAMES=1 alone) logs the item's
+    // and the panel's frames, which the rig clicks and crops by.
+    nonisolated static let tint = Double(ProcessInfo.processInfo.environment["STATION_TRIAL_TINT"] ?? "").map { CGFloat($0) }
+    static let frames = environment.keys.contains { $0.hasPrefix("STATION_TRIAL") }
 
     @Published private(set) var label = NSImage()
 
@@ -93,7 +99,7 @@ final class Trial: ObservableObject {
         let height = window.frame.height
         guard height != lastHeight else { return }
         lastHeight = height
-        log("window height=\(String(format: "%.1f", height)) y=\(String(format: "%.1f", window.frame.minY)) key=\(window.isKeyWindow)")
+        log("window height=\(String(format: "%.1f", height)) y=\(String(format: "%.1f", window.frame.minY)) top=\(String(format: "%.1f", window.frame.maxY)) x=\(String(format: "%.1f", window.frame.minX)) key=\(window.isKeyWindow)")
     }
 
     static func cpuSeconds() -> Double {

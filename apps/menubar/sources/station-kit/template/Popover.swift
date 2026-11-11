@@ -213,7 +213,7 @@ public struct Popover: View {
         ("Activity", Navigation.activity), ("Awake", Navigation.awake), ("Ports", Navigation.ports),
     ]
 
-    // invariant: the panel is the MenuBarExtra's own glass; nothing in it
+    // invariant: the panel is the app's one glass (ADR-036); nothing in it
     // is glass again (WWDC25: no glass on glass, none in the content).
     public var body: some View {
         SwiftUI.Group {

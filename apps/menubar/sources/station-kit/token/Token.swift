@@ -189,10 +189,14 @@ public enum Token {
     }
 
     // value: the panel an offscreen snapshot draws in place of the
-    // MenuBarExtra's system glass, which the renderer cannot sample: a
+    // app's tinted system glass, which the renderer cannot sample: a
     // translucent pane, its rim and its shadow over the vision's desk.
     public enum Glass {
         public static let window: CGFloat = 24
+
+        // value: the live panel's glass tint, which brings the system glass
+        // to the density the still renders' plate draws (ADR-036).
+        public static func tint(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.rgba(16, 16, 20, 0.80) : Token.rgba(250, 250, 252, 0.80) }
 
         public static func pane(_ scheme: ColorScheme) -> Color { scheme == .dark ? Token.hex(0x222328).opacity(0.58) : Token.hex(0xF6F7FB).opacity(0.62) }
         public static func sheen(_ scheme: ColorScheme) -> [Color] {
@@ -406,7 +410,8 @@ extension View {
 extension Token {
     // value: the v4 colour table (SPEC A1), by scheme and contrast, drawn
     // the M1 way: one plate under the content (80 %, M1's 82 % in light
-    // less the 2 % a text-dense frame needs to stay glass),
+    // less the 2 % a text-dense frame needs to stay glass), which still
+    // renders draw in place of the live glass and its tint (Glass.tint),
     // two text tones, cards and Find edged by a faint line, red only as a
     // solid fill. A light card is white at 30 %, not M1's 75 %: over the
     // 80 % plate that would show 5 % of the desk, opaque by the stories'

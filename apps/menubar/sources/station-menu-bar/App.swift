@@ -1,11 +1,11 @@
 import AppKit
+import Combine
 import StationKit
 import SwiftUI
 
 @main
 struct StationMenuBarApp: App {
-    @StateObject private var model = Model()
-    @StateObject private var trial = Trial()
+    @NSApplicationDelegateAdaptor(StationDelegate.self) private var station
 
     init() {
         let args = CommandLine.arguments
@@ -24,37 +24,53 @@ struct StationMenuBarApp: App {
         }
     }
 
-    var body: some Scene {
-        MenuBarExtra {
-            if Trial.on {
-                TrialPanel(cycle: Trial.cycle) { line in trial.log(line) }
-                    .stationSystemTheme()
-                    .stationSystemAccessibility()
-                    .onAppear { trial.opened() }
-                    .onDisappear { trial.closed() }
-            } else {
-                Popover(model.state, handlers: handlers)
-                    .environment(\.stationLive, model.live)
-                    .modifier(PanelOpening())
-                    .stationSystemTheme()
-                    .stationSystemAccessibility()
-                    .onAppear { model.opened() }
-                    .onDisappear { model.closed() }
-            }
-        } label: {
-            if Trial.on {
-                Image(nsImage: trial.label)
-                    .task { trial.start() }
-            } else {
-                Image(nsImage: model.iconImage)
-                    .accessibilityLabel(model.icon.label)
-                    .task {
-                        model.start()
-                        FindHotKey.shared.register { model.findFromAnywhere() }
-                    }
-            }
+    // value: an App has a scene; the panel is the status item's, not one.
+    var body: some Scene { Settings { EmptyView() } }
+}
+
+@MainActor
+final class StationDelegate: NSObject, NSApplicationDelegate {
+    let model = Model()
+    let trial = Trial()
+    private var status: StatusPanel?
+    private var labelling: AnyCancellable?
+
+    func applicationDidFinishLaunching(_: Notification) {
+        let trial = self.trial
+        let report = Trial.frames ? { line in trial.log(line) } : nil as ((String) -> Void)?
+        if Trial.on {
+            status = StatusPanel(
+                content: { AnyView(TrialPanel(cycle: Trial.cycle) { line in trial.log(line) }.stationSystemTheme().stationSystemAccessibility()) },
+                opened: { trial.opened() },
+                closed: { trial.closed() },
+                report: report)
+            labelling = trial.$label.sink { [weak self] image in self?.status?.item.button?.image = image }
+            trial.start()
+            return
         }
-        .menuBarExtraStyle(.window)
+        let model = self.model
+        status = StatusPanel(content: { AnyView(ModelPanel(model: model)) }, opened: { model.opened() }, closed: { model.closed() }, report: report)
+        label()
+        labelling = model.objectWillChange.sink { [weak self] _ in DispatchQueue.main.async { self?.label() } }
+        model.start()
+        FindHotKey.shared.register { model.findFromAnywhere() }
+    }
+
+    func label() {
+        status?.item.button?.image = model.iconImage
+        status?.item.button?.setAccessibilityLabel(model.icon.label)
+    }
+}
+
+struct ModelPanel: View {
+    @ObservedObject var model: Model
+
+    var body: some View {
+        Popover(model.state, handlers: handlers)
+            .environment(\.stationLive, model.live)
+            .modifier(PanelOpening())
+            .stationSystemTheme()
+            .stationSystemAccessibility()
     }
 
     var handlers: PopoverHandlers {
