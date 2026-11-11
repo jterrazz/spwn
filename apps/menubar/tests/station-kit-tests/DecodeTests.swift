@@ -4,7 +4,10 @@ import XCTest
 final class DecodeTests: XCTestCase {
     func testEveryFixtureDecodesAndSurvivesARoundTrip() throws {
         let fixtures = try Tree.fixtures()
-        XCTAssertEqual(fixtures.count, 129)
+        let onDisk = try FileManager.default.contentsOfDirectory(at: Tree.pages, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "json" }
+        XCTAssertFalse(fixtures.isEmpty)
+        XCTAssertEqual(fixtures.count, onDisk.count, "a fixture of the pages folder was skipped")
         for (name, data) in fixtures {
             let page = try Page.decode(data)
             XCTAssertEqual(try Page.decode(page.encoded()), page, name)
