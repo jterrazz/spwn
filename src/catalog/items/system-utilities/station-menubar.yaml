@@ -1,0 +1,47 @@
+item: station.catalog/v1
+kind: app
+name: station-menubar
+description: Station's menu bar app, from the latest release
+version-read:
+    path: ~/Applications/Station.app
+    args:
+        [
+            plutil,
+            -extract,
+            CFBundleShortVersionString,
+            raw,
+            ~/Applications/Station.app/Contents/Info.plist,
+        ]
+methods:
+    # hazard: github-release has no installer yet, so the release's zip is fetched
+    # here, refused unless checksums.txt vouches for it, and put where
+    # `make menubar-install` puts it; curl sets no quarantine on the ad hoc signature.
+    - os: macos
+      machine: computer
+      script:
+          check: test -d "$HOME/Applications/Station.app"
+          run: |
+              set -eu
+              base=https://github.com/jterrazz/studio-station/releases/latest/download
+              work=$(mktemp -d)
+              trap 'rm -rf "$work"' EXIT
+              curl -fsSL "$base/Station.app.zip" -o "$work/Station.app.zip"
+              curl -fsSL "$base/checksums.txt" -o "$work/checksums.txt"
+              expected=$(awk '$2 == "Station.app.zip" { print $1 }' "$work/checksums.txt")
+              actual=$(shasum -a 256 "$work/Station.app.zip" | awk '{ print $1 }')
+              if [ -z "$expected" ] || [ "$expected" != "$actual" ]; then
+                  echo "Station.app.zip does not match its checksum · nothing installed" >&2
+                  exit 1
+              fi
+              ditto -x -k "$work/Station.app.zip" "$work"
+              codesign --verify --strict "$work/Station.app"
+              mkdir -p "$HOME/Applications"
+              rm -rf "$HOME/Applications/Station.app"
+              mv "$work/Station.app" "$HOME/Applications/Station.app"
+disk:
+    paths:
+        - path: ~/Library/Preferences/com.jterrazz.station.menubar.plist
+          level: settings
+          note: its window, recent pages and sparkline choices
+    installed: [~/Applications/Station.app]
+    no-erase: "nothing to erase: its pages are station's, its choices are kept"

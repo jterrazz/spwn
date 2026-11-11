@@ -25,7 +25,7 @@ runs:
               System Settings > Network > Firewall
             4 more: station overview --all
           Activity    memory 12.4 of 16 GB · 388 GB free
-          Apps        ● 5 ok · ◐ 3 updates · ○ 101 not installed
+          Apps        ● 5 ok · ◐ 3 updates · ○ 102 not installed
           Settings    set by station · ○ 0 of 19 · checked · ● 8 of 9
           Disk        ◐ 388 GB free · 34.8 GB can rebuild
                       ◐ 1 misplaced
@@ -42,8 +42,8 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 109 apps for this Mac · 3 updates
-            101 not installed
+          This Mac · 110 apps for this Mac · 3 updates
+            102 not installed
 
           Updates
             ◐ node     22.11.0 → 24.11.0  mise  update available
@@ -52,7 +52,7 @@ runs:
               → station apps update ghostty
             ◐ gh       2.97.0 → 2.98.0    brew  update available
               → station apps update gh
-          Not installed  ○ 101 · cocoapods, homebrew, mas, pnpm, …
+          Not installed  ○ 102 · cocoapods, homebrew, mas, pnpm, …
           OK             ● 5 · mise, go, bat, jq, lazygit
           Not for this machine  7 apps live on other machines
 
@@ -100,7 +100,7 @@ runs:
           Needs you
             ◐ ~/go is misplaced  station disk move ~/go
           Activity    memory 26 of 64 GB · 1.6 TB free
-          Apps        ● 0 ok · ○ 109 not installed
+          Apps        ● 0 ok · ○ 110 not installed
           Settings    set by station · ● 1 of 19 · checked · ● 9 of 9
           Disk        ◐ 1.6 TB free · 1.1 GB can rebuild
                       ◐ 1 misplaced

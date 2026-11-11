@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          # Not installed	109 ○
+          # Not installed	110 ○
     - command: 'apps | /usr/bin/head -1'
       exit: 0
       stdout: |

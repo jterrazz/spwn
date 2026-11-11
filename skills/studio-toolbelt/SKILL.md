@@ -188,6 +188,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **pipifier**: Picture-in-Picture for Safari
 - **snippety**: Code snippet manager
 - **speedtest**: Internet speed test
+- **station-menubar**: Station's menu bar app, from the latest release
 
 ### Agent skills
 

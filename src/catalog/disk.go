@@ -202,6 +202,7 @@ const StationRetiredNote = "The keychain entry `station` holds nothing since rou
 
 var HomeExceptions = []Exception{
 	{Path: ".ssh", Reason: "the owner's keys and ssh_config"},
+	{Path: "Applications", Reason: "macOS's folder for one user's apps: station-menubar puts Station.app there"},
 	{Path: ".gnupg", Reason: "the owner's GPG keys"},
 	{Path: ".cargo", Reason: "rust-analyzer started by a GUI IDE would lose the toolchain"},
 	{Path: ".rustup", Reason: "rust-analyzer started by a GUI IDE would lose the toolchain"},

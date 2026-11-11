@@ -30,7 +30,7 @@ runs:
           │▸Overview           9 │┃   ◐ com.docker.vmnetd is left o…  sudo launchctl bootout system/com.docker.vmnetd… ┃
           │ Activity             │┃                                                                                    ┃
           │ Apps               ◐ │┃     Activity    memory 12.4 of 16 GB · 388 GB free                                 ┃
-          │ Settings             │┃     Apps        ● 5 ok · ◐ 3 updates · ○ 101 not installed                         ┃
+          │ Settings             │┃     Apps        ● 5 ok · ◐ 3 updates · ○ 102 not installed                         ┃
           │ Disk               ◐ │┃     Settings    set by station · ○ 0 of 19 · checked · ● 8 of 9                    ┃
           │ Ports                │┃     Disk        ◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced                ┃
           │ Accounts           ✗ │┃     Ports       Public 0 · Private 2                                               ┃

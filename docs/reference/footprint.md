@@ -602,6 +602,15 @@ Erase: none (nothing to erase: the login is the Tailscale app's).
 
 Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (nothing to erase: keys and logins are kept).
 
+### station-menubar
+
+| Path                                                       | Group         | Note                                           |
+| ---------------------------------------------------------- | ------------- | ---------------------------------------------- |
+| `~/Library/Preferences/com.jterrazz.station.menubar.plist` | never touched | its window, recent pages and sparkline choices |
+| `~/Applications/Station.app`                               | installed     | removed by `station apps remove`               |
+
+Erase: none (nothing to erase: its pages are station's, its choices are kept).
+
 ## Settings
 
 | Setting                 | Path                                                                            | Group         | Note                                                                     |
@@ -644,39 +653,40 @@ Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (not
 
 What an app keeps at the root of the home folder, declared with its reason; anything else there is misplaced.
 
-| Path               | Reason                                                                  |
-| ------------------ | ----------------------------------------------------------------------- |
-| `~/.ssh`           | the owner's keys and ssh_config                                         |
-| `~/.gnupg`         | the owner's GPG keys                                                    |
-| `~/.cargo`         | rust-analyzer started by a GUI IDE would lose the toolchain             |
-| `~/.rustup`        | rust-analyzer started by a GUI IDE would lose the toolchain             |
-| `~/.claude`        | Claude Code reads no settings file for its home                         |
-| `~/.codex`         | Codex reads no settings file for its home                               |
-| `~/.zshrc`         | a dotfile                                                               |
-| `~/.npmrc`         | a dotfile: npm's own settings                                           |
-| `~/.gitconfig`     | a dotfile                                                               |
-| `~/.bunfig.toml`   | a dotfile: bun's global settings                                        |
-| `~/.tmux.conf`     | a dotfile                                                               |
-| `~/.hushlogin`     | a dotfile                                                               |
-| `~/.claude.json`   | a dotfile                                                               |
-| `~/.zsh_history`   | a dotfile                                                               |
-| `~/.zcompdump*`    | a dotfile: zsh's completion dump                                        |
-| `~/.oh-my-zsh`     | relocated by ZSH only, a shell variable (open question 48)              |
-| `~/.gemini`        | no settings file relocates it (open question 48)                        |
-| `~/.pulumi`        | relocated by PULUMI_HOME only (open question 48)                        |
-| `~/.terraform.d`   | no settings file relocates it (open question 48)                        |
-| `~/.ansible`       | relocated by ANSIBLE_HOME only (open question 48)                       |
-| `~/.kube`          | relocated by KUBECONFIG only (open question 48)                         |
-| `~/.expo`          | no settings file relocates it (open question 48)                        |
-| `~/.agents`        | the skills CLI's home, no settings file relocates it (open question 48) |
-| `~/.cocoapods`     | relocated by CP_HOME_DIR only (open question 48)                        |
-| `~/.gradle`        | relocated by GRADLE_USER_HOME only (open question 48)                   |
-| `~/.android`       | relocated by ANDROID_USER_HOME only (open question 48)                  |
-| `~/.ollama`        | relocated by OLLAMA_MODELS only (open question 48)                      |
-| `~/.orbstack`      | OrbStack's own home (open question 48)                                  |
-| `~/.docker`        | relocated by DOCKER_CONFIG only (open question 48)                      |
-| `~/.agent-browser` | no settings file relocates it (open question 48)                        |
-| `~/.hermes`        | no settings file relocates it (open question 48)                        |
+| Path               | Reason                                                                     |
+| ------------------ | -------------------------------------------------------------------------- |
+| `~/.ssh`           | the owner's keys and ssh_config                                            |
+| `~/Applications`   | macOS's folder for one user's apps: station-menubar puts Station.app there |
+| `~/.gnupg`         | the owner's GPG keys                                                       |
+| `~/.cargo`         | rust-analyzer started by a GUI IDE would lose the toolchain                |
+| `~/.rustup`        | rust-analyzer started by a GUI IDE would lose the toolchain                |
+| `~/.claude`        | Claude Code reads no settings file for its home                            |
+| `~/.codex`         | Codex reads no settings file for its home                                  |
+| `~/.zshrc`         | a dotfile                                                                  |
+| `~/.npmrc`         | a dotfile: npm's own settings                                              |
+| `~/.gitconfig`     | a dotfile                                                                  |
+| `~/.bunfig.toml`   | a dotfile: bun's global settings                                           |
+| `~/.tmux.conf`     | a dotfile                                                                  |
+| `~/.hushlogin`     | a dotfile                                                                  |
+| `~/.claude.json`   | a dotfile                                                                  |
+| `~/.zsh_history`   | a dotfile                                                                  |
+| `~/.zcompdump*`    | a dotfile: zsh's completion dump                                           |
+| `~/.oh-my-zsh`     | relocated by ZSH only, a shell variable (open question 48)                 |
+| `~/.gemini`        | no settings file relocates it (open question 48)                           |
+| `~/.pulumi`        | relocated by PULUMI_HOME only (open question 48)                           |
+| `~/.terraform.d`   | no settings file relocates it (open question 48)                           |
+| `~/.ansible`       | relocated by ANSIBLE_HOME only (open question 48)                          |
+| `~/.kube`          | relocated by KUBECONFIG only (open question 48)                            |
+| `~/.expo`          | no settings file relocates it (open question 48)                           |
+| `~/.agents`        | the skills CLI's home, no settings file relocates it (open question 48)    |
+| `~/.cocoapods`     | relocated by CP_HOME_DIR only (open question 48)                           |
+| `~/.gradle`        | relocated by GRADLE_USER_HOME only (open question 48)                      |
+| `~/.android`       | relocated by ANDROID_USER_HOME only (open question 48)                     |
+| `~/.ollama`        | relocated by OLLAMA_MODELS only (open question 48)                         |
+| `~/.orbstack`      | OrbStack's own home (open question 48)                                     |
+| `~/.docker`        | relocated by DOCKER_CONFIG only (open question 48)                         |
+| `~/.agent-browser` | no settings file relocates it (open question 48)                           |
+| `~/.hermes`        | no settings file relocates it (open question 48)                           |
 
 ## Relocations
 

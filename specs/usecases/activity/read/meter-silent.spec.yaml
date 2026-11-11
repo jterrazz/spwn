@@ -16,4 +16,4 @@ runs:
       exit: 0
       stdout: |
           	Activity	? no answer in 2 s
-          	Apps	● 5 ok · ◐ 3 updates · ○ 101 not installed
+          	Apps	● 5 ok · ◐ 3 updates · ○ 102 not installed
