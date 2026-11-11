@@ -137,7 +137,10 @@ func (ManagerKey) Enum() []string {
 // value: where a manager stands in its system's default priority, lowest
 // first: the first manager of the list that has a method for an item
 // installs it, unless a Machinefile says `prefer:`. A system's order is
-// these numbers across the manager items, each number one manager's.
+// these numbers across the manager items, each number one manager's. A
+// `script` method has no manager and no rank: it is tried after every
+// manager of the system; a `github-release` method is ranked by the item
+// that manages it.
 
 type Priority struct {
 	MacOS  int `yaml:"macos,omitempty"`
@@ -145,12 +148,17 @@ type Priority struct {
 	Debian int `yaml:"debian,omitempty"`
 }
 
-// value: an app's port and what serves on it, a label a listening port is
-// shown with ("probably Vite"), never a decision.
+// value: an app's port and what serves on it: a label a listening port is
+// shown with ("probably Vite"), and what the port asks once it is shared:
+// `http` says a dev server that speaks HTTP, `env` the variables its server
+// is started with, each value a template where `{url}` is the shared URL and
+// `{host}` its host (known only when the port is shared).
 
 type PortHint struct {
-	Port  int    `yaml:"port"`
-	Label string `yaml:"label"`
+	Port  int               `yaml:"port"`
+	Label string            `yaml:"label"`
+	HTTP  bool              `yaml:"http,omitempty"`
+	Env   map[string]string `yaml:"env,omitempty"`
 }
 
 // value: why an item goes, and the item to take instead.

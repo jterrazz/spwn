@@ -31,43 +31,45 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 
 ## Item keys
 
-| Key               | Kinds        | Value                                                                                                                                 |
-| ----------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `item`            | all          | the schema, `station.catalog/v1`                                                                                                      |
-| `kind`            | all          | `manager` (installs other items), `app` (run or used), `setting` (a state of the system)                                              |
-| `name`            | all          | the item's name, its file's                                                                                                           |
-| `description`     | all          | one line, the owner's words                                                                                                           |
-| `requires`        | all          | items installed before it, for it; a setting requires one app                                                                         |
-| `after`           | all          | items applied before it when both are, never installed for it                                                                         |
-| `phase`           | all          | `image` (baked into a VM image), `boot` (a VM's first start), `apply` (the default)                                                   |
-| `needs`           | all          | what every method asks of the owner: `sudo`, `terminal`, `license`, `app-store-login`                                                 |
-| `after-apply`     | all          | what has to follow for it to take: `restart-dock`, `restart-finder`, `restart-menu-bar`, `logout`, `reboot`                           |
-| `renamed-from`    | all          | the names it had before                                                                                                               |
-| `deprecated`      | all          | `why` it goes (required), and the item to `use` instead                                                                               |
-| `options`         | all          | the values it asks, typed ([Options](#options))                                                                                       |
-| `methods`         | all          | the ordered list of ways to install or set it; the first that matches the machine wins                                                |
-| `manages`         | manager      | the method keys it installs by ([Managers](#managers))                                                                                |
-| `priority`        | manager      | where it stands in each system's default priority: `macos`, `ubuntu`, `debian`                                                        |
-| `provides`        | manager, app | the commands it puts on the search path, by which its presence is read                                                                |
-| `then`            | manager, app | settings proposed once it is installed                                                                                                |
-| `replaces`        | manager, app | the default it replaces, as the toolbelt says it (`cat (for humans)`)                                                                 |
-| `bundle`          | manager, app | its `/Applications` bundle, without `.app`                                                                                            |
-| `version-read`    | manager, app | how its installed version is read: `args`, a `pattern`, or a `path` glob                                                              |
-| `supersedes`      | manager, app | the formula it replaces, uninstalled once it is in                                                                                    |
-| `accepts`         | manager, app | another source whose copy stands for its install, never managed: `app-store`                                                          |
-| `live`            | manager, app | how it is read running: a `process` name, or a `command`                                                                              |
-| `ports`           | manager, app | the ports it serves on, each a `port` and its `label`: a hint a listening port is shown with ("probably Vite")                        |
-| `disk`            | manager, app | its Disk row ([Disk](disk.md)): `paths`, `installed`, `removal`, `size`, `free`, `erase`, `no-erase`, `quit`, `relocate`, `misplaced` |
-| `help`            | setting      | the hint a form shows                                                                                                                 |
-| `requires-one-of` | setting      | apps of which any one serves, never beside `requires`                                                                                 |
-| `guided`          | setting      | it opens System Settings for the owner to finish                                                                                      |
-| `reversible`      | setting      | `station settings off` takes it back                                                                                                  |
-| `run-once`        | setting      | an action, never judged after it ran                                                                                                  |
-| `declares`        | setting      | the port it opens to the machine's network: `port`, `via`, `label`                                                                    |
-| `sets`            | setting      | the values it sets, as its check reads them back: `key`, `value`                                                                      |
-| `writes`          | setting      | the files it writes, each a `path`, its `level`, a `note`, and a selector                                                             |
+| Key               | Kinds        | Value                                                                                                                                                      |
+| ----------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `item`            | all          | the schema, `station.catalog/v1`                                                                                                                           |
+| `kind`            | all          | `manager` (installs other items), `app` (run or used), `setting` (a state of the system)                                                                   |
+| `name`            | all          | the item's name, its file's                                                                                                                                |
+| `description`     | all          | one line, the owner's words                                                                                                                                |
+| `requires`        | all          | items installed before it, for it; a setting requires one app                                                                                              |
+| `after`           | all          | items applied before it when both are, never installed for it                                                                                              |
+| `phase`           | all          | `image` (baked into a VM image), `boot` (a VM's first start), `apply` (the default)                                                                        |
+| `needs`           | all          | what every method asks of the owner: `sudo`, `terminal`, `license`, `app-store-login`                                                                      |
+| `after-apply`     | all          | what has to follow for it to take: `restart-dock`, `restart-finder`, `restart-menu-bar`, `logout`, `reboot`                                                |
+| `renamed-from`    | all          | the names it had before                                                                                                                                    |
+| `deprecated`      | all          | `why` it goes (required), and the item to `use` instead                                                                                                    |
+| `options`         | all          | the values it asks, typed ([Options](#options))                                                                                                            |
+| `methods`         | all          | the ordered list of ways to install or set it; the first that matches the machine wins                                                                     |
+| `manages`         | manager      | the method keys it installs by ([Managers](#managers))                                                                                                     |
+| `priority`        | manager      | where it stands in each system's default priority: `macos`, `ubuntu`, `debian`                                                                             |
+| `provides`        | manager, app | the commands it puts on the search path, by which its presence is read                                                                                     |
+| `then`            | manager, app | settings proposed once it is installed                                                                                                                     |
+| `replaces`        | manager, app | the default it replaces, as the toolbelt says it (`cat (for humans)`)                                                                                      |
+| `bundle`          | manager, app | its `/Applications` bundle, without `.app`                                                                                                                 |
+| `version-read`    | manager, app | how its installed version is read: `args`, a `pattern`, or a `path` glob                                                                                   |
+| `supersedes`      | manager, app | the formula it replaces, uninstalled once it is in                                                                                                         |
+| `accepts`         | manager, app | another source whose copy stands for its install, never managed: `app-store`                                                                               |
+| `live`            | manager, app | how it is read running: a `process` name, or a `command`                                                                                                   |
+| `ports`           | manager, app | the ports it serves on, each a `port` and its `label`, a hint a listening port is shown with ("probably Vite"), and what a shared port sets: `http`, `env` |
+| `disk`            | manager, app | its Disk row ([Disk](disk.md)): `paths`, `installed`, `removal`, `size`, `free`, `erase`, `no-erase`, `quit`, `relocate`, `misplaced`                      |
+| `help`            | setting      | the hint a form shows                                                                                                                                      |
+| `requires-one-of` | setting      | apps of which any one serves, never beside `requires`                                                                                                      |
+| `guided`          | setting      | it opens System Settings for the owner to finish                                                                                                           |
+| `reversible`      | setting      | `station settings off` takes it back                                                                                                                       |
+| `run-once`        | setting      | an action, never judged after it ran                                                                                                                       |
+| `declares`        | setting      | the port it opens to the machine's network: `port`, `via`, `label`                                                                                         |
+| `sets`            | setting      | the values it sets, as its check reads them back: `key`, `value`                                                                                           |
+| `writes`          | setting      | the files it writes, each a `path`, its `level`, a `note`, and a selector                                                                                  |
 
 A disk action (`free`, `erase`, a misplaced row's `free`) runs a command, deletes or prunes paths: `run`, `env`, `delete`, `prune`, `uses` (the command it runs with, which must be on the search path), `exists`, and a selector.
+
+A port's `env` maps a variable name to a template the app's server is started with once the port is shared: `{url}` is the shared URL and `{host}` the name it is reached by, the only two braces a value may hold (any other is refused at decode); `http: true` marks a dev server that speaks HTTP.
 
 ## The selector
 
@@ -138,7 +140,7 @@ A `script` with neither `run` nor `url` is installed by the owner, as its `hint`
 
 ## Managers
 
-A manager item says the method keys it installs by, `manages`, each key one manager's, and where it stands in each system's default priority, `priority`, lowest first, each rank one manager's. The first manager of a system's order that has a method for an item installs it, unless a Machinefile says `prefer:`; a manager with no priority is chosen by its method alone (mise for a runtime).
+A manager item says the method keys it installs by, `manages`, each key one manager's, and where it stands in each system's default priority, `priority`, lowest first, each rank one manager's. The first manager of a system's order that has a method for an item installs it, unless a Machinefile says `prefer:`; a manager with no priority is chosen by its method alone (mise for a runtime). A `script` method has no manager and no rank: it is always tried after every manager of the system, and a `github-release` method takes the rank of the item that manages it. A `priority` ranks at least one system.
 
 ```yaml
 item: station.catalog/v1
@@ -206,12 +208,16 @@ methods:
 ```
 
 ```yaml
-# a dev server's port, as a hint
+# a dev server's port: its label, and what it sets once shared
 item: station.catalog/v1
 kind: app
 name: vite
 description: Frontend build tool and dev server
-ports: [{ port: 5173, label: Vite }]
+ports:
+    - port: 5173
+      label: Vite
+      http: true
+      env: { __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: '{host}' }
 methods:
     - os: any
       bun: vite
@@ -303,18 +309,18 @@ methods:
 
 The format is whole now, so a file a newer station writes in v1 decodes in this one; some keys are declared for the lots that read them and held, unread, until then:
 
-| Key                                                                                     | Read by                                                                 |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                        |
-| `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)  |
-| `manages`, `priority`                                                                   | the manager choice and `prefer:`                                        |
-| `ports`                                                                                 | the Ports section's labels, which a table in `src/catalog/` gives today |
-| the selector's `version`                                                                | the Machinefile's resolution, against a machine                         |
-| `pin`, `upgrade` on a method other than a `script`'s `url`                              | the lockfile and `station upgrade`                                      |
-| a method's `provides`                                                                   | presence, which reads the item's today                                  |
-| `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                          |
-| a file's `mode`                                                                         | the dotfile writes (whole files today)                                  |
-| an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                 |
-| a setting's methods after its first                                                     | the settings of each system: today it lives where its first method does |
-| `apt`, `github-release`                                                                 | their installers: until then the next method serves                     |
-| `macos-defaults`                                                                        | its Applier: until then applying it is refused as unhandled             |
+| Key                                                                                     | Read by                                                                                                    |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `after`, `phase`, `renamed-from`, `deprecated`, `after-apply`                           | the Machinefile's plan and apply                                                                           |
+| `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                     |
+| `manages`, `priority`                                                                   | the manager choice and `prefer:`                                                                           |
+| `ports`                                                                                 | the Ports section: labels, and a shared port's `http` and `env`, which tables in `src/catalog/` give today |
+| the selector's `version`                                                                | the Machinefile's resolution, against a machine                                                            |
+| `pin`, `upgrade` on a method other than a `script`'s `url`                              | the lockfile and `station upgrade`                                                                         |
+| a method's `provides`                                                                   | presence, which reads the item's today                                                                     |
+| `script`'s `check` and `undo`                                                           | presence and the ledger's undo                                                                             |
+| a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                     |
+| an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                                                    |
+| a setting's methods after its first                                                     | the settings of each system: today it lives where its first method does                                    |
+| `apt`, `github-release`                                                                 | their installers: until then the next method serves                                                        |
+| `macos-defaults`                                                                        | its Applier: until then applying it is refused as unhandled                                                |

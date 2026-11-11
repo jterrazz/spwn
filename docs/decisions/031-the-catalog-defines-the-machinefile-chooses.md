@@ -24,5 +24,7 @@ Two file types, one responsibility each. A catalog item says how to install or s
 - The user and shared layers (L2.2) decode with the same strict decoder, so a user's typo is a refusal with its line, never a silent default.
 - The lists stand by category, in the categories' tables, then by name: a file carries no order, so adding one never renumbers the others.
 - A setting carries a method per system like an app; until the settings family applies one effect per system, a setting lives where its first method does. Images and dev-server profiles stay Go values until their own lots move them.
+- A port carries what sharing it sets, beside its label: `http`, and `env`, each value a template of `{url}` and `{host}` (known only when the port is shared), so a dev-server profile is an app's own `ports` once a lot reads them, never a table beside it.
+- A `script` method has no manager and so no rank: it is always tried after every manager of the system; `github-release` is ranked by the item that manages it.
 - Each system's manager priority is declared once, by the manager items' `priority` ranks, never as a list beside them, so a manager added in a file of its own takes its rank without editing another file.
 - The words are unambiguous: a selector's machine kind is `machine:` (an item's `kind:` is what it is), an app's version probe is `version-read:` (`version:` is a selector's OS range), a disk action's command is `uses:` (`needs:` is what an item asks of the owner).

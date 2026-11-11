@@ -503,8 +503,8 @@ func (s *Surveyor) actions(ctx context.Context, actions []catalog.Action, presen
 }
 
 func (s *Surveyor) action(ctx context.Context, a catalog.Action) *actionFailure {
-	if a.Needs != "" {
-		if !s.m.Has(a.Needs) {
+	if a.Uses != "" {
+		if !s.m.Has(a.Uses) {
 			return nil
 		}
 	}

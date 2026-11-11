@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"path"
 	"reflect"
 	"regexp"
@@ -171,6 +172,9 @@ func checkItem(file string, doc *yaml.Node, it Item) error {
 		if p.Port < 1 || p.Port > 65535 || p.Label == "" {
 			return refused(file, doc, "ports", fmt.Sprintf("port %d: a port from 1 to 65535, and its label", p.Port))
 		}
+		if problem := checkPortEnv(p); problem != "" {
+			return refused(file, doc, "ports", problem)
+		}
 	}
 	if it.Phase != "" && !known(it.Phase) {
 		return refused(file, doc, "phase", fmt.Sprintf("phase %q is none of %s", it.Phase, strings.Join(it.Phase.Enum(), ", ")))
@@ -237,7 +241,7 @@ func foreignKey(it Item) string {
 	}
 	app := []key{
 		{"replaces", it.Replaces != ""}, {"provides", len(it.Provides) > 0}, {"then", len(it.Then) > 0},
-		{"bundle", it.Bundle != ""}, {"version", it.Version != nil}, {"supersedes", it.Supersedes != ""},
+		{"bundle", it.Bundle != ""}, {"version-read", it.Version != nil}, {"supersedes", it.Supersedes != ""},
 		{"accepts", len(it.Accepts) > 0}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
 		{"ports", len(it.Ports) > 0},
 	}
@@ -548,8 +552,32 @@ func checkManages(it Item) string {
 		if p.MacOS < 0 || p.Ubuntu < 0 || p.Debian < 0 {
 			return "a priority is a rank, from 1"
 		}
+		if *p == (Priority{}) {
+			return "a priority ranks at least one system"
+		}
 		if len(it.Manages) == 0 {
 			return "a manager with a priority names what it manages"
+		}
+	}
+	return ""
+}
+
+// value: the placeholders a port's env template may use.
+var portPlaceholders = []string{"{url}", "{host}"}
+
+var portPlaceholder = regexp.MustCompile(`\{[^}]*\}`)
+
+// invariant: a port's env value is a template whose only braces are `{url}`
+// and `{host}`; a name is a variable name, never empty.
+func checkPortEnv(p PortHint) string {
+	for _, name := range slices.Sorted(maps.Keys(p.Env)) {
+		if name == "" || strings.ContainsAny(name, "= ") {
+			return fmt.Sprintf("port %d: env name %q is no variable name", p.Port, name)
+		}
+		for _, b := range portPlaceholder.FindAllString(p.Env[name], -1) {
+			if !slices.Contains(portPlaceholders, b) {
+				return fmt.Sprintf("port %d: env %s uses %s, only %s are known", p.Port, name, b, strings.Join(portPlaceholders, " and "))
+			}
 		}
 	}
 	return ""

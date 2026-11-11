@@ -42,7 +42,7 @@ type Action struct {
 	Prune  []string `yaml:"prune,omitempty"`
 	// value: the command the action runs with, which must be on the
 	// search path for it to run.
-	Needs  string        `yaml:"uses,omitempty"`
+	Uses   string        `yaml:"uses,omitempty"`
 	Exists string        `yaml:"exists,omitempty"`
 	Placed Selector      `yaml:",inline" json:"-"`
 	On     []MachineKind `yaml:"-"`

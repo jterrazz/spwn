@@ -694,6 +694,15 @@
     "PortHint": {
       "additionalProperties": false,
       "properties": {
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "http": {
+          "type": "boolean"
+        },
         "label": {
           "type": "string"
         },
