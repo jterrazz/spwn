@@ -46,9 +46,19 @@ func rightsTo(to catalog.Audience, port int) func(context.Context, string) (*cat
 // entry of api's public reservation there, api running.
 func funneledAPI(t *testing.T) (harness, *flakyTailnet) {
 	t.Helper()
+	return funneledAPIOver(t, nil)
+}
+
+// value: funneledAPI with the ports of the Mac busy in mac, set before the
+// engine's goroutines read it; nil leaves the harness's own.
+func funneledAPIOver(t *testing.T, busy map[int]bool) (harness, *flakyTailnet) {
+	t.Helper()
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "db", Lifetime: model.Persistent})
 	tn := &flakyTailnet{keptTailnet: funneledFrom40000()}
 	h.d.tn = tn
+	if busy != nil {
+		h.d.h = &busyMac{fakeMac: h.mac, busy: busy}
+	}
 	h.d.o.Rights = func(ctx context.Context, vm string) (*catalog.PortRights, error) {
 		if vm == "db" {
 			return rightsTo(catalog.AudienceLocal, 5432)(ctx, vm)
@@ -73,8 +83,7 @@ func funneledAPI(t *testing.T) (harness, *flakyTailnet) {
 // fails to go replaces that entry with its own, and its release leaves
 // nothing on the internet.
 func TestABusyMoveWhoseUnshareFailsLeavesNoFunnelFromItsOldPort(t *testing.T) {
-	h, tn := funneledAPI(t)
-	h.d.h = &busyMac{fakeMac: h.mac, busy: map[int]bool{40000: true}}
+	h, tn := funneledAPIOver(t, map[int]bool{40000: true})
 	ctx := t.Context()
 	tn.failUnshare = 1
 	h.d.listen(ctx, "api", 3000, "0.0.0.0", "node")
