@@ -269,7 +269,7 @@ func gate(m Meta, target machine.Profile) error {
 	if m.Section != "" {
 		if v := section.Shown(m.Section)(target); !v.OK {
 			return fail.New(fail.NotForThisMachine, NotForThisMachine, target.Ref.Name, map[string]string{
-				"call": m.Name, "section": string(m.Section), "kind": string(target.Kind), "why": v.Why, "fix": v.Fix,
+				"call": m.Name, "section": string(m.Section), "kind": string(target.Kind), "os": string(target.System.OS), "why": v.Why, "fix": v.Fix,
 			})
 		}
 	}

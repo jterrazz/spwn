@@ -25,3 +25,22 @@ func TestAnOlderStationsMacReadsAsAComputer(t *testing.T) {
 		t.Fatalf("a Computer is written %s, never the older word", out)
 	}
 }
+
+func TestAComputerIsCalledAMacOnlyWhenItsSystemIsMacOS(t *testing.T) {
+	for _, c := range []struct {
+		kind machine.Kind
+		os   machine.OS
+		want string
+	}{
+		{machine.Computer, machine.MacOS, "Mac"},
+		{machine.Computer, "", "Mac"},
+		{machine.OlderComputer, machine.MacOS, "Mac"},
+		{machine.Computer, machine.Linux, "computer"},
+		{machine.Workspace, machine.MacOS, "workspace"},
+		{machine.Server, machine.Linux, "server"},
+	} {
+		if got := c.kind.Word(c.os); got != c.want {
+			t.Fatalf("a %s on %q is called %q, want %q", c.kind, c.os, got, c.want)
+		}
+	}
+}

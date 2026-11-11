@@ -6,7 +6,7 @@ func Applies(p machine.Profile) machine.Verdict {
 	// invariant: an agent's hook reports from inside the workspace it works
 	// in, where its journal is kept.
 	if p.Kind != machine.Workspace {
-		return machine.No(p.Ref.Name + " is a " + p.Kind.Word() + ": agents are recorded inside the workspace they work in")
+		return machine.No(p.Ref.Name + " is a " + p.Kind.Word(p.System.OS) + ": agents are recorded inside the workspace they work in")
 	}
 	return machine.Yes
 }
