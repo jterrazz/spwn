@@ -359,19 +359,61 @@ func TestServeTurnedOnAgainReconcilesUntilTheTailnetIsRead(t *testing.T) {
 	}
 }
 
-// invariant: the last reading of the tailnet stands while it cannot be
-// read: a port an entry the owner made carries from is given to no share.
+// invariant: the last reading of the tailnet, by any read, stands while
+// it cannot be read: a port an entry the owner made carries from is given
+// to no share.
 func TestThePortOfAnEntryLastReadIsGivenToNoShareWhileTheTailnetIsUnread(t *testing.T) {
 	h, tn, _ := staleFunnel(t, 0)
+	ctx := t.Context()
+	h.d.reconcileServe(ctx)
 	tn.mu.Lock()
 	tn.entries = []ports.Share{{Port: 9000, Reserved: 40000, Scheme: ports.SchemeTCP, Target: "tcp://127.0.0.1:40000"}}
 	tn.funnel = nil
 	tn.mu.Unlock()
-	ctx := t.Context()
-	h.d.reconcileServe(ctx)
+	h.d.mu.Lock()
+	_, err := h.d.sharedLocked(ctx)
+	h.d.mu.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
 	tn.failShared = 2
 	h.d.listen(ctx, "db", 5432, "0.0.0.0", "postgres")
 	if got := reservedPort(h, "db", 5432); got == 0 || got == 40000 {
 		t.Errorf("db reserved %d, want a port the owner's entry, as last read, does not carry", got)
+	}
+}
+
+// invariant: an owed entry that its reservation serves again, the HTTPS
+// mode switched back before the removal went, is kept: the tick removes
+// only what no reservation justifies.
+func TestAnOwedEntryServedAgainIsKept(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: "path"}}
+	h.d.st.Ports = pol
+	tn := &flakyTailnet{keptTailnet: &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}}
+	h.d.tn = tn
+	h.d.o.Rights = rightsTo(catalog.AudiencePrivate, 5173)
+	h.d.o.Ports = []catalog.ItemPort{{PortHint: catalog.PortHint{Port: 5173, HTTP: true}}}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.reconcileServe(ctx)
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	h.d.vms["api"].state = engine.StateRunning
+	h.d.mu.Unlock()
+	h.d.listen(ctx, "api", 5173, "0.0.0.0", "vite")
+	pol.g = &ports.PortsGroup{HTTPS: "port"}
+	tn.failUnshare = 1
+	h.d.tickShares(ctx)
+	if got := tn.dump(); got != "40000<-40000 funnel=false; 443/api/5173<-40000 funnel=false" {
+		t.Fatalf("tailnet after the failed switch to port = %s, want the path owed beside the port", got)
+	}
+	pol.g = &ports.PortsGroup{HTTPS: "path"}
+	tn.failUnshare = 1
+	h.d.tickShares(ctx)
+	h.d.tickShares(ctx)
+	if got := tn.dump(); got != "443/api/5173<-40000 funnel=false" {
+		t.Errorf("tailnet after the switch back to path = %s, want api's path served", got)
 	}
 }
