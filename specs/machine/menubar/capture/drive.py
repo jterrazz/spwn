@@ -38,6 +38,7 @@ class Rig:
         self.vnc = api.connect(f"{m.group(2)}::{m.group(3)}", password=m.group(1))
         self.vnc.refreshScreen()
         self.fb = self.vnc.screen.size
+        print(f"   framebuffer {self.fb[0]}x{self.fb[1]}", flush=True)
         self.wall = None
         self.walls = 0
         self.screen = None
@@ -93,7 +94,7 @@ class Rig:
         if not any(k.startswith("STATION_TRIAL") for k in env):
             time.sleep(5)
             return None
-        for _ in range(30):
+        for _ in range(90):
             time.sleep(1)
             line = self.last("item ")
             if line:
