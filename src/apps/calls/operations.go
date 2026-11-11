@@ -37,7 +37,15 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progr
 		inRun[t.Name] = true
 		ran[t.Name] = t
 	}
-	states := s.states(ctx, run)
+	// invariant: an app already installed is named by the method that
+	// holds it, the one its row reads it by, and its version there.
+	states := map[string]catalog.State{}
+	for i, rep := range s.reports(ctx, run) {
+		states[rep.App.Name] = rep.State
+		if rep.State == catalog.StateOK {
+			ran[run[i].Name] = s.holding(run[i], rep)
+		}
+	}
 	deps := map[string][]string{}
 	for _, t := range run {
 		deps[t.Name] = s.requirements(ctx, t)

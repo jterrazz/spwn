@@ -364,7 +364,7 @@ func TestAnAppHeldByAnotherOfItsMethodsIsAdoptedNeverInstalledAgain(t *testing.T
 			t.Errorf("%s: the plan chose %s and %s it by %s; want it adopted by %s", c.item, step.Method, line.Action, line.Method(), c.held)
 		}
 		out, err := b.shelf.Install(ctx, apps.InstallRequest{Names: []string{c.item}}, nil)
-		if err != nil || outcomeOf(t, out, c.item).Detail != apps.AlreadyInstalled || b.holds(catalog.Method(step.Method), c.key) {
+		if o := outcomeOf(t, out, c.item); err != nil || o.Detail != apps.AlreadyInstalled || string(o.Method) != c.held || b.holds(catalog.Method(step.Method), c.key) {
 			t.Errorf("%s: installed again: %+v (%v)", c.item, out, err)
 		}
 		up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{c.item}})
