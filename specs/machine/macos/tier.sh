@@ -389,16 +389,23 @@ n=0
 listing > "$fp/0-before.txt"
 step "install.sh" "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station-e2e/install.sh --name e2e </dev/null"
 # invariant: apply asks Homebrew's password, so it runs on a terminal: script(1)
-# gives it one; the run is interrupted once the cask's install has started.
-in_vm "(yes '' | script -q /tmp/station-e2e/first.log $station init --machinefile /tmp/station-e2e/test-machinefile.yaml > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
+# gives it one; the run is interrupted once the cask's install has started. The
+# shell script(1) runs writes its own pid, then becomes station, so SIGINT reaches
+# station alone, never script(1), whose arguments name the same command.
+in_vm "(yes '' | script -q /tmp/station-e2e/first.log sh -c 'echo \$\$ > /tmp/station-e2e/station.pid; exec $station init --machinefile /tmp/station-e2e/test-machinefile.yaml' > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
 waited=0
 until in_vm 'pgrep -f "cask.*ghostty|install.*ghostty" > /dev/null'; do
   waited=$((waited + 5))
   [ $waited -lt 1200 ] || fail "the cask's install never started"
   sleep 5
 done
-in_vm 'pkill -INT -f "station init --machinefile"' || fail "interrupt the apply"
-until in_vm 'test -s /tmp/station-e2e/first.exit'; do sleep 2; done
+in_vm 'kill -INT "$(cat /tmp/station-e2e/station.pid)"' || fail "interrupt the apply"
+waited=0
+until in_vm 'test -s /tmp/station-e2e/first.exit'; do
+  waited=$((waited + 2))
+  [ $waited -lt 300 ] || fail "the interrupted apply never ended"
+  sleep 2
+done
 n=$((n + 1))
 listing > "$fp/$n.txt"
 steps+=("$n:init --machinefile, interrupted")
