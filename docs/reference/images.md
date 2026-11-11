@@ -30,6 +30,8 @@ station images build linux
 
 The base of `linux` is `ghcr.io/cirruslabs/ubuntu`, pulled once (about 5 GB) and cloned for the build. The version is the UTC date, `2026.11.07`, with `.2` for a second build the same day. Station records the hash of the recipe files, so a changed recipe is rebuilt by a bare `build`. Images need Tart: `station apps install tart`.
 
+`macos` has no recipe: a macOS workspace starts from `ghcr.io/cirruslabs/macos-tahoe-base` (the `station-macos` Machinefile's `vm.image.from`), as Cirrus Labs made it. Its `admin` has a passwordless sudo because that base ships `/etc/sudoers.d/admin-nopasswd`, not because station set it, so `station apply` there asks no password only while that file stays ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)).
+
 ## Updating
 
 ```sh
