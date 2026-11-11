@@ -96,10 +96,11 @@ final class Trial: ObservableObject {
 
     func sample() {
         guard let window = PanelWindow.panel(NSApp.windows) else { return }
-        let height = window.frame.height
+        let glass = window.frame.insetBy(dx: StatusPanel.shade, dy: StatusPanel.shade)
+        let height = glass.height
         guard height != lastHeight else { return }
         lastHeight = height
-        log("window height=\(String(format: "%.1f", height)) y=\(String(format: "%.1f", window.frame.minY)) top=\(String(format: "%.1f", window.frame.maxY)) x=\(String(format: "%.1f", window.frame.minX)) key=\(window.isKeyWindow)")
+        log("window height=\(String(format: "%.1f", height)) y=\(String(format: "%.1f", glass.minY)) top=\(String(format: "%.1f", glass.maxY)) x=\(String(format: "%.1f", glass.minX)) key=\(window.isKeyWindow)")
     }
 
     static func cpuSeconds() -> Double {

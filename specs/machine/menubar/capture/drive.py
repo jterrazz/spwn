@@ -154,7 +154,7 @@ class Rig:
         self.vnc.captureScreen(path)
         return path
 
-    def crop(self, name, full, item, window, margin=40):
+    def crop(self, name, full, item, window, margin=56):
         from PIL import Image
 
         s, height = self.scale(item)
@@ -173,10 +173,9 @@ class Rig:
             self.say(f"FAIL {name}: the app logged no item frame")
             return None
         self.set_wall(wall, item)
-        if old_item:
-            self.park()
-            time.sleep(1)
-            before = self.capture(f"{name}.closed")
+        self.park()
+        time.sleep(1)
+        before = self.capture(f"{name}.closed")
         self.click_item(item)
         time.sleep(2.5)
         self.park()
@@ -185,11 +184,13 @@ class Rig:
         if old_item:
             window = self.changed(before, full, item)
         else:
-            opened, window_line = self.last("opened"), self.last("window ")
+            opened, window_line, content = self.last("opened"), self.last("glass "), self.last("content ")
             if not window_line:
-                self.say(f"FAIL {name}: no window frame logged")
+                self.say(f"FAIL {name}: no glass frame logged")
                 return None
-            window = self.frame(window_line)
+            window = self.frame(window_line.split(" window ")[0].split(" glass ")[-1])
+            edge = self.edge(before, full, item, self.frame(window_line.split(" window ")[1]))
+            self.say(f"   {content.split(' ', 1)[-1] if content else 'no content size'}; the window's edge moved by at most {edge}")
             self.say(f"   {opened.split(' ', 2)[-1] if opened else 'not opened'}; {window_line.split(' ', 2)[-1]}")
         self.crop(name, full, item, window)
         self.vnc.keyPress("esc")
@@ -197,8 +198,27 @@ class Rig:
         closed = None if old_item else bool(self.last("closed"))
         meta = {"name": name, "story": STORY, "scheme": scheme, "wall": wall, "env": env, "reduce": reduce, "contrast": contrast,
                 "a11y_read": read, "item": item, "window": window, "esc_closed": closed}
+        if not old_item:
+            meta["edge"] = edge
         self.say(f"-- {name}: {json.dumps(meta)}")
         return meta
+
+    # invariant: the window's own edge is the wallpaper: its outermost
+    # 2 px ring reads the same open as closed, so no square frame shows
+    # past the glass's shadow.
+    def edge(self, before, after, item, frame):
+        from PIL import Image, ImageChops
+
+        s, height = self.scale(item)
+        diff = ImageChops.difference(Image.open(before).convert("L"), Image.open(after).convert("L"))
+        x0, y0 = int(round(frame["x"] * s)), int(round((height - frame["y"] - frame["h"]) * s))
+        x1, y1 = x0 + int(round(frame["w"] * s)), y0 + int(round(frame["h"] * s))
+        # value: the menu bar, which the open item highlights, is no edge.
+        bar = int(30 * s)
+        top = max(y0, bar)
+        x0, x1, y1 = max(x0, 0), min(x1, diff.width), min(y1, diff.height)
+        bands = [(x0, y1 - 2, x1, y1), (x0, top, x0 + 2, y1), (x1 - 2, top, x1, y1)] + ([(x0, y0, x1, y0 + 2)] if y0 >= bar else [])
+        return max(diff.crop(b).getextrema()[1] for b in bands)
 
     def changed(self, before, after, item):
         from PIL import Image, ImageChops

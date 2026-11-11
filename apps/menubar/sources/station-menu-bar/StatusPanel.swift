@@ -14,6 +14,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let panel = GlassPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
     private let glass = NSGlassEffectView()
+    private let backdrop = Backdrop()
     private let content: () -> AnyView
     private let opened: () -> Void
     private let closed: () -> Void
@@ -32,9 +33,11 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         panel.identifier = PanelWindow.id
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        // hazard: a borderless window's own shadow and rim follow its
-        // frame's square corners, not the glass's (capture cap4), so the
-        // glass's own edge and shadow are the panel's only ones.
+        // hazard: the glass draws its own shadow past its edge, and a window
+        // the glass's size clips it to the frame's square corners (the
+        // owner's capture, 2026-11-11); the window's own shadow then follows
+        // that square alpha. So the window is the glass grown by `shade`, a
+        // clear margin the glass's shadow fades out in, and casts none itself.
         panel.hasShadow = false
         panel.level = .popUpMenu
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
@@ -42,7 +45,9 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         panel.hidesOnDeactivate = false
         glass.style = .regular
         glass.cornerRadius = Token.Glass.window
-        panel.contentView = glass
+        backdrop.addSubview(glass)
+        backdrop.outside = { [weak self] in self?.hide() }
+        panel.contentView = backdrop
         panel.delegate = self
         panel.cancelled = { [weak self] in self?.hide() }
         item.button?.target = self
@@ -120,7 +125,8 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             return
         }
         placing = true
-        let frame = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
+        let glassFrame = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
+        let frame = glassFrame.insetBy(dx: -Self.shade, dy: -Self.shade)
         if shown, frame != panel.frame, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             NSAnimationContext.runAnimationGroup { context in
                 let p = Token.Motion.smoothPoints.map { Float($0) }
@@ -132,7 +138,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             panel.setFrame(frame, display: true)
         }
         placing = false
-        report?("window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
+        report?("glass \(Self.frame(glassFrame)) window \(Self.frame(frame)) key=\(panel.isKeyWindow)")
         if let next = pending {
             pending = nil
             fit(next)
@@ -158,6 +164,27 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     // least room to the screen's edge.
     static let drop: CGFloat = 6
     static let margin: CGFloat = 8
+    // value: past the glass's shadow, which the capture reads fading out
+    // within it on every side.
+    nonisolated static let shade: CGFloat = 40
+}
+
+// invariant: the window's margin around the glass is clear and holds only
+// the glass's shadow; a click there is a click outside the panel.
+final class Backdrop: NSView {
+    var outside: (() -> Void)?
+
+    // hazard: not an autoresizing mask: the window opens from a zero frame,
+    // where a mask records the margins as 40 and -40 and the glass then
+    // overhangs the window's top and right (run k1).
+    override func resizeSubviews(withOldSize _: NSSize) {
+        let inner = bounds.insetBy(dx: StatusPanel.shade, dy: StatusPanel.shade)
+        guard !inner.isNull else { return }
+        for view in subviews { view.frame = inner }
+    }
+
+    override func mouseDown(with _: NSEvent) { outside?() }
+    override func rightMouseDown(with _: NSEvent) { outside?() }
 }
 
 final class GlassPanel: NSPanel {
