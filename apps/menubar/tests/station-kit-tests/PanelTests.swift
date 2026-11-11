@@ -51,13 +51,14 @@ final class PanelTests: XCTestCase {
             let glass = try XCTUnwrap(GlassTests.opaque(AnyView(Frame(rows: 4).stationAccessibility()), scheme: scheme))
             XCTAssertLessThan(glass, 0.4, "\(scheme)")
             for variant in Self.variants.dropFirst() {
-                let solid = AnyView(Frame(rows: 4).stationAccessibility(contrast: variant.contrast, reduceTransparency: variant.reduceTransparency))
+                let solid = AnyView(Frame(rows: 4).environment(\.stationStill, true)
+                    .stationAccessibility(contrast: variant.contrast, reduceTransparency: variant.reduceTransparency))
                 XCTAssertGreaterThan(try XCTUnwrap(GlassTests.opaque(solid, scheme: scheme)), 0.8, "\(variant.name) \(scheme)")
             }
         }
     }
 
-    func testLiveThePanelAddsOnlyItsTintAndRimAndDrawnStillItsShadowsToo() throws {
+    func testLiveThePanelPaintsNoFillNorRimAndDrawnStillItsOwnGlass() throws {
         func alpha(still: Bool, below: Bool) throws -> UInt8 {
             let pane = Panel { Color.clear.frame(width: Token.Metric.Panel.width, height: 120) }.padding(60)
             let renderer = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, still))
@@ -66,10 +67,18 @@ final class PanelTests: XCTestCase {
             let y = below ? bitmap.height - 40 : bitmap.height / 2
             return bitmap.pixels[(y * bitmap.width + bitmap.width / 2) * 4 + 3]
         }
-        XCTAssertEqual(Double(try alpha(still: false, below: false)) / 255, 0.52, accuracy: 0.02)
-        XCTAssertEqual(try alpha(still: true, below: false), try alpha(still: false, below: false))
+        XCTAssertEqual(try alpha(still: false, below: false), 0)
         XCTAssertEqual(try alpha(still: false, below: true), 0)
+        XCTAssertGreaterThan(try alpha(still: true, below: false), 0)
         XCTAssertGreaterThan(try alpha(still: true, below: true), 0)
+    }
+
+    func testLiveThePanelPaintsNoRimOnItsEdge() throws {
+        let pane = Panel { Color.clear.frame(width: Token.Metric.Panel.width, height: 120) }
+        let renderer = ImageRenderer(content: pane.stationTheme(.dark).environment(\.stationStill, false))
+        renderer.scale = 1
+        let bitmap = try XCTUnwrap(renderer.cgImage.flatMap(Bitmap.init))
+        XCTAssertEqual(stride(from: 3, to: bitmap.pixels.count, by: 4).filter { bitmap.pixels[$0] != 0 }.count, 0)
     }
 
     func testThePanelIsAsTallAsItsContentUnderTheCap() throws {

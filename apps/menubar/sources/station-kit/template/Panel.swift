@@ -325,13 +325,16 @@ struct EdgeFade: View {
     }
 }
 
+// invariant: live the pane paints nothing: MenuBarExtra's window is already the
+// system glass, and a second fill and rim over it doubles the background; the
+// fill, shadows and rim stand in for that glass in still (offscreen) renders only.
 struct PanelPane: ViewModifier {
     var bare = false
     @Environment(\.stationStill) private var still
     @Environment(\.stationTokens) private var tokens
 
     func body(content: Content) -> some View {
-        if bare {
+        if bare || !still {
             content.containerShape(RoundedRectangle(cornerRadius: Token.Glass.window, style: .continuous))
         } else {
             pane(content)
