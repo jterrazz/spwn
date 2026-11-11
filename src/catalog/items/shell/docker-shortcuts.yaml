@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: setting
+name: docker-shortcuts
+order: 250
+description: 'Docker shortcuts: dclean, dclean-images, dreset, each asks first'
+reversible: true
+methods:
+    - os: any
+      zsh-functions:
+          from: zsh/docker-shortcuts.zsh
+          functions: [dclean, dclean-images, dreset]
+writes:
+    - path: '{config}/station/zsh/docker-shortcuts.zsh'
+      level: settings
+      note: the functions station's zsh block defines

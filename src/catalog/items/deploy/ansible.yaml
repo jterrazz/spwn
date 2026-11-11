@@ -1,0 +1,23 @@
+item: station.catalog/v1
+kind: app
+name: ansible
+order: 450
+description: Agentless IT automation and configuration management
+provides: [ansible]
+methods:
+    - os: macos
+      brew: ansible
+    - os: linux
+      mise:
+          name: pipx:ansible
+          version: latest
+disk:
+    paths:
+        - path: ~/.ansible/tmp
+          level: cache
+        - path: ~/.ansible/collections
+          level: data
+    free:
+        - delete: [~/.ansible/tmp/*]
+    erase:
+        - delete: [~/.ansible/collections/*]

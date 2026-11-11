@@ -31,7 +31,7 @@ func (s *Machinist) lookup(name string) (Machine, error) {
 	}
 	for _, r := range records {
 		if r.Name == name {
-			return Machine{Name: name, Kind: kindOfImage(r.Image), Mac: cfg.ThisMachine, User: s.vmUser(cfg), Lifetime: r.Lifetime}, nil
+			return Machine{Name: name, Kind: s.kindOfImage(r.Image), Mac: cfg.ThisMachine, User: s.vmUser(cfg), Lifetime: r.Lifetime}, nil
 		}
 	}
 	// value: a Mac answers to its short name too, the one All machines shows

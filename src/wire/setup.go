@@ -14,7 +14,6 @@ import (
 
 	"github.com/jterrazz/studio-station/src/accounts"
 	accountscontract "github.com/jterrazz/studio-station/src/accounts/contract"
-	"github.com/jterrazz/studio-station/src/catalog"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/platform/local"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
@@ -42,7 +41,7 @@ func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 		// observable; unset, the running binary is the one re-executed.
 		Executable:      m.or("STATION_EXECUTABLE", m.sys.Env.Executable()),
 		Detached:        m.vars["STATION_XDG_DETACHED"] == "1",
-		Apps:            catalog.Apps,
+		Apps:            m.cat.Apps,
 		Expand:          m.expander(),
 		Files:           m.appFiles(),
 		Configurer:      setupSettingsWriter{settings: settingsOf(m)},

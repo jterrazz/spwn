@@ -35,10 +35,13 @@ type Hypervisor struct {
 	w    *world.World
 	mac  string
 	name string
+	// value: how the catalog installs the hypervisor on a Mac, which the
+	// world's installers hold once it is installed.
+	install catalog.Install
 }
 
-func HypervisorOf(w *world.World, mac, name string) *Hypervisor {
-	return &Hypervisor{w: w, mac: mac, name: name}
+func HypervisorOf(w *world.World, mac, name string, install catalog.Install) *Hypervisor {
+	return &Hypervisor{w: w, mac: mac, name: name, install: install}
 }
 
 func (h *Hypervisor) Name() string {
@@ -55,18 +58,12 @@ func (h *Hypervisor) Installed() bool {
 	if m.Hypervisor != "none" {
 		return true
 	}
-	for _, a := range catalog.Apps {
-		if a.Name != catalog.HypervisorApp {
-			continue
-		}
-		i, ok := a.InstallOn(catalog.Mac)
-		if !ok || m.Apps[i.Method()] == nil {
-			return false
-		}
-		_, held := m.Apps[i.Method()].Installed[i.Key()]
-		return held
+	i := h.install
+	if i == nil || m.Apps[i.Method()] == nil {
+		return false
 	}
-	return false
+	_, held := m.Apps[i.Method()].Installed[i.Key()]
+	return held
 }
 
 func (h *Hypervisor) Version(context.Context) (string, error) { return "1.0.0", nil }

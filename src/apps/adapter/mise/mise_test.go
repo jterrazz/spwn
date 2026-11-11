@@ -45,7 +45,7 @@ func (r *runtimes) play(c local.Cmd) (local.Output, error) {
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Mise("node", "lts"), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.MiseInstall{App: "node", Version: "lts"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		r := &runtimes{pinned: map[string]string{}, fails: seed.Fails}
 		for k, v := range seed.Installed {
 			r.pinned[k] = v

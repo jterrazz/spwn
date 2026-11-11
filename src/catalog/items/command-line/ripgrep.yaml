@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: ripgrep
+order: 240
+description: Fast grep, the rg agents and editors shell out to
+replaces: grep (what agents and editors call)
+provides: [rg]
+methods:
+    - os: macos
+      brew: ripgrep
+    - os: linux
+      mise:
+          name: ripgrep
+          version: latest

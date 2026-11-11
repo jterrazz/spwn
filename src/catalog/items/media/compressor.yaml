@@ -1,0 +1,12 @@
+item: station.catalog/v1
+kind: app
+name: compressor
+order: 840
+description: Apple video compression
+bundle: Compressor
+methods:
+    - os: macos
+      only: mac
+      mas:
+          id: 424390742
+          name: Compressor

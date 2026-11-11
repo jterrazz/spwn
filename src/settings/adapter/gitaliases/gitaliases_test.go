@@ -30,7 +30,12 @@ func (*memory) MkdirAll(string, fs.FileMode) error { return nil }
 const owners = "[user]\n\tname = Owner\n[alias]\n\tco = checkout\n"
 
 func item() catalog.Setting {
-	return catalog.Setting{Name: "git-shortcuts", Effect: catalog.GitShortcuts}
+	c, err := catalog.Builtin()
+	if err != nil {
+		panic(err)
+	}
+	it, _ := c.Setting(catalog.GitShortcutsSetting)
+	return it
 }
 
 func TestApplier(t *testing.T) {

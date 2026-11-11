@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: fd
+order: 230
+description: Fast find alternative
+replaces: find
+provides: [fd]
+methods:
+    - os: macos
+      brew: fd
+    - os: linux
+      mise:
+          name: fd
+          version: latest

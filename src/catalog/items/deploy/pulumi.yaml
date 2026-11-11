@@ -1,0 +1,27 @@
+item: station.catalog/v1
+kind: app
+name: pulumi
+order: 470
+description: Infrastructure as code using real programming languages
+provides: [pulumi]
+methods:
+    - os: macos
+      trusted: true
+      brew: pulumi/tap/pulumi
+    - os: linux
+      mise:
+          name: pulumi
+          version: latest
+disk:
+    paths:
+        - path: ~/.pulumi/plugins
+          level: cache
+        - path: ~/.pulumi/workspaces
+          level: data
+        - path: ~/.pulumi/credentials.json
+          level: kept
+    free:
+        - run: [pulumi, plugin, rm, --all, --yes]
+          needs: pulumi
+    erase:
+        - delete: [~/.pulumi/workspaces/*]

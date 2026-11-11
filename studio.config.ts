@@ -47,10 +47,14 @@ export default defineConfig({
                     "written by `make generate` from the stories' scene, byte for byte what the play world drift test compares",
                 'src/remote/api/calls.json':
                     'written by `make generate` from the call registry, byte for byte what the calls-json-fresh test compares',
+                'schemas/**':
+                    "written by `make generate` from the catalog's Go types, byte for byte what the catalog schema drift test compares",
             },
         },
         roots: {
             scripts: 'the curl-piped installer a fresh machine runs before `station` exists on it',
+            schemas:
+                "the JSON Schemas of station's own file formats, `station.catalog/v1` first, which an editor checks an item file against",
         },
     },
 });

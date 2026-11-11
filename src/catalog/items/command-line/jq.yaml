@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: app
+name: jq
+order: 280
+description: Command-line JSON processor
+provides: [jq]
+methods:
+    - os: macos
+      brew: jq
+    - os: linux
+      mise:
+          name: jq
+          version: latest

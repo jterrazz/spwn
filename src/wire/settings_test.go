@@ -17,7 +17,11 @@ func TestEverySettingOfTheCatalogueIsWrittenByAnApplierOnARealMac(t *testing.T) 
 
 	appliers := settingscontract.NewAppliers(settingAppliers(machine{sys: system, vars: map[string]string{}, stores: &stores{}})...)
 
-	for _, it := range catalog.Settings {
+	c, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, it := range c.Settings {
 		if _, ok := appliers.For(it); !ok {
 			t.Errorf("%s: its effect %v is written by no Applier", it.Name, it.Effect)
 		}

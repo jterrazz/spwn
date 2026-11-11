@@ -67,8 +67,8 @@ func TestARowPastTheBudgetIsUnknownAndDelaysNoOtherRow(t *testing.T) {
 	fs := slowUsage{Usage: usage, release: make(chan struct{})}
 	defer close(fs.release)
 	apps := []catalog.App{
-		{Name: "slow", Installs: catalog.MacOnly(catalog.Cask("slow")), Disk: catalog.Disk{Paths: []catalog.Stored{{Path: "~/slow/*", Level: catalog.LevelCache}}}},
-		{Name: "fast", Installs: catalog.MacOnly(catalog.Cask("fast")), Disk: catalog.Disk{Paths: []catalog.Stored{{Path: "~/fast/*", Level: catalog.LevelCache}}}},
+		{Name: "slow", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "slow"}}}, Disk: catalog.Disk{Paths: []catalog.Stored{{Path: "~/slow/*", Level: catalog.LevelCache}}}},
+		{Name: "fast", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "fast"}}}, Disk: catalog.Disk{Paths: []catalog.Stored{{Path: "~/fast/*", Level: catalog.LevelCache}}}},
 	}
 	s := NewSurveyor(onMachine{Usage: usage}, apps, SurveyorOptions{Disk: fs, ThisMachine: catalog.Mac, Expand: disk.Expander{Home: "/h"}, Budget: 30 * time.Millisecond})
 

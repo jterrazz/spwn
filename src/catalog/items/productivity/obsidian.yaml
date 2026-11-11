@@ -1,0 +1,16 @@
+item: station.catalog/v1
+kind: app
+name: obsidian
+order: 780
+description: Knowledge base and note-taking
+bundle: Obsidian
+methods:
+    - os: macos
+      only: mac
+      cask: obsidian
+disk:
+    paths:
+        - path: ~/Library/Application Support/obsidian
+          level: data
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Obsidian

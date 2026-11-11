@@ -173,7 +173,7 @@ func (s shell) gesture(a page.Action, rows []page.Row) (gesture.Gesture, bool) {
 			_, machine, _ := s.cell(s.key(s.current(), s.section())).Current()
 			return matrixscreen.Gesture(a, rows, machine)
 		}
-		return settingsscreen.Gesture(a, rows)
+		return settingsscreen.Gesture(s.deps.Settings, a, rows)
 	case section.Disk:
 		return diskscreen.Gesture(p, a, rows)
 	case section.Accounts:

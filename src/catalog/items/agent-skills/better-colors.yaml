@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: better-colors
+order: 1080
+description: Color craft
+methods:
+    - os: any
+      skill:
+          repo: jakubkrehel/skills
+          name: better-colors

@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: agent-browser-skill
+order: 1130
+description: Drive agent-browser, the browser automation CLI
+methods:
+    - os: any
+      skill:
+          repo: vercel-labs/agent-browser
+          name: agent-browser

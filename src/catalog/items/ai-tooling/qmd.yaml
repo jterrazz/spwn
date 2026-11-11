@@ -1,0 +1,20 @@
+item: station.catalog/v1
+kind: app
+name: qmd
+order: 580
+description: Local semantic search over markdown
+replaces: grep over markdown notes
+provides: [qmd]
+requires: [bun]
+methods:
+    - os: any
+      package: github:tobi/qmd
+      bun: qmd
+disk:
+    paths:
+        - path: '{cache}/qmd'
+          level: cache
+          note: 'GGUF models and the index: rebuilt by a reindex'
+    free:
+        - delete: ['{cache}/qmd/*']
+    no-erase: 'nothing to erase: keys and logins are kept'

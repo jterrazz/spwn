@@ -1,0 +1,30 @@
+item: station.catalog/v1
+kind: app
+name: docker
+order: 390
+description: Container engine, inside the Linux VM
+provides: [docker]
+version:
+    args: [docker, --version]
+    pattern: Docker version ([^,\s]+)
+methods:
+    - os: linux
+      script:
+          url: https://get.docker.com
+disk:
+    paths:
+        - path: ~/.docker
+          level: settings
+    size: docker-system-df
+    free:
+        - run: [docker, container, prune, -f]
+          needs: docker
+        - run: [docker, image, prune, -f]
+          needs: docker
+        - run: [docker, volume, prune, -f]
+          needs: docker
+        - run: [docker, network, prune, -f]
+          needs: docker
+        - run: [docker, builder, prune, -f]
+          needs: docker
+    no-erase: dreset, the Docker shortcuts

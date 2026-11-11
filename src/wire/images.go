@@ -9,7 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/engine/process"
@@ -37,7 +36,7 @@ func (m machine) images() *imagescalls.Builder {
 	return imagescalls.NewBuilder(imagesMachine{h: m.sys, keys: openssh.NewKeyGen(m.sys.Run, m.sys.FS)}, imagescalls.Contracts{
 		Hypervisor: hypervisor, Builds: m.buildVMs(hypervisor), Store: m.stores.images,
 		Source: m.imageSource(hypervisor.Name()), Machines: m.stores.machines,
-	}, catalog.Images, imagescalls.BuilderOptions{
+	}, m.cat.Images, imagescalls.BuilderOptions{
 		Cache: m.paths.Cache, Key: filepath.Join(m.paths.State, "images", "key"),
 		Version: Version(),
 		User:    user,
@@ -54,10 +53,10 @@ func (m machine) imageSource(hypervisor string) imagescontract.ImageSource {
 }
 
 func imagesCommand(env kit.Env, m machine) *cobra.Command {
-	return imagescmd.Command(imagescmd.Deps{ThisMachine: m.where, Every: func(ctx context.Context) ([]model.Report, error) { return m.everyMacImages(ctx, env) }}, env,
-		imagesbuild.Command(imagesbuild.Deps{ThisMachine: m.where}, env),
-		imagesupdate.Command(imagesupdate.Deps{ThisMachine: m.where}, env),
-		imagesdelete.Command(imagesdelete.Deps{ThisMachine: m.where}, env),
+	return imagescmd.Command(imagescmd.Deps{ThisMachine: m.where, Images: m.cat.Images, Every: func(ctx context.Context) ([]model.Report, error) { return m.everyMacImages(ctx, env) }}, env,
+		imagesbuild.Command(imagesbuild.Deps{ThisMachine: m.where, Images: m.cat.Images}, env),
+		imagesupdate.Command(imagesupdate.Deps{ThisMachine: m.where, Images: m.cat.Images}, env),
+		imagesdelete.Command(imagesdelete.Deps{ThisMachine: m.where, Images: m.cat.Images}, env),
 	)
 }
 

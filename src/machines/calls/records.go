@@ -43,8 +43,8 @@ func (s *Machinist) records() ([]model.VMRecord, error) {
 	return out, nil
 }
 
-func kindOfImage(image string) catalog.MachineKind {
-	for _, i := range catalog.Images {
+func (s *Machinist) kindOfImage(image string) catalog.MachineKind {
+	for _, i := range s.o.Images {
 		if i.Name == image {
 			return i.Kind
 		}
@@ -73,7 +73,7 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 	for _, r := range records {
 		info := engine[r.Name]
 		vm := model.VM{
-			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: kindOfImage(r.Image),
+			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: s.kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
 			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: r.Check, CreatedAt: r.CreatedAt, Agents: r.Agents,
 		}

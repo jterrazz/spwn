@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: app
+name: xcodegen
+order: 370
+description: Generates Xcode projects from a spec
+provides: [xcodegen]
+methods:
+    - os: macos
+      brew: xcodegen

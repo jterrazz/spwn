@@ -1,0 +1,21 @@
+item: station.catalog/v1
+kind: app
+name: gemini
+order: 510
+description: Google's CLI coding agent
+provides: [gemini]
+methods:
+    - os: macos
+      brew: gemini-cli
+    - os: linux
+      mise:
+          name: gemini
+          version: latest
+disk:
+    paths:
+        - path: ~/.gemini
+          level: data
+          note: 'beside its settings: not separable by a glob'
+        - path: ~/.gemini/settings.json
+          level: settings
+    no-erase: 'gemini keeps its login beside its data: erase it by hand'

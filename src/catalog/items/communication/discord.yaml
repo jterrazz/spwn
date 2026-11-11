@@ -1,0 +1,25 @@
+item: station.catalog/v1
+kind: app
+name: discord
+order: 720
+description: Voice and text chat
+bundle: Discord
+methods:
+    - os: macos
+      only: mac
+      cask: discord
+disk:
+    paths:
+        - path: ~/Library/Application Support/discord/Cache
+          level: cache
+        - path: ~/Library/Application Support/discord/Code Cache
+          level: cache
+        - path: ~/Library/Application Support/discord/DawnCache
+          level: cache
+    free:
+        - delete:
+              - ~/Library/Application Support/discord/Cache/*
+              - ~/Library/Application Support/discord/Code Cache/*
+              - ~/Library/Application Support/discord/DawnCache/*
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Discord

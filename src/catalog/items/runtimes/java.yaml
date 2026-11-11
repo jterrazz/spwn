@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: java
+order: 110
+description: Java Development Kit (Temurin)
+provides: [java]
+version:
+    args: [java, -version]
+    pattern: version "([^"]+)"
+methods:
+    - os: any
+      mise:
+          name: java
+          version: temurin-21

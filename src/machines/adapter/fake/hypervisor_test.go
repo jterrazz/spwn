@@ -13,7 +13,7 @@ func TestTheFakeHypervisorKeepsTheContract(t *testing.T) {
 	contracttest.Hypervisor(t, func(*testing.T) contracttest.Subject {
 		w := &world.World{}
 		return contracttest.Subject{
-			Hypervisor: HypervisorOf(w, "mac-mini", "vz"),
+			Hypervisor: HypervisorOf(w, "mac-mini", "vz", nil),
 			End: func(r contract.Run, how machines.EndReason) {
 				end := machines.RunEnd{Reason: how}
 				if how == machines.Crashed {
@@ -21,7 +21,7 @@ func TestTheFakeHypervisorKeepsTheContract(t *testing.T) {
 				}
 				End(r, end)
 			},
-			Restart: func() contract.Hypervisor { return HypervisorOf(w, "mac-mini", "vz") },
+			Restart: func() contract.Hypervisor { return HypervisorOf(w, "mac-mini", "vz", nil) },
 		}
 	})
 }

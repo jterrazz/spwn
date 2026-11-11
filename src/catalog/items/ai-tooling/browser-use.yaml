@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: app
+name: browser-use
+order: 600
+description: AI agent library for browser automation
+provides: [browser-use]
+requires: [uv]
+methods:
+    - os: macos
+      only: vm
+      uv: browser-use
+    - os: linux
+      mise:
+          name: pipx:browser-use
+          version: latest

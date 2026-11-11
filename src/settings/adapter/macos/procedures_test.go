@@ -52,13 +52,15 @@ func (noJobs) Overrides(context.Context, backgroundcontract.Domain) map[string]b
 
 func setting(t *testing.T, name string) catalog.Setting {
 	t.Helper()
-	for _, it := range catalog.Settings {
-		if it.Name == name {
-			return it
-		}
+	c, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
 	}
-	t.Fatalf("no setting %s", name)
-	return catalog.Setting{}
+	it, ok := c.Setting(name)
+	if !ok {
+		t.Fatalf("no setting %s", name)
+	}
+	return it
 }
 
 func applierOf(t *testing.T, run local.Runner, files MacFiles, it catalog.Setting) contract.Applier {

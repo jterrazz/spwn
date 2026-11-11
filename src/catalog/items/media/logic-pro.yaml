@@ -1,0 +1,12 @@
+item: station.catalog/v1
+kind: app
+name: logic-pro
+order: 870
+description: Professional music making
+bundle: Logic Pro
+methods:
+    - os: macos
+      only: mac
+      mas:
+          id: 634148309
+          name: Logic Pro

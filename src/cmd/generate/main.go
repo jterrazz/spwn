@@ -32,6 +32,7 @@ func main() {
 	catalogue := flag.String("calls", callsPath, "calls.json, the registry's catalogue, rewritten whole")
 	stories := flag.String("stories", storiesDir, "the folder the story worlds' pages are written to")
 	world := flag.String("world", pages.PlayWorldPath, "the stories' machines as an engine world, the play rig's, rewritten whole")
+	schema := flag.String("schema", schemaPath, "the JSON Schema of an item file of the catalog, rewritten whole")
 	flag.Parse()
 	current, err := os.ReadFile(*path)
 	if err != nil {
@@ -68,6 +69,12 @@ func main() {
 		panic(err)
 	}
 	if err := os.WriteFile(*world, playWorld(), 0o600); err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(*schema), 0o750); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(*schema, catalogSchema(), 0o600); err != nil {
 		panic(err)
 	}
 }
@@ -117,7 +124,7 @@ func appsBlock() string {
 	var sections []string
 	for _, category := range catalog.Categories {
 		lines := []string{"### " + string(category), ""}
-		for _, t := range catalog.Apps {
+		for _, t := range builtin().Apps {
 			if t.Category != category {
 				continue
 			}
@@ -138,7 +145,7 @@ func appsBlock() string {
 // writes, so the formatter and the sync test agree on every byte.
 func preferBlock() string {
 	rows := [][2]string{{"Instead of", "Use"}}
-	for _, t := range catalog.Apps {
+	for _, t := range builtin().Apps {
 		if t.Replaces != "" {
 			rows = append(rows, [2]string{t.Replaces, "`" + t.Name + "`: " + t.Description})
 		}
@@ -161,4 +168,14 @@ func preferBlock() string {
 
 func pad(cell string, width int) string {
 	return cell + strings.Repeat(" ", width-utf8.RuneCountInString(cell))
+}
+
+// value: the catalog station ships, which every projection reads; a catalog
+// that does not load stops the compiler.
+func builtin() catalog.Catalog {
+	c, err := catalog.Builtin()
+	if err != nil {
+		panic(err)
+	}
+	return c
 }

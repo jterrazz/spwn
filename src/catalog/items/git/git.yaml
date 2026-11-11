@@ -1,0 +1,18 @@
+item: station.catalog/v1
+kind: app
+name: git
+order: 290
+description: Distributed version control system, from xcode-select
+provides: [git]
+version:
+    args: [git, --version]
+    pattern: git version (\S+)
+methods:
+    - os: macos
+      script:
+          run: xcode-select --install
+disk:
+    paths:
+        - path: ~/.gitconfig
+          level: settings
+    no-erase: 'nothing to erase: keys and logins are kept'

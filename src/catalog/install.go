@@ -19,6 +19,9 @@ const (
 	MethodShell  Method = "shell"
 	MethodApp    Method = "app"
 	MethodSkill  Method = "skill"
+	// invariant: the command comes with another item's install: installing it
+	// installs that item, and its presence is its own provides.
+	MethodProvidedBy Method = "provided-by"
 )
 
 type Install interface {
@@ -65,17 +68,24 @@ type AppInstall struct{ Hint string }
 
 type SkillInstall struct{ Repo, Skill string }
 
-func (BrewInstall) Method() Method   { return MethodBrew }
-func (CaskInstall) Method() Method   { return MethodCask }
-func (MasInstall) Method() Method    { return MethodMas }
-func (NpmInstall) Method() Method    { return MethodNpm }
-func (UvInstall) Method() Method     { return MethodUv }
-func (BunInstall) Method() Method    { return MethodBun }
-func (MiseInstall) Method() Method   { return MethodMise }
-func (ScriptInstall) Method() Method { return MethodScript }
-func (ShellInstall) Method() Method  { return MethodShell }
-func (AppInstall) Method() Method    { return MethodApp }
-func (SkillInstall) Method() Method  { return MethodSkill }
+type ProvidedByInstall struct {
+	Item string
+	// value: the commands the item brings, which its install finds.
+	Commands []string
+}
+
+func (BrewInstall) Method() Method       { return MethodBrew }
+func (CaskInstall) Method() Method       { return MethodCask }
+func (MasInstall) Method() Method        { return MethodMas }
+func (NpmInstall) Method() Method        { return MethodNpm }
+func (UvInstall) Method() Method         { return MethodUv }
+func (BunInstall) Method() Method        { return MethodBun }
+func (MiseInstall) Method() Method       { return MethodMise }
+func (ScriptInstall) Method() Method     { return MethodScript }
+func (ShellInstall) Method() Method      { return MethodShell }
+func (AppInstall) Method() Method        { return MethodApp }
+func (SkillInstall) Method() Method      { return MethodSkill }
+func (ProvidedByInstall) Method() Method { return MethodProvidedBy }
 
 func (i BrewInstall) Key() string { return lastSegment(i.Formula) }
 func (i CaskInstall) Key() string { return lastSegment(i.Token) }
@@ -94,47 +104,36 @@ func (i BunInstall) Key() string {
 	return i.Package
 }
 
-func (i MiseInstall) Key() string   { return i.App }
-func (i ScriptInstall) Key() string { return i.URL }
-func (i ShellInstall) Key() string  { return i.Line }
-func (i AppInstall) Key() string    { return i.Hint }
-func (i SkillInstall) Key() string  { return i.Skill }
+func (i MiseInstall) Key() string       { return i.App }
+func (i ScriptInstall) Key() string     { return i.URL }
+func (i ShellInstall) Key() string      { return i.Line }
+func (i AppInstall) Key() string        { return i.Hint }
+func (i SkillInstall) Key() string      { return i.Skill }
+func (i ProvidedByInstall) Key() string { return i.Item }
 
-func (BrewInstall) isInstall()   {}
-func (CaskInstall) isInstall()   {}
-func (MasInstall) isInstall()    {}
-func (NpmInstall) isInstall()    {}
-func (UvInstall) isInstall()     {}
-func (BunInstall) isInstall()    {}
-func (MiseInstall) isInstall()   {}
-func (ScriptInstall) isInstall() {}
-func (ShellInstall) isInstall()  {}
-func (AppInstall) isInstall()    {}
-func (SkillInstall) isInstall()  {}
-
-func Brew(formula string) Install        { return BrewInstall{Formula: formula} }
-func TrustedBrew(formula string) Install { return BrewInstall{Formula: formula, Trusted: true} }
-func Cask(token string) Install          { return CaskInstall{Token: token} }
-func Mas(name string, id int) Install    { return MasInstall{Name: name, ID: id} }
-func Npm(pkg string) Install             { return NpmInstall{Package: pkg} }
-func Uv(pkg string) Install              { return UvInstall{Package: pkg} }
-func Bun(pkg string) Install             { return BunInstall{Package: pkg} }
-func BunAs(source, name string) Install  { return BunInstall{Package: source, Name: name} }
-func Mise(app, version string) Install   { return MiseInstall{App: app, Version: version} }
-func Shell(line string) Install          { return ShellInstall{Line: line} }
-func AppFrom(hint string) Install        { return AppInstall{Hint: hint} }
-func Skill(repo, skill string) Install   { return SkillInstall{Repo: repo, Skill: skill} }
-
-func Script(url string, args ...string) Install { return ScriptInstall{URL: url, Args: args} }
-
-func ScriptEnv(url string, env []string, args ...string) Install {
-	return ScriptInstall{URL: url, Args: args, Env: env}
-}
-
-func ScriptUpgrade(url string, env []string, upgrade string) Install {
-	return ScriptInstall{URL: url, Env: env, Upgrade: upgrade}
-}
+func (BrewInstall) isInstall()       {}
+func (CaskInstall) isInstall()       {}
+func (MasInstall) isInstall()        {}
+func (NpmInstall) isInstall()        {}
+func (UvInstall) isInstall()         {}
+func (BunInstall) isInstall()        {}
+func (MiseInstall) isInstall()       {}
+func (ScriptInstall) isInstall()     {}
+func (ShellInstall) isInstall()      {}
+func (AppInstall) isInstall()        {}
+func (SkillInstall) isInstall()      {}
+func (ProvidedByInstall) isInstall() {}
 
 func lastSegment(name string) string {
 	return name[strings.LastIndex(name, "/")+1:]
 }
+
+// invariant: a skill item is named after its skill, except where that name is
+// already an app's: then it carries the `-skill` suffix, and its install keeps
+// the upstream name the skills lock records.
+
+// value: the agents a skill is installed for: Claude Code (~/.claude/skills) and
+// the shared ~/.agents/skills that codex and the other universal agents read.
+// Without it the skills CLI, finding no agent on a fresh home, writes to all 79.
+
+var SkillAgents = []string{"claude-code", "codex"}

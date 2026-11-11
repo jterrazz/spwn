@@ -38,11 +38,11 @@ func oldGitWord(alias string) string {
 
 type runGitIn struct{ Words []string }
 
-func RunGit(env kit.Env) *cobra.Command {
+func RunGit(env kit.Env, aliases []catalog.GitAlias) *cobra.Command {
 	// value: v2's run git <shortcut>, now git's own alias (SPEC §4.3): it
 	// runs that alias through the Git shortcuts setting.
-	leaves := make([]*cobra.Command, 0, len(catalog.GitShortcuts.Aliases))
-	for _, a := range catalog.GitShortcuts.Aliases {
+	leaves := make([]*cobra.Command, 0, len(aliases))
+	for _, a := range aliases {
 		leaves = append(leaves, gitLeaf(env, oldGitWord(a.Name), a.Name))
 	}
 	return kit.Group(catalog.GitShortcutsGroup, "Git shortcuts, now git's own aliases", "", env, leaves...)

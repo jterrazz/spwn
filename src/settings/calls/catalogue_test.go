@@ -7,7 +7,7 @@ import (
 )
 
 func TestAnEffectNobodyHandlesIsAnErrorNotASilentSuccess(t *testing.T) {
-	svc := NewCatalogue(catalog.Settings, CatalogueOptions{ThisMachine: catalog.Mac})
+	svc := NewCatalogue(nil, CatalogueOptions{ThisMachine: catalog.Mac})
 	if _, err := svc.handler(catalog.Setting{Name: "x", Effect: catalog.Procedure("nope")}); err == nil {
 		t.Fatal("an unknown procedure dispatched")
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/apps"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/page"
 	pageapps "github.com/jterrazz/studio-station/src/pages/apps"
@@ -19,6 +20,8 @@ type Deps struct {
 	// value: the catalogue apps placed on this machine, for completion.
 	Names       func() []string
 	ThisMachine page.Context
+	// value: the catalog's apps, those of other machines among them.
+	Apps []catalog.App
 }
 
 func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
@@ -47,7 +50,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				return io.Page(pageapps.Show(out.Report, out.ThisMachine, d.ThisMachine), pageapps.ListContract(call.Schema(appscalls.Show.Name), []apps.Report{out.Report}))
+				return io.Page(pageapps.Show(out.Report, out.ThisMachine, d.ThisMachine), pageapps.ListContract(call.Schema(appscalls.Show.Name), []apps.Report{out.Report}, d.Apps))
 			}
 			thisMac := d.ThisMachine
 			if env.Far() {
@@ -59,7 +62,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 					return err
 				}
 				if err := io.LivePage(kit.Updates(updates, func(r []apps.Report) page.Page {
-					return pageapps.List(r, thisMac, in.All)
+					return pageapps.List(r, d.Apps, thisMac, in.All)
 				})); err != nil {
 					return err
 				}
@@ -69,7 +72,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pageapps.List(reports, thisMac, in.All), pageapps.ListContract(call.Schema(appscalls.List.Name), reports))
+			return io.Page(pageapps.List(reports, d.Apps, thisMac, in.All), pageapps.ListContract(call.Schema(appscalls.List.Name), reports, d.Apps))
 		},
 	}, env)
 	cmd.AddCommand(children...)

@@ -4,12 +4,16 @@ import (
 	"context"
 
 	"github.com/jterrazz/studio-station/src/apps"
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/machine"
 )
 
 type Deps struct {
 	Apps Apps
+	// value: the catalog's apps: one that lives on other machines is still
+	// shown, with where it lives.
+	Known []catalog.App
 	// value: the kind of the machine these calls run on.
 	Kind machine.Kind
 }

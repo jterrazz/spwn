@@ -23,9 +23,11 @@ const (
 type Reading struct {
 	Machines *model.AllMachines
 	Images   *[]images.Report
-	Ports    *ports.AllMachines
-	Tailnet  *ports.Status
-	Failed   map[string]page.Error
+	// value: the images the catalog knows, one no Mac holds shown as such.
+	Known   []catalog.Image
+	Ports   *ports.AllMachines
+	Tailnet *ports.Status
+	Failed  map[string]page.Error
 }
 
 func Tab(r Reading, thisMac page.Context) page.Page {
@@ -36,7 +38,7 @@ func Tab(r Reading, thisMac page.Context) page.Page {
 		return []page.Section{s}
 	})...)
 	p.Sections = append(p.Sections, part(r, "images", "Images", r.Images != nil, func() []page.Section {
-		s := pageimages.Section(*r.Images, thisMac)
+		s := pageimages.Section(*r.Images, r.Known, thisMac)
 		s.Role, s.Fold = page.Plain, page.Open
 		return []page.Section{s}
 	})...)

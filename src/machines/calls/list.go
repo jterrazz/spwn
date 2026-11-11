@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/core/confirm"
 	"github.com/jterrazz/studio-station/src/core/fail"
@@ -118,7 +117,7 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 func missingImage(ctx context.Context, d Deps, r machines.CreateRequest) string {
 	_, err := d.Machines.CheckCreate(ctx, r)
 	if unbuilt := new(machines.NoImageError); errors.As(err, &unbuilt) && d.Images != nil {
-		if catalog.FetchedOnly(unbuilt.Image) {
+		if unbuilt.Fetched {
 			return ""
 		}
 		return unbuilt.Image

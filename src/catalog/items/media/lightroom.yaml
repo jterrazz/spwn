@@ -1,0 +1,12 @@
+item: station.catalog/v1
+kind: app
+name: lightroom
+order: 860
+description: Adobe photo editor
+bundle: Adobe Lightroom
+methods:
+    - os: macos
+      only: mac
+      mas:
+          id: 1451544217
+          name: Adobe Lightroom

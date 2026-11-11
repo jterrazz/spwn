@@ -16,6 +16,8 @@ import (
 
 type Options struct {
 	ThisMachine catalog.MachineKind
+	// value: the images the catalog knows, each VM's kind read from its own.
+	Images []catalog.Image
 	// value: the folders of the VMs' known hosts and of their logs.
 	KnownHosts, Logs string
 	User             string

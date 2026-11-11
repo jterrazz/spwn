@@ -1,0 +1,19 @@
+item: station.catalog/v1
+kind: app
+name: tmux
+order: 160
+description: Terminal multiplexer for persistent sessions
+provides: [tmux]
+then: [tmux-dotfiles]
+methods:
+    - os: macos
+      brew: tmux
+    - os: linux
+      mise:
+          name: tmux
+          version: latest
+disk:
+    paths:
+        - path: ~/.tmux.conf
+          level: settings
+    no-erase: 'nothing to erase: keys and logins are kept'

@@ -17,6 +17,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the images the catalog knows, by name.
+	Images []catalog.Image
 }
 
 type Input struct{ Image, Version string }
@@ -32,8 +34,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return nil
 		},
 		Complete: func([]string, string) []string {
-			names := make([]string, 0, len(catalog.Images))
-			for _, img := range catalog.Images {
+			names := make([]string, 0, len(d.Images))
+			for _, img := range d.Images {
 				names = append(names, img.Name)
 			}
 			return names

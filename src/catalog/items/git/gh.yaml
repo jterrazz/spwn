@@ -1,0 +1,30 @@
+item: station.catalog/v1
+kind: app
+name: gh
+order: 320
+description: GitHub CLI for repository management
+replaces: raw GitHub API / web UI
+provides: [gh]
+then: [github-login]
+methods:
+    - os: macos
+      brew: gh
+    - os: linux
+      mise:
+          name: gh
+          version: latest
+disk:
+    paths:
+        - path: '{cache}/gh'
+          level: cache
+        - path: '{state}/gh'
+          level: data
+        - path: '{config}/gh/config.yml'
+          level: settings
+        - path: '{config}/gh/hosts.yml'
+          level: kept
+          note: "the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied)"
+    free:
+        - delete: ['{cache}/gh/*']
+    erase:
+        - delete: ['{state}/gh/*']

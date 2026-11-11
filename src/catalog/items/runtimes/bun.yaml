@@ -1,0 +1,48 @@
+item: station.catalog/v1
+kind: manager
+name: bun
+order: 80
+description: Fast JavaScript runtime and package manager
+provides: [bun]
+methods:
+    - os: any
+      mise:
+          name: bun
+          version: latest
+disk:
+    paths:
+        - path: '{cache}/bun/install'
+          level: cache
+        - path: ~/Library/Caches/bun
+          level: cache
+          'on': [mac, macos]
+        - path: ~/.bunfig.toml
+          level: settings
+    installed: ['{data}/bun/install/global', '{data}/bun/bin']
+    free:
+        - run: [bun, pm, cache, rm]
+          needs: bun
+        - delete: [~/Library/Caches/bun/*]
+          'on': [mac, macos]
+    no-erase: "bun's globals are apps: station apps remove <app>"
+    relocate:
+        - file: bunfig
+          key: install.globalDir
+          value: '{data}/bun/install/global'
+        - file: bunfig
+          key: install.globalBinDir
+          value: '{data}/bun/bin'
+        - file: bunfig
+          key: install.cache.dir
+          value: '{cache}/bun/install'
+    misplaced:
+        - path: ~/.bun
+          move:
+              - from: ~/.bun/install/global
+                to: '{data}/bun/install/global'
+              - from: ~/.bun/bin/*
+                to: '{data}/bun/bin'
+          prune: [~/.bun/bin, ~/.bun/install, ~/.bun]
+          free:
+              - delete: [~/.bun/install/cache]
+                prune: [~/.bun/bin, ~/.bun/install, ~/.bun]

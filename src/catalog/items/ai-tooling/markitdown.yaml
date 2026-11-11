@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: app
+name: markitdown
+order: 610
+description: Convert files to Markdown for LLMs
+provides: [markitdown]
+requires: [uv]
+methods:
+    - os: macos
+      only: vm
+      uv: markitdown[all]
+    - os: linux
+      mise:
+          name: pipx:markitdown[all]
+          version: latest

@@ -11,7 +11,7 @@ import (
 )
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Shell("npx playwright install chromium"), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.ShellInstall{Line: "npx playwright install chromium"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		return shell.New(local.Played(func(c local.Cmd) (local.Output, error) {
 			if seed.Fails || len(c.Args) != 2 || c.Args[0] != "-c" {
 				return local.Output{ExitCode: 1}, nil

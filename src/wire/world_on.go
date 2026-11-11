@@ -279,8 +279,8 @@ func (m *worldMac) system(h local.System) local.System {
 	return h
 }
 
-func (m *worldMac) hypervisor(name string) contract.Hypervisor {
-	return machinesfake.HypervisorOf(m.run.w, m.name, name)
+func (m *worldMac) hypervisor(name string, install catalog.Install) contract.Hypervisor {
+	return machinesfake.HypervisorOf(m.run.w, m.name, name, install)
 }
 
 // invariant: station's own state in a world is its Mac's slice: every store
@@ -346,10 +346,8 @@ func (m *worldMac) listeners() portscontract.Listeners {
 // no world runs a procedure of the real machine.
 func (m *worldMac) procedureAppliers() []settingscontract.Applier {
 	var out []settingscontract.Applier
-	seen := map[catalog.EffectKind]bool{}
-	for _, it := range catalog.Settings {
-		if p, ok := it.Effect.(catalog.Procedure); ok && p != catalog.ProcNeverSleeps && !seen[p.Kind()] {
-			seen[p.Kind()] = true
+	for _, name := range catalog.Procedure("").Enum() {
+		if p := catalog.Procedure(name); p != catalog.ProcNeverSleeps {
 			out = append(out, settingsfake.ApplierOf(m.run.w, m.name, p.Kind()))
 		}
 	}

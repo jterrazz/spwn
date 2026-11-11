@@ -20,7 +20,7 @@ type farMac struct {
 // invariant: a far Mac is built over its own slice of the world, with no
 // terminal: what it asks, it asks of the call's input, as over ssh.
 func (m machine) farMac(env kit.Env, w *worldMac) farMac {
-	there := resolve(m.raw, m.door, m.vars, w)
+	there := resolve(m.raw, m.door, m.vars, w, m.cat)
 	fenv := kit.Env{Out: env.Out, On: &kit.On{ThisMachine: there.thisMac()}, Self: there.profile.Ref}
 	r := there.router(fenv)
 	fenv.Calls = r

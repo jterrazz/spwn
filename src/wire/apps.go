@@ -20,6 +20,7 @@ import (
 	"github.com/jterrazz/studio-station/src/apps/adapter/mas"
 	"github.com/jterrazz/studio-station/src/apps/adapter/mise"
 	"github.com/jterrazz/studio-station/src/apps/adapter/npm"
+	"github.com/jterrazz/studio-station/src/apps/adapter/providedby"
 	"github.com/jterrazz/studio-station/src/apps/adapter/script"
 	"github.com/jterrazz/studio-station/src/apps/adapter/shell"
 	"github.com/jterrazz/studio-station/src/apps/adapter/skills"
@@ -40,7 +41,7 @@ import (
 
 func appsCommand(env kit.Env, m machine) *cobra.Command {
 	names := placedNames(appsOf(env, m))
-	return appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where}, env,
+	return appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where, Apps: m.cat.Apps}, env,
 		appsinstall.Command(appsinstall.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 		appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 		appsremove.Command(appsremove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
@@ -52,7 +53,7 @@ func appsCommand(env kit.Env, m machine) *cobra.Command {
 func appsAlias(env kit.Env, m machine) *cobra.Command {
 	names := placedNames(appsOf(env, m))
 	update := appsupdate.Via(appsupdate.Command(appsupdate.Deps{ThisMachine: m.where, Now: m.sys.Clock.Now}, env))
-	return kit.Alias("tools", appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where}, env,
+	return kit.Alias("tools", appscmd.Command(appscmd.Deps{Names: names, ThisMachine: m.where, Apps: m.cat.Apps}, env,
 		kit.Alias("install", appsinstall.Command(appsinstall.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "install"),
 		kit.Alias("uninstall", appsremove.Command(appsremove.Deps{Names: names, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "remove"),
 		kit.Alias("upgrade", update, "update"),
@@ -76,7 +77,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		ask = env.Prompt
 	}
 	registry, bundler := installers(m)
-	return appscalls.NewShelf(appsMachine{m.sys}, catalog.Apps, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
+	return appscalls.NewShelf(appsMachine{m.sys}, m.cat.Apps, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
 		Pool:        m.pool,
 		ThisMachine: m.kind,
 		Root:        m.systemRoot(),
@@ -101,7 +102,7 @@ func installers(m machine) (contract.Installers, contract.Bundler) {
 			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
 			Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
 		}),
-		script.New(run), shell.New(run), app.New(),
+		script.New(run), shell.New(run), app.New(), providedby.New(run),
 	} {
 		registry[i.Method()] = i
 	}

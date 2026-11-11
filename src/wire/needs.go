@@ -1,10 +1,7 @@
 package wire
 
 import (
-	"slices"
-
 	"github.com/jterrazz/studio-station/src/accounts/adapter/studio"
-	"github.com/jterrazz/studio-station/src/catalog"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/ports/adapter/tailscale"
 )
@@ -34,7 +31,7 @@ func (m machine) providers() map[coremachine.Need]coremachine.Provider {
 			look = func() bool { return !m.world.absent(name) }
 		}
 		p := coremachine.Provider{Name: name, Look: look}
-		if slices.ContainsFunc(catalog.Apps, func(a catalog.App) bool { return a.Name == name }) {
+		if _, ok := m.cat.App(name); ok {
 			p.Item = name
 		}
 		out[need] = p

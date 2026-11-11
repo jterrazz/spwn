@@ -1,0 +1,19 @@
+item: station.catalog/v1
+kind: setting
+name: git-signing
+order: 50
+description: Sign every commit with a GPG key
+requires: [gpg]
+needs: [terminal]
+sets:
+    - { key: commit.gpgsign, value: 'true' }
+    - { key: gpg.program, value: gpg }
+methods:
+    - os: macos
+      builtin: git-signing
+writes:
+    - path: ~/.gnupg
+      level: kept
+    - path: ~/.gitconfig
+      level: settings
+      note: '`git config --global` user.signingkey, commit.gpgsign'

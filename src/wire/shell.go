@@ -24,7 +24,7 @@ func (m machine) shell() *zshblock.Block {
 // its Applier writes it.
 func (m machine) zshFunctions() []string {
 	var out []string
-	for _, it := range catalog.Settings {
+	for _, it := range m.cat.Settings {
 		if _, ok := it.Effect.(catalog.ZshFunctions); ok {
 			out = append(out, zshblock.Script(m.zshDir(), it.Name))
 		}

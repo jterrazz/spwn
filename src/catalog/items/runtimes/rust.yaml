@@ -1,0 +1,28 @@
+item: station.catalog/v1
+kind: app
+name: rust
+order: 130
+description: Systems programming language for safety and speed
+provides: [rustc, cargo]
+methods:
+    - os: any
+      mise:
+          name: rust
+          version: stable
+disk:
+    paths:
+        - path: ~/.cargo/registry/cache
+          level: cache
+        - path: ~/.cargo/registry/src
+          level: cache
+        - path: ~/.cargo/git/checkouts
+          level: cache
+        - path: ~/.cargo/config.toml
+          level: settings
+    installed: [~/.rustup, ~/.cargo/bin]
+    free:
+        - delete:
+              - ~/.cargo/registry/cache/*
+              - ~/.cargo/registry/src/*
+              - ~/.cargo/git/checkouts/*
+    no-erase: 'nothing to erase: keys and logins are kept'

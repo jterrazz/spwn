@@ -1,0 +1,39 @@
+item: station.catalog/v1
+kind: app
+name: xcode
+order: 360
+description: Apple development IDE
+provides: [xcodebuild]
+bundle: Xcode
+version:
+    args: [xcodebuild, -version]
+    pattern: ^Xcode (\S+)
+methods:
+    - os: macos
+      mas:
+          id: 497799835
+          name: Xcode
+disk:
+    paths:
+        - path: ~/Library/Developer/Xcode/DerivedData
+          level: cache
+        - path: ~/Library/Developer/Xcode/iOS DeviceSupport
+          level: cache
+        - path: ~/Library/Developer/CoreSimulator/Devices
+          level: data
+          note: every simulator device
+        - path: ~/Library/Developer/Xcode/Archives
+          level: data
+    installed: [/Applications/Xcode.app, /Library/Developer/CoreSimulator]
+    free:
+        - delete:
+              - ~/Library/Developer/Xcode/DerivedData/*
+              - ~/Library/Developer/Xcode/iOS DeviceSupport/*
+        - run: [xcrun, simctl, delete, unavailable]
+          needs: xcrun
+    erase:
+        - run: [xcrun, simctl, shutdown, all]
+          needs: xcrun
+        - run: [xcrun, simctl, erase, all]
+          needs: xcrun
+    quit: Xcode

@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	"github.com/jterrazz/studio-station/src/page"
 )
@@ -33,6 +34,8 @@ func (a *Asked) Error() string { return a.Message }
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the catalog's settings, whose options a form asks.
+	Settings []catalog.Setting
 	// value: the machine the TUI opens on, by name: the one this terminal
 	// uses; empty is This Mac.
 	Opens string

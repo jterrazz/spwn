@@ -50,10 +50,10 @@ func Columns() []page.Column {
 	}
 }
 
-func Section(reports []images.Report, thisMac page.Context) page.Section {
+func Section(reports []images.Report, known []catalog.Image, thisMac page.Context) page.Section {
 	// invariant: one row per image per Mac, then one row for each image of
 	// the catalogue no Mac holds.
-	items := make([]page.Item, 0, len(reports)+len(catalog.Images))
+	items := make([]page.Item, 0, len(reports)+len(known))
 	for _, r := range reports {
 		row := page.Row{
 			ID: r.Mac + "/" + r.Record.Name + "@" + r.Record.Version, Label: r.Record.Name, Mark: page.OK,
@@ -69,7 +69,7 @@ func Section(reports []images.Report, thisMac page.Context) page.Section {
 		}
 		items = append(items, page.Item{Row: &row})
 	}
-	for _, img := range catalog.Images {
+	for _, img := range known {
 		if slices.ContainsFunc(reports, func(r images.Report) bool { return r.Record.Name == img.Name }) {
 			continue
 		}
@@ -92,10 +92,10 @@ const (
 	KeyDelete = "x"
 )
 
-func List(reports []images.Report, thisMac page.Context) page.Page {
+func List(reports []images.Report, known []catalog.Image, thisMac page.Context) page.Page {
 	return page.Seal(page.Page{
 		ID: "images", Command: "images", Context: thisMac,
-		Sections: []page.Section{firstLine(reports), Section(reports, thisMac)},
+		Sections: []page.Section{firstLine(reports, known), Section(reports, known, thisMac)},
 		Hints:    []page.Hint{*page.Cmd("station images update")},
 		Actions: []page.Action{
 			{Key: KeyBuild, Label: "build", On: page.OnRow, Priority: 1, Mutates: true},
@@ -145,7 +145,7 @@ func rows(records []images.Record, done string) []page.Row {
 
 // value: the first line: how many images on how many Macs, the older ones
 // and the catalogue's images no Mac holds yet.
-func firstLine(reports []images.Report) page.Section {
+func firstLine(reports []images.Report, known []catalog.Image) page.Section {
 	macs := map[string]bool{}
 	older := 0
 	for _, r := range reports {
@@ -158,7 +158,7 @@ func firstLine(reports []images.Report) page.Section {
 	if older > 0 {
 		words = append(words, count(older, "older", "older"))
 	}
-	for _, img := range catalog.Images {
+	for _, img := range known {
 		if !slices.ContainsFunc(reports, func(r images.Report) bool { return r.Record.Name == img.Name }) {
 			words = append(words, img.Name+" not built yet")
 		}

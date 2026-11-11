@@ -37,12 +37,9 @@ func RouteNames() string {
 	return strings.Join(names, ", ")
 }
 
-func DeclaredBy(setting string) string {
-	// value: the owner's words for the setting that declared a port.
-	for _, it := range Settings {
-		if it.Name == setting && it.Declares != nil {
-			return it.Declares.Label
-		}
+func (c Catalog) DeclaredBy(setting string) string {
+	if it, ok := c.Setting(setting); ok && it.Declares != nil {
+		return it.Declares.Label
 	}
 	return setting
 }

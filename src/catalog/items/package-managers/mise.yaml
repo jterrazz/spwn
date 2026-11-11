@@ -1,0 +1,47 @@
+item: station.catalog/v1
+kind: manager
+name: mise
+order: 20
+description: 'Polyglot runtime manager: node, go, python, bun, rust, java'
+provides: [mise]
+methods:
+    - os: macos
+      brew: mise
+    - os: linux
+      script:
+          url: https://mise.run
+disk:
+    paths:
+        - path: ~/Library/Caches/mise
+          level: cache
+          'on': [mac, macos]
+          memos: ['*/*/bin_paths-*.msgpack.z']
+        - path: '{cache}/mise'
+          level: cache
+          'on': [linux]
+          memos: ['*/*/bin_paths-*.msgpack.z']
+        - path: '{data}/mise/downloads'
+          level: cache
+        - path: ~/Library/Caches/sigstore-rust
+          level: cache
+          'on': [mac, macos]
+          note: mise's signature checks
+        - path: '{cache}/sigstore-rust'
+          level: cache
+          'on': [linux]
+          note: mise's signature checks
+        - path: '{state}/mise'
+          level: data
+        - path: '{config}/mise/config.toml'
+          level: settings
+    installed: ['{data}/mise/installs', '{data}/mise/shims']
+    free:
+        - run: [mise, cache, clear]
+          needs: mise
+        - run: [mise, prune, --tools, --yes]
+          needs: mise
+        - delete: [~/Library/Caches/mise/*, ~/Library/Caches/sigstore-rust/*]
+          'on': [mac, macos]
+        - delete: ['{cache}/mise/*', '{cache}/sigstore-rust/*']
+          'on': [linux]
+    no-erase: 'runtimes are apps: station apps remove <runtime>'

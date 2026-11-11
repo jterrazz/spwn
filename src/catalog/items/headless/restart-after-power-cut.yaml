@@ -1,0 +1,18 @@
+item: station.catalog/v1
+kind: setting
+name: restart-after-power-cut
+order: 150
+description: Restarts after a power cut, and wakes for the network
+needs: [sudo]
+reversible: true
+sets:
+    - { key: autorestart, value: '1' }
+    - { key: womp, value: '1' }
+methods:
+    - os: macos
+      only: mac
+      builtin: restart-after-power-cut
+writes:
+    - path: /Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist
+      level: settings
+      note: 'pmset: autorestart, wake for network'

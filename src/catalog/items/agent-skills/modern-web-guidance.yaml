@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: modern-web-guidance
+order: 1010
+description: Chrome's current web platform guidance
+methods:
+    - os: any
+      skill:
+          repo: GoogleChrome/modern-web-guidance
+          name: modern-web-guidance

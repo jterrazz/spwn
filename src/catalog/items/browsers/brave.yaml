@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: brave
+order: 700
+description: Privacy-focused web browser
+bundle: Brave Browser
+methods:
+    - os: macos
+      only: mac
+      cask: brave-browser

@@ -1,0 +1,45 @@
+item: station.catalog/v1
+kind: app
+name: codex
+order: 500
+description: OpenAI's CLI coding agent
+provides: [codex]
+requires: [bun]
+methods:
+    - os: macos
+      bun: '@openai/codex'
+    - os: linux
+      mise:
+          name: codex
+          version: latest
+disk:
+    paths:
+        - path: ~/.codex/cache
+          level: cache
+        - path: ~/.codex/logs_2.sqlite
+          level: cache
+        - path: '{cache}/codex-runtimes'
+          level: cache
+        - path: ~/.codex/sessions
+          level: data
+        - path: ~/.codex/archived_sessions
+          level: data
+        - path: ~/.codex/thread_history_1.sqlite
+          level: data
+        - path: ~/.codex/computer-use
+          level: data
+        - path: ~/.codex/config.toml
+          level: settings
+        - path: ~/.codex/auth.json
+          level: kept
+          note: "the login (HYPOTHESIS: the file's name)"
+    installed: [~/.codex/plugins]
+    free:
+        - delete: [~/.codex/cache/*, ~/.codex/logs_2.sqlite, '{cache}/codex-runtimes/*']
+    erase:
+        - delete:
+              - ~/.codex/sessions/*
+              - ~/.codex/archived_sessions/*
+              - ~/.codex/thread_history_1.sqlite
+              - ~/.codex/computer-use/*
+    quit: codex

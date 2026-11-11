@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: shadcn
+order: 1100
+description: shadcn/ui components and patterns
+methods:
+    - os: any
+      skill:
+          repo: shadcn-ui/ui
+          name: shadcn

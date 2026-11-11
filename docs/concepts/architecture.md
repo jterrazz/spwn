@@ -13,7 +13,7 @@
 | The path of a request      | What happens between argv and the bytes on the terminal           |
 | Who may import whom        | The rules of `specs/architecture/`                                |
 | The error model            | The one error shape, its types, the exit codes                    |
-| The catalogue              | Why a feature is a value                                          |
+| The catalog                | Why a feature is an item file                                     |
 | The state                  | The stores station keeps on a machine                             |
 | The compiler               | What `make generate` projects                                     |
 
@@ -66,7 +66,8 @@ Between machines, and the machine's own door:
 The data, the presentation and the surfaces:
 
 ```text
-  catalog/   pure data: apps and their disk rows, settings, managers, images, profiles, dotfiles, recipes
+  catalog/   pure data: the item files (items/<category>/<name>.yaml) and their strict decoder,
+             images, profiles, dotfiles, recipes
   page/      the page language: sections, rows, values, marks, reasons, actions; station.page/v1
   pages/     one package per page: a family's result to a page, pure
   ui/        token, atom, molecule, organism, template; render/ (tty, pipe, json, tui); help/
@@ -94,11 +95,11 @@ Every family has the same four parts, named the same way, so a reader sees the b
 
 A call declares its name, its section (empty for a call of no section: `machines.*`, `images.*`, `engine.*`, `setup.init`), its `Where`, its `Applies` (a `machine.Applies` rule over the target's Profile), the confirmation it may require, the error codes it may end in, and its `Run`. `wire` binds each family's `All` to its dependencies and hands them to the Registry. Before every call the gate runs (`call.Gate`): the target's kind must list the call's section in `core/section.For`, and the call's own `Applies` must say yes; a no is `not-for-this-machine`, exit 2, with the reason in words.
 
-A call also declares its `Needs`, what it cannot run without (`machine.Hypervisor`, `PrivateNetwork`, `Credentials`), each family in its root (`machines.VMNeeds`, `images.Needs`, `ports.ShareNeeds`, `accounts.ShareNeeds`). The gate judges them after `Applies`, on a Mac only, from the Profile's `Provides`: the provider of each need and its adapter's presence read (a path looked up), never a package manager's listing. Nothing is read when `wire` builds the Profile: the gate of a call that needs a provider reads it then, so a call with no need pays nothing and an install made since is seen. A missing need is `call.needs`, exit 2, `tart is required by machines`, its hint the catalogue item that installs it; on a terminal kit shows the line, asks to install it, installs it as `apps install` does, and runs the leaf again. A VM's Profile names no provider: its Mac provides them.
+A call also declares its `Needs`, what it cannot run without (`machine.Hypervisor`, `PrivateNetwork`, `Credentials`), each family in its root (`machines.VMNeeds`, `images.Needs`, `ports.ShareNeeds`, `accounts.ShareNeeds`). The gate judges them after `Applies`, on a Mac only, from the Profile's `Provides`: the provider of each need and its adapter's presence read (a path looked up), never a package manager's listing. Nothing is read when `wire` builds the Profile: the gate of a call that needs a provider reads it then, so a call with no need pays nothing and an install made since is seen. A missing need is `call.needs`, exit 2, `tart is required by machines`, its hint the catalog item that installs it; on a terminal kit shows the line, asks to install it, installs it as `apps install` does, and runs the leaf again. A VM's Profile names no provider: its Mac provides them.
 
 What a machine can do is its `core/machine.Profile`, built once by `wire`: its kind and system from `Self`, its battery, lid and thermal from `awake/contract.Power`, a job manager and an engine from what it wires, and on a Mac the provider of each need. A rule reads the capabilities, never a model name: a desktop Mac has no battery guard because it reports no battery, and a Linux workspace has no Background because it reports no job manager.
 
-A strategy is a contract with several adapters chosen per item at run time, through one registry in the contract package: `Installers` of `src/apps/contract/` (per catalogue method), `settings/contract.Appliers` (per effect), `ports/contract.PublicRoutes` (per `--via` route). No other code switches on a method, an effect or a route. The `Hypervisor` is one contract with one real adapter, `tart`; the spec build runs the VM stories a second time over a fake `vz`, so a second hypervisor is a folder and a line in `wire`. A family may import another family's `contract` (Settings' `lock-after-login` writes through `background/contract.Jobs`, its `agent-hooks` through `agents/contract.Hooks`), never its adapters.
+A strategy is a contract with several adapters chosen per item at run time, through one registry in the contract package: `Installers` of `src/apps/contract/` (per catalog method), `settings/contract.Appliers` (per effect), `ports/contract.PublicRoutes` (per `--via` route). No other code switches on a method, an effect or a route. The `Hypervisor` is one contract with one real adapter, `tart`; the spec build runs the VM stories a second time over a fake `vz`, so a second hypervisor is a folder and a line in `wire`. A family may import another family's `contract` (Settings' `lock-after-login` writes through `background/contract.Jobs`, its `agent-hooks` through `agents/contract.Hooks`), never its adapters.
 
 ## The contracts
 
@@ -112,7 +113,7 @@ Each contract has a real adapter, a fake in its family's `adapter/fake/`, and a 
 | `settings`   | `Applier` (strategy), `Inspector`, `AppliedStore`                                                                       | `dotfile`, `touch`, `gitaliases`, `zshblock`, `defaults`, `vault`, `neversleeps`, `agenthooks`, `docker`, `git`, `macos`; `cli`, `linux`; `jsonfile`                            |
 | `disk`       | `DiskUsage`                                                                                                             | `apfs` (macOS), `posix` (Linux), `docker`                                                                                                                                       |
 | `ports`      | `Listeners`, `Tailnet`, `PublicRoute` (strategy), `ReservationStore`, `DeclarationStore`                                | `lsof` (macOS), `procnet` (Linux), `docker`, `guest`; `tailscale`; `cloudflare`, `funnel`, `lan`; `jsonfile`                                                                    |
-| `accounts`   | `Identities`, `Vault`, `SecretSource`, `ShareStore`                                                                     | `cli` (catalogue-driven sign-in reads), `tailscale`; `keychain`; `studio`; `jsonfile`                                                                                           |
+| `accounts`   | `Identities`, `Vault`, `SecretSource`, `ShareStore`                                                                     | `cli` (catalog-driven sign-in reads), `tailscale`; `keychain`; `studio`; `jsonfile`                                                                                             |
 | `background` | `Jobs`                                                                                                                  | `launchd`                                                                                                                                                                       |
 | `awake`      | `Power`                                                                                                                 | `macos` (IOKit through `platform/darwin`, `pmset`)                                                                                                                              |
 | `activity`   | `Meter`                                                                                                                 | `macos` (sysctl, IOKit block devices, proc_pidinfo), `linux` (`/proc`)                                                                                                          |
@@ -216,13 +217,17 @@ With `--json` the same error is also the `station.error/v1` document on stdout. 
 
 Fang renders the help, the version and the completion script, and handles the interrupt, behind the CLI's own error layer: `wire` is its only importer, so removing it is one call. `station --version` prints `station <version> (<commit>)`, stamped by the linker from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)).
 
-## The catalogue
+## The catalog
 
-The catalogue is values in `src/catalog/`: apps (agent skills included) and each app's disk row, settings, managers, images, ports' profiles. A value carries no function, and a test says so: behaviour chosen by data belongs to a family, picked by the value's type from a closed union. **Add to the catalogue, not to command code**: one app entry gives the app a row in `station apps`, a count in the Overview, an install, a remove, an update and its Disk row, because all of them read the same value. Every entry says where it lives on (`mac-only`, `every-machine`, `vms-only`), so one binary lists and installs only what fits its machine. Which folder a change opens is [Develop](../guides/develop.md#where-a-change-goes)'s.
+The catalog is what station can put on a machine, and each of its items is one file: `src/catalog/items/<category>/<name>.yaml`, in the schema `station.catalog/v1`, a manager, an app (agent skills included) or a setting, with its methods and, for an app, its disk row. The catalog defines; a Machinefile chooses, and never defines an item ([ADR-031](../decisions/031-the-catalog-defines-the-machinefile-chooses.md)).
+
+The items are embedded, so the binary reads no file of the clone. `wire` loads them once a run, through the strict decoder (every key known, no anchor or merge key, YAML 1.2 scalars, a newer schema refused with `update station`), and hands the one `catalog.Catalog` value to every reader. Its JSON Schema, `schemas/station.catalog.v1.json`, is projected from the decoder's Go types.
+
+An item's file is data: behaviour chosen by data belongs to a family, picked from a closed union (the method's manager key, a setting's effect), and no Go value of the catalog carries a function, which a test says. **Add to the catalog, not to command code**: one item file gives an app a row in `station apps`, a count in the Overview, an install, a remove, an update and its Disk row, because all of them read the same item. Each method's selector says where the item lives on (`mac-only`, `every-machine`, `vms-only`), so one binary lists and installs only what fits its machine. Images and dev-server profiles are still Go values of `src/catalog/`. Which folder a change opens is [Develop](../guides/develop.md#where-a-change-goes)'s.
 
 ## The state
 
-The binary holds the catalogue; the machine holds its own state, in the XDG folders, each store one contract of its family with one `jsonfile` adapter, built by `wire` alone:
+The binary holds the catalog; the machine holds its own state, in the XDG folders, each store one contract of its family with one `jsonfile` adapter, built by `wire` alone:
 
 | Store              | Family     | File                                                                              |
 | ------------------ | ---------- | --------------------------------------------------------------------------------- |
@@ -240,7 +245,7 @@ Each store carries its version; `station init` runs every store's `Migrator`, an
 
 ## The compiler
 
-This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`src/cmd/generate/`), which writes, from the catalogue and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the page fixtures of `src/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`src/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM, the clock pinned at 2026-11-07 10:30, and its variants, one file per group of stories, `stories_<group>.go`) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `src/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
+This repository is an application in the sense of the [repo-structure doctrine](repo-structure.md): it authors a corpus and generates no API reference. Its compiler is `make generate` (`src/cmd/generate/`), which writes, from the catalog and the Registry: the rosters between the `GENERATED` markers of `skills/studio-toolbelt/SKILL.md`, `docs/reference/footprint.md` whole, the catalog's JSON Schema `schemas/station.catalog.v1.json`, the page fixtures of `src/ui/testdata/pages/` from the real page functions, the pages of the menu bar's story worlds (`src/cmd/generate/pages/stories.go`: the `machines` world of every Mac and VM, the clock pinned at 2026-11-07 10:30, and its variants, one file per group of stories, `stories_<group>.go`) into `apps/menubar/stories/pages/<world>.<page>.json`, the menu bar's recorded streams, and `src/remote/api/calls.json`. Each projection is committed, and a test fails when one drifts.
 
 ## Related
 

@@ -23,6 +23,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest) ([]apps.Outc
 		return nil, err
 	}
 	states := s.statesWithRequirements(ctx, requested)
+	requested = s.withProviders(requested, states)
 	inRequest := map[string]bool{}
 	for _, t := range requested {
 		inRequest[t.Name] = true
@@ -329,8 +330,29 @@ func (s *Shelf) then(ctx context.Context, t catalog.App, interactive bool) []app
 	return steps
 }
 
+// invariant: an app another item provides requires that item, and an install
+// of it installs that item first, reported as its own outcome; one already
+// there is left alone.
+func (s *Shelf) withProviders(list []catalog.App, states map[string]catalog.State) []catalog.App {
+	var out []catalog.App
+	for _, t := range list {
+		if by, ok := s.install(t).(catalog.ProvidedByInstall); ok && !settled(states[by.Item]) && !slices.ContainsFunc(list, sameName(catalog.App{Name: by.Item})) {
+			if p, placed := s.byName[by.Item]; placed && !slices.ContainsFunc(out, sameName(p)) {
+				if _, lives := p.InstallOn(s.o.ThisMachine); lives {
+					out = append(out, p)
+				}
+			}
+		}
+		out = append(out, t)
+	}
+	return out
+}
+
 func (s *Shelf) requirements(t catalog.App) []string {
 	reqs := slices.Clone(t.Requires)
+	if by, ok := s.install(t).(catalog.ProvidedByInstall); ok && !slices.Contains(reqs, by.Item) {
+		reqs = append([]string{by.Item}, reqs...)
+	}
 	if needs := s.installer(t).Manager().Needs; needs != "" && needs != t.Name && !slices.Contains(reqs, needs) {
 		reqs = append([]string{needs}, reqs...)
 	}

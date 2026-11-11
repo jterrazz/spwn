@@ -30,18 +30,20 @@ type LivesOn struct {
 }
 
 type VersionRead struct {
-	Args    []string
-	Pattern string
-	Path    string
+	Args    []string `yaml:"args,omitempty"`
+	Pattern string   `yaml:"pattern,omitempty"`
+	Path    string   `yaml:"path,omitempty"`
 }
 
 type Liveness struct {
-	Process string
-	Command []string
+	Process string   `yaml:"process,omitempty"`
+	Command []string `yaml:"command,omitempty"`
 }
 
 type App struct {
-	Name        string
+	Name string
+	// value: manager for an app that installs other apps, app otherwise.
+	Kind        Kind `json:",omitempty"`
 	Description string
 	Category    Category
 	Replaces    string
@@ -49,9 +51,9 @@ type App struct {
 	AppStore    bool
 	Installs    []LivesOn
 	Provides    []string
-	// value: the absolute folders the item lands its commands in, off the
-	// system's PATH, which station's own search adds so what it installs is
-	// found in the same run; the forerunner of the method key `path:`.
+	// value: the absolute folders the item's methods land its commands in,
+	// off the system's PATH, which station's own search adds so what it
+	// installs is found in the same run: its methods' `path:`.
 	Path     []string
 	Bundle   string
 	Version  VersionRead
@@ -77,21 +79,11 @@ var MethodKinds = map[Method][]MachineKind{
 	MethodScript: {Mac, Linux, MacOS},
 	MethodShell:  {Mac, Linux, MacOS},
 	MethodSkill:  {Mac, Linux, MacOS},
+	// invariant: a command another item brings lives wherever that item does.
+	MethodProvidedBy: {Mac, Linux, MacOS},
 }
 
-func Everywhere(mac, linux Install) []LivesOn {
-	return []LivesOn{{Kinds: []MachineKind{Mac, MacOS}, Install: mac}, {Kinds: []MachineKind{Linux}, Install: linux}}
-}
-
-func OnMacOS(i Install) []LivesOn { return []LivesOn{{Kinds: []MachineKind{Mac, MacOS}, Install: i}} }
-
-func MacOnly(i Install) []LivesOn { return []LivesOn{{Kinds: []MachineKind{Mac}, Install: i}} }
-
-func LinuxOnly(i Install) []LivesOn { return []LivesOn{{Kinds: []MachineKind{Linux}, Install: i}} }
-
-func VMs(mac, linux Install) []LivesOn {
-	return []LivesOn{{Kinds: []MachineKind{MacOS}, Install: mac}, {Kinds: []MachineKind{Linux}, Install: linux}}
-}
+func (MachineKind) Enum() []string { return []string{string(Mac), string(Linux), string(MacOS)} }
 
 func (t App) LivesOn() []MachineKind {
 	var kinds []MachineKind
@@ -110,7 +102,7 @@ func (t App) Superseded() (Install, bool) {
 	if t.Supersedes == "" {
 		return nil, false
 	}
-	return Brew(t.Supersedes), true
+	return BrewInstall{Formula: t.Supersedes}, true
 }
 
 func (t App) InstallOn(k MachineKind) (Install, bool) {
@@ -124,6 +116,8 @@ func (t App) InstallOn(k MachineKind) (Install, bool) {
 	return nil, false
 }
 
-func Anywhere(i Install) []LivesOn {
-	return []LivesOn{{Kinds: []MachineKind{Mac, Linux, MacOS}, Install: i}}
-}
+// value: the items the code names: the hypervisor app and its launcher setting.
+const (
+	HypervisorApp      = "tart"
+	HypervisorLauncher = HypervisorApp + "-launcher"
+)

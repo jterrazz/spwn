@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: setting
+name: tart-launcher
+order: 210
+description: "The tart launcher: Tart's home is station's VMs folder"
+methods:
+    - os: macos
+      only: mac
+      file:
+          copy:
+              - from: tart/tart
+                to: ~/.local/bin/tart
+                mode: 0o755

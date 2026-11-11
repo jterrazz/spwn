@@ -1,0 +1,22 @@
+item: station.catalog/v1
+kind: manager
+name: uv
+order: 40
+description: Fast Python package and project manager
+provides: [uv]
+methods:
+    - os: macos
+      brew: uv
+    - os: linux
+      mise:
+          name: uv
+          version: latest
+disk:
+    paths:
+        - path: '{cache}/uv'
+          level: cache
+    installed: ['{data}/uv/tools', '{data}/uv/python']
+    free:
+        - run: [uv, cache, clean]
+          needs: uv
+    no-erase: 'what uv installs is apps: station apps remove <app>'

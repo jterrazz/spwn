@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: setting
+name: zed-dotfiles
+order: 110
+description: The Zed settings and its formatter settings
+requires: [zed]
+methods:
+    - os: macos
+      file:
+          copy:
+              - from: zed/settings.json
+                to: ~/.config/zed/settings.json
+              - from: zed/.oxfmtrc.json
+                to: ~/.config/zed/.oxfmtrc.json

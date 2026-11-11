@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: whatsapp
+order: 740
+description: Messaging app
+bundle: WhatsApp
+methods:
+    - os: macos
+      only: mac
+      cask: whatsapp

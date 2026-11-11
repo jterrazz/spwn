@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: setting
+name: dock-reset
+order: 120
+description: Put the Dock back to the system defaults
+run-once: true
+sets:
+    - { key: Dock, value: back to the system defaults }
+methods:
+    - os: macos
+      builtin: dock-reset
+writes:
+    - path: ~/Library/Preferences/com.apple.dock.plist
+      level: settings
+      note: '`com.apple.dock` defaults'

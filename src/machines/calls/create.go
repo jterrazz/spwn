@@ -36,8 +36,8 @@ func validCheck(check string) bool {
 	return ok && mac != "" && err == nil && n > 0 && n < 65536
 }
 
-func imageOf(name string) (catalog.Image, bool) {
-	for _, img := range catalog.Images {
+func (s *Machinist) imageOf(name string) (catalog.Image, bool) {
+	for _, img := range s.o.Images {
 		if img.Name == name {
 			return img, true
 		}
@@ -82,7 +82,7 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	case r.Check != "" && !validCheck(r.Check):
 		return r, &model.BadCheckError{Value: r.Check}
 	}
-	img, ok := imageOf(r.Image)
+	img, ok := s.imageOf(r.Image)
 	if !ok {
 		return r, &model.UnknownImageError{Image: r.Image}
 	}
@@ -240,7 +240,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if err != nil {
 		return model.Created{}, err
 	}
-	img, _ := imageOf(r.Image)
+	img, _ := s.imageOf(r.Image)
 	disk, version, err := s.img.Latest(ctx, r.Image)
 	if err != nil {
 		return model.Created{}, err

@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: vercel-react-native-skills
+order: 1150
+description: React Native practices
+methods:
+    - os: any
+      skill:
+          repo: vercel-labs/agent-skills
+          name: vercel-react-native-skills

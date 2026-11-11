@@ -5,7 +5,6 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 	"time"
 
@@ -23,7 +22,11 @@ import (
 var update = flag.Bool("update", false, "rewrite the golden from the presenter")
 
 func fixed() pagehome.Overview {
-	node := catalog.Apps[slices.IndexFunc(catalog.Apps, func(t catalog.App) bool { return t.Name == "node" })]
+	c, err := catalog.Builtin()
+	if err != nil {
+		panic(err)
+	}
+	node, _ := c.App("node")
 	return pagehome.Overview{
 		GeneratedAt: time.Date(2026, 10, 31, 14, 0, 0, 0, time.UTC),
 		Station:     overview.Station{Version: "v3.0.0", Commit: "abc1234", Engine: overview.Check{Name: "daemon", State: catalog.StateOK, Value: "running v3.0.0"}},

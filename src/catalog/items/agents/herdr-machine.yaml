@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: setting
+name: herdr-machine
+order: 240
+description: 'Herdr reaches every workspace of this Mac: its agents show in Herdr'
+requires: [herdr-app]
+reversible: true
+sets:
+    - { key: herdr-core, value: 'every workspace a machine, by its name' }
+methods:
+    - os: macos
+      only: mac
+      mux-machines: {}

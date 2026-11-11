@@ -1,0 +1,12 @@
+item: station.catalog/v1
+kind: app
+name: final-cut-pro
+order: 850
+description: Professional video editor
+bundle: Final Cut Pro
+methods:
+    - os: macos
+      only: mac
+      mas:
+          id: 424389933
+          name: Final Cut Pro

@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: difftastic
+order: 270
+description: Structural diff
+replaces: diff
+provides: [difft]
+methods:
+    - os: macos
+      brew: difftastic
+    - os: linux
+      mise:
+          name: difftastic
+          version: latest

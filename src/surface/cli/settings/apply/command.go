@@ -21,6 +21,8 @@ import (
 )
 
 type Deps struct {
+	// value: the catalog this run reads: which settings need root.
+	Catalog     catalog.Catalog
 	Names       func() []string
 	ThisMachine page.Context
 	Now         func() time.Time
@@ -102,7 +104,7 @@ func everyMachine(ctx context.Context, env kit.Env, d Deps, in *Input, io kit.IO
 		default:
 			names := in.Names
 			if p.Mac {
-				names, a.Admin = admins(in.Names, p)
+				names, a.Admin = admins(d.Catalog, in.Names, p)
 			}
 			if len(names) == 0 && len(in.Names) > 0 {
 				break
@@ -160,11 +162,11 @@ func applyLiving(ctx context.Context, env kit.Env, p settings.LivesOn, names []s
 
 // value: the names a Mac is asked to apply, and the admin settings among
 // them, each with the command that applies it on that Mac's own terminal.
-func admins(names []string, p settings.LivesOn) ([]string, []pagesettings.AdminSetting) {
+func admins(cat catalog.Catalog, names []string, p settings.LivesOn) ([]string, []pagesettings.AdminSetting) {
 	var asked []string
 	var admin []pagesettings.AdminSetting
 	for _, n := range names {
-		if !(settings.Row{Name: n}).Item().NeedsRoot {
+		if it, _ := cat.Setting(n); !it.NeedsRoot {
 			asked = append(asked, n)
 			continue
 		}

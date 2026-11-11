@@ -37,6 +37,8 @@ type Deps[App, Item, Misplaced any] struct {
 	// value: the reads Overview composes. Tool, Item and Stray are the rows of
 	// the Apps, Settings and Disk reads, until those reads are their families' calls.
 	Pool *lanes.Pool
+	// value: the catalog this run reads: which settings need root.
+	Catalog catalog.Catalog
 	// value: the Router the Overview reads each section of this machine
 	// through, and the machine's kind, which decides its sections.
 	Calls   call.Router

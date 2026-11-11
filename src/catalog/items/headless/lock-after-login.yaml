@@ -1,0 +1,21 @@
+item: station.catalog/v1
+kind: setting
+name: lock-after-login
+order: 170
+description: A LaunchAgent that locks the screen ~20s after auto-login
+needs: [sudo]
+reversible: true
+sets:
+    - { key: agent, value: present }
+    - { key: loaded, value: 'yes' }
+methods:
+    - os: macos
+      only: mac
+      builtin: lock-after-login
+writes:
+    - path: /Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist
+      level: settings
+      note: the agent user's `lock-after-login.plist`
+    - path: /Users/jterrazz.agent/.openclaw/logs
+      level: cache
+      note: its logs

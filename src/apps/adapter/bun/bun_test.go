@@ -43,7 +43,7 @@ func (g *globals) play(c local.Cmd) (local.Output, error) {
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Bun("skills"), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.BunInstall{Package: "skills"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		g := &globals{packages: map[string]string{}, fails: seed.Fails}
 		for k, v := range seed.Installed {
 			g.packages[k] = v
@@ -71,7 +71,7 @@ func TestAScopedPackageIsListedWithItsScope(t *testing.T) {
 func TestAFailedInstallNamesTheCommandAndItsExit(t *testing.T) {
 	run := local.Played(func(local.Cmd) (local.Output, error) { return local.Output{ExitCode: 1}, nil }, "bun")
 
-	err := bun.New(run).Install(context.Background(), []catalog.Install{catalog.BunAs("github:tobi/qmd", "qmd")}, nil)
+	err := bun.New(run).Install(context.Background(), []catalog.Install{catalog.BunInstall{Package: "github:tobi/qmd", Name: "qmd"}}, nil)
 
 	if err == nil || err.Error() != "bun install exited 1" {
 		t.Errorf("error %v", err)

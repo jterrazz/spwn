@@ -39,7 +39,7 @@
 | [Awake](reference/awake.md)                     | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                               |
 | [Settings](reference/settings.md)               | Every setting station applies, the Checked group, how a setting asks its values               |
 | [Preferences](reference/preferences.md)         | `preferences.json`, its groups and their owners, the environment variables                    |
-| [Apps and skills](reference/apps-and-skills.md) | The catalogue, the method table, mise, skills as apps, the toolbelt                           |
+| [Apps and skills](reference/apps-and-skills.md) | The catalog, the method table, mise, skills as apps, the toolbelt                             |
 | [Images](reference/images.md)                   | The VM images, the recipe, the binary inside                                                  |
 | [Dotfiles](reference/dotfiles.md)               | The embedded application configs and the `~/.zshrc` block                                     |
 | [The API](reference/api.md)                     | `station.api/v2`: the transport, the frames, `calls.json`, the engine's own calls             |
@@ -80,5 +80,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [028 A server's card shows its latency, not its traffic](decisions/028-a-servers-card-shows-latency-not-traffic.md)
 - [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
 - [030 init makes a machine known; apply carries its Machinefile](decisions/030-init-makes-a-machine-known-apply-carries-its-machinefile.md) (Proposed)
+- [031 The catalog defines, the Machinefile chooses](decisions/031-the-catalog-defines-the-machinefile-chooses.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

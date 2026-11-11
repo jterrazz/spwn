@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: chrome-extensions
+order: 1020
+description: Chrome extension authoring
+methods:
+    - os: any
+      skill:
+          repo: GoogleChrome/modern-web-guidance
+          name: chrome-extensions

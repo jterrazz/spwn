@@ -55,7 +55,7 @@ func (u *tools) Bundle(_ context.Context, lines []string, _ bool, _ call.Progres
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Uv("markitdown[all]"), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.UvInstall{Package: "markitdown[all]"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		u := &tools{installed: map[string]string{}, fails: seed.Fails}
 		for k, v := range seed.Installed {
 			u.installed[k] = v

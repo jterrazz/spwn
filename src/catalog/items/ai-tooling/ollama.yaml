@@ -1,0 +1,24 @@
+item: station.catalog/v1
+kind: app
+name: ollama
+order: 570
+description: Run large language models locally, on the Mac's GPU
+provides: [ollama]
+bundle: Ollama
+live:
+    process: ollama
+methods:
+    - os: macos
+      only: mac
+      cask: ollama-app
+disk:
+    paths:
+        - path: ~/.ollama/logs
+          level: cache
+        - path: ~/.ollama/models
+          level: data
+    free:
+        - delete: [~/.ollama/logs/*]
+    erase:
+        - delete: [~/.ollama/models/*]
+    quit: ollama

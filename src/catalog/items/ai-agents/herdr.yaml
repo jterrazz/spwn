@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: app
+name: herdr
+order: 550
+description: Agent multiplexer that lives in your terminal
+provides: [herdr]
+methods:
+    - os: macos
+      brew: herdr
+    - os: linux
+      mise:
+          name: herdr
+          version: latest

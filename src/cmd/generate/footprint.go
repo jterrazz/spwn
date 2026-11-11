@@ -32,7 +32,7 @@ func footprint() string {
 		"## Station", table([]string{"Path", "Group", "Note"}, storedRows(catalog.StationDisk)), catalog.StationRetiredNote,
 		"## Apps",
 	}
-	for _, t := range catalog.Apps {
+	for _, t := range builtin().Apps {
 		if !t.Disk.Declared() {
 			continue
 		}
@@ -173,7 +173,7 @@ func actions(list []catalog.Action) string {
 
 func settingsRows() [][]string {
 	var rows [][]string
-	for _, it := range catalog.Settings {
+	for _, it := range builtin().Settings {
 		writes := it.Writes
 		if d, ok := it.Effect.(catalog.Dotfiles); ok {
 			for _, c := range d.Files {
@@ -200,7 +200,7 @@ func exceptionRows() [][]string {
 
 func relocationRows() [][]string {
 	var rows [][]string
-	for _, t := range catalog.Apps {
+	for _, t := range builtin().Apps {
 		for _, r := range t.Disk.Relocate {
 			status := "written"
 			if r.Pending != "" {

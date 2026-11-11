@@ -87,9 +87,9 @@ func lateMac() []app {
 
 func Apps() []Fixture {
 	return []Fixture{
-		{"apps.loading", pageapps.List(reports(thisMac(), true), thisMacContext(), false)},
-		{"apps.empty", pageapps.List(nil, thisMacContext(), false)},
-		{"apps.error", pageapps.List(reports(lateMac(), false), thisMacContext(), false)},
-		{"apps.full", pageapps.List(reports(thisMac(), false), thisMacContext(), false)},
+		{"apps.loading", pageapps.List(reports(thisMac(), true), builtin().Apps, thisMacContext(), false)},
+		{"apps.empty", pageapps.List(nil, builtin().Apps, thisMacContext(), false)},
+		{"apps.error", pageapps.List(reports(lateMac(), false), builtin().Apps, thisMacContext(), false)},
+		{"apps.full", pageapps.List(reports(thisMac(), false), builtin().Apps, thisMacContext(), false)},
 	}
 }

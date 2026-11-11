@@ -80,19 +80,19 @@ func build(c *cellar, absent bool) *brew.Brew {
 }
 
 func TestFormulae(t *testing.T) {
-	contracttest.Installer(t, catalog.TrustedBrew("hashicorp/tap/terraform"), func(_ *testing.T, s contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.BrewInstall{Formula: "hashicorp/tap/terraform", Trusted: true}, func(_ *testing.T, s contracttest.Seed) contract.Installer {
 		return build(newCellar(s, false), s.Absent).Formulae()
 	})
 }
 
 func TestCasks(t *testing.T) {
-	contracttest.Installer(t, catalog.Cask("ghostty"), func(_ *testing.T, s contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.CaskInstall{Token: "ghostty"}, func(_ *testing.T, s contracttest.Seed) contract.Installer {
 		return build(newCellar(s, true), s.Absent).Casks()
 	})
 }
 
 func TestBundle(t *testing.T) {
-	contracttest.Bundler(t, catalog.TrustedBrew("hashicorp/tap/terraform"), func(_ *testing.T, s contracttest.Seed) contracttest.Bundled {
+	contracttest.Bundler(t, catalog.BrewInstall{Formula: "hashicorp/tap/terraform", Trusted: true}, func(_ *testing.T, s contracttest.Seed) contracttest.Bundled {
 		b := build(newCellar(s, false), s.Absent)
 		return contracttest.Bundled{Bundler: b, Installer: b.Formulae()}
 	})
@@ -115,7 +115,7 @@ func TestATappedFormulaIsWrittenWholeAndTrusted(t *testing.T) {
 	if !ok {
 		t.Fatal("formulae ride no bundle")
 	}
-	if got := lined.Line(catalog.TrustedBrew("hashicorp/tap/terraform")); got != `brew "hashicorp/tap/terraform", trusted: true` {
+	if got := lined.Line(catalog.BrewInstall{Formula: "hashicorp/tap/terraform", Trusted: true}); got != `brew "hashicorp/tap/terraform", trusted: true` {
 		t.Errorf("line %q", got)
 	}
 }

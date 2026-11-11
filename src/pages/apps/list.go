@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/jterrazz/studio-station/src/apps"
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/page"
 )
 
@@ -40,7 +41,7 @@ func groupOf(s apps.State) group {
 	return group{"not-known", "Not known", page.NotKnown}
 }
 
-func List(reports []apps.Report, thisMac page.Context, all bool) page.Page {
+func List(reports []apps.Report, known []catalog.App, thisMac page.Context, all bool) page.Page {
 	// invariant: the Apps page groups by attention (SPEC §5.3): Updates and
 	// Failed open, then Not installed, Not managed and OK folded; what lives
 	// elsewhere is a count, unfolded with --all.
@@ -80,7 +81,7 @@ func List(reports []apps.Report, thisMac page.Context, all bool) page.Page {
 		}
 		p.Sections = append(p.Sections, page.Section{ID: g.id, Title: g.title, Fold: fold, Columns: Columns(), Items: items, PipeCounts: true})
 	}
-	if elsewhere := apps.Elsewhere(reports); len(elsewhere) > 0 {
+	if elsewhere := apps.Elsewhere(known, reports); len(elsewhere) > 0 {
 		s := page.Section{ID: "not-for-this-machine", Title: "Not for this machine", Fold: page.Open, Columns: Columns(), PipeCounts: true}
 		if all {
 			for _, t := range elsewhere {

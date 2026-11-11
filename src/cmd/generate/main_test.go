@@ -41,6 +41,13 @@ func TestTheFootprintPageHasNotDriftedFromTheCatalogue(t *testing.T) {
 	}
 }
 
+func TestTheCatalogSchemaHasNotDriftedFromItsTypes(t *testing.T) {
+	current, err := os.ReadFile(filepath.Join(root(t), schemaPath))
+	if err != nil || !bytes.Equal(current, catalogSchema()) {
+		t.Fatalf("%s is out of sync with src/catalog's types: run make generate and commit the result", schemaPath)
+	}
+}
+
 func TestThePageFixturesHaveNotDriftedFromThePageFunctions(t *testing.T) {
 	want := pageFixtures()
 	dir := filepath.Join(root(t), pagesDir)

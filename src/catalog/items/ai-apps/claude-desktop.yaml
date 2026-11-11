@@ -1,0 +1,21 @@
+item: station.catalog/v1
+kind: app
+name: claude-desktop
+order: 680
+description: Anthropic Claude desktop app
+bundle: Claude
+methods:
+    - os: macos
+      only: mac
+      cask: claude
+disk:
+    paths:
+        - path: ~/Library/Application Support/Claude/vm_bundles
+          level: data
+          note: 'HYPOTHESIS: re-downloaded; data until settled'
+        - path: ~/Library/Application Support/Claude/claude-code-vm
+          level: data
+        - path: ~/Library/Application Support/Claude/claude-code
+          level: data
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Claude

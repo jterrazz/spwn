@@ -69,7 +69,7 @@ func TestNoSectionFlickers(t *testing.T) {
 	for i := range 40 {
 		name := "t" + strconv.Itoa(i)
 		fs.Files["h/"+name+"/cache/f"] = &fstest.MapFile{Data: []byte("abc")}
-		apps = append(apps, catalog.App{Name: name, Category: categories[i%len(categories)], Installs: catalog.MacOnly(catalog.Shell(name)),
+		apps = append(apps, catalog.App{Name: name, Category: categories[i%len(categories)], Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.ShellInstall{Line: name}}},
 			Disk: catalog.Disk{Paths: []catalog.Stored{{Path: "~/" + name + "/*", Level: catalog.LevelCache}}}})
 		names = append(names, name)
 	}

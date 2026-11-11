@@ -1,0 +1,25 @@
+item: station.catalog/v1
+kind: app
+name: ohmyzsh
+order: 150
+description: Oh My Zsh shell framework
+version:
+    args: [git, -C, ~/.oh-my-zsh, rev-parse, --short, HEAD]
+    pattern: ^(\S+)
+    path: ~/.oh-my-zsh
+methods:
+    - os: any
+      script:
+          url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+          env: [RUNZSH=no, CHSH=no, KEEP_ZSHRC=yes]
+          upgrade: ZSH="$HOME/.oh-my-zsh" exec sh "$HOME/.oh-my-zsh/tools/upgrade.sh"
+disk:
+    paths:
+        - path: ~/.oh-my-zsh/cache
+          level: cache
+        - path: ~/.zcompdump*
+          level: cache
+    installed: [~/.oh-my-zsh]
+    free:
+        - delete: [~/.oh-my-zsh/cache/*, ~/.zcompdump*]
+    no-erase: 'nothing to erase: keys and logins are kept'

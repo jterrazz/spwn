@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: inferrs
+order: 640
+description: TurboQuant LLM inference server
+provides: [inferrs]
+methods:
+    - os: macos
+      trusted: true
+      brew: ericcurtin/inferrs/inferrs

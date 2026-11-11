@@ -54,8 +54,10 @@ type Observation struct {
 func (o Observation) Present() bool { return o.State == catalog.StateOK }
 
 type Row struct {
-	// value: the setting's catalogue name; Item is its whole entry.
+	// value: the setting's catalog name, and Item its whole entry as the
+	// machine that judged it reads it; a checked row's Item is empty.
 	Name  string
+	Item  catalog.Setting
 	Group Group
 	State State
 	// value: a row of the Checked group: its state there, State left empty.
@@ -73,17 +75,6 @@ type Row struct {
 	// fixes it.
 	Value, Expected string
 	Fix             finding.Fix
-}
-
-func (r Row) Item() catalog.Setting {
-	// value: the catalogue entry of the row's setting; a row travels between
-	// machines by its name, as the catalogue is the same on both.
-	for _, it := range catalog.Settings {
-		if it.Name == r.Name {
-			return it
-		}
-	}
-	return catalog.Setting{Name: r.Name}
 }
 
 func GroupOf(it catalog.Setting) Group {
@@ -114,7 +105,7 @@ func JudgeSet(it catalog.Setting, lives bool, applied *Applied, now Observation,
 	// longer matches, or whose effect is gone, is Changed since; with no record,
 	// a setting already exactly as station writes it is Applied, from before
 	// station kept records.
-	row := Row{Name: it.Name, Group: GroupOf(it), Where: now.Where}
+	row := Row{Name: it.Name, Item: it, Group: GroupOf(it), Where: now.Where}
 	switch {
 	case !lives:
 		row.State, row.Where, row.Why = StateNotForThisMachine, "", LivesOnReason(it.Kinds)

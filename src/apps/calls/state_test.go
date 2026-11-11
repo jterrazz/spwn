@@ -60,10 +60,10 @@ func java(output string, code int) machine {
 	return machine{paths: map[string]string{"java": "/usr/bin/java"}, probes: map[string]probed{"java -version": {output, code}}}
 }
 
-var javaApp = catalog.App{Name: "java", Installs: catalog.Anywhere(catalog.Cask("temurin")), Provides: []string{"java"}, Version: catalog.VersionRead{Args: []string{"java", "-version"}, Pattern: `version "([^"]+)"`}}
+var javaApp = catalog.App{Name: "java", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac, catalog.Linux, catalog.MacOS}, Install: catalog.CaskInstall{Token: "temurin"}}}, Provides: []string{"java"}, Version: catalog.VersionRead{Args: []string{"java", "-version"}, Pattern: `version "([^"]+)"`}}
 
 func TestStateAnAppPresentWithoutItsManagerIsDegraded(t *testing.T) {
-	app := catalog.App{Name: "keynote", Installs: catalog.MacOnly(catalog.Cask("keynote")), Bundle: "Keynote"}
+	app := catalog.App{Name: "keynote", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "keynote"}}}, Bundle: "Keynote"}
 
 	got := reportOf(t, app, &fake.State{Absent: true}, machine{files: map[string]bool{"/Applications/Keynote.app": true}})
 

@@ -1,0 +1,22 @@
+item: station.catalog/v1
+kind: app
+name: rtk
+order: 590
+description: Token-optimized CLI proxy for agents
+replaces: raw dev commands (token-heavy output)
+provides: [rtk]
+methods:
+    - os: macos
+      brew: rtk
+    - os: linux
+      mise:
+          name: rtk
+          version: latest
+disk:
+    paths:
+        - path: ~/Library/Application Support/rtk
+          level: data
+          'on': [mac, macos]
+          note: the gain history
+    erase:
+        - delete: [~/Library/Application Support/rtk/*]

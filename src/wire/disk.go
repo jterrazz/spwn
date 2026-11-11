@@ -46,7 +46,7 @@ func storageAlias(env kit.Env, m machine) *cobra.Command {
 }
 
 func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
-	return diskcalls.NewSurveyor(diskMachine{m.sys}, catalog.Apps, diskcalls.SurveyorOptions{
+	return diskcalls.NewSurveyor(diskMachine{m.sys}, m.cat.Apps, diskcalls.SurveyorOptions{
 		Disk:        m.disk(),
 		Containers:  diskdocker.New(m.sys.Run),
 		Pool:        m.pool,

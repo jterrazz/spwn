@@ -57,7 +57,7 @@ func (p *prefix) Bundle(_ context.Context, lines []string, _ bool, _ call.Progre
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Npm("@playwright/mcp"), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.NpmInstall{Package: "@playwright/mcp"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		p := &prefix{packages: map[string]string{}, fails: seed.Fails}
 		for k, v := range seed.Installed {
 			p.packages[k] = v

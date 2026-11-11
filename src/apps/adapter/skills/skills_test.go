@@ -109,7 +109,7 @@ func (a *agents) skills(net local.Net, names ...string) *skills.Skills {
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Skill("anthropics/skills", "frontend-design"), func(t *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.SkillInstall{Repo: "anthropics/skills", Skill: "frontend-design"}, func(t *testing.T, seed contracttest.Seed) contract.Installer {
 		a := newAgents(t)
 		a.fails = seed.Fails
 		lock := map[string]entry{}

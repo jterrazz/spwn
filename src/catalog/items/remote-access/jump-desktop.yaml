@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: jump-desktop
+order: 890
+description: Jump Desktop viewer/client app
+bundle: Jump Desktop
+methods:
+    - os: macos
+      only: mac
+      cask: jump-desktop

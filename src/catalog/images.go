@@ -25,7 +25,9 @@ const (
 	gibibyte = 1 << 30
 )
 
-var Images = []Image{
+// value: the images station knows; an image is no item of the catalog's
+// files, and reaches its readers through Catalog.Images.
+var builtinImages = []Image{
 	{
 		Name:      "linux",
 		Base:      "ghcr.io/cirruslabs/ubuntu:24.04",
@@ -42,10 +44,8 @@ var Images = []Image{
 	},
 }
 
-func FetchedOnly(name string) bool {
-	// value: whether station only fetches the image of that name: it has no
-	// recipe to build it from.
-	for _, img := range Images {
+func (c Catalog) FetchedOnly(name string) bool {
+	for _, img := range c.Images {
 		if img.Name == name {
 			return img.Recipe == ""
 		}

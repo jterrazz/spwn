@@ -15,6 +15,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the images the catalog knows, by name.
+	Images []catalog.Image
 }
 
 type Input struct{ Names []string }
@@ -25,7 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Short:     "Fetch the newest released version of images; bare, of every image held here",
 		Example:   "  station images update\n  station images update linux",
 		Args:      cobra.ArbitraryArgs,
-		ValidArgs: imageNames(),
+		ValidArgs: imageNames(d.Images),
 		Bind: func(in *Input, args []string) error {
 			in.Names = args
 			return nil
@@ -42,9 +44,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
-func imageNames() []string {
-	names := make([]string, 0, len(catalog.Images))
-	for _, img := range catalog.Images {
+func imageNames(known []catalog.Image) []string {
+	names := make([]string, 0, len(known))
+	for _, img := range known {
 		names = append(names, img.Name)
 	}
 	return names

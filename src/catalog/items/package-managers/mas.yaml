@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: manager
+name: mas
+order: 30
+description: Mac App Store command line
+provides: [mas]
+methods:
+    - os: macos
+      brew: mas

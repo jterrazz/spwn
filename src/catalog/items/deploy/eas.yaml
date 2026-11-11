@@ -1,0 +1,16 @@
+item: station.catalog/v1
+kind: app
+name: eas
+order: 460
+description: Expo's EAS CLI for app builds
+provides: [eas]
+requires: [bun]
+methods:
+    - os: any
+      bun: eas-cli
+disk:
+    paths:
+        - path: ~/.expo
+          level: kept
+          note: the eas session
+    no-erase: 'nothing to erase: keys and logins are kept'

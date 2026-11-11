@@ -42,7 +42,7 @@ func ago(since, now time.Time) string {
 func Row(r settings.Row, now time.Time) page.Row {
 	// value: one setting as a row: its mark, its state in words, where it
 	// lives, and the next step.
-	name := r.Item().Name
+	name := r.Name
 	row := page.Row{ID: name, Label: name}
 	if r.Group == settings.Checked && r.State != settings.StateReading {
 		return checkedRow(r, row)
@@ -59,7 +59,7 @@ func Row(r settings.Row, now time.Time) page.Row {
 		row.Hint = page.KeyHint("station settings apply "+name, KeyApply)
 		if r.Needs != "" {
 			row.Reason = page.Missing
-			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Item().NeedsSaid())}
+			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Item.NeedsSaid())}
 			row.Hint = page.Cmd("station apps install " + r.Needs)
 		}
 	case settings.StateOffThisMac:
@@ -379,8 +379,8 @@ func Show(r settings.Row, now time.Time, thisMac page.Context) page.Page {
 	}
 	facts := []page.Item{
 		{Fact: &page.Fact{Key: "group", Value: group}},
-		{Fact: &page.Fact{Key: "does", Value: page.Text(r.Item().Description)}},
-		{Fact: &page.Fact{Key: "lives on", Value: page.Text(livesOn(r.Item().Kinds))}},
+		{Fact: &page.Fact{Key: "does", Value: page.Text(r.Item.Description)}},
+		{Fact: &page.Fact{Key: "lives on", Value: page.Text(livesOn(r.Item.Kinds))}},
 	}
 	if r.Where != "" {
 		facts = append(facts, page.Item{Fact: &page.Fact{Key: "where", Value: page.Text(r.Where)}})
@@ -388,8 +388,8 @@ func Show(r settings.Row, now time.Time, thisMac page.Context) page.Page {
 	if !r.Since.IsZero() {
 		facts = append(facts, page.Item{Fact: &page.Fact{Key: "applied", Value: page.Text(ago(r.Since, now))}})
 	}
-	p := page.Page{ID: ID, Command: "settings " + r.Item().Name, Context: thisMac, Sections: []page.Section{
-		{ID: "setting", Title: r.Item().Name, Role: page.Banner, Columns: columns(), Items: []page.Item{{Row: &head}}},
+	p := page.Page{ID: ID, Command: "settings " + r.Name, Context: thisMac, Sections: []page.Section{
+		{ID: "setting", Title: r.Name, Role: page.Banner, Columns: columns(), Items: []page.Item{{Row: &head}}},
 		{ID: "detail", Title: "Detail", Columns: pages.OutcomeColumns(), Items: facts},
 	}}
 	return page.Seal(p)
@@ -451,12 +451,12 @@ func Values(r settings.Row, before, after []settings.KeyValue, thisMac page.Cont
 		rows = append(rows, page.Item{Row: &row})
 	}
 	cols := []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "before", Kind: page.KindText, Keep: 40}, {Key: "after", Kind: page.KindText, Keep: 40}}
-	s := page.Section{ID: "values", Title: r.Item().Name, Columns: cols, Items: rows}
+	s := page.Section{ID: "values", Title: r.Name, Columns: cols, Items: rows}
 	if !differs {
 		head := Row(r, time.Time{})
 		s.Items = []page.Item{{Row: &head}}
 	}
-	return page.Seal(page.Page{ID: ID, Command: "settings diff " + r.Item().Name, Context: thisMac, Sections: []page.Section{s}})
+	return page.Seal(page.Page{ID: ID, Command: "settings diff " + r.Name, Context: thisMac, Sections: []page.Section{s}})
 }
 
 func Changes(verb string, changes []settings.Change, thisMac page.Context) page.Page {
@@ -528,7 +528,7 @@ func Object(r settings.Row) SettingJSON {
 		}
 		return SettingJSON{Name: r.Name, Label: r.CheckedItem().Label, Group: string(r.Group), State: state, Why: r.Why, Value: r.Value, Fix: r.Fix.Path}
 	}
-	o := SettingJSON{Name: r.Item().Name, Label: r.Item().Description, Group: string(r.Group), State: string(r.State), Where: r.Where, Why: r.Why, Admin: r.Item().NeedsRoot}
+	o := SettingJSON{Name: r.Name, Label: r.Item.Description, Group: string(r.Group), State: string(r.State), Where: r.Where, Why: r.Why, Admin: r.Item.NeedsRoot}
 	if !r.Since.IsZero() {
 		at := r.Since.UTC()
 		o.AppliedAt = &at

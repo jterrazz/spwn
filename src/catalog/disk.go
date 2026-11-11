@@ -16,22 +16,30 @@ const (
 
 var Levels = []Level{LevelCache, LevelData, LevelSettings, LevelKept}
 
+func (Level) Enum() []string {
+	out := make([]string, 0, len(Levels))
+	for _, l := range Levels {
+		out = append(out, string(l))
+	}
+	return out
+}
+
 type Stored struct {
-	Path  string
-	Level Level
-	On    []MachineKind
-	Note  string
-	Memos []string
+	Path  string        `yaml:"path"`
+	Level Level         `yaml:"level"`
+	On    []MachineKind `yaml:"on,omitempty"`
+	Note  string        `yaml:"note,omitempty"`
+	Memos []string      `yaml:"memos,omitempty"`
 }
 
 type Action struct {
-	Run    []string
-	Env    []string
-	Delete []string
-	Prune  []string
-	Needs  string
-	Exists string
-	On     []MachineKind
+	Run    []string      `yaml:"run,omitempty"`
+	Env    []string      `yaml:"env,omitempty"`
+	Delete []string      `yaml:"delete,omitempty"`
+	Prune  []string      `yaml:"prune,omitempty"`
+	Needs  string        `yaml:"needs,omitempty"`
+	Exists string        `yaml:"exists,omitempty"`
+	On     []MachineKind `yaml:"on,omitempty"`
 }
 
 type AppFile string
@@ -43,6 +51,10 @@ const (
 	FileMise   AppFile = "mise settings"
 )
 
+func (AppFile) Enum() []string {
+	return []string{string(FileGoEnv), string(FileNpmrc), string(FileBunfig), string(FileMise)}
+}
+
 func (f AppFile) Tabled() bool {
 	// invariant: a TOML file keeps its keys in tables; the others keep one
 	// key per line.
@@ -50,21 +62,24 @@ func (f AppFile) Tabled() bool {
 }
 
 type Relocation struct {
-	File    AppFile
-	Key     string
-	Value   string
-	Pending string
+	File    AppFile `yaml:"file"`
+	Key     string  `yaml:"key"`
+	Value   string  `yaml:"value"`
+	Pending string  `yaml:"pending,omitempty"`
 }
 
-type Move struct{ From, To string }
+type Move struct {
+	From string `yaml:"from"`
+	To   string `yaml:"to"`
+}
 
 type Misplaced struct {
-	Path  string
-	Busy  string
-	Move  []Move
-	Prune []string
-	Then  []string
-	Free  []Action
+	Path  string   `yaml:"path"`
+	Busy  string   `yaml:"busy,omitempty"`
+	Move  []Move   `yaml:"move,omitempty"`
+	Prune []string `yaml:"prune,omitempty"`
+	Then  []string `yaml:"then,omitempty"`
+	Free  []Action `yaml:"free,omitempty"`
 }
 
 type SizeMethod string
@@ -74,17 +89,19 @@ const (
 	SizeContainers SizeMethod = "docker-system-df"
 )
 
+func (SizeMethod) Enum() []string { return []string{string(SizeContainers)} }
+
 type Disk struct {
-	Paths     []Stored
-	Installed []string
-	Removal   map[string]string
-	Size      SizeMethod
-	Free      []Action
-	Erase     []Action
-	NoErase   string
-	Quit      string
-	Relocate  []Relocation
-	Misplaced []Misplaced
+	Paths     []Stored          `yaml:"paths,omitempty"`
+	Installed []string          `yaml:"installed,omitempty"`
+	Removal   map[string]string `yaml:"removal,omitempty"`
+	Size      SizeMethod        `yaml:"size,omitempty"`
+	Free      []Action          `yaml:"free,omitempty"`
+	Erase     []Action          `yaml:"erase,omitempty"`
+	NoErase   string            `yaml:"no-erase,omitempty"`
+	Quit      string            `yaml:"quit,omitempty"`
+	Relocate  []Relocation      `yaml:"relocate,omitempty"`
+	Misplaced []Misplaced       `yaml:"misplaced,omitempty"`
 }
 
 func (s Disk) Declared() bool {
@@ -122,20 +139,11 @@ func noted(s Stored, note string) Stored { s.Note = note; return s }
 
 func memos(s Stored, patterns ...string) Stored { s.Memos = patterns; return s }
 
-func runIf(needs string, argv ...string) Action { return Action{Run: argv, Needs: needs} }
-
-func ifExists(a Action, path string) Action { a.Exists = path; return a }
-
 func remove(patterns ...string) Action { return Action{Delete: patterns} }
-
-func onMac(a Action) Action { a.On = macKinds; return a }
-
-func onLinux(a Action) Action { a.On = []MachineKind{Linux}; return a }
 
 const (
 	stationNoErase = "station's data are VMs and images: station machines delete <vm>, station images delete <image>"
 	appsNoErase    = "nothing to erase: keys and logins are kept"
-	appNoErase     = "an app's data is its account's: erase it in the app"
 )
 
 var StationDisk = Disk{
@@ -219,469 +227,6 @@ var HomeExceptions = []Exception{
 	{Path: ".agent-browser", Reason: "no settings file relocates it (open question 48)"},
 	{Path: ".hermes", Reason: "no settings file relocates it (open question 48)"},
 }
-
-var (
-	diskHomebrew = Disk{
-		Paths:     []Stored{cache("~/Library/Caches/Homebrew"), cache("~/Library/Logs/Homebrew")},
-		Installed: []string{"/opt/homebrew"},
-		Free:      []Action{runIf("brew", "brew", "cleanup", "--prune=all"), remove("~/Library/Caches/Homebrew/*")},
-		NoErase:   "Homebrew's data are its formulae: station apps remove <app>",
-	}
-	miseMemo = "*/*/bin_paths-*.msgpack.z"
-	diskMise = Disk{
-		Paths: []Stored{
-			memos(cache("~/Library/Caches/mise", Mac, MacOS), miseMemo), memos(cache("{cache}/mise", Linux), miseMemo), cache("{data}/mise/downloads"),
-			noted(cache("~/Library/Caches/sigstore-rust", Mac, MacOS), "mise's signature checks"), noted(cache("{cache}/sigstore-rust", Linux), "mise's signature checks"),
-			data("{state}/mise"),
-			conf("{config}/mise/config.toml"),
-		},
-		Installed: []string{"{data}/mise/installs", "{data}/mise/shims"},
-		Free: []Action{
-			runIf("mise", "mise", "cache", "clear"), runIf("mise", "mise", "prune", "--tools", "--yes"),
-			onMac(remove("~/Library/Caches/mise/*", "~/Library/Caches/sigstore-rust/*")),
-			onLinux(remove("{cache}/mise/*", "{cache}/sigstore-rust/*")),
-		},
-		NoErase: "runtimes are apps: station apps remove <runtime>",
-	}
-	diskNode = Disk{
-		Paths: []Stored{cache("{cache}/npm"), noted(conf("~/.npmrc"), "may hold registry tokens")},
-		Free: []Action{
-			runIf("npm", "npm", "cache", "clean", "--force"),
-			remove("{cache}/npm/*"),
-		},
-		NoErase:  "npm's globals are apps: station apps remove <app>",
-		Relocate: []Relocation{{File: FileNpmrc, Key: "cache", Value: "{cache}/npm"}},
-		Misplaced: []Misplaced{{
-			Path: "~/.npm",
-			Free: []Action{
-				runIf("npm", "npm", "cache", "clean", "--force", "--cache", "~/.npm"),
-				{Delete: []string{"~/.npm/_npx", "~/.npm/_logs", "~/.npm/_cacache"}, Prune: []string{"~/.npm"}},
-			},
-		}},
-	}
-	diskGo = Disk{
-		Paths: []Stored{
-			cache("~/Library/Caches/go-build", Mac, MacOS), cache("{cache}/go-build", Linux), cache("{cache}/go/mod"),
-			noted(cache("~/Library/Caches/gopls", Mac, MacOS), "gopls's index"), noted(cache("{cache}/gopls", Linux), "gopls's index"),
-			cache("~/Library/Caches/goimports", Mac, MacOS), cache("{cache}/goimports", Linux),
-			noted(data("{data}/go/bin/*"), "what go install put there"),
-			noted(data("{data}/go/pkg"), "the checksum database's state"),
-			conf("~/Library/Application Support/go/env", Mac, MacOS), conf("{config}/go/env", Linux),
-			noted(conf("~/Library/Application Support/go/telemetry", Mac, MacOS), "Go's telemetry mode and counters"),
-			noted(conf("{config}/go/telemetry", Linux), "Go's telemetry mode and counters"),
-		},
-		Free: []Action{
-			runIf("go", "go", "clean", "-cache", "-modcache"),
-			onMac(remove("~/Library/Caches/go-build/*", "~/Library/Caches/gopls/*", "~/Library/Caches/goimports/*")),
-			onLinux(remove("{cache}/go-build/*", "{cache}/gopls/*", "{cache}/goimports/*")),
-		},
-		Erase: []Action{remove("{data}/go/bin/*", "{data}/go/pkg/*")},
-		Relocate: []Relocation{
-			{File: FileGoEnv, Key: "GOPATH", Value: "{data}/go"},
-			{File: FileGoEnv, Key: "GOMODCACHE", Value: "{cache}/go/mod"},
-			{File: FileMise, Key: "settings.go_set_gobin", Value: "false"},
-		},
-		Misplaced: []Misplaced{{
-			Path:  "~/go",
-			Move:  []Move{{From: "~/go/bin/*", To: "{data}/go/bin"}},
-			Prune: []string{"~/go/bin", "~/go"},
-			Free: []Action{
-				{Run: []string{"go", "clean", "-modcache"}, Env: []string{"GOMODCACHE=~/go/pkg/mod", "GOFLAGS=-modcacherw"}, Needs: "go"},
-				{Delete: []string{"~/go/pkg/mod"}, Prune: []string{"~/go/pkg", "~/go/bin", "~/go"}},
-			},
-		}},
-	}
-	diskBun = Disk{
-		Paths: []Stored{
-			cache("{cache}/bun/install"), cache("~/Library/Caches/bun", Mac, MacOS),
-			conf("~/.bunfig.toml"),
-		},
-		Installed: []string{"{data}/bun/install/global", "{data}/bun/bin"},
-		Free:      []Action{runIf("bun", "bun", "pm", "cache", "rm"), onMac(remove("~/Library/Caches/bun/*"))},
-		NoErase:   "bun's globals are apps: station apps remove <app>",
-		Relocate: []Relocation{
-			{File: FileBunfig, Key: "install.globalDir", Value: "{data}/bun/install/global"},
-			{File: FileBunfig, Key: "install.globalBinDir", Value: "{data}/bun/bin"},
-			{File: FileBunfig, Key: "install.cache.dir", Value: "{cache}/bun/install"},
-		},
-		Misplaced: []Misplaced{{
-			Path: "~/.bun",
-			Move: []Move{
-				{From: "~/.bun/install/global", To: "{data}/bun/install/global"},
-				{From: "~/.bun/bin/*", To: "{data}/bun/bin"},
-			},
-			Prune: []string{"~/.bun/bin", "~/.bun/install", "~/.bun"},
-			Free:  []Action{{Delete: []string{"~/.bun/install/cache"}, Prune: []string{"~/.bun/bin", "~/.bun/install", "~/.bun"}}},
-		}},
-	}
-	diskUv = Disk{
-		Paths:     []Stored{cache("{cache}/uv")},
-		Installed: []string{"{data}/uv/tools", "{data}/uv/python"},
-		Free:      []Action{runIf("uv", "uv", "cache", "clean")},
-		NoErase:   "what uv installs is apps: station apps remove <app>",
-	}
-	diskPnpm = Disk{
-		Paths: []Stored{
-			cache("~/Library/pnpm/store", Mac, MacOS), cache("{data}/pnpm/store", Linux), cache("{state}/pnpm"),
-			conf("~/Library/Preferences/pnpm", Mac, MacOS),
-		},
-		Free: []Action{
-			onMac(ifExists(runIf("pnpm", "pnpm", "store", "prune"), "~/Library/pnpm/store")),
-			onLinux(ifExists(runIf("pnpm", "pnpm", "store", "prune"), "{data}/pnpm/store")),
-			onMac(remove("~/Library/pnpm/store/*")), onLinux(remove("{data}/pnpm/store/*")),
-		},
-		NoErase: appsNoErase,
-	}
-	diskRust = Disk{
-		Paths: []Stored{
-			cache("~/.cargo/registry/cache"), cache("~/.cargo/registry/src"), cache("~/.cargo/git/checkouts"),
-			conf("~/.cargo/config.toml"),
-		},
-		Installed: []string{"~/.rustup", "~/.cargo/bin"},
-		Free:      []Action{remove("~/.cargo/registry/cache/*", "~/.cargo/registry/src/*", "~/.cargo/git/checkouts/*")},
-		NoErase:   appsNoErase,
-	}
-	diskPython = Disk{
-		Paths:   []Stored{cache("~/Library/Caches/pip", Mac, MacOS), cache("{cache}/pip", Linux)},
-		Free:    []Action{runIf("pip3", "pip3", "cache", "purge")},
-		NoErase: appsNoErase,
-	}
-	diskOhmyzsh = Disk{
-		Paths:     []Stored{cache("~/.oh-my-zsh/cache"), cache("~/.zcompdump*")},
-		Installed: []string{"~/.oh-my-zsh"},
-		Free:      []Action{remove("~/.oh-my-zsh/cache/*", "~/.zcompdump*")},
-		NoErase:   appsNoErase,
-	}
-	diskStarship = Disk{
-		Paths:   []Stored{cache("{cache}/starship"), conf("{config}/starship.toml")},
-		Free:    []Action{remove("{cache}/starship/*")},
-		NoErase: appsNoErase,
-	}
-	diskBat = Disk{
-		Paths:   []Stored{cache("{cache}/bat")},
-		Free:    []Action{runIf("bat", "bat", "cache", "--clear")},
-		NoErase: appsNoErase,
-	}
-	diskMole = Disk{
-		Paths:   []Stored{cache("{cache}/mole"), cache("~/Library/Logs/mole", Mac, MacOS), conf("{config}/mole")},
-		Free:    []Action{remove("{cache}/mole/*", "~/Library/Logs/mole/*")},
-		NoErase: appsNoErase,
-	}
-	diskQmd = Disk{
-		Paths:   []Stored{noted(cache("{cache}/qmd"), "GGUF models and the index: rebuilt by a reindex")},
-		Free:    []Action{remove("{cache}/qmd/*")},
-		NoErase: appsNoErase,
-	}
-	diskGh = Disk{
-		Paths: []Stored{
-			cache("{cache}/gh"),
-			data("{state}/gh"),
-			conf("{config}/gh/config.yml"),
-			noted(kept("{config}/gh/hosts.yml"), "the login; the keychain's `gh:github.com` (HYPOTHESIS: listing denied)"),
-		},
-		Free:  []Action{remove("{cache}/gh/*")},
-		Erase: []Action{remove("{state}/gh/*")},
-	}
-	diskZoxide = Disk{
-		Paths: []Stored{data("~/Library/Application Support/zoxide/db.zo", Mac, MacOS), data("{data}/zoxide/db.zo", Linux)},
-		Erase: []Action{remove("~/Library/Application Support/zoxide/db.zo", "{data}/zoxide/db.zo")},
-	}
-	diskYazi = Disk{
-		Paths: []Stored{data("{state}/yazi"), conf("{config}/yazi")},
-		Erase: []Action{remove("{state}/yazi/*")},
-	}
-	diskLazygit = Disk{
-		Paths: []Stored{data("~/Library/Application Support/lazygit/state.yml", Mac, MacOS)},
-		Erase: []Action{remove("~/Library/Application Support/lazygit/state.yml")},
-	}
-	diskRtk = Disk{
-		Paths: []Stored{noted(data("~/Library/Application Support/rtk", Mac, MacOS), "the gain history")},
-		Erase: []Action{remove("~/Library/Application Support/rtk/*")},
-	}
-	diskGpg = Disk{
-		Paths:   []Stored{noted(kept("~/.gnupg"), "the private keys")},
-		NoErase: appsNoErase,
-	}
-	diskTailscale = Disk{
-		Paths: []Stored{
-			noted(kept("~/Library/Containers/io.tailscale.ipn.macos*", Mac), "the App Store app's login"),
-			noted(kept("~/Library/Containers/io.tailscale.ipn.macsys*", Mac), "the Standalone app's login"),
-			kept("~/Library/Containers/Tailscale", Mac),
-			kept("~/Library/Group Containers/*io.tailscale.ipn.macos", Mac),
-			kept("~/Library/Group Containers/*io.tailscale.ipn.macsys", Mac),
-			kept("~/Library/Group Containers/group.*.io.tailscale.shared", Mac),
-			kept("~/Library/Application Scripts/*io.tailscale.*", Mac),
-		},
-		Installed: []string{TailscaleApp, TailscaleStandaloneCLI, "~/.local/bin/tailscale"},
-		Removal:   map[string]string{"~/.local/bin/tailscale": "written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it"},
-		NoErase:   "nothing to erase: the login is the Tailscale app's",
-	}
-	diskGit = Disk{
-		Paths:   []Stored{conf("~/.gitconfig")},
-		NoErase: appsNoErase,
-	}
-	diskTmux = Disk{
-		Paths:   []Stored{conf("~/.tmux.conf")},
-		NoErase: appsNoErase,
-	}
-	diskTerraform = Disk{
-		Paths:   []Stored{conf("~/.terraform.d")},
-		NoErase: appsNoErase,
-	}
-	diskEas = Disk{
-		Paths:   []Stored{noted(kept("~/.expo"), "the eas session")},
-		NoErase: appsNoErase,
-	}
-	diskKubectl = Disk{
-		Paths:   []Stored{cache("~/.kube/cache"), kept("~/.kube/config")},
-		Free:    []Action{remove("~/.kube/cache/*")},
-		NoErase: appsNoErase,
-	}
-	diskHelm = Disk{
-		Paths:   []Stored{cache("~/Library/Caches/helm", Mac, MacOS), conf("~/Library/Preferences/helm", Mac, MacOS)},
-		Free:    []Action{onMac(remove("~/Library/Caches/helm/*"))},
-		NoErase: appsNoErase,
-	}
-	diskGhostty = Disk{
-		Paths: []Stored{
-			cache("{cache}/ghostty"),
-			cache("~/Library/HTTPStorages/com.mitchellh.ghostty", Mac, MacOS),
-			cache("~/Library/WebKit/com.mitchellh.ghostty", Mac, MacOS),
-			data("{state}/ghostty"),
-			conf("{config}/ghostty"),
-		},
-		Free:  []Action{remove("{cache}/ghostty/*", "~/Library/HTTPStorages/com.mitchellh.ghostty/*", "~/Library/WebKit/com.mitchellh.ghostty/*")},
-		Erase: []Action{remove("{state}/ghostty/*")},
-		Quit:  "ghostty",
-	}
-	diskZed = Disk{
-		Paths: []Stored{
-			cache("~/Library/Application Support/Zed/languages"),
-			cache("~/Library/Application Support/Zed/external_agents"),
-			cache("~/Library/Application Support/Zed/prettier"),
-			cache("~/Library/Application Support/Zed/node"),
-			cache("~/Library/Logs/Zed"),
-			data("~/Library/Application Support/Zed/db"),
-			data("~/Library/Application Support/Zed/extensions"),
-			conf("{config}/zed"),
-		},
-		Free: []Action{remove(
-			"~/Library/Application Support/Zed/languages/*",
-			"~/Library/Application Support/Zed/external_agents/*",
-			"~/Library/Application Support/Zed/prettier/*",
-			"~/Library/Application Support/Zed/node/*",
-			"~/Library/Logs/Zed/*",
-		)},
-		Erase: []Action{remove("~/Library/Application Support/Zed/db/*", "~/Library/Application Support/Zed/extensions/*")},
-		Quit:  "zed",
-	}
-	diskCursor = Disk{
-		Paths: []Stored{
-			cache("~/Library/Application Support/Cursor/CachedExtensionVSIXs"),
-			cache("~/Library/Application Support/Cursor/logs"),
-			cache("~/Library/Application Support/Cursor/GPUCache"),
-			cache("~/Library/Application Support/Cursor/DawnCache"),
-			data("~/Library/Application Support/Cursor/User/globalStorage"),
-			data("~/Library/Application Support/Cursor/User/History"),
-			conf("~/Library/Application Support/Cursor/User/settings.json"),
-		},
-		Free: []Action{remove(
-			"~/Library/Application Support/Cursor/CachedExtensionVSIXs/*",
-			"~/Library/Application Support/Cursor/logs/*",
-			"~/Library/Application Support/Cursor/GPUCache/*",
-			"~/Library/Application Support/Cursor/DawnCache/*",
-		)},
-		Erase: []Action{remove("~/Library/Application Support/Cursor/User/globalStorage/*", "~/Library/Application Support/Cursor/User/History/*")},
-		Quit:  "Cursor",
-	}
-	diskClaude = Disk{
-		Paths: []Stored{
-			cache("~/.claude/cache"), cache("~/.claude/shell-snapshots"), cache("~/.claude/paste-cache"), cache("~/.claude/debug"),
-			cache("~/Library/Caches/claude-cli-nodejs", Mac, MacOS), cache("{state}/claude"),
-			data("~/.claude/projects"), data("~/.claude/history.jsonl"), data("~/.claude/file-history"),
-			conf("~/.claude/settings.json"), conf("~/.claude.json"),
-		},
-		Installed: []string{"{data}/claude/versions", "~/.local/bin/claude", "~/.claude/plugins"},
-		Free: []Action{remove(
-			"~/.claude/cache/*", "~/.claude/shell-snapshots/*", "~/.claude/paste-cache/*", "~/.claude/debug/*",
-			"~/Library/Caches/claude-cli-nodejs/*", "{state}/claude/*",
-		)},
-		Erase: []Action{remove("~/.claude/projects/*", "~/.claude/history.jsonl", "~/.claude/file-history/*")},
-		Quit:  "claude",
-	}
-	diskCodex = Disk{
-		Paths: []Stored{
-			cache("~/.codex/cache"), cache("~/.codex/logs_2.sqlite"), cache("{cache}/codex-runtimes"),
-			data("~/.codex/sessions"), data("~/.codex/archived_sessions"), data("~/.codex/thread_history_1.sqlite"), data("~/.codex/computer-use"),
-			conf("~/.codex/config.toml"),
-			noted(kept("~/.codex/auth.json"), "the login (HYPOTHESIS: the file's name)"),
-		},
-		Installed: []string{"~/.codex/plugins"},
-		Free:      []Action{remove("~/.codex/cache/*", "~/.codex/logs_2.sqlite", "{cache}/codex-runtimes/*")},
-		Erase:     []Action{remove("~/.codex/sessions/*", "~/.codex/archived_sessions/*", "~/.codex/thread_history_1.sqlite", "~/.codex/computer-use/*")},
-		Quit:      "codex",
-	}
-	diskGemini = Disk{
-		Paths:   []Stored{noted(data("~/.gemini"), "beside its settings: not separable by a glob"), conf("~/.gemini/settings.json")},
-		NoErase: "gemini keeps its login beside its data: erase it by hand",
-	}
-	diskOpencode = Disk{
-		Paths: []Stored{cache("{cache}/opencode"), data("{data}/opencode"), data("{state}/opencode"), conf("{config}/opencode")},
-		Free:  []Action{remove("{cache}/opencode/*")},
-		Erase: []Action{remove("{data}/opencode/*", "{state}/opencode/*")},
-	}
-	diskHerdrApp = Disk{
-		Paths: []Stored{data("{state}/herdr-core"), conf("{config}/herdr-app")},
-		Erase: []Action{remove("{state}/herdr-core/*")},
-		Quit:  "Herdr",
-	}
-	diskOllama = Disk{
-		Paths: []Stored{cache("~/.ollama/logs"), data("~/.ollama/models")},
-		Free:  []Action{remove("~/.ollama/logs/*")},
-		Erase: []Action{remove("~/.ollama/models/*")},
-		Quit:  "ollama",
-	}
-	diskPulumi = Disk{
-		Paths: []Stored{cache("~/.pulumi/plugins"), data("~/.pulumi/workspaces"), kept("~/.pulumi/credentials.json")},
-		Free:  []Action{runIf("pulumi", "pulumi", "plugin", "rm", "--all", "--yes")},
-		Erase: []Action{remove("~/.pulumi/workspaces/*")},
-	}
-	diskAnsible = Disk{
-		Paths: []Stored{cache("~/.ansible/tmp"), data("~/.ansible/collections")},
-		Free:  []Action{remove("~/.ansible/tmp/*")},
-		Erase: []Action{remove("~/.ansible/collections/*")},
-	}
-	diskXcode = Disk{
-		Paths: []Stored{
-			cache("~/Library/Developer/Xcode/DerivedData"),
-			cache("~/Library/Developer/Xcode/iOS DeviceSupport"),
-			noted(data("~/Library/Developer/CoreSimulator/Devices"), "every simulator device"),
-			data("~/Library/Developer/Xcode/Archives"),
-		},
-		Installed: []string{"/Applications/Xcode.app", "/Library/Developer/CoreSimulator"},
-		Free: []Action{
-			remove("~/Library/Developer/Xcode/DerivedData/*", "~/Library/Developer/Xcode/iOS DeviceSupport/*"),
-			runIf("xcrun", "xcrun", "simctl", "delete", "unavailable"),
-		},
-		Erase: []Action{
-			runIf("xcrun", "xcrun", "simctl", "shutdown", "all"),
-			runIf("xcrun", "xcrun", "simctl", "erase", "all"),
-		},
-		Quit: "Xcode",
-	}
-	diskCocoapods = Disk{
-		Paths:   []Stored{cache("~/Library/Caches/CocoaPods"), cache("~/.cocoapods/repos")},
-		Free:    []Action{runIf("pod", "pod", "cache", "clean", "--all"), remove("~/.cocoapods/repos/*")},
-		NoErase: appsNoErase,
-	}
-	diskAndroidStudio = Disk{
-		Paths:     []Stored{cache("~/.gradle/caches"), cache("~/.gradle/wrapper/dists"), data("~/.android/avd")},
-		Installed: []string{"/Applications/Android Studio.app"},
-		Free:      []Action{remove("~/.gradle/caches/*", "~/.gradle/wrapper/dists/*")},
-		Erase:     []Action{remove("~/.android/avd/*")},
-		Quit:      "studio",
-	}
-	diskOrbstack = Disk{
-		Paths:     []Stored{data("~/Library/Group Containers/HUAQ24HBR6.dev.orbstack"), conf("~/.orbstack")},
-		Installed: []string{"/Applications/OrbStack.app"},
-		NoErase:   "OrbStack erases its own data, in its Settings",
-	}
-	diskDocker = Disk{
-		Paths: []Stored{conf("~/.docker")},
-		Size:  SizeContainers,
-		Free: []Action{
-			runIf("docker", "docker", "container", "prune", "-f"),
-			runIf("docker", "docker", "image", "prune", "-f"),
-			runIf("docker", "docker", "volume", "prune", "-f"),
-			runIf("docker", "docker", "network", "prune", "-f"),
-			runIf("docker", "docker", "builder", "prune", "-f"),
-		},
-		NoErase: "dreset, the Docker shortcuts",
-	}
-	diskPlaywrightBrowsers = Disk{
-		Installed: []string{"~/Library/Caches/ms-playwright", "{cache}/ms-playwright"},
-		NoErase:   "the browsers are the app: station apps remove playwright-browsers",
-	}
-	diskAgentBrowser = Disk{
-		Installed: []string{"~/.agent-browser/browsers"},
-		NoErase:   "the browsers are the app: station apps remove agent-browser",
-	}
-	diskHermes = Disk{
-		Paths:     []Stored{data("~/.hermes/checkpoints"), data("~/.hermes/sessions"), data("~/.hermes/state.db")},
-		Installed: []string{"~/.hermes/hermes-agent"},
-		Erase:     []Action{remove("~/.hermes/checkpoints/*", "~/.hermes/sessions/*", "~/.hermes/state.db")},
-	}
-	diskSkills = Disk{
-		Paths:     []Stored{conf("~/.agents/.skill-lock.json")},
-		Installed: []string{"~/.agents/skills", "~/.claude/skills"},
-		NoErase:   "skills are apps: station apps remove <skill>",
-	}
-	diskClaudeDesktop = Disk{
-		Paths: []Stored{
-			noted(data("~/Library/Application Support/Claude/vm_bundles"), "HYPOTHESIS: re-downloaded; data until settled"),
-			data("~/Library/Application Support/Claude/claude-code-vm"),
-			data("~/Library/Application Support/Claude/claude-code"),
-		},
-		NoErase: appNoErase,
-		Quit:    "Claude",
-	}
-	diskNotion = Disk{
-		Paths: []Stored{
-			cache("~/Library/Application Support/Notion/Partitions/notion/Cache"),
-			cache("~/Library/Application Support/Notion/Partitions/notion/Service Worker"),
-		},
-		Free:    []Action{remove("~/Library/Application Support/Notion/Partitions/notion/Cache/*", "~/Library/Application Support/Notion/Partitions/notion/Service Worker/*")},
-		NoErase: appNoErase,
-		Quit:    "Notion",
-	}
-	diskDiscord = Disk{
-		Paths: []Stored{
-			cache("~/Library/Application Support/discord/Cache"),
-			cache("~/Library/Application Support/discord/Code Cache"),
-			cache("~/Library/Application Support/discord/DawnCache"),
-		},
-		Free:    []Action{remove("~/Library/Application Support/discord/Cache/*", "~/Library/Application Support/discord/Code Cache/*", "~/Library/Application Support/discord/DawnCache/*")},
-		NoErase: appNoErase,
-		Quit:    "Discord",
-	}
-	diskObsidian = Disk{
-		Paths:   []Stored{data("~/Library/Application Support/obsidian")},
-		NoErase: appNoErase,
-		Quit:    "Obsidian",
-	}
-	diskTart = Disk{
-		Paths: []Stored{
-			noted(cache("{data}/station/vms/cache/OCIs"), "the base images Tart pulled"),
-			cache("{data}/station/vms/cache/IPSWs"),
-			cache("{data}/station/vms/tmp"),
-			noted(cache("~/Library/Caches/com.github.cirruslabs.tart"), "Tart's NSURLCache"),
-		},
-		Installed: []string{"{data}/station/tart", "~/.local/bin/tart"},
-		Free: []Action{
-			runIf("tart", "tart", "prune", "--entries=caches", "--older-than=0"),
-			remove("~/Library/Caches/com.github.cirruslabs.tart/*"),
-		},
-		NoErase: stationNoErase,
-		Misplaced: []Misplaced{
-			{
-				Path: "~/.tart",
-				Busy: "tart",
-				Move: []Move{{From: "~/.tart", To: "{data}/station/vms"}},
-				Then: []string{"tart-launcher"},
-			},
-			{
-				Path: "~/.local/opt",
-				Busy: "tart",
-				Move: []Move{
-					{From: "~/.local/opt/tart.app", To: "{data}/station/tart/tart.app"},
-					{From: "~/.local/opt/LICENSE", To: "{data}/station/tart/LICENSE"},
-				},
-				Prune: []string{"~/.local/opt"},
-				Then:  []string{"tart-launcher"},
-			},
-		},
-	}
-)
 
 func (f AppFile) Label() string {
 	if f == FileGoEnv {

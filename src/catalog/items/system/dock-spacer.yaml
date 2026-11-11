@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: setting
+name: dock-spacer
+order: 130
+description: Add a small spacer tile to the dock
+run-once: true
+sets:
+    - { key: Dock, value: spacer tile added }
+methods:
+    - os: macos
+      builtin: dock-spacer
+writes:
+    - path: ~/Library/Preferences/com.apple.dock.plist
+      level: settings
+      note: '`com.apple.dock` defaults: a spacer tile'

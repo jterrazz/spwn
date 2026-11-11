@@ -44,8 +44,8 @@ import (
 
 func settingsCommand(env kit.Env, m machine) *cobra.Command {
 	all := func() []string {
-		out := make([]string, 0, len(catalog.Settings))
-		for _, it := range catalog.Settings {
+		out := make([]string, 0, len(m.cat.Settings))
+		for _, it := range m.cat.Settings {
 			out = append(out, it.Name)
 		}
 		return out
@@ -53,7 +53,7 @@ func settingsCommand(env kit.Env, m machine) *cobra.Command {
 	children := func() []*cobra.Command {
 		return []*cobra.Command{
 			settingsdiff.Command(settingsdiff.Deps{Names: all, ThisMachine: m.where}, env),
-			settingsapply.Command(settingsapply.Deps{Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
+			settingsapply.Command(settingsapply.Deps{Catalog: m.cat, Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now}, env),
 			settingsoff.Command(settingsoff.Deps{Names: all, ThisMachine: m.where, Also: func(names []string) []string { return m.pauses(env, names) }}, env),
 		}
 	}
@@ -65,7 +65,7 @@ func settingsCommand(env kit.Env, m machine) *cobra.Command {
 func settingsAliases(env kit.Env, m machine) []*cobra.Command {
 	all := func() []string { return nil }
 	return []*cobra.Command{kit.Alias("config", settingscmd.Command(settingscmd.Deps{Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now, Label: m.label}, env,
-		kit.Alias("install", settingsapply.Command(settingsapply.Deps{Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "apply"),
+		kit.Alias("install", settingsapply.Command(settingsapply.Deps{Catalog: m.cat, Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "apply"),
 		kit.Alias("uninstall", settingsoff.Command(settingsoff.Deps{Names: all, ThisMachine: m.where}, env), "off"),
 	), "settings")}
 }
@@ -81,7 +81,7 @@ func (a settingsAsk) Values(it catalog.Setting) (map[string]string, error) {
 }
 
 func settingsOf(m machine) *settingscalls.Catalogue {
-	return settingscalls.NewCatalogue(catalog.Settings, settingscalls.CatalogueOptions{
+	return settingscalls.NewCatalogue(m.cat.Settings, settingscalls.CatalogueOptions{
 		ThisMachine: m.kind,
 		Admin:       m.sys.Env.Euid() == 0,
 		Has:         m.has,
@@ -153,7 +153,7 @@ func (m machine) has(app string) bool {
 	if _, ok := m.sys.Run.LookPath(app); ok {
 		return true
 	}
-	for _, t := range catalog.Apps {
+	for _, t := range m.cat.Apps {
 		if t.Name == app && t.Bundle != "" {
 			_, err := m.sys.FS.Stat(path.Join("/", m.systemRoot(), "Applications", t.Bundle+".app"))
 			return err == nil
@@ -186,7 +186,7 @@ func (m machine) sharedRead() git.Read {
 
 func settingsDefaults(m machine) map[string]map[string]string {
 	defaults := map[string]map[string]string{}
-	for _, it := range catalog.Settings {
+	for _, it := range m.cat.Settings {
 		for _, in := range it.Inputs {
 			if v := strings.TrimSpace(m.vars[in.DefaultEnv]); in.DefaultEnv != "" && v != "" {
 				if defaults[it.Name] == nil {

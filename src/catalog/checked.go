@@ -32,6 +32,9 @@ const (
 	updatesBudget = 10 * time.Second
 )
 
+// value: the kind a checked setting lives on: a Mac itself.
+var macKind = []MachineKind{Mac}
+
 var CheckedSettings = []CheckedSetting{
 	{Name: "filevault", Label: "Disk encryption", Description: "FileVault encrypts the disk", Kinds: macKind, Facts: []Fact{FactFileVault}, Fix: "System Settings > Privacy & Security > FileVault", Pane: systemSettings + "com.apple.settings.PrivacySecurity.extension?FileVault", Budget: checkedBudget},
 	{Name: "firewall", Label: "Firewall", Description: "The macOS firewall refuses unasked connections", Kinds: macKind, Facts: []Fact{FactFirewall}, Fix: "System Settings > Network > Firewall", Pane: systemSettings + "com.apple.Network-Settings.extension?Firewall", Budget: checkedBudget,

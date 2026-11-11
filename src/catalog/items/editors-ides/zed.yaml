@@ -1,0 +1,40 @@
+item: station.catalog/v1
+kind: app
+name: zed
+order: 330
+description: Zed code editor
+then: [zed-dotfiles]
+bundle: Zed
+methods:
+    - os: macos
+      cask: zed
+disk:
+    paths:
+        - path: ~/Library/Application Support/Zed/languages
+          level: cache
+        - path: ~/Library/Application Support/Zed/external_agents
+          level: cache
+        - path: ~/Library/Application Support/Zed/prettier
+          level: cache
+        - path: ~/Library/Application Support/Zed/node
+          level: cache
+        - path: ~/Library/Logs/Zed
+          level: cache
+        - path: ~/Library/Application Support/Zed/db
+          level: data
+        - path: ~/Library/Application Support/Zed/extensions
+          level: data
+        - path: '{config}/zed'
+          level: settings
+    free:
+        - delete:
+              - ~/Library/Application Support/Zed/languages/*
+              - ~/Library/Application Support/Zed/external_agents/*
+              - ~/Library/Application Support/Zed/prettier/*
+              - ~/Library/Application Support/Zed/node/*
+              - ~/Library/Logs/Zed/*
+    erase:
+        - delete:
+              - ~/Library/Application Support/Zed/db/*
+              - ~/Library/Application Support/Zed/extensions/*
+    quit: zed

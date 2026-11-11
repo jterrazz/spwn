@@ -71,7 +71,12 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	if session != nil {
 		world = session.thisMac()
 	}
-	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(vars)), darwin.NewDoor(env), vars, world)
+	cat, loaded := catalog.Builtin()
+	if loaded != nil {
+		writer.Failure(kit.Translate(loaded, ""))
+		return int(fail.ExitFailure)
+	}
+	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
@@ -265,9 +270,9 @@ func appData(home, moved string) string {
 // owners and handed to the platform's search: each catalogue item's Path, of
 // the system, and under home the bin a script installs into and the app
 // manager's shims.
-func landing(vars map[string]string) local.Search {
+func landing(cat catalog.Catalog, vars map[string]string) local.Search {
 	var s local.Search
-	for _, a := range catalog.Apps {
+	for _, a := range cat.Apps {
 		s.System = append(s.System, a.Path...)
 	}
 	if home := vars["HOME"]; filepath.IsAbs(home) {
@@ -288,15 +293,17 @@ type machine struct {
 	pool      *lanes.Pool
 	sys       local.System
 	powerPort awakecontract.Power
-	profile   coremachine.Profile
-	vars      map[string]string
-	kind      catalog.MachineKind
-	paths     setup.Paths
-	stores    *stores
-	where     page.Context
+	// value: the catalog this run reads, built once.
+	cat     catalog.Catalog
+	profile coremachine.Profile
+	vars    map[string]string
+	kind    catalog.MachineKind
+	paths   setup.Paths
+	stores  *stores
+	where   page.Context
 }
 
-func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac) machine {
+func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
 	h := raw
 	if world != nil {
 		h = world.system(raw)
@@ -338,6 +345,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		far:    &late{},
 		pool:   lanes.NewPool(context.Background(), budgets, commandLane, walkLane),
 		sys:    h,
+		cat:    cat,
 		vars:   vars,
 		paths:  paths,
 		stores: st,

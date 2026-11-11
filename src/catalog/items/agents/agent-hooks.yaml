@@ -1,0 +1,19 @@
+item: station.catalog/v1
+kind: setting
+name: agent-hooks
+order: 230
+description: 'The agent hook: station sees what Claude Code and Codex do, and what they wait for'
+requires-one-of: [claude, codex]
+reversible: true
+methods:
+    - os: any
+      only: vm
+      agent-hooks:
+          apps: [claude, codex]
+writes:
+    - path: ~/.claude/settings.json
+      level: settings
+      note: station's hook under `hooks`, every other key the owner's
+    - path: ~/.codex/config.toml
+      level: settings
+      note: '`notify`, unless the owner set it to another program'

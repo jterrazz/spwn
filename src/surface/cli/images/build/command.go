@@ -16,6 +16,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the images the catalog knows, by name.
+	Images []catalog.Image
 }
 
 type Input struct {
@@ -29,7 +31,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Short:     "Build images; bare, every image that is missing or whose recipe changed",
 		Example:   "  station images build\n  station images build linux --binary .artifacts/go/station-linux-arm64",
 		Args:      cobra.ArbitraryArgs,
-		ValidArgs: imageNames(),
+		ValidArgs: imageNames(d.Images),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Binary, "binary", "", "the linux station binary to put in the image (a dev build needs one: make build-linux)")
 		},
@@ -49,9 +51,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
-func imageNames() []string {
-	names := make([]string, 0, len(catalog.Images))
-	for _, img := range catalog.Images {
+func imageNames(known []catalog.Image) []string {
+	names := make([]string, 0, len(known))
+	for _, img := range known {
 		names = append(names, img.Name)
 	}
 	return names

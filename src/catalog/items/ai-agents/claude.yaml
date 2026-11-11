@@ -1,0 +1,53 @@
+item: station.catalog/v1
+kind: app
+name: claude
+order: 490
+description: Claude Code CLI for agentic coding
+provides: [claude]
+version:
+    args: [claude, --version]
+    pattern: ^(\S+)
+methods:
+    - os: any
+      script:
+          url: https://claude.ai/install.sh
+disk:
+    paths:
+        - path: ~/.claude/cache
+          level: cache
+        - path: ~/.claude/shell-snapshots
+          level: cache
+        - path: ~/.claude/paste-cache
+          level: cache
+        - path: ~/.claude/debug
+          level: cache
+        - path: ~/Library/Caches/claude-cli-nodejs
+          level: cache
+          'on': [mac, macos]
+        - path: '{state}/claude'
+          level: cache
+        - path: ~/.claude/projects
+          level: data
+        - path: ~/.claude/history.jsonl
+          level: data
+        - path: ~/.claude/file-history
+          level: data
+        - path: ~/.claude/settings.json
+          level: settings
+        - path: ~/.claude.json
+          level: settings
+    installed: ['{data}/claude/versions', ~/.local/bin/claude, ~/.claude/plugins]
+    free:
+        - delete:
+              - ~/.claude/cache/*
+              - ~/.claude/shell-snapshots/*
+              - ~/.claude/paste-cache/*
+              - ~/.claude/debug/*
+              - ~/Library/Caches/claude-cli-nodejs/*
+              - '{state}/claude/*'
+    erase:
+        - delete:
+              - ~/.claude/projects/*
+              - ~/.claude/history.jsonl
+              - ~/.claude/file-history/*
+    quit: claude

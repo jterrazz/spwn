@@ -57,7 +57,8 @@ const (
 
 func (m machine) machines(_ bool) *machinescalls.Machinist {
 	knownHosts := filepath.Join(m.paths.State, "known_hosts")
-	return machinescalls.New(macSystem{m.sys}, m.hypervisor(), machinescalls.Prefs{Name: m.stores.name(), Macs: m.stores.macs(), VMUser: m.stores.vmUser()}, m.stores.machines, macNodes{tailnet: m.tailnet()}, allMachinesImages{images: m.images()}, machinesEngine{m.macEngine()}, reservationReleaser{m: m}, machinescalls.Options{
+	return machinescalls.New(macSystem{m.sys}, m.hypervisor(), machinescalls.Prefs{Name: m.stores.name(), Macs: m.stores.macs(), VMUser: m.stores.vmUser()}, m.stores.machines, macNodes{tailnet: m.tailnet()}, allMachinesImages{images: m.images(), cat: m.cat}, machinesEngine{m.macEngine()}, reservationReleaser{m: m}, machinescalls.Options{
+		Images:      m.cat.Images,
 		ThisMachine: m.kind,
 		KnownHosts:  knownHosts, Logs: filepath.Join(m.paths.State, "logs"),
 		User:        m.sys.Env.User(),
@@ -186,7 +187,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 	return machinescmd.Command(machinescmd.Deps{ThisMachine: m.where, Names: vms.Names, Overview: overview}, env,
 		machinescreate.Command(machinescreate.Deps{
 			Resources: model.ParseResources, Check: createCheck(vms),
-			NotBuilt: func(image string) error { return &model.NoImageError{Image: image} },
+			NotBuilt: func(image string) error { return &model.NoImageError{Image: image, Fetched: m.cat.FetchedOnly(image)} },
 			Admit: func() error {
 				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies, Needs: machinescalls.CreateWorkspace.Needs}, m.profile)
 			},
@@ -339,7 +340,10 @@ func (c machineCalls) CheckRemote(name string) error {
 	return err
 }
 
-type allMachinesImages struct{ images *imagescalls.Builder }
+type allMachinesImages struct {
+	images *imagescalls.Builder
+	cat    catalog.Catalog
+}
 
 func (i allMachinesImages) KeyPath() string { return i.images.KeyPath() }
 
@@ -347,7 +351,7 @@ func (i allMachinesImages) Latest(ctx context.Context, image string) (disk, vers
 	r, err := i.images.Latest(ctx, image)
 	var unbuilt *images.NotBuiltError
 	if errors.As(err, &unbuilt) {
-		return "", "", &model.NoImageError{Image: image}
+		return "", "", &model.NoImageError{Image: image, Fetched: i.cat.FetchedOnly(image)}
 	}
 	if err != nil {
 		return "", "", err

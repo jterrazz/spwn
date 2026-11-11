@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: linear
+order: 760
+description: Project management
+bundle: Linear
+methods:
+    - os: macos
+      only: mac
+      cask: linear-linear

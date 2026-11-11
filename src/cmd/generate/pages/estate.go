@@ -167,9 +167,9 @@ func unnamedSnapshot() pagehome.Overview {
 func settingRows(reading bool) []settings.Row {
 	since := time.Date(2026, 11, 2, 10, 0, 0, 0, time.UTC)
 	states := []settings.State{settings.StateApplied, settings.StateChangedSince, settings.StateNotApplied, settings.StateOffThisMac, settings.StateNotForThisMachine}
-	out := make([]settings.Row, 0, len(catalog.Settings))
-	for i, it := range catalog.Settings {
-		r := settings.Row{Name: it.Name, Group: settings.GroupOf(it), State: states[i%len(states)]}
+	out := make([]settings.Row, 0, len(builtin().Settings))
+	for i, it := range builtin().Settings {
+		r := settings.Row{Name: it.Name, Item: it, Group: settings.GroupOf(it), State: states[i%len(states)]}
 		switch {
 		case reading:
 			r.State = settings.StateReading
@@ -358,10 +358,10 @@ func imageReports() []images.Report {
 
 func imageLists() []Fixture {
 	return states("images",
-		pending(pageimages.List(imageReports(), thisMacImages())),
-		pageimages.List(nil, thisMacImages()),
+		pending(pageimages.List(imageReports(), builtin().Images, thisMacImages())),
+		pageimages.List(nil, builtin().Images, thisMacImages()),
 		failure("images", "images", catalog.HypervisorApp+" is not installed", "station apps install "+catalog.HypervisorApp),
-		pageimages.List(imageReports(), thisMacImages()))
+		pageimages.List(imageReports(), builtin().Images, thisMacImages()))
 }
 
 func thisMacImages() page.Context {
@@ -406,10 +406,10 @@ func thisMacPorts() page.Context { return page.Context{Kind: "mac", Machine: "ma
 
 func portLists() []Fixture {
 	return states("ports",
-		pending(pageports.List(ports.Listing{AllMachines: portsAllMachines(), Tailnet: tailnetStatus()}, thisMacPorts())),
-		pageports.List(ports.Listing{Tailnet: ports.Status{State: catalog.StateAbsent}}, thisMacPorts()),
-		pageports.List(ports.Listing{AllMachines: stoppedPorts(), Tailnet: ports.Status{State: catalog.StateOK, BackendState: "NeedsLogin"}}, thisMacPorts()),
-		pageports.List(ports.Listing{AllMachines: estatePorts(), Tailnet: tailnetStatus()}, thisMacPorts()))
+		pending(pageports.List(ports.Listing{AllMachines: portsAllMachines(), Tailnet: tailnetStatus()}, builtin(), thisMacPorts())),
+		pageports.List(ports.Listing{Tailnet: ports.Status{State: catalog.StateAbsent}}, builtin(), thisMacPorts()),
+		pageports.List(ports.Listing{AllMachines: stoppedPorts(), Tailnet: ports.Status{State: catalog.StateOK, BackendState: "NeedsLogin"}}, builtin(), thisMacPorts()),
+		pageports.List(ports.Listing{AllMachines: estatePorts(), Tailnet: tailnetStatus()}, builtin(), thisMacPorts()))
 }
 
 // value: the reference estate's ports in their two classes: the mini's AirPlay
@@ -434,12 +434,12 @@ func estatePorts() ports.AllMachines {
 
 func allMachinesStates() []Fixture {
 	f, list, svc, tn := allMachines(), imageReports(), portsAllMachines(), tailnetStatus()
-	full := pageallmachines.Reading{Machines: &f, Images: &list, Ports: &svc, Tailnet: &tn}
+	full := pageallmachines.Reading{Machines: &f, Images: &list, Known: builtin().Images, Ports: &svc, Tailnet: &tn}
 	none := model.AllMachines{Macs: []model.MacView{{Name: "macbook", ThisMac: true, Reachable: true}}}
 	var noImages []images.Report
-	empty := pageallmachines.Reading{Machines: &none, Images: &noImages, Tailnet: &ports.Status{State: catalog.StateAbsent}}
+	empty := pageallmachines.Reading{Machines: &none, Images: &noImages, Known: builtin().Images, Tailnet: &ports.Status{State: catalog.StateAbsent}}
 	stopped, stoppedSvc := stoppedAllMachines(), stoppedPorts()
-	failed := pageallmachines.Reading{Machines: &stopped, Images: &list, Ports: &stoppedSvc, Tailnet: &tn}
+	failed := pageallmachines.Reading{Machines: &stopped, Images: &list, Known: builtin().Images, Ports: &stoppedSvc, Tailnet: &tn}
 	return states("all-machines",
 		pageallmachines.Tab(pageallmachines.Reading{}, thisMacContext()),
 		pageallmachines.Tab(empty, thisMacContext()),
@@ -502,4 +502,14 @@ func runs() []Fixture {
 		pagesettings.Removed(settings.ContainersOutcome{Shortcut: "dreset"}, "run dreset", thisMacContext()),
 		failure("outcome", "run dreset", "docker ps failed: Docker is not running", "start Docker, then run it again"),
 		pagesettings.Removed(run, "run dreset", thisMacContext()))
+}
+
+// value: the catalog station ships, which the page fixtures are drawn over;
+// a catalog that does not load stops the compiler.
+func builtin() catalog.Catalog {
+	c, err := catalog.Builtin()
+	if err != nil {
+		panic(err)
+	}
+	return c
 }

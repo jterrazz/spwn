@@ -1,0 +1,30 @@
+item: station.catalog/v1
+kind: app
+name: hermes
+order: 530
+description: Self-improving AI agent with persistent memory
+provides: [hermes]
+version:
+    args: [hermes, --version]
+    pattern: (\d+\.\d+\S*)
+methods:
+    - os: macos
+      only: vm
+      script:
+          url: https://hermes-agent.nousresearch.com/install.sh
+          args: [--skip-setup]
+    - os: linux
+      script:
+          url: https://hermes-agent.nousresearch.com/install.sh
+          args: [--skip-setup]
+disk:
+    paths:
+        - path: ~/.hermes/checkpoints
+          level: data
+        - path: ~/.hermes/sessions
+          level: data
+        - path: ~/.hermes/state.db
+          level: data
+    installed: [~/.hermes/hermes-agent]
+    erase:
+        - delete: [~/.hermes/checkpoints/*, ~/.hermes/sessions/*, ~/.hermes/state.db]

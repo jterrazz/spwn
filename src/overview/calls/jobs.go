@@ -3,7 +3,6 @@ package calls
 import (
 	"context"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
-	"slices"
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/background"
@@ -112,7 +111,7 @@ func (r *Reader[App, Item, Misplaced]) readiness(ctx context.Context) []overview
 		if !ok {
 			state = catalog.StateUnknown
 		}
-		return machines.ReadinessSetting{Name: name, State: state, Root: needsRoot(name)}
+		return machines.ReadinessSetting{Name: name, State: state, Root: r.needsRoot(name)}
 	}
 	f := machines.ReadinessFacts{
 		Mac:                   r.label(),
@@ -135,9 +134,9 @@ func (r *Reader[App, Item, Misplaced]) readiness(ctx context.Context) []overview
 	return out
 }
 
-func needsRoot(setting string) bool {
-	i := slices.IndexFunc(catalog.Settings, func(it catalog.Setting) bool { return it.Name == setting })
-	return i >= 0 && catalog.Settings[i].NeedsRoot
+func (r *Reader[App, Item, Misplaced]) needsRoot(setting string) bool {
+	it, _ := r.d.Catalog.Setting(setting)
+	return it.NeedsRoot
 }
 
 func (r *Reader[App, Item, Misplaced]) factState(ctx context.Context, f catalog.Fact) catalog.State {

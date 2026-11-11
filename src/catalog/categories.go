@@ -1,5 +1,7 @@
 package catalog
 
+import "strings"
+
 type Category string
 
 const (
@@ -44,4 +46,35 @@ var Categories = []Category{
 	CategorySecurityApps,
 	CategorySystemUtilities,
 	CategoryAgentSkills,
+}
+
+func (c Category) Folder() string { return folderOf(string(c)) }
+
+var SettingCategories = []SettingCategory{
+	CategoryShell, CategoryTerminal, CategorySecurity, CategoryEditor,
+	CategorySystem, CategoryHeadless, CategoryNetwork, CategoryAgents,
+}
+
+func (c SettingCategory) Folder() string { return folderOf(string(c)) }
+
+func folderOf(title string) string {
+	return strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(title, " & ", "-"), " ", "-"))
+}
+
+func appCategory(folder string) (Category, bool) {
+	for _, c := range Categories {
+		if c.Folder() == folder {
+			return c, true
+		}
+	}
+	return "", false
+}
+
+func settingCategory(folder string) (SettingCategory, bool) {
+	for _, c := range SettingCategories {
+		if c.Folder() == folder {
+			return c, true
+		}
+	}
+	return "", false
 }

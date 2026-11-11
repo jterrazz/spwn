@@ -37,7 +37,7 @@ var Show = call.Call[Deps, ShowIn, ShowOut]{
 				return ShowOut{Report: r, ThisMachine: true}, nil
 			}
 		}
-		for _, t := range catalog.Apps {
+		for _, t := range d.Known {
 			if t.Name == in.Name {
 				return ShowOut{Report: apps.Report{App: t, State: catalog.StateAbsent}}, nil
 			}

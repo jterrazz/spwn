@@ -42,9 +42,9 @@ type ListJSON struct {
 	Elsewhere int `json:"not_for_this_machine"`
 }
 
-func ListContract(schema string, reports []apps.Report) ListJSON {
+func ListContract(schema string, reports []apps.Report, known []catalog.App) ListJSON {
 	// invariant: every array is built with make, so an empty one encodes as [].
-	body := ListJSON{Schema: schema, Findings: finding.Doc(apps.Findings(reports, machine.Ref{})), Apps: make([]AppJSON, 0, len(reports)), Elsewhere: len(apps.Elsewhere(reports))}
+	body := ListJSON{Schema: schema, Findings: finding.Doc(apps.Findings(reports, machine.Ref{})), Apps: make([]AppJSON, 0, len(reports)), Elsewhere: len(apps.Elsewhere(known, reports))}
 	for _, r := range reports {
 		detail := r.Detail
 		if detail == "" {

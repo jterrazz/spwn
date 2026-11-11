@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: bitwarden
+order: 910
+description: Password manager
+bundle: Bitwarden
+methods:
+    - os: macos
+      only: mac
+      cask: bitwarden

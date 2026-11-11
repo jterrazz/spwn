@@ -16,6 +16,8 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the catalog this run reads: the words of a setting that declared a port.
+	Catalog catalog.Catalog
 }
 
 type Input struct{ AllMachines, All bool }
@@ -38,7 +40,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pageports.Listed(l, d.ThisMachine, in.All), pageports.ListContract(l))
+			return io.Page(pageports.Listed(l, d.Catalog, d.ThisMachine, in.All), pageports.ListContract(l))
 		},
 	}, env)
 	cmd.AddCommand(children...)

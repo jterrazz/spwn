@@ -1,0 +1,15 @@
+item: station.catalog/v1
+kind: setting
+name: spotlight-exclude
+order: 80
+description: Exclude ~/Developer from Spotlight (guided, opens Settings)
+guided: true
+sets:
+    - { key: ~/Developer, value: excluded from Spotlight }
+methods:
+    - os: macos
+      builtin: spotlight-exclude
+writes:
+    - path: /System/Volumes/Data/.Spotlight-V100
+      level: settings
+      note: the Spotlight privacy list, through System Settings

@@ -1,0 +1,26 @@
+item: station.catalog/v1
+kind: app
+name: python
+order: 120
+description: Python programming language runtime
+provides: [python3]
+version:
+    args: [python3, --version]
+    pattern: ^Python (\S+)
+methods:
+    - os: any
+      mise:
+          name: python
+          version: latest
+disk:
+    paths:
+        - path: ~/Library/Caches/pip
+          level: cache
+          'on': [mac, macos]
+        - path: '{cache}/pip'
+          level: cache
+          'on': [linux]
+    free:
+        - run: [pip3, cache, purge]
+          needs: pip3
+    no-erase: 'nothing to erase: keys and logins are kept'

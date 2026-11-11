@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/fail"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/surface/cli/words"
@@ -129,7 +128,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 		return usage(badLifetime.Error(), "station machines create --permanent"), true
 	case errors.As(err, &unknownImage):
 		return usage(unknownImage.Error(), "station images for the images"), true
-	case errors.As(err, &noImage) && catalog.FetchedOnly(noImage.Image):
+	case errors.As(err, &noImage) && noImage.Fetched:
 		return usage("image "+noImage.Image+" is not on This Mac", "station images update "+noImage.Image), true
 	case errors.As(err, &noImage):
 		return usage(noImage.Error(), "station images build "+noImage.Image), true

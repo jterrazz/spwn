@@ -77,7 +77,7 @@ func (m machine) placement(g *guest.Agent) ports.VMLivesOn {
 // line of the ports.
 func portsCommands(env kit.Env, m machine) []*cobra.Command {
 	list := func(children ...*cobra.Command) *cobra.Command {
-		return portscmd.Command(portscmd.Deps{ThisMachine: m.where}, env, children...)
+		return portscmd.Command(portscmd.Deps{ThisMachine: m.where, Catalog: m.cat}, env, children...)
 	}
 	share := func() *cobra.Command { return portsshare.Command(portsshare.Deps{ThisMachine: m.where}, env) }
 	stop := func() *cobra.Command {

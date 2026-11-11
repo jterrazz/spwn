@@ -1,0 +1,16 @@
+item: station.catalog/v1
+kind: app
+name: gpg
+order: 300
+description: GNU Privacy Guard for encryption and signing
+provides: [gpg]
+then: [git-signing]
+methods:
+    - os: macos
+      brew: gnupg
+disk:
+    paths:
+        - path: ~/.gnupg
+          level: kept
+          note: the private keys
+    no-erase: 'nothing to erase: keys and logins are kept'

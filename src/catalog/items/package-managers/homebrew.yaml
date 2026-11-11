@@ -1,0 +1,26 @@
+item: station.catalog/v1
+kind: manager
+name: homebrew
+order: 10
+description: macOS package manager
+provides: [brew]
+version:
+    args: [brew, --version]
+    pattern: ^Homebrew (\S+)
+methods:
+    - os: macos
+      path: [/opt/homebrew/bin, /usr/local/bin]
+      script:
+          url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+disk:
+    paths:
+        - path: ~/Library/Caches/Homebrew
+          level: cache
+        - path: ~/Library/Logs/Homebrew
+          level: cache
+    installed: [/opt/homebrew]
+    free:
+        - run: [brew, cleanup, --prune=all]
+          needs: brew
+        - delete: [~/Library/Caches/Homebrew/*]
+    no-erase: "Homebrew's data are its formulae: station apps remove <app>"

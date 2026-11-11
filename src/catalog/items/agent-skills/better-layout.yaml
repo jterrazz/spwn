@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: better-layout
+order: 1050
+description: Layout and spacing craft
+methods:
+    - os: any
+      skill:
+          repo: jakubkrehel/skills
+          name: better-layout

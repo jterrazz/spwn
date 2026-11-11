@@ -64,6 +64,8 @@ func installOf(m Method, raw json.RawMessage) (Install, error) {
 		return decoded[AppInstall](raw)
 	case MethodSkill:
 		return decoded[SkillInstall](raw)
+	case MethodProvidedBy:
+		return decoded[ProvidedByInstall](raw)
 	}
 	return nil, fmt.Errorf("catalog: no install method %q", m)
 }

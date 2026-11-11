@@ -31,12 +31,14 @@ func Columns() []page.Column {
 	}
 }
 
-func List(l ports.Listing, thisMac page.Context) page.Page { return Listed(l, thisMac, false) }
+func List(l ports.Listing, cat catalog.Catalog, thisMac page.Context) page.Page {
+	return Listed(l, cat, thisMac, false)
+}
 
-func Listed(l ports.Listing, thisMac page.Context, all bool) page.Page {
+func Listed(l ports.Listing, cat catalog.Catalog, thisMac page.Context, all bool) page.Page {
 	// invariant: OU-01: what needs you comes first, before the Tailscale
 	// line, as on every page.
-	sections := Sections(l.AllMachines, thisMac, all)
+	sections := Sections(l.AllMachines, cat, thisMac, all)
 	if line := TailnetLine(l.Tailnet); line != nil {
 		at := 0
 		if len(sections) > 0 && sections[0].ID == "needs-you" {
@@ -77,7 +79,7 @@ func TailnetLine(s ports.Status) *page.Section {
 		Items:   []page.Item{{Row: &row}}}
 }
 
-func Sections(f ports.AllMachines, thisMac page.Context, all bool) []page.Section {
+func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, all bool) []page.Section {
 	// invariant: SPEC 5.6: what needs you first, then Public, then Private;
 	// what listens on its machine only is a count, unfolded by all; each Mac's
 	// reserved ports one line.
@@ -99,7 +101,7 @@ func Sections(f ports.AllMachines, thisMac page.Context, all bool) []page.Sectio
 				row := named(RedRow(p), thisMac)
 				red = append(red, page.Item{Row: &row})
 			case p.Declared != nil:
-				row := named(Answering(PublicRow(p), p), thisMac)
+				row := named(Answering(PublicRow(p, cat), p), thisMac)
 				public = append(public, page.Item{Row: &row})
 			case shared[p.Key()]:
 			case p.Reach == ports.ThisMachine:
@@ -215,7 +217,7 @@ func RedRow(p ports.Port) page.Row {
 	return row
 }
 
-func PublicRow(p ports.Port) page.Row {
+func PublicRow(p ports.Port, cat catalog.Catalog) page.Row {
 	// invariant: SPEC 5.6: a declared port is OK when its route is seen,
 	// attention with what is missing when it is not.
 	row := page.Row{ID: p.Key(), Label: p.Machine.Name, Mark: page.OK,
@@ -228,7 +230,7 @@ func PublicRow(p ports.Port) page.Row {
 		row.Cells[4] = page.Text("declared, but " + v.Missing)
 	case p.Declared.By != "":
 		r, _ := catalog.RouteNamed(p.Declared.Via)
-		row.Cells[4] = page.Texts(r.Label, catalog.DeclaredBy(p.Declared.By), "by Settings")
+		row.Cells[4] = page.Texts(r.Label, cat.DeclaredBy(p.Declared.By), "by Settings")
 	default:
 		r, _ := catalog.RouteNamed(p.Declared.Via)
 		row.Cells[4] = page.Texts(r.Label, r.Seen)

@@ -1,0 +1,27 @@
+item: station.catalog/v1
+kind: app
+name: opencode
+order: 520
+description: Open-source AI coding agent CLI
+provides: [opencode]
+methods:
+    - os: macos
+      brew: opencode
+    - os: linux
+      mise:
+          name: opencode
+          version: latest
+disk:
+    paths:
+        - path: '{cache}/opencode'
+          level: cache
+        - path: '{data}/opencode'
+          level: data
+        - path: '{state}/opencode'
+          level: data
+        - path: '{config}/opencode'
+          level: settings
+    free:
+        - delete: ['{cache}/opencode/*']
+    erase:
+        - delete: ['{data}/opencode/*', '{state}/opencode/*']

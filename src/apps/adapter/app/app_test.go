@@ -10,7 +10,7 @@ import (
 )
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.AppFrom("download it from its website"), func(*testing.T, contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.AppInstall{Hint: "download it from its website"}, func(*testing.T, contracttest.Seed) contract.Installer {
 		return app.New()
 	})
 }

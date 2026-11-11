@@ -1,0 +1,36 @@
+item: station.catalog/v1
+kind: app
+name: cursor
+order: 340
+description: AI-powered code editor
+bundle: Cursor
+methods:
+    - os: macos
+      cask: cursor
+disk:
+    paths:
+        - path: ~/Library/Application Support/Cursor/CachedExtensionVSIXs
+          level: cache
+        - path: ~/Library/Application Support/Cursor/logs
+          level: cache
+        - path: ~/Library/Application Support/Cursor/GPUCache
+          level: cache
+        - path: ~/Library/Application Support/Cursor/DawnCache
+          level: cache
+        - path: ~/Library/Application Support/Cursor/User/globalStorage
+          level: data
+        - path: ~/Library/Application Support/Cursor/User/History
+          level: data
+        - path: ~/Library/Application Support/Cursor/User/settings.json
+          level: settings
+    free:
+        - delete:
+              - ~/Library/Application Support/Cursor/CachedExtensionVSIXs/*
+              - ~/Library/Application Support/Cursor/logs/*
+              - ~/Library/Application Support/Cursor/GPUCache/*
+              - ~/Library/Application Support/Cursor/DawnCache/*
+    erase:
+        - delete:
+              - ~/Library/Application Support/Cursor/User/globalStorage/*
+              - ~/Library/Application Support/Cursor/User/History/*
+    quit: Cursor

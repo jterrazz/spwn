@@ -33,7 +33,7 @@ var List = call.Watch[Deps, ListIn, []settings.Row]{
 				rows[i], _ = judge(ctx, d, it, off)
 				continue
 			}
-			rows[i] = settings.Row{Name: it.Name, Group: settings.GroupOf(it), State: settings.StateReading}
+			rows[i] = settings.Row{Name: it.Name, Item: it, Group: settings.GroupOf(it), State: settings.StateReading}
 			left++
 			go func() {
 				row, _ := judge(ctx, d, it, off)

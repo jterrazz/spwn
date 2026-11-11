@@ -1,0 +1,22 @@
+item: station.catalog/v1
+kind: app
+name: notion
+order: 770
+description: Workspace for notes and docs
+bundle: Notion
+methods:
+    - os: macos
+      only: mac
+      cask: notion
+disk:
+    paths:
+        - path: ~/Library/Application Support/Notion/Partitions/notion/Cache
+          level: cache
+        - path: ~/Library/Application Support/Notion/Partitions/notion/Service Worker
+          level: cache
+    free:
+        - delete:
+              - ~/Library/Application Support/Notion/Partitions/notion/Cache/*
+              - ~/Library/Application Support/Notion/Partitions/notion/Service Worker/*
+    no-erase: "an app's data is its account's: erase it in the app"
+    quit: Notion

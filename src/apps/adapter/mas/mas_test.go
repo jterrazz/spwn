@@ -43,7 +43,7 @@ func (s *store) play(c local.Cmd) (local.Output, error) {
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.Mas("Xcode", 497799835), func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+	contracttest.Installer(t, catalog.MasInstall{Name: "Xcode", ID: 497799835}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
 		s := &store{apps: map[string]string{}, fails: seed.Fails}
 		for k, v := range seed.Installed {
 			s.apps[k] = v
@@ -64,7 +64,7 @@ func TestASignedOutAppStoreRefusesWithTheSignInHint(t *testing.T) {
 		return local.Output{}, local.ErrSilent
 	}, "mas")
 
-	err := mas.New(signedOut).Install(context.Background(), []catalog.Install{catalog.Mas("Speedtest", 1153157709)}, nil)
+	err := mas.New(signedOut).Install(context.Background(), []catalog.Install{catalog.MasInstall{Name: "Speedtest", ID: 1153157709}}, nil)
 
 	var out *apps.SignedOutError
 	if !errors.As(err, &out) || !strings.Contains(err.Error(), "open the App Store and sign in") {

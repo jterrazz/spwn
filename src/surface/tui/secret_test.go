@@ -9,10 +9,20 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/page"
 	pagesettings "github.com/jterrazz/studio-station/src/pages/settings"
 	settingsscreen "github.com/jterrazz/studio-station/src/surface/tui/screens/settings"
 )
+
+func builtinSettings(t *testing.T) []catalog.Setting {
+	t.Helper()
+	c, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c.Settings
+}
 
 const pasted = "sk-ant-oat01-kept-nowhere"
 
@@ -30,7 +40,7 @@ func TestSecretIsHandedNeverKept(t *testing.T) {
 		return nil, nil
 	}
 	s := newShell(t.Context(), Deps{ThisMachine: page.Context{Machine: "jterrazz-macbook-pro"}, Do: do})
-	g, ok := settingsscreen.Gesture(page.Action{Key: pagesettings.KeyApply}, []page.Row{{ID: "claude-token", Label: "claude-token"}})
+	g, ok := settingsscreen.Gesture(builtinSettings(t), page.Action{Key: pagesettings.KeyApply}, []page.Row{{ID: "claude-token", Label: "claude-token"}})
 	if !ok || g.Values == nil {
 		t.Fatal("a on claude-token opens no form")
 	}

@@ -1,0 +1,10 @@
+item: station.catalog/v1
+kind: app
+name: qmd-skill
+order: 1120
+description: Drive qmd, the local markdown search
+methods:
+    - os: any
+      skill:
+          repo: tobi/qmd
+          name: qmd

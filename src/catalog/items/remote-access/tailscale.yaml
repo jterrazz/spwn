@@ -1,0 +1,46 @@
+item: station.catalog/v1
+kind: app
+name: tailscale
+order: 900
+description: 'The Tailscale app: each Mac is a node, and station reads it'
+provides: [tailscale]
+then: [tailscale-cli]
+bundle: Tailscale
+supersedes: tailscale
+app-store: true
+methods:
+    - os: macos
+      only: mac
+      cask: tailscale-app
+disk:
+    paths:
+        - path: ~/Library/Containers/io.tailscale.ipn.macos*
+          level: kept
+          'on': [mac]
+          note: the App Store app's login
+        - path: ~/Library/Containers/io.tailscale.ipn.macsys*
+          level: kept
+          'on': [mac]
+          note: the Standalone app's login
+        - path: ~/Library/Containers/Tailscale
+          level: kept
+          'on': [mac]
+        - path: ~/Library/Group Containers/*io.tailscale.ipn.macos
+          level: kept
+          'on': [mac]
+        - path: ~/Library/Group Containers/*io.tailscale.ipn.macsys
+          level: kept
+          'on': [mac]
+        - path: ~/Library/Group Containers/group.*.io.tailscale.shared
+          level: kept
+          'on': [mac]
+        - path: ~/Library/Application Scripts/*io.tailscale.*
+          level: kept
+          'on': [mac]
+    installed:
+        - /Applications/Tailscale.app
+        - /usr/local/bin/tailscale
+        - ~/.local/bin/tailscale
+    removal:
+        ~/.local/bin/tailscale: 'written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it'
+    no-erase: "nothing to erase: the login is the Tailscale app's"

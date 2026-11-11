@@ -61,7 +61,11 @@ type UnknownImageError struct{ Image string }
 
 func (e *UnknownImageError) Error() string { return "unknown image \"" + e.Image + "\"" }
 
-type NoImageError struct{ Image string }
+type NoImageError struct {
+	Image string
+	// value: station only fetches the image: it has no recipe to build it from.
+	Fetched bool
+}
 
 func (e *NoImageError) Error() string { return "image " + e.Image + " is not built on This Mac" }
 

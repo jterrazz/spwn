@@ -1,0 +1,23 @@
+item: station.catalog/v1
+kind: app
+name: starship
+order: 170
+description: Cross-shell prompt (path, git branch/status, versions)
+provides: [starship]
+then: [starship-dotfiles]
+methods:
+    - os: macos
+      brew: starship
+    - os: linux
+      mise:
+          name: starship
+          version: latest
+disk:
+    paths:
+        - path: '{cache}/starship'
+          level: cache
+        - path: '{config}/starship.toml'
+          level: settings
+    free:
+        - delete: ['{cache}/starship/*']
+    no-erase: 'nothing to erase: keys and logins are kept'
