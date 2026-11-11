@@ -191,9 +191,20 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 	if was == "" || was == mode {
 		return
 	}
-	// invariant: the Funnel ports move with the mode before any private
-	// share is served in it: path mode frees 443 of every public share
-	// first.
+	// invariant: the private shares leave the old mode, then the Funnel
+	// ports move with the mode, then the private shares are served in it:
+	// path mode frees 443 of every public share before a path takes it,
+	// and port mode frees it of every path before a public share does.
+	var private []*svc
+	for _, s := range d.svcs {
+		i := d.reservationIndex(s.vm, s.port)
+		if i < 0 || !s.served || d.reservations[i].Audience() != catalog.AudiencePrivate {
+			continue
+		}
+		_ = d.tn.Unshare(ctx, ports.ShareOf(d.reservations[i], was))
+		s.served = false
+		private = append(private, s)
+	}
 	vms := map[string]bool{}
 	for _, l := range d.reservations {
 		vms[l.VM] = true
@@ -203,13 +214,11 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 			d.judgeLocked(ctx, vm, r, mode)
 		}
 	}
-	for _, s := range d.svcs {
+	for _, s := range private {
 		i := d.reservationIndex(s.vm, s.port)
-		if i < 0 || !s.served || d.reservations[i].Audience() != catalog.AudiencePrivate {
+		if i < 0 || s.served || d.svcs[key(s.vm, s.port)] != s || d.reservations[i].Audience() != catalog.AudiencePrivate {
 			continue
 		}
-		_ = d.tn.Unshare(ctx, ports.ShareOf(d.reservations[i], was))
-		s.served = false
 		d.expose(ctx, s, d.reservations[i], mode)
 	}
 }
@@ -581,8 +590,12 @@ func (d *Engine) heldOutside(ctx context.Context, want ports.Share) error {
 		if e.Port != want.Port {
 			continue
 		}
-		if ports.CarriedFrom(e) != want.Reserved {
-			return &ports.FunnelHeld{Port: want.Port}
+		if from := ports.CarriedFrom(e); from != want.Reserved {
+			held := &ports.FunnelHeld{Port: want.Port}
+			if d.policy().InRange(from) {
+				held.From = from
+			}
+			return held
 		}
 		ours = true
 	}

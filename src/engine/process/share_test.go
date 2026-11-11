@@ -191,3 +191,52 @@ func TestAModeSwitchedWhileServeIsOffIsJudgedWhenServeTurnsOn(t *testing.T) {
 		t.Errorf("public port = %d, want 8443", got)
 	}
 }
+
+// invariant: a switch from path to port mode frees station's own private
+// paths of 443 before a public share moves onto it.
+func TestAPathToPortSwitchMovesThePublicShareOnto443(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: "path"}}
+	h.d.st.Ports = pol
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	h.d.tn = tn
+	ctx := t.Context()
+	yes := true
+	h.d.refreshSelf(ctx)
+	h.d.mu.Lock()
+	h.d.rights["api"] = ports.Rights{PortRights: catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}, {From: 3001, To: 3001}}, To: catalog.AudiencePublic}}
+	h.d.reservations = []ports.Reservation{
+		{VM: "api", GuestPort: 3000, MacPort: 40000, To: catalog.AudiencePublic, PublicPort: 8443, HTTP: &yes},
+		{VM: "api", GuestPort: 5173, MacPort: 40001, By: ports.ByOwner, HTTP: &yes},
+	}
+	for _, p := range []int{3000, 5173} {
+		s := h.d.svcOf("api", p)
+		s.st.Phase = ports.PhaseShared
+		h.d.share(ctx, s)
+	}
+	h.d.mu.Unlock()
+	h.d.tickShares(ctx)
+	pol.g = &ports.PortsGroup{HTTPS: "port"}
+	h.d.tickShares(ctx)
+	if got, want := tn.dump(), "40001<-40001 funnel=false; 443<-40000 funnel=true"; got != want {
+		t.Errorf("tailnet = %s, want %s", got, want)
+	}
+	h.d.mu.Lock()
+	defer h.d.mu.Unlock()
+	if s := h.d.svcs[key("api", 3000)]; !s.served || s.serveNote != "" {
+		t.Errorf("3000 served=%v note %q, want served on 443", s.served, s.serveNote)
+	}
+}
+
+// invariant: a Funnel port held by an entry station made for another
+// share says so, never that station did not make it.
+func TestAFunnelPortHeldByStationsOwnEntryNamesIt(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	tn.entries = []ports.Share{{Port: 443, Path: "/api/5173", Reserved: 40001, Scheme: ports.SchemeHTTPS, Target: "http://127.0.0.1:40001"}}
+	h.d.tn = tn
+	err := h.d.heldOutside(t.Context(), ports.Share{Port: 443, Path: "/", Reserved: 40000, Scheme: ports.SchemeHTTPS, To: catalog.AudiencePublic})
+	if want := "Funnel port 443 still serves station's entry from port 40001 of this Mac"; err == nil || err.Error() != want {
+		t.Errorf("held = %v, want %q", err, want)
+	}
+}
