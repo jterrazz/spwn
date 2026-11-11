@@ -304,9 +304,10 @@ func (d *Engine) carriedLocked(ctx context.Context, own *ports.Reservation) (fun
 
 // invariant: HTTPS links turned on or off on this Mac serve every served
 // port again in the new mode at the next tick, each unshared first in the
-// mode it was served in; while Serve is off the mode last served in is
-// kept, so a switch made then is judged when Serve turns on. The caller
-// holds d.mu.
+// mode it was served in, and a share the old mode's entries held, judged
+// ahead of the tick, is served at its end; while Serve is off the mode last
+// served in is kept, so a switch made then is judged when Serve turns on.
+// The caller holds d.mu.
 func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 	if !d.self.On {
 		return
@@ -316,6 +317,7 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 	if was == "" || was == mode {
 		return
 	}
+	d.retry = true
 	// invariant: the private shares leave the old mode, then the Funnel
 	// ports move with the mode, then the private shares are served in it:
 	// path mode frees 443 of every public share before a path takes it,
@@ -817,7 +819,7 @@ func (d *Engine) heldOutside(ctx context.Context, want ports.Share) error {
 		if from := ports.CarriedFrom(e); from != want.Reserved && (!at(e, want) || !d.owesLocked(e)) {
 			held := &ports.FunnelHeld{Port: want.Port}
 			if d.policy().InRange(from) {
-				held.From = from
+				held.From, held.Paths = from, e.Mounted()
 			}
 			return held
 		}

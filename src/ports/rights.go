@@ -172,6 +172,9 @@ type FunnelHeld struct {
 	// value: the port of this Mac the entry that holds it is carried from,
 	// when it is of station's range: an entry station made, still there.
 	From int
+	// value: the entry that holds it is a private path station made, of
+	// the HTTPS mode the Mac is leaving.
+	Paths bool
 }
 
 func (e *FunnelHeld) Error() string {
@@ -181,6 +184,8 @@ func (e *FunnelHeld) Error() string {
 	switch {
 	case e.Private:
 		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry station did not make: a private share on it would be public"
+	case e.Paths:
+		return "Funnel port " + strconv.Itoa(e.Port) + " still serves station's private paths: shared once they leave it"
 	case e.From != 0:
 		return "Funnel port " + strconv.Itoa(e.Port) + " still serves station's entry from port " + strconv.Itoa(e.From) + " of this Mac"
 	}

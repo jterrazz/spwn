@@ -234,7 +234,8 @@ func TestAPathToPortSwitchMovesThePublicShareOnto443(t *testing.T) {
 func TestAFunnelPortHeldByStationsOwnEntryNamesIt(t *testing.T) {
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
 	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
-	tn.entries = []ports.Share{{Port: 443, Path: "/api/5173", Reserved: 40001, Scheme: ports.SchemeHTTPS, Target: "http://127.0.0.1:40001"}}
+	tn.entries = []ports.Share{{Port: 443, Path: "/", Reserved: 40001, Scheme: ports.SchemeHTTPS, Target: "http://127.0.0.1:40001"}}
+	tn.funnel = map[int]bool{443: true}
 	h.d.tn = tn
 	err := h.d.heldOutside(t.Context(), ports.Share{Port: 443, Path: "/", Reserved: 40000, Scheme: ports.SchemeHTTPS, To: catalog.AudiencePublic})
 	if want := "Funnel port 443 still serves station's entry from port 40001 of this Mac"; err == nil || err.Error() != want {

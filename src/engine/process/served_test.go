@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -284,5 +285,61 @@ func TestAReleaseLeavesAnEntryTheOwnerPutOnItsFunnelPort(t *testing.T) {
 	}
 	if got, want := tn.dump(), "443/<-9000 funnel=true"; got != want {
 		t.Errorf("tailnet after the release = %q, want the owner's %q", got, want)
+	}
+}
+
+// invariant: a public share judged ahead of the tick of a switch from path
+// to port mode, its Funnel port moved onto 443 while 443 still serves the
+// old mode's private paths, says so, and is served at that tick.
+func TestAPublicShareJudgedAheadOfTheModeTickIsServedAtIt(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "pub", Lifetime: model.Persistent})
+	pol := &heldPolicy{g: &ports.PortsGroup{HTTPS: "path"}}
+	h.d.st.Ports = pol
+	tn := &keptTailnet{fakeTailnet: fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}}
+	h.d.tn = tn
+	h.d.o.Rights = func(_ context.Context, vm string) (*catalog.PortRights, error) {
+		if vm == "pub" {
+			return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3000}}, To: catalog.AudiencePublic}, nil
+		}
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 5173, To: 5173}}, To: catalog.AudiencePrivate}, nil
+	}
+	ctx := t.Context()
+	yes := true
+	h.d.refreshSelf(ctx)
+	h.d.reconcileServe(ctx)
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	h.d.servedMode = "path"
+	h.d.reservations = []ports.Reservation{
+		{VM: "api", GuestPort: 5173, MacPort: 40000, By: ports.ByRights, HTTP: &yes, ReservedAt: h.clock.At, LastSeenAt: h.clock.At},
+		{VM: "pub", GuestPort: 3000, MacPort: 40001, To: catalog.AudiencePublic, PublicPort: 8443, By: ports.ByRights, HTTP: &yes, ReservedAt: h.clock.At, LastSeenAt: h.clock.At},
+	}
+	h.d.mu.Unlock()
+	h.d.loadRights(ctx, "api")
+	h.d.loadRights(ctx, "pub")
+	h.d.mu.Lock()
+	for _, k := range []string{"api:5173", "pub:3000"} {
+		vm, port, _ := strings.Cut(k, ":")
+		n, _ := strconv.Atoi(port)
+		s := h.d.svcOf(vm, n)
+		s.st.Phase = ports.PhaseShared
+		h.d.share(ctx, s)
+	}
+	h.d.mu.Unlock()
+	pol.g = &ports.PortsGroup{HTTPS: "port"}
+	h.d.loadRights(ctx, "pub")
+	h.d.mu.Lock()
+	pub := h.d.svcs[key("pub", 3000)]
+	note := pub.serveNote
+	h.d.mu.Unlock()
+	if want := "serve: Funnel port 443 still serves station's private paths: shared once they leave it"; note != want {
+		t.Errorf("pub's note ahead of the tick = %q, want %q", note, want)
+	}
+	h.d.tickShares(ctx)
+	h.d.mu.Lock()
+	served := pub.served
+	h.d.mu.Unlock()
+	if got := tn.dump(); !served || got != "40000<-40000 funnel=false; 443<-40001 funnel=true" {
+		t.Errorf("after the tick: pub served %v, tailnet %s; want 443 funneled from pub's 40001 and api's port its own", served, got)
 	}
 }
