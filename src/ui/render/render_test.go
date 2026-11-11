@@ -20,7 +20,6 @@ import (
 	pagejson "github.com/jterrazz/studio-station/src/ui/render/json"
 	"github.com/jterrazz/studio-station/src/ui/render/pipe"
 	"github.com/jterrazz/studio-station/src/ui/render/tty"
-	"github.com/jterrazz/studio-station/src/ui/render/tui"
 	"github.com/jterrazz/studio-station/src/ui/token"
 )
 
@@ -69,9 +68,7 @@ func renderings(f fixture) map[string]func() (string, error) {
 		"tty80": func() (string, error) {
 			return ansi.Strip(string(tty.Render(f.page, tty.Options{Width: 80, Dark: true}))), nil
 		},
-		"json":   func() (string, error) { return string(pagejson.Render(f.page)), nil },
-		"tui100": func() (string, error) { return browse(f.page, 100), nil },
-		"tui80":  func() (string, error) { return browse(f.page, 80), nil },
+		"json": func() (string, error) { return string(pagejson.Render(f.page)), nil },
 		"pipe": func() (string, error) {
 			body, err := pipe.Render(f.page)
 			if errors.Is(err, pipe.ErrPending) {
@@ -83,23 +80,12 @@ func renderings(f fixture) map[string]func() (string, error) {
 	if f.state == "full" {
 		out["ttylight100"] = func() (string, error) { return string(tty.Render(f.page, tty.Options{Width: 100, Dark: false})), nil }
 	}
-	if strings.HasPrefix(f.name, "fleet.") || strings.HasPrefix(f.name, "ports.") {
-		out["tui120"] = func() (string, error) { return browse(f.page, 120), nil }
-	}
 	if strings.HasPrefix(f.name, "kitchen-sink.") {
 		out["tty40"] = func() (string, error) {
 			return ansi.Strip(string(tty.Render(f.page, tty.Options{Width: 40, Dark: true}))), nil
 		}
 	}
 	return out
-}
-
-func browse(p page.Page, width int) string {
-	return ansi.Strip(master(p, width, true) + "\n")
-}
-
-func master(p page.Page, width int, dark bool) string {
-	return strings.Join(tui.List{}.Show(p).Lines(tui.Shell{Dark: dark}, width, 200, false), "\n")
 }
 
 func TestEveryFixtureRendersAsItsGoldenInEveryMedium(t *testing.T) {
@@ -225,7 +211,7 @@ func TestEveryHintIsWholeInEveryMedium(t *testing.T) {
 			}
 			if s.Fold == page.Brief || s.Fold == page.Calm {
 				// value: a brief or calm section is one line on a terminal: its
-				// rows' hints are whole in the pipe and the TUI, which list them.
+				// rows' hints are whole in the pipe, which lists them.
 				all := hints
 				hints = map[string]bool{}
 				walk(s.Items)
@@ -271,7 +257,7 @@ func TestAWrappedHintSitsAtTheLabelColumn(t *testing.T) {
 	marks := []rune(token.MarkOK + token.MarkAttention + token.MarkAbsent + token.MarkBroken + token.MarkPending)
 	for _, f := range fixtures(t) {
 		for medium, render := range renderings(f) {
-			if !strings.HasPrefix(medium, "tty") && !strings.HasPrefix(medium, "tui") || medium == "tty40" {
+			if !strings.HasPrefix(medium, "tty") || medium == "tty40" {
 				continue
 			}
 			text, err := render()
@@ -357,7 +343,7 @@ func TestStateColoursAreOnMarksAndLinesOnRules(t *testing.T) {
 		lines := token.Rule + token.Divider + "├└ "
 		notFor := token.MarkNotFor + "0123456789 "
 		for _, f := range fixtures(t) {
-			for _, out := range []string{string(tty.Render(f.page, tty.Options{Width: 100, Dark: dark})), master(f.page, 100, dark)} {
+			for _, out := range []string{string(tty.Render(f.page, tty.Options{Width: 100, Dark: dark}))} {
 				for _, s := range spans(out) {
 					text := strings.TrimSpace(s.text)
 					if text == "" {

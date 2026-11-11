@@ -194,7 +194,7 @@ func Row(t background.Task) page.Row {
 		case t.Scope == background.ScopeRoot && fix != "":
 			r.Hint = &page.Hint{Command: fix, External: true}
 		case fix != "":
-			r.Hint = page.KeyHint(fix, KeyRemove)
+			r.Hint = page.Cmd(fix)
 		}
 	}
 	return r

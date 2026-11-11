@@ -38,11 +38,7 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 			g.Items = append(g.Items, page.Item{Row: &row})
 		}
 		if len(h.VMs) == 0 && h.Reachable {
-			empty := &page.Empty{Noun: "VMs", Text: "No VMs yet"}
-			if h.ThisMac {
-				empty.Hint = &page.Hint{Key: KeyCreate, Text: "create one"}
-			}
-			g.Items = append(g.Items, page.Item{Empty: empty})
+			g.Items = append(g.Items, page.Item{Empty: &page.Empty{Noun: "VMs", Text: "No VMs yet"}})
 			create := "station machines create"
 			if !h.ThisMac {
 				create += " --on " + model.Label(f, h)

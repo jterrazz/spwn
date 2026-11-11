@@ -49,8 +49,7 @@
               }
             ],
             "hint": {
-              "command": "station awake 4h",
-              "key": "a"
+              "command": "station awake 4h"
             }
           }
         }

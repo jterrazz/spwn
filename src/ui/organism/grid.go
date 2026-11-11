@@ -35,10 +35,6 @@ type Grid struct {
 	Styles  token.Styles
 	Section page.Section
 	Width   int
-	Medium  molecule.Medium
-	Keys    molecule.Keys
-	// value: the keys an empty line may name (TU-20), when not Keys.
-	Empties molecule.Keys
 	Folded  func(key string) bool
 	Match   func(r page.Row) bool
 }
@@ -123,12 +119,6 @@ func (g Grid) split() []Line {
 }
 
 func (g Grid) lines() []Line {
-	if g.Keys == nil {
-		g.Keys = molecule.NoKeys
-	}
-	if g.Empties == nil {
-		g.Empties = g.Keys
-	}
 	entries := g.entries()
 	cols, labelWidth := g.layout(entries)
 	var out []Line
@@ -156,9 +146,9 @@ func (g Grid) item(out *[]Line, it page.Item, entries []entry, at int, cols []co
 		for _, e := range entries[at : at+n] {
 			switch {
 			case e.empty != nil && e.key != "" && e.prefix != "":
-				*out = append(*out, Line{Kind: LineOther, Text: atom.Spaces(token.Margin+g.indent()) + e.prefix + molecule.Empty(g.Styles, *e.empty, g.Medium, g.Empties)})
+				*out = append(*out, Line{Kind: LineOther, Text: atom.Spaces(token.Margin+g.indent()) + e.prefix + molecule.Empty(g.Styles, *e.empty)})
 			case e.empty != nil && e.key != "":
-				*out = append(*out, Line{Kind: LineOther, Text: atom.Spaces(token.Margin+g.indent()) + g.Styles.Subtle.Render(e.prefix) + atom.Spaces(token.MarkWidth) + molecule.Empty(g.Styles, *e.empty, g.Medium, g.Empties)})
+				*out = append(*out, Line{Kind: LineOther, Text: atom.Spaces(token.Margin+g.indent()) + g.Styles.Subtle.Render(e.prefix) + atom.Spaces(token.MarkWidth) + molecule.Empty(g.Styles, *e.empty)})
 			case e.link != nil && e.key != "":
 				*out = append(*out, Line{Kind: LineOther, Text: g.link(e.prefix, *e.link, labelWidth)})
 			case e.key != "":
@@ -169,7 +159,7 @@ func (g Grid) item(out *[]Line, it page.Item, entries []entry, at int, cols []co
 	case it.Fact != nil:
 		*out = append(*out, Line{Kind: LineOther, Text: indent + molecule.Fact(st, it.Fact.Key, factWidth, atom.Show(it.Fact.Value))})
 	case it.Empty != nil:
-		*out = append(*out, Line{Kind: LineOther, Text: indent + molecule.Empty(st, *it.Empty, g.Medium, g.Empties)})
+		*out = append(*out, Line{Kind: LineOther, Text: indent + molecule.Empty(st, *it.Empty)})
 	case it.Error != nil:
 		for _, l := range molecule.ErrorLines(st, *it.Error) {
 			*out = append(*out, Line{Kind: LineOther, Text: indent + l})
@@ -373,7 +363,7 @@ func (g Grid) layout(entries []entry) (cols []column, labelWidth int) {
 		case cols[i].whole:
 			cols[i].width = -1
 		default:
-			cols[i].width = max(cols[i].width-over, min(g.floor(cols[i]), cols[i].width), cols[i].firm)
+			cols[i].width = max(cols[i].width-over, min(atom.Floor(cols[i].kind), cols[i].width), cols[i].firm)
 		}
 	}
 	if over := fixed() - avail; over > 0 {
@@ -399,45 +389,18 @@ func (g Grid) layout(entries []entry) (cols []column, labelWidth int) {
 	}
 	cols = slices.DeleteFunc(cols, func(c column) bool { return c.width < 0 })
 	g.room(entries, cols, labelWidth, avail)
-	if g.Medium == molecule.TTY {
-		for i, e := range entries {
-			if e.row.Label != "" && atom.Width(e.prefix)+atom.Width(shown(e.row)) > labelWidth {
-				entries[i].stack = true
-			}
+	for i, e := range entries {
+		if e.row.Label != "" && atom.Width(e.prefix)+atom.Width(shown(e.row)) > labelWidth {
+			entries[i].stack = true
 		}
 	}
 	return cols, labelWidth
 }
 
-func (g Grid) Dropped() []string {
-	// value: the labels of the columns a short line left out whole, in their
-	// order, so a screen can say which (SPEC §9.9).
-	wide := g
-	wide.Width = 1 << 16
-	all, _ := wide.layout(wide.entries())
-	kept, _ := g.layout(g.entries())
-	var out []string
-	for _, c := range all {
-		if c.label != "" && !slices.ContainsFunc(kept, func(k column) bool { return k.label == c.label }) {
-			out = append(out, c.label)
-		}
-	}
-	return out
-}
-
 // value: a command column on a terminal: a command cut no longer runs, so
 // it is never cut nor dropped (OU-05).
 func (g Grid) whole(c column) bool {
-	return g.Medium == molecule.TTY && c.kind == page.KindCommand
-}
-
-// value: the narrowest a column is cut to: only a terminal's page keeps a
-// command whole (OU-05); the TUI's list cuts it as it cuts a text.
-func (g Grid) floor(c column) int {
-	if c.kind == page.KindCommand && !g.whole(c) {
-		return atom.Floor(page.KindText)
-	}
-	return atom.Floor(c.kind)
+	return c.kind == page.KindCommand
 }
 
 // invariant: on a terminal a name is never cut nor a command: a row whose
@@ -445,9 +408,6 @@ func (g Grid) floor(c column) int {
 // beside the names, stacks, the widest command first, until the others fit
 // side by side, each column at its floor (OU-05).
 func (g Grid) stacks(entries []entry, cols []column) {
-	if g.Medium != molecule.TTY {
-		return
-	}
 	live := func(e entry) bool { return e.key != "" && e.link == nil && e.empty == nil && !e.stack }
 	for i, e := range entries {
 		if live(e) && atom.Width(e.prefix)+atom.Width(shown(e.row)) > token.LabelMax {
@@ -639,7 +599,7 @@ func cut(v page.Value, width int) string {
 // lines, the On line) is drawn flush at the margin, as the vision's CLI pages
 // are, and keeps no column for a mark none of its rows carries.
 func (g Grid) flush() bool {
-	return g.Medium == molecule.TTY && g.Section.Role == page.Banner && g.Section.Title == "" && len(g.Section.Caption) == 0
+	return g.Section.Role == page.Banner && g.Section.Title == "" && len(g.Section.Caption) == 0
 }
 
 func (g Grid) indent() int {
@@ -731,8 +691,8 @@ func (g Grid) row(e entry, cols []column, labelWidth int) []Line {
 	// the widest cell of the section.
 	hintLines := func() []Line {
 		pad := indent + atom.Spaces(atom.Width(e.prefix)+g.markWidth())
-		h := molecule.Hint(st, *r.Hint, g.Medium, g.Keys)
-		width := atom.Width(molecule.HintText(*r.Hint, g.Medium, g.Keys))
+		h := molecule.Hint(st, *r.Hint)
+		width := atom.Width(molecule.HintText(*r.Hint))
 		if atom.Width(pad)+width < g.Width || !strings.Contains(r.Hint.Command, joint) {
 			return []Line{{Kind: LineHint, Key: e.key, Text: pad + h}}
 		}
@@ -837,8 +797,8 @@ func (g Grid) row(e entry, cols []column, labelWidth int) []Line {
 	detail := atom.Show(r.Detail)
 	hint, hintWidth := "", 0
 	if r.Hint != nil {
-		hint = molecule.Hint(st, *r.Hint, g.Medium, g.Keys)
-		hintWidth = atom.Width(molecule.HintText(*r.Hint, g.Medium, g.Keys))
+		hint = molecule.Hint(st, *r.Hint)
+		hintWidth = atom.Width(molecule.HintText(*r.Hint))
 	}
 	// invariant: a row whose last columns are blank in it keeps its detail
 	// beside its own cells when the aligned place would cut it and that one
@@ -931,8 +891,8 @@ func (g Grid) stacked(e entry, lead string, hintLines func() []Line) []Line {
 	}
 	put(r.Detail, true, !atom.Uncut(r.Detail.Kind))
 	if r.Hint != nil {
-		if w := atom.Width(molecule.HintText(*r.Hint, g.Medium, g.Keys)); used > 0 && used+token.Gap+w <= room {
-			line += atom.Spaces(token.Gap) + molecule.Hint(st, *r.Hint, g.Medium, g.Keys)
+		if w := atom.Width(molecule.HintText(*r.Hint)); used > 0 && used+token.Gap+w <= room {
+			line += atom.Spaces(token.Gap) + molecule.Hint(st, *r.Hint)
 			flush()
 			return lines
 		}

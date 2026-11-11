@@ -53,10 +53,10 @@ func Row(r settings.Row, now time.Time) page.Row {
 	case settings.StateChangedSince:
 		row.Mark, row.Reason = page.Attention, page.Differs
 		row.Cells = []page.Value{page.Text("changed since " + ago(r.Since, now))}
-		row.Hint = page.KeyHint("station settings diff "+name, KeyDiff)
+		row.Hint = page.Cmd("station settings diff " + name)
 	case settings.StateNotApplied:
 		row.Mark, row.Cells = page.Absent, []page.Value{page.Text("not applied")}
-		row.Hint = page.KeyHint("station settings apply "+name, KeyApply)
+		row.Hint = page.Cmd("station settings apply " + name)
 		if r.Needs != "" {
 			row.Reason = page.Missing
 			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Item.NeedsSaid())}
@@ -276,8 +276,8 @@ func lookAt(r settings.Row) bool {
 	return r.State == settings.StateChangedSince
 }
 
-// value: a calm group is one line on a terminal's page, open in the TUI
-// and the menu bar; --all unfolds it everywhere.
+// value: a calm group is one line on a terminal's page, open in the
+// menu bar; --all unfolds it everywhere.
 func brief(all bool) page.Fold {
 	if all {
 		return page.Open
@@ -571,7 +571,7 @@ func Removed(o settings.ContainersOutcome, command string, thisMac page.Context)
 
 func Diff(name, diff string, thisMac page.Context) page.Page {
 	// value: a file's unified diff as a page, one line per line, for the
-	// renderers that cannot print it raw (the TUI's detail pane).
+	// renderers that cannot print it raw.
 	lines := strings.Split(strings.TrimRight(diff, "\n"), "\n")
 	items := make([]page.Item, 0, len(lines))
 	for _, l := range lines {

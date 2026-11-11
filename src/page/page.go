@@ -163,7 +163,7 @@ type Section struct {
 	SaysDropped bool `json:"says_dropped,omitempty"`
 	// value: on a terminal's page, the rows shown before Rest, the one row
 	// that sums the others (vision 07 "station disk": `+ 15 more  7.8 GB`);
-	// the TUI and the menu bar show every row, --all unfolds it.
+	// the menu bar shows every row, --all unfolds it.
 	Top  int   `json:"top,omitempty"`
 	Rest *Item `json:"rest,omitempty"`
 	// value: the section in a few words, for a surface that gives it one
@@ -190,8 +190,8 @@ const (
 	Summary Role = "summary"
 	Banner  Role = "banner"
 	// value: what needs a look, lifted first on a terminal's page from the
-	// sections its rows stay in (vision 07 "station settings"): the pipe, the
-	// TUI and the menu bar read those rows where they are.
+	// sections its rows stay in (vision 07 "station settings"): the pipe and
+	// the menu bar read those rows where they are.
 	Lifted Role = "lifted"
 )
 
@@ -201,10 +201,10 @@ const (
 	Open   Fold = "open"
 	Folded Fold = "folded"
 	Auto   Fold = "auto"
-	// value: one line on a terminal's page, open in the TUI and the menu bar
+	// value: one line on a terminal's page, open in the menu bar
 	// (vision 07 "station apps" folds Not installed; screen 2 lists it).
 	Brief Fold = "brief"
-	// value: one line on a terminal's page, folded in the TUI while every
+	// value: one line on a terminal's page, folded while every
 	// row is calm, as Auto is (Settings' Set by station).
 	Calm Fold = "calm"
 )
@@ -441,7 +441,6 @@ type Link struct {
 type Hint struct {
 	Command  string `json:"command,omitempty"`
 	External bool   `json:"external,omitempty"`
-	Key      string `json:"key,omitempty"`
 	Text     string `json:"text,omitempty"`
 }
 

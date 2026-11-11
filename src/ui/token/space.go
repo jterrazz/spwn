@@ -12,12 +12,8 @@ const (
 	LabelMax    = 28
 	DetailMin   = 20
 	NarrowWidth = 80
-	SplitWidth  = 110
-	PaneWidth   = 44
 	MinWidth    = 40
-	ModalWidth  = 60
 
 	SpinnerFrame = 80 * time.Millisecond
-	LiveFrame    = 50 * time.Millisecond
 	WaitDelay    = 300 * time.Millisecond
 )

@@ -3,7 +3,6 @@ package organism
 import (
 	"github.com/jterrazz/studio-station/src/page"
 	"github.com/jterrazz/studio-station/src/ui/atom"
-	"github.com/jterrazz/studio-station/src/ui/molecule"
 	"github.com/jterrazz/studio-station/src/ui/token"
 )
 
@@ -29,50 +28,8 @@ func Title(st token.Styles, s page.Section) string {
 	return line
 }
 
-func CountedTitle(st token.Styles, s page.Section) string {
-	// value: the TUI's title of an open section: its counts follow it, the
-	// verdict a pane's reader looks for first, except on a banner whose
-	// groups are only headings.
-	line := Title(st, s)
-	if s.Joined || !titleCounts(s) {
-		return line
-	}
-	if counts := molecule.Counts(st, s.Counts); counts != "" {
-		line += atom.Spaces(token.Gap) + counts
-	}
-	return line
-}
-
-func titleCounts(s page.Section) bool {
-	if s.Role != page.Banner {
-		return true
-	}
-	for _, it := range s.Items {
-		if it.Group != nil && !it.Group.Heading() {
-			return true
-		}
-	}
-	return false
-}
-
-func FoldTitle(st token.Styles, s page.Section, folded bool, width int) string {
-	sign := token.FoldOpen
-	if folded {
-		sign = token.FoldShut
-	}
-	left := atom.Spaces(token.Margin) + st.Muted.Render(sign) + " " + st.Strong.Render(s.Title)
-	if c := Caption(st, s); c != "" {
-		left += atom.Spaces(token.Gap) + c
-	}
-	right := molecule.Counts(st, s.Counts)
-	if right == "" {
-		return left
-	}
-	return left + atom.Spaces(max(width-1-atom.Width(left)-atom.Width(right), token.Gap)) + right
-}
-
 func Rows(st token.Styles, s page.Section, width int) []string {
-	body := (Grid{Styles: st, Section: s, Width: width, Medium: molecule.TTY}).Lines()
+	body := (Grid{Styles: st, Section: s, Width: width}).Lines()
 	lines := make([]string, 0, len(body))
 	for _, l := range body {
 		lines = append(lines, l.Text)
@@ -90,23 +47,4 @@ func Section(st token.Styles, s page.Section, width int) []string {
 		lines = append(lines, Title(st, s))
 	}
 	return append(lines, body...)
-}
-
-func AutoFolded(s page.Section) bool {
-	switch s.Fold {
-	case page.Folded:
-		return true
-	case page.Open, page.Brief:
-		return false
-	case page.Auto, page.Calm:
-		rows := 0
-		for _, t := range s.Counts {
-			if t.Mark != page.OK && t.Mark != page.Absent {
-				return false
-			}
-			rows += t.N
-		}
-		return rows > 0
-	}
-	return false
 }

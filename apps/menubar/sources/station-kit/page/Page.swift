@@ -321,7 +321,6 @@ public struct Hint: Codable, Equatable, Sendable {
     public init(command: String? = nil) { self.command = command }
     public var command: String?
     public var external: Bool?
-    public var key: String?
     public var text: String?
 }
 

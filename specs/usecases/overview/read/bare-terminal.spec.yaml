@@ -1,4 +1,4 @@
-description: 'station on a terminal prints what overview prints, its next steps with it; --all unfolds it, and nothing opens a screen'
+description: 'bare station on a terminal prints the overview with its next steps, and --all unfolds it'
 fixture:
     - ../../../__fixtures__/terminal/
 env:

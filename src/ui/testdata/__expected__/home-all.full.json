@@ -126,8 +126,7 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station apps update pnpm",
-              "key": "u"
+              "command": "station apps update pnpm"
             }
           }
         },
@@ -142,8 +141,7 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station apps update better-ui",
-              "key": "u"
+              "command": "station apps update better-ui"
             }
           }
         },
@@ -158,8 +156,7 @@
             },
             "reason": "partial",
             "hint": {
-              "command": "station settings apply restart-after-power-cut",
-              "key": "a"
+              "command": "station settings apply restart-after-power-cut"
             }
           }
         },
@@ -1203,8 +1200,7 @@
               "kind": "none"
             },
             "hint": {
-              "command": "station apps install mise",
-              "key": "i"
+              "command": "station apps install mise"
             }
           }
         },
@@ -1231,8 +1227,7 @@
               "kind": "none"
             },
             "hint": {
-              "command": "station apps install mas",
-              "key": "i"
+              "command": "station apps install mas"
             }
           }
         },
@@ -1263,8 +1258,7 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station apps update pnpm",
-              "key": "u"
+              "command": "station apps update pnpm"
             }
           }
         },
@@ -1435,8 +1429,7 @@
               "kind": "none"
             },
             "hint": {
-              "command": "station apps install typewhisper",
-              "key": "i"
+              "command": "station apps install typewhisper"
             }
           }
         },
@@ -1494,8 +1487,7 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station apps update better-ui",
-              "key": "u"
+              "command": "station apps update better-ui"
             }
           }
         }
@@ -1551,8 +1543,7 @@
             },
             "reason": "partial",
             "hint": {
-              "command": "station settings apply restart-after-power-cut",
-              "key": "a"
+              "command": "station settings apply restart-after-power-cut"
             }
           }
         }

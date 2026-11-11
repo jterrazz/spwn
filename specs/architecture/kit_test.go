@@ -19,10 +19,8 @@ func under(pkg string, patterns ...string) bool {
 	return slices.ContainsFunc(patterns, func(p string) bool { return matches(p, pkg) })
 }
 
-const qr = "rsc.io/qr"
-
 // invariant: rule 13: the drawing libraries are the kit's; fang is help's and
-// the entry point's, Bubble Tea the program's and the TUI renderer's.
+// the entry point's.
 func ruleKit(w *world) []finding {
 	var out []finding
 	for _, f := range w.files {
@@ -30,12 +28,12 @@ func ruleKit(w *world) []finding {
 			lib := func(p string) bool { return ip == p || strings.HasPrefix(ip, p+"/") }
 			ok := true
 			switch {
-			case lib(lip), lib(bubble), lib(huh), lib(ansi), lib(cprof), lib(term), lib(qr):
+			case lib(lip), lib(bubble), lib(huh), lib(ansi), lib(cprof), lib(term):
 				ok = under(f.pkg, "ui/*")
 			case lib(fang):
 				ok = under(f.pkg, "ui/help", "wire")
 			case lib(tea):
-				ok = under(f.pkg, "ui/render/tui")
+				ok = under(f.pkg, "ui/render/tty")
 			}
 			if !ok {
 				out = append(out, finding{"kit", f.at(f.syntax.Imports[i].Pos()), fmt.Sprintf("%q may not import %q: drawing is the kit's", f.pkg, ip)})
@@ -298,15 +296,12 @@ func ruleLayout(w *world) []finding {
 // invariant: rule 18: the renderers every fixture is proved by, the golden
 // names src/ui/render/render_test.go writes.
 func goldensOf(fixture string) []string {
-	out := []string{"tty100", "tty80", "pipe", "json", "tui100", "tui80"}
+	out := []string{"tty100", "tty80", "pipe", "json"}
 	if strings.HasSuffix(fixture, ".full") {
 		out = append(out, "ttylight100")
 	}
 	if strings.HasPrefix(fixture, "kitchen-sink.") {
 		out = append(out, "tty40")
-	}
-	if strings.HasPrefix(fixture, "all-machines.") || strings.HasPrefix(fixture, "ports.") {
-		out = append(out, "tui120")
 	}
 	return out
 }
@@ -352,10 +347,10 @@ func TestEveryFixtureHasItsGoldens(t *testing.T) {
 	t.Run("bites", func(t *testing.T) {
 		without := map[string]bool{}
 		for k := range goldens {
-			without[k] = k != "apps.full.tui80"
+			without[k] = k != "apps.full.tty80"
 		}
-		if !slices.ContainsFunc(missingGoldens(fixtures, without), func(f finding) bool { return strings.HasSuffix(f.where, "apps.full.tui80") }) {
-			t.Error("the goldens rule did not report a fixture without its tui80 golden")
+		if !slices.ContainsFunc(missingGoldens(fixtures, without), func(f finding) bool { return strings.HasSuffix(f.where, "apps.full.tty80") }) {
+			t.Error("the goldens rule did not report a fixture without its tty80 golden")
 		}
 	})
 }

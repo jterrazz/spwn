@@ -10,46 +10,25 @@ const (
 	MarkNotFor    = "–"
 	MarkUnknown   = "?"
 
-	Arrow       = "→"
-	Sep         = " · "
-	Ellipsis    = "…"
-	Rule        = "─"
-	Divider     = "│"
-	TreeMid     = "├─ "
-	TreeEnd     = "└─ "
-	TreeBar     = "│  "
-	FoldOpen    = "-"
-	FoldShut    = "+"
-	Spinner     = "⣾⣽⣻⢿⡿⣟⣯⣷"
-	Spark       = "▁▂▃▄▅▆▇█"
-	GaugeOn     = "█"
-	GaugeOff    = "░"
-	QRUpper     = "▀"
-	QRLower     = "▄"
-	QRFull      = "█"
-	KeyUp       = "↑"
-	KeyDown     = "↓"
-	KeyLeft     = "←"
-	KeyRight    = Arrow
-	Charging    = "⚡"
-	Awake       = "⏻"
-	Unknown     = "?"
-	Corner      = "┌┐└┘"
-	Cursor      = "▸"
-	AllMachines = "◇"
-	Crumb       = " › "
-	SideMid     = "├ "
-	SideEnd     = "└ "
-	// value: a row ticked for a group action, and a toast's success.
+	Arrow    = "→"
+	Sep      = " · "
+	Ellipsis = "…"
+	Rule     = "─"
+	Divider  = "│"
+	TreeMid  = "├─ "
+	TreeEnd  = "└─ "
+	TreeBar  = "│  "
+	Spinner  = "⣾⣽⣻⢿⡿⣟⣯⣷"
+	Spark    = "▁▂▃▄▅▆▇█"
+	Unknown  = "?"
+	Cursor   = "▸"
+	// value: the mark of a step that succeeded.
 	Tick = "✓"
-	// value: what leads a text the owner types (a dialog's field).
-	Typed = "›"
 )
 
 func Glyphs() []string {
 	return []string{
 		MarkOK, MarkAttention, MarkAbsent, MarkBroken, MarkPending, MarkOffHere, MarkNotFor, MarkUnknown,
-		Arrow, "·", Ellipsis, Rule, Divider, "├", "└", Spinner, Spark, GaugeOff, QRUpper, QRLower,
-		KeyUp, KeyDown, KeyLeft, Charging, Awake, Corner, Cursor, AllMachines, Typed, Tick,
+		Arrow, "·", Ellipsis, Rule, Divider, "├", "└", Spinner, Spark, Cursor, Tick,
 	}
 }

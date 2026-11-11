@@ -859,8 +859,7 @@
             "mark": "absent",
             "label": "absent",
             "hint": {
-              "command": "station apps install mas",
-              "key": "i"
+              "command": "station apps install mas"
             }
           }
         },

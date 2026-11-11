@@ -101,8 +101,7 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station apps update better-ui",
-              "key": "u"
+              "command": "station apps update better-ui"
             }
           }
         }
@@ -160,8 +159,7 @@
               "kind": "none"
             },
             "hint": {
-              "command": "station apps install typewhisper",
-              "key": "i"
+              "command": "station apps install typewhisper"
             }
           }
         },

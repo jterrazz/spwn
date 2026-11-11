@@ -183,7 +183,6 @@ func lookSection(m settings.Matrix, now time.Time, label func(string) string) pa
 				row.Hint = page.Cmd("station machines start " + c.Name)
 			case one.Hint != nil:
 				hint := *one.Hint
-				hint.Key = ""
 				if !hint.External && !c.ThisMachine {
 					hint.Command += " --on " + c.Name
 				}

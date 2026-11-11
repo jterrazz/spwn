@@ -38,7 +38,7 @@ const differs = "differs from station's"
 func ReportRow(r settingsmodel.Report) page.Row {
 	name := r.Item.Name
 	row := page.Row{ID: name, Label: name, Mark: pages.MarkOf(r.State), Cells: []page.Value{page.Text(r.Item.Description)}}
-	install := page.KeyHint("station settings apply "+name, KeyApply)
+	install := page.Cmd("station settings apply " + name)
 	detail := r.Detail
 	switch {
 	case r.State == catalog.StatePending:

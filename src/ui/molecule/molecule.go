@@ -8,32 +8,9 @@ import (
 	"github.com/jterrazz/studio-station/src/ui/token"
 )
 
-type Medium int
+func HintText(h page.Hint) string { return token.Arrow + " " + h.Command }
 
-const (
-	TTY Medium = iota
-	TUI
-)
-
-type Keys func(key string) (label string, ok bool)
-
-func NoKeys(string) (string, bool) { return "", false }
-
-func HintText(h page.Hint, m Medium, keys Keys) string {
-	if m == TUI && h.Key != "" && !h.External {
-		if label, ok := keys(h.Key); ok {
-			return atom.KeyName(h.Key) + " " + label
-		}
-	}
-	return token.Arrow + " " + h.Command
-}
-
-func Hint(st token.Styles, h page.Hint, m Medium, keys Keys) string {
-	if m == TUI && h.Key != "" && !h.External {
-		if label, ok := keys(h.Key); ok {
-			return atom.Key(st, h.Key, label)
-		}
-	}
+func Hint(st token.Styles, h page.Hint) string {
 	return st.Muted.Render(token.Arrow+" ") + st.Text.Render(h.Command)
 }
 
@@ -47,41 +24,16 @@ func PageHint(st token.Styles, h page.Hint, at int) string {
 	return line
 }
 
-func Counts(st token.Styles, tallies []page.Tally) string {
-	parts := make([]string, 0, len(tallies))
-	for _, t := range tallies {
-		if t.N > 0 {
-			parts = append(parts, atom.Tone(st, t.Mark).Render(atom.Count(t)))
-		}
-	}
-	return strings.Join(parts, atom.Spaces(token.Gap))
-}
-
-func Empty(st token.Styles, e page.Empty, m Medium, keys Keys) string {
+func Empty(st token.Styles, e page.Empty) string {
 	text := "no " + e.Noun
 	if e.Text != "" {
 		text = e.Text
 	}
 	line := st.Muted.Render(text)
-	if e.Hint == nil {
+	if e.Hint == nil || e.Hint.Command == "" {
 		return line
 	}
-	// invariant: TU-20: on the TUI an empty line names the key that fills
-	// it (`No VMs yet. Press n to create one.`); a key the screen does not
-	// answer is never named, and a hint with no command is the TUI's alone.
-	if m == TUI && e.Hint.Key != "" && !e.Hint.External {
-		if label, ok := keys(e.Hint.Key); ok {
-			what := e.Hint.Text
-			if what == "" {
-				what = label
-			}
-			return st.Muted.Render(text+". Press ") + st.Accent.Render(atom.KeyName(e.Hint.Key)) + st.Muted.Render(" to "+what+".")
-		}
-	}
-	if e.Hint.Command == "" {
-		return line
-	}
-	return line + atom.Spaces(token.Gap) + Hint(st, *e.Hint, m, keys)
+	return line + atom.Spaces(token.Gap) + Hint(st, *e.Hint)
 }
 
 func ErrorLines(st token.Styles, e page.Error) []string {

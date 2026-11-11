@@ -1,9 +1,0 @@
- Changes
-   ◌ restart-after-power-cut
-   ◌ tart-launcher
-
- restart-after-power-cut before
-   autorestart  0
-
- restart-after-power-cut after
-   autorestart  1

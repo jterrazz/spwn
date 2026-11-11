@@ -26,8 +26,6 @@ func PadLeft(s string, width int) string {
 
 func Spaces(n int) string { return strings.Repeat(" ", max(n, 0)) }
 
-func Repeat(s string, n int) string { return strings.Repeat(s, max(n, 0)) }
-
 func End(s string, width int) string {
 	if lipgloss.Width(s) <= width {
 		return s

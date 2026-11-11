@@ -13,9 +13,3 @@ func Spinner(st token.Styles) spinner.Model {
 	}
 	return spinner.New(spinner.WithSpinner(spinner.Spinner{Frames: frames, FPS: token.SpinnerFrame}), spinner.WithStyle(st.Muted))
 }
-
-func Frame(i int) string {
-	// value: the spinner's frame i, turning through token.Spinner.
-	frames := []rune(token.Spinner)
-	return string(frames[i%len(frames)])
-}

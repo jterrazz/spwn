@@ -16,7 +16,7 @@ import (
 func Document(st token.Styles, p page.Page, width int) []string {
 	// invariant: the CLI page starts at its own first line, at the terminal's
 	// first column (vision 07): no header, no rule, no margin; the organisms lay
-	// out at the margin the TUI keeps, and the document takes it off.
+	// out at the margin the kit keeps, and the document takes it off.
 	lines := body(st, p, width+token.Margin)
 	for i, l := range lines {
 		lines[i] = unindent(l)

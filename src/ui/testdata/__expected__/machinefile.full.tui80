@@ -1,7 +1,0 @@
- studio-linux
-     machine.kind       workspace                       built-in  station-linux
-     machine.system.os  ubuntu                          built-in  station-linux
-     vm.resources.cpus  8                               user      studio-linux
-     apps.jq            listed                          user      studio-linux
-     apps.jq.method     github-release                  user      jq
-     apps.git           optional, no method for ubunt…  built-in  station-linux

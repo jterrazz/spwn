@@ -7,7 +7,7 @@ func everyField() page.Page {
 	disk := page.Value{Kind: page.KindSize, N: 2_400_000_000, Of: 20_000_000_000, Unit: "GB", Label: "disk", Stale: true}
 	on := page.Value{Kind: page.KindText, Text: "on mac-mini", Short: "mini", Pri: 2, Nav: "menubar.machine:mac-mini"}
 	since := page.Value{Kind: page.KindAge, At: "2026-11-03T10:20:00Z", N: 600}
-	hint := &page.Hint{Command: "station machines linux-1", Key: "cmd+i", Text: "open it"}
+	hint := &page.Hint{Command: "station machines linux-1", Text: "open it"}
 	createForm := &page.Form{
 		Title:    "New VM",
 		Subtitle: "on This Mac",

@@ -187,12 +187,12 @@ func Row(r apps.Report) page.Row {
 			detail = r.Live
 		}
 	case apps.UpdateAvailable:
-		row.Reason, row.Hint, detail = page.Outdated, page.KeyHint("station apps update "+name, KeyUpdate), "update available"
+		row.Reason, row.Hint, detail = page.Outdated, page.Cmd("station apps update "+name), "update available"
 	case apps.NotInstalled:
 		if r.Why == apps.WhyMissing {
 			row.Reason, row.Hint = page.Missing, page.Cmd("station apps install "+r.Needs)
 		} else {
-			row.Hint = page.KeyHint("station apps install "+name, KeyInstall)
+			row.Hint = page.Cmd("station apps install " + name)
 		}
 	case apps.NotManaged:
 		row.Reason = reason(r.Why)

@@ -72,7 +72,7 @@ func Section(f model.AllMachines, links func(mac, vm string) []page.Link) page.S
 			g.Items = append(g.Items, page.Item{Group: &page.Group{Head: row, Items: under, Fold: page.Open}})
 		}
 		if len(h.VMs) == 0 && h.Reachable {
-			hint := page.KeyHint("station machines create", KeyCreate)
+			hint := page.Cmd("station machines create")
 			if !h.ThisMac {
 				hint = page.Cmd("station machines create --on " + h.Name)
 			}

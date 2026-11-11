@@ -7,7 +7,6 @@ import (
 	pagejson "github.com/jterrazz/studio-station/src/ui/render/json"
 	"github.com/jterrazz/studio-station/src/ui/render/pipe"
 	"github.com/jterrazz/studio-station/src/ui/render/tty"
-	"github.com/jterrazz/studio-station/src/ui/render/tui"
 )
 
 type Want struct {
@@ -28,7 +27,7 @@ func Terminal(in io.Reader, out io.Writer, dumb bool) *tty.Terminal {
 	if dumb {
 		return tty.NewTerminal(in, out, nil)
 	}
-	return tty.NewTerminal(in, out, tui.Answer)
+	return tty.NewTerminal(in, out, tty.OnFrame)
 }
 
 func (w *Writer) Page(p page.Page, contract any, want Want) error {

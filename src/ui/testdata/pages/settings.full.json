@@ -85,8 +85,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff git-shortcuts",
-              "key": "d"
+              "command": "station settings diff git-shortcuts"
             }
           }
         },
@@ -103,8 +102,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token",
-              "key": "d"
+              "command": "station settings diff claude-token"
             }
           }
         },
@@ -121,8 +119,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key",
-              "key": "d"
+              "command": "station settings diff ssh-key"
             }
           }
         },
@@ -139,8 +136,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher",
-              "key": "d"
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -232,8 +228,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff git-shortcuts",
-              "key": "d"
+              "command": "station settings diff git-shortcuts"
             }
           }
         },
@@ -250,8 +245,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff claude-token",
-              "key": "d"
+              "command": "station settings diff claude-token"
             }
           }
         },
@@ -268,8 +262,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key",
-              "key": "d"
+              "command": "station settings diff ssh-key"
             }
           }
         },
@@ -286,8 +279,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher",
-              "key": "d"
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -303,8 +295,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply ghostty-dotfiles",
-              "key": "a"
+              "command": "station settings apply ghostty-dotfiles"
             }
           }
         },
@@ -320,8 +311,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply dns",
-              "key": "a"
+              "command": "station settings apply dns"
             }
           }
         },
@@ -337,8 +327,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply zed-dotfiles",
-              "key": "a"
+              "command": "station settings apply zed-dotfiles"
             }
           }
         },
@@ -354,8 +343,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply tailscale-cli",
-              "key": "a"
+              "command": "station settings apply tailscale-cli"
             }
           }
         },

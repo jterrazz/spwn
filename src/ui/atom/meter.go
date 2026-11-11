@@ -1,10 +1,6 @@
 package atom
 
-import (
-	"strings"
-
-	"github.com/jterrazz/studio-station/src/ui/token"
-)
+import "github.com/jterrazz/studio-station/src/ui/token"
 
 func Spark(samples []int) string {
 	steps := []rune(token.Spark)
@@ -36,14 +32,4 @@ func Graph(samples []int, width int) string {
 		columns = append(columns, sum/max(to-from, 1))
 	}
 	return Spark(columns)
-}
-
-func Bar(used, total int64, width int) string {
-	// invariant: the bar's shape carries the share, never its color alone:
-	// full blocks for the used part, light ones for the rest.
-	if width <= 0 || total <= 0 {
-		return ""
-	}
-	on := int(min(max(used, 0), total) * int64(width) / total)
-	return strings.Repeat(token.GaugeOn, on) + strings.Repeat(token.GaugeOff, width-on)
 }

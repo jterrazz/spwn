@@ -70,7 +70,7 @@ func sessionRows(r awake.Report) []page.Row {
 	case stopped(r):
 		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.Attention, Reason: page.Stopped, Cells: []page.Value{page.Unknown(), page.Text("engine " + r.Engine)}, Hint: engineHint()}}
 	case r.Session == nil:
-		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.OK, Cells: []page.Value{page.Off(), ended(r.LastEnd, r.Zone)}, Hint: page.KeyHint("station awake 4h", KeyAwake)}}
+		return []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.OK, Cells: []page.Value{page.Off(), ended(r.LastEnd, r.Zone)}, Hint: page.Cmd("station awake 4h")}}
 	}
 	s := *r.Session
 	rows := []page.Row{{ID: RowAwake, Label: RowAwake, Mark: page.OK, Cells: []page.Value{

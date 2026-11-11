@@ -129,7 +129,6 @@
             "reason": "waiting",
             "hint": {
               "command": "station machines linux-1",
-              "key": "cmd+i",
               "text": "open it"
             },
             "glyph": {

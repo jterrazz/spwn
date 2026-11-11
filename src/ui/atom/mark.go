@@ -56,24 +56,6 @@ func Mark(st token.Styles, m page.Mark) string {
 	return Tone(st, m).Render(g) + " "
 }
 
-func Key(st token.Styles, key, label string) string {
-	return st.Accent.Render(KeyName(key)) + " " + st.Muted.Render(label)
-}
-
-func KeyName(key string) string {
-	switch key {
-	case "up/down":
-		return token.KeyUp + token.KeyDown
-	case "left/right":
-		return token.KeyLeft + token.KeyRight
-	case "up":
-		return token.KeyUp
-	case "down":
-		return token.KeyDown
-	}
-	return key
-}
-
 func Count(t page.Tally) string { return strconv.Itoa(t.N) + " " + Glyph(t.Mark) }
 
 func Paint(st token.Styles, base lipgloss.Style, v page.Value, text string) string {

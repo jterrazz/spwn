@@ -74,8 +74,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -90,8 +89,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -131,8 +129,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -159,8 +156,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -192,8 +188,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -224,8 +219,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -239,8 +233,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }
@@ -267,8 +260,7 @@
           "empty": {
             "noun": "VMs",
             "hint": {
-              "command": "station machines create",
-              "key": "n"
+              "command": "station machines create"
             }
           }
         }

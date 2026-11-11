@@ -34,7 +34,7 @@ func Kitchen() []Fixture {
 		}))},
 		{"kitchen-sink.empty", page.Seal(kitchen(func(p *page.Page) {
 			for si := range p.Sections {
-				p.Sections[si].Items = []page.Item{{Empty: &page.Empty{Noun: "VMs", Hint: page.KeyHint("station machines create", "n")}}}
+				p.Sections[si].Items = []page.Item{{Empty: &page.Empty{Noun: "VMs", Hint: page.Cmd("station machines create")}}}
 			}
 		}))},
 		{"kitchen-sink.error", page.Seal(page.Page{ID: "home", Command: "status", Context: thisMacContext(), Error: &page.Error{Message: "the settings file is not valid JSON", Hint: "repair the JSON of ~/.config/station/settings.json"}})},
@@ -138,7 +138,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		marks.Items = append(marks.Items, it(x))
 	}
 	marks.Items = append(marks.Items,
-		it(page.Row{ID: "absent", Mark: page.Absent, Label: "absent", Hint: page.KeyHint("station apps install mas", "i")}),
+		it(page.Row{ID: "absent", Mark: page.Absent, Label: "absent", Hint: page.Cmd("station apps install mas")}),
 		it(row("off-here", page.OffHere, page.Text("turned off on this machine"))),
 		it(row("not-for-this-machine", page.NotForThisMachine, page.Text("Macs only"))),
 		it(row("not-known", page.NotKnown, page.Text("does not answer"))),

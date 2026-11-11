@@ -1,4 +1,4 @@
-package tui
+package tty
 
 import (
 	"errors"
@@ -39,7 +39,7 @@ func (a *answered) View() tea.View {
 	return v
 }
 
-func Answer(form *huh.Form, in io.Reader, out io.Writer) error {
+func OnFrame(form *huh.Form, in io.Reader, out io.Writer) error {
 	form.SubmitCmd, form.CancelCmd = tea.Quit, tea.Interrupt
 	_, err := tea.NewProgram(&answered{form: form}, tea.WithInput(in), tea.WithOutput(out)).Run()
 	switch {

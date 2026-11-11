@@ -114,8 +114,7 @@
             },
             "reason": "failing",
             "hint": {
-              "command": "station background remove com.jterrazz.brain.x-snapshot",
-              "key": "x"
+              "command": "station background remove com.jterrazz.brain.x-snapshot"
             }
           }
         }

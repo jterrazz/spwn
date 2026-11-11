@@ -139,12 +139,6 @@ func Cmd(command string) *Hint {
 	return &Hint{Command: command, External: !isStation(command)}
 }
 
-func KeyHint(command, key string) *Hint {
-	h := Cmd(command)
-	h.Key = key
-	return h
-}
-
 func isStation(command string) bool {
 	return len(command) > len("station ") && command[:len("station ")] == "station "
 }
