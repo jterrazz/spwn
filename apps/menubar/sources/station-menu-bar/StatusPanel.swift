@@ -136,13 +136,44 @@ final class GlassPanel: NSPanel {
     override func cancelOperation(_: Any?) { cancelled?() }
 }
 
-// value: tells the panel each new size the content asks, on the same
-// layout pass, so the window follows the spring frame by frame.
+// invariant: the window's frame is the panel's alone: the content's size
+// never pushes the window through Auto Layout (which would grow it from
+// its bottom edge), and every size the content takes, on every pass of
+// its spring, is told to the panel, which follows it with its top pinned.
 final class PanelHosting: NSHostingView<AnyView> {
     var resized: ((CGSize) -> Void)?
+    private var told = CGSize.zero
+
+    required init(rootView: AnyView) {
+        super.init(rootView: rootView)
+        for axis in [NSLayoutConstraint.Orientation.horizontal, .vertical] {
+            setContentHuggingPriority(.fittingSizeCompression, for: axis)
+            setContentCompressionResistancePriority(.fittingSizeCompression, for: axis)
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) { nil }
 
     override func invalidateIntrinsicContentSize() {
         super.invalidateIntrinsicContentSize()
-        resized?(intrinsicContentSize)
+        tell()
+    }
+
+    override func updateConstraints() {
+        super.updateConstraints()
+        tell()
+    }
+
+    override func layout() {
+        super.layout()
+        tell()
+    }
+
+    func tell() {
+        let size = intrinsicContentSize
+        guard size != told else { return }
+        told = size
+        resized?(size)
     }
 }
