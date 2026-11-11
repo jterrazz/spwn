@@ -137,6 +137,24 @@ Hermes and OpenClaw, which the owner still starts by hand on an always-on
 Mac, are the first cases; their gateway rows were dropped from the Overview
 until this design, which may be a machine kind of its own.
 
+TEMPORARY, revert when the permanent machine session exists: the Herdr
+iPhone app reaches the owner's MacBook over SSH (2026-11-11). Herdr core
+listens on a local unix socket only, so remote access runs
+`~/.local/bin/herdr-core connect` over SSH, as this Mac already does to its
+gate VMs. Opened by hand on the MacBook: Remote Login on (System Settings →
+General → Sharing; `systemsetup -setremotelogin` needs Full Disk Access),
+`/etc/ssh/sshd_config.d/100-tailscale-only.conf` (`AllowUsers` limited to
+Tailscale's 100.64.0.0/10 and fd7a:115c:a1e0::/48, key-only), and the
+`jterrazz-iphone-herdr` line in `~/.ssh/authorized_keys`. Until then the
+settings lot after L2.5 standardizes it as items (`ssh-authorized-keys`,
+`ssh-tailscale-only`, a Remote Login check) and L8.4 puts the key in the
+`jterrazz-macbook-pro` Machinefile. Once a permanent machine session holds
+everything and the phone connects to it instead: Remote Login off, the
+drop-in removed, the key line removed (the file too if it is the only
+line), those items and the key dropped from the MacBook's Machinefile
+unless the permanent machine reuses them, and optionally the Mac's host key
+removed from the iPhone app.
+
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches
 what its Mac binds on every interface, and the other VMs of its Mac (sshd,
