@@ -3,6 +3,7 @@ package local
 import (
 	"io"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -36,20 +37,25 @@ func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, searc
 		systemDirs = defaultSystemDirs
 	}
 	landing := search.under(vars)
-	var dirs []string
-	for _, d := range strings.Split(vars["PATH"]+":"+systemDirs+":"+strings.Join(landing, ":"), ":") {
-		if d != "" {
-			dirs = append(dirs, d)
-		}
-	}
+	system := strings.Split(systemDirs, ":")
 	return System{
-		Run:     &runner{env: env, dirs: dirs, landing: landing, stdin: stdin, stdout: stdout, stderr: stderr},
+		Run:     &runner{env: env, dirs: searched(vars["PATH"], system, landing), system: system, landing: landing, stdin: stdin, stdout: stdout, stderr: stderr},
 		FS:      disk{},
 		Env:     identity{vars: vars},
 		Net:     network{},
 		Sockets: sockets{},
 		Clock:   clock{},
 	}
+}
+
+func searched(path string, system, landing []string) []string {
+	var dirs []string
+	for _, d := range slices.Concat(strings.Split(path, ":"), system, landing) {
+		if d != "" {
+			dirs = append(dirs, d)
+		}
+	}
+	return dirs
 }
 
 // invariant: a program is looked up on disk at each call, so a manager or a

@@ -125,7 +125,7 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 	// station was started: a project folder that pins another runtime would
 	// otherwise pick which manager lists what that runtime holds, while its
 	// removal takes back the global one.
-	run := &everywhere{}
+	run := &everywhere{calls: &[]local.Cmd{}}
 	system := localtest.Mac(localtest.NewRunner(t), localtest.NewFS(), localtest.Env{HomeDir: "/home/u", OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
 	system.Run = run
 	m := machine{sys: system, vars: map[string]string{}}
@@ -136,8 +136,8 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 	}
 	ctx := context.Background()
 	appsMachine{managing(m)}.RunBriefly(ctx, "true", nil, time.Second)
-	if len(run.calls) != 1 {
-		t.Fatalf("an app's version read ran %d commands; want 1", len(run.calls))
+	if len(*run.calls) != 1 {
+		t.Fatalf("an app's version read ran %d commands; want 1", len(*run.calls))
 	}
 	removed := map[catalog.Method]bool{}
 	for _, a := range cat.Apps {
@@ -149,9 +149,9 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 			i := registry[in.Method()]
 			_, _ = i.Inventory(ctx)
 			_ = i.Install(ctx, []catalog.Install{in}, nil)
-			before := len(run.calls)
+			before := len(*run.calls)
 			_ = i.Remove(ctx, []catalog.Install{in}, nil)
-			removed[in.Method()] = len(run.calls) > before
+			removed[in.Method()] = len(*run.calls) > before
 		}
 	}
 	for method, i := range registry {
@@ -159,7 +159,7 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 			t.Errorf("%s: no removal ran a command, so the test reads nothing of it", method)
 		}
 	}
-	for _, c := range run.calls {
+	for _, c := range *run.calls {
 		argv := c.Name + " " + strings.Join(c.Args, " ")
 		if c.Dir != "/home/u" {
 			t.Errorf("%s runs from %q; want the home folder", argv, c.Dir)
@@ -172,10 +172,16 @@ func TestEveryManagerCommandRunsFromHomeOnTheGlobalVersions(t *testing.T) {
 	}
 }
 
-type everywhere struct{ calls []local.Cmd }
+// value: a Runner that answers every command with an empty document and
+// records it with the environment it was given before its own Env.
+type everywhere struct {
+	calls *[]local.Cmd
+	env   []string
+}
 
 func (e *everywhere) Output(_ context.Context, c local.Cmd) (local.Output, error) {
-	e.calls = append(e.calls, c)
+	c.Env = append(append([]string{}, e.env...), c.Env...)
+	*e.calls = append(*e.calls, c)
 	return local.Output{Stdout: "{}"}, nil
 }
 
@@ -185,11 +191,88 @@ func (e *everywhere) Attach(ctx context.Context, c local.Cmd, _ local.Stream) (l
 }
 
 func (e *everywhere) Start(c local.Cmd, _ string) (int, error) {
-	e.calls = append(e.calls, c)
-	return 0, nil
+	_, err := e.Output(context.Background(), c)
+	return 0, err
 }
+
+func (e *everywhere) Within(env []string) local.Runner { return &everywhere{calls: e.calls, env: env} }
 
 func (e *everywhere) LookPath(name string) (string, bool) { return "/bin/" + name, true }
 func (e *everywhere) Alive(int) bool                      { return false }
 func (e *everywhere) Signal(int, local.Sig) error         { return nil }
 func (e *everywhere) Reap(string) int                     { return 0 }
+
+func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testing.T) {
+	// invariant: a shell where the runtime manager is activated puts a
+	// project's install folder first on PATH, so a package manager found
+	// there would list what that runtime holds, while the runtime's removal
+	// takes back the global one.
+	home := "/home/u"
+	data := home + "/" + catalog.AppData
+	project := data + "/installs/node/22.1.0/bin"
+	shims := data + "/" + catalog.AppShims
+	cat, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	vars := map[string]string{"HOME": home, "PATH": project + ":/usr/bin"}
+	run := localtest.NewRunner(t)
+	run.Env = []string{"HOME=" + home, "PATH=" + vars["PATH"]}
+	system := localtest.Mac(run, localtest.NewFS(), localtest.Env{HomeDir: home, OS: "darwin"}, localtest.NewNet(), &localtest.Clock{})
+	m := machine{sys: system, vars: vars}
+	registry, _ := installers(m, false)
+	runtime, packages := installsOf(t, cat, registry, "node")
+	runtimes, pkgs := registry[runtime.Method()], registry[packages.Method()]
+	rt, pm := runtimes.Manager().Name, pkgs.Manager().Name
+	run.Programs = []string{project + "/" + pm, shims + "/" + pm, "/usr/bin/" + rt}
+	run.On(pm, "ls", "-g", "--depth=0", "--json").Reply(local.Output{Stdout: `{"dependencies":{"owner-pkg":{"version":"1.0.0"}}}`})
+	run.On(pm, "uninstall", "-g", packages.Key())
+	run.On(rt, "unuse", "--global", runtime.Key())
+	ctx := context.Background()
+
+	if found, _ := managing(m).Run.LookPath(pm); found != shims+"/"+pm {
+		t.Errorf("%s is looked up at %q; want the shim %s", pm, found, shims+"/"+pm)
+	}
+	if held, err := pkgs.Inventory(ctx); err != nil || len(held) != 1 {
+		t.Errorf("%s lists %v (%v); want the global node's package", pm, held, err)
+	}
+	_ = pkgs.Remove(ctx, []catalog.Install{packages}, nil)
+	_ = runtimes.Remove(ctx, []catalog.Install{runtime}, nil)
+
+	if len(run.Calls) != 3 {
+		t.Fatalf("ran %d commands; want the read and the two removals", len(run.Calls))
+	}
+	for _, c := range run.Calls {
+		argv := c.Name + " " + strings.Join(c.Args, " ")
+		search := ""
+		for _, kv := range c.Env {
+			if v, ok := strings.CutPrefix(kv, "PATH="); ok {
+				search = v
+			}
+		}
+		if search != shims+":/usr/bin" {
+			t.Errorf("%s runs with PATH %q; want the shims, then station's PATH without the project's folder", argv, search)
+		}
+		if c.Dir != home {
+			t.Errorf("%s runs from %q; want the home folder", argv, c.Dir)
+		}
+	}
+}
+
+// value: the runtime app's install on a Linux workspace, and one install of
+// the method whose manager that runtime is, on a macOS workspace.
+func installsOf(t *testing.T, cat catalog.Catalog, registry contract.Installers, runtime string) (own, held catalog.Install) {
+	t.Helper()
+	for _, a := range cat.Apps {
+		if a.Name == runtime {
+			own, _ = a.InstallOn(catalog.Linux)
+		}
+		if in, ok := a.InstallOn(catalog.MacOS); ok && held == nil && registry[in.Method()].Manager().App == runtime {
+			held = in
+		}
+	}
+	if own == nil || held == nil {
+		t.Fatalf("the catalogue has no %s install, or no install it manages", runtime)
+	}
+	return own, held
+}

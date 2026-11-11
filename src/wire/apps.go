@@ -89,21 +89,22 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 }
 
 // invariant: every command station runs for apps, a manager's read, install or
-// removal and an app's version read, runs from the owner's home with mise
-// pinned to its global file, never from the folder station was started in: a
+// removal and an app's version read, runs from the owner's home in an
+// environment station builds, mise's shims first and pinned to its global
+// file, never from the folder nor on the PATH station was started with: a
 // project there that pins another node would pick which npm lists what node
 // holds, while `mise unuse --global node` takes back the global one.
 func managing(m machine) local.System {
 	sys := m.sys
 	home := sys.Env.Home()
-	sys.Run = local.Anchored(sys.Run, home, mise.Pinned(home)...)
+	sys.Run = local.Anchored(sys.Run, home, mise.Environment(home, m.vars, npm.PrefixVar))
 	return sys
 }
 
 func installers(m machine, terminal bool) (contract.Installers, contract.Bundler) {
 	run := managing(m).Run
 	runtimes := mise.New(run)
-	bundle := brew.New(run, func() []string { return runtimes.ShimsFirst(m.sys.Env.Home(), m.vars) })
+	bundle := brew.New(run)
 	registry := contract.Installers{}
 	for _, i := range []contract.Installer{
 		bundle.Formulae(), bundle.Casks(),

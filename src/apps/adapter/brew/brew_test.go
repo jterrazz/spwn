@@ -76,7 +76,7 @@ func build(c *cellar, absent bool) *brew.Brew {
 	if !absent {
 		names = []string{"brew"}
 	}
-	return brew.New(local.Played(c.play, names...), nil)
+	return brew.New(local.Played(c.play, names...))
 }
 
 func TestFormulae(t *testing.T) {
@@ -103,7 +103,7 @@ func TestAFormulaListedWithSeveralVersionsReadsItsLatest(t *testing.T) {
 		return local.Output{Stdout: "bat 0.24.0 0.25.0\njq\n"}, nil
 	}, "brew")
 
-	got, err := brew.New(run, nil).Formulae().Inventory(context.Background())
+	got, err := brew.New(run).Formulae().Inventory(context.Background())
 
 	if err != nil || got["bat"] != "0.25.0" || got["jq"] != "" || len(got) != 2 {
 		t.Fatalf("inventory %v %v", got, err)

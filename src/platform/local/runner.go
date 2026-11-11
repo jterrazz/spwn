@@ -19,6 +19,7 @@ import (
 type runner struct {
 	env     []string
 	dirs    []string
+	system  []string
 	landing []string
 	stdin   io.Reader
 	stdout  io.Writer
@@ -36,6 +37,18 @@ func (r *runner) LookPath(name string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func (r *runner) Within(env []string) Runner {
+	path := ""
+	for _, kv := range env {
+		if v, ok := strings.CutPrefix(kv, "PATH="); ok {
+			path = v
+		}
+	}
+	within := *r
+	within.env, within.dirs = env, searched(path, r.system, r.landing)
+	return &within
 }
 
 func executable(path string) bool {

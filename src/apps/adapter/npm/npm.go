@@ -13,6 +13,12 @@ import (
 
 const command = "npm"
 
+// value: the variable that moves npm's global prefix, what `-g` reads and
+// removes, away from the node that runs it.
+const (
+	PrefixVar = "NPM_CONFIG_PREFIX"
+)
+
 type Npm struct {
 	run    local.Runner
 	bundle contract.Bundler

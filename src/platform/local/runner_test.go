@@ -82,3 +82,30 @@ func TestAChildThatCtrlCEndedIsAnInterruptionBeforeAnyContextIsCancelled(t *test
 		t.Fatalf("an ordinary failure must stay one: %v %+v", err, ran)
 	}
 }
+
+func TestAChildGivenAnEnvironmentHasItAloneAndIsFoundOnItsPath(t *testing.T) {
+	// invariant: a command run within an environment station built is the
+	// one that environment's PATH finds, and it sees nothing of the
+	// environment station was started with.
+	started, given := t.TempDir(), t.TempDir()
+	for _, dir := range []string{started, given} {
+		script := "#!/bin/sh\necho " + filepath.Base(dir) + " \"$KEPT\" \"$DROPPED\"\n"
+		tool := filepath.Join(dir, "tool")
+		if err := os.WriteFile(tool, []byte(script), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chmod(tool, 0o700); err != nil { //nolint:gosec // value: a program the lookup finds must be executable.
+			t.Fatal(err)
+		}
+	}
+	run := NewSearching([]string{"PATH=" + started, "DROPPED=x", "STATION_SYSTEM_DIRS="}, nil, nil, nil, Search{}).Run
+	within := run.Within([]string{"PATH=" + given, "KEPT=k"})
+
+	if found, _ := within.LookPath("tool"); found != filepath.Join(given, "tool") {
+		t.Errorf("tool is looked up at %q; want the given PATH's", found)
+	}
+	out, err := within.Output(context.Background(), Command("tool"))
+	if want := filepath.Base(given) + " k"; err != nil || strings.TrimSpace(out.Stdout) != want {
+		t.Errorf("the child printed %q (%v); want %q", out.Stdout, err, want)
+	}
+}

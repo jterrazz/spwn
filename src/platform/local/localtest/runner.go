@@ -12,13 +12,19 @@ import (
 )
 
 type Runner struct {
-	mu      sync.Mutex
-	t       testing.TB
-	script  []*Call
-	Paths   map[string]string
-	live    map[int]bool
-	Calls   []local.Cmd
-	Signals []local.Sig
+	mu     sync.Mutex
+	t      testing.TB
+	script []*Call
+	Paths  map[string]string
+	// value: the environment station was started with; its PATH, when it
+	// sets one, is what LookPath walks, over Programs and Paths.
+	Env []string
+	// value: the programs on disk, by absolute path, that a lookup on a PATH
+	// finds in the first of its folders that holds one of the name.
+	Programs []string
+	live     map[int]bool
+	Calls    []local.Cmd
+	Signals  []local.Sig
 }
 
 type Call struct {
@@ -103,9 +109,68 @@ func (r *Runner) Start(c local.Cmd, _ string) (int, error) {
 }
 
 func (r *Runner) LookPath(name string) (string, bool) {
+	if search, ok := pathOf(r.Env); ok {
+		return r.find(search, name)
+	}
 	path, ok := r.Paths[name]
 	return path, ok
 }
+
+func (r *Runner) Within(env []string) local.Runner { return &within{r: r, env: env} }
+
+func (r *Runner) find(search, name string) (string, bool) {
+	for _, dir := range strings.Split(search, ":") {
+		if candidate := dir + "/" + name; dir != "" && (slices.Contains(r.Programs, candidate) || r.Paths[name] == candidate) {
+			return candidate, true
+		}
+	}
+	return "", false
+}
+
+func pathOf(env []string) (string, bool) {
+	search, set := "", false
+	for _, kv := range env {
+		if v, ok := strings.CutPrefix(kv, "PATH="); ok {
+			search, set = v, true
+		}
+	}
+	return search, set
+}
+
+// value: the Runner a child environment of its own gives: each call is
+// recorded with that environment before its own Env, and a lookup walks
+// that environment's PATH alone.
+type within struct {
+	r   *Runner
+	env []string
+}
+
+func (w *within) at(c local.Cmd) local.Cmd {
+	c.Env = append(append([]string{}, w.env...), c.Env...)
+	return c
+}
+
+func (w *within) Output(ctx context.Context, c local.Cmd) (local.Output, error) {
+	return w.r.Output(ctx, w.at(c))
+}
+
+func (w *within) Attach(ctx context.Context, c local.Cmd, out local.Stream) (local.Attached, error) {
+	return w.r.Attach(ctx, w.at(c), out)
+}
+
+func (w *within) Start(c local.Cmd, logPath string) (int, error) { return w.r.Start(w.at(c), logPath) }
+
+func (w *within) LookPath(name string) (string, bool) {
+	search, _ := pathOf(w.env)
+	return w.r.find(search, name)
+}
+
+func (w *within) Within(env []string) local.Runner { return &within{r: w.r, env: env} }
+func (w *within) Alive(pid int) bool               { return w.r.Alive(pid) }
+func (w *within) Signal(pid int, sig local.Sig) error {
+	return w.r.Signal(pid, sig)
+}
+func (w *within) Reap(dir string) int { return w.r.Reap(dir) }
 
 func (r *Runner) Alive(pid int) bool {
 	r.mu.Lock()

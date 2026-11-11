@@ -63,6 +63,10 @@ type Runner interface {
 	Attach(ctx context.Context, c Cmd, out Stream) (Attached, error)
 	Start(c Cmd, logPath string) (pid int, err error)
 	LookPath(name string) (string, bool)
+	// value: a Runner whose children are given env alone, never the
+	// environment station was started with, and whose lookup walks env's
+	// PATH where this one walks station's.
+	Within(env []string) Runner
 	Alive(pid int) bool
 	Signal(pid int, sig Sig) error
 	Reap(dir string) int

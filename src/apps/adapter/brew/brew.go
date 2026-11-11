@@ -21,16 +21,9 @@ const (
 
 var manager = contract.Manager{Name: command, App: "homebrew"}
 
-type Brew struct {
-	run local.Runner
-	env func() []string
-}
+type Brew struct{ run local.Runner }
 
-func New(run local.Runner, env func() []string) *Brew {
-	// invariant: env is asked at each bundle, so a manager installed by an
-	// earlier step of the same run is on the bundle's PATH.
-	return &Brew{run: run, env: env}
-}
+func New(run local.Runner) *Brew { return &Brew{run: run} }
 
 func (b *Brew) Formulae() contract.Installer {
 	return &kind{brew: b, method: catalog.MethodBrew, flag: "--formula", list: local.Command(command, "list", "--formula", "--versions")}
@@ -52,9 +45,6 @@ func (b *Brew) Bundle(ctx context.Context, lines []string, update bool, logs con
 	c := local.Command(command, "bundle", "install", mode, "--file=-")
 	c.Stdin = strings.Join(lines, "\n") + "\n"
 	c.Logs = logs
-	if b.env != nil {
-		c.Env = b.env()
-	}
 	ran, err := b.run.Attach(ctx, c, local.ToStderr)
 	switch {
 	case err != nil:

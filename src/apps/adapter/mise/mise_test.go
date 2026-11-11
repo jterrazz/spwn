@@ -81,3 +81,35 @@ func TestAManagerCommandInstallsNoRuntimeByItself(t *testing.T) {
 		}
 	}
 }
+
+func TestAManagerCommandGetsTheGlobalVersionsWhateverItsShellPutFirst(t *testing.T) {
+	// invariant: `mise activate` puts a project's install first on PATH, nvm
+	// its own versions, and mise's profile or a version named in the
+	// environment moves what mise reads as global, so each would answer for
+	// another runtime than the one `unuse --global` takes back.
+	home := "/home/u"
+	vars := map[string]string{
+		"HOME": home, "TERM": "dumb",
+		"PATH":     home + "/.local/share/mise/installs/node/22.1.0/bin:" + home + "/.nvm/versions/node/v20.0.0/bin:" + home + "/.asdf/installs/nodejs/18.0.0/bin:/usr/bin:" + home + "/.local/share/mise/shims",
+		"MISE_ENV": "work", "MISE_PROFILE": "work", "MISE_NODE_VERSION": "22.1.0", "MISE_SHELL": "bash", "__MISE_DIFF": "x", "__MISE_SESSION": "x",
+		"MISE_AUTO_INSTALL": "true", "MOVED_PREFIX": "/elsewhere",
+	}
+
+	env := mise.Environment(home, vars, "moved_prefix")
+
+	want := []string{"HOME=/home/u", "PATH=/home/u/.local/share/mise/shims:/usr/bin", "TERM=dumb"}
+	if got := env[:len(want)]; !slices.Equal(got, want) {
+		t.Errorf("the environment opens with %v; want %v", got, want)
+	}
+	if got := env[len(want):]; !slices.Equal(got, mise.Pinned(home)) {
+		t.Errorf("the environment then carries %v; want the pins alone", got)
+	}
+}
+
+func TestTheShimsMoveWithMisesDataFolder(t *testing.T) {
+	env := mise.Environment("/home/u", map[string]string{"MISE_DATA_DIR": "/data/mise", "PATH": "/data/mise/installs/node/24/bin:/usr/bin"})
+
+	if !slices.Contains(env, "PATH=/data/mise/shims:/usr/bin") {
+		t.Errorf("the environment is %v; want the moved shims first and the moved installs gone", env)
+	}
+}

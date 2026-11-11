@@ -85,7 +85,7 @@ func statusDeps(env kit.Env, m machine) overviewcalls.Sections {
 	facts := m.facts()
 	if m.kind != catalog.Linux {
 		// value: the status page reads listeners, jobs and app updates on a Mac only.
-		d.Listeners, d.Jobs, d.Updates = listening, m.jobs(overviewcalls.ReadBudget), brew.New(h.Run, nil)
+		d.Listeners, d.Jobs, d.Updates = listening, m.jobs(overviewcalls.ReadBudget), brew.New(h.Run)
 		d.Servers = hostedServers{d: m.macEngine()}
 	}
 	d.Facts, d.Meter, d.Battery = facts, meter, m.powerPort

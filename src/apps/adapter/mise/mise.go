@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"path"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
@@ -107,16 +109,53 @@ func Pinned(home string) []string {
 	return []string{"MISE_CEILING_PATHS=" + home, "MISE_AUTO_INSTALL=false", "MISE_EXEC_AUTO_INSTALL=false", "MISE_NOT_FOUND_AUTO_INSTALL=false"}
 }
 
-func (m *Mise) ShimsFirst(home string, vars map[string]string) []string {
-	// invariant: a bundle runs with mise's shims first once mise is installed,
-	// so a formula's post-install finds the runtimes it pins; the shims live in
-	// $MISE_DATA_DIR, else ~/.local/share/mise.
-	if _, ok := m.run.LookPath(command); !ok {
-		return nil
-	}
+func Environment(home string, vars map[string]string, moved ...string) []string {
+	// invariant: a manager command answers for the versions mise holds
+	// globally, whatever shell station was started from: mise's shims come
+	// first on its PATH, and no runtime's own folder is on it (mise's
+	// installs, put there by `mise activate`; nvm's and asdf's versions),
+	// since a project's node found there lists what that node holds while
+	// `mise unuse --global node` takes back the global one; mise's profile,
+	// a version named in the environment, `mise activate`'s session and the
+	// moved variables another manager names (npm's prefix) are left out,
+	// since each moves what is read away from what is removed.
 	data := vars["MISE_DATA_DIR"]
 	if data == "" {
 		data = path.Join(home, ".local", "share", command)
 	}
-	return []string{"PATH=" + path.Join(data, "shims") + ":" + vars["PATH"]}
+	shims := path.Join(data, "shims")
+	versions := []string{path.Join(data, "installs"), path.Join(or(vars["NVM_DIR"], path.Join(home, ".nvm")), "versions"), path.Join(or(vars["ASDF_DATA_DIR"], path.Join(home, ".asdf")), "installs")}
+	search := []string{shims}
+	for _, dir := range strings.Split(vars["PATH"], ":") {
+		if dir != "" && !slices.Contains(search, dir) && !slices.ContainsFunc(versions, func(v string) bool { return strings.HasPrefix(dir, v+"/") }) {
+			search = append(search, dir)
+		}
+	}
+	pins := Pinned(home)
+	env := []string{"PATH=" + strings.Join(search, ":")}
+	for k, v := range vars {
+		set := func(kv string) bool { return strings.HasPrefix(kv, k+"=") }
+		if k != "PATH" && !moves(k) && !slices.ContainsFunc(pins, set) && !slices.ContainsFunc(moved, func(m string) bool { return strings.EqualFold(k, m) }) {
+			env = append(env, k+"="+v)
+		}
+	}
+	slices.Sort(env)
+	return append(env, pins...)
+}
+
+func moves(name string) bool {
+	switch {
+	case name == "MISE_ENV", name == "MISE_PROFILE", name == "MISE_SHELL":
+		return true
+	case strings.HasPrefix(name, "__MISE_"):
+		return true
+	}
+	return strings.HasPrefix(name, "MISE_") && strings.HasSuffix(name, "_VERSION")
+}
+
+func or(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
 }
