@@ -393,10 +393,22 @@ step "install.sh" "STATION_INSTALL_FROM=/tmp/station-e2e/station sh /tmp/station
 # shell script(1) runs writes its own pid, then becomes station, so SIGINT reaches
 # station alone, never script(1), whose arguments name the same command.
 in_vm "(yes '' | script -q /tmp/station-e2e/first.log sh -c 'echo \$\$ > /tmp/station-e2e/station.pid; exec $station init --machinefile /tmp/station-e2e/test-machinefile.yaml' > /dev/null 2>&1; echo \$? > /tmp/station-e2e/first.exit) > /dev/null 2>&1 &" || fail "start init --machinefile"
+# value: the transcript is the only witness of an apply that ends early: it is copied
+# to the host's artifacts before the VM is deleted, and its tail rides every failure.
+first_log() {
+  in_vm 'tr -d "\r" < /tmp/station-e2e/first.log 2> /dev/null' > "$out/$label-first.log" 2>&1 || true
+}
 waited=0
 until in_vm 'pgrep -f "cask.*ghostty|install.*ghostty" > /dev/null'; do
+  if in_vm 'test -s /tmp/station-e2e/first.exit'; then
+    first_log
+    fail "init --machinefile ended before the cask's install started, exit $(in_vm 'cat /tmp/station-e2e/first.exit'): $(tail -20 "$out/$label-first.log")"
+  fi
   waited=$((waited + 5))
-  [ $waited -lt 1200 ] || fail "the cask's install never started"
+  if [ $waited -ge 1200 ]; then
+    first_log
+    fail "the cask's install never started: $(tail -20 "$out/$label-first.log")"
+  fi
   sleep 5
 done
 in_vm 'kill -INT "$(cat /tmp/station-e2e/station.pid)"' || fail "interrupt the apply"
@@ -409,6 +421,7 @@ done
 n=$((n + 1))
 listing > "$fp/$n.txt"
 steps+=("$n:init --machinefile, interrupted")
+first_log
 say "   interrupted run: $(in_vm 'tr -d "\r" < /tmp/station-e2e/first.log | grep -E "interrupted|not run" | head -3' | tr '\n' ' ')"
 [ "$(in_vm 'cat /tmp/station-e2e/first.exit')" = 130 ] || miss "the interrupted apply exited $(in_vm 'cat /tmp/station-e2e/first.exit'), not 130"
 in_vm 'grep -q "station apply resumes" /tmp/station-e2e/first.log' || miss "the interrupted apply did not say station apply resumes"
