@@ -82,5 +82,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [029 An agent is answered and merged from the panel](decisions/029-an-agent-is-answered-and-merged-from-the-panel.md)
 - [030 init makes a machine known; apply carries its Machinefile](decisions/030-init-makes-a-machine-known-apply-carries-its-machinefile.md) (Proposed)
 - [031 The catalog defines, the Machinefile chooses](decisions/031-the-catalog-defines-the-machinefile-chooses.md) (Proposed)
+- [032 The words of a VM's lifetime and network](decisions/032-the-words-of-a-vms-lifetime-and-network.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
