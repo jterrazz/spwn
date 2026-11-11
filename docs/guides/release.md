@@ -19,7 +19,7 @@ git push --tags
 
 `.github/workflows/publish.yaml` fires on `push: tags: v*` and calls the shared `studio-actions` `publish-go.yaml` workflow with the binary name `station`, the build path `./src/cmd/station`, the Go version of `go.mod`, a linker flag that stamps the tag as the version, and four targets: `darwin/arm64`, `darwin/amd64`, `linux/arm64`, `linux/amd64`. Nothing is released on a merge to `main`: a merge only runs the validate workflow ([Test](test.md)).
 
-Each target is released as an asset named `station-<os>-<arch>` plus a `checksums.txt`; the install script asks for that name and refuses a binary the checksums do not vouch for. The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); the next release is a new major, `v3.0.0`. A release that renames those assets breaks every machine's install path.
+Each target is released as an asset named `station-<os>-<arch>` plus a `checksums.txt`; the install script asks for that name and refuses a binary the checksums do not vouch for. The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v3.0.0` is released, and the next is `v3.1.0`, the first to write the new words of a machine's kind and lifetime ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)). A release that renames those assets breaks every machine's install path.
 
 ## How a machine takes it
 
