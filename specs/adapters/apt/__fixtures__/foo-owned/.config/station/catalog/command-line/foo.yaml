@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: app
+name: foo
+description: A tool whose own package the owner installed, and whose data package it lacks
+provides: [foo-tool]
+methods:
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [foo, foo-extra] }

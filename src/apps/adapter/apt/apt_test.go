@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"testing"
@@ -330,5 +331,53 @@ func TestAnAptInstallOfNoPackageIsRefusedNotIndexed(t *testing.T) {
 		if err == nil || len(d.calls) > 0 || strings.Contains(err.Error(), "panicked") {
 			t.Errorf("%s of no package gave %v and ran %q; want it refused, nothing run", name, err, d.calls)
 		}
+	}
+}
+
+func TestARemovalKeepsTheOwnersOwnPackageWhereStationAddedOnlyTheRest(t *testing.T) {
+	// invariant: an install that found the app's own package held by the
+	// owner and added the others is taken back by those alone: the owner's
+	// package is never station's to remove.
+	d := &dpkg{held: map[string]string{"foo": "1.0"}}
+	a := played(d)
+	ctx := context.Background()
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-extra"}}}
+
+	if err := a.Install(ctx, foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.Remove(ctx, foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, kept := d.held["foo"]; !kept || len(d.held) != 1 {
+		t.Errorf("held %v after the removal; want foo alone, the owner's", d.held)
+	}
+}
+
+func TestARemovalKeepsAPackageAnotherAppStillHolds(t *testing.T) {
+	// invariant: a package two apps' installs share is taken back with the
+	// last of them, not the first.
+	d := &dpkg{held: map[string]string{}}
+	a := played(d)
+	ctx := context.Background()
+	one := []catalog.Install{catalog.AptInstall{Packages: []string{"aaa", "libshared"}}}
+	other := []catalog.Install{catalog.AptInstall{Packages: []string{"bbb", "libshared"}}}
+	for _, in := range [][]catalog.Install{one, other} {
+		if err := a.Install(ctx, in, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Remove(ctx, one, nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := (map[string]string{"bbb": "1.0", "libshared": "1.0"}); !maps.Equal(d.held, want) {
+		t.Errorf("held %v after removing the first app; want %v", d.held, want)
+	}
+	if err := a.Remove(ctx, other, nil); err != nil {
+		t.Fatal(err)
+	}
+	if len(d.held) != 0 {
+		t.Errorf("held %v after removing both apps; want none", d.held)
 	}
 }

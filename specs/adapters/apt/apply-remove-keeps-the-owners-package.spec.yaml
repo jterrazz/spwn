@@ -1,0 +1,33 @@
+description: 'apply adds the packages an app lacks, and apply --remove keeps the owner''s own'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/foo-owned/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apply --machinefile ci.yaml --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	foo	apt
+          # To adopt
+          ?	apt	apt	the manager of foo · on PATH, not managed by apt
+          ◐	apt		apt	the manager of foo · adopted · on PATH, not managed by apt
+          ●	foo	1.0	apt
+    - command: '--version >/dev/null; /bin/cat dpkg.db'
+      exit: 0
+      stdout: |
+          foo	1.0
+          foo-extra	1.0
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak "s/apps: \[foo\]/apps: []/" .config/station/machinefiles/ci.yaml'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	foo	apt	installed by station for ci, listed no longer
+          ●	foo		apt	removed
+    - command: '--version >/dev/null; /bin/cat dpkg.db'
+      exit: 0
+      stdout: |
+          foo	1.0

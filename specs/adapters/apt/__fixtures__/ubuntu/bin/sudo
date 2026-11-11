@@ -1,7 +1,9 @@
 #!/bin/sh
-# sudo: records its line, then runs what it was given, `env`'s assignments exported.
+# sudo: records its line, answers the password probe (`-k -n true`) as a passwordless one, else runs what it was given, `env`'s assignments exported.
 printf 'sudo %s\n' "$*" >> "$HOME/.calls"
+[ "$1" = -k ] && shift
 [ "$1" = -n ] && shift
+[ "$1" = true ] && exit 0
 [ "$1" = env ] && shift
 while :; do
     case "$1" in
