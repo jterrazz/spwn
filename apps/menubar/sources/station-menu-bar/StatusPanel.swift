@@ -31,7 +31,10 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         panel.identifier = PanelWindow.id
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        panel.hasShadow = true
+        // hazard: a borderless window's own shadow and rim follow its
+        // frame's square corners, not the glass's (capture cap4), so the
+        // glass's own edge and shadow are the panel's only ones.
+        panel.hasShadow = false
         panel.level = .popUpMenu
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
         panel.isReleasedWhenClosed = false
@@ -75,7 +78,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         glass.contentView = view
         let size = view.fittingSize
         let room = (bar.screen ?? NSScreen.main)?.visibleFrame ?? spot
-        anchor = CGPoint(x: min(max(spot.minX, room.minX + Self.margin), room.maxX - Self.margin - size.width), y: spot.minY - Self.drop)
+        anchor = CGPoint(x: min(max(spot.maxX - size.width, room.minX + Self.margin), room.maxX - Self.margin - size.width), y: spot.minY - Self.drop)
         report?("item \(Self.frame(spot))")
         fit(size)
         NSApp.activate()
@@ -136,8 +139,9 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         return Trial.tint.map { color.withAlphaComponent($0) } ?? color
     }
 
-    // value: the gap under the menu bar and the least room to the screen's
-    // edge, as MenuBarExtra's window had them.
+    // value: the panel's right edge under the item's, 6 pt under the menu
+    // bar, as the capture read MenuBarExtra's window (run old459); the
+    // least room to the screen's edge.
     static let drop: CGFloat = 6
     static let margin: CGFloat = 8
 }
