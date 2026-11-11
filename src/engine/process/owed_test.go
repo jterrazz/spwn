@@ -231,3 +231,17 @@ func TestATailnetNeverReadGivesOutNoPortUntilATickReadsIt(t *testing.T) {
 		t.Errorf("the failed reads were said %d times, want once: %v", said, *log)
 	}
 }
+
+// invariant: an entry this engine served goes at its release even when the
+// tailnet cannot be read, never left for a later tick.
+func TestAServedEntryGoesWhenTheTailnetCannotBeRead(t *testing.T) {
+	h, tn := funneledAPI(t)
+	ctx := t.Context()
+	tn.failShared = 1
+	if _, err := h.d.release(ctx, "api", 3000); err != nil {
+		t.Fatal(err)
+	}
+	if got := tn.dump(); got != "" {
+		t.Errorf("tailnet after the release = %s, want no entry", got)
+	}
+}
