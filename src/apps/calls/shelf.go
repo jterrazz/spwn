@@ -35,21 +35,22 @@ type VMs interface {
 
 type Shelf struct {
 	m      Machine
+	cat    catalog.Catalog
 	apps   []catalog.App
 	byName map[string]catalog.App
 	cfg    Configurer
 	o      ShelfOptions
 }
 
-func NewShelf(m Machine, list []catalog.App, cfg Configurer, o ShelfOptions) *Shelf {
-	byName := make(map[string]catalog.App, len(list))
-	for _, t := range list {
+func NewShelf(m Machine, cat catalog.Catalog, cfg Configurer, o ShelfOptions) *Shelf {
+	byName := make(map[string]catalog.App, len(cat.Apps))
+	for _, t := range cat.Apps {
 		byName[t.Name] = t
 	}
 	if o.Pool == nil {
 		o.Pool = lanes.NewPool(context.Background(), m, commandLane, 1)
 	}
-	return &Shelf{m: m, apps: list, byName: byName, cfg: cfg, o: o}
+	return &Shelf{m: m, cat: cat, apps: cat.Apps, byName: byName, cfg: cfg, o: o}
 }
 
 func (s *Shelf) Placed() []catalog.App {

@@ -30,19 +30,38 @@ func (l Link) Names(item string) bool {
 
 func (c Catalog) Links(it Item, method string, sys System) []Link {
 	// invariant: the one list of what an item by a method leans on, read by
-	// what brings an item in, what orders it, and what keeps an item
-	// another one there still needs; an item never leans on itself.
+	// the resolution, which brings an item in and orders it, by what keeps
+	// an extra another one there still needs, and, through InstallLinks,
+	// by apps.install; an item never leans on itself.
+	return c.links(it.Name, it.Requires, it.RequiresOneOf, providerOf(it, method, sys), method)
+}
+
+func (c Catalog) InstallLinks(t App, in Install) []Link {
+	// value: Links for an app by the install this machine carries: its
+	// provider is that install's, its manager that of the install's method.
+	var by string
+	if p, ok := in.(ProvidedByInstall); ok {
+		by = p.Item
+	}
+	var method string
+	if in != nil {
+		method = string(in.Method())
+	}
+	return c.links(t.Name, t.Requires, nil, by, method)
+}
+
+func (c Catalog) links(name string, requires, oneOf []string, by, method string) []Link {
 	var out []Link
-	for _, r := range it.Requires {
+	for _, r := range requires {
 		out = append(out, Link{Kind: LinkRequires, Items: []string{r}})
 	}
-	if len(it.RequiresOneOf) > 0 {
-		out = append(out, Link{Kind: LinkRequiresOneOf, Items: slices.Clone(it.RequiresOneOf)})
+	if len(oneOf) > 0 {
+		out = append(out, Link{Kind: LinkRequiresOneOf, Items: slices.Clone(oneOf)})
 	}
-	if by := providerOf(it, method, sys); by != "" && by != it.Name {
+	if by != "" && by != name {
 		out = append(out, Link{Kind: LinkProvidedBy, Items: []string{by}})
 	}
-	if owner, ok := c.Manager(method); ok && owner != it.Name {
+	if owner, ok := c.Manager(method); ok && owner != name {
 		out = append(out, Link{Kind: LinkManager, Items: []string{owner}})
 	}
 	return out

@@ -23,7 +23,7 @@ func New(run local.Runner, bundle contract.Bundler) *Npm { return &Npm{run: run,
 func (n *Npm) Method() catalog.Method { return catalog.MethodNpm }
 
 func (n *Npm) Manager() contract.Manager {
-	return contract.Manager{Name: command, App: "node", Needs: "homebrew"}
+	return contract.Manager{Name: command, App: "node"}
 }
 
 func (n *Npm) Can() contract.Abilities {

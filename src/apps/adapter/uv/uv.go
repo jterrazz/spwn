@@ -24,7 +24,7 @@ func New(run local.Runner, bundle contract.Bundler) *Uv { return &Uv{run: run, b
 func (u *Uv) Method() catalog.Method { return catalog.MethodUv }
 
 func (u *Uv) Manager() contract.Manager {
-	return contract.Manager{Name: command, App: command, Needs: "homebrew"}
+	return contract.Manager{Name: command, App: command}
 }
 
 func (u *Uv) Can() contract.Abilities {

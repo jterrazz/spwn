@@ -36,8 +36,6 @@ type Manager struct {
 	Name string
 	// value: the catalogue app that provides the manager, named when it is missing.
 	App string
-	// value: the catalogue app installed before any install of this method.
-	Needs string
 }
 
 type Abilities struct {

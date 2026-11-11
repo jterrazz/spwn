@@ -34,7 +34,7 @@ func (s *Shelf) Install(ctx context.Context, r apps.InstallRequest, p call.Progr
 	states := s.states(ctx, run)
 	deps := map[string][]string{}
 	for _, t := range run {
-		deps[t.Name] = s.requiredFor(ctx, t)
+		deps[t.Name] = s.requirements(ctx, t)
 	}
 	ordered := s.topological(run, deps)
 	outcomes := map[string]*apps.Outcome{}
@@ -110,7 +110,7 @@ func (s *Shelf) withRequirements(ctx context.Context, requested []catalog.App) (
 	requiredBy := map[string][]string{}
 	for i := 0; i < len(run); i++ {
 		t := run[i]
-		for _, dep := range s.requiredFor(ctx, t) {
+		for _, dep := range s.requirements(ctx, t) {
 			if inRun[dep] {
 				if requiredBy[dep] != nil && !slices.Contains(requiredBy[dep], t.Name) {
 					requiredBy[dep] = append(requiredBy[dep], t.Name)
@@ -144,17 +144,6 @@ func (s *Shelf) withRequirements(ctx context.Context, requested []catalog.App) (
 		}
 	}
 	return run, requiredBy, nil
-}
-
-// value: what an app's install cannot run without: its requirements, and its
-// method's manager while that manager is missing.
-func (s *Shelf) requiredFor(ctx context.Context, t catalog.App) []string {
-	deps := s.requirements(t)
-	inst := s.installer(t)
-	if app := inst.Manager().App; app != "" && app != t.Name && !slices.Contains(deps, app) && errors.Is(inst.Ready(ctx), contract.ErrMissing) {
-		deps = append(deps, app)
-	}
-	return deps
 }
 
 func (s *Shelf) announce(p call.Progress, batch []catalog.App, requiredBy map[string][]string) {
@@ -444,13 +433,20 @@ func (s *Shelf) then(ctx context.Context, t catalog.App, interactive bool) []app
 	return steps
 }
 
-func (s *Shelf) requirements(t catalog.App) []string {
-	reqs := slices.Clone(t.Requires)
-	if by, ok := s.install(t).(catalog.ProvidedByInstall); ok && !slices.Contains(reqs, by.Item) {
-		reqs = append([]string{by.Item}, reqs...)
-	}
-	if needs := s.installer(t).Manager().Needs; needs != "" && needs != t.Name && !slices.Contains(reqs, needs) {
-		reqs = append([]string{needs}, reqs...)
+// value: what an app's install cannot run without, the catalog's links of
+// the install this machine carries, in the order they are said: its
+// method's manager while that manager is missing here, its provider, then
+// what it requires (an app requires none of a group: only a setting does).
+func (s *Shelf) requirements(ctx context.Context, t catalog.App) []string {
+	links := s.cat.InstallLinks(t, s.install(t))
+	missing := errors.Is(s.installer(t).Ready(ctx), contract.ErrMissing)
+	var reqs []string
+	for _, kind := range []catalog.LinkKind{catalog.LinkManager, catalog.LinkProvidedBy, catalog.LinkRequires} {
+		for _, l := range links {
+			if l.Kind == kind && (kind != catalog.LinkManager || missing) && !slices.Contains(reqs, l.Items[0]) {
+				reqs = append(reqs, l.Items[0])
+			}
+		}
 	}
 	return reqs
 }
@@ -514,7 +510,7 @@ func (s *Shelf) statesWithRequirements(ctx context.Context, list []catalog.App) 
 			return
 		}
 		all[t.Name] = t
-		for _, dep := range s.requirements(t) {
+		for _, dep := range s.requirements(ctx, t) {
 			if d, ok := s.byName[dep]; ok {
 				if _, placed := d.InstallOn(s.o.ThisMachine); placed {
 					walk(d)

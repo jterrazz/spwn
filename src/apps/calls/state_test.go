@@ -49,7 +49,7 @@ func (m machine) RunBriefly(_ context.Context, name string, args []string, _ tim
 func reportOf(t *testing.T, app catalog.App, manager *fake.State, m machine) apps.Report {
 	method := app.Installs[0].Install.Method()
 	installers := contract.Installers{method: fake.New(method, manager)}
-	reports, err := calls.NewShelf(m, []catalog.App{app}, nil, calls.ShelfOptions{ThisMachine: catalog.Mac, Root: "/", Installers: installers, Pool: lanes.NewPool(context.Background(), m, 16, 1)}).Inventory(context.Background())
+	reports, err := calls.NewShelf(m, catalog.Catalog{Apps: []catalog.App{app}}, nil, calls.ShelfOptions{ThisMachine: catalog.Mac, Root: "/", Installers: installers, Pool: lanes.NewPool(context.Background(), m, 16, 1)}).Inventory(context.Background())
 	if err != nil || len(reports) != 1 {
 		t.Fatalf("inventory: %v %v", reports, err)
 	}

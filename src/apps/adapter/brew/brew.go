@@ -19,7 +19,7 @@ const (
 	bundle  = command + " bundle"
 )
 
-var manager = contract.Manager{Name: command, App: "homebrew", Needs: "homebrew"}
+var manager = contract.Manager{Name: command, App: "homebrew"}
 
 type Brew struct {
 	run local.Runner

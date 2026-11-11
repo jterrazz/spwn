@@ -77,7 +77,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		ask = env.Prompt
 	}
 	registry, bundler := installers(m, env.Interactive)
-	return appscalls.NewShelf(appsMachine{m.sys}, m.cat.Apps, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
+	return appscalls.NewShelf(appsMachine{m.sys}, m.cat, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
 		Pool:        m.pool,
 		ThisMachine: m.kind,
 		Root:        m.systemRoot(),
@@ -109,10 +109,10 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 	if m.world != nil {
 		// invariant: a world's installers are its fakes, one per method the
 		// real registry has, each lined when the real one rides the bundle.
-		managers := map[catalog.Method]string{}
+		managers := map[catalog.Method]contract.Manager{}
 		for method, real := range registry {
 			_, lined := real.(contract.Lined)
-			managers[method] = real.Manager().App
+			managers[method] = real.Manager()
 			registry[method] = m.world.installer(method, lined)
 		}
 		m.world.managers(managers)

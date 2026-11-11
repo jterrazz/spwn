@@ -30,7 +30,7 @@ func New(run local.Runner) *Mas { return &Mas{run: run, answer: answer} }
 func (m *Mas) Method() catalog.Method { return catalog.MethodMas }
 
 func (m *Mas) Manager() contract.Manager {
-	return contract.Manager{Name: command, App: command, Needs: "homebrew"}
+	return contract.Manager{Name: command, App: command}
 }
 
 func (m *Mas) Can() contract.Abilities {

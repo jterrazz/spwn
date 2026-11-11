@@ -21,9 +21,9 @@ import (
 )
 
 type World struct {
-	// value: the catalogue app that brings each method's manager, as the real
-	// adapters name it; set by the wiring, never read from a file.
-	Managers map[catalog.Method]string `json:"-"`
+	// value: each method's manager as its real adapter names it; set by
+	// the wiring, never read from a file.
+	Managers map[catalog.Method]Named `json:"-"`
 	// invariant: every fake over the world holds this lock while it reads
 	// or writes it, as the engine's goroutines and a command share it.
 	mu sync.Mutex
@@ -179,6 +179,15 @@ type Node struct {
 	CertificatePending bool `json:"certificate_pending,omitempty"`
 	// value: the ports its Funnel config opens to the internet.
 	Funnel []int `json:"funnel,omitempty"`
+}
+
+// value: a method's manager as its real adapter names it: its word in a
+// row's detail, and the catalogue app that brings it; a method that runs
+// no manager names neither.
+
+type Named struct {
+	Name string
+	App  string
 }
 
 type Manager struct {

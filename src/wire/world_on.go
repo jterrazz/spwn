@@ -337,9 +337,15 @@ func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefil
 	return machinefilefake.SharedOf(m.run.w, src)
 }
 
-func (m *worldMac) managers(apps map[catalog.Method]string) { m.run.w.Managers = apps }
-func (m *worldMac) vault() accountscontract.Vault           { return accountsfake.NewVault(m.run.w, m.name) }
-func (m *worldMac) journal() agentscontract.Journal         { return agentsfake.JournalOf(m.run.w, m.name) }
+func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Manager) {
+	named := make(map[catalog.Method]world.Named, len(adapters))
+	for method, manager := range adapters {
+		named[method] = world.Named{Name: manager.Name, App: manager.App}
+	}
+	m.run.w.Managers = named
+}
+func (m *worldMac) vault() accountscontract.Vault   { return accountsfake.NewVault(m.run.w, m.name) }
+func (m *worldMac) journal() agentscontract.Journal { return agentsfake.JournalOf(m.run.w, m.name) }
 func (m *worldMac) agentSession() agentscontract.Session {
 	return agentsfake.SessionOf(m.run.w, m.name)
 }

@@ -32,7 +32,7 @@ func New(o Options) *Skills { return &Skills{o: o} }
 func (s *Skills) Method() catalog.Method { return catalog.MethodSkill }
 
 func (s *Skills) Manager() contract.Manager {
-	return contract.Manager{Name: command, App: command, Needs: command}
+	return contract.Manager{Name: command, App: command}
 }
 
 func (s *Skills) Can() contract.Abilities {

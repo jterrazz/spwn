@@ -22,7 +22,7 @@ func New(run local.Runner) *Mise { return &Mise{run: run} }
 func (m *Mise) Method() catalog.Method { return catalog.MethodMise }
 
 func (m *Mise) Manager() contract.Manager {
-	return contract.Manager{Name: command, App: command, Needs: command}
+	return contract.Manager{Name: command, App: command}
 }
 
 func (m *Mise) Can() contract.Abilities {

@@ -74,7 +74,7 @@ func (*worldMac) tailnet() portscontract.Tailnet                         { retur
 func (*worldMac) funnel() funnel.Funnel                                  { return nil }
 func (*worldMac) installer(catalog.Method, bool) appscontract.Installer  { return nil }
 func (*worldMac) bundler() appscontract.Bundler                          { return nil }
-func (*worldMac) managers(map[catalog.Method]string)                     {}
+func (*worldMac) managers(map[catalog.Method]appscontract.Manager)       {}
 func (*worldMac) budgets() lanes.Clock                                   { return nil }
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
 func (*worldMac) identities() accountscontract.Identities                { return nil }

@@ -78,9 +78,12 @@ func manager(w *world.World, mac string, m catalog.Method) *world.Manager {
 func (f *Installer) Method() catalog.Method { return f.method }
 
 func (f *Installer) Manager() contract.Manager {
-	// invariant: a manager names the catalogue app that brings it, the one
-	// the real adapter names (World.Managers), else its method's name.
-	return contract.Manager{Name: string(f.method), App: managerApp(f.w, f.method)}
+	// invariant: a manager is the one the real adapter names
+	// (World.Managers), else its method's name and an app of that name.
+	if named, ok := f.w.Managers[f.method]; ok {
+		return contract.Manager{Name: named.Name, App: named.App}
+	}
+	return contract.Manager{Name: string(f.method), App: string(f.method)}
 }
 
 func (f *Installer) Can() contract.Abilities {
@@ -266,8 +269,8 @@ func (b *Bundler) apply(lines []string, update, first bool) error {
 // command then answers: the methods its key lands, and the method whose
 // manager is the app of that name (mas installed by the bundle).
 func managerApp(w *world.World, m catalog.Method) string {
-	if app := w.Managers[m]; app != "" {
-		return app
+	if named, ok := w.Managers[m]; ok {
+		return named.App
 	}
 	return string(m)
 }
