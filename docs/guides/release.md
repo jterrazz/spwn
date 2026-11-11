@@ -42,7 +42,7 @@ A `workflow_dispatch` run builds the Darwin job alone and uploads its five files
 
 A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is the upgrade.
 
-A Mac takes `Station.app` as an app of the catalog, `station apps install station-menubar` ([Apps and skills](../reference/apps-and-skills.md)), with no Xcode: it downloads the latest release's `Station.app.zip`, refuses it unless `checksums.txt` vouches for it, and puts it at `~/Applications/Station.app`, as `make menubar-install` does. Like that target, it registers no login item: the app's own "Open at login" switch does.
+A Mac takes `Station.app` as an app of the catalog, `station apps install station-menubar` ([Apps and skills](../reference/apps-and-skills.md)), with no Xcode: it reads the latest release's tag once, downloads that release's `Station.app.zip`, refuses it unless its `checksums.txt` vouches for it, and puts it at `~/Applications/Station.app`, as `make menubar-install` does: the new bundle is copied beside the old, then renamed over it, so a failed install keeps the old app. A running `Station.app` keeps its old process until it is quit and opened again. Like that target, it registers no login item: the app's own "Open at login" switch does.
 
 ## From a checkout
 

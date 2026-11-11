@@ -604,10 +604,10 @@ Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (not
 
 ### station-menubar
 
-| Path                                                       | Group         | Note                                           |
-| ---------------------------------------------------------- | ------------- | ---------------------------------------------- |
-| `~/Library/Preferences/com.jterrazz.station.menubar.plist` | never touched | its window, recent pages and sparkline choices |
-| `~/Applications/Station.app`                               | installed     | removed by `station apps remove`               |
+| Path                                                       | Group         | Note                                                                                                                                                         |
+| ---------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `~/Library/Preferences/com.jterrazz.station.menubar.plist` | never touched | its window, recent pages and sparkline choices                                                                                                               |
+| `~/Applications/Station.app`                               | installed     | `make menubar-uninstall`'s two steps remove it: `~/Applications/Station.app/Contents/MacOS/StationMenuBar --unregister-login-item`, then deleting the bundle |
 
 Erase: none (nothing to erase: its pages are station's, its choices are kept).
 

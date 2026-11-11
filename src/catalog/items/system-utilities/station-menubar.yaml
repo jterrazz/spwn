@@ -13,16 +13,23 @@ version-read:
             ~/Applications/Station.app/Contents/Info.plist,
         ]
 methods:
-    # hazard: github-release has no installer yet, so the release's zip is fetched
-    # here, refused unless checksums.txt vouches for it, and put where
-    # `make menubar-install` puts it; curl sets no quarantine on the ad hoc signature.
+    # hazard: github-release has no installer yet, so the latest release's zip is
+    # fetched here, refused unless checksums.txt vouches for it, and put where
+    # `make menubar-install` puts it, the old bundle kept until the new one is
+    # renamed over it; curl sets no quarantine on the ad hoc signature.
     - os: macos
       machine: computer
       script:
           check: test -d "$HOME/Applications/Station.app"
           run: |
               set -eu
-              base=https://github.com/jterrazz/studio-station/releases/latest/download
+              repo=jterrazz/studio-station
+              tag=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+              if [ -z "$tag" ]; then
+                  echo "the latest release did not answer · try again" >&2
+                  exit 1
+              fi
+              base="https://github.com/$repo/releases/download/$tag"
               work=$(mktemp -d)
               trap 'rm -rf "$work"' EXIT
               curl -fsSL "$base/Station.app.zip" -o "$work/Station.app.zip"
@@ -35,13 +42,22 @@ methods:
               fi
               ditto -x -k "$work/Station.app.zip" "$work"
               codesign --verify --strict "$work/Station.app"
+              app="$HOME/Applications/Station.app"
               mkdir -p "$HOME/Applications"
-              rm -rf "$HOME/Applications/Station.app"
-              mv "$work/Station.app" "$HOME/Applications/Station.app"
+              rm -rf "$app.new" "$app.old"
+              ditto "$work/Station.app" "$app.new"
+              if [ -d "$app" ]; then mv "$app" "$app.old"; fi
+              if ! mv "$app.new" "$app"; then
+                  if [ -d "$app.old" ]; then mv "$app.old" "$app"; fi
+                  exit 1
+              fi
+              rm -rf "$app.old"
 disk:
     paths:
         - path: ~/Library/Preferences/com.jterrazz.station.menubar.plist
           level: settings
           note: its window, recent pages and sparkline choices
     installed: [~/Applications/Station.app]
+    removal:
+        ~/Applications/Station.app: "`make menubar-uninstall`'s two steps remove it: `~/Applications/Station.app/Contents/MacOS/StationMenuBar --unregister-login-item`, then deleting the bundle"
     no-erase: "nothing to erase: its pages are station's, its choices are kept"
