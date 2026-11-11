@@ -18,6 +18,7 @@ const (
 	SectionPublic    = "public"
 	SectionPrivate   = "private"
 	SectionListening = "listening"
+	SectionLocal     = "local"
 	SectionHTTPS     = "https"
 
 	ActionOpenPort    = "open-port:"
@@ -32,6 +33,7 @@ const (
 	TitlePublic    = "Public"
 	TitlePrivate   = "Private"
 	TitleListening = "Listening, not shared"
+	TitleLocal     = "This Mac only"
 	TitlePorts     = "Ports"
 )
 
@@ -93,7 +95,7 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 	// when it has a public port, and its listeners in its Private card. A
 	// port follows its VM: unreachable while it is down, never a verb then.
 	var b portsBody
-	var exposed, public, private, listening []page.Item
+	var exposed, public, private, local, listening []page.Item
 	for _, h := range f.Macs {
 		mark := len(private)
 		heard := map[string]ports.Port{}
@@ -111,7 +113,16 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 			if ok && p.Declared != nil {
 				continue
 			}
-			private = append(private, b.sharedRow(s, p.Answer, h, sc))
+			switch {
+			case s.State == ports.PhaseNotAllowed:
+				listening = append(listening, b.notAllowedRow(s, h, sc))
+			case catalog.Audience(s.To) == catalog.AudiencePublic:
+				public = append(public, b.sharedRow(s, p.Answer, h, sc))
+			case catalog.Audience(s.To) == catalog.AudienceLocal:
+				local = append(local, b.sharedRow(s, p.Answer, h, sc))
+			default:
+				private = append(private, b.sharedRow(s, p.Answer, h, sc))
+			}
 		}
 		for _, n := range h.NotShared {
 			if sc.holds(h, n.VM) {
@@ -144,6 +155,7 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		slices.SortStableFunc(private[mark:], func(a, b page.Item) int { return cmp.Compare(machineOf(a), machineOf(b)) })
 	}
 	b.Exposed, b.Public, b.Private = len(exposed), len(public), len(private)
+	local = capped(local)
 	heardCount := len(listening)
 	wholeExposed, wholePublic, wholePrivate := page.Tallied(exposed), page.Tallied(public), page.Tallied(private)
 	if sc.VM != "" {
@@ -179,6 +191,9 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		priv.Items = []page.Item{{Empty: &page.Empty{Text: "Nothing shared yet"}}}
 	}
 	b.Sections = append(b.Sections, priv)
+	if len(local) > 0 {
+		b.Sections = append(b.Sections, page.Section{ID: SectionLocal, Title: TitleLocal, Caption: []page.Value{count(len(local))}, Columns: columns(), Items: local})
+	}
 	if sc.VM == "" && len(listening) > 0 {
 		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(heardCount)}, Columns: columns(), Items: listening,
 			Uncounted: listeningCapped, Counts: whole(listeningCapped, wholeListening)})
@@ -259,6 +274,20 @@ func (b *portsBody) sharedRow(s ports.SharedPort, a ports.Answer, h ports.MacPor
 	b.act(stop)
 	row.Menu = slices.Concat(verbs, []string{"-", stop.ID})
 	b.Shares = append(b.Shares, page.Item{Row: &row})
+	return page.Item{Row: &row}
+}
+
+// value: a listener outside its VM's rights: flagged with the rights it is
+// outside, and offered Share, the owner's own call, which shares it anyway.
+func (b *portsBody) notAllowedRow(s ports.SharedPort, h ports.MacPorts, sc portsScope) page.Item {
+	named := s.Named()
+	key := address(s.VM, s.GuestPort)
+	row := page.Row{ID: key, Mark: page.Attention, Reason: page.Waiting, Label: named.Name, Detail: page.Texts(key, s.Detail), Glyph: chip(named)}
+	a := page.Action{ID: ActionSharePortOf + key, Label: VerbShare, On: page.OnRow, Rows: []string{key}, Mutates: true,
+		Run: &page.Run{Call: CallSharePort, In: map[string]string{"VM": s.VM, "Port": strconv.Itoa(s.GuestPort)}, Target: macTarget(h.Name, sc.Self)},
+		Hud: hud("Shared " + named.Name + " of " + s.VM)}
+	row.Verb = a.ID
+	b.act(a)
 	return page.Item{Row: &row}
 }
 

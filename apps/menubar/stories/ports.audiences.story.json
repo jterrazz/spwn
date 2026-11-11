@@ -1,0 +1,8 @@
+{
+    "group": "ports",
+    "heightNote": "a gap story: designed after the prototype",
+    "id": "ports.audiences",
+    "note": "Each share sits in the card of its audience: Public for the internet, Private for the tailnet, This Mac only for its loopback; a listener outside the rights is flagged with them and offered Share.",
+    "pages": ["pages/machines.ports.audiences.ports.json"],
+    "schema": "station.story/v1"
+}

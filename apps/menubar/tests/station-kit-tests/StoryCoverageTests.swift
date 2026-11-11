@@ -174,7 +174,7 @@ final class StoryCoverageTests: XCTestCase {
 
     func testEveryStoryIsGreen() throws {
         let coverage = try coverage()
-        XCTAssertEqual(coverage.ids.count, 181, "STORIES.md holds the 178 stories of v4, A2 the 19 it added and the 9 it retired, and the gaps mac.mini.stale and workspace.hook-missing, and the refused catalog file need L2.2 added")
+        XCTAssertEqual(coverage.ids.count, 182, "STORIES.md holds the 178 stories of v4, A2 the 19 it added and the 9 it retired, and the gaps mac.mini.stale and workspace.hook-missing, the refused catalog file need L2.2 added, and ports.audiences, which ADR-039 adds")
         let (findings, tally) = coverage.audit()
         let gaps = Coverage.gaps.filter { !coverage.ids.contains($0) }
         print("stories: \(tally.green) green, \(tally.pending) unbuilt pending: \(coverage.unbuilt.joined(separator: ", ")); \(tally.orphans) orphans; \(gaps.count) gap ids pending: \(gaps.joined(separator: ", "))")

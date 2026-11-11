@@ -15,6 +15,7 @@ func portsWorlds() []World {
 		{Name: "machines.ports.exposed", Edit: macs().then(portsAsHeard, airPlayOnEvery), Pages: []string{"ports"}},
 		{Name: "machines.ports.down", Edit: macs().then(portsAsHeard, infraDown), Pages: []string{"ports"}},
 		{Name: "machines.ports.quiet", Edit: macs().then(portsAsHeard, quietOnLinux1), Pages: []string{"ports", "machine.linux-1"}},
+		{Name: "machines.ports.audiences", Edit: macs().then(portsAsHeard, sharedByAudience), Pages: []string{"ports", "machine.linux-1"}},
 		{Name: "machines.ports.shared", Edit: macs().then(portsAsHeard, astroJustShared), Pages: []string{"machine.linux-1"}},
 	}
 }
@@ -67,4 +68,17 @@ func astroJustShared(f *Scene) {
 	h.Shared = append(h.Shared, ports.SharedPort{VM: "linux-1", GuestPort: 4321, Reserved: 40003, State: ports.PhaseShared, Process: "astro", HTTP: true,
 		ReservedAt: storyNow.Add(-2 * time.Second)})
 	serve(h, h.HTTPS)
+}
+
+// value: ports.audiences: linux-1 shares one port with each audience and
+// flags one outside its rights: 3001 public on a Funnel port, 4000 local to
+// its Mac, 8443 listening, not allowed.
+func sharedByAudience(f *Scene) {
+	h := &f.Ports.Macs[0]
+	h.Shared = append(h.Shared,
+		ports.SharedPort{VM: "linux-1", GuestPort: 3001, Reserved: 40003, State: ports.PhaseShared, Process: "node", HTTP: true, To: "public",
+			URLs: ports.URLSet{Public: "https://" + h.PublicName + ":8443"}},
+		ports.SharedPort{VM: "linux-1", GuestPort: 4000, Reserved: 40004, State: ports.PhaseShared, Process: "node", HTTP: true, To: "local",
+			URLs: ports.URLSet{Public: "http://127.0.0.1:40004"}},
+		ports.SharedPort{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Process: "node", Detail: "listens, not allowed (open: 3000-4999)"})
 }

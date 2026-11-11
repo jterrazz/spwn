@@ -419,3 +419,28 @@ func TestAVMsQuietListenersAreOneLineOfItsCard(t *testing.T) {
 		t.Fatalf("rows %+v", rows)
 	}
 }
+
+// invariant: a share sits in the card of its audience: public in Public,
+// local in This Mac only, the rest in Private; a listener outside the
+// rights is flagged among the listeners, never drawn as shared.
+func TestAShareSitsInTheCardOfItsAudience(t *testing.T) {
+	f := portFleet()
+	f.Macs[0].Shared = []ports.SharedPort{
+		{VM: "linux-1", GuestPort: 3000, Reserved: 40001, State: ports.PhaseShared, To: "public", URLs: ports.URLSet{Public: "https://pro.ts.net:8443"}},
+		{VM: "linux-1", GuestPort: 3001, Reserved: 40002, State: ports.PhaseShared, To: "local", URLs: ports.URLSet{Public: "http://127.0.0.1:40002"}},
+		{VM: "linux-1", GuestPort: 3002, Reserved: 40003, State: ports.PhaseShared, To: "private", URLs: ports.URLSet{Public: "https://pro.ts.net:40003"}},
+		{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Detail: "listens, not allowed (open: 3000-3999)"},
+	}
+	p := fleetPorts(t, f, PortsOf{})
+	for section, want := range map[string][]string{
+		SectionPublic: {"linux-1:3000", "infra:443"}, SectionLocal: {"linux-1:3001"}, SectionPrivate: {"linux-1:3002", "infra:6443"},
+	} {
+		if got := ids(rowsOf(p, section)); !slices.Equal(got, want) {
+			t.Errorf("%s lists %q, want %q", section, got, want)
+		}
+	}
+	flagged := rowsOf(p, SectionListening)[0]
+	if flagged.ID != "linux-1:8443" || flagged.Mark != page.Attention || flagged.Detail.Items[1].Text != "listens, not allowed (open: 3000-3999)" || action(p, flagged.Verb) == nil {
+		t.Fatalf("flagged %+v", flagged)
+	}
+}

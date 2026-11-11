@@ -20,7 +20,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **An agent** (8): `agent.working`, `agent.remote`, `agent.waiting`, `agent.waiting.pr-opened`, `agent.waiting.reply`, `agent.waiting.replied`, `agent.waiting.merged`, `agent.finished`
 - **A server** (8): `server.healthy`, `server.health-unfolded`, `server.activity`, `server.down`, `server.restarting`, `server.restarting.late`, `server.recovered`, `server.stopped`
 - **Agents (fleet)** (2): `agents.list`, `agents.empty`
-- **Ports (fleet and scoped)** (4): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`
+- **Ports (fleet and scoped)** (5): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`, `ports.audiences`
 - **Accounts** (4): `accounts.all`, `accounts.signing-in`, `accounts.signed-in`, `accounts.extended`
 - **Awake** (4): `awake.all`, `awake.off`, `awake.4h`, `awake.until-run`
 - **Sheets** (18): `sheet.new-vm`, `sheet.new-vm.options`, `sheet.new-vm.lend`, `sheet.new-vm.no-account`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.new-agent`, `sheet.new-agent.new`, `sheet.lend-account`, `sheet.lend-account.vm`, `sheet.share-port`, `sheet.share-port.vm`, `sheet.share-port.empty`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `sheet.hint.add-mac`, `sheet.hint.firewall`, `sheet.hint.declare-public`
@@ -946,6 +946,15 @@ Every agent of the fleet, the page behind home's Agents label (SPEC §A4, `stati
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "About private links" → info(ports); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Copy link to Vite" → copy(http://linux-1.tail3e9a.ts.net:5173); "Show QR for Vite (5173)" → qrpop(p1); "Open API dev server" → openUrl(http://linux-1.tail3e9a.ts.net:3000); "Copy link to API dev server" → copy(http://linux-1.tail3e9a.ts.net:3000); "Show QR for API dev server (3000)" → qrpop(p2); "Open Astro" → openUrl(http://linux-1.tail3e9a.ts.net:4321); "Copy link to Astro" → copy(http://linux-1.tail3e9a.ts.net:4321); "Show QR for Astro (4321)" → qrpop(p1794058377718); "Share Node inspector" → sharePort(linux-1:9229); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]; "Copy" → copy(http://linux-1.tail3e9a.ts.net:4321); "Open" → openUrl(http://linux-1.tail3e9a.ts.net:4321); "Stop sharing…" → stopShare(p1794058377718)
 - **Enters**: #pop: opacity+transform 0 scale(.94) → 1 none 200 ms snappy; .row.two: CSS land 340 ms linear; #hud: CSS hud 2600 ms linear
 - **Leaves**: #pop: opacity+transform 1 → 0 scale(.97) 200 ms snappy; .round.sm: CSS opacity 120 ms; .row.two: CSS land 340 ms linear; #hud: CSS hud 2600 ms linear (esc)
+
+### `ports.audiences`
+
+- **Capture**: none (the gap state ADR-035 rules and ADR-039 draws: the prototype shows every share as private)
+- **Shows**: linux-1 shares one port with each audience: 3001 in Public (a Funnel port), 4000 in This Mac only (its loopback), the rest in Private; 8443 listens outside its rights and reads "listens, not allowed" under Listening, not shared, with Share.
+- **Data**: a share's audience (`to`), and a listener's `not-allowed` state with the rights it is outside
+- **Interactions**: as `ports.all`; "Share Node inspector" → sharePort(linux-1:8443)
+- **Enters**: no animation (a state reached in place)
+- **Leaves**: the row leaves in place once the rights allow it or it stops listening
 
 ## Accounts
 
