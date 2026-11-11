@@ -12,7 +12,7 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: autologin's colour: no option of autologin
+          Error: autologin's colour: no option of autologin (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:5)
           Hint: station explain
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
@@ -25,7 +25,7 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: autologin's password: a secret is a vault: reference (`vault:<name>`), never written out
+          Error: autologin's password: a secret is a vault: reference (`vault:<name>`), never written out (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:5)
           Hint: station explain
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |

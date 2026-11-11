@@ -2,6 +2,16 @@ package machinefile
 
 import "strings"
 
+// value: where a refused entry is written, `<file>:<line>` (or its file
+// alone when the line is not known); empty for an item another one
+// brings in.
+func within(at, by string) string {
+	if at != "" {
+		return at
+	}
+	return by
+}
+
 type NotFoundError struct {
 	Name string
 	// value: the Machinefile whose extends names it; empty when the owner
@@ -57,13 +67,14 @@ type UnknownItemError struct {
 	By string
 	// value: what it is when it is an item of the other kind.
 	Is string
+	At string
 }
 
 func (e *UnknownItemError) Error() string {
 	if e.Is != "" {
-		return e.Name + " is " + e.Is + " (" + e.By + ")"
+		return e.Name + " is " + e.Is + " (" + within(e.At, e.By) + ")"
 	}
-	return "the catalog has no item " + e.Name + " (" + e.By + ")"
+	return "the catalog has no item " + e.Name + " (" + within(e.At, e.By) + ")"
 }
 
 type NoMethodError struct {
@@ -72,6 +83,7 @@ type NoMethodError struct {
 	Manager string
 	// value: why the item is in the plan: listed, or required by another.
 	Why string
+	At  string
 }
 
 func (e *NoMethodError) Error() string {
@@ -79,7 +91,14 @@ func (e *NoMethodError) Error() string {
 	if e.Manager != "" {
 		by = " by " + e.Manager
 	}
-	return e.Item + " has no method" + by + " for " + e.System + " (" + e.Why + ")"
+	return e.Item + " has no method" + by + " for " + e.System + " (" + e.Why + suffix(e.At) + ")"
+}
+
+func suffix(at string) string {
+	if at == "" {
+		return ""
+	}
+	return ", " + at
 }
 
 type UnpinnableError struct {
@@ -87,21 +106,23 @@ type UnpinnableError struct {
 	// value: another method of the item for this system that pins, or
 	// empty.
 	Alternative string
+	At          string
 }
 
 func (e *UnpinnableError) Error() string {
-	return e.Item + " " + e.Version + ": " + e.Method + " cannot pin a version"
+	return e.Item + " " + e.Version + ": " + e.Method + " cannot pin a version (" + e.At + ")"
 }
 
 type BadValueError struct {
 	Item, Key, Problem string
+	At                 string
 }
 
 func (e *BadValueError) Error() string {
 	if e.Key == "" {
-		return e.Item + ": " + e.Problem
+		return e.Item + ": " + e.Problem + " (" + e.At + ")"
 	}
-	return e.Item + "'s " + e.Key + ": " + e.Problem
+	return e.Item + "'s " + e.Key + ": " + e.Problem + " (" + e.At + ")"
 }
 
 type UnknownKeyError struct{ Key, Name string }

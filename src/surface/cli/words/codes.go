@@ -138,26 +138,32 @@ func Codes() map[fail.Code]Wording {
 			if m := e.Detail["manager"]; m != "" {
 				by = " by " + m
 			}
-			return e.Subject + " has no method" + by + " for " + e.Detail["system"] + " (" + e.Detail["why"] + ")", "list it as { name: " + e.Subject + ", optional: true } to skip it there"
+			why := e.Detail["why"]
+			if at := e.Detail["at"]; at != "" {
+				why += ", " + at
+			}
+			return e.Subject + " has no method" + by + " for " + e.Detail["system"] + " (" + why + ")", "list it as { name: " + e.Subject + ", optional: true } to skip it there"
 		},
 		machinefilecalls.Unpinnable: func(e *fail.Error) (string, string) {
-			said := e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version"
+			said := e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version (" + e.Detail["at"] + ")"
 			if alt := e.Detail["alternative"]; alt != "" {
 				return said, alt + " can: { name: " + e.Subject + ", version: \"" + e.Detail["version"] + "\", manager: " + alt + " }"
 			}
 			return said, "no method of " + e.Subject + " for this system pins one: drop its version"
 		},
 		machinefilecalls.UnknownItem: func(e *fail.Error) (string, string) {
+			where := cmp.Or(e.Detail["at"], e.Detail["by"])
 			if is := e.Detail["is"]; is != "" {
-				return e.Subject + " is " + is + " (" + e.Detail["by"] + ")", "station explain"
+				return e.Subject + " is " + is + " (" + where + ")", "station explain"
 			}
-			return "the catalog has no item " + e.Subject + " (" + e.Detail["by"] + ")", "station apps"
+			return "the catalog has no item " + e.Subject + " (" + where + ")", "station apps"
 		},
 		machinefilecalls.BadValue: func(e *fail.Error) (string, string) {
+			at := " (" + e.Detail["at"] + ")"
 			if k := e.Detail["key"]; k != "" {
-				return e.Subject + "'s " + k + ": " + e.Detail["problem"], "station explain"
+				return e.Subject + "'s " + k + ": " + e.Detail["problem"] + at, "station explain"
 			}
-			return e.Subject + ": " + e.Detail["problem"], "station explain"
+			return e.Subject + ": " + e.Detail["problem"] + at, "station explain"
 		},
 		machinefilecalls.UnknownKey: func(e *fail.Error) (string, string) {
 			return e.Detail["name"] + " says nothing of " + e.Subject, "station explain --machinefile " + e.Detail["name"]

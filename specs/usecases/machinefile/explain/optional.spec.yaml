@@ -1,4 +1,4 @@
-description: 'an optional app with no method for the system is skipped and says so; a required one stops the plan'
+description: 'an optional app with no method is skipped saying why; a required one stops the plan'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
@@ -13,3 +13,15 @@ runs:
       stdout: |
           # studio-linux
           	apps.ghostty	optional, no method for ubuntu 24.04	user	studio-linux
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [{ name: jq, manager: brew, optional: true }]
+      exit: 0
+    - command: 'explain apps --machinefile studio-linux'
+      exit: 0
+      stdout: |
+          # studio-linux
+          	apps.jq	optional, no method by brew for ubuntu 24.04, where it has mise	user	studio-linux

@@ -32,7 +32,7 @@ func knownKeys(n *yaml.Node, t reflect.Type, extra ...string) error {
 func (a *AppEntry) UnmarshalYAML(n *yaml.Node) error {
 	// invariant: an app is written as its name, or as a mapping.
 	if n.Kind == yaml.ScalarNode {
-		*a = AppEntry{Name: n.Value}
+		*a = AppEntry{Name: n.Value, Line: n.Line}
 		return nil
 	}
 	if n.Kind != yaml.MappingNode {
@@ -42,7 +42,11 @@ func (a *AppEntry) UnmarshalYAML(n *yaml.Node) error {
 	if err := knownKeys(n, reflect.TypeFor[plain]()); err != nil {
 		return err
 	}
-	return n.Decode((*plain)(a))
+	if err := n.Decode((*plain)(a)); err != nil {
+		return err
+	}
+	a.Line = n.Line
+	return nil
 }
 
 func (AppEntry) JSONSchema() map[string]any {
@@ -159,7 +163,11 @@ func (l *SettingList) UnmarshalYAML(n *yaml.Node) error {
 	}
 	if !changes {
 		*l = SettingList{}
-		return n.Decode(&l.Set)
+		if err := n.Decode(&l.Set); err != nil {
+			return err
+		}
+		lines(n, l.Set)
+		return nil
 	}
 	var c struct {
 		Set    map[string]SettingEntry `yaml:"set,omitempty"`
@@ -168,8 +176,23 @@ func (l *SettingList) UnmarshalYAML(n *yaml.Node) error {
 	if err := n.Decode(&c); err != nil {
 		return err
 	}
+	for i := 0; i+1 < len(n.Content); i += 2 {
+		if n.Content[i].Value == "set" {
+			lines(n.Content[i+1], c.Set)
+		}
+	}
 	*l = SettingList{Set: c.Set, Remove: c.Remove, Changes: true}
 	return nil
+}
+
+// value: each setting of a mapping given the line its name is at.
+func lines(n *yaml.Node, set map[string]SettingEntry) {
+	for i := 0; i+1 < len(n.Content); i += 2 {
+		if e, ok := set[n.Content[i].Value]; ok {
+			e.Line = n.Content[i].Line
+			set[n.Content[i].Value] = e
+		}
+	}
 }
 
 func (SettingList) JSONSchema() map[string]any {

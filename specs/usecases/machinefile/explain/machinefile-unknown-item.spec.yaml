@@ -1,4 +1,4 @@
-description: 'an app the catalog lacks, or a setting listed as an app, is refused naming the file'
+description: 'an unknown app or baked item, or a setting listed as an app, is refused at its file and line'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
@@ -11,7 +11,7 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: the catalog has no item nope (jterrazz-macbook-pro)
+          Error: the catalog has no item nope (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
           Hint: station apps
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
@@ -23,5 +23,17 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: hushlogin is a setting: list it under settings (jterrazz-macbook-pro)
+          Error: hushlogin is a setting: list it under settings (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
           Hint: station explain
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          vm: { image: { bake: [node, nope] } }
+      exit: 0
+    - command: 'explain --machinefile studio-linux'
+      exit: 2
+      stderr: |
+          Error: the catalog has no item nope (~/.config/station/machinefiles/studio-linux.yaml)
+          Hint: station apps

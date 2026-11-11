@@ -224,3 +224,29 @@ func TestAFileThatIsNoYAMLIsNotRead(t *testing.T) {
 		}
 	}
 }
+
+func TestARefusedEntryIsNamedAtItsLine(t *testing.T) {
+	cases := []struct{ about, file, want string }{
+		{"an unknown app", machine("a", "{ os: macos }", "\n    - fd\n    - nope"), "nope (~/.config/station/machinefiles/a.yaml:6)"},
+		{"a bad value", machine("a", "{ os: macos }", "[{ name: fd, options: { tint: blue } }]"), "fd's tint: no option of fd (~/.config/station/machinefiles/a.yaml:4)"},
+		{"no method", machine("a", "{ os: debian, version: '12' }", "[{ name: fd, manager: github-release }]"), "(listed, ~/.config/station/machinefiles/a.yaml:4)"},
+		{"an item baked that the catalog lacks", machine("a", "{ os: macos }", "[]") + "vm: { image: { bake: [fd, nope] } }\n", "nope (~/.config/station/machinefiles/a.yaml)"},
+	}
+	for _, c := range cases {
+		_, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": c.file}, nil), "a", machinefile.Machine{})
+		if err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: %v, want it saying %q", c.about, err, c.want)
+		}
+	}
+}
+
+func TestAnOptionalAppWhoseManagerHasNoMethodSaysWhatItHas(t *testing.T) {
+	file := machine("a", "{ os: macos }", "[{ name: fd, manager: apt, optional: true }]")
+	r, err := machinefile.Resolve(library(t, map[string]string{"machinefiles/a.yaml": file}, nil), "a", machinefile.Machine{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Skipped) != 1 || r.Skipped[0].Why != "optional, no method by apt for macos, where it has script" {
+		t.Errorf("skipped %+v, want fd skipped naming its script", r.Skipped)
+	}
+}

@@ -22,7 +22,7 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: jq 1.7: brew cannot pin a version
+          Error: jq 1.7: brew cannot pin a version (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
           Hint: mise can: { name: jq, version: "1.7", manager: mise }
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |

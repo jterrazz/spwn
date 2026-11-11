@@ -148,13 +148,13 @@ func Worded(err error) error {
 	case errors.As(err, &cycle):
 		return refused(fail.Refused, Cycle, cycle.Said(), map[string]string{"of": cycle.Of})
 	case errors.As(err, &none):
-		return refused(fail.Refused, NoMethod, none.Item, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why})
+		return refused(fail.Refused, NoMethod, none.Item, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why, "at": none.At})
 	case errors.As(err, &pin):
-		return refused(fail.Refused, Unpinnable, pin.Item, map[string]string{"version": pin.Version, "method": pin.Method, "alternative": pin.Alternative})
+		return refused(fail.Refused, Unpinnable, pin.Item, map[string]string{"version": pin.Version, "method": pin.Method, "alternative": pin.Alternative, "at": pin.At})
 	case errors.As(err, &item):
-		return refused(fail.NotFound, UnknownItem, item.Name, map[string]string{"by": item.By, "is": item.Is})
+		return refused(fail.NotFound, UnknownItem, item.Name, map[string]string{"by": item.By, "is": item.Is, "at": item.At})
 	case errors.As(err, &value):
-		return refused(fail.Refused, BadValue, value.Item, map[string]string{"key": value.Key, "problem": value.Problem})
+		return refused(fail.Refused, BadValue, value.Item, map[string]string{"key": value.Key, "problem": value.Problem, "at": value.At})
 	case errors.As(err, &key):
 		return refused(fail.NotFound, UnknownKey, key.Key, map[string]string{"name": key.Name})
 	case errors.As(err, &gone):

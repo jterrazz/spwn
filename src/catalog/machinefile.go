@@ -109,6 +109,8 @@ type AppEntry struct {
 	Optional bool                   `yaml:"optional,omitempty"`
 	Manager  ManagerKey             `yaml:"manager,omitempty"`
 	Options  map[string]OptionValue `yaml:"options,omitempty"`
+	// value: the line its file lists it at, for a refusal to point at.
+	Line int `yaml:"-"`
 }
 
 // value: a Machinefile's apps, a list; an overlay's, what it adds to the
@@ -131,6 +133,8 @@ type SettingEntry struct {
 	From     string
 	Optional bool
 	Values   map[string]OptionValue
+	// value: the line its file names it at, for a refusal to point at.
+	Line int
 }
 
 // value: the one source `from` names today: the computer a VM runs on.
