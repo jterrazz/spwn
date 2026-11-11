@@ -27,7 +27,7 @@ APP = "~/station/.artifacts/menubar/Station.app"
 CAPTURE = "~/station/specs/machine/menubar/capture"
 PAGE = "~/station/apps/menubar/stories/pages/machines.home.exposed.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
-# places it: its left edge under the item's, 6 pt under the menu bar.
+# places it: its right edge under the item's, 6 pt under the menu bar.
 DROP, MARGIN, WIDTH = 6, 8, 340
 
 
@@ -120,7 +120,7 @@ class Rig:
     def set_wall(self, kind, item):
         s, height = self.scale(item)
         width = self.fb[0] / s
-        left = min(max(item["x"], MARGIN), width - MARGIN - WIDTH)
+        left = min(max(item["x"] + item["w"] - WIDTH, MARGIN), width - MARGIN - WIDTH)
         top = height - (item["y"] - DROP)
         if self.wall == (kind, left, top):
             return
