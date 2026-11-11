@@ -17,7 +17,7 @@ runs:
           # To adopt
           ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
-          ?	claude	script	installed by station for jterrazz-macbook-pro, station cannot uninstall it: kept, remove it by hand if you want
+          ?	claude	script	installed by station for jterrazz-macbook-pro, station cannot uninstall it: kept, and yours: remove it by hand if you want
           ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
           ●	jq	1.8.1	brew
           ●	claude	2.0.14	script	station cannot uninstall it: kept, and yours: remove it by hand if you want

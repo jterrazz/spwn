@@ -130,13 +130,13 @@ func fate(e machinefile.ExtraLine) string {
 	case machinefile.Gone:
 		return "already gone"
 	case machinefile.KeptIrreversible:
-		return "station cannot uninstall it: kept, remove it by hand if you want"
+		return machinefile.CannotUninstall
 	case machinefile.KeptHolding:
 		return e.Holding() + ": kept"
 	case machinefile.KeptManagerMissing:
 		return "its manager " + e.Seen.Lacks + " is missing: kept"
 	case machinefile.KeptAnotherWay:
-		return "present another way since: kept"
+		return machinefile.AnotherWay
 	case machinefile.KeptUnread:
 	}
 	return "reads " + condition(e.Seen.Condition) + ": kept"
@@ -209,9 +209,14 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	switch {
 	case !p.Calm():
 		mark = page.Absent
-		hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
-		if slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove }) {
+		removes := slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
+		if removes || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
+			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
+		}
+		if removes {
 			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "also removes what is extra"})
+		} else if slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Forgets) {
+			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "lets go of what is yours now"})
 		}
 	case len(words) == 0:
 		words = []string{"nothing to do"}

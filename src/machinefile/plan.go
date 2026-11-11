@@ -401,6 +401,14 @@ func (s ExtraLine) Fate() Fate {
 	return KeptUnread
 }
 
+// value: the words of an extra kept and let go of, the same in the plan
+// and in the run: station cannot uninstall it here, or it is there by
+// another way since; it is the owner's from then on.
+const (
+	CannotUninstall = "station cannot uninstall it: kept, and yours: remove it by hand if you want"
+	AnotherWay      = "present another way since station installed it: kept, and yours"
+)
+
 func (s ExtraLine) Holding() string {
 	// value: the words of a manager kept for what it holds, the same in the
 	// plan and in the run.
@@ -412,6 +420,18 @@ func (s ExtraLine) Holding() string {
 	default:
 		return "holds " + strconv.Itoa(n) + " packages of yours"
 	}
+}
+
+func (s ExtraLine) Forgets() bool {
+	// value: whether `apply --remove` changes anything for the extra: it
+	// takes it back, or lets go of its record (already gone, or kept as the
+	// owner's).
+	switch s.Fate() {
+	case Taken, Gone, KeptIrreversible, KeptAnotherWay:
+		return true
+	case KeptRequired, KeptHolding, KeptManagerMissing, KeptUnread:
+	}
+	return false
 }
 
 func (p Plan) Of(a Action) []Line {
@@ -427,8 +447,8 @@ func (p Plan) Of(a Action) []Line {
 
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
-	// set, no extra to remove.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, func(s ExtraLine) bool { return s.Action == Remove })
+	// set, no extra `apply --remove` would take back or let go of.
+	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets)
 }
 
 func (p Plan) Interactive(remove bool) []Asked {

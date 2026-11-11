@@ -1,0 +1,31 @@
+description: 'a plan whose one extra station cannot uninstall is not calm: apply --remove lets go of its record'
+fixture:
+    - ../../__fixtures__/homebrew/
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["jterrazz-macbook-pro"].stores.ledger = [{item: "claude", method: "script", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" plan'
+      stdin: |
+          see Extra
+          scrollback
+      exit: 0
+      stdout: |
+          jterrazz-macbook-pro · 1 to adopt · 1 present · 1 extra
+
+          To adopt  ? homebrew · script · the manager of jq
+                      on PATH, not managed by script
+          Extra     ? claude · script
+                      installed by station for jterrazz-macbook-pro, station cannot uninst
+
+          → station apply --remove  lets go of what is yours now

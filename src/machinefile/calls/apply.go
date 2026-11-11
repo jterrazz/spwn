@@ -346,9 +346,9 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 			out = append(out, done)
 			continue
 		case machinefile.KeptIrreversible:
-			done.Detail = cannotUninstall
+			done.Detail = machinefile.CannotUninstall
 		case machinefile.KeptAnotherWay:
-			done.Detail = "present another way since station installed it: kept, and yours"
+			done.Detail = machinefile.AnotherWay
 		case machinefile.Gone:
 			done.State, done.Detail = catalog.StateAbsent, "already gone"
 		case machinefile.Taken:
@@ -382,10 +382,6 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 	return out
 }
 
-// value: the words of an extra station cannot uninstall here, kept and
-// let go of: it is the owner's from then on.
-const cannotUninstall = "station cannot uninstall it: kept, and yours: remove it by hand if you want"
-
 func leaningOn(stayed []machinefile.ExtraLine, item string) []string {
 	var out []string
 	for _, s := range stayed {
@@ -408,7 +404,7 @@ func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machi
 		done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
 		return done
 	case errors.As(err, &irreversible), errors.As(err, &fromAppStore):
-		done.Line.Action, done.Detail = machinefile.Leave, cannotUninstall
+		done.Line.Action, done.Detail = machinefile.Leave, machinefile.CannotUninstall
 		return done
 	case errors.As(err, &refused) && refused.Code == appscalls.NotInstalled:
 		done.State, done.Detail = catalog.StateAbsent, "already gone"
