@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/src/catalog"
 	model "github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/page"
+	pageports "github.com/jterrazz/studio-station/src/pages/ports"
 	"github.com/jterrazz/studio-station/src/ports"
 )
 
@@ -53,11 +54,14 @@ type portsBody struct {
 	Public   int
 	Private  int
 	Exposed  int
+	Local    int
 	// value: the shares and the listeners offered with Share, in the order
 	// listed: a workspace's Overview card draws its shares and its first
 	// listener.
 	Shares    []page.Item
 	Listeners []page.Item
+	// value: each share's audience in the class words, by its row.
+	Audience map[string]page.Value
 }
 
 func (b *portsBody) act(a page.Action) {
@@ -115,7 +119,7 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 			}
 			switch {
 			case s.State == ports.PhaseNotAllowed:
-				listening = append(listening, b.notAllowedRow(s, h, sc))
+				listening = append(listening, b.notAllowedRow(s, p.Answer, h, sc))
 			case catalog.Audience(s.To) == catalog.AudiencePublic:
 				public = append(public, b.sharedRow(s, p.Answer, h, sc))
 			case catalog.Audience(s.To) == catalog.AudienceLocal:
@@ -155,8 +159,10 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 		slices.SortStableFunc(private[mark:], func(a, b page.Item) int { return cmp.Compare(machineOf(a), machineOf(b)) })
 	}
 	b.Exposed, b.Public, b.Private = len(exposed), len(public), len(private)
-	local = capped(local)
+	b.Local = len(local)
 	heardCount := len(listening)
+	wholeLocal, localCapped := page.Tallied(local), len(local) > catalog.PortRowsShown
+	local = capped(local)
 	wholeExposed, wholePublic, wholePrivate := page.Tallied(exposed), page.Tallied(public), page.Tallied(private)
 	if sc.VM != "" {
 		wholePrivate = page.Tallied(slices.Concat(private, listening))
@@ -192,7 +198,8 @@ func portsOf(f ports.AllMachines, sc portsScope) portsBody {
 	}
 	b.Sections = append(b.Sections, priv)
 	if len(local) > 0 {
-		b.Sections = append(b.Sections, page.Section{ID: SectionLocal, Title: TitleLocal, Caption: []page.Value{count(len(local))}, Columns: columns(), Items: local})
+		b.Sections = append(b.Sections, page.Section{ID: SectionLocal, Title: TitleLocal, Caption: []page.Value{count(b.Local)}, Columns: columns(), Items: local,
+			Uncounted: localCapped, Counts: whole(localCapped, wholeLocal)})
 	}
 	if sc.VM == "" && len(listening) > 0 {
 		b.Sections = append(b.Sections, page.Section{ID: SectionListening, Title: TitleListening, Caption: []page.Value{count(heardCount)}, Columns: columns(), Items: listening,
@@ -260,35 +267,80 @@ func unanswered(row *page.Row, a ports.Answer) bool {
 func (b *portsBody) sharedRow(s ports.SharedPort, a ports.Answer, h ports.MacPorts, sc portsScope) page.Item {
 	named := s.Named()
 	key := address(s.VM, s.GuestPort)
-	row := page.Row{ID: key, Mark: page.OK, Label: named.Name, Detail: page.Text(key), Glyph: chip(named)}
+	if b.Audience == nil {
+		b.Audience = map[string]page.Value{}
+	}
+	b.Audience[key] = pageports.Audience(s)
+	mark, reason, state := pageports.State(s)
+	row := page.Row{ID: key, Mark: mark, Reason: reason, Label: named.Name, Detail: page.Text(key), Glyph: chip(named)}
 	if !sc.Now.IsZero() && !s.ReservedAt.IsZero() && sc.Now.Sub(s.ReservedAt) < model.FreshFor {
 		row.Fresh = true
 	}
 	if unanswered(&row, a) {
 		return page.Item{Row: &row}
 	}
-	link := cmpWord(s.URLs.Public, key)
-	verbs := b.linkVerbs(&row, named.Name, key, link, s.HTTP && s.URLs.Public != "")
 	stop := stopSharing(s, h.Name)
 	stop.ID, stop.Rows = ActionStopSharing+key, []string{key}
+	if mark != page.OK {
+		flagShare(&row, mark, state)
+		b.act(stop)
+		row.Menu = []string{stop.ID}
+		b.Shares = append(b.Shares, page.Item{Row: &row})
+		return page.Item{Row: &row}
+	}
+	link := cmpWord(s.URLs.Public, key)
+	verbs := b.linkVerbs(&row, named.Name, key, link, s.HTTP && s.URLs.Public != "")
 	b.act(stop)
 	row.Menu = slices.Concat(verbs, []string{"-", stop.ID})
 	b.Shares = append(b.Shares, page.Item{Row: &row})
 	return page.Item{Row: &row}
 }
 
-// value: a listener outside its VM's rights: flagged with the rights it is
-// outside, and offered Share, the owner's own call, which shares it anyway.
-func (b *portsBody) notAllowedRow(s ports.SharedPort, h ports.MacPorts, sc portsScope) page.Item {
+// value: a share that is not served: its state's first word flagged beside
+// its name in the state's tint, its cause after its address, and no
+// link, since nothing answers there.
+func flagShare(row *page.Row, mark page.Mark, state page.Value) {
+	words := []page.Value{state}
+	if state.Kind == page.KindList {
+		words = state.Items
+	}
+	signal := page.SignalWaits
+	if mark == page.Absent {
+		signal, row.Signal = page.SignalFaint, page.SignalFaint
+	}
+	row.Cells = []page.Value{signaled(words[0], signal)}
+	if len(words) > 1 && !strings.HasPrefix(words[1].Text, "reserved ") {
+		row.Detail = page.List(row.Detail, words[1])
+	}
+}
+
+// value: a listener outside its VM's rights: flagged `not allowed` beside
+// its name, the rights it is outside in its detail line, and offered Share,
+// the owner's own call, which shares it anyway; the sheet lists it too.
+func (b *portsBody) notAllowedRow(s ports.SharedPort, a ports.Answer, h ports.MacPorts, sc portsScope) page.Item {
 	named := s.Named()
 	key := address(s.VM, s.GuestPort)
-	row := page.Row{ID: key, Mark: page.Attention, Reason: page.Waiting, Label: named.Name, Detail: page.Texts(key, s.Detail), Glyph: chip(named)}
-	a := page.Action{ID: ActionSharePortOf + key, Label: VerbShare, On: page.OnRow, Rows: []string{key}, Mutates: true,
+	row := page.Row{ID: key, Mark: page.Attention, Reason: page.Waiting, Label: named.Name, Detail: page.Texts(key, rightsOf(s.Detail)), Glyph: chip(named),
+		Cells: []page.Value{signaled(page.Text(catalog.NotAllowedWord), page.SignalWaits)}}
+	if unanswered(&row, a) {
+		return page.Item{Row: &row}
+	}
+	act := page.Action{ID: ActionSharePortOf + key, Label: VerbShare, On: page.OnRow, Rows: []string{key}, Mutates: true,
 		Run: &page.Run{Call: CallSharePort, In: map[string]string{"VM": s.VM, "Port": strconv.Itoa(s.GuestPort)}, Target: macTarget(h.Name, sc.Self)},
 		Hud: hud("Shared " + named.Name + " of " + s.VM)}
-	row.Verb = a.ID
-	b.act(a)
+	row.Verb = act.ID
+	b.act(act)
+	b.Listeners = append(b.Listeners, page.Item{Row: &row})
 	return page.Item{Row: &row}
+}
+
+// value: the rights a listener is outside, the words in the parentheses of
+// the engine's detail (`open: 3000-4999`), else the detail whole.
+func rightsOf(detail string) string {
+	if _, in, ok := strings.Cut(detail, "("); ok {
+		return strings.TrimSuffix(in, ")")
+	}
+	return detail
 }
 
 // value: a link's verbs: the row opens a web page, or copies what is not

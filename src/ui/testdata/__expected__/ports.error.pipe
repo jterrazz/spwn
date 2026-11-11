@@ -1,7 +1,7 @@
 ✗	Tailscale	is signed out on This Mac: ports are local only
 # Private: shared with you on Tailscale	4 ◐
 ◐	engine				not shared while the engine is stopped		station engine start
-◐	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not shared while the engine is stopped · reserved 40001	node	probably Vite
+◐	linux-1	5173	private		not shared while the engine is stopped · reserved 40001	node	probably Vite
 ◐	linux-1	5432	private		not shared while the engine is stopped · reserved 40002	postgres
 ◐	mac-mini				does not answer		station machines
 	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

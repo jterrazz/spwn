@@ -258,6 +258,13 @@
             "id": "linux-1:5173",
             "mark": "ok",
             "label": "Vite",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "private",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:5173"
@@ -281,6 +288,13 @@
             "id": "linux-1:3000",
             "mark": "ok",
             "label": "Port 3000",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "private",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:3000"

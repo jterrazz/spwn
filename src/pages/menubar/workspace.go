@@ -312,10 +312,17 @@ func lineOf(s overview.Summary, id string) page.Value {
 }
 
 // value: a workspace's Overview Ports card: its shares, each opening its
-// link with Copy and QR beside, then its first listener offered with
+// link with Copy and QR beside and its audience after its name, then its first listener offered with
 // Share; nothing shared nor listening, the one line Nothing shared yet.
 func workspacePortsCard(b portsBody) page.Section {
-	items := slices.Clone(b.Shares)
+	items := make([]page.Item, 0, len(b.Shares)+1)
+	for _, it := range b.Shares {
+		row := *it.Row
+		if word := b.Audience[row.ID]; !word.IsNone() && len(row.Cells) == 0 {
+			row.Cells = []page.Value{signaled(word, page.SignalQuiet)}
+		}
+		items = append(items, page.Item{Row: &row})
+	}
 	if len(b.Listeners) > 0 {
 		items = append(items, b.Listeners[0])
 	}

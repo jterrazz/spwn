@@ -197,6 +197,13 @@
             "id": "linux-3:8080",
             "mark": "ok",
             "label": "Port 8080",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "private",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-3:8080"

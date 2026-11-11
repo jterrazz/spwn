@@ -99,3 +99,16 @@ func TestASharedPortsRowSaysWhatProbablyServesIt(t *testing.T) {
 		t.Fatalf("detail %+v, want probably Vite", row.Detail)
 	}
 }
+
+// invariant: a share prints its URL only while a reservation holds it: not
+// a refused one, not a listener outside the rights, not one the engine
+// stopped.
+func TestAShareWithNoReservationPrintsNoURL(t *testing.T) {
+	url := ports.URLSet{Public: "https://mac.ts.net:443"}
+	for state, want := range map[ports.Phase]bool{ports.PhaseShared: true, ports.PhaseWaiting: true, ports.PhaseRefused: false, ports.PhaseNotAllowed: false, ports.PhaseUnknown: false} {
+		row := Row(ports.SharedPort{VM: "vm", GuestPort: 3000, Reserved: 40000, State: state, URLs: url})
+		if got := row.Cells[2].Kind == page.KindURL; got != want {
+			t.Errorf("%s: url shown %v, want %v", state, got, want)
+		}
+	}
+}

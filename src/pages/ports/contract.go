@@ -97,8 +97,10 @@ func stateWord(s ports.SharedPort) string {
 	return "shared"
 }
 
-// invariant: a shared port is public exactly when its audience is public,
-// whatever its guest binds; any other share is private.
+// invariant: a shared port is public when its audience is public, whatever
+// its guest binds, and any other share is private; ListContract also calls
+// it public when what listens there is reachable outside the tailnet or
+// declared public.
 func classWord(s ports.SharedPort) string {
 	if catalog.Audience(s.To) == catalog.AudiencePublic {
 		return string(ports.Public)

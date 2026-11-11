@@ -258,6 +258,13 @@
             "id": "linux-1:5173",
             "mark": "ok",
             "label": "Vite",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "private",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:5173"
@@ -281,6 +288,13 @@
             "id": "linux-1:3000",
             "mark": "ok",
             "label": "Port 3000",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "private",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:3000"
@@ -304,6 +318,13 @@
             "id": "linux-1:3001",
             "mark": "ok",
             "label": "Port 3001",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "public",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:3001"
@@ -327,6 +348,13 @@
             "id": "linux-1:4000",
             "mark": "ok",
             "label": "Port 4000",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "this machine only",
+                "signal": "quiet"
+              }
+            ],
             "detail": {
               "kind": "text",
               "text": "linux-1:4000"
@@ -347,24 +375,45 @@
         },
         {
           "row": {
-            "id": "linux-1:4321",
-            "mark": "ok",
-            "label": "Astro",
+            "id": "linux-1:8443",
+            "mark": "attention",
+            "label": "Port 8443",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not allowed",
+                "signal": "waits"
+              }
+            ],
             "detail": {
-              "kind": "text",
-              "text": "linux-1:4321"
+              "kind": "list",
+              "items": [
+                {
+                  "kind": "text",
+                  "text": "linux-1:8443"
+                },
+                {
+                  "kind": "text",
+                  "text": "open: 3000-4999"
+                }
+              ]
             },
+            "reason": "waiting",
             "glyph": {
-              "kind": "port:astro"
+              "kind": "port:web"
             },
-            "verb": "share:linux-1:4321"
+            "verb": "share:linux-1:8443"
           }
         }
       ],
       "counts": [
         {
           "mark": "ok",
-          "n": 5
+          "n": 4
+        },
+        {
+          "mark": "attention",
+          "n": 1
         }
       ],
       "segment": "overview"
@@ -527,6 +576,13 @@
                   "id": "linux-1:8443",
                   "mark": "attention",
                   "label": "Port 8443",
+                  "cells": [
+                    {
+                      "kind": "text",
+                      "text": "not allowed",
+                      "signal": "waits"
+                    }
+                  ],
                   "detail": {
                     "kind": "list",
                     "items": [
@@ -536,7 +592,7 @@
                       },
                       {
                         "kind": "text",
-                        "text": "listens, not allowed (open: 3000-4999)"
+                        "text": "open: 3000-4999"
                       }
                     ]
                   },
@@ -2384,6 +2440,14 @@
             "kind": "rows",
             "options": [
               {
+                "value": "share:linux-1:8443",
+                "label": "Port 8443",
+                "note": "linux-1:8443",
+                "glyph": {
+                  "kind": "port:web"
+                }
+              },
+              {
                 "value": "share:linux-1:4321",
                 "label": "Astro",
                 "note": "linux-1:4321",
@@ -3166,6 +3230,14 @@
             "label": "Listening now in linux-1",
             "kind": "rows",
             "options": [
+              {
+                "value": "share:linux-1:8443",
+                "label": "Port 8443",
+                "note": "linux-1:8443",
+                "glyph": {
+                  "kind": "port:web"
+                }
+              },
               {
                 "value": "share:linux-1:4321",
                 "label": "Astro",

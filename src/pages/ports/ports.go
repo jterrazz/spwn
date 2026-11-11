@@ -376,11 +376,32 @@ func stateOf(s ports.SharedPort) (page.Mark, page.Reason, page.Value, *page.Hint
 	return page.OK, "", page.Text("shared"), nil
 }
 
+func linked(s ports.SharedPort) bool {
+	// invariant: a share shows its link only while a reservation holds it: a
+	// refused share, a listener outside the rights and a share the engine
+	// stopped hold none, and their row names no address.
+	switch s.State {
+	case ports.PhaseNotAllowed, ports.PhaseRefused, ports.PhaseUnknown:
+		return false
+	case ports.PhaseNone, ports.PhaseShared, ports.PhaseClosing, ports.PhaseWaiting, ports.PhaseGone:
+	}
+	return s.Reserved != 0 && s.URLs.Public != ""
+}
+
+func State(s ports.SharedPort) (page.Mark, page.Reason, page.Value) {
+	// value: a share's state as its row reads it: its mark and the words that
+	// say it, the first the flag (`waiting`, `local only`), the rest its cause.
+	mark, reason, state, _ := stateOf(s)
+	return mark, reason, state
+}
+
+func Audience(s ports.SharedPort) page.Value { return page.Text(classOf(s)) }
+
 func rowID(vm string, port int) string { return vm + ":" + strconv.Itoa(port) }
 
 func Row(s ports.SharedPort) page.Row {
 	url := page.URL(s.URLs.Public)
-	if s.Reserved == 0 || s.URLs.Public == "" {
+	if !linked(s) {
 		url = page.None()
 	}
 	port := page.Port(int64(s.GuestPort))
@@ -393,10 +414,10 @@ func Row(s ports.SharedPort) page.Row {
 		Detail: page.Text(catalog.ProbablyWords(s.Label)), Hint: hint}
 }
 
-// value: who a VM's shared port reaches, in the class words: the
-// internet's for one open to public, its Mac's alone for one open to
-// local, else the owner's devices.
 func classOf(s ports.SharedPort) string {
+	// value: who a VM's shared port reaches, in the class words: the
+	// internet's for one open to public, its Mac's alone for one open to
+	// local, else the owner's devices.
 	switch catalog.Audience(s.To) {
 	case catalog.AudiencePublic:
 		return ClassPublic

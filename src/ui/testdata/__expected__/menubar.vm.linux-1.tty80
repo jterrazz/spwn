@@ -4,8 +4,8 @@ Agents
   No agent on linux-1
 Gauges
 Ports  2
-  ● Vite       linux-1:5173
-  ● Port 7000  linux-1:7000
+  ● Vite       private  linux-1:5173
+  ● Port 7000  private  linux-1:7000
 Life
   Ephemeral: deleted when it powers off from inside; pauses when This Mac
   sleeps.

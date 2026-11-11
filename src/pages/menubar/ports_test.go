@@ -2,6 +2,7 @@ package menubar
 
 import (
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -349,6 +350,9 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 	if rows[0].Verb != ActionOpenPort+"linux-1:5173" || rows[1].Verb != ActionSharePortOf+"linux-1:4321" {
 		t.Fatalf("verbs %q %q", rows[0].Verb, rows[1].Verb)
 	}
+	if c := rows[0].Cells; len(c) != 1 || c[0].Text != "private" {
+		t.Fatalf("a share's card line names its audience: %+v", c)
+	}
 	menu := action(p, ActionMenu)
 	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "New agent...", "Copy ssh command", "Share a port...", "Lend an account...", "-", "Stop...", "-", "Delete... (red)"}) {
 		t.Fatalf("menu %q", menuWords(p, menu.Submenu))
@@ -440,7 +444,111 @@ func TestAShareSitsInTheCardOfItsAudience(t *testing.T) {
 		}
 	}
 	flagged := rowsOf(p, SectionListening)[0]
-	if flagged.ID != "linux-1:8443" || flagged.Mark != page.Attention || flagged.Detail.Items[1].Text != "listens, not allowed (open: 3000-3999)" || action(p, flagged.Verb) == nil {
+	if flagged.ID != "linux-1:8443" || flagged.Mark != page.Attention || flagged.Detail.Items[1].Text != "open: 3000-3999" || flagged.Cells[0].Text != catalog.NotAllowedWord || action(p, flagged.Verb) == nil {
 		t.Fatalf("flagged %+v", flagged)
 	}
+}
+
+// invariant: a share draws what its state says, in every audience: served,
+// it opens its link; waiting, refused, local only, not listening, stopped
+// or issuing, it is flagged with its cause and offers Stop sharing alone;
+// outside the rights it is a listener, flagged, offered Share.
+func TestAShareOpensItsLinkOnlyWhileItIsServed(t *testing.T) {
+	stoppedVM := catalog.StoppedDetail("linux-1")
+	states := []struct {
+		name   string
+		share  ports.SharedPort
+		opens  bool
+		mark   page.Mark
+		flag   string
+		listen bool
+	}{
+		{"served", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared}, true, page.OK, "", false},
+		{"waiting", ports.SharedPort{State: ports.PhaseRefused, Detail: "no Funnel port is left"}, false, page.Attention, "waiting", false},
+		{"unreserved", ports.SharedPort{State: ports.PhaseShared}, false, page.Attention, "waiting", false},
+		{"local only", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared, Detail: "serve: Funnel port 443 already serves an entry station did not make"}, false, page.Attention, "local only", false},
+		{"not listening", ports.SharedPort{Reserved: 40001, State: ports.PhaseWaiting}, false, page.Absent, "not listening", false},
+		{"stopped", ports.SharedPort{Reserved: 40001, State: ports.PhaseWaiting, Detail: stoppedVM}, false, page.Absent, stoppedVM, false},
+		{"engine stopped", ports.SharedPort{Reserved: 40001, State: ports.PhaseUnknown}, false, page.Attention, "not shared while the engine is stopped", false},
+		{"issuing", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared, Detail: catalog.IssuingDetail}, false, page.Attention, catalog.IssuingDetail, false},
+		{"not allowed", ports.SharedPort{State: ports.PhaseNotAllowed, Detail: "listens, not allowed (open: 3000-3999)"}, false, page.Attention, catalog.NotAllowedWord, true},
+	}
+	cards := map[string]string{"public": SectionPublic, "private": SectionPrivate, "local": SectionLocal}
+	for _, st := range states {
+		for audience, section := range cards {
+			share := st.share
+			share.VM, share.GuestPort, share.HTTP, share.To = "linux-1", 3000, true, audience
+			share.URLs = ports.URLSet{Public: "https://pro.ts.net:443"}
+			f := portFleet()
+			f.Macs[0].Shared = []ports.SharedPort{share}
+			p := fleetPorts(t, f, PortsOf{})
+			card := section
+			if st.listen {
+				card = SectionListening
+			}
+			var row *page.Row
+			for _, r := range rowsOf(p, card) {
+				if r.ID == "linux-1:3000" {
+					row = &r
+				}
+			}
+			if row == nil {
+				t.Errorf("%s, %s: no row in %s", st.name, audience, card)
+				continue
+			}
+			verb := action(p, row.Verb)
+			switch {
+			case st.opens:
+				if verb == nil || verb.Run == nil || verb.Run.Open == "" || row.Mark != page.OK {
+					t.Errorf("%s, %s: served row %+v verb %+v", st.name, audience, row, verb)
+				}
+			case st.listen:
+				if verb == nil || verb.Run == nil || verb.Run.Call != CallSharePort {
+					t.Errorf("%s, %s: no Share on %+v", st.name, audience, row)
+				}
+			default:
+				if row.Verb != "" || row.Quick != "" || len(row.Menu) != 1 || row.Mark != page.Attention && row.Mark != page.Absent {
+					t.Errorf("%s, %s: unserved row draws a link: %+v", st.name, audience, row)
+				}
+				for _, a := range p.Actions {
+					if a.Run != nil && (a.Run.Open != "" || a.Run.Copy != "") && slices.Contains(a.Rows, row.ID) {
+						t.Errorf("%s, %s: %s on an unserved share", st.name, audience, a.ID)
+					}
+				}
+			}
+			if st.mark != row.Mark || st.flag != "" && (len(row.Cells) == 0 || row.Cells[0].Text != st.flag) {
+				t.Errorf("%s, %s: mark %q cells %+v, want %q %q", st.name, audience, row.Mark, row.Cells, st.mark, st.flag)
+			}
+		}
+	}
+}
+
+// invariant: a listener outside the rights is offered by the Share a port
+// sheet with the listeners that wait, and a share past the cap does not
+// shorten the count of This Mac only.
+func TestANotAllowedListenerIsOfferedAndTheLocalCountKeepsAllShares(t *testing.T) {
+	f := portFleet()
+	f.Macs[0].Shared = []ports.SharedPort{{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Detail: "listens, not allowed (open: 3000-3999)"}}
+	b := portsOf(f, portsScope{Self: proMac})
+	if !slices.ContainsFunc(b.Listeners, func(it page.Item) bool { return it.Row.ID == "linux-1:8443" }) {
+		t.Fatalf("the sheet's listeners %q", ids(rowsFrom(b.Listeners)))
+	}
+	f.Macs[0].Shared = nil
+	for i := range catalog.PortRowsShown + 5 {
+		f.Macs[0].Shared = append(f.Macs[0].Shared, ports.SharedPort{VM: "linux-1", GuestPort: 3000 + i, Reserved: 40000 + i, State: ports.PhaseShared, To: "local"})
+	}
+	b = portsOf(f, portsScope{Self: proMac})
+	for _, s := range b.Sections {
+		if s.ID == SectionLocal && (s.Caption[0].Text != strconv.Itoa(catalog.PortRowsShown+5) || !s.Uncounted) {
+			t.Fatalf("local caption %+v uncounted %v", s.Caption, s.Uncounted)
+		}
+	}
+}
+
+func rowsFrom(items []page.Item) []page.Row {
+	out := make([]page.Row, 0, len(items))
+	for _, it := range items {
+		out = append(out, *it.Row)
+	}
+	return out
 }

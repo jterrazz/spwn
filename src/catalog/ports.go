@@ -50,6 +50,8 @@ func MoreRows(n int) string { return strconv.Itoa(n) + " more" }
 // value: the hint a row carries for a port the catalog's items label: what
 // probably serves it, never a decision.
 
+const NotAllowedWord = "not allowed" // value: the flag of a listener outside its VM's rights.
+
 func ProbablyWords(label string) string {
 	if label == "" {
 		return ""

@@ -324,6 +324,13 @@
             "id": "linux-1:8443",
             "mark": "attention",
             "label": "Port 8443",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not allowed",
+                "signal": "waits"
+              }
+            ],
             "detail": {
               "kind": "list",
               "items": [
@@ -333,7 +340,7 @@
                 },
                 {
                   "kind": "text",
-                  "text": "listens, not allowed (open: 3000-4999)"
+                  "text": "open: 3000-4999"
                 }
               ]
             },
@@ -982,6 +989,14 @@
             "kind": "rows",
             "options": [
               {
+                "value": "share:linux-1:8443",
+                "label": "Port 8443",
+                "note": "linux-1:8443",
+                "glyph": {
+                  "kind": "port:web"
+                }
+              },
+              {
                 "value": "share:linux-1:4321",
                 "label": "Astro",
                 "note": "linux-1:4321",
@@ -1060,6 +1075,14 @@
             "label": "Listening now in linux-1",
             "kind": "rows",
             "options": [
+              {
+                "value": "share:linux-1:8443",
+                "label": "Port 8443",
+                "note": "linux-1:8443",
+                "glyph": {
+                  "kind": "port:web"
+                }
+              },
               {
                 "value": "share:linux-1:4321",
                 "label": "Astro",
@@ -1415,6 +1438,14 @@
             "label": "Listening now in linux-1",
             "kind": "rows",
             "options": [
+              {
+                "value": "share:linux-1:8443",
+                "label": "Port 8443",
+                "note": "linux-1:8443",
+                "glyph": {
+                  "kind": "port:web"
+                }
+              },
               {
                 "value": "share:linux-1:4321",
                 "label": "Astro",
