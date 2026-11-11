@@ -7,7 +7,7 @@ runs:
           ●	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
           # Private: shared with you on Tailscale	3 ◐
           ◐	engine				not shared while the engine is stopped		station engine start
-          ◐	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not shared while the engine is stopped · reserved 40001		vite
+          ◐	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not shared while the engine is stopped · reserved 40001		probably Vite
           ◐	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	not shared while the engine is stopped · reserved 40002
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | [[.stores.reservations[] | [.vm, .guest_port, .host_port]], [(.tailnet.shares // [])[] | .Reserved]]'' world.json'

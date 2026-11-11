@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           ◐	com.docker.vmnetd	root	idle	Docker.app (gone)	/Library/LaunchDaemons/com.docker.vmnetd.plist · sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	vite
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
     - command: '--version >/dev/null; for read in overview apps settings disk ports accounts background awake machines images engine activity; do COLUMNS=30 "$STATION" $read --all > $read.txt 2>/dev/null || COLUMNS=30 "$STATION" $read > $read.txt; done; /bin/cat *.txt | /usr/bin/grep -c "…"'
       exit: 1
       stdout: |

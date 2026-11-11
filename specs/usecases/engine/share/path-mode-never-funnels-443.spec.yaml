@@ -21,8 +21,8 @@ runs:
     - command: 'ports | /usr/bin/grep linux-1'
       exit: 0
       stdout: |
-          ●	linux-1	3000	public	https://jterrazz-macbook-pro.tail1234.ts.net:8443	shared	node
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net/linux-1/5173/	shared	node	vite
+          ●	linux-1	3000	public	https://jterrazz-macbook-pro.tail1234.ts.net:8443	shared	node	probably Node or Next
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net/linux-1/5173/	shared	node	probably Vite
           ◐	linux-1	7000	private		listens, not allowed (open: 3000, 3001, 3002)	server	station ports share linux-1 7000
           ◐	linux-1		private		1 port not shared · no Funnel port is left for 3002: HTTPS links by path keep 443 private, so public opens 2 ports at most
           ●	linux-1	3002	private		behind jterrazz-macbook-pro, not shared	node

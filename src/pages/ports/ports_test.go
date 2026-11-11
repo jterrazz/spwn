@@ -80,3 +80,22 @@ func TestAListenerOutsideItsRightsReadsNotAllowed(t *testing.T) {
 		t.Fatalf("state %q, want not-allowed", got)
 	}
 }
+
+// invariant: a shared port's class in station.ports.list/v1 is its
+// audience's: public for one open to the internet, private for the others,
+// and `to` names the audience itself.
+func TestASharedPortsClassFollowsItsAudience(t *testing.T) {
+	for to, class := range map[string]string{"public": "public", "private": "private", "local": "private"} {
+		got := PortObject(ports.SharedPort{VM: "ws1", GuestPort: 3000, Reserved: 40000, To: to})
+		if got.Class != class || got.To != to {
+			t.Fatalf("to %q: class %q, to %q, want class %q", to, got.Class, got.To, class)
+		}
+	}
+}
+
+func TestASharedPortsRowSaysWhatProbablyServesIt(t *testing.T) {
+	row := Row(ports.SharedPort{VM: "ws1", GuestPort: 5173, Reserved: 40000, Label: "Vite"})
+	if row.Detail.Text != "probably Vite" {
+		t.Fatalf("detail %+v, want probably Vite", row.Detail)
+	}
+}

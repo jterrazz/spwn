@@ -84,7 +84,7 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 	// invariant: SPEC 5.6: what needs you first, then Public, then Private;
 	// what listens on its machine only is a count, unfolded by all; each Mac's
 	// reserved ports one line.
-	var red, public, private, local, notes []page.Item
+	var red, public, publicShares, private, localShares, local, notes []page.Item
 	for _, h := range f.Macs {
 		private = append(private, macRows(h)...)
 		if !h.Reachable {
@@ -94,7 +94,17 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 		for _, s := range h.Shared {
 			row := Row(s)
 			shared[row.ID] = true
-			private = append(private, page.Item{Row: &row})
+			into := &private
+			if s.State != ports.PhaseNotAllowed {
+				switch catalog.Audience(s.To) {
+				case catalog.AudiencePublic:
+					into = &publicShares
+				case catalog.AudienceLocal:
+					into = &localShares
+				case catalog.AudiencePrivate:
+				}
+			}
+			*into = append(*into, page.Item{Row: &row})
 		}
 		for _, n := range h.NotShared {
 			row := NotSharedRow(n)
@@ -132,10 +142,18 @@ func Sections(f ports.AllMachines, cat catalog.Catalog, thisMac page.Context, al
 	if len(public) > 0 {
 		out = append(out, kept(page.Section{ID: "public", Title: "Public: reachable from anywhere else, internet or LAN, declared", PipeCounts: true, Columns: exposedColumns()}, public))
 	}
-	if len(private) == 0 {
+	if len(publicShares) > 0 {
+		out = append(out, kept(page.Section{ID: "public-shares", Title: "Public: shared with the internet", PipeCounts: true, Columns: Columns()}, publicShares))
+	}
+	if len(private) == 0 && len(publicShares) == 0 && len(localShares) == 0 {
 		private = append(private, page.Item{Empty: &page.Empty{Noun: "shared ports", Hint: page.Cmd("station machines create")}})
 	}
-	out = append(out, kept(page.Section{ID: "private", Title: "Private: shared with you on " + catalog.TailnetProduct, PipeCounts: true, Columns: Columns()}, private))
+	if len(private) > 0 {
+		out = append(out, kept(page.Section{ID: "private", Title: "Private: shared with you on " + catalog.TailnetProduct, PipeCounts: true, Columns: Columns()}, private))
+	}
+	if len(localShares) > 0 {
+		out = append(out, kept(page.Section{ID: "local-shares", Title: "This machine only: shared on its Mac, never on " + catalog.TailnetProduct, PipeCounts: true, Columns: Columns()}, localShares))
+	}
 	if all && len(local) > 0 {
 		out = append(out, kept(page.Section{ID: "local-only", Title: "Listens on its machine only", PipeCounts: true, Columns: exposedColumns()}, local))
 	}
@@ -372,7 +390,7 @@ func Row(s ports.SharedPort) page.Row {
 	mark, reason, state, hint := stateOf(s)
 	return page.Row{ID: rowID(s.VM, s.GuestPort), Label: s.VM, Mark: mark, Reason: reason,
 		Cells:  []page.Value{port, page.Text(classOf(s)), url, state, page.Text(s.Process)},
-		Detail: page.Text(s.Profile), Hint: hint}
+		Detail: page.Text(catalog.ProbablyWords(s.Label)), Hint: hint}
 }
 
 // value: who a VM's shared port reaches, in the class words: the

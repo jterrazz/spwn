@@ -14,7 +14,7 @@ runs:
       stdout: |
           ●	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
           # Private: shared with you on Tailscale	2 ●
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	vite
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
           ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
           # Listens on its machine only	2 ●
           ●	jterrazz-macbook-pro	5432	this machine only	postgres	127.0.0.1:5432 this machine

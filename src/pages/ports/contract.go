@@ -20,10 +20,13 @@ type PortJSON struct {
 	Logo string `json:"logo,omitempty"`
 	// value: the app its process is, and its pid, for a port this machine
 	// lists itself.
-	App      string        `json:"app,omitempty"`
-	PID      int           `json:"pid,omitempty"`
-	Bind     []string      `json:"bind"`
-	Class    string        `json:"class"`
+	App   string   `json:"app,omitempty"`
+	PID   int      `json:"pid,omitempty"`
+	Bind  []string `json:"bind"`
+	Class string   `json:"class"`
+	// value: who a shared port is shared with, its audience: local, private
+	// or public; absent for a port that is not shared.
+	To       string        `json:"to,omitempty"`
 	Declared *DeclaredJSON `json:"declared"`
 	State    string        `json:"state,omitempty"`
 	Reserved int           `json:"reserved,omitempty"`
@@ -94,6 +97,15 @@ func stateWord(s ports.SharedPort) string {
 	return "shared"
 }
 
+// invariant: a shared port is public exactly when its audience is public,
+// whatever its guest binds; any other share is private.
+func classWord(s ports.SharedPort) string {
+	if catalog.Audience(s.To) == catalog.AudiencePublic {
+		return string(ports.Public)
+	}
+	return string(ports.Private)
+}
+
 func PortObject(s ports.SharedPort) PortJSON {
 	bind := []string{}
 	if s.Bind != "" {
@@ -104,7 +116,7 @@ func PortObject(s ports.SharedPort) PortJSON {
 		proto = "http"
 	}
 	known := s.Named()
-	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: "private",
+	return PortJSON{Machine: s.VM, Port: s.GuestPort, Proto: proto, Process: s.Process, Name: known.Name, Logo: known.Logo, Bind: bind, Class: classWord(s), To: s.To,
 		State: stateWord(s), Reserved: s.Reserved, SharedAt: sharedAt(s.ReservedAt), URL: s.URLs.Public, Detail: s.Detail}
 }
 
@@ -151,7 +163,10 @@ func ListContract(l ports.Listing) ListJSON {
 			shared[key] = true
 			if p, ok := heard[key]; ok {
 				l := ListenerObject(p)
-				o.Bind, o.Class, o.Declared, o.What, o.PID, o.Answer = l.Bind, l.Class, l.Declared, l.What, l.PID, l.Answer
+				o.Bind, o.Declared, o.What, o.PID, o.Answer = l.Bind, l.Declared, l.What, l.PID, l.Answer
+				if l.Class == string(ports.Public) {
+					o.Class = l.Class
+				}
 			}
 			private = append(private, o)
 		}

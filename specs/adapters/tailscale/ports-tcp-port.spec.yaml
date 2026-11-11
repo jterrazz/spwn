@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           ["tcp","macbook.tail1234.ts.net:41662",null]
-          ●	api	5432	private	macbook.tail1234.ts.net:41662	shared
+          ●	api	5432	private	macbook.tail1234.ts.net:41662	shared		probably Postgres
           tailscale serve --bg --tcp=41662 tcp://127.0.0.1:{{port}}
           1
           tailscale serve --tcp=41662 off

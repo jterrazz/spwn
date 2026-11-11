@@ -1,0 +1,19 @@
+Every Mac · 6 ports · 2 need you
+
+Tailscale  ● signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
+Public: shared with the internet
+                     port  class   url                                                state
+  ● linux-1  3001 → 40003  public  https://jterrazz-macbook-pro.tail1234.ts.net:8443  shared
+Private: shared with you on Tailscale
+                      port  class    url                       state
+  ● linux-1   5173 → 40001  private  https://jterrazz-…:40001  shared  probably Vite
+  ○ linux-1   5432 → 40002  private                            not listening · reserved 40002
+  ◐ linux-1           8443  private  listens, not allowed (open: 3000-4999)
+    → station ports share linux-1 8443
+  ◐ mac-mini                                                   does not answer
+    → station machines
+This machine only: shared on its Mac, never on Tailscale
+                     port  class              url                     state   process
+  ● linux-1  4000 → 40004  this machine only  http://127.0.0.1:40004  shared  node
+Reserved ports
+  Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

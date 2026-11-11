@@ -13,7 +13,7 @@ runs:
     - command: 'ports | /usr/bin/grep "	3000	"'
       exit: 0
       stdout: |
-          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node
+          ●	linux-1	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40000	shared	node	probably Node or Next
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.guest_port, .host_port, .to]], shared: [(.tailnet.shares // [])[] | [.Port, .Reserved, .To]], funnel: .tailnet.funnel}'' world.json'
       exit: 0
       stdout: |

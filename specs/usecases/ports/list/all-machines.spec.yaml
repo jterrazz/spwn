@@ -22,7 +22,7 @@ runs:
           # Public: reachable from anywhere else, internet or LAN, declared	1 ●
           ●	infra	443	public	traefik	*:443 all interfaces	Cloudflare Tunnel · tunnel seen
           # Private: shared with you on Tailscale	3 ●
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	vite
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
           ●	linux-1	7000	private	jterrazz-macbook-pro.tail1234.ts.net:40002	shared	server
           ●	infra	6443	private		own Tailscale device: infra	Kubernetes API
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

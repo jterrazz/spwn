@@ -8,7 +8,7 @@ runs:
       stdout: |
           "station.ports.list/v1"
           ["x","y"]
-          [["bind","class","declared","logo","machine","name","port","process","proto","reserved","shared_at","state","url"],["bind","class","declared","machine","name","port","process","proto","reserved","shared_at","state","url"],["bind","class","declared","machine","name","port","process","proto","reserved","state","url"]]
+          [["bind","class","declared","logo","machine","name","port","process","proto","reserved","shared_at","state","to","url"],["bind","class","declared","machine","name","port","process","proto","reserved","shared_at","state","to","url"],["bind","class","declared","machine","name","port","process","proto","reserved","state","url"]]
     - command: 'ports --all-machines --json | /usr/bin/jq -c ''.range'''
       exit: 0
       stdout: |
@@ -19,8 +19,8 @@ runs:
           ●	Tailscale	signed in · macbook.tail1234.ts.net · ports are shared
           # Private: shared with you on Tailscale	1 ●	4 ◐
           ◐	engine				the engine is not installed		station engine start
-          ◐	api	3000	private	https://macbook.tail1234.ts.net:40002	not shared while the engine is stopped · reserved 40002
-          ◐	api	8081	private	https://macbook.tail1234.ts.net:40000	not shared while the engine is stopped · reserved 40000		expo
+          ◐	api	3000	private	https://macbook.tail1234.ts.net:40002	not shared while the engine is stopped · reserved 40002		probably Node or Next
+          ◐	api	8081	private	https://macbook.tail1234.ts.net:40000	not shared while the engine is stopped · reserved 40000		probably Expo
           ●	w	3000	private	https://y.tail1234.ts.net:40000	shared	node
           ◐	z				does not answer		station machines
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

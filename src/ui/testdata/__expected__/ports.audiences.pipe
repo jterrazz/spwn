@@ -1,0 +1,11 @@
+●	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are shared
+# Public: shared with the internet	1 ●
+●	linux-1	3001	public	https://jterrazz-macbook-pro.tail1234.ts.net:8443	shared	node
+# Private: shared with you on Tailscale	1 ●	2 ◐	1 ○
+●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
+○	linux-1	5432	private		not listening · reserved 40002	postgres
+◐	linux-1	8443	private		listens, not allowed (open: 3000-4999)	node	station ports share linux-1 8443
+◐	mac-mini				does not answer		station machines
+# This machine only: shared on its Mac, never on Tailscale	1 ●
+●	linux-1	4000	this machine only	http://127.0.0.1:40004	shared	node
+	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free

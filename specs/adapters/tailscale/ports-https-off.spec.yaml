@@ -10,4 +10,4 @@ runs:
       stdout: |
           tailscale serve --bg --tcp=42080 tcp://127.0.0.1:{{port}}
           ["shared","http://macbook.tail1234.ts.net:42080"]
-          ●	api	8081	private	http://macbook.tail1234.ts.net:42080	shared		expo
+          ●	api	8081	private	http://macbook.tail1234.ts.net:42080	shared		probably Expo

@@ -12,8 +12,8 @@ runs:
           [5173,"not-listening","http://127.0.0.1:{{port}}","Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"]
           [5432,"local-only","127.0.0.1:{{port}}","Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"]
           [8081,"local-only","http://127.0.0.1:{{port}}","Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console"]
-          ○	api	5173	private	http://127.0.0.1:{{port}}	not listening · reserved 42241		vite
-          ◐	api	5432	private	127.0.0.1:{{port}}	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
-          ◐	api	8081	private	http://127.0.0.1:{{port}}	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console		expo
+          ○	api	5173	private	http://127.0.0.1:{{port}}	not listening · reserved 42241		probably Vite
+          ◐	api	5432	private	127.0.0.1:{{port}}	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console		probably Postgres
+          ◐	api	8081	private	http://127.0.0.1:{{port}}	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console		probably Expo
           station-test 8081
           2

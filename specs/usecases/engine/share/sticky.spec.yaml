@@ -6,13 +6,13 @@ runs:
     - command: 'ports | /usr/bin/grep 5173'
       exit: 0
       stdout: |
-          ○	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not listening · reserved 40001		vite
+          ○	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	not listening · reserved 40001		probably Vite
     - command: 'world listen linux-1 "*:5173" node'
       exit: 0
     - command: 'ports | /usr/bin/grep 5173'
       exit: 0
       stdout: |
-          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	vite
+          ●	linux-1	5173	private	https://jterrazz-macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"] | {reserved: [(.stores.reservations // [])[] | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |

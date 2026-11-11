@@ -1,0 +1,541 @@
+{
+  "schema": "station.page/v1",
+  "id": "ports",
+  "command": "ports",
+  "context": {
+    "machine": "macbook",
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Summary",
+      "role": "summary",
+      "fold": "open",
+      "columns": [
+        {
+          "key": "area",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "value",
+          "kind": "list",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "summary/ports",
+            "mark": "ok",
+            "label": "Every Mac",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "6 ports"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "2 need you"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "tailnet",
+      "title": "Tailscale",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "kind": "text",
+          "keep": 90
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "tailnet",
+            "mark": "ok",
+            "label": "Tailscale",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "signed in"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "jterrazz-macbook-pro.tail1234.ts.net"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "ports are shared"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ]
+    },
+    {
+      "id": "public-shares",
+      "title": "Public: shared with the internet",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:3001",
+            "mark": "ok",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 3001,
+                "of": 40003
+              },
+              {
+                "kind": "text",
+                "text": "public"
+              },
+              {
+                "kind": "url",
+                "text": "https://jterrazz-macbook-pro.tail1234.ts.net:8443"
+              },
+              {
+                "kind": "text",
+                "text": "shared"
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "private",
+      "title": "Private: shared with you on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:5173",
+            "mark": "ok",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5173,
+                "of": 40001
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "url",
+                "text": "https://jterrazz-macbook-pro.tail1234.ts.net:40001"
+              },
+              {
+                "kind": "text",
+                "text": "shared"
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "probably Vite"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:5432",
+            "mark": "absent",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 5432,
+                "of": 40002
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "not listening"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "reserved 40002"
+                  }
+                ]
+              },
+              {
+                "kind": "text",
+                "text": "postgres"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "waiting"
+          }
+        },
+        {
+          "row": {
+            "id": "linux-1:8443",
+            "mark": "attention",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "port",
+                "n": 8443
+              },
+              {
+                "kind": "text",
+                "text": "private"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "listens, not allowed (open: 3000-4999)"
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "waiting",
+            "hint": {
+              "command": "station ports share linux-1 8443"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "mac-mini",
+            "mark": "attention",
+            "label": "mac-mini",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "does not answer"
+              }
+            ],
+            "reason": "unreachable",
+            "hint": {
+              "command": "station machines"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "attention",
+          "n": 2
+        },
+        {
+          "mark": "absent",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "local-shares",
+      "title": "This machine only: shared on its Mac, never on Tailscale",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "linux-1:4000",
+            "mark": "ok",
+            "label": "linux-1",
+            "cells": [
+              {
+                "kind": "portmap",
+                "n": 4000,
+                "of": 40004
+              },
+              {
+                "kind": "text",
+                "text": "this machine only"
+              },
+              {
+                "kind": "url",
+                "text": "http://127.0.0.1:40004"
+              },
+              {
+                "kind": "text",
+                "text": "shared"
+              },
+              {
+                "kind": "text",
+                "text": "node"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        }
+      ],
+      "pipe_counts": true
+    },
+    {
+      "id": "ranges",
+      "title": "Reserved ports",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "vm",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "port",
+          "label": "port",
+          "kind": "portmap",
+          "keep": 80
+        },
+        {
+          "key": "class",
+          "label": "class",
+          "kind": "text",
+          "keep": 85
+        },
+        {
+          "key": "url",
+          "label": "url",
+          "kind": "url",
+          "keep": 40
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "process",
+          "label": "process",
+          "kind": "text",
+          "keep": 20,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "note": {
+            "text": "Reserved on This Mac: 2 of 1000 (40000-40999), 998 free"
+          }
+        }
+      ],
+      "uncounted": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "x",
+      "label": "stop sharing",
+      "on": "row",
+      "rows": [
+        "linux-1:5173",
+        "linux-1:5432",
+        "linux-1:3001",
+        "linux-1:4000",
+        "linux-1:8443"
+      ],
+      "confirm": {
+        "danger": true,
+        "yes": "stop sharing"
+      },
+      "priority": 1,
+      "mutates": true
+    }
+  ]
+}

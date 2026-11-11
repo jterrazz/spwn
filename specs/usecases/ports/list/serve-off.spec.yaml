@@ -6,7 +6,7 @@ runs:
       stdout: |
           ◐	Tailscale	signed in · jterrazz-macbook-pro.tail1234.ts.net · ports are local only	Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console
           # Private: shared with you on Tailscale	2 ◐
-          ◐	linux-1	5173	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	node	vite
+          ◐	linux-1	5173	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	node	probably Vite
           ◐	linux-1	7000	private	local only · Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console	server
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
     - command: 'ports --json | /usr/bin/jq -c ''[.tailscale.serve, [.ports[] | [.machine, .port, .state, .detail]]]'''

@@ -6,7 +6,7 @@ runs:
       stdout: |
           ✗	Tailscale	is signed out on This Mac: ports are local only	open Tailscale and sign in
           # Private: shared with you on Tailscale	2 ◐
-          ◐	linux-1	5173	private	local only · Tailscale is signed out	node	vite
+          ◐	linux-1	5173	private	local only · Tailscale is signed out	node	probably Vite
           ◐	linux-1	7000	private	local only · Tailscale is signed out	server
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
     - command: 'ports --json | /usr/bin/jq -c ''.tailscale.state'''

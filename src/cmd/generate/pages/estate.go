@@ -55,7 +55,7 @@ func failure(id page.ID, command, message, hint string) page.Page {
 
 func Estate() []Fixture {
 	var out []Fixture
-	for _, f := range [][]Fixture{homes(), overviewPages(), settingsPages(), settingsMatrix(), disks(), allMachinesStates(), machineLists(), sshPages(), imageLists(), machinefilePages(), portLists(), outcomes(), setups(), runs(), accountPages(), backgroundPages(), agentsPages(), controlPages(), keepAwakePages(), awakePages(), activityPages(), menubarPages(), menubarOwnPages()} {
+	for _, f := range [][]Fixture{homes(), overviewPages(), settingsPages(), settingsMatrix(), disks(), allMachinesStates(), machineLists(), sshPages(), imageLists(), machinefilePages(), portLists(), portsByAudience(), outcomes(), setups(), runs(), accountPages(), backgroundPages(), agentsPages(), controlPages(), keepAwakePages(), awakePages(), activityPages(), menubarPages(), menubarOwnPages()} {
 		out = append(out, f...)
 	}
 	return out
@@ -386,7 +386,7 @@ func portsAllMachines() ports.AllMachines {
 		{Name: "macbook", ThisMac: true, Reachable: true, Engine: ports.EngineInfo{Running: true}, PublicName: "jterrazz-macbook-pro.tail1234.ts.net", Serve: "on", HTTPS: "port",
 			Range: &ports.Range{Low: 40000, High: 40999, Reserved: 2, Free: 998, MaxPerVM: 20},
 			Shared: []ports.SharedPort{
-				{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, Process: "node", HTTP: true, Profile: "vite", URLs: ports.URLSet{Public: "https://jterrazz-macbook-pro.tail1234.ts.net:40001"}, LastSeenAt: &seen},
+				{VM: "linux-1", GuestPort: 5173, Reserved: 40001, State: ports.PhaseShared, Process: "node", HTTP: true, Profile: "vite", Label: "Vite", To: "private", URLs: ports.URLSet{Public: "https://jterrazz-macbook-pro.tail1234.ts.net:40001"}, LastSeenAt: &seen},
 				{VM: "linux-1", GuestPort: 5432, Reserved: 40002, State: ports.PhaseWaiting, Process: "postgres"},
 			}},
 		{Name: "mac-mini", Reachable: false},
@@ -410,6 +410,19 @@ func portLists() []Fixture {
 		pageports.List(ports.Listing{Tailnet: ports.Status{State: catalog.StateAbsent}}, builtin(), thisMacPorts()),
 		pageports.List(ports.Listing{AllMachines: stoppedPorts(), Tailnet: ports.Status{State: catalog.StateOK, BackendState: "NeedsLogin"}}, builtin(), thisMacPorts()),
 		pageports.List(ports.Listing{AllMachines: estatePorts(), Tailnet: tailnetStatus()}, builtin(), thisMacPorts()))
+}
+
+// value: ports.audiences: a share for each audience, and a listener outside
+// its rights, each under its own section.
+func portsByAudience() []Fixture {
+	f := portsAllMachines()
+	f.Macs[0].Shared = append(f.Macs[0].Shared,
+		ports.SharedPort{VM: "linux-1", GuestPort: 3001, Reserved: 40003, State: ports.PhaseShared, Process: "node", HTTP: true, To: "public",
+			URLs: ports.URLSet{Public: "https://jterrazz-macbook-pro.tail1234.ts.net:8443"}},
+		ports.SharedPort{VM: "linux-1", GuestPort: 4000, Reserved: 40004, State: ports.PhaseShared, Process: "node", HTTP: true, To: "local",
+			URLs: ports.URLSet{Public: "http://127.0.0.1:40004"}},
+		ports.SharedPort{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Process: "node", Detail: "listens, not allowed (open: 3000-4999)"})
+	return []Fixture{{Name: "ports.audiences", Page: pageports.List(ports.Listing{AllMachines: f, Tailnet: tailnetStatus()}, builtin(), thisMacPorts())}}
 }
 
 // value: the reference estate's ports in their two classes: the mini's AirPlay

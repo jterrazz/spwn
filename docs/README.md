@@ -90,5 +90,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [036 The menu bar owns its panel, and the panel's one background is a tinted glass](decisions/036-the-menu-bar-owns-its-glass-panel.md) (Accepted)
 - [037 The TUI is retired; the CLI is the one terminal surface](decisions/037-the-tui-is-retired.md) (Accepted)
 - [038 An app is carried by one method, the one its plan shows](decisions/038-an-app-is-carried-by-one-method-the-one-its-plan-shows.md) (Proposed)
+- [039 A share is shown under its audience](decisions/039-a-share-is-shown-under-its-audience.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

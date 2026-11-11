@@ -10,7 +10,7 @@ runs:
     - command: 'ports | /usr/bin/grep "api	3000"'
       exit: 0
       stdout: |
-          ●	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	shared	node
+          ●	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	shared	node	probably Node or Next
     - command: 'machines stop api --yes'
       exit: 0
       stdout: |
@@ -18,7 +18,7 @@ runs:
     - command: 'ports | /usr/bin/grep "api	3000"'
       exit: 0
       stdout: |
-          ○	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	not shared while api is stopped · reserved 40004
+          ○	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	not shared while api is stopped · reserved 40004		probably Node or Next
     - command: 'machines start api'
       exit: 0
       stdout: |
@@ -28,4 +28,4 @@ runs:
     - command: 'ports | /usr/bin/grep "api	3000"'
       exit: 0
       stdout: |
-          ●	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	shared	node
+          ●	api	3000	private	https://jterrazz-macbook-pro.tail1234.ts.net:40004	shared	node	probably Node or Next

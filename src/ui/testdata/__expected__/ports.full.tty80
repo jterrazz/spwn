@@ -13,7 +13,7 @@ Public: reachable from anywhere else, internet or LAN, declared
     your LAN · Remote login · by Settings
 Private: shared with you on Tailscale
                      port  class    url                       state
-  ● linux-1  5173 → 40001  private  https://jterrazz-…:40001  shared  vite
+  ● linux-1  5173 → 40001  private  https://jterrazz-…:40001  shared
   ○ linux-1  5432 → 40002  private  not listening · reserved 40002
   ● infra            6443  private  own Tailscale device: infra
 Reserved ports
