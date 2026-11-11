@@ -39,6 +39,35 @@ func (m *Mise) Ready(context.Context) error {
 }
 
 func (m *Mise) Inventory(ctx context.Context) (map[string]string, error) {
+	held, err := m.global(ctx)
+	if err != nil {
+		return nil, err
+	}
+	list := map[string]string{}
+	for name, v := range held {
+		list[name] = v.Version
+	}
+	return list, nil
+}
+
+func (m *Mise) Where(ctx context.Context, runtime string) (string, error) {
+	// value: the folder of the version of runtime mise holds globally, the
+	// one `unuse --global` takes back; empty when mise is missing or holds
+	// none.
+	if _, ok := m.run.LookPath(command); !ok {
+		return "", nil
+	}
+	held, err := m.global(ctx)
+	return held[runtime].Path, err
+}
+
+type version struct {
+	Version   string `json:"version"`
+	Path      string `json:"install_path"`
+	Installed bool   `json:"installed"`
+}
+
+func (m *Mise) global(ctx context.Context) (map[string]version, error) {
 	if err := m.Ready(ctx); err != nil {
 		return nil, err
 	}
@@ -49,23 +78,20 @@ func (m *Mise) Inventory(ctx context.Context) (map[string]string, error) {
 	if out.ExitCode != 0 {
 		return nil, errors.New("mise ls exited " + strconv.Itoa(out.ExitCode))
 	}
-	var doc map[string][]struct {
-		Version   string `json:"version"`
-		Installed bool   `json:"installed"`
-	}
+	var doc map[string][]version
 	if err := json.Unmarshal([]byte(out.Stdout), &doc); err != nil {
 		return nil, err
 	}
-	list := map[string]string{}
+	held := map[string]version{}
 	for name, versions := range doc {
 		for _, v := range versions {
 			if v.Installed {
-				list[name] = v.Version
+				held[name] = v
 				break
 			}
 		}
 	}
-	return list, nil
+	return held, nil
 }
 
 func (m *Mise) Outdated(context.Context, []string) (map[string]apps.Currency, error) {

@@ -22,9 +22,14 @@ const (
 type Npm struct {
 	run    local.Runner
 	bundle contract.Bundler
+	where  func(ctx context.Context, runtime string) (string, error)
 }
 
-func New(run local.Runner, bundle contract.Bundler) *Npm { return &Npm{run: run, bundle: bundle} }
+func New(run local.Runner, bundle contract.Bundler, where func(ctx context.Context, runtime string) (string, error)) *Npm {
+	// value: where names the folder of the global version of a runtime its
+	// manager holds, empty when it holds none; nil reads npm's own prefix.
+	return &Npm{run: run, bundle: bundle, where: where}
+}
 
 func (n *Npm) Method() catalog.Method { return catalog.MethodNpm }
 
@@ -49,7 +54,11 @@ func (n *Npm) Inventory(ctx context.Context) (map[string]string, error) {
 	if err := n.Ready(ctx); err != nil {
 		return nil, err
 	}
-	out, err := n.run.Output(ctx, local.Command(command, "ls", "-g", "--depth=0", "--json"))
+	global, err := n.global(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out, err := n.run.Output(ctx, local.Command(command, append([]string{"ls", "-g", "--depth=0", "--json"}, global...)...))
 	if err != nil {
 		return nil, err
 	}
@@ -87,18 +96,36 @@ func (n *Npm) Update(ctx context.Context, installs []catalog.Install, logs contr
 }
 
 func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	global, err := n.global(ctx)
+	if err != nil {
+		return err
+	}
 	for _, i := range installs {
 		v, ok := i.(catalog.NpmInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not an npm package")
 		}
-		c := local.Command(command, "uninstall", "-g", v.Package)
+		c := local.Command(command, append(append([]string{"uninstall", "-g"}, global...), v.Package)...)
 		c.Logs = logs
 		if err := local.Attach(ctx, n.run, c); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (n *Npm) global(ctx context.Context) ([]string, error) {
+	// invariant: what is read and what is removed are the packages of the
+	// node its manager holds globally, the one that manager's removal takes
+	// back, named by its folder, so no PATH, folder or variable picks another.
+	if n.where == nil {
+		return nil, nil
+	}
+	folder, err := n.where(ctx, n.Manager().App)
+	if err != nil || folder == "" {
+		return nil, err
+	}
+	return []string{"--prefix", folder}, nil
 }
 
 func (n *Npm) lines(installs []catalog.Install) []string {

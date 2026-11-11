@@ -113,3 +113,20 @@ func TestTheShimsMoveWithMisesDataFolder(t *testing.T) {
 		t.Errorf("the environment is %v; want the moved shims first and the moved installs gone", env)
 	}
 }
+
+func TestWhereIsTheFolderOfTheVersionHeldGlobally(t *testing.T) {
+	run := local.Played(func(local.Cmd) (local.Output, error) {
+		return local.Output{Stdout: `{"node":[{"version":"24.22.2","install_path":"/home/u/.local/share/mise/installs/node/24.22.2","installed":true}]}`}, nil
+	}, "mise")
+	m := mise.New(run)
+
+	if got, err := m.Where(context.Background(), "node"); err != nil || got != "/home/u/.local/share/mise/installs/node/24.22.2" {
+		t.Errorf("node is at %q (%v); want its global version's folder", got, err)
+	}
+	if got, err := m.Where(context.Background(), "python"); err != nil || got != "" {
+		t.Errorf("python is at %q (%v); want none, mise holds no python", got, err)
+	}
+	if got, err := mise.New(local.Played(nil)).Where(context.Background(), "node"); err != nil || got != "" {
+		t.Errorf("node is at %q (%v) with no mise; want none", got, err)
+	}
+}

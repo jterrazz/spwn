@@ -206,7 +206,8 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	// invariant: a shell where the runtime manager is activated puts a
 	// project's install folder first on PATH, so a package manager found
 	// there would list what that runtime holds, while the runtime's removal
-	// takes back the global one.
+	// takes back the global one: the lookup, every command's PATH and the
+	// folder the packages are read and removed in are the global one's.
 	home := "/home/u"
 	data := home + "/" + catalog.AppData
 	project := data + "/installs/node/22.1.0/bin"
@@ -224,9 +225,11 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	runtime, packages := installsOf(t, cat, registry, "node")
 	runtimes, pkgs := registry[runtime.Method()], registry[packages.Method()]
 	rt, pm := runtimes.Manager().Name, pkgs.Manager().Name
+	global := data + "/installs/node/24.22.2"
 	run.Programs = []string{project + "/" + pm, shims + "/" + pm, "/usr/bin/" + rt}
-	run.On(pm, "ls", "-g", "--depth=0", "--json").Reply(local.Output{Stdout: `{"dependencies":{"owner-pkg":{"version":"1.0.0"}}}`})
-	run.On(pm, "uninstall", "-g", packages.Key())
+	run.On(rt, "ls", "--global", "--json").Reply(local.Output{Stdout: `{"node":[{"version":"24.22.2","install_path":"` + global + `","installed":true}]}`})
+	run.On(pm, "ls", "-g", "--depth=0", "--json", "--prefix", global).Reply(local.Output{Stdout: `{"dependencies":{"owner-pkg":{"version":"1.0.0"}}}`})
+	run.On(pm, "uninstall", "-g", "--prefix", global, packages.Key())
 	run.On(rt, "unuse", "--global", runtime.Key())
 	ctx := context.Background()
 
@@ -239,8 +242,8 @@ func TestAManagerAnswersForTheGlobalVersionsWhateverPathStationWasGiven(t *testi
 	_ = pkgs.Remove(ctx, []catalog.Install{packages}, nil)
 	_ = runtimes.Remove(ctx, []catalog.Install{runtime}, nil)
 
-	if len(run.Calls) != 3 {
-		t.Fatalf("ran %d commands; want the read and the two removals", len(run.Calls))
+	if len(run.Calls) != 5 {
+		t.Fatalf("ran %d commands; want each read of the global node, the read of its packages and the two removals", len(run.Calls))
 	}
 	for _, c := range run.Calls {
 		argv := c.Name + " " + strings.Join(c.Args, " ")
