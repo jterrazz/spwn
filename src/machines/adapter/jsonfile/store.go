@@ -8,6 +8,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/core/store"
@@ -28,6 +29,7 @@ type Files interface {
 type Store struct {
 	files Files
 	dir   string
+	mu    *sync.Mutex
 }
 
 var (
@@ -35,7 +37,7 @@ var (
 	_ store.Migrator        = (*Store)(nil)
 )
 
-func New(files Files, dir string) *Store { return &Store{files: files, dir: dir} }
+func New(files Files, dir string) *Store { return &Store{files: files, dir: dir, mu: &sync.Mutex{}} }
 
 func (s *Store) recordFile(name string) string { return path.Join(s.dir, name+".json") }
 
@@ -97,10 +99,47 @@ func (s *Store) Get(_ context.Context, name string) (machines.Record, error) {
 	return f.record(), nil
 }
 
+type Locker interface {
+	// invariant: what serializes an Update between the processes of one
+	// Mac: a lock on a file of the records' folder (the disk's flock),
+	// held until unlock.
+	Lock(path string) (unlock func(), err error)
+}
+
+func (s *Store) Update(ctx context.Context, name string, change func(r *machines.Record)) error {
+	if err := s.files.MkdirAll(s.dir, 0o700); err != nil {
+		return err
+	}
+	// invariant: a Files with no lock (a test's) is one process's alone,
+	// whose updates the store's own mutex serializes.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if l, ok := s.files.(Locker); ok {
+		unlock, err := l.Lock(path.Join(s.dir, ".records.lock"))
+		if err != nil {
+			return err
+		}
+		defer unlock()
+	}
+	r, err := s.Get(ctx, name)
+	switch {
+	case errors.Is(err, store.ErrNotFound):
+		r = machines.Record{Name: name}
+	case err != nil:
+		return err
+	}
+	change(&r)
+	return s.put(r)
+}
+
 func (s *Store) Put(_ context.Context, r machines.Record) error {
 	if err := s.files.MkdirAll(s.dir, 0o700); err != nil {
 		return err
 	}
+	return s.put(r)
+}
+
+func (s *Store) put(r machines.Record) error {
 	// invariant: a put keeps the shares on disk as they are: the accounts'
 	// store writes them, and a record held in memory may predate a share.
 	// A put without agents keeps those on disk too: a stop writes them, and

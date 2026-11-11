@@ -271,23 +271,14 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	// frame, its memory reserved, wanting nothing until its disk is made;
 	// each step moves its birth on, and the create's end, made or kept
 	// failing, takes it off.
-	// invariant: the env is the engine's to write, at the VM's run: each
-	// write of the create keeps the one its record holds.
-	keptEnv := func() {
-		if kept, getErr := s.recs.Get(ctx, rec.Name); getErr == nil {
-			rec.Env = kept.Env
-		}
-	}
 	born := func(step string) error {
-		keptEnv()
 		rec.Birth = model.BirthAt(step, s.h.Now())
-		return s.writeRecord(rec)
+		return s.writeBirth(rec)
 	}
 	defer func() {
 		if made.record && !made.undone {
-			keptEnv()
 			rec.Birth = nil
-			_ = s.writeRecord(rec)
+			_ = s.writeBirth(rec)
 		}
 	}()
 
@@ -304,7 +295,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		return fail("the resize", err)
 	}
 	rec.Want = want
-	if err = s.writeRecord(rec); err != nil {
+	if err = s.writeBirth(rec); err != nil {
 		return fail("the record", err)
 	}
 	say(model.StepRunning)
@@ -409,13 +400,24 @@ func (s *Machinist) removeFiles(name string, record bool) {
 
 func (s *Machinist) Save(r model.VMRecord) error {
 	// invariant: a birth is the create's alone to write: a record saved by
-	// anyone else keeps the one stored, and never writes its own, so none
-	// outlives its create.
-	r.Birth = nil
-	if kept, err := s.recs.Get(context.Background(), r.Name); err == nil {
-		r.Birth = kept.Birth
-	}
-	return s.writeRecord(r)
+	// anyone else keeps the one stored, read in the same Update as its
+	// write, so none outlives its create.
+	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
+		birth := stored.Birth
+		*stored = storedOf(r)
+		stored.Birth = birth
+	})
+}
+
+// invariant: the env is the engine's to write, at the VM's run: each write
+// of the create keeps the one stored, read in the same Update as its
+// write, so the create never writes back an env the engine replaced.
+func (s *Machinist) writeBirth(r model.VMRecord) error {
+	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
+		env := stored.Env
+		*stored = storedOf(r)
+		stored.Env = env
+	})
 }
 
 func (s *Machinist) writeRecord(r model.VMRecord) error {

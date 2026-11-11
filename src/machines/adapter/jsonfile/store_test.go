@@ -5,8 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
+	"github.com/jterrazz/studio-station/src/machines"
 	"github.com/jterrazz/studio-station/src/machines/adapter/jsonfile"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	"github.com/jterrazz/studio-station/src/machines/contract/contracttest"
@@ -91,5 +94,79 @@ func TestMigrateStopsOnARecordANewerStationWrote(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(dir, "new.json"), []byte(`{"v":3,"name":"new","image":"linux"}`), 0o600)
 	if err := jsonfile.New(disk(), dir).Migrate(context.Background()); err == nil {
 		t.Errorf("Migrate passed a record a newer station wrote; want it stopped")
+	}
+}
+
+// value: the disk, whose next read runs onRead once it has read, and whose lock is one every store over it shares, as flock is
+// every process's: it says on waiting when a second taker waits for it.
+type racingDisk struct {
+	jsonfile.Files
+	onRead  func()
+	held    sync.Mutex
+	waiting chan struct{}
+	taken   bool
+	mu      sync.Mutex
+}
+
+func (d *racingDisk) ReadFile(p string) ([]byte, error) {
+	data, err := d.Files.ReadFile(p)
+	d.mu.Lock()
+	hook := d.onRead
+	d.onRead = nil
+	d.mu.Unlock()
+	if hook != nil {
+		hook()
+	}
+	return data, err
+}
+
+func (d *racingDisk) Lock(string) (func(), error) {
+	d.mu.Lock()
+	if d.taken {
+		close(d.waiting)
+	}
+	d.taken = true
+	d.mu.Unlock()
+	d.held.Lock()
+	return d.held.Unlock, nil
+}
+
+// invariant: two updates of one record never interleave, from two
+// processes (two stores over one folder, one lock): the engine's save
+// that read the create's birth while the create ended it never writes
+// that birth back, so none outlives its create.
+func TestTwoUpdatesOfARecordNeverInterleave(t *testing.T) {
+	ctx := context.Background()
+	racing := &racingDisk{Files: disk(), waiting: make(chan struct{})}
+	dir := filepath.Join(t.TempDir(), "vms")
+	create := jsonfile.New(racing, dir)
+	booting := &machines.Birth{Progress: 400, Step: machines.BornBooting, At: time.Unix(0, 0).UTC()}
+	if err := create.Put(ctx, machines.Record{Name: "linux-4", Birth: booting}); err != nil {
+		t.Fatal(err)
+	}
+	ended := make(chan error, 1)
+	hook := func() {
+		go func() {
+			ended <- create.Update(ctx, "linux-4", func(r *machines.Record) { r.Birth = nil })
+		}()
+		select {
+		case <-racing.waiting:
+		case err := <-ended:
+			ended <- err
+		}
+	}
+	racing.mu.Lock()
+	racing.onRead = hook
+	racing.mu.Unlock()
+	engine := jsonfile.New(racing, dir)
+	if err := engine.Update(ctx, "linux-4", func(r *machines.Record) { r.Env = map[string]string{"PORT": "40001"} }); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-ended; err != nil {
+		t.Fatal(err)
+	}
+	got, err := create.Get(ctx, "linux-4")
+	if err != nil || got.Birth != nil || got.Env["PORT"] != "40001" {
+		t.Errorf("record after the save and the create's end = %+v, %v; want no birth, PORT 40001", got, err)
 	}
 }

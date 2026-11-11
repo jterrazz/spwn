@@ -50,9 +50,28 @@ func (s *Store) Get(_ context.Context, name string) (machines.Record, error) {
 	return record(name, v), nil
 }
 
+func (s *Store) Update(_ context.Context, name string, change func(r *machines.Record)) error {
+	// invariant: the world's lock is every process's of a run, so an
+	// update holds it from its read to its write.
+	s.w.Lock()
+	defer s.w.Unlock()
+	r := machines.Record{Name: name}
+	if v, ok := s.vms()[name]; ok && v.Kept != nil {
+		r = record(name, v)
+	}
+	change(&r)
+	s.put(r)
+	return nil
+}
+
 func (s *Store) Put(_ context.Context, r machines.Record) error {
 	s.w.Lock()
 	defer s.w.Unlock()
+	s.put(r)
+	return nil
+}
+
+func (s *Store) put(r machines.Record) {
 	v := s.vms()[r.Name]
 	if v == nil {
 		v = &world.VM{}
@@ -67,7 +86,6 @@ func (s *Store) Put(_ context.Context, r machines.Record) error {
 		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: agents,
 	}
 	v.Size = machines.Size{CPUs: r.CPUs, Memory: r.MemoryBytes, Disk: r.DiskBytes}
-	return nil
 }
 
 func (s *Store) List(context.Context) ([]machines.Record, error) {

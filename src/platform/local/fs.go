@@ -28,6 +28,25 @@ func (disk) WriteFile(path string, data []byte, perm fs.FileMode) error {
 
 func (disk) WalkDir(root string, fn fs.WalkDirFunc) error { return filepath.WalkDir(root, fn) }
 
+// invariant: the lock is flock(2)'s on its own file, exclusive and
+// advisory, held until unlock: two processes of one Mac, or two
+// goroutines of one, never hold it at once, and a process that dies lets
+// go of it.
+func (disk) Lock(path string) (unlock func(), err error) {
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
+		_ = f.Close()
+		return nil, err
+	}
+	return func() {
+		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+		_ = f.Close()
+	}, nil
+}
+
 func (disk) Rename(from, to string) error {
 	err := os.Rename(from, to)
 	if errors.Is(err, syscall.EXDEV) {
