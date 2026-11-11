@@ -1,4 +1,4 @@
-description: 'apply --remove forgets an extra gone, keeps one put back by hand, skips one of another Machinefile'
+description: 'apply --remove forgets an extra gone, keeps one held another way, skips one of another Machinefile'
 fixture: ../__fixtures__/rg-by-hand/
 env: two-macs
 runs:

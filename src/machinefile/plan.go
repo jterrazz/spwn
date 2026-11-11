@@ -42,8 +42,9 @@ const (
 )
 
 // value: what an item reads on the machine, as its family read it: its
-// condition, its state, the method that holds it, the version there and
-// the words of its read.
+// condition, its state, the method that holds it, the version there, the
+// words of its read, and the manager its method lacks here, when that
+// manager is not installed.
 
 type Seen struct {
 	Condition Condition
@@ -51,6 +52,7 @@ type Seen struct {
 	Method    string
 	Version   string
 	Detail    string
+	Lacks     string
 }
 
 // value: one line of a plan: the step resolved, what it reads now, and
@@ -155,11 +157,12 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 
 // invariant: only what the ledger says station installed for this
 // Machinefile is extra, and of it only what reads present or outdated by
-// the method that installed it is removed: an extra already gone is
-// removed from the ledger alone, and one present another way since (put
-// back by hand, held by another method) is the owner's and left. The
-// extras run in reverse dependency order: what another extra waits on
-// (its manager, what it requires) is taken back after it.
+// the method that installed it is removed, whoever put it back there: an
+// extra already gone is removed from the ledger alone, one held by another
+// method is the owner's and left, and one whose manager is missing here
+// is left for a later run to judge. The extras run in reverse dependency
+// order: what another extra waits on (its manager, what it requires) is
+// taken back after it.
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
 	out := make([]ExtraLine, 0, len(extra))
 	for _, in := range extra {

@@ -129,6 +129,8 @@ func fate(e machinefile.ExtraLine) string {
 		return "listed no longer"
 	case e.Action == machinefile.Remove:
 		return "already gone"
+	case e.Seen.Lacks != "":
+		return "its manager " + e.Seen.Lacks + " is missing: kept"
 	case e.Seen.Condition == machinefile.NotManaged || e.Seen.Condition == machinefile.Present || e.Seen.Condition == machinefile.Outdated:
 		return "present another way since: kept"
 	}

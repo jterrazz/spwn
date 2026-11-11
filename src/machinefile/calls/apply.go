@@ -287,11 +287,12 @@ func masked(words string, secrets map[string]string) string {
 
 // invariant: only what the ledger says station installed is removed, by
 // the method that installed it, and only while it reads there by that
-// method; an extra already gone leaves the ledger alone; one present
-// another way since, or that station cannot uninstall (a script's
+// method; an extra already gone leaves the ledger alone; one held by
+// another method since, or that station cannot uninstall (a script's
 // install, the App Store's), is said and kept, and the ledger lets it go,
-// so no later run fails on it again. A read that did not answer keeps its
-// record for the next run.
+// so no later run fails on it again. One another app still needs, one
+// whose manager is missing here, and a read that did not answer keep
+// their record for the next run.
 func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
 	var out []machinefile.Done
 	for _, e := range extra {
@@ -299,6 +300,10 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 		switch {
 		case len(e.RequiredBy) > 0:
 			done.Detail = "required by " + strings.Join(e.RequiredBy, ", ") + ": kept, judged again next run"
+			out = append(out, done)
+			continue
+		case e.Action != machinefile.Remove && e.Seen.Lacks != "":
+			done.Detail = "its manager " + e.Seen.Lacks + " is missing: kept, judged again next run"
 			out = append(out, done)
 			continue
 		case e.Action != machinefile.Remove && (e.Seen.Condition == machinefile.Unknown || e.Seen.Condition == machinefile.Changed):

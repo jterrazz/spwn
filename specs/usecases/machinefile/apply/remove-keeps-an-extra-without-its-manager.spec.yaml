@@ -1,0 +1,27 @@
+description: 'apply --remove keeps an extra whose manager is missing here, and its record'
+fixture: ../__fixtures__/rg-by-hand/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: []
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].stores.ledger = [{item: "ripgrep", method: "brew", machinefile: "jterrazz-macbook-pro", at: "2026-11-01T09:00:00Z"}] | .macs["jterrazz-macbook-pro"].apps.brew.absent = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, its manager homebrew is missing: kept
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, its manager homebrew is missing: kept
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
+      exit: 0
+      stdout: |
+          ["ripgrep"]
