@@ -16,7 +16,7 @@ runs:
       exit: 2
       stderr: |
           Error: unknown network "wifi": nat or bridged
-          Hint: station machines create, behind its Mac
+          Hint: station machines create --network nat
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "services": {"range": "41060-41079"}/'' .config/station/preferences.json; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --network nat --name n > /dev/null; /usr/bin/jq -r .network .local/state/station/vms/n.json; kill $d; wait $d'
       exit: 0
       stdout: |

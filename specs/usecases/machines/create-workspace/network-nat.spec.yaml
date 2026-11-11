@@ -1,0 +1,16 @@
+description: '--network nat is the default and is recorded; the word is lower case only'
+env: two-macs
+runs:
+    - command: 'machines create box --network nat | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	box	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].vms.box.kept.network'' world.json'
+      exit: 0
+      stdout: |
+          nat
+    - command: 'machines create --network NAT'
+      exit: 2
+      stderr: |
+          Error: unknown network "NAT": nat or bridged
+          Hint: station machines create --network nat

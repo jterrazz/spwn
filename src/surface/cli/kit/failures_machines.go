@@ -115,7 +115,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 		if network.Bridge {
 			return usage(network.Error(), "share its ports instead: station ports share"), true
 		}
-		return usage(network.Error(), "station machines create, behind its Mac"), true
+		return usage(network.Error(), "station machines create --network nat"), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
 	case errors.As(err, &unhealthy):

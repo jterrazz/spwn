@@ -39,7 +39,7 @@ station machines <machine> [--json] # that machine's Overview, as station overvi
 station machines add <mac> [--user <login>] [--key <file>]
 station machines forget <mac> [--yes]
 
-station machines create [<name>] [--persistent] [--image linux] [--cpus <n>] [--memory <size>] [--disk <size>] [--network bridged]
+station machines create [<name>] [--persistent] [--image linux] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
 station machines create <name> --server [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port>]
 station machines start <vm>
 station machines stop <vm> [--yes | --confirm=<name>]

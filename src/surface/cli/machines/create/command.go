@@ -76,7 +76,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.IntVar(&in.CPUs, "cpus", 0, "virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
-			f.StringVar(&in.Network, "network", "", "bridged: its own address on your LAN (macOS images only); default behind its Mac")
+			f.StringVar(&in.Network, "network", machines.NetworkNAT, "nat: behind its Mac, no address on your LAN; bridged: its own address on your LAN (macOS images only)")
 			f.StringVar(&in.Task, "task", "", "gone: station agents start \"<task>\" --new")
 			f.BoolVar(&in.Agent, "agent", false, "gone: station agents start \"<task>\" --new")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
