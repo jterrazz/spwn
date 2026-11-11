@@ -316,4 +316,25 @@ say "   matches /proc idle and after; written +$(grew disk.written_since_boot_by
 case_pass
 
 
+
+case_begin rights-private ADR-035
+# value: ws1's Machinefile opens 3000-3999 to private, read at its next run:
+# 3000 is shared on a port of the Mac and served on the stub tailnet, 8443
+# is flagged and never reaches it.
+mkdir -p "$mac/.config/station/machinefiles"
+printf 'machinefile: station.machinefile/v1\nname: ws1\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n' > "$mac/.config/station/machinefiles/ws1.yaml"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
+in_vm ws1 '(nohup python3 -m http.server 3000 > /dev/null 2>&1 &); (nohup python3 -m http.server 8443 > /dev/null 2>&1 &)' || fail "start ws1's two servers"
+state_of() { st ports --json | jq -r --argjson p "$1" '[.all.macs[].shared[] | select(.vm == "ws1" and .guest_port == $p) | .state] | first // "none"'; }
+is_state() { [ "$(state_of "$1")" = "$2" ]; }
+until_true 24 is_state 3000 shared || fail "3000, inside the rights, is $(state_of 3000), not shared"
+until_true 6 is_state 8443 not-allowed || miss "8443, outside the rights, is $(state_of 8443), not flagged"
+on=$(st ports --json | jq -r '[.all.macs[].shared[] | select(.vm == "ws1" and .guest_port == 3000) | .reserved] | first')
+grep -q -- "serve --bg --https=$on http://127.0.0.1:$on" "$mac/.calls" || miss "3000 was never served on the tailnet at $on"
+grep -q -- "8443" "$mac/.calls" && miss "8443 reached the tailnet"
+curl -fsS -o /dev/null "http://127.0.0.1:$on/" || miss "3000 does not answer on the Mac's loopback port $on"
+rm -f "$mac/.config/station/machinefiles/ws1.yaml"
+say "   3000 shared on $on and served; 8443 flagged, never served"
+case_pass
+
 st machines delete ws1 --confirm=ws1 >> "$log" 2>&1 || true
