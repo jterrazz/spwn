@@ -325,11 +325,11 @@ mkdir -p "$mac/.config/station/machinefiles"
 printf 'machinefile: station.machinefile/v1\nname: ws1\nmachine: { kind: workspace }\nports: { open: 3000-3999, to: private }\n' > "$mac/.config/station/machinefiles/ws1.yaml"
 st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
 in_vm ws1 '(nohup python3 -m http.server 3000 > /dev/null 2>&1 &); (nohup python3 -m http.server 8443 > /dev/null 2>&1 &)' || fail "start ws1's two servers"
-state_of() { st ports --json | jq -r --argjson p "$1" '[.all.macs[].shared[] | select(.vm == "ws1" and .guest_port == $p) | .state] | first // "none"'; }
+state_of() { st ports --json | jq -r --argjson p "$1" '[.ports[] | select(.machine == "ws1" and .port == $p) | .state] | first // "none"'; }
 is_state() { [ "$(state_of "$1")" = "$2" ]; }
 until_true 24 is_state 3000 shared || fail "3000, inside the rights, is $(state_of 3000), not shared"
 until_true 6 is_state 8443 not-allowed || fail "8443, outside the rights, is $(state_of 8443), not flagged"
-on=$(st ports --json | jq -r '[.all.macs[].shared[] | select(.vm == "ws1" and .guest_port == 3000) | .reserved] | first')
+on=$(st ports --json | jq -r '[.ports[] | select(.machine == "ws1" and .port == 3000) | .reserved] | first')
 grep -q -- "serve --bg --https=$on http://127.0.0.1:$on" "$mac/.calls" || miss "3000 was never served on the tailnet at $on"
 grep -q -- "8443" "$mac/.calls" && miss "8443 reached the tailnet"
 curl -fsS -o /dev/null "http://127.0.0.1:$on/" || miss "3000 does not answer on the Mac's loopback port $on"
