@@ -7,12 +7,15 @@ import (
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/apps"
+	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
+	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
 	mffake "github.com/jterrazz/studio-station/src/machinefile/adapter/fake"
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
+	"github.com/jterrazz/studio-station/src/platform/local/localtest"
 	"github.com/jterrazz/studio-station/src/world"
 )
 
@@ -260,4 +263,48 @@ func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
 		t.Error("the app upgrade installed is not in the ledger")
 	}
 	holdsWhatTheLockNames(t, "upgraded anew", b, up.Plan, b.lock(t))
+}
+
+// value: a bundle that lands, then is caught by ctrl-c once armed.
+type armedInterrupt struct {
+	contract.Bundler
+	cancel func()
+	armed  *bool
+}
+
+func (a armedInterrupt) Bundle(ctx context.Context, lines []string, update bool, logs contract.Logs) error {
+	err := a.Bundler.Bundle(ctx, lines, update, logs)
+	if *a.armed {
+		a.cancel()
+		return ctx.Err()
+	}
+	return err
+}
+
+func TestAnInterruptedUpgradeLocksWhatInstalled(t *testing.T) {
+	// invariant: an upgrade caught by ctrl-c just after its manager
+	// finished reads the app again, as apply does, and the lock names the
+	// version the machine holds, not the one before.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	armed := false
+	b := lockBench{benchOf(t, catalog.Mac, "jq", func(_ *localtest.Runner, o *appscalls.ShelfOptions) {
+		o.Bundler = armedInterrupt{o.Bundler, cancel, &armed}
+	})}
+	b.apply(t)
+	for _, m := range b.w.Mac("here").Apps {
+		for key := range m.Installed {
+			if m.Behind == nil {
+				m.Behind = map[string]string{}
+			}
+			m.Behind[key] = "9.0.0"
+		}
+	}
+	b.shelf.Forget()
+	armed = true
+	_, _ = call.Invoke(ctx, b.calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Interactive: true}, nil)
+	held := b.row(t, "jq").Version
+	if got, _ := lockedOf(b.lock(t), "jq"); got.Version != held || held != "9.0.0" {
+		t.Errorf("the lock names jq at %q, the machine holds %q (want 9.0.0)", got.Version, held)
+	}
 }

@@ -87,6 +87,23 @@ func (r *run) reinstall(ctx context.Context, l machinefile.Line) machinefile.Don
 	return done
 }
 
+// invariant: an update interrupted hands back nothing of what it did, so
+// the app is read again past the interrupt, as apply's install is: one
+// that reads there at another version than before finished just before
+// it, and the lock takes that version; else the line stays interrupted
+// and the lock keeps the one it held.
+func finishedUpdate(ctx context.Context, d Deps, done machinefile.Done) machinefile.Done {
+	done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
+	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), rereadBudget)
+	defer cancel()
+	now, ok := reread(past, d, done.Line.Step.Item)
+	if !ok || (now.Condition != machinefile.Present && now.Condition != machinefile.Outdated) || now.Version == done.Line.Seen.Version {
+		return done
+	}
+	done.State, done.Method, done.Version, done.Reason, done.Updated = catalog.StateOK, now.Method, now.Version, "", true
+	return done
+}
+
 func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) machinefile.Done {
 	// invariant: an app whose version the Machinefile pins is kept at it;
 	// every other is updated by the method that holds it, and the lock
@@ -99,8 +116,7 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 	outcomes, err := call.Invoke(ctx, d.Calls, machine.Ref{}, appscalls.Update, appscalls.UpdateIn{Names: []string{l.Step.Item}}, p)
 	switch {
 	case ctx.Err() != nil:
-		done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
-		return done
+		return finishedUpdate(ctx, d, done)
 	case err != nil:
 		var refused *fail.Error
 		done.State, done.Detail = catalog.StateBroken, err.Error()
