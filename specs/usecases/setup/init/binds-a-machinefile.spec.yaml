@@ -43,4 +43,3 @@ runs:
           	apps.fd	listed	user	laptop
           	apps.fd.method	brew	lock	laptop
           	apps.fd.because	locked	lock	laptop
-          	apps.fd.locked	10.3.0	lock	laptop

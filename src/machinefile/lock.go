@@ -34,7 +34,7 @@ func Satisfies(asked, locked string) bool {
 func (s Step) InstallVersion() string {
 	// value: the version apply hands the install: the lock's, where the
 	// step's method pins one; else the one the Machinefile asks.
-	if s.Locked != "" && s.Spec.Pins() {
+	if s.Locked != "" {
 		return s.Locked
 	}
 	return s.Version

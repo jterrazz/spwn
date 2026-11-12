@@ -41,10 +41,13 @@ type Step struct {
 	Spec    catalog.MethodSpec
 	Version string
 	// value: the version the lock holds the item at, when the step is
-	// carried by the method the lock names, and the lock's file then.
-	Locked, Lock string
-	Phase        catalog.Phase
-	Needs        []catalog.Need
+	// carried by the method the lock names and that method pins it: the
+	// one the install takes; the lock's file when the lock names the
+	// method; and Recorded, the version the lock holds where the method
+	// cannot pin it, which the install does not take.
+	Locked, Recorded, Lock string
+	Phase                  catalog.Phase
+	Needs                  []catalog.Need
 	// value: what has to happen once it is applied for it to take (the
 	// Dock restarted, a logout), and the steps of the plan it waits on.
 	Restarts []catalog.AfterApply
@@ -507,9 +510,13 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 		}
 		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version, Method: chosen.Key(), Alternative: alt, At: where}
 	}
+	held, recorded := lockedAt(ok, version, locked.Version), ""
+	if !chosen.Pins() {
+		held, recorded = "", held
+	}
 	return Step{
 		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
-		Version: version, Locked: lockedAt(ok, version, locked.Version), Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
+		Version: version, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
 		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
 	}, nil
 }

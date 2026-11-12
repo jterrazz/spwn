@@ -98,12 +98,19 @@ func why(l machinefile.Line) string {
 	return l.Step.Why
 }
 
-// value: the version an install takes from the lock, as the plan says it.
+// value: the version an install takes from the lock, as the plan says it;
+// where the method cannot pin one, the version the lock records, said as
+// recorded, never as taken.
 func lockedWord(l machinefile.Line) string {
-	if l.Action != machinefile.Install || l.Step.Locked == "" {
+	switch {
+	case l.Action != machinefile.Install:
 		return ""
+	case l.Step.Locked != "":
+		return "locked " + l.Step.Locked
+	case l.Step.Recorded != "":
+		return "recorded " + l.Step.Recorded
 	}
-	return "locked " + l.Step.Locked
+	return ""
 }
 
 func needsSection(p machinefile.Plan) []page.Section {
