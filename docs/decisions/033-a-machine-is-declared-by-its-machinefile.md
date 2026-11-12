@@ -9,6 +9,8 @@
 
 ## Decision
 
+The shared source's pin (the layers' "pinned at a commit", and the consequence that only the owner moves it) is superseded in part by [the versions ADR](0xx-draft-versions-are-semver-ranges-applied-nightly.md): the shared source follows its default branch, forward only.
+
 A machine is declared by one file, its Machinefile, `station.machinefile/v1`, and station computes what to do from it, never from a list of its own.
 
 - Its families of keys, in reading order: `machine` (what it is: `kind` computer, workspace or server, and its `system`), `vm` (how a VM runs: lifetime, resources, network, image; refused on a computer), `extends` and `prefer` (what it inherits, the managers it tries first), `apps` and `settings` (what it carries, with option values, a secret as a `vault:` reference), `accounts` (the accounts shared with it, and those it keeps), `ports` (what it may open, and to whom: a right, never an inventory). A file without `machine` is a mixin, only extended.
