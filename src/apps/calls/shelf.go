@@ -28,6 +28,9 @@ type ShelfOptions struct {
 	// an app of that method here is that manager's, read by its own
 	// listing, never a copy present another way.
 	Kept map[catalog.Method][]string
+	// value: whether station's ledger records installing the app by the
+	// method, for a Machinefile (ADR-034); nil holds nothing.
+	HeldByLedger func(ctx context.Context, app string, m catalog.Method) (bool, error)
 }
 
 type Configurer interface {

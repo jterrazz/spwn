@@ -654,6 +654,8 @@ func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.
 		step.Detail = "kept: station cannot uninstall it"
 	case s.unrecorded(ctx, old):
 		step.Detail = "kept: yours, station added none of its packages; `station apps remove " + t.Name + "` takes it on your word"
+	case byLine(s.install(old)) && !s.ledgered(ctx, old):
+		step.Detail = "kept: yours, the ledger holds no install of it by station; `station apps remove " + t.Name + "` takes it on your word"
 	default:
 		o := s.undone(ctx, old, s.run(ctx, verbUninstall, old, false, contract.Installer.Remove), false)
 		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why
@@ -685,6 +687,17 @@ func (s *Shelf) undone(ctx context.Context, t catalog.App, o apps.Outcome, onPat
 		}
 	}
 	return o
+}
+
+// invariant: a line's undo runs off the owner's word only for an app the
+// ledger says station installed by that line's method; a ledger that does
+// not read holds nothing.
+func (s *Shelf) ledgered(ctx context.Context, t catalog.App) bool {
+	if s.o.HeldByLedger == nil {
+		return false
+	}
+	held, err := s.o.HeldByLedger(ctx, t.Name, s.install(t).Method())
+	return err == nil && held
 }
 
 // value: the install is a line station runs (a script, a shell line),

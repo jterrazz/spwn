@@ -44,6 +44,10 @@ const twin = "item: station.catalog/v1\nkind: app\nname: twin\ndescription: two 
 // value: an item the owner may have another way, read by its version.
 const probed = "item: station.catalog/v1\nkind: app\nname: probed\ndescription: read by its version\nprovides: [probed]\nversion-read: { args: [probed, --version], pattern: '^probed (\\S+)' }\nmethods:\n    - { os: macos, cask: probed }\n"
 
+// value: an item two lines install on a Mac, each read by its check, the
+// first taken back by its undo.
+const lined = "item: station.catalog/v1\nkind: app\nname: lined\ndescription: two lines\nprovides: [lined]\nmethods:\n    - { os: macos, script: { run: install-lined, check: lined --version, undo: uninstall-lined } }\n    - { os: macos, script: { url: https://example.com/lined.sh, check: lined version } }\n"
+
 type bench struct {
 	w     *world.World
 	shelf *appscalls.Shelf
@@ -114,6 +118,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 		"machinefiles/m.yaml":              machinefileOf(kind, listed...),
 		"catalog/command-line/twin.yaml":   twin,
 		"catalog/command-line/probed.yaml": probed,
+		"catalog/command-line/lined.yaml":  lined,
 	}
 	for p, body := range files {
 		user.Files = append(user.Files, machinefile.File{Path: p, Body: []byte(body)})
@@ -621,6 +626,36 @@ func TestAMoveFromACopyOnPathKeepsIt(t *testing.T) {
 	o := outcomeOf(t, out, "twin")
 	if o.Result != catalog.StateOK || !b.holds(catalog.MethodSkill, "twin") || len(o.Steps) != 1 || o.Steps[0].Item != "copy on PATH" || !strings.HasPrefix(o.Steps[0].Detail, "kept") {
 		t.Errorf("moved %+v", o)
+	}
+}
+
+// value: a ledger that holds an install of each app it names, by shell.
+type ledgered []string
+
+func (l ledgered) Recorded(_ context.Context, app string, m catalog.Method) (bool, error) {
+	return m == catalog.MethodShell && slices.Contains(l, app), nil
+}
+
+func TestAMoveOffALineRunsItsUndoOnlyForACopyTheLedgerHolds(t *testing.T) {
+	// invariant: a move carries no word of the owner's, so the old copy of a
+	// line (a script, a shell line) is undone only when the ledger says
+	// station installed it; one it does not hold is the owner's, kept.
+	for _, c := range []struct {
+		name   string
+		ledger ledgered
+		kept   bool
+	}{{"yours", nil, true}, {"station's", ledgered{"lined"}, false}} {
+		b := benchOf(t, catalog.Mac, "", func(_ *localtest.Runner, o *appscalls.ShelfOptions) { o.HeldByLedger = c.ledger.Recorded })
+		b.w.Mac("here").Apps[catalog.MethodShell].Installed["install-lined"] = "1.2.0"
+		out, err := b.shelf.Move(context.Background(), "lined", catalog.MethodScript, nil)
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		o := outcomeOf(t, out, "lined")
+		_, there := b.w.Mac("here").Apps[catalog.MethodShell].Installed["install-lined"]
+		if o.Result != catalog.StateOK || len(o.Steps) != 1 || o.Steps[0].Item != "shell copy" || there != c.kept || strings.HasPrefix(o.Steps[0].Detail, "kept") != c.kept {
+			t.Errorf("%s: moved %+v, the shell copy there: %v", c.name, o, there)
+		}
 	}
 }
 

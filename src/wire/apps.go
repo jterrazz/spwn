@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"path"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/machinefile"
 	pagesettings "github.com/jterrazz/studio-station/src/pages/settings"
 	"github.com/jterrazz/studio-station/src/settings"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
@@ -82,15 +84,31 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 	}
 	registry, bundler := installers(m, env.Interactive)
 	return appscalls.NewShelf(appsMachineOf(m), m.cat, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
-		Pool:        m.pool,
-		ThisMachine: m.kind,
-		Root:        m.systemRoot(),
-		Installers:  registry,
-		Bundler:     bundler,
-		VMs:         m.machines(env.Interactive),
-		Logs:        filepath.Join(m.paths.State, "logs"),
-		Kept:        mise.Kept(m.sys.Env.Home(), m.vars),
+		Pool:         m.pool,
+		ThisMachine:  m.kind,
+		Root:         m.systemRoot(),
+		Installers:   registry,
+		Bundler:      bundler,
+		VMs:          m.machines(env.Interactive),
+		Logs:         filepath.Join(m.paths.State, "logs"),
+		Kept:         mise.Kept(m.sys.Env.Home(), m.vars),
+		HeldByLedger: ledgerOf{m.stores.ledger}.Recorded,
 	})
+}
+
+// value: the ledger as the apps family reads it: whether it holds an
+// install of an app by a method.
+type ledgerOf struct{ l ledgerStore }
+
+func (l ledgerOf) Recorded(ctx context.Context, name string, m catalog.Method) (bool, error) {
+	if l.l == nil {
+		return false, nil
+	}
+	all, err := l.l.List(ctx)
+	if err != nil {
+		return false, err
+	}
+	return slices.ContainsFunc(all, func(in machinefile.Installed) bool { return in.Item == name && in.Method == string(m) }), nil
 }
 
 // invariant: every command station runs for apps, a manager's read, install or
