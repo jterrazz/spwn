@@ -93,5 +93,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [039 A share is shown under its audience](decisions/039-a-share-is-shown-under-its-audience.md) (Accepted)
 - [040 apt takes back only what it names; a release installs only what a checksum vouches for](decisions/040-apt-takes-back-only-what-it-names-a-release-installs-only-what-a-checksum-vouches-for.md) (Accepted)
 - [041 The lock is what apply installs; upgrade alone moves it](decisions/041-the-lock-is-what-apply-installs.md) (Accepted)
+- [0xx Versions are semver ranges, applied every night](decisions/0xx-draft-versions-are-semver-ranges-applied-nightly.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
