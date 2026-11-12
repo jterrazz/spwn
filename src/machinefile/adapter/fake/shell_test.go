@@ -10,7 +10,7 @@ import (
 )
 
 func TestTheShellOfTheWorldKeepsTheContract(t *testing.T) {
-	contracttest.Shell(t, "mkdir -p ~/src", func(_ *testing.T, fails bool) contract.Shell {
+	contracttest.Shell(t, func(_ *testing.T, fails bool) contract.Shell {
 		w := &world.World{}
 		if fails {
 			w.Script = append(w.Script, world.Fault{Call: "Shell.Run"})

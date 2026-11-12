@@ -13,7 +13,11 @@ type ShellRun struct {
 
 type Shell interface {
 	// invariant: the lines run as this machine's user, from its home, in
-	// one shell that stops at the first line that fails; an error is a
-	// shell that could not run at all.
+	// one shell, so a cd or an export carries to the next line; the first
+	// command whose status is not zero (a line, or the lines of one
+	// construct), the left of an `&&` and a pipe included, ends the run
+	// with that status, and the last line on stderr names it
+	// (`station: exit <n> at: <its first line>`); an error is a shell that
+	// could not run at all.
 	Run(ctx context.Context, lines string) (ShellRun, error)
 }

@@ -142,8 +142,8 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 
 // invariant: the owner's lines of a phase run once its items are carried
 // out, as this machine's user from its home, and stop at the first line
-// that fails: their run ends broken, with the last word they said, and
-// what was applied stays applied.
+// that fails: their run ends broken, with the last words they said
+// (saidLines), and what was applied stays applied.
 func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
 	task := "run." + string(s.Phase)
 	p.Step(task, strings.Join(machinefile.ScriptLines(s.Lines), "\n"))
@@ -159,8 +159,8 @@ func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *ma
 		out.State, out.Detail = catalog.StateBroken, err.Error()
 	case got.ExitCode != 0:
 		out.State, out.Detail = catalog.StateBroken, "exited "+strconv.Itoa(got.ExitCode)
-		if last := lastLine(got.Stderr + got.Stdout); last != "" {
-			out.Detail += ": " + last
+		if said := lastLines(got.Stdout+got.Stderr, saidLines); said != "" {
+			out.Detail += ": " + said
 		}
 	}
 	if out.State == catalog.StateBroken {
@@ -171,12 +171,16 @@ func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *ma
 	return out
 }
 
-func lastLine(text string) string {
+// value: how many of the last lines a failed run said its step shows.
+const saidLines = 3
+
+func lastLines(text string, n int) string {
 	lines := machinefile.ScriptLines(text)
-	if len(lines) == 0 {
-		return ""
+	lines = lines[max(0, len(lines)-n):]
+	for i, l := range lines {
+		lines[i] = strings.TrimSpace(l)
 	}
-	return strings.TrimSpace(lines[len(lines)-1])
+	return strings.Join(lines, "; ")
 }
 
 func badPhase(phase catalog.Phase, remove bool) error {

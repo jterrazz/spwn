@@ -2,14 +2,40 @@ package bash
 
 import (
 	"context"
-	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
-// value: the longest the owner's lines of one phase run.
-const bound = 20 * time.Minute
+// invariant: the owner's lines are the driver's argument, never pasted
+// into it. The driver evals one complete command at a time (a line, or
+// the lines a multi-line construct, a heredoc or a trailing `\` holds, as
+// `bash -n` reads them), all in one shell under -e and pipefail, so a cd
+// and an export carry to the next line; a command whose status is not
+// zero ends the run with that status, even where -e lets it pass (the
+// left of `&&`, a pipe), and its first line is said on stderr. It calls
+// bash's builtins alone, so it runs on any PATH, bash 3.2 included.
+const driver = `set -o pipefail
+__station_nl='
+'
+__station_part=
+__station_said() {
+  __station_s=$?
+  [ "$__station_s" -eq 0 ] || [ -z "$__station_part" ] || printf 'station: exit %s at: %s\n' "$__station_s" "${__station_part%%"$__station_nl"*}" >&2
+}
+trap __station_said EXIT
+while IFS= read -r __station_line <&3 || [ -n "$__station_line" ]; do
+  __station_part=$__station_part$__station_line$__station_nl
+  case $__station_line in *\\) continue ;; esac
+  [ -z "$("$BASH" -n -c "$__station_part" 2>&1)" ] || continue
+  eval "$__station_part"
+  __station_s=$?
+  [ "$__station_s" -eq 0 ] || exit "$__station_s"
+  __station_part=
+done 3<<<"$1"
+[ -z "$__station_part" ] || eval "$__station_part"
+`
 
 type Bash struct {
 	run  local.Runner
@@ -21,8 +47,8 @@ var _ contract.Shell = (*Bash)(nil)
 func New(run local.Runner, home string) *Bash { return &Bash{run: run, home: home} }
 
 func (b *Bash) Run(ctx context.Context, lines string) (contract.ShellRun, error) {
-	c := local.Command("bash", "-e", "-c", lines)
-	c.Dir, c.Timeout = b.home, bound
+	c := local.Command("bash", "-e", "-c", driver, "station", lines)
+	c.Dir, c.Timeout = b.home, catalog.RunBound
 	out, err := b.run.Output(ctx, c)
 	if err != nil {
 		return contract.ShellRun{}, err

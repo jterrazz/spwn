@@ -1,5 +1,7 @@
 package catalog
 
+import "time"
+
 // value: the schema every Machinefile of this station names in its
 // `machinefile:` key, and the family its versions share; a file naming a
 // newer version is refused with `update station`.
@@ -102,6 +104,8 @@ type RunSpec struct {
 	Boot    string `yaml:"boot,omitempty"`
 	Upgrade string `yaml:"upgrade,omitempty"`
 }
+
+const RunBound = 20 * time.Minute // value: the longest the owner's lines of one phase run.
 
 // value: a size in megabytes, gigabytes or terabytes: `512M`, `32G`, `1T`.
 

@@ -70,7 +70,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 	if err != nil {
 		return err
 	}
-	failed, total := 0, len(out.Blocks)
+	failed, total, noun := 0, len(out.Blocks), "items"
 	for _, b := range out.Blocks {
 		if b.State == catalog.StateBroken {
 			failed++
@@ -83,13 +83,13 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		}
 	}
 	if out.Ran != nil {
-		total++
+		total, noun = total+1, "steps"
 		if out.Ran.State == catalog.StateBroken {
 			failed++
 		}
 	}
 	if failed > 0 {
-		return kit.PartialFailure{Failed: failed, Total: total, Noun: "items", FirstHint: "station apply"}
+		return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station apply"}
 	}
 	return nil
 }

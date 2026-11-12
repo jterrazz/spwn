@@ -1,4 +1,4 @@
-description: 'a failing run.boot line ends its step broken with the exit and last word, the phase kept'
+description: 'a failing run.boot line ends its step broken, its last lines said, counted as a step'
 env: in-workspace
 runs:
     - command: 'world edit linux-1 machinefiles/linux-1.yaml'
@@ -17,7 +17,7 @@ runs:
       stdout: |
           # To run
           ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	linux-1
-          ✗	run.boot		linux-1	1 line · exited 1: bash: line 1: the line failed
+          ✗	run.boot		linux-1	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
       stderr: |
-          Error: 1 of 1 items failed
+          Error: 1 of 1 steps failed
           Hint: station apply
