@@ -38,6 +38,9 @@ type Deps struct {
 	Password contract.Password
 	Turn     contract.Turn
 	Now      func() time.Time
+	// value: this machine's ~/.zshrc, and the home its variables name.
+	Zshrc Zshrc
+	Home  string
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
 	Calls call.Router

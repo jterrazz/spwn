@@ -1,0 +1,67 @@
+description: a shell block edited by hand reads changed, and apply leaves it as it is
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [postgres]
+      exit: 0
+    - command: 'init > /dev/null'
+      exit: 0
+    - command: 'apply > /dev/null'
+      exit: 0
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	homebrew	script	present
+          ●	postgres	brew	present
+          ●	postgres	shell	present · ~/.zshrc [station:postgres/path]
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/-d /-e /'' .zshrc'
+      exit: 0
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	homebrew	script	present
+          ●	postgres	brew	present
+          ◐	postgres	shell	changed · ~/.zshrc [station:postgres/path]
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # Left as it is
+          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station plan --diff shows how
+          ●	homebrew	5.0.1	script	the manager of postgres
+          ●	postgres	18.1	brew
+          ◐	postgres		shell	~/.zshrc [station:postgres/path]: edited by hand: left as it is
+    - command: '--version >/dev/null; /usr/bin/grep -c -e ''-e /opt/homebrew'' .zshrc'
+      exit: 0
+      stdout: |
+          1
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''/station:postgres/d;/-e /d'' .zshrc; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To set
+          ○	postgres	shell	~/.zshrc [station:postgres/path]: 1 line
+          ●	homebrew	5.0.1	script	the manager of postgres
+          ●	postgres	18.1	brew
+          ●	postgres		shell	~/.zshrc [station:postgres/path]: written
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	homebrew	script	present
+          ●	postgres	brew	present
+          ●	postgres	shell	present · ~/.zshrc [station:postgres/path]

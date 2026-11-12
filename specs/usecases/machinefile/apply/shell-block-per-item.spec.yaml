@@ -1,0 +1,73 @@
+description: 'apply writes one block per app into ~/.zshrc after station''s own, your lines kept'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [postgres]
+      exit: 0
+    - command: '--version >/dev/null; printf ''export EDITOR=vim\n\nalias gs=git\n'' > .zshrc'
+      exit: 0
+    - command: 'init > /dev/null; printf ''alias ll="ls -l"\n'' >> .zshrc; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          export EDITOR=vim
+
+          alias gs=git
+
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+          alias ll="ls -l"
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	postgres	brew
+          # To set
+          ○	postgres	shell	~/.zshrc [station:postgres/path]: 1 line
+          ●	homebrew	5.0.1	script	the manager of postgres
+          ●	postgres	18.1	brew
+          ●	postgres		shell	~/.zshrc [station:postgres/path]: written
+    - command: '--version >/dev/null; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          export EDITOR=vim
+
+          alias gs=git
+
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+          # >>> station:postgres/path >>>
+          [[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
+          # <<< station:postgres/path <<<
+          alias ll="ls -l"
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of postgres
+          ●	postgres	18.1	brew
+          ●	postgres		shell	~/.zshrc [station:postgres/path]
+    - command: '--version >/dev/null; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          export EDITOR=vim
+
+          alias gs=git
+
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+          # >>> station:postgres/path >>>
+          [[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
+          # <<< station:postgres/path <<<
+          alias ll="ls -l"

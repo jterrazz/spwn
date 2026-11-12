@@ -90,7 +90,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			out.Bound = plan.Name
 		}
-		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}}
+		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}}
 		for i, l := range plan.Lines {
 			if ctx.Err() != nil {
 				for _, rest := range plan.Lines[i:] {
@@ -100,6 +100,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			done := r.line(ctx, l)
 			r.ended[l.Step.Item] = done.State
+			r.there[l.Step.Item] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
 			if done.Reason == machinefile.NotRun {
 				r.ended[l.Step.Item] = catalog.StateBroken
 			}
@@ -109,6 +110,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			out.Interrupted = true
 			return out, errors.Join(err, relock(ctx, d, plan, out.Done))
 		}
+		out.Blocks = r.blocks(ctx, plan)
 		if in.Remove {
 			out.Removed = r.remove(ctx, plan.Extra)
 		}
@@ -166,6 +168,9 @@ type run struct {
 	in    ApplyIn
 	name  string
 	ended map[string]catalog.State
+	// value: the apps that read there once their line ended, whose blocks
+	// may be written.
+	there map[string]bool
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {

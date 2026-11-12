@@ -166,7 +166,7 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
-		Password: m.password(), Turn: m.turn(), Now: m.sys.Clock.Now, Calls: calls,
+		Password: m.password(), Turn: m.turn(), Now: m.sys.Clock.Now, Calls: calls, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
 	}
 }
 

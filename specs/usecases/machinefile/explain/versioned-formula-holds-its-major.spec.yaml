@@ -33,5 +33,8 @@ runs:
       stdout: |
           # To install
           ○	postgres	brew
+          # To set
+          ○	postgres	shell	~/.zshrc [station:postgres/path]: 1 line
           ●	homebrew	5.0.1	script	the manager of postgres
           ●	postgres	1.0.0	brew
+          ●	postgres		shell	~/.zshrc [station:postgres/path]: written

@@ -1,0 +1,45 @@
+description: 'each new block goes after the last station block, in the plan''s order'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/alpha.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: alpha
+          description: An app with a block of its own
+          provides: [alpha]
+          methods:
+              - os: macos
+                brew: eza
+                shell:
+                    - id: station:alpha
+                      zsh: |
+                          export ALPHA=1
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [postgres, alpha]
+      exit: 0
+    - command: 'init > /dev/null'
+      exit: 0
+    - command: 'apply > /dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+          # >>> station:postgres/path >>>
+          [[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
+          # <<< station:postgres/path <<<
+          # >>> station:alpha >>>
+          export ALPHA=1
+          # <<< station:alpha <<<

@@ -1,0 +1,41 @@
+description: 'plan --diff shows each shell block''s diff, and a block edited by hand is left'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [postgres]
+      exit: 0
+    - command: 'plan --diff'
+      exit: 0
+      stdout: |
+          --- station's ~/.zshrc [station:postgres/path]
+          +++ ~/.zshrc [station:postgres/path]
+          @@ -1,1 +1,0 @@
+          -[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
+    - command: 'init > /dev/null'
+      exit: 0
+    - command: 'apply > /dev/null'
+      exit: 0
+    - command: 'plan --diff'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/opt\/homebrew\/opt/opt\/mine/g'' .zshrc'
+      exit: 0
+    - command: 'plan --diff'
+      exit: 0
+      stdout: |
+          --- station's ~/.zshrc [station:postgres/path]
+          +++ ~/.zshrc [station:postgres/path]
+          @@ -1,1 +1,1 @@
+          -[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
+          +[[ -d /opt/mine/postgresql@18/bin ]] && path=(/opt/mine/postgresql@18/bin $path)
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # Left as it is
+          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station plan --diff shows how

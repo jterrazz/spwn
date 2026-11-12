@@ -192,7 +192,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		for _, l := range p.Of(a) {
 			rows = append(rows, lineRow(l, why(l), lockedWord(l)))
 		}
-		return rows
+		return append(rows, blockRows(p, a)...)
 	}
 	var words []string
 	sections := needsSection(p)
@@ -205,6 +205,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		{machinefile.Set, "set", "To set", "to set", ""},
 		{machinefile.Adopt, "adopt", "To adopt", "to adopt", ""},
 		{machinefile.Leave, "leave", "Left as it is", "left as it is", ""},
+		{machinefile.Remove, "remove-blocks", "To remove", "to remove", ""},
 	} {
 		if rows := byAction(part.action); len(rows) > 0 {
 			sections = append(sections, section(part.id, part.title, rows))
@@ -225,7 +226,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	case !p.Calm():
 		mark = page.Absent
 		removes := slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
-		if removes || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
+		if removes || p.WritesBlocks() || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
 		}
 		if removes {
@@ -252,6 +253,12 @@ func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
 	for _, l := range p.Lines {
 		rows = append(rows, lineRow(l, condition(l.Seen.Condition)))
 		if l.Seen.Condition != machinefile.Present {
+			drifted++
+		}
+	}
+	for _, b := range p.Blocks {
+		rows = append(rows, blockRow(b, condition(b.Condition), blockWhere(b)))
+		if b.Condition != machinefile.Present {
 			drifted++
 		}
 	}
@@ -284,7 +291,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 	// and what to do next.
 	steps := make([]pages.RunStep, 0, len(done)+len(removed))
 	changed, failed, interrupted := 0, 0, a.Interrupted
-	for _, d := range append(slices.Clone(done), removed...) {
+	step := func(d Worded) {
 		detail := d.Detail
 		var said []string
 		if w := why(d.Line); w != "" {
@@ -309,6 +316,23 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		case d.Installed || (d.Line.Acts() && d.State == catalog.StateOK) || (d.Line.Action == machinefile.Remove && d.State == catalog.StateOK):
 			changed++
 		}
+	}
+	for _, d := range done {
+		step(d)
+	}
+	for _, b := range a.Blocks {
+		steps = append(steps, pages.RunStep{ID: b.ID, Label: b.Item, State: b.State, Cells: []page.Value{page.Version(""), page.Texts(blockMethod)}, Detail: strings.TrimSuffix(blockWhere(b.Block)+": "+b.Detail, ": ")})
+		switch {
+		case b.State == catalog.StateBroken:
+			failed++
+		case b.Action == machinefile.Set && b.State == catalog.StateOK && b.Detail == "written":
+			changed++
+		case b.Action == machinefile.Remove && b.State == catalog.StateOK && b.Detail == "removed":
+			changed++
+		}
+	}
+	for _, d := range removed {
+		step(d)
 	}
 	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "items in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
 	var words []string

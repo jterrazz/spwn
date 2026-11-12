@@ -1,0 +1,29 @@
+description: 'plan --diff shows a setting''s file too, as settings diff draws it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          settings: { git-shortcuts: {} }
+      exit: 0
+    - command: 'plan --diff | /usr/bin/head -4'
+      exit: 0
+      stdout: |
+          --- station's ~/.gitconfig [alias]
+          +++ ~/.gitconfig [alias]
+          @@ -1,13 +1,0 @@
+          -# >>> station git-shortcuts >>>
+    - command: 'settings diff git-shortcuts | /usr/bin/head -4'
+      exit: 0
+      stdout: |
+          --- station's ~/.gitconfig [alias]
+          +++ ~/.gitconfig [alias]
+          @@ -1,13 +1,0 @@
+          -# >>> station git-shortcuts >>>
+    - command: 'plan --diff --json | /usr/bin/jq -r .schema'
+      exit: 0
+      stdout: |
+          station.machinefile.plan/v1

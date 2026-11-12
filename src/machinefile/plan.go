@@ -112,12 +112,15 @@ type Asked struct {
 // a line run as root asks no password here, as the machine answered it.
 
 type Plan struct {
-	Name         string
-	Lock         Lock
-	Source       *catalog.LockSource
-	Needs        []Asked
-	Lines        []Line
-	Extra        []ExtraLine
+	Name   string
+	Lock   Lock
+	Source *catalog.LockSource
+	Needs  []Asked
+	Lines  []Line
+	Extra  []ExtraLine
+	// value: the blocks of ~/.zshrc the lines' methods write, in the plan's
+	// order, then those of an item the plan carries no longer.
+	Blocks       []Block
 	Skipped      []Skip
 	Restarts     []catalog.AfterApply
 	Passwordless bool
@@ -463,7 +466,7 @@ func (p Plan) Of(a Action) []Line {
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
 	// set, no extra `apply --remove` would take back or let go of.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets)
+	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks()
 }
 
 func (p Plan) Interactive(remove bool) []Asked {
@@ -590,9 +593,11 @@ func WaitingOf(done []Done) []Waiting {
 // just before).
 
 type Applied struct {
-	Plan        Plan
-	Done        []Done
-	Removed     []Done
+	Plan    Plan
+	Done    []Done
+	Removed []Done
+	// value: what each block of ~/.zshrc the plan carries came to.
+	Blocks      []BlockDone
 	Bound       string
 	Interrupted bool
 }

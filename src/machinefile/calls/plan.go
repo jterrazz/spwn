@@ -59,6 +59,9 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 		return machinefile.Plan{}, err
 	}
 	p := machinefile.Judge(r, cat, seen, ledger, false)
+	if p, err = withBlocks(ctx, d, p, cat); err != nil {
+		return machinefile.Plan{}, Worded(err)
+	}
 	// invariant: whether the machine asks a password is read when a run of
 	// this plan, an apply or an upgrade, would ask one.
 	sudo := func(a machinefile.Asked) bool { return a.Need == catalog.NeedSudo }
@@ -67,6 +70,9 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 	}
 	if asked, err := d.Password.Asked(ctx); err == nil && !asked {
 		p = machinefile.Judge(r, cat, seen, ledger, true)
+		if p, err = withBlocks(ctx, d, p, cat); err != nil {
+			return machinefile.Plan{}, Worded(err)
+		}
 	}
 	return p, nil
 }

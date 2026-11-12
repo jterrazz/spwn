@@ -35,12 +35,27 @@ type ExtraJSON struct {
 	Action    string `json:"action"`
 }
 
+// value: one block of ~/.zshrc: its item and id, what the file holds of it
+// (`present`, `absent`, `changed`, or `extra` for one whose item is no longer
+// listed), what apply does with it (`set`, `keep`, `leave`, `remove`), and
+// what a run did (`ok`, `broken`...); a plan's block has no result.
+
+type BlockJSON struct {
+	Item      string `json:"item"`
+	ID        string `json:"id"`
+	Condition string `json:"condition"`
+	Action    string `json:"action"`
+	Result    string `json:"result,omitempty"`
+	Detail    string `json:"detail,omitempty"`
+}
+
 type PlanJSON struct {
 	Schema      string      `json:"schema"`
 	Machinefile string      `json:"machinefile"`
 	Needs       []NeedJSON  `json:"needs"`
 	Lines       []LineJSON  `json:"lines"`
 	Extra       []ExtraJSON `json:"extra"`
+	Blocks      []BlockJSON `json:"blocks,omitempty"`
 	AfterApply  []string    `json:"after_apply"`
 	Bound       string      `json:"bound,omitempty"`
 }
@@ -69,6 +84,9 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	for _, e := range p.Extra {
 		out.Extra = append(out.Extra, ExtraJSON{Item: e.Step.Item, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Action)})
 	}
+	for _, b := range p.Blocks {
+		out.Blocks = append(out.Blocks, BlockJSON{Item: b.Item, ID: b.ID, Condition: string(b.Condition), Action: string(b.Action)})
+	}
 	for _, r := range p.Restarts {
 		out.AfterApply = append(out.AfterApply, string(r))
 	}
@@ -80,6 +98,9 @@ func AppliedContract(a machinefile.Applied, done, removed []Worded) PlanJSON {
 	// what the run did with it, then each extra removed.
 	out := PlanContract("station.machinefile.apply/v1", a.Plan)
 	out.Lines, out.Bound = []LineJSON{}, a.Bound
+	for i, b := range a.Blocks {
+		out.Blocks[i].Result, out.Blocks[i].Detail = string(b.State), b.Detail
+	}
 	for _, d := range append(append([]Worded{}, done...), removed...) {
 		detail := d.Detail
 		if len(d.Words) > 0 {

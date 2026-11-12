@@ -320,7 +320,7 @@ methods:
 | `{{ arch }}`          | the machine's architecture: `arm64` or `amd64`                                             |
 | `{{ option.<name> }}` | an app's option, as the Machinefile gives it, else its default; never a secret option      |
 
-A name outside this set, an option the item does not declare or a secret one, a marker line inside `zsh` and a lone `{{` are refused at decode; an option with no value, neither given nor defaulted, is refused when the plan is made, never written as an empty string. A setting's block takes the machine's variables alone, since its values arrive at apply.
+A name outside this set, an option the item does not declare or a secret one, a marker line inside `zsh` and a lone `{{` are refused at decode; an option with no value, neither given nor defaulted, is refused when the plan is made, never written as an empty string. A setting's block takes the machine's variables alone, since its values arrive at apply. What the blocks do in the file, their order, their removal and a hand edit are [Dotfiles](dotfiles.md#package-blocks)'s.
 
 ## What is read today
 

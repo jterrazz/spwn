@@ -68,7 +68,12 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 	if err != nil {
 		return err
 	}
-	failed, total := 0, 0
+	failed, total := 0, len(out.Blocks)
+	for _, b := range out.Blocks {
+		if b.State == catalog.StateBroken {
+			failed++
+		}
+	}
 	for _, w := range append(done, removed...) {
 		total++
 		if w.State == catalog.StateBroken {
