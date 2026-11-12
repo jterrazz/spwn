@@ -178,7 +178,13 @@ st machines create apps1 >> "$log" 2>&1 || fail "machines create apps1 exited $?
 token_into apps1
 while read -r app commands; do
   case "$app" in '' | '#'*) continue ;; esac
-  st apps install "$app" --on apps1 >> "$log" 2>&1 || { miss "apps install $app exited $?"; continue; }
+  # value: a failed install's logs, its own and a requirement's, the two newest, are
+  # kept in the tier's, since apps1 is deleted at the case's end.
+  st apps install "$app" --on apps1 >> "$log" 2>&1 || {
+    miss "apps install $app exited $?"
+    in_vm apps1 'cd ~/.local/state/station/logs && tail -n 5 $(ls -t *.log | head -n 2)' >> "$log" 2>&1
+    continue
+  }
   state=$(st apps --all --on apps1 --json | jq -r --arg a "$app" '.apps[] | select(.name == $a) | .state')
   say "   $app: $state"
   case "$state" in not-installed | failed | not-known | "") miss "$app reads \"$state\" after its install" ;; esac
