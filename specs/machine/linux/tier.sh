@@ -160,15 +160,16 @@ case_begin apps-every-linux-app AP-25 ADR-038 ADR-040
 # value: a workspace of its own, deleted after, so every app installs on a fresh home
 # and none leans on what ws1 already holds.
 st machines create apps1 >> "$log" 2>&1 || fail "machines create apps1 exited $?"
-guest_path='PATH=$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH'
 while read -r app commands; do
   case "$app" in '' | '#'*) continue ;; esac
   st apps install "$app" --on apps1 >> "$log" 2>&1 || { miss "apps install $app exited $?"; continue; }
   state=$(st apps --all --on apps1 --json | jq -r --arg a "$app" '.apps[] | select(.name == $a) | .state')
   say "   $app: $state"
   case "$state" in not-installed | failed | not-known | "") miss "$app reads \"$state\" after its install" ;; esac
+  # value: a command is looked for on the PATH station's own shell block gives a new
+  # terminal of the guest, never on a list of folders kept here.
   for command in $commands; do
-    in_vm apps1 "$guest_path; command -v $command" > /dev/null || miss "$app: $command is not on the guest's PATH"
+    in_vm apps1 "zsh -ic 'command -v $command'" > /dev/null 2>&1 || miss "$app: $command is not on the PATH of the guest's shell"
   done
 done < "$suite/linux/every-app.txt"
 st machines delete apps1 --confirm=apps1 >> "$log" 2>&1 || on_mac tart delete apps1 >> "$log" 2>&1

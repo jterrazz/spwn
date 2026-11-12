@@ -1,6 +1,6 @@
 # Every app a Linux workspace carries by apt, a GitHub release, a script or bun, in a
 # throwaway workspace of its own: each installed through the engine, then each command it
-# provides found on the guest's PATH, as the catalogue names it (apt's bat is `batcat`,
+# provides found on the PATH of the guest's shell, as the catalogue names it (apt's bat is `batcat`,
 # fd-find's is `fdfind`). An app with no command lists none and is read by its state.
 ansible ansible
 bat batcat
