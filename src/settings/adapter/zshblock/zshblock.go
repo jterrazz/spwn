@@ -92,15 +92,17 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	if err != nil {
 		return settings.Observation{}, err
 	}
+	// invariant: the fingerprint is the text between the markers of each
+	// block there, NUL between two, so a lone block's is its text's alone,
+	// the fingerprint the setting's file of functions once had.
 	o := settings.Observation{Where: where(blocks)}
 	var found, same int
-	var diffs []string
-	sum := sha256.New()
+	var diffs, there []string
 	for _, b := range blocks {
 		have, state := settings.PackageBlock(text, b.id)
 		if state != settings.BlockAbsent {
 			found++
-			sum.Write([]byte(b.id + "\n" + have))
+			there = append(there, have)
 		}
 		if state == settings.BlockHere && have == b.body {
 			same++
@@ -118,7 +120,8 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
 	}
 	if found > 0 {
-		o.Digest = "sha256:" + hex.EncodeToString(sum.Sum(nil))
+		sum := sha256.Sum256([]byte(strings.Join(there, "\x00")))
+		o.Digest = "sha256:" + hex.EncodeToString(sum[:])
 	}
 	return o, nil
 }

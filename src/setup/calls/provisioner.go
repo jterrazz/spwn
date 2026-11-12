@@ -175,12 +175,15 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 	}
 	zshrc, zshrcErr := s.zshrc()
 	layout, layoutErr := s.layout(ctx, migrated)
-	if layoutErr == nil {
-		layout = append(layout, s.retireZshDir()...)
+	var zshErr error
+	if layoutErr == nil && zshrcErr == nil {
+		var retired []setup.Step
+		retired, zshErr = s.retireZshDir()
+		layout = append(layout, retired...)
 	}
 	relocate, relocateErr := s.relocate(ctx, r.Interactive)
 	steps := append(append([]setup.Step{name, zshrc}, layout...), relocate)
-	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, relocateErr)
+	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, zshErr, relocateErr)
 }
 
 // invariant: the move comes before any step reads a preference, and says so

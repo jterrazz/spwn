@@ -1,6 +1,8 @@
 package zshblock_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"io/fs"
 	"testing"
 	"testing/fstest"
@@ -68,5 +70,18 @@ func TestApplyWritesTheExactBytesAndUndoGivesTheOwnersFileBack(t *testing.T) {
 	}
 	if got := string(files.files[zshrc]); got != owner {
 		t.Fatalf("undone\n%s\nwant the owner's file\n%s", got, owner)
+	}
+}
+
+func TestALoneBlocksFingerprintIsItsTextsAlone(t *testing.T) {
+	// invariant: a setting's record from the file of functions it once
+	// wrote matches the block that file's bytes moved into.
+	body := "greet() { echo hi; }\n"
+	files := &memory{files: map[string][]byte{zshrc: []byte("mine\n# >>> station:greetings >>>\n" + body + "# <<< station:greetings <<<\n")}}
+	item := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: body}}}}
+	o, err := zshblock.New(files, zshblock.Options{File: zshrc, Home: "/home/u"}).Observe(t.Context(), item)
+	sum := sha256.Sum256([]byte(body))
+	if err != nil || o.Digest != "sha256:"+hex.EncodeToString(sum[:]) {
+		t.Errorf("fingerprint %q, %v", o.Digest, err)
 	}
 }

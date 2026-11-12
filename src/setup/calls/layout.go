@@ -7,12 +7,14 @@ import (
 	"path"
 	"reflect"
 	"slices"
+	"strings"
 
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 
 	"github.com/jterrazz/studio-station/src/setup"
 
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/settings"
 )
 
 const legacyDir = ".studio"
@@ -138,29 +140,78 @@ func (s *Provisioner) layout(ctx context.Context, migrated error) ([]setup.Step,
 }
 
 // invariant: the folder station's zsh block once read its functions from
-// goes the way ~/.studio did: the files it wrote, by name, and the folder
-// once it is empty; a file of the owner's in it stays, and so does the folder.
-func retiredZsh() []string { return []string{"docker-shortcuts.zsh"} }
+// goes the way ~/.studio did. Each file station wrote there, by its
+// setting's name, moves into ~/.zshrc as that setting's block, its bytes as
+// they are (an edit of the owner's included), so every shell keeps its
+// functions and the setting's record still matches what is there; a file
+// whose block ~/.zshrc holds already, or whose bytes hold a marker line,
+// stays where it is. A file of the owner's in the folder stays, and so does
+// the folder; it goes once it is empty.
+func retiredZsh() []string { return []string{"docker-shortcuts"} }
 
-func (s *Provisioner) retireZshDir() []setup.Step {
+func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
 	dir := path.Join(path.Dir(s.o.PreferencesFile), "zsh")
 	entries, found, err := s.m.Entries(dir)
-	if err != nil || !found {
-		return nil
+	switch {
+	case err != nil:
+		return failedSteps(stepZsh, err)
+	case !found:
+		return nil, nil
+	}
+	current, _, err := s.m.ReadFile(s.zshrcPath())
+	if err != nil {
+		return failedSteps(stepZsh, err)
+	}
+	zshrc := string(current)
+	var moved []string
+	for _, e := range entries {
+		name, ok := strings.CutSuffix(e.Name, ".zsh")
+		if e.Dir || !ok || !slices.Contains(retiredZsh(), name) {
+			continue
+		}
+		file := path.Join(dir, e.Name)
+		data, found, err := s.m.ReadFile(file)
+		id := "station:" + name
+		if _, state := settings.PackageBlock(zshrc, id); err != nil || !found || state != settings.BlockAbsent || holdsMarker(string(data)) {
+			continue
+		}
+		body := string(data)
+		if !strings.HasSuffix(body, "\n") {
+			body += "\n"
+		}
+		zshrc, _ = settings.UpsertPackageBlock(zshrc, id, body)
+		moved = append(moved, file)
+	}
+	if len(moved) > 0 {
+		if err := s.m.WriteFile(s.zshrcPath(), []byte(zshrc), s.m.Mode(s.zshrcPath(), 0o644)); err != nil {
+			return failedSteps(stepZsh, err)
+		}
 	}
 	dropped := false
-	for _, e := range entries {
-		if !e.Dir && slices.Contains(retiredZsh(), e.Name) {
-			dropped = s.drop(path.Join(dir, e.Name)) || dropped
-		}
+	for _, file := range moved {
+		dropped = s.drop(file) || dropped
 	}
 	if left, _, err := s.m.Entries(dir); err == nil && len(left) == 0 {
 		dropped = s.drop(dir) || dropped
 	}
 	if !dropped {
-		return nil
+		return nil, nil
 	}
-	return []setup.Step{{Name: stepZsh, State: catalog.StateOK, Detail: "retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now", Changed: true}}
+	return []setup.Step{{Name: stepZsh, State: catalog.StateOK, Detail: "retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now", Changed: true}}, nil
+}
+
+func holdsMarker(text string) bool {
+	for _, line := range strings.Split(text, "\n") {
+		if t := strings.TrimSpace(line); strings.HasPrefix(t, "# >>> station") || strings.HasPrefix(t, "# <<< station") {
+			return true
+		}
+	}
+	return false
+}
+
+func failedSteps(name string, err error) ([]setup.Step, error) {
+	step, err := failed(name, err)
+	return []setup.Step{step}, err
 }
 
 func (s *Provisioner) moveDNS() (bool, error) {

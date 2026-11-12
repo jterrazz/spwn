@@ -1,7 +1,11 @@
-description: 'init retires the zsh folder: its own file goes, yours and its folder stay'
+description: 'init moves the zsh folder''s file into its block of ~/.zshrc, byte for byte; yours stay'
 runs:
-    - command: '--version >/dev/null; /bin/mkdir -p .config/station/zsh; printf ''old()\n'' > .config/station/zsh/docker-shortcuts.zsh; printf ''mine()\n'' > .config/station/zsh/mine.zsh'
+    - command: 'settings apply docker-shortcuts >/dev/null'
       exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p .config/station/zsh; /usr/bin/sed -n ''/^# >>> station:docker-shortcuts/,/^# <<< station:docker-shortcuts/p'' .zshrc | /usr/bin/sed ''1d;$d'' > .config/station/zsh/docker-shortcuts.zsh; /usr/bin/sed -i.bak ''/^# >>> station:docker-shortcuts/,/^# <<< station:docker-shortcuts/d'' .zshrc; printf ''mine()\n'' > .config/station/zsh/mine.zsh; /usr/bin/grep -c station:docker-shortcuts .zshrc'
+      exit: 1
+      stdout: |
+          0
     - command: 'init --name m </dev/null'
       exit: 0
       stdout: |
@@ -12,11 +16,32 @@ runs:
           ●	relocate	bunfig, go env, mise settings, npmrc
           # Machinefile
           	none bound by init: init --machinefile binds one
-    - command: '--version >/dev/null; /bin/ls .config/station/zsh'
+    - command: '--version >/dev/null; /bin/ls .config/station/zsh; /usr/bin/grep -c -E ''^(dclean|dclean-images|dreset)\(\)'' .zshrc'
       exit: 0
       stdout: |
           mine.zsh
-    - command: '--version >/dev/null; /bin/rm .config/station/zsh/mine.zsh'
+          3
+    - command: 'settings docker-shortcuts | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	applied · ~/.zshrc [station:docker-shortcuts]
+    - command: '--version >/dev/null; printf ''dclean() { :; }\n'' > .config/station/zsh/docker-shortcuts.zsh'
+      exit: 0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: '--version >/dev/null; /bin/ls .config/station/zsh'
+      exit: 0
+      stdout: |
+          docker-shortcuts.zsh
+          mine.zsh
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''/^# >>> station:docker-shortcuts/,/^# <<< station:docker-shortcuts/d'' .zshrc; /bin/rm .config/station/zsh/mine.zsh'
       exit: 0
     - command: 'init --name m </dev/null'
       exit: 0
@@ -28,16 +53,18 @@ runs:
           ●	relocate	nothing to do
           # Machinefile
           	none bound by init: init --machinefile binds one
-    - command: '--version >/dev/null; /bin/ls .config/station | /usr/bin/grep -c zsh'
-      exit: 1
-      stdout: |
-          0
-    - command: 'init --name m </dev/null'
+    - command: '--version >/dev/null; /bin/ls .config/station | /usr/bin/grep -c zsh; /bin/cat .zshrc'
       exit: 0
       stdout: |
-          ●	name	m
-          ●	zshrc
-          ●	layout	nothing to retire
-          ●	relocate	nothing to do
-          # Machinefile
-          	none bound by init: init --machinefile binds one
+          0
+          # >>> station >>>
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
+          # <<< station <<<
+          # >>> station:docker-shortcuts >>>
+          dclean() { :; }
+          # <<< station:docker-shortcuts <<<
+    - command: 'settings docker-shortcuts | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ◐	docker-shortcuts	changed since just now	station settings diff docker-shortcuts

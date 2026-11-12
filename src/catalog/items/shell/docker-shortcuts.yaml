@@ -8,6 +8,9 @@ methods:
       shell:
           - id: station:docker-shortcuts
             zsh: |
+                # value: the Docker shortcuts station's zsh block defines once the docker-shortcuts
+                # setting is applied; each asks before it removes anything.
+
                 _station_docker_ask() {
                     printf '%s? [y/N] ' "$1"
                     read -r _station_docker_answer

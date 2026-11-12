@@ -59,7 +59,9 @@ An app's blocks are written by `station apply` once the app is there, whichever 
 - **A block you edited by hand** (other text than apply last wrote, a start with no end, an id twice) reads `changed` in `station drift` and in `station plan` (`edited by hand: station plan --diff shows how`), and apply leaves it as it is (hard case 15 of [Machinefiles](machinefiles.md)); delete it and the next apply writes it again.
 - **Removal.** A block goes with its package: a block apply wrote for an app the Machinefile lists no longer is extra, kept by a bare apply as the app is, and taken back by `apply --remove` once the app is taken back, gone, or let go of as yours; while the app's removal is judged again next run, its block stays with it. It goes only while it is still what apply last wrote, and a block the ledger does not hold is never station's to take. A setting's block goes when the setting is turned off.
 
-`station plan --diff` shows each block's diff, and each file a setting writes, as apply would change it: the file's lines first (`-`), then what apply writes (`+`). `~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired: `station init` removes the file station wrote there and the folder once it is empty, never a file of yours.
+`station plan --diff` shows each block's diff, and each file a setting writes, as apply would change it: the file's lines first (`-`), then what apply writes (`+`).
+
+`~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired. `station init` moves `docker-shortcuts.zsh` into `~/.zshrc` as the block `station:docker-shortcuts`, its bytes as they are, your edits included, so every shell keeps the functions and the setting reads as it did (applied, or changed since); a file whose block `~/.zshrc` holds already stays where it is. The folder goes once it is empty, never a file of yours.
 
 ## Removing the block
 
