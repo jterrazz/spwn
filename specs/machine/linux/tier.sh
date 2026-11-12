@@ -80,6 +80,20 @@ vm_ssh() {
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
 
+# invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its
+# releases ask GitHub with it rather than share the address's 60 calls an hour: it is
+# written to the guest's /etc/environment over stdin, never on a command line nor in the
+# log, and the VM restarts, since its sshd reads that file as the engine's connection
+# opens. With none, the guest asks without one, as a fresh owner machine does.
+token_into() {
+  local vm=$1
+  [ -n "${GITHUB_TOKEN:-}" ] || return 0
+  printf 'GITHUB_TOKEN=%s\n' "$GITHUB_TOKEN" | vm_ssh "$vm" 'sudo -n tee -a /etc/environment > /dev/null' || fail "give $vm the runner's GITHUB_TOKEN"
+  st machines restart "$vm" >> "$log" 2>&1 || fail "machines restart $vm exited $?"
+  in_vm "$vm" 'test -n "${GITHUB_TOKEN:-}"' || fail "$vm's sessions do not hold the GITHUB_TOKEN written to /etc/environment"
+  say "   $vm asks GitHub with the runner's GITHUB_TOKEN"
+}
+
 # value: a guest's /proc files as a tar, the recorded inputs of the D specs; each is
 # copied first, because /proc reports a size of 0 and tar would archive it empty.
 capture() { echo "rm -rf /tmp/e2e-cap && for f in $*; do mkdir -p /tmp/e2e-cap/\${f%/*} && cat /\$f > /tmp/e2e-cap/\$f; done; tar cf - -C /tmp/e2e-cap proc"; }
@@ -109,6 +123,7 @@ built=$(st images --json | jq -r '[.images[] | select(.name == "linux") | .versi
 [ -n "$built" ] || fail "images lists no linux version"
 on_mac tart list --quiet --source local | grep -q '^station-image-linux-' || fail "no station-image-linux-* in the store"
 st machines create ws1 >> "$log" 2>&1 || fail "machines create ws1 exited $?"
+token_into ws1
 kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
 [ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
 say "   linux $built boots, its guest answers, station inside reports workspace"
@@ -160,6 +175,7 @@ case_begin apps-every-linux-app AP-25 ADR-038 ADR-040
 # value: a workspace of its own, deleted after, so every app installs on a fresh home
 # and none leans on what ws1 already holds.
 st machines create apps1 >> "$log" 2>&1 || fail "machines create apps1 exited $?"
+token_into apps1
 while read -r app commands; do
   case "$app" in '' | '#'*) continue ;; esac
   st apps install "$app" --on apps1 >> "$log" 2>&1 || { miss "apps install $app exited $?"; continue; }
