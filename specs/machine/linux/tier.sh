@@ -161,7 +161,7 @@ for baked in mise git docker build-essential playwright-deps; do
   state=$(st drift --on ws1 --json | jq -r --arg a "$baked" '[.. | objects | select(.item? == $a) | .condition] | first // "none"')
   [ "$state" = present ] || fail "$baked, baked into the image, reads $state in ws1's drift"
 done
-in_vm ws1 'docker run --rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"
+in_vm ws1 'docker run --rm hello-world && docker image rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"
 say "   station inside ws1 reports workspace, what studio-linux bakes reads present, docker runs hello-world"
 case_pass
 
