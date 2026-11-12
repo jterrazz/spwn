@@ -59,22 +59,34 @@ func Every(watched bool) time.Duration {
 }
 
 func (s *Sample) due(h *activity.History, name string, now time.Time, every time.Duration) bool {
-	// invariant: a machine is sampled once its last sample, or its last try,
-	// is every old: an engine that starts again goes on from its history.
+	// invariant: a machine is sampled once its last point of the series, or
+	// its last try, is every old: an engine that starts again goes on from its
+	// history.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.last == nil {
 		s.last = map[string]time.Time{}
 	}
 	last := s.last[name]
-	if kept, ok := h.Of(name); ok && kept.Last.Sample.At.After(last) {
-		last = kept.Last.Sample.At
+	if kept, ok := h.Of(name); ok {
+		if at, has := kept.Series.Last(); has && at.At.After(last) {
+			last = at.At
+		}
 	}
 	if !last.IsZero() && now.Sub(last) < every {
 		return false
 	}
 	s.last[name] = now
 	return true
+}
+
+// invariant: a VM tried while its guest was not connected gave the series no
+// point: it is tried again a fine step later, so the guest that connects
+// meanwhile is sampled then, not a whole window later.
+func (s *Sample) retrySoon(name string, now time.Time, every time.Duration) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.last[name] = now.Add(activity.FineEvery - every)
 }
 
 func (s *Sample) Run(ctx context.Context) {
@@ -85,8 +97,9 @@ func (s *Sample) Run(ctx context.Context) {
 	now := s.Clock.Now()
 	seen := s.Seen()
 	type read struct {
-		r  activity.Reading
-		ok bool
+		r     activity.Reading
+		ok    bool
+		tried bool
 	}
 	reads := make([]read, len(seen))
 	var all sync.WaitGroup
@@ -96,7 +109,7 @@ func (s *Sample) Run(ctx context.Context) {
 		}
 		all.Go(func() {
 			r, ok := s.read(ctx, m, now)
-			reads[i] = read{r, ok}
+			reads[i] = read{r, ok, true}
 		})
 	}
 	// invariant: the machines are read together, so a tick costs one
@@ -104,6 +117,9 @@ func (s *Sample) Run(ctx context.Context) {
 	all.Wait()
 	for i, m := range seen {
 		r, ok := reads[i].r, reads[i].ok
+		if reads[i].tried && m.Ref.On != "" && !m.Guest {
+			s.retrySoon(m.Ref.Name, now, Every(s.Watched(m.Ref)))
+		}
 		if !ok {
 			continue
 		}

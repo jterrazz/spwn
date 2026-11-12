@@ -110,6 +110,46 @@ func TestAVMWhoseGuestIsSilentKeepsAGapInItsHistoryNeverZeros(t *testing.T) {
 	}
 }
 
+type blindMeter struct{ silentMeter }
+
+func (blindMeter) Process(context.Context, int) (activity.Usage, error) {
+	return activity.Usage{}, errors.New("no such process")
+}
+
+type lateGuest struct {
+	machines
+	from time.Time
+}
+
+func (l *lateGuest) Invoke(ctx context.Context, target machine.Ref, name string, in, out any, p call.Progress) error {
+	if l.clock.now.Before(l.from) {
+		return errors.New("the guest is not connected yet")
+	}
+	return l.machines.Invoke(ctx, target, name, in, out, p)
+}
+
+func TestAVMWhoseGuestConnectsAfterTheFirstTickGetsItsPointAtOnceNotAWindowLater(t *testing.T) {
+	c := &clock{now: time.Date(2026, 11, 4, 10, 0, 0, 0, time.UTC)}
+	h := activity.NewHistory(c.now)
+	guests := &lateGuest{machines: machines{clock: c, asked: map[string]int{}}, from: c.now.Add(time.Second)}
+	s := &Sample{
+		Calls: guests, Meter: blindMeter{}, Clock: c,
+		Seen: func() []Seen {
+			return []Seen{{Ref: machine.Ref{Name: "linux-1", On: "mac"}, Kind: machine.Workspace, PID: 4242, Guest: !c.now.Before(guests.from)}}
+		},
+		Watched: func(machine.Ref) bool { return false },
+		History: func() *activity.History { return h }, Tell: func(string, string, string) {},
+	}
+	for range 5 {
+		s.Run(t.Context())
+		c.now = c.now.Add(time.Second)
+	}
+	kept, _ := h.Of("linux-1")
+	if got := len(kept.Series.Coarse()); got != 1 {
+		t.Errorf("linux-1 has %d coarse points 5 s after its guest connected; want 1, not a window's wait", got)
+	}
+}
+
 type hung struct {
 	machines
 	waiting  sync.WaitGroup
