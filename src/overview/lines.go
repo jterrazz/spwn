@@ -67,7 +67,9 @@ func ActivityRead(r activity.Report) Read {
 // one moved, when it is the night just past, and what the last one left
 // the owner, as it read it: every version waiting past a range, each app
 // left for the owner's run or whose update failed, why the shared source
-// was not pulled, and why the night did not run to its end.
+// was not pulled, and why the night did not run to its end. Beside a night
+// that did not, the last one that did still says what it moved and what
+// waits.
 
 type Nights struct {
 	Moved       int
@@ -84,8 +86,15 @@ func NightOf(n machinefile.Night, ran bool, now time.Time) Nights {
 		return Nights{}
 	}
 	out := Nights{Machinefile: n.Machinefile, Waiting: n.Waiting, Left: n.Left, Failed: n.Failed, Unpulled: n.Unpulled, Error: n.Error}
-	if !n.At.Before(machinefile.LastNight(now)) {
-		out.Moved = len(n.Moved)
+	nights := []machinefile.Night{n}
+	if n.Last != nil && !n.Complete() {
+		out.Waiting = n.Last.Waiting
+		nights = append(nights, *n.Last)
+	}
+	for _, night := range nights {
+		if !night.At.Before(machinefile.LastNight(now)) {
+			out.Moved += len(night.Moved)
+		}
 	}
 	return out
 }

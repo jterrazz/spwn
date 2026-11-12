@@ -37,14 +37,17 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
 		// invariant: every night is recorded, one that failed with its
-		// error, so the owner reads it and the next try comes; the owner's
+		// error and the last night that ran to its end beside it, so the
+		// owner reads it and the next try comes; the owner's
 		// own upgrade run to its end refreshes what the last night of that
 		// Machinefile says waits.
 		out, err := upgrade(ctx, d, in, p)
 		out.Interrupted = out.Interrupted || ctx.Err() != nil
 		switch {
 		case in.Unattended:
-			if werr := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, err, in.Machinefile, d.Now())); werr != nil && err == nil {
+			last, ran, rerr := d.Ledger.Night(context.WithoutCancel(ctx))
+			night := machinefile.NightOf(out, err, in.Machinefile, d.Now()).After(last, ran && rerr == nil)
+			if werr := d.Ledger.Write(context.WithoutCancel(ctx), night); werr != nil && err == nil {
 				err = werr
 			}
 		case err == nil && !out.Interrupted:

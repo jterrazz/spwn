@@ -17,8 +17,10 @@ const NightHour = 3
 // ran, each app it moved, each version waiting past a range, the apps it
 // left for the owner's run (a step that asks a password), the apps whose
 // update failed, whether it was interrupted, why the shared source was
-// not pulled, and why the night did not run to its end (the Machinefile
-// does not resolve, another run held the machine, the lock not written).
+// not pulled, why the night did not run to its end (the Machinefile
+// does not resolve, another run held the machine, the lock not written),
+// and, beside a night that did not, the last one of its Machinefile that
+// did: what that one moved and left waiting still holds.
 
 type Night struct {
 	At          time.Time `json:"at"`
@@ -30,6 +32,7 @@ type Night struct {
 	Interrupted bool      `json:"interrupted,omitempty"`
 	Unpulled    string    `json:"unpulled,omitempty"`
 	Error       string    `json:"error,omitempty"`
+	Last        *Night    `json:"last,omitempty"`
 }
 
 // value: one app a night moved: from the version it read to the one it
@@ -55,6 +58,25 @@ func NightOf(u Upgraded, failed error, name string, at time.Time) Night {
 	return n
 }
 
+func (n Night) Complete() bool { return !n.Interrupted && n.Error == "" }
+
+func (n Night) After(last Night, ran bool) Night {
+	// invariant: a night that did not run to its end keeps beside it the
+	// last night of its Machinefile that did, so a failed, busy or
+	// interrupted night never erases what that one moved and left waiting;
+	// a night that ran to its end keeps none.
+	n.Last = nil
+	switch {
+	case n.Complete() || !ran || last.Machinefile != n.Machinefile:
+	case last.Complete():
+		last.Last = nil
+		n.Last = &last
+	default:
+		n.Last = last.Last
+	}
+	return n
+}
+
 func (n *Night) seen(u Upgraded) {
 	n.Left, n.Failed = nil, nil
 	for _, d := range u.Done {
@@ -74,9 +96,10 @@ func (n Night) Refreshed(u Upgraded) Night {
 	// invariant: the owner's own upgrade of the night's Machinefile, run to
 	// its end, is what the machine now reads: what waits, what is left,
 	// what failed and whether the source was pulled are its own, and the
-	// night's moves stay the night's.
+	// night's moves stay the night's; it ran to its end, so it keeps no
+	// last night beside it.
 	moved := n.Moved
-	n.Waiting, n.Unpulled, n.Error, n.Interrupted = u.Waiting, u.Unpulled, "", false
+	n.Waiting, n.Unpulled, n.Error, n.Interrupted, n.Last = u.Waiting, u.Unpulled, "", false, nil
 	n.seen(u)
 	n.Moved = moved
 	return n

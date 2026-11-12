@@ -1,0 +1,39 @@
+description: 'a night that fails keeps beside it what the last good night moved and left waiting'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22' }]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22' }, no-such-app]
+      exit: 0
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -E "night|node|Apps"'
+      exit: 0
+      stdout: |
+          ✗	the night's upgrade of jterrazz-macbook-pro failed: the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)	station upgrade
+          ◐	node 25.1.0 available: change '22' to '25'	~/.config/station/machinefiles/jterrazz-macbook-pro.yaml
+          	Apps	● 10 ok · ○ 104 not installed
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at, .last.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-macbook-pro","error":"the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)","last":{"machinefile":"jterrazz-macbook-pro","moved":[{"app":"node","was":"22.11.0","now":"22.14.0","range":"22"},{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"22","moved":"25","file":"~/.config/station/machinefiles/jterrazz-macbook-pro.yaml"}]}}
