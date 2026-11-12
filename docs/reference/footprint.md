@@ -131,6 +131,7 @@ Erase: none (skills are apps: station apps remove <skill>).
 | `~/.cache/uv`              | can rebuild |                                  |
 | `~/.local/share/uv/tools`  | installed   | removed by `station apps remove` |
 | `~/.local/share/uv/python` | installed   | removed by `station apps remove` |
+| `~/.local/bin/uv`          | installed   | removed by `station apps remove` |
 
 Free: `uv cache clean`. Erase: none (what uv installs is apps: station apps remove <app>).
 

@@ -17,7 +17,7 @@ disk:
     paths:
         - path: '{cache}/uv'
           level: cache
-    installed: ['{data}/uv/tools', '{data}/uv/python']
+    installed: ['{data}/uv/tools', '{data}/uv/python', ~/.local/bin/uv]
     free:
         - run: [uv, cache, clean]
           uses: uv
