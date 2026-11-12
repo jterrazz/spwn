@@ -27,8 +27,14 @@ type dpkg struct {
 	fails   bool
 	// value: an install is cut short once dpkg wrote what it adds, as by
 	// ctrl-c.
-	cut   bool
-	calls []string
+	cut bool
+	// value: what runs as the lists refresh, the owner's hands in another
+	// shell.
+	refreshing func(*dpkg)
+	// value: a cancel the install calls when cut, so the run is interrupted
+	// as ctrl-c does.
+	interrupt context.CancelFunc
+	calls     []string
 }
 
 func (d *dpkg) play(c local.Cmd) (local.Output, error) {
@@ -53,6 +59,9 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 		return local.Output{Stdout: out.String()}, nil
 	case c.Name != "sudo":
 		return local.Output{ExitCode: 97}, nil
+	case slices.Contains(c.Args, "update") && d.refreshing != nil:
+		d.refreshing(d)
+		return local.Output{}, nil
 	case d.fails:
 		return local.Output{ExitCode: 100, Stderr: "E: Unable to locate package"}, nil
 	}
@@ -70,6 +79,9 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 		}
 	}
 	if d.cut && c.Args[verb] == "install" {
+		if d.interrupt != nil {
+			d.interrupt()
+		}
 		return local.Output{ExitCode: 130}, nil
 	}
 	return local.Output{}, nil
@@ -485,15 +497,16 @@ func TestAnInstallCutShortLeavesTheRecordOfWhatItMayHaveAdded(t *testing.T) {
 	// install cut short once dpkg wrote leaves the record of it, and a
 	// later removal takes back that alone; a package it never added is let
 	// go once apt has run.
-	d := &dpkg{held: map[string]string{"foo": "1.0"}, cut: true}
+	ctx, interrupt := context.WithCancel(context.Background())
+	d := &dpkg{held: map[string]string{"foo": "1.0"}, cut: true, interrupt: interrupt}
 	a := played(d)
-	ctx := context.Background()
 	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo", "foo-extra"}}}
 
 	if err := a.InstallFor(ctx, apply("x"), foo, nil); err == nil {
 		t.Fatal("an install cut short returned no error")
 	}
 	d.cut = false
+	ctx = context.Background()
 	if err := a.RemoveFor(ctx, apply("x"), foo, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -570,3 +583,43 @@ func TestARecordIsWrittenBesideThenRenamedOverTheOld(t *testing.T) {
 		t.Errorf("record reads %q (%v); want both holders", got, err)
 	}
 }
+
+func TestAPackageTheOwnerInstallsWhileTheListsRefreshIsTheirs(t *testing.T) {
+	// invariant: dpkg is read after the lists refresh, so a package the
+	// owner installs meanwhile is not recorded the app's, and an apply's
+	// removal leaves it.
+	d := &dpkg{held: map[string]string{}}
+	d.refreshing = func(d *dpkg) { d.held["foo"] = "1.0" }
+	a := played(d)
+	ctx := context.Background()
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}
+
+	if err := a.InstallFor(ctx, apply("x"), foo, nil); err != nil {
+		t.Fatal(err)
+	}
+	if holds, err := a.Holds(ctx, "x"); err != nil || holds {
+		t.Errorf("holds %v (%v) a package the owner installed during the refresh; want no record", holds, err)
+	}
+	if err := a.RemoveFor(ctx, apply("x"), foo, nil); err == nil || !d.has("foo") {
+		t.Errorf("the owner's foo held %v after an apply's removal (%v); want it kept", d.has("foo"), err)
+	}
+}
+
+func TestAFailedRunThatWasNotInterruptedLetsGoOfEveryRecord(t *testing.T) {
+	// invariant: an apt-get that fails without an interrupt, on the dpkg
+	// lock the owner's own run holds, keeps no record, though the package
+	// reads present by then; only an interrupt keeps what it may have added.
+	d := &dpkg{held: map[string]string{}, fails: true}
+	d.refreshing = func(d *dpkg) { d.held["foo"] = "1.0" }
+	a := played(d)
+	ctx := context.Background()
+
+	if err := a.InstallFor(ctx, apply("x"), []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}, nil); err == nil {
+		t.Fatal("a failed install returned no error")
+	}
+	if holds, err := a.Holds(ctx, "x"); err != nil || holds {
+		t.Errorf("holds %v (%v) after a failed install; want no record", holds, err)
+	}
+}
+
+func (d *dpkg) has(p string) bool { _, ok := d.held[p]; return ok }

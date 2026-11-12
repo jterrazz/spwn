@@ -162,13 +162,21 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 	// hold is recorded the app's, as what this install may add, so an
 	// install cut short leaves the record of all it may have added; one dpkg
 	// held before is the owner's and stays unrecorded, unless station's
-	// record of it is there already, where the app joins its holders. Once
-	// apt has run, interrupted or not, a package so recorded that dpkg does
-	// not hold is let go by the app.
+	// record of it is there already, where the app joins its holders. dpkg is
+	// read once the lists are refreshed, as late as the install allows, so a
+	// package the owner installs meanwhile is theirs. Once apt has run, a
+	// package so recorded that dpkg does not hold is let go by the app, and
+	// so is every one when apt failed without being interrupted, since a
+	// package present then may be the owner's; only an interrupt, a cancel or
+	// a signal's exit, keeps them.
 	if err := checkApp(f.App); err != nil {
 		return err
 	}
 	names, asked, err := packages(installs, true)
+	if err != nil {
+		return err
+	}
+	err = a.refresh(ctx, logs)
 	if err != nil {
 		return err
 	}
@@ -194,9 +202,6 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 			intent = append(intent, p)
 		}
 	}
-	if err := a.refresh(ctx, logs); err != nil {
-		return err
-	}
 	if err := a.files.MkdirAll(a.store, 0o755); err != nil {
 		return err
 	}
@@ -208,22 +213,30 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 	ran := a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--"}, names)...)
 	past, cancel := context.WithTimeout(context.WithoutCancel(ctx), settleBudget)
 	defer cancel()
-	if err := a.settle(past, f.App, intent); err != nil && ran == nil {
+	if err := a.settle(past, f.App, intent, ran != nil && !interrupted(ctx, ran)); err != nil && ran == nil {
 		return err
 	}
 	return ran
 }
 
+// invariant: a run is interrupted once its context is cancelled, or when it
+// ends by a signal, whose exit code is 128 and above, since ctrl-c reaches
+// apt-get before it reaches station's own context.
+func interrupted(ctx context.Context, ran error) bool {
+	var exit *local.ExitError
+	return ctx.Err() != nil || errors.As(ran, &exit) && exit.Code > 128
+}
+
 // value: how long the read after an install may take, past an interrupt.
 const settleBudget = 30 * time.Second
 
-func (a *Apt) settle(ctx context.Context, app string, intent []string) error {
+func (a *Apt) settle(ctx context.Context, app string, intent []string, failed bool) error {
 	now, err := a.Inventory(ctx)
 	if err != nil {
 		return err
 	}
 	for _, p := range intent {
-		if _, there := now[p]; there {
+		if _, there := now[p]; there && !failed {
 			continue
 		}
 		held, _, err := a.holders(p)
