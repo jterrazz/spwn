@@ -107,7 +107,7 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 			Action: machinefile.Remove,
 		}}
 	}
-	out := r.remove(context.Background(), []machinefile.ExtraLine{extra("browsers", "runtime"), extra("runtime", "base"), extra("base"), extra("other")})
+	out, _ := r.remove(context.Background(), machinefile.Plan{Extra: []machinefile.ExtraLine{extra("browsers", "runtime"), extra("runtime", "base"), extra("base"), extra("other")}})
 	if want := []string{appscalls.Remove.Name + " browsers", appscalls.Remove.Name + " other"}; !slices.Equal(c.asked, want) {
 		t.Errorf("uninstalled %v; want %v", c.asked, want)
 	}

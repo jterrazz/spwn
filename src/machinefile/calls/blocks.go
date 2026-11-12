@@ -25,9 +25,10 @@ func blockName(id string) string { return zshrcName + " [" + id + "]" }
 // (a template or an option moved), is outdated and set again; any other text
 // (edited by hand, a start with no end, an id twice) is left as it is. The
 // blocks of an app the plan carries come first, in the plan's order; then
-// each block the ledger holds of an app the plan carries no longer, which
-// `apply --remove` takes back while it is still what apply wrote. A block
-// the ledger does not hold is never station's to take, and a setting
+// each block the ledger holds of an extra of the plan, which goes with it
+// (extraBlock). A block of an app that stays, the owner's, another
+// Machinefile's or one skipped here, stays with it and is not judged; a
+// block the ledger does not hold is never station's to take, and a setting
 // writes its own block through its own apply, so it is never judged here.
 func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Catalog) (machinefile.Plan, error) {
 	if d.Zshrc == nil {
@@ -42,14 +43,14 @@ func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Cat
 		return p, err
 	}
 	vars := catalog.ShellVars{Home: d.Home, OS: d.Machine.System.OS, Arch: d.Machine.System.Arch}
-	wanted := map[string]bool{}
+	judged := map[string]bool{}
 	for _, l := range p.Lines {
 		if l.Step.Kind != catalog.KindApp || len(l.Step.Spec.Shell) == 0 {
 			continue
 		}
 		it, _ := cat.Item(l.Step.Item)
 		for _, b := range l.Step.Spec.Shell {
-			wanted[b.ID] = true
+			judged[b.ID] = true
 			if l.Action == machinefile.Leave {
 				continue
 			}
@@ -62,9 +63,16 @@ func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Cat
 			p.Blocks = append(p.Blocks, judgeBlock(zshrc, l.Step.Item, b.ID, body, written))
 		}
 	}
+	extras := map[string]machinefile.Fate{}
+	for _, e := range p.Extra {
+		extras[e.Step.Item] = e.Fate()
+	}
 	for _, id := range settings.PackageBlockIDs(zshrc) {
-		if w, ok := written[id]; ok && !wanted[id] {
-			p.Blocks = append(p.Blocks, staleBlock(zshrc, w))
+		w, ok := written[id]
+		fate, extra := extras[w.Item]
+		if ok && extra && !judged[id] {
+			judged[id] = true
+			p.Blocks = append(p.Blocks, extraBlock(zshrc, w, fate))
 		}
 	}
 	return p, nil
@@ -113,12 +121,19 @@ func judgeBlock(zshrc, item, id, body string, written map[string]machinefile.Wri
 	return b
 }
 
-func staleBlock(zshrc string, w machinefile.Written) machinefile.Block {
+// invariant: a block station wrote for an extra goes with it: taken back
+// by `apply --remove` with the app's own removal (taken, or already gone)
+// while it is still what apply last wrote; kept with an app that stays,
+// and the owner's with an app let go of as the owner's; and the owner's,
+// kept, once edited by hand since station wrote it.
+func extraBlock(zshrc string, w machinefile.Written, app machinefile.Fate) machinefile.Block {
 	have, state := settings.PackageBlock(zshrc, w.ID)
-	b := machinefile.Block{Item: w.Item, ID: w.ID, Condition: machinefile.Changed, Action: machinefile.Leave}
-	if lastWritten(have, state, w, true) {
-		b.Zsh, b.Condition, b.Action = have, machinefile.Extra, machinefile.Remove
-		b.Diff = blockDiff(have, "", w.ID)
+	b := machinefile.Block{Item: w.Item, ID: w.ID, Zsh: have, Condition: machinefile.Extra, Action: machinefile.Leave, Fate: app}
+	switch {
+	case !lastWritten(have, state, w, true):
+		b.Fate = machinefile.KeptEdited
+	case app == machinefile.Taken || app == machinefile.Gone:
+		b.Action, b.Diff = machinefile.Remove, blockDiff(have, "", w.ID)
 	}
 	return b
 }
@@ -126,14 +141,14 @@ func staleBlock(zshrc string, w machinefile.Written) machinefile.Block {
 // invariant: a block is written once its app reads there, and only while
 // the file still holds what the plan judged; it is recorded as written,
 // so a later edit by hand reads changed and a later template change reads
-// outdated. A stale block is not taken here: it goes with `apply --remove`,
-// after its app (removedBlocks).
+// outdated. An extra's block is not judged here: it follows its app in
+// `apply --remove` (followApp).
 func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.BlockDone {
 	out := make([]machinefile.BlockDone, 0, len(p.Blocks))
 	for _, b := range p.Blocks {
 		done := machinefile.BlockDone{Block: b, State: catalog.StateOK}
 		switch {
-		case b.Action == machinefile.Remove:
+		case b.Condition == machinefile.Extra:
 			continue
 		case b.Action == machinefile.Keep:
 		case b.Action == machinefile.Leave:
@@ -150,28 +165,73 @@ func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.Bloc
 	return out
 }
 
-// invariant: `apply --remove` takes back a stale block with its app: while
-// the app's removal is judged again next run (required, held, unread,
-// failed), its block stays with it; once the app is taken, gone, or let go
-// of as the owner's, the block station wrote goes.
-func (r *run) removedBlocks(ctx context.Context, p machinefile.Plan) []machinefile.BlockDone {
-	var out []machinefile.BlockDone
+// value: what became of an extra's app in `apply --remove`, which its
+// blocks follow: kept for the next run to judge again, taken back (or
+// already gone), or let go of as the owner's.
+
+type appEnd int
+
+const (
+	appStays appEnd = iota
+	appGoes
+	appLetGo
+)
+
+// invariant: an extra's blocks follow what became of its app in this run:
+// with the app taken back or already gone, each block still as apply last
+// wrote it is taken; with the app let go of as the owner's, its blocks are
+// let go of too, kept in the file; with the app kept for the next run, they
+// stay with it, records and all. A block edited by hand since station wrote
+// it is let go of as the owner's, whatever became of its app. Once the app
+// goes or is let go of, no record of its blocks is left; broke is true when
+// one could not be taken or let go of, so the app's own record is kept and
+// the next run tries again.
+func (r *run) followApp(ctx context.Context, p machinefile.Plan, item string, end appEnd) (out []machinefile.BlockDone, broke bool) {
 	for _, b := range p.Blocks {
-		if b.Action != machinefile.Remove {
+		if b.Condition != machinefile.Extra || b.Item != item {
 			continue
 		}
 		done := machinefile.BlockDone{Block: b, State: catalog.StateOK}
 		switch {
-		case r.stays[b.Item]:
-			done.Detail = "kept with " + b.Item + ": judged again next run"
+		case b.Fate == machinefile.KeptEdited:
+			done = r.letGo(ctx, done, editedKept)
+		case end == appLetGo:
+			done = r.letGo(ctx, done, "kept with "+item+", and yours")
+		case end == appStays || b.Action != machinefile.Remove:
+			done.Detail = "kept with " + item + ": judged again next run"
 		case ctx.Err() != nil:
 			done.State = catalog.StateBroken
 		default:
 			done = r.writeBlock(ctx, done)
 		}
+		broke = broke || done.State == catalog.StateBroken
 		out = append(out, done)
 	}
-	return out
+	if end == appStays || broke {
+		return out, broke
+	}
+	written, err := writtenBlocks(ctx, r.d)
+	for _, w := range written {
+		if err == nil && w.Item == item {
+			err = r.d.Ledger.DeleteBlock(ctx, w.ID)
+		}
+	}
+	if err != nil {
+		out = append(out, machinefile.BlockDone{Block: machinefile.Block{Item: item, Condition: machinefile.Extra}, State: catalog.StateBroken, Detail: err.Error()})
+	}
+	return out, err != nil
+}
+
+// value: the words of a block edited by hand since station wrote it, once
+// its app is listed no longer: the owner's from then on.
+const editedKept = "edited by hand: kept, and yours"
+
+func (r *run) letGo(ctx context.Context, done machinefile.BlockDone, detail string) machinefile.BlockDone {
+	done.Detail = detail
+	if err := r.d.Ledger.DeleteBlock(ctx, done.ID); err != nil {
+		done.State, done.Detail = catalog.StateBroken, err.Error()
+	}
+	return done
 }
 
 func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
@@ -200,9 +260,9 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		text, _ = settings.UpsertPackageBlock(zshrc, done.ID, done.Zsh)
 		done.Detail = "written"
 	default:
-		if w, ok := written[done.ID]; !ok || staleBlock(zshrc, w).Action != machinefile.Remove {
-			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
-			return done
+		have, state := settings.PackageBlock(zshrc, done.ID)
+		if w, ok := written[done.ID]; !lastWritten(have, state, w, ok) {
+			return r.letGo(ctx, done, editedKept)
 		}
 		text, _ = settings.RemovePackageBlock(zshrc, done.ID)
 		done.Detail = "removed"

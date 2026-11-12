@@ -40,13 +40,13 @@ runs:
       stdout: |
           # Extra
           ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, goes with postgres
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
           ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, goes with postgres
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	postgres		brew	removed

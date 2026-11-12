@@ -71,7 +71,7 @@ func wrote(id, body string) machinefile.Written {
 }
 
 func depsOver(z *zshrcText, written ...machinefile.Written) Deps {
-	return Deps{Zshrc: z, Ledger: &writtenLedger{blocks: written}, Home: "/Users/a", Machine: machinefile.Machine{System: catalog.SystemSpec{OS: catalog.OSMacOS, Arch: catalog.ArchARM64}}}
+	return Deps{Zshrc: z, Ledger: &writtenLedger{blocks: slices.Clone(written)}, Home: "/Users/a", Machine: machinefile.Machine{System: catalog.SystemSpec{OS: catalog.OSMacOS, Arch: catalog.ArchARM64}}}
 }
 
 func TestABlockIsJudgedAgainstWhatTheFileHolds(t *testing.T) {
@@ -119,35 +119,59 @@ func TestAnOptionWithNoValueIsAPlanErrorNeverAnEmptyString(t *testing.T) {
 	}
 }
 
-func TestABlockOfAnAppThePlanCarriesNoLongerIsExtraWhileItIsWhatStationLastWrote(t *testing.T) {
-	block := func(body string) string { return "mine\n# >>> station:solo >>>\n" + body + "# <<< station:solo <<<\n" }
-	written := []machinefile.Written{{ID: "station:solo", Item: "solo", Digest: machinefile.BlockDigest("export SOLO=1\n")}}
+// value: an extra of the plan whose app reads as seen, by the method the
+// ledger recorded, "pkg".
+func extraSeen(item string, seen machinefile.Seen, action machinefile.Action, requiredBy ...string) machinefile.ExtraLine {
+	return machinefile.ExtraLine{
+		Installed:  machinefile.Installed{Item: item, Method: "pkg", Machinefile: "laptop"},
+		Line:       machinefile.Line{Step: machinefile.Step{Item: item, Kind: catalog.KindApp, Method: "pkg"}, Seen: seen, Action: action},
+		RequiredBy: requiredBy,
+	}
+}
+
+var (
+	soloTaken     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Remove)
+	soloGone      = extraSeen("solo", machinefile.Seen{Condition: machinefile.Absent}, machinefile.Remove)
+	soloYours     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "other"}, machinefile.Leave)
+	soloRequired  = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Remove, "app")
+	soloRecord    = machinefile.Written{ID: "station:solo", Item: "solo", Digest: machinefile.BlockDigest("export SOLO=1\n")}
+	soloFile      = func(body string) string { return "mine\n# >>> station:solo >>>\n" + body + "# <<< station:solo <<<\n" }
+	soloUntouched = soloFile("export SOLO=1\n")
+)
+
+func TestABlockStationWroteForAnExtraGoesWithItsApp(t *testing.T) {
 	cases := []struct {
-		name, file string
-		written    []machinefile.Written
-		blocks     int
-		condition  machinefile.Condition
-		action     machinefile.Action
+		name    string
+		file    string
+		written []machinefile.Written
+		extra   []machinefile.ExtraLine
+		blocks  int
+		action  machinefile.Action
+		fate    machinefile.Fate
 	}{
-		{"as station last wrote it", block("export SOLO=1\n"), written, 1, machinefile.Extra, machinefile.Remove},
-		{"edited by hand since", block("export SOLO=mine\n"), written, 1, machinefile.Changed, machinefile.Leave},
-		{"never written by station", block("export SOLO=1\n"), nil, 0, "", ""},
-		{"none in the file", "mine\n", written, 0, "", ""},
+		{"its app taken back", soloUntouched, []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloTaken}, 1, machinefile.Remove, machinefile.Taken},
+		{"its app already gone", soloUntouched, []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloGone}, 1, machinefile.Remove, machinefile.Gone},
+		{"its app the owner's since", soloUntouched, []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloYours}, 1, machinefile.Leave, machinefile.KeptAnotherWay},
+		{"its app still required", soloUntouched, []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloRequired}, 1, machinefile.Leave, machinefile.KeptRequired},
+		{"edited by hand since", soloFile("export SOLO=mine\n"), []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloTaken}, 1, machinefile.Leave, machinefile.KeptEdited},
+		{"its app no extra: adopted, another Machinefile's, skipped here", soloUntouched, []machinefile.Written{soloRecord}, nil, 0, "", ""},
+		{"never written by station", soloUntouched, nil, []machinefile.ExtraLine{soloTaken}, 0, "", ""},
+		{"none in the file", "mine\n", []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloTaken}, 0, "", ""},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			p, err := withBlocks(t.Context(), depsOver(&zshrcText{c.file}, c.written...), machinefile.Plan{}, catalog.Catalog{})
+			p, err := withBlocks(t.Context(), depsOver(&zshrcText{c.file}, c.written...), machinefile.Plan{Extra: c.extra}, catalog.Catalog{})
 			if err != nil || len(p.Blocks) != c.blocks {
 				t.Fatalf("judged %+v, %v", p.Blocks, err)
 			}
-			if c.blocks == 1 && (p.Blocks[0].Condition != c.condition || p.Blocks[0].Action != c.action || p.Blocks[0].Item != "solo") {
-				t.Errorf("judged %+v, want %s and %s", p.Blocks[0], c.condition, c.action)
+			if b := p.Blocks; c.blocks == 1 && (b[0].Condition != machinefile.Extra || b[0].Action != c.action || b[0].Fate != c.fate || b[0].Item != "solo") {
+				t.Errorf("judged %+v, want %s and %s", b[0], c.action, c.fate)
 			}
 		})
 	}
 }
 
-func TestApplyRecordsTheBlockItWritesAndRemoveTakesItOnlyOnceItsAppGoes(t *testing.T) {
+func TestApplyRecordsTheBlockItWrites(t *testing.T) {
 	body := "export SOLO=1\n"
 	z, l := &zshrcText{"mine\n"}, &writtenLedger{}
 	r := &run{d: Deps{Zshrc: z, Ledger: l, Now: epoch}, there: map[string]bool{"solo": true}}
@@ -158,17 +182,53 @@ func TestApplyRecordsTheBlockItWritesAndRemoveTakesItOnlyOnceItsAppGoes(t *testi
 	if len(l.blocks) != 1 || l.blocks[0].Digest != machinefile.BlockDigest(body) || l.blocks[0].Item != "solo" {
 		t.Fatalf("recorded %+v", l.blocks)
 	}
-	stale := machinefile.Plan{Blocks: []machinefile.Block{{Item: "solo", ID: "station:solo", Zsh: body, Condition: machinefile.Extra, Action: machinefile.Remove}}}
-	if done := r.blocks(t.Context(), stale); len(done) != 0 {
+	extra := machinefile.Plan{Blocks: []machinefile.Block{{Item: "solo", ID: "station:solo", Zsh: body, Condition: machinefile.Extra, Action: machinefile.Remove, Fate: machinefile.Taken}}}
+	if done := r.blocks(t.Context(), extra); len(done) != 0 {
 		t.Errorf("a bare apply took %+v", done)
 	}
-	written := z.text
-	r.stays = map[string]bool{"solo": true}
-	if done := r.removedBlocks(t.Context(), stale); len(done) != 1 || done[0].Detail != "kept with solo: judged again next run" || z.text != written {
-		t.Errorf("an app that stays lost its block: %+v\n%s", done, z.text)
+}
+
+func TestRemoveTakesABlockOnlyWithItsApp(t *testing.T) {
+	cases := []struct {
+		name      string
+		file      string
+		extra     machinefile.ExtraLine
+		broken    bool
+		detail    string
+		left      string
+		recorded  int
+		appForgot bool
+	}{
+		{"its app taken back", soloUntouched, soloTaken, false, "removed", "mine\n", 0, true},
+		{"its app already gone", soloUntouched, soloGone, false, "removed", "mine\n", 0, true},
+		{"its app failed to uninstall", soloUntouched, soloTaken, true, "kept with solo: judged again next run", soloUntouched, 1, false},
+		{"its app still required", soloUntouched, soloRequired, false, "kept with solo: judged again next run", soloUntouched, 1, false},
+		{"its app the owner's since", soloUntouched, soloYours, false, "kept with solo, and yours", soloUntouched, 0, true},
+		{"edited by hand, its app still required", soloFile("export SOLO=mine\n"), soloRequired, false, editedKept, soloFile("export SOLO=mine\n"), 0, false},
 	}
-	r.stays = map[string]bool{}
-	if done := r.removedBlocks(t.Context(), stale); len(done) != 1 || done[0].Detail != "removed" || z.text != "mine\n" || len(l.blocks) != 0 {
-		t.Errorf("removed %+v, file %q, record %+v", done, z.text, l.blocks)
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			z := &zshrcText{c.file}
+			l := &writtenLedger{blocks: []machinefile.Written{soloRecord}}
+			d := depsOver(z)
+			d.Ledger = l
+			calls := &calls{}
+			if c.broken {
+				calls.broken = []string{"solo"}
+			}
+			d.Calls, d.Now = calls, epoch
+			p, err := withBlocks(t.Context(), d, machinefile.Plan{Extra: []machinefile.ExtraLine{c.extra}}, catalog.Catalog{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := &run{d: d, name: "laptop", ended: map[string]catalog.State{}}
+			_, blocks := r.remove(t.Context(), p)
+			if len(blocks) != 1 || blocks[0].Detail != c.detail || blocks[0].State != catalog.StateOK {
+				t.Fatalf("blocks %+v, want %q", blocks, c.detail)
+			}
+			if z.text != c.left || len(l.blocks) != c.recorded || slices.Contains(l.deleted, "solo") != c.appForgot {
+				t.Errorf("left %q, records %+v, app forgotten %v", z.text, l.blocks, l.deleted)
+			}
+		})
 	}
 }

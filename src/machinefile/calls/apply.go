@@ -112,8 +112,8 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		out.Blocks = r.blocks(ctx, plan)
 		if in.Remove {
-			out.Removed = r.remove(ctx, plan.Extra)
-			out.Blocks = append(out.Blocks, r.removedBlocks(ctx, plan)...)
+			removed, blocks := r.remove(ctx, plan)
+			out.Removed, out.Blocks = removed, append(out.Blocks, blocks...)
 		}
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
@@ -172,9 +172,6 @@ type run struct {
 	// value: the apps that read there once their line ended, whose blocks
 	// may be written.
 	there map[string]bool
-	// value: the extras `apply --remove` kept, to be judged again next run,
-	// whose blocks stay with them.
-	stays map[string]bool
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
@@ -366,35 +363,45 @@ func masked(words string, secrets map[string]string) string {
 // missing here, and a read that did not answer keep their record for the
 // next run. An extra the run did not take back (its
 // uninstall failed or was refused) is still there, so what it leans on
-// is kept with its record, and so on down.
-func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
+// is kept with its record, and so on down. Each extra's blocks follow it
+// (followApp), and an extra whose block could not follow keeps its record.
+func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Done, []machinefile.BlockDone) {
 	var out []machinefile.Done
+	var blocks []machinefile.BlockDone
 	var stayed []machinefile.ExtraLine
-	r.stays = map[string]bool{}
-	for _, e := range extra {
+	follow := func(e machinefile.ExtraLine, end appEnd) bool {
+		done, broke := r.followApp(ctx, p, e.Step.Item, end)
+		blocks = append(blocks, done...)
+		return broke
+	}
+	for _, e := range p.Extra {
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
-		r.stays[e.Step.Item] = true
+		end := appGoes
 		switch e.Fate() {
 		case machinefile.KeptRequired:
 			done.Detail = "required by " + strings.Join(e.RequiredBy, ", ") + ": kept, judged again next run"
 			out = append(out, done)
+			follow(e, appStays)
 			continue
 		case machinefile.KeptManagerMissing:
 			done.Detail = "its manager " + e.Seen.Lacks + " is missing: kept, judged again next run"
 			out = append(out, done)
+			follow(e, appStays)
 			continue
 		case machinefile.KeptHolding:
 			done.Detail = e.Holding() + ": kept, judged again next run"
 			out = append(out, done)
+			follow(e, appStays)
 			continue
 		case machinefile.KeptUnread:
 			done.Detail = "reads " + strings.ReplaceAll(string(e.Seen.Condition), "-", " ") + ": kept, judged again next run"
 			out = append(out, done)
+			follow(e, appStays)
 			continue
 		case machinefile.KeptIrreversible:
-			done.Detail = machinefile.CannotUninstall
-		case machinefile.KeptAnotherWay:
-			done.Detail = machinefile.AnotherWay
+			done.Detail, end = machinefile.CannotUninstall, appLetGo
+		case machinefile.KeptAnotherWay, machinefile.KeptEdited:
+			done.Detail, end = machinefile.AnotherWay, appLetGo
 		case machinefile.Gone:
 			done.State, done.Detail = catalog.StateAbsent, "already gone"
 		case machinefile.Taken:
@@ -402,11 +409,12 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 				done.Detail = "required by " + strings.Join(needers, ", ") + ": kept, judged again next run"
 				stayed = append(stayed, e)
 				out = append(out, done)
+				follow(e, appStays)
 				continue
 			}
 			if ctx.Err() != nil {
 				done.State, done.Reason = catalog.StateBroken, machinefile.Interrupted
-				return append(out, done)
+				return append(out, done), blocks
 			}
 			done = r.uninstall(ctx, e, done)
 			if done.State == catalog.StateBroken || done.Line.Action == machinefile.Leave {
@@ -415,19 +423,25 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 			if done.Reason == machinefile.Interrupted || done.State == catalog.StateBroken {
 				out = append(out, done)
 				if done.Reason == machinefile.Interrupted {
-					return out
+					return out, blocks
 				}
+				follow(e, appStays)
 				continue
 			}
+			if done.Line.Action == machinefile.Leave {
+				end = appLetGo
+			}
+		}
+		if follow(e, end) {
+			out = append(out, done)
+			continue
 		}
 		if err := r.d.Ledger.Delete(ctx, e.Step.Item); err != nil {
 			done.State, done.Detail = catalog.StateBroken, err.Error()
-		} else {
-			delete(r.stays, e.Step.Item)
 		}
 		out = append(out, done)
 	}
-	return out
+	return out, blocks
 }
 
 func leaningOn(stayed []machinefile.ExtraLine, item string) []string {

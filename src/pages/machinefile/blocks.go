@@ -48,7 +48,7 @@ func blockRows(p machinefile.Plan, a machinefile.Action) []page.Row {
 	var rows []page.Row
 	for _, b := range p.Blocks {
 		switch {
-		case b.Action != a:
+		case b.Action != a || b.Condition == machinefile.Extra:
 		case a == machinefile.Set && b.Condition == machinefile.Outdated:
 			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh), "station's earlier text, written anew"))
 		case a == machinefile.Set:
@@ -60,14 +60,28 @@ func blockRows(p machinefile.Plan, a machinefile.Action) []page.Row {
 	return rows
 }
 
-// value: the rows of the blocks station wrote for an app listed no longer,
-// which `apply --remove` takes back with it.
+// value: the rows of the blocks station wrote for an extra, each with what
+// `apply --remove` does with it: takes it with its app, keeps it with an
+// app that stays, or lets go of it as the owner's.
 func extraBlockRows(p machinefile.Plan, lead ...string) []page.Row {
 	var rows []page.Row
 	for _, b := range p.Blocks {
-		if b.Action == machinefile.Remove {
-			rows = append(rows, blockRow(b, append(slices.Clone(lead), blockWhere(b), "written by station, listed no longer")...))
+		if b.Condition == machinefile.Extra {
+			rows = append(rows, blockRow(b, append(slices.Clone(lead), blockWhere(b), blockFate(b))...))
 		}
 	}
 	return rows
+}
+
+func blockFate(b machinefile.Block) string {
+	switch b.Fate {
+	case machinefile.Taken, machinefile.Gone:
+		return "written by station, goes with " + b.Item
+	case machinefile.KeptEdited:
+		return "edited by hand since station wrote it: kept, and yours"
+	case machinefile.KeptIrreversible, machinefile.KeptAnotherWay:
+		return "kept with " + b.Item + ", and yours"
+	case machinefile.KeptRequired, machinefile.KeptHolding, machinefile.KeptManagerMissing, machinefile.KeptUnread:
+	}
+	return "kept with " + b.Item
 }

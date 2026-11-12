@@ -375,7 +375,9 @@ func (s ExtraLine) Takes() bool {
 // there still needs it, station cannot uninstall it here, it is a manager
 // that holds packages of the owner's (or whose packages do not read), its
 // manager is missing here, it is there by another way than its method, or
-// its read did not answer.
+// its read did not answer. A block of ~/.zshrc station wrote for an extra
+// has a fate too: its app's, or kept and the owner's once it was edited by
+// hand since station wrote it.
 
 type Fate string
 
@@ -388,6 +390,7 @@ const (
 	KeptManagerMissing Fate = "kept-manager-missing"
 	KeptAnotherWay     Fate = "kept-another-way"
 	KeptUnread         Fate = "kept-unread"
+	KeptEdited         Fate = "kept-edited"
 )
 
 func (s ExtraLine) Fate() Fate {
@@ -444,8 +447,14 @@ func (s ExtraLine) Forgets() bool {
 	// value: whether `apply --remove` changes anything for the extra: it
 	// takes it back, or lets go of its record (already gone, or kept as the
 	// owner's).
-	switch s.Fate() {
-	case Taken, Gone, KeptIrreversible, KeptAnotherWay:
+	return s.Fate().Forgets()
+}
+
+func (f Fate) Forgets() bool {
+	// value: whether `apply --remove` takes back or lets go of what has
+	// this fate, rather than keeping its record for the next run.
+	switch f {
+	case Taken, Gone, KeptIrreversible, KeptAnotherWay, KeptEdited:
 		return true
 	case KeptRequired, KeptHolding, KeptManagerMissing, KeptUnread:
 	}
@@ -466,7 +475,7 @@ func (p Plan) Of(a Action) []Line {
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
 	// set, no extra `apply --remove` would take back or let go of.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !p.RemovesBlocks()
+	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !slices.ContainsFunc(p.Blocks, Block.Forgets)
 }
 
 func (p Plan) Interactive(remove bool) []Asked {

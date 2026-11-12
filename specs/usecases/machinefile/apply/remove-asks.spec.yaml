@@ -27,7 +27,6 @@ runs:
           Extra  ? lazygit · brew
                    installed by station for jterrazz-macbook-pro, listed no longer
 
-          → station apply           carries it out
           → station apply --remove  also removes what is extra
           ┃ Remove what the Machinefile lists no longer?
           ┃

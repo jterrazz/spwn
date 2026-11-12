@@ -36,9 +36,11 @@ type ExtraJSON struct {
 }
 
 // value: one block of ~/.zshrc: its item and id, what the file holds of it
-// (`present`, `absent`, `outdated`, `changed`, or `extra` for one whose item is no longer
-// listed), what apply does with it (`set`, `keep`, `leave`, `remove`), and
-// what a run did (`ok`, `broken`...); a plan's block has no result.
+// (`present`, `absent`, `outdated`, `changed`, or `extra` for one station
+// wrote for an extra), what apply does with it (`set`, `keep`, `leave`,
+// `remove`), and what a run did (`ok`, `broken`...); a plan's block has no
+// result, and a run lists only the blocks it judged, so an extra's block is
+// in a run with `--remove` alone.
 
 type BlockJSON struct {
 	Item      string `json:"item"`
@@ -95,13 +97,17 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 
 func AppliedContract(a machinefile.Applied, done, removed []Worded) PlanJSON {
 	// value: station.machinefile.apply/v1: the plan's shape, each line with
-	// what the run did with it, then each extra removed.
+	// what the run did with it, then each extra removed, and each block the
+	// run judged with what it did.
 	out := PlanContract("station.machinefile.apply/v1", a.Plan)
 	out.Lines, out.Bound = []LineJSON{}, a.Bound
-	for _, b := range a.Blocks {
-		for i := range out.Blocks {
-			if out.Blocks[i].ID == b.ID {
-				out.Blocks[i].Result, out.Blocks[i].Detail = string(b.State), b.Detail
+	blocks := out.Blocks
+	out.Blocks = nil
+	for _, j := range blocks {
+		for _, b := range a.Blocks {
+			if b.ID == j.ID {
+				j.Result, j.Detail = string(b.State), b.Detail
+				out.Blocks = append(out.Blocks, j)
 			}
 		}
 	}

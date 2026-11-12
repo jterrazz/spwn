@@ -150,7 +150,7 @@ func fate(e machinefile.ExtraLine) string {
 		return e.Holding() + ": kept"
 	case machinefile.KeptManagerMissing:
 		return "its manager " + e.Seen.Lacks + " is missing: kept"
-	case machinefile.KeptAnotherWay:
+	case machinefile.KeptAnotherWay, machinefile.KeptEdited:
 		return machinefile.AnotherWay
 	case machinefile.KeptUnread:
 	}
@@ -225,12 +225,13 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	case !p.Calm():
 		mark = page.Absent
 		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
-		if removes || p.WritesBlocks() || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
+		if p.WritesBlocks() || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
 		}
-		if removes {
+		switch {
+		case removes:
 			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "also removes what is extra"})
-		} else if slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Forgets) {
+		case slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Forgets), slices.ContainsFunc(p.Blocks, machinefile.Block.Forgets):
 			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "lets go of what is yours now"})
 		}
 	case len(words) == 0:
@@ -256,7 +257,7 @@ func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
 		}
 	}
 	for _, b := range p.Blocks {
-		if b.Action == machinefile.Remove {
+		if b.Condition == machinefile.Extra {
 			continue
 		}
 		rows = append(rows, blockRow(b, condition(b.Condition), blockWhere(b)))
@@ -334,7 +335,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		}
 	}
 	for _, b := range a.Blocks {
-		if b.Action != machinefile.Remove {
+		if b.Condition != machinefile.Extra {
 			block(b)
 		}
 	}
@@ -342,7 +343,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		step(d)
 	}
 	for _, b := range a.Blocks {
-		if b.Action == machinefile.Remove {
+		if b.Condition == machinefile.Extra {
 			block(b)
 		}
 	}

@@ -1,0 +1,52 @@
+description: a block edited by hand since station wrote it stays as its app goes, its record let go
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.offers["postgresql@18"] = "18.1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, postgres]
+      exit: 0
+    - command: 'init > /dev/null'
+      exit: 0
+    - command: 'apply > /dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s|^\[\[ -d /opt/homebrew/opt/postgresql@18/bin \]\].*|path=(/opt/pg/bin $path)|'' .zshrc'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	homebrew	script	present
+          ●	jq	brew	present
+          ?	postgres	brew	extra · installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	extra · ~/.zshrc [station:postgres/path] · edited by hand since station wrote it: kept, and yours
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          # Extra
+          ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand since station wrote it: kept, and yours
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ●	postgres		brew	removed
+          ●	postgres		shell	~/.zshrc [station:postgres/path]: edited by hand: kept, and yours
+    - command: '--version >/dev/null; /usr/bin/grep -A1 ">>> station:postgres/path" .zshrc; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.blocks // []'' world.json'
+      exit: 0
+      stdout: |
+          # >>> station:postgres/path >>>
+          path=(/opt/pg/bin $path)
+          []
+    - command: 'plan'
+      exit: 0

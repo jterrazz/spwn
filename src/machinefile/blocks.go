@@ -10,13 +10,14 @@ import (
 
 // value: one identified block of ~/.zshrc as the plan judges it: the item
 // whose method writes it, its id, the zsh apply would write once the
-// variables are filled, what the file holds of it (present as it would be
-// written, absent, outdated when it is still what station last wrote but
-// station writes it otherwise now, changed since by hand, or extra when its
-// item is listed no longer), its diff from the file to what apply writes,
-// and what apply does with it: set it, keep it, leave a changed one as it
-// is, or, with `--remove`, take back the block of an item the plan carries
-// no longer.
+// variables are filled (for an extra, what the file holds), what the file
+// holds of it (present as it would be written, absent, outdated when it is
+// still what station last wrote but station writes it otherwise now,
+// changed since by hand, or extra when station wrote it for an extra of the
+// plan), its diff from the file to what apply writes, and what apply does
+// with it: set it, keep it, leave a changed one as it is, or, with
+// `--remove`, take it back with its item. An extra's Fate is what `apply
+// --remove` does with it.
 
 type Block struct {
 	Item      string
@@ -25,6 +26,13 @@ type Block struct {
 	Condition Condition
 	Action    Action
 	Diff      string
+	Fate      Fate
+}
+
+func (b Block) Forgets() bool {
+	// value: whether `apply --remove` takes back the block, or lets go of
+	// its record as the owner's.
+	return b.Condition == Extra && b.Fate.Forgets()
 }
 
 // value: a block of ~/.zshrc apply wrote: its id, the item it was written
