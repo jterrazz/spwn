@@ -67,10 +67,10 @@ func withBlocks(ctx context.Context, d Deps, p machinefile.Plan, cat catalog.Cat
 	return p, nil
 }
 
-// value: a block's diff as `station settings diff` draws every one: what
-// station writes first (`-`), then what the file holds (`+`).
+// value: a block's diff as apply would change the file: what the file holds
+// first (`-`), then what apply writes (`+`).
 func blockDiff(want, have, id string) string {
-	return settings.UnifiedDiff(want, have, "station's "+blockName(id), blockName(id))
+	return settings.UnifiedDiff(have, want, blockName(id), "station's "+blockName(id))
 }
 
 func judgeBlock(zshrc, item, id, body string) machinefile.Block {

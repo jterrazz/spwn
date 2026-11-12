@@ -57,7 +57,7 @@ An app's blocks are written by `station apply` once the app is there, whichever 
 - **Removal.** A block goes with its package: when `apply --remove` takes the app back, when the Machinefile lists the app no longer (the app stays yours, its block does not), and when a setting is turned off. It goes only while it is still what station would write.
 - **A block you edited by hand** reads `changed` in `station drift` and in `station plan` (`edited by hand: station plan --diff shows how`), and apply leaves it as it is (hard case 15 of [Machinefiles](machinefiles.md)); delete it and the next apply writes it again. A block whose item the catalog no longer knows is left alone.
 
-`station plan --diff` shows each block's diff, and each file a setting writes, as `station settings diff` draws it: station's lines first (`-`), then the file's (`+`). `~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired: `station init` removes the file station wrote there and the folder once it is empty, never a file of yours.
+`station plan --diff` shows each block's diff, and each file a setting writes, as apply would change it: the file's lines first (`-`), then what apply writes (`+`). `~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired: `station init` removes the file station wrote there and the folder once it is empty, never a file of yours.
 
 ## Removing the block
 

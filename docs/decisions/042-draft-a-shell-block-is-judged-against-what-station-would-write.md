@@ -12,7 +12,7 @@ The owner decided that each catalog package may put one identified block into `~
 - **The measure is the text station would write now.** A block reads `present` when the file holds exactly the rendering of the method's `zsh` with this machine's variables and the app's options, `absent` when its markers are not there, and `changed` for any other text, a start with no end, or an id twice. No new store records a digest; an app's block is judged at each plan, from the file alone.
 - **A block of a package the plan carries no longer is removed only while it is still such a rendering** (the options at their defaults), and only for an app the catalog knows; a block of an unknown item or of a setting is left, since a setting's own apply and `off` own its block.
 - **A setting writes its own block** through its applier, so `settings apply`, `settings off`, `settings diff` and the recorded fingerprint work as for any setting; an app's blocks are written by `apply`, after the app is there, whichever way it got there.
-- **`plan --diff` draws a block as `settings diff` draws every file**: station's lines first (`-`), then the file's (`+`).
+- **`plan --diff` draws what apply would change**: the file's lines first (`-`), then what apply writes (`+`), for a block and for a setting's file alike (`station settings diff` keeps its own way, station's first).
 
 ## Consequences
 

@@ -7,16 +7,17 @@ import (
 
 const diffContext = 2
 
-func UnifiedDiff(want, have, wantName, haveName string) string {
-	// value: the unified diff of two texts, station's first ("-") then the
-	// machine's ("+"), with two lines of context; empty when they are the same.
-	if want == have {
+func UnifiedDiff(from, to, fromName, toName string) string {
+	// value: the unified diff of two texts, the first's lines "-" and the
+	// second's "+", with two lines of context; empty when they are the same.
+	// A setting draws station's text first, then the machine's.
+	if from == to {
 		return ""
 	}
-	a, b := lines(want), lines(have)
+	a, b := lines(from), lines(to)
 	ops := script(a, b)
 	var out strings.Builder
-	out.WriteString("--- " + wantName + "\n+++ " + haveName + "\n")
+	out.WriteString("--- " + fromName + "\n+++ " + toName + "\n")
 	for start := 0; start < len(ops); {
 		for start < len(ops) && ops[start].kind == ' ' {
 			start++
@@ -110,4 +111,48 @@ func script(a, b []string) []op {
 		}
 	}
 	return out
+}
+
+func ReversedDiff(diff string) string {
+	// value: a unified diff drawn the other way, from its second text to its
+	// first: the two names swapped, each hunk's ranges swapped, and in each
+	// run of changed lines the first text's lines, now "+", after the
+	// second's, now "-".
+	var out strings.Builder
+	var minus, plus []string
+	flush := func() {
+		for _, l := range plus {
+			out.WriteString("-" + l + "\n")
+		}
+		for _, l := range minus {
+			out.WriteString("+" + l + "\n")
+		}
+		minus, plus = nil, nil
+	}
+	rows := strings.Split(strings.TrimSuffix(diff, "\n"), "\n")
+	for i := 0; i < len(rows); i++ {
+		row := rows[i]
+		switch {
+		case diff == "":
+		case strings.HasPrefix(row, "--- ") && i+1 < len(rows) && strings.HasPrefix(rows[i+1], "+++ "):
+			flush()
+			out.WriteString("--- " + strings.TrimPrefix(rows[i+1], "+++ ") + "\n+++ " + strings.TrimPrefix(row, "--- ") + "\n")
+			i++
+		case strings.HasPrefix(row, "@@ "):
+			flush()
+			if f := strings.Fields(row); len(f) == 4 {
+				row = "@@ -" + strings.TrimPrefix(f[2], "+") + " +" + strings.TrimPrefix(f[1], "-") + " @@"
+			}
+			out.WriteString(row + "\n")
+		case strings.HasPrefix(row, "-"):
+			minus = append(minus, row[1:])
+		case strings.HasPrefix(row, "+"):
+			plus = append(plus, row[1:])
+		default:
+			flush()
+			out.WriteString(row + "\n")
+		}
+	}
+	flush()
+	return out.String()
 }

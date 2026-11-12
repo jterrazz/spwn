@@ -28,3 +28,20 @@ func TestUnifiedDiffOfAMissingFileRemovesEveryLine(t *testing.T) {
 		t.Fatalf("diff =\n%s", got)
 	}
 }
+
+func TestAReversedDiffIsTheDiffDrawnTheOtherWay(t *testing.T) {
+	for _, c := range []struct{ a, b string }{
+		{"a\nb\nc\nd\ne\nf\ng\n", "a\nb\nc\nD\ne\nf\ng\n"},
+		{"a\nb\n", ""},
+		{"", "a\nb\n"},
+		{"a\nb\nc\n", "a\nx\ny\nc\nz\n"},
+	} {
+		got := settings.ReversedDiff(settings.UnifiedDiff(c.a, c.b, "one", "two"))
+		if want := settings.UnifiedDiff(c.b, c.a, "two", "one"); got != want {
+			t.Errorf("reversed %q -> %q =\n%s\nwant\n%s", c.a, c.b, got, want)
+		}
+	}
+	if got := settings.ReversedDiff(""); got != "" {
+		t.Errorf("reversed nothing = %q", got)
+	}
+}

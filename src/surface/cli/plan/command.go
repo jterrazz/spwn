@@ -13,6 +13,7 @@ import (
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	"github.com/jterrazz/studio-station/src/page"
 	pagemachinefile "github.com/jterrazz/studio-station/src/pages/machinefile"
+	"github.com/jterrazz/studio-station/src/settings"
 	settingscalls "github.com/jterrazz/studio-station/src/settings/calls"
 	"github.com/jterrazz/studio-station/src/surface/cli/kit"
 )
@@ -25,15 +26,16 @@ type Input struct {
 }
 
 func Diffs(ctx context.Context, env kit.Env, p machinefile.Plan) string {
-	// value: the diff of every file apply would write: a setting's, as `station
-	// settings diff` draws it, and each shell block of ~/.zshrc, in the plan's
-	// order; a setting whose diff cannot be read says nothing here.
+	// value: the diff of every file apply would write, from what the file
+	// holds (`-`) to what apply writes (`+`): a setting's, `station settings
+	// diff` drawn the other way, and each shell block of ~/.zshrc, in the
+	// plan's order; a setting whose diff cannot be read says nothing here.
 	var out strings.Builder
 	shown := map[string]bool{}
 	for _, l := range p.Lines {
 		if l.Step.Kind == catalog.KindSetting && (l.Action == machinefile.Set || l.Seen.Condition == machinefile.Changed) {
 			if d, err := call.Invoke(ctx, env.Calls, env.Target(), settingscalls.Diff, settingscalls.DiffIn{Name: l.Step.Item}, nil); err == nil {
-				out.WriteString(d.Diff)
+				out.WriteString(settings.ReversedDiff(d.Diff))
 			}
 		}
 		for _, b := range p.Blocks {
@@ -59,7 +61,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile planned, by its name or its file (default: the one this machine carries)")
-			f.BoolVar(&in.Diff, "diff", false, "what apply would write into each file it changes: each shell block of ~/.zshrc and each setting's file, station's first")
+			f.BoolVar(&in.Diff, "diff", false, "what apply would change in each file it writes, from the file to station's: each shell block of ~/.zshrc and each setting's file")
 		},
 		Read:  func(*Input) bool { return true },
 		Pages: true,
