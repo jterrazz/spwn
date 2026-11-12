@@ -12,8 +12,13 @@ import (
 	model "github.com/jterrazz/studio-station/src/machines"
 )
 
-// value: the longest a boot phase's apply runs inside a workspace.
-const bootWait = 15 * time.Minute
+// value: the longest a boot phase's apply runs inside a workspace: its
+// items' share, then the bound of its run.boot lines, so slow lines end
+// as a broken run.boot step of the apply, never as the apply cut short.
+const (
+	bootItemsWait = 15 * time.Minute
+	bootWait      = bootItemsWait + catalog.RunBound
+)
 
 // value: the folder of the VM user's station files, under its home, and
 // the station binary the image carries.
