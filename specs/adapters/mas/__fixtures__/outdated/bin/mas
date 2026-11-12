@@ -1,0 +1,17 @@
+#!/bin/sh
+# mas: Xcode is listed and outdated until it is updated by name, as the App Store leaves it.
+# outside: `outdated` is written from mas's documented format; no Mac recorded it.
+printf 'mas %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    list)
+        if /usr/bin/grep -q 'mas update 497799835' "$HOME/.calls"; then echo "497799835  Xcode  (26.2)"; else echo "497799835  Xcode  (26.1)"; fi
+        ;;
+    outdated)
+        if ! /usr/bin/grep -q 'mas update 497799835' "$HOME/.calls"; then echo "497799835 Xcode (26.1 -> 26.2)"; fi
+        ;;
+    "update 497799835") echo "==> Downloading Xcode (26.2)" ;;
+    *)
+        echo "stub mas: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

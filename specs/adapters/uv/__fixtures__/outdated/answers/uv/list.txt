@@ -1,0 +1,4 @@
+markitdown v0.1.2
+- markitdown
+browser-use v0.5.0
+- browser-use

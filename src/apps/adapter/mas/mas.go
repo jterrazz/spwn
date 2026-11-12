@@ -60,8 +60,36 @@ func (m *Mas) Inventory(ctx context.Context) (map[string]string, error) {
 	return parseList(out.Stdout), nil
 }
 
-func (m *Mas) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
-	return nil, nil
+func (m *Mas) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
+	// invariant: an app is behind when `mas outdated` lists its id, with the
+	// version it would bring; a mas that does not answer in the budget (an App
+	// Store signed out) leaves every key unknown.
+	if len(keys) == 0 {
+		return map[string]apps.Currency{}, nil
+	}
+	out, err := m.run.Output(ctx, local.Cmd{Name: command, Args: []string{"outdated"}, Timeout: contract.CurrencyBudget})
+	if err == nil && out.ExitCode == 0 {
+		return apps.Verdicts(keys, parseOutdated(out.Stdout)), nil
+	}
+	return apps.Unread(keys), nil
+}
+
+func parseOutdated(stdout string) map[string]string {
+	// outside: mas prints `<id> <name> (<installed> -> <newest>)` a line.
+	behind := map[string]string{}
+	for _, line := range strings.Split(stdout, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 {
+			continue
+		}
+		if _, err := strconv.Atoi(fields[0]); err != nil {
+			continue
+		}
+		if arrow := strings.LastIndex(line, "-> "); arrow >= 0 {
+			behind[fields[0]] = strings.TrimSuffix(strings.TrimSpace(line[arrow+3:]), ")")
+		}
+	}
+	return behind
 }
 
 func (m *Mas) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

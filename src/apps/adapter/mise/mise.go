@@ -102,8 +102,39 @@ func (m *Mise) global(ctx context.Context) (map[string][]version, error) {
 	return held, nil
 }
 
-func (m *Mise) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
-	return nil, nil
+func (m *Mise) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
+	// invariant: mise lists a runtime only where a newer version satisfies what
+	// the global file requests, so a version pinned there exactly is never
+	// behind: its pin is the repo's to move (ADR-003). A read that did not
+	// answer leaves every key unknown.
+	if len(keys) == 0 {
+		return map[string]apps.Currency{}, nil
+	}
+	behind, ok := m.outdated(ctx, keys)
+	if !ok {
+		return apps.Unread(keys), nil
+	}
+	return apps.Verdicts(keys, behind), nil
+}
+
+func (m *Mise) outdated(ctx context.Context, keys []string) (map[string]string, bool) {
+	out, err := m.run.Output(ctx, local.Cmd{Name: command, Args: append([]string{"outdated", "--json", "--"}, keys...), Timeout: contract.CurrencyBudget})
+	if err != nil || out.ExitCode != 0 {
+		return nil, false
+	}
+	var doc map[string]struct {
+		Latest string `json:"latest"`
+	}
+	if err := json.Unmarshal([]byte(out.Stdout), &doc); err != nil {
+		return nil, false
+	}
+	behind := map[string]string{}
+	for name, runtime := range doc {
+		if runtime.Latest != "" {
+			behind[name] = runtime.Latest
+		}
+	}
+	return behind, true
 }
 
 func (m *Mise) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

@@ -3,6 +3,7 @@ package contract
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -15,6 +16,13 @@ var (
 	ErrUnlisted = errors.New("its method keeps no list")
 	// invariant: a verb its Abilities deny is refused, never faked.
 	ErrCannot = errors.New("its method cannot do this")
+)
+
+// invariant: a read of what is behind goes to the network, so it is bounded: a
+// manager that does not answer in this time leaves its apps' currency unknown
+// and never holds `station apps`.
+const (
+	CurrencyBudget = 5 * time.Second
 )
 
 type Logs []string // value: the files a verb appends its program's raw output to, one per app it serves (`~/.local/state/station/logs/<app>.log`); none leaves it on the terminal's stderr.

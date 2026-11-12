@@ -38,7 +38,7 @@ func (m Method) KeepsList() bool {
 func (m Method) ReadsCurrency() bool {
 	// invariant: a method whose adapter reads whether an installed app is
 	// behind its newest; every other leaves the app current.
-	return slices.Contains([]Method{MethodBrew, MethodCask, MethodApt, MethodSkill, MethodGitHubRelease}, m)
+	return slices.Contains([]Method{MethodBrew, MethodCask, MethodMas, MethodNpm, MethodUv, MethodBun, MethodMise, MethodApt, MethodSkill, MethodGitHubRelease}, m)
 }
 
 type Install interface {

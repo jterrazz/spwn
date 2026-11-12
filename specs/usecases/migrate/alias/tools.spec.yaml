@@ -4,7 +4,7 @@ runs:
     - command: 'tools | /usr/bin/head -1'
       exit: 0
       stdout: |
-          # Updates	2 ◐
+          # Updates	3 ◐
       stderr: |
           → now: station apps
     - command: 'tools install jq'

@@ -1,9 +1,12 @@
 #!/bin/sh
-# mise: its global listing is an answer file; use, unuse and upgrade succeed.
+# mise: its global listing and what is outdated are answer files; use, unuse and upgrade succeed.
 answers="${0%/*}/../answers/mise"
 printf 'mise %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     "ls --global --json") /bin/cat "$answers/ls.json" ;;
+    "outdated --json -- "*)
+        if [ -f "$answers/outdated.json" ]; then /bin/cat "$answers/outdated.json"; else echo '{}'; fi
+        ;;
     "use --global "* | "unuse --global "* | "upgrade "*) ;;
     *)
         echo "stub mise: unexpected invocation: $*" >&2

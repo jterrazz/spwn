@@ -10,11 +10,12 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          ✓ Updated 2 apps on This Mac
+          ✓ Updated 3 apps on This Mac
 
           Changes
-            ● ghostty  1.2.1   cask
-            ● gh       2.98.0  brew
+            ● ghostty  1.2.1    cask
+            ● gh       2.98.0   brew
+            ● node     24.11.0  mise
     - command: 'apps update'
       exit: 0
       stdout: |

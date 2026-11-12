@@ -105,14 +105,7 @@ func (k *kind) Outdated(ctx context.Context, keys []string) (map[string]apps.Cur
 	if err != nil {
 		return nil, err
 	}
-	currency := make(map[string]apps.Currency, len(keys))
-	for _, key := range keys {
-		currency[key] = apps.Currency{Verdict: apps.Current}
-		if newest, ok := behind[key]; ok {
-			currency[key] = apps.Currency{Verdict: apps.Behind, Newest: newest}
-		}
-	}
-	return currency, nil
+	return apps.Verdicts(keys, behind), nil
 }
 
 func (k *kind) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

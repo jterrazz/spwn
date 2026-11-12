@@ -64,8 +64,44 @@ func (u *Uv) Inventory(ctx context.Context) (map[string]string, error) {
 	return list, nil
 }
 
-func (u *Uv) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
-	return nil, nil
+func (u *Uv) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
+	// invariant: `uv tool list --outdated` lists every tool and marks the
+	// behind ones `[latest: <version>]`; a tool it does not list at all is
+	// unread, never current, since an index uv could not reach is answered
+	// with an empty list. It names the index's newest version, not what the
+	// tool's own constraint allows, so a tool installed at a pinned version
+	// reads behind while `uv tool upgrade` leaves it: its pin is the owner's.
+	if len(keys) == 0 {
+		return map[string]apps.Currency{}, nil
+	}
+	out, err := u.run.Output(ctx, local.Cmd{Name: command, Args: []string{"tool", "list", "--outdated"}, Timeout: contract.CurrencyBudget})
+	if err != nil || out.ExitCode != 0 {
+		out.Stdout = ""
+	}
+	listed := map[string]string{}
+	for _, line := range strings.Split(out.Stdout, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 || strings.HasPrefix(fields[0], "-") {
+			continue
+		}
+		listed[fields[0]] = ""
+		if open := strings.Index(line, "[latest: "); open >= 0 {
+			listed[fields[0]] = strings.TrimSuffix(strings.TrimSpace(line[open+len("[latest: "):]), "]")
+		}
+	}
+	verdicts := make(map[string]apps.Currency, len(keys))
+	for _, k := range keys {
+		newest, there := listed[k]
+		switch {
+		case !there:
+			verdicts[k] = apps.Currency{Verdict: apps.Unknown}
+		case newest != "":
+			verdicts[k] = apps.Currency{Verdict: apps.Behind, Newest: newest}
+		default:
+			verdicts[k] = apps.Currency{Verdict: apps.Current}
+		}
+	}
+	return verdicts, nil
 }
 
 func (u *Uv) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

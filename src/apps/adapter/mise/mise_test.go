@@ -3,6 +3,8 @@ package mise_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"github.com/jterrazz/studio-station/src/apps"
 	"slices"
 	"strings"
 	"testing"
@@ -133,5 +135,39 @@ func TestWhereIsTheFolderOfEveryVersionHeldGlobally(t *testing.T) {
 	}
 	if got, err := mise.New(local.Played(nil)).Where(context.Background(), "node"); err != nil || len(got) != 0 {
 		t.Errorf("node is at %q (%v) with no mise; want none", got, err)
+	}
+}
+
+func TestOutdatedNamesATrackedRuntimeBehindItsNewestAndLeavesAPinnedOneCurrent(t *testing.T) {
+	// invariant: `mise outdated` lists a runtime only where a newer version
+	// satisfies what the global file requests: node = "22" with 22.1.0 held
+	// is listed, python = "3.12.0" is the repo's pin and never is.
+	var ran local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = c
+		return local.Output{Stdout: `{"node":{"name":"node","requested":"22","current":"22.1.0","bump":null,"latest":"22.23.5","source":{"type":"mise.toml","path":"/home/u/.config/mise/config.toml"}}}`}, nil
+	}, "mise")
+
+	got, err := mise.New(run).Outdated(context.Background(), []string{"node", "python"})
+
+	if err != nil || got["node"] != (apps.Currency{Verdict: apps.Behind, Newest: "22.23.5"}) || got["python"].Verdict != apps.Current {
+		t.Fatalf("currency %v %v", got, err)
+	}
+	if want := "outdated --json -- node python"; strings.Join(ran.Args, " ") != want || ran.Timeout != contract.CurrencyBudget {
+		t.Errorf("mise ran %q within %v; want %q within %v", ran.Args, ran.Timeout, want, contract.CurrencyBudget)
+	}
+}
+
+func TestAMiseThatDoesNotAnswerLeavesTheCurrencyUnknown(t *testing.T) {
+	for name, play := range map[string]func(local.Cmd) (local.Output, error){
+		"a failed run":  func(local.Cmd) (local.Output, error) { return local.Output{ExitCode: 1}, nil },
+		"a timeout":     func(local.Cmd) (local.Output, error) { return local.Output{}, local.ErrTimeout },
+		"unread output": func(local.Cmd) (local.Output, error) { return local.Output{Stdout: "not json"}, nil },
+		"an error":      func(local.Cmd) (local.Output, error) { return local.Output{}, errors.New("boom") },
+	} {
+		got, err := mise.New(local.Played(play, "mise")).Outdated(context.Background(), []string{"node"})
+		if err != nil || got["node"].Verdict != apps.Unknown {
+			t.Errorf("%s: currency %v %v; want unknown", name, got, err)
+		}
 	}
 }

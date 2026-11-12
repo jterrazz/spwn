@@ -1,0 +1,16 @@
+#!/bin/sh
+# npm: its global listing and what is outdated are answer files, `outdated` exiting 1 when it
+# lists a package as the real one does.
+answers="${0%/*}/../answers/npm"
+printf 'npm %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "ls -g --depth=0 --json") /bin/cat "$answers/ls.json" ;;
+    "outdated -g --json")
+        /bin/cat "$answers/outdated.json"
+        if [ -s "$answers/outdated.json" ]; then exit 1; fi
+        ;;
+    *)
+        echo "stub npm: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

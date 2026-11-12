@@ -162,6 +162,17 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		}
 	})
 
+	t.Run("a method that reads a currency answers each key, current, behind or unknown, or says it could not read", func(t *testing.T) {
+		i := build(t, held())
+		if !i.Method().ReadsCurrency() {
+			t.Skip("its method reads no currency")
+		}
+		got, err := i.Outdated(ctx, []string{key})
+		if err == nil && (len(got) != 1 || got[key].Verdict == "") {
+			t.Errorf("the currency of %s read %v, %v", key, got, err)
+		}
+	})
+
 	t.Run("a bundled method spells its line", func(t *testing.T) {
 		lined, ok := build(t, Seed{}).(contract.Lined)
 		if !ok {

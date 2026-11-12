@@ -89,3 +89,33 @@ func TestABareUpdateLeavesTheAppStoreItsOwnApps(t *testing.T) {
 		t.Error("a bare update reaches the App Store's apps")
 	}
 }
+
+func TestOutdatedListsTheAppsTheAppStoreHasANewerVersionOf(t *testing.T) {
+	// outside: `mas outdated` prints `<id> <name> (<installed> -> <newest>)`;
+	// this sample follows its documented format and was never recorded on a
+	// Mac, so the parse is unproven against a real mas.
+	var ran local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = c
+		return local.Output{Stdout: "497799835 Xcode (26.1 -> 26.2)\n409183694 Keynote (14.3 -> 14.4)\n"}, nil
+	}, "mas")
+
+	got, err := mas.New(run).Outdated(context.Background(), []string{"497799835", "1153157709"})
+
+	if err != nil || got["497799835"] != (apps.Currency{Verdict: apps.Behind, Newest: "26.2"}) || got["1153157709"].Verdict != apps.Current {
+		t.Fatalf("currency %v %v", got, err)
+	}
+	if want := "outdated"; strings.Join(ran.Args, " ") != want || ran.Timeout != contract.CurrencyBudget {
+		t.Errorf("mas ran %q within %v; want %q within %v", ran.Args, ran.Timeout, want, contract.CurrencyBudget)
+	}
+}
+
+func TestASignedOutAppStoreLeavesTheCurrencyUnknown(t *testing.T) {
+	run := local.Played(func(local.Cmd) (local.Output, error) { return local.Output{}, local.ErrTimeout }, "mas")
+
+	got, err := mas.New(run).Outdated(context.Background(), []string{"497799835"})
+
+	if err != nil || got["497799835"].Verdict != apps.Unknown {
+		t.Errorf("currency %v %v; want unknown", got, err)
+	}
+}

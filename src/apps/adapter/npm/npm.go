@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
@@ -99,8 +100,64 @@ func (n *Npm) list(ctx context.Context, folder []string) (map[string]string, err
 // so `npm ls -g` lists them beside what was installed there.
 func bundled(name string) bool { return name == command || name == "corepack" }
 
-func (n *Npm) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
-	return nil, nil
+func (n *Npm) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
+	// invariant: a package is behind when any node its manager holds globally
+	// has it at another version than the registry's latest; one folder whose
+	// read did not answer leaves every key unknown, as it does the list.
+	if len(keys) == 0 {
+		return map[string]apps.Currency{}, nil
+	}
+	folders, err := n.global(ctx)
+	if err == nil {
+		return n.verdicts(ctx, keys, folders), nil
+	}
+	return apps.Unread(keys), nil
+}
+
+func (n *Npm) verdicts(ctx context.Context, keys []string, folders [][]string) map[string]apps.Currency {
+	behind := map[string]string{}
+	for _, folder := range folders {
+		found, ok := n.outdated(ctx, folder)
+		if !ok {
+			return apps.Unread(keys)
+		}
+		for name, latest := range found {
+			if _, seen := behind[name]; !seen {
+				behind[name] = latest
+			}
+		}
+	}
+	return apps.Verdicts(keys, behind)
+}
+
+func (n *Npm) outdated(ctx context.Context, folder []string) (map[string]string, bool) {
+	// outside: `npm outdated` exits 1 when it lists a package, 0 when it lists
+	// none (printing nothing), and prints nothing on stdout when the registry
+	// did not answer: an empty stdout is no answer at exit 1 only.
+	out, err := n.run.Output(ctx, local.Cmd{Name: command, Args: append([]string{"outdated", "-g", "--json"}, folder...), Timeout: contract.CurrencyBudget})
+	if err != nil || out.ExitCode > 1 || out.ExitCode == 1 && strings.TrimSpace(out.Stdout) == "" {
+		return nil, false
+	}
+	if strings.TrimSpace(out.Stdout) == "" {
+		return map[string]string{}, true
+	}
+	var doc map[string]struct {
+		Current string `json:"current"`
+		Latest  string `json:"latest"`
+	}
+	if err := json.Unmarshal([]byte(out.Stdout), &doc); err != nil {
+		return nil, false
+	}
+	if _, failed := doc["error"]; failed {
+		return nil, false
+	}
+	behind := map[string]string{}
+	for name, p := range doc {
+		if p.Latest != "" && p.Latest != p.Current {
+			behind[name] = p.Latest
+		}
+	}
+	return behind, true
 }
 
 func (n *Npm) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

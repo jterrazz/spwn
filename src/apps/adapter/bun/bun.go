@@ -47,8 +47,41 @@ func (b *Bun) Inventory(ctx context.Context) (map[string]string, error) {
 	return parseList(out.Stdout), nil
 }
 
-func (b *Bun) Outdated(context.Context, []string) (map[string]apps.Currency, error) {
-	return nil, nil
+func (b *Bun) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
+	// invariant: a package is behind when `bun update -g` would move it: its
+	// Update column is another version than the one installed. Its Latest
+	// column is not read: a package installed at an exact version is held
+	// there by its own range, and an update never moves it. A bun that does
+	// not answer, or has no `outdated`, leaves every key unknown.
+	if len(keys) == 0 {
+		return map[string]apps.Currency{}, nil
+	}
+	out, err := b.run.Output(ctx, local.Cmd{Name: command, Args: []string{"outdated", "-g"}, Timeout: contract.CurrencyBudget})
+	if err == nil && out.ExitCode == 0 {
+		return apps.Verdicts(keys, parseOutdated(out.Stdout)), nil
+	}
+	return apps.Unread(keys), nil
+}
+
+func parseOutdated(stdout string) map[string]string {
+	// outside: bun prints a table, `| Package | Current | Update | Latest |`,
+	// one row a package, and nothing but its banner when none is behind.
+	behind := map[string]string{}
+	for _, line := range strings.Split(stdout, "\n") {
+		if !strings.HasPrefix(line, "|") {
+			continue
+		}
+		cells := strings.Split(strings.Trim(line, "| "), "|")
+		if len(cells) != 4 {
+			continue
+		}
+		name, current, update := strings.TrimSpace(cells[0]), strings.TrimSpace(cells[1]), strings.TrimSpace(cells[2])
+		if name == "Package" || strings.Trim(name, "-") == "" || update == "" || update == current {
+			continue
+		}
+		behind[name] = update
+	}
+	return behind
 }
 
 func (b *Bun) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           accounts  1  same as overview
-          apps  1  same as overview
+          apps  2  same as overview
           settings  1  same as overview
           disk  1  same as overview
           background  4  same as overview

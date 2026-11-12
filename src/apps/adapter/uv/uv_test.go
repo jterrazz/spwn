@@ -3,6 +3,7 @@ package uv_test
 import (
 	"context"
 	"errors"
+	"github.com/jterrazz/studio-station/src/apps"
 	"regexp"
 	"strings"
 	"testing"
@@ -76,5 +77,35 @@ func TestAToolIsListedWithoutItsExecutablesAndTheV(t *testing.T) {
 
 	if err != nil || len(got) != 1 || got["markitdown"] != "0.1.2" {
 		t.Fatalf("inventory %v %v", got, err)
+	}
+}
+
+func TestOutdatedReadsTheLatestUvMarksOnEachTool(t *testing.T) {
+	// outside: a recorded `uv tool list --outdated` (uv 0.13.7): every tool is
+	// listed, the behind ones with `[latest: <version>]`.
+	listing := "cowsay v6.0 [latest: 6.1]\n- cowsay\nhttpie v3.2.4\n- http\n- httpie\n- https\n"
+	var ran local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = c
+		return local.Output{Stdout: listing}, nil
+	}, "uv")
+
+	got, err := uv.New(run, nil).Outdated(context.Background(), []string{"cowsay", "httpie", "ruff"})
+
+	if err != nil || got["cowsay"] != (apps.Currency{Verdict: apps.Behind, Newest: "6.1"}) || got["httpie"].Verdict != apps.Current || got["ruff"].Verdict != apps.Unknown {
+		t.Fatalf("currency %v %v", got, err)
+	}
+	if want := "tool list --outdated"; strings.Join(ran.Args, " ") != want || ran.Timeout != contract.CurrencyBudget {
+		t.Errorf("uv ran %q within %v; want %q within %v", ran.Args, ran.Timeout, want, contract.CurrencyBudget)
+	}
+}
+
+func TestAUvThatDoesNotAnswerLeavesTheCurrencyUnknown(t *testing.T) {
+	run := local.Played(func(local.Cmd) (local.Output, error) { return local.Output{ExitCode: 2}, nil }, "uv")
+
+	got, err := uv.New(run, nil).Outdated(context.Background(), []string{"cowsay"})
+
+	if err != nil || got["cowsay"].Verdict != apps.Unknown {
+		t.Errorf("currency %v %v; want unknown", got, err)
 	}
 }

@@ -5,4 +5,5 @@ runs:
       exit: 0
       stdout: |
           ✗	npm sign-in expired	npm login
+          ◐	1 mise update waiting	station apps update --manager mise
           ◐	com.docker.socket is left over	sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist

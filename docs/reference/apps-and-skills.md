@@ -6,6 +6,7 @@ An app is installed content: software or an agent skill (v2 had its own word for
 | -------------- | ------------------------------------------------------ |
 | The catalog    | How an app is declared, and where it lives             |
 | Methods        | How each method installs, removes, updates and is read |
+| Currency       | How each method says an app has a newer version        |
 | Runtimes       | Why mise owns node, go, python, bun, rust and java     |
 | Skills as apps | Agent skills installed with `station apps install`     |
 | The toolbelt   | The committed projection agents read                   |
@@ -39,7 +40,7 @@ The method an app is installed by is the first of its methods here in the system
 
 ## Methods
 
-One registry, `Installers` in `src/apps/contract/`, holds an installer per method, each its own adapter under `src/apps/adapter/<method>/` with its commands and its parser; nothing else switches on a method. A method that holds what it adds by app, apt, is a `Holder` too: the apps model hands its install and its removal the app they serve and whether you asked that removal by name, and its plain install and removal refuse. `wire` builds the registry; `src/apps/calls` asks each installer what it can do and what is behind (`Outdated`): brew reads `brew outdated --json=v2`, a pinned formula left out; a skill compares its lock with GitHub.
+One registry, `Installers` in `src/apps/contract/`, holds an installer per method, each its own adapter under `src/apps/adapter/<method>/` with its commands and its parser; nothing else switches on a method. A method that holds what it adds by app, apt, is a `Holder` too: the apps model hands its install and its removal the app they serve and whether you asked that removal by name, and its plain install and removal refuse. `wire` builds the registry; `src/apps/calls` asks each installer what it can do and what is behind (`Outdated`), as [Currency](#currency) says.
 
 | Method            | Install                                                               | Remove                                           | Update                           | Kinds      |
 | ----------------- | --------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------- | ---------- |
@@ -72,6 +73,26 @@ A `provided-by` app comes with another item's install: `herdr-core`, the `hc` co
 Every method's program writes its words to the app's log, `~/.local/state/station/logs/<app>.log` (each app of a `brew bundle` gets the whole run), appended, and the terminal keeps only station's lines. A `script` installer reads one RETURN on stdin, the consent the install already is; a password it asks is sudo's, on the terminal. Homebrew's runs with `INTERACTIVE=1` where the run has a terminal, so on that stdin it still asks sudo rather than giving up, and with `NONINTERACTIVE=1` where it has none (its installer refuses `INTERACTIVE` beside `CI`); its catalogue line says so before it runs (`asks your password once`). An installer that offers a quiet mode is given it (plannotator's `--non-interactive`), and every `script` step is said as a line of its own before it runs, since a curl installer may still read the terminal.
 
 An App Store app is installed by mas itself, outside the bundle: signed out, the App Store waits on a sign-in no terminal can give and mas says nothing, so a mas that says nothing for 60 s is stopped and the app fails with `the App Store did not answer in 60 s, as when it is signed out: open the App Store and sign in` (exit 1). `brew bundle` installs a whole request in one call and taps a trusted formula itself; the catalog's `trusted` taps are the owner's act of trust ([ADR-002](../decisions/002-brew-bundle-installs-native-commands-uninstall.md)). `station apps update` updates the catalog apps that have an update, and only those; `--manager <manager>` narrows it to one manager's apps, by any key its item installs by (`brew` and `cask` both reach Homebrew's).
+
+## Currency
+
+An app is Update available when its method's own program says a newer version exists, and the catalog names the methods that read it (`ReadsCurrency`, whose home is `src/catalog/`); every other method leaves its apps current. Every read runs as any other of station's commands does, from your home in the environment station builds, and is bounded to 5 s: a program that does not answer in time leaves its apps OK with `currency unknown`, never behind, and never holds `station apps`.
+
+| Method           | Reads                                                       | Behind when                                                                             |
+| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `brew`, `cask`   | `brew outdated --json=v2`                                   | listed; a pinned formula is left out                                                    |
+| `mise`           | `mise outdated --json -- <runtimes>`                        | listed: a newer version fits what the global file requests                              |
+| `npm`            | `npm outdated -g --json`, once per node mise holds globally | listed in any of them, npm and corepack left out                                        |
+| `bun`            | `bun outdated -g`                                           | its Update column is another version than the installed one: what `bun update -g` moves |
+| `uv`             | `uv tool list --outdated`                                   | marked `[latest: <version>]`                                                            |
+| `mas`            | `mas outdated`                                              | listed, with the version it would bring                                                 |
+| `apt`            | `apt-cache policy`                                          | its candidate is another version than the installed one                                 |
+| `skill`          | the lock, against GitHub                                    | a folder changed upstream                                                               |
+| `github-release` | the repo's latest release, asked once an hour at most       | another tag than the installed one                                                      |
+
+Each program's own rule decides what a pin is, and station does not read around it. A version `mise.toml` pins exactly (`node = "22.1.0"`) is never listed, so it is never behind: moving it is the repo's ([ADR-003](../decisions/003-mise-owns-the-runtimes.md)); a version it tracks (`node = "22"`, `lts`) is listed when a newer one fits. A bun package installed at an exact version is held there by its range and read current whatever its Latest column says. `uv` names the index's newest version, not what a constraint its package was installed with allows, so a package the owner installed by hand at a pinned version reads behind while `uv tool upgrade` leaves it: station installs its own unconstrained. A program that cannot answer (a registry down, a `bun` with no `outdated` (1.0.0 answers that it is reserved), a `uv` that lists no package) leaves each app it should have read unknown, as does an App Store signed out.
+
+A bare `station apps update` reaches the rows that read behind, whose method updates all (`UpdateAll`): every one of the table above but `mas`. The App Store updates its own apps, so a `mas` row says Update available and is moved by name, `station apps update <app>`. `mas outdated` is proven only against a sample written from its documented format: no Mac has run it yet.
 
 ## Superseded installs and App Store copies
 

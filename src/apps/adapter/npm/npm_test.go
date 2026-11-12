@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/jterrazz/studio-station/src/apps"
 	"regexp"
 	"slices"
 	"strings"
@@ -183,5 +184,65 @@ func TestAGlobalNodeWhoseListDoesNotReadLeavesThePackagesUnread(t *testing.T) {
 
 	if got, err := npm.New(run, nil, where).Inventory(context.Background()); err == nil {
 		t.Fatalf("inventory %v; want the second node's list to fail it", got)
+	}
+}
+
+func TestOutdatedReadsTheRegistrysLatestOfEachGlobalNode(t *testing.T) {
+	// outside: a recorded `npm outdated -g --json`: it exits 1 when it lists a
+	// package, and lists the npm and corepack node itself lays too.
+	listing := `{
+  "cowsay": {"current": "1.4.0", "wanted": "1.6.0", "latest": "1.6.0", "dependent": "global", "location": "/n/lib/node_modules/cowsay"},
+  "npm": {"current": "10.7.0", "wanted": "12.2.2", "latest": "12.2.2", "dependent": "global", "location": "/n/lib/node_modules/npm"}
+}`
+	var ran []local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = append(ran, c)
+		return local.Output{ExitCode: 1, Stdout: listing}, nil
+	}, "npm")
+	where := func(context.Context, string) ([]string, error) { return []string{"/home/u/node/22.1.0"}, nil }
+
+	got, err := npm.New(run, nil, where).Outdated(context.Background(), []string{"cowsay", "left-pad"})
+
+	if err != nil || got["cowsay"] != (apps.Currency{Verdict: apps.Behind, Newest: "1.6.0"}) || got["left-pad"].Verdict != apps.Current {
+		t.Fatalf("currency %v %v", got, err)
+	}
+	if want := "outdated -g --json --prefix /home/u/node/22.1.0"; len(ran) != 1 || strings.Join(ran[0].Args, " ") != want || ran[0].Timeout != contract.CurrencyBudget {
+		t.Errorf("npm ran %v; want %q within %v", ran, want, contract.CurrencyBudget)
+	}
+}
+
+func TestOutdatedIsCurrentWhenNpmListsNothingAndUnknownWhenItDidNotAnswer(t *testing.T) {
+	for name, tc := range map[string]struct {
+		out  local.Output
+		want apps.Verdict
+	}{
+		"nothing behind":       {local.Output{}, apps.Current},
+		"the registry is down": {local.Output{ExitCode: 1}, apps.Unknown},
+		"npm's own error":      {local.Output{ExitCode: 254, Stdout: `{"error":{"code":"ENOENT","summary":"no such file"}}`}, apps.Unknown},
+		"an error document":    {local.Output{ExitCode: 1, Stdout: `{"error":{"code":"E","summary":"s"}}`}, apps.Unknown},
+	} {
+		run := local.Played(func(local.Cmd) (local.Output, error) { return tc.out, nil }, "npm")
+		got, err := npm.New(run, nil, nil).Outdated(context.Background(), []string{"cowsay"})
+		if err != nil || got["cowsay"].Verdict != tc.want {
+			t.Errorf("%s: currency %v %v; want %s", name, got, err, tc.want)
+		}
+	}
+}
+
+func TestOutdatedIsBehindWhereAnyGlobalNodeHoldsAnOldCopy(t *testing.T) {
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		if strings.HasSuffix(strings.Join(c.Args, " "), "/22.1.0") {
+			return local.Output{ExitCode: 1, Stdout: `{"cowsay":{"current":"1.4.0","latest":"1.6.0"}}`}, nil
+		}
+		return local.Output{}, nil
+	}, "npm")
+	where := func(context.Context, string) ([]string, error) {
+		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
+	}
+
+	got, _ := npm.New(run, nil, where).Outdated(context.Background(), []string{"cowsay"})
+
+	if got["cowsay"].Verdict != apps.Behind {
+		t.Errorf("currency %v; want behind", got)
 	}
 }

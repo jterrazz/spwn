@@ -16,7 +16,7 @@ runs:
           ◐	gh	2.97.0	brew	outdated
           ●	jq	1.8.1	brew
           ●	mise	2026.10.1	brew	the manager of node
-          ●	node	22.11.0	mise
+          ◐	node	22.11.0	mise	outdated
     - command: 'upgrade'
       exit: 0
       stdout: |

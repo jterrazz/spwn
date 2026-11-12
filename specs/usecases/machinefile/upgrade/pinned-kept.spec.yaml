@@ -15,13 +15,13 @@ runs:
           ●	homebrew	5.0.1	script	the manager of gh
           ◐	gh	2.97.0	brew	outdated
           ●	mise	2026.10.1	brew	the manager of node
-          ●	node	22.11.0	mise
+          ◐	node	22.11.0	mise	outdated
     - command: 'upgrade'
       exit: 0
       stdout: |
           ●	homebrew		script
           ●	mise	2026.10.1	brew
-          ●	node	22.11.0	mise	pinned 22 by jterrazz-macbook-pro: kept
+          ◐	node	22.11.0	mise	pinned 22 by jterrazz-macbook-pro: kept
           ●	gh	2.98.0	brew
           # Lock
           ●	gh		2.98.0 by brew, was 2.97.0 by brew

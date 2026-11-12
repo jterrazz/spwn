@@ -1,0 +1,28 @@
+description: 'mas outdated marks an app behind; a bare update leaves it, an update by name moves it'
+fixture:
+    - ../../__fixtures__/stubs/
+    - ./__fixtures__/outdated/
+env:
+    - STATION_MACHINE_KIND=macos
+runs:
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "xcode") | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+      exit: 0
+      stdout: |
+          xcode update-available 26.1 26.2 outdated
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	every app is up to date on gate2
+    - command: 'apps update xcode'
+      exit: 0
+      stdout: |
+          ●	xcode	26.2	mas
+      files:
+          .calls:
+              contains:
+                  - 'mas outdated'
+                  - 'mas update 497799835'
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "xcode") | "\(.name) \(.state) \(.installed)"'''
+      exit: 0
+      stdout: |
+          xcode ok 26.2

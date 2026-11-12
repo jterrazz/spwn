@@ -29,8 +29,6 @@ const (
 	applications    = "/Applications"
 )
 
-const currencyBudget = 5 * time.Second
-
 type listing struct {
 	keys     map[string]string
 	currency map[string]apps.Currency
@@ -71,7 +69,7 @@ func (s *Shelf) watch(ctx context.Context) <-chan []apps.Report {
 	for _, m := range methods {
 		rows := byMethod[m]
 		jobs = append(jobs, lanes.Job[[]apps.Report]{
-			Key: subject + "/method/" + string(m), Budget: inventoryBudget + versionBudget + currencyBudget,
+			Key: subject + "/method/" + string(m), Budget: inventoryBudget + versionBudget + contract.CurrencyBudget,
 			Partial: func(ctx context.Context, emit func(func(*[]apps.Report))) func(*[]apps.Report) {
 				group := make([]catalog.App, len(rows))
 				for k, i := range rows {
@@ -92,7 +90,7 @@ func (s *Shelf) watch(ctx context.Context) <-chan []apps.Report {
 					if !(*out)[i].Pending {
 						continue
 					}
-					(*out)[i] = apps.Report{App: list[i], Method: m, State: catalog.StateUnknown, Why: apps.WhyLate, Detail: "no answer in " + (inventoryBudget + versionBudget + currencyBudget).String()}
+					(*out)[i] = apps.Report{App: list[i], Method: m, State: catalog.StateUnknown, Why: apps.WhyLate, Detail: "no answer in " + (inventoryBudget + versionBudget + contract.CurrencyBudget).String()}
 				}
 			},
 		})
@@ -194,7 +192,7 @@ func (s *Shelf) list(ctx context.Context, m catalog.Method, list []catalog.App) 
 		}
 	}
 	if len(held) > 0 {
-		told, cancel := context.WithTimeout(ctx, currencyBudget)
+		told, cancel := context.WithTimeout(ctx, contract.CurrencyBudget)
 		l.currency, _ = inst.Outdated(told, held)
 		cancel()
 	}

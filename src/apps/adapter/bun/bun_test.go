@@ -2,6 +2,7 @@ package bun_test
 
 import (
 	"context"
+	"github.com/jterrazz/studio-station/src/apps"
 	"strings"
 	"testing"
 
@@ -75,5 +76,50 @@ func TestAFailedInstallNamesTheCommandAndItsExit(t *testing.T) {
 
 	if err == nil || err.Error() != "bun install exited 1" {
 		t.Errorf("error %v", err)
+	}
+}
+
+func TestOutdatedIsWhatAGlobalUpdateWouldMove(t *testing.T) {
+	// outside: a recorded `bun outdated -g` (bun 1.4.4): cowsay is installed
+	// at a caret range, so its Update column moves; left-pad is installed at an
+	// exact version, so only its Latest column differs and an update leaves it.
+	table := `bun outdated v1.4.4 (38afee6c8)
+|--------------------------------------|
+| Package  | Current | Update | Latest |
+|----------|---------|--------|--------|
+| cowsay   | 1.4.0   | 1.6.0  | 1.6.0  |
+|----------|---------|--------|--------|
+| left-pad | 1.0.0   | 1.0.0  | 1.3.0  |
+|--------------------------------------|
+`
+	var ran local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = c
+		return local.Output{Stdout: table}, nil
+	}, "bun")
+
+	got, err := bun.New(run).Outdated(context.Background(), []string{"cowsay", "left-pad", "is-odd"})
+
+	if err != nil || got["cowsay"] != (apps.Currency{Verdict: apps.Behind, Newest: "1.6.0"}) || got["left-pad"].Verdict != apps.Current || got["is-odd"].Verdict != apps.Current {
+		t.Fatalf("currency %v %v", got, err)
+	}
+	if want := "outdated -g"; strings.Join(ran.Args, " ") != want || ran.Timeout != contract.CurrencyBudget {
+		t.Errorf("bun ran %q within %v; want %q within %v", ran.Args, ran.Timeout, want, contract.CurrencyBudget)
+	}
+}
+
+func TestABunWithNoOutdatedOrNoRegistryLeavesTheCurrencyUnknown(t *testing.T) {
+	// outside: a bun before 1.2 answers `outdated` as a subcommand reserved
+	// for future use, exit 1; one that cannot reach the registry prints only its
+	// banner on stdout, its errors on stderr, exit 1.
+	for name, out := range map[string]local.Output{
+		"reserved":   {ExitCode: 1, Stdout: "Uh-oh. bun outdated is a subcommand reserved for future use by Bun."},
+		"no network": {ExitCode: 1, Stdout: "bun outdated v1.4.4 (38afee6c8)\n", Stderr: "error: ConnectionRefused downloading package manifest cowsay"},
+	} {
+		run := local.Played(func(local.Cmd) (local.Output, error) { return out, nil }, "bun")
+		got, err := bun.New(run).Outdated(context.Background(), []string{"cowsay"})
+		if err != nil || got["cowsay"].Verdict != apps.Unknown {
+			t.Errorf("%s: currency %v %v; want unknown", name, got, err)
+		}
 	}
 }

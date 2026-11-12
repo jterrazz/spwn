@@ -1,8 +1,6 @@
 description: 'update all with one update failing: the others are done, and the one that failed stays to update'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.skill = {installed: {"agent-browser": "1.0.0"}, behind: {"agent-browser": "1.1.0"}}'' world.json > w.json && /bin/mv w.json world.json'
-      exit: 0
     - command: 'world fault Installer.Update 1'
       exit: 0
     - command: 'apps update'
@@ -10,12 +8,12 @@ runs:
       stdout: |
           ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
-          ✗	agent-browser-skill		skill	~/.local/state/station/logs/agent-browser-skill.log
+          ✗	node		mise	~/.local/state/station/logs/node.log
       stderr: |
           Error: 1 of 3 apps failed
-          Hint: re-run it: station apps update agent-browser-skill
+          Hint: re-run it: station apps update node
     - command: 'apps | /usr/bin/grep -A1 "^# Updates"'
       exit: 0
       stdout: |
           # Updates	1 ◐
-          ◐	agent-browser-skill	1.0.0	skill	update available · station apps update agent-browser-skill
+          ◐	node	22.11.0	mise	update available · station apps update node
