@@ -268,7 +268,8 @@ func (f *Installer) offered(k string) []string {
 
 // invariant: an install that carries a version holds what mise's `use`
 // and bun's range resolve it to among what the world offers: an exact one
-// that version; a range the newest within it; `latest` and `stable` the
+// the newest it holds, its build read through (`temurin-21.0.13` holds
+// temurin-21.0.13+9.0.LTS); a range the newest within it; `latest` and `stable` the
 // newest; `lts` the newest of an even major, node's long-term lines, never
 // a newer odd one; any other word a prefix, as mise reads `temurin` and
 // `temurin-21`, the newest that starts with it. A range or a prefix the
@@ -302,8 +303,6 @@ func resolved(v string, offered []string) string {
 	r, err := catalog.ParseRange(v)
 	var keep func(string) bool
 	switch {
-	case err == nil && r.Exact():
-		return v
 	case (err == nil && r.Any()) || v == "stable":
 		keep = func(string) bool { return true }
 	case err == nil:

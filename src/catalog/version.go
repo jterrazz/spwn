@@ -210,8 +210,13 @@ func exactly(exact, version string) bool {
 	// invariant: a version is the one an exact range names, a `v` before
 	// either aside; a vendor before its numbers is read through when the
 	// range names none (`9.8.7` holds temurin-9.8.7, never zulu's when it
-	// names temurin's).
+	// names temurin's), and so are build words after a plus when it names
+	// none (`21.0.13` holds temurin-21.0.13+9.0.LTS, `21.0.13+9` only its
+	// own build).
 	exact, version = strings.TrimPrefix(exact, "v"), strings.TrimPrefix(version, "v")
+	if !strings.Contains(exact, "+") {
+		version, _, _ = strings.Cut(version, "+")
+	}
 	if version == exact || vendorHead.MatchString(exact) {
 		return version == exact
 	}
@@ -244,13 +249,18 @@ func (r Range) Past(version string) bool {
 func (r Range) Moved(version string) string {
 	// value: the range written as its file writes it, moved to hold a newer
 	// version: `24` to `25`, `~24.11.0` to `~25.1.0`, an exact one to that
-	// version.
+	// version as a file writes it, its vendor and its build read through
+	// as an exact range reads them (`temurin-27.0.1+0` to `27.0.1`).
 	v, ok := numbers(version)
 	if !ok || r.Any() {
 		return r.String()
 	}
 	if r.Exact() {
-		return strings.TrimPrefix(version, "v")
+		if m := vendorHead.FindStringSubmatch(version); m != nil {
+			version = version[len(m[1]):]
+		}
+		version, _, _ = strings.Cut(strings.TrimPrefix(version, "v"), "+")
+		return version
 	}
 	m := rangeWord.FindStringSubmatch(r.text)
 	parts := 1

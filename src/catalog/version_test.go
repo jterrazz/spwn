@@ -66,6 +66,7 @@ func TestANewerVersionPastTheRangeWaitsWithTheLineMoved(t *testing.T) {
 		{"24.11", "24.14.0", "24.14"},
 		{"^24.2.0", "25.1.0", "^25.1.0"},
 		{"24.11.3", "24.11.4", "24.11.4"},
+		{"21.0.13", "temurin-27.0.1+0", "27.0.1"},
 	} {
 		r, _ := catalog.ParseRange(c.asked)
 		if !r.Past(c.newest) || r.Moved(c.newest) != c.moved {
@@ -161,6 +162,8 @@ func TestAVendorBeforeTheNumbersIsReadThrough(t *testing.T) {
 	}{
 		{"9.8.7", "temurin-9.8.7", true}, {"v9.8.7", "temurin-v9.8.7", true}, {"9.8.7", "temurin-9.8.8", false},
 		{"temurin-9.8.7", "temurin-9.8.7", true}, {"temurin-9.8.7", "zulu-9.8.7", false}, {"temurin-9.8.7", "9.8.7", false},
+		{"21.0.13", "temurin-21.0.13+9.0.LTS", true}, {"21.0.13", "21.0.13+9", true}, {"21.0.13+9", "21.0.13+9", true},
+		{"21.0.13+9", "21.0.13+7", false}, {"21.0.13", "temurin-21.0.14+1", false},
 	} {
 		if got := catalog.Exactly(c.exact).Contains(c.version); got != c.holds {
 			t.Errorf("exactly %s holds %s: %v; want %v", c.exact, c.version, got, c.holds)

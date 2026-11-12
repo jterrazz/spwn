@@ -2,8 +2,6 @@ description: 'a range of java keeps the catalog''s vendor: 21 installs temurin-2
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.mise.versions.java = ["21.0.2+13", "temurin-21.0.12+7.0.LTS", "temurin-21.0.13+9.0.LTS", "27.0.1+0", "temurin-27.0.1+0"]'' world.json > w.json && /bin/mv w.json world.json'
-      exit: 0
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
           machinefile: station.machinefile/v1
