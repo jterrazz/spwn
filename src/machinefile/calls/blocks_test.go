@@ -188,6 +188,34 @@ func TestApplyRecordsTheBlockItWrites(t *testing.T) {
 	}
 }
 
+func TestABlockOfStationsTextWithNoRecordOfItIsRecorded(t *testing.T) {
+	body := "export SOLO=1\n"
+	file := "# >>> station:solo >>>\n" + body + "# <<< station:solo <<<\n"
+	keep := machinefile.Block{Item: "solo", ID: "station:solo", Zsh: body, Condition: machinefile.Present, Action: machinefile.Keep}
+	cases := []struct {
+		name    string
+		written []machinefile.Written
+	}{
+		{"with no record", nil},
+		{"with the record of other text", []machinefile.Written{{ID: "station:solo", Item: "solo", Digest: machinefile.BlockDigest("export SOLO=0\n")}}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			z, l := &zshrcText{file}, &writtenLedger{blocks: slices.Clone(c.written)}
+			r := &run{d: Deps{Zshrc: z, Ledger: l, Now: epoch}, there: map[string]bool{"solo": true}}
+			if done := r.blocks(t.Context(), machinefile.Plan{Blocks: []machinefile.Block{keep}}); len(done) != 1 || done[0].State != catalog.StateOK {
+				t.Fatalf("kept %+v", done)
+			}
+			if len(l.blocks) != 1 || l.blocks[0].Digest != machinefile.BlockDigest(body) || l.blocks[0].Item != "solo" {
+				t.Errorf("recorded %+v", l.blocks)
+			}
+			if z.text != file {
+				t.Errorf("rewrote the file: %q", z.text)
+			}
+		})
+	}
+}
+
 func TestRemoveTakesABlockOnlyWithItsApp(t *testing.T) {
 	cases := []struct {
 		name      string

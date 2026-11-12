@@ -141,7 +141,9 @@ func extraBlock(zshrc string, w machinefile.Written, app machinefile.Fate) machi
 // invariant: a block is written once its app reads there, and only while
 // the file still holds what the plan judged; it is recorded as written,
 // so a later edit by hand reads changed and a later template change reads
-// outdated. An extra's block is not judged here: it follows its app in
+// outdated. A block already exactly as apply writes it is recorded too when
+// the ledger holds no record of that text, so it follows its package from
+// then on. An extra's block is not judged here: it follows its app in
 // `apply --remove` (followApp).
 func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.BlockDone {
 	out := make([]machinefile.BlockDone, 0, len(p.Blocks))
@@ -151,6 +153,7 @@ func (r *run) blocks(ctx context.Context, p machinefile.Plan) []machinefile.Bloc
 		case b.Condition == machinefile.Extra:
 			continue
 		case b.Action == machinefile.Keep:
+			done = r.recordBlock(ctx, done)
 		case b.Action == machinefile.Leave:
 			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
 		case !r.there[b.Item]:
@@ -251,7 +254,7 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		now := judgeBlock(zshrc, done.Item, done.ID, done.Zsh, written).Action
 		if now == machinefile.Keep {
 			done.Detail = ""
-			return done
+			return r.recordBlock(ctx, done)
 		}
 		if now != machinefile.Set {
 			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
@@ -275,6 +278,21 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Item: done.Item, Digest: machinefile.BlockDigest(done.Zsh), At: r.d.Now().UTC()})
 	} else {
 		err = r.d.Ledger.DeleteBlock(ctx, done.ID)
+	}
+	if err != nil {
+		done.State, done.Detail = catalog.StateBroken, err.Error()
+	}
+	return done
+}
+
+func (r *run) recordBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
+	written, err := writtenBlocks(ctx, r.d)
+	digest := machinefile.BlockDigest(done.Zsh)
+	if w, ok := written[done.ID]; err == nil && ok && w.Item == done.Item && w.Digest == digest {
+		return done
+	}
+	if err == nil {
+		err = r.d.Ledger.PutBlock(ctx, machinefile.Written{ID: done.ID, Item: done.Item, Digest: digest, At: r.d.Now().UTC()})
 	}
 	if err != nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
