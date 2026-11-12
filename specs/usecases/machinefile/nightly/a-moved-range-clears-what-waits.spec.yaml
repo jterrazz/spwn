@@ -1,0 +1,40 @@
+description: 'an apply of a range moved to hold the waiting version clears its Needs you line at once'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: node, version: '22' }]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of mise
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -c "available"'
+      exit: 0
+      stdout: |
+          1
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: node, version: '25' }]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of mise
+          ●	mise	2026.10.1	brew	the manager of node
+          ●	node	22.14.0	mise
+    - command: 'overview | /usr/bin/grep -c "available"'
+      exit: 1
+      stdout: |
+          0

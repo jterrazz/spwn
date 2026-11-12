@@ -57,7 +57,9 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		// confirmation, a copy that would replace the owner's file. Then
 		// the machine is bound, so an interrupted run is resumed by a bare
 		// `station apply`. One run of the machine at a time: an upgrade or
-		// the night's holding it is waited for, a while.
+		// the night's holding it is waited for, a while. An apply run to its
+		// end reads the last night's waiting versions against the ranges it
+		// applied, so a range moved past one clears it at once.
 		release, err := take(ctx, d)
 		if err != nil {
 			return machinefile.Applied{}, err
@@ -113,6 +115,9 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
+		}
+		if n, ran, err := d.Ledger.Night(ctx); err == nil && ran && n.Machinefile == plan.Name {
+			_ = d.Ledger.Write(context.WithoutCancel(ctx), n.Reread(plan))
 		}
 		return out, ctx.Err()
 	},

@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/machinefile"
 )
 
@@ -35,5 +36,34 @@ func TestANightThatDidNotEndKeepsTheLastOneThatDid(t *testing.T) {
 	}
 	if refreshed := first.Refreshed(machinefile.Upgraded{}); refreshed.Last != nil {
 		t.Error("an owner's upgrade run to its end kept the last night beside it")
+	}
+}
+
+func TestAnApplyReadsWhatWaitsAgainstTheRangesItApplied(t *testing.T) {
+	// invariant: a version past the range its app's line holds now still
+	// waits, in that range's words; one the line's range was moved to
+	// hold, or of an app listed no longer, waits no more.
+	line := func(item, version string) machinefile.Line {
+		r, err := catalog.ParseRange(version)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var l machinefile.Line
+		l.Step.Item, l.Step.Version = item, r
+		return l
+	}
+	n := machinefile.Night{Machinefile: "m", Waiting: []machinefile.Waiting{
+		{App: "node", Newest: "25.1.0", Range: "24", Moved: "25"},
+		{App: "go", Newest: "1.26.0", Range: "~1.25.0", Moved: "~1.26.0"},
+		{App: "gone", Newest: "2.0.0", Range: "1", Moved: "2"},
+	}}
+	n.Last = &machinefile.Night{Machinefile: "m", Waiting: n.Waiting}
+	got := n.Reread(machinefile.Plan{Lines: []machinefile.Line{line("node", "25"), line("go", "1.25")}})
+	want := machinefile.Waiting{App: "go", Newest: "1.26.0", Range: "1.25", Moved: "1.26"}
+	if len(got.Waiting) != 1 || got.Waiting[0] != want {
+		t.Errorf("waits %+v; want only %+v", got.Waiting, want)
+	}
+	if got.Last == nil || len(got.Last.Waiting) != 1 {
+		t.Errorf("the last night kept beside was not read again: %+v", got.Last)
 	}
 }

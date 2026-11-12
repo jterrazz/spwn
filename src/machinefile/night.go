@@ -105,6 +105,30 @@ func (n Night) Refreshed(u Upgraded) Night {
 	return n
 }
 
+func (n Night) Reread(p Plan) Night {
+	// invariant: a version waits while its app's line, as the plan reads
+	// it now, holds a range it is past; one whose range was moved to hold
+	// it, or whose app is listed no longer, waits no more, and the one
+	// kept beside a night that did not end is read the same way.
+	ranges := map[string]Line{}
+	for _, l := range p.Lines {
+		ranges[l.Step.Item] = l
+	}
+	var waiting []Waiting
+	for _, w := range n.Waiting {
+		l, ok := ranges[w.App]
+		if r := l.Step.Version; ok && r.Past(w.Newest) {
+			waiting = append(waiting, Waiting{App: w.App, Newest: w.Newest, Range: r.String(), Moved: r.Moved(w.Newest), File: l.Step.Origin.File})
+		}
+	}
+	n.Waiting = waiting
+	if n.Last != nil {
+		last := n.Last.Reread(p)
+		n.Last = &last
+	}
+	return n
+}
+
 func LastNight(now time.Time) time.Time {
 	// value: the most recent NightHour at or before now, on now's clock.
 	y, m, d := now.Date()
