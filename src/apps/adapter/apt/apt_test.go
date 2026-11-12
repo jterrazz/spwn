@@ -34,7 +34,10 @@ type dpkg struct {
 	// value: a cancel the install calls when cut, so the run is interrupted
 	// as ctrl-c does.
 	interrupt context.CancelFunc
-	calls     []string
+	// value: an install the runner reports cancelled, as it does a child
+	// ctrl-c ended before station's own context is, which stays live.
+	signaled bool
+	calls    []string
 }
 
 func (d *dpkg) play(c local.Cmd) (local.Output, error) {
@@ -77,6 +80,9 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 			name, version, _ := strings.Cut(p, "=")
 			d.held[name] = cmpOr(version, "1.0")
 		}
+	}
+	if d.signaled && c.Args[verb] == "install" {
+		return local.Output{}, context.Canceled
 	}
 	if d.cut && c.Args[verb] == "install" {
 		if d.interrupt != nil {
@@ -520,6 +526,23 @@ func TestAnInstallCutShortLeavesTheRecordOfWhatItMayHaveAdded(t *testing.T) {
 	failed.fails = false
 	if holds, err := b.Holds(ctx, "y"); err != nil || holds {
 		t.Errorf("holds %v (%v) after an install that added nothing; want no record", holds, err)
+	}
+}
+
+func TestAnInstallCutByASignalBeforeTheContextIsKeepsItsRecord(t *testing.T) {
+	// hazard: ctrl-c reaches apt-get with station's own handler not yet run,
+	// so the runner reports the child cancelled while ctx is live; that is an
+	// interruption, and the record of what it may have added stays.
+	d := &dpkg{held: map[string]string{}, signaled: true}
+	a := played(d)
+	ctx := context.Background()
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}
+
+	if err := a.InstallFor(ctx, apply("x"), foo, nil); err == nil {
+		t.Fatal("an install cut short returned no error")
+	}
+	if holds, err := a.Holds(ctx, "x"); err != nil || !holds {
+		t.Errorf("holds %v (%v) after an install cut by a signal; want its record kept", holds, err)
 	}
 }
 

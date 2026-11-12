@@ -219,12 +219,14 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 	return ran
 }
 
-// invariant: a run is interrupted once its context is cancelled, or when it
-// ends by a signal, whose exit code is 128 and above, since ctrl-c reaches
-// apt-get before it reaches station's own context.
+// invariant: a run is interrupted once its context is cancelled, when the
+// runner says it was cancelled, or when it ends by a signal, whose exit code
+// is 128 and above, since ctrl-c reaches apt-get before it reaches station's
+// own context, and the runner names a child ctrl-c ended as cancelled whether
+// or not that context has been yet.
 func interrupted(ctx context.Context, ran error) bool {
 	var exit *local.ExitError
-	return ctx.Err() != nil || errors.As(ran, &exit) && exit.Code > 128
+	return ctx.Err() != nil || errors.Is(ran, context.Canceled) || errors.As(ran, &exit) && exit.Code > 128
 }
 
 // value: how long the read after an install may take, past an interrupt.
