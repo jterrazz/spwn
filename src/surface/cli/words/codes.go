@@ -125,6 +125,12 @@ func Codes() map[fail.Code]Wording {
 			verb := cmp.Or(e.Detail["verb"], "apply")
 			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station " + verb + " on a terminal"
 		},
+		machinefilecalls.BadPhase: func(e *fail.Error) (string, string) {
+			if e.Detail["remove"] != "" {
+				return "--remove takes back what apply's phase lists no longer, and the " + e.Subject + " phase carries a part of it", "station apply --remove"
+			}
+			return "no phase " + e.Subject + ": a Machinefile's phases are " + e.Detail["phases"], "station apply --phase image"
+		},
 		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
 			if strings.HasSuffix(e.Subject, catalog.LockSuffix) {
 				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"

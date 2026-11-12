@@ -1,0 +1,30 @@
+description: 'a phase the Machinefile has not, or --remove of the image phase, is refused before any effect'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply --phase install --yes'
+      exit: 2
+      stderr: |
+          Error: no phase install: a Machinefile's phases are image, boot, apply
+          Hint: station apply --phase image
+    - command: 'apply --phase image --remove --yes'
+      exit: 2
+      stdout: |
+          # Left as it is
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+      stderr: |
+          Error: --remove takes back what apply's phase lists no longer, and the image phase carries a part of it
+          Hint: station apply --remove
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ○	apt	apt	absent
+          ○	jq	apt	absent

@@ -22,6 +22,7 @@ type Deps struct{ ThisMachine page.Context }
 
 type Input struct {
 	Machinefile string
+	Phase       string
 	Diff        bool
 }
 
@@ -61,12 +62,13 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile planned, by its name or its file (default: the one this machine carries)")
+			f.StringVar(&in.Phase, "phase", "", "plan one phase: image (what a VM image bakes), boot (a VM's first start), apply (default)")
 			f.BoolVar(&in.Diff, "diff", false, "what apply would change in each file it writes, from the file to station's: each shell block of ~/.zshrc and each setting's file")
 		},
 		Read:  func(*Input) bool { return true },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile}, nil)
+			p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile, Phase: catalog.Phase(in.Phase)}, nil)
 			if err != nil {
 				return err
 			}

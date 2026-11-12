@@ -20,6 +20,7 @@ type Deps struct{ ThisMachine page.Context }
 type Input struct {
 	Machinefile string
 	Remove      bool
+	Phase       string
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -31,6 +32,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile, by its name or its file, which this machine then carries (default: the one it carries)")
 			f.BoolVar(&in.Remove, "remove", false, "also remove what station installed here that the Machinefile lists no longer")
+			f.StringVar(&in.Phase, "phase", "", "carry out one phase: image (what a VM image bakes), boot (a VM's first start), apply (default)")
 		},
 		Asks:    true,
 		Confirm: func(*Input) string { return "Remove what the Machinefile lists no longer?" },
@@ -44,7 +46,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 	// value: the plan, then the run: what `station apply` and `station init
 	// --machinefile` print.
-	p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile}, nil)
+	p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile, Phase: catalog.Phase(in.Phase)}, nil)
 	if err != nil {
 		return err
 	}
@@ -54,7 +56,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 	var out machinefile.Applied
 	steps := kit.Steps(io)
 	err = io.Confirmed(func(answer string) (err error) {
-		out, err = call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Apply, machinefilecalls.ApplyIn{Machinefile: in.Machinefile, Remove: in.Remove, Interactive: io.Interactive, Confirm: answer}, steps)
+		out, err = call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Apply, machinefilecalls.ApplyIn{Machinefile: in.Machinefile, Remove: in.Remove, Phase: catalog.Phase(in.Phase), Interactive: io.Interactive, Confirm: answer}, steps)
 		return err
 	})
 	steps.Stop()

@@ -1,0 +1,38 @@
+description: 'apply --phase image installs what the image bakes and what it requires, and leaves the rest'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          vm: { image: { bake: [jq] } }
+          apps: [jq, playwright-mcp]
+      exit: 0
+    - command: 'apply --phase image --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          # Left as it is
+          ○	mise	script	the manager of node
+          ○	node	mise	required by playwright-mcp
+          ○	bun	mise	the manager of playwright-mcp
+          ○	playwright-mcp	bun
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
+          ○	mise		script	the manager of node
+          ○	node		mise	required by playwright-mcp
+          ○	bun		mise	the manager of playwright-mcp
+          ○	playwright-mcp		bun
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	apt	apt	present
+          ●	jq	apt	present
+          ○	mise	script	absent
+          ○	node	mise	absent
+          ○	bun	mise	absent
+          ○	playwright-mcp	bun	absent

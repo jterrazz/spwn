@@ -26,6 +26,9 @@ const (
 	// value: a Machinefile named by its path whose name the owner's folder
 	// already holds with other bytes: it is never replaced.
 	NameTaken fail.Code = "machinefile.name-taken"
+	// value: a phase that is none of the Machinefile's, or --remove asked
+	// of a phase that carries only a part of it.
+	BadPhase fail.Code = "machinefile.bad-phase"
 )
 
 // value: how long the read past an interrupt waits for the interrupted
@@ -39,7 +42,10 @@ type ApplyIn struct {
 	Machinefile string
 	// value: also remove what station installed for this machine that its
 	// Machinefile lists no longer, and only that.
-	Remove      bool
+	Remove bool
+	// value: the phase carried out: empty, apply's; image, what the VM
+	// image bakes (its build runs it); boot, a VM's first start.
+	Phase       catalog.Phase
 	Interactive bool
 	Confirm     string
 }
@@ -49,8 +55,11 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded, Busy},
+	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
+		if bad := badPhase(in.Phase, in.Remove); bad != nil {
+			return machinefile.Applied{}, bad
+		}
 		// invariant: everything is judged before any effect: the
 		// Machinefile, the needs a run off a terminal cannot answer (with
 		// --remove, those of each extra it uninstalls), the removal's
@@ -65,7 +74,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		defer release()
-		plan, err := judged(ctx, d, in.Machinefile)
+		plan, err := judged(ctx, d, in.Machinefile, in.Phase)
 		if err != nil {
 			return machinefile.Applied{}, err
 		}
@@ -124,6 +133,16 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		return out, ctx.Err()
 	},
+}
+
+func badPhase(phase catalog.Phase, remove bool) error {
+	switch {
+	case phase != "" && !slices.Contains(phase.Enum(), string(phase)):
+		return fail.New(fail.Refused, BadPhase, string(phase), map[string]string{"phases": strings.Join(phase.Enum(), ", ")})
+	case remove && phase != "" && phase != catalog.PhaseApply:
+		return fail.New(fail.Refused, BadPhase, string(phase), map[string]string{"remove": "true"})
+	}
+	return nil
 }
 
 func refusedOffTerminal(asked []machinefile.Asked, verb string) error {

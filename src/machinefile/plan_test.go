@@ -31,7 +31,7 @@ func TestJudgeTakesBackOnlyThisMachinefilesExtrasDependentsFirst(t *testing.T) {
 		"tool":    {Condition: machinefile.Present, Method: "pkg"},
 		"other":   {Condition: machinefile.Present, Method: "pkg"},
 	}
-	p := machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false)
+	p := machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "")
 	order := make([]string, 0, 3)
 	var removed []string
 	for _, e := range p.Extra {
@@ -55,7 +55,7 @@ func TestJudgeKeepsAnItemSkippedOnThisSystem(t *testing.T) {
 	ledger := []machinefile.Installed{{Item: "foo", Method: "pkg", Machinefile: "laptop"}}
 	seen := map[string]machinefile.Seen{"foo": {Condition: machinefile.Present, Method: "pkg"}}
 	r := machinefile.Resolved{Name: "laptop", Skipped: []machinefile.Skip{{Item: "foo", Why: "optional, no method for macos 27"}}}
-	for _, e := range machinefile.Judge(r, cat, seen, ledger, false).Extra {
+	for _, e := range machinefile.Judge(r, cat, seen, ledger, false, "").Extra {
 		t.Errorf("%s is extra (%s); want none: it is still listed", e.Step.Item, e.Action)
 	}
 }
@@ -83,7 +83,7 @@ func TestJudgeKeepsAnExtraAnotherAppStillNeeds(t *testing.T) {
 		"dotfiles": {Condition: machinefile.Present},
 	}
 	kept := map[string][]string{}
-	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false).Extra {
+	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "").Extra {
 		if !e.Takes() {
 			kept[e.Step.Item] = e.RequiredBy
 		}
@@ -109,7 +109,7 @@ func TestJudgeKeepsTheProviderOfAListedApp(t *testing.T) {
 		"core":    {Condition: machinefile.Present, Method: "provided-by"},
 	}
 	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{{Item: "core", Kind: catalog.KindApp, Method: "provided-by", Phase: catalog.PhaseApply}}}
-	for _, e := range machinefile.Judge(r, cat, seen, ledger, false).Extra {
+	for _, e := range machinefile.Judge(r, cat, seen, ledger, false, "").Extra {
 		if e.Takes() || !slices.Equal(e.RequiredBy, []string{"core"}) {
 			t.Errorf("%s: takes %v, required by %v; want kept, required by [core]", e.Step.Item, e.Takes(), e.RequiredBy)
 		}
@@ -132,7 +132,7 @@ func TestJudgeKeepsWhatAnExtraStationCannotUninstallNeeds(t *testing.T) {
 		"browsers": {Condition: machinefile.Present, Method: "script", Irreversible: true},
 	}
 	fates := map[string]machinefile.Fate{}
-	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false).Extra {
+	for _, e := range machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "").Extra {
 		fates[e.Step.Item] = e.Fate()
 		if e.Step.Item == "runtime" && !slices.Equal(e.RequiredBy, []string{"browsers"}) {
 			t.Errorf("runtime required by %v; want [browsers]", e.RequiredBy)
@@ -175,7 +175,7 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 				tool, want = machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, c.neededBy
 			}
 			seen := map[string]machinefile.Seen{"manager": {Condition: machinefile.Present, Method: "script"}, "lib": c.lib, "tool": tool}
-			p := machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false)
+			p := machinefile.Judge(machinefile.Resolved{Name: "laptop"}, cat, seen, ledger, false, "")
 			e := p.Extra[0]
 			if got := e.Fate(); got != want {
 				t.Errorf("lib %s, needed %v: %s; want %s", c.reads, needed, got, want)
@@ -229,7 +229,7 @@ func TestJudgeAsksThePasswordOnlyWhereTheMachineAsksOne(t *testing.T) {
 		{false, []catalog.Need{catalog.NeedSudo, catalog.NeedLicense}, []catalog.Need{catalog.NeedSudo, catalog.NeedLicense}},
 		{true, []catalog.Need{catalog.NeedLicense}, []catalog.Need{catalog.NeedLicense}},
 	} {
-		p := machinefile.Judge(r, cat, seen, ledger, c.passwordless)
+		p := machinefile.Judge(r, cat, seen, ledger, c.passwordless, "")
 		if got := needs(p.Needs); !slices.Equal(got, c.plan) {
 			t.Errorf("passwordless %v: the plan asks %v; want %v", c.passwordless, got, c.plan)
 		}
@@ -263,7 +263,7 @@ func TestUpgradeAsksOnlyWhatTheUpdateNeedsNotItsInstalls(t *testing.T) {
 		"gone":    {Condition: machinefile.Absent},
 		"pkg":     {Condition: machinefile.Present, Method: "script"},
 	}
-	p := machinefile.Judge(r, cat, seen, nil, false)
+	p := machinefile.Judge(r, cat, seen, nil, false, "")
 	got := p.UpgradeNeeds()
 	if len(got) != 2 || got[0].Need != catalog.NeedSudo || !slices.Equal(got[0].Items, []string{"gone"}) || got[1].Need != catalog.NeedLicense || !slices.Equal(got[1].Items, []string{"pkg"}) {
 		t.Errorf("upgrade asks %+v; want sudo for gone (installed) and a license for pkg (its method's)", got)

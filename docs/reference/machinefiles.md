@@ -11,6 +11,7 @@ A Machinefile is one YAML file in the schema `station.machinefile/v1` that says 
 | The resolution     | How a Machinefile becomes the steps of a plan, and its errors |
 | explain            | Each value and the layer it comes from                        |
 | plan, apply, drift | The machine read against it, carried out, and its ledger      |
+| Phases             | What an image bakes, a first start, and a bare apply          |
 | The lock           | What a machine carries of it, and what `apply` installs again |
 | upgrade            | Every app it carries updated, the managers first, every night |
 | The hard cases     | Where the format absorbs each of them                         |
@@ -79,7 +80,7 @@ ports: # WHAT it may open, and to whom
 | `vm.lifetime`    | `persistent` (kept until deleted) or `ephemeral` (deleted once powered off from inside)                                                                                                                                                                                               |
 | `vm.resources`   | `cpus` (a count), `memory` and `disk` (a size: `512M`, `32G`, `1T`)                                                                                                                                                                                                                   |
 | `vm.network`     | `nat` (behind its computer, no address on the LAN) or `bridged` (its own LAN address)                                                                                                                                                                                                 |
-| `vm.image`       | `from`, the image its disk is made from, and `bake`, the items baked into it                                                                                                                                                                                                          |
+| `vm.image`       | `from`, the image its disk is made from, and `bake`, the items baked into it: the image phase installs them and what they require ([Phases](#phases))                                                                                                                                 |
 | `extends`        | the Machinefiles it inherits, in order                                                                                                                                                                                                                                                |
 | `prefer`         | method keys (`brew`, `mise`, `apt`, `github-release`...) tried first, in this order, before the system's priority                                                                                                                                                                     |
 | `apps`           | a list: an item's name, or `{ name, version, optional, manager, options }`: how far it moves ([Versions](#versions); its method must hold that range), `optional` (no method for the system skips it), the method key it is installed by instead of the priority's, its option values |
@@ -168,6 +169,18 @@ What `apply` installed is in the ledger, `~/.local/state/station/ledger.json`: e
 `plan` and the run say these in the same words. A plan whose only extras `--remove` would let go of (already gone, held another way since, or one station cannot uninstall) is not calm: it ends on `station apply --remove  lets go of what is yours now`. A manager's packages are what each method it manages lists (`npm ls -g --prefix <folder>` for each node mise holds globally, `uv tool list`, `bun pm ls -g`, `mise ls --global`) that no app of the catalog placed here installs by that method, npm and corepack being node's own, read from your home with mise's shims first and mise pinned to its global file, so neither the folder you run station from nor the PATH your shell gave it picks which node answers; once you remove the last of them, the next `apply --remove` takes it back. What an app there leans on is judged by its method as `station apps` shows it (the one chosen here, even for an app present another way); an app `station apps` has no row of (one not for this machine) holds nothing, and a setting's `requires` holds no app. An extra station cannot uninstall is never counted as taken back, so what it needs is `required by` it in the plan already, and when another app there needs it, it is `required by <app>: kept` like any other, with its record; an extra whose uninstall fails at the run is still there too, so each extra it leans on that comes after it is `required by <app>: kept, judged again next run`, with its record.
 
 An apt app station recorded adding none of the packages of (`~/.local/share/station/apt`, [Apps and skills](apps-and-skills.md)) is yours, whoever the ledger says installed it: the plan says `listed no longer`, and the run keeps it, `station cannot uninstall it: kept, and yours: remove it by hand if you want`, and forgets it. Only `station apps remove <app>`, your own word for it, takes its package.
+
+## Phases
+
+A Machinefile is carried out in three phases, each `plan --phase` and `apply --phase` read alone ([Commands](commands.md#station-itself)):
+
+| Phase   | Carries                                                                                                                          | Run by                              |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `image` | each item `vm.image.bake` lists, and what a baked item requires (its `requires`, its provider, its manager), in the plan's order | a VM image's build                  |
+| `boot`  | the items whose `phase` is `boot`                                                                                                | a VM's first start                  |
+| `apply` | every other item, the baked ones included: on a VM made from the image they read present and are kept                            | a bare `station apply`, the default |
+
+A step of another phase than the one run is left as it is, and only `apply`'s phase has extras, so `apply --remove` with another phase is refused before any effect. A baked item the Machinefile does not list under `apps` is carried all the same, `baked` as why.
 
 ## The lock
 

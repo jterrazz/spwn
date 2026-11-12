@@ -378,7 +378,7 @@ func TestAnAppHeldByAnotherOfItsMethodsIsAdoptedNeverInstalledAgain(t *testing.T
 			t.Errorf("%s: reads %s by %s (%s), want ok by %s", c.item, row.State, row.Method, row.Detail, c.held)
 		}
 		seen := map[string]machinefile.Seen{c.item: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
-		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false).Lines[0]
+		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false, "").Lines[0]
 		if step.Method == c.held || line.Action != machinefile.Adopt || line.Method() != c.held {
 			t.Errorf("%s: the plan chose %s and %s it by %s; want it adopted by %s", c.item, step.Method, line.Action, line.Method(), c.held)
 		}
@@ -493,7 +493,7 @@ func TestAMoveHandsTheAppToTheMethodAskedOnEveryPath(t *testing.T) {
 		row := b.row(t, c.item)
 		step := b.step(t, c.item)
 		seen := map[string]machinefile.Seen{c.item: {Condition: machinefile.Present, State: catalog.StateOK, Method: string(row.Method)}}
-		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false).Lines[0]
+		line := machinefile.Judge(machinefile.Resolved{Name: "m", Steps: []machinefile.Step{step}}, b.cat, seen, nil, false, "").Lines[0]
 		if string(row.Method) != c.to || step.Method != c.to || line.Action != machinefile.Keep {
 			t.Errorf("%s: reads by %s, the plan asks %s and %s it", about, row.Method, step.Method, line.Action)
 		}

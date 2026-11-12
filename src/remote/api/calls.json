@@ -370,6 +370,7 @@
       "confirm": "remove",
       "errors": [
         "confirm.yes-needed",
+        "machinefile.bad-phase",
         "machinefile.busy",
         "machinefile.name-taken",
         "machinefile.needs-terminal",
@@ -423,6 +424,7 @@
       "schema": "station.machinefile.plan/v1",
       "where": "at-target",
       "errors": [
+        "machinefile.bad-phase",
         "machinefile.not-found"
       ],
       "in": "PlanIn",

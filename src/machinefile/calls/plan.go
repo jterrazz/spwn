@@ -19,6 +19,9 @@ type PlanIn struct {
 	// value: the Machinefile, by its name or its path; empty, the one this
 	// machine is bound to, else the one named after it.
 	Machinefile string
+	// value: the phase read: empty, apply's; image, what the VM image
+	// bakes; boot, a VM's first start.
+	Phase catalog.Phase
 }
 
 var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
@@ -26,9 +29,12 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 	// each item to install, set, adopt or leave, what is extra, and what
 	// has to happen once it is applied. It changes nothing.
 	Name: "machinefile.plan", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, BadPhase},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
-		return judged(ctx, d, in.Machinefile)
+		if bad := badPhase(in.Phase, false); bad != nil {
+			return machinefile.Plan{}, bad
+		}
+		return judged(ctx, d, in.Machinefile, in.Phase)
 	},
 }
 
@@ -38,14 +44,14 @@ var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
 	Name: "machinefile.drift", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
-		return judged(ctx, d, in.Machinefile)
+		return judged(ctx, d, in.Machinefile, in.Phase)
 	},
 }
 
 // invariant: whether a line run as root asks a password is the machine's
 // answer, read once and only for a plan a sudo need is in; a read that
 // cannot tell asks it, so a run off a terminal is refused as before.
-func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error) {
+func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
 	r, cat, err := resolveIn(ctx, d, asked)
 	if err != nil {
 		return machinefile.Plan{}, err
@@ -58,7 +64,7 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
-	p := machinefile.Judge(r, cat, seen, ledger, false)
+	p := machinefile.Judge(r, cat, seen, ledger, false, phase)
 	if p, err = withBlocks(ctx, d, p, cat); err != nil {
 		return machinefile.Plan{}, Worded(err)
 	}
@@ -69,7 +75,7 @@ func judged(ctx context.Context, d Deps, asked string) (machinefile.Plan, error)
 		return p, nil
 	}
 	if asked, err := d.Password.Asked(ctx); err == nil && !asked {
-		p = machinefile.Judge(r, cat, seen, ledger, true)
+		p = machinefile.Judge(r, cat, seen, ledger, true, phase)
 		if p, err = withBlocks(ctx, d, p, cat); err != nil {
 			return machinefile.Plan{}, Worded(err)
 		}

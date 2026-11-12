@@ -1,6 +1,7 @@
 package machinefile
 
 import (
+	"cmp"
 	"slices"
 	"strconv"
 	"time"
@@ -112,7 +113,10 @@ type Asked struct {
 // a line run as root asks no password here, as the machine answered it.
 
 type Plan struct {
-	Name   string
+	Name string
+	// value: the phase the plan carries out: apply's, the default; image,
+	// what the VM image bakes; boot, a VM's first start.
+	Phase  catalog.Phase
 	Lock   Lock
 	Source *catalog.LockSource
 	Needs  []Asked
@@ -126,14 +130,26 @@ type Plan struct {
 	Passwordless bool
 }
 
-func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed, passwordless bool) Plan {
+func InPhase(s Step, phase catalog.Phase) bool {
+	// invariant: a step is of the phase its item says, apply's by default;
+	// the image phase also runs every baked step, which a bare apply
+	// carries too.
+	if phase == catalog.PhaseImage && s.Baked {
+		return true
+	}
+	return s.Phase == cmp.Or(phase, catalog.PhaseApply)
+}
+
+func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Installed, passwordless bool, phase catalog.Phase) Plan {
 	// invariant: an item's action follows from what it reads: absent is
 	// installed or set, present by its method kept, present by another of
 	// its methods or another way adopted and never reinstalled, an app that no longer answers installed again, a
 	// setting changed by hand or a read that did not answer left as it is
 	// (the owner's to decide); an item of another phase is left to it. An
-	// item skipped on this system is still listed, so never extra.
-	p := Plan{Name: r.Name, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless}
+	// item skipped on this system is still listed, so never extra; only
+	// apply's phase has extras, since another phase carries a part.
+	phase = cmp.Or(phase, catalog.PhaseApply)
+	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Item] = true
@@ -145,14 +161,14 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 			l.Seen.Condition = Unknown
 		}
 		l.Action = actionOf(s, l.Seen)
-		if s.Phase != catalog.PhaseApply {
+		if !InPhase(s, phase) {
 			l.Action = Leave
 		}
 		p.Lines = append(p.Lines, l)
 	}
 	var extra []Installed
 	for _, in := range ledger {
-		if in.Machinefile == r.Name && !listed[in.Item] {
+		if phase == catalog.PhaseApply && in.Machinefile == r.Name && !listed[in.Item] {
 			extra = append(extra, in)
 		}
 	}

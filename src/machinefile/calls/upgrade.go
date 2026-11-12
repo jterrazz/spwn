@@ -69,7 +69,7 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 	defer release()
 	offTerminal := !in.Unattended && !in.Interactive
 	plan, unpulled, err := atNewest(
-		func() (machinefile.Plan, error) { return judged(ctx, d, in.Machinefile) },
+		func() (machinefile.Plan, error) { return judged(ctx, d, in.Machinefile, "") },
 		func() (func(), bool, string) { return pull(ctx, d) },
 		func(p machinefile.Plan) error {
 			if asked := p.UpgradeNeeds(); offTerminal && len(asked) > 0 {

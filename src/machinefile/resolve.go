@@ -50,7 +50,11 @@ type Step struct {
 	// cannot pin it, which the install does not take.
 	Locked, Recorded, Lock string
 	Phase                  catalog.Phase
-	Needs                  []catalog.Need
+	// value: the step is baked into the VM image (vm.image.bake, and what
+	// a baked item requires): `apply --phase image` runs it, and a bare
+	// apply carries it as any other.
+	Baked bool
+	Needs []catalog.Need
 	// value: what has to happen once it is applied for it to take (the
 	// Dock restarted, a logout), and the steps of the plan it waits on.
 	Restarts []catalog.AfterApply
@@ -329,8 +333,16 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		}
 	}
 	for _, a := range m.apps {
-		if listed := p.app(a.entry, a.origin); listed != nil {
+		if listed := p.app(a.entry, a.origin, "listed"); listed != nil {
 			return Resolved{}, listed
+		}
+	}
+	for _, b := range m.bake {
+		if _, ok := p.at[b.name]; ok || slices.ContainsFunc(p.skipped, func(s Skip) bool { return s.Item == b.name }) {
+			continue
+		}
+		if baked := p.app(catalog.AppEntry{Name: b.name}, b.origin, "baked"); baked != nil {
+			return Resolved{}, baked
 		}
 	}
 	for _, s := range m.setting {
@@ -349,7 +361,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if err != nil {
 		return Resolved{}, err
 	}
-	r.Steps, r.Skipped = steps, p.skipped
+	r.Steps, r.Skipped = p.baked(steps, m.bake), p.skipped
 	r.Values = values(m, r, lib.Catalog)
 	return r, nil
 }
@@ -406,7 +418,35 @@ func itemOrigin(it catalog.Placed) Origin {
 	return Origin{Name: it.Item.Name, Layer: Layer(it.Layer), File: it.File}
 }
 
-func (p *planner) app(e catalog.AppEntry, o Origin) error {
+// invariant: what the image bakes is its bake list and, step by step,
+// what a baked step requires (its requires, its provider, its manager),
+// so `apply --phase image` never runs an item whose requirement it left.
+func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
+	at := make(map[string]int, len(steps))
+	for i, s := range steps {
+		at[s.Item] = i
+	}
+	queue := make([]string, 0, len(bake))
+	for _, b := range bake {
+		queue = append(queue, b.name)
+	}
+	for len(queue) > 0 {
+		name := queue[0]
+		queue = queue[1:]
+		i, ok := at[name]
+		if !ok || steps[i].Baked {
+			continue
+		}
+		steps[i].Baked = true
+		it, _ := p.cat.Item(name)
+		for _, l := range p.cat.Links(it.Item, steps[i].Method, p.sys) {
+			queue = append(queue, l.Items...)
+		}
+	}
+	return steps
+}
+
+func (p *planner) app(e catalog.AppEntry, o Origin, why string) error {
 	where := at(o, e.Line)
 	it, err := p.item(e.Name, o, where, catalog.KindApp)
 	if err != nil {
@@ -415,7 +455,7 @@ func (p *planner) app(e catalog.AppEntry, o Origin) error {
 	if bad := checkValues(it.Item, e.Options, where); bad != nil {
 		return bad
 	}
-	step, err := p.choose(it, e.Manager, e.Version, "listed", where)
+	step, err := p.choose(it, e.Manager, e.Version, why, where)
 	if err != nil {
 		var none *NoMethodError
 		if e.Optional && errors.As(err, &none) {

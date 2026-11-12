@@ -1,0 +1,15 @@
+description: 'a plan of a phase none of the Machinefile has is refused'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+      exit: 0
+    - command: 'plan --phase install'
+      exit: 2
+      stderr: |
+          Error: no phase install: a Machinefile's phases are image, boot, apply
+          Hint: station apply --phase image
