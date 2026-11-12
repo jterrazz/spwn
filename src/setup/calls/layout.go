@@ -144,9 +144,11 @@ func (s *Provisioner) layout(ctx context.Context, migrated error) ([]setup.Step,
 // setting's name, moves into ~/.zshrc as that setting's block, its bytes as
 // they are (an edit of the owner's included), so every shell keeps its
 // functions and the setting's record still matches what is there; a file
-// whose block ~/.zshrc holds already, or whose bytes hold a marker line,
-// stays where it is. A file of the owner's in the folder stays, and so does
-// the folder; it goes once it is empty.
+// whose block ~/.zshrc holds already with exactly its bytes is what an
+// earlier move could not delete, and goes now; one whose block holds other
+// text, or whose bytes hold a marker line, stays where it is. A file of the
+// owner's in the folder stays, and so does the folder; it goes once it is
+// empty.
 func retiredZsh() []string { return []string{"docker-shortcuts"} }
 
 func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
@@ -163,7 +165,7 @@ func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
 		return failedSteps(stepZsh, err)
 	}
 	zshrc := string(current)
-	var moved []string
+	var moved, leftover []string
 	for _, e := range entries {
 		name, ok := strings.CutSuffix(e.Name, ".zsh")
 		if e.Dir || !ok || !slices.Contains(retiredZsh(), name) {
@@ -172,15 +174,19 @@ func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
 		file := path.Join(dir, e.Name)
 		data, found, err := s.m.ReadFile(file)
 		id := "station:" + name
-		if _, state := settings.PackageBlock(zshrc, id); err != nil || !found || state != settings.BlockAbsent || holdsMarker(string(data)) {
-			continue
-		}
 		body := string(data)
 		if !strings.HasSuffix(body, "\n") {
 			body += "\n"
 		}
-		zshrc, _ = settings.UpsertPackageBlock(zshrc, id, body)
-		moved = append(moved, file)
+		have, state := settings.PackageBlock(zshrc, id)
+		switch {
+		case err != nil || !found || holdsMarker(body):
+		case state == settings.BlockHere && have == body:
+			leftover = append(leftover, file)
+		case state == settings.BlockAbsent:
+			zshrc, _ = settings.UpsertPackageBlock(zshrc, id, body)
+			moved = append(moved, file)
+		}
 	}
 	if len(moved) > 0 {
 		if err := s.m.WriteFile(s.zshrcPath(), []byte(zshrc), s.m.Mode(s.zshrcPath(), 0o644)); err != nil {
@@ -188,7 +194,7 @@ func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
 		}
 	}
 	dropped := false
-	for _, file := range moved {
+	for _, file := range append(moved, leftover...) {
 		dropped = s.drop(file) || dropped
 	}
 	if left, _, err := s.m.Entries(dir); err == nil && len(left) == 0 {

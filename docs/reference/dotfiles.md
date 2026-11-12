@@ -61,7 +61,7 @@ An app's blocks are written by `station apply` once the app is there, whichever 
 
 `station plan --diff` shows each block's diff, and each file a setting writes, as apply would change it: the file's lines first (`-`), then what apply writes (`+`).
 
-`~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired. `station init` moves `docker-shortcuts.zsh` into `~/.zshrc` as the block `station:docker-shortcuts`, its bytes as they are, your edits included, so every shell keeps the functions and the setting reads as it did (applied, or changed since); a file whose block `~/.zshrc` holds already stays where it is. The folder goes once it is empty, never a file of yours.
+`~/.config/station/zsh/`, where station's block once read the functions of `docker-shortcuts` from, is retired. `station init` moves `docker-shortcuts.zsh` into `~/.zshrc` as the block `station:docker-shortcuts`, its bytes as they are, your edits included, so every shell keeps the functions and the setting reads as it did (applied, or changed since); a file whose block `~/.zshrc` holds already with exactly its bytes, which an earlier move could not delete, goes now, and one whose block holds other text stays where it is. The folder goes once it is empty, never a file of yours.
 
 ## Removing the block
 

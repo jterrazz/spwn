@@ -68,3 +68,20 @@ runs:
       exit: 0
       stdout: |
           ◐	docker-shortcuts	changed since just now	station settings diff docker-shortcuts
+    - command: '--version >/dev/null; /bin/mkdir -p .config/station/zsh; printf ''dclean() { :; }\n'' > .config/station/zsh/docker-shortcuts.zsh'
+      exit: 0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	zsh	retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now
+          ●	relocate	nothing to do
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: '--version >/dev/null; /bin/ls .config/station | /usr/bin/grep -c zsh; /usr/bin/grep -c station:docker-shortcuts .zshrc'
+      exit: 0
+      stdout: |
+          0
+          2
