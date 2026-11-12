@@ -72,15 +72,17 @@ cleanup_tier() {
 
 # value: ssh into a VM of the Mac as the image's login, through the product's own
 # pipe: the engine's address, never a guess.
+# invariant: every ssh into a guest ends at its bound, 10 minutes unless in_vm_for
+# names a shorter one, so a guest command that never returns fails its case rather
+# than hold the run.
 key="$mac/.local/state/station/images/key"
 vm_ssh() {
   local vm=$1
   shift
-  on_mac /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$@"
+  on_mac /usr/bin/timeout -k 10 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$@"
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
-# invariant: in_vm_for <seconds> <vm> <command> ends the ssh itself at its bound, so
-# a guest command that never returns fails its case rather than hold the run.
+# value: in_vm_for <seconds> <vm> <command>: in_vm with a bound of its own.
 in_vm_for() {
   local secs=$1 vm=$2
   on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$3" < /dev/null
@@ -171,12 +173,17 @@ in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.yaml' || fail "th
 in_vm ws1 'git -C ~/Developer/seed log --format=%s -1' 2>> "$log" | grep -qx seed || fail "run.boot did not clone the seed into ws1"
 echo live > "$mac/shared/live.txt"
 [ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "a file written on the Mac does not read in ws1's mount"
-in_vm ws1 'touch ~/shared/from-guest' 2>/dev/null && fail "ws1 wrote into a read-only mount"
+refused=$(in_vm ws1 'touch ~/shared/from-guest' 2>&1) && fail "ws1 wrote into a read-only mount"
+grep -q 'Read-only file system' <<< "$refused" || fail "a write into ws1's read-only mount failed for another reason: $refused"
 st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
 [ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "ws1's mount is gone after a restart"
+sed -i.bak '/^  mounts:/d' "$mac/.config/station/machinefiles/studio-linux.yaml" && rm -f "$mac/.config/station/machinefiles/studio-linux.yaml.bak"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1, its mount taken out, exited $?"
+in_vm ws1 'mountpoint -q ~/shared' && fail "ws1 still mounts ~/shared once vm.mounts no longer names it"
+in_vm ws1 'grep -q "^station-" /etc/fstab' && fail "ws1's /etc/fstab keeps a mount vm.mounts no longer names"
 token_into ws1
 rm -f "$mac/shared/live.txt"
-say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image, run.image and run.boot ran, ~/shared mounted read-only and live"
+say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image, run.image and run.boot ran, ~/shared mounted read-only and live, then gone from the guest once vm.mounts no longer names it"
 case_pass
 
 

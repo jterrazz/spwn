@@ -40,12 +40,25 @@ cleanup_tier() { :; }
 # invariant: whatever happens, every VM this run made is stopped and deleted and
 # every process it started is gone; only the macOS image cache survives.
 cleanup() {
+  [ -z "${watchdog:-}" ] || { pkill -P "$watchdog" 2>/dev/null; kill "$watchdog" 2>/dev/null; }
   cleanup_tier
   say "-- passed: ${passed[*]:-none}"
   [ ${#failed[@]} -eq 0 ] || say "-- failed: ${failed[*]}"
 }
 trap cleanup EXIT
 trap 'exit 130' INT TERM
+
+# invariant: a run ends at its limit, E2E_LIMIT seconds (3 h for linux, 8 h for macos,
+# whose Xcode case alone takes hours): the watchdog ends what the run waits on, so its
+# TERM is heard and the cleanup runs; a run that ends first ends the watchdog.
+limit=${E2E_LIMIT:-$([ "$kind" = linux ] && echo 10800 || echo 28800)}
+(
+  sleep "$limit"
+  say "FAIL the run passed its limit of $limit s"
+  kill -TERM $$
+  pkill -TERM -P $$
+) > /dev/null 2>&1 &
+watchdog=$!
 
 say "== tier $([ "$kind" = linux ] && echo 2 || echo 3): $kind, $(cd "$repo" && git describe --always --dirty 2>/dev/null)"
 run_tier "$suite/$kind/tier.sh"
