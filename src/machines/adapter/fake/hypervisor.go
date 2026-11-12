@@ -186,8 +186,22 @@ func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOpti
 		return nil, ErrScripted
 	}
 	v.PID, v.Ended, v.UpAt = h.nextPID(), nil, h.w.Now
-	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: []string{}}
+	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: folders(opts.Mounts)}
 	return &run{h: h, vm: vm, pid: v.PID}, nil
+}
+
+// value: the folders a run shares, each as tart's --dir says it:
+// `<folder>[:ro],tag=<tag>`.
+func folders(mounts []machines.Mount) []string {
+	out := make([]string, 0, len(mounts))
+	for i, m := range mounts {
+		share := m.Computer + ":"
+		if m.ReadOnly {
+			share += "ro,"
+		}
+		out = append(out, share+"tag="+machines.MountTag(i))
+	}
+	return out
 }
 
 // invariant: a held call, called under the world's lock, lets the world go

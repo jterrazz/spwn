@@ -1,0 +1,44 @@
+description: 'a restart shares the vm.mounts its Machinefile says now, a mount taken out no more'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Developer/notes data'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm:
+            lifetime: persistent
+            mounts:
+              - { computer: ~/Developer/notes, guest: ~/notes, read-only: true }
+              - { computer: ~/data, guest: /data }
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create web --from studio-linux >/dev/null'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm:
+            lifetime: persistent
+            mounts:
+              - { computer: ~/data, guest: /data }
+      exit: 0
+    - command: 'machines restart web'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	web	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {folders: .booted.folders, mounted: [.guest.ran[]? | select(startswith("sudo bash -s -- "))] | last}'' world.json'
+      exit: 0
+      stdout: |
+          {"folders":["{{workdir}}/data:tag=station-1"],"mounted":"sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '/data' rw"}

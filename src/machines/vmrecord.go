@@ -60,5 +60,4 @@ type VMRecord struct {
 	Agents []string
 	// value: the Machinefile it was made from; empty for none.
 	Template string
-	Mounts   []Mount
 }

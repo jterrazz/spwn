@@ -309,9 +309,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second), Template: r.From,
 	}
-	if t != nil {
-		rec.Mounts = t.Mounts
-	}
 	want := ""
 	if r.Lifetime == model.Persistent || server {
 		want = model.WantRunning

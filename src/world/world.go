@@ -347,7 +347,8 @@ type VM struct {
 	UpAt   time.Time `json:"up_at,omitzero"`
 	DownAt time.Time `json:"down_at,omitzero"`
 	// value: what its last boot was asked: its network, and the folders of
-	// its Mac shared into it (SC-06: station never shares one).
+	// its Mac shared into it as tart's --dir says them, only the vm.mounts
+	// of the Machinefile it was made from (SC-06: nothing else).
 	Booted  *Boot  `json:"booted,omitempty"`
 	Address string `json:"address,omitempty"`
 	// value: the lines its runs wrote on its console, the oldest first.
@@ -428,8 +429,6 @@ type Kept struct {
 	Agents []string `json:"agents,omitempty"`
 	// value: the Machinefile it was made from.
 	Template string `json:"template,omitempty"`
-	// value: the folders of its Mac it shares live.
-	Mounts []machines.Mount `json:"mounts,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

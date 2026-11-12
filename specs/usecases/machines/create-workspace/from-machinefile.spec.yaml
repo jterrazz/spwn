@@ -26,4 +26,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {image: .kept.image, template: .kept.template, lifetime: .kept.lifetime, size, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
       stdout: |
-          {"image":"studio-linux","template":"studio-linux","lifetime":"persistent","size":{"CPUs":6,"Memory":3221225472,"Disk":30000000000},"ran":["sudo bash -s","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}
+          {"image":"studio-linux","template":"studio-linux","lifetime":"persistent","size":{"CPUs":6,"Memory":3221225472,"Disk":30000000000},"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\"","sudo bash -s","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}

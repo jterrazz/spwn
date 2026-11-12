@@ -62,31 +62,15 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 }
 
 // invariant: each folder the VM shares with its Mac is mounted at its
-// guest folder before the boot phase runs, so its lines may read it, and
-// stays mounted at every later start: its line in /etc/fstab names the
-// tag the hypervisor shares it under, read-only where the Machinefile
-// says so, and a start that finds no share goes on without it.
+// guest folder before the boot phase runs, so its lines may read it; the
+// engine brings the mounts to the Machinefile's again at every later
+// start (model.MountLine).
 func (s *Machinist) mount(ctx context.Context, name string, mounts []model.Mount) error {
 	if len(mounts) == 0 {
 		return nil
 	}
-	var script strings.Builder
-	script.WriteString("set -e\nhome=$1\nuser=$2\n")
-	for i, m := range mounts {
-		at := m.Guest
-		if rest, ok := strings.CutPrefix(at, "~"); ok {
-			at = "$home" + rest
-		}
-		mode := "rw"
-		if m.ReadOnly {
-			mode = "ro"
-		}
-		tag := model.MountTag(i)
-		script.WriteString("[ -d \"" + at + "\" ] || { mkdir -p \"" + at + "\" && chown \"$user:\" \"" + at + "\"; }\n")
-		script.WriteString("grep -q '^" + tag + " ' /etc/fstab || echo \"" + tag + " " + at + " virtiofs " + mode + ",nofail 0 0\" >> /etc/fstab\n")
-		script.WriteString("mountpoint -q \"" + at + "\" || mount \"" + at + "\"\n")
-	}
-	out, err := s.engineAPI.GuestExec(ctx, name, catalog.AsRoot(`bash -s -- "$HOME" "$(id -un)"`), script.String())
+	line, script := model.MountLine(mounts)
+	out, err := s.engineAPI.GuestExec(ctx, name, line, script)
 	switch {
 	case err != nil:
 		return err

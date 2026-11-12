@@ -57,6 +57,32 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 	return out, nil
 }
 
+// value: the folders of this Mac a VM shares at a start, read from the
+// Machinefile it was made from as it says them now; none for a VM made
+// from an image alone. A Machinefile that cannot be read, or a folder of
+// this Mac that is not there, refuses the start: tart itself refuses a
+// shared folder that is missing ("A directory sharing device
+// configuration is invalid"), naming no folder.
+func (m machine) vmMounts(ctx context.Context, vm string) ([]model.Mount, error) {
+	rec, err := m.stores.machines.Get(ctx, vm)
+	if err != nil {
+		return nil, err
+	}
+	if rec.Template == "" {
+		return nil, nil
+	}
+	t, err := machineTemplates{m}.Template(ctx, rec.Template)
+	if err != nil {
+		return nil, err
+	}
+	for _, mt := range t.Mounts {
+		if info, err := m.sys.FS.Stat(mt.Computer); err != nil || !info.IsDir() {
+			return nil, errors.New(mt.Computer + ", which " + vm + "'s Machinefile " + rec.Template + " shares at " + mt.Guest + ", is no folder of this Mac: make it, or take it out of vm.mounts")
+		}
+	}
+	return t.Mounts, nil
+}
+
 // value: a folder of a mount on this Mac, its `~` opened at the home.
 func (t machineTemplates) onMac(folder string) string {
 	if folder == "~" {

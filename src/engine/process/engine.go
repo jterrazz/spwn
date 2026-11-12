@@ -74,7 +74,11 @@ type Options struct {
 	// value: the ports a VM's Machinefile says it may open, read by its
 	// name; nil when it says none (or there is none), and nil Rights reads
 	// none for every VM.
-	Rights    func(ctx context.Context, vm string) (*catalog.PortRights, error)
+	Rights func(ctx context.Context, vm string) (*catalog.PortRights, error)
+	// value: the folders of this Mac a VM shares, read from its Machinefile
+	// at each of its starts; an error (a folder that is not there) refuses
+	// the start, and nil Mounts shares none.
+	Mounts    func(ctx context.Context, vm string) ([]model.Mount, error)
 	Version   string
 	Page      int
 	PID       int

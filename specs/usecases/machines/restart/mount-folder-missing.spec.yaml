@@ -1,0 +1,31 @@
+description: 'a start whose vm.mounts folder is not on the Mac is refused before the VM boots, naming it'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p data'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm:
+            lifetime: persistent
+            mounts: [{ computer: ~/data, guest: /data }]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create web --from studio-linux >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /bin/rmdir data'
+      exit: 0
+    - command: 'machines restart web'
+      exit: 1
+      stderr: |
+          Error: {{workdir}}/data, which web's Machinefile studio-linux shares at /data, is no folder of this Mac: make it, or take it out of vm.mounts
+          Hint: station machines
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {pid, folders: .booted.folders}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":null,"folders":["{{workdir}}/data:tag=station-1"]}

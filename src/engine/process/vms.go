@@ -51,6 +51,10 @@ type vmState struct {
 	gen     int
 	asked   map[string]chan guestMessage
 	seq     int
+	// value: the folders of its Mac its run shares, as its start read them;
+	// read is false for a run this engine adopted, whose start it did not see.
+	mounts []model.Mount
+	read   bool
 	// value: a server's restarts, when its run began, its health check as
 	// last run and whether one runs now; whether its ssh connection opened.
 	restarts model.Restarts
@@ -168,14 +172,22 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 			}
 		}
 	}
+	var mounts []model.Mount
+	if d.o.Mounts != nil {
+		m, err := d.o.Mounts(ctx, name)
+		if err != nil {
+			return err
+		}
+		mounts = m
+	}
 	d.refreshSelf(ctx)
 	d.renderEnv(ctx, v)
-	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: v.rec.Network == model.Bridged}, v.rec.Mounts)
+	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: v.rec.Network == model.Bridged}, mounts)
 	if err != nil {
 		return err
 	}
 	d.mu.Lock()
-	v.run, v.end, v.state, v.detail, v.stopping = run, nil, engine.StateRunning, "", false
+	v.run, v.end, v.state, v.detail, v.stopping, v.mounts, v.read = run, nil, engine.StateRunning, "", false, mounts, true
 	v.bootAt, v.check = d.h.Now(), model.CheckStatus{}
 	if v.rec.Lifetime == model.AlwaysOn && v.down && v.walk == nil {
 		v.walk = &model.RestartWalk{Step: 1, At: v.bootAt}
@@ -540,6 +552,7 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 		return
 	}
 	defer func() { _ = client.Close() }()
+	d.mountFolders(ctx, v, client)
 	d.mu.Lock()
 	if v.gen != gen {
 		d.mu.Unlock()
@@ -561,6 +574,36 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 		d.fromGuest(ctx, v, scanner.Bytes())
 	}
 	_ = session.Close()
+}
+
+// value: how long the guest's mounts take to follow its run's.
+const mountWait = 60 * time.Second
+
+// invariant: at each connection to a run this engine started of a VM made
+// from a Machinefile, before the connection is handed to any caller, the
+// guest's mounts are brought to the ones the run shares (model.MountLine):
+// a mount the Machinefile dropped since leaves its /etc/fstab and is
+// unmounted, one it added or changed is mounted, so a caller never meets
+// the last run's. A run the engine adopted keeps what its start mounted.
+// A guest that could not follow says why in daemon.log and connects all
+// the same.
+func (d *Engine) mountFolders(ctx context.Context, v *vmState, client Guest) {
+	d.mu.Lock()
+	mounts, read, template := v.mounts, v.read, v.rec.Template
+	d.mu.Unlock()
+	if d.o.Mounts == nil || !read || template == "" {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, mountWait)
+	defer cancel()
+	line, script := model.MountLine(mounts)
+	ran, err := client.Exec(ctx, line, script)
+	switch {
+	case err != nil:
+		d.logf(v.rec.Name+" mounts", err.Error())
+	case ran.Code != 0:
+		d.logf(v.rec.Name+" mounts", "exited "+strconv.Itoa(ran.Code)+": "+strings.TrimSpace(ran.Stderr))
+	}
 }
 
 // invariant: why a guest does not connect reaches daemon.log once per new
