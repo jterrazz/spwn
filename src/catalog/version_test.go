@@ -53,7 +53,7 @@ func TestAVersionIsReadIntoItsRange(t *testing.T) {
 }
 
 func TestAWordThatIsNoVersionIsRefusedNamingTheForms(t *testing.T) {
-	for _, text := range []string{"lts", "24.x", ">=24", "^", "24.11.3.1", "1 2"} {
+	for _, text := range []string{"lts", "24.x", ">=24", "^", "24.11.3.1", "1 2", "=", "=lts"} {
 		if _, err := catalog.ParseRange(text); err == nil || err.Error() != `version "`+text+`" is no version: `+catalog.RangeForms {
 			t.Errorf("ParseRange(%q) = %v; want refused naming the forms", text, err)
 		}
@@ -126,11 +126,54 @@ func TestEveryMethodMeetsEveryVersionForm(t *testing.T) {
 			case ok != holds:
 				t.Errorf("%s at %q: pinned %v, holds %v; want the same", method, text, ok, holds)
 			case !ok:
-			case r.Any() && !reflect.DeepEqual(pinned, in):
+			case r.Any() && method == catalog.MethodMise && catalog.VersionOf(pinned) != "latest":
+				t.Errorf("mise at latest carries %q; want latest, never the catalog's lts", catalog.VersionOf(pinned))
+			case r.Any() && method != catalog.MethodMise && !reflect.DeepEqual(pinned, in):
 				t.Errorf("%s at latest carries %v; want the catalog's own install", method, pinned)
 			case !r.Any() && catalog.VersionOf(pinned) != r.Head() && catalog.VersionOf(pinned) != r.Npm():
 				t.Errorf("%s at %q carries %q to its manager; want its prefix %q or its range %q", method, text, catalog.VersionOf(pinned), r.Head(), r.Npm())
 			}
+		}
+	}
+}
+
+func TestAPrereleaseIsNeitherHeldByARangeNorWaiting(t *testing.T) {
+	r, _ := catalog.ParseRange("25")
+	if r.Contains("25.1.0-rc.1") || !r.Contains("25.1.0+build.2") {
+		t.Errorf("25 holds 25.1.0-rc.1: %v, 25.1.0+build.2: %v; want neither the prerelease, the build", r.Contains("25.1.0-rc.1"), r.Contains("25.1.0+build.2"))
+	}
+	if r24, _ := catalog.ParseRange("24"); r24.Past("26.0.0-rc.1") {
+		t.Error("26.0.0-rc.1 waits past 24; want a prerelease never waiting")
+	}
+	if got := catalog.Newest("24.1.0-rc.1", "24.1.0", "24.0.9"); got != "24.1.0" {
+		t.Errorf("newest %q; want the release before its prerelease", got)
+	}
+}
+
+func TestAVendorBeforeTheNumbersIsReadThrough(t *testing.T) {
+	r, _ := catalog.ParseRange("21")
+	if !r.Contains("temurin-21.0.13+9.0.LTS") || r.Contains("temurin-27.0.1+0") || !r.Past("temurin-27.0.1+0") {
+		t.Error("21 does not read temurin's versions by their numbers")
+	}
+	for _, c := range []struct {
+		exact, version string
+		holds          bool
+	}{
+		{"9.8.7", "temurin-9.8.7", true}, {"v9.8.7", "temurin-v9.8.7", true}, {"9.8.7", "temurin-9.8.8", false},
+		{"temurin-9.8.7", "temurin-9.8.7", true}, {"temurin-9.8.7", "zulu-9.8.7", false}, {"temurin-9.8.7", "9.8.7", false},
+	} {
+		if got := catalog.Exactly(c.exact).Contains(c.version); got != c.holds {
+			t.Errorf("exactly %s holds %s: %v; want %v", c.exact, c.version, got, c.holds)
+		}
+	}
+	for _, c := range []struct{ catalog, text, want string }{
+		{"lts", "", "latest"}, {"lts", "latest", "latest"}, {"stable", "latest", "stable"}, {"latest", "24", "24"},
+		{"temurin-21", "latest", "temurin"}, {"temurin-21", "21", "temurin-21"}, {"temurin-21", "21.0", "temurin-21.0"},
+		{"temurin-21", "=temurin-21.0.13+9.0.LTS", "temurin-21.0.13+9.0.LTS"},
+	} {
+		r, _ := catalog.ParseRange(c.text)
+		if got := catalog.MiseAt(c.catalog, r); got != c.want {
+			t.Errorf("mise at %q of %q: %q; want %q", c.text, c.catalog, got, c.want)
 		}
 	}
 }

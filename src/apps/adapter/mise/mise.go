@@ -145,7 +145,13 @@ func (m *Mise) Newest(ctx context.Context, in catalog.Install) (string, error) {
 	if err := m.Ready(ctx); err != nil {
 		return "", err
 	}
-	out, err := m.run.Output(ctx, local.Cmd{Name: command, Args: []string{"latest", "--", v.App}, Timeout: contract.CurrencyBudget})
+	// invariant: a runtime the catalog names a vendor of is read newest
+	// within that vendor (`java@temurin`), the versions its range is judged by.
+	name := v.App
+	if vendor := catalog.MiseVendor(v.Version); vendor != "" {
+		name += "@" + vendor
+	}
+	out, err := m.run.Output(ctx, local.Cmd{Name: command, Args: []string{"latest", "--", name}, Timeout: contract.CurrencyBudget})
 	if err != nil {
 		return "", err
 	}

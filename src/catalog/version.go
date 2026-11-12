@@ -58,7 +58,8 @@ func (h Hold) String() string {
 var (
 	rangeWord   = regexp.MustCompile(`^([\^~]?)v?(\d+)(?:\.(\d+))?(?:\.(\d+))?$`)
 	exactWord   = regexp.MustCompile(`^v?\d+\.\d+\.\d+[-+][0-9A-Za-z.+-]+$`)
-	versionHead = regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?`)
+	versionHead = regexp.MustCompile(`^(?:[A-Za-z][A-Za-z0-9]*-)*v?(\d+)(?:\.(\d+))?(?:\.(\d+))?`)
+	vendorHead  = regexp.MustCompile(`^((?:[A-Za-z][A-Za-z0-9]*-)+)v?\d`)
 )
 
 const RangeForms = "latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0" // value: every form a version takes, as a refusal names them.
@@ -66,12 +67,13 @@ const RangeForms = "latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0" // value: e
 func ParseRange(text string) (Range, error) {
 	// invariant: npm's semver forms and three bare ones: a major alone is
 	// ^major, a minor alone ~major.minor, three numbers exact; `=` before
-	// any word is that word exactly, as a lock hands it on.
+	// a word that names a number is that word exactly, as a lock hands it
+	// on (`=1:2.43.0-1ubuntu7`, `=temurin-21.0.13+9.0.LTS`).
 	text = strings.TrimSpace(text)
 	switch {
 	case text == "" || text == "latest":
 		return Range{text: text}, nil
-	case strings.HasPrefix(text, "=") && len(text) > 1 && !strings.ContainsAny(text, " \t"):
+	case strings.HasPrefix(text, "=") && strings.ContainsAny(text, "0123456789") && !strings.ContainsAny(text, " \t"):
 		return Exactly(text[1:]), nil
 	case exactWord.MatchString(text):
 		return Exactly(text), nil
@@ -190,23 +192,42 @@ func (r Range) Head() string {
 
 func (r Range) Contains(version string) bool {
 	// invariant: every version is in latest; an exact range holds its one
-	// version (a `v` before it aside); any other holds the versions from its
-	// lower bound up to, not including, its upper one, and never a version
-	// that names no number.
+	// version (a `v` before it aside); any other holds the released
+	// versions from its lower bound up to, not including, its upper one,
+	// never a prerelease (`25.0.0-rc.1`) nor a version that names no number.
 	switch r.form {
 	case RangeAny:
 		return true
 	case RangeExact:
-		return strings.TrimPrefix(version, "v") == strings.TrimPrefix(r.exact, "v")
+		return exactly(r.exact, version)
 	case RangeCaret, RangeTilde:
 	}
 	v, ok := numbers(version)
-	return ok && compare(v, r.low) >= 0 && compare(v, r.high) < 0
+	return ok && !prerelease(version) && compare(v, r.low) >= 0 && compare(v, r.high) < 0
+}
+
+func exactly(exact, version string) bool {
+	// invariant: a version is the one an exact range names, a `v` before
+	// either aside; a vendor before its numbers is read through when the
+	// range names none (`9.8.7` holds temurin-9.8.7, never zulu's when it
+	// names temurin's).
+	exact, version = strings.TrimPrefix(exact, "v"), strings.TrimPrefix(version, "v")
+	if version == exact || vendorHead.MatchString(exact) {
+		return version == exact
+	}
+	if m := vendorHead.FindStringSubmatch(version); m != nil {
+		return strings.TrimPrefix(version[len(m[1]):], "v") == exact
+	}
+	return false
 }
 
 func (r Range) Past(version string) bool {
-	// value: whether a version is newer than all the range holds: a major
-	// past `24`, a minor past `24.11`, any newer one past an exact range.
+	// value: whether a released version is newer than all the range holds:
+	// a major past `24`, a minor past `24.11`, any newer one past an exact
+	// range; a prerelease is never past, so never waits.
+	if prerelease(version) {
+		return false
+	}
 	switch r.form {
 	case RangeAny:
 		return false
@@ -243,16 +264,28 @@ func (r Range) Moved(version string) string {
 }
 
 func Newest(versions ...string) string {
-	// value: the newest of versions by their numbers, the first of a tie;
-	// empty when none names a number.
+	// value: the newest of versions by their numbers, a release before a
+	// prerelease of the same numbers, else the first of a tie; empty when
+	// none names a number.
 	best, at := "", [3]int{}
 	for _, s := range versions {
 		v, ok := numbers(s)
-		if ok && (best == "" || compare(v, at) > 0) {
+		if !ok {
+			continue
+		}
+		if c := compare(v, at); best == "" || c > 0 || (c == 0 && prerelease(best) && !prerelease(s)) {
 			best, at = s, v
 		}
 	}
 	return best
+}
+
+func prerelease(version string) bool {
+	// value: whether a version is a prerelease of its numbers, as semver
+	// writes one after a dash (`25.0.0-rc.1`); build words after a plus
+	// (`21.0.13+9`) are none.
+	head := versionHead.FindString(strings.TrimSpace(version))
+	return head != "" && strings.HasPrefix(strings.TrimSpace(version)[len(head):], "-")
 }
 
 func numbers(version string) ([3]int, bool) {

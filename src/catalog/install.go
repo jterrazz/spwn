@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -211,20 +212,21 @@ func Keys(in Install) []string {
 
 func Pinned(in Install, r Range) (Install, bool) {
 	// value: the install held within a range, where its method holds that
-	// range (HoldOf): a runtime of mise's at the range's prefix, a package
-	// of bun's at its specifier, apt's package and a
-	// release's tag at its one version; latest leaves every install as the
-	// catalog writes it.
+	// range (HoldOf): a runtime of mise's at its word for the range
+	// (MiseAt), a package of bun's at its specifier, apt's package and a
+	// release's tag at its one version; latest leaves every install but
+	// mise's as the catalog writes it.
 	if !HoldOf(in).Holds(r) {
 		return nil, false
+	}
+	if m, ok := in.(MiseInstall); ok {
+		m.Version = MiseAt(m.Version, r)
+		return m, true
 	}
 	if r.Any() {
 		return in, true
 	}
 	switch m := in.(type) {
-	case MiseInstall:
-		m.Version = r.Head()
-		return m, true
 	case BunInstall:
 		m.Version = r.Npm()
 		return m, true
@@ -236,6 +238,48 @@ func Pinned(in Install, r Range) (Install, bool) {
 		return m, true
 	}
 	return nil, false
+}
+
+func VendorOf(in Install) string {
+	// value: the vendor an install's version names before its numbers
+	// (`temurin` of a runtime at `temurin-21`), empty where it names none.
+	if m, ok := in.(MiseInstall); ok {
+		return MiseVendor(m.Version)
+	}
+	return ""
+}
+
+// value: the vendor a mise runtime's catalog version names before its
+// numbers, `temurin` of `temurin-21`, as mise lists java's.
+var miseVendor = regexp.MustCompile(`^([a-z][a-z0-9]*(?:-[a-z][a-z0-9]*)*)-v?\d`)
+
+func MiseVendor(catalogVersion string) string {
+	if m := miseVendor.FindStringSubmatch(catalogVersion); m != nil {
+		return m[1]
+	}
+	return ""
+}
+
+func MiseAt(catalogVersion string, r Range) string {
+	// invariant: the word `mise use` resolves to the newest version r holds:
+	// every version is the catalog's vendor alone where it names one
+	// (`temurin`, the newest temurin of every major), else `latest`, so a
+	// channel that holds fewer majors (node's `lts`) never stands for it; a
+	// channel that is the newest already (rust's `stable`) stays. A range is
+	// its prefix after that vendor (`temurin-21`), unless it names it itself,
+	// as a lock's version does.
+	vendor := MiseVendor(catalogVersion)
+	switch {
+	case r.Any() && vendor != "":
+		return vendor
+	case r.Any() && catalogVersion == "lts":
+		return "latest"
+	case r.Any():
+		return catalogVersion
+	case vendor != "" && !strings.HasPrefix(r.Head(), vendor+"-"):
+		return vendor + "-" + r.Head()
+	}
+	return r.Head()
 }
 
 func VersionOf(in Install) string {

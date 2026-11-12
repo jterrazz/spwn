@@ -134,7 +134,7 @@ func TestWhatApplyInstallsIsWhatTheLockNamesOnEveryPath(t *testing.T) {
 				}
 				if d.Line.Step.Spec.Pins() {
 					pinned[catalog.Method(d.Line.Step.Method)]++
-					if d.Version != locked.Version {
+					if !catalog.Exactly(locked.Version).Contains(d.Version) {
 						t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Item, locked.Version, d.Version)
 					}
 				}

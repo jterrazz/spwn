@@ -198,7 +198,9 @@ An app's `version` says how far it moves, in npm's semver words; it is read once
 | `'24.11'`, `~24.11.0` | `~24.11.0`           | patches of 24.11           |
 | `'24.11.3'`           | that version         | nothing                    |
 
-A method holds what its install carries to its manager: mise any range (by its prefix: `node@24`), bun any range (`pkg@^24.2.0`), apt and a release one exact version (`package=<version>`, a tag), every other method (brew, a cask, npm and uv through brew's bundle, a script) only its newest. An app whose item says `updates: self` (Claude, Ghostty, a browser: a cask whose app runs its own updater) is checked present and nothing more: no range moves it, `upgrade` leaves it (`updates itself: station checks it is there`), and its lock line keeps the version it was installed at, so a new Mac starts from it. A range a method cannot hold is refused by the resolution, never faked; brew holds a major only by a versioned formula, an item of its own (`postgresql@18`).
+A range holds released versions alone: a prerelease (`25.0.0-rc.1`) is never moved to and never said waiting.
+
+A method holds what its install carries to its manager: mise any range (by its prefix: `node@24`; every version is `node@latest`, never the catalog's narrower `lts`, and a catalog version that names a vendor keeps it, `java@temurin` for every version and `java@temurin-21` for `'21'`), bun any range (`pkg@^24.2.0`), apt and a release one exact version (`package=<version>`, a tag), every other method (brew, a cask, npm and uv through brew's bundle, a script) only its newest. An app whose item says `updates: self` (Claude, Ghostty, a browser: a cask whose app runs its own updater) is checked present and nothing more: no range moves it, `upgrade` leaves it (`updates itself: station checks it is there`), and its lock line keeps the version it was installed at, so a new Mac starts from it. A range a method cannot hold is refused by the resolution, never faked; brew holds a major only by a versioned formula, an item of its own (`postgresql@18`).
 
 ## upgrade
 

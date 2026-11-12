@@ -191,18 +191,29 @@ func TestARangeIsInstalledByItsPrefixAndTheNewestIsReadPastIt(t *testing.T) {
 		return local.Output{}, nil
 	}, "mise")
 	m := mise.New(run)
-	for _, text := range []string{"22", "^22.5.0", "~22.11.0", "22.11.0"} {
-		r, _ := catalog.ParseRange(text)
-		in, ok := catalog.Pinned(catalog.MiseInstall{App: "node", Version: "lts"}, r)
+	for _, c := range []struct{ app, catalog, text string }{
+		{"node", "lts", "22"}, {"node", "lts", "^22.5.0"}, {"node", "lts", "~22.11.0"}, {"node", "lts", "22.11.0"},
+		{"node", "lts", "latest"}, {"java", "temurin-21", "latest"}, {"java", "temurin-21", "17"},
+		{"java", "temurin-21", "=temurin-21.0.13+9.0.LTS"},
+	} {
+		r, _ := catalog.ParseRange(c.text)
+		in, ok := catalog.Pinned(catalog.MiseInstall{App: c.app, Version: c.catalog}, r)
 		if !ok {
-			t.Fatalf("mise holds no %q", text)
+			t.Fatalf("mise holds no %q", c.text)
 		}
 		if err := m.Install(context.Background(), []catalog.Install{in}, nil); err != nil {
 			t.Fatal(err)
 		}
 	}
-	newest, err := m.Newest(context.Background(), catalog.MiseInstall{App: "node"})
-	want := []string{"use --global node@22", "use --global node@22", "use --global node@22.11", "use --global node@22.11.0", "latest -- node"}
+	newest, err := m.Newest(context.Background(), catalog.MiseInstall{App: "node", Version: "lts"})
+	if _, jerr := m.Newest(context.Background(), catalog.MiseInstall{App: "java", Version: "temurin-21"}); jerr != nil {
+		t.Fatal(jerr)
+	}
+	want := []string{
+		"use --global node@22", "use --global node@22", "use --global node@22.11", "use --global node@22.11.0",
+		"use --global node@latest", "use --global java@temurin", "use --global java@temurin-17",
+		"use --global java@temurin-21.0.13+9.0.LTS", "latest -- node", "latest -- java@temurin",
+	}
 	if err != nil || newest != "25.1.0" || !slices.Equal(ran, want) {
 		t.Errorf("ran %q, newest %q (%v); want %q, 25.1.0", ran, newest, err, want)
 	}

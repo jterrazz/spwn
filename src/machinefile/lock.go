@@ -28,9 +28,14 @@ func (l Lock) App(name string) (catalog.LockedApp, bool) {
 func (s Step) InstallVersion() string {
 	// value: the range apply hands the install, in its one unambiguous
 	// word: the lock's version exactly, where the step's method pins one;
-	// else the range the Machinefile asks.
+	// else the range the Machinefile asks, every version said `latest` to a
+	// method that holds any range, so mise installs its newest of every
+	// major, never the catalog's narrower channel (node's `lts`).
 	if s.Locked != "" {
 		return catalog.Exactly(s.Locked).Spec()
+	}
+	if s.Version.Any() && s.Spec.Holds() == catalog.HoldAny {
+		return "latest"
 	}
 	return s.Version.Spec()
 }

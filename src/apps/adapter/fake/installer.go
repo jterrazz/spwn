@@ -5,6 +5,7 @@ import (
 	"errors"
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
@@ -265,12 +266,16 @@ func (f *Installer) offered(k string) []string {
 	return out
 }
 
-// invariant: an install that carries a version holds the newest version
-// the world offers within it, as mise's `use` of a prefix and bun's of a
-// range resolve it, an exact one that version, and a channel (latest,
-// lts, stable) the newest the world offers; a range the world offers
-// nothing within holds the prefix it carries. A version that reaches the
-// one an update waited for leaves the app current.
+// invariant: an install that carries a version holds what mise's `use`
+// and bun's range resolve it to among what the world offers: an exact one
+// that version; a range the newest within it; `latest` and `stable` the
+// newest; `lts` the newest of an even major, node's long-term lines, never
+// a newer odd one; any other word a prefix, as mise reads `temurin` and
+// `temurin-21`, the newest that starts with it. A range or a prefix the
+// world offers nothing within holds the version it carries when that
+// names a number, a vendor before it read through (`temurin-9.8.7`). A
+// version that reaches the one an update waited for leaves the app
+// current.
 func (f *Installer) pin(installs []catalog.Install, offered map[string][]string) {
 	f.w.Lock()
 	defer f.w.Unlock()
@@ -280,21 +285,10 @@ func (f *Installer) pin(installs []catalog.Install, offered map[string][]string)
 			continue
 		}
 		s, k := f.manager(), i.Key()
-		r, err := catalog.ParseRange(v)
-		switch {
-		case (err == nil && r.Exact()) || (err != nil && strings.ContainsAny(v[:1], "0123456789")):
+		if best := resolved(v, offered[k]); best != "" {
+			s.Installed[k] = best
+		} else if catalog.Newest(v) == v {
 			s.Installed[k] = v
-		case err != nil || r.Any():
-			if best := catalog.Newest(offered[k]...); best != "" {
-				s.Installed[k] = best
-			}
-		default:
-			within := slices.DeleteFunc(slices.Clone(offered[k]), func(o string) bool { return !r.Contains(o) })
-			if best := catalog.Newest(within...); best != "" {
-				s.Installed[k] = best
-			} else if strings.ContainsAny(v[:1], "0123456789") {
-				s.Installed[k] = v
-			}
 		}
 		if b, ok := s.Behind[k]; ok && catalog.Newest(s.Installed[k], b) == s.Installed[k] {
 			delete(s.Behind, k)
@@ -302,9 +296,34 @@ func (f *Installer) pin(installs []catalog.Install, offered map[string][]string)
 	}
 }
 
+func resolved(v string, offered []string) string {
+	r, err := catalog.ParseRange(v)
+	var keep func(string) bool
+	switch {
+	case err == nil && r.Exact():
+		return v
+	case (err == nil && r.Any()) || v == "stable":
+		keep = func(string) bool { return true }
+	case err == nil:
+		keep = r.Contains
+	case v == "lts":
+		keep = func(o string) bool {
+			major, _, _ := strings.Cut(strings.TrimPrefix(o, "v"), ".")
+			n, err := strconv.Atoi(major)
+			return err == nil && n%2 == 0
+		}
+	default:
+		keep = func(o string) bool {
+			return o == v || strings.HasPrefix(o, v+"-") || strings.HasPrefix(o, v+".") || strings.HasPrefix(o, v+"+")
+		}
+	}
+	return catalog.Newest(slices.DeleteFunc(slices.Clone(offered), func(o string) bool { return !keep(o) })...)
+}
+
 func (f *Installer) Newest(ctx context.Context, in catalog.Install) (string, error) {
-	// value: the newest version the world offers of the install's key, read
-	// by a manager the world says reads one, as its real adapter does.
+	// value: the newest version the world offers of the install's key,
+	// within the vendor its catalog version names (`java@temurin`), read by
+	// a manager the world says reads one, as its real adapter does.
 	if err := f.Ready(ctx); err != nil {
 		return "", err
 	}
@@ -312,6 +331,9 @@ func (f *Installer) Newest(ctx context.Context, in catalog.Install) (string, err
 	defer f.w.Unlock()
 	if !f.manager().ReadsNewest {
 		return "", contract.ErrCannot
+	}
+	if vendor := catalog.VendorOf(in); vendor != "" {
+		return resolved(vendor, f.offered(in.Key())), nil
 	}
 	return catalog.Newest(f.offered(in.Key())...), nil
 }
