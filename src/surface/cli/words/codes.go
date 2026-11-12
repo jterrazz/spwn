@@ -162,7 +162,7 @@ func Codes() map[fail.Code]Wording {
 			if alt := e.Detail["alternative"]; alt != "" {
 				return said, alt + " can: { name: " + e.Subject + ", version: \"" + e.Detail["version"] + "\", manager: " + alt + " }"
 			}
-			return said, "no method of " + e.Subject + " for this system holds it: drop its version, or list a versioned item (postgresql@18)"
+			return said, "no method of " + e.Subject + " for this system holds it: drop its version"
 		},
 		machinefilecalls.UnknownItem: func(e *fail.Error) (string, string) {
 			where := cmp.Or(e.Detail["at"], e.Detail["by"])

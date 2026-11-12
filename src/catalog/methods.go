@@ -26,6 +26,26 @@ func (m MethodSpec) Holds() Hold {
 	return HoldOf(m.install(nil))
 }
 
+func (m MethodSpec) Fits(r Range) bool {
+	// value: whether this method installs within r: what it holds (Holds),
+	// or the one major a versioned formula of brew's names (Fits).
+	if m.Pin == PinNone {
+		return HoldLatest.Holds(r)
+	}
+	return Fits(m.install(nil), r)
+}
+
+func (m MethodSpec) HoldWords() string {
+	// value: what this method holds, as a refusal says it: `only its newest
+	// of 18 (postgresql@18)` for a versioned formula of brew's.
+	if b, ok := m.install(nil).(BrewInstall); ok && m.Pin != PinNone {
+		if _, major, versioned := strings.Cut(lastSegment(b.Formula), "@"); versioned {
+			return "only its newest of " + major + " (" + lastSegment(b.Formula) + ")"
+		}
+	}
+	return m.Holds().String()
+}
+
 func (m MethodSpec) Pins() bool {
 	// value: whether this method installs one version it is handed, as a
 	// lock hands it one.

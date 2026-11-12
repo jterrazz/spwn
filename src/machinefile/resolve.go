@@ -499,22 +499,22 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version 
 	chosen, because := matching[0], p.because(matching[0], len(matching))
 	locked, ok := p.lock.App(it.Item.Name)
 	if ok && it.Item.Kind != catalog.KindSetting {
-		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && m.Holds().Holds(version) })
+		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && m.Fits(version) })
 		if at >= 0 {
 			chosen, because = matching[at], "locked"
 		} else {
 			ok = false
 		}
 	}
-	if !chosen.Holds().Holds(version) {
+	if !chosen.Fits(version) {
 		alt := ""
 		for _, m := range matching[1:] {
-			if m.Holds().Holds(version) {
+			if m.Fits(version) {
 				alt = m.Key()
 				break
 			}
 		}
-		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version.String(), Method: chosen.Key(), Holds: chosen.Holds(), Alternative: alt, At: where}
+		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version.String(), Method: chosen.Key(), Holds: chosen.HoldWords(), Alternative: alt, At: where}
 	}
 	held, recorded := lockedAt(ok, version, locked.Version), ""
 	if !chosen.Pins() {

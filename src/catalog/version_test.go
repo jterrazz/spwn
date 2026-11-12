@@ -177,3 +177,16 @@ func TestAVendorBeforeTheNumbersIsReadThrough(t *testing.T) {
 		}
 	}
 }
+
+func TestAVersionedFormulaHoldsItsOwnMajor(t *testing.T) {
+	pg := catalog.BrewInstall{Formula: "postgresql@18"}
+	for text, want := range map[string]bool{"18": true, "^18.0.0": true, "~18": true, "latest": true, "17": false, "18.1": false, "^18.2.0": false, "18.1.0": false} {
+		r, _ := catalog.ParseRange(text)
+		if got := catalog.Fits(pg, r); got != want {
+			t.Errorf("postgresql@18 fits %q: %v; want %v", text, got, want)
+		}
+	}
+	if r, _ := catalog.ParseRange("18"); catalog.Fits(catalog.BrewInstall{Formula: "jq"}, r) {
+		t.Error("jq fits 18; want an unversioned formula holding only its newest")
+	}
+}

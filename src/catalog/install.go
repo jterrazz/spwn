@@ -212,11 +212,11 @@ func Keys(in Install) []string {
 
 func Pinned(in Install, r Range) (Install, bool) {
 	// value: the install held within a range, where its method holds that
-	// range (HoldOf): a runtime of mise's at its word for the range
-	// (MiseAt), a package of bun's at its specifier, apt's package and a
-	// release's tag at its one version; latest leaves every install but
-	// mise's as the catalog writes it.
-	if !HoldOf(in).Holds(r) {
+	// range (Fits): a runtime of mise's at its word for the range (MiseAt),
+	// a package of bun's at its specifier, apt's package and a release's
+	// tag at its one version, a versioned formula of brew's at its major as
+	// it is; latest leaves every install but mise's as the catalog writes it.
+	if !Fits(in, r) {
 		return nil, false
 	}
 	if m, ok := in.(MiseInstall); ok {
@@ -237,7 +237,7 @@ func Pinned(in Install, r Range) (Install, bool) {
 		m.Tag = r.Head()
 		return m, true
 	}
-	return nil, false
+	return in, true
 }
 
 func VendorOf(in Install) string {

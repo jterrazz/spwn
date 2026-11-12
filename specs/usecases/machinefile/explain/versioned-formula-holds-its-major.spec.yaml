@@ -1,4 +1,5 @@
-description: 'brew holds a major only by a versioned formula (postgresql@18): a range asked of it is refused'
+description: 'a versioned formula (postgresql@18) holds its own major and refuses any other'
+fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
@@ -11,19 +12,26 @@ runs:
     - command: 'explain apps.postgres'
       exit: 2
       stderr: |
-          Error: postgres 17: brew holds only its newest, never 17 (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
-          Hint: no method of postgres for this system holds it: drop its version, or list a versioned item (postgresql@18)
+          Error: postgres 17: brew holds only its newest of 18 (postgresql@18), never 17 (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Hint: no method of postgres for this system holds it: drop its version
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
           machinefile: station.machinefile/v1
           name: jterrazz-macbook-pro
           machine: { kind: computer, system: { os: macos } }
-          apps: [postgres]
+          apps: [{ name: postgres, version: '18' }]
       exit: 0
     - command: 'explain apps.postgres'
       exit: 0
       stdout: |
           # jterrazz-macbook-pro
-          	apps.postgres	listed	user	jterrazz-macbook-pro
+          	apps.postgres	18	user	jterrazz-macbook-pro
           	apps.postgres.method	brew	built-in	postgres
           	apps.postgres.because	its one method for macos	built-in	postgres
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          # To install
+          ○	postgres	brew
+          ●	homebrew	5.0.1	script	the manager of postgres
+          ●	postgres	1.0.0	brew

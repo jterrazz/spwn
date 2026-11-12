@@ -350,6 +350,32 @@ func HoldOf(in Install) Hold {
 	return HoldLatest
 }
 
+func Fits(in Install, r Range) bool {
+	// value: whether an install installs within r: its method holds r
+	// (HoldOf), or it is a versioned formula of brew's (`postgresql@18`) and
+	// r is the one major its name holds (`18`, `^18.0.0`), whose newest an
+	// update then keeps.
+	if HoldOf(in).Holds(r) {
+		return true
+	}
+	b, ok := in.(BrewInstall)
+	if !ok {
+		return false
+	}
+	_, at, versioned := strings.Cut(lastSegment(b.Formula), "@")
+	major, whole := r.Major()
+	return versioned && whole && at == strconv.Itoa(major)
+}
+
+func (r Range) Major() (int, bool) {
+	// value: the one major r holds whole, every minor and patch of it
+	// (`18`, `^18.0.0`, `~18`); false for any other range.
+	if r.form != RangeCaret && r.form != RangeTilde {
+		return 0, false
+	}
+	return r.low[0], r.low[1] == 0 && r.low[2] == 0 && r.high == [3]int{r.low[0] + 1, 0, 0}
+}
+
 func (h Hold) Holds(r Range) bool {
 	// value: whether a method holding h installs within r: every method
 	// within latest, an exact one by a method that pins one version.

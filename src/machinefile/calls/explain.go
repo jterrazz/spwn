@@ -226,7 +226,7 @@ func Worded(err error) error {
 	case errors.As(err, &none):
 		return refused(fail.Refused, NoMethod, none.Item, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why, "at": none.At})
 	case errors.As(err, &pin):
-		return refused(fail.Refused, Unpinnable, pin.Item, map[string]string{"version": pin.Version, "method": pin.Method, "holds": pin.Holds.String(), "alternative": pin.Alternative, "at": pin.At})
+		return refused(fail.Refused, Unpinnable, pin.Item, map[string]string{"version": pin.Version, "method": pin.Method, "holds": pin.Holds, "alternative": pin.Alternative, "at": pin.At})
 	case errors.As(err, &item):
 		return refused(fail.NotFound, UnknownItem, item.Name, map[string]string{"by": item.By, "is": item.Is, "at": item.At})
 	case errors.As(err, &value):
