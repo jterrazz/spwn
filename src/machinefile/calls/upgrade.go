@@ -57,40 +57,25 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 }
 
 func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
-	// invariant: one run of the machine at a time, and everything judged
-	// before any effect: the plan where the shared source's clone stands,
-	// and the refusal of what asks the owner something off a terminal; the
-	// source then moves forward to its branch's newest commit and the plan
-	// is judged again there. A source that cannot move, or whose newest
-	// commit does not resolve, is put back where it stood and the run goes
-	// on from it, saying why; one whose newest commit asks something off a
-	// terminal is put back and the upgrade refused.
+	// invariant: one run of the machine at a time, judged at the shared
+	// source's newest commit it may take (atNewest) before any effect.
 	release, err := take(ctx, d)
 	if err != nil {
 		return machinefile.Upgraded{}, err
 	}
 	defer release()
-	plan, err := judged(ctx, d, in.Machinefile)
+	offTerminal := !in.Unattended && !in.Interactive
+	plan, unpulled, err := atNewest(
+		func() (machinefile.Plan, error) { return judged(ctx, d, in.Machinefile) },
+		func() (func(), bool, string) { return pull(ctx, d) },
+		func(p machinefile.Plan) error {
+			if asked := p.UpgradeNeeds(); offTerminal && len(asked) > 0 {
+				return refusedOffTerminal(asked, "upgrade")
+			}
+			return nil
+		})
 	if err != nil {
-		return machinefile.Upgraded{}, err
-	}
-	if asked := plan.UpgradeNeeds(); !in.Unattended && !in.Interactive && len(asked) > 0 {
-		return machinefile.Upgraded{Plan: plan}, refusedOffTerminal(asked, "upgrade")
-	}
-	back, moved, unpulled := pull(ctx, d)
-	if moved {
-		fresh, err := judged(ctx, d, in.Machinefile)
-		asked := fresh.UpgradeNeeds()
-		switch {
-		case err != nil:
-			back()
-			unpulled = "its newest commit does not resolve, so station keeps the one before: " + err.Error()
-		case !in.Unattended && !in.Interactive && len(asked) > 0:
-			back()
-			return machinefile.Upgraded{Plan: fresh}, refusedOffTerminal(asked, "upgrade")
-		default:
-			plan = fresh
-		}
+		return machinefile.Upgraded{Plan: plan}, err
 	}
 	out := machinefile.Upgraded{Plan: plan, Unpulled: unpulled}
 	if bound, err := d.Prefs.Bound(); err == nil && bound == "" {
@@ -129,6 +114,49 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		}
 	}
 	return out, ctx.Err()
+}
+
+func atNewest(judge func() (machinefile.Plan, error), pull func() (back func(), moved bool, unpulled string), refuse func(machinefile.Plan) error) (machinefile.Plan, string, error) {
+	// invariant: everything judged before any effect: the plan where the
+	// shared source's clone stands, and the refusal of what asks the owner
+	// something off a terminal; the source then moves forward to its
+	// branch's newest commit and the plan is judged again there. A source
+	// that cannot move, or whose newest commit does not resolve, is put
+	// back where it stood and the run goes on from it, saying why; one
+	// whose newest commit asks something off a terminal is put back and the
+	// upgrade refused. A clone whose own commit does not resolve has no
+	// plan to refuse: the source moves first, its newest commit is judged
+	// as the only one, and the run fails only when that one does not
+	// resolve either, the clone left on it.
+	plan, stood := judge()
+	if stood == nil {
+		if err := refuse(plan); err != nil {
+			return plan, "", err
+		}
+	}
+	back, moved, unpulled := pull()
+	if !moved {
+		return plan, unpulled, stood
+	}
+	fresh, err := judge()
+	switch {
+	case err != nil && stood != nil:
+		return machinefile.Plan{}, unpulled, err
+	case err != nil:
+		return keptBefore(plan, back, err)
+	}
+	if err := refuse(fresh); err != nil {
+		back()
+		return fresh, "", err
+	}
+	return fresh, unpulled, nil
+}
+
+// value: the plan where the clone stood, the clone put back there, and
+// why its newest commit was not taken, as the run says it.
+func keptBefore(plan machinefile.Plan, back func(), unresolved error) (machinefile.Plan, string, error) {
+	back()
+	return plan, "its newest commit does not resolve, so station keeps the one before: " + unresolved.Error(), nil
 }
 
 // value: the machine's turn, taken for one apply or upgrade; a turn

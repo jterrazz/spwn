@@ -1,0 +1,28 @@
+description: 'a clone that no longer resolves is pulled first: offline it fails, online it takes the fix'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Source.Pull", times: 1}] | .macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .macs["jterrazz-macbook-pro"].clones = {"https://example.com/studio.git": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"} | .sources = {"https://example.com/studio.git": {head: "ffffffffffffffffffffffffffffffffffffffff", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/jterrazz-macbook-pro.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq, no-such-app]\n"}, "ffffffffffffffffffffffffffffffffffffffff": {"machinefiles/jterrazz-macbook-pro.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"}}, parents: {"ffffffffffffffffffffffffffffffffffffffff": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'upgrade'
+      exit: 2
+      stderr: |
+          Error: the catalog has no item no-such-app (studio@1a2b3c4/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Hint: station apps
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].clones'' world.json'
+      exit: 0
+      stdout: |
+          {"https://example.com/studio.git":"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	jq	1.8.1	brew
+          # Lock
+          ●	homebrew		added, 5.0.1 by script
+          ●	jq		added, 1.8.1 by brew
+          ●	shared source		studio@fffffff, was none
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].clones'' world.json'
+      exit: 0
+      stdout: |
+          {"https://example.com/studio.git":"ffffffffffffffffffffffffffffffffffffffff"}
