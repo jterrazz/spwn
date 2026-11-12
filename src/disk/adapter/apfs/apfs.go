@@ -16,6 +16,10 @@ const (
 	pgrepWait = 2 * time.Second
 	// value: the APFS volume of the owner's data; / is the sealed system's.
 	dataVolume = "/System/Volumes/Data"
+	// value: the disk of a staged system root, a Mac's of 1 TiB with half of
+	// it free.
+	stagedTotal = 1 << 40
+	stagedFree  = 1 << 39
 )
 
 type Commands interface {
@@ -36,11 +40,14 @@ func (u *Usage) Sizes(ctx context.Context, roots []string, each func(int, int64)
 }
 
 func (u *Usage) Volume(context.Context) (total, free int64, err error) {
-	// invariant: the volume is the one that holds the data volume's folder
-	// under the system root, so a root without that folder is measured where
-	// it is.
+	// invariant: a staged root stands on no volume of this host: its disk is
+	// the one the stage says, so no read of it tells the free space of the
+	// machine that happens to run it.
+	if u.root != "" {
+		return stagedTotal, stagedFree, nil
+	}
 	var st unix.Statfs_t
-	path := filepath.Join(u.root, dataVolume)
+	path := dataVolume
 	for {
 		err = unix.Statfs(path, &st)
 		if !errors.Is(err, fs.ErrNotExist) || path == "/" {

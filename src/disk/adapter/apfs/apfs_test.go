@@ -37,3 +37,10 @@ func TestTheAPFSDiskUsageKeepsTheContract(t *testing.T) {
 		return New(pgrep{}, root), root
 	})
 }
+
+func TestAStagedRootStandsOnTheDiskTheStageSaysNeverTheHosts(t *testing.T) {
+	total, free, err := New(pgrep{}, t.TempDir()).Volume(context.Background())
+	if err != nil || total != stagedTotal || free != stagedFree {
+		t.Errorf("Volume = %d total, %d free, %v; want the stage's %d and %d", total, free, err, stagedTotal, stagedFree)
+	}
+}
