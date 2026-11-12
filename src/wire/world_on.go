@@ -300,7 +300,7 @@ func (m *worldMac) password() machinefilecontract.Password {
 	return machinefilefake.PasswordOf(m.run.w, m.name)
 }
 func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefilecontract.Source {
-	return machinefilefake.SharedOf(m.run.w, src)
+	return machinefilefake.SharedOf(m.run.w, m.name, src)
 }
 
 func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Installer) {

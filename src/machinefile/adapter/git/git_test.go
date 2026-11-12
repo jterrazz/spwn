@@ -16,7 +16,6 @@ import (
 
 const (
 	pinned = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
-	moved  = "ffffffffffffffffffffffffffffffffffffffff"
 	url    = "https://example.com/studio.git"
 )
 
@@ -33,7 +32,7 @@ func in(dir string, args ...string) []string {
 	return append([]string{"-C", dir}, quiet(args...)...)
 }
 
-// value: a clone as git leaves it: the files at the commit.
+// value: a clone as git leaves it: the files at its commit.
 func clone(t *testing.T, dir string, held map[string]string) {
 	t.Helper()
 	held = maps.Clone(held)
@@ -58,8 +57,8 @@ func status(at string, held ...string) local.Output {
 	return local.Output{Stdout: strings.Join(lines, "\n") + "\n"}
 }
 
-func source(run local.Runner, cache, name, commit string) git.Source {
-	return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: name, URL: url, Commit: commit})
+func source(run local.Runner, cache, name string) git.Source {
+	return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: name, URL: url})
 }
 
 func TestTheSharedSourceKeepsTheContract(t *testing.T) {
@@ -67,39 +66,67 @@ func TestTheSharedSourceKeepsTheContract(t *testing.T) {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		run := localtest.NewRunner(t)
-		run.On("git", quiet("clone", "--quiet", "--no-checkout", "--", url, dir)...).Answer(func() local.Output {
+		run.On("git", quiet("clone", "--quiet", "--", url, dir)...).Answer(func() local.Output {
 			clone(t, dir, held)
 			return local.Output{}
 		})
-		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", pinned, "--")...).Reply(local.Output{})
-		return source(run, cache, "studio", pinned)
+		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
+		return source(run, cache, "studio")
 	})
 }
 
-func TestAnUntouchedCloneAtThePinFetchesNothing(t *testing.T) {
+func TestACloneIsReadWhereItStandsAndFetchesNothing(t *testing.T) {
 	cache := t.TempDir()
 	dir := filepath.Join(cache, "sources", "studio")
 	clone(t, dir, nil)
 	run := localtest.NewRunner(t)
 	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
-	if _, err := source(run, cache, "studio", pinned).Read(t.Context()); err != nil {
+	tree, err := source(run, cache, "studio").Read(t.Context())
+	if err != nil {
 		t.Fatal(err)
+	}
+	if tree.Root != "studio@1a2b3c4" || tree.Source == nil || tree.Source.Commit != pinned {
+		t.Errorf("read as %s from %+v, want studio@1a2b3c4 at %s", tree.Root, tree.Source, pinned)
 	}
 }
 
-func TestACloneAtAnotherCommitIsFetchedFromItsURL(t *testing.T) {
+func TestTheSharedSourceFollowsItsBranch(t *testing.T) {
+	contracttest.Follows(t, func(t *testing.T) (contract.Source, func() string) {
+		cache := t.TempDir()
+		dir := filepath.Join(cache, "sources", "studio")
+		clone(t, dir, nil)
+		at, branch, fetched := pinned, pinned, ""
+		run := localtest.NewRunner(t)
+		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Answer(func() local.Output { return status(at) })
+		run.On("git", in(dir, "fetch", "--quiet", "--no-recurse-submodules", "--", url, "HEAD")...).Answer(func() local.Output {
+			fetched = branch
+			return local.Output{}
+		})
+		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD", "--")...).Answer(func() local.Output {
+			at = fetched
+			return local.Output{}
+		})
+		return source(run, cache, "studio"), func() string {
+			branch = "ffffffffffffffffffffffffffffffffffffffff"
+			return branch
+		}
+	})
+}
+
+func TestPullOnNoCloneClonesItOnce(t *testing.T) {
 	cache := t.TempDir()
 	dir := filepath.Join(cache, "sources", "studio")
-	clone(t, dir, nil)
 	run := localtest.NewRunner(t)
+	clones := run.On("git", quiet("clone", "--quiet", "--", url, dir)...).Answer(func() local.Output {
+		clone(t, dir, nil)
+		return local.Output{}
+	})
 	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
-	fetch := run.On("git", in(dir, "fetch", "--quiet", "--no-recurse-submodules", "--", url, moved)...).Reply(local.Output{})
-	run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", moved, "--")...).Reply(local.Output{})
-	if _, err := source(run, cache, "studio", moved).Read(t.Context()); err != nil {
+	if err := source(run, cache, "studio").Pull(t.Context()); err != nil {
 		t.Fatal(err)
 	}
-	if fetch.Seen != 1 {
-		t.Errorf("fetched %d times, want once", fetch.Seen)
+	if clones.Seen != 1 {
+		t.Errorf("cloned %d times, want once", clones.Seen)
 	}
 }
 
@@ -110,32 +137,40 @@ func TestACloneThatHoldsChangesIsNotTrusted(t *testing.T) {
 		clone(t, dir, nil)
 		run := localtest.NewRunner(t)
 		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned, held))
-		_, err := source(run, cache, "studio", pinned).Read(t.Context())
+		_, err := source(run, cache, "studio").Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), "holds changes") {
 			t.Errorf("a clone holding %q read with %v", held, err)
 		}
+		if err := source(run, cache, "studio").Pull(t.Context()); err == nil || !strings.Contains(err.Error(), "holds changes") {
+			t.Errorf("a clone holding %q pulled with %v", held, err)
+		}
+	}
+}
+
+func TestACloneAtNoCommitIsNotRead(t *testing.T) {
+	cache := t.TempDir()
+	dir := filepath.Join(cache, "sources", "studio")
+	clone(t, dir, nil)
+	run := localtest.NewRunner(t)
+	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status("(initial)"))
+	if _, err := source(run, cache, "studio").Read(t.Context()); err == nil || !strings.Contains(err.Error(), "is at no commit") {
+		t.Errorf("a clone at no commit read with %v", err)
 	}
 }
 
 func TestANameThatIsNoNameRunsNothing(t *testing.T) {
 	for _, name := range []string{"..", "../escape", "a/b", "-x", "--upload-pack=touch", "Studio", ""} {
-		_, err := source(localtest.NewRunner(t), t.TempDir(), name, pinned).Read(t.Context())
+		_, err := source(localtest.NewRunner(t), t.TempDir(), name).Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), "is no name") {
 			t.Errorf("a source named %q read with %v", name, err)
 		}
 	}
 }
 
-func TestABranchIsNoPin(t *testing.T) {
-	if _, err := source(localtest.NewRunner(t), t.TempDir(), "studio", "main").Read(t.Context()); err == nil {
-		t.Fatal("a source read at a branch")
-	}
-}
-
 func TestAUrlThatIsNoRemoteRunsNothing(t *testing.T) {
 	for _, bad := range []string{"ext::sh -c touch% /tmp/pwned", "file:///etc", "/etc", "../x", "-x", "git://example.com/x.git", "http://example.com/x.git", ""} {
 		cache := t.TempDir()
-		src := contract.SharedSource{Name: "studio", URL: bad, Commit: pinned}
+		src := contract.SharedSource{Name: "studio", URL: bad}
 		_, err := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), "is no url") {
 			t.Errorf("a source at %q read with %v", bad, err)
@@ -148,12 +183,12 @@ func TestAnHttpsSshOrShortUrlIsCloned(t *testing.T) {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		run := localtest.NewRunner(t)
-		clones := run.On("git", quiet("clone", "--quiet", "--no-checkout", "--", good, dir)...).Answer(func() local.Output {
+		clones := run.On("git", quiet("clone", "--quiet", "--", good, dir)...).Answer(func() local.Output {
 			clone(t, dir, nil)
 			return local.Output{}
 		})
-		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", pinned, "--")...).Reply(local.Output{})
-		src := contract.SharedSource{Name: "studio", URL: good, Commit: pinned}
+		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
+		src := contract.SharedSource{Name: "studio", URL: good}
 		if _, err := git.New(run, local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context()); err != nil {
 			t.Errorf("%s: %v", good, err)
 		}

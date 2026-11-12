@@ -53,10 +53,12 @@ type World struct {
 	Sources map[string]*Repository `json:"sources,omitempty"`
 }
 
-// value: a repository's files at each of its commits, by slash path.
+// value: a repository's files at each of its commits, by slash path,
+// and the commit its default branch is at.
 
 type Repository struct {
 	Commits map[string]map[string]string `json:"commits"`
+	Head    string                       `json:"head"`
 }
 
 type Fault struct {
@@ -105,6 +107,9 @@ type Mac struct {
 	// value: station's own files as text, by name, while no store has read
 	// them: a file edited by hand, a file station v2 left.
 	Files map[string]string `json:"files,omitempty"`
+	// value: the commit each shared source's clone is at, by the source's
+	// url.
+	Clones map[string]string `json:"clones,omitempty"`
 	// value: the images the hypervisor holds, by reference.
 	Images []string `json:"images,omitempty"`
 	// value: a VM freshly cloned from a fetched image, before anything ran

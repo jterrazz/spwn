@@ -1,6 +1,7 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"path/filepath"
@@ -154,6 +155,10 @@ func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved,
 		}
 		trees = append(trees, t)
 	}
+	var source *catalog.LockSource
+	for _, t := range trees {
+		source = cmp.Or(source, t.Source)
+	}
 	lib, err := machinefile.Load(trees)
 	if err != nil {
 		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
@@ -163,6 +168,7 @@ func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved,
 		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
 	}
 	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
+	r.Source = source
 	return r, lib.Catalog, Worded(err)
 }
 
@@ -228,7 +234,7 @@ func Worded(err error) error {
 	case errors.As(err, &key):
 		return refused(fail.NotFound, UnknownKey, key.Key, map[string]string{"name": key.Name})
 	case errors.As(err, &gone):
-		return refused(fail.Failed, Unavailable, gone.Source, map[string]string{"commit": gone.Commit, "cause": gone.Cause.Error()})
+		return refused(fail.Failed, Unavailable, gone.Source, map[string]string{"cause": gone.Cause.Error()})
 	}
 	return err
 }

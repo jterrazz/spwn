@@ -18,13 +18,32 @@ func TestTheOwnersFilesOfAMacKeepTheContract(t *testing.T) {
 	})
 }
 
+const (
+	head  = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
+	moved = "ffffffffffffffffffffffffffffffffffffffff"
+)
+
 func TestARepositoryOfTheWorldKeepsTheContract(t *testing.T) {
 	contracttest.Source(t, func(_ *testing.T, held map[string]string) contract.Source {
-		src := contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git", Commit: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}
-		w := &world.World{Sources: map[string]*world.Repository{src.URL: {Commits: map[string]map[string]string{src.Commit: maps.Clone(held)}}}}
+		src := contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git"}
 		if held == nil {
-			w.Sources[src.URL].Commits[src.Commit] = map[string]string{}
+			held = map[string]string{}
 		}
-		return fake.SharedOf(w, src)
+		w := &world.World{Sources: map[string]*world.Repository{src.URL: {Head: head, Commits: map[string]map[string]string{head: maps.Clone(held)}}}}
+		return fake.SharedOf(w, "laptop", src)
+	})
+}
+
+func TestAMacsCloneFollowsItsRepositorysHead(t *testing.T) {
+	contracttest.Follows(t, func(*testing.T) (contract.Source, func() string) {
+		src := contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git"}
+		repo := &world.Repository{Head: head, Commits: map[string]map[string]string{head: {}, moved: {}}}
+		w := &world.World{Sources: map[string]*world.Repository{src.URL: repo}}
+		return fake.SharedOf(w, "laptop", src), func() string {
+			w.Lock()
+			defer w.Unlock()
+			repo.Head = moved
+			return moved
+		}
 	})
 }

@@ -371,8 +371,7 @@
         "confirm.yes-needed",
         "machinefile.name-taken",
         "machinefile.needs-terminal",
-        "machinefile.not-found",
-        "machinefile.source-moved"
+        "machinefile.not-found"
       ],
       "in": "ApplyIn",
       "out": "Applied"

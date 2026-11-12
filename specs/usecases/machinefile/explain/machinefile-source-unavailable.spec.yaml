@@ -1,10 +1,10 @@
-description: 'a shared source unreadable at its pinned commit stops explain, naming source and commit'
+description: 'a shared source with no repository at its url stops explain, naming the source'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git", commit: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'explain --machinefile station-macos'
       exit: 1
       stderr: |
-          Error: the source studio cannot be read at 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d: no such commit in the repository
-          Hint: check its url and commit in ~/.config/station/preferences.json
+          Error: the source studio cannot be read: no repository at its url
+          Hint: check its url in ~/.config/station/preferences.json

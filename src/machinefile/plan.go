@@ -114,6 +114,7 @@ type Asked struct {
 type Plan struct {
 	Name         string
 	Lock         Lock
+	Source       *catalog.LockSource
 	Needs        []Asked
 	Lines        []Line
 	Extra        []ExtraLine
@@ -129,7 +130,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	// setting changed by hand or a read that did not answer left as it is
 	// (the owner's to decide); an item of another phase is left to it. An
 	// item skipped on this system is still listed, so never extra.
-	p := Plan{Name: r.Name, Lock: r.Lock, Skipped: r.Skipped, Passwordless: passwordless}
+	p := Plan{Name: r.Name, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Item] = true

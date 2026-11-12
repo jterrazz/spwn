@@ -7,8 +7,8 @@ runs:
     - command: 'explain machine.kind --machinefile station-macos >/dev/null; : > .cache/station/sources/studio/planted.yaml; : > .calls; "$STATION" explain machine.kind --machinefile station-macos'
       exit: 1
       stderr: |
-          Error: the source studio cannot be read at 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d: its clone {{workdir}}/.cache/station/sources/studio holds changes: station only checks it out, so delete it and station clones it again
-          Hint: check its url and commit in ~/.config/station/preferences.json
+          Error: the source studio cannot be read: its clone {{workdir}}/.cache/station/sources/studio holds changes: station only checks it out, so delete it and station clones it again
+          Hint: check its url in ~/.config/station/preferences.json
       files:
           .calls:
               equals: |

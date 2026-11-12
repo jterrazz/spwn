@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/fail"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
+	"github.com/jterrazz/studio-station/src/machinefile/contract"
 )
 
 type UpgradeIn struct {
@@ -35,9 +36,12 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
-		// invariant: an upgrade is the one run that takes a shared source
-		// pinned elsewhere since the lock: the lock it leaves holds the
-		// commit read now.
+		// invariant: an upgrade is the one run that moves the shared source
+		// to its branch's newest commit, before anything is read: the lock
+		// it leaves holds the commit read then.
+		if err := pull(ctx, d); err != nil {
+			return machinefile.Upgraded{}, err
+		}
 		plan, err := judged(ctx, d, in.Machinefile)
 		if err != nil {
 			return machinefile.Upgraded{}, err
@@ -48,10 +52,6 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 			waits = plan.Waits()
 		} else if !in.Interactive && len(asked) > 0 {
 			return out, refusedOffTerminal(asked, "upgrade")
-		}
-		source, err := sharedSource(d)
-		if err != nil {
-			return out, err
 		}
 		lines := plan.Upgrades()
 		for i, l := range lines {
@@ -74,7 +74,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		}
 		out.Interrupted = ctx.Err() != nil
 		out.Waiting = machinefile.WaitingOf(out.Done)
-		now := machinefile.Relocked(plan, out.Done, source)
+		now := machinefile.Relocked(plan, out.Done, plan.Source)
 		out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
 		if !out.Lock.Empty() {
 			if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
@@ -88,6 +88,17 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		}
 		return out, ctx.Err()
 	},
+}
+
+func pull(ctx context.Context, d Deps) error {
+	for _, s := range d.Sources() {
+		if f, ok := s.(contract.Follows); ok {
+			if err := f.Pull(ctx); err != nil {
+				return Worded(err)
+			}
+		}
+	}
+	return nil
 }
 
 // invariant: an app the lock holds that is not there is installed by the

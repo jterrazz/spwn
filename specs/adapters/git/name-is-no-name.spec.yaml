@@ -6,7 +6,7 @@ runs:
     - command: 'explain machine.kind --machinefile station-macos'
       exit: 1
       stderr: |
-          Error: the source ../escape cannot be read at 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d: its name "../escape" is no name: lower-case words joined by dashes (`studio`)
-          Hint: check its url and commit in ~/.config/station/preferences.json
+          Error: the source ../escape cannot be read: its name "../escape" is no name: lower-case words joined by dashes (`studio`)
+          Hint: check its url in ~/.config/station/preferences.json
       files:
           .calls: absent

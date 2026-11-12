@@ -14,8 +14,8 @@ import (
 	"github.com/jterrazz/studio-station/src/platform/local"
 )
 
-// value: a commit as git names it whole; a branch or a tag moves, a
-// source is pinned.
+// value: a commit as git names it whole, the one a clone's HEAD must be
+// at to be read.
 var commit = regexp.MustCompile(`^[0-9a-f]{40}$`)
 
 // value: what every git run of a source is given before its verb: no hook
@@ -48,53 +48,63 @@ func New(run local.Runner, fsys local.FS, cache string, src contract.SharedSourc
 }
 
 func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
-	if err := s.checkout(ctx); err != nil {
-		return machinefile.Tree{}, &contract.UnavailableError{Source: s.src.Name, Commit: s.src.Commit, Cause: err}
+	head, _, err := s.clone(ctx)
+	if err != nil {
+		return machinefile.Tree{}, &contract.UnavailableError{Source: s.src.Name, Cause: err}
 	}
-	root := s.src.Name + "@" + s.src.Commit[:7]
 	files, err := contract.ReadFolders(s.fs, contract.NoLinks, filepath.Join(s.dir, "catalog"), filepath.Join(s.dir, "machinefiles"))
-	return machinefile.Tree{Layer: machinefile.Shared, Root: root, Files: files}, err
+	return machinefile.Tree{
+		Layer: machinefile.Shared, Root: s.src.Name + "@" + head[:7], Files: files,
+		Source: &catalog.LockSource{Name: s.src.Name, Commit: head},
+	}, err
+}
+
+func (s Source) Pull(ctx context.Context) error {
+	// invariant: the commit the source's default branch is at now is
+	// fetched from its url and checked out detached; a clone made by this
+	// very call is already there and fetches nothing more.
+	_, fresh, err := s.clone(ctx)
+	if err == nil && !fresh {
+		if _, err = s.git(ctx, s.dir, "fetch", "--quiet", "--no-recurse-submodules", "--", s.src.URL, "HEAD"); err == nil {
+			_, err = s.git(ctx, s.dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD", "--")
+		}
+	}
+	if err != nil {
+		return &contract.UnavailableError{Source: s.src.Name, Cause: err}
+	}
+	return nil
 }
 
 // invariant: the clone is station's alone and only ever checked out. A
 // source is named as a Machinefile is, so its clone is one folder of the
-// cache; a clone already there is trusted only untouched (no change, no file
-// git does not track) and is read with nothing fetched when its HEAD is
-// the pinned commit; else it is cloned once, fetched from its url when
-// the commit is new to it, and checked out detached at the commit.
-func (s Source) checkout(ctx context.Context) error {
+// cache, cloned once at the source's default branch when it is not
+// there; a clone already there is trusted only untouched (no change, no
+// file git does not track) and is read where it stands, with nothing
+// fetched. It answers the commit the clone's HEAD is at, and whether this
+// call cloned it.
+func (s Source) clone(ctx context.Context) (head string, fresh bool, err error) {
 	switch {
 	case !catalog.IsMachinefileName(s.src.Name):
-		return errors.New("its name " + strconv.Quote(s.src.Name) + " is no name: lower-case words joined by dashes (`studio`)")
+		return "", false, errors.New("its name " + strconv.Quote(s.src.Name) + " is no name: lower-case words joined by dashes (`studio`)")
 	case !remote.MatchString(s.src.URL):
-		return errors.New("its url " + strconv.Quote(s.src.URL) + " is no url station clones: https://, ssh:// or user@domain:path")
-	case !commit.MatchString(s.src.Commit):
-		return errors.New("its commit " + s.src.Commit + " is no commit: a source is pinned by its 40-character sha")
+		return "", false, errors.New("its url " + strconv.Quote(s.src.URL) + " is no url station clones: https://, ssh:// or user@domain:path")
 	}
-	if _, err := s.fs.Stat(filepath.Join(s.dir, ".git")); err != nil {
-		if _, err := s.git(ctx, "", "clone", "--quiet", "--no-checkout", "--", s.src.URL, s.dir); err != nil {
-			return err
+	if _, missing := s.fs.Stat(filepath.Join(s.dir, ".git")); missing != nil {
+		if _, err = s.git(ctx, "", "clone", "--quiet", "--", s.src.URL, s.dir); err != nil {
+			return "", false, err
 		}
-		return s.detach(ctx)
+		fresh = true
 	}
 	head, untouched, err := s.status(ctx)
 	switch {
 	case err != nil:
-		return err
+		return "", false, err
 	case !untouched:
-		return errors.New("its clone " + s.dir + " holds changes: station only checks it out, so delete it and station clones it again")
-	case head == s.src.Commit:
-		return nil
+		return "", false, errors.New("its clone " + s.dir + " holds changes: station only checks it out, so delete it and station clones it again")
+	case !commit.MatchString(head):
+		return "", false, errors.New("its clone " + s.dir + " is at no commit: its default branch holds none")
 	}
-	if _, err := s.git(ctx, s.dir, "fetch", "--quiet", "--no-recurse-submodules", "--", s.src.URL, s.src.Commit); err != nil {
-		return err
-	}
-	return s.detach(ctx)
-}
-
-func (s Source) detach(ctx context.Context) error {
-	_, err := s.git(ctx, s.dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", s.src.Commit, "--")
-	return err
+	return head, fresh, nil
 }
 
 // value: the commit a clone's HEAD is at, and whether its working tree is

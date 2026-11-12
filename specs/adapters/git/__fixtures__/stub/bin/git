@@ -1,7 +1,9 @@
 #!/bin/sh
-# git as a shared source meets it: clone makes the folder, checkout moves
-# HEAD, fetch answers, status reads HEAD back and lists a file planted
-# beside the clone's own as untracked. Every call lands in .calls.
+# git as a shared source meets it: clone makes the folder at the default
+# branch's commit, fetch reads that commit (from $HOME/.origin when a
+# document moved it), checkout moves HEAD there, status reads HEAD back
+# and lists a file planted beside the clone's own as untracked. Every call
+# lands in .calls.
 echo "git $*" >> "$HOME/.calls"
 dir=""
 if [ "$1" = "-C" ]; then
@@ -13,9 +15,12 @@ case "$1" in
     clone)
         for a; do dir="$a"; done
         /bin/mkdir -p "$dir/.git" "$dir/machinefiles"
+        echo 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d > "$dir/.git/HEAD"
         ;;
-    checkout) echo "$4" > "$dir/.git/HEAD" ;;
-    fetch) ;;
+    checkout) /bin/cat "$dir/.git/$4" > "$dir/.git/HEAD" ;;
+    fetch)
+        if [ -f "$HOME/.origin" ]; then /bin/cat "$HOME/.origin"; else echo 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d; fi > "$dir/.git/FETCH_HEAD"
+        ;;
     status)
         echo "# branch.oid $(/bin/cat "$dir/.git/HEAD")"
         echo "# branch.head (detached)"

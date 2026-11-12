@@ -11,13 +11,12 @@ import (
 
 const GroupSource = "machinefile"
 
-// value: the shared source: a repository read at a pinned commit,
+// value: the shared source: a repository read at its default branch,
 // named as the plan names it (`studio`).
 
 type SharedSource struct {
-	Name   string `json:"name"`
-	URL    string `json:"url"`
-	Commit string `json:"commit"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
 }
 
 type SourcePrefs struct{ p corecontract.Preferences }

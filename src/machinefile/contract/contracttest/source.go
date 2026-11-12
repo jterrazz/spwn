@@ -52,3 +52,40 @@ func Source(t *testing.T, subject Subject) {
 		}
 	})
 }
+
+// value: a source that follows a branch, built by the adapter under test,
+// and the gesture that moves its branch to a new commit, answering it.
+
+type Branch func(t *testing.T) (contract.Source, func() string)
+
+func Follows(t *testing.T, branch Branch) {
+	t.Run("is read where it stands until it is pulled, then at the branch's newest commit", func(t *testing.T) {
+		src, move := branch(t)
+		at := func() string {
+			t.Helper()
+			tree, err := src.Read(context.Background())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tree.Source == nil || tree.Source.Commit == "" {
+				t.Fatalf("a followed source's tree names no commit: %+v", tree)
+			}
+			return tree.Source.Commit
+		}
+		first := at()
+		moved := move()
+		if now := at(); now != first {
+			t.Errorf("a read moved the source from %s to %s", first, now)
+		}
+		follows, ok := src.(contract.Follows)
+		if !ok {
+			t.Fatalf("%T follows no branch: it has no Pull", src)
+		}
+		if err := follows.Pull(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+		if now := at(); now != moved {
+			t.Errorf("pulled to %s, want %s", now, moved)
+		}
+	})
+}

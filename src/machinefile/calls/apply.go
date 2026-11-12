@@ -26,10 +26,6 @@ const (
 	// value: a Machinefile named by its path whose name the owner's folder
 	// already holds with other bytes: it is never replaced.
 	NameTaken fail.Code = "machinefile.name-taken"
-	// value: the shared source is pinned at another commit than the one the
-	// lock was written from: its scripts are new code, which only `station
-	// upgrade` takes.
-	SourceMoved fail.Code = "machinefile.source-moved"
 )
 
 // value: how long the read past an interrupt waits for the interrupted
@@ -53,11 +49,10 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, SourceMoved, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
 		// invariant: everything is judged before any effect: the
-		// Machinefile, the shared source the lock holds, the needs a run off
-		// a terminal cannot answer (with
+		// Machinefile, the needs a run off a terminal cannot answer (with
 		// --remove, those of each extra it uninstalls), the removal's
 		// confirmation, a copy that would replace the owner's file. Then
 		// the machine is bound, so an interrupted run is resumed by a bare
@@ -67,13 +62,6 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		out := machinefile.Applied{Plan: plan}
-		source, err := sharedSource(d)
-		if err != nil {
-			return out, err
-		}
-		if moved := movedSource(plan.Lock, source); moved != nil {
-			return out, moved
-		}
 		if asked := plan.Interactive(in.Remove); !in.Interactive && len(asked) > 0 {
 			return out, refusedOffTerminal(asked, "apply")
 		}
@@ -111,13 +99,13 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		if err := ctx.Err(); err != nil {
 			out.Interrupted = true
-			return out, errors.Join(err, relock(ctx, d, plan, out.Done, source))
+			return out, errors.Join(err, relock(ctx, d, plan, out.Done))
 		}
 		if in.Remove {
 			out.Removed = r.remove(ctx, plan.Extra)
 		}
 		out.Interrupted = ctx.Err() != nil
-		if err := relock(ctx, d, plan, out.Done, source); err != nil {
+		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
 		}
 		return out, ctx.Err()
@@ -456,36 +444,11 @@ func (r *run) uninstall(ctx context.Context, e machinefile.ExtraLine, done machi
 	return done
 }
 
-// value: the shared source this machine reads, as the lock records it;
-// nil when it reads none.
-func sharedSource(d Deps) (*catalog.LockSource, error) {
-	shared, ok, err := d.Prefs.Get()
-	if err != nil || !ok {
-		return nil, err
-	}
-	return &catalog.LockSource{Name: shared.Name, Commit: shared.Commit}, nil
-}
-
-// invariant: a lock written from a shared source holds its commit, and a
-// run that is not an upgrade reads only that commit: a source pinned
-// elsewhere since, or dropped, is refused before any effect.
-func movedSource(lock machinefile.Lock, now *catalog.LockSource) error {
-	was := lock.Source
-	if was == nil || (now != nil && *now == *was) {
-		return nil
-	}
-	detail := map[string]string{"locked": was.Commit, "lock": lock.File}
-	if now != nil {
-		detail["now"], detail["name"] = now.Commit, now.Name
-	}
-	return fail.New(fail.Refused, SourceMoved, was.Name, detail)
-}
-
 // invariant: the lock is written once the run ends, interrupted or not,
 // and only when it changed, so a run that changed nothing leaves the
 // file as it was.
-func relock(ctx context.Context, d Deps, p machinefile.Plan, done []machinefile.Done, source *catalog.LockSource) error {
-	now := machinefile.Relocked(p, done, source)
+func relock(ctx context.Context, d Deps, p machinefile.Plan, done []machinefile.Done) error {
+	now := machinefile.Relocked(p, done, p.Source)
 	if machinefile.Diff(p.Lock.LockFile, now).Empty() {
 		return nil
 	}

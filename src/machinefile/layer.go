@@ -34,6 +34,9 @@ type Tree struct {
 	Layer Layer
 	Root  string
 	Files []File
+	// value: a shared source's name and the commit its files were read
+	// at, as the lock records it; nil for every other layer.
+	Source *catalog.LockSource
 }
 
 type File struct {

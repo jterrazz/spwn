@@ -75,8 +75,11 @@ type Skip struct {
 // optional items skipped.
 
 type Resolved struct {
-	Name    string
-	Lock    Lock
+	Name string
+	Lock Lock
+	// value: the shared source read, as the lock records it; nil when the
+	// machine reads none.
+	Source  *catalog.LockSource
 	Kind    catalog.MachineRole
 	System  catalog.System
 	Files   []Origin

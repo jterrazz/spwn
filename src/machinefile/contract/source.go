@@ -14,16 +14,23 @@ type Source interface {
 	Read(ctx context.Context) (machinefile.Tree, error)
 }
 
-// value: a shared source that cannot be read at its commit: the clone or
+type Follows interface {
+	// invariant: a source that follows a branch is read where its clone
+	// stands; Pull moves the clone to the branch's newest commit, the one
+	// gesture that changes what Read reads.
+	Pull(ctx context.Context) error
+}
+
+// value: a shared source that cannot be read: the clone, the fetch or
 // the checkout failed.
 
 type UnavailableError struct {
-	Source, Commit string
-	Cause          error
+	Source string
+	Cause  error
 }
 
 func (e *UnavailableError) Error() string {
-	return "the source " + e.Source + " cannot be read at " + e.Commit + ": " + e.Cause.Error()
+	return "the source " + e.Source + " cannot be read: " + e.Cause.Error()
 }
 
 func (e *UnavailableError) Unwrap() error { return e.Cause }

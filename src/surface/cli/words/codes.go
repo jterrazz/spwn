@@ -122,13 +122,6 @@ func Codes() map[fail.Code]Wording {
 			verb := cmp.Or(e.Detail["verb"], "apply")
 			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station " + verb + " on a terminal"
 		},
-		machinefilecalls.SourceMoved: func(e *fail.Error) (string, string) {
-			now := "names none"
-			if e.Detail["now"] != "" {
-				now = "is at " + abbreviated(e.Detail["now"])
-			}
-			return "the shared source " + e.Subject + " " + now + ", and " + e.Detail["lock"] + " holds " + abbreviated(e.Detail["locked"]) + ": its scripts are code apply never takes unseen", "station upgrade takes it, then station apply"
-		},
 		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
 			if strings.HasSuffix(e.Subject, catalog.LockSuffix) {
 				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"
@@ -189,7 +182,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Detail["name"] + " says nothing of " + e.Subject, "station explain --machinefile " + e.Detail["name"]
 		},
 		machinefilecalls.Unavailable: func(e *fail.Error) (string, string) {
-			return "the source " + e.Subject + " cannot be read at " + e.Detail["commit"] + ": " + e.Detail["cause"], "check its url and commit in ~/.config/station/preferences.json"
+			return "the source " + e.Subject + " cannot be read: " + e.Detail["cause"], "check its url in ~/.config/station/preferences.json"
 		},
 		imagescalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no image \"" + e.Subject + "\"", "station images"
@@ -441,12 +434,4 @@ func needsWords(needs string) string {
 		}
 	}
 	return strings.Join(said, " and ")
-}
-
-// value: a commit as git abbreviates it, its first seven characters.
-func abbreviated(commit string) string {
-	if len(commit) > 7 {
-		return commit[:7]
-	}
-	return commit
 }
