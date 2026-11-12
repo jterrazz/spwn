@@ -1,0 +1,61 @@
+description: a setting as station last wrote it, which station writes otherwise now, is rewritten unasked
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: greet
+          description: 'A greeting, in a block of ~/.zshrc'
+          reversible: true
+          methods:
+              - os: any
+                shell:
+                    - id: station:greet
+                      zsh: |
+                          greet() { echo hi; }
+          writes:
+              - path: ~/.zshrc
+                level: settings
+                note: the block station:greet
+      exit: 0
+    - command: 'settings apply greet'
+      exit: 0
+      stdout: |
+          ●	greet	~/.zshrc [station:greet]: written
+    - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: greet
+          description: 'A greeting, in a block of ~/.zshrc'
+          reversible: true
+          methods:
+              - os: any
+                shell:
+                    - id: station:greet
+                      zsh: |
+                          greet() { echo hello; }
+          writes:
+              - path: ~/.zshrc
+                level: settings
+                note: the block station:greet
+      exit: 0
+    - command: 'settings greet | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ○	greet	not applied	station settings apply greet
+    - command: 'settings apply greet </dev/null'
+      exit: 0
+      stdout: |
+          ●	greet	~/.zshrc [station:greet]: written
+    - command: '--version >/dev/null; /usr/bin/grep greet .zshrc'
+      exit: 0
+      stdout: |
+          # >>> station:greet >>>
+          greet() { echo hello; }
+          # <<< station:greet <<<
+    - command: 'settings greet | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	greet	applied · ~/.zshrc [station:greet]

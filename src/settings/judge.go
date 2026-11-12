@@ -119,8 +119,10 @@ func JudgeSet(it catalog.Setting, lives bool, applied *Applied, now Observation,
 	// invariant: one setting's state on one machine, from its place, the owner's
 	// Off here, what station recorded when it applied it and what is there now.
 	// Off here wins over everything but the place; a record whose fingerprint no
-	// longer matches, or whose effect is gone, is Changed since; with no record,
-	// a setting already exactly as station writes it is Applied, from before
+	// longer matches, or whose effect is gone, is Changed since; one that still
+	// matches what is there, which station now writes otherwise, is Not applied,
+	// station's own earlier text for apply to write anew; with no record, a
+	// setting already exactly as station writes it is Applied, from before
 	// station kept records.
 	row := Row{Name: it.Name, Item: it, Group: GroupOf(it), Where: now.Where}
 	switch {
@@ -132,6 +134,8 @@ func JudgeSet(it catalog.Setting, lives bool, applied *Applied, now Observation,
 		row.State = StateReading
 	case applied != nil && now.Blind:
 		row.State, row.Since = StateApplied, applied.At
+	case applied != nil && !now.Present() && now.Digest != "" && applied.Digest == now.Digest:
+		row.State = StateNotApplied
 	case applied != nil && (!now.Present() || applied.Digest != now.Digest):
 		row.State, row.Since = StateChangedSince, applied.At
 	case applied != nil:

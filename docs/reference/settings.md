@@ -10,7 +10,7 @@
 
 ## The items
 
-A setting that does not live on this machine's kind reads Not for this machine, and an apply of it is refused with exit 2. Each that lives here reads Applied (exactly as station applied it), Changed since (applied, then changed by someone: `station settings diff` shows how), Not applied, or Off here (the owner's choice, kept as `off_here` in [`preferences.json`](preferences.md)). What station applied, its fingerprint and when, is kept under `~/.local/state/station/applied/`.
+A setting that does not live on this machine's kind reads Not for this machine, and an apply of it is refused with exit 2. Each that lives here reads Applied (exactly as station applied it), Changed since (applied, then changed by someone: `station settings diff` shows how), Not applied (never applied, or still exactly as station applied it while station writes it otherwise now, so the next apply writes the new text without asking), or Off here (the owner's choice, kept as `off_here` in [`preferences.json`](preferences.md)). What station applied, its fingerprint and when, is kept under `~/.local/state/station/applied/`.
 
 | Item                        | Lives on   | Sets                                                                                                                                                                                                                                          | Reversible |
 | --------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
