@@ -11,7 +11,7 @@ methods:
       brew: hashicorp/tap/terraform
     - family: linux
       script:
-          check: terraform version
+          check: CHECKPOINT_DISABLE=1 terraform version
           undo: rm -f "$HOME/.local/bin/terraform"
           run: |
               set -eu
