@@ -100,7 +100,10 @@ const (
 	ProcClaudeToken          Procedure = "claude-token"
 	ProcBackupExclusions     Procedure = "backup-exclusions"
 	ProcTailscaleCLI         Procedure = "tailscale-cli"
+	ProcOSCheckout           Procedure = "os-checkout"
 )
+
+const SourceURLEnv = "STATION_SOURCE_URL" // value: where a workspace's boot phase hands os-checkout its Mac's shared source URL.
 
 func (Touch) Kind() EffectKind         { return EffectTouch }
 func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
@@ -121,7 +124,7 @@ func Procedures() []string {
 		string(ProcGitSigning), string(ProcSSHKey), string(ProcGitHubLogin), string(ProcSpotlight), string(ProcDNS),
 		string(ProcDockReset), string(ProcDockSpacer), string(ProcAutologin), string(ProcRestartAfterPowerCut),
 		string(ProcNeverSleeps), string(ProcLockAfterLogin), string(ProcSshd), string(ProcClaudeToken),
-		string(ProcBackupExclusions), string(ProcTailscaleCLI),
+		string(ProcBackupExclusions), string(ProcTailscaleCLI), string(ProcOSCheckout),
 	}
 }
 

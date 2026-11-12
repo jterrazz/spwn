@@ -1,5 +1,5 @@
 description: 'a recipe the guest breaks off fails the build, names its step, and keeps no half image'
-fixture: ./__fixtures__/build/
+fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
     - command: 'world fault Guest.Exec 1'

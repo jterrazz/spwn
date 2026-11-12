@@ -23,6 +23,9 @@ type Record struct {
 	// value: the name of every agent a workspace held when it last stopped,
 	// finished ones too: what it holds while no one reads its journal.
 	Agents []string
+	// value: the Machinefile it was made from (create --from); empty for
+	// one made from an image alone.
+	Template string
 }
 
 type MacRecord struct {

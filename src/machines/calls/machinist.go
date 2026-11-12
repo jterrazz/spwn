@@ -53,6 +53,20 @@ type Options struct {
 	// value: installs this Mac's engine job and starts it, as engine start
 	// does; nil installs none.
 	StartEngine func(ctx context.Context) error
+	// value: the Machinefiles workspaces are made from, as this Mac reads
+	// them; nil reads none.
+	Templates Templates
+	// value: shares an account this Mac holds with one of its VMs for a
+	// term, as accounts share does; nil shares none.
+	Share func(ctx context.Context, account, vm string, term time.Duration) error
+}
+
+type Templates interface {
+	// value: the Machinefile of that name, as a workspace is made from it.
+	Template(ctx context.Context, name string) (model.Template, error)
+	// value: what the image's version was baked from that its Machinefile
+	// no longer says, one line an item.
+	Drift(ctx context.Context, name, version string) ([]string, error)
 }
 
 type Multiplexer interface {

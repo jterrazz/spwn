@@ -15,7 +15,7 @@ runs:
           ●	time-machine	as expected · last backup 2 d ago
           ●	macos-updates	as expected · up to date
           # Not for this machine
-          –	1 not for this machine	VMs only
+          –	2 not for this machine	VMs only
     - command: 'settings --json | /usr/bin/jq -c ''.settings[] | select(.name == "firewall")'''
       exit: 0
       stdout: |

@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "20 set by station here"
+                    "text": "21 set by station here"
                   },
                   {
                     "kind": "text",
@@ -233,6 +233,16 @@
         },
         {
           "row": {
+            "id": "os-checkout",
+            "mark": "pending",
+            "label": "os-checkout",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "tart-launcher",
             "mark": "pending",
             "label": "tart-launcher",
@@ -275,7 +285,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 20
+          "n": 21
         }
       ],
       "pipe_counts": true

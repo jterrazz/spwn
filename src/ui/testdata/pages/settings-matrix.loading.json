@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "34 settings on 4 machines",
+            "label": "35 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -123,7 +123,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/tart-launcher",
+            "id": "jterrazz-macbook-pro/os-checkout",
             "mark": "pending",
             "label": "jterrazz-macbook-pro",
             "short": "This Mac",
@@ -237,7 +237,7 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/tart-launcher",
+            "id": "jterrazz-mac-mini/os-checkout",
             "mark": "pending",
             "label": "jterrazz-mac-mini",
             "short": "mac-mini",
@@ -351,7 +351,7 @@
         },
         {
           "row": {
-            "id": "linux-1/tart-launcher",
+            "id": "linux-1/os-checkout",
             "mark": "pending",
             "label": "linux-1",
             "short": "linux-1",
@@ -427,7 +427,7 @@
         },
         {
           "row": {
-            "id": "api/tart-launcher",
+            "id": "api/os-checkout",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -701,9 +701,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "os-checkout",
             "mark": "pending",
-            "label": "tart-launcher",
+            "label": "os-checkout",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "16 more",
+            "label": "17 more",
             "cells": [
               {
                 "kind": "pending"
@@ -999,6 +999,7 @@
         "backup-exclusions",
         "dock-reset",
         "dock-spacer",
+        "os-checkout",
         "tart-launcher",
         "autologin",
         "lock-after-login",
@@ -1033,6 +1034,7 @@
         "backup-exclusions",
         "dock-reset",
         "dock-spacer",
+        "os-checkout",
         "tart-launcher",
         "autologin",
         "lock-after-login",

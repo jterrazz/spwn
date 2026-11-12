@@ -662,6 +662,7 @@ Erase: none (nothing to erase: its pages are station's, its choices are kept).
 | backup-exclusions       | `~/.local/share/station/vms`                                                    | never touched | a sticky Time Machine exclusion (`tmutil addexclusion`)                  |
 | dock-reset              | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults                                                |
 | dock-spacer             | `~/Library/Preferences/com.apple.dock.plist`                                    | never touched | `com.apple.dock` defaults: a spacer tile                                 |
+| os-checkout             | `~/Developer`                                                                   | your data     | the repository's clone, the owner's work                                 |
 | tart-launcher           | `~/.local/bin/tart`                                                             | never touched | the embedded `tart/tart`                                                 |
 | autologin               | `/etc/kcpassword`                                                               | never touched | the agent user's login password, obfuscated                              |
 | autologin               | `/Library/Preferences/com.apple.loginwindow`                                    | never touched | `autoLoginUser` in `com.apple.loginwindow`                               |

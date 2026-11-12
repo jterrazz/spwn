@@ -1,6 +1,7 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"slices"
@@ -38,14 +39,54 @@ func validCheck(check string) bool {
 }
 
 // value: the image a name stands for, by its name or one it was renamed
-// from.
-func (s *Machinist) imageOf(name string) (catalog.Image, bool) {
+// from; else the image a Machinefile of that name is built into, set up
+// by the first boot of the built-in image of its system.
+func (s *Machinist) imageOf(ctx context.Context, name string) (catalog.Image, bool) {
 	for _, img := range s.o.Images {
 		if img.Name == name || slices.Contains(img.RenamedFrom, name) {
 			return img, true
 		}
 	}
-	return catalog.Image{}, false
+	if s.o.Templates == nil {
+		return catalog.Image{}, false
+	}
+	t, err := s.o.Templates.Template(ctx, name)
+	if err != nil || t.Server {
+		return catalog.Image{}, false
+	}
+	img, ok := catalog.Catalog{Images: s.o.Images}.RecipeFor(t.OS)
+	if !ok {
+		return catalog.Image{}, false
+	}
+	img.Name, img.Machinefile, img.RenamedFrom = t.Name, t.Name, nil
+	return img, true
+}
+
+// invariant: a create from a Machinefile makes the image named after it,
+// and takes what its vm says of how the workspace runs wherever the
+// request says nothing; a server's Machinefile is refused, station
+// setting nothing up in a server.
+func (s *Machinist) fromTemplate(ctx context.Context, r model.CreateRequest) (model.CreateRequest, *model.Template, error) {
+	if r.From == "" {
+		return r, nil, nil
+	}
+	if s.o.Templates == nil {
+		return r, nil, &model.UnknownImageError{Image: r.From}
+	}
+	t, err := s.o.Templates.Template(ctx, r.From)
+	switch {
+	case err != nil:
+		return r, nil, err
+	case t.Server || r.Server:
+		return r, nil, &model.ServerTemplateError{Name: t.Name}
+	}
+	r.Image = t.Name
+	r.Lifetime = cmp.Or(r.Lifetime, t.Lifetime)
+	r.Network = cmp.Or(r.Network, t.Network)
+	r.Size.CPUs = cmp.Or(r.Size.CPUs, t.Size.CPUs)
+	r.Size.MemoryBytes = cmp.Or(r.Size.MemoryBytes, t.Size.MemoryBytes)
+	r.Size.DiskBytes = cmp.Or(r.Size.DiskBytes, t.Size.DiskBytes)
+	return r, &t, nil
 }
 
 func networkFor(img catalog.Image, asked string) (string, error) {
@@ -66,6 +107,14 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if err := s.CheckMac(); err != nil {
 		return r, err
 	}
+	r, _, err := s.fromTemplate(ctx, r)
+	if err != nil {
+		return r, err
+	}
+	return s.checkCreate(ctx, r)
+}
+
+func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (model.CreateRequest, error) {
 	server := r.Server
 	switch {
 	case server:
@@ -85,7 +134,7 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	case r.Check != "" && !validCheck(r.Check):
 		return r, &model.BadCheckError{Value: r.Check}
 	}
-	img, ok := s.imageOf(r.Image)
+	img, ok := s.imageOf(ctx, r.Image)
 	if !ok {
 		return r, &model.UnknownImageError{Image: r.Image}
 	}
@@ -228,8 +277,14 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	// every made thing back, and from the first run on the VM is kept, with
 	// what failed; the ports its env names are reserved by its Mac's engine
 	// at that run, and read back once it answers.
-	r, err := s.CheckCreate(ctx, r)
+	if err := s.CheckMac(); err != nil {
+		return model.Created{}, err
+	}
+	r, t, err := s.fromTemplate(ctx, r)
 	if err != nil {
+		return model.Created{}, err
+	}
+	if r, err = s.checkCreate(ctx, r); err != nil {
 		return model.Created{}, err
 	}
 	if up := s.EngineUp(ctx); up != nil {
@@ -244,7 +299,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if err != nil {
 		return model.Created{}, err
 	}
-	img, _ := s.imageOf(r.Image)
+	img, _ := s.imageOf(ctx, r.Image)
 	disk, version, err := s.img.Latest(ctx, r.Image)
 	if err != nil {
 		return model.Created{}, err
@@ -252,7 +307,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	server := r.Lifetime == model.AlwaysOn
 	rec := model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
-		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second),
+		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second), Template: r.From,
 	}
 	want := ""
 	if r.Lifetime == model.Persistent || server {
@@ -319,6 +374,11 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if err := s.setUp(ctx, img, r); err != nil {
 		return failed(&model.UnhealthyError{Name: r.Name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())})
 	}
+	var boot *model.FirstStart
+	if t != nil {
+		say(model.StepBoot)
+		boot = s.bootPhase(ctx, r.Name, version, *t)
+	}
 	if allMachines, err := s.AllMachines(ctx, false); err == nil {
 		_ = s.SSHBlocks(ctx, allMachines)
 	}
@@ -344,6 +404,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		},
 		Ports: reserved,
 		Env:   env,
+		Boot:  boot,
 	}, nil
 }
 

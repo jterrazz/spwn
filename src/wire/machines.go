@@ -78,6 +78,8 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Terminals:   m.multiplexer(),
 		AgentsOf:    farAgents{m}.Held,
 		StartEngine: m.startEngine,
+		Templates:   machineTemplates{m},
+		Share:       m.shareAccount,
 	})
 }
 

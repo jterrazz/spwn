@@ -426,6 +426,8 @@ type Kept struct {
 	Shared []string `json:"lent,omitempty"`
 	// value: the agents a workspace held when it last stopped.
 	Agents []string `json:"agents,omitempty"`
+	// value: the Machinefile it was made from.
+	Template string `json:"template,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

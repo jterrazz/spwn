@@ -142,20 +142,29 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 	return say
 }
 
-// value: the ports the Machinefile named after a VM says it may open, read
-// from every source as explain reads them; nil when there is none or it
-// says none. A source that cannot be read, or a refused file of its chain,
-// is the error: the VM then opens nothing.
+// value: the ports the Machinefile named after a VM says it may open, else
+// the one it was made from (create --from), read from every source as
+// explain reads them; nil when there is none or it says none. A source
+// that cannot be read, or a refused file of its chain, is the error: the
+// VM then opens nothing.
 func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights, error) {
 	trees := make([]machinefile.Tree, 0, 3)
+	named := false
 	for _, s := range m.machinefileSources() {
 		t, err := s.Read(ctx)
 		if err != nil {
 			return nil, err
 		}
 		trees = append(trees, t)
+		for _, f := range t.Files {
+			named = named || f.Path == "machinefiles/"+vm+".yaml"
+		}
 	}
-	rights, err := machinefile.RightsOf(trees, vm)
+	name := vm
+	if rec, err := m.stores.machines.Get(ctx, vm); !named && err == nil && rec.Template != "" {
+		name = rec.Template
+	}
+	rights, err := machinefile.RightsOf(trees, name)
 	if err != nil {
 		return nil, machinefilecalls.Worded(err)
 	}

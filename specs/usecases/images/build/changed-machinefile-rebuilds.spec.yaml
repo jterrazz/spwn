@@ -1,5 +1,5 @@
 description: 'a bare build rebuilds an image whose Machinefile changed, and only that one'
-fixture: ./__fixtures__/build/
+fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'

@@ -1,5 +1,5 @@
 description: 'a name no source holds is no image; a Machinefile that makes none is refused, saying why'
-fixture: ./__fixtures__/build/
+fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
     - command: 'images build studio-linux --binary $HOME/station-linux'

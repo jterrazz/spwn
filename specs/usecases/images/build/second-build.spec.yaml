@@ -1,5 +1,5 @@
 description: 'a second build the same UTC day is version .2, beside the first'
-fixture: ./__fixtures__/build/
+fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
     - command: 'images build linux --binary $HOME/station-linux'

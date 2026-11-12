@@ -4,21 +4,32 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"path"
+	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 )
 
 // value: a Machinefile a VM image is made from: its name (the image's),
-// the image its disk starts from, its system, the items it bakes, the
-// files of its chain a build VM needs (every one but station's built-in
-// ones, which its binary embeds), the lock its build installs, and the
-// hash of all of them, which a changed chain or lock changes.
+// the image its disk starts from, its system, the items it bakes, what its
+// vm says of how a VM made from it runs and the accounts it is shared
+// (each term as written), the files of its chain a build VM needs (every
+// one but station's built-in ones, which its binary embeds), the lock its
+// build installs, and the hash of all of them, which a changed chain or
+// lock changes.
 
 type Template struct {
-	Name string
-	From string
-	OS   catalog.OS
-	Bake []string
+	Name     string
+	From     string
+	OS       catalog.OS
+	Kind     catalog.MachineRole
+	Bake     []string
+	Lifetime string
+	Network  string
+	CPUs     int
+	Memory   string
+	Disk     string
+	Shares   []catalog.AccountShare
 	// value: each file by its slash path under the owner's folder
 	// (`machinefiles/<name>.yaml`, `machinefiles/<name>.local.yaml`).
 	Files []File
@@ -37,10 +48,27 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	m := merge(files)
 	kind := catalog.MachineRole(m.values["machine.kind"].Text)
 	from := m.values["vm.image.from"].Text
-	if !m.machine || kind == catalog.RoleComputer || from == "" {
+	switch {
+	case m.machine && kind == catalog.RoleComputer && m.vm != nil:
+		return Template{}, &VMOnComputerError{Name: name, File: m.vm.File}
+	case !m.machine || kind == catalog.RoleComputer || from == "":
 		return Template{}, &NotTemplateError{Name: name}
 	}
-	t := Template{Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Lock: lock}
+	t := Template{
+		Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Kind: kind, Lock: lock,
+		Lifetime: m.values["vm.lifetime"].Text, Network: m.values["vm.network"].Text,
+		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text,
+	}
+	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)
+	for _, key := range m.order {
+		if account, ok := strings.CutPrefix(key, "accounts.share."); ok {
+			term := m.values[key].Text
+			if term == "shared" {
+				term = ""
+			}
+			t.Shares = append(t.Shares, catalog.AccountShare{Account: account, For: term})
+		}
+	}
 	for _, b := range m.bake {
 		t.Bake = append(t.Bake, b.name)
 	}

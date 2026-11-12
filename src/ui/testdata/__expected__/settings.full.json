@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "16 set by station here"
+                    "text": "17 set by station here"
                   },
                   {
                     "kind": "text",
@@ -125,9 +125,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "os-checkout",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "os-checkout",
             "cells": [
               {
                 "kind": "text",
@@ -136,7 +136,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff os-checkout"
             }
           }
         },
@@ -268,9 +268,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "os-checkout",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "os-checkout",
             "cells": [
               {
                 "kind": "text",
@@ -279,7 +279,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff os-checkout"
             }
           }
         },
@@ -333,9 +333,9 @@
         },
         {
           "row": {
-            "id": "tailscale-cli",
+            "id": "tart-launcher",
             "mark": "absent",
-            "label": "tailscale-cli",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -343,7 +343,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply tailscale-cli"
+              "command": "station settings apply tart-launcher"
             }
           }
         },
@@ -437,6 +437,28 @@
         },
         {
           "row": {
+            "id": "herdr-machine",
+            "mark": "ok",
+            "label": "herdr-machine",
+            "cells": [
+              {
+                "kind": "list",
+                "items": [
+                  {
+                    "kind": "text",
+                    "text": "applied"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "~/.herdr-machine"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "row": {
             "id": "hushlogin",
             "mark": "off-here",
             "label": "hushlogin",
@@ -476,9 +498,9 @@
         },
         {
           "row": {
-            "id": "agent-hooks",
+            "id": "tailscale-cli",
             "mark": "off-here",
-            "label": "agent-hooks",
+            "label": "tailscale-cli",
             "cells": [
               {
                 "kind": "text",
@@ -491,7 +513,7 @@
       "counts": [
         {
           "mark": "ok",
-          "n": 4
+          "n": 5
         },
         {
           "mark": "attention",

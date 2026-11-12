@@ -11,7 +11,7 @@ runs:
           ?	api	Workspace	stopped · not read since the engine started
           –	infra	Server	not checked: station does not manage its settings
           # Set by station
-          ○	20 settings	○ 0/19	?	○ 0/7	?	0/26
+          ○	21 settings	○ 0/19	?	○ 0/8	?	0/27
           # Always-on Mac
           ○	5 settings	○	?	–	?	–
           # Checked

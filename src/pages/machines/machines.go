@@ -3,6 +3,7 @@ package machines
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 
@@ -334,6 +335,23 @@ type CreatedJSON struct {
 	Health      CreatedHealth     `json:"health"`
 	Ports       []CreatedPort     `json:"ports"`
 	Env         map[string]string `json:"env"`
+	// value: the Machinefile it was made from, and its first start's boot
+	// phase; absent for a workspace made from an image alone.
+	Template string       `json:"template,omitempty"`
+	Boot     *CreatedBoot `json:"boot,omitempty"`
+}
+
+type CreatedBoot struct {
+	// value: why the boot phase's apply did not end well; empty when it did.
+	Failed string         `json:"failed,omitempty"`
+	Shares []CreatedShare `json:"shares"`
+	Drift  []string       `json:"drift"`
+}
+
+type CreatedShare struct {
+	Account string `json:"account"`
+	ForS    int64  `json:"for_s"`
+	Failed  string `json:"failed,omitempty"`
 }
 
 type CreatedHealth struct {
@@ -364,6 +382,13 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	for _, s := range c.Ports {
 		body.Ports = append(body.Ports, CreatedPort{GuestPort: s.GuestPort, Reserved: s.MacPort, Profile: s.Profile, URL: s.URL})
 	}
+	if b := c.Boot; b != nil {
+		body.Template = b.Template
+		body.Boot = &CreatedBoot{Failed: b.Failed, Shares: []CreatedShare{}, Drift: append([]string{}, b.Drift...)}
+		for _, s := range b.Shares {
+			body.Boot.Shares = append(body.Boot.Shares, CreatedShare{Account: s.Account, ForS: int64(s.For.Seconds()), Failed: s.Failed})
+		}
+	}
 	return body
 }
 
@@ -387,6 +412,7 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 		row := page.Row{ID: "ports", Label: "ports", Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(off)}}
 		rows = append(rows, row)
 	}
+	rows = append(rows, bootRows(c.Boot)...)
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("Created"), page.List(page.Text(titled(string(vm.Lifetime))), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}
 	rows = append(rows, head)
@@ -396,7 +422,61 @@ func Created(c model.Created, thisMac page.Context) page.Page {
 	}
 	p := pages.Outcome("machines create", thisMac, columns, rows, "VMs")
 	p.Hints = []page.Hint{*page.Cmd(catalog.SSHCommand("", vm.Name))}
+	if b := c.Boot; b != nil && len(b.Drift) > 0 {
+		p.Hints = append(p.Hints, *page.Cmd("station images build " + b.Template))
+	}
 	return p
+}
+
+// invariant: a first start's boot phase says what it did of its
+// Machinefile and what it left: a boot phase or a share that failed is
+// attention, never a failed create, and the image's drift names each item
+// with the build that carries it.
+func bootRows(b *model.FirstStart) []page.Row {
+	if b == nil {
+		return nil
+	}
+	attention := func(id, label, detail string) page.Row {
+		return page.Row{ID: id, Label: label, Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(detail), page.None()}}
+	}
+	var rows []page.Row
+	if b.Failed != "" {
+		rows = append(rows, attention("boot", model.StepBoot, b.Failed))
+	} else {
+		rows = append(rows, passed(model.StepBoot, b.Template))
+	}
+	for _, s := range b.Shares {
+		if s.Failed != "" {
+			rows = append(rows, attention("share/"+s.Account, s.Account, "not shared: "+s.Failed))
+			continue
+		}
+		row := passed(s.Account, "shared for "+termWords(s.For))
+		row.ID = "share/" + s.Account
+		rows = append(rows, row)
+	}
+	if len(b.Drift) > 0 {
+		row := attention("drift", "Drift", "from its image")
+		items := make([]page.Value, 0, len(b.Drift))
+		for _, d := range b.Drift {
+			items = append(items, page.Text(d))
+		}
+		row.Cells[1] = page.List(items...)
+		rows = append(rows, row)
+	}
+	return rows
+}
+
+// value: a share's term in the owner's words: `7 d`, `12 h`, `30 min`.
+func termWords(d time.Duration) string {
+	switch {
+	case d <= 0:
+		return "its default term"
+	case d%(24*time.Hour) == 0:
+		return strconv.Itoa(int(d/(24*time.Hour))) + " d"
+	case d%time.Hour == 0:
+		return strconv.Itoa(int(d/time.Hour)) + " h"
+	}
+	return strconv.Itoa(int(d/time.Minute)) + " min"
 }
 
 func passed(label, detail string) page.Row {

@@ -92,6 +92,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	var kindRule *model.KindRuleError
 	var badCheck *model.BadCheckError
 	var serverLifetime *model.ServerLifetimeError
+	var serverTemplate *model.ServerTemplateError
 	var agent *model.AgentNotStartedError
 	if f, ok := pipeFailure(err); ok {
 		return f, true
@@ -103,6 +104,8 @@ func vmFailure(err error) (*fail.Error, bool) {
 		return failed(agent.Name+" is ready, but its agent did not start: "+Translate(agent.Cause, "").Message, "station agents start \"<task>\" --on "+agent.Name, err), true
 	case errors.As(err, &serverLifetime):
 		return usage(serverLifetime.Error(), "station machines create "+serverLifetime.Name+" --server"), true
+	case errors.As(err, &serverTemplate):
+		return usage(serverTemplate.Error(), "station machines create <name> --server"), true
 	case errors.As(err, &kindRule):
 		return usage(kindRule.Error(), kindRule.Fix), true
 	case errors.As(err, &badCheck):

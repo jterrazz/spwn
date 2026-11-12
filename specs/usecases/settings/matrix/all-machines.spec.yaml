@@ -26,7 +26,7 @@ runs:
           –	infra	Server	not checked: station does not manage its settings
           # Set by station
           ◐	tart-launcher	◐	○	–	?	0/2
-          ○	19 more	○ 0/18	○ 2/18	○ 0/7	?	2/43
+          ○	20 more	○ 0/18	○ 2/18	○ 0/8	?	2/44
           # Always-on Mac
           ○	5 settings	○	○ 3/5	–	?	3/5
           # Checked

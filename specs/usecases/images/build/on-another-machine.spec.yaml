@@ -1,5 +1,5 @@
 description: 'a build on another Mac makes the image there, This Mac''s untouched'
-fixture: ./__fixtures__/build/
+fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
     - command: 'images build linux --binary $HOME/station-linux --on jterrazz-mac-mini'

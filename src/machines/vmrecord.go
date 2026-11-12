@@ -58,4 +58,6 @@ type VMRecord struct {
 	Birth                *Birth
 	// value: the agents a workspace held when it last stopped.
 	Agents []string
+	// value: the Machinefile it was made from; empty for none.
+	Template string
 }

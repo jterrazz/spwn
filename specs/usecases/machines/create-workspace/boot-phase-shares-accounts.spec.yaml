@@ -1,0 +1,27 @@
+description: 'a first start shares each account its Machinefile shares; one it cannot share is said'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          accounts: { share: [{ account: github, for: 12h }, { account: npm, for: 7d }] }
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = (.macs["linux-1"] | del(.secrets))'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create web --from studio-linux | /usr/bin/grep -E "Boot|github|npm|Created"'
+      exit: 0
+      stdout: |
+          ●	Boot phase	studio-linux
+          ●	github	shared for 12 h
+          ◐	npm	not shared: npm is not on the share list
+          ●	web	Created	Persistent · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.shares["web"] | map([.name, (((.until|fromdate) - (.at|fromdate)) / 3600)])'' world.json'
+      exit: 0
+      stdout: |
+          [["session:github",12]]

@@ -139,6 +139,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		vault.NewClaudeToken(m.sys.Run, accountscalls.NewShareList(m.stores.shareList())),
 		git.NewSigning(m.sys.Run, m.stores.identity()),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
+		git.NewCheckout(m.sys.Run, func(p string) bool { _, err := m.sys.FS.Stat(p); return err == nil }, m.sys.Env.Home(), m.vars[catalog.SourceURLEnv]),
 		settingstailscale.New(m.sys.FS, settingstailscale.Options{
 			Bin: m.paths.Bin, Shown: m.expander().Display(filepath.Join(m.paths.Bin, catalog.TailnetCLI)),
 			AppStoreCLI: m.tailnetCLI().AppStoreCLI, LookPath: m.sys.Run.LookPath,

@@ -21,7 +21,7 @@ runs:
     - command: 'settings --on linux-1 --all | /usr/bin/grep -e "^#" -e "	dns	" -e "	tart-launcher	"'
       exit: 0
       stdout: |
-          # Set by station	7 ○
+          # Set by station	8 ○
           # Checked
           # Not for this machine
           –	dns	not for this machine · Mac only

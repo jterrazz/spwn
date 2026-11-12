@@ -118,19 +118,43 @@ say "-- the engine of this build runs for $mac (pid $engine_pid)"
 
 
 case_begin image-build IM-09 ADR-043
-# value: the build's own minutes, against its bound (images/calls/build.go: 30 min the
-# recipe, 30 the image phase).
+# value: the owner's template, read through the run's own user source: it extends
+# station-linux and bakes what it bakes; the build's own minutes, against its bound
+# (images/calls/build.go: 30 min the recipe, 30 the image phase).
+mkdir -p "$mac/.config/station/machinefiles"
+cat > "$mac/.config/station/machinefiles/studio-linux.yaml" << 'YAML'
+machinefile: station.machinefile/v1
+name: studio-linux
+machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+extends: [station-linux]
+vm: { lifetime: persistent, resources: { cpus: 4, memory: 4G, disk: 30G } }
+YAML
 started=$(date +%s)
-st images build station-linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build station-linux exited $?"
-say "   images build station-linux took $(( ($(date +%s) - started) / 60 )) min $(( ($(date +%s) - started) % 60 )) s"
-built=$(st images --json | jq -r '[.images[] | select(.name == "station-linux") | .version] | join(" ")')
-[ -n "$built" ] || fail "images lists no station-linux version"
-on_mac tart list --quiet --source local | grep -q '^station-image-station-linux-' || fail "no station-image-station-linux-* in the store"
-record=$(cat "$mac"/.local/state/station/images/station-linux/*.json)
-[ "$(jq -r .machinefile <<< "$record")" = station-linux ] || fail "the image record names no Machinefile: $record"
+st images build studio-linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build studio-linux exited $?"
+say "   images build studio-linux took $(( ($(date +%s) - started) / 60 )) min $(( ($(date +%s) - started) % 60 )) s"
+built=$(st images --json | jq -r '[.images[] | select(.name == "studio-linux") | .version] | join(" ")')
+[ -n "$built" ] || fail "images lists no studio-linux version"
+on_mac tart list --quiet --source local | grep -q '^station-image-studio-linux-' || fail "no station-image-studio-linux-* in the store"
+record=$(cat "$mac"/.local/state/station/images/studio-linux/*.json)
+[ "$(jq -r .machinefile <<< "$record")" = studio-linux ] || fail "the image record names no Machinefile: $record"
 jq -r .lock <<< "$record" | grep -q '^lock: station.lock/v1' || fail "the image record holds no lock: $record"
-st machines create ws1 >> "$log" 2>&1 || fail "machines create ws1 exited $?"
+case_pass
+
+
+case_begin create-workspace-from ADR-043
+st machines create ws1 --from studio-linux --json > "$work/ws1-created.json" 2>> "$log" || fail "machines create ws1 --from studio-linux exited $?"
+created=$(cat "$work/ws1-created.json")
+[ "$(jq -r '.template' <<< "$created")" = studio-linux ] || fail "ws1 is not made from studio-linux: $created"
+[ "$(jq -r '.lifetime, .cpus, .disk_bytes' <<< "$created" | tr '\n' ' ')" = "persistent 4 30000000000 " ] || fail "ws1 is not sized and kept as studio-linux's vm says: $created"
+[ "$(jq -r '.boot.failed // ""' <<< "$created")" = "" ] || fail "ws1's boot phase failed: $(jq -r .boot.failed <<< "$created")"
+[ "$(jq -c '.boot.drift' <<< "$created")" = "[]" ] || fail "ws1, made from the newest studio-linux, shows drift: $(jq -c .boot.drift <<< "$created")"
+in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.yaml' || fail "the boot phase left no studio-linux.yaml in ws1"
 token_into ws1
+say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image"
+case_pass
+
+
+case_begin drift-clean ADR-043
 kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
 [ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
 for baked in mise git docker build-essential playwright-deps; do
@@ -138,7 +162,7 @@ for baked in mise git docker build-essential playwright-deps; do
   [ "$state" = present ] || fail "$baked, baked into the image, reads $state in ws1's drift"
 done
 in_vm ws1 'docker run --rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"
-say "   station-linux $built boots, its guest answers, station inside reports workspace, what it bakes is present"
+say "   station inside ws1 reports workspace, what studio-linux bakes reads present, docker runs hello-world"
 case_pass
 
 
@@ -196,7 +220,7 @@ case_pass
 case_begin apps-every-linux-app AP-25 ADR-038 ADR-040
 # value: a workspace of its own, deleted after, so every app installs on a fresh home
 # and none leans on what ws1 already holds.
-st machines create apps1 >> "$log" 2>&1 || fail "machines create apps1 exited $?"
+st machines create apps1 --image studio-linux >> "$log" 2>&1 || fail "machines create apps1 exited $?"
 token_into apps1
 while read -r app commands; do
   case "$app" in '' | '#'*) continue ;; esac
@@ -248,7 +272,7 @@ case_pass
 
 
 case_begin server-check-self-signed KP-21
-st machines create srv1 --server --check https://srv1:8443/readyz --cpus 2 --memory 2G --disk 20G >> "$log" 2>&1 || fail "create srv1 exited $?"
+st machines create srv1 --image studio-linux --server --check https://srv1:8443/readyz --cpus 2 --memory 2G --disk 20G >> "$log" 2>&1 || fail "create srv1 exited $?"
 vm_ssh srv1 'mkdir -p /tmp/e2e-tls && cd /tmp/e2e-tls && openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 -subj /CN=cluster-ca 2>/dev/null && cat > https.py && (nohup python3 https.py > /dev/null 2>&1 &)' < "$suite/linux/https.py" || fail "serve readyz in srv1"
 check_ok() { [ "$(st machines srv1 --json | jq -r '.health.check.ok')" = "$1" ]; }
 until_true 24 check_ok true || fail "the check on srv1's own name never passed with its self-signed certificate"

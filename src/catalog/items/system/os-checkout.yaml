@@ -1,0 +1,22 @@
+item: station.catalog/v1
+kind: setting
+name: os-checkout
+description: The shared source's repository, cloned into the workspace at its first start
+help: without a repository, the shared source of the Mac the workspace runs on
+phase: boot
+requires: [git]
+options:
+    - name: repository
+      label: The repository to clone
+      help: a git URL; without one, the shared source of the Mac the workspace runs on
+      type: string
+sets:
+    - { key: ~/Developer/<repository>, value: cloned }
+methods:
+    - os: any
+      machine: workspace
+      builtin: os-checkout
+writes:
+    - path: ~/Developer
+      level: data
+      note: the repository's clone, the owner's work

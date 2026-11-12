@@ -164,6 +164,9 @@ type CreateRequest struct {
 	Server bool
 	// value: a server's health check, a URL or host:port; empty for none.
 	Check string
+	// value: the Machinefile the workspace is made from, by its name: its
+	// image, and what its vm says where the request says nothing.
+	From string
 }
 
 type AgentNotStartedError struct {
@@ -199,6 +202,9 @@ type Created struct {
 	// value: the Mac it was made on reports a battery: a server there stops
 	// whenever the Mac sleeps.
 	OnALaptop bool
+	// value: its first start's boot phase; nil when made from no
+	// Machinefile.
+	Boot *FirstStart
 }
 
 type Step struct{ Label string }
@@ -208,6 +214,9 @@ const (
 	StepRunning = "Running"
 	StepAddress = "Has an address"
 	StepSSH     = "SSH answers"
+	// value: a workspace made from a Machinefile runs its boot phase once
+	// it answers.
+	StepBoot = "Boot phase"
 )
 
 type DeleteReport struct {

@@ -2,23 +2,23 @@
 ◐	jterrazz-macbook-pro	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
 ◐	jterrazz-macbook-pro	claude-token	changed since 2 d ago	station settings diff claude-token
 ◐	jterrazz-macbook-pro	ssh-key	changed since 2 d ago	station settings diff ssh-key
-◐	jterrazz-macbook-pro	tart-launcher	changed since 2 d ago	station settings diff tart-launcher
+◐	jterrazz-macbook-pro	os-checkout	changed since 2 d ago	station settings diff os-checkout
 ◐	jterrazz-macbook-pro	firewall	off	System Settings > Network > Firewall
 ◐	jterrazz-macbook-pro	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	jterrazz-mac-mini	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	claude-token	changed since 2 d ago	station settings diff claude-token --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	ssh-key	changed since 2 d ago	station settings diff ssh-key --on jterrazz-mac-mini
-◐	jterrazz-mac-mini	tart-launcher	changed since 2 d ago	station settings diff tart-launcher --on jterrazz-mac-mini
+◐	jterrazz-mac-mini	os-checkout	changed since 2 d ago	station settings diff os-checkout --on jterrazz-mac-mini
 ◐	jterrazz-mac-mini	firewall	off	System Settings > Network > Firewall
 ◐	jterrazz-mac-mini	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	linux-1	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on linux-1
 ◐	linux-1	claude-token	changed since 2 d ago	station settings diff claude-token --on linux-1
 ◐	linux-1	ssh-key	changed since 2 d ago	station settings diff ssh-key --on linux-1
-◐	linux-1	tart-launcher	changed since 2 d ago	station settings diff tart-launcher --on linux-1
+◐	linux-1	os-checkout	changed since 2 d ago	station settings diff os-checkout --on linux-1
 ◐	api	git-shortcuts	changed since 2 d ago	station machines start api
 ◐	api	claude-token	changed since 2 d ago	station machines start api
 ◐	api	ssh-key	changed since 2 d ago	station machines start api
-◐	api	tart-launcher	changed since 2 d ago	station machines start api
+◐	api	os-checkout	changed since 2 d ago	station machines start api
 # Machines
 ●	jterrazz-macbook-pro	Mac	read
 ●	jterrazz-mac-mini	Mac	read
@@ -29,8 +29,8 @@
 ◐	git-shortcuts	◐	◐	◐	◐	0/4
 ◐	claude-token	◐	◐	◐	◐	0/4
 ◐	ssh-key	◐	◐	◐	◐	0/4
-◐	tart-launcher	◐	◐	◐	◐	0/4
-○	16 more	○ 4/12	○ 4/12	○ 4/12	○ 4/12	16/48
+◐	os-checkout	◐	◐	◐	◐	0/4
+○	17 more	○ 5/13	○ 5/13	○ 5/13	○ 5/13	20/52
 # Always-on Mac
 ○	5 settings	○	○	–	–	–
 # Checked

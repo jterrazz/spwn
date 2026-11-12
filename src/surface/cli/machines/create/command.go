@@ -48,7 +48,10 @@ type Input struct {
 	AlwaysOn bool
 	// value: v2's --lifetime, kept hidden for one release (SPEC §4.3).
 	Lifetime string
-	request  machines.CreateRequest
+	// value: the Machinefile the workspace is made from.
+	From    string
+	flags   *pflag.FlagSet
+	request machines.CreateRequest
 	// value: another Mac chosen on a terminal, the create sent there.
 	mac string
 }
@@ -59,6 +62,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Short: "Make a workspace on this Mac, ephemeral or --persistent; or a server, always on, with --server",
 		Example: "  station machines create\n" +
 			"  station machines create api --persistent --memory 12G\n" +
+			"  station machines create web --from studio-linux\n" +
 			"  station machines create infra --server --check https://infra:6443/readyz --on mac-mini",
 		Args: cobra.MaximumNArgs(1),
 		Asks: true,
@@ -72,7 +76,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by station (default 4 CPU, 8G, 50G)")
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
 			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
+			in.flags = f
 			f.StringVar(&in.Image, "image", "station-linux", "the image the workspace is made from")
+			f.StringVar(&in.From, "from", "", "the Machinefile the workspace is made from: the image built from it, and how its vm says it runs")
 			f.IntVar(&in.CPUs, "cpus", 0, "virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
@@ -128,7 +134,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				}
 			}
 			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server}
-			return nil
+			return from(in)
 		},
 		Validate: func(ctx context.Context, in *Input) error {
 			if !env.Far() {
@@ -179,6 +185,27 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return io.Page(pagemachines.Created(created, d.ThisMachine), pagemachines.CreatedContract(schema, created))
 		},
 	}, env)
+}
+
+// invariant: a create --from makes the image named after its Machinefile,
+// so it names no other; the network its flag does not say is the
+// Machinefile's, and a server is set up by its own tooling, never from a
+// Machinefile.
+func from(in *Input) error {
+	if in.From == "" {
+		return nil
+	}
+	switch {
+	case in.Server:
+		return &machines.ServerTemplateError{Name: in.From}
+	case in.flags != nil && in.flags.Changed("image"):
+		return &machines.KindRuleError{Why: "--from names the image: the one built from its Machinefile", Fix: "station machines create --from " + in.From}
+	}
+	in.request.Image, in.request.From = in.From, in.From
+	if in.flags != nil && !in.flags.Changed("network") {
+		in.request.Network = ""
+	}
+	return nil
 }
 
 // value: the A2 words of a create written with v3's --task.

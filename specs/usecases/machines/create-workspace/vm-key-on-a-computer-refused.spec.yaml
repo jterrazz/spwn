@@ -1,0 +1,20 @@
+description: 'create --from a computer''s Machinefile that says vm is refused at its file, nothing made'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/laptop.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: laptop
+          machine: { kind: computer }
+          vm: { lifetime: persistent }
+          apps: [jq]
+      exit: 0
+    - command: 'machines create web --from laptop'
+      exit: 2
+      stderr: |
+          Error: laptop is a computer, and ~/.config/station/machinefiles/laptop.yaml says vm: vm is a workspace's or a server's
+          Hint: remove vm, or say kind: workspace or server
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms | has("web")'' world.json'
+      exit: 0
+      stdout: |
+          false
