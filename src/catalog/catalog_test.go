@@ -188,3 +188,22 @@ func TestMiseInstallsOnlyARuntime(t *testing.T) {
 		}
 	}
 }
+
+func TestAVersionedFormulaIsLookedForInItsKeg(t *testing.T) {
+	// outside: Homebrew links no versioned formula (`postgresql@18` is keg-only,
+	// `versioned_formula`), so its commands are found only in its keg's bin,
+	// which the app's method puts on station's search, on either prefix.
+	for _, a := range builtin(t).Apps {
+		for _, p := range a.Installs {
+			b, ok := p.Install.(catalog.BrewInstall)
+			if !ok || !strings.Contains(b.Formula, "@") || len(a.Provides) == 0 {
+				continue
+			}
+			for _, prefix := range []string{"/opt/homebrew", "/usr/local"} {
+				if keg := prefix + "/opt/" + b.Formula + "/bin"; !slices.Contains(a.Path, keg) {
+					t.Errorf("%s installs brew %s, keg-only, and its search path %v lacks %s", a.Name, b.Formula, a.Path, keg)
+				}
+			}
+		}
+	}
+}

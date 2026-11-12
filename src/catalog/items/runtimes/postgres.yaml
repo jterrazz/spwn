@@ -11,5 +11,8 @@ methods:
       provides: [psql]
       needs: [sudo]
       apt: { packages: [postgresql] }
+    # outside: Homebrew links no versioned formula, so postgres and psql are
+    # found in the keg's bin alone.
     - os: macos
+      path: [/opt/homebrew/opt/postgresql@18/bin, /usr/local/opt/postgresql@18/bin]
       brew: postgresql@18
