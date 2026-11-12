@@ -14,22 +14,16 @@ runs:
       exit: 0
     - command: 'apply'
       exit: 2
-      stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
       stderr: |
           Error: the shared source studio is at 1a2b3c4, and ~/.config/station/machinefiles/jterrazz-macbook-pro.lock holds 0f0f0f0: its scripts are code apply never takes unseen
           Hint: station upgrade takes it, then station apply
     - command: 'upgrade'
-      exit: 0
-      stdout: |
-          ●	jq	1.8.1	brew
-          # Lock
-          ●	shared source		studio@1a2b3c4, was studio@0f0f0f0
+      exit: 2
+      stderr: |
+          Error: homebrew asks your password: upgrade asks it on a terminal, and this run has none
+          Hint: run station upgrade on a terminal
     - command: 'apply'
-      exit: 0
-      stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
-          ●	jq	1.8.1	brew
+      exit: 2
+      stderr: |
+          Error: the shared source studio is at 1a2b3c4, and ~/.config/station/machinefiles/jterrazz-macbook-pro.lock holds 0f0f0f0: its scripts are code apply never takes unseen
+          Hint: station upgrade takes it, then station apply

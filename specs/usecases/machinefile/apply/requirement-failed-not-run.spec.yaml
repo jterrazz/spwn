@@ -20,9 +20,7 @@ runs:
           ○	fd	brew
           # To set
           ○	starship-dotfiles	file
-          # To adopt
-          ?	homebrew	script	the manager of starship · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of starship · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of starship
           ✗	starship		brew	~/.local/state/station/logs/starship.log
           ●	fd	10.3.0	brew
           ○	starship-dotfiles		file	not run · requires starship, which did not install

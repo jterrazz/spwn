@@ -92,7 +92,7 @@ func TestStateAShimThatAnswersIsDegraded(t *testing.T) {
 func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
 	// invariant: what a manager's methods list beyond the catalog's own
 	// apps is the owner's, by key; a list that cannot be read is unread.
-	manager := catalog.App{Name: "casks", Kind: catalog.KindManager, Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.ScriptInstall{URL: "https://example.com/install.sh"}}}}
+	manager := catalog.App{Name: "casks", Kind: catalog.KindManager, Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.AptInstall{Packages: []string{"casks-manager"}}}}}
 	tool := catalog.App{Name: "tool", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "tool"}}}}
 	cat := catalog.Catalog{
 		Apps:  []catalog.App{manager, tool},
@@ -108,8 +108,8 @@ func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
 		{&fake.State{Absent: true}, nil, true},
 	} {
 		installers := contract.Installers{
-			catalog.MethodScript: fake.New(catalog.MethodScript, &fake.State{Installed: map[string]string{"https://example.com/install.sh": "1.0.0"}}),
-			catalog.MethodCask:   fake.New(catalog.MethodCask, c.casks),
+			catalog.MethodApt:  fake.New(catalog.MethodApt, &fake.State{Installed: map[string]string{"casks-manager": "1.0.0"}}),
+			catalog.MethodCask: fake.New(catalog.MethodCask, c.casks),
 		}
 		m := machine{}
 		reports, err := calls.NewShelf(m, cat, nil, calls.ShelfOptions{ThisMachine: catalog.Mac, Root: "/", Installers: installers, Pool: lanes.NewPool(context.Background(), m, 16, 1)}).Inventory(context.Background())

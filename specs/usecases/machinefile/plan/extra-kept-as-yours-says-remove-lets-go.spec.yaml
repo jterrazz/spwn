@@ -21,11 +21,9 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          jterrazz-macbook-pro · 1 to adopt · 1 present · 1 extra
+          jterrazz-macbook-pro · 2 present · 1 extra
 
-          To adopt  ? homebrew · script · the manager of jq
-                      on PATH, not managed by script
-          Extra     ? claude · script
-                      installed by station for jterrazz-macbook-pro, station cannot uninst
+          Extra  ? claude · script
+                   installed by station for jterrazz-macbook-pro, station cannot uninstalt
 
           → station apply --remove  lets go of what is yours now

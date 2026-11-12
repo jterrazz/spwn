@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -27,6 +28,18 @@ const (
 	// installs that item, and its presence is its own provides.
 	MethodProvidedBy Method = "provided-by"
 )
+
+func (m Method) KeepsList() bool {
+	// invariant: a method whose adapter keeps no list of what it installed: an
+	// install's presence is the app's own check, never an inventory.
+	return !slices.Contains([]Method{MethodScript, MethodShell, MethodApp, MethodProvidedBy}, m)
+}
+
+func (m Method) ReadsCurrency() bool {
+	// invariant: a method whose adapter reads whether an installed app is
+	// behind its newest; every other leaves the app current.
+	return slices.Contains([]Method{MethodBrew, MethodCask, MethodApt, MethodSkill, MethodGitHubRelease}, m)
+}
 
 type Install interface {
 	Method() Method

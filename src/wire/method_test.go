@@ -129,11 +129,13 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 	w.Mac("here").Apps = map[catalog.Method]*world.Manager{}
 	registry := contract.Installers{}
 	for method, adapter := range adapters {
-		w.Managers[method] = world.Named{Name: adapter.Manager().Name, App: adapter.Manager().App}
+		w.Managers[method] = appsfake.Named(adapter)
 		w.Mac("here").Apps[method] = &world.Manager{Installed: map[string]string{}}
 		_, lined := adapter.(contract.Lined)
 		registry[method] = appsfake.InstallerOf(w, "here", method, lined)
 	}
+	foot := appsfake.FootprintOf(w, "here", lib.Catalog)
+	system.Run, system.FS = appsfake.Seen{Runner: system.Run, Foot: foot, Home: "/home/u"}, appsfake.SeenFS{FS: system.FS, Foot: foot, Home: "/home/u"}
 	options := appscalls.ShelfOptions{ThisMachine: kind, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "here")}
 	for _, edit := range edits {
 		edit(runner, &options)
@@ -321,8 +323,11 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 						t.Errorf("%s: an update reached %+v (%v)", about, up, err)
 					}
 				}
-				if can.Update && can.UpdateAll {
-					b.w.Mac("here").Apps[method].Behind = map[string]string{in.Key(): "99.0.0"}
+				b.w.Mac("here").Apps[method].Behind = map[string]string{in.Key(): "99.0.0"}
+				// invariant: a bare update takes the rows its method reads behind, so a
+				// method that reads no currency is reached by name only.
+				seen, _ := appsfake.InstallerOf(b.w, "here", method, false).Outdated(ctx, []string{in.Key()})
+				if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind {
 					var via []catalog.ManagerKey
 					if _, ok := b.cat.Manager(row.Manager); ok {
 						via = []catalog.ManagerKey{catalog.ManagerKey(row.Manager)}

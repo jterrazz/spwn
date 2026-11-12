@@ -2,11 +2,13 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/apps"
+	appsfake "github.com/jterrazz/studio-station/src/apps/adapter/fake"
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/apps/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -56,6 +58,11 @@ func lockedOf(l catalog.LockFile, item string) (catalog.LockedApp, bool) {
 // plan lists that reads there by a method, that method and the version it
 // reads; a copy no method holds, none; every other app keeps what the
 // lock held of it before the run.
+func listless(b bench, m catalog.Method) bool {
+	_, err := appsfake.InstallerOf(b.w, "here", m, false).Inventory(context.Background())
+	return errors.Is(err, contract.ErrUnlisted)
+}
+
 func holdsWhatTheLockNames(t *testing.T, about string, b lockBench, plan machinefile.Plan, l catalog.LockFile) {
 	t.Helper()
 	for _, line := range plan.Lines {
@@ -67,6 +74,12 @@ func holdsWhatTheLockNames(t *testing.T, about string, b lockBench, plan machine
 		st := apps.StateOf(row)
 		if row.Managed && row.Method != "" && (st == apps.OK || st == apps.UpdateAvailable) {
 			want := catalog.LockedApp{Name: line.Step.Item, Method: string(row.Method), Version: row.Version}
+			if listless(b.bench, row.Method) || listless(b.bench, catalog.Method(got.Method)) {
+				// invariant: a method that keeps no list is read by its app's own check, which
+				// names neither the method that put the app there nor the version its
+				// install outcome lists (none), so the lock and the read agree by name.
+				want, got = catalog.LockedApp{Name: want.Name}, catalog.LockedApp{Name: got.Name}
+			}
 			if !ok || got != want {
 				t.Errorf("%s: %s holds %+v, the lock names %+v", about, line.Step.Item, want, got)
 			}

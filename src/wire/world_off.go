@@ -46,7 +46,7 @@ func (*worldRun) farFrom(func(*worldMac) farMac) {}
 func (*worldRun) command() *cobra.Command        { return nil }
 func (*worldRun) close(context.Context) error    { return nil }
 
-func (*worldMac) system(h local.System) local.System                     { return h }
+func (*worldMac) system(h local.System, _ catalog.Catalog) local.System  { return h }
 func (*worldMac) handOver(context.Context) error                         { return nil }
 func (*worldMac) watch([]string) func()                                  { return func() {} }
 func (*worldMac) stores(*stores)                                         {}
@@ -74,7 +74,7 @@ func (*worldMac) tailnet() sharingNode                                   { retur
 func (*worldMac) funnel() funnel.Funnel                                  { return nil }
 func (*worldMac) installer(catalog.Method, bool) appscontract.Installer  { return nil }
 func (*worldMac) bundler() appscontract.Bundler                          { return nil }
-func (*worldMac) managers(map[catalog.Method]appscontract.Manager)       {}
+func (*worldMac) managers(map[catalog.Method]appscontract.Installer)     {}
 func (*worldMac) budgets() lanes.Clock                                   { return nil }
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
 func (*worldMac) identities() accountscontract.Identities                { return nil }

@@ -30,7 +30,7 @@ runs:
           ○	playwright-mcp	bun
           ●	apt	1.0.0	apt	the manager of jq
           ●	jq	1.0.0	apt
-          ●	mise	1.0.0	script	the manager of node
+          ●	mise		script	the manager of node
           ●	node	1.0.0	mise	required by playwright-mcp
           ●	bun	1.0.0	mise	the manager of playwright-mcp
           ●	playwright-mcp	1.0.0	bun

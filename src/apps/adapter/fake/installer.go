@@ -94,13 +94,27 @@ func (f *Installer) Manager() contract.Manager {
 	if named, ok := f.w.Managers[f.method]; ok {
 		return contract.Manager{Name: named.Name, App: named.App}
 	}
+	if !f.method.KeepsList() {
+		return contract.Manager{}
+	}
 	return contract.Manager{Name: string(f.method), App: string(f.method)}
+}
+
+func Named(adapter contract.Installer) world.Named {
+	// invariant: a world names a method as its real adapter does: its manager
+	// and what it can do.
+	m, can := adapter.Manager(), adapter.Can()
+	return world.Named{Name: m.Name, App: m.App, Install: can.Install, Update: can.Update, Remove: can.Remove, UpdateAll: can.UpdateAll}
 }
 
 func (f *Installer) Can() contract.Abilities {
 	// invariant: what the real adapter of its method can do: a script's
 	// install updates but is never removed, a shell line or a command
-	// another item provides only installs, an app bundle is the owner's.
+	// another item provides only installs, an app bundle is the owner's; a
+	// world that names its managers gives their abilities too.
+	if named, ok := f.w.Managers[f.method]; ok {
+		return contract.Abilities{Install: named.Install, Update: named.Update, Remove: named.Remove, UpdateAll: named.UpdateAll}
+	}
 	switch f.method {
 	case catalog.MethodScript:
 		return contract.Abilities{Install: true, Update: true, UpdateAll: true}
@@ -114,6 +128,9 @@ func (f *Installer) Can() contract.Abilities {
 }
 
 func (f *Installer) Ready(context.Context) error {
+	if f.Manager().Name == "" {
+		return nil
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	if f.manager().Absent {
@@ -123,6 +140,9 @@ func (f *Installer) Ready(context.Context) error {
 }
 
 func (f *Installer) Inventory(ctx context.Context) (map[string]string, error) {
+	if !f.method.KeepsList() {
+		return nil, contract.ErrUnlisted
+	}
 	if err := f.Ready(ctx); err != nil {
 		return nil, err
 	}
@@ -132,6 +152,9 @@ func (f *Installer) Inventory(ctx context.Context) (map[string]string, error) {
 }
 
 func (f *Installer) Outdated(_ context.Context, keys []string) (map[string]apps.Currency, error) {
+	if !f.method.ReadsCurrency() {
+		return nil, nil
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	out := map[string]apps.Currency{}
@@ -153,6 +176,9 @@ func (f *Installer) run(ctx context.Context, verb string, installs []catalog.Ins
 }
 
 func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, apply func(s *world.Manager, key string)) error {
+	if !f.allows(verb) {
+		return contract.ErrCannot
+	}
 	if err := f.Ready(ctx); err != nil {
 		return err
 	}
@@ -173,6 +199,17 @@ func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, app
 	}
 	f.w.Unlock()
 	return wait(ctx, held)
+}
+
+func (f *Installer) allows(verb string) bool {
+	can := f.Can()
+	switch verb {
+	case "Install":
+		return can.Install
+	case "Update":
+		return can.Update
+	}
+	return can.Remove
 }
 
 func wait(ctx context.Context, held bool) error {

@@ -14,9 +14,7 @@ runs:
       stdout: |
           # To install
           ○	fd	brew
-          # To adopt
-          ?	homebrew	script	the manager of fd · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of fd · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of fd
           ●	fd	10.3.0	brew
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |

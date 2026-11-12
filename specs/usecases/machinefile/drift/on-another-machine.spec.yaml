@@ -14,5 +14,5 @@ runs:
       stdout: |
           	On mac-mini:
           # Items
-          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	homebrew	script	present
           ○	jq	brew	absent

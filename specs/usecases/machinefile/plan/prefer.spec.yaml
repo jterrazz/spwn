@@ -33,16 +33,12 @@ runs:
       stdout: |
           # To install
           ○	fd	mise
-          # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
     - command: 'apply'
       exit: 0
       stdout: |
           # To install
           ○	fd	mise
-          # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of mise · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of mise
           ●	mise	2026.10.1	brew	the manager of fd
           ●	fd	10.2.0	mise
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map([.item, .method])'' world.json'
@@ -57,6 +53,6 @@ runs:
       exit: 0
       stdout: |
           # Items
-          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	homebrew	script	present
           ●	mise	brew	present
           ●	fd	mise	present

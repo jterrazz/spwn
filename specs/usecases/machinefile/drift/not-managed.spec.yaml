@@ -13,7 +13,7 @@ runs:
       exit: 0
       stdout: |
           # Items
-          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	homebrew	script	present
           ●	jq	brew	present
           ◐	gh	brew	outdated
           ○	fd	brew	absent
@@ -21,4 +21,4 @@ runs:
     - command: 'drift --json | /usr/bin/jq -c "[.lines[] | [.item, .condition]]"'
       exit: 0
       stdout: |
-          [["homebrew","not-managed"],["jq","present"],["gh","outdated"],["fd","absent"],["ripgrep","not-managed"]]
+          [["homebrew","present"],["jq","present"],["gh","outdated"],["fd","absent"],["ripgrep","not-managed"]]

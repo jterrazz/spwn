@@ -13,15 +13,13 @@ runs:
       exit: 0
       stdout: |
           # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           ?	ripgrep	brew	on PATH, not managed by brew
     - command: 'apply'
       exit: 0
       stdout: |
           # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           ?	ripgrep	brew	on PATH, not managed by brew
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ◐	ripgrep		brew	adopted · on PATH, not managed by brew
     - command: 'apps | /usr/bin/grep "	ripgrep	"'

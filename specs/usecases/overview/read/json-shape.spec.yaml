@@ -17,7 +17,7 @@ runs:
       exit: 0
       stdout: |
           ["activity",{}]
-          ["apps",{"not-installed":105,"ok":6,"update-available":3}]
+          ["apps",{"not-installed":105,"ok":7,"update-available":2}]
           ["settings",{"applied":0,"as-expected":8}]
           ["disk",{"misplaced":1}]
           ["ports",{"private":2,"public":0}]

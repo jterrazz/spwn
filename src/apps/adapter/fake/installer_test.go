@@ -20,9 +20,21 @@ func seeded(s contracttest.Seed, m catalog.Method) *world.World {
 }
 
 func TestInstaller(t *testing.T) {
-	contracttest.Installer(t, catalog.SkillInstall{Repo: "anthropics/skills", Skill: "frontend-design"}, func(_ *testing.T, s contracttest.Seed) contract.Installer {
-		return fake.InstallerOf(seeded(s, catalog.MethodSkill), "mbp", catalog.MethodSkill, false)
-	})
+	samples := []catalog.Install{
+		catalog.SkillInstall{Repo: "anthropics/skills", Skill: "frontend-design"},
+		catalog.ScriptInstall{URL: "https://claude.ai/install.sh"},
+		catalog.ShellInstall{Line: "npx playwright install chromium"},
+		catalog.AppInstall{Hint: "download it from its website"},
+		catalog.ProvidedByInstall{Item: "desk-app", Commands: []string{"dk"}},
+		catalog.GitHubReleaseInstall{Repo: "acme/tool", Asset: "tool-*-{os}-{arch}.tar.gz", Commands: []string{"tool"}},
+	}
+	for _, sample := range samples {
+		t.Run(string(sample.Method()), func(t *testing.T) {
+			contracttest.Installer(t, sample, func(_ *testing.T, s contracttest.Seed) contract.Installer {
+				return fake.InstallerOf(seeded(s, sample.Method()), "mbp", sample.Method(), false)
+			})
+		})
+	}
 }
 
 func TestHoldingInstaller(t *testing.T) {

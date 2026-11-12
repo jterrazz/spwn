@@ -6,7 +6,6 @@ runs:
       stdout: |
           ["broken","accounts","npm"]
           ["broken","background","com.jterrazz.brain.x-snapshot"]
-          ["needs-a-look","apps","mise"]
           ["needs-a-look","apps","brew"]
           ["needs-a-look","settings","firewall"]
           ["needs-a-look","disk","~/.tart"]
@@ -19,7 +18,6 @@ runs:
           # Needs you
           ✗	npm sign-in expired
           ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2
-          ◐	1 mise update waiting
           ◐	2 brew updates waiting
           ◐	Firewall: off
           ◐	~/.tart is misplaced

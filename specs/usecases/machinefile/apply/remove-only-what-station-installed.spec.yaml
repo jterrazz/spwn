@@ -15,9 +15,7 @@ runs:
           # To install
           ○	fd	brew
           ○	eza	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
           ●	eza	0.23.4	brew
@@ -31,18 +29,14 @@ runs:
     - command: 'plan'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of eza · on PATH, not managed by script
           # Extra
           ?	fd	brew	installed by station for jterrazz-macbook-pro, listed no longer
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of eza · on PATH, not managed by script
           # Extra
           ?	fd	brew	installed by station for jterrazz-macbook-pro, listed no longer
-          ◐	homebrew	5.0.1	script	the manager of eza · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of eza
           ●	eza	0.23.4	brew
           ●	fd		brew	removed
     - command: 'apps | /usr/bin/grep -e "	fd	" -e "	eza	" -e "	jq	"'

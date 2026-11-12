@@ -27,8 +27,6 @@ runs:
       stdout: |
           # To install
           ○	fd	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
           ?	corp-vpn	cask	installed by station for jterrazz-macbook-pro, listed no longer · asks your password once
       stderr: |

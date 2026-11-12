@@ -17,10 +17,8 @@ runs:
           ○	fd	brew
           # To set
           ○	git-shortcuts	git-aliases
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           ●	git-shortcuts		git-aliases	~/.gitconfig [alias]: written
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.ledger | map(.item)'' world.json'
@@ -30,9 +28,7 @@ runs:
     - command: 'apply'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           ●	git-shortcuts		git-aliases	~/.gitconfig [alias]
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew

@@ -22,12 +22,10 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          jterrazz-macbook-pro · 1 to adopt · 1 present · 1 extra
+          jterrazz-macbook-pro · 2 present · 1 extra
 
-          To adopt  ? homebrew · script · the manager of jq
-                      on PATH, not managed by script
-          Extra     ? lazygit · brew
-                      installed by station for jterrazz-macbook-pro, listed no longer
+          Extra  ? lazygit · brew
+                   installed by station for jterrazz-macbook-pro, listed no longer
 
           → station apply           carries it out
           → station apply --remove  also removes what is extra
@@ -36,7 +34,7 @@ runs:
           ✓ Applied jterrazz-macbook-pro · 1 changed
 
           Changes
-            ◐ homebrew  5.0.1  script  the manager of jq · adopted …
+            ● homebrew  5.0.1  script  the manager of jq
             ● jq        1.8.1  brew
             ● lazygit          brew    removed
           ○	lazygit		brew	station apps install lazygit

@@ -1,6 +1,8 @@
 description: 'station apps update --manager brew updates the brew and cask rows that wait, never another manager''s'
 env: two-macs
 runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.skill = {installed: {"agent-browser": "1.0.0"}, behind: {"agent-browser": "1.1.0"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
     - command: 'apps update --manager brew'
       exit: 0
       stdout: |
@@ -10,6 +12,6 @@ runs:
       exit: 0
       stdout: |
           # Updates	1 ◐
-          ◐	node	22.11.0	mise	update available · station apps update node
-          # Not installed	105 ○
+          ◐	agent-browser-skill	1.0.0	skill	update available · station apps update agent-browser-skill
+          # Not installed	104 ○
           ○	cocoapods		brew	station apps install cocoapods

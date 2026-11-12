@@ -14,9 +14,7 @@ runs:
       stdout: |
           # To install
           ○	mas	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	mas	1.0.0	brew
     - command: 'apps install keynote'
@@ -33,18 +31,14 @@ runs:
     - command: 'plan'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
           ?	mas	brew	installed by station for jterrazz-macbook-pro, required by keynote: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
           ?	mas	brew	installed by station for jterrazz-macbook-pro, required by keynote: kept
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	mas	1.0.0	brew	required by keynote: kept, judged again next run
     - command: 'apps | /usr/bin/grep -e "^.	mas	" -e "^.	keynote	"'

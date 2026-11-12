@@ -22,19 +22,17 @@ runs:
           scrollback
       exit: 130
       stdout: |
-          jterrazz-macbook-pro · 2 to install · 1 to adopt
+          jterrazz-macbook-pro · 2 to install · 1 present
 
           To install
             ○ fd   brew
             ○ eza  brew
-          To adopt  ? homebrew · script · the manager of fd
-                      on PATH, not managed by script
 
           → station apply  carries it out
           ✗ jterrazz-macbook-pro interrupted · 1 changed
 
           Changes
-            ◐ homebrew  5.0.1   script  the manager of fd · adopted …
+            ● homebrew  5.0.1   script  the manager of fd
             ● fd        10.3.0  brew
             ○ eza               brew    not run · station apply resumes
 
@@ -48,21 +46,22 @@ runs:
               - name: fd
                 method: brew
                 version: 10.3.0
+              - name: homebrew
+                method: script
+                version: 5.0.1
 
     - command: 'apply'
       exit: 0
       stdout: |
           # To install
           ○	eza	brew
-          # To adopt
-          ?	homebrew	script	the manager of fd · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of fd · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of fd
           ●	fd	10.3.0	brew
           ●	eza	0.23.4	brew
     - command: 'drift'
       exit: 0
       stdout: |
           # Items
-          ?	homebrew	script	not managed · on PATH, not managed by script
+          ●	homebrew	script	present
           ●	fd	brew	present
           ●	eza	brew	present

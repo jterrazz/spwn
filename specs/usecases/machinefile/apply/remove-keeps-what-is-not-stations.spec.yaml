@@ -14,20 +14,16 @@ runs:
     - command: 'plan'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
           ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
           ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since station installed it: kept, and yours
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           # Extra
           ?	fd	brew	installed by station for jterrazz-macbook-pro, already gone
           ?	ripgrep	brew	installed by station for jterrazz-macbook-pro, present another way since station installed it: kept, and yours
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ○	fd		brew	already gone
           ◐	ripgrep		brew	present another way since station installed it: kept, and yours

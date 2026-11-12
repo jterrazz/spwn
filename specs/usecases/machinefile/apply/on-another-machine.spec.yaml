@@ -15,8 +15,6 @@ runs:
           	On mac-mini:
           # To install
           ○	jq	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
           	On mac-mini:
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.0.0	brew

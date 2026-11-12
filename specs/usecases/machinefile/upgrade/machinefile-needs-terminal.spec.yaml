@@ -25,7 +25,7 @@ runs:
     - command: 'upgrade'
       exit: 2
       stderr: |
-          Error: rooted asks your password: upgrade asks it on a terminal, and this run has none
+          Error: homebrew, rooted asks your password: upgrade asks it on a terminal, and this run has none
           Hint: run station upgrade on a terminal
     - command: 'apps | /usr/bin/grep "	rooted	"'
       exit: 0

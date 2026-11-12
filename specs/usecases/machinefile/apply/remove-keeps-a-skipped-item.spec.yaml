@@ -14,9 +14,7 @@ runs:
       stdout: |
           # To install
           ○	fd	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	fd	10.3.0	brew
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
@@ -28,15 +26,10 @@ runs:
       exit: 0
     - command: 'plan'
       exit: 0
-      stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
     - command: 'apps fd | /usr/bin/head -1'
       exit: 0

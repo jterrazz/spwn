@@ -21,16 +21,12 @@ runs:
       stdout: |
           # To install
           ○	python	mise	locked 3.12.7
-          # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
     - command: 'apply'
       exit: 0
       stdout: |
           # To install
           ○	python	mise	locked 3.12.7
-          # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of mise · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of mise
           ●	mise	2026.10.1	brew	the manager of python
           ●	python	3.12.7	mise
     - command: 'explain apps.python'
@@ -47,6 +43,9 @@ runs:
           lock: station.lock/v1
           machinefile: jterrazz-macbook-pro
           apps:
+              - name: homebrew
+                method: script
+                version: 5.0.1
               - name: mise
                 method: brew
                 version: 2026.10.1

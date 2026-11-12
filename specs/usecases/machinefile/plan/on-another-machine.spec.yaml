@@ -15,5 +15,3 @@ runs:
           	On mac-mini:
           # To install
           ○	jq	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script

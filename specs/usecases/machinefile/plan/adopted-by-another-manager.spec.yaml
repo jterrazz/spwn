@@ -24,15 +24,13 @@ runs:
       exit: 0
       stdout: |
           # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
           ●	jq	brew
     - command: 'apply'
       exit: 0
       stdout: |
           # To adopt
-          ?	homebrew	script	the manager of mise · on PATH, not managed by script
           ●	jq	brew
-          ◐	homebrew	5.0.1	script	the manager of mise · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of mise
           ●	mise	2026.10.1	brew	the manager of jq
           ●	jq	1.8.1	brew	adopted
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["jterrazz-macbook-pro"].apps.mise.installed.jq, (.macs["jterrazz-macbook-pro"].stores.ledger // [] | map(.item))]'' world.json'

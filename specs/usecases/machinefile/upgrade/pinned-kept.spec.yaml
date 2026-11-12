@@ -12,20 +12,15 @@ runs:
     - command: 'apply'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of gh · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of gh · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of gh
           ◐	gh	2.97.0	brew	outdated
           ●	mise	2026.10.1	brew	the manager of node
-          ◐	node	22.11.0	mise	outdated
+          ●	node	22.11.0	mise
     - command: 'upgrade'
-      exit: 0
-      stdout: |
-          ●	mise	2026.10.1	brew
-          ◐	node	22.11.0	mise	pinned 22 by jterrazz-macbook-pro: kept
-          ●	gh	2.98.0	brew
-          # Lock
-          ●	gh		2.98.0 by brew, was 2.97.0 by brew
+      exit: 2
+      stderr: |
+          Error: homebrew asks your password: upgrade asks it on a terminal, and this run has none
+          Hint: run station upgrade on a terminal
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
       exit: 0
       stdout: |+
@@ -34,7 +29,10 @@ runs:
           apps:
               - name: gh
                 method: brew
-                version: 2.98.0
+                version: 2.97.0
+              - name: homebrew
+                method: script
+                version: 5.0.1
               - name: mise
                 method: brew
                 version: 2026.10.1

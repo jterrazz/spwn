@@ -315,7 +315,7 @@ type machine struct {
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
 	h := raw
 	if world != nil {
-		h = world.system(raw)
+		h = world.system(raw, cat)
 	}
 	paths := pathsOf(h.Env.Home(), vars)
 	st := newStores(h.FS, paths)

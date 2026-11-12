@@ -100,12 +100,14 @@ func TestInstallBringsWhatTheCatalogLinksAndNoMore(t *testing.T) {
 	w.Mac("vm").Apps = map[catalog.Method]*world.Manager{}
 	registry := contract.Installers{}
 	for method, adapter := range adapters {
-		w.Managers[method] = world.Named{Name: adapter.Manager().Name, App: adapter.Manager().App}
+		w.Managers[method] = appsfake.Named(adapter)
 		w.Mac("vm").Apps[method] = &world.Manager{Absent: method != in.Method() && method != nodeIn.Method(), Installed: map[string]string{}}
 		_, lined := adapter.(contract.Lined)
 		registry[method] = appsfake.InstallerOf(w, "vm", method, lined)
 	}
 	w.Mac("vm").Apps[nodeIn.Method()].Installed[nodeIn.Key()] = "22.11.0"
+	foot := appsfake.FootprintOf(w, "vm", cat)
+	system.Run, system.FS = appsfake.Seen{Runner: system.Run, Foot: foot, Home: "/home/u"}, appsfake.SeenFS{FS: system.FS, Foot: foot, Home: "/home/u"}
 	shelf := appscalls.NewShelf(appsMachine{h: system, run: system.Run}, cat, nil, appscalls.ShelfOptions{ThisMachine: catalog.MacOS, Root: "/", Installers: registry, Bundler: appsfake.BundlerOf(w, "vm")})
 	out, err := shelf.Install(context.Background(), apps.InstallRequest{Names: []string{app.Name}}, nil)
 	if err != nil {

@@ -39,7 +39,8 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 	// invariant: what every Installer owes the apps model, whatever runs it:
 	// what it holds is listed, what it installs or removes shows in its next
 	// list, a failed run is an error, a missing manager is not ready, and a
-	// verb it cannot do is refused, never faked. A Holder installs and
+	// verb it cannot do is refused as ErrCannot, never faked, and a method
+	// that keeps no list runs no manager and reads no currency. A Holder installs and
 	// removes through its own verbs, for one app, on the owner's word.
 	t.Helper()
 	ctx := context.Background()
@@ -77,8 +78,8 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		i := build(t, Seed{Installed: map[string]string{}})
 		err := install(ctx, i, sample)
 		if !i.Can().Install {
-			if err == nil {
-				t.Errorf("an installer that cannot install said it installed %s", key)
+			if !errors.Is(err, contract.ErrCannot) {
+				t.Errorf("an installer that cannot install answered %v for %s, not ErrCannot", err, key)
 			}
 			return
 		}
@@ -96,8 +97,8 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		i := build(t, held())
 		err := remove(ctx, i, sample)
 		if !i.Can().Remove {
-			if err == nil {
-				t.Errorf("an installer that cannot remove said it removed %s", key)
+			if !errors.Is(err, contract.ErrCannot) {
+				t.Errorf("an installer that cannot remove answered %v for %s, not ErrCannot", err, key)
 			}
 			return
 		}
@@ -115,8 +116,8 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		i := build(t, held())
 		err := i.Update(ctx, []catalog.Install{sample}, nil)
 		switch {
-		case !i.Can().Update && err == nil:
-			t.Errorf("an installer that cannot update said it updated %s", key)
+		case !i.Can().Update && !errors.Is(err, contract.ErrCannot):
+			t.Errorf("an installer that cannot update answered %v for %s, not ErrCannot", err, key)
 		case i.Can().Update && err != nil:
 			t.Errorf("update: %v", err)
 		}
@@ -142,6 +143,22 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 		}
 		if _, err := i.Inventory(ctx); err != nil && !errors.Is(err, contract.ErrMissing) {
 			t.Errorf("an absent manager's inventory failed as %v, not as missing", err)
+		}
+	})
+
+	t.Run("a method that keeps no list is ready, runs no manager and reads no currency", func(t *testing.T) {
+		i := build(t, Seed{Absent: true})
+		if _, err := i.Inventory(ctx); !errors.Is(err, contract.ErrUnlisted) {
+			t.Skip("its method keeps a list")
+		}
+		if err := i.Ready(ctx); err != nil {
+			t.Errorf("a method that keeps no list answered %v when ready", err)
+		}
+		if m := i.Manager(); m != (contract.Manager{}) {
+			t.Errorf("a method that keeps no list names the manager %+v", m)
+		}
+		if got, err := i.Outdated(ctx, []string{key}); err != nil || len(got) != 0 {
+			t.Errorf("a method that keeps no list read the currency %v, %v", got, err)
 		}
 	})
 

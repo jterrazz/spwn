@@ -5,11 +5,11 @@ runs:
       exit: 0
       stdout: |
           ●	herdr-app	1.0.0	cask	required by herdr-core
-          ●	herdr-core	1.0.0	provided-by
+          ●	herdr-core		provided-by
     - command: 'apps herdr-core | /usr/bin/head -3'
       exit: 0
       stdout: |
-          ●	herdr-core	1.0.0	provided-by
+          ●	herdr-core		provided-by
           # Detail
           method	provided-by
     - command: 'apps herdr-app | /usr/bin/head -1'

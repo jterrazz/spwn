@@ -10,22 +10,21 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · jterrazz-macbook-pro · 9 things need you
+          This Mac · jterrazz-macbook-pro · 8 things need you
             Engine running
 
           Needs you
-            ✗ npm sign-in expired  npm login
+            ✗ npm sign-in expired   npm login
             ✗ com.jterrazz.brain.x-snapshot is failing, last exit 2
               station background remove com.jterrazz.brain.x-snapshot
-            ◐ 1 mise update waiting
-              station apps update --manager mise
             ◐ 2 brew updates waiting
               station apps update --manager brew
             ◐ Firewall: off
               System Settings > Network > Firewall
-            4 more: station overview --all
+            ◐ ~/.tart is misplaced  station disk move ~/.tart
+            3 more: station overview --all
           Activity    memory 12.4 of 16 GB · 388 GB free
-          Apps        ● 6 ok · ◐ 3 updates · ○ 105 not installed
+          Apps        ● 7 ok · ◐ 2 updates · ○ 105 not installed
           Settings    set by station · ○ 0 of 19 · checked · ● 8 of 9
           Disk        ◐ 388 GB free · 34.8 GB can rebuild
                       ◐ 1 misplaced
@@ -42,21 +41,19 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 114 apps for this Mac · 3 updates
+          This Mac · 114 apps for this Mac · 2 updates
             105 not installed
 
           Updates
-            ◐ node     22.11.0 → 24.11.0  mise  update available
-              → station apps update node
-            ◐ ghostty  1.2.0 → 1.2.1      cask  update available
+            ◐ ghostty  1.2.0 → 1.2.1    cask  update available
               → station apps update ghostty
-            ◐ gh       2.97.0 → 2.98.0    brew  update available
+            ◐ gh       2.97.0 → 2.98.0  brew  update available
               → station apps update gh
           Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, …
-          OK             ● 6 · github-release, mise, go, bat, jq, …
+          OK             ● 7 · github-release, mise, go, node, bat, …
           Not for this machine  8 apps live on other machines
 
-          → station apps update            the 3 updates
+          → station apps update            the 2 updates
           → station apps install <app...>  install some
     - command: '--version >/dev/null; terminal --size 60x60 /usr/bin/env -u NO_COLOR COLUMNS=60 "$STATION" background'
       stdin: |

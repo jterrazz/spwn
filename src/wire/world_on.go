@@ -230,10 +230,11 @@ func (m *worldMac) slice() world.Mac {
 
 func (m *worldMac) runs() bool { mac := m.slice(); return mac.EngineRuns() }
 
-func (m *worldMac) system(h local.System) local.System {
-	h.Run = rootless{Runner: h.Run, w: m.run.w}
+func (m *worldMac) system(h local.System, cat catalog.Catalog) local.System {
+	foot := appsfake.FootprintOf(m.run.w, m.name, cat)
+	h.Run = appsfake.Seen{Runner: rootless{Runner: h.Run, w: m.run.w}, Foot: foot, Home: h.Env.Home()}
 	m.home = h.Env.Home()
-	h.FS = worldFS{FS: h.FS, m: m, plist: catalog.EnginePlist(h.Env.Home()), files: m.files()}
+	h.FS = worldFS{FS: appsfake.SeenFS{FS: h.FS, Foot: foot, Home: h.Env.Home()}, m: m, plist: catalog.EnginePlist(h.Env.Home()), files: m.files()}
 	h.Env = worldEnv{Env: h.Env, thisMac: m.name, user: m.run.w.User, admin: m.run.w.Admin && m.name == m.run.w.ThisMac || m.slice().Root}
 	h.Clock = m.run.clock()
 	h.Sockets = worldSockets{Sockets: h.Sockets, m: m}
@@ -301,10 +302,10 @@ func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefil
 	return machinefilefake.SharedOf(m.run.w, src)
 }
 
-func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Manager) {
+func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Installer) {
 	named := make(map[catalog.Method]world.Named, len(adapters))
-	for method, manager := range adapters {
-		named[method] = world.Named{Name: manager.Name, App: manager.App}
+	for method, real := range adapters {
+		named[method] = appsfake.Named(real)
 	}
 	m.run.w.Managers = named
 }

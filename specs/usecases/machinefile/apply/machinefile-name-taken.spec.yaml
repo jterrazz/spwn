@@ -21,8 +21,6 @@ runs:
       stdout: |
           # To install
           ○	fd	brew
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
       stderr: |
           Error: machinefiles/laptop.yaml already holds another laptop: station never replaces your Machinefile
           Hint: edit that file, or remove it to copy downloads/laptop.yaml instead
@@ -50,9 +48,7 @@ runs:
     - command: 'apply --machinefile downloads/laptop.yaml'
       exit: 0
       stdout: |
-          # To adopt
-          ?	homebrew	script	the manager of jq · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of jq · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.machinefile'' world.json'
       exit: 0

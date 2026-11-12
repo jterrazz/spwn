@@ -191,6 +191,8 @@ type Node struct {
 type Named struct {
 	Name string
 	App  string
+	// value: what its real adapter can do.
+	Install, Update, Remove, UpdateAll bool
 }
 
 type Manager struct {

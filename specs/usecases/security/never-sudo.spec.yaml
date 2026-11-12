@@ -14,7 +14,7 @@ runs:
     - command: 'apps install tart'
       exit: 0
       stdout: |
-          ●	tart	1.0.0	shell
+          ●	tart		shell
           ●	tart-launcher			~/.local/bin/tart
     - command: 'init --name jterrazz-macbook-pro >/dev/null; /usr/bin/grep -c "\"as_root\"" world.json'
       exit: 1

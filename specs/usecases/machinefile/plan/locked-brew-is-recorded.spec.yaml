@@ -21,8 +21,6 @@ runs:
       stdout: |
           # To install
           ○	ripgrep	brew	recorded 14.0.0
-          # To adopt
-          ?	homebrew	script	the manager of ripgrep · on PATH, not managed by script
     - command: 'explain apps.ripgrep'
       exit: 0
       stdout: |
@@ -35,9 +33,7 @@ runs:
       stdout: |
           # To install
           ○	ripgrep	brew	recorded 14.0.0
-          # To adopt
-          ?	homebrew	script	the manager of ripgrep · on PATH, not managed by script
-          ◐	homebrew	5.0.1	script	the manager of ripgrep · adopted · on PATH, not managed by script
+          ●	homebrew	5.0.1	script	the manager of ripgrep
           ●	ripgrep	1.0.0	brew
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
       exit: 0
@@ -45,6 +41,9 @@ runs:
           lock: station.lock/v1
           machinefile: jterrazz-macbook-pro
           apps:
+              - name: homebrew
+                method: script
+                version: 5.0.1
               - name: ripgrep
                 method: brew
                 version: 1.0.0
