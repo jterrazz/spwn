@@ -45,6 +45,30 @@ func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 			t.Errorf("List = %+v, %v; want none", got, err)
 		}
 	})
+	t.Run("no night reads as none; the last night written is read back, the installs kept", func(t *testing.T) {
+		l := open(t)
+		if _, ok, err := l.Night(ctx); ok || err != nil {
+			t.Errorf("Night before any = %v, %v; want none", ok, err)
+		}
+		if err := l.Put(ctx, installed("jq", "first")); err != nil {
+			t.Fatal(err)
+		}
+		at := time.Date(2026, 11, 12, 3, 0, 4, 0, time.UTC)
+		first := machinefile.Night{At: at, Machinefile: "laptop", Moved: []machinefile.Moved{{App: "node", Was: "24.10.0", Now: "24.11.0", Range: "24"}}}
+		last := machinefile.Night{At: at.AddDate(0, 0, 1), Machinefile: "laptop", Left: []string{"jq"}, Interrupted: true}
+		for _, n := range []machinefile.Night{first, last} {
+			if err := l.Write(ctx, n); err != nil {
+				t.Fatalf("Write: %v", err)
+			}
+		}
+		got, ok, err := l.Night(ctx)
+		if !ok || err != nil || !got.At.Equal(last.At) || !slices.Equal(got.Left, last.Left) || !got.Interrupted || len(got.Moved) != 0 {
+			t.Errorf("Night = %+v, %v, %v; want %+v", got, ok, err, last)
+		}
+		if list, err := l.List(ctx); err != nil || !slices.Equal(list, []machinefile.Installed{installed("jq", "first")}) {
+			t.Errorf("List after a night = %+v, %v", list, err)
+		}
+	})
 }
 
 // value: an owner's folder whose path holds body (none when path is

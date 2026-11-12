@@ -167,7 +167,7 @@ func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved,
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d), call.Bind(Upgrade, d)}
+	return []call.Handler{call.Bind(Explain, d), call.Bind(Plan, d), call.Bind(Apply, d), call.Bind(Drift, d), call.Bind(Upgrade, d), call.Bind(LastNight, d)}
 }
 
 func Worded(err error) error {

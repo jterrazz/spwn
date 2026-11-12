@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"time"
 
 	accountscalls "github.com/jterrazz/studio-station/src/accounts/calls"
 	activitycalls "github.com/jterrazz/studio-station/src/activity/calls"
@@ -18,6 +19,7 @@ import (
 	diskcalls "github.com/jterrazz/studio-station/src/disk/calls"
 	"github.com/jterrazz/studio-station/src/engine"
 	enginecalls "github.com/jterrazz/studio-station/src/engine/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	"github.com/jterrazz/studio-station/src/machines"
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 	"github.com/jterrazz/studio-station/src/overview"
@@ -29,7 +31,7 @@ type sectionRead func(ctx context.Context, r call.Router, self machine.Ref) (ove
 
 // value: the read of each section an Overview has a line for, by its call
 // (SSH is the door, by the machine's name).
-func sectionReads() map[section.ID]sectionRead {
+func sectionReads(now time.Time) map[section.ID]sectionRead {
 	thisMac := machine.Ref{}
 	return map[section.ID]sectionRead{
 		section.Activity: func(ctx context.Context, r call.Router, _ machine.Ref) (overview.Read, error) {
@@ -38,7 +40,10 @@ func sectionReads() map[section.ID]sectionRead {
 		},
 		section.Apps: func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error) {
 			out, err := call.Read(ctx, r, thisMac, appscalls.List, appscalls.ListIn{}, nil)
-			return overview.AppsRead(out, self), err
+			// invariant: a machine whose station has no night (an older one)
+			// reads its apps alone.
+			night, nerr := call.Invoke(ctx, r, thisMac, machinefilecalls.LastNight, machinefilecalls.NightlyIn{}, nil)
+			return overview.AppsRead(out, self, overview.NightOf(night.Night, night.Ran && nerr == nil, now)), err
 		},
 		section.Settings: func(ctx context.Context, r call.Router, self machine.Ref) (overview.Read, error) {
 			out, err := call.Read(ctx, r, thisMac, settingscalls.List, settingscalls.ListIn{}, nil)
@@ -91,7 +96,11 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context) <-chan overv
 			head.Up = sample.At.Sub(sample.Boot)
 		}
 	}
-	reads := sectionReads()
+	var now time.Time
+	if r.d.Clock != nil {
+		now = r.d.Clock.Now()
+	}
+	reads := sectionReads(now)
 	var ids []section.ID
 	for _, id := range section.For(kind) {
 		if _, ok := reads[id]; ok {

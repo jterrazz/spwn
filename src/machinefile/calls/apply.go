@@ -158,7 +158,7 @@ func bind(ctx context.Context, d Deps, asked, name string) error {
 			return err
 		}
 	}
-	return d.Prefs.Bind(name)
+	return d.Prefs.Bind(name, d.Now())
 }
 
 type run struct {

@@ -64,6 +64,10 @@ type ledger struct{ deleted []string }
 
 func (*ledger) List(context.Context) ([]machinefile.Installed, error) { return nil, nil }
 func (*ledger) Put(context.Context, machinefile.Installed) error      { return nil }
+func (*ledger) Night(context.Context) (machinefile.Night, bool, error) {
+	return machinefile.Night{}, false, nil
+}
+func (*ledger) Write(context.Context, machinefile.Night) error { return nil }
 func (l *ledger) Delete(_ context.Context, item string) error {
 	l.deleted = append(l.deleted, item)
 	return nil

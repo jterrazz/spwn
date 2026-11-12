@@ -50,7 +50,7 @@ runs:
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.machinefile'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].preferences.machinefile | .bound_at |= type'' world.json'
       exit: 0
       stdout: |
-          {"name":"laptop"}
+          {"name":"laptop","bound_at":"string"}

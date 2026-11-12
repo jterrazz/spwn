@@ -1,0 +1,71 @@
+description: 'past 03:00 the engine moves each app within its range; the apps line says what moved and waits'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22' }]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'overview'
+      exit: 0
+      stdout: |
+          # Needs you
+          ✗	npm sign-in expired	npm login
+          ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2	station background remove com.jterrazz.brain.x-snapshot
+          ◐	1 mise update waiting	station apps update --manager mise
+          ◐	1 brew update waiting	station apps update --manager brew
+          ◐	Firewall: off	System Settings > Network > Firewall
+          	4 more: station overview --all
+          	Activity	memory 12.4 of 16 GB · 388 GB free
+          	Apps	● 8 ok · ◐ 2 updates · ○ 104 not installed
+          	Settings	set by station · ○ 0 of 19 · checked · ● 8 of 9
+          	Disk	◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced
+          	Ports	Public 0 · Private 2
+          	Accounts	● 6 · ✗ npm
+          	Background	● 10 · ✗ 1 failing · ◐ 3 orphans
+          	Awake	○ sleeps normally
+          	VMs	○ api stopped · ● linux-1 running
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview'
+      exit: 0
+      stdout: |
+          # Needs you
+          ✗	npm sign-in expired	npm login
+          ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2	station background remove com.jterrazz.brain.x-snapshot
+          ◐	1 mise update waiting	station apps update --manager mise
+          ◐	node 25.1.0 available: change '22' to '25'	~/.config/station/machinefiles/jterrazz-macbook-pro.yaml
+          ◐	Firewall: off	System Settings > Network > Firewall
+          	4 more: station overview --all
+          	Activity	memory 12.4 of 16 GB · 388 GB free
+          	Apps	● 9 ok · ◐ 1 update · ○ 104 not installed · 2 moved last night
+          	Settings	set by station · ○ 0 of 19 · checked · ● 8 of 9
+          	Disk	◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced
+          	Ports	Public 0 · Private 2
+          	Accounts	● 6 · ✗ npm
+          	Background	● 10 · ✗ 1 failing · ◐ 3 orphans
+          	Awake	○ sleeps normally
+          	VMs	○ api stopped · ● linux-1 running
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-macbook-pro","moved":[{"app":"node","was":"22.11.0","now":"22.14.0","range":"22"},{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"22","moved":"25","file":"~/.config/station/machinefiles/jterrazz-macbook-pro.yaml"}]}
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	mise	2026.10.1	brew
+          ●	node	22.14.0	mise	within 22
+          ●	gh	2.98.0	brew
+          # Waiting
+          ◐	node		25.1.0 available: change '22' to '25' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml

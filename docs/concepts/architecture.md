@@ -38,7 +38,8 @@ src/
              init), and the preferences groups it writes
   engine/    the engine's model (its events, its own calls), engine/calls, engine/contract (the Notifier)
     process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server
-    jobs/    the sample job, which feeds Activity's history
+    jobs/    the sample job, which feeds Activity's history, and the nightly job, which
+             upgrades a Mac's bound Machinefile every night
     feeds/   the menu bar's pages, built over watches
 ```
 

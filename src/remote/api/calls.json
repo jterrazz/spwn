@@ -411,6 +411,13 @@
       "out": "ExplainOut"
     },
     {
+      "name": "machinefile.nightly",
+      "schema": "station.machinefile.nightly/v1",
+      "where": "at-target",
+      "in": "NightlyIn",
+      "out": "Nightly"
+    },
+    {
       "name": "machinefile.plan",
       "schema": "station.machinefile.plan/v1",
       "where": "at-target",

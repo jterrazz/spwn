@@ -3,7 +3,6 @@ package overview
 import (
 	"strconv"
 	"strings"
-
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts"
@@ -12,9 +11,11 @@ import (
 	"github.com/jterrazz/studio-station/src/awake"
 	"github.com/jterrazz/studio-station/src/background"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/finding"
 	"github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/core/section"
 	"github.com/jterrazz/studio-station/src/disk"
+	"github.com/jterrazz/studio-station/src/machinefile"
 	"github.com/jterrazz/studio-station/src/ports"
 	"github.com/jterrazz/studio-station/src/settings"
 )
@@ -62,20 +63,51 @@ func ActivityRead(r activity.Report) Read {
 	return Read{Line: Line{Section: section.Activity, Parts: parts}, Findings: r.Findings}
 }
 
-func AppsRead(reports []apps.Report, m machine.Ref) Read {
+// value: what the apps line says of the engine's nights: the apps the last
+// one moved, when it is the night just past, and every version waiting past
+// a range, as the last night read it.
+
+type Nights struct {
+	Moved   int
+	Waiting []machinefile.Waiting
+}
+
+func NightOf(n machinefile.Night, ran bool, now time.Time) Nights {
+	if !ran {
+		return Nights{}
+	}
+	out := Nights{Waiting: n.Waiting}
+	if !n.At.Before(machinefile.LastNight(now)) {
+		out.Moved = len(n.Moved)
+	}
+	return out
+}
+
+func AppsRead(reports []apps.Report, m machine.Ref, night Nights) Read {
 	n := apps.Counts(reports)
 	updates := "updates"
 	if n[apps.UpdateAvailable] == 1 {
 		updates = "update"
 	}
-	return Read{Line: Line{Section: section.Apps, Pending: n[apps.Pending] > 0, Parts: counted([]Part{
+	parts := counted([]Part{
 		Count(catalog.StateOK, n[apps.OK], "ok", string(apps.OK)),
 		Count(catalog.StateDegraded, n[apps.UpdateAvailable], updates, string(apps.UpdateAvailable)),
 		Count(catalog.StateBroken, n[apps.Failed], "failed", string(apps.Failed)),
 		Count(catalog.StateUnknown, n[apps.NotManaged], "not managed", string(apps.NotManaged)),
 		Count(catalog.StateUnknown, n[apps.NotKnown], "not known", string(apps.NotKnown)),
 		Count(catalog.StateAbsent, n[apps.NotInstalled], "not installed", string(apps.NotInstalled)),
-	})}, Findings: apps.Findings(reports, m)}
+	})
+	if night.Moved > 0 {
+		parts = append(parts, Part{Word: strconv.Itoa(night.Moved) + " moved last night"})
+	}
+	found := apps.Findings(reports, m)
+	for _, w := range night.Waiting {
+		file := w.File
+		w.File = ""
+		found = append(found, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: w.App,
+			Text: w.App + " " + w.Words(), Fix: finding.Fix{Path: file}})
+	}
+	return Read{Line: Line{Section: section.Apps, Pending: n[apps.Pending] > 0, Parts: parts}, Findings: found}
 }
 
 func SettingsRead(rows []settings.Row, m machine.Ref) Read {

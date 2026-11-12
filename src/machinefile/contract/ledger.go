@@ -13,6 +13,10 @@ type Ledger interface {
 	Put(ctx context.Context, in machinefile.Installed) error
 	// invariant: deleting an item never recorded changes nothing.
 	Delete(ctx context.Context, item string) error
+	// invariant: the last night the engine's upgrade recorded, as the last
+	// Write left it; none written reads as none (false) with no error.
+	Night(ctx context.Context) (machinefile.Night, bool, error)
+	Write(ctx context.Context, n machinefile.Night) error
 }
 
 type Owned interface {

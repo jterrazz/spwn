@@ -259,6 +259,8 @@ type Stores struct {
 	Uptime map[string]machines.Uptime `json:"uptime,omitempty"`
 	// value: what station installed for a Machinefile, by item.
 	Ledger []machinefile.Installed `json:"ledger,omitempty"`
+	// value: the last night the engine's upgrade recorded.
+	Night *machinefile.Night `json:"night,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

@@ -1,0 +1,48 @@
+description: 'another Mac upgrades its own Machinefile at night, and its overview says so from here'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-mac-mini --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # To install
+          ○	gh	brew
+          	On mac-mini:
+          ●	homebrew	5.0.1	script	the manager of gh
+          ●	gh	1.0.0	brew
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Needs you
+          ◐	~/go is misplaced	station disk move ~/go
+          	Activity	memory 26 of 64 GB · 1.6 TB free
+          	Apps	● 3 ok · ○ 111 not installed
+          	Settings	set by station · ● 1 of 19 · checked · ● 9 of 9
+          	Disk	◐ 1.6 TB free · 1.1 GB can rebuild · ◐ 1 misplaced
+          	Ports	Public 0 · Private 0
+          	Accounts	● 1
+          	Background	● 1
+          	Awake	● never sleeps
+          	VMs	● infra running
+          # Mac readiness
+          ●	restarts after a power cut	applied
+          ●	never sleeps	applied
+          ●	logs in by itself	applied
+          ◐	disk unlock after a power cut	needs you	station machines unlock mac-mini (from the same network)
+          ●	planned restarts unlock themselves	supported
+          ●	engine starts at login	installed
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-mac-mini"].stores.night | del(.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-mac-mini"}

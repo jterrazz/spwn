@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"slices"
 	"strings"
 
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
@@ -19,6 +20,10 @@ type UpgradeIn struct {
 	// bound to, else the one named after it.
 	Machinefile string
 	Interactive bool
+	// value: the engine's night: what asks the owner something waits for
+	// the owner's run instead of refusing the upgrade, and the night is
+	// recorded.
+	Unattended bool
 }
 
 var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
@@ -38,7 +43,10 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 			return machinefile.Upgraded{}, err
 		}
 		out := machinefile.Upgraded{Plan: plan}
-		if asked := plan.UpgradeNeeds(); !in.Interactive && len(asked) > 0 {
+		var waits []string
+		if asked := plan.UpgradeNeeds(); in.Unattended {
+			waits = plan.Waits()
+		} else if !in.Interactive && len(asked) > 0 {
 			return out, refusedOffTerminal(asked, "upgrade")
 		}
 		source, err := sharedSource(d)
@@ -53,6 +61,10 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 				}
 				break
 			}
+			if slices.Contains(waits, l.Step.Item) {
+				out.Done = append(out.Done, machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version, Reason: machinefile.WaitsForYou})
+				continue
+			}
 			if l.Seen.Condition == machinefile.Absent {
 				r := &run{d: d, p: p, in: ApplyIn{Interactive: in.Interactive}, name: plan.Name}
 				out.Done = append(out.Done, r.reinstall(ctx, l))
@@ -66,6 +78,11 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
 		if !out.Lock.Empty() {
 			if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
+				return out, err
+			}
+		}
+		if in.Unattended {
+			if err := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, d.Now())); err != nil {
 				return out, err
 			}
 		}

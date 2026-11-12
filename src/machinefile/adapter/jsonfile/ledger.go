@@ -44,32 +44,40 @@ func NewLedger(files Files, at string) *Ledger { return &Ledger{files: files, at
 type file struct {
 	V         int                     `json:"v"`
 	Installed []machinefile.Installed `json:"installed"`
+	// value: the last night the engine's upgrade recorded.
+	Night *machinefile.Night `json:"night,omitempty"`
 }
 
 func (l *Ledger) read() ([]machinefile.Installed, error) {
+	f, err := l.file()
+	return f.Installed, err
+}
+
+func (l *Ledger) file() (file, error) {
 	data, err := l.files.ReadFile(l.at)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, nil
+		return file{}, nil
 	}
 	if err != nil {
-		return nil, &store.UnreadableError{Path: l.at, Cause: err}
+		return file{}, &store.UnreadableError{Path: l.at, Cause: err}
 	}
 	var f file
 	if err := json.Unmarshal(data, &f); err != nil {
-		return nil, &store.UnreadableError{Path: l.at, Cause: err}
+		return file{}, &store.UnreadableError{Path: l.at, Cause: err}
 	}
 	if _, err := store.Current(f.V, Version); err != nil {
-		return nil, &store.UnreadableError{Path: l.at, Cause: err}
+		return file{}, &store.UnreadableError{Path: l.at, Cause: err}
 	}
-	return f.Installed, nil
+	return f, nil
 }
 
-func (l *Ledger) write(list []machinefile.Installed) error {
-	slices.SortFunc(list, func(a, b machinefile.Installed) int { return strings.Compare(a.Item, b.Item) })
+func (l *Ledger) write(f file) error {
+	slices.SortFunc(f.Installed, func(a, b machinefile.Installed) int { return strings.Compare(a.Item, b.Item) })
 	if err := l.files.MkdirAll(path.Dir(l.at), 0o700); err != nil {
 		return &store.UnwritableError{Path: l.at, Cause: err}
 	}
-	data, err := json.MarshalIndent(file{V: Version, Installed: list}, "", "  ")
+	f.V = Version
+	data, err := json.MarshalIndent(f, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -89,6 +97,14 @@ func (l *Ledger) write(list []machinefile.Installed) error {
 // and a reader never sees half a file. The lock is held for one record,
 // so a second apply waits for it rather than being refused.
 func (l *Ledger) change(edit func([]machinefile.Installed) ([]machinefile.Installed, bool)) error {
+	return l.changeFile(func(f file) (file, bool) {
+		list, changed := edit(f.Installed)
+		f.Installed = list
+		return f, changed
+	})
+}
+
+func (l *Ledger) changeFile(edit func(file) (file, bool)) error {
 	if err := l.files.MkdirAll(path.Dir(l.at), 0o700); err != nil {
 		return &store.UnwritableError{Path: l.at, Cause: err}
 	}
@@ -97,15 +113,30 @@ func (l *Ledger) change(edit func([]machinefile.Installed) ([]machinefile.Instal
 		return &store.UnwritableError{Path: l.at, Cause: err}
 	}
 	defer release()
-	list, err := l.read()
+	f, err := l.file()
 	if err != nil {
 		return err
 	}
-	list, changed := edit(list)
+	f, changed := edit(f)
 	if !changed {
 		return nil
 	}
-	return l.write(list)
+	return l.write(f)
+}
+
+func (l *Ledger) Night(context.Context) (machinefile.Night, bool, error) {
+	f, err := l.file()
+	if err != nil || f.Night == nil {
+		return machinefile.Night{}, false, err
+	}
+	return *f.Night, true, nil
+}
+
+func (l *Ledger) Write(_ context.Context, n machinefile.Night) error {
+	return l.changeFile(func(f file) (file, bool) {
+		f.Night = &n
+		return f, true
+	})
 }
 
 func (l *Ledger) List(context.Context) ([]machinefile.Installed, error) { return l.read() }

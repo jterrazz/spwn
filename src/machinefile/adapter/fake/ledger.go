@@ -49,6 +49,23 @@ func (l *Ledger) Delete(_ context.Context, item string) error {
 	return nil
 }
 
+func (l *Ledger) Night(context.Context) (machinefile.Night, bool, error) {
+	l.w.Lock()
+	defer l.w.Unlock()
+	n := l.w.Mac(l.mac).Store().Night
+	if n == nil {
+		return machinefile.Night{}, false, nil
+	}
+	return *n, true, nil
+}
+
+func (l *Ledger) Write(_ context.Context, n machinefile.Night) error {
+	l.w.Lock()
+	defer l.w.Unlock()
+	l.w.Mac(l.mac).Store().Night = &n
+	return nil
+}
+
 func (l *Ledger) Migrate(context.Context) error { return nil }
 
 // value: the owner's folder of a Mac of the world: a file named by its

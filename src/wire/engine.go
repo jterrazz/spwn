@@ -1,6 +1,7 @@
 package wire
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"os"
@@ -18,6 +19,9 @@ import (
 	"github.com/jterrazz/studio-station/src/activity"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	enginejobs "github.com/jterrazz/studio-station/src/engine/jobs"
+	"github.com/jterrazz/studio-station/src/machinefile"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
+	machinefilecontract "github.com/jterrazz/studio-station/src/machinefile/contract"
 	"github.com/jterrazz/studio-station/src/ports"
 	portscalls "github.com/jterrazz/studio-station/src/ports/calls"
 
@@ -25,6 +29,7 @@ import (
 
 	"github.com/jterrazz/studio-station/src/background/contract"
 	"github.com/jterrazz/studio-station/src/catalog"
+	"github.com/jterrazz/studio-station/src/core/call"
 
 	"github.com/jterrazz/studio-station/src/engine"
 	enginelog "github.com/jterrazz/studio-station/src/engine/adapter/log"
@@ -91,6 +96,10 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return seen
 		},
 	}
+	jobs := []process.Tick{sample.Run}
+	if m.kind == catalog.Mac {
+		jobs = append(jobs, m.nightly(calls).Run)
+	}
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
@@ -104,7 +113,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Sample:   live.Sample,
 		Notifier: notifier, Checks: checks, Join: func(parts ...string) string { return strings.Join(parts, token.Sep) },
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
-		Jobs:     []process.Tick{sample.Run},
+		Jobs:     jobs,
 		TellBack: m.machines(false).TellBack, Answers: m.answers, ToldBack: m.machines(false).ToldBack, Label: m.label,
 		AgentsHeld: func(ctx context.Context) (agents.Held, error) {
 			return agentscalls.HeldEverywhere(ctx, calls)
@@ -120,6 +129,33 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	})
 	d.ServeWith(m.engineServer(d, registry, calls))
 	return d
+}
+
+// invariant: a Mac's engine upgrades its bound Machinefile every night,
+// unattended, through this machine's own calls; in a world the night runs
+// inside the step, so a story reads what it did once the step ends.
+func (m machine) nightly(calls call.Router) *enginejobs.Nightly {
+	prefs := machinefilecontract.NewSourcePrefs(m.stores.prefs)
+	run := func(f func()) { go f() }
+	if m.world != nil {
+		run = func(f func()) { f() }
+	}
+	return &enginejobs.Nightly{
+		Clock: m.sys.Clock, Started: cmp.Or(m.engineStarted(), m.sys.Clock.Now()), Go: run,
+		Bound: func() (string, time.Time, bool) {
+			name, err := prefs.Bound()
+			at, _ := prefs.BoundAt()
+			return name, at, err == nil && name != ""
+		},
+		Last: func(ctx context.Context) (machinefile.Night, bool, error) {
+			out, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.LastNight, machinefilecalls.NightlyIn{}, nil)
+			return out.Night, out.Ran, err
+		},
+		Upgrade: func(ctx context.Context, name string) error {
+			_, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Machinefile: name, Unattended: true}, nil)
+			return err
+		},
+	}
 }
 
 // value: what the engine of a world Mac says of itself, the version it runs

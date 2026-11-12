@@ -169,13 +169,18 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 		fang.WithColorSchemeFunc(help.FangScheme),
 		fang.WithNotifySignal(os.Interrupt, syscall.SIGTERM),
 	)
+	// invariant: a world's engines take their turn on the command before its
+	// pool closes, as a real engine runs beside a live one: a night's
+	// upgrade reads this machine's apps.
+	var closed error
+	if session != nil {
+		closed = session.close(context.Background())
+	}
 	thisMac.pool.Close()
 	reported()
-	if session != nil {
-		if closed := session.close(context.Background()); closed != nil && err == nil {
-			err = closed
-			writer.Failure(kit.Translate(err, ""))
-		}
+	if closed != nil && err == nil {
+		err = closed
+		writer.Failure(kit.Translate(err, ""))
 	}
 	if err == nil {
 		return int(fail.ExitOK)

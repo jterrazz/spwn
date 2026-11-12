@@ -504,6 +504,9 @@ const (
 	Pinned Reason = "pinned"
 	// value: an upgrade leaves an app that updates itself to its updater.
 	SelfUpdating Reason = "updates-itself"
+	// value: an unattended upgrade (the engine's, at night) leaves an app
+	// whose update asks the owner something for the owner's own run.
+	WaitsForYou Reason = "waits-for-you"
 )
 
 // value: one line of a run: what it was, how it ended, the version and
@@ -549,7 +552,11 @@ func (s Step) Within() string {
 // file writes it, the same range moved to hold it, and the file.
 
 type Waiting struct {
-	App, Newest, Range, Moved, File string
+	App    string `json:"app"`
+	Newest string `json:"newest"`
+	Range  string `json:"range"`
+	Moved  string `json:"moved"`
+	File   string `json:"file,omitempty"`
 }
 
 func (v Waiting) Words() string {

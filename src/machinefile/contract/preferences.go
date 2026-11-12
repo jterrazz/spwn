@@ -1,6 +1,10 @@
 package contract
 
-import corecontract "github.com/jterrazz/studio-station/src/core/contract"
+import (
+	"time"
+
+	corecontract "github.com/jterrazz/studio-station/src/core/contract"
+)
 
 // value: the preferences group of the shared source and of the
 // Machinefile this machine carries.
@@ -25,6 +29,8 @@ type group struct {
 	// value: the Machinefile this machine carries, bound by
 	// `station init --machinefile` and `station apply --machinefile`.
 	Name string `json:"name,omitempty"`
+	// value: when it was bound: the engine's first night is past it.
+	BoundAt time.Time `json:"bound_at,omitzero"`
 }
 
 func (s SourcePrefs) Get() (src SharedSource, ok bool, err error) {
@@ -43,12 +49,23 @@ func (s SourcePrefs) Bound() (string, error) {
 	return g.Name, err
 }
 
-func (s SourcePrefs) Bind(name string) error {
-	// invariant: binding keeps the shared source as it was.
+func (s SourcePrefs) BoundAt() (time.Time, error) {
+	// value: when this machine was bound to its Machinefile; zero when it is
+	// not, or was bound by a station that kept no time.
+	var g group
+	err := s.p.Read(GroupSource, &g)
+	return g.BoundAt, err
+}
+
+func (s SourcePrefs) Bind(name string, at time.Time) error {
+	// invariant: binding keeps the shared source as it was, and binding the
+	// same Machinefile again keeps when it was first bound.
 	var g group
 	if err := s.p.Read(GroupSource, &g); err != nil {
 		return err
 	}
-	g.Name = name
+	if g.Name != name {
+		g.Name, g.BoundAt = name, at.UTC()
+	}
 	return s.p.Write(GroupSource, g)
 }
