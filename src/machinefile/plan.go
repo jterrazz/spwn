@@ -537,13 +537,15 @@ func (p Plan) Upgrades() []Line {
 	// reads there by one of its methods, the managers first and then the
 	// rest, each in the plan's order, so a manager is fresh before what it
 	// installs is updated; an app of another phase is its phase's, and a
-	// copy no method holds is the owner's.
+	// copy no method holds is the owner's. It reaches too an app the lock
+	// holds that is not there, whose method is there to install it: the
+	// way out of a locked version that can no longer install.
 	var managers, rest []Line
 	for _, l := range p.Lines {
-		if l.Step.Kind == catalog.KindSetting || l.Step.Phase != catalog.PhaseApply || l.Seen.Method == "" {
+		if l.Step.Kind == catalog.KindSetting || l.Step.Phase != catalog.PhaseApply {
 			continue
 		}
-		if l.Seen.Condition != Present && l.Seen.Condition != Outdated {
+		if !p.reaches(l) {
 			continue
 		}
 		if l.Step.Kind == catalog.KindManager {
@@ -555,12 +557,24 @@ func (p Plan) Upgrades() []Line {
 	return append(managers, rest...)
 }
 
+func (p Plan) reaches(l Line) bool {
+	if l.Seen.Method != "" && (l.Seen.Condition == Present || l.Seen.Condition == Outdated) {
+		return true
+	}
+	if l.Seen.Condition != Absent || l.Action != Install || l.Step.Lock == "" {
+		return false
+	}
+	return !slices.ContainsFunc(l.Step.Waits, func(w string) bool {
+		return slices.ContainsFunc(p.Lines, func(o Line) bool { return o.Step.Item == w && o.Acts() })
+	})
+}
+
 func (p Plan) UpgradeNeeds() []Asked {
 	// value: what an upgrade asks of the owner: the needs of each app it
 	// updates, a version the Machinefile pins being kept as it is.
 	var lines []Line
 	for _, l := range p.Upgrades() {
-		if l.Step.Version == "" {
+		if l.Step.Version == "" || l.Seen.Condition == Absent {
 			lines = append(lines, l)
 		}
 	}

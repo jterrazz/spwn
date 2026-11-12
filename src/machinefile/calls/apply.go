@@ -186,7 +186,23 @@ func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
 	if l.Action == machinefile.Set {
 		return r.set(ctx, l, done)
 	}
-	return r.install(ctx, l, done)
+	return r.wayOut(l, r.install(ctx, l, done))
+}
+
+// invariant: an install at a locked version that failed names the way
+// out, which the lock itself cannot: `station upgrade <app>` installs the
+// newest the Machinefile allows and relocks it, and the lock's line may be
+// edited by hand.
+func (r *run) wayOut(l machinefile.Line, done machinefile.Done) machinefile.Done {
+	if l.Step.Locked == "" || done.State != catalog.StateBroken || done.Reason != "" {
+		return done
+	}
+	hint := "locked at " + l.Step.Locked + " in " + l.Step.Lock + ": station upgrade installs the newest the Machinefile allows, or edit that line"
+	if done.Detail != "" {
+		hint = done.Detail + "; " + hint
+	}
+	done.Detail = hint
+	return done
 }
 
 func (r *run) install(ctx context.Context, l machinefile.Line, done machinefile.Done) machinefile.Done {

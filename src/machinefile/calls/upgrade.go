@@ -1,8 +1,10 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"strings"
 
 	appscalls "github.com/jterrazz/studio-station/src/apps/calls"
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -49,6 +51,11 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 				}
 				break
 			}
+			if l.Seen.Condition == machinefile.Absent {
+				r := &run{d: d, p: p, in: ApplyIn{Interactive: in.Interactive}, name: plan.Name}
+				out.Done = append(out.Done, r.reinstall(ctx, l))
+				continue
+			}
 			out.Done = append(out.Done, update(ctx, d, l, p))
 		}
 		out.Interrupted = ctx.Err() != nil
@@ -61,6 +68,23 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		}
 		return out, ctx.Err()
 	},
+}
+
+// invariant: an app the lock holds that is not there is installed by the
+// method the lock names, at the newest version the Machinefile allows (the
+// lock's own version is what could no longer install), and the lock takes
+// what that method reads once it ran.
+func (r *run) reinstall(ctx context.Context, l machinefile.Line) machinefile.Done {
+	held := cmp.Or(l.Step.Locked, l.Step.Recorded)
+	fresh := l
+	fresh.Step.Locked = ""
+	done := r.install(ctx, fresh, machinefile.Done{Line: l, State: l.Seen.State, Version: l.Seen.Version})
+	done.Line = l
+	if done.Installed {
+		done.Updated = true
+		done.Detail = strings.TrimSpace("installed anew, the lock held " + held)
+	}
+	return done
 }
 
 func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) machinefile.Done {

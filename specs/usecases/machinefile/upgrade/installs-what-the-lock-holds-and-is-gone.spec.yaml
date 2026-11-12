@@ -1,0 +1,39 @@
+description: 'upgrade installs an app the lock holds that is not there, at the newest allowed'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [ripgrep]
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.lock'
+      stdin: |
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - { name: ripgrep, method: brew, version: 14.0.0 }
+      exit: 0
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	ripgrep	1.0.0	brew	installed anew, the lock held 14.0.0
+          # Lock
+          ●	ripgrep		1.0.0 by brew, was 14.0.0 by brew
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
+      exit: 0
+      stdout: |+
+          lock: station.lock/v1
+          machinefile: jterrazz-macbook-pro
+          apps:
+              - name: ripgrep
+                method: brew
+                version: 1.0.0
+
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To adopt
+          ?	homebrew	script	the manager of ripgrep · on PATH, not managed by script

@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile"
 	mffake "github.com/jterrazz/studio-station/src/machinefile/adapter/fake"
 	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
+	"github.com/jterrazz/studio-station/src/world"
 )
 
 // value: a bench whose Machinefile `m` lists entries, with its lock body
@@ -222,4 +223,41 @@ func TestAnUpgradeLeavesTheLockOfWhatItUpdated(t *testing.T) {
 			t.Errorf("the manager %s updated after an app", d.Line.Step.Item)
 		}
 	}
+}
+
+func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
+	// invariant: a locked version that no longer installs is no dead end:
+	// apply's failure names `station upgrade`, which installs the app the
+	// lock holds but the machine does not, at the newest the Machinefile
+	// allows, and the lock follows what it installed.
+	ctx := context.Background()
+	rt := benchOf(t, catalog.Mac, "node").step(t, "node").Method
+	b := lockBenchOf(t, catalog.Mac, "lock: station.lock/v1\nmachinefile: m\napps:\n    - { name: node, method: "+rt+", version: 22.11.0 }\n", "node")
+	b.apply(t)
+	delete(b.w.Mac("here").Apps[catalog.Method(rt)].Installed, "node")
+	b.w.Script = []world.Fault{{Call: "Installer.Install", Times: 1}}
+	out := b.apply(t)
+	i := slices.IndexFunc(out.Done, func(d machinefile.Done) bool { return d.Line.Step.Item == "node" })
+	if i < 0 || out.Done[i].State != catalog.StateBroken || !strings.Contains(out.Done[i].Detail, "station upgrade") {
+		t.Fatalf("apply ended %+v; want node broken, naming station upgrade", out.Done)
+	}
+	if got, _ := lockedOf(b.lock(t), "node"); got.Version != "22.11.0" {
+		t.Fatalf("the failed install moved the lock to %+v", got)
+	}
+	b.shelf.Forget()
+	up, err := call.Invoke(ctx, b.calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Interactive: true}, nil)
+	if err != nil {
+		t.Fatalf("upgrade: %v", err)
+	}
+	j := slices.IndexFunc(up.Done, func(d machinefile.Done) bool { return d.Line.Step.Item == "node" })
+	if j < 0 || up.Done[j].State != catalog.StateOK || !up.Done[j].Installed {
+		t.Fatalf("upgrade ended %+v; want node installed", up.Done)
+	}
+	if got, ok := lockedOf(b.lock(t), "node"); !ok || got.Version == "22.11.0" || got.Version == "" {
+		t.Errorf("the lock holds %+v; want node at the version upgrade installed", got)
+	}
+	if _, ok := b.recorded("node"); !ok {
+		t.Error("the app upgrade installed is not in the ledger")
+	}
+	holdsWhatTheLockNames(t, "upgraded anew", b, up.Plan, b.lock(t))
 }
