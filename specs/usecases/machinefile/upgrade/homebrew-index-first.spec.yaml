@@ -1,0 +1,25 @@
+description: 'a managed homebrew is upgraded first, by its own brew update, then its apps'
+env: bridged-macos
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "macos-1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world edit macos-1 machinefiles/macos-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macos-1
+          machine: { kind: workspace, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'apply --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	homebrew	script	the manager of jq
+          ○	jq	brew
+          ●	homebrew	1.0.0	script	the manager of jq
+          ●	jq	1.0.0	brew
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	1.0.0	script
+          ●	jq	1.0.0	brew
