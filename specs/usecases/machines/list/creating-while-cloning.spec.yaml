@@ -10,6 +10,7 @@ runs:
     - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create linux-4'
       stdin: |
           see On which Mac?
+          settle
           send \r
           see cloning
           run "$STATION" machines --json | /usr/bin/jq -c '.macs[0] | {vms: [.vms[] | select(.name == "linux-4") | {state, birth}], held: [.capacity.vms[] | select(.name == "linux-4") | .memory_bytes]}' >seen
