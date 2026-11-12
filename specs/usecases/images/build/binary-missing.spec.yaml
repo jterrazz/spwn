@@ -5,7 +5,7 @@ runs:
       exit: 2
       stderr: |
           Error: {{workdir}}/nowhere: no such file
-          Hint: make build-linux, then station images build linux --binary .artifacts/go/station-linux-arm64
+          Hint: make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64
     - command: 'images --json | /usr/bin/jq -r ''.images | length'''
       exit: 0
       stdout: |

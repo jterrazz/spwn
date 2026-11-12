@@ -15,13 +15,19 @@ type Ref struct {
 func (r Ref) String() string { return r.Name + "@" + r.Version }
 
 type Record struct {
-	Name      string    `json:"name"`
-	Version   string    `json:"version"`
-	Base      string    `json:"base"`
-	Station   string    `json:"station"`
-	RecipeSHA string    `json:"recipe_sha"`
-	BuiltAt   time.Time `json:"built_at"`
-	SizeGB    int       `json:"size_gb"`
+	Name      string `json:"name"`
+	Version   string `json:"version"`
+	Base      string `json:"base"`
+	Station   string `json:"station"`
+	RecipeSHA string `json:"recipe_sha"`
+	// value: the Machinefile the image was made from, the hash of its
+	// chain and lock as the build read them, and the lock the build VM
+	// wrote once its image phase ran: what the image carries.
+	Machinefile    string    `json:"machinefile,omitempty"`
+	MachinefileSHA string    `json:"machinefile_sha,omitempty"`
+	Lock           string    `json:"lock,omitempty"`
+	BuiltAt        time.Time `json:"built_at"`
+	SizeGB         int       `json:"size_gb"`
 	// value: fetched from the registry that releases the image, not built
 	// here.
 	Fetched bool `json:"fetched,omitempty"`
@@ -85,3 +91,12 @@ func part(parts []string, i int) int {
 type UnknownError struct{ Image string }
 
 func (e *UnknownError) Error() string { return "no image \"" + e.Image + "\"" }
+
+// value: a Machinefile no image is made from: a mixin, a computer's, or a
+// VM's that says no vm.image.from.
+
+type NotTemplateError struct{ Image string }
+
+func (e *NotTemplateError) Error() string {
+	return e.Image + " makes no image: its Machinefile says no vm.image.from"
+}

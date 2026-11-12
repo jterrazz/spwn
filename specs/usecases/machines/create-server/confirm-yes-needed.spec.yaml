@@ -4,8 +4,8 @@ runs:
     - command: 'machines create infra --server'
       exit: 2
       stderr: |
-          Error: image linux is not built on This Mac
-          Hint: station images build linux
+          Error: image station-linux is not built on This Mac
+          Hint: station images build station-linux
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
       exit: 0
       stdout: |
@@ -14,4 +14,4 @@ runs:
       exit: 2
       stderr: |
           Error: this station is a dev build: there is no release binary to put in the image
-          Hint: make build-linux, then station images build linux --binary .artifacts/go/station-linux-arm64
+          Hint: make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64

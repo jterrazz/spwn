@@ -11,22 +11,28 @@ import (
 )
 
 // value: bare, every image this Mac holds a version of; named, those.
-func (s *Builder) updating(names []string) ([]string, error) {
+func (s *Builder) updating(ctx context.Context, names []string) ([]string, error) {
 	if len(names) > 0 {
 		var out []string
 		for _, name := range names {
-			if _, err := s.image(name); err != nil {
+			img, err := s.image(ctx, name)
+			var none *images.NoRecipeError
+			if err != nil && !errors.As(err, &none) {
 				return nil, err
 			}
-			if !slices.Contains(out, name) {
-				out = append(out, name)
+			if !slices.Contains(out, img.Name) {
+				out = append(out, img.Name)
 			}
 		}
 		return out, nil
 	}
+	list, err := s.all(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var out []string
-	for _, img := range s.list {
-		held, err := s.records(img.Name)
+	for _, img := range list {
+		held, err := s.records(img)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +44,7 @@ func (s *Builder) updating(names []string) ([]string, error) {
 }
 
 func (s *Builder) Update(ctx context.Context, names []string, progress func(images.Step)) ([]images.Update, error) {
-	wanted, err := s.updating(names)
+	wanted, err := s.updating(ctx, names)
 	if err != nil || len(wanted) == 0 {
 		return nil, err
 	}
@@ -63,15 +69,23 @@ func (s *Builder) Update(ctx context.Context, names []string, progress func(imag
 // it lands whole as an image disk or not at all, so a failed fetch leaves
 // the image as it was.
 func (s *Builder) updateOne(ctx context.Context, name string, progress func(images.Step)) (images.Update, error) {
+	img, _ := s.image(ctx, name)
 	latest, err := s.source.Latest(ctx, name)
+	// invariant: an image renamed is asked of its registry by each name
+	// it was known by too, for one release.
+	for _, was := range img.RenamedFrom {
+		if !errors.Is(err, imagescontract.ErrNotReleased) {
+			break
+		}
+		latest, err = s.source.Latest(ctx, was)
+	}
 	switch {
 	case errors.Is(err, imagescontract.ErrNotReleased):
-		img, _ := s.image(name)
 		return images.Update{}, &images.NotReleasedError{Image: name, Buildable: img.Recipe != ""}
 	case err != nil:
 		return images.Update{}, &images.RegistryError{Image: name, Cause: err}
 	}
-	held, err := s.records(name)
+	held, err := s.records(img)
 	if err != nil {
 		return images.Update{}, err
 	}
@@ -100,9 +114,7 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 	}
 	_ = s.e.Discard(ctx, at)
 	rec := images.Record{Name: name, Version: latest.Version, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
-	if img, err := s.image(name); err == nil {
-		rec.Base = img.Base
-	}
+	rec.Base = img.Base
 	if disks, err := s.e.Disks(ctx); err == nil {
 		for _, d := range disks {
 			if d.VM == disk {

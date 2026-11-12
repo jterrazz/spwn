@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -19,6 +18,7 @@ const (
 	addressWait = 60 * time.Second
 	stopWait    = 120 * time.Second
 	recipeWait  = 30 * time.Minute
+	bakeWait    = 30 * time.Minute
 	pollEvery   = time.Second
 	remoteBin   = "/tmp/station"
 )
@@ -29,7 +29,7 @@ var baseAdmin = Login{User: "admin", Password: "admin"}
 
 func (s *Builder) recipeSHA(img catalog.Image) (string, error) {
 	h := sha256.New()
-	for _, file := range []string{img.Recipe, img.Cleanup, img.Firstboot} {
+	for _, file := range []string{img.Recipe, img.Bake, img.Cleanup, img.Firstboot} {
 		data, err := catalog.Recipes.ReadFile(file)
 		if err != nil {
 			return "", err
@@ -39,41 +39,66 @@ func (s *Builder) recipeSHA(img catalog.Image) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func (s *Builder) selection(ctx context.Context, names []string) ([]catalog.Image, error) {
+// value: an image to build: the catalog's plumbing for its system and the
+// template it is made from.
+type wanted struct {
+	img catalog.Image
+	t   images.Template
+}
+
+func (s *Builder) wanted(ctx context.Context, name string) (wanted, error) {
+	img, err := s.image(ctx, name)
+	if err != nil {
+		return wanted{}, err
+	}
+	if img.Recipe == "" {
+		return wanted{}, &images.NoRecipeError{Image: name}
+	}
+	t, err := s.templates.Template(ctx, img.Machinefile)
+	if err != nil {
+		return wanted{}, err
+	}
+	return wanted{img: img, t: t}, nil
+}
+
+// invariant: a bare build builds every image missing here, or whose
+// recipe, Machinefile chain or lock changed since its newest version.
+func (s *Builder) selection(ctx context.Context, names []string) ([]wanted, error) {
+	var out []wanted
 	if len(names) > 0 {
-		var out []catalog.Image
 		for _, name := range names {
-			img, err := s.image(name)
+			w, err := s.wanted(ctx, name)
 			if err != nil {
 				return nil, err
 			}
-			if img.Recipe == "" {
-				return nil, &images.NoRecipeError{Image: name}
-			}
-			if !slices.ContainsFunc(out, func(i catalog.Image) bool { return i.Name == name }) {
-				out = append(out, img)
+			if !slices.ContainsFunc(out, func(o wanted) bool { return o.img.Name == w.img.Name }) {
+				out = append(out, w)
 			}
 		}
 		return out, nil
 	}
-	var out []catalog.Image
-	for _, img := range s.list {
+	list, err := s.all(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, img := range list {
 		if img.Recipe == "" {
 			continue
+		}
+		w, err := s.wanted(ctx, img.Name)
+		if err != nil {
+			return nil, err
 		}
 		sha, err := s.recipeSHA(img)
 		if err != nil {
 			return nil, err
 		}
-		latest, err := s.Latest(ctx, img.Name)
-		var missing *images.NotBuiltError
+		held, err := s.records(img)
 		switch {
-		case errors.As(err, &missing):
-			out = append(out, img)
 		case err != nil:
 			return nil, err
-		case latest.RecipeSHA != sha:
-			out = append(out, img)
+		case len(held) == 0, held[0].RecipeSHA != sha, held[0].MachinefileSHA != w.t.SHA:
+			out = append(out, w)
 		}
 	}
 	return out, nil
@@ -98,8 +123,8 @@ func (s *Builder) Build(ctx context.Context, r images.BuildRequest, progress fun
 		progress = func(images.Step) {}
 	}
 	var built []images.Record
-	for _, img := range wanted {
-		rec, err := s.buildOne(ctx, img, binary, progress)
+	for _, w := range wanted {
+		rec, err := s.buildOne(ctx, w, binary, progress)
 		if err != nil {
 			return built, err
 		}
@@ -108,7 +133,8 @@ func (s *Builder) Build(ctx context.Context, r images.BuildRequest, progress fun
 	return built, nil
 }
 
-func (s *Builder) buildOne(ctx context.Context, img catalog.Image, binary string, progress func(images.Step)) (images.Record, error) {
+func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progress func(images.Step)) (images.Record, error) {
+	img, t := w.img, w.t
 	vm := buildPrefix + img.Name
 	failed := func(step string, cause error) (images.Record, error) {
 		// invariant: a failed build leaves no VM behind; the cleanup survives a cancelled ctx.
@@ -117,7 +143,7 @@ func (s *Builder) buildOne(ctx context.Context, img catalog.Image, binary string
 		_ = s.e.Delete(detached, vm)
 		return images.Record{}, &images.BuildFailedError{Image: img.Name, Step: step, Cause: cause}
 	}
-	version, err := s.nextVersion(img.Name)
+	version, err := s.nextVersion(img)
 	if err != nil {
 		return images.Record{}, err
 	}
@@ -141,12 +167,12 @@ func (s *Builder) buildOne(ctx context.Context, img catalog.Image, binary string
 		return images.Record{}, &images.BuildFailedError{Image: img.Name, Step: "removing the earlier build VM", Cause: err}
 	}
 
-	progress(images.Step{Label: "pulling " + img.Base})
-	if err = s.e.Fetch(ctx, s.location(img.Base), nil); err != nil {
+	progress(images.Step{Label: "pulling " + t.From})
+	if err = s.e.Fetch(ctx, s.location(t.From), nil); err != nil {
 		return failed("pulling the base", err)
 	}
 	progress(images.Step{Label: "cloning " + vm})
-	if err = s.e.Clone(ctx, s.location(img.Base), vm); err != nil {
+	if err = s.e.Clone(ctx, s.location(t.From), vm); err != nil {
 		return failed("cloning the base", err)
 	}
 	progress(images.Step{Label: "booting " + vm})
@@ -160,13 +186,18 @@ func (s *Builder) buildOne(ctx context.Context, img catalog.Image, binary string
 	defer func() { _ = b.Close() }()
 
 	progress(images.Step{Label: "copying station into " + vm})
-	if err := s.copy(ctx, b, binary); err != nil {
+	if err = s.copy(ctx, b, binary); err != nil {
 		return failed("copying the station binary", err)
 	}
 	progress(images.Step{Label: "running the " + img.Name + " recipe"})
 	env := "VM_USER=" + quote(s.o.User) + " IMAGE_KEY=" + quote(strings.TrimSpace(pub))
-	if err := recipeRun(ctx, b, string(recipe), env); err != nil {
+	if err = recipeRun(ctx, b, string(recipe), env); err != nil {
 		return failed("the recipe", err)
+	}
+	progress(images.Step{Label: "baking " + t.Name + "'s image phase"})
+	lock, err := s.bakeRun(ctx, b, img, t, Login{User: s.o.User, Key: key})
+	if err != nil {
+		return failed("the image phase", err)
 	}
 	progress(images.Step{Label: "removing the base's admin user"})
 	if err := cleanupRun(ctx, b, string(cleanup), Login{User: s.o.User, Key: key}); err != nil {
@@ -182,7 +213,10 @@ func (s *Builder) buildOne(ctx context.Context, img catalog.Image, binary string
 	if err := s.e.Rename(ctx, vm, final); err != nil {
 		return failed("renaming the build VM", err)
 	}
-	rec := images.Record{Name: img.Name, Version: version, Base: img.Base, Station: s.o.Version, RecipeSHA: sha, BuiltAt: s.m.Now().UTC()}
+	rec := images.Record{
+		Name: img.Name, Version: version, Base: t.From, Station: s.o.Version, RecipeSHA: sha, BuiltAt: s.m.Now().UTC(),
+		Machinefile: t.Name, MachinefileSHA: t.SHA, Lock: lock,
+	}
 	if disks, err := s.e.Disks(ctx); err == nil {
 		for _, d := range disks {
 			if d.VM == final {
@@ -261,6 +295,41 @@ func recipeRun(ctx context.Context, b BuildVM, script, env string) error {
 		return outputError(out)
 	}
 	return nil
+}
+
+// value: the line that parts the image phase's own output from the lock
+// it wrote, which the bake prints after it.
+const lockMark = "--- station lock"
+
+func (s *Builder) bakeRun(ctx context.Context, b BuildVM, img catalog.Image, t images.Template, as Login) (string, error) {
+	// invariant: the image phase runs as the VM's user, its sudo
+	// passwordless, over the chain's files and the lock put into its
+	// owner's folder; what it hands back is the lock that run wrote.
+	script, err := catalog.Recipes.ReadFile(img.Bake)
+	if err != nil {
+		return "", err
+	}
+	folder := "/home/" + s.o.User + "/.config/station/"
+	files := slices.Clone(t.Files)
+	if t.Lock != nil {
+		files = append(files, images.TemplateFile{Path: "machinefiles/" + t.Name + catalog.LockSuffix, Body: t.Lock})
+	}
+	for _, f := range files {
+		if put := b.Put(ctx, as, folder+f.Path, f.Body, 0o600); put != nil {
+			return "", put
+		}
+	}
+	ctx, cancel := context.WithTimeout(ctx, bakeWait)
+	defer cancel()
+	out, err := b.Run(ctx, as, "env MACHINEFILE="+quote(t.Name)+" bash -s", string(script))
+	if err != nil {
+		return "", err
+	}
+	if out.Code != 0 {
+		return "", outputError(out)
+	}
+	_, lock, _ := strings.Cut(out.Stdout, lockMark+"\n")
+	return lock, nil
 }
 
 func cleanupRun(ctx context.Context, b BuildVM, script string, as Login) error {

@@ -1,0 +1,9 @@
+item: station.catalog/v1
+kind: app
+name: build-essential
+description: The C compiler and make, which native npm and Python modules build with
+provides: [cc, make]
+methods:
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [build-essential] }

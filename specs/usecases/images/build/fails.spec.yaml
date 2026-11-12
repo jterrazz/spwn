@@ -7,8 +7,8 @@ runs:
     - command: 'images build linux --binary $HOME/station-linux'
       exit: 1
       stderr: |
-          Error: image linux: the recipe failed: the guest connection broke, as the world scripted it
-          Hint: station images build linux
+          Error: image station-linux: the recipe failed: the guest connection broke, as the world scripted it
+          Hint: station images build station-linux
     - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro") | .version'''
       exit: 0
       stdout: |
@@ -17,4 +17,4 @@ runs:
     - command: 'images build linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	linux	2026.11.04	built
+          ●	station-linux	2026.11.04	built

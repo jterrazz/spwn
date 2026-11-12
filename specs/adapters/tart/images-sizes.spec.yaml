@@ -6,6 +6,6 @@ runs:
     - command: 'images'
       exit: 0
       stdout: |
-          ●	linux	2026.11.07	6.0 GB	jterrazz-macbook-pro	api
-          ○	linux	2026.11.01	5.0 GB	jterrazz-macbook-pro	older · station images delete linux@2026.11.01
+          ●	station-linux	2026.11.07	6.0 GB	jterrazz-macbook-pro	api
+          ○	station-linux	2026.11.01	5.0 GB	jterrazz-macbook-pro	older · station images delete station-linux@2026.11.01
           ○	macos				not built yet

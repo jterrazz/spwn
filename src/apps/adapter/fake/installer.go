@@ -169,10 +169,12 @@ func (f *Installer) Outdated(_ context.Context, keys []string) (map[string]apps.
 	return out, nil
 }
 
+// invariant: an install of several packages (apt's) holds each of them,
+// as the real manager leaves them, so its presence reads every one.
 func (f *Installer) run(ctx context.Context, verb string, installs []catalog.Install, apply func(s *world.Manager, key string)) error {
 	keys := make([]string, 0, len(installs))
 	for _, i := range installs {
-		keys = append(keys, i.Key())
+		keys = append(keys, catalog.Keys(i)...)
 	}
 	return f.runKeys(ctx, verb, keys, apply)
 }
@@ -378,19 +380,20 @@ func (h HoldingInstaller) InstallFor(ctx context.Context, f contract.For, instal
 	s := h.manager()
 	var added []string
 	for _, i := range installs {
-		k := i.Key()
-		_, had := s.Installed[k]
-		held, recorded := s.Holders[k]
-		if had && !recorded {
-			continue
+		for _, k := range catalog.Keys(i) {
+			_, had := s.Installed[k]
+			held, recorded := s.Holders[k]
+			if had && !recorded || slices.Contains(added, k) {
+				continue
+			}
+			if s.Holders == nil {
+				s.Holders = map[string][]string{}
+			}
+			if !slices.Contains(held, f.App) {
+				s.Holders[k] = append(slices.Clone(held), f.App)
+			}
+			added = append(added, k)
 		}
-		if s.Holders == nil {
-			s.Holders = map[string][]string{}
-		}
-		if !slices.Contains(held, f.App) {
-			s.Holders[k] = append(slices.Clone(held), f.App)
-		}
-		added = append(added, k)
 	}
 	h.w.Unlock()
 	err := h.Installer.Install(ctx, installs, logs)
@@ -424,8 +427,10 @@ func (h HoldingInstaller) RemoveFor(ctx context.Context, f contract.For, install
 	}
 	if !ours {
 		for _, i := range installs {
-			if _, recorded := s.Holders[i.Key()]; !recorded {
-				take = append(take, i.Key())
+			for _, k := range catalog.Keys(i) {
+				if _, recorded := s.Holders[k]; !recorded && !slices.Contains(take, k) {
+					take = append(take, k)
+				}
 			}
 		}
 	}

@@ -72,7 +72,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by station (default 4 CPU, 8G, 50G)")
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
 			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
-			f.StringVar(&in.Image, "image", "linux", "the image the workspace is made from")
+			f.StringVar(&in.Image, "image", "station-linux", "the image the workspace is made from")
 			f.IntVar(&in.CPUs, "cpus", 0, "virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")

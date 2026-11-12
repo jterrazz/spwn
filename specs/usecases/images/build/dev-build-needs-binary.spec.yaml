@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: this station is a dev build: there is no release binary to put in the image
-          Hint: make build-linux, then station images build linux --binary .artifacts/go/station-linux-arm64
+          Hint: make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64

@@ -6,15 +6,15 @@ fixture:
     - ./__fixtures__/images-recipe-fails/
 serve: sshd
 runs:
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 1
       stderr: |
-          Error: image linux: the recipe failed: exited 1: E: Unable to locate package libatomic1
-          Hint: station images build linux
+          Error: image station-linux: the recipe failed: exited 1: E: Unable to locate package libatomic1
+          Hint: station images build station-linux
       files:
           .calls:
-              contains: 'tart delete station-build-linux'
-          .local/state/station/consoles/station-build-linux: absent
+              contains: 'tart delete station-build-station-linux'
+          .local/state/station/consoles/station-build-station-linux: absent
     - command: '--version > /dev/null; /bin/ls .local/state/station/images'
       exit: 0
       stdout: |

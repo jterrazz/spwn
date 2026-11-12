@@ -44,7 +44,7 @@ runs:
             ◐ gh    2.97.0 → 2.98.0    brew  update available  → station apps update gh
           Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
           OK             ● 7 · github-release, mise, go, ghostty, bat, jq, lazygit
-          Not for this machine  8 apps live on other machines
+          Not for this machine  10 apps live on other machines
 
           → station apps update            the 2 updates
           → station apps install <app...>  install some
@@ -118,12 +118,12 @@ runs:
           3 images on 2 Macs · 1 older · macos not built yet
 
           Images
-                     version       size  on
-            ● linux  2026.11.01  4.0 GB  This Mac  api · linux-1
-            ○ linux  2026.10.20  3.0 GB  This Mac  older
-              → station images delete linux@2026.10.20
-            ● linux  2026.11.01  4.0 GB  mac-mini  infra
-            ○ macos                                not built yet
+                             version       size  on
+            ● station-linux  2026.11.01  4.0 GB  This Mac  api · linux-1
+            ○ station-linux  2026.10.20  3.0 GB  This Mac  older
+              → station images delete station-linux@2026.10.20
+            ● station-linux  2026.11.01  4.0 GB  mac-mini  infra
+            ○ macos                                        not built yet
 
           → station images update
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" disk'

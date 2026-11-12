@@ -8,7 +8,7 @@ runs:
       stdout: |
           	On linux-1:
           	Activity	memory 1.1 of 4 GB · 12.4 GB free
-          	Apps	● 2 ok · ○ 68 not installed
+          	Apps	● 2 ok · ○ 71 not installed
           	Settings	set by station · ○ 0 of 7
           	Disk	● 12.4 GB free · 1.5 GB can rebuild
           	Ports	Public 0 · Private 2

@@ -180,9 +180,9 @@
       "items": [
         {
           "row": {
-            "id": "linux",
+            "id": "station-linux",
             "mark": "absent",
-            "label": "linux",
+            "label": "station-linux",
             "detail": {
               "kind": "text",
               "text": "not built yet"

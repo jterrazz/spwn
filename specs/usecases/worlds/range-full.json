@@ -32,6 +32,7 @@
                 "guest": {
                     "answers": {
                         "sudo env *": {},
+                        "env MACHINEFILE=*": {},
                         "sudo bash -s": {
                             "poweroff": true
                         }
@@ -633,6 +634,7 @@
                 "guest": {
                     "answers": {
                         "sudo env *": {},
+                        "env MACHINEFILE=*": {},
                         "sudo bash -s": {
                             "poweroff": true
                         }

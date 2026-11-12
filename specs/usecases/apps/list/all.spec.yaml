@@ -5,10 +5,10 @@ runs:
       exit: 0
       stdout: |
           # Not for this machine
-          	8 apps live on other machines
+          	10 apps live on other machines
     - command: 'apps --all | /usr/bin/grep -A2 "^# Not for this machine"'
       exit: 0
       stdout: |
-          # Not for this machine	8 –
+          # Not for this machine	10 –
           –	apt			Linux VMs only
-          –	docker			Linux VMs only
+          –	build-essential			Linux VMs only

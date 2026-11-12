@@ -5,8 +5,8 @@ runs:
     - command: 'images build linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	linux	2026.11.04	built
+          ●	station-linux	2026.11.04	built
     - command: 'images build linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	linux	2026.11.04.2	built
+          ●	station-linux	2026.11.04.2	built

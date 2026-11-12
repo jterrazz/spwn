@@ -4,11 +4,11 @@ runs:
     - command: 'images update linux'
       exit: 0
       stdout: |
-          ●	linux	2026.11.03	fetched
+          ●	station-linux	2026.11.03	fetched
     - command: 'images update'
       exit: 0
       stdout: |
-          ●	linux	2026.11.03	is the newest
+          ●	station-linux	2026.11.03	is the newest
     - command: 'images --json | /usr/bin/jq -r ''[.images[] | select(.mac == "jterrazz-macbook-pro")] | length'''
       exit: 0
       stdout: |

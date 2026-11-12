@@ -69,6 +69,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### Command line
 
 - **bat**: Cat clone with syntax highlighting
+- **build-essential**: The C compiler and make, which native npm and Python modules build with
 - **difftastic**: Structural diff
 - **dust**: Intuitive disk usage viewer
 - **expo**: React Native framework and its dev server
@@ -84,7 +85,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### Git
 
 - **gh**: GitHub CLI for repository management
-- **git**: Distributed version control system, from xcode-select
+- **git**: Distributed version control system
 - **gpg**: GNU Privacy Guard for encryption and signing
 - **lazygit**: Terminal UI for git
 
@@ -134,6 +135,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **ollama**: Run large language models locally, on the Mac's GPU
 - **plannotator**: Review AI agent plans and code before committing
 - **playwright-browsers**: Chromium runtime for website specs (@jterrazz/test)
+- **playwright-deps**: The system libraries and fonts headless Chromium needs on Linux
 - **playwright-mcp**: Browser automation for AI agents via MCP
 - **qmd**: Local semantic search over markdown
 - **rtk**: Token-optimized CLI proxy for agents

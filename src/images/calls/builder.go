@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"time"
 
@@ -23,14 +24,15 @@ type BuilderOptions struct {
 }
 
 type Builder struct {
-	m      Machine
-	e      contract.Hypervisor
-	builds BuildVMs
-	store  imagescontract.ImageStore
-	source imagescontract.ImageSource
-	vms    contract.MachineStore
-	list   []catalog.Image
-	o      BuilderOptions
+	m         Machine
+	e         contract.Hypervisor
+	builds    BuildVMs
+	store     imagescontract.ImageStore
+	source    imagescontract.ImageSource
+	vms       contract.MachineStore
+	templates Templates
+	cat       catalog.Catalog
+	o         BuilderOptions
 }
 
 type Contracts struct {
@@ -39,6 +41,16 @@ type Contracts struct {
 	Store      imagescontract.ImageStore
 	Source     imagescontract.ImageSource
 	Machines   contract.MachineStore
+	Templates  Templates
+}
+
+type Templates interface {
+	// value: the Machinefile an image is made from, read from every source
+	// as plan reads it: images.UnknownError when no source holds it,
+	// images.NotTemplateError when it makes no image.
+	Template(ctx context.Context, name string) (images.Template, error)
+	// value: every Machinefile an image is made from, by name.
+	Names(ctx context.Context) ([]string, error)
 }
 
 type BuildVMs interface {
@@ -68,17 +80,46 @@ type Ran struct {
 	Stdout, Stderr string
 }
 
-func NewBuilder(m Machine, c Contracts, list []catalog.Image, o BuilderOptions) *Builder {
-	return &Builder{m: m, e: c.Hypervisor, builds: c.Builds, store: c.Store, source: c.Source, vms: c.Machines, list: list, o: o}
+func NewBuilder(m Machine, c Contracts, cat catalog.Catalog, o BuilderOptions) *Builder {
+	return &Builder{m: m, e: c.Hypervisor, builds: c.Builds, store: c.Store, source: c.Source, vms: c.Machines, templates: c.Templates, cat: cat, o: o}
 }
 
-func (s *Builder) image(name string) (catalog.Image, error) {
-	for _, img := range s.list {
-		if img.Name == name {
-			return img, nil
+// invariant: an image is one of the catalog's, by its name or one it was
+// renamed from, or a template's of a source, named after its
+// Machinefile and built with the plumbing of its system.
+func (s *Builder) image(ctx context.Context, name string) (catalog.Image, error) {
+	if img, ok := s.cat.Image(name); ok {
+		return img, nil
+	}
+	t, err := s.templates.Template(ctx, name)
+	if err != nil {
+		return catalog.Image{}, err
+	}
+	img, ok := s.cat.RecipeFor(t.OS)
+	if !ok {
+		return catalog.Image{Name: name}, &images.NoRecipeError{Image: name}
+	}
+	img.Name, img.Machinefile, img.RenamedFrom = name, name, nil
+	return img, nil
+}
+
+// value: every image this Mac may hold: the catalog's, then each
+// template a source holds that has a recipe, in name order.
+func (s *Builder) all(ctx context.Context) ([]catalog.Image, error) {
+	out := slices.Clone(s.cat.Images)
+	names, err := s.templates.Names(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, name := range names {
+		if _, ok := s.cat.Image(name); ok {
+			continue
+		}
+		if img, err := s.image(ctx, name); err == nil {
+			out = append(out, img)
 		}
 	}
-	return catalog.Image{}, &images.UnknownError{Image: name}
+	return out, nil
 }
 
 func (s *Builder) List(ctx context.Context) ([]images.Report, error) {
@@ -92,17 +133,23 @@ func (s *Builder) List(ctx context.Context) ([]images.Report, error) {
 	if err != nil {
 		return nil, err
 	}
+	list, err := s.all(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var out []images.Report
-	for _, img := range s.list {
-		all, err := s.records(img.Name)
+	for _, img := range list {
+		held, err := s.records(img)
 		if err != nil {
 			return nil, err
 		}
-		for i, r := range all {
+		for i, r := range held {
 			if size, ok := sizes[DiskName(r.Name, r.Version)]; ok {
 				r.SizeGB = size
 			}
-			out = append(out, images.Report{Record: r, Newest: i == 0, VMs: users[r.Name+"@"+r.Version], Mac: s.o.Mac})
+			vms := users[r.Name+"@"+r.Version]
+			r.Name = img.Name
+			out = append(out, images.Report{Record: r, Newest: i == 0, VMs: vms, Mac: s.o.Mac})
 		}
 	}
 	return out, nil
@@ -124,11 +171,13 @@ func (s *Builder) users() (map[string][]string, error) {
 	return out, nil
 }
 
-func (s *Builder) CheckDelete(image, version string) error {
-	if _, err := s.image(image); err != nil {
+func (s *Builder) CheckDelete(ctx context.Context, image, version string) error {
+	img, err := s.image(ctx, image)
+	var none *images.NoRecipeError
+	if err != nil && !errors.As(err, &none) {
 		return err
 	}
-	all, err := s.records(image)
+	all, err := s.records(img)
 	if err != nil {
 		return err
 	}
@@ -142,13 +191,14 @@ func (s *Builder) CheckDelete(image, version string) error {
 }
 
 func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.Record, error) {
-	if err := s.CheckDelete(image, version); err != nil {
+	if err := s.CheckDelete(ctx, image, version); err != nil {
 		return nil, err
 	}
 	if _, err := s.e.Version(ctx); err != nil {
 		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Cause: err}
 	}
-	all, err := s.records(image)
+	img, _ := s.image(ctx, image)
+	all, err := s.records(img)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +217,7 @@ func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.R
 				return removed, err
 			}
 		}
-		if err := s.store.Delete(ctx, image, r.Version); err != nil {
+		if err := s.store.Delete(ctx, r.Name, r.Version); err != nil {
 			return removed, err
 		}
 		removed = append(removed, r)

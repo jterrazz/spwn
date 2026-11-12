@@ -8,12 +8,13 @@ All machines
     station v2.0.0-248, This Mac v2.0.0-250
      no VMs  → station machines create --on mac-mini
 Images
-           version       size  on
-  ● linux  2026.11.01  4.0 GB  jterrazz-macbook-pro  linux-1 · api
-  ○ linux  2026.10.20  4.0 GB  jterrazz-macbook-pro  older
+                   version       size  on
+  ● linux          2026.11.01  4.0 GB  jterrazz-macbook-pro  linux-1 · api
+  ○ linux          2026.10.20  4.0 GB  jterrazz-macbook-pro  older
     → station images delete linux@2026.10.20
-  ● linux  2026.11.01  4.0 GB  jterrazz-mac-mini     infra
-  ○ macos                                            not built yet
+  ● linux          2026.11.01  4.0 GB  jterrazz-mac-mini     infra
+  ○ station-linux                                            not built yet
+  ○ macos                                                    not built yet
 Tailscale
   ● Tailscale        Running · jterrazz-macbook-pro.tail1234.ts.net
   ● node             macbook  100.98.133.14

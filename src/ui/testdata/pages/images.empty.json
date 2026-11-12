@@ -38,7 +38,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "linux not built yet"
+                    "text": "station-linux not built yet"
                   },
                   {
                     "kind": "text",
@@ -92,9 +92,9 @@
       "items": [
         {
           "row": {
-            "id": "linux",
+            "id": "station-linux",
             "mark": "absent",
-            "label": "linux",
+            "label": "station-linux",
             "detail": {
               "kind": "text",
               "text": "not built yet"

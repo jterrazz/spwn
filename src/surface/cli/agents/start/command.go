@@ -45,7 +45,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.App, "app", "", "the agent's app, by its adapter's name; the first station reads by default")
 			f.StringVar(&in.Folder, "folder", "", "the folder it works in, inside the workspace")
 			f.StringVar(&in.Mac, "mac", "", "with --new: the Mac the ephemeral workspace is made on (default this Mac)")
-			f.StringVar(&in.Image, "image", "linux", "with --new: the image the ephemeral workspace is made from")
+			f.StringVar(&in.Image, "image", "station-linux", "with --new: the image the ephemeral workspace is made from")
 			f.IntVar(&in.CPUs, "cpus", 0, "with --new: virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "with --new: memory with its unit, e.g. 8G (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "with --new: disk size with its unit, e.g. 50G (default 20G)")

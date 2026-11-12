@@ -6,8 +6,8 @@ runs:
     - command: 'machines create </dev/null'
       exit: 2
       stderr: |
-          Error: image linux is not built on This Mac
-          Hint: station images build linux
+          Error: image station-linux is not built on This Mac
+          Hint: station images build station-linux
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].jobs // {} | keys'' world.json'
       exit: 0
       stdout: |

@@ -1,7 +1,7 @@
 item: station.catalog/v1
 kind: app
 name: git
-description: Distributed version control system, from xcode-select
+description: Distributed version control system
 provides: [git]
 version-read:
     args: [git, --version]
@@ -10,6 +10,9 @@ methods:
     - os: macos
       script:
           run: xcode-select --install
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [git] }
 disk:
     paths:
         - path: ~/.gitconfig

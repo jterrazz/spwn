@@ -15,16 +15,31 @@ runs:
           	vm.resources.disk	20G	built-in	station-linux
           	vm.network	nat	built-in	station-linux
           	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	station-linux
+          	vm.image.bake	mise, git, docker, build-essential, playwright-deps	built-in	station-linux
           	apps.mise	listed	built-in	station-linux
           	apps.mise.method	script	built-in	mise
           	apps.mise.because	its one method for ubuntu 24.04	built-in	mise
           	apps.ohmyzsh	listed	built-in	station-linux
           	apps.ohmyzsh.method	script	built-in	ohmyzsh
           	apps.ohmyzsh.because	its one method for ubuntu 24.04	built-in	ohmyzsh
+          	apps.docker	listed	built-in	station-linux
+          	apps.docker.method	script	built-in	docker
+          	apps.docker.because	its one method for ubuntu 24.04	built-in	docker
           	settings.git-shortcuts	listed	built-in	station-linux
           	settings.git-shortcuts.method	git-aliases	built-in	git-shortcuts
           	settings.git-shortcuts.because	its one method for ubuntu 24.04	built-in	git-shortcuts
           	settings.hushlogin	listed	built-in	station-linux
           	settings.hushlogin.method	file	built-in	hushlogin
           	settings.hushlogin.because	its one method for ubuntu 24.04	built-in	hushlogin
-          	apps.git	optional, no method for ubuntu 24.04	built-in	station-linux
+          	apps.apt	the manager of git	built-in	git
+          	apps.apt.method	apt	built-in	apt
+          	apps.apt.because	its one method for ubuntu 24.04	built-in	apt
+          	apps.git	listed	built-in	station-linux
+          	apps.git.method	apt	built-in	git
+          	apps.git.because	its one method for ubuntu 24.04	built-in	git
+          	apps.build-essential	listed	built-in	station-linux
+          	apps.build-essential.method	apt	built-in	build-essential
+          	apps.build-essential.because	its one method for ubuntu 24.04	built-in	build-essential
+          	apps.playwright-deps	listed	built-in	station-linux
+          	apps.playwright-deps.method	apt	built-in	playwright-deps
+          	apps.playwright-deps.because	its one method for ubuntu 24.04	built-in	playwright-deps

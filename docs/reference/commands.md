@@ -39,7 +39,7 @@ station machines <machine> [--json] # that machine's Overview, as station overvi
 station machines add <mac> [--user <login>] [--key <file>]
 station machines forget <mac> [--yes]
 
-station machines create [<name>] [--persistent] [--image linux] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
+station machines create [<name>] [--persistent] [--image station-linux] [--cpus <n>] [--memory <size>] [--disk <size>] [--network nat|bridged]
 station machines create <name> --server [--cpus <n>] [--memory <size>] [--disk <size>] [--check <url|host:port>]
 station machines start <vm>
 station machines stop <vm> [--yes | --confirm=<name>]
@@ -61,7 +61,7 @@ station machines remind <mac>
 ```sh
 station agents [--on <workspace>] [--json] # every agent of every machine, or that workspace's
 station agents start "<task>" --on <workspace> [--name <name>] [--app <app>] [--folder <path>]
-station agents start "<task>" --new [--mac <mac>] [--name <name>] [--image linux] [--cpus <n>] [--memory <size>] [--disk <size>]
+station agents start "<task>" --new [--mac <mac>] [--name <name>] [--image station-linux] [--cpus <n>] [--memory <size>] [--disk <size>]
 station agents reply <agent> [<text>]
 station agents attach <agent>
 station agents merge <agent>
@@ -186,12 +186,12 @@ A Mac only; a guard already past its threshold refuses the start (exit 1). Piped
 
 ```sh
 station images [--json] # every Mac's, one row per version per Mac
-station images build [<image...>] [--binary <linux station binary>]
+station images build [<machinefile...>] [--binary <linux station binary>]
 station images update [<image...>] # the newest released version
 station images delete <image>[@<version>] [--yes]
 ```
 
-A bare `build` builds every image that is missing or whose recipe changed; a bare `update` updates every image this Mac holds. An image the catalogue does not hold is `no image "debian"` (exit 2). See [Images](images.md).
+An image is named after the Machinefile it is built from (`station-linux`, `studio-linux`); `linux` names `station-linux` for one release. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
 
 ### `station engine`
 
@@ -236,7 +236,7 @@ station help [command]
 
 `drift` is the plan read as conditions, one row per item: `present`, `absent`, `outdated`, `changed`, `not managed`, `extra`, `unknown`. It never acts. `--json` prints `station.machinefile.drift/v1`.
 
-`--phase` plans or carries out one phase of the Machinefile: `image`, what a VM image bakes (`vm.image.bake` and what each baked item requires); `boot`, a VM's first start; `apply`, the default, every item but a boot or image item's, the baked ones included. A phase none of these is refused before any effect, exit 2, and so is `--remove` with another phase than `apply`, since another phase carries only a part of the Machinefile ([Machinefiles](machinefiles.md#phases)).
+`--phase` plans or carries out one phase of the Machinefile: `image`, what a VM image bakes (`vm.image.bake` and what each baked item requires), the one `station images build` runs inside its build VM; `boot`, a VM's first start; `apply`, the default, every item but a boot or image item's, the baked ones included. A phase none of these is refused before any effect, exit 2, and so is `--remove` with another phase than `apply`, since another phase carries only a part of the Machinefile ([Machinefiles](machinefiles.md#phases)).
 
 `apply` and `upgrade` write the Machinefile's lock, `~/.config/station/machinefiles/<name>.lock`, once their run ends, interrupted or not ([Machinefiles](machinefiles.md#the-lock)). `apply` installs an app the lock holds by the lock's method, at its version where that method pins one, and the plan says it (`○ python  mise  locked 3.12.7`). `apply` reads the shared source where its clone stands, and `upgrade` moves it forward to its default branch's newest commit; a lock that does not decode is refused at its file, `Hint: remove it: the next station apply writes it anew from what is there`.
 

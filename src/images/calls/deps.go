@@ -23,7 +23,7 @@ type Images interface {
 	// value: fetches the newest published version of the named images, or
 	// of every one held here.
 	Update(ctx context.Context, names []string, step func(label string)) ([]images.Update, error)
-	CheckDelete(image, version string) error
+	CheckDelete(ctx context.Context, image, version string) error
 	Delete(ctx context.Context, image, version string) ([]images.Record, error)
 }
 

@@ -1,0 +1,20 @@
+description: 'a name no source holds is no image; a Machinefile that makes none is refused, saying why'
+fixture: ./__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build studio-linux --binary $HOME/station-linux'
+      exit: 2
+      stderr: |
+          Error: no image "studio-linux"
+          Hint: station images
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-base.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-base
+          apps: [jq]
+      exit: 0
+    - command: 'images build jterrazz-base --binary $HOME/station-linux'
+      exit: 2
+      stderr: |
+          Error: jterrazz-base makes no image: its Machinefile says no vm.image.from
+          Hint: station explain --machinefile jterrazz-base

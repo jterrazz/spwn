@@ -163,6 +163,16 @@
         },
         {
           "row": {
+            "id": "station-linux",
+            "mark": "pending",
+            "label": "station-linux",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "macos",
             "mark": "pending",
             "label": "macos",
@@ -175,7 +185,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 4
+          "n": 5
         }
       ]
     }

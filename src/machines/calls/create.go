@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -36,9 +37,11 @@ func validCheck(check string) bool {
 	return ok && mac != "" && err == nil && n > 0 && n < 65536
 }
 
+// value: the image a name stands for, by its name or one it was renamed
+// from.
 func (s *Machinist) imageOf(name string) (catalog.Image, bool) {
 	for _, img := range s.o.Images {
-		if img.Name == name {
+		if img.Name == name || slices.Contains(img.RenamedFrom, name) {
 			return img, true
 		}
 	}
@@ -86,6 +89,7 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	if !ok {
 		return r, &model.UnknownImageError{Image: r.Image}
 	}
+	r.Image = img.Name
 	network, err := networkFor(img, r.Network)
 	if err != nil {
 		return r, err
@@ -106,7 +110,7 @@ func (s *Machinist) CheckCreate(ctx context.Context, r model.CreateRequest) (mod
 	}
 	switch {
 	case r.Name == "":
-		r.Name = allocateName(r.Image, held)
+		r.Name = allocateName(string(img.Kind), held)
 	case !held.free(r.Name):
 		return r, held.taken(r.Name)
 	}

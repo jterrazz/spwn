@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"math"
 	"path/filepath"
 	"slices"
@@ -16,6 +17,8 @@ import (
 	"github.com/jterrazz/studio-station/src/images/adapter/oci"
 	imagescalls "github.com/jterrazz/studio-station/src/images/calls"
 	imagescontract "github.com/jterrazz/studio-station/src/images/contract"
+	"github.com/jterrazz/studio-station/src/machinefile"
+	machinefilecalls "github.com/jterrazz/studio-station/src/machinefile/calls"
 	"github.com/jterrazz/studio-station/src/machines/adapter/openssh"
 	"github.com/jterrazz/studio-station/src/machines/contract"
 	"github.com/jterrazz/studio-station/src/platform/local"
@@ -35,8 +38,8 @@ func (m machine) images() *imagescalls.Builder {
 	hypervisor := m.hypervisor()
 	return imagescalls.NewBuilder(imagesMachine{h: m.sys, keys: openssh.NewKeyGen(m.sys.Run, m.sys.FS)}, imagescalls.Contracts{
 		Hypervisor: hypervisor, Builds: m.buildVMs(hypervisor), Store: m.stores.images,
-		Source: m.imageSource(hypervisor.Name()), Machines: m.stores.machines,
-	}, m.cat.Images, imagescalls.BuilderOptions{
+		Source: m.imageSource(hypervisor.Name()), Machines: m.stores.machines, Templates: templates{m},
+	}, m.cat, imagescalls.BuilderOptions{
 		Cache: m.paths.Cache, Key: filepath.Join(m.paths.State, "images", "key"),
 		Version: Version(),
 		User:    user,
@@ -58,6 +61,33 @@ func imagesCommand(env kit.Env, m machine) *cobra.Command {
 		imagesupdate.Command(imagesupdate.Deps{ThisMachine: m.where, Images: m.cat.Images}, env),
 		imagesdelete.Command(imagesdelete.Deps{ThisMachine: m.where, Images: m.cat.Images}, env),
 	)
+}
+
+// value: the Machinefiles images are made from, read from every source
+// as plan reads them.
+type templates struct{ m machine }
+
+func (t templates) Template(ctx context.Context, name string) (model.Template, error) {
+	got, err := machinefilecalls.Template(ctx, t.m.machinefileDeps(nil), name)
+	var missing *machinefile.NotFoundError
+	var none *machinefile.NotTemplateError
+	switch {
+	case errors.As(err, &missing) && missing.By == "":
+		return model.Template{}, &model.UnknownError{Image: name}
+	case errors.As(err, &none):
+		return model.Template{}, &model.NotTemplateError{Image: name}
+	case err != nil:
+		return model.Template{}, machinefilecalls.Worded(err)
+	}
+	out := model.Template{Name: got.Name, From: got.From, OS: got.OS, Bake: got.Bake, Lock: got.Lock, SHA: got.SHA}
+	for _, f := range got.Files {
+		out.Files = append(out.Files, model.TemplateFile{Path: f.Path, Body: f.Body})
+	}
+	return out, nil
+}
+
+func (t templates) Names(ctx context.Context) ([]string, error) {
+	return machinefilecalls.Templates(ctx, t.m.machinefileDeps(nil))
 }
 
 type imageBuilder struct{ *imagescalls.Builder }

@@ -1,0 +1,71 @@
+package machinefile
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"path"
+
+	"github.com/jterrazz/studio-station/src/catalog"
+)
+
+// value: a Machinefile a VM image is made from: its name (the image's),
+// the image its disk starts from, its system, the items it bakes, the
+// files of its chain a build VM needs (every one but station's built-in
+// ones, which its binary embeds), the lock its build installs, and the
+// hash of all of them, which a changed chain or lock changes.
+
+type Template struct {
+	Name string
+	From string
+	OS   catalog.OS
+	Bake []string
+	// value: each file by its slash path under the owner's folder
+	// (`machinefiles/<name>.yaml`, `machinefiles/<name>.local.yaml`).
+	Files []File
+	Lock  []byte
+	SHA   string
+}
+
+func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
+	// invariant: a template is a Machinefile of a VM (a workspace or a
+	// server) that says the image its disk starts from; a mixin, a
+	// computer's, or one that names no image is none.
+	files, err := lib.chain(name)
+	if err != nil {
+		return Template{}, err
+	}
+	m := merge(files)
+	kind := catalog.MachineRole(m.values["machine.kind"].Text)
+	from := m.values["vm.image.from"].Text
+	if !m.machine || kind == catalog.RoleComputer || from == "" {
+		return Template{}, &NotTemplateError{Name: name}
+	}
+	t := Template{Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Lock: lock}
+	for _, b := range m.bake {
+		t.Bake = append(t.Bake, b.name)
+	}
+	h := sha256.New()
+	for _, f := range files {
+		file := path.Base(f.Path)
+		h.Write([]byte(file + "\x00"))
+		h.Write(f.Body)
+		h.Write([]byte{0})
+		if f.Layer != Builtin {
+			t.Files = append(t.Files, File{Path: machinefilesDir + "/" + file, Body: f.Body})
+		}
+	}
+	h.Write(lock)
+	t.SHA = hex.EncodeToString(h.Sum(nil))
+	return t, nil
+}
+
+func (l Library) Templates() []string {
+	// value: the names of every template the library holds, in name order.
+	var out []string
+	for _, name := range sortedNames(l.Machinefiles) {
+		if _, err := TemplateOf(l, name, nil); err == nil {
+			out = append(out, name)
+		}
+	}
+	return out
+}

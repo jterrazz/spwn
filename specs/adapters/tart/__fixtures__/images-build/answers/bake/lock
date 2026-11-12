@@ -1,0 +1,6 @@
+lock: station.lock/v1
+machinefile: station-linux
+apps:
+    - name: mise
+      method: script
+      version: 2026.11.1

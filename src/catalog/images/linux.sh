@@ -1,8 +1,9 @@
 #!/bin/bash
-# invariant: The linux image recipe: run as root (sudo bash -s) over the build VM's NAT
-# session, as the base's admin user. Its inputs are the environment variables
+# invariant: The linux image's base plumbing: run as root (sudo bash -s) over the build
+# VM's NAT session, as the base's admin user. Its inputs are the environment variables
 # station sets: VM_USER, IMAGE_KEY (the host's image public key) and the station
-# binary already copied to /tmp/station.
+# binary already copied to /tmp/station. What the image carries is its Machinefile's
+# image phase, which the build runs after it.
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
@@ -14,15 +15,14 @@ install -d -m 0700 -o "$VM_USER" -g "$VM_USER" "/home/$VM_USER/.ssh"
 printf '%s\n' "$IMAGE_KEY" > "/home/$VM_USER/.ssh/authorized_keys"
 chown "$VM_USER:$VM_USER" "/home/$VM_USER/.ssh/authorized_keys"
 chmod 0600 "/home/$VM_USER/.ssh/authorized_keys"
+install -d -m 0700 -o "$VM_USER" -g "$VM_USER" "/home/$VM_USER/.config" "/home/$VM_USER/.config/station" "/home/$VM_USER/.config/station/machinefiles"
 
 apt-get update
-apt-get install -y libatomic1 git zsh curl ca-certificates build-essential gnupg cloud-guest-utils
-# outside: the system libraries and fonts of `playwright install-deps chromium` on Ubuntu 24.04, so a headless browser gate runs in a fresh workspace.
-apt-get install -y libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 xvfb fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 xfonts-cyrillic xfonts-scalable fonts-liberation fonts-ipafont-gothic fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf
-
-curl -fsSL https://get.docker.com | sh
+# outside: zsh is the user's login shell, growpart (cloud-guest-utils) grows the disk at first boot, and node's linux builds link libatomic, which the base lacks.
+apt-get install -y zsh curl ca-certificates cloud-guest-utils libatomic1
+# outside: the docker group exists before the docker item installs, so the user is in it from the image's first session.
+groupadd -f docker
 usermod -aG docker "$VM_USER"
-sudo -u "$VM_USER" bash -c 'curl -fsSL https://mise.run | sh'
 
 cat > /etc/ssh/sshd_config.d/60-station.conf <<'CONF'
 AllowTcpForwarding local

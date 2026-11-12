@@ -1,0 +1,25 @@
+description: 'an owner''s VM Machinefile builds an image after its name, recording the Machinefile and its hash'
+fixture: ./__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm: { image: { bake: [mise, git, docker, playwright-deps, jq] } }
+          apps: [jq]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	studio-linux	2026.11.04	built
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro" and .name == "studio-linux") | "\(.name) \(.version) \(.newest)"'''
+      exit: 0
+      stdout: |
+          studio-linux 2026.11.04 true
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].stores.images[] | select(.name == "studio-linux") | "\(.machinefile) \(.machinefile_sha | length)"'' "$STATION_WORLD"'
+      exit: 0
+      stdout: |
+          studio-linux 64

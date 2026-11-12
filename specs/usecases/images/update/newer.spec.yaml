@@ -4,7 +4,7 @@ runs:
     - command: 'images update linux'
       exit: 0
       stdout: |
-          ●	linux	2026.11.03	fetched
+          ●	station-linux	2026.11.03	fetched
     - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.mac == "jterrazz-macbook-pro") | "\(.version) \(.newest) \(.vms | join(","))"'''
       exit: 0
       stdout: |

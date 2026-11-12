@@ -1,6 +1,6 @@
 machinefile: station.machinefile/v1
 name: station-linux
-description: A Linux workspace with the runtime manager, git and zsh
+description: A Linux workspace with the runtime manager, git, zsh, Docker and headless Chromium's libraries
 machine:
     kind: workspace
     system: { os: ubuntu, version: '24.04', arch: arm64 }
@@ -8,11 +8,18 @@ vm:
     lifetime: persistent
     resources: { cpus: 4, memory: 4G, disk: 20G }
     network: nat
-    image: { from: 'ghcr.io/cirruslabs/ubuntu:24.04' }
+    image:
+        {
+            from: 'ghcr.io/cirruslabs/ubuntu:24.04',
+            bake: [mise, git, docker, build-essential, playwright-deps],
+        }
 apps:
     - mise
     - { name: git, optional: true }
     - ohmyzsh
+    - docker
+    - build-essential
+    - playwright-deps
 settings:
     git-shortcuts: {}
     hushlogin: {}

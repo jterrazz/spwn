@@ -9,6 +9,6 @@ runs:
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.name) \(.version) \(.newest) \(.size_bytes) \(.vms | join(","))"'''
       exit: 0
       stdout: |
-          jterrazz-macbook-pro linux 2026.11.01 true 4000000000 api,linux-1
-          jterrazz-macbook-pro linux 2026.10.20 false 3000000000 
-          jterrazz-mac-mini linux 2026.11.01 true 4000000000 infra
+          jterrazz-macbook-pro station-linux 2026.11.01 true 4000000000 api,linux-1
+          jterrazz-macbook-pro station-linux 2026.10.20 false 3000000000 
+          jterrazz-mac-mini station-linux 2026.11.01 true 4000000000 infra

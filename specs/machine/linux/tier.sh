@@ -117,16 +117,28 @@ until_true 6 st engine --json > /dev/null 2>&1 || fail "the engine of this build
 say "-- the engine of this build runs for $mac (pid $engine_pid)"
 
 
-case_begin image-build IM-09
-st images build linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build linux exited $?"
-built=$(st images --json | jq -r '[.images[] | select(.name == "linux") | .version] | join(" ")')
-[ -n "$built" ] || fail "images lists no linux version"
-on_mac tart list --quiet --source local | grep -q '^station-image-linux-' || fail "no station-image-linux-* in the store"
+case_begin image-build IM-09 ADR-043
+# value: the build's own minutes, against its bound (images/calls/build.go: 30 min the
+# recipe, 30 the image phase).
+started=$(date +%s)
+st images build station-linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build station-linux exited $?"
+say "   images build station-linux took $(( ($(date +%s) - started) / 60 )) min $(( ($(date +%s) - started) % 60 )) s"
+built=$(st images --json | jq -r '[.images[] | select(.name == "station-linux") | .version] | join(" ")')
+[ -n "$built" ] || fail "images lists no station-linux version"
+on_mac tart list --quiet --source local | grep -q '^station-image-station-linux-' || fail "no station-image-station-linux-* in the store"
+record=$(cat "$mac"/.local/state/station/images/station-linux/*.json)
+[ "$(jq -r .machinefile <<< "$record")" = station-linux ] || fail "the image record names no Machinefile: $record"
+jq -r .lock <<< "$record" | grep -q '^lock: station.lock/v1' || fail "the image record holds no lock: $record"
 st machines create ws1 >> "$log" 2>&1 || fail "machines create ws1 exited $?"
 token_into ws1
 kind_inside=$(st overview --on ws1 --json | jq -r '.machine.kind')
 [ "$kind_inside" = workspace ] || fail "station inside ws1 reports $kind_inside, not workspace"
-say "   linux $built boots, its guest answers, station inside reports workspace"
+for baked in mise git docker build-essential playwright-deps; do
+  state=$(st drift --on ws1 --json | jq -r --arg a "$baked" '[.. | objects | select(.item? == $a) | .condition] | first // "none"')
+  [ "$state" = present ] || fail "$baked, baked into the image, reads $state in ws1's drift"
+done
+in_vm ws1 'docker run --rm hello-world' >> "$log" 2>&1 || fail "docker run hello-world in ws1 failed"
+say "   station-linux $built boots, its guest answers, station inside reports workspace, what it bakes is present"
 case_pass
 
 
@@ -168,6 +180,16 @@ st disk free --on ws1 >> "$log" 2>&1 || fail "disk free exited $?"
 left=$(st disk --on ws1 --json | jq -r '.rows[] | select(.group == "can-rebuild" and .bytes > 0) | "\(.app) \(.bytes)"')
 [ -z "$left" ] || fail "disk free left: $left"
 say "   ws1 answers ssh, its apps install through the engine, its home holds only the footprint"
+case_pass
+
+
+case_begin chromium-headless ADR-043
+# value: headless Chromium launches on the libraries station-linux bakes alone: no
+# `playwright install-deps`, which would install them as root.
+st apps install node --on ws1 >> "$log" 2>&1 || fail "apps install node exited $?"
+launched=$(in_vm ws1 "$mise_path; mkdir -p /tmp/e2e/pw && cd /tmp/e2e/pw && printf '{\"name\":\"pw\",\"private\":true}\n' > package.json && npm i --silent playwright@1.55.0 >/dev/null && npx playwright install chromium >/dev/null && node -e \"const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();await p.setContent('<h1>headless ok</h1>');console.log(await p.textContent('h1'));await b.close()})()\"" 2>> "$log")
+[ "$launched" = "headless ok" ] || fail "headless Chromium did not launch in ws1: $launched"
+say "   headless Chromium launches in ws1 and reads its page"
 case_pass
 
 

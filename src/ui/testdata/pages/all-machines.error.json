@@ -549,6 +549,18 @@
         },
         {
           "row": {
+            "id": "station-linux",
+            "mark": "absent",
+            "label": "station-linux",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        },
+        {
+          "row": {
             "id": "macos",
             "mark": "absent",
             "label": "macos",
@@ -567,7 +579,7 @@
         },
         {
           "mark": "absent",
-          "n": 2
+          "n": 3
         }
       ]
     },

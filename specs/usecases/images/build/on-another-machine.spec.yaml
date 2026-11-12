@@ -6,7 +6,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	linux	2026.11.04	built
+          ●	station-linux	2026.11.04	built
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

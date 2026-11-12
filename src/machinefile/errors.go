@@ -131,3 +131,12 @@ func (e *BadValueError) Error() string {
 type UnknownKeyError struct{ Key, Name string }
 
 func (e *UnknownKeyError) Error() string { return e.Name + " says nothing of " + e.Key }
+
+// value: a Machinefile no VM image is made from: a mixin, a computer's,
+// or one whose vm says no image.from.
+
+type NotTemplateError struct{ Name string }
+
+func (e *NotTemplateError) Error() string {
+	return e.Name + " makes no image: an image is made from a VM's Machinefile that says its vm.image.from"
+}

@@ -1,0 +1,33 @@
+description: 'a bare build rebuilds an image whose Machinefile changed, and only that one'
+fixture: ./__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          apps: [jq]
+      exit: 0
+    - command: 'images build --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	station-linux	2026.11.04	built
+          ●	studio-linux	2026.11.04	built
+    - command: 'images build --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          	none
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          apps: [jq, fd]
+      exit: 0
+    - command: 'images build --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	studio-linux	2026.11.04.2	built

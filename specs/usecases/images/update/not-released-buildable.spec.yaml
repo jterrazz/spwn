@@ -4,5 +4,5 @@ runs:
     - command: 'images update linux'
       exit: 1
       stderr: |
-          Error: image linux is not released
-          Hint: station images build linux
+          Error: image station-linux is not released
+          Hint: station images build station-linux

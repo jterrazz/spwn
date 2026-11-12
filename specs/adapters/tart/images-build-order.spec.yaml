@@ -1,23 +1,24 @@
-description: "a build copies station in, runs the recipe then the cleanup, waits for the poweroff, records"
+description: "a build copies station in, runs the recipe, the image phase, the cleanup, then records"
 fixture:
     - ./__fixtures__/images-stubs/
     - ./__fixtures__/images-build/
     - ./__fixtures__/images-served/
 serve: sshd
 runs:
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
-          ●	linux	{{string}}	built
+          ●	station-linux	{{string}}	built
       files:
           .calls:
               contains:
                   - |-
                     tart pull ghcr.io/cirruslabs/ubuntu:24.04
-                    tart clone ghcr.io/cirruslabs/ubuntu:24.04 station-build-linux
-                    tart ip station-build-linux --wait 60
+                    tart clone ghcr.io/cirruslabs/ubuntu:24.04 station-build-station-linux
+                    tart ip station-build-station-linux --wait 60
                   - "vm-sshd exec /bin/cat > '/tmp/station' && /bin/chmod 755 '/tmp/station'"
                   - "vm-sshd exec sudo env VM_USER='dev' IMAGE_KEY='ssh-ed25519 AAAAstub station-image' bash -s"
+                  - "vm-sshd exec env MACHINEFILE='station-linux' bash -s"
                   - 'vm-sshd exec sudo bash -s'
           .recipe.env:
               equals: |
@@ -25,19 +26,25 @@ runs:
                   IMAGE_KEY=ssh-ed25519 AAAAstub station-image
           .recipe.stdin:
               contains:
-                  - 'apt-get install -y libatomic1'
+                  - 'cloud-guest-utils libatomic1'
+                  - 'groupadd -f docker'
                   - 'station-intent.service'
                   - 'station-hostkeys.service'
+          .bake.env:
+              equals: |
+                  MACHINEFILE=station-linux
+          .bake.stdin:
+              contains: '/usr/local/bin/station apply --machinefile "$MACHINEFILE" --phase image </dev/null'
           .cleanup.stdin:
               contains:
                   - 'pkill -KILL -u admin'
                   - 'userdel --remove admin'
                   - 'systemctl --no-block poweroff'
-          .local/state/station/consoles/station-build-linux: absent
+          .local/state/station/consoles/station-build-station-linux: absent
           .local/state/station/images/askpass: absent
           .runs:
-              contains: 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/station-build-linux station-build-linux'
-    - command: '--version > /dev/null; /usr/bin/awk ''/^tart pull/{p=NR} /^tart clone/{c=NR} /^vm-sshd exec \/bin\/cat/{s=NR} /^vm-sshd exec sudo env/{a=NR} /^vm-sshd exec sudo bash -s$/{d=NR} /^tart stop/{t=NR} /^tart rename/{r=NR} END{print (p<c && c<s && s<a && a<d && d<t && t<r) ? "ordered" : "disordered"}'' .calls'
+              contains: 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/station-build-station-linux station-build-station-linux'
+    - command: '--version > /dev/null; /usr/bin/awk ''/^tart pull/{p=NR} /^tart clone/{c=NR} /^vm-sshd exec \/bin\/cat/{s=NR} /^vm-sshd exec sudo env/{a=NR} /^vm-sshd exec env MACHINEFILE/{b=NR} /^vm-sshd exec sudo bash -s$/{d=NR} /^tart stop/{t=NR} /^tart rename/{r=NR} END{print (p<c && c<s && s<a && a<b && b<d && d<t && t<r) ? "ordered" : "disordered"}'' .calls'
       exit: 0
       stdout: |
           ordered
@@ -49,11 +56,11 @@ runs:
       exit: 0
       stdout: |
           3
-    - command: '--version > /dev/null; /usr/bin/grep -c "^tart rename station-build-linux station-image-linux-$(/bin/date -u +%Y.%m.%d)$" .calls'
+    - command: '--version > /dev/null; /usr/bin/grep -c "^tart rename station-build-station-linux station-image-station-linux-$(/bin/date -u +%Y.%m.%d)$" .calls'
       exit: 0
       stdout: |
           1
-    - command: '--version > /dev/null; /usr/bin/jq -r ''[.name, .base, (.recipe_sha | length)] | join(" ")'' .local/state/station/images/linux/$(/bin/date -u +%Y.%m.%d).json'
+    - command: '--version > /dev/null; /usr/bin/jq -r ''[.name, .base, (.recipe_sha | length), .machinefile, (.machinefile_sha | length), (.lock | split("\n") | .[0])] | join(" ")'' .local/state/station/images/station-linux/$(/bin/date -u +%Y.%m.%d).json'
       exit: 0
       stdout: |
-          linux ghcr.io/cirruslabs/ubuntu:24.04 64
+          station-linux ghcr.io/cirruslabs/ubuntu:24.04 64 station-linux 64 lock: station.lock/v1

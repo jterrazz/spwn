@@ -57,8 +57,10 @@ const (
 type Placed struct {
 	File  catalog.Machinefile
 	Layer Layer
-	// value: the file as a reader finds it: its tree's root and its path.
+	// value: the file as a reader finds it: its tree's root and its path;
+	// and its bytes, as its source holds them.
 	Path string
+	Body []byte
 }
 
 // value: every source read: the catalog in its layers, the Machinefiles by
@@ -161,7 +163,7 @@ func Load(trees []Tree) (Library, error) {
 				return Library{}, refusedFile("machinefile", err)
 			}
 			name, overlay := catalog.MachinefileOf(path.Base(f.Path))
-			placed := Placed{File: mf, Layer: t.Layer, Path: file}
+			placed := Placed{File: mf, Layer: t.Layer, Path: file, Body: f.Body}
 			switch {
 			case overlay && t.Layer != User:
 				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "an overlay is the owner's alone, in ~/.config/station/machinefiles"})

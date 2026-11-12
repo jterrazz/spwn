@@ -8,7 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/fail"
 )
 
-const linuxBinaryHint = "make build-linux, then station images build linux --binary .artifacts/go/station-linux-arm64"
+const linuxBinaryHint = "make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64"
 
 func imagesFailure(err error) (*fail.Error, bool) {
 	var version *images.UnknownVersionError
@@ -21,7 +21,10 @@ func imagesFailure(err error) (*fail.Error, bool) {
 	var registry *images.RegistryError
 	var fetch *images.FetchFailedError
 	var build *images.BuildFailedError
+	var template *images.NotTemplateError
 	switch {
+	case errors.As(err, &template):
+		return usage(template.Error(), "station explain --machinefile "+template.Image), true
 	case errors.As(err, &version):
 		return usage(version.Error(), "station images lists the versions"), true
 	case errors.As(err, &notBuilt):
