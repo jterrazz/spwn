@@ -151,7 +151,7 @@ func (s *Provisioner) layout(ctx context.Context, migrated error) ([]setup.Step,
 // empty.
 func retiredZsh() []string { return []string{"docker-shortcuts"} }
 
-func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
+func (s *Provisioner) retireZshDir(ctx context.Context) ([]setup.Step, error) {
 	dir := path.Join(path.Dir(s.o.PreferencesFile), "zsh")
 	entries, found, err := s.m.Entries(dir)
 	switch {
@@ -160,38 +160,35 @@ func (s *Provisioner) retireZshDir() ([]setup.Step, error) {
 	case !found:
 		return nil, nil
 	}
-	current, _, err := s.m.ReadFile(s.zshrcPath())
+	var moved, leftover []string
+	err = s.o.Zshrc.Edit(ctx, func(zshrc string) (string, error) {
+		moved, leftover = nil, nil
+		for _, e := range entries {
+			name, ok := strings.CutSuffix(e.Name, ".zsh")
+			if e.Dir || !ok || !slices.Contains(retiredZsh(), name) {
+				continue
+			}
+			file := path.Join(dir, e.Name)
+			data, found, readErr := s.m.ReadFile(file)
+			id := "station:" + name
+			body := string(data)
+			if !strings.HasSuffix(body, "\n") {
+				body += "\n"
+			}
+			have, state := settings.PackageBlock(zshrc, id)
+			switch {
+			case readErr != nil || !found || holdsMarker(body):
+			case state == settings.BlockHere && have == body:
+				leftover = append(leftover, file)
+			case state == settings.BlockAbsent:
+				zshrc, _ = settings.UpsertPackageBlock(zshrc, id, body)
+				moved = append(moved, file)
+			}
+		}
+		return zshrc, nil
+	})
 	if err != nil {
 		return failedSteps(stepZsh, err)
-	}
-	zshrc := string(current)
-	var moved, leftover []string
-	for _, e := range entries {
-		name, ok := strings.CutSuffix(e.Name, ".zsh")
-		if e.Dir || !ok || !slices.Contains(retiredZsh(), name) {
-			continue
-		}
-		file := path.Join(dir, e.Name)
-		data, found, err := s.m.ReadFile(file)
-		id := "station:" + name
-		body := string(data)
-		if !strings.HasSuffix(body, "\n") {
-			body += "\n"
-		}
-		have, state := settings.PackageBlock(zshrc, id)
-		switch {
-		case err != nil || !found || holdsMarker(body):
-		case state == settings.BlockHere && have == body:
-			leftover = append(leftover, file)
-		case state == settings.BlockAbsent:
-			zshrc, _ = settings.UpsertPackageBlock(zshrc, id, body)
-			moved = append(moved, file)
-		}
-	}
-	if len(moved) > 0 {
-		if err := s.m.WriteFile(s.zshrcPath(), []byte(zshrc), s.m.Mode(s.zshrcPath(), 0o644)); err != nil {
-			return failedSteps(stepZsh, err)
-		}
 	}
 	dropped := false
 	for _, file := range append(moved, leftover...) {

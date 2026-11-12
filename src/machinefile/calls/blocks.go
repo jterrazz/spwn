@@ -8,11 +8,13 @@ import (
 	"github.com/jterrazz/studio-station/src/settings"
 )
 
-// value: this machine's ~/.zshrc, read whole and written whole.
+// value: this machine's ~/.zshrc, read whole, and edited whole under the
+// lock every writer of it takes: edit gets its text and answers the text to
+// write.
 
 type Zshrc interface {
 	Read(ctx context.Context) (string, error)
-	Write(ctx context.Context, text string) error
+	Edit(ctx context.Context, edit func(text string) (string, error)) error
 }
 
 const zshrcName = "~/.zshrc"
@@ -238,40 +240,46 @@ func (r *run) letGo(ctx context.Context, done machinefile.BlockDone, detail stri
 }
 
 func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machinefile.BlockDone {
-	zshrc, err := r.d.Zshrc.Read(ctx)
-	if err != nil {
-		done.State, done.Detail = catalog.StateBroken, err.Error()
-		return done
-	}
 	written, err := writtenBlocks(ctx, r.d)
 	if err != nil {
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		return done
 	}
-	var text string
-	switch done.Action {
-	case machinefile.Set:
-		now := judgeBlock(zshrc, done.Item, done.ID, done.Zsh, written).Action
-		if now == machinefile.Keep {
-			done.Detail = ""
-			return r.recordBlock(ctx, done)
+	edited := false
+	err = r.d.Zshrc.Edit(ctx, func(zshrc string) (string, error) {
+		switch done.Action {
+		case machinefile.Set:
+			switch judgeBlock(zshrc, done.Item, done.ID, done.Zsh, written).Action {
+			case machinefile.Keep:
+				done.Detail = ""
+				return zshrc, nil
+			case machinefile.Set:
+			default:
+				done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
+				return zshrc, nil
+			}
+			text, _ := settings.UpsertPackageBlock(zshrc, done.ID, done.Zsh)
+			done.Detail, edited = "written", true
+			return text, nil
+		default:
+			have, state := settings.PackageBlock(zshrc, done.ID)
+			if w, ok := written[done.ID]; !lastWritten(have, state, w, ok) {
+				return zshrc, nil
+			}
+			text, _ := settings.RemovePackageBlock(zshrc, done.ID)
+			done.Detail, edited = "removed", true
+			return text, nil
 		}
-		if now != machinefile.Set {
-			done.State, done.Detail = catalog.StateDegraded, "edited by hand: left as it is"
-			return done
-		}
-		text, _ = settings.UpsertPackageBlock(zshrc, done.ID, done.Zsh)
-		done.Detail = "written"
-	default:
-		have, state := settings.PackageBlock(zshrc, done.ID)
-		if w, ok := written[done.ID]; !lastWritten(have, state, w, ok) {
-			return r.letGo(ctx, done, editedKept)
-		}
-		text, _ = settings.RemovePackageBlock(zshrc, done.ID)
-		done.Detail = "removed"
-	}
-	if err = r.d.Zshrc.Write(ctx, text); err != nil {
+	})
+	switch {
+	case err != nil:
 		done.State, done.Detail = catalog.StateBroken, err.Error()
+		return done
+	case !edited && done.Action != machinefile.Set:
+		return r.letGo(ctx, done, editedKept)
+	case !edited && done.State == catalog.StateOK:
+		return r.recordBlock(ctx, done)
+	case !edited:
 		return done
 	}
 	if done.Action == machinefile.Set {

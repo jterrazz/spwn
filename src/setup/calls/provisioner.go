@@ -52,6 +52,15 @@ type ProvisionerOptions struct {
 	// value: moves the preferences out of the file station v2 kept them in,
 	// once; nil where there is none to move.
 	MovePreferences func(ctx context.Context) (moved bool, err error)
+	// value: this machine's ~/.zshrc, every write of it one edit under the
+	// lock each station process takes for it.
+	Zshrc Zshrc
+}
+
+// value: edit gets the text of ~/.zshrc and answers the text to write.
+
+type Zshrc interface {
+	Edit(ctx context.Context, edit func(text string) (string, error)) error
 }
 
 type ProvisionerPrefs struct {
@@ -161,7 +170,7 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 		return setup.Report{Steps: append(moved, setup.Step{Name: stepKind, State: catalog.StateOK, Detail: "server: its own tooling keeps it, station sets nothing up"})}, nil
 	}
 	if !s.onMac() {
-		zshrc, err := s.zshrc()
+		zshrc, err := s.zshrc(ctx)
 		relocate, relocateErr := s.relocate(ctx, r.Interactive)
 		return setup.Report{Steps: append(moved, zshrc, relocate)}, errors.Join(err, relocateErr)
 	}
@@ -173,12 +182,12 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 	if nameErr != nil && !isStepFailure(nameErr) {
 		return setup.Report{}, nameErr
 	}
-	zshrc, zshrcErr := s.zshrc()
+	zshrc, zshrcErr := s.zshrc(ctx)
 	layout, layoutErr := s.layout(ctx, migrated)
 	var zshErr error
 	if layoutErr == nil && zshrcErr == nil {
 		var retired []setup.Step
-		retired, zshErr = s.retireZshDir()
+		retired, zshErr = s.retireZshDir(ctx)
 		layout = append(layout, retired...)
 	}
 	relocate, relocateErr := s.relocate(ctx, r.Interactive)
@@ -244,16 +253,15 @@ func failed(step string, cause error) (setup.Step, error) {
 
 func (s *Provisioner) zshrcPath() string { return path.Join(s.m.Home(), ".zshrc") }
 
-func (s *Provisioner) zshrc() (setup.Step, error) {
-	current, _, err := s.m.ReadFile(s.zshrcPath())
+func (s *Provisioner) zshrc(ctx context.Context) (setup.Step, error) {
+	changed := false
+	err := s.o.Zshrc.Edit(ctx, func(text string) (string, error) {
+		updated, upserted := settings.UpsertBlock(text)
+		changed = upserted
+		return updated, nil
+	})
 	if err != nil {
 		return failed(stepZshrc, err)
-	}
-	updated, changed := settings.UpsertBlock(string(current))
-	if changed {
-		if err := s.m.WriteFile(s.zshrcPath(), []byte(updated), s.m.Mode(s.zshrcPath(), 0o644)); err != nil {
-			return failed(stepZshrc, err)
-		}
 	}
 	return setup.Step{Name: stepZshrc, State: catalog.StateOK, Changed: changed}, nil
 }

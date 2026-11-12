@@ -1,8 +1,10 @@
 package zshblock_test
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"io/fs"
 	"testing"
 	"testing/fstest"
@@ -35,6 +37,30 @@ func (m *memory) Stat(p string) (fs.FileInfo, error) {
 
 const zshrc = "/home/u/.zshrc"
 
+// value: the owner's ~/.zshrc over memory, an edit written back only when
+// it changed the text.
+type zshrcIn struct{ m *memory }
+
+func (z zshrcIn) Read(context.Context) (string, error) {
+	b, err := z.m.ReadFile(zshrc)
+	if errors.Is(err, fs.ErrNotExist) {
+		return "", nil
+	}
+	return string(b), err
+}
+
+func (z zshrcIn) Edit(ctx context.Context, edit func(string) (string, error)) error {
+	text, err := z.Read(ctx)
+	if err != nil {
+		return err
+	}
+	out, err := edit(text)
+	if err == nil && out != text {
+		err = z.m.WriteFile(zshrc, []byte(out), 0o644)
+	}
+	return err
+}
+
 func TestApplier(t *testing.T) {
 	contracttest.Applier(t, func(*testing.T) contracttest.Opened {
 		files := &memory{files: map[string][]byte{}}
@@ -42,7 +68,7 @@ func TestApplier(t *testing.T) {
 		edit := func(*testing.T) {
 			files.files[zshrc] = []byte("# >>> station:greetings >>>\ngreet() { echo mine; }\n# <<< station:greetings <<<\n")
 		}
-		return contracttest.Opened{Applier: zshblock.New(files, zshblock.Options{File: zshrc, Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64}), Item: item, Edit: edit}
+		return contracttest.Opened{Applier: zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64}), Item: item, Edit: edit}
 	})
 }
 
@@ -53,7 +79,7 @@ func TestApplyWritesTheExactBytesAndUndoGivesTheOwnersFileBack(t *testing.T) {
 		{ID: "station:greetings", Zsh: "export HELLO={{ home }}\n"},
 		{ID: "station:greetings/path", Zsh: "path=({{ home }}/bin $path)\n"},
 	}}}
-	applier := zshblock.New(files, zshblock.Options{File: zshrc, Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64})
+	applier := zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u", OS: catalog.OSMacOS, Arch: catalog.ArchARM64})
 	if _, err := applier.Apply(t.Context(), item, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +105,7 @@ func TestALoneBlocksFingerprintIsItsTextsAlone(t *testing.T) {
 	body := "greet() { echo hi; }\n"
 	files := &memory{files: map[string][]byte{zshrc: []byte("mine\n# >>> station:greetings >>>\n" + body + "# <<< station:greetings <<<\n")}}
 	item := catalog.Setting{Name: "greetings", Effect: catalog.ShellBlocks{Blocks: []catalog.ShellBlock{{ID: "station:greetings", Zsh: body}}}}
-	o, err := zshblock.New(files, zshblock.Options{File: zshrc, Home: "/home/u"}).Observe(t.Context(), item)
+	o, err := zshblock.New(zshrcIn{files}, zshblock.Options{Home: "/home/u"}).Observe(t.Context(), item)
 	sum := sha256.Sum256([]byte(body))
 	if err != nil || o.Digest != "sha256:"+hex.EncodeToString(sum[:]) {
 		t.Errorf("fingerprint %q, %v", o.Digest, err)

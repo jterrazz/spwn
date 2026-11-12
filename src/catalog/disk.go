@@ -184,6 +184,7 @@ var StationDisk = Disk{
 		noted(kept("{state}/station/ledger.json"), "what `station apply` installed and the `~/.zshrc` blocks it wrote, the only ones `apply --remove` takes back, and what the last night's upgrade did: deleting it makes station remove none"),
 		noted(data("{state}/station/ledger.json.lock"), "empty: the lock two applies at once take in turn to change the ledger"),
 		noted(data("{state}/station/runs.lock"), "empty: the turn an apply, an upgrade and the night's upgrade take, so one runs at a time"),
+		noted(data("{state}/station/zshrc.lock"), "empty: the lock every station process takes in turn to rewrite `~/.zshrc`"),
 	},
 	Installed: []string{"~/.local/bin/station"},
 	Free: []Action{remove(

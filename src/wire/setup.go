@@ -49,6 +49,7 @@ func setupOf(env kit.Env, m machine) *setupcalls.Provisioner {
 		Files:           m.appFiles(),
 		Configurer:      setupSettingsWriter{settings: settingsOf(m)},
 		MovePreferences: m.stores.prefs.MoveRetired,
+		Zshrc:           m.zshrc(),
 	})
 }
 

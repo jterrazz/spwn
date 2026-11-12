@@ -12,8 +12,14 @@ import (
 
 type zshrcText struct{ text string }
 
-func (z *zshrcText) Read(context.Context) (string, error)    { return z.text, nil }
-func (z *zshrcText) Write(_ context.Context, s string) error { z.text = s; return nil }
+func (z *zshrcText) Read(context.Context) (string, error) { return z.text, nil }
+func (z *zshrcText) Edit(_ context.Context, edit func(string) (string, error)) error {
+	text, err := edit(z.text)
+	if err == nil {
+		z.text = text
+	}
+	return err
+}
 
 const lib = `item: station.catalog/v1
 kind: app

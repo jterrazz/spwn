@@ -19,23 +19,30 @@ type Files interface {
 	Stat(path string) (fs.FileInfo, error)
 }
 
+// value: the owner's ~/.zshrc, read whole, and edited whole under the lock
+// every writer of it takes: edit gets its text and answers the text to
+// write.
+
+type Zshrc interface {
+	Read(ctx context.Context) (string, error)
+	Edit(ctx context.Context, edit func(text string) (string, error)) error
+}
+
 type Options struct {
-	// value: the owner's ~/.zshrc, and the machine the blocks' variables
-	// name.
-	File string
+	// value: the machine the blocks' variables name.
 	Home string
 	OS   catalog.OS
 	Arch catalog.Arch
 }
 
 type Applier struct {
-	files Files
+	zshrc Zshrc
 	o     Options
 }
 
 var _ contract.Applier = (*Applier)(nil)
 
-func New(files Files, o Options) *Applier { return &Applier{files: files, o: o} }
+func New(zshrc Zshrc, o Options) *Applier { return &Applier{zshrc: zshrc, o: o} }
 
 func (*Applier) Kind() catalog.EffectKind { return catalog.EffectShell }
 
@@ -57,22 +64,6 @@ func (a *Applier) of(it catalog.Setting) ([]rendered, error) {
 	return out, nil
 }
 
-func (a *Applier) read() (string, error) {
-	data, err := a.files.ReadFile(a.o.File)
-	if errors.Is(err, fs.ErrNotExist) {
-		return "", nil
-	}
-	return string(data), err
-}
-
-func (a *Applier) write(text string) error {
-	mode := fs.FileMode(0o644)
-	if info, err := a.files.Stat(a.o.File); err == nil {
-		mode = info.Mode().Perm()
-	}
-	return a.files.WriteFile(a.o.File, []byte(text), mode)
-}
-
 func name(id string) string { return "~/.zshrc [" + id + "]" }
 
 func where(blocks []rendered) string {
@@ -83,12 +74,12 @@ func where(blocks []rendered) string {
 	return "~/.zshrc [" + strings.Join(ids, ", ") + "]"
 }
 
-func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
+func (a *Applier) Observe(ctx context.Context, it catalog.Setting) (settings.Observation, error) {
 	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Observation{}, err
 	}
-	text, err := a.read()
+	text, err := a.zshrc.Read(ctx)
 	if err != nil {
 		return settings.Observation{}, err
 	}
@@ -126,52 +117,48 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	return o, nil
 }
 
-func (a *Applier) Apply(_ context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {
+func (a *Applier) Apply(ctx context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {
 	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
-	text, err := a.read()
+	err = a.zshrc.Edit(ctx, func(text string) (string, error) {
+		for _, b := range blocks {
+			text, _ = settings.UpsertPackageBlock(text, b.id, b.body)
+		}
+		return text, nil
+	})
 	if err != nil {
-		return settings.Change{}, err
-	}
-	for _, b := range blocks {
-		text, _ = settings.UpsertPackageBlock(text, b.id, b.body)
-	}
-	if err := a.write(text); err != nil {
 		return settings.Change{}, err
 	}
 	return settings.Change{Steps: []settings.ChangeStep{{Label: where(blocks), State: catalog.StateOK, Detail: "written"}}}, nil
 }
 
-func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, error) {
+func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	// invariant: a block leaves ~/.zshrc only while it is still exactly
 	// station's: off never destroys a change of the owner's.
 	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
-	text, err := a.read()
-	if err != nil {
-		return settings.Change{}, err
-	}
 	var steps []settings.ChangeStep
-	for _, b := range blocks {
-		have, state := settings.PackageBlock(text, b.id)
-		switch {
-		case state == settings.BlockAbsent:
-			continue
-		case state != settings.BlockHere || have != b.body:
-			steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "yours, kept"})
-			continue
+	err = a.zshrc.Edit(ctx, func(text string) (string, error) {
+		steps = nil
+		for _, b := range blocks {
+			have, state := settings.PackageBlock(text, b.id)
+			switch {
+			case state == settings.BlockAbsent:
+				continue
+			case state != settings.BlockHere || have != b.body:
+				steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "yours, kept"})
+				continue
+			}
+			text, _ = settings.RemovePackageBlock(text, b.id)
+			steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "removed"})
 		}
-		text, _ = settings.RemovePackageBlock(text, b.id)
-		steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "removed"})
-	}
-	if len(steps) == 0 {
-		return settings.Change{}, nil
-	}
-	if err := a.write(text); err != nil {
+		return text, nil
+	})
+	if err != nil || len(steps) == 0 {
 		return settings.Change{}, err
 	}
 	return settings.Change{Steps: steps}, nil
