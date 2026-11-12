@@ -1,6 +1,8 @@
 package local
 
 import (
+	"context"
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -33,5 +35,24 @@ func TestTheDiskLockIsHeldByOneTakerAtATime(t *testing.T) {
 		second()
 	case <-time.After(5 * time.Second):
 		t.Fatal("the second taker never took the lock the first let go of")
+	}
+}
+
+// invariant: a turn another holder keeps is answered held once within
+// ends, and interrupted, never held, when the run's ctx ends first.
+func TestAWaitForAHeldLockEndsHeldOrInterrupted(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "runs.lock")
+	release, held, err := ExclusiveWithin(context.Background(), at, time.Second)
+	if err != nil || held {
+		t.Fatalf("a free lock was not taken: held %v, %v", held, err)
+	}
+	defer release()
+	if _, held, err := ExclusiveWithin(context.Background(), at, 200*time.Millisecond); err != nil || !held {
+		t.Errorf("a lock held past within answered held %v, %v", held, err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(150*time.Millisecond, cancel)
+	if _, held, err := ExclusiveWithin(ctx, at, 10*time.Second); held || !errors.Is(err, context.Canceled) {
+		t.Errorf("a wait the run's ctx ended answered held %v, %v", held, err)
 	}
 }

@@ -18,10 +18,13 @@ var _ contract.Turn = Turn{}
 
 func TurnOf(w *world.World, mac string) Turn { return Turn{w: w, mac: mac} }
 
-func (t Turn) Take(context.Context) (func(), error) {
+func (t Turn) Take(ctx context.Context) (func(), error) {
 	t.w.Lock()
 	defer t.w.Unlock()
 	if t.w.Fails("Turn.Take") || !t.w.Mac(t.mac).TakeTurn() {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		return nil, contract.ErrBusy
 	}
 	return func() {

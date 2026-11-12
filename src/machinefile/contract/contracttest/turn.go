@@ -14,7 +14,7 @@ import (
 type Turns func(t *testing.T) (first, second contract.Turn)
 
 func Turn(t *testing.T, turns Turns) {
-	t.Run("a second taker is refused while the first holds the turn, then takes it", func(t *testing.T) {
+	t.Run("a second taker is interrupted while the first holds the turn, then takes it", func(t *testing.T) {
 		first, second := turns(t)
 		release, err := first.Take(context.Background())
 		if err != nil {
@@ -22,8 +22,8 @@ func Turn(t *testing.T, turns Turns) {
 		}
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
-		if _, refused := second.Take(ctx); !errors.Is(refused, contract.ErrBusy) && !errors.Is(refused, context.Canceled) {
-			t.Errorf("took a held turn: %v", refused)
+		if _, refused := second.Take(ctx); !errors.Is(refused, context.Canceled) {
+			t.Errorf("a wait for a held turn the run's ctx ended is not interrupted: %v", refused)
 		}
 		release()
 		again, err := second.Take(context.Background())

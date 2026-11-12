@@ -10,7 +10,8 @@ type Turn interface {
 	// invariant: one apply, upgrade or night of a machine at a time, across
 	// every process of it: Take holds the machine's turn until release,
 	// waits up to TurnWait for a run that holds it, then refuses with
-	// ErrBusy; a process that ends lets go of it.
+	// ErrBusy; a wait ctx ends first answers ctx's error; a process that
+	// ends lets go of it.
 	Take(ctx context.Context) (release func(), err error)
 }
 

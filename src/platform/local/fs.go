@@ -52,8 +52,9 @@ func (disk) Lock(path string) (unlock func(), err error) {
 func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error) {
 	// invariant: Exclusive's lock, its folder made when missing, tried every
 	// tenth of a second until it is free; one another holder keeps past
-	// within, or past ctx, is answered held, never waited for longer.
-	ctx, cancel := context.WithTimeout(ctx, within)
+	// within is answered held, never waited for longer, and a wait ctx
+	// ends first answers ctx's error: the run was interrupted, not refused.
+	wait, cancel := context.WithTimeout(ctx, within)
 	defer cancel()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
@@ -63,7 +64,10 @@ func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (re
 			return release, false, err
 		}
 		select {
-		case <-ctx.Done():
+		case <-wait.Done():
+			if err := ctx.Err(); err != nil {
+				return nil, false, err
+			}
 			return nil, true, nil
 		case <-tick.C:
 		}
