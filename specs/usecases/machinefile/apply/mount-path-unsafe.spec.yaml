@@ -1,0 +1,17 @@
+description: 'a vm.mounts folder holding a character outside letters, digits, . _ - and / is refused'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          vm:
+            mounts:
+              - { computer: ~/notes, guest: '~/notes$(reboot)' }
+      exit: 0
+    - command: 'apply --yes'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/linux-1.yaml:4: mount "~/notes" at "~/notes$(reboot)": a mount's folders hold letters, digits, ., _, - and / alone
+          Hint: fix that line: station never rewrites a Machinefile

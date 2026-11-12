@@ -186,7 +186,10 @@ func checkVM(v VMSpec) string {
 }
 
 // invariant: a mount names both of its folders, each a path from the root
-// or the home (`~/`), and no two mounts share a folder of the guest.
+// or the home (`~/`) written in letters, digits, `.`, `_`, `-` and `/`
+// alone, since the guest's is handed to a script run as root and the
+// computer's to the hypervisor's argv; no two mounts share a folder of the
+// guest.
 func checkMounts(mounts []Mount) string {
 	guests := map[string]bool{}
 	for _, m := range mounts {
@@ -195,8 +198,8 @@ func checkMounts(mounts []Mount) string {
 			return fmt.Sprintf("mount folder %q of the computer is not a path from / or ~/", m.Computer)
 		case !mountFolder(m.Guest):
 			return fmt.Sprintf("mount folder %q of the VM is not a path from / or ~/", m.Guest)
-		case strings.ContainsAny(m.Computer+m.Guest, ": \t"):
-			return fmt.Sprintf("mount %q at %q: a mount's folders hold no space and no colon", m.Computer, m.Guest)
+		case !mountSafe(m.Computer) || !mountSafe(m.Guest):
+			return fmt.Sprintf("mount %q at %q: a mount's folders hold letters, digits, ., _, - and / alone", m.Computer, m.Guest)
 		case guests[path.Clean(m.Guest)]:
 			return fmt.Sprintf("two mounts share the guest folder %q", m.Guest)
 		}
@@ -207,6 +210,10 @@ func checkMounts(mounts []Mount) string {
 
 func mountFolder(p string) bool {
 	return p == "~" || strings.HasPrefix(p, "/") || strings.HasPrefix(p, "~/")
+}
+
+func mountSafe(p string) bool {
+	return strings.Trim(strings.TrimPrefix(p, "~"), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-/") == ""
 }
 
 func checkPrefer(prefer []ManagerKey) string {
