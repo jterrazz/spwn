@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -678,7 +679,9 @@ func (m *worldMac) down(forget bool) {
 	activity := d.History().Hand()
 	read := d.SettingsKept()
 	if leave := m.takeLeave(); leave != nil {
+		left := m.run.clock().moved.leave()
 		leave()
+		left()
 	}
 	if !forget && !m.runs() {
 		d.Stop()
@@ -842,6 +845,9 @@ type waits struct{}
 type moves struct {
 	mu sync.Mutex
 	ch chan struct{}
+	// invariant: while a Mac's surfaces are being let go, a wait on the clock
+	// does not wait for it to move: the flow that moves it waits on them.
+	leaving atomic.Int32
 }
 
 func (r *worldRun) clock() worldClock {
@@ -855,6 +861,12 @@ func (m *moves) next() <-chan struct{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.ch
+}
+
+func (m *moves) leave() func() {
+	m.leaving.Add(1)
+	m.tell()
+	return func() { m.leaving.Add(-1) }
 }
 
 func (m *moves) tell() {
@@ -895,6 +907,14 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 		moved := c.moved.next()
 		if !c.Now().Before(until) {
 			return nil
+		}
+		if c.moved.leaving.Load() > 0 {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(time.Millisecond):
+				return nil
+			}
 		}
 		select {
 		case <-ctx.Done():
