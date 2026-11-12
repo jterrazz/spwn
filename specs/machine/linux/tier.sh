@@ -79,6 +79,12 @@ vm_ssh() {
   on_mac /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$@"
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
+# invariant: in_vm_for <seconds> <vm> <command> ends the ssh itself at its bound, so
+# a guest command that never returns fails its case rather than hold the run.
+in_vm_for() {
+  local secs=$1 vm=$2
+  on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "e2e@$vm" "$3" < /dev/null
+}
 
 # invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its
 # releases ask GitHub with it rather than share the address's 60 calls an hour: it is
@@ -210,9 +216,14 @@ case_pass
 case_begin chromium-headless ADR-043
 # value: headless Chromium launches on the libraries station-linux bakes alone: no
 # `playwright install-deps`, which would install them as root.
+# hazard: playwright 1.55.0's browser install never ends on Node 26 (the archive is
+# downloaded, its extraction waits forever); a release that knows the Node the catalog
+# installs is pinned, and every guest command has its bound.
 st apps install node --on ws1 >> "$log" 2>&1 || fail "apps install node exited $?"
-launched=$(in_vm ws1 "$mise_path; mkdir -p /tmp/e2e/pw && cd /tmp/e2e/pw && printf '{\"name\":\"pw\",\"private\":true}\n' > package.json && npm i --silent playwright@1.55.0 >/dev/null && npx playwright install chromium >/dev/null && node -e \"const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();await p.setContent('<h1>headless ok</h1>');console.log(await p.textContent('h1'));await b.close()})()\"" 2>> "$log")
-[ "$launched" = "headless ok" ] || fail "headless Chromium did not launch in ws1: $launched"
+launched=$(in_vm_for 420 ws1 "$mise_path; set -e; mkdir -p /tmp/e2e/pw && cd /tmp/e2e/pw && printf '{\"name\":\"pw\",\"private\":true}\n' > package.json && timeout 120 npm i --silent playwright@1.65.0 >/dev/null && timeout 240 npx playwright install chromium >/dev/null && timeout 60 node -e \"const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage();await p.setContent('<h1>headless ok</h1>');console.log(await p.textContent('h1'));await b.close()})()\"" 2> "$work/chromium.err")
+code=$?
+cat "$work/chromium.err" >> "$log"
+[ "$launched" = "headless ok" ] || fail "headless Chromium did not launch in ws1 (exit $code): $launched $(tail -n 3 "$work/chromium.err")"
 say "   headless Chromium launches in ws1 and reads its page"
 case_pass
 
