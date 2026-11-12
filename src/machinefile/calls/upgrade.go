@@ -34,12 +34,18 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// anew, its moves shown, and each newer version past a range said
 	// waiting.
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound, NeedsTerminal},
+	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
 		// invariant: an upgrade is the one run that moves the shared source
 		// to its branch's newest commit, before anything is read: the lock
 		// it leaves holds the commit read then.
-		if err := pull(ctx, d); err != nil {
+		release, err := take(ctx, d)
+		if err != nil {
+			return machinefile.Upgraded{}, err
+		}
+		defer release()
+		err = pull(ctx, d)
+		if err != nil {
 			return machinefile.Upgraded{}, err
 		}
 		plan, err := judged(ctx, d, in.Machinefile)
@@ -88,6 +94,16 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		}
 		return out, ctx.Err()
 	},
+}
+
+// value: the machine's turn, taken for one apply or upgrade; a turn
+// another run holds is the owner's to wait for, refused in words.
+func take(ctx context.Context, d Deps) (func(), error) {
+	release, err := d.Turn.Take(ctx)
+	if errors.Is(err, contract.ErrBusy) {
+		return nil, fail.New(fail.Refused, Busy, "this machine", nil)
+	}
+	return release, err
 }
 
 func pull(ctx context.Context, d Deps) error {

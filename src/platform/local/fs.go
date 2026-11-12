@@ -1,11 +1,13 @@
 package local
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 type disk struct{}
@@ -45,6 +47,52 @@ func (disk) Lock(path string) (unlock func(), err error) {
 		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
 		_ = f.Close()
 	}, nil
+}
+
+func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error) {
+	// invariant: Exclusive's lock, its folder made when missing, tried every
+	// tenth of a second until it is free; one another holder keeps past
+	// within, or past ctx, is answered held, never waited for longer.
+	ctx, cancel := context.WithTimeout(ctx, within)
+	defer cancel()
+	tick := time.NewTicker(100 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		release, held, err := tryExclusive(path)
+		if err != nil || !held {
+			return release, false, err
+		}
+		select {
+		case <-ctx.Done():
+			return nil, true, nil
+		case <-tick.C:
+		}
+	}
+}
+
+func tryExclusive(path string) (release func(), held bool, err error) {
+	f, err := openMade(path)
+	if err != nil {
+		return nil, false, err
+	}
+	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+		_ = f.Close()
+		if errors.Is(err, syscall.EWOULDBLOCK) {
+			return nil, true, nil
+		}
+		return nil, false, err
+	}
+	return func() {
+		_ = syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+		_ = f.Close()
+	}, false, nil
+}
+
+func openMade(path string) (*os.File, error) {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return nil, err
+	}
+	return os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
 }
 
 func (disk) Rename(from, to string) error {

@@ -183,6 +183,7 @@ var StationDisk = Disk{
 		noted(kept("{state}/station/leases.json"), "the reserved ports of its Mac: deleting it changes every URL"),
 		noted(kept("{state}/station/ledger.json"), "what `station apply` installed, the only apps `apply --remove` takes back, and what the last night's upgrade did: deleting it makes station remove none"),
 		noted(data("{state}/station/ledger.json.lock"), "empty: the lock two applies at once take in turn to change the ledger"),
+		noted(data("{state}/station/runs.lock"), "empty: the turn an apply, an upgrade and the night's upgrade take, so one runs at a time"),
 	},
 	Installed: []string{"~/.local/bin/station"},
 	Free: []Action{remove(

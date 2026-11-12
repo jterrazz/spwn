@@ -72,6 +72,9 @@ type Fault struct {
 }
 
 type Mac struct {
+	// value: a run of this Mac holds its turn (an apply, an upgrade, the
+	// night's), within one process: a run in another reads it free.
+	turn bool
 	// value: the engine of this Mac; nil when none was ever set up.
 	Engine *Engine `json:"engine,omitempty"`
 	// value: FileVault waits for its password at pre-boot: nothing of the
@@ -503,6 +506,18 @@ func (w *World) Mac(name string) *Mac {
 	}
 	return m
 }
+
+func (m *Mac) TakeTurn() bool {
+	// invariant: called under the world's lock; true when the turn was free
+	// and is now held.
+	if m.turn {
+		return false
+	}
+	m.turn = true
+	return true
+}
+
+func (m *Mac) GiveTurn() { m.turn = false }
 
 func (w *World) Fails(call string) bool {
 	// invariant: a scripted fault fails its call and is spent; one with no

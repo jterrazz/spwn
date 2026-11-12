@@ -118,6 +118,9 @@ func Codes() map[fail.Code]Wording {
 		machinefilecalls.NameTaken: func(e *fail.Error) (string, string) {
 			return e.Detail["path"] + " already holds another " + e.Detail["name"] + ": station never replaces your Machinefile", "edit that file, or remove it to copy " + e.Subject + " instead"
 		},
+		machinefilecalls.Busy: func(*fail.Error) (string, string) {
+			return "another station run holds this machine (an apply, an upgrade or the night's upgrade): one runs at a time", "run it again once that one ends"
+		},
 		machinefilecalls.NeedsTerminal: func(e *fail.Error) (string, string) {
 			verb := cmp.Or(e.Detail["verb"], "apply")
 			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station " + verb + " on a terminal"

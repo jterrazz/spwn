@@ -1,0 +1,23 @@
+description: 'while another run holds the machine, apply waits a while, then is refused before any effect'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Turn.Take", times: 1}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply'
+      exit: 2
+      stderr: |
+          Error: another station run holds this machine (an apply, an upgrade or the night's upgrade): one runs at a time
+          Hint: run it again once that one ends
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew

@@ -369,6 +369,7 @@
       "confirm": "remove",
       "errors": [
         "confirm.yes-needed",
+        "machinefile.busy",
         "machinefile.name-taken",
         "machinefile.needs-terminal",
         "machinefile.not-found"
@@ -431,6 +432,7 @@
       "schema": "station.machinefile.upgrade/v1",
       "where": "at-target",
       "errors": [
+        "machinefile.busy",
         "machinefile.needs-terminal",
         "machinefile.not-found"
       ],

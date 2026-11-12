@@ -1,0 +1,22 @@
+description: 'while another run holds the machine, upgrade waits a while, then is refused before any effect'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Turn.Take", times: 1}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'upgrade'
+      exit: 2
+      stderr: |
+          Error: another station run holds this machine (an apply, an upgrade or the night's upgrade): one runs at a time
+          Hint: run it again once that one ends
+    - command: 'apps | /usr/bin/grep "	gh	"'
+      exit: 0
+      stdout: |
+          ◐	gh	2.97.0	brew	update available · station apps update gh

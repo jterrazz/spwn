@@ -49,14 +49,20 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
 		// invariant: everything is judged before any effect: the
 		// Machinefile, the needs a run off a terminal cannot answer (with
 		// --remove, those of each extra it uninstalls), the removal's
 		// confirmation, a copy that would replace the owner's file. Then
 		// the machine is bound, so an interrupted run is resumed by a bare
-		// `station apply`.
+		// `station apply`. One run of the machine at a time: an upgrade or
+		// the night's holding it is waited for, a while.
+		release, err := take(ctx, d)
+		if err != nil {
+			return machinefile.Applied{}, err
+		}
+		defer release()
 		plan, err := judged(ctx, d, in.Machinefile)
 		if err != nil {
 			return machinefile.Applied{}, err

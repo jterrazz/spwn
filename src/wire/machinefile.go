@@ -166,8 +166,17 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
-		Password: m.password(), Now: m.sys.Clock.Now, Calls: calls,
+		Password: m.password(), Turn: m.turn(), Now: m.sys.Clock.Now, Calls: calls,
 	}
+}
+
+// value: the machine's one turn of apply, upgrade and the night, across
+// its processes; in a world, its Mac's.
+func (m machine) turn() machinefilecontract.Turn {
+	if m.world != nil {
+		return m.world.turn()
+	}
+	return files.NewTurn(filepath.Join(m.paths.State, "runs.lock"), local.ExclusiveWithin)
 }
 
 // value: whether a line run as root asks a password here, as sudo answers

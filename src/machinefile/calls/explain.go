@@ -28,13 +28,15 @@ type Deps struct {
 	// value: the Machinefile this machine is bound to, the ledger of what
 	// station installed, the lock of what it carries, the owner's folder a
 	// path is copied into, the vault a `vault:` reference is read from,
-	// whether a line run as root asks a password here, and the clock.
+	// whether a line run as root asks a password here, the turn one apply,
+	// upgrade or night holds at a time, and the clock.
 	Prefs    contract.SourcePrefs
 	Ledger   contract.Ledger
 	Locks    contract.Locks
 	Owned    contract.Owned
 	Vault    Vault
 	Password contract.Password
+	Turn     contract.Turn
 	Now      func() time.Time
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
@@ -59,6 +61,7 @@ const (
 	BadValue       fail.Code = "machinefile.bad-value"
 	UnknownKey     fail.Code = "machinefile.unknown-key"
 	Unavailable    fail.Code = "machinefile.source-unavailable"
+	Busy           fail.Code = "machinefile.busy"
 	CatalogInvalid fail.Code = "catalog.invalid"
 	CatalogNewer   fail.Code = "catalog.newer-schema"
 )
