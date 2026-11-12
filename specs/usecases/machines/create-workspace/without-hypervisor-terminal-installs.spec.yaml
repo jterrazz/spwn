@@ -17,7 +17,7 @@ runs:
           ○ tart is required by machines · station apps install tart
           ┃ Install tart now?
           ┃
-          ●       tart            shell
+          ●       tart    1.0.0   shell
           ●       tart-launcher                   ~/.local/bin/tart
           ●       Running
           ●       Has an address  192.168.64.5

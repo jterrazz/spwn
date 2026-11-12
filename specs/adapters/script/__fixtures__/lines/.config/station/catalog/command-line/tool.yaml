@@ -1,0 +1,13 @@
+item: station.catalog/v1
+kind: app
+name: tool
+description: A tool a shell line puts down and takes back
+provides: [tool]
+version-read:
+    pattern: 'tool (\d+\.\d+\.\d+)'
+methods:
+    - os: any
+      script:
+          check: tool --version
+          run: make tool
+          undo: rm tool

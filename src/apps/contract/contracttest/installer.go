@@ -96,7 +96,7 @@ func Installer(t *testing.T, sample catalog.Install, build Build) {
 	t.Run("what it removes is no longer listed", func(t *testing.T) {
 		i := build(t, held())
 		err := remove(ctx, i, sample)
-		if !i.Can().Remove {
+		if !i.Can().Remove || !catalog.Undoable(sample) {
 			if !errors.Is(err, contract.ErrCannot) {
 				t.Errorf("an installer that cannot remove answered %v for %s, not ErrCannot", err, key)
 			}

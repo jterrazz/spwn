@@ -96,6 +96,13 @@ type ScriptInstall struct {
 	URL  string
 	Args []string
 	Env  []string
+	// value: the shell line whose exit 0 says the app is there, its output
+	// the version a `version-read` pattern reads; empty, the app's commands
+	// are looked up.
+	Check string
+	// value: the shell line that takes the app back; empty, station cannot
+	// remove it.
+	Undo string
 	// value: the shell line that updates what the installer put, for an installer
 	// that refuses to run over its own install; empty, an update runs the installer.
 	Upgrade string
@@ -104,7 +111,16 @@ type ScriptInstall struct {
 	OnTerminal, OffTerminal []string
 }
 
-type ShellInstall struct{ Line string }
+type ShellInstall struct {
+	Line string
+	// value: the shell line whose exit 0 says the app is there, its output
+	// the version a `version-read` pattern reads; empty, the app's commands
+	// are looked up.
+	Check string
+	// value: the shell line that takes the app back; empty, station cannot
+	// remove it.
+	Undo string
+}
 
 type AppInstall struct{ Hint string }
 
@@ -220,6 +236,30 @@ func VersionOf(in Install) string {
 		return m.Tag
 	}
 	return ""
+}
+
+func CheckOf(in Install) string {
+	// value: the line an install is read present by, empty where it has none.
+	switch m := in.(type) {
+	case ScriptInstall:
+		return m.Check
+	case ShellInstall:
+		return m.Check
+	}
+	return ""
+}
+
+func Undoable(in Install) bool {
+	// value: whether the install can be taken back: a script's or a shell
+	// line's only by the `undo` its catalog line gives; any other by its
+	// method.
+	switch m := in.(type) {
+	case ScriptInstall:
+		return m.Undo != ""
+	case ShellInstall:
+		return m.Undo != ""
+	}
+	return true
 }
 
 func lastSegment(name string) string {

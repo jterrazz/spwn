@@ -23,7 +23,9 @@ func TestInstaller(t *testing.T) {
 	samples := []catalog.Install{
 		catalog.SkillInstall{Repo: "anthropics/skills", Skill: "frontend-design"},
 		catalog.ScriptInstall{URL: "https://claude.ai/install.sh"},
+		catalog.ScriptInstall{URL: "https://claude.ai/install.sh", Undo: "rm ~/.local/bin/tool"},
 		catalog.ShellInstall{Line: "npx playwright install chromium"},
+		catalog.ShellInstall{Line: "make tool", Undo: "make untool"},
 		catalog.AppInstall{Hint: "download it from its website"},
 		catalog.ProvidedByInstall{Item: "desk-app", Commands: []string{"dk"}},
 		catalog.GitHubReleaseInstall{Repo: "acme/tool", Asset: "tool-*-{os}-{arch}.tar.gz", Commands: []string{"tool"}},

@@ -1,0 +1,25 @@
+description: 'a script app is present when its check exits 0, and its output gives the version'
+fixture: ./__fixtures__/lines/
+runs:
+    - command: 'apps tool'
+      exit: 0
+      stdout: |
+          ○	tool		shell	station apps install tool
+          # Detail
+          method	shell
+          version
+          lives on	every machine
+          category	Command line
+          what	A tool a shell line puts down and takes back
+    - command: 'apps install tool'
+      exit: 0
+      stdout: |
+          ●	tool	2.4.1	shell
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make tool] DIR=
+    - command: 'apps tool | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	tool	2.4.1	shell

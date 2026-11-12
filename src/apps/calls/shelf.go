@@ -122,7 +122,7 @@ func (s *Shelf) CheckUninstall(names []string) error {
 }
 
 func (s *Shelf) uninstallable(t catalog.App) error {
-	if !s.installer(t).Can().Remove {
+	if !s.installer(t).Can().Remove || !catalog.Undoable(s.install(t)) {
 		return &apps.NotReversibleError{App: t.Name}
 	}
 	if s.fromAppStore(t) {

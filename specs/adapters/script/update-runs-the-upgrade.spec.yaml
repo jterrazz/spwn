@@ -4,7 +4,7 @@ runs:
     - command: 'apps update ohmyzsh'
       exit: 0
       stdout: |
-          ●	ohmyzsh		script
+          ●	ohmyzsh	.oh-my-zsh	script
       files:
           .calls:
               equals: |

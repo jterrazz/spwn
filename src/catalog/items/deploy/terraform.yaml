@@ -3,12 +3,16 @@ kind: app
 name: terraform
 description: Infrastructure as code provisioning
 provides: [terraform]
+version-read:
+    pattern: Terraform v(\d+\.\d+\.\d+)
 methods:
     - os: macos
       trusted: true
       brew: hashicorp/tap/terraform
     - family: linux
       script:
+          check: terraform version
+          undo: rm -f "$HOME/.local/bin/terraform"
           run: |
               set -eu
               case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) echo "no build for $(uname -m)" >&2; exit 1 ;; esac

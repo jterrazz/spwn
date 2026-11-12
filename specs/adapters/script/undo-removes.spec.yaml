@@ -1,0 +1,20 @@
+description: 'apps remove runs the undo of a script app, and its check then reads it absent'
+fixture: ./__fixtures__/lines/
+runs:
+    - command: 'apps install tool'
+      exit: 0
+      stdout: |
+          ●	tool	2.4.1	shell
+    - command: 'apps remove tool --yes'
+      exit: 0
+      stdout: |
+          ●	tool		shell
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make tool] DIR=
+                  bash [-c] [rm tool] DIR=
+    - command: 'apps tool | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	tool		shell	station apps install tool

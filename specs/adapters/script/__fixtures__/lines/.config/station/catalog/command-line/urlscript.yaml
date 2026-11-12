@@ -1,0 +1,14 @@
+item: station.catalog/v1
+kind: app
+name: urlscript
+description: A tool an installer fetched from a url puts down and takes back
+provides: [urlscript]
+version-read:
+    pattern: 'urlscript (\d+\.\d+\.\d+)'
+methods:
+    - os: any
+      script:
+          check: urlscript --version
+          url: https://example.test/get
+          env: [DIR=~/.local/bin]
+          undo: rm "$DIR/urlscript"

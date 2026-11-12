@@ -22,10 +22,8 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
           ●	jq	1.0.0	brew
-          # Lock
-          ●	homebrew		by script, was 5.0.1 by script
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-mac-mini"].files["machinefiles/jterrazz-mac-mini.lock"]'' world.json'
       exit: 0
       stdout: |+
@@ -34,6 +32,7 @@ runs:
           apps:
               - name: homebrew
                 method: script
+                version: 5.0.1
               - name: jq
                 method: brew
                 version: 1.0.0

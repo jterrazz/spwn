@@ -1,0 +1,38 @@
+description: 'apply --remove runs no undo for a script app the ledger does not hold, whatever its undo says'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: scripted
+          description: A tool a script puts down and takes back
+          provides: [scripted]
+          version-read:
+              pattern: 'scripted v(\d+\.\d+\.\d+)'
+          methods:
+              - os: macos
+                script:
+                    check: scripted --version
+                    run: install-scripted
+                    undo: uninstall-scripted
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0"}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'apply --remove --yes'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+    - command: 'apps | /usr/bin/grep -e "	scripted	"'
+      exit: 0
+      stdout: |
+          ●	scripted	1.2.0	shell

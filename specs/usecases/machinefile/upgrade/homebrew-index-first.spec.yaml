@@ -16,10 +16,10 @@ runs:
           # To install
           ○	homebrew	script	the manager of jq
           ○	jq	brew
-          ●	homebrew		script	the manager of jq
+          ●	homebrew	1.0.0	script	the manager of jq
           ●	jq	1.0.0	brew
     - command: 'upgrade'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	1.0.0	script
           ●	jq	1.0.0	brew

@@ -10,5 +10,6 @@ methods:
       uv: markitdown[all]
     - family: linux
       script:
+          check: markitdown --version
           run: uv tool install 'markitdown[all]'
           undo: uv tool uninstall markitdown

@@ -356,6 +356,9 @@ func (s *Shelf) readInstalled(ctx context.Context, t catalog.App, r apps.Report)
 		}
 		return r
 	}
+	if check := catalog.CheckOf(s.install(t)); check != "" {
+		return s.readChecked(ctx, t, r, check)
+	}
 	if !s.provided(t) {
 		return r
 	}
@@ -369,6 +372,28 @@ func (s *Shelf) readInstalled(ctx context.Context, t catalog.App, r apps.Report)
 		r.State, r.Version, r.Managed = catalog.StateOK, version, true
 	case ok:
 		r.State, r.Why, r.Detail = catalog.StateBroken, apps.WhyFailing, strings.Join(t.Version.Args, " ")+" exited "+strconv.Itoa(code)
+	}
+	return r
+}
+
+// invariant: an install that names a check is there when the check exits 0,
+// whatever its commands are; its output is the version a `version-read`
+// pattern reads, unless the app reads its version by a command of its own.
+// A check that fails or does not start reads the app absent.
+func (s *Shelf) readChecked(ctx context.Context, t catalog.App, r apps.Report, check string) apps.Report {
+	text, code, ran := s.m.RunBriefly(ctx, "bash", []string{"-c", check}, versionBudget)
+	if !ran || code != 0 {
+		return r
+	}
+	r.State, r.Managed = catalog.StateOK, true
+	if len(t.Version.Args) > 0 {
+		if version, code, ok := s.readVersion(ctx, t.Version); ok && code == 0 {
+			r.Version = version
+		}
+		return r
+	}
+	if t.Version.Pattern != "" {
+		r.Version = matchVersion(t.Version.Pattern, text)
 	}
 	return r
 }
@@ -475,14 +500,18 @@ func (s *Shelf) readVersion(ctx context.Context, p catalog.VersionRead) (version
 	if p.Pattern == "" {
 		return strings.TrimSpace(text), code, true
 	}
-	re, err := regexp.Compile("(?m)" + p.Pattern)
+	return matchVersion(p.Pattern, text), code, true
+}
+
+func matchVersion(pattern, text string) string {
+	re, err := regexp.Compile("(?m)" + pattern)
 	if err != nil {
-		return "", code, true
+		return ""
 	}
 	if m := re.FindStringSubmatch(text); len(m) > 1 {
-		return m[1], code, true
+		return m[1]
 	}
-	return "", code, true
+	return ""
 }
 
 func (s *Shelf) home(p string) string {

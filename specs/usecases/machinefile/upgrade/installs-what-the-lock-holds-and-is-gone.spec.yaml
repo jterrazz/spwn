@@ -19,10 +19,10 @@ runs:
     - command: 'upgrade'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
           ●	ripgrep	1.0.0	brew	installed anew, the lock held 14.0.0
           # Lock
-          ●	homebrew		added, by script
+          ●	homebrew		added, 5.0.1 by script
           ●	ripgrep		1.0.0 by brew, was 14.0.0 by brew
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
       exit: 0
@@ -32,6 +32,7 @@ runs:
           apps:
               - name: homebrew
                 method: script
+                version: 5.0.1
               - name: ripgrep
                 method: brew
                 version: 1.0.0

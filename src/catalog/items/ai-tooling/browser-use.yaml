@@ -10,5 +10,6 @@ methods:
       uv: browser-use
     - family: linux
       script:
+          check: browser-use --version
           run: uv tool install browser-use
           undo: uv tool uninstall browser-use

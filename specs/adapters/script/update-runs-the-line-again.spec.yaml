@@ -1,0 +1,34 @@
+description: 'an update by name runs a script app again, and a bare update, which reads no currency, runs none'
+fixture: ./__fixtures__/lines/
+runs:
+    - command: 'apps install tool urlscript'
+      exit: 0
+      stdout: |
+          ●	tool	2.4.1	shell
+          ●	urlscript	0.9.0	script
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make tool] DIR=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://example.test/get] DIR=/.local/bin
+    - command: 'apps update'
+      exit: 0
+      stdout: |
+          ●	every app is up to date on This Mac
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make tool] DIR=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://example.test/get] DIR=/.local/bin
+    - command: 'apps update tool urlscript'
+      exit: 0
+      stdout: |
+          ●	tool	2.4.1	shell
+          ●	urlscript	0.9.0	script
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [make tool] DIR=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://example.test/get] DIR=/.local/bin
+                  bash [-c] [make tool] DIR=
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://example.test/get] DIR=/.local/bin

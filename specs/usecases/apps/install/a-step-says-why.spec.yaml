@@ -14,7 +14,7 @@ runs:
           ✓ Installed 2 apps on This Mac
 
           Changes
-            ● homebrew             script  required by gh
+            ● homebrew      5.0.1  script  required by gh
             ● gh            1.0.0  brew
             ● github-login                 github-login
 

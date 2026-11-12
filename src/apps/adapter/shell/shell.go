@@ -16,7 +16,9 @@ func New(run local.Runner) *Shell { return &Shell{run: run} }
 
 func (s *Shell) Method() catalog.Method    { return catalog.MethodShell }
 func (s *Shell) Manager() contract.Manager { return contract.Manager{} }
-func (s *Shell) Can() contract.Abilities   { return contract.Abilities{Install: true} }
+func (s *Shell) Can() contract.Abilities {
+	return contract.Abilities{Install: true, Update: true, Remove: true}
+}
 
 func (s *Shell) Ready(context.Context) error { return nil }
 
@@ -28,25 +30,49 @@ func (s *Shell) Outdated(context.Context, []string) (map[string]apps.Currency, e
 	return nil, nil
 }
 
+func (s *Shell) line(ctx context.Context, line string, logs contract.Logs) error {
+	c := local.Command("bash", "-c", line)
+	c.Logs = logs
+	return local.Attach(ctx, s.run, c)
+}
+
 func (s *Shell) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	for _, i := range installs {
 		v, ok := i.(catalog.ShellInstall)
 		if !ok {
 			return errors.New(i.Key() + " is not a shell line")
 		}
-		c := local.Command("bash", "-c", v.Line)
-		c.Logs = logs
-		if err := local.Attach(ctx, s.run, c); err != nil {
+		if err := s.line(ctx, v.Line, logs); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (s *Shell) Update(context.Context, []catalog.Install, contract.Logs) error {
-	return contract.ErrCannot
+func (s *Shell) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	// invariant: an update of a line is the line again: it reads no currency,
+	// so only an update by name reaches it.
+	return s.Install(ctx, installs, logs)
 }
 
-func (s *Shell) Remove(context.Context, []catalog.Install, contract.Logs) error {
-	return contract.ErrCannot
+func (s *Shell) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	// invariant: a line is taken back by its `undo` alone; one with none is
+	// refused before anything runs, for every install of the call.
+	undos := make([]string, 0, len(installs))
+	for _, i := range installs {
+		v, ok := i.(catalog.ShellInstall)
+		if !ok {
+			return errors.New(i.Key() + " is not a shell line")
+		}
+		if v.Undo == "" {
+			return contract.ErrCannot
+		}
+		undos = append(undos, v.Undo)
+	}
+	for _, undo := range undos {
+		if err := s.line(ctx, undo, logs); err != nil {
+			return err
+		}
+	}
+	return nil
 }

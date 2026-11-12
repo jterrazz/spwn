@@ -4,7 +4,7 @@ runs:
     - command: 'apps install homebrew jq'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
           ●	jq	1.7.1	brew
       files:
           .calls:

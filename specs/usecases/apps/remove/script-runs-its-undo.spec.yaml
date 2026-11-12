@@ -1,0 +1,31 @@
+description: 'apps remove takes a script app back by its undo, and its check then reads it absent'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: scripted
+          description: A tool a script puts down and takes back
+          provides: [scripted]
+          version-read:
+              pattern: 'scripted v(\d+\.\d+\.\d+)'
+          methods:
+              - os: macos
+                script:
+                    check: scripted --version
+                    run: install-scripted
+                    undo: uninstall-scripted
+      exit: 0
+    - command: 'apps install scripted'
+      exit: 0
+      stdout: |
+          ●	scripted	1.0.0	shell
+    - command: 'apps remove scripted --yes'
+      exit: 0
+      stdout: |
+          ●	scripted		shell
+    - command: 'apps scripted | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	scripted		shell	station apps install scripted

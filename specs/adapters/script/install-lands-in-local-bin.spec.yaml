@@ -4,8 +4,8 @@ runs:
     - command: 'apps install homebrew claude'
       exit: 0
       stdout: |
-          ●	homebrew		script
-          ●	claude		script
+          ●	homebrew	5.0.1	script
+          ●	claude	2.1.0	script
       files:
           .calls:
               equals: |

@@ -103,9 +103,9 @@ func (m MethodSpec) install(provides []string) Install {
 		g := m.GitHubRelease
 		return GitHubReleaseInstall{Repo: g.Repo, Asset: g.Asset, Checksums: g.Checksums, Unverified: g.Unverified, Commands: provides}
 	case m.Script != nil && m.Script.Run != "":
-		return ShellInstall{Line: m.Script.Run}
+		return ShellInstall{Line: m.Script.Run, Check: m.Script.Check, Undo: m.Script.Undo}
 	case m.Script != nil && m.Script.URL != "":
-		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Upgrade: m.Upgrade, OnTerminal: m.Script.OnTerminal, OffTerminal: m.Script.OffTerminal}
+		return ScriptInstall{URL: m.Script.URL, Args: m.Script.Args, Env: m.Script.Env, Check: m.Script.Check, Undo: m.Script.Undo, Upgrade: m.Upgrade, OnTerminal: m.Script.OnTerminal, OffTerminal: m.Script.OffTerminal}
 	case m.Script != nil:
 		return AppInstall{Hint: m.Script.Hint}
 	case m.Skill != nil:

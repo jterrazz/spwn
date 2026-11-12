@@ -338,7 +338,7 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 						t.Errorf("%s: the update of %v reached %+v (%v)", about, via, up, err)
 					}
 				}
-				if can.Remove {
+				if can.Remove && catalog.Undoable(in) {
 					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}, true); err != nil || b.holds(method, in.Key()) {
 						t.Errorf("%s: the removal left the %s copy (%v)", about, step.Method, err)
 					}

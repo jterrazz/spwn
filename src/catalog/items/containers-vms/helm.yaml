@@ -3,11 +3,15 @@ kind: app
 name: helm
 description: Kubernetes package manager
 provides: [helm]
+version-read:
+    pattern: v(\d+\.\d+\.\d+)
 methods:
     - os: macos
       brew: helm
     - family: linux
       script:
+          check: helm version --short
+          undo: rm -f "$HELM_INSTALL_DIR/helm"
           url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
           env: [HELM_INSTALL_DIR=~/.local/bin, USE_SUDO=false]
 disk:

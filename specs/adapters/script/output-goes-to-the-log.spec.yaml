@@ -4,7 +4,7 @@ runs:
     - command: 'apps install homebrew'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
       files:
           .local/state/station/logs/homebrew.log:
               equals: |

@@ -54,7 +54,7 @@ func (s *Script) Method() catalog.Method    { return catalog.MethodScript }
 func (s *Script) Manager() contract.Manager { return contract.Manager{} }
 
 func (s *Script) Can() contract.Abilities {
-	return contract.Abilities{Install: true, Update: true, UpdateAll: true}
+	return contract.Abilities{Install: true, Update: true, Remove: true}
 }
 
 func (s *Script) Ready(context.Context) error { return nil }
@@ -103,6 +103,27 @@ func (s *Script) Update(ctx context.Context, installs []catalog.Install, logs co
 	return nil
 }
 
-func (s *Script) Remove(context.Context, []catalog.Install, contract.Logs) error {
-	return contract.ErrCannot
+func (s *Script) Remove(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
+	// invariant: an installer is taken back by its `undo` alone, run as the
+	// upgrade is, with the install's variables; one with none is refused
+	// before anything runs, for every install of the call.
+	scripts := make([]catalog.ScriptInstall, 0, len(installs))
+	for _, i := range installs {
+		v, ok := i.(catalog.ScriptInstall)
+		if !ok {
+			return errors.New(i.Key() + " is not an install script")
+		}
+		if v.Undo == "" {
+			return contract.ErrCannot
+		}
+		scripts = append(scripts, v)
+	}
+	for _, v := range scripts {
+		c := local.Command("bash", "-c", v.Undo)
+		c.Env, c.Logs = s.env(v), logs
+		if err := local.Attach(ctx, s.run, c); err != nil {
+			return err
+		}
+	}
+	return nil
 }

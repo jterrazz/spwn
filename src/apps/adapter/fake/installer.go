@@ -109,16 +109,17 @@ func Named(adapter contract.Installer) world.Named {
 
 func (f *Installer) Can() contract.Abilities {
 	// invariant: what the real adapter of its method can do: a script's
-	// install updates but is never removed, a shell line or a command
-	// another item provides only installs, an app bundle is the owner's; a
-	// world that names its managers gives their abilities too.
+	// install and a shell line update by name and are removed by their
+	// `undo`, a command another item provides only installs, an app bundle
+	// is the owner's; a world that names its managers gives their
+	// abilities too.
 	if named, ok := f.w.Managers[f.method]; ok {
 		return contract.Abilities{Install: named.Install, Update: named.Update, Remove: named.Remove, UpdateAll: named.UpdateAll}
 	}
 	switch f.method {
-	case catalog.MethodScript:
-		return contract.Abilities{Install: true, Update: true, UpdateAll: true}
-	case catalog.MethodShell, catalog.MethodProvidedBy:
+	case catalog.MethodScript, catalog.MethodShell:
+		return contract.Abilities{Install: true, Update: true, Remove: true}
+	case catalog.MethodProvidedBy:
 		return contract.Abilities{Install: true}
 	case catalog.MethodApp:
 		return contract.Abilities{}
@@ -276,6 +277,9 @@ func (f *Installer) Update(ctx context.Context, installs []catalog.Install, _ co
 }
 
 func (f *Installer) Remove(ctx context.Context, installs []catalog.Install, _ contract.Logs) error {
+	if slices.ContainsFunc(installs, func(i catalog.Install) bool { return !catalog.Undoable(i) }) {
+		return contract.ErrCannot
+	}
 	return f.run(ctx, "Remove", installs, func(s *world.Manager, k string) { delete(s.Installed, k) })
 }
 

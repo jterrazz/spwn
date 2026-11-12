@@ -1,0 +1,20 @@
+description: 'the undo of a url script runs with the variables of its install, a path under the home opened'
+fixture: ./__fixtures__/lines/
+runs:
+    - command: 'apps install urlscript'
+      exit: 0
+      stdout: |
+          ●	urlscript	0.9.0	script
+    - command: 'apps remove urlscript --yes'
+      exit: 0
+      stdout: |
+          ●	urlscript		script
+      files:
+          .calls:
+              equals: |
+                  bash [-c] [script="$(curl -fsSL "$0")" && exec bash -c "$script" bash "$@"] [https://example.test/get] DIR=/.local/bin
+                  bash [-c] [rm "$DIR/urlscript"] DIR=/.local/bin
+    - command: 'apps urlscript | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	urlscript		script	station apps install urlscript

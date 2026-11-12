@@ -3,11 +3,15 @@ kind: app
 name: kubectl
 description: Kubernetes command line
 provides: [kubectl]
+version-read:
+    pattern: 'Client Version: v(\d+\.\d+\.\d+)'
 methods:
     - os: macos
       brew: kubectl
     - family: linux
       script:
+          check: kubectl version --client
+          undo: rm -f "$HOME/.local/bin/kubectl"
           run: |
               set -eu
               case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) echo "no build for $(uname -m)" >&2; exit 1 ;; esac

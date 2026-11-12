@@ -4,11 +4,11 @@ runs:
     - command: 'apps install homebrew'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
     - command: 'apps install homebrew'
       exit: 0
       stdout: |
-          ●	homebrew		script	already installed
+          ●	homebrew	5.0.1	script	already installed
     - command: '--version >/dev/null; /usr/bin/grep -c Homebrew/install .calls'
       exit: 0
       stdout: |

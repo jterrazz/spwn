@@ -327,7 +327,8 @@ func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outc
 func (s *Shelf) held(ctx context.Context, outcomes []apps.Outcome, ran map[string]catalog.App) []apps.Outcome {
 	// invariant: an outcome names the method that holds its app, the one
 	// the run installed or updated it by, and the version that method
-	// lists once the verb has run, read once per method.
+	// lists once the verb has run, read once per method; a method that
+	// lists none, the app's own read of it (its check, its version read).
 	versions := map[catalog.Method]map[string]string{}
 	for i := range outcomes {
 		t, ok := ran[outcomes[i].Name]
@@ -337,6 +338,10 @@ func (s *Shelf) held(ctx context.Context, outcomes []apps.Outcome, ran map[strin
 		in := s.install(t)
 		outcomes[i].Method = in.Method()
 		if outcomes[i].Result != catalog.StateOK {
+			continue
+		}
+		if !in.Method().KeepsList() {
+			outcomes[i].Version = s.readInstalled(ctx, t, apps.Report{}).Version
 			continue
 		}
 		listed, read := versions[in.Method()]

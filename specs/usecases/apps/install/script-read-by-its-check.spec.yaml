@@ -1,0 +1,31 @@
+description: 'a script app is present when its check exits 0, and the checks output gives the version it ends with'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/scripted.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: app
+          name: scripted
+          description: A tool a script puts down and takes back
+          provides: [scripted]
+          version-read:
+              pattern: 'scripted v(\d+\.\d+\.\d+)'
+          methods:
+              - os: macos
+                script:
+                    check: scripted --version
+                    run: install-scripted
+                    undo: uninstall-scripted
+      exit: 0
+    - command: 'apps scripted | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ○	scripted		shell	station apps install scripted
+    - command: 'apps install scripted'
+      exit: 0
+      stdout: |
+          ●	scripted	1.0.0	shell
+    - command: 'apps scripted | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	scripted	1.0.0	shell

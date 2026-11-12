@@ -4,7 +4,7 @@ runs:
     - command: 'apps install homebrew ohmyzsh'
       exit: 0
       stdout: |
-          ●	homebrew		script
+          ●	homebrew	5.0.1	script
           ●	ohmyzsh		script
       files:
           .calls:

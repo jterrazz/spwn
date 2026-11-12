@@ -1,0 +1,17 @@
+#!/bin/sh
+# bash as station's lines meet it: a check answers from the file its tool leaves, every other line is recorded, one argument in brackets, with the variable an installer is given.
+case "$2" in
+"tool --version") [ -f "$HOME/.tool" ] && echo "tool 2.4.1" && exit 0; exit 1 ;;
+"keeper --version") [ -f "$HOME/.keeper" ] && echo "keeper 1.0.0" && exit 0; exit 1 ;;
+"urlscript --version") [ -f "$HOME/.urlscript" ] && echo "urlscript 0.9.0" && exit 0; exit 1 ;;
+esac
+line='bash'
+for arg in "$@"; do line="$line [$arg]"; done
+printf '%s DIR=%s\n' "$line" "${DIR#"$HOME"}" >> "$HOME/.calls"
+case "$2" in
+"make tool") : > "$HOME/.tool" ;;
+"make keeper") : > "$HOME/.keeper" ;;
+"rm tool") /bin/rm -f "$HOME/.tool" ;;
+'rm "$DIR/urlscript"') /bin/rm -f "$HOME/.urlscript" ;;
+*curl*) : > "$HOME/.urlscript" ;;
+esac

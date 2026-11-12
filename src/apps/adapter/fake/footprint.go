@@ -47,6 +47,25 @@ func (f Footprint) Path(pattern string) bool {
 	return f.any(func(t catalog.App) bool { return t.Version.Path != "" && t.Version.Path == pattern })
 }
 
+func (f Footprint) Check(line string) (held bool, version string, known bool) {
+	// invariant: a check line some install of the catalog names answers as
+	// the world holds that install: exit 0 and the version, or exit 1.
+	f.w.Lock()
+	defer f.w.Unlock()
+	for _, t := range f.apps {
+		for _, p := range t.Installs {
+			if catalog.CheckOf(p.Install) != line {
+				continue
+			}
+			known = true
+			if v, there := manager(f.w, f.mac, p.Install.Method()).Installed[p.Install.Key()]; there {
+				return true, said(t.Version.Pattern, v), true
+			}
+		}
+	}
+	return false, "", known
+}
+
 func (f Footprint) Reads(home, arg string) bool {
 	return f.any(func(t catalog.App) bool {
 		at, _, _ := strings.Cut(strings.Replace(t.Version.Path, "~", home, 1), "*")
@@ -136,6 +155,14 @@ func (s Seen) Output(ctx context.Context, c local.Cmd) (local.Output, error) {
 	// value: a program the world only finds, or one that reads what a no-list
 	// install left, answers every run with exit 0 and no output: no version to
 	// read, none to fail.
+	if len(c.Args) == 2 && path.Base(c.Name) == "bash" && c.Args[0] == "-c" {
+		if held, version, known := s.Foot.Check(c.Args[1]); known {
+			if !held {
+				return local.Output{ExitCode: 1}, nil
+			}
+			return local.Output{Stdout: version + "\n"}, nil
+		}
+	}
 	if out, ok := s.Foot.VersionOf(s.Home, c); ok {
 		return local.Output{Stdout: out + "\n"}, nil
 	}

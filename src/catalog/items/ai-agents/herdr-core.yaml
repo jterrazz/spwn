@@ -3,6 +3,8 @@ kind: app
 name: herdr-core
 description: "Herdr's agent engine, the hc command station drives"
 provides: [hc]
+version-read:
+    pattern: (\d+\.\d+\.\d+\S*)
 # outside: herdr-core ships no GitHub release, so a machine with no
 # herdr-app installs hc by the project's own installer, which checks the
 # archive against its manifest; the herdr-machine setting's copy from a Mac
