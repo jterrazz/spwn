@@ -1,6 +1,7 @@
 package machinefile
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -41,21 +42,31 @@ func blockRow(b machinefile.Block, words ...string) page.Row {
 }
 
 // value: the rows of the blocks apply does one thing with: set (written
-// where it is absent), left (edited by hand since, said with the way to see
-// how), or removed (its item is in the plan no more).
+// where it is absent, or written anew over what station last wrote), or left
+// (edited by hand since, said with the way to see how).
 func blockRows(p machinefile.Plan, a machinefile.Action) []page.Row {
 	var rows []page.Row
 	for _, b := range p.Blocks {
-		if b.Action != a {
-			continue
-		}
-		switch a {
-		case machinefile.Set:
+		switch {
+		case b.Action != a:
+		case a == machinefile.Set && b.Condition == machinefile.Outdated:
+			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh), "station's earlier text, written anew"))
+		case a == machinefile.Set:
 			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh)))
-		case machinefile.Leave:
+		case a == machinefile.Leave:
 			rows = append(rows, blockRow(b, blockWhere(b), "edited by hand: station plan --diff shows how"))
-		default:
-			rows = append(rows, blockRow(b, blockWhere(b), "its item is no longer listed"))
+		}
+	}
+	return rows
+}
+
+// value: the rows of the blocks station wrote for an app listed no longer,
+// which `apply --remove` takes back with it.
+func extraBlockRows(p machinefile.Plan, lead ...string) []page.Row {
+	var rows []page.Row
+	for _, b := range p.Blocks {
+		if b.Action == machinefile.Remove {
+			rows = append(rows, blockRow(b, append(slices.Clone(lead), blockWhere(b), "written by station, listed no longer")...))
 		}
 	}
 	return rows

@@ -205,7 +205,6 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		{machinefile.Set, "set", "To set", "to set", ""},
 		{machinefile.Adopt, "adopt", "To adopt", "to adopt", ""},
 		{machinefile.Leave, "leave", "Left as it is", "left as it is", ""},
-		{machinefile.Remove, "remove-blocks", "To remove", "to remove", ""},
 	} {
 		if rows := byAction(part.action); len(rows) > 0 {
 			sections = append(sections, section(part.id, part.title, rows))
@@ -215,7 +214,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	if kept := len(p.Of(machinefile.Keep)); kept > 0 {
 		words = append(words, counted(kept, "present"))
 	}
-	if rows := extraRows(p); len(rows) > 0 {
+	if rows := append(extraRows(p), extraBlockRows(p)...); len(rows) > 0 {
 		sections = append(sections, section("extra", "Extra", rows))
 		words = append(words, counted(len(rows), "extra"))
 	}
@@ -225,7 +224,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	switch {
 	case !p.Calm():
 		mark = page.Absent
-		removes := slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
+		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
 		if removes || p.WritesBlocks() || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
 		}
@@ -257,12 +256,15 @@ func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
 		}
 	}
 	for _, b := range p.Blocks {
+		if b.Action == machinefile.Remove {
+			continue
+		}
 		rows = append(rows, blockRow(b, condition(b.Condition), blockWhere(b)))
 		if b.Condition != machinefile.Present {
 			drifted++
 		}
 	}
-	for _, r := range extraRows(p, condition(machinefile.Extra)) {
+	for _, r := range append(extraRows(p, condition(machinefile.Extra)), extraBlockRows(p, condition(machinefile.Extra))...) {
 		rows = append(rows, r)
 		drifted++
 	}
@@ -320,7 +322,7 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 	for _, d := range done {
 		step(d)
 	}
-	for _, b := range a.Blocks {
+	block := func(b machinefile.BlockDone) {
 		steps = append(steps, pages.RunStep{ID: b.ID, Label: b.Item, State: b.State, Cells: []page.Value{page.Version(""), page.Texts(blockMethod)}, Detail: strings.TrimSuffix(blockWhere(b.Block)+": "+b.Detail, ": ")})
 		switch {
 		case b.State == catalog.StateBroken:
@@ -331,8 +333,18 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 			changed++
 		}
 	}
+	for _, b := range a.Blocks {
+		if b.Action != machinefile.Remove {
+			block(b)
+		}
+	}
 	for _, d := range removed {
 		step(d)
+	}
+	for _, b := range a.Blocks {
+		if b.Action == machinefile.Remove {
+			block(b)
+		}
 	}
 	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "items in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
 	var words []string

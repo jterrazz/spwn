@@ -1,4 +1,4 @@
-description: an app listed no longer loses its block at a bare apply and stays installed
+description: an app listed no longer keeps its block at a bare apply, as it stays installed
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
@@ -15,10 +15,6 @@ runs:
       exit: 0
     - command: 'apply > /dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/grep -c station:postgres/path .zshrc'
-      exit: 0
-      stdout: |
-          2
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -29,18 +25,24 @@ runs:
     - command: 'apply'
       exit: 0
       stdout: |
-          # To remove
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · its item is no longer listed
           # Extra
           ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, listed no longer
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-          ●	postgres		shell	~/.zshrc [station:postgres/path]: removed
-    - command: '--version >/dev/null; /usr/bin/grep -c station:postgres .zshrc'
-      exit: 1
+    - command: '--version >/dev/null; /usr/bin/grep -c station:postgres/path .zshrc'
+      exit: 0
       stdout: |
-          0
+          2
     - command: 'apps | /usr/bin/grep postgres'
       exit: 0
       stdout: |
           ●	postgres	18.1	brew
+    - command: 'drift'
+      exit: 0
+      stdout: |
+          # Items
+          ●	homebrew	script	present
+          ●	jq	brew	present
+          ?	postgres	brew	extra · installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	extra · ~/.zshrc [station:postgres/path] · written by station, listed no longer

@@ -38,21 +38,19 @@ runs:
     - command: 'plan'
       exit: 0
       stdout: |
-          # To remove
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · its item is no longer listed
           # Extra
           ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, listed no longer
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
-          # To remove
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · its item is no longer listed
           # Extra
           ?	postgres	brew	installed by station for jterrazz-macbook-pro, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · written by station, listed no longer
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-          ●	postgres		shell	~/.zshrc [station:postgres/path]: removed
           ●	postgres		brew	removed
+          ●	postgres		shell	~/.zshrc [station:postgres/path]: removed
     - command: '--version >/dev/null; /bin/cat .zshrc'
       exit: 0
       stdout: |

@@ -66,6 +66,29 @@ func (l *Ledger) Write(_ context.Context, n machinefile.Night) error {
 	return nil
 }
 
+func (l *Ledger) Blocks(context.Context) ([]machinefile.Written, error) {
+	l.w.Lock()
+	defer l.w.Unlock()
+	return slices.Clone(l.w.Mac(l.mac).Store().Blocks), nil
+}
+
+func (l *Ledger) PutBlock(_ context.Context, w machinefile.Written) error {
+	l.w.Lock()
+	defer l.w.Unlock()
+	st := l.w.Mac(l.mac).Store()
+	st.Blocks = append(slices.DeleteFunc(st.Blocks, func(e machinefile.Written) bool { return e.ID == w.ID }), w)
+	slices.SortFunc(st.Blocks, func(a, b machinefile.Written) int { return strings.Compare(a.ID, b.ID) })
+	return nil
+}
+
+func (l *Ledger) DeleteBlock(_ context.Context, id string) error {
+	l.w.Lock()
+	defer l.w.Unlock()
+	st := l.w.Mac(l.mac).Store()
+	st.Blocks = slices.DeleteFunc(st.Blocks, func(e machinefile.Written) bool { return e.ID == id })
+	return nil
+}
+
 func (l *Ledger) Migrate(context.Context) error { return nil }
 
 // value: the owner's folder of a Mac of the world: a file named by its

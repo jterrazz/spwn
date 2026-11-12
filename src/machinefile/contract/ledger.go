@@ -17,6 +17,12 @@ type Ledger interface {
 	// Write left it; none written reads as none (false) with no error.
 	Night(ctx context.Context) (machinefile.Night, bool, error)
 	Write(ctx context.Context, n machinefile.Night) error
+	// invariant: the blocks of ~/.zshrc apply wrote, by id; a block written
+	// again replaces the earlier record of its id, and deleting an id never
+	// recorded changes nothing.
+	Blocks(ctx context.Context) ([]machinefile.Written, error)
+	PutBlock(ctx context.Context, w machinefile.Written) error
+	DeleteBlock(ctx context.Context, id string) error
 }
 
 type Owned interface {

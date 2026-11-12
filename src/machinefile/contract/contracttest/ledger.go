@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/fs"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,6 +70,44 @@ func Ledger(t *testing.T, open func(t *testing.T) contract.Ledger) {
 			t.Errorf("List after a night = %+v, %v", list, err)
 		}
 	})
+	t.Run("a block written is listed by id beside the installs, and written again replaces it", func(t *testing.T) {
+		l := open(t)
+		if err := l.Put(ctx, installed("jq", "first")); err != nil {
+			t.Fatal(err)
+		}
+		for _, w := range []machinefile.Written{written("station:jq", "a\n"), written("station:fd", "b\n"), written("station:jq", "c\n")} {
+			if err := l.PutBlock(ctx, w); err != nil {
+				t.Fatalf("PutBlock: %v", err)
+			}
+		}
+		got, err := l.Blocks(ctx)
+		want := []machinefile.Written{written("station:fd", "b\n"), written("station:jq", "c\n")}
+		if err != nil || !slices.Equal(got, want) {
+			t.Errorf("Blocks = %+v, %v; want %+v", got, err, want)
+		}
+		if got, err := l.List(ctx); err != nil || !slices.Equal(got, []machinefile.Installed{installed("jq", "first")}) {
+			t.Errorf("List = %+v, %v; want the install kept", got, err)
+		}
+	})
+	t.Run("a deleted block is gone, and deleting one never recorded changes nothing", func(t *testing.T) {
+		l := open(t)
+		if err := l.PutBlock(ctx, written("station:jq", "a\n")); err != nil {
+			t.Fatal(err)
+		}
+		for _, id := range []string{"station:jq", "station:jq", "station:fd"} {
+			if err := l.DeleteBlock(ctx, id); err != nil {
+				t.Errorf("DeleteBlock(%s) = %v", id, err)
+			}
+		}
+		if got, err := l.Blocks(ctx); err != nil || len(got) != 0 {
+			t.Errorf("Blocks = %+v, %v; want none", got, err)
+		}
+	})
+}
+
+func written(id, body string) machinefile.Written {
+	item, _, _ := strings.Cut(strings.TrimPrefix(id, "station:"), "/")
+	return machinefile.Written{ID: id, Item: item, Digest: machinefile.BlockDigest(body), At: time.Date(2026, 11, 12, 9, 0, 0, 0, time.UTC)}
 }
 
 // value: an owner's folder whose path holds body (none when path is

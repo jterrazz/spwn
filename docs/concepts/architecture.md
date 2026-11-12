@@ -234,18 +234,18 @@ An item's file is data: behaviour chosen by data belongs to a family, picked fro
 
 The binary holds the catalog; the machine holds its own state, in the XDG folders, each store one contract of its family with one `jsonfile` adapter, built by `wire` alone:
 
-| Store              | Family        | File                                                                                        |
-| ------------------ | ------------- | ------------------------------------------------------------------------------------------- |
-| `Preferences`      | `core`        | `~/.config/station/preferences.json` ([Preferences](../reference/preferences.md))           |
-| `DeclarationStore` | `ports`       | `~/.config/station/public.json`                                                             |
-| `MachineStore`     | `machines`    | `~/.local/state/station/vms/`                                                               |
-| `ImageStore`       | `images`      | `~/.local/state/station/images/`                                                            |
-| `ShareStore`       | `accounts`    | `~/.local/state/station/shares.json`                                                        |
-| `ReservationStore` | `ports`       | `~/.local/state/station/leases.json`                                                        |
-| `AppliedStore`     | `settings`    | `~/.local/state/station/applied/`                                                           |
-| `Ledger`           | `machinefile` | `~/.local/state/station/ledger.json`: what `apply` installed, which bounds `apply --remove` |
-| `UptimeStore`      | `machines`    | `~/.local/state/station/uptime.json`, written by the engine's keep job alone                |
-| `Journal`          | `agents`      | `~/.local/state/station/agents/`, inside a VM, one file per session                         |
+| Store              | Family        | File                                                                                                                           |
+| ------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Preferences`      | `core`        | `~/.config/station/preferences.json` ([Preferences](../reference/preferences.md))                                              |
+| `DeclarationStore` | `ports`       | `~/.config/station/public.json`                                                                                                |
+| `MachineStore`     | `machines`    | `~/.local/state/station/vms/`                                                                                                  |
+| `ImageStore`       | `images`      | `~/.local/state/station/images/`                                                                                               |
+| `ShareStore`       | `accounts`    | `~/.local/state/station/shares.json`                                                                                           |
+| `ReservationStore` | `ports`       | `~/.local/state/station/leases.json`                                                                                           |
+| `AppliedStore`     | `settings`    | `~/.local/state/station/applied/`                                                                                              |
+| `Ledger`           | `machinefile` | `~/.local/state/station/ledger.json`: what `apply` installed and the `~/.zshrc` blocks it wrote, which bounds `apply --remove` |
+| `UptimeStore`      | `machines`    | `~/.local/state/station/uptime.json`, written by the engine's keep job alone                                                   |
+| `Journal`          | `agents`      | `~/.local/state/station/agents/`, inside a VM, one file per session                                                            |
 
 The shared source's clone, `~/.cache/station/sources/<name>`, is no store: it is cloned at its default branch, moved only by `upgrade` and only forward, and cloned again when it is gone. Each store carries its version; `station init` runs every store's `Migrator`, and a store written by a newer station is refused rather than read. Nothing else is consulted, and no file inside the clone matters: the dotfiles and the VM recipes are embedded. [Footprint](../reference/footprint.md) lists every file station writes.
 

@@ -36,7 +36,7 @@ type ExtraJSON struct {
 }
 
 // value: one block of ~/.zshrc: its item and id, what the file holds of it
-// (`present`, `absent`, `changed`, or `extra` for one whose item is no longer
+// (`present`, `absent`, `outdated`, `changed`, or `extra` for one whose item is no longer
 // listed), what apply does with it (`set`, `keep`, `leave`, `remove`), and
 // what a run did (`ok`, `broken`...); a plan's block has no result.
 
@@ -98,8 +98,12 @@ func AppliedContract(a machinefile.Applied, done, removed []Worded) PlanJSON {
 	// what the run did with it, then each extra removed.
 	out := PlanContract("station.machinefile.apply/v1", a.Plan)
 	out.Lines, out.Bound = []LineJSON{}, a.Bound
-	for i, b := range a.Blocks {
-		out.Blocks[i].Result, out.Blocks[i].Detail = string(b.State), b.Detail
+	for _, b := range a.Blocks {
+		for i := range out.Blocks {
+			if out.Blocks[i].ID == b.ID {
+				out.Blocks[i].Result, out.Blocks[i].Detail = string(b.State), b.Detail
+			}
+		}
 	}
 	for _, d := range append(append([]Worded{}, done...), removed...) {
 		detail := d.Detail

@@ -466,7 +466,7 @@ func (p Plan) Of(a Action) []Line {
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
 	// set, no extra `apply --remove` would take back or let go of.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks()
+	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !p.RemovesBlocks()
 }
 
 func (p Plan) Interactive(remove bool) []Asked {

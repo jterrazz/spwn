@@ -113,6 +113,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		out.Blocks = r.blocks(ctx, plan)
 		if in.Remove {
 			out.Removed = r.remove(ctx, plan.Extra)
+			out.Blocks = append(out.Blocks, r.removedBlocks(ctx, plan)...)
 		}
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
@@ -171,6 +172,9 @@ type run struct {
 	// value: the apps that read there once their line ended, whose blocks
 	// may be written.
 	there map[string]bool
+	// value: the extras `apply --remove` kept, to be judged again next run,
+	// whose blocks stay with them.
+	stays map[string]bool
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
@@ -366,8 +370,10 @@ func masked(words string, secrets map[string]string) string {
 func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machinefile.Done {
 	var out []machinefile.Done
 	var stayed []machinefile.ExtraLine
+	r.stays = map[string]bool{}
 	for _, e := range extra {
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
+		r.stays[e.Step.Item] = true
 		switch e.Fate() {
 		case machinefile.KeptRequired:
 			done.Detail = "required by " + strings.Join(e.RequiredBy, ", ") + ": kept, judged again next run"
@@ -416,6 +422,8 @@ func (r *run) remove(ctx context.Context, extra []machinefile.ExtraLine) []machi
 		}
 		if err := r.d.Ledger.Delete(ctx, e.Step.Item); err != nil {
 			done.State, done.Detail = catalog.StateBroken, err.Error()
+		} else {
+			delete(r.stays, e.Step.Item)
 		}
 		out = append(out, done)
 	}

@@ -72,6 +72,9 @@ func (l *ledger) Delete(_ context.Context, item string) error {
 	l.deleted = append(l.deleted, item)
 	return nil
 }
+func (*ledger) Blocks(context.Context) ([]machinefile.Written, error) { return nil, nil }
+func (*ledger) PutBlock(context.Context, machinefile.Written) error   { return nil }
+func (*ledger) DeleteBlock(context.Context, string) error             { return nil }
 
 func TestAnInstallThatAnsweredBeforeTheInterruptIsNotReadAgain(t *testing.T) {
 	// invariant: the read past an interrupt is for an item whose install
