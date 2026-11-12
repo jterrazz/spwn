@@ -7,9 +7,19 @@ methods:
     - os: macos
       brew: kubectl
     - family: linux
-      mise:
-          name: kubectl
-          version: latest
+      script:
+          run: |
+              set -eu
+              case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) echo "no build for $(uname -m)" >&2; exit 1 ;; esac
+              version=$(curl -fsSL https://dl.k8s.io/release/stable.txt)
+              base=https://dl.k8s.io/release/$version/bin/linux/$arch
+              dir=$(mktemp -d)
+              trap 'rm -rf "$dir"' EXIT
+              curl -fsSL -o "$dir/kubectl" "$base/kubectl"
+              curl -fsSL -o "$dir/kubectl.sha256" "$base/kubectl.sha256"
+              echo "$(cat "$dir/kubectl.sha256")  $dir/kubectl" | sha256sum -c -
+              mkdir -p "$HOME/.local/bin"
+              install -m 0755 "$dir/kubectl" "$HOME/.local/bin/kubectl"
 disk:
     paths:
         - path: ~/.kube/cache

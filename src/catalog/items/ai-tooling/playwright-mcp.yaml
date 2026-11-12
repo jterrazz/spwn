@@ -8,6 +8,4 @@ methods:
       machine: [workspace, server]
       npm: '@playwright/mcp'
     - family: linux
-      mise:
-          name: npm:@playwright/mcp
-          version: latest
+      bun: '@playwright/mcp'

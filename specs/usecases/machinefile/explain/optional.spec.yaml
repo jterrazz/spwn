@@ -24,4 +24,4 @@ runs:
       exit: 0
       stdout: |
           # studio-linux
-          	apps.jq	optional, no method by brew for ubuntu 24.04, where it has mise	user	studio-linux
+          	apps.jq	optional, no method by brew for ubuntu 24.04, where it has apt	user	studio-linux

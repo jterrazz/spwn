@@ -7,10 +7,10 @@ provides: [bat]
 methods:
     - os: macos
       brew: bat
-    - family: linux
-      mise:
-          name: bat
-          version: latest
+    - os: ubuntu
+      provides: [batcat]
+      needs: [sudo]
+      apt: { packages: [bat] }
 disk:
     paths:
         - path: '{cache}/bat'

@@ -8,9 +8,27 @@ methods:
       trusted: true
       brew: pulumi/tap/pulumi
     - family: linux
-      mise:
-          name: pulumi
-          version: latest
+      arch: arm64
+      provides:
+          [
+              pulumi,
+              pulumi-language-go,
+              pulumi-language-nodejs,
+              pulumi-language-python,
+              pulumi-language-python-exec,
+          ]
+      github-release: { repo: pulumi/pulumi, asset: 'pulumi-v*-linux-arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      provides:
+          [
+              pulumi,
+              pulumi-language-go,
+              pulumi-language-nodejs,
+              pulumi-language-python,
+              pulumi-language-python-exec,
+          ]
+      github-release: { repo: pulumi/pulumi, asset: 'pulumi-v*-linux-x64.tar.gz' }
 disk:
     paths:
         - path: ~/.pulumi/plugins

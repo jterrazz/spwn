@@ -8,6 +8,8 @@ methods:
     - os: macos
       brew: dust
     - family: linux
-      mise:
-          name: dust
-          version: latest
+      arch: arm64
+      github-release: { repo: bootandy/dust, asset: 'dust-*-aarch64-unknown-linux-gnu.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: bootandy/dust, asset: 'dust-*-x86_64-unknown-linux-gnu.tar.gz' }

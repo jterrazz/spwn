@@ -6,10 +6,9 @@ provides: [ansible]
 methods:
     - os: macos
       brew: ansible
-    - family: linux
-      mise:
-          name: pipx:ansible
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [ansible] }
 disk:
     paths:
         - path: ~/.ansible/tmp

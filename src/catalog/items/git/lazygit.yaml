@@ -8,9 +8,11 @@ methods:
     - os: macos
       brew: lazygit
     - family: linux
-      mise:
-          name: lazygit
-          version: latest
+      arch: arm64
+      github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_x86_64.tar.gz' }
 disk:
     paths:
         - path: ~/Library/Application Support/lazygit/state.yml

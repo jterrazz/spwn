@@ -14,10 +14,10 @@ runs:
       exit: 0
       stdout: |
           # To install
-          ○	mise	script	the manager of jq
-          ○	jq	mise
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
           # Extra
           ?	node	mise	installed by station for linux-1, what it holds does not read: kept
-          ●	mise	1.0.0	script	the manager of jq
-          ●	jq	1.0.0	mise
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
           ●	node	24.11.0	mise	what it holds does not read: kept, judged again next run

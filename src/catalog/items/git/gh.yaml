@@ -8,10 +8,9 @@ then: [github-login]
 methods:
     - os: macos
       brew: gh
-    - family: linux
-      mise:
-          name: gh
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [gh] }
 disk:
     paths:
         - path: '{cache}/gh'

@@ -9,6 +9,6 @@ methods:
       machine: [workspace, server]
       uv: browser-use
     - family: linux
-      mise:
-          name: pipx:browser-use
-          version: latest
+      script:
+          run: uv tool install browser-use
+          undo: uv tool uninstall browser-use

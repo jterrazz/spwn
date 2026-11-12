@@ -8,9 +8,13 @@ methods:
     - os: macos
       brew: starship
     - family: linux
-      mise:
-          name: starship
-          version: latest
+      arch: arm64
+      github-release:
+          { repo: starship/starship, asset: 'starship-aarch64-unknown-linux-musl.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release:
+          { repo: starship/starship, asset: 'starship-x86_64-unknown-linux-musl.tar.gz' }
 disk:
     paths:
         - path: '{cache}/starship'

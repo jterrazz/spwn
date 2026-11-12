@@ -14,20 +14,20 @@ runs:
       exit: 0
       stdout: |
           # To install
-          ○	mise	script	the manager of jq
-          ○	jq	mise
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
           # Extra
           ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # To install
-          ○	mise	script	the manager of jq
-          ○	jq	mise
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
           # Extra
           ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
-          ●	mise	1.0.0	script	the manager of jq
-          ●	jq	1.0.0	mise
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
           ●	node	24.11.0	mise	holds 1 package of yours: kept, judged again next run
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["linux-1"].apps.npm.installed = {}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
@@ -36,6 +36,6 @@ runs:
       stdout: |
           # Extra
           ?	node	mise	installed by station for linux-1, listed no longer
-          ●	mise	1.0.0	script	the manager of jq
-          ●	jq	1.0.0	mise
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
           ●	node		mise	removed

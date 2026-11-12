@@ -7,7 +7,7 @@ provides: [fd]
 methods:
     - os: macos
       brew: fd
-    - family: linux
-      mise:
-          name: fd
-          version: latest
+    - os: ubuntu
+      provides: [fdfind]
+      needs: [sudo]
+      apt: { packages: [fd-find] }

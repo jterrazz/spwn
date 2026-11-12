@@ -1,17 +1,16 @@
-description: 'on a linux VM a brew app installs through mise, and brew is never called'
+description: 'on a linux VM a runtime installs through mise, and brew is never called'
 fixture: ../../__fixtures__/stubs/
 env:
     - STATION_MACHINE_KIND=linux
 runs:
-    - command: 'apps install gh'
+    - command: 'apps install go'
       exit: 0
       stdout: |
-          ●	gh		mise
-          ○	github-login			needs a terminal: station settings apply github-login
+          ●	go		mise
       files:
           .calls:
               contains:
-                  - 'mise use --global gh@latest'
+                  - 'mise use --global go@latest'
     - command: '--version > /dev/null; /usr/bin/grep -c ''^brew'' .calls'
       exit: 1
       stdout: |

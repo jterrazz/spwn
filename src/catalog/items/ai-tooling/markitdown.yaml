@@ -9,6 +9,6 @@ methods:
       machine: [workspace, server]
       uv: markitdown[all]
     - family: linux
-      mise:
-          name: pipx:markitdown[all]
-          version: latest
+      script:
+          run: uv tool install 'markitdown[all]'
+          undo: uv tool uninstall markitdown

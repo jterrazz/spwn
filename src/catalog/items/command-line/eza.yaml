@@ -7,7 +7,6 @@ provides: [eza]
 methods:
     - os: macos
       brew: eza
-    - family: linux
-      mise:
-          name: eza
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [eza] }

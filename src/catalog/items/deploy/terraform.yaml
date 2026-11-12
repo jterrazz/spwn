@@ -8,9 +8,22 @@ methods:
       trusted: true
       brew: hashicorp/tap/terraform
     - family: linux
-      mise:
-          name: terraform
-          version: latest
+      script:
+          run: |
+              set -eu
+              case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) echo "no build for $(uname -m)" >&2; exit 1 ;; esac
+              version=$(curl -fsSL https://checkpoint-api.hashicorp.com/v1/check/terraform | sed -n 's/.*"current_version":"\([^"]*\)".*/\1/p')
+              [ -n "$version" ] || { echo "the latest release did not answer" >&2; exit 1; }
+              base=https://releases.hashicorp.com/terraform/$version
+              zip=terraform_${version}_linux_$arch.zip
+              dir=$(mktemp -d)
+              trap 'rm -rf "$dir"' EXIT
+              curl -fsSL -o "$dir/$zip" "$base/$zip"
+              curl -fsSL -o "$dir/sums" "$base/terraform_${version}_SHA256SUMS"
+              (cd "$dir" && grep " $zip\$" sums | sha256sum -c -)
+              python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extract("terraform", sys.argv[2])' "$dir/$zip" "$dir"
+              mkdir -p "$HOME/.local/bin"
+              install -m 0755 "$dir/terraform" "$HOME/.local/bin/terraform"
 disk:
     paths:
         - path: ~/.terraform.d

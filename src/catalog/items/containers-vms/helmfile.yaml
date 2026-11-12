@@ -7,6 +7,4 @@ methods:
     - os: macos
       brew: helmfile
     - family: linux
-      mise:
-          name: helmfile
-          version: latest
+      github-release: { repo: helmfile/helmfile, asset: 'helmfile_*_linux_{arch}.tar.gz' }

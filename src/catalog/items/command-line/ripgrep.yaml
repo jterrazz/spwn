@@ -7,7 +7,6 @@ provides: [rg]
 methods:
     - os: macos
       brew: ripgrep
-    - family: linux
-      mise:
-          name: ripgrep
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [ripgrep] }

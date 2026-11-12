@@ -7,9 +7,9 @@ runs:
       exit: 0
       stdout: |
           	On linux-1:
-          ●	ripgrep	1.0.0	mise
+          ●	ripgrep	1.0.0	apt
     - command: '--version >/dev/null; "$STATION" apps ripgrep --on linux-1 | /usr/bin/sed -n 2p; "$STATION" apps ripgrep | /usr/bin/head -1'
       exit: 0
       stdout: |
-          ●	ripgrep	1.0.0	mise
+          ●	ripgrep	1.0.0	apt
           ○	ripgrep		brew	station apps install ripgrep

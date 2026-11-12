@@ -7,9 +7,11 @@ methods:
     - os: macos
       brew: opencode
     - family: linux
-      mise:
-          name: opencode
-          version: latest
+      arch: arm64
+      github-release: { repo: anomalyco/opencode, asset: 'opencode-linux-arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: anomalyco/opencode, asset: 'opencode-linux-x64.tar.gz' }
 disk:
     paths:
         - path: '{cache}/opencode'

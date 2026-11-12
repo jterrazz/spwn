@@ -7,6 +7,8 @@ methods:
     - os: macos
       brew: herdr
     - family: linux
-      mise:
-          name: herdr
-          version: latest
+      arch: arm64
+      github-release: { repo: herdrdev/herdr, asset: 'herdr-linux-aarch64' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: herdrdev/herdr, asset: 'herdr-linux-x86_64' }

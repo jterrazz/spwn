@@ -54,7 +54,7 @@ apps: # WHAT it carries
     - docker
     - { name: node, version: '24' }
     - { name: ghostty, optional: true }
-    - { name: jq, manager: mise }
+    - { name: jq, manager: apt }
 settings:
     git-identity: { from: computer }
     autologin: { password: 'vault:agent-password' }

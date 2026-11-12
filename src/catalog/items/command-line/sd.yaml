@@ -7,7 +7,6 @@ provides: [sd]
 methods:
     - os: macos
       brew: sd
-    - family: linux
-      mise:
-          name: sd
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [sd] }

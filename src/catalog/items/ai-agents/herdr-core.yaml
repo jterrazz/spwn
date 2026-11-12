@@ -3,9 +3,15 @@ kind: app
 name: herdr-core
 description: "Herdr's agent engine, the hc command station drives"
 provides: [hc]
-# outside: on a Linux workspace no method installs hc yet: the herdr-machine
-# setting of its Mac copies it in (`hc machine add --install`).
+# outside: herdr-core ships no GitHub release, so a machine with no
+# herdr-app installs hc by the project's own installer, which checks the
+# archive against its manifest; the herdr-machine setting's copy from a Mac
+# (`hc machine add --install`) stays the way for a VM made before.
 methods:
     - os: macos
       machine: computer
       provided-by: herdr-app
+    - os: any
+      script:
+          check: hc --version
+          url: https://releases.herdr.dev/core/install.sh

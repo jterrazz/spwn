@@ -7,10 +7,9 @@ provides: [zoxide]
 methods:
     - os: macos
       brew: zoxide
-    - family: linux
-      mise:
-          name: zoxide
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [zoxide] }
 disk:
     paths:
         - path: ~/Library/Application Support/zoxide/db.zo

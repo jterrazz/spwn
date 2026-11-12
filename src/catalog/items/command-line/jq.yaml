@@ -6,7 +6,6 @@ provides: [jq]
 methods:
     - os: macos
       brew: jq
-    - family: linux
-      mise:
-          name: jq
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [jq] }

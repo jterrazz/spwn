@@ -8,9 +8,11 @@ methods:
     - os: macos
       brew: uv
     - family: linux
-      mise:
-          name: uv
-          version: latest
+      arch: arm64
+      github-release: { repo: astral-sh/uv, asset: 'uv-aarch64-unknown-linux-gnu.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: astral-sh/uv, asset: 'uv-x86_64-unknown-linux-gnu.tar.gz' }
 disk:
     paths:
         - path: '{cache}/uv'

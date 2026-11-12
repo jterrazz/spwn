@@ -7,10 +7,9 @@ then: [tmux-dotfiles]
 methods:
     - os: macos
       brew: tmux
-    - family: linux
-      mise:
-          name: tmux
-          version: latest
+    - os: ubuntu
+      needs: [sudo]
+      apt: { packages: [tmux] }
 disk:
     paths:
         - path: ~/.tmux.conf

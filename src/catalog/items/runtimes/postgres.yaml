@@ -7,7 +7,9 @@ ports:
     - port: 5432
       label: Postgres
 methods:
-    - os: any
-      mise:
-          name: postgres
-          version: latest
+    - os: ubuntu
+      provides: [psql]
+      needs: [sudo]
+      apt: { packages: [postgresql] }
+    - os: macos
+      brew: postgresql@18

@@ -7,9 +7,11 @@ methods:
     - os: macos
       brew: pnpm
     - family: linux
-      mise:
-          name: pnpm
-          version: latest
+      arch: arm64
+      github-release: { repo: pnpm/pnpm, asset: 'pnpm-linux-arm64.tar.gz' }
+    - family: linux
+      arch: amd64
+      github-release: { repo: pnpm/pnpm, asset: 'pnpm-linux-x64.tar.gz' }
 disk:
     paths:
         - path: ~/Library/pnpm/store

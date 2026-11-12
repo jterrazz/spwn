@@ -91,7 +91,8 @@ A method names its system by `os` or by `family`, one of them; a version range b
   cask: tailscale-app
 - family: linux
   machine: [workspace, server]
-  mise: { name: lazygit, version: latest }
+  arch: arm64
+  github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_arm64.tar.gz' }
 ```
 
 Station's computers today are Macs and its VMs run on them, so `os: macos` is a Mac and a macOS VM, `family: linux` and `os: ubuntu` a Linux VM. `os: debian`, a Linux computer and `arch: amd64` match no machine station runs yet, and a version range is not judged before the Machinefile's resolution reads a machine's system.

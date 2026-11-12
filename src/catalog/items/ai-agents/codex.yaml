@@ -5,12 +5,8 @@ description: OpenAI's CLI coding agent
 provides: [codex]
 requires: [bun]
 methods:
-    - os: macos
+    - os: any
       bun: '@openai/codex'
-    - family: linux
-      mise:
-          name: codex
-          version: latest
 disk:
     paths:
         - path: ~/.codex/cache

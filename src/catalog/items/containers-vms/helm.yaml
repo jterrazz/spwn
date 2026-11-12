@@ -7,9 +7,8 @@ methods:
     - os: macos
       brew: helm
     - family: linux
-      mise:
-          name: helm
-          version: latest
+      script:
+          run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | HELM_INSTALL_DIR="$HOME/.local/bin" USE_SUDO=false bash
 disk:
     paths:
         - path: ~/Library/Caches/helm
