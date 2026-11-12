@@ -137,7 +137,7 @@ Every manager type has its own check, upgrade and undo; an override is written o
 | `path`     | an app's             | absolute folders it lands commands in, which station's search adds at once       |
 | `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                      |
 
-A `script` with neither `run` nor `url` is installed by the owner, as its `hint` says; a `run` line takes no `args`, `env` nor `upgrade`. A `script`'s `check` is the shell line whose exit 0 says the item is there; without one, its `provides` are looked up.
+A `script` with neither `run` nor `url` is installed by the owner, as its `hint` says; a `run` line takes no `args`, `env` nor `upgrade`. An `env` value that opens with `~/` is given under the home (`HELM_INSTALL_DIR=~/.local/bin`), since an installer reads its variables as they are. A `script`'s `check` is the shell line whose exit 0 says the item is there; without one, its `provides` are looked up.
 
 ## Managers
 

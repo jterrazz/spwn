@@ -3,7 +3,9 @@ package script
 import (
 	"context"
 	"errors"
+	"path"
 	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
@@ -22,17 +24,30 @@ const curlInstaller = `script="$(curl -fsSL "$0")" && exec bash -c "$script" bas
 
 type Script struct {
 	run local.Runner
+	// value: the home a value's `~/` opens at.
+	home string
 	// value: the run has a terminal the owner answers on.
 	terminal bool
 }
 
-func New(run local.Runner, terminal bool) *Script { return &Script{run: run, terminal: terminal} }
+func New(run local.Runner, home string, terminal bool) *Script {
+	return &Script{run: run, home: home, terminal: terminal}
+}
 
+// invariant: a variable's value that opens with `~/` is under the home,
+// since an installer reads it as is (`HELM_INSTALL_DIR=~/.local/bin`).
 func (s *Script) env(v catalog.ScriptInstall) []string {
+	pairs := append(slices.Clone(v.Env), v.OffTerminal...)
 	if s.terminal {
-		return append(slices.Clone(v.Env), v.OnTerminal...)
+		pairs = append(slices.Clone(v.Env), v.OnTerminal...)
 	}
-	return append(slices.Clone(v.Env), v.OffTerminal...)
+	for i, kv := range pairs {
+		k, v, _ := strings.Cut(kv, "=")
+		if rest, ok := strings.CutPrefix(v, "~/"); ok {
+			pairs[i] = k + "=" + path.Join(s.home, rest)
+		}
+	}
+	return pairs
 }
 
 func (s *Script) Method() catalog.Method    { return catalog.MethodScript }
