@@ -24,6 +24,7 @@ func (e Env) GOARCH() string     { return e.Arch }
 
 type Response struct {
 	Status int
+	Header map[string]string
 	Body   []byte
 	Err    error
 }
@@ -60,25 +61,33 @@ func (n *Net) Dial(_ context.Context, mac string, port int, _ time.Duration) boo
 	return n.Open[fmt.Sprintf("%s:%d", mac, port)]
 }
 
-func (n *Net) answer(method, url string, payload []byte) (status int, body []byte, err error) {
+func (n *Net) answer(method, url string, payload []byte) (Response, error) {
 	n.Requests = append(n.Requests, Request{Method: method, URL: url, Body: payload})
 	r, ok := n.Responses[method+" "+url]
 	if !ok {
-		return 0, nil, fmt.Errorf("systemtest: unscripted %s %s", method, url)
+		return Response{}, fmt.Errorf("systemtest: unscripted %s %s", method, url)
 	}
-	return r.Status, r.Body, r.Err
+	return r, r.Err
 }
 
 func (n *Net) Get(_ context.Context, url string, _ map[string]string) (status int, body []byte, err error) {
-	return n.answer("GET", url, nil)
+	r, err := n.answer("GET", url, nil)
+	return r.Status, r.Body, err
+}
+
+func (n *Net) Fetch(_ context.Context, url string, _ map[string]string) (local.Reply, error) {
+	r, err := n.answer("GET", url, nil)
+	return local.Reply{Status: r.Status, Header: r.Header, Body: r.Body}, err
 }
 
 func (n *Net) Post(_ context.Context, url string, _ map[string]string, payload []byte) (status int, body []byte, err error) {
-	return n.answer("POST", url, payload)
+	r, err := n.answer("POST", url, payload)
+	return r.Status, r.Body, err
 }
 
 func (n *Net) Delete(_ context.Context, url string, _ map[string]string) (status int, body []byte, err error) {
-	return n.answer("DELETE", url, nil)
+	r, err := n.answer("DELETE", url, nil)
+	return r.Status, r.Body, err
 }
 
 type Clock struct{ At time.Time }

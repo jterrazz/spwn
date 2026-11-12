@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"net"
+	"net/http"
 	"time"
 )
 
@@ -103,6 +104,9 @@ type Env interface {
 type Net interface {
 	Dial(ctx context.Context, mac string, port int, timeout time.Duration) bool
 	Get(ctx context.Context, url string, header map[string]string) (status int, body []byte, err error)
+	// value: a GET's answer with the headers it came with, for a caller
+	// that reads them (a rate limit's end).
+	Fetch(ctx context.Context, url string, header map[string]string) (Reply, error)
 	// value: one UDP datagram broadcast to 255.255.255.255, port: macOS sends
 	// it out of the interface of the default route only.
 	Broadcast(ctx context.Context, port int, payload []byte) error
@@ -110,6 +114,16 @@ type Net interface {
 	// aa:bb:cc:dd:ee:ff; empty when none does.
 	HardwareAddress(ip string) string
 }
+
+type Reply struct {
+	Status int
+	// value: each header's first value, by its canonical name
+	// (`X-Ratelimit-Remaining`); Said reads one by its name in any case.
+	Header map[string]string
+	Body   []byte
+}
+
+func (r Reply) Said(name string) string { return r.Header[http.CanonicalHeaderKey(name)] }
 
 type Conn interface{ io.ReadWriteCloser }
 

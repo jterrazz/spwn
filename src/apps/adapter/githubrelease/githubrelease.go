@@ -8,9 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"net/url"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/contract"
@@ -21,8 +23,9 @@ import (
 const name = "github-release"
 
 type Options struct {
-	FS  local.FS
-	Net local.Net
+	FS    local.FS
+	Net   local.Net
+	Clock local.Clock
 	// value: the GitHub API's root, and the token its calls carry when
 	// there is one.
 	APIURL, Token string
@@ -32,7 +35,8 @@ type Options struct {
 	// value: the folder the commands land in, on the search path.
 	Bin string
 	// value: station's own folder of what it installed, one record per
-	// release: `<owner>/<name>.json`.
+	// release: `<owner>/<name>.json`; and each repo's latest release as
+	// GitHub last gave it, `.latest/<owner>/<name>.json`.
 	Store string
 }
 
@@ -219,7 +223,7 @@ func (r *Releases) install(ctx context.Context, v catalog.GitHubReleaseInstall) 
 	if err != nil {
 		return err
 	}
-	body, err := r.download(ctx, v.Repo, asset)
+	body, err := r.download(ctx, asset)
 	if err != nil {
 		return err
 	}
@@ -404,51 +408,107 @@ func (r *Releases) writeRecord(rec record) error {
 }
 
 // outside: GitHub's release object, the fields station reads: its tag and
-// each asset's id, name and digest (`sha256:<hex>`, given by GitHub for
-// an asset uploaded since 2025).
+// each asset's name, digest (`sha256:<hex>`, given by GitHub for an asset
+// uploaded since 2025) and download address, which is no API call.
 type release struct {
 	Tag    string  `json:"tag_name"`
 	Assets []asset `json:"assets"`
 }
 
 type asset struct {
-	ID     int64  `json:"id"`
 	Name   string `json:"name"`
 	Digest string `json:"digest"`
+	URL    string `json:"browser_download_url"`
 }
 
 func (r *Releases) release(ctx context.Context, repo, tag string) (release, error) {
 	// invariant: a tag asked is checked before it joins the route, and is the
 	// release's tag, or that tag with a `v` before it (`1.4.4` finds
 	// `v1.4.4`); none asked, the latest release.
-	tries := []string{"/releases/latest"}
-	if tag != "" {
-		if err := catalog.CheckTag(tag); err != nil {
-			return release{}, err
-		}
-		tries = []string{"/releases/tags/" + tag}
-		if !strings.HasPrefix(tag, "v") {
-			tries = append(tries, "/releases/tags/v"+tag)
-		}
+	if tag == "" {
+		return r.latest(ctx, repo)
+	}
+	if err := catalog.CheckTag(tag); err != nil {
+		return release{}, err
+	}
+	tries := []string{"/releases/tags/" + tag}
+	if !strings.HasPrefix(tag, "v") {
+		tries = append(tries, "/releases/tags/v"+tag)
 	}
 	for _, t := range tries {
-		status, body, err := r.get(ctx, "/repos/"+repo+t, "application/vnd.github+json")
-		if err != nil {
-			return release{}, err
+		rel, found, err := r.read(ctx, repo, t)
+		if err != nil || found {
+			return rel, err
 		}
-		if status == 404 {
-			continue
-		}
-		if status != 200 {
-			return release{}, fmt.Errorf("the release of %s did not answer: GitHub said %d", repo, status)
-		}
-		var rel release
-		if err := json.Unmarshal(body, &rel); err != nil {
-			return release{}, fmt.Errorf("the release of %s: %w", repo, err)
-		}
-		return rel, nil
 	}
 	return release{}, &NoReleaseError{Repo: repo, Tag: tag}
+}
+
+// value: how long a repo's latest release, once read, is the answer: one
+// call an hour per repo, whatever reads it (an install, every `apps`).
+const fresh = time.Hour
+
+type kept struct {
+	Read    time.Time `json:"read"`
+	Release release   `json:"release"`
+}
+
+// invariant: a repo's latest release is asked of GitHub at most once an
+// hour: the answer is kept with the time it was read, and is the answer
+// until the hour is out; one kept at a time ahead of the clock is asked
+// again. A file that does not read is no answer, and is written over.
+func (r *Releases) latest(ctx context.Context, repo string) (release, error) {
+	file, err := keptPath(r.o.Store, repo)
+	if err != nil {
+		return release{}, err
+	}
+	now := r.o.Clock.Now()
+	if data, unread := r.o.FS.ReadFile(file); unread == nil {
+		var k kept
+		if json.Unmarshal(data, &k) == nil && k.Release.Tag != "" && !now.Before(k.Read) && now.Sub(k.Read) < fresh {
+			return k.Release, nil
+		}
+	}
+	rel, found, err := r.read(ctx, repo, "/releases/latest")
+	if err != nil {
+		return release{}, err
+	}
+	if !found {
+		return release{}, &NoReleaseError{Repo: repo}
+	}
+	data, err := json.MarshalIndent(kept{Read: now, Release: rel}, "", "  ")
+	if err != nil {
+		return release{}, err
+	}
+	if err := r.o.FS.MkdirAll(path.Dir(file), 0o755); err != nil {
+		return release{}, err
+	}
+	return rel, r.land(file, append(data, '\n'), 0o644)
+}
+
+// invariant: no repo's owner opens with a dot (catalog.CheckRepo), so the
+// kept answers' folder is no owner's records.
+func keptPath(store, repo string) (string, error) {
+	if err := catalog.CheckRepo(repo); err != nil {
+		return "", err
+	}
+	return path.Join(store, ".latest", repo+".json"), nil
+}
+
+func (r *Releases) read(ctx context.Context, repo, route string) (rel release, found bool, err error) {
+	a, err := r.get(ctx, "/repos/"+repo+route, "application/vnd.github+json")
+	switch {
+	case err != nil:
+		return release{}, false, err
+	case a.Status == 404:
+		return release{}, false, nil
+	case a.Status != 200:
+		return release{}, false, fmt.Errorf("the release of %s did not answer: %w", repo, r.refusal(a))
+	}
+	if err := json.Unmarshal(a.Body, &rel); err != nil {
+		return release{}, false, fmt.Errorf("the release of %s: %w", repo, err)
+	}
+	return rel, true, nil
 }
 
 func (rel release) only(pattern, os, arch, repo string) (asset, error) {
@@ -467,27 +527,54 @@ func (rel release) only(pattern, os, arch, repo string) (asset, error) {
 	return asset{}, fmt.Errorf("%d assets of %s %s match %s: the method names one", len(found), repo, rel.Tag, pattern)
 }
 
-func (r *Releases) download(ctx context.Context, repo string, a asset) ([]byte, error) {
-	status, body, err := r.get(ctx, "/repos/"+repo+"/releases/assets/"+strconv.FormatInt(a.ID, 10), "application/octet-stream")
+// invariant: an asset downloads from the address its release gives,
+// never through the API, so a download spends none of the API's calls; the
+// address is of the API's own scheme, and the token is never sent to it.
+func (r *Releases) download(ctx context.Context, a asset) ([]byte, error) {
+	at, err := url.Parse(a.URL)
+	api, _ := url.Parse(r.o.APIURL)
+	if a.URL == "" || err != nil || at.Host == "" || api == nil || at.Scheme != api.Scheme {
+		return nil, fmt.Errorf("%s has no download address station takes (%q)", a.Name, a.URL)
+	}
+	got, err := r.o.Net.Fetch(ctx, a.URL, map[string]string{"Accept": "application/octet-stream"})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GitHub: %w", err)
 	}
-	if status != 200 {
-		return nil, fmt.Errorf("%s did not download: GitHub said %d", a.Name, status)
+	if got.Status != 200 {
+		return nil, fmt.Errorf("%s did not download: %w", a.Name, r.refusal(got))
 	}
-	return body, nil
+	return got.Body, nil
 }
 
-func (r *Releases) get(ctx context.Context, route, accept string) (status int, body []byte, err error) {
+func (r *Releases) get(ctx context.Context, route, accept string) (local.Reply, error) {
 	header := map[string]string{"Accept": accept}
 	if r.o.Token != "" {
 		header["Authorization"] = "Bearer " + r.o.Token
 	}
-	status, body, err = r.o.Net.Get(ctx, strings.TrimSuffix(r.o.APIURL, "/")+route, header)
+	got, err := r.o.Net.Fetch(ctx, strings.TrimSuffix(r.o.APIURL, "/")+route, header)
 	if err != nil {
-		return 0, nil, fmt.Errorf("GitHub: %w", err)
+		return local.Reply{}, fmt.Errorf("GitHub: %w", err)
 	}
-	return status, body, nil
+	return got, nil
+}
+
+// outside: GitHub refuses a call over its rate limit with a 403 whose
+// `X-RateLimit-Remaining` is 0, or a 429; the limit is
+// `X-RateLimit-Limit`, its end `X-RateLimit-Reset` (Unix seconds) or a
+// `Retry-After` in seconds.
+func (r *Releases) refusal(a local.Reply) error {
+	limited := a.Status == 429 || (a.Status == 403 && (a.Said("X-RateLimit-Remaining") == "0" || a.Said("Retry-After") != ""))
+	if !limited {
+		return fmt.Errorf("GitHub said %d", a.Status)
+	}
+	e := &LimitError{Token: r.o.Token != ""}
+	e.Limit, _ = strconv.Atoi(a.Said("X-RateLimit-Limit"))
+	if ends, err := strconv.ParseInt(a.Said("X-RateLimit-Reset"), 10, 64); err == nil && ends > 0 {
+		e.Until = time.Unix(ends, 0)
+	} else if after, err := strconv.Atoi(a.Said("Retry-After")); err == nil && after >= 0 {
+		e.Until = r.o.Clock.Now().Add(time.Duration(after) * time.Second)
+	}
+	return e
 }
 
 type voucher struct{ source, sum string }
@@ -519,7 +606,7 @@ func (r *Releases) vouchers(ctx context.Context, v catalog.GitHubReleaseInstall,
 		return nil, fmt.Errorf("%s %s has no asset %s, the checksums its method names", v.Repo, rel.Tag, v.Checksums)
 	}
 	for _, f := range files {
-		body, err := r.download(ctx, v.Repo, f)
+		body, err := r.download(ctx, f)
 		if err != nil {
 			return nil, err
 		}

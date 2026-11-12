@@ -83,11 +83,11 @@ func aliasName(name string) bool {
 // file's location (`~/.ssh/config`, `{config}/gh/hosts.yml`), a URL, a
 // launchd label or a bundle id, a menu bar story's id (`sheet.lend-account`,
 // STORIES.md's name for it), a file's name, an environment variable's
-// name, ssh_config's own lines (`Host *`), the JSON keys of another program
+// name, an HTTP header's (`X-RateLimit-Reset`), ssh_config's own lines (`Host *`), the JSON keys of another program
 // (Tailscale's `HostName`), a code span quoted in a text, and a command line
 // station runs: the literal Args, Run and Command of a step, the literal
 // arguments of a run…, Script…, Shell… or Command call.
-var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|sheet\.[a-z0-9]+-[a-z0-9-]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
+var foreignShape = regexp.MustCompile(`^(?:[~/{][^\n]*|\.[A-Za-z]\S*|[^\s/]+/\S*|\S*://\S*|[a-z]+(?:\.[a-z0-9-]+){2,}\.?|sheet\.[a-z0-9]+-[a-z0-9-]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|X-[A-Za-z]+(?:-[A-Za-z]+)+|\s*Host (?:\*(?:\n[^\n]*)*)?|[\w-]+\.(?:toml|json|yml|yaml|env|plist|conf)|json:\x22[A-Z]\w*\x22)$`)
 
 func commandLine(fun ast.Expr) bool {
 	var name string
@@ -560,12 +560,12 @@ func TestVocabularyLetsOnlyTheCatalogueSayOrbStack(t *testing.T) {
 }
 
 func TestVocabularyReadsPastForeignTextOnly(t *testing.T) {
-	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`, "sheet.lend-account"} {
+	for _, text := range []string{"~/.ssh/config", "{config}/gh/hosts.yml", "https://example.com/tools/x.sh", "com.jterrazz.station.daemon", "STATION_PUBLIC_HOST", "config.toml", "Host ", "\nHost *\n  UseKeychain yes\n", `json:"HostName"`, "sheet.lend-account", "X-RateLimit-Reset"} {
 		if !foreignShape.MatchString(text) {
 			t.Errorf("%q is another program's text, read as station's", text)
 		}
 	}
-	for _, text := range []string{"the daemon runs", "Host port 40000 is busy", "Storage", "lend list", `json:"leased"`, "accounts.lend-github"} {
+	for _, text := range []string{"the daemon runs", "Host port 40000 is busy", "Storage", "lend list", `json:"leased"`, "accounts.lend-github", "X-ray reset"} {
 		if foreignShape.MatchString(text) {
 			t.Errorf("%q is station's text, read past as another program's", text)
 		}

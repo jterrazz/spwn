@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/src/apps"
 	"github.com/jterrazz/studio-station/src/apps/adapter/githubrelease"
@@ -27,6 +28,7 @@ import (
 
 const (
 	api   = "https://api.test"
+	dl    = "https://dl.test"
 	repo  = "acme/tool"
 	bin   = "/home/u/.local/bin"
 	store = "/home/u/.local/share/station/releases"
@@ -89,18 +91,17 @@ func serve(n *localtest.Net, latest served, others ...served) {
 	for k := range n.Responses {
 		delete(n.Responses, k)
 	}
-	id := 0
 	for i, s := range append([]served{latest}, others...) {
 		type a struct {
-			ID     int    `json:"id"`
 			Name   string `json:"name"`
 			Digest string `json:"digest,omitempty"`
+			URL    string `json:"browser_download_url"`
 		}
 		list := make([]a, 0, len(s.assets))
 		for _, name := range slices.Sorted(maps.Keys(s.assets)) {
-			id++
-			list = append(list, a{ID: id, Name: name, Digest: s.digests[name]})
-			n.Responses["GET "+api+"/repos/"+repo+"/releases/assets/"+strconv.Itoa(id)] = localtest.Response{Status: 200, Body: s.assets[name]}
+			at := dl + "/" + repo + "/releases/download/" + s.tag + "/" + name
+			list = append(list, a{Name: name, Digest: s.digests[name], URL: at})
+			n.Responses["GET "+at] = localtest.Response{Status: 200, Body: s.assets[name]}
 		}
 		doc, _ := json.Marshal(map[string]any{"tag_name": s.tag, "assets": list})
 		n.Responses["GET "+api+"/repos/"+repo+"/releases/tags/"+strings.TrimPrefix(s.tag, "v")] = localtest.Response{Status: 404}
@@ -142,8 +143,22 @@ func (f *interrupted) Rename(from, to string) error {
 	return f.FS.Rename(from, to)
 }
 
+// value: one clock for every Releases a test builds, an hour on at each
+// read, so every latest release asked is asked of GitHub, as a release
+// served anew is.
+type later struct{ at time.Time }
+
+var hourly = &later{}
+
+func (c *later) Now() time.Time {
+	c.at = c.at.Add(61 * time.Minute)
+	return c.at
+}
+
+func (c *later) Sleep(context.Context, time.Duration) error { return nil }
+
 func releases(files local.FS, n local.Net, arch string) *githubrelease.Releases {
-	return githubrelease.New(githubrelease.Options{FS: files, Net: n, APIURL: api, OS: "linux", Arch: arch, Bin: bin, Store: store})
+	return githubrelease.New(githubrelease.Options{FS: files, Net: n, Clock: hourly, APIURL: api, OS: "linux", Arch: arch, Bin: bin, Store: store})
 }
 
 func tool(tag string) catalog.GitHubReleaseInstall {
@@ -402,5 +417,78 @@ func TestOutdatedComparesTheLatestTagWithTheOneInstalled(t *testing.T) {
 	n.Responses["GET "+api+"/repos/"+repo+"/releases/latest"] = localtest.Response{Status: 403}
 	if got, _ := r.Outdated(context.Background(), []string{repo}); got[repo].Verdict != apps.Unknown {
 		t.Errorf("an unanswered read gave %+v; want unknown", got[repo])
+	}
+}
+
+func TestALatestReleaseIsAskedOfGitHubOnceAnHourAndADownloadNever(t *testing.T) {
+	files, n := localtest.NewFS(), localtest.NewNet()
+	serve(n, toolAt(t, "v2.0.0"))
+	clock := &localtest.Clock{At: time.Date(2026, 11, 12, 1, 0, 0, 0, time.UTC)}
+	r := githubrelease.New(githubrelease.Options{FS: files, Net: n, Clock: clock, APIURL: api, OS: "linux", Arch: "arm64", Bin: bin, Store: store})
+	calls := func() int {
+		count := 0
+		for _, q := range n.Requests {
+			if strings.HasPrefix(q.URL, api) {
+				count++
+			}
+		}
+		return count
+	}
+
+	if err := r.Install(context.Background(), []catalog.Install{tool("")}, nil); err != nil {
+		t.Fatal(err)
+	}
+	for range 3 {
+		clock.At = clock.At.Add(15 * time.Minute)
+		if got, _ := r.Outdated(context.Background(), []string{repo}); got[repo].Verdict != apps.Current {
+			t.Fatalf("tool reads %+v; want current", got[repo])
+		}
+	}
+	if got := calls(); got != 1 {
+		t.Errorf("an install and three reads within the hour asked the API %d times; want 1 (%v)", got, n.Requests)
+	}
+	serve(n, toolAt(t, "v3.0.0"))
+	clock.At = clock.At.Add(16 * time.Minute)
+	if got, _ := r.Outdated(context.Background(), []string{repo}); got[repo] != (apps.Currency{Verdict: apps.Behind, Newest: "v3.0.0"}) {
+		t.Errorf("past the hour tool reads %+v; want behind v3.0.0", got[repo])
+	}
+	if got := calls(); got != 2 {
+		t.Errorf("past the hour the API was asked %d times in all; want 2", got)
+	}
+}
+
+func TestARateRefusalSaysUntilWhenAndWhatRaisesTheLimit(t *testing.T) {
+	ends := time.Date(2026, 11, 12, 2, 15, 10, 0, time.UTC)
+	spent := localtest.Response{Status: 403, Header: map[string]string{
+		"X-Ratelimit-Limit": "60", "X-Ratelimit-Remaining": "0", "X-Ratelimit-Reset": strconv.FormatInt(ends.Unix(), 10),
+	}}
+	for _, c := range []struct {
+		name, token string
+		answer      localtest.Response
+		want        string
+	}{
+		{name: "without a token", answer: spent, want: "the release of acme/tool did not answer: GitHub refuses calls without a token until 02:15 UTC: its limit of 60 calls an hour is spent; set GITHUB_TOKEN (or GH_TOKEN) to a GitHub token to raise it"},
+		{name: "with a token", token: "t", answer: spent, want: "the release of acme/tool did not answer: GitHub refuses the token's calls until 02:15 UTC: its limit of 60 calls an hour is spent"},
+		{name: "a 429 with a wait", answer: localtest.Response{Status: 429, Header: map[string]string{"Retry-After": "120"}}, want: "the release of acme/tool did not answer: GitHub refuses calls without a token until 01:02 UTC: its hourly limit is spent; set GITHUB_TOKEN (or GH_TOKEN) to a GitHub token to raise it"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			files, n := localtest.NewFS(), localtest.NewNet()
+			n.Responses["GET "+api+"/repos/"+repo+"/releases/latest"] = c.answer
+			clock := &localtest.Clock{At: time.Date(2026, 11, 12, 1, 0, 0, 0, time.UTC)}
+			r := githubrelease.New(githubrelease.Options{FS: files, Net: n, Clock: clock, APIURL: api, Token: c.token, OS: "linux", Arch: "arm64", Bin: bin, Store: store})
+
+			err := r.Install(context.Background(), []catalog.Install{tool("")}, nil)
+
+			var limited *githubrelease.LimitError
+			if !errors.As(err, &limited) || err.Error() != c.want {
+				t.Fatalf("install gave %v;\nwant %s", err, c.want)
+			}
+		})
+	}
+	files, n := localtest.NewFS(), localtest.NewNet()
+	n.Responses["GET "+api+"/repos/"+repo+"/releases/latest"] = localtest.Response{Status: 403}
+	err := releases(files, n, "arm64").Install(context.Background(), []catalog.Install{tool("")}, nil)
+	if err == nil || err.Error() != "the release of acme/tool did not answer: GitHub said 403" {
+		t.Errorf("a 403 over no limit gave %v", err)
 	}
 }

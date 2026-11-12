@@ -105,6 +105,11 @@ func (g github) Get(_ context.Context, url string, _ map[string]string) (status 
 	return 200, body, err
 }
 
+func (g github) Fetch(ctx context.Context, url string, header map[string]string) (local.Reply, error) {
+	status, body, err := g.Get(ctx, url, header)
+	return local.Reply{Status: status, Body: body}, err
+}
+
 func (a *agents) skills(net local.Net, names ...string) *skills.Skills {
 	return skills.New(skills.Options{Run: local.Played(a.play, names...), FS: a.fs, Net: net, Home: a.home, APIURL: "http://github.test"})
 }

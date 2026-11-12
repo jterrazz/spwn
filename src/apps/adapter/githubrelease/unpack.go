@@ -11,7 +11,9 @@ import (
 	"io"
 	"path"
 	"slices"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // value: what an asset may hold: each command at most, and its archive
@@ -220,6 +222,29 @@ func (e *NoReleaseError) Error() string {
 		return e.Repo + " has no release"
 	}
 	return e.Repo + " has no release " + e.Tag
+}
+
+type LimitError struct {
+	// value: the calls an hour and the limit's end, each zero when GitHub
+	// did not say it, and whether the refused call carried a token.
+	Limit int
+	Until time.Time
+	Token bool
+}
+
+func (e *LimitError) Error() string {
+	limit := "its hourly limit"
+	if e.Limit > 0 {
+		limit = "its limit of " + strconv.Itoa(e.Limit) + " calls an hour"
+	}
+	until := "for now"
+	if !e.Until.IsZero() {
+		until = "until " + e.Until.UTC().Format("15:04") + " UTC"
+	}
+	if e.Token {
+		return "GitHub refuses the token's calls " + until + ": " + limit + " is spent"
+	}
+	return "GitHub refuses calls without a token " + until + ": " + limit + " is spent; set GITHUB_TOKEN (or GH_TOKEN) to a GitHub token to raise it"
 }
 
 type NoAssetError struct{ Repo, Tag, Pattern, OS, Arch string }

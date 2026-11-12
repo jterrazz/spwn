@@ -124,7 +124,7 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 		}),
 		script.New(run, terminal), shell.New(run), app.New(), providedby.New(run),
 		githubrelease.New(githubrelease.Options{
-			FS: m.sys.FS, Net: m.sys.Net,
+			FS: m.sys.FS, Net: m.sys.Net, Clock: m.sys.Clock,
 			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
 			Token:  m.or("GITHUB_TOKEN", m.vars["GH_TOKEN"]),
 			OS:     m.sys.Env.GOOS(), Arch: m.sys.Env.GOARCH(),

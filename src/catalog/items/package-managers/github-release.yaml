@@ -14,5 +14,5 @@ disk:
     paths:
         - path: '{data}/station/releases'
           level: kept
-          note: what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there
+          note: what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there; and each repo's latest release, kept an hour in .latest/
     no-erase: 'what it installed is apps: station apps remove <app>'

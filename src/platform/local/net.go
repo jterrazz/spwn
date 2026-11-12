@@ -1,7 +1,6 @@
 package local
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -29,13 +28,14 @@ func (network) Dial(ctx context.Context, addr string, port int, timeout time.Dur
 }
 
 func (n network) Get(ctx context.Context, url string, header map[string]string) (status int, body []byte, err error) {
-	return n.do(ctx, http.MethodGet, url, header, nil)
+	a, err := n.Fetch(ctx, url, header)
+	return a.Status, a.Body, err
 }
 
-func (n network) do(ctx context.Context, method, url string, header map[string]string, payload []byte) (status int, body []byte, err error) {
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewReader(payload))
+func (n network) Fetch(ctx context.Context, url string, header map[string]string) (Reply, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
-		return 0, nil, err
+		return Reply{}, err
 	}
 	for k, v := range header {
 		req.Header.Set(k, v)
@@ -43,14 +43,18 @@ func (n network) do(ctx context.Context, method, url string, header map[string]s
 	client := http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, nil, err
+		return Reply{}, err
 	}
 	defer func() { _ = resp.Body.Close() }()
-	body, err = io.ReadAll(io.LimitReader(resp.Body, n.most+1))
-	if err == nil && int64(len(body)) > n.most {
-		return resp.StatusCode, nil, fmt.Errorf("%s answered past %d MiB", url, n.most>>20)
+	said := map[string]string{}
+	for k := range resp.Header {
+		said[k] = resp.Header.Get(k)
 	}
-	return resp.StatusCode, body, err
+	body, err := io.ReadAll(io.LimitReader(resp.Body, n.most+1))
+	if err == nil && int64(len(body)) > n.most {
+		return Reply{Status: resp.StatusCode, Header: said}, fmt.Errorf("%s answered past %d MiB", url, n.most>>20)
+	}
+	return Reply{Status: resp.StatusCode, Header: said, Body: body}, err
 }
 
 func (network) Broadcast(ctx context.Context, port int, payload []byte) error {

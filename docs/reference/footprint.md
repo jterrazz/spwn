@@ -71,9 +71,9 @@ Free: `pod cache clean --all`, delete `~/.cocoapods/repos/*`. Erase: none (nothi
 
 ### github-release
 
-| Path                              | Group         | Note                                                                                                                 |
-| --------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `~/.local/share/station/releases` | never touched | what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there |
+| Path                              | Group         | Note                                                                                                                                                                           |
+| --------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `~/.local/share/station/releases` | never touched | what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there; and each repo's latest release, kept an hour in .latest/ |
 
 Erase: none (what it installed is apps: station apps remove <app>).
 

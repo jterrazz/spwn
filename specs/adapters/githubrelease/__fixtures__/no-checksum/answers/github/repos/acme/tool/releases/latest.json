@@ -1,1 +1,1 @@
-{"tag_name":"v1.0.0","assets":[{"id":1,"name":"tool-arm64"},{"id":2,"name":"tool-amd64"}]}
+{"tag_name":"v1.0.0","assets":[{"name":"tool-arm64","browser_download_url":"{origin}/repos/acme/tool/releases/assets/1"},{"name":"tool-amd64","browser_download_url":"{origin}/repos/acme/tool/releases/assets/2"}]}
