@@ -1,6 +1,6 @@
 # ADR-041: The lock is what apply installs; upgrade alone moves it
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

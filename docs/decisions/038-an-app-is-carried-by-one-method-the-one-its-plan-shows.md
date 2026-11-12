@@ -1,6 +1,6 @@
 # ADR-038: An app is carried by one method, the one its plan shows
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

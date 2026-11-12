@@ -1,6 +1,6 @@
 # ADR-039: A share is shown under its audience
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 Builds on [ADR-035](035-a-port-is-a-right-with-an-audience.md).

@@ -1,6 +1,6 @@
 # ADR-040: apt takes back only what it names; a release installs only what a checksum vouches for
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-11
 
 ## Context

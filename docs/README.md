@@ -89,9 +89,9 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [035 A port is a right with an audience](decisions/035-a-port-is-a-right-with-an-audience.md) (Accepted)
 - [036 The menu bar owns its panel, and the panel's one background is a tinted glass](decisions/036-the-menu-bar-owns-its-glass-panel.md) (Accepted)
 - [037 The TUI is retired; the CLI is the one terminal surface](decisions/037-the-tui-is-retired.md) (Accepted)
-- [038 An app is carried by one method, the one its plan shows](decisions/038-an-app-is-carried-by-one-method-the-one-its-plan-shows.md) (Proposed)
-- [039 A share is shown under its audience](decisions/039-a-share-is-shown-under-its-audience.md) (Proposed)
-- [040 apt takes back only what it names; a release installs only what a checksum vouches for](decisions/040-apt-takes-back-only-what-it-names-a-release-installs-only-what-a-checksum-vouches-for.md) (Proposed)
-- [041 The lock is what apply installs; upgrade alone moves it](decisions/041-the-lock-is-what-apply-installs.md) (Proposed)
+- [038 An app is carried by one method, the one its plan shows](decisions/038-an-app-is-carried-by-one-method-the-one-its-plan-shows.md) (Accepted)
+- [039 A share is shown under its audience](decisions/039-a-share-is-shown-under-its-audience.md) (Accepted)
+- [040 apt takes back only what it names; a release installs only what a checksum vouches for](decisions/040-apt-takes-back-only-what-it-names-a-release-installs-only-what-a-checksum-vouches-for.md) (Accepted)
+- [041 The lock is what apply installs; upgrade alone moves it](decisions/041-the-lock-is-what-apply-installs.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
