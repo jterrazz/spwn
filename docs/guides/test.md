@@ -25,7 +25,7 @@ Three tiers prove station, each with one purpose, and a fourth rig runs the menu
 ## The two suites
 
 ```sh
-make test      # go test ./src/... ./specs/..., then typescript test: the specs against a fresh build of station, then the machines and engine/keep use cases again over vz
+make test      # go test ./src/... ./specs/..., the spec build's world under -race, then typescript test: the specs against a fresh build of station, then the machines and engine/keep use cases again over vz
 npm test       # the specs alone
 ```
 

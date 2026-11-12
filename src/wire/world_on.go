@@ -107,7 +107,13 @@ type worldMac struct {
 	run  *worldRun
 	name string
 
-	start    func() *process.Engine
+	start func() *process.Engine
+	// invariant: mu guards starting, engine, began, tick and leave: an
+	// engine's own goroutines (its surfaces, a guest session, another Mac's
+	// engine) ask for this Mac's engine while the command ends it, and a
+	// reader takes the pointer once under mu, never twice. It is never held
+	// across a call into the engine, which may ask for this Mac again.
+	mu       sync.Mutex
 	starting bool
 	engine   *process.Engine
 	// value: when the world says the running engine started: a Mac rebooted
@@ -508,12 +514,14 @@ func (m *worldMac) macs() remotecontract.EndpointDialer { return worldDialer{r: 
 // then stepped over the world's clock until it is quiet, so a story that
 // waits on the engine is deterministic.
 func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
-	if m.engine != nil && m.runs() && !m.engineStarted().Equal(m.began) {
+	d, began := m.running()
+	if d != nil && m.runs() && !m.engineStarted().Equal(began) {
 		m.down(true)
+		d = m.current()
 	}
-	if m.engine != nil {
+	if d != nil {
 		if m.runs() {
-			return m.engine, true
+			return d, true
 		}
 		m.down(false)
 		return nil, false
@@ -521,12 +529,11 @@ func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
 	if m.start == nil && m.name != m.run.w.ThisMac && m.run.far != nil && m.runs() {
 		m.serve()
 	}
-	if m.start == nil || m.starting || !m.runs() {
+	if m.start == nil || !m.runs() || !m.beginStarting() {
 		return nil, false
 	}
-	m.starting = true
-	defer func() { m.starting = false }()
-	d := m.start()
+	defer m.endStarting()
+	d = m.start()
 	d.Remember(m.slice().Engine.Memory)
 	if kept := m.slice().Engine.Awake; kept != nil {
 		d.RememberAwake(*kept)
@@ -543,8 +550,7 @@ func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
 	}
 	// invariant: when it began is set before the engine is, so a surface of
 	// that engine that asks for it meanwhile never reads it as a successor.
-	m.began = m.engineStarted()
-	m.engine = d
+	m.hold(d, m.engineStarted())
 	m.surfaces(ctx, d)
 	m.settle(ctx)
 	return d, true
@@ -585,22 +591,72 @@ func (m *worldMac) surfaces(ctx context.Context, d *process.Engine) {
 	if len(e.Watching) > 0 {
 		hold(func(ctx context.Context, send func(any) error) error { return d.Watch(ctx, e.Watching, send) })
 	}
+	m.mu.Lock()
 	m.leave = func() {
 		cancel()
 		held.Wait()
 	}
+	m.mu.Unlock()
+}
+
+func (m *worldMac) running() (*process.Engine, time.Time) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.engine, m.began
+}
+
+func (m *worldMac) current() *process.Engine {
+	d, _ := m.running()
+	return d
+}
+
+func (m *worldMac) hold(d *process.Engine, began time.Time) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.began, m.engine = began, d
+}
+
+func (m *worldMac) beginStarting() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.starting {
+		return false
+	}
+	m.starting = true
+	return true
+}
+
+func (m *worldMac) endStarting() {
+	m.mu.Lock()
+	m.starting = false
+	m.mu.Unlock()
+}
+
+func (m *worldMac) nextTick() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.tick++
+	return m.tick
+}
+
+func (m *worldMac) takeLeave() func() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	leave := m.leave
+	m.leave = nil
+	return leave
 }
 
 func (m *worldMac) settle(ctx context.Context) {
 	quiet := 0
 	for n := 0; n < mostTicks && quiet < quietTicks; n++ {
-		m.tick++
+		tick := m.nextTick()
 		_ = m.run.clock().Sleep(ctx, time.Second)
-		d := m.engine
+		d := m.current()
 		if d == nil {
 			return
 		}
-		if d.Step(ctx, m.tick) {
+		if d.Step(ctx, tick) {
 			quiet = 0
 		} else {
 			quiet++
@@ -611,24 +667,24 @@ func (m *worldMac) settle(ctx context.Context) {
 // invariant: an engine that ends keeps what it knew in the world, unless its
 // process ends with it (a reboot, a crash): its successor knows nothing.
 func (m *worldMac) down(forget bool) {
-	if m.engine == nil {
+	d := m.current()
+	if d == nil {
 		return
 	}
-	kept := m.engine.AwakeKept()
-	exposure := m.engine.ExposureKept()
-	memory := m.engine.Memory()
-	activity := m.engine.History().Hand()
-	read := m.engine.SettingsKept()
-	if m.leave != nil {
-		m.leave()
-		m.leave = nil
+	kept := d.AwakeKept()
+	exposure := d.ExposureKept()
+	memory := d.Memory()
+	activity := d.History().Hand()
+	read := d.SettingsKept()
+	if leave := m.takeLeave(); leave != nil {
+		leave()
 	}
 	if !forget && !m.runs() {
-		m.engine.Stop()
+		d.Stop()
 	} else {
-		m.engine.Suspend()
+		d.Suspend()
 	}
-	m.engine = nil
+	m.release(d)
 	if forget {
 		memory = nil
 	}
@@ -640,6 +696,14 @@ func (m *worldMac) down(forget bool) {
 		if forget || e.Stopped {
 			e.Awake, e.Exposure, e.Activity, e.Settings = nil, nil, nil, nil
 		}
+	}
+}
+
+func (m *worldMac) release(d *process.Engine) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.engine == d {
+		m.engine = nil
 	}
 }
 
