@@ -226,7 +226,11 @@
                     "type": "object"
                   },
                   "version": {
-                    "type": "string"
+                    "description": "how far the app moves: latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0",
+                    "type": [
+                      "string",
+                      "number"
+                    ]
                   }
                 },
                 "required": [
@@ -282,7 +286,11 @@
                         "type": "object"
                       },
                       "version": {
-                        "type": "string"
+                        "description": "how far the app moves: latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0",
+                        "type": [
+                          "string",
+                          "number"
+                        ]
                       }
                     },
                     "required": [

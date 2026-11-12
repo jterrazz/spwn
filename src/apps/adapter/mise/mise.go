@@ -137,6 +137,24 @@ func (m *Mise) outdated(ctx context.Context, keys []string) (map[string]string, 
 	return behind, true
 }
 
+func (m *Mise) Newest(ctx context.Context, in catalog.Install) (string, error) {
+	v, ok := in.(catalog.MiseInstall)
+	if !ok {
+		return "", errors.New(in.Key() + " is not a mise runtime")
+	}
+	if err := m.Ready(ctx); err != nil {
+		return "", err
+	}
+	out, err := m.run.Output(ctx, local.Cmd{Name: command, Args: []string{"latest", "--", v.App}, Timeout: contract.CurrencyBudget})
+	if err != nil {
+		return "", err
+	}
+	if out.ExitCode != 0 {
+		return "", errors.New("mise latest exited " + strconv.Itoa(out.ExitCode))
+	}
+	return strings.TrimSpace(out.Stdout), nil
+}
+
 func (m *Mise) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
 	return m.each(ctx, installs, logs, func(v catalog.MiseInstall) local.Cmd {
 		return local.Command(command, "use", "--global", v.App+"@"+v.Version)

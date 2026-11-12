@@ -1,6 +1,6 @@
-description: 'a version the Machinefile pins is kept by upgrade, and stays in the lock as it was'
+description: 'a major alone (22) moves node within 22, and the newer major waits with the line that takes it'
 fixture: ../../__fixtures__/homebrew/
-env: two-macs
+env: versions
 runs:
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |
@@ -21,26 +21,10 @@ runs:
       stdout: |
           ●	homebrew	5.0.1	script
           ●	mise	2026.10.1	brew
-          ◐	node	22.11.0	mise	pinned 22 by jterrazz-macbook-pro: kept
+          ●	node	22.14.0	mise	within 22
           ●	gh	2.98.0	brew
           # Lock
           ●	gh		2.98.0 by brew, was 2.97.0 by brew
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["jterrazz-macbook-pro"].files["machinefiles/jterrazz-macbook-pro.lock"]'' world.json'
-      exit: 0
-      stdout: |+
-          lock: station.lock/v1
-          machinefile: jterrazz-macbook-pro
-          apps:
-              - name: gh
-                method: brew
-                version: 2.98.0
-              - name: homebrew
-                method: script
-                version: 5.0.1
-              - name: mise
-                method: brew
-                version: 2026.10.1
-              - name: node
-                method: mise
-                version: 22.11.0
-
+          ●	node		22.14.0 by mise, was 22.11.0 by mise
+          # Waiting
+          ◐	node		25.1.0 available: change '22' to '25' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml

@@ -54,7 +54,7 @@ func (AppEntry) JSONSchema() map[string]any {
 	entry := map[string]any{
 		"type": "object", "additionalProperties": false, "required": []string{"name"},
 		"properties": map[string]any{
-			"name": map[string]any{"type": "string"}, "version": map[string]any{"type": "string"},
+			"name": map[string]any{"type": "string"}, "version": map[string]any{"type": []string{"string", "number"}, "description": "how far the app moves: " + RangeForms},
 			"optional": map[string]any{"type": "boolean"}, "manager": map[string]any{"type": "string", "enum": ManagerKey("").Enum()},
 			"options": map[string]any{"type": "object", "additionalProperties": scalar},
 		},

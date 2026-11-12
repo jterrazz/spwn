@@ -56,6 +56,9 @@ type Outcome struct {
 	// the verb has run ("" where nothing lists one).
 	Method  catalog.Method
 	Version string
+	// value: the newest version the app's manager offers, whatever range
+	// holds it, read by an update within a range ("" where unread).
+	Newest string
 	// value: why it ended broken, when the reason is typed rather than
 	// worded in Detail.
 	Why Why
@@ -96,6 +99,11 @@ type UpgradeRequest struct {
 	// value: the manager keys whose managers' apps are updated, each
 	// reaching every key its manager item manages (brew reaches cask).
 	Via []catalog.ManagerKey
+	// value: the range a Machinefile lets the one app named move within
+	// (`latest`, `24`, `=24.11.3`); given, a method that holds any range
+	// installs it at the newest the range holds, and reads the newest its
+	// manager offers past it.
+	Within string
 }
 
 // invariant: a step's progress detail is typed lines, worded by the binary

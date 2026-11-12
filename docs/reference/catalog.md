@@ -127,15 +127,15 @@ A setting, like an app, may carry a method per system.
 
 Every manager type has its own check, upgrade and undo; an override is written only where that does not fit:
 
-| Override   | On                   | Value                                                                            |
-| ---------- | -------------------- | -------------------------------------------------------------------------------- |
-| `needs`    | any method           | what this method alone asks of the owner (apt's `sudo`, mas's `app-store-login`) |
-| `provides` | an app's             | the commands this method lands when they differ from the item's (`fdfind`)       |
-| `package`  | a bun's              | the source bun fetches when it differs from the name (`github:tobi/qmd`)         |
-| `upgrade`  | an app's             | the shell line that upgrades what it installed                                   |
-| `pin`      | an app's             | what it can pin: `none` or `version`                                             |
-| `path`     | an app's             | absolute folders it lands commands in, which station's search adds at once       |
-| `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                      |
+| Override   | On                   | Value                                                                              |
+| ---------- | -------------------- | ---------------------------------------------------------------------------------- |
+| `needs`    | any method           | what this method alone asks of the owner (apt's `sudo`, mas's `app-store-login`)   |
+| `provides` | an app's             | the commands this method lands when they differ from the item's (`fdfind`)         |
+| `package`  | a bun's              | the source bun fetches when it differs from the name (`github:tobi/qmd`)           |
+| `upgrade`  | an app's             | the shell line that upgrades what it installed                                     |
+| `pin`      | an app's             | what it can hold: `none` (only its newest) or `version` (what its install carries) |
+| `path`     | an app's             | absolute folders it lands commands in, which station's search adds at once         |
+| `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                        |
 
 A `script` with neither `run` nor `url` is installed by the owner, as its `hint` says; a `run` line takes no `args`, `env` nor `upgrade`. An `env` value that opens with `~/` is given under the home (`HELM_INSTALL_DIR=~/.local/bin`), since an installer reads its variables as they are. A `script`'s `check` is the shell line whose exit 0 says the item is there, run with `~/.local/bin`, the folder a script lands its commands in, as its whole PATH, so it answers for the copy station installed and never for one ahead of it on yours (a mise shim); without one, its `provides` are looked up. The check's output is read for a version by the item's `version-read` `pattern` (`pattern: 'Terraform v(\d+\.\d+\.\d+)'` with `check: CHECKPOINT_DISABLE=1 terraform version`), unless the item reads its version by a command of its own (`version-read` `args`). Its `undo` is the shell line that takes the app back: `station apps remove` and `station apply --remove` run it, and without one station cannot remove the app (`remove it by hand`). Station runs both as it runs a `run` line, `bash -c <line>` from the home, with no value interpolated into it; a `url` script's `undo` runs with its `env`, and a `check` line still running at its 5 seconds is stopped with everything it started. A `run` line or a `url` installer is also its own update: `station apps update <app>` runs it again.
 
@@ -316,8 +316,8 @@ The format is whole now, so a file a newer station writes in v1 decodes in this 
 | `needs: license`, `needs: app-store-login`, a method's `needs`                          | the plan, at its head (an item's `needs` is said at its install today)                                            |
 | `ports`                                                                                 | the engine: a reserved port's `http`, a VM's env at each run, a row's label ([Ports](ports.md#what-an-item-sets)) |
 | the selector's `version`                                                                | the Machinefile's resolution reads it against the system, and `explain`; `apps install` does not yet              |
-| `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a version its method cannot pin is refused); `upgrade` by `station upgrade`              |
-| a version asked of `npm`, `uv` or `bun`, a `pin: version` on a method station runs      | the installs, of which mise's and apt's carry a version yet: until then such a version is refused as unpinnable   |
+| `pin`, `upgrade` on a method other than a `script`'s `url`                              | `pin` by the resolution (a range its method cannot hold is refused); `upgrade` by `station upgrade`               |
+| a version asked of `npm` or `uv`, a `pin: version` on a method station runs             | npm's and uv's installs ride brew's bundle, whose lines carry no version: a range asked of them is refused        |
 | a method's `provides`                                                                   | presence, which reads the item's today                                                                            |
 | a file's `mode`                                                                         | the dotfile writes (whole files today)                                                                            |
 | an app's `options`, an option's `default`, `min`, `max`, `examples`, `${option.<name>}` | the forms and the apply                                                                                           |

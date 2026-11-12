@@ -165,11 +165,11 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " has no method" + by + " for " + e.Detail["system"] + " (" + why + ")", "list it as { name: " + e.Subject + ", optional: true } to skip it there"
 		},
 		machinefilecalls.Unpinnable: func(e *fail.Error) (string, string) {
-			said := e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version (" + e.Detail["at"] + ")"
+			said := e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " holds " + cmp.Or(e.Detail["holds"], "only its newest") + ", never " + e.Detail["version"] + " (" + e.Detail["at"] + ")"
 			if alt := e.Detail["alternative"]; alt != "" {
 				return said, alt + " can: { name: " + e.Subject + ", version: \"" + e.Detail["version"] + "\", manager: " + alt + " }"
 			}
-			return said, "no method of " + e.Subject + " for this system pins one: drop its version"
+			return said, "no method of " + e.Subject + " for this system holds it: drop its version, or list a versioned item (postgresql@18)"
 		},
 		machinefilecalls.UnknownItem: func(e *fail.Error) (string, string) {
 			where := cmp.Or(e.Detail["at"], e.Detail["by"])
@@ -223,7 +223,7 @@ func Codes() map[fail.Code]Wording {
 			return said, "station apps " + e.Subject
 		},
 		appscalls.Unpinnable: func(e *fail.Error) (string, string) {
-			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " cannot pin a version", "ask " + e.Subject + " with no version, or by a method that pins one"
+			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " holds " + cmp.Or(e.Detail["holds"], "only its newest") + ", never " + e.Detail["version"], "ask " + e.Subject + " with no version, or by a method that holds it"
 		},
 		accountscalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no account named \"" + e.Subject + "\"", "station accounts"

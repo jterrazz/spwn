@@ -1,0 +1,28 @@
+description: 'latest moves node to the newest its manager offers, and nothing waits'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: 'latest' }]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	mise	2026.10.1	brew
+          ●	node	25.1.0	mise
+          ●	gh	2.98.0	brew
+          # Lock
+          ●	gh		2.98.0 by brew, was 2.97.0 by brew
+          ●	node		25.1.0 by mise, was 22.11.0 by mise

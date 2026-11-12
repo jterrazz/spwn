@@ -1,0 +1,15 @@
+description: 'a version that is none of its forms is refused at its line, naming the forms it takes'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: node, version: '>=22' }]
+      exit: 0
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml: unmarshal errors: line 4: version ">=22" is no version: latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0
+          Hint: fix that line: station never rewrites a Machinefile

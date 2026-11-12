@@ -41,6 +41,19 @@ func lockSection(d machinefile.LockDiff) []page.Section {
 	return []page.Section{{ID: "lock", Title: "Lock", Columns: columns(), Items: itemsOf(rows)}}
 }
 
+// value: each newer version past its range, and the line that takes it:
+// `node  25.1.0 available: change '24' to '25' in <file>`.
+func waitingSection(w []machinefile.Waiting) []page.Section {
+	if len(w) == 0 {
+		return nil
+	}
+	rows := make([]page.Row, 0, len(w))
+	for _, v := range w {
+		rows = append(rows, page.Row{ID: "waiting/" + v.App, Label: v.App, Mark: page.Attention, Detail: page.Text(v.Words())})
+	}
+	return []page.Section{{ID: "waiting", Title: "Waiting", Columns: columns(), Items: itemsOf(rows)}}
+}
+
 func itemsOf(rows []page.Row) []page.Item {
 	items := make([]page.Item, 0, len(rows))
 	for i := range rows {
@@ -72,7 +85,11 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 		var said []string
 		detail := d.Detail
 		if d.Reason == machinefile.Pinned {
-			said = append(said, "pinned "+d.Line.Step.Version+" by "+u.Plan.Name+": kept")
+			said = append(said, "pinned "+d.Line.Step.Version.String()+" by "+u.Plan.Name+": kept")
+		} else if v := d.Line.Step.Version; v.Exact() {
+			said = append(said, "held at "+v.String())
+		} else if !v.Any() {
+			said = append(said, "within "+v.String())
 		}
 		if len(d.Words) > 0 {
 			said, detail = append(said, d.Words[:len(d.Words)-1]...), d.Words[len(d.Words)-1]
@@ -87,11 +104,11 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 			interrupted = true
 		case d.State == catalog.StateBroken:
 			failed++
-		case d.Updated && d.State == catalog.StateOK:
+		case d.Updated && d.State == catalog.StateOK && (d.Version != d.Line.Seen.Version || d.Line.Step.Within() == ""):
 			updated++
 		}
 	}
-	r := pages.Run{Command: "upgrade", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: lockSection(u.Lock)}
+	r := pages.Run{Command: "upgrade", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: append(lockSection(u.Lock), waitingSection(u.Waiting)...)}
 	switch {
 	case interrupted:
 		r.Head = &pages.RunHead{Label: u.Plan.Name + " interrupted", Mark: page.Broken}
@@ -127,14 +144,27 @@ type UpgradedJSON struct {
 	Lock        []LockChangeJSON `json:"lock"`
 	// value: the shared source before and after, `<name>@<commit>`, when
 	// the upgrade moved it.
-	Source      []string `json:"source,omitempty"`
-	Interrupted bool     `json:"interrupted"`
+	Source []string `json:"source,omitempty"`
+	// value: each newer version past its range, waiting for the owner.
+	Waiting     []WaitingJSON `json:"waiting"`
+	Interrupted bool          `json:"interrupted"`
+}
+
+type WaitingJSON struct {
+	App    string `json:"app"`
+	Newest string `json:"newest"`
+	Range  string `json:"range"`
+	Moved  string `json:"moved"`
+	File   string `json:"file,omitempty"`
 }
 
 func UpgradedContract(u machinefile.Upgraded, done []Worded) UpgradedJSON {
 	// value: station.machinefile.upgrade/v1: each app as the upgrade left
 	// it, and what moved in the lock.
-	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Interrupted: u.Interrupted}
+	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Interrupted: u.Interrupted}
+	for _, w := range u.Waiting {
+		out.Waiting = append(out.Waiting, WaitingJSON(w))
+	}
 	for _, d := range done {
 		l := lineJSON(d.Line, string(d.State), d.Detail)
 		if d.Method != "" {

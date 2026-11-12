@@ -16,16 +16,20 @@ func (m MethodSpec) Key() string {
 	return keys[0]
 }
 
-func (m MethodSpec) Pins() bool {
-	// value: whether this method installs the version a Machinefile asks:
-	// never under `pin: none`; else whether its install carries a version
-	// to its manager (mise's, apt's, a release's tag), whatever `pin`
-	// claims.
+func (m MethodSpec) Holds() Hold {
+	// value: what this method holds of a range a Machinefile asks: only its
+	// newest under `pin: none`; else what its install carries to its
+	// manager (HoldOf), whatever `pin` claims.
 	if m.Pin == PinNone {
-		return false
+		return HoldLatest
 	}
-	_, ok := Pinned(m.install(nil), "")
-	return ok
+	return HoldOf(m.install(nil))
+}
+
+func (m MethodSpec) Pins() bool {
+	// value: whether this method installs one version it is handed, as a
+	// lock hands it one.
+	return m.Holds() >= HoldExact
 }
 
 func (o Option) Check(v OptionValue) string {

@@ -499,7 +499,8 @@ type Reason string
 const (
 	Interrupted Reason = "interrupted"
 	NotRun      Reason = "not-run"
-	// value: an upgrade keeps an app at the version its Machinefile asks.
+	// value: an upgrade keeps an app at the one version its Machinefile
+	// asks, by a method that holds no range around it.
 	Pinned Reason = "pinned"
 )
 
@@ -517,6 +518,59 @@ type Done struct {
 	Reason    Reason
 	Installed bool
 	Updated   bool
+	// value: the newest version the app's manager offers, read by an
+	// upgrade within its range ("" where unread).
+	Newest string
+}
+
+func (s Step) Kept() bool {
+	// value: whether an upgrade leaves the app where it is: one version
+	// asked of a method that holds no range around it (apt, a release).
+	return s.Version.Exact() && s.Spec.Holds() < catalog.HoldAny
+}
+
+func (s Step) Within() string {
+	// value: the range an upgrade hands the update, for a method that holds
+	// any range; empty for one that updates as its manager does.
+	if s.Spec.Holds() != catalog.HoldAny {
+		return ""
+	}
+	if s.Version.Any() {
+		return "latest"
+	}
+	return s.Version.Spec()
+}
+
+// value: a newer version past the range a Machinefile asks, which waits
+// for the owner's gesture: the app, the version offered, the range as the
+// file writes it, the same range moved to hold it, and the file.
+
+type Waiting struct {
+	App, Newest, Range, Moved, File string
+}
+
+func (v Waiting) Words() string {
+	// value: a version waiting, in the words the owner acts on: `25.1.0
+	// available: change '24' to '25' in <file>`.
+	words := v.Newest + " available: change '" + v.Range + "' to '" + v.Moved + "'"
+	if v.File != "" {
+		words += " in " + v.File
+	}
+	return words
+}
+
+func WaitingOf(done []Done) []Waiting {
+	// invariant: a version waits when the manager offers one past the
+	// range asked: a major past `24`, a minor past `24.11`; latest has none.
+	var out []Waiting
+	for _, d := range done {
+		r := d.Line.Step.Version
+		if d.Newest == "" || !r.Past(d.Newest) {
+			continue
+		}
+		out = append(out, Waiting{App: d.Line.Step.Item, Newest: d.Newest, Range: r.String(), Moved: r.Moved(d.Newest), File: d.Line.Step.Origin.File})
+	}
+	return out
 }
 
 // value: a Machinefile applied: its plan, each line as it ended in the
@@ -576,7 +630,7 @@ func (p Plan) UpgradeNeeds() []Asked {
 	// install's, asked when the upgrade installs an app that is not there.
 	var lines []Line
 	for _, l := range p.Upgrades() {
-		if l.Step.Version != "" && l.Seen.Condition != Absent {
+		if l.Step.Kept() && l.Seen.Condition != Absent {
 			continue
 		}
 		if l.Seen.Condition != Absent {
@@ -594,5 +648,6 @@ type Upgraded struct {
 	Plan        Plan
 	Done        []Done
 	Lock        LockDiff
+	Waiting     []Waiting
 	Interrupted bool
 }

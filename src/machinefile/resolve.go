@@ -38,8 +38,9 @@ type Step struct {
 	Method string
 	Chosen string
 	// value: the method chosen, as its file says it.
-	Spec    catalog.MethodSpec
-	Version string
+	Spec catalog.MethodSpec
+	// value: the range of versions the Machinefile lets the app move within.
+	Version catalog.Range
 	// value: the version the lock holds the item at, when the step is
 	// carried by the method the lock names and that method pins it: the
 	// one the install takes; the lock's file when the lock names the
@@ -432,7 +433,7 @@ func (p *planner) setting(name string, e catalog.SettingEntry, o Origin) error {
 	if bad := checkValues(it.Item, e.Values, where); bad != nil {
 		return bad
 	}
-	step, err := p.choose(it, "", "", "listed", where)
+	step, err := p.choose(it, "", catalog.Range{}, "listed", where)
 	if err != nil {
 		var none *NoMethodError
 		if e.Optional && errors.As(err, &none) {
@@ -479,7 +480,7 @@ func (p *planner) system() string {
 	return s
 }
 
-func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version, why, where string) (Step, error) {
+func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version catalog.Range, why, where string) (Step, error) {
 	var matching []catalog.MethodSpec
 	for _, m := range it.Item.Methods {
 		if m.Matches(p.sys) && (manager == "" || m.Key() == string(manager)) {
@@ -493,22 +494,22 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 	chosen, because := matching[0], p.because(matching[0], len(matching))
 	locked, ok := p.lock.App(it.Item.Name)
 	if ok && it.Item.Kind != catalog.KindSetting {
-		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && (version == "" || m.Pins()) })
+		at := slices.IndexFunc(matching, func(m catalog.MethodSpec) bool { return m.Method() == locked.Method && m.Holds().Holds(version) })
 		if at >= 0 {
 			chosen, because = matching[at], "locked"
 		} else {
 			ok = false
 		}
 	}
-	if version != "" && !chosen.Pins() {
+	if !chosen.Holds().Holds(version) {
 		alt := ""
 		for _, m := range matching[1:] {
-			if m.Pins() {
+			if m.Holds().Holds(version) {
 				alt = m.Key()
 				break
 			}
 		}
-		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version, Method: chosen.Key(), Alternative: alt, At: where}
+		return Step{}, &UnpinnableError{Item: it.Item.Name, Version: version.String(), Method: chosen.Key(), Holds: chosen.Holds(), Alternative: alt, At: where}
 	}
 	held, recorded := lockedAt(ok, version, locked.Version), ""
 	if !chosen.Pins() {
@@ -521,8 +522,8 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version,
 	}, nil
 }
 
-func lockedAt(ok bool, asked, locked string) string {
-	if ok && Satisfies(asked, locked) {
+func lockedAt(ok bool, asked catalog.Range, locked string) string {
+	if ok && asked.Contains(locked) {
 		return locked
 	}
 	return ""
@@ -568,7 +569,7 @@ func (p *planner) implied() error {
 			if err != nil {
 				return err
 			}
-			step, err := p.choose(dep, "", "", broughtBy(l.Kind, s.Item), "")
+			step, err := p.choose(dep, "", catalog.Range{}, broughtBy(l.Kind, s.Item), "")
 			if err != nil {
 				return err
 			}
@@ -702,8 +703,8 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		key := group + s.Item
 		text := s.Why
-		if s.Version != "" {
-			text = s.Version
+		if !s.Version.IsZero() {
+			text = s.Version.String()
 		}
 		chose := s.Defined
 		if s.Lock != "" {

@@ -239,24 +239,81 @@ func (f *Installer) Install(ctx context.Context, installs []catalog.Install, _ c
 	if err := f.unopened(installs); err != nil {
 		return err
 	}
+	f.w.Lock()
+	offered := map[string][]string{}
+	for _, i := range installs {
+		offered[i.Key()] = f.offered(i.Key())
+	}
+	f.w.Unlock()
 	if err := f.run(ctx, "Install", installs, installed); err != nil {
 		return err
 	}
-	f.pin(installs)
+	f.pin(installs, offered)
 	return nil
 }
 
-// invariant: an install that carries a version holds that version, as
-// the real adapter's global use of it leaves it; a channel (latest, lts,
-// stable) holds whatever the world offers.
-func (f *Installer) pin(installs []catalog.Install) {
+// value: every version the world offers of a key: the one there, the
+// one an update brings, the one an install brings, and the others listed.
+func (f *Installer) offered(k string) []string {
+	s := f.manager()
+	out := slices.Clone(s.Versions[k])
+	for _, v := range []string{s.Installed[k], s.Behind[k], s.Offers[k]} {
+		if v != "" {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+// invariant: an install that carries a version holds the newest version
+// the world offers within it, as mise's `use` of a prefix and bun's of a
+// range resolve it, an exact one that version, and a channel (latest,
+// lts, stable) the newest the world offers; a range the world offers
+// nothing within holds the prefix it carries. A version that reaches the
+// one an update waited for leaves the app current.
+func (f *Installer) pin(installs []catalog.Install, offered map[string][]string) {
 	f.w.Lock()
 	defer f.w.Unlock()
 	for _, i := range installs {
-		if v := catalog.VersionOf(i); v != "" && strings.ContainsAny(v[:1], "0123456789") {
-			f.manager().Installed[i.Key()] = v
+		v := catalog.VersionOf(i)
+		if v == "" {
+			continue
+		}
+		s, k := f.manager(), i.Key()
+		r, err := catalog.ParseRange(v)
+		switch {
+		case (err == nil && r.Exact()) || (err != nil && strings.ContainsAny(v[:1], "0123456789")):
+			s.Installed[k] = v
+		case err != nil || r.Any():
+			if best := catalog.Newest(offered[k]...); best != "" {
+				s.Installed[k] = best
+			}
+		default:
+			within := slices.DeleteFunc(slices.Clone(offered[k]), func(o string) bool { return !r.Contains(o) })
+			if best := catalog.Newest(within...); best != "" {
+				s.Installed[k] = best
+			} else if strings.ContainsAny(v[:1], "0123456789") {
+				s.Installed[k] = v
+			}
+		}
+		if b, ok := s.Behind[k]; ok && catalog.Newest(s.Installed[k], b) == s.Installed[k] {
+			delete(s.Behind, k)
 		}
 	}
+}
+
+func (f *Installer) Newest(ctx context.Context, in catalog.Install) (string, error) {
+	// value: the newest version the world offers of the install's key, read
+	// by a manager the world says reads one, as its real adapter does.
+	if err := f.Ready(ctx); err != nil {
+		return "", err
+	}
+	f.w.Lock()
+	defer f.w.Unlock()
+	if !f.manager().ReadsNewest {
+		return "", contract.ErrCannot
+	}
+	return catalog.Newest(f.offered(in.Key())...), nil
 }
 
 // invariant: a command another item brings at its first launch is absent

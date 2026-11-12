@@ -98,14 +98,14 @@ type ImageSpec struct {
 	Bake []string `yaml:"bake,omitempty"`
 }
 
-// value: an app a Machinefile lists: its catalog item, the version asked
-// (the method must pin it), optional (no method for the system skips it),
+// value: an app a Machinefile lists: its catalog item, the range of
+// versions it may move within (its method must hold it), optional (no method for the system skips it),
 // the manager it is installed by instead of the priority's, and its option
 // values. Written as its name alone, or as a mapping.
 
 type AppEntry struct {
 	Name     string                 `yaml:"name"`
-	Version  string                 `yaml:"version,omitempty"`
+	Version  Range                  `yaml:"version,omitempty"`
 	Optional bool                   `yaml:"optional,omitempty"`
 	Manager  ManagerKey             `yaml:"manager,omitempty"`
 	Options  map[string]OptionValue `yaml:"options,omitempty"`

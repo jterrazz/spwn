@@ -85,7 +85,16 @@ func parseOutdated(stdout string) map[string]string {
 }
 
 func (b *Bun) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {
-	return b.each(ctx, installs, logs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "install", "-g", v.Package) })
+	return b.each(ctx, installs, logs, func(v catalog.BunInstall) local.Cmd { return local.Command(command, "install", "-g", at(v)) })
+}
+
+// value: the package as bun's install takes it, at the range asked
+// (`pkg@^1.2.0`); none asked, its newest.
+func at(v catalog.BunInstall) string {
+	if v.Version == "" {
+		return v.Package
+	}
+	return v.Package + "@" + v.Version
 }
 
 func (b *Bun) Update(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

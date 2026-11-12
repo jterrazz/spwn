@@ -1,4 +1,4 @@
-description: 'a version its method cannot pin is refused naming the manager that can, which then pins it'
+description: 'a range its method cannot hold is refused naming the manager that can, which then holds it'
 env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
@@ -22,7 +22,7 @@ runs:
     - command: 'explain'
       exit: 2
       stderr: |
-          Error: jq 1.7: brew cannot pin a version (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
+          Error: jq 1.7: brew holds only its newest, never 1.7 (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)
           Hint: mise can: { name: jq, version: "1.7", manager: mise }
     - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
       stdin: |

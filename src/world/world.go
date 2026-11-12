@@ -203,6 +203,12 @@ type Manager struct {
 	Behind map[string]string `json:"behind,omitempty"`
 	// value: the version an install of a key brings.
 	Offers map[string]string `json:"offers,omitempty"`
+	// value: the other versions the manager offers of a key, any order: an
+	// install within a range takes the newest of them it holds.
+	Versions map[string][]string `json:"versions,omitempty"`
+	// value: the manager reads the newest version it offers of a key,
+	// whatever range holds it, as its real adapter does (mise's `latest`).
+	ReadsNewest bool `json:"reads_newest,omitempty"`
 	// value: the methods an install of a key brings, their manager present
 	// from then on: Homebrew's script lands brew and cask.
 	Lands map[string][]catalog.Method `json:"lands,omitempty"`

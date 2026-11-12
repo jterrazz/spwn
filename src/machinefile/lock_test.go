@@ -59,20 +59,6 @@ func TestARunThatStopsKeepsTheLockOfWhatItDidNotReach(t *testing.T) {
 	}
 }
 
-func TestALockedVersionMeetsTheOneAskedOnlyUnderIt(t *testing.T) {
-	for asked, cases := range map[string]map[string]bool{
-		"":      {"1.0": true},
-		"22":    {"22": true, "22.11.0": true, "220.1": false, "2": false},
-		"1.4.4": {"1.4.4": true, "1.4.40": false},
-	} {
-		for locked, want := range cases {
-			if got := machinefile.Satisfies(asked, locked); got != want {
-				t.Errorf("Satisfies(%q, %q) = %v", asked, locked, got)
-			}
-		}
-	}
-}
-
 func TestAWriteMovesOnlyWhatItsRunChanged(t *testing.T) {
 	// invariant: the lock on disk keeps every line the run did not change,
 	// takes the ones it added or moved, drops the ones it removed, and

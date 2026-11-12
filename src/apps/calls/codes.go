@@ -40,7 +40,7 @@ func coded(err error) error {
 		}
 		return fail.New(fail.Refused, NoMethod, none.App, map[string]string{"method": string(none.Method), "has": strings.Join(has, ", "), "held": string(none.Held)})
 	case errors.As(err, &unpinnable):
-		return fail.New(fail.Refused, Unpinnable, unpinnable.App, map[string]string{"method": string(unpinnable.Method), "version": unpinnable.Version})
+		return fail.New(fail.Refused, Unpinnable, unpinnable.App, map[string]string{"method": string(unpinnable.Method), "version": unpinnable.Version, "holds": unpinnable.Holds.String()})
 	}
 	return err
 }

@@ -22,9 +22,11 @@ type UpgradeIn struct {
 }
 
 var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
-	// value: every app the Machinefile lists that is there updated by the
-	// method that holds it, the managers first, a version the Machinefile
-	// pins kept; then the lock written anew, its moves shown.
+	// value: every app the Machinefile lists that is there moved as far as
+	// its range lets it, by the method that holds it, the managers first, a
+	// version a method holds no range around kept; then the lock written
+	// anew, its moves shown, and each newer version past a range said
+	// waiting.
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
@@ -59,6 +61,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 			out.Done = append(out.Done, update(ctx, d, l, p))
 		}
 		out.Interrupted = ctx.Err() != nil
+		out.Waiting = machinefile.WaitingOf(out.Done)
 		now := machinefile.Relocked(plan, out.Done, source)
 		out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
 		if !out.Lock.Empty() {
@@ -109,11 +112,11 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 	// every other is updated by the method that holds it, and the lock
 	// takes the version that method lists once it ran.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version}
-	if l.Step.Version != "" {
+	if l.Step.Kept() {
 		done.Reason = machinefile.Pinned
 		return done
 	}
-	outcomes, err := call.Invoke(ctx, d.Calls, machine.Ref{}, appscalls.Update, appscalls.UpdateIn{Names: []string{l.Step.Item}}, p)
+	outcomes, err := call.Invoke(ctx, d.Calls, machine.Ref{}, appscalls.Update, appscalls.UpdateIn{Names: []string{l.Step.Item}, Within: l.Step.Within()}, p)
 	switch {
 	case ctx.Err() != nil:
 		return finishedUpdate(ctx, d, done)
@@ -129,7 +132,7 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 		if o.Name != l.Step.Item {
 			continue
 		}
-		done.State, done.Detail, done.Log, done.Updated = o.Result, o.Detail, o.Log, true
+		done.State, done.Detail, done.Log, done.Updated, done.Newest = o.Result, o.Detail, o.Log, true, o.Newest
 		if o.Method != "" {
 			done.Method, done.Version = string(o.Method), o.Version
 		}

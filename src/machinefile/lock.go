@@ -25,19 +25,14 @@ func (l Lock) App(name string) (catalog.LockedApp, bool) {
 	return l.Apps[i], true
 }
 
-func Satisfies(asked, locked string) bool {
-	// value: whether a locked version meets the one a Machinefile asks: the
-	// same one, or one under it (`22` is met by `22.11.0`, never by `220.1`).
-	return asked == "" || locked == asked || strings.HasPrefix(locked, asked+".")
-}
-
 func (s Step) InstallVersion() string {
-	// value: the version apply hands the install: the lock's, where the
-	// step's method pins one; else the one the Machinefile asks.
+	// value: the range apply hands the install, in its one unambiguous
+	// word: the lock's version exactly, where the step's method pins one;
+	// else the range the Machinefile asks.
 	if s.Locked != "" {
-		return s.Locked
+		return catalog.Exactly(s.Locked).Spec()
 	}
-	return s.Version
+	return s.Version.Spec()
 }
 
 func Relocked(p Plan, done []Done, source *catalog.LockSource) catalog.LockFile {

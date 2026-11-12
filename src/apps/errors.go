@@ -137,8 +137,9 @@ type UnpinnableError struct {
 	App     string
 	Method  catalog.Method
 	Version string
+	Holds   catalog.Hold
 }
 
 func (e *UnpinnableError) Error() string {
-	return string(e.Method) + " cannot install " + e.App + " at " + e.Version
+	return string(e.Method) + " cannot hold " + e.App + " at " + e.Version
 }

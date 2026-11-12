@@ -253,6 +253,9 @@ func (s *Shelf) Uninstall(ctx context.Context, names []string, word bool) ([]app
 }
 
 func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error) {
+	if r.Within != "" && len(r.Names) == 1 {
+		return s.within(ctx, r)
+	}
 	via := map[catalog.Method]bool{}
 	for _, k := range r.Via {
 		owner, _ := s.cat.Manager(string(k))
@@ -744,4 +747,54 @@ func (s *Shelf) unrecorded(ctx context.Context, t catalog.App) bool {
 	}
 	holds, err := h.Holds(ctx, t.Name)
 	return err == nil && !holds
+}
+
+// invariant: an update within a range moves an app as far as the range
+// lets it: a method that holds any range installs it again at the range
+// (mise's `use --global node@24`, bun's `pkg@^1.2.0`), whose newest it
+// then holds; any other updates as its manager does. Either way the
+// outcome names the newest version the manager offers, past the range or
+// not, where the method reads one.
+func (s *Shelf) within(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outcome, error) {
+	asked, err := catalog.ParseRange(r.Within)
+	if err != nil {
+		return nil, &apps.UnpinnableError{App: r.Names[0], Version: r.Within}
+	}
+	found, err := s.Find(r.Names)
+	if err != nil {
+		return nil, err
+	}
+	rep := s.reports(ctx, found)[0]
+	if !apps.StateOf(rep).Installed() {
+		return nil, &apps.NotInstalledError{App: found[0].Name}
+	}
+	t := s.holding(found[0], rep)
+	in := s.install(t)
+	pinned, ok := catalog.Pinned(in, asked)
+	if !ok || catalog.HoldOf(in) != catalog.HoldAny {
+		r.Within = ""
+		out, err := s.Upgrade(ctx, r)
+		return s.newest(ctx, out, t, in), err
+	}
+	o := s.run(ctx, verbUpdate, s.as(t, pinned), false, contract.Installer.Install)
+	return s.newest(ctx, s.held(ctx, []apps.Outcome{o}, map[string]catalog.App{t.Name: t}), t, in), nil
+}
+
+func (s *Shelf) newest(ctx context.Context, out []apps.Outcome, t catalog.App, in catalog.Install) []apps.Outcome {
+	reads, ok := s.installer(t).(contract.Newest)
+	if !ok {
+		return out
+	}
+	told, cancel := context.WithTimeout(ctx, contract.CurrencyBudget)
+	defer cancel()
+	v, err := reads.Newest(told, in)
+	if err != nil {
+		return out
+	}
+	for i := range out {
+		if out[i].Name == t.Name {
+			out[i].Newest = v
+		}
+	}
+	return out
 }

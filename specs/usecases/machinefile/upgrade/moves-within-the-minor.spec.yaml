@@ -1,0 +1,30 @@
+description: 'a minor alone (22.11) moves node through its patches only, and the newer version waits'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22.11' }]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	mise	2026.10.1	brew
+          ●	node	22.11.5	mise	within 22.11
+          ●	gh	2.98.0	brew
+          # Lock
+          ●	gh		2.98.0 by brew, was 2.97.0 by brew
+          ●	node		22.11.5 by mise, was 22.11.0 by mise
+          # Waiting
+          ◐	node		25.1.0 available: change '22.11' to '25.1' in ~/.config/station/machinefiles/jterrazz-macbook-pro.yaml

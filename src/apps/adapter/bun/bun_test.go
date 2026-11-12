@@ -123,3 +123,22 @@ func TestABunWithNoOutdatedOrNoRegistryLeavesTheCurrencyUnknown(t *testing.T) {
 		}
 	}
 }
+
+func TestARangeIsInstalledAsTheSpecifierBunTakes(t *testing.T) {
+	var ran []string
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = append(ran, strings.Join(c.Args, " "))
+		return local.Output{}, nil
+	}, "bun")
+	for _, text := range []string{"", "1", "1.2", "^1.2.0", "1.2.3"} {
+		r, _ := catalog.ParseRange(text)
+		in, _ := catalog.Pinned(catalog.BunInstall{Package: "github:tobi/qmd", Name: "qmd"}, r)
+		if err := bun.New(run).Install(context.Background(), []catalog.Install{in}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want := "install -g github:tobi/qmd|install -g github:tobi/qmd@^1.0.0|install -g github:tobi/qmd@~1.2.0|install -g github:tobi/qmd@^1.2.0|install -g github:tobi/qmd@1.2.3"
+	if got := strings.Join(ran, "|"); got != want {
+		t.Errorf("ran %q; want %q", got, want)
+	}
+}

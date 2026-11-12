@@ -16,6 +16,10 @@ type UpdateIn struct {
 	// value: manager keys, as `--manager` takes them; the field keeps its
 	// v3 name so an older station reads it.
 	Method []string
+	// value: the range a Machinefile lets the one app named move within, as
+	// apps.UpgradeRequest's Within; an older station drops it and updates
+	// as its manager does.
+	Within string
 }
 
 func keys(words []string) []catalog.ManagerKey {
@@ -38,7 +42,7 @@ var Update = call.Call[Deps, UpdateIn, []apps.Outcome]{
 			}
 		}
 		step(p, "Updating "+updating(in))
-		out, err := d.Apps.Upgrade(ctx, apps.UpgradeRequest{Names: in.Names, All: len(in.Names) == 0 && len(in.Method) == 0, Via: keys(in.Method)})
+		out, err := d.Apps.Upgrade(ctx, apps.UpgradeRequest{Names: in.Names, All: len(in.Names) == 0 && len(in.Method) == 0, Via: keys(in.Method), Within: in.Within})
 		return interrupted(ctx, out, err)
 	},
 }

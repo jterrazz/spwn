@@ -62,6 +62,13 @@ type Holder interface {
 	Holds(ctx context.Context, app string) (bool, error)
 }
 
+type Newest interface {
+	// invariant: a method that reads the newest version its manager offers
+	// of an install, whatever range holds it, as `mise latest node` does; a
+	// method with no such read leaves a newer major unsaid, never guessed.
+	Newest(ctx context.Context, in catalog.Install) (string, error)
+}
+
 type Manager struct {
 	// value: the manager's word in a row's detail: "brew did not answer".
 	Name string

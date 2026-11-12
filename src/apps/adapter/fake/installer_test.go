@@ -39,6 +39,15 @@ func TestInstaller(t *testing.T) {
 	}
 }
 
+func TestNewest(t *testing.T) {
+	sample := catalog.GitHubReleaseInstall{Repo: "acme/tool", Asset: "tool-*-{os}-{arch}.tar.gz", Commands: []string{"tool"}}
+	contracttest.Newest(t, sample, func(_ *testing.T, s contracttest.Seed) contract.Installer {
+		w := seeded(s, sample.Method())
+		w.Mac("mbp").Apps[sample.Method()].ReadsNewest = true
+		return fake.InstallerOf(w, "mbp", sample.Method(), false)
+	})
+}
+
 func TestHoldingInstaller(t *testing.T) {
 	build := func(_ *testing.T, s contracttest.Seed) contract.Installer {
 		return fake.InstallerOf(seeded(s, catalog.MethodApt), "mbp", catalog.MethodApt, false)

@@ -308,7 +308,7 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 					t.Errorf("%s: the plan showed %s, apply ended %s %q and left %s without it", about, step.Method, done.State, done.Detail, step.Method)
 					continue
 				}
-				if step.Version != "" && done.Version != step.Version {
+				if !step.Version.Any() && !step.Version.Contains(done.Version) {
 					t.Errorf("%s: asked at %s, holds %s", about, step.Version, done.Version)
 				}
 				if rec, ok := b.recorded(a.Name); !ok || rec.Method != step.Method {

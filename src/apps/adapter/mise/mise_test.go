@@ -39,6 +39,8 @@ func (r *runtimes) play(c local.Cmd) (local.Output, error) {
 		tool, version, _ := strings.Cut(strings.TrimPrefix(args, "use --global "), "@")
 		r.pinned[tool] = version
 	case strings.HasPrefix(args, "upgrade "):
+	case strings.HasPrefix(args, "latest -- "):
+		return local.Output{Stdout: "25.1.0\n"}, nil
 	case strings.HasPrefix(args, "unuse --global --no-prune "):
 		delete(r.pinned, strings.TrimPrefix(args, "unuse --global --no-prune "))
 	default:
@@ -58,6 +60,13 @@ func TestInstaller(t *testing.T) {
 			names = nil
 		}
 		return mise.New(local.Played(r.play, names...))
+	})
+	contracttest.Newest(t, catalog.MiseInstall{App: "node", Version: "lts"}, func(_ *testing.T, seed contracttest.Seed) contract.Installer {
+		names := []string{"mise"}
+		if seed.Absent {
+			names = nil
+		}
+		return mise.New(local.Played((&runtimes{pinned: map[string]string{}}).play, names...))
 	})
 }
 
@@ -169,5 +178,32 @@ func TestAMiseThatDoesNotAnswerLeavesTheCurrencyUnknown(t *testing.T) {
 		if err != nil || got["node"].Verdict != apps.Unknown {
 			t.Errorf("%s: currency %v %v; want unknown", name, got, err)
 		}
+	}
+}
+
+func TestARangeIsInstalledByItsPrefixAndTheNewestIsReadPastIt(t *testing.T) {
+	var ran []string
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = append(ran, strings.Join(c.Args, " "))
+		if c.Args[0] == "latest" {
+			return local.Output{Stdout: "25.1.0\n"}, nil
+		}
+		return local.Output{}, nil
+	}, "mise")
+	m := mise.New(run)
+	for _, text := range []string{"22", "^22.5.0", "~22.11.0", "22.11.0"} {
+		r, _ := catalog.ParseRange(text)
+		in, ok := catalog.Pinned(catalog.MiseInstall{App: "node", Version: "lts"}, r)
+		if !ok {
+			t.Fatalf("mise holds no %q", text)
+		}
+		if err := m.Install(context.Background(), []catalog.Install{in}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	newest, err := m.Newest(context.Background(), catalog.MiseInstall{App: "node"})
+	want := []string{"use --global node@22", "use --global node@22", "use --global node@22.11", "use --global node@22.11.0", "latest -- node"}
+	if err != nil || newest != "25.1.0" || !slices.Equal(ran, want) {
+		t.Errorf("ran %q, newest %q (%v); want %q, 25.1.0", ran, newest, err, want)
 	}
 }

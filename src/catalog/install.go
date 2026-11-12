@@ -66,7 +66,10 @@ type NpmInstall struct{ Package string }
 
 type UvInstall struct{ Package string }
 
-type BunInstall struct{ Package, Name string }
+// value: a package of bun's, and the range asked of it in npm's form
+// (`^24.2.0`, `~24.11.0`, `24.11.3`); empty, the newest.
+
+type BunInstall struct{ Package, Name, Version string }
 
 type MiseInstall struct{ App, Version string }
 
@@ -206,19 +209,30 @@ func Keys(in Install) []string {
 	return []string{in.Key()}
 }
 
-func Pinned(in Install, version string) (Install, bool) {
-	// value: the install at the version asked, where it carries one to its
-	// manager: a runtime of mise's, apt's package version, a release's tag;
-	// any other carries none.
+func Pinned(in Install, r Range) (Install, bool) {
+	// value: the install held within a range, where its method holds that
+	// range (HoldOf): a runtime of mise's at the range's prefix, a package
+	// of bun's at its specifier, apt's package and a
+	// release's tag at its one version; latest leaves every install as the
+	// catalog writes it.
+	if !HoldOf(in).Holds(r) {
+		return nil, false
+	}
+	if r.Any() {
+		return in, true
+	}
 	switch m := in.(type) {
 	case MiseInstall:
-		m.Version = version
+		m.Version = r.Head()
+		return m, true
+	case BunInstall:
+		m.Version = r.Npm()
 		return m, true
 	case AptInstall:
-		m.Version = version
+		m.Version = r.Head()
 		return m, true
 	case GitHubReleaseInstall:
-		m.Tag = version
+		m.Tag = r.Head()
 		return m, true
 	}
 	return nil, false
@@ -229,6 +243,8 @@ func VersionOf(in Install) string {
 	// it carries none.
 	switch m := in.(type) {
 	case MiseInstall:
+		return m.Version
+	case BunInstall:
 		return m.Version
 	case AptInstall:
 		return m.Version

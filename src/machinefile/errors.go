@@ -1,6 +1,10 @@
 package machinefile
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/jterrazz/studio-station/src/catalog"
+)
 
 // value: where a refused entry is written, `<file>:<line>` (or its file
 // alone when the line is not known); empty for an item another one
@@ -101,16 +105,19 @@ func suffix(at string) string {
 	return ", " + at
 }
 
+// value: a range the chosen method cannot hold: what it holds, and
+// another method of the item for this system that holds the range, or
+// empty.
+
 type UnpinnableError struct {
 	Item, Version, Method string
-	// value: another method of the item for this system that pins, or
-	// empty.
-	Alternative string
-	At          string
+	Holds                 catalog.Hold
+	Alternative           string
+	At                    string
 }
 
 func (e *UnpinnableError) Error() string {
-	return e.Item + " " + e.Version + ": " + e.Method + " cannot pin a version (" + e.At + ")"
+	return e.Item + " " + e.Version + ": " + e.Method + " holds " + e.Holds.String() + ", never " + e.Version + " (" + e.At + ")"
 }
 
 type BadValueError struct {

@@ -224,7 +224,7 @@ func TestARemovalThatWouldTakeMoreTakesNothing(t *testing.T) {
 func TestAVersionAskedIsTheFirstPackages(t *testing.T) {
 	d := &dpkg{held: map[string]string{}}
 
-	in, _ := catalog.Pinned(catalog.AptInstall{Packages: []string{"tree", "tree-extra"}}, "1:2.43.0")
+	in, _ := catalog.Pinned(catalog.AptInstall{Packages: []string{"tree", "tree-extra"}}, catalog.Exactly("1:2.43.0"))
 	if err := played(d).InstallFor(context.Background(), word("tree"), []catalog.Install{in}, nil); err != nil {
 		t.Fatal(err)
 	}
