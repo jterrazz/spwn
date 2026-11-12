@@ -1,8 +1,11 @@
 package machinefile
 
 import (
+	"cmp"
 	"slices"
 	"time"
+
+	"github.com/jterrazz/studio-station/src/catalog"
 )
 
 // value: the hour of the night the engine upgrades a bound Machinefile at,
@@ -12,8 +15,10 @@ const NightHour = 3
 
 // value: what the night's upgrade did: when it ended, the Machinefile it
 // ran, each app it moved, each version waiting past a range, the apps it
-// left for the owner's run (a step that asks a password), and whether it
-// was interrupted.
+// left for the owner's run (a step that asks a password), the apps whose
+// update failed, whether it was interrupted, why the shared source was
+// not pulled, and why the night did not run to its end (the Machinefile
+// does not resolve, another run held the machine, the lock not written).
 
 type Night struct {
 	At          time.Time `json:"at"`
@@ -21,7 +26,10 @@ type Night struct {
 	Moved       []Moved   `json:"moved,omitempty"`
 	Waiting     []Waiting `json:"waiting,omitempty"`
 	Left        []string  `json:"left,omitempty"`
+	Failed      []string  `json:"failed,omitempty"`
 	Interrupted bool      `json:"interrupted,omitempty"`
+	Unpulled    string    `json:"unpulled,omitempty"`
+	Error       string    `json:"error,omitempty"`
 }
 
 // value: one app a night moved: from the version it read to the one it
@@ -34,18 +42,43 @@ type Moved struct {
 	Range string `json:"range"`
 }
 
-func NightOf(u Upgraded, at time.Time) Night {
+func NightOf(u Upgraded, failed error, name string, at time.Time) Night {
 	// invariant: an app moved is one the run updated to another version
-	// than it read; an app left is one whose line waits for the owner's run.
-	n := Night{At: at.UTC(), Machinefile: u.Plan.Name, Waiting: u.Waiting, Interrupted: u.Interrupted}
+	// than it read; an app left is one whose line waits for the owner's run;
+	// an app failed is one whose update ended broken. A night that failed
+	// before its end keeps its error, so the owner reads it.
+	n := Night{At: at.UTC(), Machinefile: cmp.Or(u.Plan.Name, name), Waiting: u.Waiting, Interrupted: u.Interrupted, Unpulled: u.Unpulled}
+	if failed != nil && !u.Interrupted {
+		n.Error = failed.Error()
+	}
+	n.seen(u)
+	return n
+}
+
+func (n *Night) seen(u Upgraded) {
+	n.Left, n.Failed = nil, nil
 	for _, d := range u.Done {
 		switch {
 		case d.Reason == WaitsForYou:
 			n.Left = append(n.Left, d.Line.Step.Item)
+		case d.Reason == Interrupted || d.Reason == NotRun:
+		case d.State == catalog.StateBroken:
+			n.Failed = append(n.Failed, d.Line.Step.Item)
 		case d.Updated && d.Version != "" && d.Version != d.Line.Seen.Version:
 			n.Moved = append(n.Moved, Moved{App: d.Line.Step.Item, Was: d.Line.Seen.Version, Now: d.Version, Range: d.Line.Step.Version.String()})
 		}
 	}
+}
+
+func (n Night) Refreshed(u Upgraded) Night {
+	// invariant: the owner's own upgrade of the night's Machinefile, run to
+	// its end, is what the machine now reads: what waits, what is left,
+	// what failed and whether the source was pulled are its own, and the
+	// night's moves stay the night's.
+	moved := n.Moved
+	n.Waiting, n.Unpulled, n.Error, n.Interrupted = u.Waiting, u.Unpulled, "", false
+	n.seen(u)
+	n.Moved = moved
 	return n
 }
 
@@ -63,9 +96,9 @@ func NightDue(now, since time.Time, last Night, ran bool) bool {
 	// invariant: a night is due once a NightHour has passed since the last
 	// night that completed, or, with none, since since (the engine's start
 	// or the binding, the later): a Mac asleep or off at that hour upgrades
-	// when it is back. A night interrupted did not complete, so the next run
-	// takes it again.
-	if ran && last.Interrupted {
+	// when it is back. A night interrupted or failed did not complete, so
+	// the next run takes it again.
+	if ran && (last.Interrupted || last.Error != "") {
 		return true
 	}
 	from := since

@@ -655,7 +655,7 @@ func (p Plan) UpgradeNeeds() []Asked {
 // value: an upgrade run: its plan, each app as it ended in the order it
 // ran, the lock before and after, whether it was interrupted, and why the
 // shared source was not pulled, when it was not (the run went on from
-// its clone as it stood).
+// its clone as it stood), and whether the machine is bound to none.
 
 type Upgraded struct {
 	Plan        Plan
@@ -664,4 +664,6 @@ type Upgraded struct {
 	Waiting     []Waiting
 	Interrupted bool
 	Unpulled    string
+	// value: the machine is bound to no Machinefile, so no night upgrades it.
+	Unbound bool
 }

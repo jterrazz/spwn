@@ -275,7 +275,9 @@ func (f *Installer) offered(k string) []string {
 // world offers nothing within holds the version it carries when that
 // names a number, a vendor before it read through (`temurin-9.8.7`). A
 // version that reaches the one an update waited for leaves the app
-// current.
+// current, and so does one held by a word that does not reach it, as
+// `mise outdated` reads a runtime only within what its config asks (`22`
+// is never behind 24.11.0).
 func (f *Installer) pin(installs []catalog.Install, offered map[string][]string) {
 	f.w.Lock()
 	defer f.w.Unlock()
@@ -290,7 +292,7 @@ func (f *Installer) pin(installs []catalog.Install, offered map[string][]string)
 		} else if catalog.Newest(v) == v {
 			s.Installed[k] = v
 		}
-		if b, ok := s.Behind[k]; ok && catalog.Newest(s.Installed[k], b) == s.Installed[k] {
+		if b, ok := s.Behind[k]; ok && (catalog.Newest(s.Installed[k], b) == s.Installed[k] || resolved(v, []string{b}) == "") {
 			delete(s.Behind, k)
 		}
 	}

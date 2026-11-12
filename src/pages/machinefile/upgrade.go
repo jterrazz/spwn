@@ -132,6 +132,9 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 	default:
 		r.Head = &pages.RunHead{Label: "Upgraded " + u.Plan.Name, Mark: page.OK}
 	}
+	if u.Unbound {
+		r.Next = append(r.Next, page.Hint{Command: "station apply --machinefile " + u.Plan.Name, Text: "binds this machine: no night upgrades it until then"})
+	}
 	words := []string{counted(updated, "updated")}
 	if u.Lock.Empty() {
 		words = append(words, "lock unchanged")

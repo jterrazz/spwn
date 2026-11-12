@@ -1,0 +1,46 @@
+description: 'a night that cannot run is recorded and said, tried again an hour later, and gone once it runs'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, no-such-app]
+      exit: 0
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep "night"'
+      exit: 0
+      stdout: |
+          ✗	the night's upgrade of jterrazz-macbook-pro failed: the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)	station upgrade
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-macbook-pro","error":"the catalog has no item no-such-app (~/.config/station/machinefiles/jterrazz-macbook-pro.yaml:4)"}
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'world advance 1h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].stores.night | del(.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-macbook-pro","moved":[{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}]}

@@ -64,21 +64,57 @@ func ActivityRead(r activity.Report) Read {
 }
 
 // value: what the apps line says of the engine's nights: the apps the last
-// one moved, when it is the night just past, and every version waiting past
-// a range, as the last night read it.
+// one moved, when it is the night just past, and what the last one left
+// the owner, as it read it: every version waiting past a range, each app
+// left for the owner's run or whose update failed, why the shared source
+// was not pulled, and why the night did not run to its end.
 
 type Nights struct {
-	Moved   int
-	Waiting []machinefile.Waiting
+	Moved       int
+	Machinefile string
+	Waiting     []machinefile.Waiting
+	Left        []string
+	Failed      []string
+	Unpulled    string
+	Error       string
 }
 
 func NightOf(n machinefile.Night, ran bool, now time.Time) Nights {
 	if !ran {
 		return Nights{}
 	}
-	out := Nights{Waiting: n.Waiting}
+	out := Nights{Machinefile: n.Machinefile, Waiting: n.Waiting, Left: n.Left, Failed: n.Failed, Unpulled: n.Unpulled, Error: n.Error}
 	if !n.At.Before(machinefile.LastNight(now)) {
 		out.Moved = len(n.Moved)
+	}
+	return out
+}
+
+func (n Nights) findings(m machine.Ref) []finding.Finding {
+	// invariant: one Needs you line per thing the last night left the
+	// owner, each fixed by the owner's own upgrade but a waiting version,
+	// fixed by its line of the Machinefile.
+	var out []finding.Finding
+	upgrade := finding.Fix{Command: "station upgrade"}
+	said := func(severity finding.Severity, subject, text string, fix finding.Fix) {
+		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: severity, Subject: subject, Text: text, Fix: fix})
+	}
+	if n.Error != "" {
+		said(finding.Broken, n.Machinefile, "the night's upgrade of "+n.Machinefile+" failed: "+n.Error, upgrade)
+	}
+	if n.Unpulled != "" {
+		said(finding.NeedsALook, "shared source", "the shared source was not pulled: "+n.Unpulled, upgrade)
+	}
+	for _, app := range n.Failed {
+		said(finding.Broken, app, app+" failed its update last night", upgrade)
+	}
+	for _, app := range n.Left {
+		said(finding.NeedsALook, app, app+" waits for your station upgrade: its update asks you", upgrade)
+	}
+	for _, w := range n.Waiting {
+		file := w.File
+		w.File = ""
+		said(finding.NeedsALook, w.App, w.App+" "+w.Words(), finding.Fix{Path: file})
 	}
 	return out
 }
@@ -100,13 +136,7 @@ func AppsRead(reports []apps.Report, m machine.Ref, night Nights) Read {
 	if night.Moved > 0 {
 		parts = append(parts, Part{Word: strconv.Itoa(night.Moved) + " moved last night"})
 	}
-	found := apps.Findings(reports, m)
-	for _, w := range night.Waiting {
-		file := w.File
-		w.File = ""
-		found = append(found, finding.Finding{Machine: m, Section: section.Apps, Severity: finding.NeedsALook, Subject: w.App,
-			Text: w.App + " " + w.Words(), Fix: finding.Fix{Path: file}})
-	}
+	found := append(apps.Findings(reports, m), night.findings(m)...)
 	return Read{Line: Line{Section: section.Apps, Pending: n[apps.Pending] > 0, Parts: parts}, Findings: found}
 }
 

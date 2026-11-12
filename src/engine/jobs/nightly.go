@@ -8,8 +8,8 @@ import (
 	"github.com/jterrazz/studio-station/src/machinefile"
 )
 
-// value: how long a night that ended without a record (the Machinefile
-// not found, a store that cannot be written) waits before it is tried again.
+// value: how long a night that did not complete (it failed, or it ended
+// without a record) waits before it is tried again.
 const retryNight = time.Hour
 
 type Nightly struct {
@@ -34,31 +34,47 @@ type Nightly struct {
 	mu      sync.Mutex
 	running bool
 	tried   time.Time
+	// value: before it no night can be due, so a step reads nothing: the
+	// next NightHour past a check that found none due, or the end of a
+	// retry's wait.
+	quiet time.Time
 }
 
 func (n *Nightly) Run(ctx context.Context) {
-	// invariant: one night at a time, never started again while one runs,
-	// and a try that recorded nothing waits retryNight before the next.
-	name, bound, ok := n.Bound()
-	if !ok || !n.begin() {
+	// invariant: one night at a time, never started again while one runs;
+	// a night that failed is tried again retryNight later, and between two
+	// NightHours with nothing due no step reads the binding or the ledger.
+	now := n.Clock.Now()
+	if !n.begin(now) {
 		return
 	}
-	now := n.Clock.Now()
+	name, bound, ok := n.Bound()
+	if !ok {
+		n.end(time.Time{}, machinefile.LastNight(now).AddDate(0, 0, 1))
+		return
+	}
 	last, ran, err := n.Last(ctx)
-	if err != nil || !machinefile.NightDue(now, later(n.Started, bound), last, ran) || n.recently(now) {
-		n.end(time.Time{})
+	switch {
+	case err != nil:
+		n.end(time.Time{}, time.Time{})
+		return
+	case !machinefile.NightDue(now, later(n.Started, bound), last, ran):
+		n.end(time.Time{}, machinefile.LastNight(now).AddDate(0, 0, 1))
+		return
+	case n.recently(now):
+		n.end(time.Time{}, n.tried.Add(retryNight))
 		return
 	}
 	n.Go(func() {
 		_ = n.Upgrade(ctx, name)
-		n.end(now)
+		n.end(now, time.Time{})
 	})
 }
 
-func (n *Nightly) begin() bool {
+func (n *Nightly) begin(now time.Time) bool {
 	n.mu.Lock()
 	defer n.mu.Unlock()
-	if n.running {
+	if n.running || now.Before(n.quiet) {
 		return false
 	}
 	n.running = true
@@ -78,10 +94,10 @@ func (n *Nightly) recently(now time.Time) bool {
 	return !n.tried.IsZero() && now.Sub(n.tried) < retryNight
 }
 
-func (n *Nightly) end(tried time.Time) {
+func (n *Nightly) end(tried, quiet time.Time) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
-	n.running = false
+	n.running, n.quiet = false, quiet
 	if !tried.IsZero() {
 		n.tried = tried
 	}

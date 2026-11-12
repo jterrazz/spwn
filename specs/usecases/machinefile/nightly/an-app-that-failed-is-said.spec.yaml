@@ -1,0 +1,34 @@
+description: 'an app whose update failed in the night is said in Needs you until an upgrade moves it'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'apply --machinefile jterrazz-macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+    - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Installer.Update", times: 1}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep "last night"'
+      exit: 0
+      stdout: |
+          ✗	homebrew failed its update last night	station upgrade
+          	Apps	● 9 ok · ◐ 1 update · ○ 104 not installed · 1 moved last night
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script
+          ●	gh	2.98.0	brew
+    - command: 'overview | /usr/bin/grep -c "failed its update"'
+      exit: 1
+      stdout: |
+          0

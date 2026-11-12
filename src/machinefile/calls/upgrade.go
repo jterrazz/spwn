@@ -35,7 +35,25 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// waiting.
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
-	Run:    upgrade,
+	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
+		// invariant: every night is recorded, one that failed with its
+		// error, so the owner reads it and the next try comes; the owner's
+		// own upgrade run to its end refreshes what the last night of that
+		// Machinefile says waits.
+		out, err := upgrade(ctx, d, in, p)
+		out.Interrupted = out.Interrupted || ctx.Err() != nil
+		switch {
+		case in.Unattended:
+			if werr := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, err, in.Machinefile, d.Now())); werr != nil && err == nil {
+				err = werr
+			}
+		case err == nil && !out.Interrupted:
+			if n, ran, rerr := d.Ledger.Night(ctx); rerr == nil && ran && n.Machinefile == out.Plan.Name {
+				_ = d.Ledger.Write(context.WithoutCancel(ctx), n.Refreshed(out))
+			}
+		}
+		return out, err
+	},
 }
 
 func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
@@ -75,6 +93,9 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		}
 	}
 	out := machinefile.Upgraded{Plan: plan, Unpulled: unpulled}
+	if bound, err := d.Prefs.Bound(); err == nil && bound == "" {
+		out.Unbound = true
+	}
 	var waits []string
 	if in.Unattended {
 		waits = plan.Waits()
@@ -104,11 +125,6 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 	out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
 	if !out.Lock.Empty() {
 		if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
-			return out, err
-		}
-	}
-	if in.Unattended {
-		if err := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, d.Now())); err != nil {
 			return out, err
 		}
 	}

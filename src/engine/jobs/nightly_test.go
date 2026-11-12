@@ -16,6 +16,8 @@ type nights struct {
 	ran     []string
 	records bool
 	cancel  bool
+	failure string
+	reads   int
 	held    []func()
 }
 
@@ -24,6 +26,7 @@ func (n *nights) job(started time.Time) *Nightly {
 		Clock: n.clock, Started: started,
 		Bound: func() (string, time.Time, bool) { return n.bound, n.since, n.bound != "" },
 		Last: func(context.Context) (machinefile.Night, bool, error) {
+			n.reads++
 			if n.last == nil {
 				return machinefile.Night{}, false, nil
 			}
@@ -32,7 +35,7 @@ func (n *nights) job(started time.Time) *Nightly {
 		Upgrade: func(_ context.Context, name string) error {
 			n.ran = append(n.ran, name)
 			if n.records {
-				n.last = &machinefile.Night{At: n.clock.Now(), Machinefile: name, Interrupted: n.cancel}
+				n.last = &machinefile.Night{At: n.clock.Now(), Machinefile: name, Interrupted: n.cancel, Error: n.failure}
 			}
 			return nil
 		},
@@ -114,5 +117,42 @@ func TestANightThatRecordedNothingWaitsAnHourBeforeTheNextTry(t *testing.T) {
 	}
 	if len(n.ran) != 2 {
 		t.Errorf("tried %d times by 04:00; want at 03:00 and 04:00", len(n.ran))
+	}
+}
+
+func TestAFailedNightIsRecordedAndTriedAgainAnHourLater(t *testing.T) {
+	// invariant: a night that failed (its Machinefile does not resolve) is
+	// recorded with its error and did not complete: it is tried again an
+	// hour later, not at every tick, nor only the next night.
+	n := &nights{clock: &clock{now: at(12, 3, 0)}, bound: "laptop", since: at(11, 10, 0), records: true, failure: "laptop does not resolve"}
+	job := n.job(at(11, 10, 0))
+	for _, now := range []time.Time{at(12, 3, 0), at(12, 3, 30), at(12, 4, 0)} {
+		n.clock.now = now
+		job.Run(context.Background())
+		n.finish()
+	}
+	if len(n.ran) != 2 || n.last.Error == "" {
+		t.Errorf("tried %d times by 04:00, last %+v; want at 03:00 and 04:00, the error recorded", len(n.ran), n.last)
+	}
+}
+
+func TestNoStepReadsTheLedgerBetweenTwoNights(t *testing.T) {
+	// invariant: once a check finds no night due, the steps before the
+	// next 03:00 read neither the binding nor the ledger.
+	n := &nights{clock: &clock{now: at(12, 4, 0)}, bound: "laptop", since: at(11, 10, 0), records: true}
+	job := n.job(at(11, 10, 0))
+	for now := at(12, 4, 0); now.Before(at(13, 3, 0)); now = now.Add(10 * time.Minute) {
+		n.clock.now = now
+		job.Run(context.Background())
+		n.finish()
+	}
+	if len(n.ran) != 1 || n.reads != 2 {
+		t.Errorf("ran %v with %d reads of the ledger by 02:50; want one night and two reads", n.ran, n.reads)
+	}
+	n.clock.now = at(13, 3, 0)
+	job.Run(context.Background())
+	n.finish()
+	if len(n.ran) != 2 {
+		t.Errorf("ran %v at the next 03:00; want a second night", n.ran)
 	}
 }
