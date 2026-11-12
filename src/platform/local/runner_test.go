@@ -56,6 +56,28 @@ func TestACommandSilentPastItsAnswerBoundIsStoppedWithWhatItStarted(t *testing.T
 	}
 }
 
+func TestAReadPastItsBoundEndsWithWhatItStartedThoughItHoldsThePipes(t *testing.T) {
+	r := &runner{dirs: []string{"/bin"}}
+	start := time.Now()
+
+	out, err := r.Output(context.Background(), Cmd{Name: "sh", Args: []string{"-c", "sleep 30 & echo $!; sleep 30"}, Timeout: time.Second})
+
+	if took := time.Since(start); err == nil || took > 3*time.Second {
+		t.Fatalf("a read bound to 1 s ran %s and ended as %v", took, err)
+	}
+	left, err := strconv.Atoi(strings.TrimSpace(out.Stdout))
+	if err != nil {
+		t.Fatalf("the background sleep's pid did not read: %q", out.Stdout)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for syscall.Kill(left, 0) == nil {
+		if time.Now().After(deadline) {
+			t.Fatalf("the sleep the read started outlives it (pid %d)", left)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
 func TestACommandThatAnswersInTimeMayThenTakeItsTime(t *testing.T) {
 	var said bytes.Buffer
 	r := &runner{dirs: []string{"/bin"}, stdout: &said, stderr: &said}

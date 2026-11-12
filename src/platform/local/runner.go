@@ -175,6 +175,9 @@ func (r *runner) Output(ctx context.Context, c Cmd) (Output, error) {
 		return Output{}, err
 	}
 	defer cancel()
+	if c.Timeout > 0 && c.Track == "" {
+		bounded(cmd)
+	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
 	if c.Stdin != "" {
@@ -182,6 +185,20 @@ func (r *runner) Output(ctx context.Context, c Cmd) (Output, error) {
 	}
 	code, err := exitOf(ctx, run(cmd, c.Track))
 	return Output{Stdout: stdout.String(), Stderr: stderr.String(), ExitCode: code}, err
+}
+
+// invariant: a command read within a bound leads its own process group:
+// past the bound the whole group is told to stop (SIGTERM), killed a second
+// later (SIGKILL), and its pipes closed then, so nothing it started holds
+// the read past its bound.
+func bounded(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.WaitDelay = time.Second
+	cmd.Cancel = func() error {
+		group := -cmd.Process.Pid
+		time.AfterFunc(time.Second, func() { _ = syscall.Kill(group, syscall.SIGKILL) })
+		return syscall.Kill(group, syscall.SIGTERM)
+	}
 }
 
 func (r *runner) Attach(ctx context.Context, c Cmd, out Stream) (Attached, error) {
