@@ -3,6 +3,7 @@ kind: app
 name: conductor
 description: Runs parallel AI coding agents in git worktrees
 bundle: Conductor
+updates: self
 methods:
     - os: macos
       machine: computer

@@ -332,7 +332,14 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 				// invariant: a bare update takes the rows its method reads behind, so a
 				// method that reads no currency is reached by name only.
 				seen, _ := appsfake.InstallerOf(b.w, "here", method, false).Outdated(ctx, []string{in.Key()})
-				if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind {
+				// invariant: a bare update leaves an app that updates itself to its updater.
+				if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind && a.UpdatesSelf {
+					b.shelf.Forget()
+					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: true})
+					if err != nil || slices.ContainsFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }) || b.w.Mac("here").Apps[method].Installed[in.Key()] == "99.0.0" {
+						t.Errorf("%s: a bare update moved an app that updates itself: %+v (%v)", about, up, err)
+					}
+				} else if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind {
 					var via []catalog.ManagerKey
 					if _, ok := b.cat.Manager(row.Manager); ok {
 						via = []catalog.ManagerKey{catalog.ManagerKey(row.Manager)}

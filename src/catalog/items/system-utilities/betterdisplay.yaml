@@ -3,6 +3,7 @@ kind: app
 name: betterdisplay
 description: Flexible HiDPI scaling and display management
 bundle: BetterDisplay
+updates: self
 methods:
     - os: macos
       machine: computer

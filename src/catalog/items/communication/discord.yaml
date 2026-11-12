@@ -3,6 +3,7 @@ kind: app
 name: discord
 description: Voice and text chat
 bundle: Discord
+updates: self
 methods:
     - os: macos
       machine: computer

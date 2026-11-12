@@ -3,6 +3,7 @@ kind: app
 name: jump-desktop-connect
 description: Remote GUI recovery for headless Macs
 bundle: Jump Desktop Connect
+updates: self
 methods:
     - os: macos
       machine: computer

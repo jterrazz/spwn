@@ -6,10 +6,10 @@ runs:
     - command: 'apps | /usr/bin/head -4'
       exit: 0
       stdout: |
-          # Updates	3 ◐
+          # Updates	2 ◐
           ◐	node	22.11.0	mise	update available · station apps update node
-          ◐	ghostty	1.2.0	cask	update available · station apps update ghostty
           ◐	gh	2.97.0	brew	update available · station apps update gh
+          # Not installed	105 ○
     - command: 'machines | /usr/bin/cut -f2'
       exit: 0
       stdout: |

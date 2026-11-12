@@ -4,7 +4,7 @@ runs:
     - command: 'tools | /usr/bin/head -1'
       exit: 0
       stdout: |
-          # Updates	3 ◐
+          # Updates	2 ◐
       stderr: |
           → now: station apps
     - command: 'tools install jq'
@@ -22,7 +22,6 @@ runs:
     - command: 'tools upgrade --via brew'
       exit: 0
       stdout: |
-          ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
       stderr: |
           → now: station apps update --manager=brew

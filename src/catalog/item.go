@@ -195,6 +195,16 @@ const SourceAppStore Source = "app-store"
 
 func (Source) Enum() []string { return []string{string(SourceAppStore)} }
 
+// value: who moves an app's version: `self`, the app's own updater
+// (Claude, Ghostty, a browser), so station checks it is there and never
+// updates it nor records its version.
+
+type Updates string
+
+const UpdatesSelf Updates = "self"
+
+func (Updates) Enum() []string { return []string{string(UpdatesSelf)} }
+
 // value: what a method can pin: nothing (it installs the newest), or the
 // version a Machinefile asks.
 
@@ -249,6 +259,7 @@ type Item struct {
 	Version    *VersionRead `yaml:"version-read,omitempty"`
 	Supersedes string       `yaml:"supersedes,omitempty"`
 	Accepts    []Source     `yaml:"accepts,omitempty"`
+	Updates    Updates      `yaml:"updates,omitempty"`
 	Live       *Liveness    `yaml:"live,omitempty"`
 	Needs      []Need       `yaml:"needs,omitempty"`
 	AfterApply []AfterApply `yaml:"after-apply,omitempty"`

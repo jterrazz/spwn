@@ -4,6 +4,7 @@ name: zed
 description: Zed code editor
 then: [zed-dotfiles]
 bundle: Zed
+updates: self
 methods:
     - os: macos
       cask: zed

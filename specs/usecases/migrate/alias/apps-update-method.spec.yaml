@@ -4,7 +4,6 @@ runs:
     - command: 'apps update --method brew'
       exit: 0
       stdout: |
-          ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
       stderr: |
           → now: station apps update --manager brew

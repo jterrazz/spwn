@@ -309,6 +309,9 @@ func (s *Shelf) Upgrade(ctx context.Context, r apps.UpgradeRequest) ([]apps.Outc
 		case reports[t.Name].Detail == DetailAppStore && len(r.Names) > 0:
 			outcomes = append(outcomes, apps.Outcome{Name: t.Name, Verb: verbUpdate, Result: catalog.StateAbsent, Detail: "the App Store updates it"})
 		case reports[t.Name].Detail == DetailAppStore:
+		case t.UpdatesSelf && len(r.Names) > 0:
+			outcomes = append(outcomes, apps.Outcome{Name: t.Name, Verb: verbUpdate, Result: catalog.StateOK, Detail: DetailUpdatesSelf})
+		case t.UpdatesSelf:
 		case !upgradable && len(r.Names) > 0:
 			return nil, &apps.NotInstalledError{App: t.Name}
 		case !upgradable:

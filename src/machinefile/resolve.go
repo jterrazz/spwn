@@ -39,8 +39,10 @@ type Step struct {
 	Chosen string
 	// value: the method chosen, as its file says it.
 	Spec catalog.MethodSpec
-	// value: the range of versions the Machinefile lets the app move within.
-	Version catalog.Range
+	// value: the range of versions the Machinefile lets the app move within,
+	// and whether the app updates itself, which no range moves.
+	Version     catalog.Range
+	UpdatesSelf bool
 	// value: the version the lock holds the item at, when the step is
 	// carried by the method the lock names and that method pins it: the
 	// one the install takes; the lock's file when the lock names the
@@ -517,7 +519,7 @@ func (p *planner) choose(it catalog.Placed, manager catalog.ManagerKey, version 
 	}
 	return Step{
 		Item: it.Item.Name, Kind: it.Item.Kind, Method: chosen.Method(), Chosen: because, Spec: chosen,
-		Version: version, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
+		Version: version, UpdatesSelf: it.Item.Updates == catalog.UpdatesSelf, Locked: held, Recorded: recorded, Lock: lockFile(ok, p.lock.File), Phase: cmp.Or(it.Item.Phase, catalog.PhaseApply), Needs: slices.Concat(it.Item.Needs, chosen.Needs),
 		Restarts: it.Item.AfterApply, Why: why, Defined: itemOrigin(it),
 	}, nil
 }

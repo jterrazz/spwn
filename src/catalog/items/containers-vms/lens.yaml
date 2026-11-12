@@ -3,6 +3,7 @@ kind: app
 name: lens
 description: Kubernetes IDE for managing clusters
 bundle: Lens
+updates: self
 methods:
     - os: macos
       cask: lens

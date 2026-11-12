@@ -1137,6 +1137,12 @@
       },
       "type": "array"
     },
+    "updates": {
+      "enum": [
+        "self"
+      ],
+      "type": "string"
+    },
     "version-read": {
       "$ref": "#/$defs/VersionRead"
     },

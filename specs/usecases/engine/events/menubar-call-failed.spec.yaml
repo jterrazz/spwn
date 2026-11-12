@@ -6,11 +6,10 @@ runs:
     - command: 'apps update'
       exit: 1
       stdout: |
-          ●	ghostty	1.2.1	cask
           ●	gh	2.98.0	brew
           ✗	node		mise	~/.local/state/station/logs/node.log
       stderr: |
-          Error: 1 of 3 apps failed
+          Error: 1 of 2 apps failed
           Hint: re-run it: station apps update node
     - command: 'apps | /usr/bin/grep -A1 "^# Updates"'
       exit: 0

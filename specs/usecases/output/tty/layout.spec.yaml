@@ -13,15 +13,15 @@ runs:
           {bold This Mac} · jterrazz-macbook-pro · 9 things need you · Engine running
 
           {bold Needs you}
-            {bad ✗} {bold npm sign-in expired}     npm login
+            {bad ✗} {bold npm sign-in expired}    npm login
             {bad ✗} {bold com.jterrazz.brain.x-snapshot is failing, last exit 2}
               station background remove com.jterrazz.brain.x-snapshot
-            {warn ◐} {bold 1 mise update waiting}   station apps update --manager mise
-            {warn ◐} {bold 2 brew updates waiting}  station apps update --manager brew
-            {warn ◐} {bold Firewall: off}           System Settings > Network > Firewall
+            {warn ◐} {bold 1 mise update waiting}  station apps update --manager mise
+            {warn ◐} {bold 1 brew update waiting}  station apps update --manager brew
+            {warn ◐} {bold Firewall: off}          System Settings > Network > Firewall
             4 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
-          {bold Apps}        {good ●} 6 ok · {warn ◐} 3 updates · {muted ○} 105 not installed
+          {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 105 not installed
           {bold Settings}    set by station · {muted ○} 0 of 19 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
@@ -37,20 +37,16 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 114 apps for this Mac · 3 updates · 105 not installed
+          This Mac · 114 apps for this Mac · 2 updates · 105 not installed
 
           Updates
-            ◐ node     22.11.0 → 24.11.0  mise  update available
-              → station apps update node
-            ◐ ghostty  1.2.0 → 1.2.1      cask  update available
-              → station apps update ghostty
-            ◐ gh       2.97.0 → 2.98.0    brew  update available
-              → station apps update gh
+            ◐ node  22.11.0 → 24.11.0  mise  update available  → station apps update node
+            ◐ gh    2.97.0 → 2.98.0    brew  update available  → station apps update gh
           Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
-          OK             ● 6 · github-release, mise, go, bat, jq, lazygit
+          OK             ● 7 · github-release, mise, go, ghostty, bat, jq, lazygit
           Not for this machine  8 apps live on other machines
 
-          → station apps update            the 3 updates
+          → station apps update            the 2 updates
           → station apps install <app...>  install some
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" settings'
       stdin: |

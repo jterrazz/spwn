@@ -3,19 +3,19 @@ fixture:
     - ../../__fixtures__/stubs/
     - ./__fixtures__/outdated/
 runs:
-    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("bat", "jq", "terraform", "ghostty")) | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
+    - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name | IN("bat", "jq", "terraform", "linear")) | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
       exit: 0
       stdout: |
-          ghostty update-available 1.1.3 1.2.0 outdated
           bat update-available 0.24.0 0.25.0 outdated
           jq ok 1.7.1 - 
           terraform update-available 1.9.0 1.13.4 outdated
+          linear update-available 1.1.3 1.2.0 outdated
     - command: 'apps update'
       exit: 0
       stdout: |
-          ●	ghostty	1.1.3	cask
           ●	bat	0.24.0	brew
           ●	terraform	1.9.0	brew
+          ●	linear	1.1.3	cask
       files:
           .calls:
               contains:
@@ -25,6 +25,6 @@ runs:
       exit: 0
       stdout: |
           brew bundle install --upgrade --file=-
-          cask "ghostty"
           brew "bat"
           brew "hashicorp/tap/terraform", trusted: true
+          cask "linear-linear"

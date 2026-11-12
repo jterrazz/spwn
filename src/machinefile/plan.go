@@ -502,6 +502,8 @@ const (
 	// value: an upgrade keeps an app at the one version its Machinefile
 	// asks, by a method that holds no range around it.
 	Pinned Reason = "pinned"
+	// value: an upgrade leaves an app that updates itself to its updater.
+	SelfUpdating Reason = "updates-itself"
 )
 
 // value: one line of a run: what it was, how it ended, the version and
@@ -524,9 +526,10 @@ type Done struct {
 }
 
 func (s Step) Kept() bool {
-	// value: whether an upgrade leaves the app where it is: one version
-	// asked of a method that holds no range around it (apt, a release).
-	return s.Version.Exact() && s.Spec.Holds() < catalog.HoldAny
+	// value: whether an upgrade leaves the app where it is: one that updates
+	// itself, or one version asked of a method that holds no range around
+	// it (apt, a release).
+	return s.UpdatesSelf || (s.Version.Exact() && s.Spec.Holds() < catalog.HoldAny)
 }
 
 func (s Step) Within() string {

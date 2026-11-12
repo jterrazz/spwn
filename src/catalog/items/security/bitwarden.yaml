@@ -3,6 +3,7 @@ kind: app
 name: bitwarden
 description: Password manager
 bundle: Bitwarden
+updates: self
 methods:
     - os: macos
       machine: computer

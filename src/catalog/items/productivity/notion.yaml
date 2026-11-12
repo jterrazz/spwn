@@ -3,6 +3,7 @@ kind: app
 name: notion
 description: Workspace for notes and docs
 bundle: Notion
+updates: self
 methods:
     - os: macos
       machine: computer

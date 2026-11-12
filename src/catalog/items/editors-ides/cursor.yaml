@@ -3,6 +3,7 @@ kind: app
 name: cursor
 description: AI-powered code editor
 bundle: Cursor
+updates: self
 methods:
     - os: macos
       cask: cursor

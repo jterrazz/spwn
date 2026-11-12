@@ -112,6 +112,10 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 	// every other is updated by the method that holds it, and the lock
 	// takes the version that method lists once it ran.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version}
+	if l.Step.UpdatesSelf {
+		done.Reason = machinefile.SelfUpdating
+		return done
+	}
 	if l.Step.Kept() {
 		done.Reason = machinefile.Pinned
 		return done

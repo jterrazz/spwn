@@ -3,6 +3,7 @@ kind: app
 name: chatgpt
 description: OpenAI ChatGPT desktop app
 bundle: ChatGPT
+updates: self
 methods:
     - os: macos
       machine: computer

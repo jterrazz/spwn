@@ -7,5 +7,4 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	ghostty	1.2.1	cask
           ●	upgrading-expo	1.1.0	skill

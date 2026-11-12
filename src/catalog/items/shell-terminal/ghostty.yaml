@@ -4,6 +4,7 @@ name: ghostty
 description: GPU-accelerated terminal emulator
 then: [ghostty-dotfiles]
 bundle: Ghostty
+updates: self
 methods:
     - os: macos
       cask: ghostty

@@ -3,6 +3,7 @@ kind: app
 name: brave
 description: Privacy-focused web browser
 bundle: Brave Browser
+updates: self
 methods:
     - os: macos
       machine: computer

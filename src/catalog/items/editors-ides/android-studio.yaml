@@ -3,6 +3,7 @@ kind: app
 name: android-studio
 description: Android development IDE
 bundle: Android Studio
+updates: self
 methods:
     - os: macos
       cask: android-studio

@@ -3,6 +3,7 @@ kind: app
 name: whatsapp
 description: Messaging app
 bundle: WhatsApp
+updates: self
 methods:
     - os: macos
       machine: computer

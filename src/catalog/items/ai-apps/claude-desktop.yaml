@@ -3,6 +3,7 @@ kind: app
 name: claude-desktop
 description: Anthropic Claude desktop app
 bundle: Claude
+updates: self
 methods:
     - os: macos
       machine: computer

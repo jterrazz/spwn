@@ -51,6 +51,9 @@ type App struct {
 	Replaces    string
 	Supersedes  string
 	AppStore    bool
+	// value: the app updates itself (`updates: self`): station reads it
+	// present, never behind, and never updates it.
+	UpdatesSelf bool
 	Installs    []LivesOn
 	Provides    []string
 	// value: the absolute folders the item's methods land its commands in,

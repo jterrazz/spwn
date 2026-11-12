@@ -3,6 +3,7 @@ kind: app
 name: typewhisper
 description: Whisper-based dictation app
 bundle: TypeWhisper
+updates: self
 methods:
     - os: macos
       machine: computer

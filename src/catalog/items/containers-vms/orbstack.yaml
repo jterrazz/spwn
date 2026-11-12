@@ -4,6 +4,7 @@ name: orbstack
 description: Docker and Linux machines on the Mac, for exploration on a Mac
 provides: [orb]
 bundle: OrbStack
+updates: self
 methods:
     - os: macos
       machine: computer

@@ -20,7 +20,7 @@ runs:
           ✗	npm sign-in expired
           ✗	com.jterrazz.brain.x-snapshot is failing, last exit 2
           ◐	1 mise update waiting
-          ◐	2 brew updates waiting
+          ◐	1 brew update waiting
           ◐	Firewall: off
           ◐	~/.tart is misplaced
           ◐	com.bjango.istatmenus.installer is left over

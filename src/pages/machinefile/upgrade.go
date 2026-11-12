@@ -84,7 +84,9 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 	for _, d := range done {
 		var said []string
 		detail := d.Detail
-		if d.Reason == machinefile.Pinned {
+		if d.Reason == machinefile.SelfUpdating {
+			said = append(said, "updates itself: station checks it is there")
+		} else if d.Reason == machinefile.Pinned {
 			said = append(said, "pinned "+d.Line.Step.Version.String()+" by "+u.Plan.Name+": kept")
 		} else if v := d.Line.Step.Version; v.Exact() {
 			said = append(said, "held at "+v.String())

@@ -4,7 +4,7 @@ runs:
     - command: 'apps update --all-machines'
       exit: 0
       stdout: |
-          ●	jterrazz-macbook-pro	updated 3 apps
+          ●	jterrazz-macbook-pro	updated 2 apps
           –	api	skipped (stopped)
           ●	linux-1	every app is up to date
           ●	jterrazz-mac-mini	every app is up to date

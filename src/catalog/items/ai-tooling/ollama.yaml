@@ -6,6 +6,7 @@ provides: [ollama]
 bundle: Ollama
 live:
     process: ollama
+updates: self
 methods:
     - os: macos
       machine: computer

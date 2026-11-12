@@ -140,7 +140,7 @@ func (m MethodSpec) effect() Effect {
 func (it Item) app(category Category) App {
 	t := App{
 		Name: it.Name, Kind: it.Kind, Description: it.Description, Category: category, Replaces: it.Replaces,
-		Supersedes: it.Supersedes, AppStore: slices.Contains(it.Accepts, SourceAppStore), Provides: it.Provides, Bundle: it.Bundle,
+		Supersedes: it.Supersedes, AppStore: slices.Contains(it.Accepts, SourceAppStore), UpdatesSelf: it.Updates == UpdatesSelf, Provides: it.Provides, Bundle: it.Bundle,
 		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
 	for _, m := range it.Methods {

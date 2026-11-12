@@ -28,11 +28,11 @@ runs:
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of herdr-app
-          ●	herdr-app	1.0.0	cask	the provider of herdr-core
+          ●	herdr-app	1.0.0	cask	the provider of herdr-core · updates itself
           ●	herdr-core		provided-by
     - command: 'apps | /usr/bin/grep -e "herdr"'
       exit: 0
       stdout: |
           ○	herdr		brew	station apps install herdr
-          ●	herdr-app	1.0.0	cask
+          ●	herdr-app	1.0.0	cask	updates itself
           ●	herdr-core		provided-by

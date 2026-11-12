@@ -273,7 +273,7 @@ func foreignKey(it Item) string {
 	app := []key{
 		{"replaces", it.Replaces != ""}, {"provides", len(it.Provides) > 0}, {"then", len(it.Then) > 0},
 		{"bundle", it.Bundle != ""}, {"version-read", it.Version != nil}, {"supersedes", it.Supersedes != ""},
-		{"accepts", len(it.Accepts) > 0}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
+		{"accepts", len(it.Accepts) > 0}, {"updates", it.Updates != ""}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
 		{"ports", len(it.Ports) > 0},
 	}
 	setting := []key{

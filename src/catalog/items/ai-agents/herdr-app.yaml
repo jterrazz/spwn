@@ -3,6 +3,7 @@ kind: app
 name: herdr-app
 description: Desktop app that keeps coding agents running in the background
 bundle: Herdr
+updates: self
 methods:
     - os: macos
       machine: computer

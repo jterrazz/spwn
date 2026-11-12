@@ -20,7 +20,10 @@ import (
 
 const (
 	DetailAppStore = "app-store"
-	subject        = "apps"
+	// value: the detail of an app that updates itself, read present and
+	// never behind.
+	DetailUpdatesSelf = "updates itself"
+	subject           = "apps"
 )
 
 const (
@@ -218,6 +221,10 @@ func (s *Shelf) report(ctx context.Context, t catalog.App, listings map[catalog.
 	if version, ok := listedAll(l.keys, i); ok {
 		r.State, r.Version, r.Managed = catalog.StateOK, version, true
 		r.Holds, r.HoldsUnread = s.holds(t, listings)
+		if t.UpdatesSelf {
+			r.Detail = DetailUpdatesSelf
+			return r
+		}
 		// invariant: an inconclusive currency leaves the app ok, never outdated.
 		switch l.currency[i.Key()].Verdict {
 		case apps.Unknown:

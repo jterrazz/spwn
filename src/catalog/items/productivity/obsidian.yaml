@@ -3,6 +3,7 @@ kind: app
 name: obsidian
 description: Knowledge base and note-taking
 bundle: Obsidian
+updates: self
 methods:
     - os: macos
       machine: computer
