@@ -17,8 +17,7 @@ type UpdateIn struct {
 	// v3 name so an older station reads it.
 	Method []string
 	// value: the range a Machinefile lets the one app named move within, as
-	// apps.UpgradeRequest's Within; an older station drops it and updates
-	// as its manager does.
+	// apps.UpgradeRequest's Within.
 	Within string
 }
 
