@@ -648,7 +648,7 @@ func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.
 	case s.uninstallable(old) != nil:
 		step.Detail = "kept: station cannot uninstall it"
 	case s.unrecorded(ctx, old):
-		step.Detail = "kept: yours, station added none of its packages"
+		step.Detail = "kept: yours, station added none of its packages; `station apps remove " + t.Name + "` takes it on your word"
 	default:
 		o := s.run(ctx, verbUninstall, old, false, contract.Installer.Remove)
 		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why

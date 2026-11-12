@@ -657,7 +657,7 @@ func TestAHolderIsToldTheAppAndWhetherTheOwnerGaveTheirWord(t *testing.T) {
 		t.Errorf("a removal without the owner's word gave %v, told %v; want it refused, the copy kept", err, spy.told)
 	}
 	out, err := b.shelf.Move(ctx, "twin", catalog.MethodSkill, nil)
-	if o := outcomeOf(t, out, "twin"); err != nil || !b.holds(catalog.MethodCask, "twin") || len(o.Steps) != 1 || !strings.HasPrefix(o.Steps[0].Detail, "kept: yours") {
+	if o := outcomeOf(t, out, "twin"); err != nil || !b.holds(catalog.MethodCask, "twin") || len(o.Steps) != 1 || !strings.HasPrefix(o.Steps[0].Detail, "kept: yours") || !strings.Contains(o.Steps[0].Detail, "station apps remove twin") {
 		t.Errorf("moved %+v (%v); want the cask copy kept, the owner's", out, err)
 	}
 	b.w.Mac("here").Apps[catalog.MethodSkill].Installed = map[string]string{}
