@@ -37,7 +37,9 @@ type Deps struct {
 	Vault    Vault
 	Password contract.Password
 	Turn     contract.Turn
-	Now      func() time.Time
+	// value: the shell the owner's lines of a phase run in.
+	Shell contract.Shell
+	Now   func() time.Time
 	// value: this machine's ~/.zshrc, and the home its variables name.
 	Zshrc Zshrc
 	Home  string

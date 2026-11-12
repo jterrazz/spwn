@@ -1,21 +1,20 @@
-# Set by station	5 ●	4 ◐	4 ○	4 ⊘
+# Set by station	4 ●	4 ◐	4 ○	4 ⊘
 ◐	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
 ◐	claude-token	changed since 2 d ago	station settings diff claude-token
 ◐	ssh-key	changed since 2 d ago	station settings diff ssh-key
-◐	os-checkout	changed since 2 d ago	station settings diff os-checkout
+◐	tart-launcher	changed since 2 d ago	station settings diff tart-launcher
 ○	ghostty-dotfiles	not applied	station settings apply ghostty-dotfiles
 ○	dns	not applied	station settings apply dns
 ○	zed-dotfiles	not applied	station settings apply zed-dotfiles
-○	tart-launcher	not applied	station settings apply tart-launcher
+○	tailscale-cli	not applied	station settings apply tailscale-cli
 ●	docker-shortcuts	applied · ~/.docker-shortcuts
 ●	tmux-dotfiles	applied · ~/.tmux-dotfiles
 ●	spotlight-exclude	applied · ~/.spotlight-exclude
 ●	dock-spacer	applied · ~/.dock-spacer
-●	herdr-machine	applied · ~/.herdr-machine
 ⊘	hushlogin	off here
 ⊘	git-signing	off here
 ⊘	backup-exclusions	off here
-⊘	tailscale-cli	off here
+⊘	agent-hooks	off here
 # Always-on Mac
 ○	Always-on Mac	5 · for a Mac that hosts servers
 # Checked	5 ●	2 ◐	1 ⊘	1 ?

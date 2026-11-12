@@ -90,6 +90,38 @@ type Resolved struct {
 	Values  []Value
 	Steps   []Step
 	Skipped []Skip
+	// value: the owner's lines of each phase, in the order image, boot,
+	// upgrade, a phase its files say none of left out.
+	Scripts []Script
+}
+
+// value: the owner's shell lines of one phase (`run.boot`), and the file
+// that says them.
+
+type Script struct {
+	Phase  RunPhase
+	Lines  string
+	Origin Origin
+}
+
+// value: when a Script runs: image, as its image is built; boot, at a
+// VM's first start; upgrade, at each upgrade, after its apps.
+
+type RunPhase string
+
+const (
+	RunImage   RunPhase = "image"
+	RunBoot    RunPhase = "boot"
+	RunUpgrade RunPhase = "upgrade"
+)
+
+func (r Resolved) ScriptOf(phase RunPhase) (Script, bool) {
+	for _, s := range r.Scripts {
+		if s.Phase == phase {
+			return s, true
+		}
+	}
+	return Script{}, false
 }
 
 // value: this machine, for what a Machinefile does not say of its system.
@@ -105,7 +137,11 @@ type merged struct {
 	machine bool
 	vm      *Origin
 	// value: the items baked into the image, and the file that says so.
-	bake    []listed[struct{}]
+	bake []listed[struct{}]
+	// value: the folders a VM made from it shares with its computer, as
+	// the strongest file that says them lists them.
+	mounts  []catalog.Mount
+	scripts map[RunPhase]Script
 	prefer  []catalog.ManagerKey
 	apps    []listed[catalog.AppEntry]
 	set     map[string]listed[catalog.SettingEntry]
@@ -180,7 +216,7 @@ func originOf(p Placed) Origin {
 }
 
 func merge(files []Placed) merged {
-	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}}
+	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, scripts: map[RunPhase]Script{}}
 	for _, p := range files {
 		o := originOf(p)
 		f := p.File
@@ -227,8 +263,36 @@ func merge(files []Placed) merged {
 				m.put("ports.except", ints(p.Except), o)
 			}
 		}
+		if r := f.Run; r != nil {
+			mergeRun(&m, *r, o)
+		}
 	}
 	return m
+}
+
+// invariant: a file that says a phase's lines replaces those of the files
+// it extends, whole; a phase it says nothing of keeps theirs.
+func mergeRun(m *merged, r catalog.RunSpec, o Origin) {
+	for _, s := range []Script{{Phase: RunImage, Lines: r.Image}, {Phase: RunBoot, Lines: r.Boot}, {Phase: RunUpgrade, Lines: r.Upgrade}} {
+		if strings.TrimSpace(s.Lines) == "" {
+			continue
+		}
+		s.Origin = o
+		m.scripts[s.Phase] = s
+		m.put("run."+string(s.Phase), strings.Join(ScriptLines(s.Lines), "; "), o)
+	}
+}
+
+func ScriptLines(text string) []string {
+	// value: a script's lines as the plan shows them, each line the owner
+	// wrote that holds a word.
+	var out []string
+	for _, l := range strings.Split(text, "\n") {
+		if strings.TrimSpace(l) != "" {
+			out = append(out, strings.TrimRight(l, " \t"))
+		}
+	}
+	return out
 }
 
 func mergeVM(m *merged, v catalog.VMSpec, o Origin) {
@@ -253,6 +317,18 @@ func mergeVM(m *merged, v catalog.VMSpec, o Origin) {
 				m.bake = append(m.bake, listed[struct{}]{name: b, origin: o})
 			}
 		}
+	}
+	if v.Mounts != nil {
+		m.mounts = v.Mounts
+		said := make([]string, 0, len(v.Mounts))
+		for _, mt := range v.Mounts {
+			w := mt.Computer + " at " + mt.Guest
+			if mt.ReadOnly {
+				w += " read-only"
+			}
+			said = append(said, w)
+		}
+		m.put("vm.mounts", strings.Join(said, ", "), o)
 	}
 }
 
@@ -362,6 +438,11 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		return Resolved{}, err
 	}
 	r.Steps, r.Skipped = p.baked(steps, m.bake), p.skipped
+	for _, phase := range []RunPhase{RunImage, RunBoot, RunUpgrade} {
+		if s, ok := m.scripts[phase]; ok {
+			r.Scripts = append(r.Scripts, s)
+		}
+	}
 	r.Values = values(m, r, lib.Catalog)
 	return r, nil
 }
@@ -731,7 +812,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 	// invariant: the values in the Machinefile's reading order: what the
 	// machine is and how it runs, then what it carries (the steps in the
 	// order they run, then what is skipped), then what it is lent and may
-	// open.
+	// open, then the owner's lines per phase.
 	out := make([]Value, 0, len(m.order)+3*len(r.Steps))
 	family := func(k string) string { f, _, _ := strings.Cut(k, "."); return f }
 	for _, f := range []string{"machine", "vm", "prefer"} {
@@ -773,7 +854,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		out = append(out, Value{Key: group + s.Item, Text: s.Why, Origin: s.Origin})
 	}
-	for _, f := range []string{"accounts", "ports"} {
+	for _, f := range []string{"accounts", "ports", "run"} {
 		for _, k := range m.order {
 			if family(k) == f {
 				out = append(out, m.values[k])

@@ -30,9 +30,9 @@ type UpgradeIn struct {
 var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// value: every app the Machinefile lists that is there moved as far as
 	// its range lets it, by the method that holds it, the managers first, a
-	// version a method holds no range around kept; then the lock written
-	// anew, its moves shown, and each newer version past a range said
-	// waiting.
+	// version a method holds no range around kept; then the owner's
+	// run.upgrade lines; then the lock written anew, its moves shown, and
+	// each newer version past a range said waiting.
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
@@ -106,6 +106,9 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 			continue
 		}
 		out.Done = append(out.Done, update(ctx, d, l, p))
+	}
+	if s, ok := plan.ScriptOf(machinefile.RunUpgrade); ok && ctx.Err() == nil {
+		out.Ran = ran(ctx, d, s, p)
 	}
 	out.Interrupted = ctx.Err() != nil
 	out.Waiting = machinefile.WaitingOf(out.Done)

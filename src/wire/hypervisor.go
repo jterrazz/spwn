@@ -24,8 +24,8 @@ func (m machine) hypervisor() contract.Hypervisor {
 
 type engineHypervisor struct{ contract.Hypervisor }
 
-func (h engineHypervisor) Boot(ctx context.Context, vm string, n model.Network) (process.Run, error) {
-	return h.Hypervisor.Boot(ctx, vm, contract.BootOptions{Network: n})
+func (h engineHypervisor) Boot(ctx context.Context, vm string, n model.Network, mounts []model.Mount) (process.Run, error) {
+	return h.Hypervisor.Boot(ctx, vm, contract.BootOptions{Network: n, Mounts: mounts})
 }
 
 func (h engineHypervisor) Adopt(ctx context.Context, vm string) (process.Run, bool) {

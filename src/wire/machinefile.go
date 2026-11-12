@@ -12,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/src/core/call"
 	coremachine "github.com/jterrazz/studio-station/src/core/machine"
 	"github.com/jterrazz/studio-station/src/machinefile"
+	"github.com/jterrazz/studio-station/src/machinefile/adapter/bash"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/files"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/git"
 	"github.com/jterrazz/studio-station/src/machinefile/adapter/sudoers"
@@ -175,7 +176,7 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 	return machinefilecalls.Deps{
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
-		Password: m.password(), Turn: m.turn(), Now: m.sys.Clock.Now, Calls: calls, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
+		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
 	}
 }
 
@@ -186,6 +187,15 @@ func (m machine) turn() machinefilecontract.Turn {
 		return m.world.turn()
 	}
 	return files.NewTurn(filepath.Join(m.paths.State, "runs.lock"), local.ExclusiveWithin)
+}
+
+// value: the shell the owner's lines of a phase run in, as this
+// machine's user; in a world, the world's.
+func (m machine) phaseShell() machinefilecontract.Shell {
+	if m.world != nil {
+		return m.world.phaseShell()
+	}
+	return bash.New(m.sys.Run, m.sys.Env.Home())
 }
 
 // value: whether a line run as root asks a password here, as sudo answers

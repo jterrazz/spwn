@@ -76,7 +76,7 @@ func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 		for _, k := range []struct {
 			key string
 			set bool
-		}{{"machine", mf.Machine != nil}, {"vm", mf.VM != nil}, {"extends", len(mf.Extends) > 0}, {"prefer", len(mf.Prefer) > 0}} {
+		}{{"machine", mf.Machine != nil}, {"vm", mf.VM != nil}, {"extends", len(mf.Extends) > 0}, {"prefer", len(mf.Prefer) > 0}, {"run", mf.Run != nil}} {
 			if k.set {
 				return refused(file, doc, k.key, "an overlay changes apps, settings, accounts and ports: `"+k.key+"` is its Machinefile's")
 			}
@@ -119,6 +119,9 @@ func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 		if problem := checkPorts(*p); problem != "" {
 			return refused(file, doc, "ports", problem)
 		}
+	}
+	if r := mf.Run; r != nil && strings.TrimSpace(r.Image+r.Boot+r.Upgrade) == "" {
+		return refused(file, doc, "run", "run names the lines of a phase: image, boot or upgrade")
 	}
 	return nil
 }
@@ -179,7 +182,31 @@ func checkVM(v VMSpec) string {
 	if i := v.Image; i != nil && slices.Contains(i.Bake, "") {
 		return "bake lists items by name"
 	}
+	return checkMounts(v.Mounts)
+}
+
+// invariant: a mount names both of its folders, each a path from the root
+// or the home (`~/`), and no two mounts share a folder of the guest.
+func checkMounts(mounts []Mount) string {
+	guests := map[string]bool{}
+	for _, m := range mounts {
+		switch {
+		case !mountFolder(m.Computer):
+			return fmt.Sprintf("mount folder %q of the computer is not a path from / or ~/", m.Computer)
+		case !mountFolder(m.Guest):
+			return fmt.Sprintf("mount folder %q of the VM is not a path from / or ~/", m.Guest)
+		case strings.ContainsAny(m.Computer+m.Guest, ": \t"):
+			return fmt.Sprintf("mount %q at %q: a mount's folders hold no space and no colon", m.Computer, m.Guest)
+		case guests[path.Clean(m.Guest)]:
+			return fmt.Sprintf("two mounts share the guest folder %q", m.Guest)
+		}
+		guests[path.Clean(m.Guest)] = true
+	}
 	return ""
+}
+
+func mountFolder(p string) bool {
+	return p == "~" || strings.HasPrefix(p, "/") || strings.HasPrefix(p, "~/")
 }
 
 func checkPrefer(prefer []ManagerKey) string {

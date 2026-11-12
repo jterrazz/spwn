@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"errors"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -41,6 +42,9 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 		Name: got.Name, OS: got.OS, Server: got.Kind == catalog.RoleServer, Lifetime: model.Lifetime(got.Lifetime),
 		Network: got.Network, Size: size,
 	}
+	for _, mt := range got.Mounts {
+		out.Mounts = append(out.Mounts, model.Mount{Computer: t.onMac(mt.Computer), Guest: mt.Guest, ReadOnly: mt.ReadOnly})
+	}
 	for _, s := range got.Shares {
 		out.Shares = append(out.Shares, model.TemplateShare{Account: s.Account, For: term(s.For)})
 	}
@@ -50,10 +54,18 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 	if got.Lock != nil {
 		out.Files = append(out.Files, model.TemplateFile{Path: "machinefiles/" + got.Name + catalog.LockSuffix, Body: got.Lock})
 	}
-	if src, ok, err := t.m.machinefileDeps(nil).Prefs.Get(); err == nil && ok {
-		out.Source = src.URL
-	}
 	return out, nil
+}
+
+// value: a folder of a mount on this Mac, its `~` opened at the home.
+func (t machineTemplates) onMac(folder string) string {
+	if folder == "~" {
+		return t.m.sys.Env.Home()
+	}
+	if rest, ok := strings.CutPrefix(folder, "~/"); ok {
+		return path.Join(t.m.sys.Env.Home(), rest)
+	}
+	return folder
 }
 
 // value: a Machinefile's term as a share takes it: weeks in days; none, or

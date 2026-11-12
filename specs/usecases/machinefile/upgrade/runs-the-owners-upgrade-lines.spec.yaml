@@ -1,0 +1,27 @@
+description: 'upgrade runs the owner''s run.upgrade lines once its apps moved, a step of the run'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+          run:
+            upgrade: |
+              git -C ~/Developer/studio-os pull --ff-only
+      exit: 0
+    - command: 'apply --yes'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          ●	apt	1.0.0	apt	the manager of jq
+          ●	jq	1.0.0	apt
+    - command: 'upgrade'
+      exit: 0
+      stdout: |
+          ●	apt	1.0.0	apt
+          ●	jq	1.0.0	apt
+          ●	run.upgrade		linux-1	1 line

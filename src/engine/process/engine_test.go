@@ -65,7 +65,7 @@ type fakeHypervisor struct {
 
 func newHypervisor() *fakeHypervisor { return &fakeHypervisor{live: map[string]*fakeRun{}} }
 
-func (h *fakeHypervisor) Boot(_ context.Context, vm string, _ model.Network) (Run, error) {
+func (h *fakeHypervisor) Boot(_ context.Context, vm string, _ model.Network, _ []model.Mount) (Run, error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.boots++

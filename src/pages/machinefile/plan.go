@@ -175,6 +175,13 @@ func extraRows(p machinefile.Plan, lead ...string) []page.Row {
 
 func counted(n int, what string) string { return strconv.Itoa(n) + " " + what }
 
+func lineCount(n int) string {
+	if n == 1 {
+		return "1 line"
+	}
+	return counted(n, "lines")
+}
+
 func head(label string, mark page.Mark, words []string) page.Section {
 	row := page.Row{ID: "summary/head", Label: label, Mark: mark}
 	if len(words) > 0 {
@@ -186,7 +193,8 @@ func head(label string, mark page.Mark, words []string) page.Section {
 func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	// invariant: a plan opens with what it asks of the owner, then what it
 	// installs, sets and adopts, what it leaves as it is, what is extra,
-	// and what has to happen once applied, each once; it ends on apply.
+	// the owner's lines its phase runs, each shown before it runs, and what
+	// has to happen once applied, each once; it ends on apply.
 	byAction := func(a machinefile.Action) []page.Row {
 		rows := make([]page.Row, 0, len(p.Lines))
 		for _, l := range p.Of(a) {
@@ -218,6 +226,10 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		sections = append(sections, section("extra", "Extra", rows))
 		words = append(words, counted(len(rows), "extra"))
 	}
+	if rows := scriptRows(p); len(rows) > 0 {
+		sections = append(sections, section("run", "To run", rows))
+		words = append(words, lineCount(len(rows))+" to run")
+	}
 	sections = append(sections, restartsSection(p.Restarts)...)
 	mark := page.OK
 	var hints []page.Hint
@@ -225,7 +237,8 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	case !p.Calm():
 		mark = page.Absent
 		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
-		if p.WritesBlocks() || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
+		_, runs := p.Script()
+		if p.WritesBlocks() || runs || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
 		}
 		switch {
@@ -239,6 +252,29 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	}
 	sections = append([]page.Section{head(p.Name, mark, words)}, sections...)
 	return page.Seal(page.Page{ID: ID, Command: "plan", Context: thisMac, Sections: sections, Hints: hints})
+}
+
+// value: the owner's lines the plan's phase runs, one row a line, each
+// with the Machinefile that says it.
+func scriptRows(p machinefile.Plan) []page.Row {
+	s, ok := p.Script()
+	if !ok {
+		return nil
+	}
+	lines := machinefile.ScriptLines(s.Lines)
+	rows := make([]page.Row, 0, len(lines))
+	for i, l := range lines {
+		rows = append(rows, page.Row{ID: "run." + string(s.Phase) + "." + strconv.Itoa(i+1), Label: l, Mark: page.Absent, Cells: []page.Value{page.Texts("run." + string(s.Phase))}, Detail: page.Texts(s.Origin.Name)})
+	}
+	return rows
+}
+
+// value: the step a phase's lines are once they ran, in a run's page.
+func ranStep(r *machinefile.Ran) []pages.RunStep {
+	if r == nil {
+		return nil
+	}
+	return []pages.RunStep{{ID: "run." + string(r.Script.Phase), State: r.State, Cells: []page.Value{page.Version(""), page.Texts(r.Script.Origin.Name)}, Why: []string{lineCount(len(machinefile.ScriptLines(r.Script.Lines)))}, Detail: r.Detail}}
 }
 
 // value: a condition in the owner's words.
@@ -290,8 +326,8 @@ type Worded struct {
 func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context) page.Page {
 	// invariant: apply reads as every run does (pages.RunPage): the line
 	// that sums it up, each item with its mark, its method and why it ran,
-	// then each extra removed, what has to happen once applied, each once,
-	// and what to do next.
+	// then each extra removed, the owner's lines of its phase, what has to
+	// happen once applied, each once, and what to do next.
 	steps := make([]pages.RunStep, 0, len(done)+len(removed))
 	changed, failed, interrupted := 0, 0, a.Interrupted
 	step := func(d Worded) {
@@ -345,6 +381,14 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 	for _, b := range a.Blocks {
 		if b.Condition == machinefile.Extra {
 			block(b)
+		}
+	}
+	for _, s := range ranStep(a.Ran) {
+		steps = append(steps, s)
+		if s.State == catalog.StateBroken {
+			failed++
+		} else {
+			changed++
 		}
 	}
 	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "items in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}

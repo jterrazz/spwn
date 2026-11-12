@@ -11,9 +11,9 @@ const (
 
 // value: what a machine carries, in the order a reader takes it: WHAT it is
 // (machine), HOW it runs (vm, a VM's alone), WHAT it inherits (extends,
-// prefer), WHAT it carries (apps, settings), WHAT it is lent (accounts) and
-// WHAT it may open (ports). A file without machine is a mixin, only ever
-// extended. An overlay, `<name>.local.yaml`, names the file it changes in
+// prefer), WHAT it carries (apps, settings), WHAT it is lent (accounts),
+// WHAT it may open (ports) and the owner's own lines per phase (run). A
+// file without machine is a mixin, only ever extended. An overlay, `<name>.local.yaml`, names the file it changes in
 // overrides and carries apps, settings, accounts and ports alone.
 
 type Machinefile struct {
@@ -31,6 +31,7 @@ type Machinefile struct {
 	Settings *SettingList  `yaml:"settings,omitempty"`
 	Accounts *AccountsSpec `yaml:"accounts,omitempty"`
 	Ports    *PortRights   `yaml:"ports,omitempty"`
+	Run      *RunSpec      `yaml:"run,omitempty"`
 }
 
 type MachineSpec struct {
@@ -78,6 +79,28 @@ type VMSpec struct {
 	Resources *Resources `yaml:"resources,omitempty"`
 	Network   Network    `yaml:"network,omitempty"`
 	Image     *ImageSpec `yaml:"image,omitempty"`
+	Mounts    []Mount    `yaml:"mounts,omitempty"`
+}
+
+// value: a folder of the computer shared live with a VM made from the
+// Machinefile, at a folder of the guest (`~/` opens at each side's home),
+// read-only when the VM may not write to it.
+
+type Mount struct {
+	Computer string `yaml:"computer"`
+	Guest    string `yaml:"guest"`
+	ReadOnly bool   `yaml:"read-only,omitempty"`
+}
+
+// value: the owner's own shell lines, one block per phase, run as the
+// machine's user once its items are carried out: image, as the image is
+// built; boot, at a VM's first start; upgrade, at each upgrade, after its
+// apps. The plan shows them before they run.
+
+type RunSpec struct {
+	Image   string `yaml:"image,omitempty"`
+	Boot    string `yaml:"boot,omitempty"`
+	Upgrade string `yaml:"upgrade,omitempty"`
 }
 
 // value: a size in megabytes, gigabytes or terabytes: `512M`, `32G`, `1T`.

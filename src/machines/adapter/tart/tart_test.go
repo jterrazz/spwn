@@ -213,6 +213,18 @@ func TestABridgedVMBootsOnTheMacsDefaultInterface(t *testing.T) {
 	<-r.Ended()
 }
 
+func TestAVMBootsSharingEachMountUnderItsOwnTag(t *testing.T) {
+	m := newMachine(t)
+	m.boot("dev", "--dir=/Users/me/src:tag=station-1", "--dir=/Users/me/refs:ro,tag=station-2")
+	mounts := []machines.Mount{{Computer: "/Users/me/src", Guest: "~/src"}, {Computer: "/Users/me/refs", Guest: "~/refs", ReadOnly: true}}
+	r, err := m.hypervisor().Boot(t.Context(), "dev", contract.BootOptions{Mounts: mounts})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.end(r, machines.GuestPoweroff)
+	<-r.Ended()
+}
+
 func TestTheEndOfAnOlderRunKeepsTheNewerRunAdoptable(t *testing.T) {
 	m := newMachine(t)
 	m.boot("dev")

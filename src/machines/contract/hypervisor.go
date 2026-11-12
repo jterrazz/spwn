@@ -48,7 +48,13 @@ type Disk struct {
 	State DiskState
 }
 
-type BootOptions struct{ Network machines.Network }
+// value: how a VM boots: its network, and the folders of its Mac it
+// shares live, each under its tag (machines.MountTag).
+
+type BootOptions struct {
+	Network machines.Network
+	Mounts  []machines.Mount
+}
 
 type Run interface {
 	VM() string

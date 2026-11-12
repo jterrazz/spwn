@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,7 +54,8 @@ type ApplyIn struct {
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// value: the plan carried out: each item installed by apps.install,
 	// by the method and at the version its step chose, or set by
-	// settings.apply, one at a time in the plan's order.
+	// settings.apply, one at a time in the plan's order; then the owner's
+	// lines of its phase.
 	Name: "machinefile.apply", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
@@ -124,6 +126,9 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			removed, blocks := r.remove(ctx, plan)
 			out.Removed, out.Blocks = removed, append(out.Blocks, blocks...)
 		}
+		if s, ok := plan.Script(); ok && ctx.Err() == nil {
+			out.Ran = ran(ctx, d, s, p)
+		}
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
@@ -133,6 +138,45 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		return out, ctx.Err()
 	},
+}
+
+// invariant: the owner's lines of a phase run once its items are carried
+// out, as this machine's user from its home, and stop at the first line
+// that fails: their run ends broken, with the last word they said, and
+// what was applied stays applied.
+func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
+	task := "run." + string(s.Phase)
+	p.Step(task, strings.Join(machinefile.ScriptLines(s.Lines), "\n"))
+	out := &machinefile.Ran{Script: s, State: catalog.StateOK}
+	if d.Shell == nil {
+		out.State, out.Detail = catalog.StateBroken, "this machine runs no shell"
+		p.Done(task, errors.New(out.Detail))
+		return out
+	}
+	got, err := d.Shell.Run(ctx, s.Lines)
+	switch {
+	case err != nil:
+		out.State, out.Detail = catalog.StateBroken, err.Error()
+	case got.ExitCode != 0:
+		out.State, out.Detail = catalog.StateBroken, "exited "+strconv.Itoa(got.ExitCode)
+		if last := lastLine(got.Stderr + got.Stdout); last != "" {
+			out.Detail += ": " + last
+		}
+	}
+	if out.State == catalog.StateBroken {
+		p.Done(task, errors.New(out.Detail))
+	} else {
+		p.Done(task, nil)
+	}
+	return out
+}
+
+func lastLine(text string) string {
+	lines := machinefile.ScriptLines(text)
+	if len(lines) == 0 {
+		return ""
+	}
+	return strings.TrimSpace(lines[len(lines)-1])
 }
 
 func badPhase(phase catalog.Phase, remove bool) error {

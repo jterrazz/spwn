@@ -1,0 +1,24 @@
+description: 'apply --phase boot runs the owner''s run.boot lines after the phase''s items, a step of the run'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+          run:
+            boot: |
+              git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
+      exit: 0
+    - command: 'apply --phase boot --yes'
+      exit: 0
+      stdout: |
+          # Left as it is
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          # To run
+          ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	linux-1
+          ○	apt		apt	the manager of jq
+          ○	jq		apt
+          ●	run.boot		linux-1	1 line

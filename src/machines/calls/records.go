@@ -15,7 +15,7 @@ func recordOf(r model.Record) model.VMRecord {
 	return model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
-		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: r.Agents, Template: r.Template,
+		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
 	}
 }
 
@@ -23,7 +23,7 @@ func storedOf(r model.VMRecord) model.Record {
 	return model.Record{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Agents: r.Agents, Template: r.Template,
+		Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
 	}
 }
 

@@ -428,6 +428,8 @@ type Kept struct {
 	Agents []string `json:"agents,omitempty"`
 	// value: the Machinefile it was made from.
 	Template string `json:"template,omitempty"`
+	// value: the folders of its Mac it shares live.
+	Mounts []machines.Mount `json:"mounts,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

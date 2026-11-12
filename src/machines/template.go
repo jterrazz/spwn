@@ -8,10 +8,10 @@ import (
 
 // value: the Machinefile a workspace is made from (create --from), as the
 // create reads it on its Mac: its name (the image's), its system, what its
-// vm says of how it runs (zero where it says nothing), the accounts it is
-// shared, the URL of the Mac's shared source (empty for none), and the
-// files the guest's boot phase reads: its chain and its lock, by their
-// slash path under the owner's folder.
+// vm says of how it runs (zero where it says nothing), the folders of the
+// Mac it shares live, the accounts it is shared, and the files the
+// guest's boot phase reads: its chain and its lock, by their slash path
+// under the owner's folder.
 
 type Template struct {
 	Name     string
@@ -20,8 +20,8 @@ type Template struct {
 	Lifetime Lifetime
 	Network  string
 	Size     Resources
+	Mounts   []Mount
 	Shares   []TemplateShare
-	Source   string
 	Files    []TemplateFile
 }
 

@@ -84,6 +84,7 @@ func (*worldMac) owned() machinefilecontract.Owned                       { retur
 func (*worldMac) locks() machinefilecontract.Locks                       { return nil }
 func (*worldMac) password() machinefilecontract.Password                 { return nil }
 func (*worldMac) turn() machinefilecontract.Turn                         { return nil }
+func (*worldMac) phaseShell() machinefilecontract.Shell                  { return nil }
 func (*worldMac) sharedSource(machinefilecontract.SharedSource) machinefilecontract.Source {
 	return nil
 }

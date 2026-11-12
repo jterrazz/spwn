@@ -68,6 +68,25 @@
       ],
       "type": "object"
     },
+    "Mount": {
+      "additionalProperties": false,
+      "properties": {
+        "computer": {
+          "type": "string"
+        },
+        "guest": {
+          "type": "string"
+        },
+        "read-only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "computer",
+        "guest"
+      ],
+      "type": "object"
+    },
     "PortRights": {
       "additionalProperties": false,
       "properties": {
@@ -123,6 +142,21 @@
       },
       "type": "object"
     },
+    "RunSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "boot": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "upgrade": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "SystemSpec": {
       "additionalProperties": false,
       "properties": {
@@ -160,6 +194,12 @@
             "ephemeral"
           ],
           "type": "string"
+        },
+        "mounts": {
+          "items": {
+            "$ref": "#/$defs/Mount"
+          },
+          "type": "array"
         },
         "network": {
           "enum": [
@@ -354,6 +394,9 @@
         "type": "string"
       },
       "type": "array"
+    },
+    "run": {
+      "$ref": "#/$defs/RunSpec"
     },
     "settings": {
       "additionalProperties": {

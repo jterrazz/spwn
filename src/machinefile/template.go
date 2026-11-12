@@ -12,7 +12,8 @@ import (
 
 // value: a Machinefile a VM image is made from: its name (the image's),
 // the image its disk starts from, its system, the items it bakes, what its
-// vm says of how a VM made from it runs and the accounts it is shared
+// vm says of how a VM made from it runs (the folders it mounts included)
+// and the accounts it is shared
 // (each term as written), the files of its chain a build VM needs (every
 // one but station's built-in ones, which its binary embeds), the lock its
 // build installs, and the hash of all of them, which a changed chain or
@@ -29,6 +30,7 @@ type Template struct {
 	CPUs     int
 	Memory   string
 	Disk     string
+	Mounts   []catalog.Mount
 	Shares   []catalog.AccountShare
 	// value: each file by its slash path under the owner's folder
 	// (`machinefiles/<name>.yaml`, `machinefiles/<name>.local.yaml`).
@@ -57,7 +59,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	t := Template{
 		Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Kind: kind, Lock: lock,
 		Lifetime: m.values["vm.lifetime"].Text, Network: m.values["vm.network"].Text,
-		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text,
+		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text, Mounts: m.mounts,
 	}
 	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)
 	for _, key := range m.order {

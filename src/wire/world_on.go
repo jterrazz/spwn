@@ -300,6 +300,7 @@ func (m *worldMac) turn() machinefilecontract.Turn   { return machinefilefake.Tu
 func (m *worldMac) password() machinefilecontract.Password {
 	return machinefilefake.PasswordOf(m.run.w, m.name)
 }
+func (m *worldMac) phaseShell() machinefilecontract.Shell { return machinefilefake.ShellOf(m.run.w) }
 func (m *worldMac) sharedSource(src machinefilecontract.SharedSource) machinefilecontract.Source {
 	return machinefilefake.SharedOf(m.run.w, m.name, src)
 }

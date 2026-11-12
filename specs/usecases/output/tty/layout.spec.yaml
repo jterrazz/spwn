@@ -60,7 +60,7 @@ runs:
           Set by station  ○ 19 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
           Always-on Mac   ○ 5 · for a Mac that hosts servers
           Checked         ● 8  ◐ 1 · firewall, filevault, sip, automatic-updates, …
-          – 2 not for this machine · VMs only
+          – 1 not for this machine · VMs only
 
           → station settings apply  apply the 19
           → station settings --all  for every row
@@ -69,14 +69,14 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          35 settings on 4 machines · 1 needs a look · infra is a server: not checked
+          34 settings on 4 machines · 1 needs a look · infra is a server: not checked
 
           Needs a look
             ◐ This Mac  firewall  off  → System Settings > Network > Firewall
           Machines  ● 3  – 1  ? 1 · This Mac, mac-mini, linux-1, api, infra
           Set by station
                            This Mac  mac-mini  linux-1  api  OK
-            ○ 21 settings  ○ 0/19    ○ 1/19    ○ 0/8    ?    1/46
+            ○ 20 settings  ○ 0/19    ○ 1/19    ○ 0/7    ?    1/45
           Always-on Mac
                           This Mac  mac-mini  linux-1  api  OK
             ○ 5 settings  ○         ○ 3/5     –        ?    3/5

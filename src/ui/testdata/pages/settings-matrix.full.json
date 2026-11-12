@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "35 settings on 4 machines",
+            "label": "34 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -139,14 +139,14 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/os-checkout",
+            "id": "jterrazz-macbook-pro/tart-launcher",
             "mark": "attention",
             "label": "jterrazz-macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "os-checkout"
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -155,7 +155,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff os-checkout"
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -287,14 +287,14 @@
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/os-checkout",
+            "id": "jterrazz-mac-mini/tart-launcher",
             "mark": "attention",
             "label": "jterrazz-mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "os-checkout"
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -303,7 +303,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff os-checkout --on jterrazz-mac-mini"
+              "command": "station settings diff tart-launcher --on jterrazz-mac-mini"
             }
           }
         },
@@ -435,14 +435,14 @@
         },
         {
           "row": {
-            "id": "linux-1/os-checkout",
+            "id": "linux-1/tart-launcher",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "os-checkout"
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -451,7 +451,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff os-checkout --on linux-1"
+              "command": "station settings diff tart-launcher --on linux-1"
             }
           }
         },
@@ -523,14 +523,14 @@
         },
         {
           "row": {
-            "id": "api/os-checkout",
+            "id": "api/tart-launcher",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "os-checkout"
+                "text": "tart-launcher"
               },
               {
                 "kind": "text",
@@ -837,9 +837,9 @@
         },
         {
           "row": {
-            "id": "os-checkout",
+            "id": "tart-launcher",
             "mark": "attention",
-            "label": "os-checkout",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -869,31 +869,31 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "17 more",
+            "label": "16 more",
             "cells": [
               {
                 "kind": "text",
-                "text": "5/13",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "5/13",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "5/13",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "5/13",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "20/52"
+                "text": "16/48"
               }
             ]
           }
@@ -1138,7 +1138,6 @@
         "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "os-checkout",
         "tart-launcher",
         "autologin",
         "lock-after-login",
@@ -1173,7 +1172,6 @@
         "backup-exclusions",
         "dock-reset",
         "dock-spacer",
-        "os-checkout",
         "tart-launcher",
         "autologin",
         "lock-after-login",

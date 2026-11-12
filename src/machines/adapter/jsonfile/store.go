@@ -60,13 +60,14 @@ type file struct {
 	Birth       *machines.Birth   `json:"birth,omitempty"`
 	Agents      []string          `json:"agents,omitempty"`
 	Template    string            `json:"template,omitempty"`
+	Mounts      []machines.Mount  `json:"mounts,omitempty"`
 	V           int               `json:"v,omitempty"`
 }
 
 func (f file) record() machines.Record {
 	return machines.Record{
 		Name: f.Name, Image: f.Image, Version: f.Version, Lifetime: f.Lifetime, Want: f.Want, Network: f.Network, Check: f.Check, Env: f.Env,
-		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Agents: f.Agents, Template: f.Template,
+		CPUs: f.CPUs, MemoryBytes: f.MemoryBytes, DiskBytes: f.DiskBytes, CreatedAt: f.CreatedAt, Birth: f.Birth, Agents: f.Agents, Template: f.Template, Mounts: f.Mounts,
 	}
 }
 
@@ -155,7 +156,7 @@ func (s *Store) put(r machines.Record) error {
 	data, err := json.MarshalIndent(file{
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes, Shared: held.Shared, CreatedAt: r.CreatedAt,
-		Birth: r.Birth, Agents: r.Agents, Template: r.Template, V: Version,
+		Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts, V: Version,
 	}, "", "  ")
 	if err != nil {
 		return err

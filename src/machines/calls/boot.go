@@ -8,9 +8,8 @@ import (
 	"strings"
 	"time"
 
-	model "github.com/jterrazz/studio-station/src/machines"
-
 	"github.com/jterrazz/studio-station/src/catalog"
+	model "github.com/jterrazz/studio-station/src/machines"
 )
 
 // value: the longest a boot phase's apply runs inside a workspace.
@@ -24,7 +23,8 @@ const (
 )
 
 // invariant: a workspace made from a Machinefile runs its boot phase at
-// its first start, once it answers ssh: its Machinefile's chain and lock,
+// its first start, once it answers ssh: the folders it shares with its
+// Mac mounted first, then its Machinefile's chain and lock,
 // as this Mac reads them now, replace the image's copies in the VM user's
 // folder, then `station apply --phase boot` runs as that user, a
 // secret named only by its `vault:` reference, which the guest resolves;
@@ -34,7 +34,9 @@ const (
 // its page says what is left to do.
 func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model.Template) *model.FirstStart {
 	b := &model.FirstStart{Template: t.Name}
-	if err := s.putTemplate(ctx, name, t.Files); err != nil {
+	if err := s.mount(ctx, name, t.Mounts); err != nil {
+		b.Failed = firstLine(err.Error())
+	} else if err := s.putTemplate(ctx, name, t.Files); err != nil {
 		b.Failed = firstLine(err.Error())
 	} else if err := s.applyBoot(ctx, name, t); err != nil {
 		b.Failed = firstLine(err.Error())
@@ -52,6 +54,41 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 		b.Drift, _ = s.o.Templates.Drift(ctx, t.Name, version)
 	}
 	return b
+}
+
+// invariant: each folder the VM shares with its Mac is mounted at its
+// guest folder before the boot phase runs, so its lines may read it, and
+// stays mounted at every later start: its line in /etc/fstab names the
+// tag the hypervisor shares it under, read-only where the Machinefile
+// says so, and a start that finds no share goes on without it.
+func (s *Machinist) mount(ctx context.Context, name string, mounts []model.Mount) error {
+	if len(mounts) == 0 {
+		return nil
+	}
+	var script strings.Builder
+	script.WriteString("set -e\nhome=$1\nuser=$2\n")
+	for i, m := range mounts {
+		at := m.Guest
+		if rest, ok := strings.CutPrefix(at, "~"); ok {
+			at = "$home" + rest
+		}
+		mode := "rw"
+		if m.ReadOnly {
+			mode = "ro"
+		}
+		tag := model.MountTag(i)
+		script.WriteString("[ -d \"" + at + "\" ] || { mkdir -p \"" + at + "\" && chown \"$user:\" \"" + at + "\"; }\n")
+		script.WriteString("grep -q '^" + tag + " ' /etc/fstab || echo \"" + tag + " " + at + " virtiofs " + mode + ",nofail 0 0\" >> /etc/fstab\n")
+		script.WriteString("mountpoint -q \"" + at + "\" || mount \"" + at + "\"\n")
+	}
+	out, err := s.engineAPI.GuestExec(ctx, name, catalog.AsRoot(`bash -s -- "$HOME" "$(id -un)"`), script.String())
+	switch {
+	case err != nil:
+		return err
+	case out.ExitCode != 0:
+		return errors.New("its folders could not be mounted: " + firstLine(cmpOr(out.Stderr, out.Stdout)))
+	}
+	return nil
 }
 
 func (s *Machinist) putTemplate(ctx context.Context, name string, files []model.TemplateFile) error {
@@ -87,14 +124,10 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 }
 
 // value: the line a workspace's boot phase runs as its user: station's
-// apply of its Machinefile, its boot phase alone, the URL of its Mac's
-// shared source handed to the items that read it (os-checkout).
+// apply of its Machinefile, its boot phase alone, the owner's run.boot
+// lines last.
 func bootLine(t model.Template) string {
-	line := guestStationBin + " apply --machinefile " + quote(t.Name) + " --phase boot </dev/null"
-	if t.Source != "" {
-		line = "env " + catalog.SourceURLEnv + "=" + quote(t.Source) + " " + line
-	}
-	return line
+	return guestStationBin + " apply --machinefile " + quote(t.Name) + " --phase boot </dev/null"
 }
 
 func quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }

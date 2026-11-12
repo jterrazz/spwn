@@ -71,6 +71,13 @@ func (h *hypervisor) Boot(ctx context.Context, vm string, o contract.BootOptions
 			argv = append(argv, "--net-bridged="+iface)
 		}
 	}
+	for i, m := range o.Mounts {
+		share := m.Computer + ":"
+		if m.ReadOnly {
+			share += "ro,"
+		}
+		argv = append(argv, "--dir="+share+"tag="+machines.MountTag(i))
+	}
 	pid, err := h.run.Start(wrapped(append(argv, vm), h.files.exit(vm)), h.files.log(vm))
 	if err != nil {
 		return nil, err

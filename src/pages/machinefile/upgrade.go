@@ -89,7 +89,8 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 	// invariant: upgrade reads as every run does (pages.RunPage): the line
 	// that sums it up, each app with its mark, its version and its method
 	// in the order it ran (the managers first), a version the Machinefile
-	// pins said kept, then what the lock moved, and what to do next.
+	// pins said kept, the owner's run.upgrade lines, then what the lock
+	// moved, and what to do next.
 	steps := make([]pages.RunStep, 0, len(done))
 	updated, failed, interrupted := 0, 0, u.Interrupted
 	for _, d := range done {
@@ -119,6 +120,12 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 			failed++
 		case d.Updated && d.State == catalog.StateOK && (d.Version != d.Line.Seen.Version || d.Line.Step.Within() == ""):
 			updated++
+		}
+	}
+	for _, s := range ranStep(u.Ran) {
+		steps = append(steps, s)
+		if s.State == catalog.StateBroken {
+			failed++
 		}
 	}
 	r := pages.Run{Command: "upgrade", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: slices.Concat(unpulledSection(u.Unpulled), lockSection(u.Lock), waitingSection(u.Waiting))}
@@ -163,6 +170,7 @@ type UpgradedJSON struct {
 	Source []string `json:"source,omitempty"`
 	// value: each newer version past its range, waiting for the owner.
 	Waiting     []WaitingJSON `json:"waiting"`
+	Run         *RunJSON      `json:"run,omitempty"`
 	Interrupted bool          `json:"interrupted"`
 	// value: why the shared source was not pulled, when it was not.
 	Unpulled string `json:"unpulled,omitempty"`
@@ -179,7 +187,7 @@ type WaitingJSON struct {
 func UpgradedContract(u machinefile.Upgraded, done []Worded) UpgradedJSON {
 	// value: station.machinefile.upgrade/v1: each app as the upgrade left
 	// it, and what moved in the lock.
-	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Interrupted: u.Interrupted, Unpulled: u.Unpulled}
+	out := UpgradedJSON{Schema: "station.machinefile.upgrade/v1", Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled}
 	for _, w := range u.Waiting {
 		out.Waiting = append(out.Waiting, WaitingJSON(w))
 	}

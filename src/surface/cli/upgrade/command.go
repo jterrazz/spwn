@@ -43,14 +43,20 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			failed := 0
+			failed, total, noun := 0, len(done), "apps"
 			for _, w := range done {
 				if w.State == catalog.StateBroken {
 					failed++
 				}
 			}
+			if out.Ran != nil {
+				total, noun = total+1, "steps"
+				if out.Ran.State == catalog.StateBroken {
+					failed++
+				}
+			}
 			if failed > 0 {
-				return kit.PartialFailure{Failed: failed, Total: len(done), Noun: "apps", FirstHint: "station upgrade"}
+				return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station upgrade"}
 			}
 			return nil
 		},

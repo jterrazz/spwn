@@ -1,0 +1,42 @@
+description: 'plan --phase boot shows each of the owner''s run.boot lines before it runs, with its Machinefile'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+          run:
+            boot: |
+              git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
+
+              cd ~/Developer/studio-os && make install
+            upgrade: |
+              cd ~/Developer/studio-os && git pull --ff-only
+      exit: 0
+    - command: 'plan --phase boot'
+      exit: 0
+      stdout: |
+          # Left as it is
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+          # To run
+          ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	linux-1
+          ○	cd ~/Developer/studio-os && make install	run.boot	linux-1
+    - command: 'plan --phase boot --json | /usr/bin/jq -c .run'
+      exit: 0
+      stdout: |
+          {"phase":"boot","machinefile":"linux-1","lines":["git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os","cd ~/Developer/studio-os && make install"]}
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of jq
+          ○	jq	apt
+    - command: 'explain run'
+      exit: 0
+      stdout: |
+          # linux-1
+          	run.boot	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os; cd ~/Developer/studio-os && make install	user	linux-1
+          	run.upgrade	cd ~/Developer/studio-os && git pull --ff-only	user	linux-1

@@ -125,15 +125,27 @@ say "-- the engine of this build runs for $mac (pid $engine_pid)"
 
 case_begin image-build IM-09 ADR-043
 # value: the owner's template, read through the run's own user source: it extends
-# station-linux and bakes what it bakes; the build's own minutes, against its bound
-# (images/calls/build.go: 30 min the recipe, 30 the image phase).
-mkdir -p "$mac/.config/station/machinefiles"
+# station-linux and bakes what it bakes, shares a folder of the Mac read-only, and
+# its own lines run at the image's build (run.image) and at a first start (run.boot,
+# a clone of a repository the shared folder holds); the build's own minutes, against
+# its bound (images/calls/build.go: 30 min the recipe, 30 the image phase).
+mkdir -p "$mac/.config/station/machinefiles" "$mac/shared"
+on_mac git init -q "$work/seed" && on_mac git -C "$work/seed" -c user.name=e2e -c user.email=e2e@station.test commit -q --allow-empty -m seed \
+  && on_mac git -C "$work/seed" bundle create -q "$mac/shared/seed.bundle" HEAD || fail "make the seed repository's bundle"
 cat > "$mac/.config/station/machinefiles/studio-linux.yaml" << 'YAML'
 machinefile: station.machinefile/v1
 name: studio-linux
 machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
 extends: [station-linux]
-vm: { lifetime: persistent, resources: { cpus: 4, memory: 4G, disk: 30G } }
+vm:
+  lifetime: persistent
+  resources: { cpus: 4, memory: 4G, disk: 30G }
+  mounts: [{ computer: ~/shared, guest: ~/shared, read-only: true }]
+run:
+  image: |
+    mkdir -p ~/.local/state/e2e && echo image > ~/.local/state/e2e/run-image
+  boot: |
+    git clone -q ~/shared/seed.bundle ~/Developer/seed
 YAML
 started=$(date +%s)
 st images build studio-linux --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build studio-linux exited $?"
@@ -155,8 +167,16 @@ created=$(cat "$work/ws1-created.json")
 [ "$(jq -r '.boot.failed // ""' <<< "$created")" = "" ] || fail "ws1's boot phase failed: $(jq -r .boot.failed <<< "$created")"
 [ "$(jq -c '.boot.drift' <<< "$created")" = "[]" ] || fail "ws1, made from the newest studio-linux, shows drift: $(jq -c .boot.drift <<< "$created")"
 in_vm ws1 'test -s ~/.config/station/machinefiles/studio-linux.yaml' || fail "the boot phase left no studio-linux.yaml in ws1"
+[ "$(in_vm ws1 'cat ~/.local/state/e2e/run-image')" = image ] || fail "run.image left nothing in ws1's image"
+in_vm ws1 'git -C ~/Developer/seed log --format=%s -1' 2>> "$log" | grep -qx seed || fail "run.boot did not clone the seed into ws1"
+echo live > "$mac/shared/live.txt"
+[ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "a file written on the Mac does not read in ws1's mount"
+in_vm ws1 'touch ~/shared/from-guest' 2>/dev/null && fail "ws1 wrote into a read-only mount"
+st machines restart ws1 >> "$log" 2>&1 || fail "machines restart ws1 exited $?"
+[ "$(in_vm ws1 'cat ~/shared/live.txt')" = live ] || fail "ws1's mount is gone after a restart"
 token_into ws1
-say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image"
+rm -f "$mac/shared/live.txt"
+say "   ws1 made from studio-linux $built: persistent, 4 CPU, 30 GB, its boot phase ran, no drift from its image, run.image and run.boot ran, ~/shared mounted read-only and live"
 case_pass
 
 

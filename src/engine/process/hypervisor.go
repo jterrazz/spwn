@@ -11,7 +11,7 @@ import (
 type Hypervisor interface {
 	// invariant: what the engine needs of a VM's hypervisor: a run it boots or
 	// adopts, and how that run ended; never how the hypervisor runs it.
-	Boot(ctx context.Context, vm string, n model.Network) (Run, error)
+	Boot(ctx context.Context, vm string, n model.Network, mounts []model.Mount) (Run, error)
 	Adopt(ctx context.Context, vm string) (Run, bool)
 	Shutdown(ctx context.Context, vm string, grace time.Duration) error
 	Address(ctx context.Context, vm string, wait time.Duration) (netip.Addr, error)

@@ -1,0 +1,31 @@
+description: 'create --from shares each vm.mounts folder, records it, and mounts it before the boot phase'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm:
+            mounts:
+              - { computer: ~/Developer/notes, guest: ~/notes, read-only: true }
+              - { computer: /Volumes/data, guest: /data }
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create web --from studio-linux'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	vite	5173	https://jterrazz-macbook-pro.tail1234.ts.net:40003
+          ●	expo	8081	https://jterrazz-macbook-pro.tail1234.ts.net:40000
+          ●	Boot phase	studio-linux
+          ●	web	Created	Persistent · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {mounts: .kept.mounts, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
+      exit: 0
+      stdout: |
+          {"mounts":[{"computer":"{{workdir}}/Developer/notes","guest":"~/notes","read_only":true},{"computer":"/Volumes/data","guest":"/data"}],"ran":["sudo bash -s","sudo bash -s -- \"$HOME\" \"$(id -un)\"","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}

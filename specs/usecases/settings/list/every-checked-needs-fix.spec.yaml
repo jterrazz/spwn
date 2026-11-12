@@ -25,7 +25,7 @@ runs:
           ●	remote-login	as expected · off
           ●	time-machine	as expected · last backup 2 d ago
           # Not for this machine
-          –	2 not for this machine	VMs only
+          –	1 not for this machine	VMs only
     - command: 'overview --all --json | /usr/bin/jq -c ''[.findings[] | select(.section == "settings") | .fix | with_entries(select(.value != null)) | keys]'''
       exit: 0
       stdout: |

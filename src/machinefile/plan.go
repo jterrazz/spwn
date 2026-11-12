@@ -128,6 +128,26 @@ type Plan struct {
 	Skipped      []Skip
 	Restarts     []catalog.AfterApply
 	Passwordless bool
+	// value: the owner's lines of every phase the Machinefile says.
+	Scripts []Script
+}
+
+func (p Plan) Script() (Script, bool) {
+	// value: the owner's lines this plan's phase runs once its items are
+	// carried out: the image's as it is built, the boot's at a first
+	// start; apply's phase runs none.
+	switch p.Phase {
+	case catalog.PhaseImage:
+		return p.ScriptOf(RunImage)
+	case catalog.PhaseBoot:
+		return p.ScriptOf(RunBoot)
+	case catalog.PhaseApply:
+	}
+	return Script{}, false
+}
+
+func (p Plan) ScriptOf(phase RunPhase) (Script, bool) {
+	return Resolved{Scripts: p.Scripts}.ScriptOf(phase)
 }
 
 func InPhase(s Step, phase catalog.Phase) bool {
@@ -149,7 +169,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	// item skipped on this system is still listed, so never extra; only
 	// apply's phase has extras, since another phase carries a part.
 	phase = cmp.Or(phase, catalog.PhaseApply)
-	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless}
+	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless, Scripts: r.Scripts}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Item] = true
@@ -490,8 +510,10 @@ func (p Plan) Of(a Action) []Line {
 
 func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
-	// set, no extra `apply --remove` would take back or let go of.
-	return !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !slices.ContainsFunc(p.Blocks, Block.Forgets)
+	// set, no extra `apply --remove` would take back or let go of, no
+	// block to write or let go of, none of the owner's lines to run.
+	_, runs := p.Script()
+	return !runs && !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !slices.ContainsFunc(p.Blocks, Block.Forgets)
 }
 
 func (p Plan) Interactive(remove bool) []Asked {
@@ -621,10 +643,20 @@ type Applied struct {
 	Plan    Plan
 	Done    []Done
 	Removed []Done
+	Ran     *Ran
 	// value: what each block of ~/.zshrc the plan carries came to.
 	Blocks      []BlockDone
 	Bound       string
 	Interrupted bool
+}
+
+// value: the owner's lines of a phase once they ran: how they ended, ok,
+// or broken with their exit and the last line they said.
+
+type Ran struct {
+	Script Script
+	State  catalog.State
+	Detail string
 }
 
 func (p Plan) Upgrades() []Line {
@@ -690,6 +722,7 @@ func (p Plan) UpgradeNeeds() []Asked {
 type Upgraded struct {
 	Plan        Plan
 	Done        []Done
+	Ran         *Ran
 	Lock        LockDiff
 	Waiting     []Waiting
 	Interrupted bool
