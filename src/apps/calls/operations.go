@@ -245,7 +245,7 @@ func (s *Shelf) Uninstall(ctx context.Context, names []string, word bool) ([]app
 	}
 	out := make([]apps.Outcome, 0, len(requested))
 	for _, held := range held {
-		o := s.run(ctx, verbUninstall, held, word, contract.Installer.Remove)
+		o := s.undone(ctx, held, s.run(ctx, verbUninstall, held, word, contract.Installer.Remove), true)
 		o.Method = s.install(held).Method()
 		out = append(out, o)
 	}
@@ -655,13 +655,46 @@ func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.
 	case s.unrecorded(ctx, old):
 		step.Detail = "kept: yours, station added none of its packages; `station apps remove " + t.Name + "` takes it on your word"
 	default:
-		o := s.run(ctx, verbUninstall, old, false, contract.Installer.Remove)
+		o := s.undone(ctx, old, s.run(ctx, verbUninstall, old, false, contract.Installer.Remove), false)
 		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why
 		if o.Result != catalog.StateOK {
 			step.Detail = o.Detail
 		}
 	}
 	return step
+}
+
+// invariant: a script's or a shell line's undo is done only once the app
+// reads gone: its check fails in the folder the install lands in, and, for
+// a removal (onPath; a move's new copy answers there by design), none of
+// its commands answers on the owner's PATH. Otherwise the outcome is no
+// success, and says what still answers, and where.
+func (s *Shelf) undone(ctx context.Context, t catalog.App, o apps.Outcome, onPath bool) apps.Outcome {
+	in := s.install(t)
+	if o.Result != catalog.StateOK || !byLine(in) {
+		return o
+	}
+	if check := catalog.CheckOf(in); check != "" && s.readChecked(ctx, t, apps.Report{}, check).State == catalog.StateOK {
+		o.Result, o.Detail = catalog.StateBroken, "undone, but its check still passes in "+catalog.ScriptBin
+		return o
+	}
+	for _, name := range t.Provides {
+		if where, ok := s.m.LookPath(name); ok && onPath {
+			o.Result, o.Detail = catalog.StateBroken, "undone, but "+name+" still answers at "+s.shown(where)
+			return o
+		}
+	}
+	return o
+}
+
+// value: the install is a line station runs (a script, a shell line),
+// taken back by its own `undo`.
+func byLine(in catalog.Install) bool {
+	switch in.(type) {
+	case catalog.ScriptInstall, catalog.ShellInstall:
+		return true
+	}
+	return false
 }
 
 // value: an app's installer as its verbs meet it: a Holder is told the app

@@ -242,6 +242,14 @@ func (a appsMachine) RunBriefly(ctx context.Context, name string, args []string,
 	return out.Stdout + out.Stderr, out.ExitCode, true
 }
 
+func (a appsMachine) RunSealed(ctx context.Context, bin, name string, args []string, budget time.Duration) (output string, code int, ran bool) {
+	out, err := a.run.Output(ctx, local.Cmd{Name: name, Args: args, Timeout: budget, Env: []string{"PATH=" + bin}, Sealed: true})
+	if err != nil {
+		return "", 0, false
+	}
+	return out.Stdout + out.Stderr, out.ExitCode, true
+}
+
 func (a appsMachine) Keep(file, line string) error {
 	before, err := a.h.FS.ReadFile(file)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {

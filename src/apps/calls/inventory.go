@@ -379,16 +379,31 @@ func (s *Shelf) readInstalled(ctx context.Context, t catalog.App, r apps.Report)
 // invariant: an install that names a check is there when the check exits 0,
 // whatever its commands are; its output is the version a `version-read`
 // pattern reads, unless the app reads its version by a command of its own.
-// A check that fails or does not start reads the app absent.
+// Both run with the folder the install lands its commands in as their whole
+// PATH, so they answer for station's copy, never for one found ahead of it
+// (an owner's shim). A check that fails or does not start reads the app
+// absent.
 func (s *Shelf) readChecked(ctx context.Context, t catalog.App, r apps.Report, check string) apps.Report {
-	text, code, ran := s.m.RunBriefly(ctx, "bash", []string{"-c", check}, versionBudget)
+	bin := s.home(catalog.ScriptBin)
+	text, code, ran := s.m.RunSealed(ctx, bin, "bash", []string{"-c", check}, versionBudget)
 	if !ran || code != 0 {
 		return r
 	}
 	r.State, r.Managed = catalog.StateOK, true
 	if len(t.Version.Args) > 0 {
-		if version, code, ok := s.readVersion(ctx, t.Version); ok && code == 0 {
-			r.Version = version
+		args := make([]string, 0, len(t.Version.Args)-1)
+		for _, a := range t.Version.Args[1:] {
+			args = append(args, s.home(a))
+		}
+		name := s.home(t.Version.Args[0])
+		if !strings.Contains(name, "/") {
+			name = path.Join(bin, name)
+		}
+		if said, code, ok := s.m.RunSealed(ctx, bin, name, args, versionBudget); ok && code == 0 {
+			r.Version = strings.TrimSpace(said)
+			if t.Version.Pattern != "" {
+				r.Version = matchVersion(t.Version.Pattern, said)
+			}
 		}
 		return r
 	}

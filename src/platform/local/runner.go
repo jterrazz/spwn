@@ -67,7 +67,10 @@ func (r *runner) command(ctx context.Context, c Cmd) (context.Context, *exec.Cmd
 	}
 	cmd := exec.CommandContext(ctx, path, c.Args...)
 	cmd.Dir = c.Dir
-	cmd.Env = r.withLanding(append(append([]string{}, r.env...), c.Env...))
+	cmd.Env = append(append([]string{}, r.env...), c.Env...)
+	if !c.Sealed {
+		cmd.Env = r.withLanding(cmd.Env)
+	}
 	if c.Track != "" {
 		// invariant: a tracked child leads its own process group, so the end of
 		// its context kills whatever it spawned too, never only the direct child.

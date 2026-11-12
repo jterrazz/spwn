@@ -47,9 +47,10 @@ func (f Footprint) Path(pattern string) bool {
 	return f.any(func(t catalog.App) bool { return t.Version.Path != "" && t.Version.Path == pattern })
 }
 
-func (f Footprint) Check(line string) (held bool, version string, known bool) {
+func (f Footprint) Check(line string) (held bool, version string, commands []string, known bool) {
 	// invariant: a check line some install of the catalog names answers as
-	// the world holds that install: exit 0 and the version, or exit 1.
+	// the world holds that install, the copy it put in its own folder: exit
+	// 0 and the version, or exit 1; commands are the app's.
 	f.w.Lock()
 	defer f.w.Unlock()
 	for _, t := range f.apps {
@@ -57,13 +58,13 @@ func (f Footprint) Check(line string) (held bool, version string, known bool) {
 			if catalog.CheckOf(p.Install) != line {
 				continue
 			}
-			known = true
+			known, commands = true, t.Provides
 			if v, there := manager(f.w, f.mac, p.Install.Method()).Installed[p.Install.Key()]; there {
-				return true, said(t.Version.Pattern, v), true
+				return true, said(t.Version.Pattern, v), commands, true
 			}
 		}
 	}
-	return false, "", known
+	return false, "", commands, known
 }
 
 func (f Footprint) Reads(home, arg string) bool {
@@ -156,7 +157,10 @@ func (s Seen) Output(ctx context.Context, c local.Cmd) (local.Output, error) {
 	// install left, answers every run with exit 0 and no output: no version to
 	// read, none to fail.
 	if len(c.Args) == 2 && path.Base(c.Name) == "bash" && c.Args[0] == "-c" {
-		if held, version, known := s.Foot.Check(c.Args[1]); known {
+		if held, version, commands, known := s.Foot.Check(c.Args[1]); known {
+			if out, ok := s.ahead(ctx, c, commands); ok {
+				return out, nil
+			}
 			if !held {
 				return local.Output{ExitCode: 1}, nil
 			}
@@ -170,6 +174,22 @@ func (s Seen) Output(ctx context.Context, c local.Cmd) (local.Output, error) {
 		return local.Output{}, nil
 	}
 	return s.Runner.Output(ctx, c)
+}
+
+// invariant: a check run on a PATH it does not seal answers by the first
+// copy of its command that PATH finds, as bash would: one of the owner's
+// ahead of station's (a shim, a copy on PATH) answers for it.
+func (s Seen) ahead(ctx context.Context, c local.Cmd, commands []string) (local.Output, bool) {
+	words := strings.Fields(c.Args[1])
+	if c.Sealed || len(words) == 0 || !slices.Contains(commands, words[0]) {
+		return local.Output{}, false
+	}
+	where, found := s.Runner.LookPath(words[0])
+	if !found {
+		return local.Output{}, false
+	}
+	out, err := s.Runner.Output(ctx, local.Cmd{Name: where, Args: words[1:]})
+	return out, err == nil
 }
 
 func (s Seen) Within(env []string) local.Runner {

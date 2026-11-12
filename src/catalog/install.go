@@ -238,6 +238,11 @@ func VersionOf(in Install) string {
 	return ""
 }
 
+// value: the folder a script's and a shell line's commands land in: their
+// check finds a command there, and nowhere else.
+
+const ScriptBin = "~/.local/bin"
+
 func CheckOf(in Install) string {
 	// value: the line an install is read present by, empty where it has none.
 	switch m := in.(type) {

@@ -47,6 +47,10 @@ func (m machine) RunBriefly(_ context.Context, name string, args []string, _ tim
 	return p.output, p.code, ok
 }
 
+func (m machine) RunSealed(ctx context.Context, _, name string, args []string, budget time.Duration) (output string, code int, ran bool) {
+	return m.RunBriefly(ctx, name, args, budget)
+}
+
 func reportOf(t *testing.T, app catalog.App, manager *fake.State, m machine) apps.Report {
 	method := app.Installs[0].Install.Method()
 	installers := contract.Installers{method: fake.New(method, manager)}
