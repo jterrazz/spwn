@@ -536,3 +536,40 @@ func TestAVMsQuietListenersAreCountedWhilePresentOnly(t *testing.T) {
 		t.Fatalf("quiet = %+v after the VM stopped, want none", got)
 	}
 }
+
+// invariant: a guest's snapshot is acted on by port, whatever order it lists
+// them in, so the shares it makes are the ones the first tick makes.
+func TestASnapshotSharesInPortOrderWhateverItsOwn(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	tn := &fakeTailnet{sharing: ports.SharingState{On: true, DNSName: "x.tail1234.ts.net", Backend: ports.Running}}
+	h.d.tn = tn
+	h.d.o.Rights = func(context.Context, string) (*catalog.PortRights, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 1024, To: 65535}}, To: catalog.AudiencePrivate}, nil
+	}
+	ctx := t.Context()
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.mu.Lock()
+	h.d.vms["api"].state = engine.StateRunning
+	h.d.reconciled = true
+	h.d.mu.Unlock()
+	h.d.fromGuest(ctx, h.d.vms["api"], []byte(`{"type":"snapshot","ports":[{"port":7000,"ip":"0.0.0.0","process":"a"},{"port":3000,"ip":"0.0.0.0","process":"b"},{"port":5173,"ip":"0.0.0.0","process":"c"}]}`))
+	got := make([]int, 0, len(h.d.reservations))
+	for _, l := range h.d.reservations {
+		got = append(got, l.GuestPort)
+	}
+	if want := []int{3000, 5173, 7000}; !slices.Equal(got, want) {
+		t.Errorf("reserved in the order %v, want %v", got, want)
+	}
+	tn.mu.Lock()
+	defer tn.mu.Unlock()
+	var shares []string
+	for _, c := range tn.calls {
+		if strings.HasPrefix(c, "share ") {
+			shares = append(shares, c)
+		}
+	}
+	if len(shares) != 3 || !strings.HasSuffix(shares[0], "from 40000") || !strings.HasSuffix(shares[1], "from 40001") || !strings.HasSuffix(shares[2], "from 40002") {
+		t.Errorf("shared %v, want 3000, 5173 and 7000 from 40000, 40001 and 40002", shares)
+	}
+}

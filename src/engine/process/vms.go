@@ -2,6 +2,7 @@ package process
 
 import (
 	"bufio"
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -631,13 +632,29 @@ type guestMessage struct {
 	IP      string               `json:"ip"`
 	Process string               `json:"process"`
 	Quiet   bool                 `json:"quiet"`
-	Ports   []struct {
-		Port    int    `json:"port"`
-		IP      string `json:"ip"`
-		Process string `json:"process"`
-		Quiet   bool   `json:"quiet"`
-	} `json:"ports"`
-	Agents []agents.Agent `json:"agents"`
+	Ports   []guestPort          `json:"ports"`
+	Agents  []agents.Agent       `json:"agents"`
+}
+
+type guestPort struct {
+	Port    int    `json:"port"`
+	IP      string `json:"ip"`
+	Process string `json:"process"`
+	Quiet   bool   `json:"quiet"`
+}
+
+func (d *Engine) inReservationOrder(vm string, in []guestPort) []guestPort {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	at := func(p guestPort) int {
+		if i := d.reservationIndex(vm, p.Port); i >= 0 {
+			return i
+		}
+		return len(d.reservations)
+	}
+	return slices.SortedStableFunc(slices.Values(in), func(a, b guestPort) int {
+		return cmp.Or(cmp.Compare(at(a), at(b)), cmp.Compare(a.Port, b.Port))
+	})
 }
 
 func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
@@ -656,7 +673,12 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 		seen := map[int]bool{}
 		heard := make([]ports.Listener, 0, len(m.Ports))
 		quiet := map[int]ports.Listener{}
-		for _, p := range m.Ports {
+		// invariant: a snapshot is acted on in the order the reservations are
+		// kept in, the ports with none after them by port, so the shares a
+		// guest's first scan makes land in the tailnet's list in the order the
+		// first tick makes them in, whichever of the two a start's adoption
+		// lets come first.
+		for _, p := range d.inReservationOrder(name, m.Ports) {
 			l := ports.Listener{Port: p.Port, Bind: p.IP, Process: p.Process}
 			if p.Quiet && !d.reserved(name, p.Port) {
 				quiet[p.Port] = l
