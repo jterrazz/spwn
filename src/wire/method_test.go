@@ -416,6 +416,17 @@ func TestAVersionAMethodCannotPinIsACodedRefusal(t *testing.T) {
 	}
 }
 
+func TestAVersionedFormulaRefusedSaysTheMajorItHolds(t *testing.T) {
+	// invariant: apps.install refuses a range a versioned formula cannot
+	// hold in the words a Machinefile's refusal says it (HoldWordsOf).
+	b := benchOf(t, catalog.Mac, "postgres")
+	_, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, appscalls.Install, appscalls.InstallIn{Names: []string{"postgres"}, Version: "17"}, nil)
+	var refused *fail.Error
+	if !errors.As(err, &refused) || refused.Code != appscalls.Unpinnable || refused.Detail["holds"] != "only its newest of 18 (postgresql@18)" {
+		t.Errorf("postgres at 17 was not refused for the major its formula holds: %v", err)
+	}
+}
+
 func TestAMoveToAMethodTheAppHasNoneOfNamesTheOneThatHoldsIt(t *testing.T) {
 	// invariant: a move refused for a method the app has none of here
 	// names the method that holds it, so its hint never asks a move to

@@ -188,7 +188,7 @@ func (s *Shelf) by(found []catalog.App, method catalog.Method, version string) (
 			r, err := catalog.ParseRange(version)
 			pinned, ok := catalog.Pinned(in, r)
 			if err != nil || !ok {
-				return nil, &apps.UnpinnableError{App: t.Name, Method: in.Method(), Version: version, Holds: catalog.HoldOf(in)}
+				return nil, &apps.UnpinnableError{App: t.Name, Method: in.Method(), Version: version, Holds: catalog.HoldWordsOf(in)}
 			}
 			in = pinned
 		}

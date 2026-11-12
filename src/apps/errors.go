@@ -137,7 +137,7 @@ type UnpinnableError struct {
 	App     string
 	Method  catalog.Method
 	Version string
-	Holds   catalog.Hold
+	Holds   string
 }
 
 func (e *UnpinnableError) Error() string {
