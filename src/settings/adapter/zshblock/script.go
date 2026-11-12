@@ -3,7 +3,6 @@ package zshblock
 import (
 	"context"
 	"io/fs"
-	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/src/accounts/contract"
@@ -19,15 +18,12 @@ const (
 type BlockOptions struct {
 	ThisMachine catalog.MachineKind
 	PortsEnv    string
-	// value: the scripts of the shell functions settings applied here; one
-	// not written is skipped.
-	Functions []string
 }
 
 type Block struct {
 	// value: the script station's ~/.zshrc block evaluates: the dotfiles'
-	// loader, the tools' activation, completion, the Claude token, the
-	// services' variables and the settings' shell functions.
+	// loader, the tools' activation, completion, the Claude token and the
+	// services' variables.
 	files    Files
 	embedded fs.FS
 	source   contract.SecretSource
@@ -52,19 +48,7 @@ func (s *Block) Zsh(ctx context.Context, completion string) (string, error) {
 	if line, ok := s.token(ctx); ok {
 		script += "\n" + line + "\n"
 	}
-	return script + s.portsEnv() + s.functions(), nil
-}
-
-// invariant: the functions of an applied setting are a file read, like the
-// profiles' exports: a shell start never waits on anything.
-func (s *Block) functions() string {
-	var out strings.Builder
-	for _, f := range s.o.Functions {
-		if data, err := s.files.ReadFile(f); err == nil && len(data) > 0 {
-			out.WriteString("\n" + string(data))
-		}
-	}
-	return out.String()
+	return script + s.portsEnv(), nil
 }
 
 // invariant: in a VM the profiles' exports the guest wrote are a file read, never

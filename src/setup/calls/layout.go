@@ -6,6 +6,7 @@ import (
 	"errors"
 	"path"
 	"reflect"
+	"slices"
 
 	machinescalls "github.com/jterrazz/studio-station/src/machines/calls"
 
@@ -134,6 +135,32 @@ func (s *Provisioner) layout(ctx context.Context, migrated error) ([]setup.Step,
 		step.Detail += " (~/.studio keeps files that are not station's)"
 	}
 	return append([]setup.Step{step}, retired...), nil
+}
+
+// invariant: the folder station's zsh block once read its functions from
+// goes the way ~/.studio did: the files it wrote, by name, and the folder
+// once it is empty; a file of the owner's in it stays, and so does the folder.
+func retiredZsh() []string { return []string{"docker-shortcuts.zsh"} }
+
+func (s *Provisioner) retireZshDir() []setup.Step {
+	dir := path.Join(path.Dir(s.o.PreferencesFile), "zsh")
+	entries, found, err := s.m.Entries(dir)
+	if err != nil || !found {
+		return nil
+	}
+	dropped := false
+	for _, e := range entries {
+		if !e.Dir && slices.Contains(retiredZsh(), e.Name) {
+			dropped = s.drop(path.Join(dir, e.Name)) || dropped
+		}
+	}
+	if left, _, err := s.m.Entries(dir); err == nil && len(left) == 0 {
+		dropped = s.drop(dir) || dropped
+	}
+	if !dropped {
+		return nil
+	}
+	return []setup.Step{{Name: stepZsh, State: catalog.StateOK, Detail: "retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now", Changed: true}}
 }
 
 func (s *Provisioner) moveDNS() (bool, error) {

@@ -315,7 +315,7 @@ func (m MethodSpec) settingKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
 		"file": m.File != nil, "builtin": m.Builtin != "", "macos-defaults": m.MacOSDefaults != nil, "git-aliases": m.GitAliases != nil,
-		"zsh-functions": m.ZshFunctions != nil, "agent-hooks": m.AgentHooks != nil, "mux-machines": m.MuxMachines != nil,
+		"shell": len(m.Shell) > 0 && len(m.appKeys()) == 0, "agent-hooks": m.AgentHooks != nil, "mux-machines": m.MuxMachines != nil,
 	} {
 		if set {
 			keys = append(keys, key)
@@ -375,6 +375,9 @@ func checkMethod(it Item, m MethodSpec) string {
 		return problem
 	}
 	if problem := m.checkManager(); problem != "" {
+		return problem
+	}
+	if problem := it.checkShell(m.Shell); problem != "" {
 		return problem
 	}
 	if it.Kind == KindSetting {

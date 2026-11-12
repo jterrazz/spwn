@@ -22,7 +22,7 @@ runs:
           ┃ Apply every setting not applied or changed since? A setting changed since is
           ┃ overwritten: yours is lost
           ┃
-          ●       docker-shortcuts        zsh block: dclean, dclean-images, dreset added
+          ●       docker-shortcuts        ~/.zshrc [station:docker-shortcuts]: written
           ●       git-shortcuts   ~/.gitconfig [alias]: written
           ●       hushlogin       ~/.hushlogin: created
           ●       dns     dns: applied

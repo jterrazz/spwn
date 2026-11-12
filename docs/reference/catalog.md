@@ -120,7 +120,7 @@ A method is a selector, exactly one manager key, and the overrides that keep ins
 | `builtin`        | setting      | a procedure station carries (`dns`, `ssh-key`...); one this station does not carry decodes, and its apply says `update station`                                                                                                                                                                                                                    |
 | `macos-defaults` | setting      | a `domain`, `this-mac` (its keys of this Mac alone), and its `keys`, each `key`, `type` (`string`, `integer`, `float`, `boolean`), `value`                                                                                                                                                                                                         |
 | `git-aliases`    | setting      | the git config `file` and its `aliases`                                                                                                                                                                                                                                                                                                            |
-| `zsh-functions`  | setting      | the embedded script `from`, and its `functions`                                                                                                                                                                                                                                                                                                    |
+| `shell`          | setting      | the identified blocks of `~/.zshrc` the setting writes, `id` and `zsh` each (alone, it is the setting's effect; beside an app's manager key it is a modifier, below)                                                                                                                                                                               |
 | `agent-hooks`    | setting      | the `apps` whose agents are hooked                                                                                                                                                                                                                                                                                                                 |
 | `mux-machines`   | setting      | `{}`                                                                                                                                                                                                                                                                                                                                               |
 
@@ -137,6 +137,7 @@ Every manager type has its own check, upgrade and undo; an override is written o
 | `pin`      | an app's             | what it can hold: `none` (only its newest) or `version` (what its install carries) |
 | `path`     | an app's             | absolute folders it lands commands in, which station's search adds at once         |
 | `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                        |
+| `shell`    | an app's             | the blocks of `~/.zshrc` this method writes once the app is there                  |
 
 A `script` with neither `run` nor `url` is installed by the owner, as its `hint` says; a `run` line takes no `args`, `env` nor `upgrade`. An `env` value that opens with `~/` is given under the home (`HELM_INSTALL_DIR=~/.local/bin`), since an installer reads its variables as they are. A `script`'s `check` is the shell line whose exit 0 says the item is there, run with `~/.local/bin`, the folder a script lands its commands in, as its whole PATH, so it answers for the copy station installed and never for one ahead of it on yours (a mise shim); without one, its `provides` are looked up. The check's output is read for a version by the item's `version-read` `pattern` (`pattern: 'Terraform v(\d+\.\d+\.\d+)'` with `check: CHECKPOINT_DISABLE=1 terraform version`), unless the item reads its version by a command of its own (`version-read` `args`). Its `undo` is the shell line that takes the app back: `station apps remove` and `station apply --remove` run it, and without one station cannot remove the app (`remove it by hand`). Station runs both as it runs a `run` line, `bash -c <line>` from the home, with no value interpolated into it; a `url` script's `undo` runs with its `env`, and a `check` line still running at its 5 seconds is stopped with everything it started. A `run` line or a `url` installer is also its own update: `station apps update <app>` runs it again.
 
@@ -298,7 +299,7 @@ methods:
 - os: any
   git-aliases: { file: ~/.gitconfig, aliases: [{ name: st, command: status }] }
 - os: any
-  zsh-functions: { from: zsh/docker-shortcuts.zsh, functions: [dclean] }
+  shell: [{ id: station:docker-shortcuts, zsh: 'dclean() { docker rm -vf $(docker ps -aq); }' }]
 - os: any
   machine: [workspace, server]
   agent-hooks: { apps: [claude, codex] }
@@ -306,6 +307,20 @@ methods:
   machine: computer
   mux-machines: {}
 ```
+
+### The shell key
+
+`shell` is a list of `{ id, zsh }`, one per block of `~/.zshrc` a method writes: on an app's method, beside its manager key, the blocks that go with the app; on a setting's method, alone, the setting's effect. The `id` is stable for life and names the block's two marker lines: `station:<item>`, or `station:<item>/<sub>` when an item writes several, never another item's name, written once in a method. The `zsh` is plain text: shell variables stay the shell's (`$HOME`, `$HOMEBREW_PREFIX`, resolved at each shell start), and station's variables between double braces are filled once, when apply writes the block, by plain substitution of a fixed set of names and nothing evaluated.
+
+| Variable              | Is                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `{{ brew.prefix }}`   | Homebrew's prefix on this machine: `/opt/homebrew` on Apple silicon, `/usr/local` on Intel |
+| `{{ home }}`          | the machine's home folder                                                                  |
+| `{{ os }}`            | the machine's system: `macos`, `ubuntu` or `debian`                                        |
+| `{{ arch }}`          | the machine's architecture: `arm64` or `amd64`                                             |
+| `{{ option.<name> }}` | an app's option, as the Machinefile gives it, else its default; never a secret option      |
+
+A name outside this set, an option the item does not declare or a secret one, a marker line inside `zsh` and a lone `{{` are refused at decode; an option with no value, neither given nor defaulted, is refused when the plan is made, never written as an empty string. A setting's block takes the machine's variables alone, since its values arrive at apply.
 
 ## What is read today
 

@@ -40,12 +40,12 @@ type Effect interface{ Kind() EffectKind }
 type EffectKind string
 
 const (
-	EffectTouch        EffectKind = "touch"
-	EffectDotfile      EffectKind = "dotfile"
-	EffectGitAliases   EffectKind = "git-aliases"
-	EffectZshFunctions EffectKind = "zsh-functions"
-	EffectAgentHooks   EffectKind = "agent-hooks"
-	EffectMuxMachines  EffectKind = "mux-machines"
+	EffectTouch       EffectKind = "touch"
+	EffectDotfile     EffectKind = "dotfile"
+	EffectGitAliases  EffectKind = "git-aliases"
+	EffectShell       EffectKind = "shell"
+	EffectAgentHooks  EffectKind = "agent-hooks"
+	EffectMuxMachines EffectKind = "mux-machines"
 	// value: no Applier writes it yet: applied, it is refused as unhandled.
 	EffectMacOSDefaults EffectKind = "macos-defaults"
 )
@@ -72,12 +72,6 @@ type GitAliases struct {
 type GitAlias struct {
 	Name    string `yaml:"name"`
 	Command string `yaml:"command"`
-}
-
-type ZshFunctions struct {
-	// value: the embedded script of the functions station's zsh block defines.
-	From      string   `yaml:"from"`
-	Functions []string `yaml:"functions"`
 }
 
 type MuxMachines struct{}
@@ -111,7 +105,6 @@ const (
 func (Touch) Kind() EffectKind         { return EffectTouch }
 func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
 func (GitAliases) Kind() EffectKind    { return EffectGitAliases }
-func (ZshFunctions) Kind() EffectKind  { return EffectZshFunctions }
 func (AgentHooks) Kind() EffectKind    { return EffectAgentHooks }
 func (MuxMachines) Kind() EffectKind   { return EffectMuxMachines }
 func (MacOSDefaults) Kind() EffectKind { return EffectMacOSDefaults }

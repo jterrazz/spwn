@@ -114,7 +114,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	appliers := []settingscontract.Applier{
 		touch.New(m.sys.FS, m.sys.Env.Home()),
 		gitaliases.New(m.sys.FS, m.sys.Env.Home()),
-		zshblock.New(m.sys.FS, zshblock.Options{Dir: m.zshDir(), Ours: files}),
+		zshblock.New(m.sys.FS, zshblock.Options{File: m.zshrcPath(), Home: m.sys.Env.Home(), OS: machineOf(m.profile).System.OS, Arch: machineOf(m.profile).System.Arch}),
 		dotfile.New(m.sys.FS, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files}),
 		neversleeps.New(m.stores.neverSleeps()),
 		agenthooks.New(m.has,

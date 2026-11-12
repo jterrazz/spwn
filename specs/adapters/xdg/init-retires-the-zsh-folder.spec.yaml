@@ -1,0 +1,43 @@
+description: 'init retires the zsh folder: its own file goes, yours and its folder stay'
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .config/station/zsh; printf ''old()\n'' > .config/station/zsh/docker-shortcuts.zsh; printf ''mine()\n'' > .config/station/zsh/mine.zsh'
+      exit: 0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	zsh	retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: '--version >/dev/null; /bin/ls .config/station/zsh'
+      exit: 0
+      stdout: |
+          mine.zsh
+    - command: '--version >/dev/null; /bin/rm .config/station/zsh/mine.zsh'
+      exit: 0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	zsh	retired ~/.config/station/zsh: shell blocks live in ~/.zshrc now
+          ●	relocate	nothing to do
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: '--version >/dev/null; /bin/ls .config/station | /usr/bin/grep -c zsh'
+      exit: 1
+      stdout: |
+          0
+    - command: 'init --name m </dev/null'
+      exit: 0
+      stdout: |
+          ●	name	m
+          ●	zshrc
+          ●	layout	nothing to retire
+          ●	relocate	nothing to do
+          # Machinefile
+          	none bound by init: init --machinefile binds one

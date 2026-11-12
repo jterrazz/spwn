@@ -530,6 +530,12 @@
         "script": {
           "$ref": "#/$defs/ScriptMethod"
         },
+        "shell": {
+          "items": {
+            "$ref": "#/$defs/ShellBlock"
+          },
+          "type": "array"
+        },
         "skill": {
           "$ref": "#/$defs/SkillMethod"
         },
@@ -544,9 +550,6 @@
         },
         "version": {
           "type": "string"
-        },
-        "zsh-functions": {
-          "$ref": "#/$defs/ZshFunctions"
         }
       },
       "type": "object"
@@ -808,6 +811,22 @@
       },
       "type": "object"
     },
+    "ShellBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "zsh": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "zsh"
+      ],
+      "type": "object"
+    },
     "SkillMethod": {
       "additionalProperties": false,
       "properties": {
@@ -937,25 +956,6 @@
           "type": "string"
         }
       },
-      "type": "object"
-    },
-    "ZshFunctions": {
-      "additionalProperties": false,
-      "properties": {
-        "from": {
-          "type": "string"
-        },
-        "functions": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "from",
-        "functions"
-      ],
       "type": "object"
     }
   },

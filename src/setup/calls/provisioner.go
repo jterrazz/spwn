@@ -26,6 +26,7 @@ const (
 	stepZshrc  = "zshrc"
 	stepLayout = "layout"
 	stepKind   = "kind"
+	stepZsh    = "zsh"
 
 	stepPreferences = "preferences"
 )
@@ -174,6 +175,9 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 	}
 	zshrc, zshrcErr := s.zshrc()
 	layout, layoutErr := s.layout(ctx, migrated)
+	if layoutErr == nil {
+		layout = append(layout, s.retireZshDir()...)
+	}
 	relocate, relocateErr := s.relocate(ctx, r.Interactive)
 	steps := append(append([]setup.Step{name, zshrc}, layout...), relocate)
 	return setup.Report{Steps: append(moved, steps...)}, errors.Join(nameErr, zshrcErr, layoutErr, relocateErr)

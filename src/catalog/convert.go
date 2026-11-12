@@ -125,8 +125,8 @@ func (m MethodSpec) effect() Effect {
 		return Dotfiles{Files: m.File.Copy, Reload: m.File.Reload}
 	case m.GitAliases != nil:
 		return *m.GitAliases
-	case m.ZshFunctions != nil:
-		return *m.ZshFunctions
+	case len(m.Shell) > 0:
+		return ShellBlocks{Blocks: m.Shell}
 	case m.AgentHooks != nil:
 		return *m.AgentHooks
 	case m.MuxMachines != nil:

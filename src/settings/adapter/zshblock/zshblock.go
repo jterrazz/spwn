@@ -1,13 +1,11 @@
 package zshblock
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"io/fs"
-	"path"
 	"strings"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -15,21 +13,19 @@ import (
 	"github.com/jterrazz/studio-station/src/settings/contract"
 )
 
-const where = "zsh block"
-
 type Files interface {
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
-	MkdirAll(path string, perm fs.FileMode) error
-	Remove(path string) error
+	Stat(path string) (fs.FileInfo, error)
 }
 
 type Options struct {
-	// value: the folder of the scripts station's zsh block evaluates, one
-	// per setting.
-	Dir string
-	// value: station's own copies of the scripts, the embedded dotfiles.
-	Ours fs.FS
+	// value: the owner's ~/.zshrc, and the machine the blocks' variables
+	// name.
+	File string
+	Home string
+	OS   catalog.OS
+	Arch catalog.Arch
 }
 
 type Applier struct {
@@ -41,85 +37,139 @@ var _ contract.Applier = (*Applier)(nil)
 
 func New(files Files, o Options) *Applier { return &Applier{files: files, o: o} }
 
-func (*Applier) Kind() catalog.EffectKind { return catalog.EffectZshFunctions }
+func (*Applier) Kind() catalog.EffectKind { return catalog.EffectShell }
 
-func Script(dir, setting string) string {
-	// value: the script a setting's functions live in, which `station shell
-	// zsh` appends to the block it prints.
-	return path.Join(dir, setting+".zsh")
+type rendered struct{ id, body string }
+
+func (a *Applier) of(it catalog.Setting) ([]rendered, error) {
+	s, ok := it.Effect.(catalog.ShellBlocks)
+	if !ok || len(s.Blocks) == 0 {
+		return nil, errors.New(it.Name + " is not shell blocks station writes")
+	}
+	var out []rendered
+	for _, b := range s.Blocks {
+		body, err := catalog.Item{}.RenderShell(b, catalog.ShellVars{Home: a.o.Home, OS: a.o.OS, Arch: a.o.Arch})
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, rendered{b.ID, body})
+	}
+	return out, nil
 }
 
-func (a *Applier) of(it catalog.Setting) (want []byte, file string, err error) {
-	z, ok := it.Effect.(catalog.ZshFunctions)
-	if !ok {
-		return nil, "", errors.New(it.Name + " is not shell functions station defines")
+func (a *Applier) read() (string, error) {
+	data, err := a.files.ReadFile(a.o.File)
+	if errors.Is(err, fs.ErrNotExist) {
+		return "", nil
 	}
-	want, err = fs.ReadFile(a.o.Ours, z.From)
-	return want, Script(a.o.Dir, it.Name), err
+	return string(data), err
+}
+
+func (a *Applier) write(text string) error {
+	mode := fs.FileMode(0o644)
+	if info, err := a.files.Stat(a.o.File); err == nil {
+		mode = info.Mode().Perm()
+	}
+	return a.files.WriteFile(a.o.File, []byte(text), mode)
+}
+
+func name(id string) string { return "~/.zshrc [" + id + "]" }
+
+func where(blocks []rendered) string {
+	ids := make([]string, len(blocks))
+	for i, b := range blocks {
+		ids[i] = b.id
+	}
+	return "~/.zshrc [" + strings.Join(ids, ", ") + "]"
 }
 
 func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
-	want, file, err := a.of(it)
+	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Observation{}, err
 	}
-	have, err := a.files.ReadFile(file)
-	o := settings.Observation{Where: where}
-	switch {
-	case errors.Is(err, fs.ErrNotExist):
-		o.State, o.Diff = catalog.StateAbsent, settings.UnifiedDiff(string(want), "", "station's "+where, where)
-		return o, nil
-	case err != nil:
+	text, err := a.read()
+	if err != nil {
 		return settings.Observation{}, err
 	}
-	sum := sha256.Sum256(have)
-	o.Digest = "sha256:" + hex.EncodeToString(sum[:])
-	if bytes.Equal(want, have) {
-		o.State, o.Detail = catalog.StateOK, where+": "+strings.Join(functions(it), ", ")
-		return o, nil
+	o := settings.Observation{Where: where(blocks)}
+	var found, same int
+	var diffs []string
+	sum := sha256.New()
+	for _, b := range blocks {
+		have, state := settings.PackageBlock(text, b.id)
+		if state != settings.BlockAbsent {
+			found++
+			sum.Write([]byte(b.id + "\n" + have))
+		}
+		if state == settings.BlockHere && have == b.body {
+			same++
+			continue
+		}
+		diffs = append(diffs, settings.UnifiedDiff(b.body, have, "station's "+name(b.id), name(b.id)))
 	}
-	o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
-	o.Diff = settings.UnifiedDiff(string(want), string(have), "station's "+where, where)
+	o.Diff = strings.Join(diffs, "")
+	switch {
+	case found == 0:
+		o.State = catalog.StateAbsent
+	case same == len(blocks):
+		o.State, o.Detail = catalog.StateOK, o.Where
+	default:
+		o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
+	}
+	if found > 0 {
+		o.Digest = "sha256:" + hex.EncodeToString(sum.Sum(nil))
+	}
 	return o, nil
 }
 
-func functions(it catalog.Setting) []string {
-	z, _ := it.Effect.(catalog.ZshFunctions)
-	return z.Functions
-}
-
 func (a *Applier) Apply(_ context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {
-	want, file, err := a.of(it)
+	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
-	if err := a.files.MkdirAll(path.Dir(file), 0o750); err != nil {
+	text, err := a.read()
+	if err != nil {
 		return settings.Change{}, err
 	}
-	if err := a.files.WriteFile(file, want, 0o600); err != nil {
+	for _, b := range blocks {
+		text, _ = settings.UpsertPackageBlock(text, b.id, b.body)
+	}
+	if err := a.write(text); err != nil {
 		return settings.Change{}, err
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: where, State: catalog.StateOK, Detail: strings.Join(functions(it), ", ") + " added"}}}, nil
+	return settings.Change{Steps: []settings.ChangeStep{{Label: where(blocks), State: catalog.StateOK, Detail: "written"}}}, nil
 }
 
 func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, error) {
-	// invariant: the functions leave the block only while they are still
-	// exactly station's: off never destroys a change of the owner's.
-	want, file, err := a.of(it)
+	// invariant: a block leaves ~/.zshrc only while it is still exactly
+	// station's: off never destroys a change of the owner's.
+	blocks, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
-	have, err := a.files.ReadFile(file)
-	switch {
-	case errors.Is(err, fs.ErrNotExist):
+	text, err := a.read()
+	if err != nil {
+		return settings.Change{}, err
+	}
+	var steps []settings.ChangeStep
+	for _, b := range blocks {
+		have, state := settings.PackageBlock(text, b.id)
+		switch {
+		case state == settings.BlockAbsent:
+			continue
+		case state != settings.BlockHere || have != b.body:
+			steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "yours, kept"})
+			continue
+		}
+		text, _ = settings.RemovePackageBlock(text, b.id)
+		steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "removed"})
+	}
+	if len(steps) == 0 {
 		return settings.Change{}, nil
-	case err != nil:
-		return settings.Change{}, err
-	case !bytes.Equal(want, have):
-		return settings.Change{Steps: []settings.ChangeStep{{Label: where, State: catalog.StateOK, Detail: "yours, kept"}}}, nil
 	}
-	if err := a.files.Remove(file); err != nil {
+	if err := a.write(text); err != nil {
 		return settings.Change{}, err
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: where, State: catalog.StateOK, Detail: strings.Join(functions(it), ", ") + " removed"}}}, nil
+	return settings.Change{Steps: steps}, nil
 }

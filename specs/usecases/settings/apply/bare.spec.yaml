@@ -4,7 +4,7 @@ runs:
     - command: 'settings apply'
       exit: 0
       stdout: |
-          ●	docker-shortcuts	zsh block: dclean, dclean-images, dreset added
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: written
           ●	git-shortcuts	~/.gitconfig [alias]: written
           ●	hushlogin	~/.hushlogin: created
           ●	dns	dns: applied

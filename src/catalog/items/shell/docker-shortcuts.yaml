@@ -5,10 +5,48 @@ description: 'Docker shortcuts: dclean, dclean-images, dreset, each asks first'
 reversible: true
 methods:
     - os: any
-      zsh-functions:
-          from: zsh/docker-shortcuts.zsh
-          functions: [dclean, dclean-images, dreset]
+      shell:
+          - id: station:docker-shortcuts
+            zsh: |
+                _station_docker_ask() {
+                    printf '%s? [y/N] ' "$1"
+                    read -r _station_docker_answer
+                    case "$_station_docker_answer" in
+                        y | Y | yes) return 0 ;;
+                    esac
+                    printf 'kept: you said no\n'
+                    return 1
+                }
+
+                # invariant: the ids are split into words by the command substitution, which zsh and
+                # bash both split, where zsh would keep a variable whole.
+                _station_docker_remove() {
+                    _station_docker_ids=$(docker "$1" "$2") || return
+                    set -- "$3" "$4" "$5" $(printf '%s\n' "$_station_docker_ids")
+                    _station_docker_what=$1 _station_docker_rm=$2 _station_docker_flag=$3
+                    shift 3
+                    if [ "$#" -eq 0 ]; then
+                        printf 'no %s to remove\n' "$_station_docker_what"
+                        return 0
+                    fi
+                    docker "$_station_docker_rm" "$_station_docker_flag" "$@" >/dev/null || return
+                    printf '%s %s removed\n' "$#" "$_station_docker_what"
+                }
+
+                dclean() {
+                    _station_docker_ask 'Remove every container' && _station_docker_remove ps -aq containers rm -vf
+                }
+
+                dclean-images() {
+                    _station_docker_ask 'Remove every image' && _station_docker_remove images -aq images rmi -f
+                }
+
+                dreset() {
+                    _station_docker_ask 'Remove every container and image' &&
+                        _station_docker_remove ps -aq containers rm -vf &&
+                        _station_docker_remove images -aq images rmi -f
+                }
 writes:
-    - path: '{config}/station/zsh/docker-shortcuts.zsh'
+    - path: ~/.zshrc
       level: settings
-      note: the functions station's zsh block defines
+      note: the block station:docker-shortcuts, between its two marker lines

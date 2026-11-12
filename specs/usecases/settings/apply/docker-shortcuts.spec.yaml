@@ -1,22 +1,20 @@
-description: 'docker-shortcuts puts dclean, dclean-images and dreset in the zsh block; each asks before it removes'
+description: docker-shortcuts is one block of ~/.zshrc, each function asks first, off takes it
 fixture: ../../__fixtures__/docker/
 env: two-macs
 runs:
-    - command: 'shell zsh | /usr/bin/grep -c ''^dclean()'''
-      exit: 1
-      stdout: |
-          0
+    - command: '--version >/dev/null; printf ''export EDITOR=vim\n'' > .zshrc'
+      exit: 0
     - command: 'settings apply docker-shortcuts'
       exit: 0
       stdout: |
-          ●	docker-shortcuts	zsh block: dclean, dclean-images, dreset added
-    - command: 'shell zsh | /usr/bin/grep -E ''^(dclean|dclean-images|dreset)\(\)'''
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: written
+    - command: '--version >/dev/null; /usr/bin/grep -E ''^(dclean|dclean-images|dreset)\(\)'' .zshrc'
       exit: 0
       stdout: |
           dclean() {
           dclean-images() {
           dreset() {
-    - command: 'shell zsh | /usr/bin/sed -n ''/^_station_docker_ask()/,$p'' > block.zsh; echo n | /bin/bash -c ''. ./block.zsh; dclean'''
+    - command: '--version >/dev/null; /usr/bin/sed -n ''/^_station_docker_ask()/,/^# <<< station:docker-shortcuts/p'' .zshrc | /usr/bin/sed ''$d'' > block.zsh; echo n | /bin/bash -c ''. ./block.zsh; dclean'''
       exit: 1
       stdout: |
           Remove every container? [y/N] kept: you said no
@@ -34,4 +32,12 @@ runs:
     - command: 'settings docker-shortcuts | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
-          ●	docker-shortcuts	applied · zsh block
+          ●	docker-shortcuts	applied · ~/.zshrc [station:docker-shortcuts]
+    - command: 'settings off docker-shortcuts --yes'
+      exit: 0
+      stdout: |
+          ●	docker-shortcuts	~/.zshrc [station:docker-shortcuts]: removed
+    - command: '--version >/dev/null; /bin/cat .zshrc'
+      exit: 0
+      stdout: |
+          export EDITOR=vim

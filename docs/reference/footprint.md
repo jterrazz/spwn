@@ -39,7 +39,7 @@ Paths under `~/.config`, `~/.local/share`, `~/.local/state` and `~/.cache` follo
 | `~/.local/state/station/guest.json`                        | your data     | vm; the Mac that runs it                                                                                                                                            |
 | `~/.local/state/station/guest.sock`                        | your data     | vm; the guest's socket, live while it runs                                                                                                                          |
 | `~/.local/state/station/agents/*.json`                     | your data     | vm; its agents' journal, one file per session, 0600: each agent's name, task, state, steps and the scrubbed words of its last message, folded from its hooks        |
-| `~/.zshrc`                                                 | never touched | the one managed block                                                                                                                                               |
+| `~/.zshrc`                                                 | never touched | station's main block, and one block per package that declares shell                                                                                                 |
 | `~/.ssh/config`                                            | never touched | one block per machine                                                                                                                                               |
 | `~/.local/state/station/vms/*.json`                        | never touched | VM records: do not delete                                                                                                                                           |
 | `~/.local/state/station/images/key*`                       | never touched | the only way into a fresh VM: do not delete                                                                                                                         |
@@ -638,7 +638,7 @@ Erase: none (nothing to erase: its pages are station's, its choices are kept).
 
 | Setting                 | Path                                                                            | Group         | Note                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| docker-shortcuts        | `~/.config/station/zsh/docker-shortcuts.zsh`                                    | never touched | the functions station's zsh block defines                                |
+| docker-shortcuts        | `~/.zshrc`                                                                      | never touched | the block station:docker-shortcuts, between its two marker lines         |
 | git-shortcuts           | `~/.gitconfig`                                                                  | never touched | station's `[alias]` block                                                |
 | ghostty-dotfiles        | `~/.config/ghostty/config`                                                      | never touched | the embedded `ghostty/config`                                            |
 | ghostty-dotfiles        | `~/.config/ghostty/themes/catppuccin-espresso-blur`                             | never touched | the embedded `ghostty/themes/catppuccin-espresso-blur`                   |

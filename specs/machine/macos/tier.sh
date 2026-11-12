@@ -177,7 +177,7 @@ plain=$(in_vm "zsh -lic 'zsh -c \"command -v station mise; go env GOPATH\"'" 2> 
 step "IDE: go env" "$mise_path; d=\$(mise where go)/bin; env -i HOME=\$HOME PATH=\$d go env GOPATH"
 step "IDE: gopls version" "$mise_path; d=\$(mise where go)/bin; env -i HOME=\$HOME PATH=\$HOME/.local/share/go/bin:\$d gopls version"
 step "IDE: npm config get cache" "$mise_path; d=\$(mise where node)/bin; env -i HOME=\$HOME PATH=\$d:/usr/bin:/bin npm config get cache"
-if in_vm "grep -n -e '/private/tmp' -e '/Developer/' -e '.artifacts' ~/.zshrc ~/.config/station/zsh/* 2>/dev/null"; then
+if in_vm "grep -n -e '/private/tmp' -e '/Developer/' -e '.artifacts' ~/.zshrc 2>/dev/null"; then
   fail "the shell block names a clone path"
 fi
 case_pass
