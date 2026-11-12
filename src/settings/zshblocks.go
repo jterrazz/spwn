@@ -87,8 +87,10 @@ func PackageBlockIDs(zshrc string) []string {
 func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 	// invariant: an upsert touches the block's own lines alone: a block there is
 	// replaced in place; a new one goes right after the last station block, or at
-	// the end of the file when there is none, so the owner's lines keep their
-	// bytes and their places, and a removal gives the file back as it was.
+	// the end of the file when there is none, before its final newline when it
+	// has one, so the owner's lines keep their bytes and their places, and the
+	// block's removal gives the file back byte for byte, a last line with no
+	// newline included.
 	lines := strings.Split(zshrc, "\n")
 	start, end := BlockMarkers(id)
 	block := append(append([]string{start}, bodyLines(body)...), end)
@@ -102,10 +104,10 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 			return strings.Join(out, "\n"), true
 		}
 	}
-	if lines[len(lines)-1] != "" {
-		lines = append(lines, "")
+	pos, last := len(lines), -1
+	if lines[len(lines)-1] == "" {
+		pos--
 	}
-	pos, last := len(lines)-1, -1
 	if _, end, ok := mainSpan(lines); ok {
 		last = end
 	}
@@ -120,7 +122,8 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 }
 
 func RemovePackageBlock(zshrc, id string) (updated string, changed bool) {
-	// value: zshrc without the package block of that id.
+	// value: zshrc without the package block of that id, its marker lines
+	// and what is between them, every other byte as it was.
 	lines := strings.Split(zshrc, "\n")
 	for _, s := range spansOf(lines) {
 		if s.id == id && s.end >= 0 {

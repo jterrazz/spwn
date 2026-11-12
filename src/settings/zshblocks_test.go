@@ -30,15 +30,11 @@ func TestABlockIsReplacedInPlaceBetweenTheOwnersLines(t *testing.T) {
 }
 
 func TestRemovingABlockGivesTheFileBackAsItWas(t *testing.T) {
-	for _, before := range []string{"", owner, "no newline at the end", owner + "\n# >>> station >>>\nx\n# <<< station <<<\n"} {
+	for _, before := range []string{"", owner, "no newline at the end", "\n\n", owner + "\n# >>> station >>>\nx\n# <<< station <<<\n", "# >>> station >>>\nx\n# <<< station <<<"} {
 		written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
 		back, changed := RemovePackageBlock(written, "station:a")
-		want := before
-		if before != "" && before[len(before)-1] != '\n' {
-			want += "\n"
-		}
-		if !changed || back != want {
-			t.Errorf("removed from %q leaves %q, %v; want %q", written, back, changed, want)
+		if !changed || back != before {
+			t.Errorf("removed from %q leaves %q, %v; want %q", written, back, changed, before)
 		}
 	}
 	if same, changed := RemovePackageBlock(owner, "station:a"); changed || same != owner {
