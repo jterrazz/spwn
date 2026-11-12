@@ -35,6 +35,9 @@ func TestAReversedDiffIsTheDiffDrawnTheOtherWay(t *testing.T) {
 		{"a\nb\n", ""},
 		{"", "a\nb\n"},
 		{"a\nb\nc\n", "a\nx\ny\nc\nz\n"},
+		{"-- x\n", "++ y\n"},
+		{"a\n-- x\nb\n", "a\n++ y\nb\n"},
+		{"@@ -1 +1 @@\n", "--- one\n+++ two\n"},
 	} {
 		got := settings.ReversedDiff(settings.UnifiedDiff(c.a, c.b, "one", "two"))
 		if want := settings.UnifiedDiff(c.b, c.a, "two", "one"); got != want {

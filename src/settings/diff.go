@@ -117,7 +117,8 @@ func ReversedDiff(diff string) string {
 	// value: a unified diff drawn the other way, from its second text to its
 	// first: the two names swapped, each hunk's ranges swapped, and in each
 	// run of changed lines the first text's lines, now "+", after the
-	// second's, now "-".
+	// second's, now "-". A hunk's lines are counted by its ranges, so a line
+	// whose text opens like a header or a hunk is read as the line it is.
 	var out strings.Builder
 	var minus, plus []string
 	flush := func() {
@@ -130,10 +131,18 @@ func ReversedDiff(diff string) string {
 		minus, plus = nil, nil
 	}
 	rows := strings.Split(strings.TrimSuffix(diff, "\n"), "\n")
-	for i := 0; i < len(rows); i++ {
+	left, right := 0, 0
+	for i := 0; i < len(rows) && diff != ""; i++ {
 		row := rows[i]
 		switch {
-		case diff == "":
+		case left+right > 0 && strings.HasPrefix(row, "-"):
+			minus, left = append(minus, row[1:]), left-1
+		case left+right > 0 && strings.HasPrefix(row, "+"):
+			plus, right = append(plus, row[1:]), right-1
+		case left+right > 0:
+			flush()
+			out.WriteString(row + "\n")
+			left, right = left-1, right-1
 		case strings.HasPrefix(row, "--- ") && i+1 < len(rows) && strings.HasPrefix(rows[i+1], "+++ "):
 			flush()
 			out.WriteString("--- " + strings.TrimPrefix(rows[i+1], "+++ ") + "\n+++ " + strings.TrimPrefix(row, "--- ") + "\n")
@@ -141,13 +150,10 @@ func ReversedDiff(diff string) string {
 		case strings.HasPrefix(row, "@@ "):
 			flush()
 			if f := strings.Fields(row); len(f) == 4 {
+				left, right = hunkLines(f[1]), hunkLines(f[2])
 				row = "@@ -" + strings.TrimPrefix(f[2], "+") + " +" + strings.TrimPrefix(f[1], "-") + " @@"
 			}
 			out.WriteString(row + "\n")
-		case strings.HasPrefix(row, "-"):
-			minus = append(minus, row[1:])
-		case strings.HasPrefix(row, "+"):
-			plus = append(plus, row[1:])
 		default:
 			flush()
 			out.WriteString(row + "\n")
@@ -155,4 +161,17 @@ func ReversedDiff(diff string) string {
 	}
 	flush()
 	return out.String()
+}
+
+// value: the number of lines a hunk's range counts, "-3,4" or "+5" (one).
+func hunkLines(r string) int {
+	_, n, ok := strings.Cut(r[1:], ",")
+	if !ok {
+		return 1
+	}
+	count, err := strconv.Atoi(n)
+	if err != nil {
+		return 0
+	}
+	return count
 }
