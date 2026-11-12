@@ -3,7 +3,7 @@ fixture:
     - ../../__fixtures__/stubs/
     - ./__fixtures__/outdated/
 env:
-    - STATION_MACHINE_KIND=macos
+    - STATION_MACHINE_KIND=mac
 runs:
     - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "xcode") | "\(.name) \(.state) \(.installed) \(.newest // "-") \(.detail)"'''
       exit: 0
@@ -12,7 +12,7 @@ runs:
     - command: 'apps update'
       exit: 0
       stdout: |
-          ●	every app is up to date on gate2
+          ●	every app is up to date on This Mac
     - command: 'apps update xcode'
       exit: 0
       stdout: |
