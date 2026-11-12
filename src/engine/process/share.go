@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"maps"
 	"slices"
 	"sort"
 	"strconv"
@@ -72,6 +73,23 @@ func asOp(err error) error {
 		return perVM.Refusal()
 	}
 	return fault("internal", err.Error(), "station ports")
+}
+
+// invariant: the shares act in the order of their reservations, the ones with
+// none after them by VM and port, never in a map's: the entries the tailnet
+// is given are the same from one run to the next. The caller holds d.mu.
+func (d *Engine) svcsInOrder() []*svc {
+	out := slices.Collect(maps.Values(d.svcs))
+	at := func(s *svc) int {
+		if i := d.reservationIndex(s.vm, s.port); i >= 0 {
+			return i
+		}
+		return len(d.reservations)
+	}
+	slices.SortFunc(out, func(a, b *svc) int {
+		return cmp.Or(cmp.Compare(at(a), at(b)), cmp.Compare(a.vm, b.vm), cmp.Compare(a.port, b.port))
+	})
+	return out
 }
 
 func (d *Engine) svcOf(vm string, port int) *svc {
@@ -151,7 +169,7 @@ func (d *Engine) unlisten(vm string, port int) {
 func (d *Engine) unlistenExcept(vm string, seen map[int]bool) {
 	d.mu.Lock()
 	var gone []int
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		if s.vm == vm && !seen[s.port] {
 			gone = append(gone, s.port)
 		}
@@ -182,7 +200,7 @@ func (d *Engine) tickShares(ctx context.Context) {
 	for _, l := range slices.Clone(d.reservations) {
 		d.svcOf(l.VM, l.GuestPort)
 	}
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		var acts []ports.Action
 		s.st, acts = ports.Next(s.st, ports.EvTick, now)
 		d.apply(ctx, s, acts)
@@ -201,7 +219,7 @@ func (d *Engine) retryLocked(ctx context.Context) {
 		return
 	}
 	d.retry = false
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		i := d.reservationIndex(s.vm, s.port)
 		switch {
 		case i >= 0 && s.st.Phase == ports.PhaseShared && !s.served && len(s.listeners) > 0:
@@ -326,7 +344,7 @@ func (d *Engine) serveInModeLocked(ctx context.Context, mode string) {
 	// path mode frees 443 of every public share before a path takes it,
 	// and port mode frees it of every path before a public share does.
 	var private []*svc
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		i := d.reservationIndex(s.vm, s.port)
 		if i < 0 || !s.served || d.reservations[i].Audience() != catalog.AudiencePrivate {
 			continue
@@ -361,7 +379,7 @@ func (d *Engine) vmStopped(ctx context.Context, vm string) {
 	}
 	delete(d.heard, vm)
 	delete(d.quiet, vm)
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		if s.vm == vm && (s.st.Phase == ports.PhaseNotAllowed || s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0) {
 			delete(d.svcs, key(s.vm, s.port))
 			continue
@@ -382,7 +400,7 @@ func (d *Engine) releaseVM(ctx context.Context, vm string) {
 			d.dropLocked(ctx, l.VM, l.GuestPort)
 		}
 	}
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		if s.vm == vm {
 			d.unpublish(ctx, s)
 			delete(d.svcs, key(s.vm, s.port))
@@ -566,7 +584,7 @@ func (d *Engine) expose(ctx context.Context, s *svc, reservation ports.Reservati
 func (d *Engine) serveAll(ctx context.Context) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		if i := d.reservationIndex(s.vm, s.port); i >= 0 && s.st.Phase == ports.PhaseShared && len(s.listeners) > 0 {
 			d.expose(ctx, s, d.reservations[i])
 		}
@@ -577,7 +595,7 @@ func (d *Engine) unserveAll() {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.reconciled = false
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		s.served, s.serveNote = false, ""
 	}
 }
@@ -735,7 +753,7 @@ func (d *Engine) macPorts(vm string) ports.MacPorts {
 	}
 	refused := map[string]*ports.NotShared{}
 	firstPort := map[string]int{}
-	for _, s := range d.svcs {
+	for _, s := range d.svcsInOrder() {
 		if s.st.Phase == ports.PhaseRefused && d.reservationIndex(s.vm, s.port) < 0 && (vm == "" || s.vm == vm) {
 			n := refused[s.vm]
 			if n == nil {
