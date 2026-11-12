@@ -92,6 +92,7 @@ func TestWhatApplyInstallsIsWhatTheLockNamesOnEveryPath(t *testing.T) {
 	// names what the machine holds.
 	base := benchOf(t, catalog.Mac, "")
 	written := map[catalog.MachineKind]map[string]string{}
+	pinned := map[catalog.Method]int{}
 	for kind := range systems() {
 		written[kind] = map[string]string{}
 		for _, a := range base.cat.Apps {
@@ -118,11 +119,19 @@ func TestWhatApplyInstallsIsWhatTheLockNamesOnEveryPath(t *testing.T) {
 				if d.Method != locked.Method {
 					t.Errorf("%s locked: %s locked by %s, installed by %s", about, d.Line.Step.Item, locked.Method, d.Method)
 				}
-				if d.Line.Step.Spec.Pins() && d.Version != locked.Version {
-					t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Item, locked.Version, d.Version)
+				if d.Line.Step.Spec.Pins() {
+					pinned[catalog.Method(d.Line.Step.Method)]++
+					if d.Version != locked.Version {
+						t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Item, locked.Version, d.Version)
+					}
 				}
 			}
 			holdsWhatTheLockNames(t, about+" locked", again, out.Plan, again.lock(t))
+		}
+	}
+	for _, m := range []catalog.Method{catalog.MethodApt, catalog.MethodGitHubRelease} {
+		if pinned[m] == 0 {
+			t.Errorf("no app of the catalog was installed at its locked version by %s", m)
 		}
 	}
 	for kind := range systems() {
