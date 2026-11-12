@@ -241,3 +241,31 @@ func TestJudgeAsksThePasswordOnlyWhereTheMachineAsksOne(t *testing.T) {
 		}
 	}
 }
+
+func TestUpgradeAsksOnlyWhatTheUpdateNeedsNotItsInstalls(t *testing.T) {
+	// invariant: an upgrade asks the item's needs only for an app it
+	// installs; an app it updates asks its method's needs alone.
+	cat := catalog.Catalog{Items: []catalog.Placed{
+		placed(catalog.Item{Name: "manager", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Item{Name: "gone", Needs: []catalog.Need{catalog.NeedSudo}}),
+		placed(catalog.Item{Name: "pkg"}),
+	}}
+	step := func(item string, spec catalog.MethodSpec, needs ...catalog.Need) machinefile.Step {
+		return machinefile.Step{Item: item, Kind: catalog.KindApp, Method: "script", Spec: spec, Phase: catalog.PhaseApply, Lock: "station.lock", Needs: needs}
+	}
+	r := machinefile.Resolved{Name: "laptop", Steps: []machinefile.Step{
+		step("manager", catalog.MethodSpec{}, catalog.NeedSudo),
+		step("gone", catalog.MethodSpec{}, catalog.NeedSudo),
+		step("pkg", catalog.MethodSpec{Needs: []catalog.Need{catalog.NeedLicense}}, catalog.NeedLicense),
+	}}
+	seen := map[string]machinefile.Seen{
+		"manager": {Condition: machinefile.Present, Method: "script"},
+		"gone":    {Condition: machinefile.Absent},
+		"pkg":     {Condition: machinefile.Present, Method: "script"},
+	}
+	p := machinefile.Judge(r, cat, seen, nil, false)
+	got := p.UpgradeNeeds()
+	if len(got) != 2 || got[0].Need != catalog.NeedSudo || !slices.Equal(got[0].Items, []string{"gone"}) || got[1].Need != catalog.NeedLicense || !slices.Equal(got[1].Items, []string{"pkg"}) {
+		t.Errorf("upgrade asks %+v; want sudo for gone (installed) and a license for pkg (its method's)", got)
+	}
+}

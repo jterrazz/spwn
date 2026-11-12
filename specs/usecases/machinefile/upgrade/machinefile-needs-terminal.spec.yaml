@@ -7,11 +7,10 @@ runs:
           item: station.catalog/v1
           kind: app
           name: rooted
-          description: a tool whose update asks root
+          description: a tool whose brew update asks root
           provides: [rooted]
-          needs: [sudo]
           methods:
-              - { os: macos, brew: rooted }
+              - { os: macos, brew: rooted, needs: [sudo] }
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].apps.brew.installed.rooted = "1.0.0" | .macs["jterrazz-macbook-pro"].apps.brew.behind.rooted = "1.1.0"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
@@ -25,7 +24,7 @@ runs:
     - command: 'upgrade'
       exit: 2
       stderr: |
-          Error: homebrew, rooted asks your password: upgrade asks it on a terminal, and this run has none
+          Error: rooted asks your password: upgrade asks it on a terminal, and this run has none
           Hint: run station upgrade on a terminal
     - command: 'apps | /usr/bin/grep "	rooted	"'
       exit: 0

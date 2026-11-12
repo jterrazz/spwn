@@ -571,12 +571,18 @@ func (p Plan) reaches(l Line) bool {
 
 func (p Plan) UpgradeNeeds() []Asked {
 	// value: what an upgrade asks of the owner: the needs of each app it
-	// updates, a version the Machinefile pins being kept as it is.
+	// updates, a version the Machinefile pins being kept as it is. An app
+	// updated asks only what its method asks; the item's needs are its
+	// install's, asked when the upgrade installs an app that is not there.
 	var lines []Line
 	for _, l := range p.Upgrades() {
-		if l.Step.Version == "" || l.Seen.Condition == Absent {
-			lines = append(lines, l)
+		if l.Step.Version != "" && l.Seen.Condition != Absent {
+			continue
 		}
+		if l.Seen.Condition != Absent {
+			l.Step.Needs = l.Step.Spec.Needs
+		}
+		lines = append(lines, l)
 	}
 	return p.asked(lines)
 }
