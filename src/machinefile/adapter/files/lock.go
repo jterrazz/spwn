@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io/fs"
 	"path/filepath"
+	"strconv"
+	"sync/atomic"
 
 	"github.com/jterrazz/studio-station/src/catalog"
 	"github.com/jterrazz/studio-station/src/machinefile"
@@ -45,17 +47,37 @@ func (l Locks) Read(_ context.Context, name string) (catalog.LockFile, bool, err
 	return lock, true, nil
 }
 
-func (l Locks) Write(_ context.Context, lock catalog.LockFile) error {
-	body, err := catalog.EncodeLock(lock)
-	if err != nil {
-		return err
-	}
+// value: a temp name no other write of this process shares; across
+// processes the file lock is what keeps one write at a time.
+var written atomic.Uint64
+
+func (l Locks) Write(ctx context.Context, was, now catalog.LockFile) error {
 	if err := l.fs.MkdirAll(l.dir, 0o700); err != nil {
 		return err
 	}
-	at := filepath.Join(l.dir, lock.Machinefile+catalog.LockSuffix)
-	if err := l.fs.WriteFile(at+".new", body, 0o600); err != nil {
+	if locker, ok := l.fs.(interface {
+		Lock(path string) (unlock func(), err error)
+	}); ok {
+		unlock, err := locker.Lock(filepath.Join(l.dir, ".writing"))
+		if err != nil {
+			return err
+		}
+		defer unlock()
+	}
+	switch current, ok, err := l.Read(ctx, now.Machinefile); {
+	case err != nil:
+		return err
+	case ok:
+		now = machinefile.Merged(current, was, now)
+	}
+	body, err := catalog.EncodeLock(now)
+	if err != nil {
 		return err
 	}
-	return l.fs.Rename(at+".new", at)
+	at := filepath.Join(l.dir, now.Machinefile+catalog.LockSuffix)
+	temp := at + "." + strconv.FormatUint(written.Add(1), 10) + ".new"
+	if err := l.fs.WriteFile(temp, body, 0o600); err != nil {
+		return err
+	}
+	return l.fs.Rename(temp, at)
 }

@@ -40,17 +40,25 @@ func (l Locks) Read(_ context.Context, name string) (catalog.LockFile, bool, err
 	return lock, true, nil
 }
 
-func (l Locks) Write(_ context.Context, lock catalog.LockFile) error {
-	body, err := catalog.EncodeLock(lock)
-	if err != nil {
-		return err
-	}
+func (l Locks) Write(_ context.Context, was, now catalog.LockFile) error {
 	l.w.Lock()
 	defer l.w.Unlock()
 	m := l.w.Mac(l.mac)
 	if m.Files == nil {
 		m.Files = map[string]string{}
 	}
-	m.Files["machinefiles/"+lock.Machinefile+catalog.LockSuffix] = string(body)
+	at := "machinefiles/" + now.Machinefile + catalog.LockSuffix
+	if body, ok := m.Files[at]; ok {
+		current, err := catalog.DecodeLock(l.Where(now.Machinefile), []byte(body))
+		if err != nil {
+			return &machinefile.RefusedFileError{Format: "machinefile", Err: err}
+		}
+		now = machinefile.Merged(current, was, now)
+	}
+	body, err := catalog.EncodeLock(now)
+	if err != nil {
+		return err
+	}
+	m.Files[at] = string(body)
 	return nil
 }

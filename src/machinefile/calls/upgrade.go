@@ -55,7 +55,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		now := machinefile.Relocked(plan, out.Done, source)
 		out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
 		if !out.Lock.Empty() {
-			if err := d.Locks.Write(context.WithoutCancel(ctx), now); err != nil {
+			if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
 				return out, err
 			}
 		}

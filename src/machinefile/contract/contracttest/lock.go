@@ -3,6 +3,8 @@ package contracttest
 import (
 	"context"
 	"reflect"
+	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/jterrazz/studio-station/src/catalog"
@@ -31,13 +33,52 @@ func Locks(t *testing.T, subject LocksSubject) {
 		laptop := lockOf("laptop", catalog.LockedApp{Name: "jq", Method: "pkg", Version: "1.7.1"})
 		laptop.Source = &catalog.LockSource{Name: "studio", Commit: "0123456789abcdef0123456789abcdef01234567"}
 		for _, w := range []catalog.LockFile{laptop, lockOf("server", catalog.LockedApp{Name: "node", Method: "rt", Version: "22.11.0"})} {
-			if err := l.Write(ctx, w); err != nil {
+			if err := l.Write(ctx, catalog.LockFile{}, w); err != nil {
 				t.Fatalf("Write: %v", err)
 			}
 		}
 		got, ok, err := l.Read(ctx, "laptop")
 		if err != nil || !ok || !reflect.DeepEqual(got, laptop) {
 			t.Errorf("Read = %+v, %v, %v; want %+v", got, ok, err, laptop)
+		}
+	})
+	t.Run("a write moves only what its run changed", func(t *testing.T) {
+		l, _ := subject(t)
+		jq := catalog.LockedApp{Name: "jq", Method: "pkg", Version: "1.7.1"}
+		node := catalog.LockedApp{Name: "node", Method: "rt", Version: "22.11.0"}
+		if err := l.Write(ctx, catalog.LockFile{}, lockOf("laptop", jq)); err != nil {
+			t.Fatal(err)
+		}
+		if err := l.Write(ctx, lockOf("laptop"), lockOf("laptop", node)); err != nil {
+			t.Fatal(err)
+		}
+		got, _, err := l.Read(ctx, "laptop")
+		if want := lockOf("laptop", jq, node); err != nil || !reflect.DeepEqual(got, want) {
+			t.Errorf("Read = %+v, %v; want %+v", got, err, want)
+		}
+	})
+	t.Run("writes at once lose none and fail none", func(t *testing.T) {
+		l, _ := subject(t)
+		const writers = 16
+		var wg sync.WaitGroup
+		errs := make(chan error, writers)
+		for i := range writers {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				errs <- l.Write(ctx, lockOf("laptop"), lockOf("laptop", catalog.LockedApp{Name: "app" + strconv.Itoa(i), Method: "pkg", Version: "1"}))
+			}()
+		}
+		wg.Wait()
+		close(errs)
+		for err := range errs {
+			if err != nil {
+				t.Errorf("Write: %v", err)
+			}
+		}
+		got, _, err := l.Read(ctx, "laptop")
+		if err != nil || len(got.Apps) != writers {
+			t.Errorf("Read = %d apps, %v; want %d", len(got.Apps), err, writers)
 		}
 	})
 	t.Run("a lock edited into another shape is refused at its file", func(t *testing.T) {

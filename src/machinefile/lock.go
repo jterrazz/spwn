@@ -117,6 +117,27 @@ func Diff(was, now catalog.LockFile) LockDiff {
 	return d
 }
 
+func Merged(current, was, now catalog.LockFile) catalog.LockFile {
+	// invariant: a run moves only what it changed: the lock on disk now
+	// takes each app and the source that differ between the lock the run
+	// planned from and the one it ends with, and keeps every other line as
+	// it stands, so two runs at once never lose each other's installs.
+	out := now
+	out.Apps = slices.Clone(current.Apps)
+	d := Diff(was, now)
+	for _, c := range d.Apps {
+		out.Apps = slices.DeleteFunc(out.Apps, func(a catalog.LockedApp) bool { return a.Name == c.App })
+		if c.Now != nil {
+			out.Apps = append(out.Apps, *c.Now)
+		}
+	}
+	slices.SortFunc(out.Apps, func(a, b catalog.LockedApp) int { return strings.Compare(a.Name, b.Name) })
+	if d.Source == nil {
+		out.Source = current.Source
+	}
+	return out
+}
+
 func commit(s *catalog.LockSource) string {
 	if s == nil {
 		return ""

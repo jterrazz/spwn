@@ -72,3 +72,19 @@ func TestALockedVersionMeetsTheOneAskedOnlyUnderIt(t *testing.T) {
 		}
 	}
 }
+
+func TestAWriteMovesOnlyWhatItsRunChanged(t *testing.T) {
+	// invariant: the lock on disk keeps every line the run did not change,
+	// takes the ones it added or moved, drops the ones it removed, and
+	// keeps the source unless the run moved it.
+	jq := catalog.LockedApp{Name: "jq", Method: "pkg", Version: "1.0"}
+	was := catalog.LockFile{Machinefile: "m", Apps: []catalog.LockedApp{jq, {Name: "gone", Method: "pkg"}, {Name: "up", Method: "pkg", Version: "1"}}}
+	now := catalog.LockFile{Machinefile: "m", Apps: []catalog.LockedApp{jq, {Name: "up", Method: "pkg", Version: "2"}, {Name: "mine", Method: "pkg", Version: "1"}}}
+	source := &catalog.LockSource{Name: "s", Commit: "0123456789abcdef0123456789abcdef01234567"}
+	current := catalog.LockFile{Machinefile: "m", Source: source, Apps: []catalog.LockedApp{jq, {Name: "gone", Method: "pkg"}, {Name: "up", Method: "pkg", Version: "1"}, {Name: "theirs", Method: "pkg", Version: "9"}}}
+	got := machinefile.Merged(current, was, now)
+	want := []catalog.LockedApp{jq, {Name: "mine", Method: "pkg", Version: "1"}, {Name: "theirs", Method: "pkg", Version: "9"}, {Name: "up", Method: "pkg", Version: "2"}}
+	if !reflect.DeepEqual(got.Apps, want) || got.Source != source {
+		t.Errorf("Merged = %+v, source %v\nwant %+v", got.Apps, got.Source, want)
+	}
+}

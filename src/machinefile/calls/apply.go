@@ -473,5 +473,5 @@ func relock(ctx context.Context, d Deps, p machinefile.Plan, done []machinefile.
 	if machinefile.Diff(p.Lock.LockFile, now).Empty() {
 		return nil
 	}
-	return d.Locks.Write(context.WithoutCancel(ctx), now)
+	return d.Locks.Write(context.WithoutCancel(ctx), p.Lock.LockFile, now)
 }

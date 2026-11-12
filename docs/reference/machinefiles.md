@@ -171,7 +171,7 @@ An apt app station recorded adding none of the packages of (`~/.local/share/stat
 
 ## The lock
 
-What a machine carries of its Machinefile is its lock, `~/.config/station/machinefiles/<name>.lock` beside it, in the schema `station.lock/v1`: the Machinefile's name, the shared source's commit it was read at, and each app with the method that holds it and the version there. No source reads it (only a `.yaml` file is read), it is read as strictly as a Machinefile, and one that does not decode is refused at its file: removing it is the way back, since the next `apply` writes it anew from what is there. It is station's file: written whole, its apps by name, so two locks differ only where something moved.
+What a machine carries of its Machinefile is its lock, `~/.config/station/machinefiles/<name>.lock` beside it, in the schema `station.lock/v1`: the Machinefile's name, the shared source's commit it was read at, and each app with the method that holds it and the version there. No source reads it (only a `.yaml` file is read), it is read as strictly as a Machinefile, and one that does not decode is refused at its file: removing it is the way back, since the next `apply` writes it anew from what is there. It is station's file: written whole, its apps by name, so two locks differ only where something moved, and written as a move under a file lock (`.writing`, beside it): a run applies what it changed to the lock as it stands, so two runs at once (two applies, an apply and an upgrade) keep each other's lines.
 
 ```yaml
 lock: station.lock/v1
