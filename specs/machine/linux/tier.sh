@@ -156,6 +156,25 @@ say "   ws1 answers ssh, its apps install through the engine, its home holds onl
 case_pass
 
 
+case_begin apps-every-linux-app AP-25 ADR-038 ADR-040
+# value: a workspace of its own, deleted after, so every app installs on a fresh home
+# and none leans on what ws1 already holds.
+st machines create apps1 >> "$log" 2>&1 || fail "machines create apps1 exited $?"
+guest_path='PATH=$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH'
+while read -r app commands; do
+  case "$app" in '' | '#'*) continue ;; esac
+  st apps install "$app" --on apps1 >> "$log" 2>&1 || { miss "apps install $app exited $?"; continue; }
+  state=$(st apps --all --on apps1 --json | jq -r --arg a "$app" '.apps[] | select(.name == $a) | .state')
+  say "   $app: $state"
+  case "$state" in not-installed | failed | not-known | "") miss "$app reads \"$state\" after its install" ;; esac
+  for command in $commands; do
+    in_vm apps1 "$guest_path; command -v $command" > /dev/null || miss "$app: $command is not on the guest's PATH"
+  done
+done < "$suite/linux/every-app.txt"
+st machines delete apps1 --confirm=apps1 >> "$log" 2>&1 || on_mac tart delete apps1 >> "$log" 2>&1
+case_pass
+
+
 case_begin docker-shortcuts SE-28
 st settings apply docker-shortcuts --on ws1 >> "$log" 2>&1 || fail "settings apply exited $?"
 [ "$(in_vm ws1 "zsh -ic 'whence -w dclean'" 2>/dev/null)" = "dclean: function" ] || fail "dclean is not a function of the zsh block"
