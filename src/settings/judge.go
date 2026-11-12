@@ -36,8 +36,10 @@ type Observation struct {
 	// reads it: in place, missing, partly there, unknown.
 	State  catalog.State
 	Detail string
-	// value: a fingerprint of what is there now; empty for a setting whose
-	// effect has no content to compare (a login, a procedure's yes or no).
+	// value: a fingerprint of what is there now of station's effect, read
+	// from the machine, never from what station would write; empty for a
+	// setting whose effect has no content to compare (a login, a
+	// procedure's yes or no).
 	Digest string
 	// value: where it lives: "~/.config/starship.toml".
 	Where string

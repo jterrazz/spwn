@@ -42,11 +42,20 @@ func (a *Applier) read(ctx context.Context) (workspaces, reached, missing []stri
 }
 
 func (a *Applier) Observe(ctx context.Context, _ catalog.Setting) (settings.Observation, error) {
-	workspaces, _, missing, err := a.read(ctx)
+	workspaces, reached, missing, err := a.read(ctx)
 	if err != nil {
 		return settings.Observation{}, err
 	}
-	o := settings.Observation{Digest: "reached:" + strings.Join(workspaces, ",")}
+	// invariant: the fingerprint is the workspaces the multiplexer reaches
+	// now, never the ones station would add: one the owner took out moves
+	// it, and a new workspace station has yet to add does not.
+	var there []string
+	for _, w := range workspaces {
+		if slices.Contains(reached, w) {
+			there = append(there, w)
+		}
+	}
+	o := settings.Observation{Digest: "reached:" + strings.Join(there, ",")}
 	for _, w := range missing {
 		o.Before = append(o.Before, settings.KeyValue{Key: w, Value: "not reached"})
 		o.After = append(o.After, settings.KeyValue{Key: w, Value: "reached"})

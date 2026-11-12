@@ -65,3 +65,23 @@ func TestOneWorkspaceTheHostDoesNotReachIsAGapAndOffLeavesTheOwnersMachines(t *t
 		t.Errorf("reached %q once off, want the owner's vps alone", got)
 	}
 }
+
+func TestTheFingerprintIsWhatTheMultiplexerReaches(t *testing.T) {
+	// invariant: a workspace the owner took out moves the fingerprint, so
+	// the setting reads changed since; a workspace station has yet to add
+	// does not, so it reads as station's to add.
+	ctx := context.Background()
+	multiplexer := &mux{}
+	if _, err := muxmachines.New(multiplexer, workspaces("linux-1", "linux-2")).Apply(ctx, setting(), nil); err != nil {
+		t.Fatal(err)
+	}
+	applied, _ := muxmachines.New(multiplexer, workspaces("linux-1", "linux-2")).Observe(ctx, setting())
+	gained, _ := muxmachines.New(multiplexer, workspaces("linux-1", "linux-2", "linux-3")).Observe(ctx, setting())
+	if gained.Present() || gained.Digest != applied.Digest {
+		t.Errorf("a new workspace read %+v; want missing, with the fingerprint as applied, %s", gained, applied.Digest)
+	}
+	_ = multiplexer.Remove(ctx, "linux-2")
+	if taken, _ := muxmachines.New(multiplexer, workspaces("linux-1", "linux-2")).Observe(ctx, setting()); taken.Digest == applied.Digest {
+		t.Errorf("a workspace taken out kept the fingerprint %s", taken.Digest)
+	}
+}

@@ -1,0 +1,53 @@
+description: a setting as station last wrote it that gains a file reads not applied, and apply writes it unasked
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/terminal/prompt.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: prompt
+          description: 'The prompt settings'
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: starship/starship.toml
+                          to: ~/.config/starship.toml
+      exit: 0
+    - command: 'settings apply prompt >/dev/null'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro catalog/terminal/prompt.yaml'
+      stdin: |
+          item: station.catalog/v1
+          kind: setting
+          name: prompt
+          description: 'The prompt settings'
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: starship/starship.toml
+                          to: ~/.config/starship.toml
+                        - from: tmux/tmux.conf
+                          to: ~/.tmux.conf
+      exit: 0
+    - command: 'settings prompt | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ○	prompt	not applied	station settings apply prompt
+    - command: 'settings apply prompt </dev/null >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /bin/ls .tmux.conf'
+      exit: 0
+      stdout: |
+          .tmux.conf
+    - command: 'settings prompt | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	prompt	applied · ~/.config/starship.toml
+    - command: '--version >/dev/null; /bin/rm .tmux.conf'
+      exit: 0
+    - command: 'settings prompt | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ◐	prompt	changed since just now	station settings diff prompt

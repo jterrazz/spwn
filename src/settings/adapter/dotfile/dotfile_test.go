@@ -61,3 +61,23 @@ func TestApplier(t *testing.T) {
 		return contracttest.Opened{Applier: dotfile.New(files, silent{}, dotfile.Options{Home: "/home/u", Ours: ours}), Item: item, Edit: edit}
 	})
 }
+
+func TestAFileTheSettingGainsLeavesTheFingerprintAsStationLastWroteIt(t *testing.T) {
+	files := newMemory()
+	ours := fstest.MapFS{"tool/a.conf": {Data: []byte("a\n")}, "tool/b.conf": {Data: []byte("b\n")}}
+	a := dotfile.New(files, silent{}, dotfile.Options{Home: "/home/u", Ours: ours})
+	one := catalog.Setting{Name: "tool", Effect: catalog.Dotfiles{Files: []catalog.Copy{{From: "tool/a.conf", To: "~/.a.conf"}}}}
+	two := catalog.Setting{Name: "tool", Effect: catalog.Dotfiles{Files: []catalog.Copy{{From: "tool/a.conf", To: "~/.a.conf"}, {From: "tool/b.conf", To: "~/.b.conf"}}}}
+	if _, err := a.Apply(t.Context(), one, nil); err != nil {
+		t.Fatal(err)
+	}
+	applied, _ := a.Observe(t.Context(), one)
+	gained, _ := a.Observe(t.Context(), two)
+	if gained.Present() || gained.Digest != applied.Digest {
+		t.Fatalf("a gained file read %+v, fingerprint %s; want missing, %s as applied", gained, gained.Digest, applied.Digest)
+	}
+	delete(files.files, "/home/u/.a.conf")
+	if removed, _ := a.Observe(t.Context(), one); removed.Digest == applied.Digest {
+		t.Errorf("a file taken away kept the fingerprint %s", removed.Digest)
+	}
+}

@@ -56,8 +56,10 @@ func of(it catalog.Setting) (catalog.Dotfiles, error) {
 }
 
 func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
-	// invariant: the fingerprint covers every file of the setting in its order,
-	// a missing one included, so an edit or a removal of any of them shows.
+	// invariant: the fingerprint covers each file of the setting that is
+	// there, in its order: an edit or a removal of one station wrote moves
+	// it, and a file the setting gains, not there yet, does not, so a
+	// setting otherwise as station last wrote it reads as station's to write.
 	d, err := of(it)
 	if err != nil {
 		return settings.Observation{}, err
@@ -78,7 +80,6 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 			sum.Write([]byte(c.To + "\x00"))
 			sum.Write(have)
 		case errors.Is(err, fs.ErrNotExist):
-			sum.Write([]byte(c.To + "\x00absent\x00"))
 		default:
 			return settings.Observation{}, err
 		}

@@ -14,7 +14,12 @@ type Applier interface {
 	// value: the kind of effect it writes, its key in Appliers.
 	Kind() catalog.EffectKind
 	// invariant: Observe reads and never writes; a setting it cannot read
-	// back reads Blind.
+	// back reads Blind. Its fingerprint is what the machine holds of the
+	// setting's effect: an edit by hand, or a part of it taken away, moves
+	// it; a part station has yet to write (a file, a block, a workspace,
+	// a hook the setting gained) does not, so a setting still as station
+	// last left it reads as station's to write again, never as the
+	// owner's change.
 	Observe(ctx context.Context, it catalog.Setting) (settings.Observation, error)
 	// invariant: once Apply returns no error, Observe reads it present and
 	// exactly as station writes it.
