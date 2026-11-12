@@ -15,8 +15,10 @@ import (
 )
 
 const (
-	pinned = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
-	url    = "https://example.com/studio.git"
+	pinned    = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
+	moved     = "ffffffffffffffffffffffffffffffffffffffff"
+	rewritten = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+	url       = "https://example.com/studio.git"
 )
 
 // value: what every git run of a source is given before its verb, then
@@ -91,25 +93,39 @@ func TestACloneIsReadWhereItStandsAndFetchesNothing(t *testing.T) {
 }
 
 func TestTheSharedSourceFollowsItsBranch(t *testing.T) {
-	contracttest.Follows(t, func(t *testing.T) (contract.Source, func() string) {
+	contracttest.Follows(t, func(t *testing.T) (contract.Source, func() string, func() string) {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		clone(t, dir, nil)
-		at, branch, fetched := pinned, pinned, ""
+		at, branch, fetched, forward := pinned, pinned, "", true
 		run := localtest.NewRunner(t)
 		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Answer(func() local.Output { return status(at) })
 		run.On("git", in(dir, "fetch", "--quiet", "--no-recurse-submodules", "--", url, "HEAD")...).Answer(func() local.Output {
 			fetched = branch
 			return local.Output{}
 		})
-		run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD", "--")...).Answer(func() local.Output {
-			at = fetched
-			return local.Output{}
-		})
-		return source(run, cache, "studio"), func() string {
-			branch = "ffffffffffffffffffffffffffffffffffffffff"
-			return branch
+		run.On("git", in(dir, "rev-parse", "--verify", "--quiet", "FETCH_HEAD^{commit}")...).Answer(func() local.Output { return local.Output{Stdout: fetched + "\n"} })
+		for _, to := range []string{moved, rewritten} {
+			run.On("git", in(dir, "merge-base", "--is-ancestor", pinned, to)...).Answer(func() local.Output {
+				if forward {
+					return local.Output{}
+				}
+				return local.Output{ExitCode: 1}
+			})
 		}
+		for _, to := range []string{pinned, moved} {
+			run.On("git", in(dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", to, "--")...).Answer(func() local.Output {
+				at = to
+				return local.Output{}
+			})
+		}
+		move := func(commit string, ahead bool) func() string {
+			return func() string {
+				branch, forward = commit, ahead
+				return commit
+			}
+		}
+		return source(run, cache, "studio"), move(moved, true), move(rewritten, false)
 	})
 }
 
@@ -122,7 +138,7 @@ func TestPullOnNoCloneClonesItOnce(t *testing.T) {
 		return local.Output{}
 	})
 	run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
-	if err := source(run, cache, "studio").Pull(t.Context()); err != nil {
+	if _, err := source(run, cache, "studio").Pull(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 	if clones.Seen != 1 {
@@ -141,7 +157,7 @@ func TestACloneThatHoldsChangesIsNotTrusted(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "holds changes") {
 			t.Errorf("a clone holding %q read with %v", held, err)
 		}
-		if err := source(run, cache, "studio").Pull(t.Context()); err == nil || !strings.Contains(err.Error(), "holds changes") {
+		if _, err := source(run, cache, "studio").Pull(t.Context()); err == nil || !strings.Contains(err.Error(), "holds changes") {
 			t.Errorf("a clone holding %q pulled with %v", held, err)
 		}
 	}

@@ -653,7 +653,9 @@ func (p Plan) UpgradeNeeds() []Asked {
 }
 
 // value: an upgrade run: its plan, each app as it ended in the order it
-// ran, the lock before and after, and whether it was interrupted.
+// ran, the lock before and after, whether it was interrupted, and why the
+// shared source was not pulled, when it was not (the run went on from
+// its clone as it stood).
 
 type Upgraded struct {
 	Plan        Plan
@@ -661,4 +663,5 @@ type Upgraded struct {
 	Lock        LockDiff
 	Waiting     []Waiting
 	Interrupted bool
+	Unpulled    string
 }

@@ -35,65 +35,84 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// waiting.
 	Name: "machinefile.upgrade", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
-	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
-		// invariant: an upgrade is the one run that moves the shared source
-		// to its branch's newest commit, before anything is read: the lock
-		// it leaves holds the commit read then.
-		release, err := take(ctx, d)
-		if err != nil {
-			return machinefile.Upgraded{}, err
+	Run:    upgrade,
+}
+
+func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
+	// invariant: one run of the machine at a time, and everything judged
+	// before any effect: the plan where the shared source's clone stands,
+	// and the refusal of what asks the owner something off a terminal; the
+	// source then moves forward to its branch's newest commit and the plan
+	// is judged again there. A source that cannot move, or whose newest
+	// commit does not resolve, is put back where it stood and the run goes
+	// on from it, saying why; one whose newest commit asks something off a
+	// terminal is put back and the upgrade refused.
+	release, err := take(ctx, d)
+	if err != nil {
+		return machinefile.Upgraded{}, err
+	}
+	defer release()
+	plan, err := judged(ctx, d, in.Machinefile)
+	if err != nil {
+		return machinefile.Upgraded{}, err
+	}
+	if asked := plan.UpgradeNeeds(); !in.Unattended && !in.Interactive && len(asked) > 0 {
+		return machinefile.Upgraded{Plan: plan}, refusedOffTerminal(asked, "upgrade")
+	}
+	back, moved, unpulled := pull(ctx, d)
+	if moved {
+		fresh, err := judged(ctx, d, in.Machinefile)
+		asked := fresh.UpgradeNeeds()
+		switch {
+		case err != nil:
+			back()
+			unpulled = "its newest commit does not resolve, so station keeps the one before: " + err.Error()
+		case !in.Unattended && !in.Interactive && len(asked) > 0:
+			back()
+			return machinefile.Upgraded{Plan: fresh}, refusedOffTerminal(asked, "upgrade")
+		default:
+			plan = fresh
 		}
-		defer release()
-		err = pull(ctx, d)
-		if err != nil {
-			return machinefile.Upgraded{}, err
-		}
-		plan, err := judged(ctx, d, in.Machinefile)
-		if err != nil {
-			return machinefile.Upgraded{}, err
-		}
-		out := machinefile.Upgraded{Plan: plan}
-		var waits []string
-		if asked := plan.UpgradeNeeds(); in.Unattended {
-			waits = plan.Waits()
-		} else if !in.Interactive && len(asked) > 0 {
-			return out, refusedOffTerminal(asked, "upgrade")
-		}
-		lines := plan.Upgrades()
-		for i, l := range lines {
-			if ctx.Err() != nil {
-				for _, rest := range lines[i:] {
-					out.Done = append(out.Done, machinefile.Done{Line: rest, State: rest.Seen.State, Version: rest.Seen.Version, Reason: machinefile.NotRun})
-				}
-				break
+	}
+	out := machinefile.Upgraded{Plan: plan, Unpulled: unpulled}
+	var waits []string
+	if in.Unattended {
+		waits = plan.Waits()
+	}
+	lines := plan.Upgrades()
+	for i, l := range lines {
+		if ctx.Err() != nil {
+			for _, rest := range lines[i:] {
+				out.Done = append(out.Done, machinefile.Done{Line: rest, State: rest.Seen.State, Version: rest.Seen.Version, Reason: machinefile.NotRun})
 			}
-			if slices.Contains(waits, l.Step.Item) {
-				out.Done = append(out.Done, machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version, Reason: machinefile.WaitsForYou})
-				continue
-			}
-			if l.Seen.Condition == machinefile.Absent {
-				r := &run{d: d, p: p, in: ApplyIn{Interactive: in.Interactive}, name: plan.Name}
-				out.Done = append(out.Done, r.reinstall(ctx, l))
-				continue
-			}
-			out.Done = append(out.Done, update(ctx, d, l, p))
+			break
 		}
-		out.Interrupted = ctx.Err() != nil
-		out.Waiting = machinefile.WaitingOf(out.Done)
-		now := machinefile.Relocked(plan, out.Done, plan.Source)
-		out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
-		if !out.Lock.Empty() {
-			if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
-				return out, err
-			}
+		if slices.Contains(waits, l.Step.Item) {
+			out.Done = append(out.Done, machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version, Reason: machinefile.WaitsForYou})
+			continue
 		}
-		if in.Unattended {
-			if err := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, d.Now())); err != nil {
-				return out, err
-			}
+		if l.Seen.Condition == machinefile.Absent {
+			r := &run{d: d, p: p, in: ApplyIn{Interactive: in.Interactive}, name: plan.Name}
+			out.Done = append(out.Done, r.reinstall(ctx, l))
+			continue
 		}
-		return out, ctx.Err()
-	},
+		out.Done = append(out.Done, update(ctx, d, l, p))
+	}
+	out.Interrupted = ctx.Err() != nil
+	out.Waiting = machinefile.WaitingOf(out.Done)
+	now := machinefile.Relocked(plan, out.Done, plan.Source)
+	out.Lock = machinefile.Diff(plan.Lock.LockFile, now)
+	if !out.Lock.Empty() {
+		if err := d.Locks.Write(context.WithoutCancel(ctx), plan.Lock.LockFile, now); err != nil {
+			return out, err
+		}
+	}
+	if in.Unattended {
+		if err := d.Ledger.Write(context.WithoutCancel(ctx), machinefile.NightOf(out, d.Now())); err != nil {
+			return out, err
+		}
+	}
+	return out, ctx.Err()
 }
 
 // value: the machine's turn, taken for one apply or upgrade; a turn
@@ -106,15 +125,34 @@ func take(ctx context.Context, d Deps) (func(), error) {
 	return release, err
 }
 
-func pull(ctx context.Context, d Deps) error {
+// value: each source that follows a branch moved forward: how to put
+// every one that moved back, whether one moved, and why one did not
+// move, in the owner's words (empty when each did).
+func pull(ctx context.Context, d Deps) (back func(), moved bool, unpulled string) {
+	var undo []func()
+	var said []string
 	for _, s := range d.Sources() {
-		if f, ok := s.(contract.Follows); ok {
-			if err := f.Pull(ctx); err != nil {
-				return Worded(err)
-			}
+		f, ok := s.(contract.Follows)
+		if !ok {
+			continue
+		}
+		pulled, err := f.Pull(ctx)
+		var refused *contract.NotForwardError
+		switch {
+		case errors.As(err, &refused):
+			said = append(said, refused.Error()+": delete "+refused.Clone+" to take the branch as it is now")
+		case err != nil:
+			said = append(said, err.Error())
+		case pulled.Moved():
+			moved = true
+			undo = append(undo, func() { _ = f.Back(context.WithoutCancel(ctx), pulled.Was) })
 		}
 	}
-	return nil
+	return func() {
+		for _, u := range undo {
+			u()
+		}
+	}, moved, strings.Join(said, "; ")
 }
 
 // invariant: an app the lock holds that is not there is installed by the

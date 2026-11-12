@@ -1,0 +1,20 @@
+description: 'upgrade checks out no fetched commit that does not descend from the clone''s, and goes on'
+fixture:
+    - ./__fixtures__/stub/
+    - ./__fixtures__/source/
+env: engine
+runs:
+    - command: 'explain machine.kind --machinefile station-macos >/dev/null; /usr/bin/printf "machinefile: station.machinefile/v1\nname: bare\nmachine: { kind: computer, system: { os: macos } }\n" > .cache/station/sources/studio/machinefiles/bare.yaml; echo ffffffffffffffffffffffffffffffffffffffff > .origin; : > .rewritten; : > .calls; "$STATION" upgrade --machinefile bare'
+      exit: 0
+      stdout: |
+          	none
+          # Source
+          ◐	shared source		not pulled, read where its clone stands: its branch is at fffffff, which does not follow 1a2b3c4, the commit its clone is at (a force-push, a rewritten history or another default branch): station keeps 1a2b3c4: delete {{workdir}}/.cache/station/sources/studio to take the branch as it is now
+          # Lock
+          ●	shared source		studio@1a2b3c4, was none
+      files:
+          .calls:
+              contains: |
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always fetch --quiet --no-recurse-submodules -- https://example.com/studio.git HEAD
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always rev-parse --verify --quiet FETCH_HEAD^{commit}
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always merge-base --is-ancestor 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d ffffffffffffffffffffffffffffffffffffffff

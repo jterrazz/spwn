@@ -19,8 +19,9 @@ func TestTheOwnersFilesOfAMacKeepTheContract(t *testing.T) {
 }
 
 const (
-	head  = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
-	moved = "ffffffffffffffffffffffffffffffffffffffff"
+	head      = "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"
+	moved     = "ffffffffffffffffffffffffffffffffffffffff"
+	rewritten = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 )
 
 func TestARepositoryOfTheWorldKeepsTheContract(t *testing.T) {
@@ -35,15 +36,18 @@ func TestARepositoryOfTheWorldKeepsTheContract(t *testing.T) {
 }
 
 func TestAMacsCloneFollowsItsRepositorysHead(t *testing.T) {
-	contracttest.Follows(t, func(*testing.T) (contract.Source, func() string) {
+	contracttest.Follows(t, func(*testing.T) (contract.Source, func() string, func() string) {
 		src := contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git"}
-		repo := &world.Repository{Head: head, Commits: map[string]map[string]string{head: {}, moved: {}}}
+		repo := &world.Repository{Head: head, Commits: map[string]map[string]string{head: {}, moved: {}, rewritten: {}}, Parents: map[string]string{moved: head}}
 		w := &world.World{Sources: map[string]*world.Repository{src.URL: repo}}
-		return fake.SharedOf(w, "laptop", src), func() string {
-			w.Lock()
-			defer w.Unlock()
-			repo.Head = moved
-			return moved
+		to := func(commit string) func() string {
+			return func() string {
+				w.Lock()
+				defer w.Unlock()
+				repo.Head = commit
+				return commit
+			}
 		}
+		return fake.SharedOf(w, "laptop", src), to(moved), to(rewritten)
 	})
 }

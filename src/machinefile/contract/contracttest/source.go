@@ -2,6 +2,7 @@ package contracttest
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"testing"
 
@@ -53,39 +54,68 @@ func Source(t *testing.T, subject Subject) {
 	})
 }
 
-// value: a source that follows a branch, built by the adapter under test,
-// and the gesture that moves its branch to a new commit, answering it.
+// value: a source that follows a branch, built by the adapter under test;
+// the gesture that moves its branch forward to a new commit, and the one
+// that rewrites it to a commit that does not follow the clone's, each
+// answering the commit the branch is at then.
 
-type Branch func(t *testing.T) (contract.Source, func() string)
+type Branch func(t *testing.T) (src contract.Source, forward, rewrite func() string)
 
 func Follows(t *testing.T, branch Branch) {
-	t.Run("is read where it stands until it is pulled, then at the branch's newest commit", func(t *testing.T) {
-		src, move := branch(t)
-		at := func() string {
-			t.Helper()
-			tree, err := src.Read(context.Background())
-			if err != nil {
-				t.Fatal(err)
-			}
-			if tree.Source == nil || tree.Source.Commit == "" {
-				t.Fatalf("a followed source's tree names no commit: %+v", tree)
-			}
-			return tree.Source.Commit
+	at := func(t *testing.T, src contract.Source) string {
+		t.Helper()
+		tree, err := src.Read(context.Background())
+		if err != nil {
+			t.Fatal(err)
 		}
-		first := at()
-		moved := move()
-		if now := at(); now != first {
-			t.Errorf("a read moved the source from %s to %s", first, now)
+		if tree.Source == nil || tree.Source.Commit == "" {
+			t.Fatalf("a followed source's tree names no commit: %+v", tree)
 		}
-		follows, ok := src.(contract.Follows)
+		return tree.Source.Commit
+	}
+	follows := func(t *testing.T, src contract.Source) contract.Follows {
+		t.Helper()
+		f, ok := src.(contract.Follows)
 		if !ok {
 			t.Fatalf("%T follows no branch: it has no Pull", src)
 		}
-		if err := follows.Pull(context.Background()); err != nil {
+		return f
+	}
+	t.Run("is read where it stands until it is pulled, then at the branch's newest commit", func(t *testing.T) {
+		src, forward, _ := branch(t)
+		first := at(t, src)
+		moved := forward()
+		if now := at(t, src); now != first {
+			t.Errorf("a read moved the source from %s to %s", first, now)
+		}
+		pulled, err := follows(t, src).Pull(context.Background())
+		if err != nil {
 			t.Fatal(err)
 		}
-		if now := at(); now != moved {
-			t.Errorf("pulled to %s, want %s", now, moved)
+		if now := at(t, src); now != moved || pulled != (contract.Pulled{Was: first, Now: moved}) {
+			t.Errorf("pulled %+v and read at %s, want from %s to %s", pulled, now, first, moved)
+		}
+		if again, err := follows(t, src).Pull(context.Background()); err != nil || again.Moved() {
+			t.Errorf("a second pull answered %+v, %v; want unmoved", again, err)
+		}
+		if err := follows(t, src).Back(context.Background(), pulled.Was); err != nil {
+			t.Fatal(err)
+		}
+		if now := at(t, src); now != first {
+			t.Errorf("put back at %s, want %s", now, first)
+		}
+	})
+	t.Run("a newest commit that does not follow the clone's is refused, and the clone stays", func(t *testing.T) {
+		src, _, rewrite := branch(t)
+		first := at(t, src)
+		newest := rewrite()
+		_, err := follows(t, src).Pull(context.Background())
+		var refused *contract.NotForwardError
+		if !errors.As(err, &refused) || refused.At != first || refused.Newest != newest {
+			t.Errorf("pulled a rewritten branch with %v; want refused from %s to %s", err, first, newest)
+		}
+		if now := at(t, src); now != first {
+			t.Errorf("a refused pull moved the clone to %s", now)
 		}
 	})
 }

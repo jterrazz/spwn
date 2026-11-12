@@ -54,11 +54,26 @@ type World struct {
 }
 
 // value: a repository's files at each of its commits, by slash path,
-// and the commit its default branch is at.
+// the commit its default branch is at, and its history.
 
 type Repository struct {
 	Commits map[string]map[string]string `json:"commits"`
 	Head    string                       `json:"head"`
+	// value: each commit's parent, so a history is read: a commit with
+	// none written starts one.
+	Parents map[string]string `json:"parents,omitempty"`
+}
+
+func (r *Repository) Descends(commit, from string) bool {
+	// invariant: a commit descends from itself and from every commit its
+	// parents lead back to.
+	for seen := 0; commit != "" && seen <= len(r.Commits); seen++ {
+		if commit == from {
+			return true
+		}
+		commit = r.Parents[commit]
+	}
+	return false
 }
 
 type Fault struct {

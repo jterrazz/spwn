@@ -39,11 +39,14 @@ type Shared struct {
 func SharedOf(w *world.World, mac string, src contract.SharedSource) Shared {
 	// value: the shared source over the world's repository at its URL, read
 	// from the Mac's clone of it, cloned at the repository's head when the
-	// Mac has none.
+	// Mac has none; a scripted `Source.Pull` is a fetch that does not answer.
 	return Shared{w: w, mac: mac, src: src}
 }
 
-var errNoRepository = errors.New("no repository at its url")
+var (
+	errNoRepository = errors.New("no repository at its url")
+	errUnreachable  = errors.New("its url does not answer")
+)
 
 func (s Shared) Read(context.Context) (machinefile.Tree, error) {
 	s.w.Lock()
@@ -57,13 +60,33 @@ func (s Shared) Read(context.Context) (machinefile.Tree, error) {
 	return t, nil
 }
 
-func (s Shared) Pull(context.Context) error {
+func (s Shared) Pull(context.Context) (contract.Pulled, error) {
+	// invariant: as the real clone, the Mac's clone moves to the
+	// repository's head only when the head descends from it.
+	s.w.Lock()
+	defer s.w.Unlock()
+	at, err := s.clone()
+	if err != nil {
+		return contract.Pulled{}, err
+	}
+	if s.w.Fails("Source.Pull") {
+		return contract.Pulled{Was: at, Now: at}, &contract.UnavailableError{Source: s.src.Name, Cause: errUnreachable}
+	}
+	repo := s.w.Sources[s.src.URL]
+	if !repo.Descends(repo.Head, at) {
+		return contract.Pulled{Was: at, Now: at}, &contract.NotForwardError{Source: s.src.Name, At: at, Newest: repo.Head, Clone: "~/.cache/station/sources/" + s.src.Name}
+	}
+	s.w.Mac(s.mac).Clones[s.src.URL] = repo.Head
+	return contract.Pulled{Was: at, Now: repo.Head}, nil
+}
+
+func (s Shared) Back(_ context.Context, commit string) error {
 	s.w.Lock()
 	defer s.w.Unlock()
 	if _, err := s.clone(); err != nil {
 		return err
 	}
-	s.w.Mac(s.mac).Clones[s.src.URL] = s.w.Sources[s.src.URL].Head
+	s.w.Mac(s.mac).Clones[s.src.URL] = commit
 	return nil
 }
 

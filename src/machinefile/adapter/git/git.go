@@ -59,20 +59,63 @@ func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
 	}, err
 }
 
-func (s Source) Pull(ctx context.Context) error {
+func (s Source) Pull(ctx context.Context) (contract.Pulled, error) {
 	// invariant: the commit the source's default branch is at now is
-	// fetched from its url and checked out detached; a clone made by this
-	// very call is already there and fetches nothing more.
-	_, fresh, err := s.clone(ctx)
+	// fetched from its url and checked out detached, when it descends from
+	// the clone's own; one that does not is refused and nothing is checked
+	// out. A clone made by this very call is already there and fetches
+	// nothing more.
+	head, fresh, err := s.clone(ctx)
+	pulled := contract.Pulled{Was: head, Now: head}
 	if err == nil && !fresh {
-		if _, err = s.git(ctx, s.dir, "fetch", "--quiet", "--no-recurse-submodules", "--", s.src.URL, "HEAD"); err == nil {
-			_, err = s.git(ctx, s.dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD", "--")
-		}
+		pulled.Now, err = s.forward(ctx, head)
+	}
+	var refused *contract.NotForwardError
+	if err != nil && !errors.As(err, &refused) {
+		err = &contract.UnavailableError{Source: s.src.Name, Cause: err}
 	}
 	if err != nil {
+		pulled.Now = head
+	}
+	return pulled, err
+}
+
+func (s Source) forward(ctx context.Context, head string) (string, error) {
+	if _, err := s.git(ctx, s.dir, "fetch", "--quiet", "--no-recurse-submodules", "--", s.src.URL, "HEAD"); err != nil {
+		return "", err
+	}
+	newest, err := s.git(ctx, s.dir, "rev-parse", "--verify", "--quiet", "FETCH_HEAD^{commit}")
+	if newest = strings.TrimSpace(newest); err != nil || !commit.MatchString(newest) {
+		return "", errors.Join(errors.New("its fetched branch names no commit"), err)
+	}
+	if newest == head {
+		return head, nil
+	}
+	out, err := s.run.Output(ctx, local.Cmd{Name: "git", Args: append(append([]string{"-C", s.dir}, quiet()...), "merge-base", "--is-ancestor", head, newest)})
+	switch {
+	case err != nil:
+		return "", err
+	case out.ExitCode == 1:
+		return "", &contract.NotForwardError{Source: s.src.Name, At: head, Newest: newest, Clone: s.dir}
+	case out.ExitCode != 0:
+		return "", errors.New(strings.TrimSpace(out.Stderr))
+	}
+	return newest, s.checkout(ctx, newest)
+}
+
+func (s Source) Back(ctx context.Context, at string) error {
+	if !commit.MatchString(at) {
+		return &contract.UnavailableError{Source: s.src.Name, Cause: errors.New(strconv.Quote(at) + " is no commit")}
+	}
+	if err := s.checkout(ctx, at); err != nil {
 		return &contract.UnavailableError{Source: s.src.Name, Cause: err}
 	}
 	return nil
+}
+
+func (s Source) checkout(ctx context.Context, at string) error {
+	_, err := s.git(ctx, s.dir, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", at, "--")
+	return err
 }
 
 // invariant: the clone is station's alone and only ever checked out. A

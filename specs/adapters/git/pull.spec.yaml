@@ -1,4 +1,4 @@
-description: 'upgrade fetches the default branch from its url, after --, checks it out detached, reads it there'
+description: 'upgrade fetches the branch from its url, after --, checks out a descendant detached, reads it there'
 fixture:
     - ./__fixtures__/stub/
     - ./__fixtures__/source/
@@ -15,5 +15,7 @@ runs:
               contains: |
                   git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored
                   git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always fetch --quiet --no-recurse-submodules -- https://example.com/studio.git HEAD
-                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD --
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always rev-parse --verify --quiet FETCH_HEAD^{commit}
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always merge-base --is-ancestor 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d ffffffffffffffffffffffffffffffffffffffff
+                  git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always -c advice.detachedHead=false checkout --quiet --detach ffffffffffffffffffffffffffffffffffffffff --
                   git -C {{workdir}}/.cache/station/sources/studio -c core.hooksPath=/dev/null -c submodule.recurse=false -c protocol.allow=never -c protocol.https.allow=always -c protocol.ssh.allow=always status --porcelain=v2 --branch --untracked-files=all --ignored
