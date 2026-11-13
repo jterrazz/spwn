@@ -26,7 +26,7 @@ func (d *Engine) Running() []engine.Running {
 		if v.state != engine.StateRunning {
 			continue
 		}
-		out = append(out, engine.Running{Name: name, Lifetime: v.rec.Lifetime, PID: v.holder(), Guest: v.guest == engine.GuestConnected})
+		out = append(out, engine.Running{Name: name, Lifetime: v.recordLocked().Lifetime, PID: v.holder(), Guest: v.guest == engine.GuestConnected})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out

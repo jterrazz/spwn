@@ -31,11 +31,11 @@ func (d *Engine) heardAgents(ctx context.Context, v *vmState, now []agents.Agent
 		}
 		switch {
 		case i < 0 && agents.Live(a) && a.State != agents.Waiting:
-			d.tell(ctx, v.rec.Name, started(v.rec.Name, a))
+			d.tell(ctx, v.name, started(v.name, a))
 		case a.State == agents.Waiting && (before.State != agents.Waiting || !sameAsk(before.Ask, a.Ask)):
-			d.tell(ctx, v.rec.Name, waiting(v.rec.Name, a))
+			d.tell(ctx, v.name, waiting(v.name, a))
 		case a.State == agents.Finished && i >= 0 && before.State != agents.Finished:
-			d.tell(ctx, v.rec.Name, finished(v.rec.Name, a))
+			d.tell(ctx, v.name, finished(v.name, a))
 		}
 	}
 }
@@ -108,7 +108,7 @@ func (d *Engine) working(vm string) bool {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	for _, v := range d.vms {
-		if v.rec.Name != vm {
+		if v.name != vm {
 			continue
 		}
 		return slices.ContainsFunc(v.agents, func(a agents.Agent) bool {

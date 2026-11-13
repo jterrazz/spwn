@@ -114,7 +114,8 @@ func (d *Engine) haltLocked(v *vmState) ports.Halt {
 	if v == nil {
 		return ports.StoppedOnPurpose
 	}
-	vm := model.VM{Lifetime: v.rec.Lifetime, State: model.VMState(v.state), Want: v.rec.Want, Detail: v.detail, Restarts: v.restarts}
+	rec := v.recordLocked()
+	vm := model.VM{Lifetime: rec.Lifetime, State: model.VMState(v.state), Want: rec.Want, Detail: v.detail, Restarts: v.restarts}
 	switch {
 	case v.restarts.Looping:
 		return ports.Down
@@ -151,7 +152,7 @@ func (d *Engine) listeningLocked() []ports.Machine {
 			}
 			ls = d.lastHeard[vm]
 		}
-		m := ports.VMOf(vm, d.m.ThisMacName(), v != nil && v.rec.Network == model.Bridged, slices.Clone(ls))
+		m := ports.VMOf(vm, d.m.ThisMacName(), v != nil && v.recordLocked().Network == model.Bridged, slices.Clone(ls))
 		m.Answer = answer
 		out = append(out, m)
 	}

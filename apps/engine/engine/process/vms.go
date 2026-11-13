@@ -30,6 +30,7 @@ const (
 )
 
 type vmState struct {
+	name     string
 	rec      model.VMRecord
 	run      Run
 	end      *model.RunEnd
@@ -80,6 +81,25 @@ type vmState struct {
 	readyAt time.Time
 }
 
+// invariant: a VM's record changes under d.mu, as a tick reads the store
+// again or a run's end writes its wish, and is reached through these three
+// alone (rule vm-record-locked); its name is the one thing a session reads
+// without the lock, so it is held apart, set once.
+func (v *vmState) recordLocked() model.VMRecord { return v.rec }
+
+func (d *Engine) record(v *vmState) model.VMRecord {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return v.rec
+}
+
+func (d *Engine) editRecord(v *vmState, edit func(*model.VMRecord)) model.VMRecord {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	edit(&v.rec)
+	return v.rec
+}
+
 // invariant: SPEC B5.10: the create that made a VM tells its engine once it
 // is ready: the engine keeps when, and tells the owner.
 func (d *Engine) ready(ctx context.Context, vm string) error {
@@ -101,7 +121,7 @@ func (d *Engine) ready(ctx context.Context, vm string) error {
 func (d *Engine) adopt(ctx context.Context) {
 	records, _ := d.m.Records()
 	for _, r := range records {
-		v := &vmState{rec: r, state: engine.StateStopped, guest: engine.GuestAbsent}
+		v := &vmState{name: r.Name, rec: r, state: engine.StateStopped, guest: engine.GuestAbsent}
 		known, remembered := d.memory[r.Name]
 		v.reruns, v.restarts, v.bootAt, v.check = known.Reruns, known.Restarts, known.BootAt, known.Check
 		v.latency, v.walk, v.down = known.Latency, known.Restart, known.Down
@@ -151,7 +171,7 @@ func (d *Engine) find(vm string) (*vmState, error) {
 		if r.Name != vm {
 			continue
 		}
-		v := &vmState{rec: r, state: engine.StateStopped, guest: engine.GuestAbsent}
+		v := &vmState{name: r.Name, rec: r, state: engine.StateStopped, guest: engine.GuestAbsent}
 		d.mu.Lock()
 		if held, ok := d.vms[vm]; ok {
 			v = held
@@ -165,13 +185,11 @@ func (d *Engine) find(vm string) (*vmState, error) {
 }
 
 func (d *Engine) start(ctx context.Context, v *vmState) error {
-	name := v.rec.Name
+	name := v.name
 	if records, err := d.m.Records(); err == nil {
 		for _, r := range records {
 			if r.Name == name {
-				d.mu.Lock()
-				v.rec = r
-				d.mu.Unlock()
+				d.editRecord(v, func(rec *model.VMRecord) { *rec = r })
 			}
 		}
 	}
@@ -189,7 +207,7 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	}
 	d.refreshSelf(ctx)
 	d.renderEnv(ctx, v)
-	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: v.rec.Network == model.Bridged}, mounts)
+	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: d.record(v).Network == model.Bridged}, mounts)
 	if err != nil {
 		return err
 	}
@@ -197,7 +215,7 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	d.mu.Lock()
 	v.run, v.end, v.state, v.detail, v.stopping, v.mounts, v.read = run, nil, engine.StateRunning, read.Why, false, mounts, true
 	v.bootAt, v.check = d.h.Now(), model.CheckStatus{}
-	if v.rec.Lifetime == model.AlwaysOn && v.down && v.walk == nil {
+	if v.recordLocked().Lifetime == model.AlwaysOn && v.down && v.walk == nil {
 		v.walk = &model.RestartWalk{Step: 1, At: v.bootAt}
 	}
 	d.mu.Unlock()
@@ -208,14 +226,13 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 // invariant: a run's record keeps the folders its start shared, so a
 // later start whose Machinefile cannot be read shares them again.
 func (d *Engine) keepMounts(v *vmState, mounts []model.Mount) {
-	d.mu.Lock()
-	same := slices.Equal(v.rec.Mounts, mounts)
-	if !same {
-		v.rec.Mounts = slices.Clone(mounts)
-	}
-	rec := v.rec
-	d.mu.Unlock()
-	if !same {
+	changed := false
+	rec := d.editRecord(v, func(rec *model.VMRecord) {
+		if !slices.Equal(rec.Mounts, mounts) {
+			rec.Mounts, changed = slices.Clone(mounts), true
+		}
+	})
+	if changed {
 		_ = d.m.Save(rec)
 	}
 }
@@ -226,8 +243,8 @@ func (d *Engine) tick(ctx context.Context) {
 	for _, r := range records {
 		known[r.Name] = true
 		v, _ := d.find(r.Name)
+		d.editRecord(v, func(rec *model.VMRecord) { *rec = r })
 		d.mu.Lock()
-		v.rec = r
 		ended := v.run != nil && !v.stopping && v.over()
 		later := !v.rerunAt.IsZero() && !d.h.Now().Before(v.rerunAt)
 		d.mu.Unlock()
@@ -258,14 +275,14 @@ func (d *Engine) tick(ctx context.Context) {
 }
 
 func (d *Engine) ended(ctx context.Context, v *vmState) {
-	name := v.rec.Name
+	name := v.name
 	d.mu.Lock()
 	end := unread
 	if v.end != nil {
 		end = *v.end
 	}
 	now := d.h.Now()
-	act, reruns := model.AfterRun(v.rec.Lifetime, end, v.reruns, now)
+	act, reruns := model.AfterRun(v.recordLocked().Lifetime, end, v.reruns, now)
 	v.reruns, v.run, v.end = reruns, nil, nil
 	up := now.Sub(v.bootAt)
 	d.mu.Unlock()
@@ -282,12 +299,11 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 	case model.ActRestart:
 		d.restartLater(ctx, v, up, now)
 	case model.ActPoweredOff:
-		v.rec.Want = model.WantStopped
-		_ = d.m.Save(v.rec)
+		_ = d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped }))
 		d.setState(v, engine.StateStopped, model.PoweredOffInside)
 		d.tell(ctx, name, engine.PoweredOff(name))
 	case model.ActRerun:
-		if v.rec.Lifetime == model.AlwaysOn {
+		if d.record(v).Lifetime == model.AlwaysOn {
 			d.mu.Lock()
 			v.restarts = v.restarts.Rebooted(now)
 			d.mu.Unlock()
@@ -299,8 +315,7 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 		_, _ = d.m.Remove(ctx, name)
 		d.forget(name)
 	case model.ActStopped:
-		v.rec.Want = model.WantStopped
-		_ = d.m.Save(v.rec)
+		_ = d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped }))
 		d.setState(v, engine.StateStopped, "")
 	case model.ActBroken:
 		d.setState(v, engine.StateBroken, model.BrokenDetail())
@@ -390,8 +405,7 @@ func (d *Engine) opStart(ctx context.Context, vm string) error {
 	if err := d.opRun(ctx, vm); err != nil {
 		return err
 	}
-	v.rec.Want = model.WantRunning
-	return d.m.Save(v.rec)
+	return d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantRunning }))
 }
 
 // invariant: a graceful stop is the guest's own poweroff, sent on the VM's one
@@ -408,10 +422,9 @@ func (d *Engine) opStop(ctx context.Context, vm string, want bool) error {
 // invariant: halt ends a VM's run and keeps its disk; want also keeps the
 // wish stopped, so a persistent VM stays stopped when the engine starts again.
 func (d *Engine) halt(ctx context.Context, v *vmState, want bool) error {
-	vm := v.rec.Name
+	vm := v.name
 	if want {
-		v.rec.Want = model.WantStopped
-		if err := d.m.Save(v.rec); err != nil {
+		if err := d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped })); err != nil {
 			return err
 		}
 	}
@@ -541,7 +554,7 @@ func (d *Engine) session(ctx context.Context, v *vmState, gen int) {
 		if !d.current(v, gen) || ctx.Err() != nil {
 			return
 		}
-		d.vmStopped(ctx, v.rec.Name)
+		d.vmStopped(ctx, v.name)
 		if ctx.Err() != nil || d.h.Sleep(ctx, backoff) != nil {
 			return
 		}
@@ -552,7 +565,7 @@ func (d *Engine) session(ctx context.Context, v *vmState, gen int) {
 }
 
 func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
-	name := v.rec.Name
+	name := v.name
 	addr, err := d.hv.Address(ctx, name, 5*time.Second)
 	if err != nil {
 		d.guestFailed(ctx, v, "no ip: "+err.Error())
@@ -612,7 +625,7 @@ const mountWait = 60 * time.Second
 // the same.
 func (d *Engine) mountFolders(ctx context.Context, v *vmState, client Guest) {
 	d.mu.Lock()
-	mounts, read, template := v.mounts, v.read, v.rec.Template
+	mounts, read, template := v.mounts, v.read, v.recordLocked().Template
 	d.mu.Unlock()
 	if d.o.Mounts == nil || !read || template == "" {
 		return
@@ -623,9 +636,9 @@ func (d *Engine) mountFolders(ctx context.Context, v *vmState, client Guest) {
 	ran, err := client.Exec(ctx, line, script)
 	switch {
 	case err != nil:
-		d.logf(v.rec.Name+" mounts", err.Error())
+		d.logf(v.name+" mounts", err.Error())
 	case ran.Code != 0:
-		d.logf(v.rec.Name+" mounts", "exited "+strconv.Itoa(ran.Code)+": "+strings.TrimSpace(ran.Stderr))
+		d.logf(v.name+" mounts", "exited "+strconv.Itoa(ran.Code)+": "+strings.TrimSpace(ran.Stderr))
 	}
 }
 
@@ -640,7 +653,7 @@ func (d *Engine) guestFailed(ctx context.Context, v *vmState, reason string) {
 	v.lastErr, v.guest, v.ssh = reason, engine.GuestAbsent, false
 	d.mu.Unlock()
 	if !repeated {
-		d.logf(v.rec.Name+" guest", reason)
+		d.logf(v.name+" guest", reason)
 	}
 }
 
@@ -662,18 +675,18 @@ func (d *Engine) write(v *vmState, msg any) {
 // value: alias of hello v1, the line a guest of any version reads: its
 // keys keep the words v2 wrote.
 func (d *Engine) hello(v *vmState) {
-	r := d.rightsOf(context.Background(), v.rec.Name)
+	r := d.rightsOf(context.Background(), v.name)
 	keys := d.hostKeys()
 	d.mu.Lock()
 	v.keys = strings.Join(keys, "\n")
 	public := ports.ExposureOf(d.self.On, d.self.DNSName).PublicName
 	d.mu.Unlock()
-	env := v.rec.Env
+	env := d.record(v).Env
 	if env == nil {
 		env = map[string]string{}
 	}
 	d.write(v, map[string]any{
-		"v": 1, "type": "hello", "host": d.m.ThisMacName(), "vm": v.rec.Name, "public_host": public,
+		"v": 1, "type": "hello", "host": d.m.ThisMacName(), "vm": v.name, "public_host": public,
 		"keys": keys, "env": env, "ignored": []int{d.o.GuestPort}, "min_port": r.Floor(),
 	})
 }
@@ -728,7 +741,7 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 	if ctx.Err() != nil || json.Unmarshal(line, &m) != nil {
 		return
 	}
-	name := v.rec.Name
+	name := v.name
 	switch m.Type {
 	case "ready":
 		d.takeBackBeforeReady(ctx, name)
@@ -793,7 +806,7 @@ func (d *Engine) fromGuest(ctx context.Context, v *vmState, line []byte) {
 const opAgentsHeld = "agents-held"
 
 func (d *Engine) answerGuest(ctx context.Context, v *vmState, m guestMessage) {
-	result, err := d.guestRequest(ctx, v.rec.Name, m)
+	result, err := d.guestRequest(ctx, v.name, m)
 	reply := map[string]any{"v": 1, "type": "reply", "id": m.ID, "ok": err == nil}
 	if err != nil {
 		var op *enginecalls.OpError
@@ -856,11 +869,11 @@ func (d *Engine) askGuest(ctx context.Context, v *vmState, op string, budget tim
 			if m.Error != nil {
 				return nil, m.Error
 			}
-			return nil, fault("internal", v.rec.Name+"'s guest refused "+op, "station machines "+v.rec.Name)
+			return nil, fault("internal", v.name+"'s guest refused "+op, "station machines "+v.name)
 		}
 		return m.Result, nil
 	case <-wait.Done():
-		return nil, fault("guest_timeout", v.rec.Name+"'s guest did not answer "+op+" in "+budget.String(), "station machines "+v.rec.Name)
+		return nil, fault("guest_timeout", v.name+"'s guest did not answer "+op+" in "+budget.String(), "station machines "+v.name)
 	}
 }
 
@@ -878,7 +891,7 @@ func joinPort(ip string, port int) string {
 // the rights, is reserved then, before anything listens, so the server
 // started on it reads its URL.
 func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
-	r := d.loadRights(ctx, v.rec.Name)
+	r := d.loadRights(ctx, v.name)
 	p := d.policy()
 	d.mu.Lock()
 	e := d.exposureLocked()
@@ -887,9 +900,9 @@ func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 		if len(h.Env) == 0 || !r.Allows(h.Port) {
 			continue
 		}
-		l, i := ports.Find(d.reservations, v.rec.Name, h.Port)
+		l, i := ports.Find(d.reservations, v.name, h.Port)
 		if i < 0 {
-			reserved, err := d.reserveLocked(ctx, p, v.rec.Name, h.Port, r, ports.ByRights)
+			reserved, err := d.reserveLocked(ctx, p, v.name, h.Port, r, ports.ByRights)
 			if err != nil {
 				continue
 			}
@@ -905,15 +918,13 @@ func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 	if len(env) > 0 {
 		env[catalog.PublicNameEnv] = e.PublicName
 	}
-	rec := v.rec
+	rec := v.recordLocked()
 	d.mu.Unlock()
 	if maps.Equal(env, rec.Env) || len(env) == 0 && len(rec.Env) == 0 {
 		return
 	}
 	rec.Env = env
 	if d.m.Save(rec) == nil {
-		d.mu.Lock()
-		v.rec = rec
-		d.mu.Unlock()
+		d.editRecord(v, func(rec *model.VMRecord) { rec.Env = env })
 	}
 }

@@ -539,16 +539,16 @@ func (d *Engine) accounts(ctx context.Context) engine.AccountsView {
 			d.mu.Lock()
 			guest := v.guest
 			d.mu.Unlock()
-			out[i] = engine.VMAccounts{Name: v.rec.Name, Guest: engine.GuestAbsent}
+			out[i] = engine.VMAccounts{Name: v.name, Guest: engine.GuestAbsent}
 			if guest != engine.GuestConnected {
 				return
 			}
 			rows, err := d.askGuest(ctx, v, "accounts", accountsBudget)
 			if err != nil {
-				d.logf(v.rec.Name+" accounts", err.Error())
+				d.logf(v.name+" accounts", err.Error())
 				return
 			}
-			out[i] = engine.VMAccounts{Name: v.rec.Name, Guest: engine.GuestConnected, Accounts: rows}
+			out[i] = engine.VMAccounts{Name: v.name, Guest: engine.GuestConnected, Accounts: rows}
 		}()
 	}
 	wg.Wait()

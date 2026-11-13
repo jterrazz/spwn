@@ -132,7 +132,7 @@ func (d *Engine) listen(ctx context.Context, vm string, port int, ip, process st
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	reserved := d.reservationIndex(vm, port) >= 0
-	if v := d.vms[vm]; v != nil && v.rec.Lifetime == model.AlwaysOn && !reserved && !r.Opens() {
+	if v := d.vms[vm]; v != nil && v.recordLocked().Lifetime == model.AlwaysOn && !reserved && !r.Opens() {
 		return
 	}
 	s := d.svcOf(vm, port)

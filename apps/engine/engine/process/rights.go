@@ -17,7 +17,7 @@ func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 	d.mu.Lock()
 	server := false
 	if v := d.vms[vm]; v != nil {
-		server = v.rec.Lifetime == model.AlwaysOn
+		server = v.recordLocked().Lifetime == model.AlwaysOn
 	}
 	d.mu.Unlock()
 	r := ports.RightsOf(nil, server)

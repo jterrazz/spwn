@@ -40,9 +40,9 @@ func (d *Engine) restartLater(ctx context.Context, v *vmState, up time.Duration,
 	d.mu.Unlock()
 	switch {
 	case r.Looping && !was:
-		d.tell(ctx, v.rec.Name, engine.Looping(v.rec.Name, r))
+		d.tell(ctx, v.name, engine.Looping(v.name, r))
 	case !r.Looping:
-		d.tell(ctx, v.rec.Name, engine.Restarting(v.rec.Name, r.Count))
+		d.tell(ctx, v.name, engine.Restarting(v.name, r.Count))
 	}
 }
 
@@ -52,18 +52,19 @@ func (d *Engine) restartLater(ctx context.Context, v *vmState, up time.Duration,
 func (d *Engine) keep(ctx context.Context, v *vmState) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if v.rec.Lifetime != model.AlwaysOn || v.run == nil || v.stopping || v.state != engine.StateRunning {
+	rec := v.recordLocked()
+	if rec.Lifetime != model.AlwaysOn || v.run == nil || v.stopping || v.state != engine.StateRunning {
 		return
 	}
 	now := d.h.Now()
 	v.restarts = v.restarts.Steady(now.Sub(v.bootAt), now)
-	check, ok := model.ParseCheck(v.rec.Check)
+	check, ok := model.ParseCheck(rec.Check)
 	addr, err := netip.ParseAddr(v.ip)
 	if d.o.Checks == nil || !ok || err != nil || v.checking || !v.check.Due(now) {
 		return
 	}
 	v.checking = true
-	target := check.Target(v.rec.Name, addr)
+	target := check.Target(v.name, addr)
 	if d.life != nil {
 		ctx = d.life
 	}
@@ -81,12 +82,12 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 		d.mu.Unlock()
 		switch change {
 		case model.CheckFails:
-			d.logf(v.rec.Name, "its check fails: "+v.rec.Check)
-			lines, _ := d.hv.Console(ctx, v.rec.Name, model.ConsoleWindow)
+			d.logf(v.name, "its check fails: "+rec.Check)
+			lines, _ := d.hv.Console(ctx, v.name, model.ConsoleWindow)
 			kept := model.LastLines(lines)
 			d.wentDown(ctx, v, model.CheckCause(kept), kept, false, now)
 		case model.CheckBack:
-			d.tell(ctx, v.rec.Name, engine.Back(v.rec.Name))
+			d.tell(ctx, v.name, engine.Back(v.name))
 		case model.CheckSame:
 		}
 	}()
@@ -97,7 +98,7 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 // follows walks the four health steps from the first.
 func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines []string, restarts bool, now time.Time) {
 	d.mu.Lock()
-	if v.rec.Lifetime != model.AlwaysOn {
+	if v.recordLocked().Lifetime != model.AlwaysOn {
 		d.mu.Unlock()
 		return
 	}
@@ -111,7 +112,7 @@ func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines [
 	}
 	d.mu.Unlock()
 	if !was {
-		d.markUptime(ctx, model.UptimeMark{Server: v.rec.Name, Change: model.WentDown, At: now, Cause: cause})
+		d.markUptime(ctx, model.UptimeMark{Server: v.name, Change: model.WentDown, At: now, Cause: cause})
 	}
 }
 
@@ -122,13 +123,13 @@ func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines [
 // an incident an earlier engine left open.
 func (d *Engine) walk(ctx context.Context, v *vmState) {
 	d.mu.Lock()
-	if v.rec.Lifetime != model.AlwaysOn {
+	if v.recordLocked().Lifetime != model.AlwaysOn {
 		d.mu.Unlock()
 		return
 	}
 	now := d.h.Now()
 	running := v.state == engine.StateRunning
-	_, hasCheck := model.ParseCheck(v.rec.Check)
+	_, hasCheck := model.ParseCheck(v.recordLocked().Check)
 	step := model.WalkStep(running, running && v.ip != "", running && (v.guest == engine.GuestConnected || v.ssh), !hasCheck || v.check.State == model.CheckPassing)
 	if step != 0 {
 		if v.walk != nil && v.walk.Step != step {
@@ -145,7 +146,7 @@ func (d *Engine) walk(ctx context.Context, v *vmState) {
 	v.walk, v.down, v.marked = nil, false, true
 	v.cause, v.lastLines = "", nil
 	d.mu.Unlock()
-	d.markUptime(ctx, model.UptimeMark{Server: v.rec.Name, Change: model.CameBack, At: now, Restarted: walked})
+	d.markUptime(ctx, model.UptimeMark{Server: v.name, Change: model.CameBack, At: now, Restarted: walked})
 }
 
 func (d *Engine) markUptime(ctx context.Context, m model.UptimeMark) {
