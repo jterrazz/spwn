@@ -20,6 +20,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.hint {
+    color: var(--t3);
+    font-size: var(--text-label);
+}
 .item {
     display: flex;
     align-items: center;

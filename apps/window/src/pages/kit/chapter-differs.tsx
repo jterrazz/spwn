@@ -1,6 +1,7 @@
 import type { MachinefileDiffering } from '@jterrazz/station-api';
 
 import { AppIcon, Panel, StatePill, Value } from '../../design/index';
+import { absentFromFile } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { differingSide } from '../../engine/shown';
 import type { DifferingSide, SharedChapter } from '../../engine/shown';
@@ -32,6 +33,29 @@ function Lead({
     );
 }
 
+function Side({
+    chapter,
+    differing,
+    name,
+    side,
+}: {
+    chapter: SharedChapter;
+    differing: MachinefileDiffering;
+    name: string;
+    side: DifferingSide;
+}) {
+    const shown = differingSide(chapter, side, differing);
+    if (side === 'asked' && absentFromFile(chapter, differing)) {
+        return <span className={styles.hint}>{shown.word}</span>;
+    }
+    return (
+        <div className={styles.item}>
+            <Lead chapter={chapter} differing={differing} name={name} />
+            <StatePill {...shown} dotted={false} />
+        </div>
+    );
+}
+
 type ChapterDiffersProps = {
     found: Found;
     chapter: SharedChapter;
@@ -57,10 +81,13 @@ export function ChapterDiffers({ found, chapter, nameOf }: ChapterDiffersProps) 
             {differing.map((one) => (
                 <div className={styles.compare} key={`${one.Port}/${one.Account}`}>
                     {SIDES.map((side) => (
-                        <div className={styles.item} key={side}>
-                            <Lead chapter={chapter} differing={one} name={nameOf(one)} />
-                            <StatePill {...differingSide(chapter, side, one)} dotted={false} />
-                        </div>
+                        <Side
+                            chapter={chapter}
+                            differing={one}
+                            key={side}
+                            name={nameOf(one)}
+                            side={side}
+                        />
                     ))}
                 </div>
             ))}

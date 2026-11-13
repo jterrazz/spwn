@@ -8,6 +8,8 @@ import type {
     DiskRow,
     EngineReading,
     EngineStartInput,
+    MachinefileChapter,
+    MachinefileDiffering,
     MachinefileExtraLine,
     MachinefileLine,
     MachinesEngineView,
@@ -231,6 +233,14 @@ export function layerOf(line: PlanLine, all: readonly PlanLine[], seen = new Set
     return by === undefined || seen.has(by.Step.Package)
         ? line.Step.Origin.Name
         : layerOf(by, all, seen);
+}
+
+// outside: an account's empty Asked on machinefile.drift is one the file does not name, until Asked is a closed enum.
+export function absentFromFile(
+    chapter: MachinefileChapter,
+    differing: MachinefileDiffering,
+): boolean {
+    return chapter === 'accounts' && differing.Asked === '';
 }
 
 // outside: apps.list marks no entry a skill; the catalog files skills under one category, until each carries a kind.

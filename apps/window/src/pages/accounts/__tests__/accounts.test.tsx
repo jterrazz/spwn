@@ -50,8 +50,9 @@ describe('Accounts tab', () => {
             },
         );
 
-        // Then - the shares, the share list held, no unread row, and the two copies its file does not ask for
+        // Then - the shares, the share list held, no unread row, and two copies the file names not, each a bare hint
         expect(result.content.text).toContain('Not in the file');
+        expect(result.content.text).not.toMatch(/claude\s*Not in the file/u);
         expect(result.content.text).not.toContain('?');
         expect(result.content.text).not.toContain('Accounts on linux-1');
         await expect(result.tree).toMatch(file('./__expected__/stories-linux-1.aria.yaml'));
