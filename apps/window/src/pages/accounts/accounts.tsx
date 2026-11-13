@@ -127,9 +127,11 @@ function AccountRow({ account, report, found, go, target }: AccountRowProps) {
     const on = found.mac.Name;
     const shown = account.provider;
     const back = useTakeBack({ account: account.provider, shown, target, vm: on });
+    const shares = sharesOf(report, account.provider);
     return (
         <>
             <GestureRow
+                below={<SharedWithChips found={found} go={go} shares={shares} />}
                 gesture={back}
                 lead={<AppIcon name={account.provider} />}
                 outcome={<ScreenedOutcome gesture={back} />}
@@ -155,7 +157,6 @@ function AccountRow({ account, report, found, go, target }: AccountRowProps) {
                 }
                 trailSize="wide"
             />
-            <SharedWithChips found={found} go={go} shares={sharesOf(report, account.provider)} />
             <Withheld fields={[...about.withheld, ...(looksSecret(hint) ? ['hint'] : [])]} />
         </>
     );

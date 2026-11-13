@@ -32,14 +32,20 @@
 .leadChip {
     --column-lead: 196px;
 }
+.leadMachine {
+    --column-lead: 20px;
+}
 .nested.leadIcon {
     --column-lead: 38px;
+}
+.nested.leadMachine {
+    --column-lead: 34px;
 }
 .nested .lead {
     padding-left: 14px;
 }
 .hasStart {
-    --column-start: 104px;
+    --column-start: max-content;
 }
 .hasKind {
     --column-kind: 72px;
@@ -63,11 +69,12 @@
     --column-trail: 240px;
 }
 .catalog {
-    --column-name: minmax(140px, 180px);
+    --column-name: minmax(140px, 184px);
     --column-cells: minmax(0, 1fr);
+    min-height: 40px;
 }
-.catalog .cell {
-    white-space: normal;
+.catalog.hasState {
+    --column-state: 96px;
 }
 .catalog.hasValue {
     --column-value: 88px;
@@ -77,6 +84,8 @@
 }
 .meters {
     --column-cells: 112px 150px;
+    min-height: 40px;
+    padding-block: var(--space-4);
 }
 .hasStart.hasTrail {
     --column-trail: minmax(0, 260px);

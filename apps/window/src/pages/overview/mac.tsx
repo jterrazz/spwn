@@ -61,6 +61,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                 <Row
                     key={vm.Name}
                     lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
+                    leadSize="machine"
                     onOpen={() => {
                         go(machineRoute(vm.Name));
                     }}

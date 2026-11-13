@@ -16,16 +16,16 @@
     - text: An account lives on this Mac; a machine gets a copy for a time, never the account itself · no secret is ever shown here
   - region "Accounts on this Mac":
     - heading "Accounts on this Mac" [level=2]
-    - text: github jterrazz · read:org, repo · kept here Signed in
+    - text: github jterrazz · read:org, repo · kept here
     - paragraph:
       - text: shared with
       - button "linux-1"
-    - text: npm kept here · token refused npm login
+    - text: Signed in npm kept here · token refused npm login
     - button "Copy npm login": Copy
     - text: Refused
     - button "Sign in"
-    - text: claude admin@jterrazz.com · max · kept here Signed in
+    - text: claude admin@jterrazz.com · max · kept here
     - paragraph:
       - text: shared with
       - button "linux-1"
-    - text: tailscale kept here · app-store Signed in cloudflare admin@jterrazz.com · kept here · wrangler Signed in git Jean-Baptiste Terrazzoni, admin@jterrazz.com · kept here Signed in ssh 1 key · admin@jterrazz.com · kept here Signed in docker not signed in Not set
+    - text: Signed in tailscale kept here · app-store Signed in cloudflare admin@jterrazz.com · kept here · wrangler Signed in git Jean-Baptiste Terrazzoni, admin@jterrazz.com · kept here Signed in ssh 1 key · admin@jterrazz.com · kept here Signed in docker not signed in Not set

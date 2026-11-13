@@ -62,7 +62,6 @@ function Held({
                 identity={identity}
                 label={`Memory of ${name}, used of its total`}
                 percent={(used / total) * 100}
-                width="fixed"
             />
             <span className={styles.figure}>{`${gb(used)} / ${gb(total)}`}</span>
         </span>

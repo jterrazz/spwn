@@ -20,8 +20,8 @@ import styles from './catalog.module.css';
 const ABOUT =
     'Everything station knows how to install or set: apps, agent skills and settings, each one a package';
 
-function kindOf(word: string): null | string {
-    return word === '' ? null : word;
+function kindOf(word: string): { tag?: string; tagLook?: 'type' } {
+    return word === '' ? {} : { tag: word, tagLook: 'type' };
 }
 
 type Open = (name: string) => void;
@@ -32,8 +32,8 @@ function AppRow({ report, open }: { report: AppsReport; open: Open }) {
     const version = report.Version === '' ? null : <Value look="raised">{report.Version}</Value>;
     return (
         <Row
-            cells={[update === null ? sentence([App.Description, report.Detail]) : App.Description]}
-            kind={App.Kind === undefined ? null : kindOf(CATALOG_KIND_WORDS[App.Kind])}
+            cells={[App.Description]}
+            {...(App.Kind === undefined ? {} : kindOf(CATALOG_KIND_WORDS[App.Kind]))}
             lead={<AppIcon kind={App.Kind} name={App.Name} />}
             onOpen={() => {
                 open(App.Name);
@@ -81,7 +81,7 @@ function SettingRow({
     return (
         <Row
             cells={[row.Package.Description]}
-            kind={CATALOG_KIND_WORDS.setting}
+            {...kindOf(CATALOG_KIND_WORDS.setting)}
             lead={<AppIcon kind="setting" name={row.Name} />}
             onOpen={() => {
                 open(row.Name);

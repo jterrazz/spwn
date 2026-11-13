@@ -7,7 +7,7 @@
 }
 .figure {
     color: var(--t2);
+    font-family: var(--font-mono);
     font-size: var(--text-label);
-    font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }

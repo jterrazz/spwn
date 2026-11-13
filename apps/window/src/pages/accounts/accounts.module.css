@@ -24,8 +24,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-6);
-    margin: calc(-1 * var(--space-4)) 0 0;
-    padding: 0 0 var(--space-8) calc(24px + var(--space-12));
+    margin: var(--space-6) 0 0;
 }
 .withheld {
     font-size: var(--text-label);

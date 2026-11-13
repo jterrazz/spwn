@@ -57,6 +57,7 @@ function Process({
             <div className={styles.process}>
                 <Row
                     lead={leads ? null : undefined}
+                    leadSize="machine"
                     size="slim"
                     title={name}
                     titleLook="mono"
@@ -70,6 +71,7 @@ function Process({
             lead={
                 vm ? <MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} /> : null
             }
+            leadSize="machine"
             onOpen={() => {
                 go(machineRoute(name, 'Activity'));
             }}

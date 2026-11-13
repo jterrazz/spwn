@@ -20,10 +20,11 @@ export type RowProps = {
     title: string;
     titleLook?: 'mono' | 'plain';
     tag?: string;
-    tagLook?: 'chip' | 'hint';
+    tagLook?: 'chip' | 'hint' | 'type';
     sentence?: ReactNode;
+    below?: ReactNode;
     lead?: ReactNode;
-    leadSize?: 'chip' | 'dot' | 'icon' | 'value';
+    leadSize?: 'chip' | 'dot' | 'icon' | 'machine' | 'value';
     state?: null | RowState;
     stateAt?: 'end' | 'start';
     cells?: readonly ReactNode[];
@@ -58,6 +59,7 @@ const LEAD_SIZES = {
     chip: styles.leadChip,
     dot: styles.leadDot,
     icon: styles.leadIcon,
+    machine: styles.leadMachine,
     value: styles.leadValue,
 };
 const TRAIL_SIZES = { fit: styles.hasTrail, pill: styles.trailPill, wide: styles.trailWide };
@@ -130,11 +132,12 @@ type NameProps = {
     title: string;
     titleLook: 'mono' | 'plain' | undefined;
     tag: string | undefined;
-    tagLook: 'chip' | 'hint';
+    tagLook: 'chip' | 'hint' | 'type';
     sentence: ReactNode;
+    below: ReactNode;
 };
 
-function Name({ title, titleLook, tag, tagLook, sentence }: NameProps) {
+function Name({ title, titleLook, tag, tagLook, sentence, below }: NameProps) {
     const titled = (
         <span
             className={`${styles.title} ${titleLook === 'mono' ? styles.mono : ''}`}
@@ -150,11 +153,9 @@ function Name({ title, titleLook, tag, tagLook, sentence }: NameProps) {
             ) : (
                 <span className={styles.tagged}>
                     {titled}
-                    {tagLook === 'hint' ? (
-                        <span className={styles.hint}>{tag}</span>
-                    ) : (
-                        <Value look="raised">{tag}</Value>
-                    )}
+                    {tagLook === 'hint' ? <span className={styles.hint}>{tag}</span> : null}
+                    {tagLook === 'chip' ? <Value look="raised">{tag}</Value> : null}
+                    {tagLook === 'type' ? <TypeTag>{tag}</TypeTag> : null}
                 </span>
             )}
             {sentence === undefined || sentence === null || sentence === '' ? null : (
@@ -162,6 +163,7 @@ function Name({ title, titleLook, tag, tagLook, sentence }: NameProps) {
                     {sentence}
                 </span>
             )}
+            {below}
         </div>
     );
 }
@@ -174,6 +176,7 @@ function RowBody({
     tag,
     tagLook = 'chip',
     sentence,
+    below,
     lead,
     state,
     stateAt = 'end',
@@ -187,6 +190,7 @@ function RowBody({
             {lead === undefined ? null : <div className={styles.lead}>{lead}</div>}
             {stateAt === 'start' ? <StateCell at="start" state={state} /> : null}
             <Name
+                below={below}
                 sentence={sentence}
                 tag={tag}
                 tagLook={tagLook}
