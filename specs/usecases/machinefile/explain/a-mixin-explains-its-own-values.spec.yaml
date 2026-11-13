@@ -1,0 +1,17 @@
+description: 'a mixin explains the values its own chain says, none judged against a machine'
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/dev-tools.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: dev-tools
+          apps: [git, jq]
+          accounts: { keep: [github] }
+      exit: 0
+    - command: 'explain --machinefile dev-tools'
+      exit: 0
+      stdout: |
+          # dev-tools
+          	apps.git	listed	user	dev-tools
+          	apps.jq	listed	user	dev-tools
+          	accounts.keep.github	kept	user	dev-tools

@@ -821,14 +821,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 	// order they run, then what is skipped), then what it is lent and may
 	// open, then the owner's lines per phase.
 	out := make([]Value, 0, len(m.order)+3*len(r.Steps))
-	family := func(k string) string { f, _, _ := strings.Cut(k, "."); return f }
-	for _, f := range []string{"machine", "vm", "prefer"} {
-		for _, k := range m.order {
-			if family(k) == f {
-				out = append(out, m.values[k])
-			}
-		}
-	}
+	out = append(out, m.family("machine", "vm", "prefer")...)
 	for _, s := range r.Steps {
 		group := "apps."
 		if s.Kind == catalog.KindSetting {
@@ -862,9 +855,14 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		out = append(out, Value{Key: group + s.Package, Text: s.Why, Origin: s.Origin})
 	}
-	for _, f := range []string{"accounts", "ports", "run"} {
+	return append(out, m.family("accounts", "ports", "run")...)
+}
+
+func (m merged) family(families ...string) []Value {
+	var out []Value
+	for _, f := range families {
 		for _, k := range m.order {
-			if family(k) == f {
+			if head, _, _ := strings.Cut(k, "."); head == f {
 				out = append(out, m.values[k])
 			}
 		}
@@ -884,6 +882,41 @@ func withhold(text string) (string, bool) {
 		return secret.Marker, true
 	}
 	return text, false
+}
+
+func Own(lib Library, name string) (Resolved, error) {
+	// invariant: a mixin answers the values its chain says, in the
+	// Machinefile's reading order, each app and setting listed as the
+	// strongest file lists it; none is resolved against the catalog or a
+	// system, so a refusal of a plan is never raised here.
+	files, err := lib.chain(name)
+	if err != nil {
+		return Resolved{}, err
+	}
+	m := merge(files)
+	r := Resolved{Name: name}
+	for _, f := range files {
+		r.Files = append(r.Files, originOf(f))
+	}
+	r.Values = m.family("machine", "vm", "prefer")
+	for _, a := range m.apps {
+		r.Values = append(r.Values, Value{Key: "apps." + a.name, Text: "listed", Origin: a.origin})
+		for _, k := range sortedNames(a.entry.Options) {
+			r.Values = append(r.Values, Value{Key: "apps." + a.name + "." + k, Text: string(a.entry.Options[k]), Origin: a.origin})
+		}
+	}
+	for _, n := range m.setting {
+		l := m.set[n]
+		r.Values = append(r.Values, Value{Key: "settings." + n, Text: "listed", Origin: l.origin})
+		for _, k := range sortedNames(l.entry.Values) {
+			r.Values = append(r.Values, Value{Key: "settings." + n + "." + k, Text: string(l.entry.Values[k]), Origin: l.origin})
+		}
+		if l.entry.From != "" {
+			r.Values = append(r.Values, Value{Key: "settings." + n + ".from", Text: l.entry.From, Origin: l.origin})
+		}
+	}
+	r.Values = append(r.Values, m.family("accounts", "ports", "run")...)
+	return r, nil
 }
 
 func Explain(r Resolved, key string) ([]Value, error) {

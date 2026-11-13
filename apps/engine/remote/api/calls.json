@@ -585,7 +585,6 @@
         "machinefile.bad-value",
         "machinefile.cycle",
         "machinefile.invalid",
-        "machinefile.mixin",
         "machinefile.newer-schema",
         "machinefile.no-method",
         "machinefile.not-found",

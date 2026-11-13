@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -99,9 +100,9 @@ var Explain = call.Call[Deps, ExplainIn, ExplainOut]{
 	// value: each value of a machine's Machinefile, resolved against the
 	// catalog, with the layer and the file it was read from.
 	Name: "machinefile.explain", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: append([]fail.Code{UnknownKey}, resolution()...),
+	Errors: append([]fail.Code{UnknownKey}, slices.DeleteFunc(resolution(), func(c fail.Code) bool { return c == Mixin })...),
 	Run: func(ctx context.Context, d Deps, in ExplainIn, _ call.Progress) (ExplainOut, error) {
-		r, err := resolve(ctx, d, in.Machinefile)
+		r, err := resolveValues(ctx, d, in.Machinefile)
 		if err != nil {
 			return ExplainOut{}, err
 		}
@@ -146,17 +147,38 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 	return mf.Name, &machinefile.Tree{Layer: machinefile.User, Root: filepath.Dir(asked), Files: []machinefile.File{{Path: "machinefiles/" + mf.Name + catalog.MachinefileSuffix, Body: body, At: asked}}}, nil
 }
 
-func resolve(ctx context.Context, d Deps, asked string) (machinefile.Resolved, error) {
-	r, _, err := resolveIn(ctx, d, asked)
-	return r, err
-}
-
 // value: the Machinefile resolved, with the catalog it was resolved
 // against, which judges what the ledger holds that it lists no longer.
 func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved, catalog.Catalog, error) {
-	name, path, err := named(ctx, d, asked)
+	name, lib, source, lock, err := load(ctx, d, asked)
 	if err != nil {
 		return machinefile.Resolved{}, catalog.Catalog{}, err
+	}
+	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
+	r.Source = source
+	return r, lib.Catalog, Worded(err)
+}
+
+// value: what explain reads: the Machinefile resolved, or, for a mixin,
+// the values its own chain says.
+func resolveValues(ctx context.Context, d Deps, asked string) (machinefile.Resolved, error) {
+	name, lib, source, lock, err := load(ctx, d, asked)
+	if err != nil {
+		return machinefile.Resolved{}, err
+	}
+	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
+	var mixin *machinefile.MixinError
+	if errors.As(err, &mixin) {
+		r, err = machinefile.Own(lib, name)
+	}
+	r.Source = source
+	return r, Worded(err)
+}
+
+func load(ctx context.Context, d Deps, asked string) (name string, lib machinefile.Library, source *catalog.LockSource, lock machinefile.Lock, err error) {
+	name, path, err := named(ctx, d, asked)
+	if err != nil {
+		return "", lib, nil, lock, err
 	}
 	var trees []machinefile.Tree
 	if path != nil {
@@ -165,25 +187,21 @@ func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved,
 	for _, s := range d.Sources() {
 		t, read := s.Read(ctx)
 		if read != nil {
-			return machinefile.Resolved{}, catalog.Catalog{}, Worded(read)
+			return "", lib, nil, lock, Worded(read)
 		}
 		trees = append(trees, t)
 	}
-	var source *catalog.LockSource
 	for _, t := range trees {
 		source = cmp.Or(source, t.Source)
 	}
-	lib, err := machinefile.Load(trees)
-	if err != nil {
-		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
+	if lib, err = machinefile.Load(trees); err != nil {
+		return "", lib, nil, lock, Worded(err)
 	}
-	lock := machinefile.Lock{File: d.Locks.Where(name)}
+	lock = machinefile.Lock{File: d.Locks.Where(name)}
 	if lock.LockFile, _, err = d.Locks.Read(ctx, name); err != nil {
-		return machinefile.Resolved{}, catalog.Catalog{}, Worded(err)
+		return "", lib, nil, lock, Worded(err)
 	}
-	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
-	r.Source = source
-	return r, lib.Catalog, Worded(err)
+	return name, lib, source, lock, nil
 }
 
 func All(d Deps) []call.Handler {

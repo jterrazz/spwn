@@ -7,7 +7,7 @@ runs:
           name: jterrazz-base
           apps: [git]
       exit: 0
-    - command: 'explain --machinefile jterrazz-base'
+    - command: 'plan --machinefile jterrazz-base'
       exit: 2
       stderr: |
           Error: jterrazz-base is a mixin (it says no machine): it is extended, never applied

@@ -305,3 +305,41 @@ methods:
 		}
 	}
 }
+
+func TestAMixinAnswersItsOwnChainsValuesAndIsNeverResolved(t *testing.T) {
+	base := "machinefile: station.machinefile/v1\nname: base\napps: [fd, left]\nvm: { network: nat }\naccounts: { keep: [github] }\n"
+	top := "machinefile: station.machinefile/v1\nname: top\nextends: [base]\napps: [releases]\nvm: { resources: { cpus: 4 } }\n"
+	lib := library(t, map[string]string{"machinefiles/top.machine.yaml": top}, map[string]string{"machinefiles/base.machine.yaml": base})
+	if _, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, new(*machinefile.MixinError)) {
+		t.Fatalf("resolve of a mixin: %v, want the mixin refusal", err)
+	}
+	r, err := machinefile.Own(lib, "top")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]machinefile.Value{}
+	for _, v := range r.Values {
+		got[v.Key] = v
+	}
+	if v := got["vm.network"]; v.Text != "nat" || v.Origin.Name != "base" {
+		t.Errorf("network %+v, want the extended mixin's nat", v)
+	}
+	if v := got["vm.resources.cpus"]; v.Text != "4" || v.Origin.Name != "top" {
+		t.Errorf("cpus %+v, want its own 4", v)
+	}
+	if v := got["apps.fd"]; v.Text != "listed" || v.Origin.Name != "base" {
+		t.Errorf("fd %+v, want listed by base", v)
+	}
+	if v := got["apps.releases"]; v.Text != "listed" || v.Origin.Name != "top" {
+		t.Errorf("releases %+v, want listed by top", v)
+	}
+	if v := got["apps.left"]; v.Text != "listed" || v.Origin.Name != "base" {
+		t.Errorf("left %+v, want listed by base though no catalog step holds it", v)
+	}
+	if v := got["accounts.keep.github"]; v.Text != "kept" {
+		t.Errorf("github %+v, want kept", v)
+	}
+	if len(r.Steps) != 0 {
+		t.Errorf("a mixin holds steps %+v, want none judged", r.Steps)
+	}
+}
