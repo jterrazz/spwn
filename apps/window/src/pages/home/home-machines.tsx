@@ -18,6 +18,7 @@ const SPARK_BARS = 8;
 
 const COLUMNS = [
     { label: 'Machine' },
+    { label: 'What it is for' },
     { label: 'CPU', numeric: true },
     { label: 'Memory, GB', numeric: true },
 ] as const;
@@ -83,15 +84,17 @@ function macCells(name: string, report: ActivityReport | undefined) {
 }
 
 export function vmCells(
-    vm: Pick<MachinesVM, 'Name' | 'Resources'>,
+    vm: Pick<MachinesVM, 'Name' | 'Purpose' | 'Resources'>,
     report: ActivityReport | undefined,
 ) {
+    const purpose = vm.Purpose === '' ? null : vm.Purpose;
     const usage = report?.last.vms?.find((one) => one.vm === vm.Name);
     if (usage === undefined) {
-        return [null, null];
+        return [purpose, null, null];
     }
     const total = vm.Resources.MemoryBytes;
     return [
+        purpose,
         <Cpu key="cpu" name={vm.Name} value={percent(usage.cpu)} />,
         total > 0 ? (
             <Held
@@ -112,13 +115,13 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
         <>
             {readers}
             <Row
-                cells={macCells(mac.Name, report)}
+                cells={[null, ...macCells(mac.Name, report)]}
                 lead={<MachineIcon kind="mac" />}
                 leadSize="machine"
                 onOpen={() => {
                     go(machineRoute(mac.Name));
                 }}
-                template="meters"
+                template="fleet"
                 title={mac.Name}
             />
             {(mac.VMs ?? []).map((vm) => (
@@ -131,7 +134,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
                     onOpen={() => {
                         go(machineRoute(vm.Name));
                     }}
-                    template="meters"
+                    template="fleet"
                     title={vm.Name}
                 />
             ))}
@@ -142,7 +145,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
 export function HomeMachines({ macs, go }: { macs: readonly MachinesMacView[]; go: Go }) {
     return (
         <Panel title="Machines">
-            <RowHead columns={COLUMNS} lead template="meters" />
+            <RowHead columns={COLUMNS} lead template="fleet" />
             {macs.map((mac) => (
                 <MacRows go={go} key={mac.Name} mac={mac} />
             ))}

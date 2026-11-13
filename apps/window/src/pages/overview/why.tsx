@@ -1,6 +1,7 @@
 import type { ActivityReport, MachinesVM } from '@jterrazz/station-api';
 
 import { MissingMark, Panel, Row, Value } from '../../design/index';
+import { NO_PURPOSE_WORD } from '../../engine/words';
 import type { Found } from '../../model/machines';
 import { BusyShare } from '../activity/busiest';
 import { busiestOf } from '../activity/measures';
@@ -11,17 +12,19 @@ import styles from './overview.module.css';
 
 const BUSIEST_ROWS = 3;
 
+function sentenceBy(created: string, creator: string): string {
+    return creator === '' ? created : `${created}, by ${creator}`;
+}
+
 export function WhyItExists({ vm }: { vm: MachinesVM }) {
     const created = shortDay(vm.CreatedAt);
     return (
         <Panel padded title="Why it exists">
             <dl className={styles.kv}>
                 <dt>Purpose</dt>
-                <dd>
-                    <MissingMark />
-                </dd>
+                <dd>{vm.Purpose === '' ? NO_PURPOSE_WORD : vm.Purpose}</dd>
                 <dt>Created</dt>
-                <dd>{created ?? <MissingMark />}</dd>
+                <dd>{created === undefined ? <MissingMark /> : sentenceBy(created, vm.Creator)}</dd>
                 <dt>Hold</dt>
                 <dd>
                     <MissingMark />

@@ -7,7 +7,7 @@ import { Value } from './value';
 
 import styles from './row.module.css';
 
-export type RowTemplate = 'catalog' | 'flow' | 'meters';
+export type RowTemplate = 'catalog' | 'fleet' | 'flow' | 'meters';
 
 // value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared").
 type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: 'unsaid' | 'word' };

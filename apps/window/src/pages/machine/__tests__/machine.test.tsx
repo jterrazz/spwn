@@ -48,7 +48,8 @@ describe('machine', () => {
             },
         );
 
-        // Then - CPU, memory and disk are its numbers, what the engine does not give is said not given
+        // Then - CPU, memory and disk are its numbers, who made it the engine's, what it does not give said not given
+        expect(result.content.text).toContain('by you');
         await expect(result.tree).toMatch(
             file('./__expected__/two-macs-linux-1-overview.aria.yaml'),
         );

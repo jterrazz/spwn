@@ -49,8 +49,8 @@
     - paragraph: Not given yet What each machine holds of this Mac's memory.
   - region "Its machines":
     - heading "Its machines" [level=2]
-    - button "api persistent · 4 CPU · 8 GB · 50 GB disk Stopped"
-    - button "linux-1 ephemeral · 4 CPU · 8 GB · 50 GB disk Running"
+    - button "api by you Stopped"
+    - button "linux-1 by you Running"
   - region "Packages":
     - heading "Packages" [level=2]
     - button "Follows jterrazz-macbook-pro its apps, settings and the values you set are read in Machine files 2 differences from jterrazz-macbook-pro."

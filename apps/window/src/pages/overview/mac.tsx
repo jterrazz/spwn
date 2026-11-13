@@ -4,9 +4,9 @@ import { Icon } from '../../design/icon';
 import { identityOf, MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
-import { verdictShown, vmLifetimeWord, vmState } from '../../engine/shown';
+import { verdictShown, vmState } from '../../engine/shown';
 import { duration, sentence } from '../../model/format';
-import { driftAsked, resourcesOf } from '../../model/machines';
+import { driftAsked } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
@@ -65,7 +65,10 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                     onOpen={() => {
                         go(machineRoute(vm.Name));
                     }}
-                    sentence={sentence([vmLifetimeWord(vm), resourcesOf(vm)])}
+                    sentence={sentence([
+                        vm.Purpose,
+                        vm.Creator === '' ? undefined : `by ${vm.Creator}`,
+                    ])}
                     state={stateUp(vm, read)}
                     title={vm.Name}
                 />

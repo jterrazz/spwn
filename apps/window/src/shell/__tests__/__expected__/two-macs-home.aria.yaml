@@ -72,7 +72,7 @@
     - paragraph: Not given yet What each machine holds, against each Mac's total
   - region "Machines":
     - heading "Machines" [level=2]
-    - text: Machine CPU Memory, GB
+    - text: Machine What it is for CPU Memory, GB
     - button "jterrazz-macbook-pro 34 % 78 12.4 / 16":
       - text: jterrazz-macbook-pro 34 %
       - meter "Memory of jterrazz-macbook-pro, used of its total"
