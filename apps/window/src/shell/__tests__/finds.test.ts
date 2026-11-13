@@ -62,12 +62,11 @@ describe('finds', () => {
         // Given - two Macs, two VMs, a need and three packages held
         const groups = matching(everything(HELD), '');
 
-        // Then - places, the machines each Mac then its VMs, the library, needs and the actions; tabs and packages wait for a query
+        // Then - places, the machines each Mac then its VMs, the library and the actions; tabs, needs and packages wait for a query
         expect(shown(groups)).toStrictEqual([
             ['Places', ['Home', 'Inbox', 'Storage']],
             ['Machines', ['mini', 'book', 'linux-1', 'api']],
-            ['Library', ['Machine files', 'Catalog', 'Apps', 'Skills', 'Settings']],
-            ['Needs', ['web does not answer on :3000']],
+            ['Library', ['Machine files', 'Catalog', 'Storage']],
             ['Actions', ['New machine', 'Show or hide the sidebar']],
         ]);
     });
@@ -80,7 +79,7 @@ describe('finds', () => {
         const details = (kind: string) =>
             groups.find((group) => group.kind === kind)?.results.map((result) => result.detail);
         expect(details('Places')).toStrictEqual(['page', 'page', 'page']);
-        expect(details('Library')).toStrictEqual(['setup', 'setup', 'setup', 'setup', 'setup']);
+        expect(details('Library')).toStrictEqual(['setup', 'setup', 'setup']);
     });
 
     test('this Mac is named so, any other Mac is a Mac', () => {
@@ -141,14 +140,16 @@ describe('finds', () => {
         expect(need[0]?.results[0]?.to).toStrictEqual({ route: machineRoute('linux-1', 'Ports') });
     });
 
-    test('the gallery is found only in a window that holds it', () => {
-        // Given - the same query in a production window, then a proof window
+    test('the gallery is found only in a window that holds it, and only by its name', () => {
+        // Given - the same query in a production window, then a proof window, then the proof window's empty query
         const production = matching(everything(HELD), 'gallery');
         const proof = matching(everything({ ...HELD, withGallery: true }), 'gallery');
+        const unasked = matching(everything({ ...HELD, withGallery: true }), '');
 
-        // Then - only the proof window finds it
+        // Then - only the proof window finds it, and its empty query does not list it
         expect(production).toStrictEqual([]);
         expect(shown(proof)).toStrictEqual([['Library', ['Gallery']]]);
+        expect(shown(unasked)).toContainEqual(['Library', ['Machine files', 'Catalog', 'Storage']]);
     });
 
     test('a query nothing holds finds nothing', () => {

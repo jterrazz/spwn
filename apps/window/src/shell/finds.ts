@@ -47,15 +47,10 @@ export type Held = {
 };
 
 const PLACES: readonly PlainPage[] = ['home', 'inbox', 'storage'];
-const LIBRARY: readonly PlainPage[] = [
-    'machine-files',
-    'catalog',
-    'catalog-apps',
-    'catalog-skills',
-    'catalog-settings',
-];
+const LIBRARY: readonly PlainPage[] = ['machine-files', 'catalog', 'storage'];
+const FOUND_BY_NAME: ReadonlySet<PlainPage> = new Set<PlainPage>(['gallery']);
 
-const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Packages', 'Tabs']);
+const WITH_A_QUERY: ReadonlySet<Kind> = new Set<Kind>(['Needs', 'Packages', 'Tabs']);
 const PAGE_DETAILS: Partial<Record<Kind, string>> = { Library: 'setup', Places: 'page' };
 
 function page(held: Held, kind: Kind, one: PlainPage): Result {
@@ -162,6 +157,15 @@ export function resultKey(result: Result): string {
     return `${result.kind}\u0000${result.label}\u0000${result.detail}`;
 }
 
+function asked(result: Result): boolean {
+    return (
+        WITH_A_QUERY.has(result.kind) ||
+        ('route' in result.to &&
+            result.to.route.page !== 'machine' &&
+            FOUND_BY_NAME.has(result.to.route.page))
+    );
+}
+
 function machineOf(result: Result): string {
     return 'route' in result.to && result.to.route.page === 'machine'
         ? result.to.route.machine
@@ -189,7 +193,7 @@ export function matching(all: readonly Result[], query: string): readonly Group[
     const seen = new Set<string>();
     const kept = all.filter((result) => {
         const key = resultKey(result);
-        if (seen.has(key) || (terms.length === 0 && WITH_A_QUERY.has(result.kind))) {
+        if (seen.has(key) || (terms.length === 0 && asked(result))) {
             return false;
         }
         seen.add(key);
