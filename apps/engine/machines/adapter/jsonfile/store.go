@@ -206,12 +206,23 @@ func (s *Store) Delete(_ context.Context, name string) error {
 	return nil
 }
 
+func lifetimeAlias(l machines.Lifetime) machines.Lifetime {
+	// value: today's word for a lifetime a record says before version 2,
+	// v2's (temporary, lasting) or v3.0's (throwaway, permanent); read by
+	// Migrate alone, which writes today's.
+	switch string(l) {
+	case "temporary", "throwaway":
+		return machines.Ephemeral
+	case "lasting", "permanent":
+		return machines.Persistent
+	}
+	return l
+}
+
 func (s *Store) Migrate(context.Context) error {
-	// invariant: version 2 writes the lifetime as ephemeral or persistent,
-	// where version 1 wrote throwaway or permanent (or v2's words); a record
-	// written before it is rewritten in today's words, its shares kept as
-	// they are; a record at version 2, or one that cannot be read, is left
-	// as it is.
+	// invariant: a record written before version 2 is rewritten at it in
+	// today's lifetime words, its shares kept as they are; a record at
+	// version 2, or one that cannot be read, is left as it is.
 	entries, err := s.files.ReadDir(s.dir)
 	if err != nil {
 		return store.OnlyNewer(err)
@@ -228,6 +239,7 @@ func (s *Store) Migrate(context.Context) error {
 		if err != nil || f.V >= Version {
 			continue
 		}
+		f.Lifetime = lifetimeAlias(f.Lifetime)
 		f.V = Version
 		data, err := json.MarshalIndent(f, "", "  ")
 		if err != nil {

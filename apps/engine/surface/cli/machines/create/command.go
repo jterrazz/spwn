@@ -126,10 +126,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				lifetime = machines.Persistent
 			}
 			if in.Lifetime != "" {
-				var old machines.Lifetime
-				_ = old.UnmarshalText([]byte(in.Lifetime))
-				lifetime = old
-				if old == machines.Persistent {
+				lifetime = machines.Lifetime(in.Lifetime)
+				if lifetime == machines.Persistent {
 					env.Out.Now(nowWords(in))
 				}
 			}

@@ -262,11 +262,11 @@ A v2 word, or a v3.0 one (`setup`), runs its new command with the same arguments
 | `station machines probe <machine>`    | `station machines <machine>`                                                                                                                                                                              |
 | `station setup`                       | `station init`, v3.0's word, and one more muted line on stderr: apps and settings no longer come with it (`station apps install <app>`, `station settings apply <setting>`)                               |
 | `machines create --always-on`         | `machines create --server`                                                                                                                                                                                |
-| `machines create --permanent`         | `machines create --persistent`; a lifetime stored or sent as `throwaway` or `permanent` reads as `ephemeral` or `persistent`, and the store is rewritten on the next `station init`                       |
+| `machines create --permanent`         | `machines create --persistent`; a VM record stored as `throwaway` or `permanent` is rewritten as `ephemeral` or `persistent` by the next `station init`                                                   |
 | `station run git <shortcut>`          | `git <alias>`, the [Git shortcuts](settings.md#the-items) setting's alias (`log`, `push`, `status` are `lg`, `pushup`, `st`); refused with `station settings apply git-shortcuts` while it is not applied |
 | `station run docker rm\|rmi\|reset`   | the steps of `dclean`, `dclean-images`, `dreset`, the [Docker shortcuts](settings.md#the-items), asking as before (`--yes` off a terminal)                                                                |
 
-The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.list/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent` where they said `mac`, `throwaway` and `permanent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
+The words of a kind and a lifetime are not aliased in `--json`: `station.machines.list/v1`, `station.accounts.list/v1` and `station.overview.read/v1` say `computer`, `ephemeral` and `persistent`, and `station.status/v1` keeps its words ([ADR-032](../decisions/032-the-words-of-a-vms-lifetime-and-network.md)).
 
 ## Plumbing
 

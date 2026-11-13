@@ -1,7 +1,5 @@
 package machine
 
-import "encoding/json"
-
 type Kind string
 
 const (
@@ -10,32 +8,12 @@ const (
 	Workspace Kind = "workspace"
 )
 
-const (
-	// value: the word a station older than ADR-032 says for a Computer, in
-	// its stores and on the wire.
-	OlderComputer = "mac"
-)
-
-func (k *Kind) UnmarshalJSON(b []byte) error {
-	var word string
-	if err := json.Unmarshal(b, &word); err != nil {
-		return err
-	}
-	// value: the older word is read for one release; it is written only to
-	// a peer that reads no other (remote/api's OlderWords).
-	if word == OlderComputer {
-		word = string(Computer)
-	}
-	*k = Kind(word)
-	return nil
-}
-
 func (k Kind) Word(os OS) string {
 	// value: the word a sentence calls a kind by: a computer whose system is
 	// macOS is a Mac, as is one whose system was not said (every computer an
 	// older detail named ran macOS), and any other is a computer; a
 	// workspace and a server are called by their own names.
-	if k == Computer || k == OlderComputer {
+	if k == Computer {
 		if os == "" || os == MacOS {
 			return "Mac"
 		}

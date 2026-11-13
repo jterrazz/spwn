@@ -2,7 +2,7 @@
   "name": "api",
   "image": "linux",
   "version": "2026.11.07",
-  "lifetime": "lasting",
+  "lifetime": "persistent",
   "cpus": 4,
   "memory_bytes": 8589934592,
   "disk_bytes": 50000000000,

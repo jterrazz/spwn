@@ -66,6 +66,8 @@ func TestMigrateRewritesAnOlderRecordInTodaysLifetimeWordsAndLeavesTheRest(t *te
 		"api":   `{"name":"api","image":"linux","lifetime":"permanent","lent":[{"name":"session:a","at":"2026-11-01T09:00:00Z","until":"2026-11-01T17:00:00Z"}]}`,
 		"v2":    `{"name":"v2","image":"linux","lifetime":"lasting"}`,
 		"temp":  `{"name":"temp","image":"linux","lifetime":"throwaway"}`,
+		"v2tmp": `{"name":"v2tmp","image":"linux","lifetime":"temporary"}`,
+		"on":    `{"name":"on","image":"linux","lifetime":"always-on"}`,
 		"today": "{\n  \"name\": \"today\",\n  \"lifetime\": \"ephemeral\",\n  \"v\": 2\n}\n",
 	}
 	for name, body := range old {
@@ -75,11 +77,14 @@ func TestMigrateRewritesAnOlderRecordInTodaysLifetimeWordsAndLeavesTheRest(t *te
 	if err := s.Migrate(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	for name, want := range map[string]string{"api": "persistent", "v2": "persistent", "temp": "ephemeral"} {
+	for name, want := range map[string]machines.Lifetime{"api": machines.Persistent, "v2": machines.Persistent, "temp": machines.Ephemeral, "v2tmp": machines.Ephemeral, "on": machines.AlwaysOn} {
 		data, _ := os.ReadFile(filepath.Join(dir, name+".json"))
-		if !strings.Contains(string(data), `"lifetime": "`+want+`"`) || !strings.Contains(string(data), `"v": 2`) {
+		if !strings.Contains(string(data), `"lifetime": "`+string(want)+`"`) || !strings.Contains(string(data), `"v": 2`) {
 			t.Errorf("%s was not rewritten at version 2 with %s:\n%s", name, want, data)
 		}
+	}
+	if r, err := s.Get(context.Background(), "temp"); err != nil || r.Lifetime != machines.Ephemeral {
+		t.Errorf("temp reads %q, %v after the migration; want ephemeral", r.Lifetime, err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(dir, "api.json")); !strings.Contains(string(data), `"until": "2026-11-01T17:00:00Z"`) {
 		t.Errorf("the share was lost:\n%s", data)

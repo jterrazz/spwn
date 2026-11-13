@@ -1,7 +1,7 @@
 description: 'the v2 words create --lifetime, --always-on and machines probe run the v3 command, named on stderr'
 env: two-macs
 runs:
-    - command: 'machines create box --lifetime lasting | /usr/bin/tail -1'
+    - command: 'machines create box --lifetime persistent | /usr/bin/tail -1'
       exit: 0
       stdout: |
           ●	box	Created	Persistent · 4 CPU · 4 GB · 20 GB

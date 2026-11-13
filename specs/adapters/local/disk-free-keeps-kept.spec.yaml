@@ -9,7 +9,7 @@ runs:
       stdout: |
           	none
       files:
-          .local/state/station/vms/a.json: { equals: "{\"lifetime\":\"lasting\"}\n" }
+          .local/state/station/vms/a.json: { equals: "{\"lifetime\":\"persistent\"}\n" }
           .local/state/station/images/key: { equals: "a private key\n" }
           .local/state/station/leases.json: { equals: "{\"schema\":\"station.leases/v1\",\"leases\":[]}\n" }
           .local/state/station/known_hosts/x: { equals: "x ssh-ed25519 AAAA\n" }

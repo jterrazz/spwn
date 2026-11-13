@@ -15,14 +15,6 @@ const (
 	AlwaysOn Lifetime = "always-on"
 )
 
-// value: the words a station older than ADR-032 says for Ephemeral and
-// Persistent: read for one release, written only to a peer that reads no
-// other (remote/api's OlderWords); words, not lifetimes.
-const (
-	OlderEphemeral  = "throwaway"
-	OlderPersistent = "permanent"
-)
-
 func (l Lifetime) Kind() machine.Kind {
 	// invariant: the lifetime is the one record of a VM's kind: always on is
 	// a server, every other a workspace.
@@ -37,23 +29,6 @@ func (l Lifetime) Word() string {
 		return "always on"
 	}
 	return string(l)
-}
-
-func (l *Lifetime) UnmarshalText(text []byte) error {
-	// value: alias of the lifetime words of v2 (temporary, lasting) and of
-	// v3 (throwaway, permanent), read for one release and written in
-	// ephemeral and persistent.
-	// invariant: a record or a request of an older station reads in today's
-	// words; the next write keeps the new word.
-	switch v := Lifetime(text); v {
-	case "temporary", OlderEphemeral:
-		*l = Ephemeral
-	case "lasting", OlderPersistent:
-		*l = Persistent
-	default:
-		*l = v
-	}
-	return nil
 }
 
 type Size struct {
