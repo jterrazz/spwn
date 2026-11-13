@@ -200,13 +200,14 @@ A gesture is recorded by naming it in `GESTURES` of `scripts/record.py`, with it
 
 Each button below is disabled until it goes through `useGesture`. The confirmation word is the one `calls.json` declares, and the reads are what `rereads` names. The gestures already wired are Start, Stop and Delete of a machine, and Restart of a server; a need's `apps.update`, `disk.move`, `background.remove` and `engine.start`; Storage's `disk.free`, `disk.move`, `disk.erase` and `images.delete`, and a machine's Storage tab's `disk.free`, `disk.move` and `disk.erase`; a port's shares, and an account's share already made, extended or taken back (sharing an account not yet shared is the row below); a Mac port's Declare it public, by `ports.declare`, which asks nothing; Apply of a machine's plan and its Upgrade now; and Create of New machine, by `machines.create-workspace` or `machines.create-server`. Open in Terminal, a port's Open and Sign in are no gestures: they open the engine's value outside the window ([above](#what-the-window-opens-outside-itself)).
 
-| Group              | Page                 | Button                | Call                                                                                      | Confirmation | Reads to refresh    |
-| ------------------ | -------------------- | --------------------- | ----------------------------------------------------------------------------------------- | ------------ | ------------------- |
-| Accounts and ports | a machine's Accounts | Share for (each span) | `accounts.share`, no id                                                                   | none         | `accounts.list`     |
-| Disk and images    | Storage              | Build a new one       | `images.build`, whose input `docs/reference/api.md` does not give                         |              | `images.list`       |
-| Files and needs    | a catalog item       | Add to a machine      | no call adds a package to a machine's file                                                |              | `machinefile.drift` |
-| Files and needs    | a machine's Packages | Capture               | no call names it yet                                                                      |              | `machinefile.drift` |
-| Machines           | a server's header    | Restart               | `machines.restart`, wired; the world build refuses it, so it is unproved on a real server | yes          | `machines.list`     |
+| Group              | Page                 | Button                | Call                                                                                                         | Confirmation | Reads to refresh    |
+| ------------------ | -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------ | ------------ | ------------------- |
+| Accounts and ports | a machine's Accounts | Share for (each span) | `accounts.share`, no id                                                                                      | none         | `accounts.list`     |
+| Disk and images    | Storage              | Build a new one       | `images.build`, whose input `docs/reference/api.md` does not give                                            |              | `images.list`       |
+| Files and needs    | a catalog item       | Add to a machine      | no call adds a package to a machine's file                                                                   |              | `machinefile.drift` |
+| Files and needs    | a machine's Packages | Capture               | no call names it yet                                                                                         |              | `machinefile.drift` |
+| Machines           | Settings             | Add a Mac             | `machines.add`, not bridged: the mockup has no Add a Mac screen, and its dialog waits for the owner's design | none         | `machines.list`     |
+| Machines           | a server's header    | Restart               | `machines.restart`, wired; the world build refuses it, so it is unproved on a real server                    | yes          | `machines.list`     |
 
 ## The keyboard
 
