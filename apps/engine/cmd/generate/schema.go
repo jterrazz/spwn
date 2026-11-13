@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
 const (
@@ -239,15 +240,17 @@ func (r *reflector) zeroable(t reflect.Type, s map[string]any) map[string]any {
 // lifetime is set at its create, and the store's migrator rewrites an
 // older record's word; an Origin on the wire takes its layer from the
 // layer it was read in; a machine's kind, system and architecture come
-// from the catalog's own. The worlds' answers are held to these schemas by
-// specs/architecture.
+// from the catalog's own; a drift's chapter is named by the drift that
+// counts it. A verdict always carries its tone, the one closed enum that
+// is not worded, since it is how a word is drawn. The worlds' answers are
+// held to these schemas by specs/architecture.
 func neverZero() []reflect.Type {
 	enums := wordedEnums()
-	out := make([]reflect.Type, 0, len(enums))
+	out := make([]reflect.Type, 0, len(enums)+1)
 	for _, w := range enums {
 		out = append(out, reflect.TypeOf(w.of))
 	}
-	return out
+	return append(out, reflect.TypeFor[verdict.Tone]())
 }
 
 // invariant: what call.Encode writes for a value of t that is not

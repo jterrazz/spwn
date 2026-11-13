@@ -71,7 +71,7 @@ export function Follows({ found, go }: { found: Found; go: Go }) {
                     go({ page: 'machine-files' });
                 }}
                 sentence="its apps, settings and the values you set are read in Machine files"
-                title={`Follows ${drift.out.Name}`}
+                title={`Follows ${drift.out.Plan.Name}`}
                 trail={<MissingMark />}
             />
         </Panel>

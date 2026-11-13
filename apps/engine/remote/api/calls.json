@@ -567,13 +567,13 @@
     },
     {
       "name": "machinefile.drift",
-      "schema": "station.machinefile.drift/v2",
+      "schema": "station.machinefile.drift/v3",
       "where": "at-target",
       "errors": [
         "machinefile.not-found"
       ],
       "in": "PlanIn",
-      "out": "Plan"
+      "out": "Drift"
     },
     {
       "name": "machinefile.explain",

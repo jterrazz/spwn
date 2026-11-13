@@ -41,6 +41,32 @@
       "Tone": "plain"
     }
   },
+  "MachinefileChapter": {
+    "accounts": {
+      "Word": "Accounts",
+      "One": "account",
+      "Other": "accounts",
+      "Tone": "plain"
+    },
+    "apps": {
+      "Word": "Apps",
+      "One": "app",
+      "Other": "apps",
+      "Tone": "plain"
+    },
+    "ports": {
+      "Word": "Ports",
+      "One": "port",
+      "Other": "ports",
+      "Tone": "plain"
+    },
+    "settings": {
+      "Word": "Settings",
+      "One": "setting",
+      "Other": "settings",
+      "Tone": "plain"
+    }
+  },
   "MachinefileLayer": {
     "built-in": {
       "Word": "built into station",

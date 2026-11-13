@@ -176,8 +176,8 @@ function File({
             />
             {drift.kind === 'read' ? (
                 <>
-                    <Asks plan={drift.out} title="What applying it would ask of you" />
-                    <Chapters plan={drift.out} />
+                    <Asks plan={drift.out.Plan} title="What applying it would ask of you" />
+                    <Chapters plan={drift.out.Plan} />
                 </>
             ) : drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="tab" />

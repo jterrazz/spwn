@@ -1,4 +1,4 @@
-import type { CallName, MachinefilePlan, Target } from '@jterrazz/station-api';
+import type { CallName, MachinefileDrift, Target } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Screen } from '../../design/index';
@@ -33,7 +33,7 @@ function FileLink({ file }: { file: string }) {
     );
 }
 
-function FileState({ drift, name }: { drift: Read<MachinefilePlan>; name: string }) {
+function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: string }) {
     if (drift.kind === 'reading') {
         return <Reading size="tab" what={`the file ${name} follows`} />;
     }
@@ -41,7 +41,7 @@ function FileState({ drift, name }: { drift: Read<MachinefilePlan>; name: string
         <NoVerdict
             line={
                 drift.kind === 'read' ? (
-                    <FileLink file={drift.out.Name} />
+                    <FileLink file={drift.out.Plan.Name} />
                 ) : (
                     'What the engine answered is below'
                 )
@@ -86,7 +86,7 @@ function Setup({ target, name, onPlan }: Aimed & { onPlan: () => void }) {
     return (
         <Page>
             <FileState drift={drift} name={name} />
-            {drift.kind === 'read' ? <Differs onPlan={onPlan} plan={drift.out} /> : null}
+            {drift.kind === 'read' ? <Differs onPlan={onPlan} plan={drift.out.Plan} /> : null}
             <Upgrades name={name} target={target} />
             <Inventory drift={drift} target={target} />
         </Page>

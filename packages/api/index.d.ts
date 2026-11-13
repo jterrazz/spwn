@@ -842,6 +842,11 @@ export type CoreMachineRefInput = {
     On?: string;
 };
 
+export type CoreVerdictVerdict = {
+    Sentence: string;
+    Tone: 'ok' | 'warn' | 'bad' | 'plain' | 'new';
+};
+
 export type DiskCallsEraseIn = {
     App?: string;
     Confirm?: string;
@@ -1164,6 +1169,14 @@ export type MachinefileApplied = {
     Removed: MachinefileDone[] | null;
 };
 
+export type MachinefileApplying = {
+    Adopt: number;
+    Install: number;
+    Leave: number;
+    Remove: number;
+    Sentence: string;
+};
+
 export type MachinefileAsked = {
     Need: '' | 'sudo' | 'terminal' | 'license' | 'app-store-login';
     Packages: string[] | null;
@@ -1228,6 +1241,24 @@ export type MachinefileCallsUpgradeIn = {
     Unattended?: boolean;
 };
 
+export type MachinefileChapterDrift = {
+    Chapter: 'apps' | 'settings' | 'ports' | 'accounts';
+    Differing: MachinefileDiffering[] | null;
+    Listed: number;
+    Matching: number;
+    Verdict: CoreVerdictVerdict;
+};
+
+export type MachinefileDiffering = {
+    Account: string;
+    Asked: string;
+    Block: string;
+    Condition: '' | 'absent' | 'changed' | 'extra' | 'not-managed' | 'outdated' | 'present' | 'unknown';
+    Package: string;
+    Port: number;
+    Seen: string;
+};
+
 export type MachinefileDone = {
     Detail: string;
     Installed: boolean;
@@ -1239,6 +1270,15 @@ export type MachinefileDone = {
     State: '' | 'absent' | 'broken' | 'degraded' | 'ok' | 'pending' | 'unknown';
     Updated: boolean;
     Version: string;
+};
+
+export type MachinefileDrift = {
+    Apply: MachinefileApplying;
+    Chapters: MachinefileChapterDrift[] | null;
+    Differences: number;
+    Machine: string;
+    Plan: MachinefilePlan;
+    Verdict: CoreVerdictVerdict;
 };
 
 export type MachinefileExtraLine = {
@@ -2911,7 +2951,7 @@ export type ImagesUpdateOutput = ImagesUpdate[] | null;
 export type MachinefileApplyInput = MachinefileCallsApplyIn;
 export type MachinefileApplyOutput = MachinefileApplied;
 export type MachinefileDriftInput = MachinefileCallsPlanIn;
-export type MachinefileDriftOutput = MachinefilePlan;
+export type MachinefileDriftOutput = MachinefileDrift;
 export type MachinefileExplainInput = MachinefileCallsExplainIn;
 export type MachinefileExplainOutput = MachinefileCallsExplainOut;
 export type MachinefileNightlyInput = MachinefileCallsNightlyIn;
@@ -3104,6 +3144,8 @@ export type CatalogOS = 'macos' | 'ubuntu' | 'debian' | 'any';
 
 export type CoreVerdictTone = 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 
+export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
+
 export type MachinefileLayer = 'overlay' | 'user' | 'shared' | 'built-in' | 'this machine' | 'catalog' | 'lock';
 
 export type MachinesBirthStep = 'building' | 'cloning' | 'booting' | 'address' | 'ssh';
@@ -3122,6 +3164,7 @@ export type StationWords = {
     CatalogArch: Record<CatalogArch, StationWord>;
     CatalogMachineKind: Record<CatalogMachineKind, StationWord>;
     CatalogOS: Record<CatalogOS, StationWord>;
+    MachinefileChapter: Record<MachinefileChapter, StationWord>;
     MachinefileLayer: Record<MachinefileLayer, StationWord>;
     MachinesBirthStep: Record<MachinesBirthStep, StationWord>;
     MachinesLifetime: Record<MachinesLifetime, StationWord>;

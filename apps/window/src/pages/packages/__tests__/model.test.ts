@@ -30,7 +30,10 @@ function answered<N extends CallName>(world: string, request: Asked<N>): Out<N> 
 describe('model', () => {
     test("a file's lines are grouped by the layer that sets each, in the engine's order, a colour per position", () => {
         // Given - This Mac's drift from its file over machinefile-differs
-        const plan = answered('machinefile-differs', { name: 'machinefile.drift', watch: false });
+        const plan = answered('machinefile-differs', {
+            name: 'machinefile.drift',
+            watch: false,
+        }).Plan;
 
         // When - its lines are grouped by layer
         const layers = layersOf(plan);
@@ -48,7 +51,7 @@ describe('model', () => {
     test('each shelf holds the lines of its kind, a skill told by its category', () => {
         // Given - This Mac's drift over stories-file, its one setting, and gh filed as an agent skill
         const layers = layersOf(
-            answered('stories-file', { name: 'machinefile.drift', watch: false }),
+            answered('stories-file', { name: 'machinefile.drift', watch: false }).Plan,
         );
         const categories = new Map([['gh', 'Agent skills' as const]]);
 

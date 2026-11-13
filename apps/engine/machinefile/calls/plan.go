@@ -39,14 +39,20 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 	},
 }
 
-var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
-	// value: the plan read as conditions: each package present, absent,
-	// outdated, changed, not managed, extra or unknown. It never acts.
-	Name: "machinefile.drift", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
+var Drift = call.Call[Deps, PlanIn, machinefile.Drift]{
+	// value: the plan read as conditions (each package present, absent,
+	// outdated, changed, not managed, extra or unknown), then counted by
+	// chapter, with what apply would do and the verdict. It never acts.
+	Name: "machinefile.drift", Document: 3, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
-	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
+	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Drift, error) {
 		p, err := judged(ctx, d, in.Machinefile, in.Phase)
-		return p.Answered(), err
+		if err != nil {
+			return machinefile.Drift{}, err
+		}
+		drift := machinefile.DriftOf(p)
+		drift.Machine = d.Name
+		return drift, nil
 	},
 }
 

@@ -653,6 +653,57 @@
       ],
       "type": "object"
     },
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "machinefile.Applying": {
+      "additionalProperties": false,
+      "properties": {
+        "Adopt": {
+          "type": "integer"
+        },
+        "Install": {
+          "type": "integer"
+        },
+        "Leave": {
+          "type": "integer"
+        },
+        "Remove": {
+          "type": "integer"
+        },
+        "Sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Adopt",
+        "Install",
+        "Leave",
+        "Remove",
+        "Sentence"
+      ],
+      "type": "object"
+    },
     "machinefile.Asked": {
       "additionalProperties": false,
       "properties": {
@@ -746,6 +797,130 @@
         "ID",
         "Package",
         "Zsh"
+      ],
+      "type": "object"
+    },
+    "machinefile.ChapterDrift": {
+      "additionalProperties": false,
+      "properties": {
+        "Chapter": {
+          "enum": [
+            "apps",
+            "settings",
+            "ports",
+            "accounts"
+          ],
+          "type": "string"
+        },
+        "Differing": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Differing"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Listed": {
+          "type": "integer"
+        },
+        "Matching": {
+          "type": "integer"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Chapter",
+        "Differing",
+        "Listed",
+        "Matching",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "machinefile.Differing": {
+      "additionalProperties": false,
+      "properties": {
+        "Account": {
+          "type": "string"
+        },
+        "Asked": {
+          "type": "string"
+        },
+        "Block": {
+          "type": "string"
+        },
+        "Condition": {
+          "enum": [
+            "",
+            "absent",
+            "changed",
+            "extra",
+            "not-managed",
+            "outdated",
+            "present",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "Package": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "integer"
+        },
+        "Seen": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Account",
+        "Asked",
+        "Block",
+        "Condition",
+        "Package",
+        "Port",
+        "Seen"
+      ],
+      "type": "object"
+    },
+    "machinefile.Drift": {
+      "additionalProperties": false,
+      "properties": {
+        "Apply": {
+          "$ref": "#/$defs/machinefile.Applying"
+        },
+        "Chapters": {
+          "items": {
+            "$ref": "#/$defs/machinefile.ChapterDrift"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Differences": {
+          "type": "integer"
+        },
+        "Machine": {
+          "type": "string"
+        },
+        "Plan": {
+          "$ref": "#/$defs/machinefile.Plan"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Apply",
+        "Chapters",
+        "Differences",
+        "Machine",
+        "Plan",
+        "Verdict"
       ],
       "type": "object"
     },
@@ -1313,7 +1488,7 @@
       "$ref": "#/$defs/machinefile.calls.PlanIn"
     },
     "out": {
-      "$ref": "#/$defs/machinefile.Plan"
+      "$ref": "#/$defs/machinefile.Drift"
     }
   },
   "required": [

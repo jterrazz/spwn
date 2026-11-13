@@ -99,7 +99,7 @@ func lineJSON(l machinefile.Line, result, detail string) LineJSON {
 }
 
 func PlanContract(schema string, p machinefile.Plan) PlanJSON {
-	// value: station.machinefile.plan/v2 and station.machinefile.drift/v2:
+	// value: station.machinefile.plan/v2 and station.machinefile.drift/v3:
 	// the plan's needs, its lines, what is extra and what follows an apply.
 	out := PlanJSON{Schema: schema, Machinefile: p.Name, Needs: []NeedJSON{}, Lines: []LineJSON{}, Extra: []ExtraJSON{}, AfterApply: []string{}}
 	for _, a := range p.Needs {

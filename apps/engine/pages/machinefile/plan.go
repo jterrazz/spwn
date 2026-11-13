@@ -280,35 +280,26 @@ func ranStep(r *machinefile.Ran) []pages.RunStep {
 // value: a condition in the owner's words.
 func condition(c machinefile.Condition) string { return strings.ReplaceAll(string(c), "-", " ") }
 
-func Drift(p machinefile.Plan, thisMac page.Context) page.Page {
+func Drift(d machinefile.Drift, thisMac page.Context) page.Page {
 	// invariant: drift is the plan as conditions, one row per package in the
-	// plan's order, then what is extra; what is as the Machinefile asks
-	// counts as present, and anything else is drift.
+	// plan's order, then what is extra; its count is the drift's own, and
+	// whatever is not counted reads present.
+	p := d.Plan
 	rows := make([]page.Row, 0, len(p.Lines)+len(p.Extra))
-	drifted := 0
 	for _, l := range p.Lines {
 		rows = append(rows, lineRow(l, condition(l.Seen.Condition)))
-		if l.Seen.Condition != machinefile.Present {
-			drifted++
-		}
 	}
 	for _, b := range p.Blocks {
-		if b.Condition == machinefile.Extra {
-			continue
-		}
-		rows = append(rows, blockRow(b, condition(b.Condition), blockWhere(b)))
-		if b.Condition != machinefile.Present {
-			drifted++
+		if b.Condition != machinefile.Extra {
+			rows = append(rows, blockRow(b, condition(b.Condition), blockWhere(b)))
 		}
 	}
-	for _, r := range append(extraRows(p, condition(machinefile.Extra)), extraBlockRows(p, condition(machinefile.Extra))...) {
-		rows = append(rows, r)
-		drifted++
-	}
+	rows = append(rows, extraRows(p, condition(machinefile.Extra))...)
+	rows = append(rows, extraBlockRows(p, condition(machinefile.Extra))...)
 	mark, words := page.OK, []string{"no drift"}
 	var hints []page.Hint
-	if drifted > 0 {
-		mark, words = page.Attention, []string{counted(drifted, "drifted"), counted(len(rows)-drifted, "present")}
+	if d.Differences > 0 {
+		mark, words = page.Attention, []string{counted(d.Differences, "drifted"), counted(len(rows)-d.Differences, "present")}
 		hints = []page.Hint{{Command: "station plan", Text: "what apply would do"}}
 	}
 	sections := []page.Section{head(p.Name, mark, words), section("packages", "Packages", rows)}

@@ -1,4 +1,4 @@
-import type { MachinefilePlan, Target } from '@jterrazz/station-api';
+import type { MachinefileDrift, MachinefilePlan, Target } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { Panel, Switch } from '../../design/index';
@@ -55,12 +55,12 @@ export function Inventory({
     drift,
     target,
 }: {
-    drift: Read<MachinefilePlan>;
+    drift: Read<MachinefileDrift>;
     target: Target | undefined;
 }) {
     const [shelf, setShelf] = useState<Shelf>('Apps');
     if (drift.kind === 'read') {
-        return <Lines plan={drift.out} setShelf={setShelf} shelf={shelf} target={target} />;
+        return <Lines plan={drift.out.Plan} setShelf={setShelf} shelf={shelf} target={target} />;
     }
     return (
         <Panel note={BY_LAYER} title={shelf}>

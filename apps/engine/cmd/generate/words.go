@@ -64,6 +64,12 @@ func wordedEnums() []worded {
 			string(machines.BornAddress):  {Word: machines.BornAddress.Word(), Detail: machines.BornAddress.Noun(), Tone: verdict.New},
 			string(machines.BornSSH):      {Word: machines.BornSSH.Word(), Detail: machines.BornSSH.Noun(), Tone: verdict.New},
 		}},
+		{machinefile.Chapter(""), map[string]word{
+			string(machinefile.ChapterApps):     {Word: "Apps", One: "app", Other: "apps", Tone: verdict.Plain},
+			string(machinefile.ChapterSettings): {Word: "Settings", One: "setting", Other: "settings", Tone: verdict.Plain},
+			string(machinefile.ChapterPorts):    {Word: "Ports", One: "port", Other: "ports", Tone: verdict.Plain},
+			string(machinefile.ChapterAccounts): {Word: "Accounts", One: "account", Other: "accounts", Tone: verdict.Plain},
+		}},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),

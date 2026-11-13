@@ -17,7 +17,7 @@ type Deps struct{ ThisMachine page.Context }
 
 type Input struct{ Machinefile string }
 
-func Command(d Deps, env kit.Env) *cobra.Command {
+func Command(deps Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "drift",
 		Short:   "How this machine differs from its Machinefile: each package present, absent, outdated, changed, not managed, extra",
@@ -29,11 +29,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Read:  func(*Input) bool { return true },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Drift, machinefilecalls.PlanIn{Machinefile: in.Machinefile}, nil)
+			d, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Drift, machinefilecalls.PlanIn{Machinefile: in.Machinefile}, nil)
 			if err != nil {
 				return err
 			}
-			return io.Page(pagemachinefile.Drift(p, d.ThisMachine), pagemachinefile.PlanContract(machinefilecalls.Drift.Schema(), p))
+			return io.Page(pagemachinefile.Drift(d, deps.ThisMachine), pagemachinefile.PlanContract(machinefilecalls.Drift.Schema(), d.Plan))
 		},
 	}, env)
 }

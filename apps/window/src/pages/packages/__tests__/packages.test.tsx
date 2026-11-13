@@ -1,4 +1,4 @@
-import type { MachinefilePlanOutput } from '@jterrazz/station-api';
+import type { MachinefilePlan } from '@jterrazz/station-api';
 import {
     button,
     component,
@@ -14,6 +14,7 @@ import {
 import { describe, expect, test } from 'vitest';
 
 import { Screen } from '../../../design/index';
+import type { Out } from '../../../engine/client';
 import { keyOf } from '../../../engine/frame';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
@@ -29,20 +30,20 @@ const recordingFor = await recordingsOf(
     'two-macs',
 );
 
-function builtInPlan(call: string): MachinefilePlanOutput {
+function builtInPlan(call: 'machinefile.drift' | 'machinefile.plan'): MachinefilePlan {
     const asked = keyOf({
         call,
         in: { Machinefile: 'station-macos' },
     });
     const exchange = recordingFor('two-macs').exchanges.find((one) => keyOf(one.request) === asked);
     const answer = exchange?.answers.find(
-        (one): one is { out: MachinefilePlanOutput } =>
+        (one): one is { out: Out<typeof call> } =>
             typeof one === 'object' && one !== null && 'out' in one,
     );
     if (!answer) {
         throw new Error(`two-macs records no answer to ${asked}.`);
     }
-    return answer.out;
+    return 'Plan' in answer.out ? answer.out.Plan : answer.out;
 }
 
 function windowOver(world: string, machine: string) {

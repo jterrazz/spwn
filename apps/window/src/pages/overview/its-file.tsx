@@ -55,5 +55,5 @@ export function ItsFile({ found, go }: { found: Found; go: Go }) {
             </Panel>
         );
     }
-    return <FileChapters file={drift.kind === 'read' ? drift.out.Name : ''} go={go} vm={vm} />;
+    return <FileChapters file={drift.kind === 'read' ? drift.out.Plan.Name : ''} go={go} vm={vm} />;
 }
