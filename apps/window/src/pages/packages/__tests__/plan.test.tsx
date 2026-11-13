@@ -60,7 +60,7 @@ describe('Plan', () => {
         const result = await component.render(
             planOver('machinefile-kept', MAC),
             async (visitor) => {
-                await visitor.see(content('as declared'));
+                await visitor.see(content('apps as declared'));
                 await visitor.gone(heading('To install', { exact: false }));
 
                 // When - Apply is clicked and confirmed

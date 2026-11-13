@@ -6,7 +6,7 @@ import type { PlanLine } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import type { Reading as Read } from '../../engine/react';
 import { useGesture } from '../../engine/use-gesture';
-import { PLAN_GROUP_WORDS, RESTART_WORDS } from '../../engine/words';
+import { CATALOG_SHELF_WORDS, PLAN_GROUP_WORDS, RESTART_WORDS } from '../../engine/words';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
 import { Reading, Unanswered } from '../kit/readings';
 import { Page, Tiles } from '../page';
@@ -29,7 +29,13 @@ function Steps({ lines, all, title, note = String(lines.length) }: StepsProps) {
                 return (
                     <Row
                         key={`${line.Step.Kind}/${line.Step.Package}`}
-                        lead={<AppIcon kind={line.Step.Kind} name={line.Step.Package} />}
+                        lead={
+                            <span className={styles.step}>
+                                <span aria-hidden="true" className={styles.waiting} />
+                                <AppIcon kind={line.Step.Kind} name={line.Step.Package} />
+                            </span>
+                        }
+                        leadSize="dot"
                         size="slim"
                         {...(line.Step.Version === '' ? {} : { tag: line.Step.Version })}
                         title={line.Step.Package}
@@ -147,6 +153,13 @@ function PlanBody({ plan, name }: { plan: Read<MachinefilePlan>; name: string })
     );
 }
 
+export function unitOf(lines: readonly PlanLine[]): string {
+    const shelves = new Set(lines.map((line) => CATALOG_SHELF_WORDS[line.Step.Kind]));
+    const [shelf] = shelves;
+    const plural = shelves.size === 1 && shelf !== undefined ? shelf.toLowerCase() : 'packages';
+    return lines.length === 1 ? plural.slice(0, -1) : plural;
+}
+
 const COUNTED: readonly { action: PlanLine['Action']; foot: string }[] = [
     { action: 'install', foot: 'from the file' },
     { action: 'adopt', foot: '' },
@@ -160,7 +173,9 @@ function PlanCounts({ plan }: { plan: MachinefilePlan }) {
         <Tiles>
             {COUNTED.map(({ action, foot }) => (
                 <Tile
-                    foot={foot}
+                    foot={
+                        action === UNCHANGED ? `${unitOf(groups.get(action) ?? [])} ${foot}` : foot
+                    }
                     key={action}
                     label={PLAN_GROUP_WORDS[action]}
                     value={groups.get(action)?.length ?? 0}

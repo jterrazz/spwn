@@ -23,7 +23,7 @@ export type RowProps = {
     tagLook?: 'chip' | 'hint';
     sentence?: ReactNode;
     lead?: ReactNode;
-    leadSize?: 'chip' | 'icon' | 'value';
+    leadSize?: 'chip' | 'dot' | 'icon' | 'value';
     state?: null | RowState;
     stateAt?: 'end' | 'start';
     cells?: readonly ReactNode[];
@@ -54,7 +54,12 @@ type Columns = Pick<
     | 'valueSize'
 >;
 
-const LEAD_SIZES = { chip: styles.leadChip, icon: styles.leadIcon, value: styles.leadValue };
+const LEAD_SIZES = {
+    chip: styles.leadChip,
+    dot: styles.leadDot,
+    icon: styles.leadIcon,
+    value: styles.leadValue,
+};
 const TRAIL_SIZES = { fit: styles.hasTrail, pill: styles.trailPill, wide: styles.trailWide };
 
 function leadOf({ lead, leadSize = 'icon' }: Columns): string | undefined {

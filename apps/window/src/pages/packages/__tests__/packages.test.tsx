@@ -19,7 +19,7 @@ import { keyOf } from '../../../engine/frame';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
 import { Differs } from '../differs';
-import { PlanSteps } from '../plan';
+import { PlanSteps, unitOf } from '../plan';
 
 const recordingFor = await recordingsOf(
     'machinefile-differs',
@@ -199,6 +199,19 @@ describe('Packages', () => {
 
         // Then - its installs and its settings, each from the file whose layer lists it, what stays left out
         await expect(result.tree).toMatch(file('./__expected__/station-macos-plan.aria.yaml'));
+    });
+
+    test("a count's unit is the shelf its lines are on, packages when they are on both", () => {
+        // Given - the built-in station-macos plan's installs and settings
+        const lines = builtInPlan('machinefile.plan').Lines ?? [];
+        const installs = lines.filter((line) => line.Step.Kind !== 'setting');
+        const settings = lines.filter((line) => line.Step.Kind === 'setting');
+
+        // Then - apps, settings, one setting, and packages for the two together
+        expect(unitOf(installs)).toBe('apps');
+        expect(unitOf(settings)).toBe('settings');
+        expect(unitOf(settings.slice(0, 1))).toBe('setting');
+        expect(unitOf(lines)).toBe('packages');
     });
 
     test('an upgrade starts on the click, with no confirmation, and the engine says it is done', async () => {

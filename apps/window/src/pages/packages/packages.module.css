@@ -85,3 +85,15 @@
     color: var(--t3);
     font-size: var(--text-row);
 }
+.step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+}
+.waiting {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--t4);
+}
