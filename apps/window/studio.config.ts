@@ -74,7 +74,7 @@ export default defineConfig({
                 },
                 {
                     files: ['src/engine/words.ts'],
-                    reason: "the law's one table of the words the engine owes, one literal map per code, so it grows with the wire until the engine's words table reaches packages/api; a name of its own (`*.data.ts`) would move every import of it",
+                    reason: "the law's one table of the words the engine owes, one literal map per code, so it grows with the wire and shrinks as each enum joins packages/api's words.json; a name of its own (`*.data.ts`) would move every import of it",
                     rules: { 'max-lines': 'off' },
                 },
                 {

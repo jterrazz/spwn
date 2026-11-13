@@ -3,7 +3,7 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 import { Button, identityOf, MachineIcon, StatePill, Switch } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
-import { engineViewWord, macState, vmAbout, vmKindWord, vmState } from '../../engine/shown';
+import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
 import { AWAKE_WORDS, THIS_MAC_WORD } from '../../engine/words';
 import { clock, sentence } from '../../model/format';
 import { targetOf } from '../../model/machines';
@@ -56,7 +56,7 @@ function VmLine({ found, go }: { found: Found; go: Props['go'] }) {
     }
     return (
         <p className={styles.sentence}>
-            {`${sentence([vmKindWord(vm), vmAbout(vm).lifetime])} · on `}
+            {`${sentence([vmKindWord(vm), vmLifetimeWord(vm)])} · on `}
             <button
                 className={styles.link}
                 onClick={() => {

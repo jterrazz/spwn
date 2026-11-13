@@ -12,8 +12,8 @@ import {
     TypeTag,
     Value,
 } from '../../design/index';
+import { codesOf, wordOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
-import { SYSTEM_WORDS } from '../../engine/words';
 import { findMachine } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
@@ -60,13 +60,13 @@ export function ItemHead({
     );
 }
 
-const EVERY_SYSTEM = Object.keys(SYSTEM_WORDS).filter((system): system is System => system !== '');
+const EVERY_SYSTEM = codesOf('CatalogMachineKind');
 
 export function systemsWord(systems: readonly System[]): string {
     if (EVERY_SYSTEM.every((system) => systems.includes(system))) {
         return 'any system';
     }
-    return systems.map((system) => SYSTEM_WORDS[system]).join(', ');
+    return systems.map((system) => wordOf('CatalogMachineKind', system).Word).join(', ');
 }
 
 export function Installs({ lines }: { lines: readonly InstallLine[] }) {

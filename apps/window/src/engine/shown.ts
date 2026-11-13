@@ -9,6 +9,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import type { Tone } from '../tone';
+import { wordOf } from './engine-words';
 import {
     engineStateOf,
     engineViewStateOf,
@@ -16,7 +17,6 @@ import {
     macStateOf,
     shareEndOf,
     shareEndWordOf,
-    vmLifetimeOf,
     vmStateOf,
 } from './provisional';
 import {
@@ -35,7 +35,6 @@ import {
 import {
     APP_WHY_WORDS,
     ENGINE_STATE_WORDS,
-    LIFETIME_WORDS,
     MAC_STATE_WORDS,
     MACHINE_KIND_WORDS,
     NEWEST_WORD,
@@ -47,7 +46,6 @@ import {
     SEVERITY_WORDS,
     SHARE_TO_WORDS,
     SSH_WORDS,
-    SYSTEM_WORDS,
     VM_CHECK_WORDS,
     VM_STATE_WORDS,
 } from './words';
@@ -130,12 +128,8 @@ export function holdsFor(until: string, now: string): Shown {
     return { tone: SHARE_END_TONES[end.kind], word: shareEndWordOf(end, until) };
 }
 
-export function vmAbout(vm: MachinesVM): { lifetime: string; system: string } {
-    const lifetime = vmLifetimeOf(vm);
-    return {
-        lifetime: lifetime === undefined ? vm.Lifetime : LIFETIME_WORDS[lifetime],
-        system: SYSTEM_WORDS[vm.Kind],
-    };
+export function vmLifetimeWord(vm: Pick<MachinesVM, 'Lifetime'>): string {
+    return wordOf('MachinesLifetime', vm.Lifetime).Word;
 }
 
 export function vmKindWord(vm: Pick<MachinesVM, 'Lifetime'>): string {

@@ -56,7 +56,7 @@
       - paragraph: Not given yet What each machine holds of this Mac's memory.
     - region "Its machines":
       - heading "Its machines" [level=2]
-      - button "infra always-on · 8 CPU · 24 GB Unknown"
+      - button "infra always on · 8 CPU · 24 GB Unknown"
     - region "Packages":
       - heading "Packages" [level=2]
       - text: No answer No answer from the engine.

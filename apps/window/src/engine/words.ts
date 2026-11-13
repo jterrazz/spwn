@@ -15,14 +15,13 @@ import type {
     MachinefileSeen,
     MachinefileStep,
     MachinesCheckStatus,
-    MachinesVM,
     OverviewNeed,
     PortsPort,
     PortsReservation,
     PortsSharedPort,
 } from '@jterrazz/station-api';
 
-import type { DiskCall, EngineState, MacState, NeedCall, VmLifetime, VmState } from './provisional';
+import type { DiskCall, EngineState, MacState, NeedCall, VmState } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
 
@@ -150,18 +149,6 @@ export const ENGINE_STATE_WORDS: Words<EngineState> = {
     'not-installed': 'not installed',
     running: 'running',
     stopped: 'stopped',
-};
-
-export const LIFETIME_WORDS: Words<VmLifetime> = {
-    'always-on': 'always-on',
-    ephemeral: 'ephemeral',
-    persistent: 'persistent',
-};
-
-export const SYSTEM_WORDS: Words<MachinesVM['Kind']> = {
-    linux: 'Linux',
-    mac: 'Mac',
-    macos: 'macOS VM',
 };
 
 export const VM_CHECK_WORDS: Words<'' | NonNullable<MachinesCheckStatus['state']>> = {

@@ -66,6 +66,65 @@ function foundIn(lines: readonly string[]): number[] {
     return lines.map((line) => findingsIn('pages/any.tsx', line).length);
 }
 
+const API = join(SRC, '..', '..', '..', 'packages', 'api');
+
+const DECLARED = join(API, 'index.d.ts');
+
+const ENGINE_READER = 'engine/engine-words.ts';
+
+type Enums = ReadonlyMap<string, string>;
+
+function codeSet(codes: readonly string[]): string {
+    return codes.toSorted((one, other) => one.localeCompare(other)).join('|');
+}
+
+function keysOf(value: unknown): string[] {
+    return typeof value === 'object' && value !== null ? Object.keys(value) : [];
+}
+
+function wordedEnums(): Enums {
+    const words: unknown = JSON.parse(readFileSync(join(API, 'words.json'), 'utf8'));
+    const tables = typeof words === 'object' && words !== null ? Object.entries(words) : [];
+    return new Map(
+        tables.map(([name, table]: [string, unknown]) => [name, codeSet(keysOf(table))]),
+    );
+}
+
+function fieldsOf(enums: Enums, declared: string): string[] {
+    const covered = new Set(enums.values());
+    const fields: string[] = [];
+    let owner = '';
+    for (const line of declared.split('\n')) {
+        owner = /^export type (?<owner>\w+) = \{$/u.exec(line)?.groups?.owner ?? owner;
+        const field = /^\s+(?<name>\w+)\??: (?<type>[^;]+);$/u.exec(line)?.groups;
+        const type = field?.type ?? '';
+        const codes = [...type.matchAll(/'(?<code>[^']*)'/gu)]
+            .map((found) => found.groups?.code ?? '')
+            .filter((code) => code !== '');
+        const rest = type.replaceAll(/'[^']*'/gu, '').replaceAll(/null|[\s()|[\]]/gu, '');
+        if (field !== undefined && rest === '' && covered.has(codeSet(codes))) {
+            fields.push(`${owner}\\['${field.name ?? ''}'\\]`);
+        }
+    }
+    return fields;
+}
+
+function tableOfAWordedEnum(enums: Enums, declared: string): RegExp {
+    const keys = [...enums.keys(), ...fieldsOf(enums, declared)].join('|');
+    return new RegExp(
+        String.raw`(?:Words|Tones|Record)<\s*(?:''\s*\|\s*)?(?:NonNullable<\s*)?(?:${keys})(?!\w)`,
+        'gu',
+    );
+}
+
+const WORDED_TABLE = tableOfAWordedEnum(wordedEnums(), readFileSync(DECLARED, 'utf8'));
+
+function wordedTablesIn(file: string, text: string): string[] {
+    return [...text.matchAll(WORDED_TABLE)].map(
+        (found) => `${file}:${String(lineAt(text, found.index))}`,
+    );
+}
+
 describe('words', () => {
     test('no page and no part of the shell maps a code of its own', () => {
         // Given - every source of src/pages/ and src/shell/ but the specs
@@ -107,6 +166,49 @@ describe('words', () => {
         expect(found).toStrictEqual([
             [1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 0, 0],
+        ]);
+    });
+
+    test("no table words or tones an enum the engine words, the engine's reader aside", () => {
+        // Given - every source of src/ but the fixtures and the specs, the engine's words read by one module
+        const files = ['engine', 'pages', 'shell', 'model', 'design']
+            .flatMap((folder) => sourcesUnder(folder))
+            .filter((file) => file !== ENGINE_READER);
+
+        // When - each is read for a table keyed by an enum of packages/api/words.json
+        const findings = files.flatMap((file) =>
+            wordedTablesIn(file, readFileSync(join(SRC, file), 'utf8')),
+        );
+
+        // Then - none is found
+        expect(files.length).toBeGreaterThan(100);
+        expect(findings).toStrictEqual([]);
+    });
+
+    test('a table of an enum the engine words is found by its name or by its field, and no other', () => {
+        // Given - tables of the enums words.json covers, and the lawful lines nearest to them
+        const forbidden = [
+            'const L: Words<MachinesLifetime> = {};',
+            "const L: Words<MachinesVM['Lifetime']> = {};",
+            "const T: Tones<MachinefileOrigin['Layer']> = {};",
+            "const S: Words<'' | MachinesVM['Kind']> = {};",
+            "const K: Readonly<Record<NonNullable<CatalogMethodSpec['OS']>, string>> = {};",
+        ];
+        const lawful = [
+            "const S: Words<MachinesVM['State']> = {};",
+            "const K: Words<NonNullable<CatalogApp['Kind']>> = {};",
+            "export const LIFETIMES = ['ephemeral', 'persistent'] as const satisfies readonly MachinesLifetime[];",
+        ];
+
+        // When - each is read as a line of a page
+        const found = [forbidden, lawful].map((lines) =>
+            lines.map((line) => wordedTablesIn('pages/any.tsx', line).length),
+        );
+
+        // Then - every forbidden line is found once, no lawful one
+        expect(found).toStrictEqual([
+            [1, 1, 1, 1, 1],
+            [0, 0, 0],
         ]);
     });
 });

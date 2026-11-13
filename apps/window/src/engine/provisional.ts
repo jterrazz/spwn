@@ -12,6 +12,7 @@ import type {
     MachinefileLine,
     MachinefilePlan,
     MachinesEngineView,
+    MachinesLifetime,
     MachinesMacView,
     MachinesVM,
     OverviewNeed,
@@ -43,22 +44,11 @@ export const VM_STATES = [
 
 export type VmState = (typeof VM_STATES)[number];
 
-// outside: packages/api types a create's Lifetime as a plain string though station's Go asks one of two codes of
-// outside: a workspace (apps/engine/machines/run.go; a server's is always on, set by the engine): this is that list.
-export const LIFETIMES = ['ephemeral', 'persistent'] as const;
+// outside: the lifetimes a workspace may be created with are the window's list until machines.new offers them; a
+// outside: server's is always on, set by the engine.
+export const LIFETIMES = ['ephemeral', 'persistent'] as const satisfies readonly MachinesLifetime[];
 
 export type Lifetime = (typeof LIFETIMES)[number];
-
-// outside: packages/api types a VM's Lifetime as a plain string though station's Go names three codes, a server's
-// outside: always on among them (apps/engine/machines/run.go); the recorded worlds send its older words too (throwaway,
-// outside: permanent), which are shown as they came.
-export const VM_LIFETIMES = [...LIFETIMES, 'always-on'] as const;
-
-export type VmLifetime = (typeof VM_LIFETIMES)[number];
-
-export function vmLifetimeOf(vm: MachinesVM): undefined | VmLifetime {
-    return VM_LIFETIMES.find((lifetime) => lifetime === vm.Lifetime);
-}
 
 // outside: packages/api types engine.read's State as a plain string though station's Go gives it three codes
 // outside: (apps/engine/engine/reading.go).

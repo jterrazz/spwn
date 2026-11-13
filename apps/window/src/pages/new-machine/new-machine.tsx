@@ -3,11 +3,11 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Button, Dialog, FormField, Missing, Screen, Switch } from '../../design/index';
+import { wordOf } from '../../engine/engine-words';
 import { LIFETIMES } from '../../engine/provisional';
 import type { Lifetime } from '../../engine/provisional';
 import { useRead } from '../../engine/react';
 import { useGesture } from '../../engine/use-gesture';
-import { LIFETIME_WORDS } from '../../engine/words';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { GestureButton, GestureOutcome } from '../kit/gestures';
@@ -22,7 +22,10 @@ const KINDS: readonly { id: Kind; label: string }[] = [
     { id: 'server', label: 'Server' },
 ];
 
-const LIFETIME_OPTIONS = LIFETIMES.map((id) => ({ id, label: LIFETIME_WORDS[id] }));
+const LIFETIME_OPTIONS = LIFETIMES.map((id) => ({
+    id,
+    label: wordOf('MachinesLifetime', id).Word,
+}));
 
 type Change = (next: Partial<Draft>) => void;
 
