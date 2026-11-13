@@ -35,9 +35,9 @@
     - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
     - button "Build a new one" [disabled]
     - text: station-linux 2026.11.01 built 2026-11-01 · 4 GB · 2 machines made from it Newest
-    - button "Delete station-linux 2026.11.01": Delete
+    - button "Delete station-linux 2026.11.01": Delete · frees 4 GB
     - text: station-linux 2026.10.20 built 2026-10-20 · 3 GB · no machine made from it
-    - button "Delete station-linux 2026.10.20": Delete
+    - button "Delete station-linux 2026.10.20": Delete · frees 3 GB
   - region "Machines":
     - heading "Machines what is inside one is on its own Storage tab" [level=2]
     - button "jterrazz-macbook-pro the Mac itself"

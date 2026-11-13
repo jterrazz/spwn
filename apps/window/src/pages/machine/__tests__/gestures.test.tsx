@@ -187,14 +187,14 @@ describe('gestures', () => {
             await visitor.click(button('Delete api…'));
             const asked = dialog('Delete api?');
             const typed = within(asked, field('Type api to confirm'));
-            const held = disabled(button('Delete api'));
-            const free = enabled(button('Delete api'));
+            const held = disabled(button('Delete'));
+            const free = enabled(button('Delete'));
             await visitor.see(within(asked, held));
             await visitor.fill(typed, 'ap');
             await visitor.see(within(asked, held));
             await visitor.fill(typed, 'api');
             await visitor.see(within(asked, free));
-            await visitor.click(within(asked, button('Delete api')));
+            await visitor.click(within(asked, button('Delete')));
 
             // Then - Home, and api is no machine of the sidebar any more
             const gone = within(sidebar, button('api stopped'));

@@ -36,6 +36,20 @@
 .quiet {
     color: var(--t3);
 }
+.disc {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    color: var(--t2);
+    display: grid;
+    place-items: center;
+}
+.disc svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.4;
+}
 .trail {
     display: flex;
     align-items: center;

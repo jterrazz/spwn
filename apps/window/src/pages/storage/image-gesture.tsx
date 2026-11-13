@@ -1,6 +1,7 @@
 import type { CallName, ImagesReport, MachinesMacView } from '@jterrazz/station-api';
 
-import { AppIcon, StatePill } from '../../design/index';
+import { Icon } from '../../design/icon';
+import { StatePill } from '../../design/index';
 import { newestState } from '../../engine/shown';
 import { useGesture } from '../../engine/use-gesture';
 import { targetOf } from '../../model/machines';
@@ -29,7 +30,11 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
     return (
         <GestureRow
             gesture={remove}
-            lead={<AppIcon name={name} />}
+            lead={
+                <span className={styles.disc}>
+                    <Icon name="disc" />
+                </span>
+            }
             sentence={sentence}
             tag={version}
             title={name}
@@ -37,11 +42,16 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
                 <span className={styles.trail}>
                     {newest === null ? null : <StatePill {...newest} />}
                     <GestureButton
+                        destroys
                         gesture={remove}
-                        label="Delete"
+                        label={
+                            image.Record.size_gb > 0
+                                ? `Delete · frees ${String(image.Record.size_gb)} GB`
+                                : 'Delete'
+                        }
                         name={`Delete ${shown}`}
                         title={`Delete ${shown}?`}
-                        variant="danger"
+                        verb="Delete"
                     />
                 </span>
             }

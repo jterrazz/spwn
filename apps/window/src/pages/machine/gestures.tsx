@@ -77,7 +77,7 @@ export function DeleteGesture({ mac, vm, go }: VmProps & { go: (to: Route) => vo
                 label={`Delete ${vm.Name}…`}
                 title={`Delete ${vm.Name}?`}
                 variant="danger"
-                verb={`Delete ${vm.Name}`}
+                verb="Delete"
             />
             <GestureOutcome gesture={remove} />
         </div>

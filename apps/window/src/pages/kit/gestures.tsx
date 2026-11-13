@@ -29,6 +29,7 @@ type GestureButtonProps = {
     verb?: string;
     variant?: ButtonVariant;
     name?: string;
+    destroys?: boolean;
 };
 
 export function marked(gesture: Gesture<unknown>, mark: () => void): Gesture<unknown> {
@@ -48,13 +49,14 @@ export function GestureButton({
     verb = label,
     variant = 'plain',
     name,
+    destroys = variant === 'danger',
 }: GestureButtonProps) {
     const gestures = useGestureStore();
     const start = () => {
         gestures.askedBy({
             cancel: gesture.cancel,
             confirm: gesture.confirm,
-            destroys: variant === 'danger',
+            destroys,
             key: gesture.key,
             title,
             verb,
