@@ -59,6 +59,8 @@ type playEngine struct {
 	StartedAt time.Time     `json:"started_at,omitzero"`
 	Memory    engine.Memory `json:"memory,omitempty"`
 	Awake     *awake.Kept   `json:"awake,omitempty"`
+	// value: the activity the engine kept before the story, by machine.
+	Past map[string]activity.Profile `json:"past,omitempty"`
 }
 
 type playSelf struct {
@@ -78,7 +80,9 @@ type playApps struct {
 }
 
 type playMeter struct {
-	Sample activity.Sample `json:"sample"`
+	Sample    activity.Sample        `json:"sample"`
+	PerSecond *activity.Sample       `json:"per_second,omitempty"`
+	Processes map[int]activity.Usage `json:"processes,omitempty"`
 }
 
 type playDisk struct {
@@ -130,6 +134,7 @@ func PlayWorld(base []byte) []byte {
 	}
 	w := playWorld{Now: storyNow, ThisMac: proName, User: "jterrazz", Macs: map[string]*playMac{}, Registry: map[string]string{"linux": "3"}}
 	known := map[string]any{}
+	past := profiles()
 	pid := 1000
 	for _, h := range f.All.Macs {
 		hw := hardware[h.Name]
@@ -149,7 +154,7 @@ func PlayWorld(base []byte) []byte {
 			VMs:         map[string]*playVM{},
 			Self:        &playSelf{Hardware: hw},
 			Tailnet:     &playNode{Self: ports.Self{Node: ports.Node{ID: h.Name, Name: h.Name, DNSName: h.Name + tailnet, IP: h.Node.IP, Online: true}, Sharing: ports.SharingState{Backend: "Running", On: true, DNSName: h.Name + tailnet}}},
-			Meter:       &playMeter{Sample: meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))},
+			Meter:       playMeterOf(past[h.Name], meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))),
 			Facts:       macFacts(h.ThisMac),
 			Stores:      &playStores{Images: []images.Record{{Name: "linux", Version: "3", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
 		}
@@ -167,16 +172,24 @@ func PlayWorld(base []byte) []byte {
 			m.Disk = &playDisk{Total: 994e9, Free: 610e9}
 		}
 		m.Identities, m.Secrets = playAccounts(f, h.Name)
+		m.Engine.Past = map[string]activity.Profile{h.Name: past[h.Name]}
+		m.Meter.Processes = map[int]activity.Usage{}
 		for _, vm := range h.VMs {
 			pid++
 			m.VMs[vm.Name] = playMachine(f, h.Name, vm, pid)
+			if vm.State == model.Running {
+				if p, ok := past[vm.Name]; ok {
+					m.Engine.Past[vm.Name] = p
+				}
+				m.Meter.Processes[pid] = activity.Usage{CPU: 100 * cpu[vm.Name] * float64(vm.Resources.CPUs) / float64(hw.CPUs), Memory: vm.Resources.MemoryBytes * 2 / 3, Started: vm.BootAt}
+			}
 			if vm.State == model.Running && !vm.BootAt.IsZero() {
 				if m.Engine.Memory == nil {
 					m.Engine.Memory = engine.Memory{}
 				}
 				m.Engine.Memory[vm.Name] = engine.Remembered{State: engine.StateRunning, BootAt: vm.BootAt}
 			}
-			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name])
+			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name], past[vm.Name])
 		}
 		var notShared []string
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
@@ -270,6 +283,24 @@ func macUp(f Scene, name string) time.Duration {
 		}
 	}
 	return 24 * time.Hour
+}
+
+func playMeterOf(p activity.Profile, s activity.Sample) *playMeter {
+	// value: a meter whose counters are what the machine's profile counted
+	// since it booted, growing a second as the profile does now.
+	if s.Boot.IsZero() {
+		return &playMeter{Sample: s}
+	}
+	counted := p.Points(storyNow, storyNow.Sub(s.Boot).Truncate(activity.CoarseEvery), activity.CoarseEvery)
+	end := counted[len(counted)-1]
+	s.CPUBusy, s.CPUTotal, s.NetIn, s.NetOut = end.CPUBusy, end.CPUTotal, end.NetIn, end.NetOut
+	step := p.Points(storyNow, activity.FineEvery, activity.FineEvery)
+	every := uint64(activity.FineEvery / time.Second)
+	per := func(a, b uint64) uint64 { return (b - a) / every }
+	return &playMeter{Sample: s, PerSecond: &activity.Sample{
+		CPUBusy: per(step[0].CPUBusy, step[1].CPUBusy), CPUTotal: per(step[0].CPUTotal, step[1].CPUTotal),
+		NetIn: per(step[0].NetIn, step[1].NetIn), NetOut: per(step[0].NetOut, step[1].NetOut),
+	}}
 }
 
 func meterSample(share float64, cpus int, memory int64, boot time.Time) activity.Sample {
@@ -382,14 +413,14 @@ func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
 	return v
 }
 
-func inside(f Scene, vm model.VM, share float64) *playMac {
+func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
 	kind := coremachine.Workspace
 	if vm.Lifetime == model.AlwaysOn {
 		kind = coremachine.Server
 	}
 	m := &playMac{Self: &playSelf{Kind: kind, System: coremachine.System{OS: "linux"}}, Disk: &playDisk{Total: int64(vm.SizeGB) * 1e9, Free: int64(vm.SizeGB) * 1e9 * 3 / 4}}
 	if vm.State == model.Running {
-		m.Meter = &playMeter{Sample: meterSample(share, vm.Resources.CPUs, vm.Resources.MemoryBytes, vm.BootAt)}
+		m.Meter = playMeterOf(p, meterSample(share, vm.Resources.CPUs, vm.Resources.MemoryBytes, vm.BootAt))
 	}
 	if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
 		m.Apps = map[catalog.Method]*playApps{catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0"}, Behind: map[string]string{"gh": "2.98.0", "jq": "1.8.2"}}}

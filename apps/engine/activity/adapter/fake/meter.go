@@ -1,10 +1,8 @@
 package fake
 
 import (
-	"cmp"
 	"context"
 	"errors"
-	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -38,13 +36,10 @@ func (m *Meter) read() (world.Meter, bool) {
 	defer m.w.Unlock()
 	if r := m.w.Mac(m.mac).Meter; r != nil {
 		out := *r
-		if r.PerSecond != nil && !r.Sample.At.IsZero() {
-			out.Sample = grown(r.Sample, *r.PerSecond, m.w.Now.Sub(r.Sample.At).Seconds())
-		}
-		out.Sample.At = m.w.Now
+		out.Sample = r.Answers(m.w.Now)
 		return out, true
 	}
-	return world.Meter{Sample: activity.Sample{At: m.w.Now}}, false
+	return world.Meter{Sample: world.Meter{}.Answers(m.w.Now)}, false
 }
 
 func (m *Meter) Sample(ctx context.Context) (activity.Sample, error) {
@@ -58,9 +53,7 @@ func (m *Meter) Sample(ctx context.Context) (activity.Sample, error) {
 		return activity.Sample{}, ErrSilent
 	}
 	r, _ := m.read()
-	s := r.Sample
-	s.Thermal, s.Battery, s.DiskFree, s.DiskTotal = activity.ThermalUnknown, nil, 0, 0
-	return s, nil
+	return r.Sample, nil
 }
 
 func (m *Meter) Top(ctx context.Context) (activity.Busiest, error) {
@@ -68,7 +61,7 @@ func (m *Meter) Top(ctx context.Context) (activity.Busiest, error) {
 		return activity.Busiest{}, err
 	}
 	r, _ := m.read()
-	return activity.Busiest{CPU: top(r.Top.CPU), Memory: top(r.Top.Memory)}, nil
+	return activity.Busiest{CPU: activity.Ranked(r.Top.CPU), Memory: activity.Ranked(r.Top.Memory)}, nil
 }
 
 func (m *Meter) Process(ctx context.Context, pid int) (activity.Usage, error) {
@@ -81,25 +74,4 @@ func (m *Meter) Process(ctx context.Context, pid int) (activity.Usage, error) {
 		return activity.Usage{}, ErrNoProcess
 	}
 	return u, nil
-}
-
-func top(ps []activity.Process) []activity.Process {
-	out := slices.Clone(ps)
-	if out == nil {
-		out = []activity.Process{}
-	}
-	slices.SortStableFunc(out, func(a, b activity.Process) int { return cmp.Compare(b.Value, a.Value) })
-	return out[:min(len(out), activity.Top)]
-}
-
-func grown(s, rate activity.Sample, seconds float64) activity.Sample {
-	if seconds < 0 {
-		seconds = 0
-	}
-	by := func(n, per uint64) uint64 { return n + uint64(float64(per)*seconds) }
-	s.CPUBusy, s.CPUTotal = by(s.CPUBusy, rate.CPUBusy), by(s.CPUTotal, rate.CPUTotal)
-	s.DiskRead, s.DiskWritten = by(s.DiskRead, rate.DiskRead), by(s.DiskWritten, rate.DiskWritten)
-	s.NetIn, s.NetOut = by(s.NetIn, rate.NetIn), by(s.NetOut, rate.NetOut)
-	s.SwapUsed += int64(float64(rate.SwapUsed) * seconds)
-	return s
 }

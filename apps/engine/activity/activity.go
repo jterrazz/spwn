@@ -1,6 +1,8 @@
 package activity
 
 import (
+	"cmp"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -76,6 +78,16 @@ type Busiest struct {
 	// each, busiest first.
 	CPU    []Process `json:"cpu"`
 	Memory []Process `json:"memory"`
+}
+
+func Ranked(ps []Process) []Process {
+	// invariant: a list of Busiest: never nil, busiest first, at most Top.
+	out := slices.Clone(ps)
+	if out == nil {
+		out = []Process{}
+	}
+	slices.SortStableFunc(out, func(a, b Process) int { return cmp.Compare(b.Value, a.Value) })
+	return out[:min(len(out), Top)]
 }
 
 type Usage struct {

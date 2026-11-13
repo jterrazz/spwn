@@ -314,6 +314,9 @@ type Engine struct {
 	// value: the activity the engine holds in its memory between two
 	// commands, by machine; its successor after a restart holds none.
 	Activity map[string]activity.Kept `json:"activity,omitempty"`
+	// value: the activity the engine kept before the world's now, by
+	// machine, as profiles: unfolded into Activity when the world is read.
+	Past map[string]activity.Profile `json:"past,omitempty"`
 	// value: the last settings read of each workspace the engine holds in
 	// its memory between two commands; its successor after a restart holds
 	// none.
@@ -479,6 +482,7 @@ func Decode(data []byte) (*World, error) {
 	if err := json.Unmarshal(data, w); err != nil {
 		return nil, err
 	}
+	w.unfold()
 	return w, nil
 }
 

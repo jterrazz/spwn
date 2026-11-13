@@ -8,8 +8,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 400000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 285916,
+                    "cpu_total": 8200000,
                     "cpus": 4,
                     "load": [
                         0.16,
@@ -22,10 +22,30 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 407459701,
+                    "net_out": 161537324,
                     "thermal": 0,
                     "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 52,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 58166,
+                    "net_out": 19846,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
                 }
             },
             "self": {
@@ -67,8 +87,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 1800000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 155610273,
+                    "cpu_total": 1037800000,
                     "cpus": 8,
                     "load": [
                         1.44,
@@ -81,10 +101,30 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 642175580276,
+                    "net_out": 231788115545,
                     "thermal": 0,
                     "boot": "2026-10-26T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 187,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 646547,
+                    "net_out": 246126,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
                 }
             },
             "self": {
@@ -146,8 +186,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 3700000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 2658836,
+                    "cpu_total": 8200000,
                     "cpus": 4,
                     "load": [
                         1.48,
@@ -160,10 +200,30 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 3628657175,
+                    "net_out": 2405357580,
                     "thermal": 0,
                     "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 226,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 334319,
+                    "net_out": 263918,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
                 }
             },
             "self": {
@@ -201,8 +261,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 6000000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 3656140,
+                    "cpu_total": 8200000,
                     "cpus": 4,
                     "load": [
                         2.4,
@@ -215,10 +275,30 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 1614005293,
+                    "net_out": 801011304,
                     "thermal": 0,
                     "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 419,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 174242,
+                    "net_out": 73078,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
                 }
             },
             "self": {
@@ -254,6 +334,54 @@
                     "review-bot": {
                         "state": "running",
                         "boot_at": "2026-11-07T08:30:00Z"
+                    }
+                },
+                "past": {
+                    "infra": {
+                        "base": 15,
+                        "swing": 3,
+                        "seed": 13,
+                        "bumps": [
+                            {
+                                "ago": 2280000000000,
+                                "width": 240000000000,
+                                "height": 26
+                            }
+                        ],
+                        "in": 0.55,
+                        "out": 0.2
+                    },
+                    "linux-3": {
+                        "base": 50,
+                        "swing": 8,
+                        "seed": 17,
+                        "in": 0.2,
+                        "out": 0.1
+                    },
+                    "mac-mini": {
+                        "base": 41,
+                        "swing": 4,
+                        "seed": 11,
+                        "bumps": [
+                            {
+                                "ago": 1800000000000,
+                                "width": 180000000000,
+                                "height": 14
+                            }
+                        ],
+                        "plateau": [
+                            "2026-11-07T02:58:00Z",
+                            "2026-11-07T03:32:00Z"
+                        ],
+                        "in": 0.3,
+                        "out": 0.25
+                    },
+                    "review-bot": {
+                        "base": 3,
+                        "swing": 1,
+                        "seed": 19,
+                        "in": 0.02,
+                        "out": 0.01
                     }
                 }
             },
@@ -364,8 +492,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 5500000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 745069804,
+                    "cpu_total": 1815400000,
                     "cpus": 14,
                     "load": [
                         7.700000000000001,
@@ -378,10 +506,47 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 613012539991,
+                    "net_out": 507010972651,
                     "thermal": 0,
                     "boot": "2026-10-17T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 349,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 239681,
+                    "net_out": 196004,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "processes": {
+                    "1004": {
+                        "cpu": 10.285714285714286,
+                        "memory": 17179869184,
+                        "started": "2026-10-26T10:30:00Z"
+                    },
+                    "1005": {
+                        "cpu": 17.142857142857142,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    },
+                    "1006": {
+                        "cpu": 0.8571428571428571,
+                        "memory": 2863311530,
+                        "started": "2026-11-07T08:30:00Z"
+                    }
                 }
             },
             "power": {
@@ -768,6 +933,53 @@
                         "until": "2026-11-07T18:00:00Z",
                         "by": "station awake --until 18:00 --lid"
                     }
+                },
+                "past": {
+                    "agent-7f": {
+                        "base": 4,
+                        "swing": 1,
+                        "seed": 8,
+                        "in": 0.05,
+                        "out": 0.02
+                    },
+                    "linux-1": {
+                        "base": 34,
+                        "swing": 6,
+                        "seed": 5,
+                        "bumps": [
+                            {
+                                "ago": 900000000000,
+                                "width": 240000000000,
+                                "height": 36
+                            },
+                            {
+                                "ago": 3120000000000,
+                                "width": 240000000000,
+                                "height": 10
+                            }
+                        ],
+                        "in": 0.45,
+                        "out": 0.3
+                    },
+                    "macbook-pro": {
+                        "base": 22,
+                        "swing": 4,
+                        "seed": 3,
+                        "bumps": [
+                            {
+                                "ago": 1500000000000,
+                                "width": 240000000000,
+                                "height": 24
+                            },
+                            {
+                                "ago": 3000000000000,
+                                "width": 300000000000,
+                                "height": 8
+                            }
+                        ],
+                        "in": 0.5,
+                        "out": 0.45
+                    }
                 }
             },
             "facts": {
@@ -898,8 +1110,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 3000000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 57179022,
+                    "cpu_total": 260200000,
                     "cpus": 16,
                     "load": [
                         4.8,
@@ -912,10 +1124,42 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 145957623867,
+                    "net_out": 130396098039,
                     "thermal": 0,
                     "boot": "2026-11-04T10:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 219,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 497347,
+                    "net_out": 435313,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
+                },
+                "processes": {
+                    "1001": {
+                        "cpu": 9.25,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    },
+                    "1002": {
+                        "cpu": 1,
+                        "memory": 5726623061,
+                        "started": "2026-11-07T08:30:00Z"
+                    }
                 }
             },
             "power": {
@@ -1261,8 +1505,8 @@
             "meter": {
                 "sample": {
                     "at": "2026-11-07T10:30:00Z",
-                    "cpu_busy": 600000,
-                    "cpu_total": 10000000,
+                    "cpu_busy": 209290,
+                    "cpu_total": 8200000,
                     "cpus": 2,
                     "load": [
                         0.12,
@@ -1275,10 +1519,30 @@
                     "swap_used": 0,
                     "disk_read": 0,
                     "disk_written": 0,
-                    "net_in": 0,
-                    "net_out": 0,
+                    "net_in": 161704006,
+                    "net_out": 80803671,
                     "thermal": 0,
                     "boot": "2026-11-07T08:30:00Z"
+                },
+                "per_second": {
+                    "at": "0001-01-01T00:00:00Z",
+                    "cpu_busy": 34,
+                    "cpu_total": 1000,
+                    "cpus": 0,
+                    "load": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "mem_used": 0,
+                    "mem_total": 0,
+                    "swap_used": 0,
+                    "disk_read": 0,
+                    "disk_written": 0,
+                    "net_in": 21310,
+                    "net_out": 12720,
+                    "thermal": 0,
+                    "boot": "0001-01-01T00:00:00Z"
                 }
             },
             "self": {
