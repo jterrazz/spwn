@@ -37,6 +37,8 @@ export const NEWEST_TONE: Tone = 'ok';
 
 export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 
+export const REVERSIBLE_TONE: Tone = 'ok';
+
 // outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
 // outside: groups take, and design/'s type checks each where a page hands it over.
 type GroupColour = 'pink' | 'purple' | 'slate' | 'system' | 'teal';

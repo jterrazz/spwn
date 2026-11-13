@@ -43,7 +43,7 @@ export type Held = {
     }[];
     needs: readonly OverviewNeed[];
     routeOfNeed: (need: OverviewNeed) => Route;
-    apps: readonly { name: string; category: string }[];
+    apps: readonly { name: string; category: string; skill?: boolean }[];
     settings: readonly { name: string; category: string }[];
 };
 
@@ -99,13 +99,23 @@ function tabsOf(held: Held): readonly Result[] {
     );
 }
 
-function packageOf(shelf: 'apps' | 'settings', item: { name: string; category: string }): Result {
+function shelfOf(shelf: 'apps' | 'settings', skill: boolean | undefined): PlainPage {
+    if (shelf === 'settings') {
+        return 'catalog-settings';
+    }
+    return skill === true ? 'catalog-skills' : 'catalog-apps';
+}
+
+function packageOf(
+    shelf: 'apps' | 'settings',
+    item: { name: string; category: string; skill?: boolean },
+): Result {
     return {
         detail: sentenceOf([shelf === 'apps' ? 'app' : 'setting', item.category]),
         kind: 'Packages',
         label: item.name,
         mark: { kind: shelf === 'apps' ? 'app' : 'setting', name: item.name },
-        to: { route: { page: shelf === 'apps' ? 'catalog-apps' : 'catalog-settings' } },
+        to: { route: { item: item.name, page: shelfOf(shelf, item.skill) } },
     };
 }
 

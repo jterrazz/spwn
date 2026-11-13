@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { TITLES } from '../shell/window';
 import type { PageProps, Pages } from '../shell/window';
 import { CatalogPage } from './catalog/catalog';
+import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
 import { HomePage } from './home/home';
 import { InboxPage } from './inbox/inbox';
@@ -14,6 +15,24 @@ import { routeOfNeed } from './needs/needs';
 import { NewMachine } from './new-machine/new-machine';
 import { PlaceholderPage } from './placeholder';
 import { StoragePage } from './storage/storage';
+
+function Shelf({
+    shelf,
+    item,
+    go,
+    macs,
+}: {
+    shelf: 'apps' | 'settings' | 'skills';
+    item: string | undefined;
+    go: PageProps['go'];
+    macs: PageProps['home']['macs'];
+}) {
+    return item === undefined ? (
+        <ShelfPage go={go} shelf={shelf} />
+    ) : (
+        <ItemPage go={go} macs={macs} name={item} shelf={shelf} />
+    );
+}
 
 function Head({ route, found, go, newMachine }: PageProps) {
     return route.page === 'machine' && found ? (
@@ -52,13 +71,13 @@ function Body({ route, found, home, go, Gallery, newMachine }: PageProps) {
             return <CatalogPage go={go} />;
         }
         case 'catalog-apps': {
-            return <ShelfPage shelf="apps" />;
+            return <Shelf go={go} item={route.item} macs={home.macs} shelf="apps" />;
         }
         case 'catalog-skills': {
-            return <ShelfPage shelf="skills" />;
+            return <Shelf go={go} item={route.item} macs={home.macs} shelf="skills" />;
         }
         case 'catalog-settings': {
-            return <ShelfPage shelf="settings" />;
+            return <Shelf go={go} item={route.item} macs={home.macs} shelf="settings" />;
         }
         case 'gallery': {
             return Gallery ? (

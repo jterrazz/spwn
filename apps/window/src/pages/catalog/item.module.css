@@ -1,0 +1,98 @@
+.head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-14);
+    padding: var(--space-8) 0 var(--space-4);
+}
+.named {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+.name {
+    margin: 0;
+    font-size: var(--text-tab-verdict);
+    font-weight: var(--weight-strong);
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    flex-wrap: wrap;
+}
+.about {
+    margin: 0;
+    color: var(--t2);
+}
+.two {
+    display: grid;
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
+    gap: var(--space-14);
+    align-items: start;
+}
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-14);
+    min-width: 0;
+}
+.rail {
+    background: var(--panel);
+    border-radius: var(--radius-panel);
+    padding: var(--space-14) var(--space-16) var(--space-16);
+    min-width: 0;
+}
+.installs {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--line);
+}
+.install {
+    display: grid;
+    grid-template-columns: 120px auto minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: baseline;
+    padding: var(--space-6) 0;
+}
+.systems {
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.target {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t2);
+    overflow-wrap: anywhere;
+}
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+}
+.chip {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
+    border-radius: var(--radius-control);
+    background: var(--raise);
+    font-size: var(--text-label);
+}
+.chip:hover {
+    background: var(--raise-2);
+}
+.chip:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 2px;
+}
+.rows {
+    padding-bottom: var(--space-8);
+}
+@media (max-width: 860px) {
+    .two {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

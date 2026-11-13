@@ -120,6 +120,28 @@ describe('route', () => {
         });
     });
 
+    test('a start route opens a catalog item on its shelf alone', () => {
+        // Given - the queries a capture opens an item with
+        // Then - a shelf opens on its item, and a page that holds none ignores it
+        expect(startOf('?page=catalog-apps&item=node')).toStrictEqual({
+            item: 'node',
+            page: 'catalog-apps',
+        });
+        expect(startOf('?page=inbox&item=node')).toStrictEqual({ page: 'inbox' });
+    });
+
+    test('a catalog item is a navigation of its own, its shelf one step back', () => {
+        // Given - the Apps shelf
+        const history = navigate(start, { page: 'catalog-apps' });
+
+        // When - node is opened from it
+        const item = navigate(history, { item: 'node', page: 'catalog-apps' });
+
+        // Then - node's page is shown, the shelf one step back
+        expect(item.current).toStrictEqual({ item: 'node', page: 'catalog-apps' });
+        expect(goBack(item).current).toStrictEqual({ page: 'catalog-apps' });
+    });
+
     test('machine files opened on another file is a navigation of its own', () => {
         // Given - Machine files opened on This Mac's file
         const history = navigate(start, { page: 'machine-files' });

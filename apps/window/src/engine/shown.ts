@@ -26,6 +26,7 @@ import {
     NEWEST_TONE,
     OWN_STATE_TONES,
     PORT_REACH_TONES,
+    REVERSIBLE_TONE,
     SEVERITY_TONES,
     SHARE_END_TONES,
     VM_CHECK_TONES,
@@ -42,6 +43,7 @@ import {
     NO_STATE_WORD,
     OWN_STATE_WORDS,
     PORT_REACH_WORDS,
+    REVERSIBLE_WORD,
     SEVERITY_WORDS,
     SHARE_TO_WORDS,
     SSH_WORDS,
@@ -117,6 +119,10 @@ export function machineKindWord(kind: string): string {
 
 export function newestState(newest: boolean): null | Shown {
     return newest ? { tone: NEWEST_TONE, word: NEWEST_WORD } : null;
+}
+
+export function reversibleState(reversible: boolean): null | Shown {
+    return reversible ? { tone: REVERSIBLE_TONE, word: REVERSIBLE_WORD } : null;
 }
 
 export function holdsFor(until: string, now: string): Shown {

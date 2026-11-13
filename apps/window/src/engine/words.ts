@@ -4,6 +4,7 @@ import type {
     ActivitySample,
     AppsReport,
     CatalogApp,
+    CatalogStored,
     CoreCallWireError,
     CoreFindingFinding,
     DiskOutcome,
@@ -200,12 +201,38 @@ export const CATALOG_KIND_WORDS: Words<NonNullable<CatalogApp['Kind']>> = {
     setting: 'setting',
 };
 
+export const CATALOG_KIND_NAMES: Words<NonNullable<CatalogApp['Kind']>> = {
+    app: 'app',
+    manager: 'manager',
+    setting: 'setting',
+};
+
+export const SKILL_KIND_NAME = 'agent skill';
+
 export const CATALOG_SHELF_WORDS: Words<MachinefileStep['Kind']> = {
     '': 'Apps',
     app: 'Apps',
     manager: 'Apps',
     setting: 'Settings',
 };
+
+export const CATALOG_LEVEL_WORDS: Words<CatalogStored['Level']> = {
+    '': 'no level given',
+    cache: 'cache',
+    data: 'data',
+    kept: 'kept',
+    settings: 'settings',
+};
+
+export const CATALOG_LEVEL_LINES: Words<CatalogStored['Level']> = {
+    '': '',
+    cache: 'rebuilt when needed',
+    data: 'yours, kept',
+    kept: 'kept',
+    settings: 'your settings, kept',
+};
+
+export const REVERSIBLE_WORD = 'Can be undone';
 
 export function newestOutWord(newest: string): string {
     return `${newest} is out`;

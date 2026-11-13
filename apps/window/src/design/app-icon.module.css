@@ -8,6 +8,19 @@
     background: var(--raise-2);
     color: var(--t1);
 }
+.icon.page {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-well);
+}
+.icon.page svg,
+.icon.page .mark {
+    width: 22px;
+    height: 22px;
+}
+.icon.page .letters {
+    font-size: 14px;
+}
 .icon svg {
     width: 14px;
     height: 14px;

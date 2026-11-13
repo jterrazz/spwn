@@ -4,6 +4,7 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 
 import { moved } from '../design/focus';
 import { AppIcon, identityOf, MachineIcon, Modal } from '../design/index';
+import { isSkill } from '../engine/provisional';
 import { useWatch } from '../engine/react';
 import { everything, matching, resultKey } from './finds';
 import type { Action, Group, Result } from './finds';
@@ -29,7 +30,11 @@ function useHeld(props: FindProps) {
         ...props,
         apps:
             apps.kind === 'read'
-                ? (apps.out ?? []).map(({ App }) => ({ category: App.Category, name: App.Name }))
+                ? (apps.out ?? []).map(({ App }) => ({
+                      category: App.Category,
+                      name: App.Name,
+                      skill: isSkill(App.Category),
+                  }))
                 : [],
         settings:
             settings.kind === 'read'

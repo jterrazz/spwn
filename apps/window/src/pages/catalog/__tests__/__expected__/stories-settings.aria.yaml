@@ -17,20 +17,45 @@
     - button "No category given9"
   - region "Settings":
     - paragraph: Shell 2
-    - text: "docker-shortcuts setting Docker shortcuts: dclean, dclean-images, dreset, each asks first 0 of 6 machines OK git-shortcuts setting Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup 0 of 6 machines OK"
+    - 'button "docker-shortcuts setting Docker shortcuts: dclean, dclean-images, dreset, each asks first 0 of 6 machines OK"'
+    - 'button "git-shortcuts setting Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup 0 of 6 machines OK"'
     - paragraph: Terminal 4
-    - text: ghostty-dotfiles setting The Ghostty settings and its Catppuccin themes 0 of 2 machines OK hushlogin setting Silence the terminal login message 0 of 6 machines OK starship-dotfiles setting The Starship prompt settings 0 of 6 machines OK tmux-dotfiles setting The tmux settings 0 of 6 machines OK
+    - button "ghostty-dotfiles setting The Ghostty settings and its Catppuccin themes 0 of 2 machines OK"
+    - button "hushlogin setting Silence the terminal login message 0 of 6 machines OK"
+    - button "starship-dotfiles setting The Starship prompt settings 0 of 6 machines OK"
+    - button "tmux-dotfiles setting The tmux settings 0 of 6 machines OK"
     - paragraph: Security 6
-    - text: claude-token setting The Claude Code subscription token a VM may borrow 0 of 2 machines OK dns setting Encrypted DNS via Quad9 (DoH) 0 of 2 machines OK git-signing setting Sign every commit with a GPG key 0 of 2 machines OK github-login setting The GitHub CLI logged in over SSH 0 of 6 machines OK spotlight-exclude setting Exclude ~/Developer from Spotlight (guided, opens Settings) 0 of 2 machines OK ssh-key setting An ed25519 SSH key, kept in the Keychain 0 of 2 machines OK
+    - button "claude-token setting The Claude Code subscription token a VM may borrow 0 of 2 machines OK"
+    - button "dns setting Encrypted DNS via Quad9 (DoH) 0 of 2 machines OK"
+    - button "git-signing setting Sign every commit with a GPG key 0 of 2 machines OK"
+    - button "github-login setting The GitHub CLI logged in over SSH 0 of 6 machines OK"
+    - button "spotlight-exclude setting Exclude ~/Developer from Spotlight (guided, opens Settings) 0 of 2 machines OK"
+    - button "ssh-key setting An ed25519 SSH key, kept in the Keychain 0 of 2 machines OK"
     - paragraph: Editor 1
-    - text: zed-dotfiles setting The Zed settings and its formatter settings 0 of 2 machines OK
+    - button "zed-dotfiles setting The Zed settings and its formatter settings 0 of 2 machines OK"
     - paragraph: System 4
-    - text: "backup-exclusions setting Keep ~/.cache and station's VMs out of Time Machine 0 of 2 machines OK dock-reset setting Put the Dock back to the system defaults 0 of 2 machines OK dock-spacer setting Add a small spacer tile to the dock 0 of 2 machines OK tart-launcher setting The tart launcher: Tart's home is station's VMs folder 0 of 2 machines OK"
+    - button "backup-exclusions setting Keep ~/.cache and station's VMs out of Time Machine 0 of 2 machines OK"
+    - button "dock-reset setting Put the Dock back to the system defaults 0 of 2 machines OK"
+    - button "dock-spacer setting Add a small spacer tile to the dock 0 of 2 machines OK"
+    - 'button "tart-launcher setting The tart launcher: Tart''s home is station''s VMs folder 0 of 2 machines OK"'
     - paragraph: Headless 5
-    - text: "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK lock-after-login setting A LaunchAgent that locks the screen ~20s after auto-login 0 of 1 machine OK never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK restart-after-power-cut setting Restarts after a power cut, and wakes for the network 1 of 1 machine OK sshd setting macOS Remote Login (sshd) 0 of 1 machine OK"
+    - button "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK"
+    - button "lock-after-login setting A LaunchAgent that locks the screen ~20s after auto-login 0 of 1 machine OK"
+    - 'button "never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK"'
+    - button "restart-after-power-cut setting Restarts after a power cut, and wakes for the network 1 of 1 machine OK"
+    - button "sshd setting macOS Remote Login (sshd) 0 of 1 machine OK"
     - paragraph: Network 1
-    - text: "tailscale-cli setting The tailscale command for the App Store app: a script on PATH, never a link to the app 0 of 2 machines OK"
+    - 'button "tailscale-cli setting The tailscale command for the App Store app: a script on PATH, never a link to the app 0 of 2 machines OK"'
     - paragraph: Agents 2
-    - text: "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for · VMs only 0 of 4 machines OK herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"
+    - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for · VMs only 0 of 4 machines OK"'
+    - 'button "herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"'
     - paragraph: No category given 9
-    - text: filevault setting on 2 of 2 machines OK firewall setting off 1 of 2 machines OK sip setting on 2 of 2 machines OK automatic-updates setting on 2 of 2 machines OK screen-lock setting locks after 2 min 2 of 2 machines OK gatekeeper setting on 2 of 2 machines OK remote-login setting could not be read 0 of 2 machines OK time-machine setting last backup 1 d ago 2 of 2 machines OK macos-updates setting up to date 2 of 2 machines OK
+    - button "filevault setting on 2 of 2 machines OK"
+    - button "firewall setting off 1 of 2 machines OK"
+    - button "sip setting on 2 of 2 machines OK"
+    - button "automatic-updates setting on 2 of 2 machines OK"
+    - button "screen-lock setting locks after 2 min 2 of 2 machines OK"
+    - button "gatekeeper setting on 2 of 2 machines OK"
+    - button "remote-login setting could not be read 0 of 2 machines OK"
+    - button "time-machine setting last backup 1 d ago 2 of 2 machines OK"
+    - button "macos-updates setting up to date 2 of 2 machines OK"

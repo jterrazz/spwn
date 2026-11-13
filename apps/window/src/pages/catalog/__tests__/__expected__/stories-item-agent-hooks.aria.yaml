@@ -1,0 +1,31 @@
+- main:
+  - heading "agent-hooks setting" [level=1]
+  - paragraph: "The agent hook: station sees what Claude Code and Codex do, and what they wait for"
+  - button "Add to a machine" [disabled]
+  - region "How it is applied":
+    - heading "How it is applied" [level=2]
+    - text: Can be undone
+    - term: "On"
+    - definition: linux, macos
+    - term: Needs one of
+    - definition:
+      - button "claude"
+      - button "codex"
+  - region "What it changes":
+    - heading "What it changes and nothing else" [level=2]
+    - text: "~/.claude/settings.json station's hook under `hooks`, every other key the owner's settings ~/.codex/config.toml `notify`, unless the owner set it to another program settings"
+  - region "agent-hooks in the catalog":
+    - term: Kind
+    - definition: setting
+    - term: Category
+    - definition: Agents
+    - term: Declared in
+    - definition: Not given yet
+    - term: Machines it is for
+    - definition:
+      - button "agent-7f"
+      - button "linux-1"
+      - button "linux-3"
+      - button "review-bot"
+    - term: Comes from
+    - definition: Not given yet

@@ -7,6 +7,7 @@ import { appUpdate } from '../../engine/shown';
 import { APP_STATE_TONES } from '../../engine/tones';
 import { APP_STATE_WORDS, CATALOG_KIND_WORDS } from '../../engine/words';
 import { sentence } from '../../model/format';
+import type { Route } from '../../shell/route';
 import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { Listing } from './listing';
@@ -21,7 +22,9 @@ function kindOf(word: string): null | string {
     return word === '' ? null : word;
 }
 
-function AppRow({ report }: { report: AppsReport }) {
+type Open = (name: string) => void;
+
+function AppRow({ report, open }: { report: AppsReport; open: Open }) {
     const { App } = report;
     const update = appUpdate(report);
     return (
@@ -29,6 +32,9 @@ function AppRow({ report }: { report: AppsReport }) {
             cells={[sentence([App.Description, report.Detail])]}
             kind={App.Kind === undefined ? null : kindOf(CATALOG_KIND_WORDS[App.Kind])}
             lead={<AppIcon kind={App.Kind} name={App.Name} />}
+            onOpen={() => {
+                open(App.Name);
+            }}
             size="slim"
             state={
                 update ?? {
@@ -43,12 +49,23 @@ function AppRow({ report }: { report: AppsReport }) {
     );
 }
 
-function SettingRow({ row, held }: { row: SettingsRow; held: SettingsMatrixRow | undefined }) {
+function SettingRow({
+    row,
+    held,
+    open,
+}: {
+    row: SettingsRow;
+    held: SettingsMatrixRow | undefined;
+    open: Open;
+}) {
     return (
         <Row
             cells={[sentence([row.Package.Description, row.Value, row.Why])]}
             kind={CATALOG_KIND_WORDS.setting}
             lead={<AppIcon kind="setting" name={row.Name} />}
+            onOpen={() => {
+                open(row.Name);
+            }}
             size="slim"
             template="catalog"
             title={row.Name}
@@ -73,7 +90,7 @@ function Waiting({ reading, what }: { reading: Reading<unknown>; what: string })
     return <ReadingVerdict size="page" what={what} />;
 }
 
-function SettingsShelf() {
+function SettingsShelf({ open }: { open: Open }) {
     const reach = useReach();
     const settings = useWatch('settings.list', {});
     const matrix = useRead('settings.matrix', {});
@@ -94,7 +111,7 @@ function SettingsShelf() {
                 items={settings.out ?? []}
                 packageOf={packageOfSetting}
                 renderRow={(row) => (
-                    <SettingRow held={held.get(row.Name)} key={row.Name} row={row} />
+                    <SettingRow held={held.get(row.Name)} key={row.Name} open={open} row={row} />
                 )}
                 title="Settings"
             />
@@ -103,7 +120,7 @@ function SettingsShelf() {
     );
 }
 
-function AppsShelf({ shelf }: { shelf: 'apps' | 'skills' }) {
+function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const reach = useReach();
     const apps = useWatch('apps.list', {});
     const { title } = SHELVES[shelf];
@@ -120,13 +137,20 @@ function AppsShelf({ shelf }: { shelf: 'apps' | 'skills' }) {
             <Listing
                 items={appsOn(shelf, apps.out ?? [])}
                 packageOf={packageOfApp}
-                renderRow={(report) => <AppRow key={report.App.Name} report={report} />}
+                renderRow={(report) => <AppRow key={report.App.Name} open={open} report={report} />}
                 title={title}
             />
         </Page>
     );
 }
 
-export function ShelfPage({ shelf }: { shelf: Shelf }) {
-    return shelf === 'settings' ? <SettingsShelf /> : <AppsShelf shelf={shelf} />;
+export function ShelfPage({ shelf, go }: { shelf: Shelf; go: (to: Route) => void }) {
+    const open = (item: string) => {
+        go({ item, page: SHELVES[shelf].page });
+    };
+    return shelf === 'settings' ? (
+        <SettingsShelf open={open} />
+    ) : (
+        <AppsShelf open={open} shelf={shelf} />
+    );
 }

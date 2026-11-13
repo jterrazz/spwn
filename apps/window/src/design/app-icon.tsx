@@ -35,9 +35,17 @@ function Drawn({ name, kind }: { name: string; kind: string | undefined }) {
     }
 }
 
-export function AppIcon({ name, kind }: { name: string; kind?: string | undefined }) {
+export function AppIcon({
+    name,
+    kind,
+    size = 'row',
+}: {
+    name: string;
+    kind?: string | undefined;
+    size?: 'page' | 'row';
+}) {
     return (
-        <span aria-hidden="true" className={styles.icon}>
+        <span aria-hidden="true" className={`${styles.icon} ${size === 'page' ? styles.page : ''}`}>
             <Drawn kind={kind} name={name} />
         </span>
     );

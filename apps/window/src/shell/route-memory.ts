@@ -1,4 +1,4 @@
-import { machineRoute, PLAIN_PAGES, TABS } from './route';
+import { machineRoute, PLAIN_PAGES, plainRoute, TABS } from './route';
 import type { Route } from './route';
 
 export type Memory = Pick<Storage, 'getItem' | 'setItem'>;
@@ -21,7 +21,7 @@ function routeOf(value: unknown): Route | undefined {
     if (!isRecord(value)) {
         return undefined;
     }
-    const { page, machine, tab, file } = value;
+    const { page, machine, tab, file, item } = value;
     if (page === 'machine') {
         const known = TABS.find((one) => one === tab);
         return typeof machine === 'string' && machine !== '' && known
@@ -32,7 +32,7 @@ function routeOf(value: unknown): Route | undefined {
     if (plain === undefined) {
         return undefined;
     }
-    return typeof file === 'string' && file !== '' ? { file, page: plain } : { page: plain };
+    return plainRoute(plain, file, item);
 }
 
 export function recalled(memory: Memory | undefined, withGallery: boolean): Route | undefined {

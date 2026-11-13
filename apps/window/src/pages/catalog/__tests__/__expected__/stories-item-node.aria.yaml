@@ -1,0 +1,34 @@
+- main:
+  - heading "node manager" [level=1]
+  - paragraph: JavaScript runtime built on Chrome's V8 engine
+  - button "Add to a machine" [disabled]
+  - region "How it is installed":
+    - heading "How it is installed" [level=2]
+    - text: mac, linux, macos mise node · lts
+    - term: Puts on your path
+    - definition: node npm npx
+  - region "Version":
+    - heading "Version" [level=2]
+    - term: On this Mac
+    - definition: Not installed
+    - term: Rule
+    - definition: Not given yet
+    - term: Newest
+    - definition: Not given yet
+    - term: Last moved
+    - definition: Not given yet
+  - region "What it keeps on disk":
+    - heading "What it keeps on disk" [level=2]
+    - button "Storage"
+    - text: "{cache}/npm rebuilt when needed cache ~/.npmrc your settings, kept · may hold registry tokens settings"
+  - region "node in the catalog":
+    - term: Kind
+    - definition: manager
+    - term: Category
+    - definition: Runtimes
+    - term: Declared in
+    - definition: Not given yet
+    - term: Machines
+    - definition: Not given yet
+    - term: Comes from
+    - definition: Not given yet

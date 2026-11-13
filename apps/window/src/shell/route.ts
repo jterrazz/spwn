@@ -26,9 +26,15 @@ export const PLAIN_PAGES = [
 
 export type PlainPage = (typeof PLAIN_PAGES)[number];
 
-export type Route =
-    | { page: 'machine'; machine: string; tab: Tab }
-    | { page: PlainPage; file?: string | undefined };
+export const IN_CATALOG: ReadonlySet<PlainPage> = new Set<PlainPage>([
+    'catalog-apps',
+    'catalog-settings',
+    'catalog-skills',
+]);
+
+type PlainRoute = { page: PlainPage; file?: string | undefined; item?: string | undefined };
+
+export type Route = PlainRoute | { page: 'machine'; machine: string; tab: Tab };
 
 export type History = { current: Route; back: readonly Route[]; forward: readonly Route[] };
 
@@ -41,7 +47,9 @@ export function sameRoute(a: Route, b: Route): boolean {
     if (a.page === 'machine' || b.page === 'machine') {
         return false;
     }
-    return a.page === b.page && (a.file ?? '') === (b.file ?? '');
+    return (
+        a.page === b.page && (a.file ?? '') === (b.file ?? '') && (a.item ?? '') === (b.item ?? '')
+    );
 }
 
 export function historyAt(current: Route): History {
@@ -93,6 +101,22 @@ export function startRoute(query: URLSearchParams): Route {
         return machineRoute(machine, oneOf(TABS, query.get('tab')) ?? 'Overview');
     }
     const page = oneOf(PLAIN_PAGES, query.get('page')) ?? 'home';
-    const file = query.get('file');
-    return file !== null && file !== '' ? { file, page } : { page };
+    return plainRoute(page, query.get('file'), query.get('item'));
+}
+
+function named(value: unknown): string | undefined {
+    return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
+export function plainRoute(page: PlainPage, file: unknown, item: unknown): Route {
+    const route: PlainRoute = { page };
+    const opened = named(file);
+    const chosen = IN_CATALOG.has(page) ? named(item) : undefined;
+    if (opened !== undefined) {
+        route.file = opened;
+    }
+    if (chosen !== undefined) {
+        route.item = chosen;
+    }
+    return route;
 }

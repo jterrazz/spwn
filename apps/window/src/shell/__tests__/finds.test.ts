@@ -116,14 +116,16 @@ describe('finds', () => {
         expect(tabs.every((result) => result.detail === '')).toBe(true);
     });
 
-    test("a package is found by its name and opens its shelf, a need opens where the need's row does", () => {
+    test("a package is found by its name and opens its page, a need opens where the need's row does", () => {
         // Given - queries for a setting, an app's category, and a need's words
         const setting = matching(everything(HELD), 'dock');
         const runtime = matching(everything(HELD), 'runtimes');
         const need = matching(everything(HELD), 'answer');
 
         // Then - each lands where its page shows it
-        expect(setting[0]?.results[0]?.to).toStrictEqual({ route: { page: 'catalog-settings' } });
+        expect(setting[0]?.results[0]?.to).toStrictEqual({
+            route: { item: 'dock-autohide', page: 'catalog-settings' },
+        });
         expect(shown(runtime)).toStrictEqual([['Packages', ['node']]]);
         expect(need[0]?.results[0]?.to).toStrictEqual({ route: machineRoute('linux-1', 'Ports') });
     });

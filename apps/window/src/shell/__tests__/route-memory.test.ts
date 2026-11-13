@@ -31,6 +31,18 @@ describe('route memory', () => {
         expect(route).toStrictEqual(machineRoute('linux-1', 'Logs'));
     });
 
+    test('a catalog item and a machine file are recalled with the page that holds them', () => {
+        // Given - the window left on node's page, then on the file of api
+        const item = memoryOf();
+        remember(item, { item: 'node', page: 'catalog-apps' });
+        const file = memoryOf();
+        remember(file, { file: 'api', page: 'machine-files' });
+
+        // Then - each reopens on what it held
+        expect(recalled(item, false)).toStrictEqual({ item: 'node', page: 'catalog-apps' });
+        expect(recalled(file, false)).toStrictEqual({ file: 'api', page: 'machine-files' });
+    });
+
     test.each([
         { text: 'not json' },
         { text: '{"page":"nope"}' },

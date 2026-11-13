@@ -26,4 +26,7 @@
     - button "System Utilities6"
   - region "Apps":
     - paragraph: Git 4
-    - text: gh GitHub CLI for repository management · outdated 2.97.0 2.98.0 is out git Distributed version control system Not installed gpg GNU Privacy Guard for encryption and signing Not installed lazygit Terminal UI for git 0.55.1 Installed
+    - button "gh GitHub CLI for repository management · outdated 2.97.0 2.98.0 is out"
+    - button "git Distributed version control system Not installed"
+    - button "gpg GNU Privacy Guard for encryption and signing Not installed"
+    - button "lazygit Terminal UI for git 0.55.1 Installed"

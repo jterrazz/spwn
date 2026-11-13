@@ -13,7 +13,7 @@ import { Find } from './find';
 import type { Action } from './finds';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
-import { machineRoute, TAB_PANEL } from './route';
+import { IN_CATALOG, machineRoute, TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
@@ -75,15 +75,9 @@ export function Window({ initial, pages, Gallery, onRoute }: WindowProps) {
 
 type Sheet = 'find' | 'new-machine' | 'none';
 
-const IN_CATALOG: ReadonlySet<PlainPage> = new Set<PlainPage>([
-    'catalog-apps',
-    'catalog-settings',
-    'catalog-skills',
-]);
-
 function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
     if (route.page !== 'machine') {
-        const page = { label: TITLES[route.page] };
+        const page = { label: route.item ?? TITLES[route.page] };
         if (!IN_CATALOG.has(route.page)) {
             return [page];
         }
@@ -111,7 +105,10 @@ function crumbsOf(route: Route, found: Found | undefined, go: Go): Crumb[] {
 }
 
 export function whereOf(route: Route): string {
-    return route.page === 'machine' ? `${route.machine} › ${route.tab}` : TITLES[route.page];
+    if (route.page === 'machine') {
+        return `${route.machine} › ${route.tab}`;
+    }
+    return route.item === undefined ? TITLES[route.page] : `${TITLES.catalog} › ${route.item}`;
 }
 
 type AreaProps = PageProps & { pages: Pages; panel?: boolean };
