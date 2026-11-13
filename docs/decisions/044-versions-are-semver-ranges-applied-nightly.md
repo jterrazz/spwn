@@ -1,4 +1,4 @@
-# ADR-0xx: Versions are semver ranges, applied every night
+# ADR-044: Versions are semver ranges, applied every night
 
 **Status:** Proposed
 **Date:** 2026-11-12

@@ -9,7 +9,7 @@
 
 ## Decision
 
-The shared source's pin (the layers' "pinned at a commit", and the consequence that only the owner moves it) is superseded in part by [the versions ADR](0xx-draft-versions-are-semver-ranges-applied-nightly.md): the shared source follows its default branch, forward only.
+The shared source's pin (the layers' "pinned at a commit", and the consequence that only the owner moves it) is superseded in part by [the versions ADR](044-versions-are-semver-ranges-applied-nightly.md): the shared source follows its default branch, forward only.
 
 A machine is declared by one file, its Machinefile, `station.machinefile/v1`, and station computes what to do from it, never from a list of its own.
 
