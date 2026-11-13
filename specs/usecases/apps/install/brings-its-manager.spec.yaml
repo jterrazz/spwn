@@ -6,7 +6,7 @@ runs:
       stdout: |
           ●	mas	1.0.0	brew	required by keynote
           ●	keynote	1.0.0	mas
-    - command: 'apps | /usr/bin/grep -e "^.	mas	" -e "^.	keynote	"'
+    - command: 'apps | /usr/bin/grep -e "^[^	]*	mas	" -e "^[^	]*	keynote	"'
       exit: 0
       stdout: |
           ●	mas	1.0.0	brew
