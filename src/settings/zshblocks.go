@@ -86,11 +86,14 @@ func PackageBlockIDs(zshrc string) []string {
 
 func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 	// invariant: an upsert touches the block's own lines alone: a block there is
-	// replaced in place; a new one goes right after the last station block, or at
-	// the end of the file when there is none, before its final newline when it
-	// has one, so the owner's lines keep their bytes and their places, and the
-	// block's removal gives the file back byte for byte, a last line with no
-	// newline included.
+	// replaced in place; a new one goes right after the last station block, or,
+	// when there is none, before the file's last line: its final newline, or a
+	// last line of the owner's with no newline. So the owner's lines keep their
+	// bytes and their order, a new block's end marker is always followed by a
+	// newline, so an installer's `>>` append is never glued to it, and the
+	// block's removal gives the file back byte for byte. A station marker that
+	// ends the file with no newline gets one, station's own byte, before the
+	// new block follows it.
 	lines := strings.Split(zshrc, "\n")
 	start, end := BlockMarkers(id)
 	block := append(append([]string{start}, bodyLines(body)...), end)
@@ -104,10 +107,7 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 			return strings.Join(out, "\n"), true
 		}
 	}
-	pos, last := len(lines), -1
-	if lines[len(lines)-1] == "" {
-		pos--
-	}
+	pos, last := len(lines)-1, -1
 	if _, end, ok := mainSpan(lines); ok {
 		last = end
 	}
@@ -116,6 +116,9 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 	}
 	if last >= 0 {
 		pos = last + 1
+	}
+	if pos == len(lines) {
+		lines = append(lines, "")
 	}
 	out := append(append(cloned(lines[:pos]), block...), lines[pos:]...)
 	return strings.Join(out, "\n"), true

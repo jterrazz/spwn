@@ -1,6 +1,10 @@
 package settings
 
-import "testing"
+import (
+	"slices"
+	"strings"
+	"testing"
+)
 
 const owner = "export EDITOR=vim\n\nalias gs='git status'\n"
 
@@ -30,7 +34,7 @@ func TestABlockIsReplacedInPlaceBetweenTheOwnersLines(t *testing.T) {
 }
 
 func TestRemovingABlockGivesTheFileBackAsItWas(t *testing.T) {
-	for _, before := range []string{"", owner, "no newline at the end", "\n\n", owner + "\n# >>> station >>>\nx\n# <<< station <<<\n", "# >>> station >>>\nx\n# <<< station <<<"} {
+	for _, before := range []string{"", owner, "no newline at the end", "a\nlast with none", "\n\n", "crlf\r\nlines\r\n", "crlf\r\nlast with none", owner + "\n# >>> station >>>\nx\n# <<< station <<<\n"} {
 		written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
 		back, changed := RemovePackageBlock(written, "station:a")
 		if !changed || back != before {
@@ -76,5 +80,30 @@ func TestPackageBlockIDsListTheBlocksInFileOrder(t *testing.T) {
 	ids := PackageBlockIDs(text)
 	if len(ids) != 2 || ids[0] != "station:b" || ids[1] != "station:a/x" {
 		t.Errorf("listed %v", ids)
+	}
+}
+
+func TestANewBlocksEndMarkerIsNeverGluedToWhatAnInstallerAppends(t *testing.T) {
+	for _, before := range []string{"", owner, "no newline at the end", "a\nlast with none", "crlf\r\nlines\r\n", "crlf\r\nlast with none", "# >>> station >>>\nx\n# <<< station <<<"} {
+		written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
+		appended := written + "export FROM_AN_INSTALLER=1\n"
+		if body, state := PackageBlock(appended, "station:a"); state != BlockHere || body != "echo a\n" {
+			t.Errorf("an append to %q breaks the block: %q, %v", written, body, state)
+		}
+		lines := strings.Split(appended, "\n")
+		if !slices.Contains(lines, "# <<< station:a <<<") {
+			t.Errorf("the end marker is not a line of its own in %q", appended)
+		}
+	}
+}
+
+func TestAMainMarkerThatEndsTheFileGetsItsNewlineBeforeANewBlock(t *testing.T) {
+	before := "mine\n# >>> station >>>\nx\n# <<< station <<<"
+	written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
+	if want := before + "\n# >>> station:a >>>\necho a\n# <<< station:a <<<\n"; written != want {
+		t.Errorf("got %q, want %q", written, want)
+	}
+	if back, _ := RemovePackageBlock(written, "station:a"); back != before+"\n" {
+		t.Errorf("removal leaves %q; want the owner's lines with station's marker ended", back)
 	}
 }
