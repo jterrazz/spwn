@@ -4,6 +4,11 @@ import { defineConfig } from '@jterrazz/typescript/config';
 export default defineConfig({
     presets: [test()],
     typescript: {
+        knip: {
+            ignoreDependencies: {
+                turbo: 'the task runner `make lint` and `make test` invoke through `npx`; no source file imports it',
+            },
+        },
         oxfmt: {
             ignore: {
                 'TODO.md': 'copied verbatim from the design',

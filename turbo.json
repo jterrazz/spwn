@@ -1,0 +1,37 @@
+{
+    "$schema": "https://turborepo.dev/schema.json",
+    "agentGuidance": false,
+    "futureFlags": {
+        "experimentalGoWorkspaces": true,
+        "experimentalTaskCommand": true
+    },
+    "cacheDir": ".artifacts/turbo",
+    "tasks": {
+        "lint": {
+            "command": {
+                "go": ["go", "tool", "golangci-lint", "run", "--allow-parallel-runners", "./..."]
+            },
+            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.golangci.yml"]
+        },
+        "//#lint": {
+            "cache": false
+        },
+        "test": {},
+        "specs#test": {
+            "cache": false
+        },
+        "studio-station-specs#test": {
+            "cache": false
+        }
+    },
+    "globalPassThroughEnv": [
+        "STATION_SPEC_BUILT",
+        "STATION_SPEC_HYPERVISOR",
+        "STATION_REQUIRE_MENUBAR",
+        "STATION_WORLD",
+        "TEST_UPDATE",
+        "VITEST_MAX_WORKERS",
+        "GOFLAGS",
+        "GOOS"
+    ]
+}

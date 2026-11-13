@@ -11,6 +11,7 @@ TEST_PATH    := .artifacts/go/$(BINARY)-test
 SPEC_TAGS    := world
 BIN_DIR      := $(HOME)/.local/bin
 INSTALL_PATH := $(BIN_DIR)/$(BINARY)
+TURBO        := npx turbo
 MENUBAR_APP  := .artifacts/menubar/Station.app
 # value: /usr/bin/make on macOS is itself an xcrun shim, so a missing SDK is
 # staged by overriding the probe (`make menubar-check SDK_PROBE=false`).
@@ -49,12 +50,11 @@ build-linux: ## Build the linux/arm64 binary a VM image carries
 lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode over Go, typescript check over the rest
 	@unformatted=$$(gofmt -l ./apps/engine ./catalog ./specs); \
 		if [ -n "$$unformatted" ]; then printf "gofmt would rewrite:\n%s\n" "$$unformatted"; exit 1; fi
-	@go tool golangci-lint run ./apps/engine/... ./catalog/... ./specs/...
+	@$(TURBO) run lint --filter='!go-workspace'
 	@GOOS=linux $$(go tool -n golangci-lint) run ./apps/engine/... ./catalog/... ./specs/...
 	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./apps/engine/...); \
 		if [ -n "$$dead" ]; then printf "deadcode found unreachable functions:\n%s\n" "$$dead"; exit 1; fi
-	@printf "$(GREEN)●$(RESET) Go lint passed\n"
-	@npm run --silent lint
+	@printf "$(GREEN)●$(RESET) Lint passed\n"
 
 fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 	@status=0; \
@@ -67,7 +67,7 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 VZ_SUITES    := usecases/machines usecases/engine/keep
 
 test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station, then the VM suites again over vz
-	@go test ./apps/engine/... ./catalog/... ./specs/...
+	@$(TURBO) run test --filter='!go-workspace' --filter='!studio-station-specs'
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
 	@STATION_SPEC_BUILT=1 npm --workspace specs exec -- vitest --run

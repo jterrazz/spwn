@@ -72,8 +72,8 @@ Between machines, and the machine's own door:
 The data, the presentation and the surfaces:
 
 ```text
-  catalog/   pure data: the item files (items/<category>/<name>.yaml), the built-in Machinefiles
-             (machinefiles/<name>.yaml) and their strict decoder, images, dotfiles, recipes
+  catalog/   the Go package that decodes and judges the data of the root `catalog/` module, which it
+             embeds: the item files, the built-in Machinefiles, images, dotfiles, recipes
   page/      the page language: sections, rows, values, marks, reasons, actions; station.page/v1
   pages/     one package per page: a family's result to a page, pure
   ui/        token, atom, molecule, organism, template; render/ (tty, pipe, json); help/
@@ -86,6 +86,8 @@ The data, the presentation and the surfaces:
 ```
 
 Beside `apps/engine/`: `apps/menubar` (Swift: StationKit, the kit every view is drawn from, the menu bar app, a client of the engine's socket, and the Station Catalog, the dev-only window over every story, which is also its test suite: [ADR-026](../decisions/026-the-stories-are-the-menu-bars-test-suite.md)), `specs/` (the proofs, [Test](../guides/test.md)), `skills/` (what this repository ships to agents).
+
+The repository root is a workspace of members. `go.work` joins three Go modules: `apps/engine` (the engine and its `cmd/`), `catalog` (pure data, `catalog/packages/<category>/<name>.yaml` and `catalog/machines/<name>.machine.yaml`, embedded by the engine) and `specs` (the architecture rules and the boundary tests). `package.json` declares the npm workspaces `apps/*`, `packages/*` and `specs`; `packages/api/schemas/` holds the generated file-format schemas, and `specs/` is also the `studio-station-specs` member that runs the CLI documents on Vitest. Turborepo (`turbo.json`) runs `lint` and `test` in every Go module, and replays the result of a module whose inputs did not change.
 
 ## The hexagon in each family
 
