@@ -1,0 +1,17 @@
+description: 'the play world tells each dev VM''s drift against its Machinefile, one VM off its file'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{name: .out.Name, apps: [.out.Lines[] | select(.Step.Kind == "app") | [.Step.Package, .Step.Origin.Name, .Seen.Condition, .Seen.Version]]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"linux-1"},"in":{}}
+      exit: 0
+      stdout: |
+          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","outdated","2.45.0"],["ripgrep","linux-dev","absent",""]]}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{name: .out.Name, apps: [.out.Lines[] | select(.Step.Kind == "app") | [.Step.Package, .Step.Origin.Name, .Seen.Condition, .Seen.Version]]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{"name":"agent-7f"},"in":{}}
+      exit: 0
+      stdout: |
+          {"name":"linux-dev","apps":[["jq","jterrazz-base","present","1.7.1"],["gh","jterrazz-base","present","2.45.0"],["ripgrep","linux-dev","present","14.1.0"]]}

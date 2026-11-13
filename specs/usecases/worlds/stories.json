@@ -1,9 +1,22 @@
 {
     "macs": {
         "agent-7f": {
+            "apps": {
+                "apt": {
+                    "installed": {
+                        "gh": "2.45.0",
+                        "jq": "1.7.1",
+                        "ripgrep": "14.1.0"
+                    }
+                }
+            },
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000
+            },
+            "files": {
+                "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n"
             },
             "meter": {
                 "sample": {
@@ -46,6 +59,11 @@
                     "net_out": 19846,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "preferences": {
+                "machinefile": {
+                    "name": "linux-dev"
                 }
             },
             "self": {
@@ -142,20 +160,23 @@
         },
         "linux-1": {
             "apps": {
-                "brew": {
+                "apt": {
                     "installed": {
-                        "gh": "2.97.0",
-                        "jq": "1.8.1"
+                        "gh": "2.45.0",
+                        "jq": "1.7.1"
                     },
                     "behind": {
-                        "gh": "2.98.0",
-                        "jq": "1.8.2"
+                        "gh": "2.46.0"
                     }
                 }
             },
             "disk": {
                 "total": 40000000000,
                 "free": 30000000000
+            },
+            "files": {
+                "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n"
             },
             "identities": {
                 "claude": {
@@ -224,6 +245,11 @@
                     "net_out": 263918,
                     "thermal": 0,
                     "boot": "0001-01-01T00:00:00Z"
+                }
+            },
+            "preferences": {
+                "machinefile": {
+                    "name": "linux-dev"
                 }
             },
             "self": {
@@ -1029,6 +1055,11 @@
                     "Detail": ""
                 }
             },
+            "files": {
+                "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n",
+                "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [jterrazz-base]\napps: [lazygit]\n"
+            },
             "fresh": {
                 "size": {
                     "CPUs": 4,
@@ -1304,7 +1335,8 @@
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "template": "linux-dev"
                     },
                     "disk": true,
                     "size": {
@@ -1386,7 +1418,8 @@
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
-                        "created_at": "2026-11-02T10:30:00Z"
+                        "created_at": "2026-11-02T10:30:00Z",
+                        "template": "linux-dev"
                     },
                     "disk": true,
                     "size": {

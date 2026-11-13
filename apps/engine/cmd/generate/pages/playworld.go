@@ -52,6 +52,7 @@ type playMac struct {
 	Meter       *playMeter                     `json:"meter,omitempty"`
 	Disk        *playDisk                      `json:"disk,omitempty"`
 	Stores      *playStores                    `json:"stores,omitempty"`
+	Files       map[string]string              `json:"files,omitempty"`
 }
 
 type playEngine struct {
@@ -115,6 +116,7 @@ type playKept struct {
 	Want      string         `json:"want,omitempty"`
 	Check     string         `json:"check,omitempty"`
 	CreatedAt time.Time      `json:"created_at,omitzero"`
+	Template  string         `json:"template,omitempty"`
 }
 
 type playAgents struct {
@@ -162,6 +164,7 @@ func PlayWorld(base []byte) []byte {
 		if h.ThisMac {
 			m.Engine.Awake = &awake.Kept{Session: f.Awake.Session}
 			m.Disk = &playDisk{Total: 994e9, Free: 388e9}
+			m.Files = ownerFiles()
 			m.Jobs = map[string]background.Job{"com.jterrazz.brain.x-snapshot": {Label: "com.jterrazz.brain.x-snapshot", Program: "~/.local/bin/x-snapshot", File: "~/Library/LaunchAgents/com.jterrazz.brain.x-snapshot.plist", Scope: "user", Loaded: true, LastExit: 2, ProgramExists: true, OwnerExists: true}}
 			m.Apps = map[catalog.Method]*playApps{
 				catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0", "lazygit": "0.55.1"}, Behind: map[string]string{"gh": "2.98.0"}},
@@ -375,6 +378,9 @@ func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
 		Kept: &playKept{Image: vm.Image, Version: vm.Version, Lifetime: vm.Lifetime, Want: want, Check: vm.Check, CreatedAt: vm.CreatedAt},
 		Disk: true, Size: model.Size{CPUs: vm.Resources.CPUs, Memory: vm.Resources.MemoryBytes, Disk: int64(vm.SizeGB) * 1e9},
 	}
+	if _, ok := devApps(vm.Name); ok {
+		v.Kept.Template = devFile
+	}
 	if vm.State != model.Running {
 		return v
 	}
@@ -422,7 +428,11 @@ func inside(f Scene, vm model.VM, share float64, p activity.Profile) *playMac {
 	if vm.State == model.Running {
 		m.Meter = playMeterOf(p, meterSample(share, vm.Resources.CPUs, vm.Resources.MemoryBytes, vm.BootAt))
 	}
-	if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
+	if apt, ok := devApps(vm.Name); ok {
+		m.Files = devFiles()
+		m.Preferences = map[string]any{"machinefile": map[string]string{"name": devFile}}
+		m.Apps = map[catalog.Method]*playApps{catalog.MethodApt: apt}
+	} else if s, ok := f.Insides[vm.Name]; ok && len(s.Needs) > 0 {
 		m.Apps = map[catalog.Method]*playApps{catalog.MethodBrew: {Installed: map[string]string{"jq": "1.8.1", "gh": "2.97.0"}, Behind: map[string]string{"gh": "2.98.0", "jq": "1.8.2"}}}
 	}
 	ids := map[string]accounts.Identity{}
