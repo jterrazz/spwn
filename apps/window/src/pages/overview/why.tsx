@@ -21,11 +21,7 @@ export function WhyItExists({ vm }: { vm: MachinesVM }) {
                     <MissingMark />
                 </dd>
                 <dt>Created</dt>
-                <dd>
-                    {created ?? <MissingMark />}
-                    {', by '}
-                    <MissingMark />
-                </dd>
+                <dd>{created ?? <MissingMark />}</dd>
                 <dt>Hold</dt>
                 <dd>
                     <MissingMark />
@@ -34,7 +30,7 @@ export function WhyItExists({ vm }: { vm: MachinesVM }) {
                     <>
                         <dt>Check</dt>
                         <dd>
-                            <Value>{vm.Check}</Value>
+                            <Value look="raised">{vm.Check}</Value>
                         </dd>
                     </>
                 )}

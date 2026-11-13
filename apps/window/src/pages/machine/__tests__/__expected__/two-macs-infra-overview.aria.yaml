@@ -18,7 +18,7 @@
   - heading "No answer from the engine." [level=1]
   - paragraph:
     - img "no answer"
-    - text: No answer · two-macs holds no answer
+    - text: No answer
   - text: CPU no answer Memory no answer Disk no answer Check 41ms passing · at 10:00
   - region "Health":
     - heading "Health checked at 10:00" [level=2]
@@ -35,7 +35,7 @@
     - term: Purpose
     - definition: Not given yet
     - term: Created
-    - definition: 23 Oct, by Not given yet
+    - definition: 23 Oct
     - term: Hold
     - definition: Not given yet
     - term: Check

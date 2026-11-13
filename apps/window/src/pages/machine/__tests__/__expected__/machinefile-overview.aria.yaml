@@ -20,7 +20,7 @@
   - meter "Disk used of its total"
   - text: of 994 GB Its machines 2machines Not given yet
   - region "Needs you, on this Mac":
-    - heading "Needs you, on this Mac 9" [level=2]
+    - heading "Needs you, on this Mac" [level=2]
     - button "Broken npm sign-in expired jterrazz-macbook-pro · Accounts"
     - text: npm login
     - button "Copy npm login": Copy

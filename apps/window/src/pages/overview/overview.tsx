@@ -52,6 +52,7 @@ function NeedsOf({ overview, mac, name, title, go }: NeedsOfProps) {
             go={go}
             macs={[mac]}
             needs={overview.out.Summary.Needs ?? []}
+            note=""
             on={name}
             title={title}
         />
