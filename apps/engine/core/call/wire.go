@@ -8,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 type WireError struct {
@@ -34,15 +35,31 @@ func ToWire(err error, word Wording) *WireError {
 	if f == nil {
 		f = &fail.Error{Message: err.Error(), Exit: fail.ExitFailure}
 	}
-	w := &WireError{Type: f.Type, Code: f.Code, Subject: f.Subject, Detail: f.Detail, Message: f.Message, Hint: f.Hint, Exit: f.Exit}
+	w := &WireError{Type: f.Type, Code: f.Code, Subject: screened(f.Subject), Detail: screenedAll(f.Detail), Message: screened(f.Message), Hint: screened(f.Hint), Exit: f.Exit}
 	if w.Message == "" {
-		w.Message = f.Error()
+		w.Message = screened(f.Error())
 	}
 	if f.Fix.Call != "" || f.Fix.Command != "" || f.Fix.Path != "" || len(f.Fix.Args) > 0 {
 		fix := f.Fix
 		w.Fix = &fix
 	}
 	return w
+}
+
+func screened(text string) string {
+	kept, _ := secret.Screen(text)
+	return kept
+}
+
+func screenedAll(detail map[string]string) map[string]string {
+	if detail == nil {
+		return nil
+	}
+	out := make(map[string]string, len(detail))
+	for k, v := range detail {
+		out[k] = screened(v)
+	}
+	return out
 }
 
 func (w *WireError) Err() *fail.Error {

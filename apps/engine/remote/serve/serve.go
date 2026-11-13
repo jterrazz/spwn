@@ -137,9 +137,14 @@ type progress struct {
 }
 
 func (p progress) Step(task, detail string) {
-	p.out.write(api.Frame{V: api.Version, ID: p.id, Progress: &api.Progress{Task: task, Detail: detail}})
+	p.out.write(api.Frame{V: api.Version, ID: p.id, Progress: &api.Progress{Task: task, Detail: screened(detail)}})
 }
 
 func (p progress) Done(task string, err error) {
 	p.out.write(api.Frame{V: api.Version, ID: p.id, Progress: &api.Progress{Task: task, Done: true, Error: call.ToWire(err, p.word)}})
+}
+
+func screened(text string) string {
+	kept, _ := secret.Screen(text)
+	return kept
 }

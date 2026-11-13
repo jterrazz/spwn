@@ -58,7 +58,7 @@ func importTable() map[string][]string {
 		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "agents", "machinefile", "core/machine", "catalog", "ui/token", std},
 		"wire":                       {"*", fang, cobra, "os", "os/signal", "syscall", "runtime/debug", "net/netip", std},
 		"surface/cli":                {"surface/cli/kit", cobra, std},
-		"surface/cli/kit":            append([]string{"output", "page", "core/fail", "surface/cli/words", "core/store", "engine", "catalog", "testing", cobra, pflag, std}, calls...),
+		"surface/cli/kit":            append([]string{"output", "page", "core/fail", "core/secret", "surface/cli/words", "core/store", "engine", "catalog", "testing", cobra, pflag, std}, calls...),
 		"surface/cli/*":              append([]string{"surface/cli/kit", "core/fail", "engine", "page", "pages/*", "catalog", cobra, pflag, std}, calls...),
 		"engine":                     {"platform/local", "catalog", "setup", "core/call/lanes", "ports", "ports/contract", "background", "background/contract", "accounts", "accounts/contract", "settings", "settings/contract", "machines", "machines/contract", "images", "setup", "setup/contract", "core/store", "core/adapter/fake", "machines/adapter/fake", std, "activity", "ports/calls", "awake", "awake/contract", "awake/calls", "net/netip"},
 		"machines/adapter/ssh":       {"machines/contract", "machines/contract/contracttest", sshPkg, sshPkg + "/knownhosts", "platform/local", "platform/local/localtest", "net/netip", std},

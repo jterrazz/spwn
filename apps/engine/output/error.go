@@ -37,9 +37,9 @@ func (w *Writer) FailureJSON(err error) {
 	if e.Message == "" {
 		return
 	}
-	doc := errorJSON{Schema: ErrorSchema, Type: string(typeOf(e)), Code: orNull(string(e.Code)), Subject: orNull(e.Subject), Message: e.Message, Hint: e.Hint}
+	doc := errorJSON{Schema: ErrorSchema, Type: string(typeOf(e)), Code: orNull(string(e.Code)), Subject: orNull(screened(e.Subject)), Message: screened(e.Message), Hint: screened(e.Hint)}
 	if f := e.Fix; f.Call != "" || f.Command != "" || f.Path != "" {
-		doc.Fix = &fixJSON{Call: orNull(f.Call), Command: orNull(f.Command), Path: orNull(f.Path)}
+		doc.Fix = &fixJSON{Call: orNull(screened(f.Call)), Command: orNull(screened(f.Command)), Path: orNull(screened(f.Path))}
 	}
 	data, mErr := json.MarshalIndent(doc, "", "  ")
 	if mErr != nil {
@@ -64,6 +64,11 @@ func typeOf(e *fail.Error) fail.Type {
 	case fail.ExitOK, fail.ExitFailure:
 	}
 	return fail.Failed
+}
+
+func screened(text string) string {
+	kept, _ := secret.Screen(text)
+	return kept
 }
 
 func orNull(s string) *string {

@@ -15,8 +15,13 @@ var strict bool
 func Strict(on bool) { strict = on }
 
 func Seal(p Page) Page {
+	// invariant: the words of every error a page says are screened here,
+	// once, for each page and each caller (a menu bar page that could not
+	// be read says its cause's words).
+	p.Error = screenedError(p.Error)
 	pending := false
 	for i := range p.Sections {
+		screenedErrors(p.Sections[i].Items)
 		counts := map[Mark]int{}
 		waits := false
 		for _, it := range p.Sections[i].Items {
@@ -51,6 +56,24 @@ func Seal(p Page) Page {
 	}
 	secret.TripwireJSON(p)
 	return p
+}
+
+func screenedError(e *Error) *Error {
+	if e == nil {
+		return nil
+	}
+	message, _ := secret.Screen(e.Message)
+	hint, _ := secret.Screen(e.Hint)
+	return &Error{Message: message, Hint: hint}
+}
+
+func screenedErrors(items []Item) {
+	for i := range items {
+		items[i].Error = screenedError(items[i].Error)
+		if items[i].Group != nil {
+			screenedErrors(items[i].Group.Items)
+		}
+	}
 }
 
 func Tallied(items []Item) []Tally {

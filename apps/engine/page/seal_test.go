@@ -91,3 +91,17 @@ func TestTheOnLineOfAnotherMachineNeedsNoTitle(t *testing.T) {
 		t.Error("Check kept an untitled section that is no banner")
 	}
 }
+
+func TestAnErrorAPageSaysIsScreened(t *testing.T) {
+	cause := "fetch refused for https://bot:hunter2@github.com/o/r"
+	nested := page.Item{Error: &page.Error{Message: cause, Hint: "station sources " + cause}}
+	p := page.Seal(page.Page{Error: &page.Error{Message: cause, Hint: "retry " + cause}, Sections: []page.Section{section(
+		page.Item{Group: &page.Group{Head: page.Row{ID: "g", Mark: page.Absent}, Items: []page.Item{nested}}},
+	)}})
+	said := []string{p.Error.Message, p.Error.Hint, p.Sections[0].Items[0].Group.Items[0].Error.Message, p.Sections[0].Items[0].Group.Items[0].Error.Hint}
+	for _, words := range said {
+		if strings.Contains(words, "hunter2") || !strings.Contains(words, "https://withheld@github.com/o/r") {
+			t.Errorf("a sealed page says %q, want the password withheld and the rest kept", words)
+		}
+	}
+}

@@ -233,3 +233,34 @@ func TestACallerOfAReleaseBeforeTheFloorIsAnsweredItsHelloAndRefusedEveryCall(t 
 		t.Errorf("a call from a build of no release ran %d times and answered %+v, want it run", ran, frames["2"].Error)
 	}
 }
+
+type said struct{ details []string }
+
+func (s *said) Step(_, detail string) { s.details = append(s.details, detail) }
+func (s *said) Done(string, error)    {}
+
+func TestAnErrorAndAProgressLeaveWithTheirTokensWithheld(t *testing.T) {
+	token := "s" + "k-" + strings.Repeat("Ab3dE", 8)
+	ref, spec := "refs/heads/feat/redaction-pre-verify1-2026-11-13", "specs/usecases/machinefile/apply/a-failing-line-withholds-its-token.spec.yaml"
+	fetch := call.Bind(call.Call[struct{}, struct{}, struct{}]{
+		Name: "machinefile.fetch", Where: call.InEngine, Applies: machine.Anywhere,
+		Run: func(_ context.Context, _ struct{}, _ struct{}, p call.Progress) (struct{}, error) {
+			p.Step("Fetching", "fetching https://owner:"+token+"@example.test/repo")
+			return struct{}{}, &fail.Error{Message: "fetch refused for https://owner:" + token + "@example.test/repo at " + ref + " of " + spec, Hint: "token=" + token, Subject: token, Detail: map[string]string{"url": "?token=" + token}}
+		},
+	}, struct{}{})
+	s := serve.Server{Calls: func(name string) (call.Handler, bool) { return fetch, name == "machinefile.fetch" }, ThisMachine: laptop}
+	var p said
+	err := dialed(t.Context(), s).Call(t.Context(), "machinefile.fetch", machine.Ref{}, struct{}{}, nil, &p)
+	var e *fail.Error
+	if !errors.As(err, &e) {
+		t.Fatalf("the failing call answered %v, want its error", err)
+	}
+	heard := strings.Join(p.details, "|") + "|" + e.Message + "|" + e.Hint + "|" + e.Subject + "|" + e.Detail["url"]
+	if strings.Contains(heard, token) || !strings.Contains(heard, "withheld") {
+		t.Fatalf("a call's words over the socket: %s, want the token withheld", heard)
+	}
+	if !strings.HasSuffix(e.Message, " at "+ref+" of "+spec) {
+		t.Errorf("the error's ref and path were not kept: %q", e.Message)
+	}
+}

@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
@@ -461,6 +462,7 @@ func (s *Spinner) Step(task, detail string) {
 	// spinner line, replacing the last; a step that asks the owner is a line
 	// of its own instead, under which its prompt waits.
 	s.stop()
+	detail, _ = secret.Screen(detail)
 	why := strings.Split(detail, "\n")
 	if detail == "" {
 		why = nil

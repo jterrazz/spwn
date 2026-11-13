@@ -52,7 +52,7 @@ func (w *Writer) Failure(err error) {
 	}
 	w.settle()
 	c := Detect(w.stderr, w.env, false)
-	block := tty.ErrorBlock(page.Error{Message: e.Message, Hint: e.Hint}, c.Mode == TTY, c.Dark)
+	block := tty.ErrorBlock(page.Error{Message: screened(e.Message), Hint: screened(e.Hint)}, c.Mode == TTY, c.Dark)
 	secret.Tripwire([]byte(block))
 	_, _ = io.WriteString(w.colored(w.stderr, c), block)
 }
@@ -77,6 +77,7 @@ func (w *Writer) Now(command string) {
 	// command it ran (SPEC §4.3).
 	w.settle()
 	c := Detect(w.stderr, w.env, false)
+	command = screened(command)
 	line := tty.NowLine(command, c.Mode == TTY, c.Dark)
 	secret.Tripwire([]byte(line))
 	_, _ = io.WriteString(w.colored(w.stderr, c), line)
