@@ -3,12 +3,12 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
       stdin: |
-          item: station.catalog/v2
+          package: station.package/v2
           kind: app
           name: jq
       exit: 0
     - command: 'apps'
       exit: 2
       stderr: |
-          Error: ~/.config/station/catalog/command-line/jq.yaml is station.catalog/v2, newer than this station reads (station.catalog/v1)
+          Error: ~/.config/station/catalog/command-line/jq.yaml is station.package/v2, newer than this station reads (station.package/v1)
           Hint: update station

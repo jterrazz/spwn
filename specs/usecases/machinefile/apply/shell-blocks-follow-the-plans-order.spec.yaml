@@ -6,7 +6,7 @@ runs:
       exit: 0
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/alpha.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: alpha
           description: An app with a block of its own

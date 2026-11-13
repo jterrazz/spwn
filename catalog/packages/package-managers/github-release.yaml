@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: manager
 name: github-release
 description: Commands from a project's GitHub releases, fetched and checked by station itself

@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: last30days
 description: Research what happened in the last 30 days

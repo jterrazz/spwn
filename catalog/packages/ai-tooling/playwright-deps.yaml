@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: playwright-deps
 description: The system libraries and fonts headless Chromium needs on Linux

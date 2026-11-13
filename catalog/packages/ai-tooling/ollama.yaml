@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: ollama
 description: Run large language models locally, on the Mac's GPU

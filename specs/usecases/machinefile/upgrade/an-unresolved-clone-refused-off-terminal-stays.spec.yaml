@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/rooted.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: rooted
           description: a tool whose brew update asks root

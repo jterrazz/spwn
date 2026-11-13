@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: foo
 description: A tool whose own package the owner installed, and whose data package it lacks

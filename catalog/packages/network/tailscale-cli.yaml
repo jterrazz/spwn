@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: tailscale-cli
 description: 'The tailscale command for the App Store app: a script on PATH, never a link to the app'

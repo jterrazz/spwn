@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: thing
 description: a command the owner's own item lands in its own folder

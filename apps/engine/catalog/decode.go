@@ -56,7 +56,7 @@ type format struct {
 }
 
 var (
-	packages     = format{key: "item", schema: Schema, family: SchemaFamily}
+	packages     = format{key: "package", schema: Schema, family: SchemaFamily}
 	machinefiles = format{key: "machinefile", schema: MachinefileSchema, family: MachinefileFamily}
 )
 

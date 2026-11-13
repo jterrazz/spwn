@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/fd.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: fd
           description: A simple, fast alternative to find

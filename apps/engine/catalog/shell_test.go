@@ -8,7 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-const pg = `item: station.catalog/v1
+const pg = `package: station.package/v1
 kind: app
 name: pg
 description: Database
@@ -110,7 +110,7 @@ func TestAShellBlockHoldsNoMarkerLine(t *testing.T) {
 }
 
 func TestASettingsShellIsItsEffectAndTakesNoOptions(t *testing.T) {
-	setting := "item: station.catalog/v1\nkind: setting\nname: hello\ndescription: d\nmethods:\n    - os: any\n      shell:\n          - id: station:hello\n            zsh: echo {{ home }}\n"
+	setting := "package: station.package/v1\nkind: setting\nname: hello\ndescription: d\nmethods:\n    - os: any\n      shell:\n          - id: station:hello\n            zsh: echo {{ home }}\n"
 	if _, err := catalog.Decode("items/shell/hello.yaml", []byte(setting)); err != nil {
 		t.Fatal(err)
 	}

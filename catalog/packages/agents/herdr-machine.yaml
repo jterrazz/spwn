@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: herdr-machine
 description: 'Herdr reaches every workspace of this Mac: its agents show in Herdr'

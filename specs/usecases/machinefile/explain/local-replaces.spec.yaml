@@ -17,7 +17,7 @@ runs:
           	apps.jq.because	its one method for macos	built-in	jq
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: jq
           description: Command-line JSON processor, from mise everywhere

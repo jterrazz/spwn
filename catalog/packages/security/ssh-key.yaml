@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: ssh-key
 description: An ed25519 SSH key, kept in the Keychain

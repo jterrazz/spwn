@@ -9,7 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 )
 
-const gh = `item: station.catalog/v1
+const gh = `package: station.package/v1
 kind: app
 name: gh
 description: GitHub CLI
@@ -55,9 +55,9 @@ func TestAnAnchorAnAliasOrAMergeKeyIsRefused(t *testing.T) {
 }
 
 func TestAYAML11ScalarIsRefusedForItsTwoReadings(t *testing.T) {
-	setting := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nreversible: yes\nmethods:\n    - os: any\n      builtin: dns\n"
+	setting := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nreversible: yes\nmethods:\n    - os: any\n      builtin: dns\n"
 	refusedFor(t, setting, `"yes" reads differently in YAML 1.1`)
-	copied := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: b, permissions: 0755}\n"
+	copied := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: b, permissions: 0755}\n"
 	refusedFor(t, copied, `"0755" reads differently in YAML 1.1`)
 	if err := decoded(t, strings.Replace(copied, "0755", "0o755", 1)); err != nil {
 		t.Errorf("a YAML 1.2 octal is refused: %v", err)
@@ -68,17 +68,17 @@ func TestAYAML11ScalarIsRefusedForItsTwoReadings(t *testing.T) {
 }
 
 func TestANewerSchemaIsRefusedWithUpdateStation(t *testing.T) {
-	err := decoded(t, strings.Replace(gh, "station.catalog/v1", "station.catalog/v2", 1))
+	err := decoded(t, strings.Replace(gh, "station.package/v1", "station.package/v2", 1))
 	var newer *catalog.NewerSchemaError
 	if !errors.As(err, &newer) || !strings.HasSuffix(err.Error(), ": update station") {
 		t.Errorf("a v2 item decoded with %v, want a refusal ending update station", err)
 	}
-	refusedFor(t, strings.Replace(gh, "station.catalog/v1", "station.machinefile/v1", 1), `names the schema "station.machinefile/v1"`)
-	ahead := strings.Replace(strings.Replace(gh, "station.catalog/v1", "station.catalog/v2", 1), "provides: [gh]", "provides: &c [gh]\ntint: blue", 1)
+	refusedFor(t, strings.Replace(gh, "station.package/v1", "station.machinefile/v1", 1), `names the schema "station.machinefile/v1"`)
+	ahead := strings.Replace(strings.Replace(gh, "station.package/v1", "station.package/v2", 1), "provides: [gh]", "provides: &c [gh]\ntint: blue", 1)
 	if err := decoded(t, ahead); !errors.As(err, &newer) {
 		t.Errorf("a v2 item with keys v1 refuses decoded with %v, want update station first", err)
 	}
-	refusedFor(t, strings.Replace(gh, "item: station.catalog/v1\n", "", 1), "names no schema")
+	refusedFor(t, strings.Replace(gh, "package: station.package/v1\n", "", 1), "names no schema")
 }
 
 func TestAPackageIsJudgedAlone(t *testing.T) {
@@ -127,7 +127,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	} {
 		refusedFor(t, body, want)
 	}
-	setting := "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\nbundle: GH\nmethods:\n    - os: any\n      builtin: dns\n"
+	setting := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nbundle: GH\nmethods:\n    - os: any\n      builtin: dns\n"
 	refusedFor(t, setting, "`bundle` is not a key of a setting")
 	refusedFor(t, strings.Replace(setting, "bundle: GH", "version-read: {args: [gh], pattern: x}", 1), "`version-read` is not a key of a setting")
 	withPort := strings.Replace(gh, "provides: [gh]", "provides: [gh]\nports: [{port: 5173, label: Vite, http: true, env: {A: '{url}', B: 'h={host}'}}]", 1)
@@ -154,7 +154,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 
 func TestAnOptionIsJudgedByItsType(t *testing.T) {
 	option := func(o string) string {
-		return "item: station.catalog/v1\nkind: setting\nname: gh\ndescription: d\noptions:\n    - " + o + "\nmethods:\n    - os: any\n      builtin: dns\n"
+		return "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\noptions:\n    - " + o + "\nmethods:\n    - os: any\n      builtin: dns\n"
 	}
 	for o, want := range map[string]string{
 		"{name: a, label: A, type: text}":                                 `type "text" is none of`,
@@ -184,7 +184,7 @@ func TestAnOptionIsJudgedByItsType(t *testing.T) {
 }
 
 func TestEveryKeyOfTheFormatDecodes(t *testing.T) {
-	full := `item: station.catalog/v1
+	full := `package: station.package/v1
 kind: app
 name: gh
 description: GitHub CLI
@@ -242,11 +242,11 @@ func catalogOf(files map[string]string) (catalog.Catalog, error) {
 }
 
 func manager(name, manages, at string) string {
-	return "item: station.catalog/v1\nkind: manager\nname: " + name + "\ndescription: d\nmanages: " + manages + "\npriority: {macos: " + at + "}\nmethods:\n    - os: macos\n      script: {url: https://x.sh}\n"
+	return "package: station.package/v1\nkind: manager\nname: " + name + "\ndescription: d\nmanages: " + manages + "\npriority: {macos: " + at + "}\nmethods:\n    - os: macos\n      script: {url: https://x.sh}\n"
 }
 
 func TestThePackagesAreJudgedTogether(t *testing.T) {
-	dns := "item: station.catalog/v1\nkind: setting\nname: dns\ndescription: d\nrequires: [gpg]\nmethods:\n    - os: any\n      builtin: dns\n"
+	dns := "package: station.package/v1\nkind: setting\nname: dns\ndescription: d\nrequires: [gpg]\nmethods:\n    - os: any\n      builtin: dns\n"
 	for files, want := range map[*map[string]string]string{
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "requires: [git]", 1)}: `items/git/gh.yaml: gh requires "git", which is no app`,
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "then: [dns]", 1)}:     `gh proposes "dns", which is no setting`,

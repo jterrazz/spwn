@@ -1,12 +1,12 @@
 package catalog
 
-// value: the schema every item file of this station names in its `item:`
+// value: the schema every package file of this station names in its `package:`
 // key, and the family its versions share; a file naming a newer version is
 // refused with `update station`.
 
 const (
-	Schema       = "station.catalog/v1"
-	SchemaFamily = "station.catalog"
+	Schema       = "station.package/v1"
+	SchemaFamily = "station.package"
 )
 
 // value: what an item IS (how it installs is its methods): a manager installs
@@ -231,7 +231,7 @@ func (OptionType) Enum() []string {
 }
 
 type Package struct {
-	Package     string   `yaml:"item"`
+	Package     string   `yaml:"package"`
 	Kind        Kind     `yaml:"kind"`
 	Name        string   `yaml:"name"`
 	Description string   `yaml:"description"`

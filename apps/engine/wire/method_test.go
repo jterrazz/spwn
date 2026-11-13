@@ -39,14 +39,14 @@ func systems() map[catalog.MachineKind]string {
 
 // value: an item with two methods on macOS, a ranked manager's and
 // another's, so a plan may choose either and the machine may hold either.
-const twin = "item: station.catalog/v1\nkind: app\nname: twin\ndescription: two ways\nprovides: [twin]\nmethods:\n    - { os: macos, skill: { repo: owner/twin, name: twin } }\n    - { os: macos, cask: twin }\n"
+const twin = "package: station.package/v1\nkind: app\nname: twin\ndescription: two ways\nprovides: [twin]\nmethods:\n    - { os: macos, skill: { repo: owner/twin, name: twin } }\n    - { os: macos, cask: twin }\n"
 
 // value: an item the owner may have another way, read by its version.
-const probed = "item: station.catalog/v1\nkind: app\nname: probed\ndescription: read by its version\nprovides: [probed]\nversion-read: { args: [probed, --version], pattern: '^probed (\\S+)' }\nmethods:\n    - { os: macos, cask: probed }\n"
+const probed = "package: station.package/v1\nkind: app\nname: probed\ndescription: read by its version\nprovides: [probed]\nversion-read: { args: [probed, --version], pattern: '^probed (\\S+)' }\nmethods:\n    - { os: macos, cask: probed }\n"
 
 // value: an item two lines install on a Mac, each read by its check, the
 // first taken back by its undo.
-const lined = "item: station.catalog/v1\nkind: app\nname: lined\ndescription: two lines\nprovides: [lined]\nmethods:\n    - { os: macos, script: { run: install-lined, check: lined --version, undo: uninstall-lined } }\n    - { os: macos, script: { url: https://example.com/lined.sh, check: lined version } }\n"
+const lined = "package: station.package/v1\nkind: app\nname: lined\ndescription: two lines\nprovides: [lined]\nmethods:\n    - { os: macos, script: { run: install-lined, check: lined --version, undo: uninstall-lined } }\n    - { os: macos, script: { url: https://example.com/lined.sh, check: lined version } }\n"
 
 type bench struct {
 	w     *world.World

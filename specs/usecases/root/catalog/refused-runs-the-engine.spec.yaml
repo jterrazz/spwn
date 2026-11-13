@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: jq
           description: x
@@ -32,7 +32,7 @@ runs:
           Hint: fix that line: station never rewrites an item file
     - command: 'world edit jterrazz-macbook-pro catalog/command-line/jq.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: app
           name: jq
           description: x

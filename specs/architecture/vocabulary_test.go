@@ -506,7 +506,7 @@ func TestVocabularyReadsTheCatalogsPackages(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
-	pkg := "item: station.catalog/v1\nkind: app\nname: orb\ndescription: Restart the daemon\n# outside: the host keeps it\nmethods:\n    - os: macos\n      script: {run: daemon --tools, check: daemon --version}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
+	pkg := "package: station.package/v1\nkind: app\nname: orb\ndescription: Restart the daemon\n# outside: the host keeps it\nmethods:\n    - os: macos\n      script: {run: daemon --tools, check: daemon --version}\ndisk:\n    paths: [{path: ~/.orb, level: cache, note: OrbStack's own storage}]\n"
 	if err := os.WriteFile(filepath.Join(dir, "orb.yaml"), []byte(pkg), 0o600); err != nil {
 		t.Fatal(err)
 	}

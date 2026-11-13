@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: bbb
 description: A tool that opens with the same package as aaa, and adds its own

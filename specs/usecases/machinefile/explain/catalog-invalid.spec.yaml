@@ -1,7 +1,7 @@
 description: 'an item of the shared source the strict decoder refuses stops explain at its line'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"catalog/command-line/jq.yaml": "item: station.catalog/v1\nkind: app\nname: jq\ndescription: x\ntint: blue\nmethods:\n    - { os: any, mise: { name: jq, version: latest } }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["jterrazz-macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"catalog/command-line/jq.yaml": "package: station.package/v1\nkind: app\nname: jq\ndescription: x\ntint: blue\nmethods:\n    - { os: any, mise: { name: jq, version: latest } }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'explain --machinefile station-macos'
       exit: 2

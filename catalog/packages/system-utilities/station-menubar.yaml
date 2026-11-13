@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: station-menubar
 description: Station's menu bar app, from the latest release

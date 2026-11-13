@@ -959,10 +959,10 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.catalog.v1.json",
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/station.package.v1.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
+  "description": "One package of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.",
   "properties": {
     "accepts": {
       "items": {
@@ -1012,9 +1012,6 @@
     },
     "help": {
       "type": "string"
-    },
-    "item": {
-      "const": "station.catalog/v1"
     },
     "kind": {
       "enum": [
@@ -1071,6 +1068,9 @@
         "$ref": "#/$defs/Option"
       },
       "type": "array"
+    },
+    "package": {
+      "const": "station.package/v1"
     },
     "phase": {
       "enum": [
@@ -1154,12 +1154,12 @@
     }
   },
   "required": [
-    "item",
+    "package",
     "kind",
     "name",
     "description",
     "methods"
   ],
-  "title": "station.catalog/v1",
+  "title": "station.package/v1",
   "type": "object"
 }

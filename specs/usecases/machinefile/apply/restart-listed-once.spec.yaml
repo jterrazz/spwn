@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/system/dock-left.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: setting
           name: dock-left
           description: The Dock on the left
@@ -15,7 +15,7 @@ runs:
       exit: 0
     - command: 'world edit jterrazz-macbook-pro catalog/system/dock-small.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: setting
           name: dock-small
           description: A small Dock

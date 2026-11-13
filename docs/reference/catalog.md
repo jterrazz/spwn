@@ -1,6 +1,6 @@
 # The catalog's item format
 
-An item of the catalog is one YAML file in the schema `station.catalog/v1`: what a thing is, and how it is installed or set on each system. This page is the format, every key of it; what station does with an app is [Apps and skills](apps-and-skills.md), with a setting [Settings](settings.md).
+An item of the catalog is one YAML file in the schema `station.package/v1`: what a thing is, and how it is installed or set on each system. This page is the format, every key of it; what station does with an app is [Apps and skills](apps-and-skills.md), with a setting [Settings](settings.md).
 
 | Section             | Answers                                                         |
 | ------------------- | --------------------------------------------------------------- |
@@ -15,17 +15,17 @@ An item of the catalog is one YAML file in the schema `station.catalog/v1`: what
 
 ## The file
 
-The built-in items are embedded in the binary, `catalog/packages/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `item: station.catalog/v1`. The owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's are layers above them: a same-name item replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-layers)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
+The built-in items are embedded in the binary, `catalog/packages/<category>/<name>.yaml`: the folder is the item's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `package: station.package/v1`. The owner's own items, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's are layers above them: a same-name item replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-layers)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
 
 A file is read strictly, so a typo is a refusal with its line, never a silent default:
 
-- the schema first: a file naming a newer one, `station.catalog/v2`, is refused with `update station` before anything else is judged;
+- the schema first: a file naming a newer one, `station.package/v2`, is refused with `update station` before anything else is judged;
 - one YAML 1.2 document, every key known (`line 9: field tint not found`);
 - no anchor, alias or merge key: a value is written out;
 - no plain scalar that YAML 1.1 reads otherwise (`yes`, `on`, `0755`): write `true`, quote it, or `0o755`;
 - every enumerated value one of its list, every check of this page passed.
 
-The JSON Schema an editor checks a file against, [`packages/api/schemas/station.catalog.v1.json`](../../packages/api/schemas/station.catalog.v1.json), is projected from the decoder's Go types by `make generate`. It checks the keys, their types, the required ones and the enumerated values. Only station checks the rest: a key that belongs to another kind, a method's one manager key, an option's default against its type, a version range, an `${option.<name>}` reference, and what judges the catalog whole (a requirement that names no app, two managers of one method key), whose refusal names the file it is in.
+The JSON Schema an editor checks a file against, [`packages/api/schemas/station.package.v1.json`](../../packages/api/schemas/station.package.v1.json), is projected from the decoder's Go types by `make generate`. It checks the keys, their types, the required ones and the enumerated values. Only station checks the rest: a key that belongs to another kind, a method's one manager key, an option's default against its type, a version range, an `${option.<name>}` reference, and what judges the catalog whole (a requirement that names no app, two managers of one method key), whose refusal names the file it is in.
 
 The lists stand by category, in the categories' order (`Package Managers`, `Runtimes`, `Shell & Terminal`... for the apps; `Shell`, `Terminal`, `Security`... for the settings), then by name. A file has no order of its own.
 
@@ -33,7 +33,7 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 
 | Key               | Kinds        | Value                                                                                                                                                                                                                              |
 | ----------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `item`            | all          | the schema, `station.catalog/v1`                                                                                                                                                                                                   |
+| `package`         | all          | the schema, `station.package/v1`                                                                                                                                                                                                   |
 | `kind`            | all          | `manager` (installs other items), `app` (run or used), `setting` (a state of the system)                                                                                                                                           |
 | `name`            | all          | the item's name, its file's                                                                                                                                                                                                        |
 | `description`     | all          | one line, the owner's words                                                                                                                                                                                                        |
@@ -146,7 +146,7 @@ A `script` with neither `run` nor `url` is installed by the owner, as its `hint`
 A manager item says the method keys it installs by, `manages`, each key one manager's, and where it stands in each system's default priority, `priority`, lowest first, each rank one manager's. The first manager of a system's order that has a method for an item installs it, unless a Machinefile says `prefer:`, and the order is one: `apps install` and a Machinefile's resolution choose by it alike, so the method a machine carries an app by is the one its plan shows; a manager with no priority is chosen by its method alone (mise for a runtime). A `script` method has no manager and no rank: it is always tried after every manager of the system, and a `github-release` method takes the rank of the item that manages it. A `priority` ranks at least one system.
 
 ```yaml
-item: station.catalog/v1
+package: station.package/v1
 kind: manager
 name: homebrew
 description: macOS package manager
@@ -176,7 +176,7 @@ Each block is one file, or the methods of one; the first method that matches a m
 
 ```yaml
 # brew on macOS, apt on Ubuntu with Debian's own command name, github-release elsewhere on Linux
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: fd
 description: Fast find alternative
@@ -198,7 +198,7 @@ methods:
 
 ```yaml
 # a mas app on the Mac itself, whose install needs the App Store signed in
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: speedtest
 description: Internet speed test
@@ -212,7 +212,7 @@ methods:
 
 ```yaml
 # a dev server's port: its label, and what it sets once shared
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: vite
 description: Frontend build tool and dev server
@@ -264,7 +264,7 @@ methods:
 
 ```yaml
 # a setting of macOS defaults, grouped by subject, its values read from its options
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: macos-dock
 description: The Dock hides itself, at the size and on the side asked

@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: agent-browser-skill
 description: Drive agent-browser, the browser automation CLI

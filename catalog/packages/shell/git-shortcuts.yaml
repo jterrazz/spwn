@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: git-shortcuts
 description: 'Git shortcuts: git wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup'

@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: upgrading-expo
 description: Upgrade an Expo app across SDK versions

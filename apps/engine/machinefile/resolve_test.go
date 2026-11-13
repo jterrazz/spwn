@@ -15,7 +15,7 @@ import (
 // each other.
 func packages() map[string]string {
 	return map[string]string{
-		"catalog/package-managers/releases.yaml": `item: station.catalog/v1
+		"catalog/package-managers/releases.yaml": `package: station.package/v1
 kind: manager
 name: releases
 description: release assets
@@ -24,7 +24,7 @@ priority: { macos: 1 }
 methods:
     - { os: any, script: { run: 'true' } }
 `,
-		"catalog/package-managers/packages.yaml": `item: station.catalog/v1
+		"catalog/package-managers/packages.yaml": `package: station.package/v1
 kind: manager
 name: packages
 description: system packages
@@ -32,7 +32,7 @@ manages: [cask]
 methods:
     - { os: any, script: { run: 'true' } }
 `,
-		"catalog/command-line/fd.yaml": `item: station.catalog/v1
+		"catalog/command-line/fd.yaml": `package: station.package/v1
 kind: app
 name: fd
 description: find
@@ -41,7 +41,7 @@ methods:
     - { os: macos, version: '>=26', skill: { repo: owner/fd, name: fd } }
     - { os: ubuntu, script: { run: 'true' } }
 `,
-		"catalog/command-line/left.yaml": `item: station.catalog/v1
+		"catalog/command-line/left.yaml": `package: station.package/v1
 kind: app
 name: left
 description: one side
@@ -49,7 +49,7 @@ requires: [right]
 methods:
     - { os: any, script: { run: 'true' } }
 `,
-		"catalog/command-line/right.yaml": `item: station.catalog/v1
+		"catalog/command-line/right.yaml": `package: station.package/v1
 kind: app
 name: right
 description: the other side
@@ -255,8 +255,8 @@ func TestAPackageProvidedByAnotherBringsItInFirst(t *testing.T) {
 	// invariant: provided-by is a link like requires: its provider is
 	// resolved into the plan and runs before it.
 	provided := map[string]string{
-		"catalog/ai-agents/core.yaml":    "item: station.catalog/v1\nkind: app\nname: core\ndescription: the engine\nprovides: [engine]\nmethods:\n    - { os: any, provided-by: desktop }\n",
-		"catalog/ai-agents/desktop.yaml": "item: station.catalog/v1\nkind: app\nname: desktop\ndescription: the app\nmethods:\n    - { os: any, script: { run: 'true' } }\n",
+		"catalog/ai-agents/core.yaml":    "package: station.package/v1\nkind: app\nname: core\ndescription: the engine\nprovides: [engine]\nmethods:\n    - { os: any, provided-by: desktop }\n",
+		"catalog/ai-agents/desktop.yaml": "package: station.package/v1\nkind: app\nname: desktop\ndescription: the app\nmethods:\n    - { os: any, script: { run: 'true' } }\n",
 	}
 	lib := library(t, map[string]string{"machinefiles/a.yaml": machine("a", "{ os: macos }", "[core]")}, provided)
 	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})

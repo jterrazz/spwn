@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: setting
           name: greet
           description: 'A greeting, in a block of ~/.zshrc'
@@ -25,7 +25,7 @@ runs:
           ●	greet	~/.zshrc [station:greet]: written
     - command: 'world edit jterrazz-macbook-pro catalog/shell/greet.yaml'
       stdin: |
-          item: station.catalog/v1
+          package: station.package/v1
           kind: setting
           name: greet
           description: 'A greeting, in a block of ~/.zshrc'

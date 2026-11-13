@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	schemaPath            = "packages/api/schemas/station.catalog.v1.json"
+	schemaPath            = "packages/api/schemas/station.package.v1.json"
 	machinefileSchemaPath = "packages/api/schemas/station.machinefile.v1.json"
 )
 
@@ -26,8 +26,8 @@ type schematic interface{ JSONSchema() map[string]any }
 // key without omitempty is required, every struct refuses a key it does not
 // name, and a type with an Enum lists its values.
 func catalogSchema() []byte {
-	return projected(reflect.TypeFor[catalog.Package](), "item", catalog.Schema, schemaPath,
-		"One item of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
+	return projected(reflect.TypeFor[catalog.Package](), "package", catalog.Schema, schemaPath,
+		"One package of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
 }
 
 func machinefileSchema() []byte {

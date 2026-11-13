@@ -1,4 +1,4 @@
-item: station.catalog/v1
+package: station.package/v1
 kind: setting
 name: never-sleeps
 description: 'Never sleeps: the engine keeps this Mac awake, its servers with it'

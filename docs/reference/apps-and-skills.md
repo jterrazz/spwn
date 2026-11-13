@@ -13,10 +13,10 @@ An app is installed content: software or an agent skill (v2 had its own word for
 
 ## The catalog
 
-An app is one item file, `catalog/packages/<category>/<name>.yaml`, in the schema `station.catalog/v1`: its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os`, `family`, `version`, `arch`, `kind`) and exactly one manager key, the first method that matches the machine winning. Every key of the format, and how strictly a file is read, is [The catalog's item format](catalog.md):
+An app is one item file, `catalog/packages/<category>/<name>.yaml`, in the schema `station.package/v1`: its `kind` (`manager` for one that installs other apps, `app` otherwise), name, description, its category (the folder), the commands it `provides`, what it `requires`, its `methods` and its disk row. A method is a selector (`os`, `family`, `version`, `arch`, `kind`) and exactly one manager key, the first method that matches the machine winning. Every key of the format, and how strictly a file is read, is [The catalog's item format](catalog.md):
 
 ```yaml
-item: station.catalog/v1
+package: station.package/v1
 kind: app
 name: gh
 description: GitHub CLI for repository management

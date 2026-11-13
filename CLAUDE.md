@@ -6,7 +6,7 @@ A Go CLI that sets up and runs a Mac, its VMs (servers and workspaces) and the o
 
 - **Families first.** `apps/engine/` is one package per family (`machines`, `apps`, `settings`, `ports`, `awake`...), each with its model, `contract/`, `calls/` and `adapter/<tech>/`; the architecture test holds the tree and every import ([`docs/concepts/architecture.md`](docs/concepts/architecture.md)).
 - **A use case is a call.** `<family>.<verb>`, reached through the Router, which runs it in this process, at its target, or in a Mac's engine; every surface makes the same call.
-- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one item file, `catalog/packages/<category>/<name>.yaml` (`station.catalog/v1`); images are still values in `apps/engine/catalog/`, and a dev server's port and env are its item's `ports`.
+- **Add to the catalog, not to command code.** An app (agent skills included, its disk row in the same file) or a setting is one item file, `catalog/packages/<category>/<name>.yaml` (`station.package/v1`); images are still values in `apps/engine/catalog/`, and a dev server's port and env are its item's `ports`.
 - **Capabilities, never model names.** What a machine can do is its `Profile`; a section a kind does not have is refused as not for this machine.
 - **The binary is hermetic.** The catalog's items, the built-in Machinefiles, dotfiles and VM recipes are embedded; nothing reads a file inside the clone. The owner's items and Machinefiles (`~/.config/station/`) and the shared source are layers above them ([`docs/reference/machinefiles.md`](docs/reference/machinefiles.md)).
 - **The words are the glossary's.** One word per concept ([`docs/concepts/glossary.md`](docs/concepts/glossary.md)); the retired words are refused by `specs/architecture/`.
@@ -48,7 +48,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | `@jterrazz` stack conventions                        | `docs/concepts/stack.md`            |
 | Repo doctrine (corpus/injection/compiler)            | `docs/concepts/repo-structure.md`   |
 
-The repo-structure doctrine is authored **here** and ships to agents as the `studio-repo-structure` skill. This repo is an application: it adopts the corpus + injection layers and generates no API reference. Its one compiler is `make generate` (`apps/engine/cmd/generate/`), which projects the catalog into the `studio-toolbelt` skill, `docs/reference/footprint.md` and the JSON Schemas `packages/api/schemas/station.catalog.v1.json` and `packages/api/schemas/station.machinefile.v1.json`, writes the page fixtures of `apps/engine/ui/testdata/pages/` and the story worlds' pages of `apps/menubar/stories/pages/` from the real page functions, and the Registry into `apps/engine/remote/api/calls.json`.
+The repo-structure doctrine is authored **here** and ships to agents as the `studio-repo-structure` skill. This repo is an application: it adopts the corpus + injection layers and generates no API reference. Its one compiler is `make generate` (`apps/engine/cmd/generate/`), which projects the catalog into the `studio-toolbelt` skill, `docs/reference/footprint.md` and the JSON Schemas `packages/api/schemas/station.package.v1.json` and `packages/api/schemas/station.machinefile.v1.json`, writes the page fixtures of `apps/engine/ui/testdata/pages/` and the story worlds' pages of `apps/menubar/stories/pages/` from the real page functions, and the Registry into `apps/engine/remote/api/calls.json`.
 
 ## Setup & commands
 

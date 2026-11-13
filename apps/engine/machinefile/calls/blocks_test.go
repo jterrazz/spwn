@@ -21,7 +21,7 @@ func (z *zshrcText) Edit(_ context.Context, edit func(string) (string, error)) e
 	return err
 }
 
-const lib = `item: station.catalog/v1
+const lib = `package: station.package/v1
 kind: app
 name: lib
 description: A library

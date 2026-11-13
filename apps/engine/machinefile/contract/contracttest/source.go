@@ -13,7 +13,7 @@ import (
 // the two folders a source is read for.
 func held() map[string]string {
 	return map[string]string{
-		"catalog/apps/jq.yaml":           "item: station.catalog/v1\n",
+		"catalog/apps/jq.yaml":           "package: station.package/v1\n",
 		"machinefiles/laptop.yaml":       "machinefile: station.machinefile/v1\n",
 		"machinefiles/laptop.local.yaml": "machinefile: station.machinefile/v1\n",
 		"notes/readme.md":                "not read",
