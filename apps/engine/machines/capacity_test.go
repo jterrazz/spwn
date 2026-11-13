@@ -81,3 +81,28 @@ func TestTheRoomiestAwakeMacTakesANewVM(t *testing.T) {
 		}
 	}
 }
+
+func TestASizeFitsTheFreeMemoryAndNotAByteMore(t *testing.T) {
+	c, _ := CapacityOf(mini(sized(VM{Name: "infra", Lifetime: AlwaysOn, Want: WantRunning, State: Running}, 24*gb)))
+	if !Fits(Resources{MemoryBytes: c.Free}, c) {
+		t.Errorf("%d bytes on a Mac with %d free: refused, want the whole free figure to fit", c.Free, c.Free)
+	}
+	if Fits(Resources{MemoryBytes: c.Free + 1}, c) {
+		t.Errorf("%d bytes on a Mac with %d free: fits, want one byte over refused", c.Free+1, c.Free)
+	}
+}
+
+func TestEachMacThatSaidItsMemoryHasItsRoom(t *testing.T) {
+	this := MacView{Name: "macbook-pro", ThisMac: true, Reachable: true, Hardware: machine.Hardware{Memory: 16 * gb}}
+	never := MacView{Name: "mac-studio"}
+	silent := MacView{Name: "mac-mini", Hardware: machine.Hardware{Memory: 64 * gb}, VMs: []VM{sized(VM{Name: "infra", Lifetime: AlwaysOn, State: UnknownState}, 24*gb)}}
+	rooms := Rooms(AllMachines{Macs: []MacView{this, never, silent}})
+	if len(rooms) != 2 || rooms[0].Mac != "macbook-pro" || rooms[1].Mac != "mac-mini" {
+		t.Fatalf("rooms %+v: want macbook-pro then mac-mini, none for a Mac that never said its memory", rooms)
+	}
+	for i, h := range []MacView{this, silent} {
+		if c, _ := CapacityOf(h); rooms[i].Capacity.Free != c.Free || len(rooms[i].Capacity.VMs) != len(c.VMs) {
+			t.Errorf("%s's room %+v: want its capacity %+v", h.Name, rooms[i].Capacity, c)
+		}
+	}
+}

@@ -206,6 +206,36 @@
       ],
       "type": "object"
     },
+    "machines.Capacity": {
+      "additionalProperties": false,
+      "properties": {
+        "Free": {
+          "type": "integer"
+        },
+        "MacOS": {
+          "type": "integer"
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/machines.Share"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Free",
+        "MacOS",
+        "Total",
+        "VMs"
+      ],
+      "type": "object"
+    },
     "machines.CheckStatus": {
       "additionalProperties": false,
       "properties": {
@@ -439,6 +469,38 @@
           "type": "integer"
         }
       },
+      "type": "object"
+    },
+    "machines.Room": {
+      "additionalProperties": false,
+      "properties": {
+        "Capacity": {
+          "$ref": "#/$defs/machines.Capacity"
+        },
+        "Mac": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Capacity",
+        "Mac"
+      ],
+      "type": "object"
+    },
+    "machines.Share": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name"
+      ],
       "type": "object"
     },
     "machines.Uptime": {
@@ -683,6 +745,18 @@
         "All": {
           "$ref": "#/$defs/machines.AllMachines"
         },
+        "Roomiest": {
+          "type": "string"
+        },
+        "Rooms": {
+          "items": {
+            "$ref": "#/$defs/machines.Room"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Unrefreshed": {
           "anyOf": [
             {
@@ -696,6 +770,8 @@
       },
       "required": [
         "All",
+        "Roomiest",
+        "Rooms",
         "Unrefreshed"
       ],
       "type": "object"

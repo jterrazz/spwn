@@ -16,6 +16,30 @@ type Share struct {
 	Bytes int64
 }
 
+type Room struct {
+	// value: the Mac, by its fleet name, and its capacity.
+	Mac      string
+	Capacity Capacity
+}
+
+func Fits(size Resources, c Capacity) bool {
+	// invariant: memory alone judges a size, a create's refusal and every
+	// room a client draws alike, so the largest size that fits is Free.
+	return size.MemoryBytes <= c.Free
+}
+
+func Rooms(f AllMachines) []Room {
+	// value: the room of each Mac of the fleet, none for one that never
+	// said its memory.
+	out := make([]Room, 0, len(f.Macs))
+	for _, h := range f.Macs {
+		if c, ok := CapacityOf(h); ok {
+			out = append(out, Room{Mac: h.Name, Capacity: c})
+		}
+	}
+	return out
+}
+
 func CapacityOf(h MacView) (Capacity, bool) {
 	// invariant: a VM reserves its memory while it runs or is being made,
 	// and a server its record wants running keeps its share while it is

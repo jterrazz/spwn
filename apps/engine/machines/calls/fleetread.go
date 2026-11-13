@@ -123,6 +123,11 @@ func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answer
 			silent.Hardware = *h.Hardware
 		}
 		for _, vm := range h.VMs {
+			// invariant: a VM remembered with no kind is left out, never
+			// guessed; its Mac's next answer brings it back with its own.
+			if vm.Kind == "" {
+				continue
+			}
 			silent.VMs = append(silent.VMs, model.VM{
 				Name: vm.Name, Mac: name, Kind: vm.Kind, Lifetime: vm.Lifetime, State: model.UnknownState,
 				Resources: model.Resources{CPUs: vm.CPUs, MemoryBytes: vm.MemoryBytes}, Agents: vm.Agents,

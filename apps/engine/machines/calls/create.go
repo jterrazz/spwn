@@ -186,8 +186,8 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 	if r.Size.DiskBytes == 0 {
 		r.Size.DiskBytes = size.DiskBytes
 	}
-	if left, ok := s.memoryLeft(ctx); ok && r.Size.MemoryBytes > left {
-		return r, claims{}, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
+	if c, ok := s.capacity(ctx); ok && !model.Fits(r.Size, c) {
+		return r, claims{}, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(c.Free >> 30)}
 	}
 	return r, held, nil
 }
@@ -237,7 +237,8 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 }
 
 // value: every name All machines holds, for a VM's name the Mac it is on,
-// by the Name machines.list gives it, This Mac's included; and
+// by the Name machines.list gives it, This Mac's included, and every VM's
+// another Mac was last seen holding; and
 // every agent's of a running workspace of a Mac that answers, and those a
 // workspace held when it last stopped, of one stopped or of a silent Mac.
 func (s *Machinist) claims(ctx context.Context) (claims, error) {
@@ -269,19 +270,25 @@ func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	if err != nil {
 		return claims{}, err
 	}
-	for name := range cfg.Macs {
+	for name, h := range cfg.Macs {
 		c.held[name] = claimMac
+		// invariant: a VM a silent Mac was last seen holding keeps its name
+		// held, its kind told or not: the list leaves out one with no kind,
+		// a create never takes its name.
+		for _, vm := range h.VMs {
+			if c.held[vm.Name] == unclaimed {
+				c.held[vm.Name], c.on[vm.Name] = claimVM, name
+			}
+		}
 	}
 	return c, nil
 }
 
-// value: the memory a new VM may take on this Mac, its capacity's free
-// figure; unknown when the Mac does not say what it has.
-func (s *Machinist) memoryLeft(ctx context.Context) (int64, bool) {
+// value: this Mac's capacity; unknown when the Mac does not say what it has.
+func (s *Machinist) capacity(ctx context.Context) (model.Capacity, bool) {
 	_, live := s.engineView(ctx)
 	vms, _ := s.vms(ctx, "", live)
-	c, ok := model.CapacityOf(model.MacView{Hardware: s.hardware(ctx), VMs: vms})
-	return c.Free, ok
+	return model.CapacityOf(model.MacView{Hardware: s.hardware(ctx), VMs: vms})
 }
 
 // invariant: a create's record lands by a claim of This Mac's records, so
@@ -305,8 +312,8 @@ func (s *Machinist) claim(ctx context.Context, asked string, r *model.CreateRequ
 			return model.Record{}, refused
 		}
 		vms := s.vmsOf("", records, disks, live)
-		if c, ok := model.CapacityOf(model.MacView{Hardware: hardware, VMs: vms}); ok && r.Size.MemoryBytes > c.Free {
-			refused = &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(c.Free, 0) >> 30)}
+		if c, ok := model.CapacityOf(model.MacView{Hardware: hardware, VMs: vms}); ok && !model.Fits(r.Size, c) {
+			refused = &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(c.Free >> 30)}
 			return model.Record{}, refused
 		}
 		rec.Name = r.Name

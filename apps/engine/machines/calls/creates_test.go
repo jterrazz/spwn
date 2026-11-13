@@ -221,6 +221,19 @@ func TestACreateWithNoRoomIsRefusedBeforeItsImageIsBuilt(t *testing.T) {
 	}
 }
 
+func TestACreateTakesTheWholeFreeMemoryAndNotAByteMore(t *testing.T) {
+	ctx := context.Background()
+	b := creating(t, true)
+	free := int64(12 << 30)
+	if _, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Size: model.Resources{MemoryBytes: free}}); err != nil {
+		t.Errorf("12 GB on a Mac of 16, 12 free: %v; want it to fit", err)
+	}
+	_, err := b.m.CheckCreate(ctx, model.CreateRequest{Image: "station-linux", Size: model.Resources{MemoryBytes: free + 1}})
+	if tooBig := new(model.TooBigError); !errors.As(err, &tooBig) || tooBig.LeftGB != 12 {
+		t.Errorf("one byte over the free 12 GB: %v; want refused for memory, 12 GB left", err)
+	}
+}
+
 func TestABuildThatFailsLeavesNoRecord(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, false)
@@ -475,5 +488,16 @@ func TestAPurposeIsOneLineOfAtMostItsLimit(t *testing.T) {
 		if refused := errors.As(err, new(*model.BadPurposeError)); refused == c.ok {
 			t.Errorf("purpose %q: %v; want refused %v", c.purpose, err, !c.ok)
 		}
+	}
+}
+
+func TestAVMASilentMacHoldsWithNoKindKeepsItsName(t *testing.T) {
+	b := creating(t, true)
+	if err := b.prefs.Macs.Set(map[string]model.MacRecord{"studio": {VMs: []model.SeenVM{{Name: "old", Lifetime: model.Persistent, CPUs: 2, MemoryBytes: 4 << 30}}}}); err != nil {
+		t.Fatal(err)
+	}
+	_, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "station-linux", Name: "old"})
+	if taken := new(model.NameTakenError); !errors.As(err, &taken) || !taken.VM || taken.On != "studio" {
+		t.Errorf("a create named after the VM silent studio holds with no kind: %v; want the name taken, on studio", err)
 	}
 }

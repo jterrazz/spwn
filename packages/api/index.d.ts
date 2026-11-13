@@ -1489,6 +1489,8 @@ export type MachinesCallsListIn = {
 
 export type MachinesCallsListOut = {
     All: MachinesAllMachines;
+    Roomiest: string;
+    Rooms: MachinesRoom[] | null;
     Unrefreshed: CoreCallWireError | null;
 };
 
@@ -1554,6 +1556,13 @@ export type MachinesCandidate = {
     Ports: number[] | null;
     Reason: string;
     Stopped: boolean;
+};
+
+export type MachinesCapacity = {
+    Free: number;
+    MacOS: number;
+    Total: number;
+    VMs: MachinesShare[] | null;
 };
 
 export type MachinesCheckStatus = {
@@ -1703,10 +1712,20 @@ export type MachinesRestarts = {
     wait?: number;
 };
 
+export type MachinesRoom = {
+    Capacity: MachinesCapacity;
+    Mac: string;
+};
+
 export type MachinesSSHTarget = {
     Address: string;
     Command: string;
     User: string;
+};
+
+export type MachinesShare = {
+    Bytes: number;
+    Name: string;
 };
 
 export type MachinesUnlocked = {

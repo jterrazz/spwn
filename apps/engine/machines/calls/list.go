@@ -20,6 +20,11 @@ type ListIn struct {
 
 type ListOut struct {
 	All machines.AllMachines
+	// value: the room of each Mac of All that said its memory.
+	Rooms []machines.Room
+	// value: the Mac a new VM goes on when none is named; empty when no
+	// awake Mac says its memory.
+	Roomiest string
 	// value: why the owner's client blocks for the fleet were not rewritten.
 	Unrefreshed error
 }
@@ -39,12 +44,12 @@ var List = call.Watch[Deps, ListIn, ListOut]{
 		}
 		go func() {
 			defer close(updates)
-			allMachines, err := d.Machines.AllMachinesAsItFills(ctx, in.ThisMac, func(f machines.AllMachines) { send(call.Update[ListOut]{Value: ListOut{All: f}}) })
+			allMachines, err := d.Machines.AllMachinesAsItFills(ctx, in.ThisMac, func(f machines.AllMachines) { send(call.Update[ListOut]{Value: listOut(f)}) })
 			if err != nil {
 				send(call.Update[ListOut]{Err: err})
 				return
 			}
-			out := ListOut{All: allMachines}
+			out := listOut(allMachines)
 			if !in.ThisMac && !in.Unwritten {
 				out.Unrefreshed = errors.Join(d.Machines.SSHBlocks(ctx, allMachines), d.Machines.Remember(ctx, allMachines))
 			}
@@ -52,6 +57,10 @@ var List = call.Watch[Deps, ListIn, ListOut]{
 		}()
 		return updates, nil
 	},
+}
+
+func listOut(f machines.AllMachines) ListOut {
+	return ListOut{All: f, Rooms: machines.Rooms(f), Roomiest: machines.Roomiest(f)}
 }
 
 type CreateIn struct {

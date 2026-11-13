@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"path/filepath"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
@@ -48,6 +52,30 @@ func TestNoWordedEnumAdmitsAnEmptyValueOnTheWire(t *testing.T) {
 		got := r.zeroable(reflect.TypeOf(w.of), map[string]any{"enum": w.of.Enum()})
 		if values, _ := got["enum"].([]string); slices.Contains(values, "") {
 			t.Errorf("%s admits \"\" on the wire: %v", wordsName(w.of), values)
+		}
+	}
+}
+
+func TestAMachinesKindIsClosedInTheSchemasTheWindowReads(t *testing.T) {
+	kinds := catalog.MachineKind("").Enum()
+	files := apiFiles(root(t))
+	for file, at := range map[string]string{
+		"machines.list.json": "machines.VM",
+		"overview.read.json": "overview.Machine",
+	} {
+		var doc struct {
+			Defs map[string]struct {
+				Properties map[string]struct {
+					Enum []string `json:"enum"`
+				} `json:"properties"`
+			} `json:"$defs"`
+		}
+		if err := json.Unmarshal(files[filepath.Join(apiCallsDir, file)], &doc); err != nil {
+			t.Fatalf("%s: %v", file, err)
+		}
+		got := doc.Defs[at].Properties["Kind"].Enum
+		if !slices.Equal(got, kinds) {
+			t.Errorf("%s: %s.Kind is [%s]; want exactly [%s], with no \"\"", file, at, strings.Join(got, ", "), strings.Join(kinds, ", "))
 		}
 	}
 }
