@@ -105,6 +105,10 @@ type ListVM struct {
 	Image   ListImage `json:"image"`
 	Detail  string    `json:"detail,omitempty"`
 	Created time.Time `json:"created_at"`
+	// value: what it is for, absent when its create was told nothing; who
+	// made it, a session by its name or you.
+	Purpose string `json:"purpose,omitempty"`
+	Creator string `json:"creator"`
 	// value: a server's last 30 days (SPEC B5.2), its check's latency
 	// (B5.4) and the step its restart runs (B5.11), each absent until known.
 	Uptime  *ListUptime  `json:"uptime,omitempty"`
@@ -255,7 +259,7 @@ func ToList(f AllMachines) ListDoc {
 				Name: vm.Name, Kind: string(vm.Lifetime.Kind()), Lifetime: string(vm.Lifetime), State: string(vm.State),
 				Wanted: Wanted(vm), Health: HealthOf(vm), Restarts: restartsOf(vm.Restarts), IP: vm.IP, Bridged: vm.Network == "bridged",
 				Size:  ListSize{CPUs: vm.Resources.CPUs, MemoryBytes: vm.Resources.MemoryBytes, DiskBytes: vm.Resources.DiskBytes},
-				Image: ListImage{Name: vm.Image, Version: vm.Version}, Detail: vm.Detail, Created: vm.CreatedAt,
+				Image: ListImage{Name: vm.Image, Version: vm.Version}, Detail: vm.Detail, Created: vm.CreatedAt, Purpose: vm.Purpose, Creator: CreatorOf(vm.Creator),
 				Uptime: uptimeOf(vm, f.Read), Latency: latencyOf(vm), Restart: restartOf(vm),
 				Cause: vm.Cause, LastLines: vm.LastLines, Birth: birthOf(vm), Fresh: Fresh(vm, f.Read),
 			})

@@ -85,6 +85,9 @@ type CreateServerIn struct {
 	Size                 machines.Resources
 	// value: its health check, a URL or host:port; empty for none.
 	Check string
+	// value: what it is for, free text; the session that asks for it, by
+	// its name, empty for the owner.
+	Purpose, Creator string
 	// value: the answer to "build the missing image first?", asked only when
 	// the image is not built on this Mac.
 	Confirm string
@@ -96,7 +99,7 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 	Name: "machines.create-server", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
 	Errors: serverRefusals(),
 	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
-		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check}
+		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check, Purpose: in.Purpose, Creator: in.Creator}
 		if image := missingImage(ctx, d, r); image != "" {
 			if err := confirm.Ask(confirm.BuildImage, d.Kind, d.OS, image, in.Confirm); err != nil {
 				return machines.Created{}, err

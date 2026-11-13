@@ -8,4 +8,4 @@ runs:
     - command: 'machines --json | /usr/bin/jq -r ''.macs[0].vms[0] | keys | join(" ")'''
       exit: 0
       stdout: |
-          bridged created_at health image ip kind lifetime name restarts size state wanted
+          bridged created_at creator health image ip kind lifetime name restarts size state wanted

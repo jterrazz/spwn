@@ -301,6 +301,9 @@
           "format": "date-time",
           "type": "string"
         },
+        "Creator": {
+          "type": "string"
+        },
         "Detail": {
           "type": "string"
         },
@@ -359,6 +362,9 @@
         "Network": {
           "type": "string"
         },
+        "Purpose": {
+          "type": "string"
+        },
         "ReadyAt": {
           "format": "date-time",
           "type": "string"
@@ -406,6 +412,7 @@
         "Check",
         "CheckStatus",
         "CreatedAt",
+        "Creator",
         "Detail",
         "Device",
         "Guest",
@@ -418,6 +425,7 @@
         "Mac",
         "Name",
         "Network",
+        "Purpose",
         "ReadyAt",
         "Resources",
         "Restart",

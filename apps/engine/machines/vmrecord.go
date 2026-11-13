@@ -62,4 +62,6 @@ type VMRecord struct {
 	Template string
 	// value: the folders of its Mac its last start shared.
 	Mounts []Mount
+	// value: what it is for; the session that made it, empty for the owner.
+	Purpose, Creator string
 }

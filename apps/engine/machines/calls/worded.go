@@ -19,19 +19,21 @@ const (
 	CheckForServers fail.Code = "machines.check-for-servers"
 	ServerBridged   fail.Code = "machines.server-bridged"
 	BadCheck        fail.Code = "machines.bad-check"
+	BadCreator      fail.Code = "machines.bad-creator"
 	UnknownImage    fail.Code = "machines.unknown-image"
 	ServerTemplate  fail.Code = "machines.server-template"
 	BadNetwork      fail.Code = "machines.bad-network"
 	NoHypervisor    fail.Code = "machines.no-hypervisor"
 	BadName         fail.Code = "machines.bad-name"
 	NameTaken       fail.Code = "machines.name-taken"
+	BadPurpose      fail.Code = "machines.bad-purpose"
 )
 
 // value: the refusals both creates declare, each coded by Worded; each
 // create adds those only it can end in, and a missing hypervisor is their
 // need, refused before they run.
 func createRefusals() []fail.Code {
-	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
+	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, BadCreator, BadPurpose, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
 }
 
 func workspaceRefusals() []fail.Code {
@@ -60,12 +62,14 @@ func Worded(err error) error {
 		down   *machines.EngineDownError
 		life   *machines.BadLifetimeError
 		check  *machines.BadCheckError
+		by     *machines.BadCreatorError
 		image  *machines.UnknownImageError
 		tmpl   *machines.ServerTemplateError
 		net    *machines.BadNetworkError
 		hyper  *machines.NoEngineError
 		bad    *machines.BadNameError
 		taken  *machines.NameTakenError
+		why    *machines.BadPurposeError
 	)
 	switch {
 	case errors.As(err, &tooBig):
@@ -84,6 +88,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, ServerBridged, "", nil)
 	case errors.As(err, &check):
 		return refused(fail.Refused, BadCheck, check.Value, nil)
+	case errors.As(err, &by):
+		return refused(fail.Refused, BadCreator, by.Session, nil)
 	case errors.As(err, &image):
 		return refused(fail.NotFound, UnknownImage, image.Image, nil)
 	case errors.As(err, &tmpl):
@@ -96,6 +102,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, BadName, bad.Name, nil)
 	case errors.As(err, &taken):
 		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On, "agent": taken.Agent})
+	case errors.As(err, &why):
+		return refused(fail.Refused, BadPurpose, why.Purpose, nil)
 	}
 	return err
 }

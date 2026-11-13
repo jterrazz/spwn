@@ -30,13 +30,18 @@ type Deps struct {
 	Admit func() error
 	// value: All machines, for the Mac question; read only.
 	AllMachines func(ctx context.Context) (machines.AllMachines, error)
+	// value: the session this command runs for, by its name
+	// (STATION_SESSION); empty for the owner.
+	Session     string
 	ThisMachine page.Context
 	Ask         kit.Asker
 }
 
 type Input struct {
 	Image, Name, Memory, Disk, Network, Check string
-	Persistent, Server                        bool
+	// value: what the VM is for, free text.
+	Purpose            string
+	Persistent, Server bool
 	// value: v3's --permanent, kept hidden for one release: --persistent.
 	Permanent bool
 	// value: v3's --task and --agent, gone with A2: a create that names
@@ -82,6 +87,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.IntVar(&in.CPUs, "cpus", 0, "virtual CPUs (default 4)")
 			f.StringVar(&in.Memory, "memory", "", "memory with its unit, e.g. 8G or 512M (default 4G)")
 			f.StringVar(&in.Disk, "disk", "", "disk size with its unit, e.g. 50G (default 20G)")
+			f.StringVar(&in.Purpose, "for", "", "what it is for, in your words, kept with the VM")
 			f.StringVar(&in.Network, "network", machines.NetworkNAT, "nat: behind its Mac, no address on your LAN; bridged: its own address on your LAN (macOS images only)")
 			f.StringVar(&in.Task, "task", "", "gone: station agents start \"<task>\" --new")
 			f.BoolVar(&in.Agent, "agent", false, "gone: station agents start \"<task>\" --new")
@@ -131,7 +137,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					env.Out.Now(nowWords(in))
 				}
 			}
-			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server}
+			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: in.Network, Size: r, Check: in.Check, Server: in.Server, Purpose: in.Purpose, Creator: d.Session}
 			return from(in)
 		},
 		Validate: func(ctx context.Context, in *Input) error {
@@ -170,7 +176,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					r.Lifetime = ""
 				}
 				if in.Server {
-					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Confirm: answer}, steps)
+					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Purpose: r.Purpose, Creator: r.Creator, Confirm: answer}, steps)
 				} else {
 					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateWorkspace, machinescalls.CreateIn{Request: r, Confirm: answer}, steps)
 				}

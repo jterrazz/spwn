@@ -434,6 +434,9 @@ type Kept struct {
 	Template string `json:"template,omitempty"`
 	// value: the folders its last start shared.
 	Mounts []machines.Mount `json:"mounts,omitempty"`
+	// value: what it is for; the session that made it, empty for the owner.
+	Purpose string `json:"purpose,omitempty"`
+	Creator string `json:"creator,omitempty"`
 }
 
 func (v *VM) Running() bool { return v.PID != 0 }

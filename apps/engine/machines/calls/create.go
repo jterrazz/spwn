@@ -132,6 +132,10 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, CheckForServersRule
 	case r.Check != "" && !validCheck(r.Check):
 		return r, &model.BadCheckError{Value: r.Check}
+	case r.Creator != "" && (!validName(r.Creator) || r.Creator == model.ByOwner):
+		return r, &model.BadCreatorError{Session: r.Creator}
+	case !validPurpose(r.Purpose):
+		return r, &model.BadPurposeError{Purpose: r.Purpose}
 	}
 	img, ok := s.imageOf(ctx, r.Image)
 	if !ok {
@@ -306,6 +310,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	rec := model.VMRecord{
 		Name: r.Name, Image: r.Image, Version: version, Lifetime: r.Lifetime, Network: r.Network, Check: r.Check,
 		Resources: r.Size, CreatedAt: s.h.Now().UTC().Truncate(time.Second), Template: r.From,
+		Purpose: r.Purpose, Creator: r.Creator,
 	}
 	want := ""
 	if r.Lifetime == model.Persistent || server {
@@ -399,6 +404,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 		VM: model.VM{
 			Name: r.Name, Image: r.Image, Version: version, Mac: s.thisMac(cfg), Kind: img.Kind, Lifetime: r.Lifetime,
 			State: model.Running, Resources: r.Size, Network: r.Network, IP: ip, Check: model.ShownCheck(r.Check), CreatedAt: rec.CreatedAt,
+			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator),
 		},
 		Ports: reserved,
 		Env:   env,

@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -188,6 +190,13 @@ func (s *Machinist) CheckMac() error {
 }
 
 var nameChars = func(r rune) bool { return r == '-' || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') }
+
+// invariant: a purpose is one line with no control character, at most
+// model.PurposeMax characters: what a list shows on its row.
+func validPurpose(purpose string) bool {
+	return utf8.ValidString(purpose) && utf8.RuneCountInString(purpose) <= model.PurposeMax &&
+		strings.IndexFunc(purpose, func(r rune) bool { return unicode.IsControl(r) || r == '\u2028' || r == '\u2029' }) < 0
+}
 
 func validName(name string) bool {
 	return len(name) >= 1 && len(name) <= 40 && strings.IndexFunc(name, func(r rune) bool { return !nameChars(r) }) < 0

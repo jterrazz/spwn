@@ -92,6 +92,10 @@ type VM struct {
 	// value: the agents a workspace held when it last stopped, which a
 	// stopped one or one of a silent Mac still holds.
 	Agents []string `json:",omitempty"`
+	// value: what it is for, as its create was told, empty when it was told
+	// nothing; who made it, the session its create named, else you.
+	Purpose string
+	Creator string
 }
 
 type AgentView struct {
@@ -169,6 +173,10 @@ type CreateRequest struct {
 	// value: the Machinefile the workspace is made from, by its name: its
 	// image, and what its vm says where the request says nothing.
 	From string
+	// value: what it is for, free text; the session that asks for it, by
+	// its name, empty for the owner.
+	Purpose string
+	Creator string
 }
 
 type AgentNotStartedError struct {

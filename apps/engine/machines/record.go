@@ -30,6 +30,9 @@ type Record struct {
 	// value: the folders of its Mac its last start shared: what a start
 	// shares when its Machinefile cannot be read.
 	Mounts []Mount
+	// value: what it is for, as its create was told; the session that made
+	// it, empty for the owner.
+	Purpose, Creator string
 }
 
 type MacRecord struct {
@@ -59,4 +62,15 @@ type SeenVM struct {
 	MemoryBytes int64               `json:"memory_bytes"`
 	// value: the agents a stopped workspace of it held, as that Mac last said.
 	Agents []string `json:"agents,omitempty"`
+}
+
+const PurposeMax = 120 // value: the most characters a VM's purpose holds, on one line.
+
+const ByOwner = "you"
+
+func CreatorOf(session string) string {
+	if session == "" {
+		return ByOwner
+	}
+	return session
 }

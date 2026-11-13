@@ -1454,9 +1454,11 @@ export type MachinesCallsCreateIn = {
 export type MachinesCallsCreateServerIn = {
     Check?: string;
     Confirm?: string;
+    Creator?: string;
     Image?: string;
     Name?: string;
     Network?: string;
+    Purpose?: string;
     Size?: MachinesResourcesInput;
 };
 
@@ -1566,11 +1568,13 @@ export type MachinesCleaned = {
 
 export type MachinesCreateRequest = {
     Check?: string;
+    Creator?: string;
     From?: string;
     Image?: string;
     Lifetime?: 'ephemeral' | 'persistent' | 'always-on';
     Name?: string;
     Network?: string;
+    Purpose?: string;
     Server?: boolean;
     Size?: MachinesResourcesInput;
 };
@@ -1729,6 +1733,7 @@ export type MachinesVM = {
     Check: string;
     CheckStatus: MachinesCheckStatus;
     CreatedAt: string;
+    Creator: string;
     Detail: string;
     Device: string;
     Guest: string;
@@ -1741,6 +1746,7 @@ export type MachinesVM = {
     Mac: string;
     Name: string;
     Network: string;
+    Purpose: string;
     ReadyAt: string;
     Resources: MachinesResources;
     Restart: MachinesRestartWalk | null;

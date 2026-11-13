@@ -318,6 +318,9 @@ func Codes() map[fail.Code]Wording {
 		machinescalls.BadCheck: func(e *fail.Error) (string, string) {
 			return (&machines.BadCheckError{Value: e.Subject}).Error(), "--check https://<name>:6443/readyz, or --check <name>:6443"
 		},
+		machinescalls.BadCreator: func(e *fail.Error) (string, string) {
+			return (&machines.BadCreatorError{Session: e.Subject}).Error(), "name the session in lowercase letters, digits and \"-\", 1 to 40 characters, never \"" + machines.ByOwner + "\""
+		},
 		machinescalls.UnknownImage: func(e *fail.Error) (string, string) {
 			return (&machines.UnknownImageError{Image: e.Subject}).Error(), "station images for the images"
 		},
@@ -346,6 +349,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
 			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
+		},
+		machinescalls.BadPurpose: func(e *fail.Error) (string, string) {
+			return (&machines.BadPurposeError{Purpose: e.Subject}).Error(), "say what it is for in one shorter line"
 		},
 		machinescalls.BadName: func(e *fail.Error) (string, string) {
 			return "\"" + e.Subject + "\" is not a valid name", "use lowercase letters, digits and \"-\", 1 to 40 characters"

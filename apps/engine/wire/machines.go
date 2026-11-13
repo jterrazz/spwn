@@ -196,6 +196,7 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies, Needs: machinescalls.CreateWorkspace.Needs}, m.profile)
 			},
 			AllMachines: func(ctx context.Context) (model.AllMachines, error) { return vms.AllMachines(ctx, false) },
+			Session:     m.vars["STATION_SESSION"],
 			ThisMachine: m.where, Ask: createAsker(env),
 		}, env),
 		machinesstart.Command(machinesstart.Deps{Names: vms.Names, ThisMachine: m.where}, env),

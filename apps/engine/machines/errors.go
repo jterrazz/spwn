@@ -51,6 +51,18 @@ func (e *BadCheckError) Error() string {
 	return "--check \"" + e.Value + "\" is neither a URL nor host:port"
 }
 
+type BadCreatorError struct{ Session string }
+
+func (e *BadCreatorError) Error() string {
+	return "STATION_SESSION \"" + e.Session + "\" is not a session's name"
+}
+
+type BadPurposeError struct{ Purpose string }
+
+func (e *BadPurposeError) Error() string {
+	return "a purpose is one line of at most " + strconv.Itoa(PurposeMax) + " characters"
+}
+
 type BadLifetimeError struct{ Value string }
 
 func (e *BadLifetimeError) Error() string {

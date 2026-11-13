@@ -1,0 +1,17 @@
+description: 'a purpose of two lines, or past 120 characters, is refused before anything is made'
+env: two-macs
+runs:
+    - command: 'machines create gate --memory 2G --for "$(printf ''one\ntwo'')"'
+      exit: 2
+      stderr: |
+          Error: a purpose is one line of at most 120 characters
+          Hint: say what it is for in one shorter line
+    - command: 'machines create gate --memory 2G --for "$(printf ''%0121d'' 0)"'
+      exit: 2
+      stderr: |
+          Error: a purpose is one line of at most 120 characters
+          Hint: say what it is for in one shorter line
+    - command: 'machines --this-mac --json | /usr/bin/jq -c ''[.macs[0].vms[].name | select(. == "gate")]'''
+      exit: 0
+      stdout: |
+          []

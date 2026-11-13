@@ -16,6 +16,7 @@ func recordOf(r model.Record) model.VMRecord {
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		Resources: model.Resources{CPUs: r.CPUs, MemoryBytes: r.MemoryBytes, DiskBytes: r.DiskBytes},
 		CreatedAt: r.CreatedAt, Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
 
@@ -24,6 +25,7 @@ func storedOf(r model.VMRecord) model.Record {
 		Name: r.Name, Image: r.Image, Version: r.Version, Lifetime: r.Lifetime, Want: r.Want, Network: r.Network, Check: r.Check, Env: r.Env,
 		CPUs: r.Resources.CPUs, MemoryBytes: r.Resources.MemoryBytes, DiskBytes: r.Resources.DiskBytes, CreatedAt: r.CreatedAt,
 		Birth: r.Birth, Agents: r.Agents, Template: r.Template, Mounts: r.Mounts,
+		Purpose: r.Purpose, Creator: r.Creator,
 	}
 }
 
@@ -76,6 +78,7 @@ func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineV
 			Name: r.Name, Image: r.Image, Version: r.Version, Mac: mac, Kind: s.kindOfImage(r.Image),
 			Lifetime: r.Lifetime, State: stateOf(info), Resources: r.Resources, SizeGB: int(info.Bytes / 1e9),
 			Network: networkOf(r), Guest: "unknown", Want: r.Want, Check: model.ShownCheck(r.Check), CreatedAt: r.CreatedAt, Agents: r.Agents,
+			Purpose: r.Purpose, Creator: model.CreatorOf(r.Creator),
 		}
 		if d, ok := live[r.Name]; ok && live != nil {
 			if d.State != "" {
