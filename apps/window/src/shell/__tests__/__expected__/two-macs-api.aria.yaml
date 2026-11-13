@@ -34,7 +34,6 @@
   - button "Back"
   - button "jterrazz-macbook-pro"
   - text: api
-  - button "Find"
   - heading "api Stopped" [level=2]
   - paragraph:
     - text: workspace · persistent · on

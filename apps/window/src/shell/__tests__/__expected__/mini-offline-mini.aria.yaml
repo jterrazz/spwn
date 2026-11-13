@@ -33,7 +33,6 @@
   - button "Show or hide the sidebar"
   - button "Back"
   - text: jterrazz-mac-mini
-  - button "Find"
   - heading "jterrazz-mac-mini Not seen" [level=2]
   - paragraph
   - button "New machine"

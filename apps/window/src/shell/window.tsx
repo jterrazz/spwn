@@ -219,7 +219,6 @@ function Frame({ Gallery, pages }: { Gallery?: ComponentType | undefined; pages:
                         crumbs={crumbsOf(route, found, go)}
                         newMachineLeads={!engineStopped(macs)}
                         onBack={back}
-                        onFind={find}
                         onNewMachine={route.page === 'home' ? newMachine : undefined}
                         onToggleSidebar={toggleSidebar}
                         sidebar={sidebar}

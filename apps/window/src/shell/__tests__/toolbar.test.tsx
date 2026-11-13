@@ -12,7 +12,6 @@ function toolbar(onNewMachine: (() => void) | undefined) {
             canGoBack={false}
             crumbs={[{ label: 'Storage' }]}
             onBack={IDLE}
-            onFind={IDLE}
             onNewMachine={onNewMachine}
             onToggleSidebar={IDLE}
         />

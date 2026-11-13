@@ -21,7 +21,6 @@
   - button "Show or hide the sidebar"
   - button "Back" [disabled]
   - text: jterrazz-macbook-pro
-  - button "Find"
   - heading "jterrazz-macbook-pro Online" [level=2]
   - paragraph: This Mac · Engine running
   - button "New machine"
