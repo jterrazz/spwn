@@ -49,6 +49,7 @@ export function ConfirmDialog({
                     (said ?? '') === '' ? undefined : asSentence(shownOrWithheld(said ?? ''))
                 }
                 onClose={onCancel}
+                opensOn="dialog"
                 title={title}
             >
                 {typed === undefined ? null : (

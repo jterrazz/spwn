@@ -17,11 +17,17 @@ export type ModalProps = {
     label?: string | undefined;
     labelledBy?: string | undefined;
     className?: string | undefined;
+    opensOn?: OpensOn | undefined;
 };
 
-function opening(pop: HTMLElement | null): HTMLElement | undefined {
+type OpensOn = 'dialog' | 'field';
+
+function opening(pop: HTMLElement | null, on: OpensOn): HTMLElement | undefined {
     if (!pop) {
         return undefined;
+    }
+    if (on === 'dialog') {
+        return pop;
     }
     return pop.querySelector<HTMLElement>('input:not(:disabled)') ?? focusablesIn(pop)[0] ?? pop;
 }
@@ -40,16 +46,24 @@ function trapped(event: KeyboardEvent, pop: HTMLElement | null, close: () => voi
     }
 }
 
-export function Modal({ onClose, children, label, labelledBy, className }: ModalProps) {
+export function Modal({
+    onClose,
+    children,
+    label,
+    labelledBy,
+    className,
+    opensOn = 'field',
+}: ModalProps) {
     const pop = useRef<HTMLDivElement>(null);
     const close = useRef(onClose);
+    const on = useRef(opensOn);
     useEffect(() => {
         close.current = onClose;
     });
     useLayoutEffect(() => {
         const opener = document.activeElement;
         open += 1;
-        opening(pop.current)?.focus();
+        opening(pop.current, on.current)?.focus();
         return () => {
             open -= 1;
             if (opener instanceof HTMLElement && opener.isConnected) {
@@ -91,12 +105,13 @@ export type DialogProps = {
     children: ReactNode;
     actions: ReactNode;
     consequence?: string | undefined;
+    opensOn?: OpensOn;
 };
 
-export function Dialog({ title, onClose, children, actions, consequence }: DialogProps) {
+export function Dialog({ title, onClose, children, actions, consequence, opensOn }: DialogProps) {
     const titleId = useId();
     return (
-        <Modal labelledBy={titleId} onClose={onClose}>
+        <Modal labelledBy={titleId} onClose={onClose} opensOn={opensOn}>
             <div className={styles.sheet}>
                 <div className={styles.head}>
                     <h3 className={styles.title} id={titleId}>
