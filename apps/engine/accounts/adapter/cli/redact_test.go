@@ -9,7 +9,7 @@ import (
 func TestRedactDropsEveryTokenShape(t *testing.T) {
 	shapes := []string{
 		"ghp_abcdefghij0123456789", "gho_x", "ghs_abc", "ghu_abc", "ghr_abc", "github_pat_11ABCDEF_xyz",
-		"sk-ant-api03-abcdef", "npm_abcdefghij0123456789", "xoxb-1234-5678", "xoxp-1-2",
+		"sk-ant-api03-abcdef", "npm_abcdefghij0123456789abcdefghij012345", "xoxb-1234-5678", "xoxp-1-2",
 		"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl",
 		"0123456789abcdef0123456789abcdef", "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0MTIz",
 	}

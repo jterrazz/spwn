@@ -86,8 +86,6 @@ var Providers = []Provider{
 	{ID: ProviderEntry, Label: "entry", VM: true},
 }
 
-const LeakShapes = `gh[opusr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|sk-ant-[A-Za-z0-9_-]+|npm_[A-Za-z0-9]+|xox[abpr]-[A-Za-z0-9-]+|eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*|[A-Za-z0-9+/=_-]{32,}` // value: the token shapes no kept value may hold: GitHub, Anthropic, npm and Slack tokens, a JWT, or 32 and more characters of base64 or hex.
-
 type ShareScope struct {
 	// value: a lend-list name, the provider whose right its copy carries,
 	// and what that right lets the VM do.

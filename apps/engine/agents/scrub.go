@@ -5,8 +5,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 func Scrub(text string) (title, detail string) {
@@ -83,7 +83,7 @@ func scrubbed(line string) string {
 	words := strings.Fields(line)
 	kept := words[:0]
 	for _, w := range words {
-		if _, redacted := accounts.Redact(strings.Trim(w, ".,;:!?()\"'")); !redacted {
+		if !secret.Shaped(strings.Trim(w, ".,;:!?()\"'")) {
 			kept = append(kept, w)
 		}
 	}

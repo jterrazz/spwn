@@ -1,0 +1,32 @@
+# ADR-048: The engine withholds a secret before any answer
+
+**Status:** Proposed
+**Date:** 2026-11-13
+
+## Context
+
+One heuristic guards a secret today, and it runs on accounts and agent journals only. A Machinefile's values, its run lines, a failing run's last words, an error's text, a progress's detail, a VM's console lines and a port's URL reach the CLI, `--json`, the pages and the API frames exactly as they were produced. The vault's value travels in clear inside a call's input, guarded by an exact string replace. The window draws `Withheld` itself and names the engine's redaction as its debt.
+
+One mutating pass at the boundary would be the simplest form, and it is wrong: the bare-run shape rewrites commits, image digests, ssh keys and a guest command's output, and it misses the in-process CLI and the sealed page. Station knows some secrets exactly (a vault value, a secret option) and can only recognise the others (words that came from outside).
+
+## Decision
+
+- **One owner for what a secret looks like**: `apps/engine/core/secret`. Its shapes are an issuer's prefix, a credential in a URL (its userinfo, from `://` to the word's last `@` not after a `/`, or its last `@` when each one follows a `/`, whatever it holds short of whitespace, so a password holding an `@`, a quote, a `<` or a `/` is withheld whole; a query value named for a token, a key, a secret, a password or a signature) or in an `Authorization` header (`Authorization: Bearer …`, as a header or a JSON key), a private key, a UUID, and a bare run of 32 and more characters of letters, digits and `_+/=-`. A run that mixes upper case, lower case and digits is a token whatever its segments; any other run is read segment by segment between `-`, `_` and `/`, where a segment of 20 and more holding a letter and a digit is a token. Neither is one in a path from a root (a word that starts at `/` or `~`, not after a `:` but a `file:` URL's, holding two segments and more and no `+` or `=`), in a URL's path (after an `http`, `https`, `git`, `ssh` or `file` scheme, before any `?` or `#`) whose two segments and more are words (each under 20 characters, under 16 when it holds a letter and a digit, and not mixing upper case with digits, or a commit's hex), in a Go test's name (`Test`, `Benchmark`, `Example` or `Fuzz`, then capitalised words with one number of up to four digits at most), after a digest or an integrity named by its algorithm (`sha256:`, `sha512-`), as the body of an ssh public key, or as 40 or 64 characters of lowercase hex. A query value is withheld when its parameter's name ends in a token, a secret, a password, a signature or a credential, after any word or none (`access_token`, `app_secret`, `hub.verify_token`, `X-Amz-Signature`, `secrets`), or is a key alone or after a word that makes it a secret (`key`, `api_key`, `apikey`, `master_key`, `access_key`); `cache_key`, `sort_key`, `public_key`, `keys` and `keyboard` are data. A slug, a git ref, a relative path and a VM's name are lower case in short segments, and read in clear. Every heuristic in the engine and in the fixture rule reads these shapes.
+- **Outside words are screened once, where an answer leaves its owner**, word by word: an error stays readable (`https://withheld@github.com/…`), and only the secret is replaced. An error is screened as it is encoded for the wire, the CLI writes it, or a page is sealed; a progress as it is sent; a Machinefile's plan, run, upgrade and night as their call returns them, so the answer is screened before another Mac or any surface reads it, and a page builder screens nothing.
+- **A whole value withheld says so on the wire**, as a `withheld` flag beside it (explain's values), so a client tells withheld from unknown.
+- **The CLI never shows a secret on ask.** A hint names the store that owns it.
+- **The world build is a tripwire.** In the spec build, a frame the engine serves, an answer the world's second Mac sends back, each write of the CLI (a page, live or not, an error, a note, a finding, a wait, a step said ahead, the alias line, a menu) and a sealed page that holds a world's secret, as written or as JSON encodes it, or an issuer's shape panics, so every story, a call to another Mac's engine included, is a leak check for those two; a bare run trips nothing, since it may be data. The release build never arms it: the calls are there, and do nothing.
+- **The marker is one word, `withheld`.**
+
+## Consequences
+
+- The shapes, the shown hex lengths and the marker are three values of `core/secret`: an owner's later call on any of them is a one-line change.
+- A 40 or 64 lowercase hex token is shown, as a commit is; a UUID is withheld, as a token is; a relative path or a name of 32 characters and more that mixes cases and digits is withheld, as a token is.
+- Some secrets are missed by design: a token shorter than a shape (a run under 32 that names no issuer, a segment under 20 of a run in one case, a password outside a URL or a header), a base64 secret that reads as a path from a root (two segments and more, no `+` or `=`), a token split across two lines by a wrap, and a secret station does not know whose shape names no issuer. The screen is a net for outside words; the exact guard for a secret station knows is not yet carried (Not yet).
+- Frames and pages keep their types, so `station.api/v2` and `station.page/v1` take no bump.
+- The files on disk (the engine's and the apps' logs) stay raw: they are the owner's own files, not answers.
+
+## Not yet
+
+- **A secret station knows is not yet a value that never prints.** `core/secret` holds the type, `secret.Value` (it prints, formats and marshals as its reference, `vault:<name>`, or `withheld`; it is never read from JSON; `Reveal` is its only exit), and no call carries it. The vault's value still rides `settingscalls.ApplyIn.Values` as a plain string, guarded only by the exact replace in `masked()` (`machinefile/calls/apply.go`). Carrying the reference in the call's input and revealing the value only at the point that writes it (the keychain, `/etc/kcpassword`, an infra `.env`), with an architecture rule that keeps `Reveal` to those points, is the next lot.
+- **A page has no `withheld` value kind.** A page's cell shows the marker as its text; a client tells a withheld cell from an unknown one only where a `withheld` flag stands beside the value.

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 func Judge(a Agent, events ...Event) Agent {
@@ -125,7 +125,7 @@ func relative(folder, p string) string {
 	if strings.HasPrefix(p, "../") {
 		p = path.Base(p)
 	}
-	if _, redacted := accounts.Redact(p); redacted {
+	if secret.Shaped(p) {
 		return ""
 	}
 	return p

@@ -6,12 +6,11 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 // value: a JSON fixture the repository commits: a page fixture, a recorded
@@ -89,19 +88,6 @@ func worldSecrets(t *testing.T, root string) []string {
 	return slices.Compact(slices.DeleteFunc(out, func(s string) bool { return strings.TrimSpace(s) == "" }))
 }
 
-// value: the token shapes of catalog.LeakShapes that name their issuer
-// (GitHub, Anthropic, npm, Slack, a JWT), without the bare run of base64
-// a digest also is.
-func tokenShapes() *regexp.Regexp {
-	var named []string
-	for _, shape := range strings.Split(catalog.LeakShapes, "|") {
-		if !strings.HasPrefix(shape, "[") {
-			named = append(named, shape)
-		}
-	}
-	return regexp.MustCompile(strings.Join(named, "|"))
-}
-
 // invariant: rule fixtures-carry-no-secret (13.3 rule 16, SC-10): no JSON
 // fixture carries a secret of a world, nor anything shaped like an issued
 // token, so a page, a stream, a golden file or an agent's journal that
@@ -109,14 +95,13 @@ func tokenShapes() *regexp.Regexp {
 // be caught here, not in a review.
 func ruleFixturesCarryNoSecret(fixtures map[string]string, secrets []string) []finding {
 	var out []finding
-	shapes := tokenShapes()
 	for _, rel := range slices.Sorted(maps.Keys(fixtures)) {
 		for _, s := range secrets {
 			if strings.Contains(fixtures[rel], s) {
 				out = append(out, finding{"fixtures-carry-no-secret", rel, "carries a secret of the worlds"})
 			}
 		}
-		if shapes.MatchString(fixtures[rel]) {
+		if secret.Issued(fixtures[rel]) {
 			out = append(out, finding{"fixtures-carry-no-secret", rel, "carries a token"})
 		}
 	}

@@ -99,5 +99,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md) (Proposed)
 - [046 The repository is a monorepo of members](decisions/046-the-repository-is-a-monorepo-of-members.md) (Proposed)
 - [047 A catalog entry is a package, and a machine file is `<name>.machine.yaml`](decisions/047-a-catalog-entry-is-a-package-a-machine-file-is-name-machine-yaml.md) (Accepted)
+- [048 The engine withholds a secret before any answer](decisions/048-the-engine-withholds-a-secret-before-any-answer.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
