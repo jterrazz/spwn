@@ -375,8 +375,9 @@ func collect[R any](ctx context.Context, clock Clock, report R, left int, answer
 			if send == nil && wakeUp == nil {
 				wake := make(chan struct{})
 				wakeUp = wake
+				wait := max(coalesce-clock.Now().Sub(last), 0)
 				go func() {
-					if clock.Sleep(ctx, max(coalesce-clock.Now().Sub(last), 0)) == nil {
+					if clock.Sleep(ctx, wait) == nil {
 						close(wake)
 					}
 				}()
