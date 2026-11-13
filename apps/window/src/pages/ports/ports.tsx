@@ -1,7 +1,7 @@
 import type { PortsPort, Target } from '@jterrazz/station-api';
 
 import { Panel, Row, StatePill, Value } from '../../design/index';
-import { isPortShared } from '../../engine/provisional';
+import { isDeclarable, isPortShared } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
 import { portReach } from '../../engine/shown';
 import { PORT_ANSWER_TONES } from '../../engine/tones';
@@ -13,7 +13,7 @@ import { GestureButton, GestureRow, HeldOutcomes } from '../kit/gestures';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
-import { usePortShare } from './port-gestures';
+import { usePortDeclare, usePortShare } from './port-gestures';
 import { aboutPort, needsOf, portsOf } from './ports-of';
 import type { PortsOf } from './ports-of';
 import { SharedRow } from './shared-row';
@@ -58,20 +58,53 @@ function ShareableRow({ port, vm, target }: ShareableProps) {
     );
 }
 
-function MacPortRow({ port }: { port: PortsPort }) {
+type MacPortProps = { port: PortsPort; mac: string; target: Target | undefined };
+
+function macPortRow(port: PortsPort) {
+    return {
+        lead: <Value look="raised">{`:${port.Port}`}</Value>,
+        leadSize: 'value',
+        sentence: aboutPort(port),
+        title: port.Process === '' ? 'process not given yet' : port.Process,
+        trailSize: 'wide',
+    } as const;
+}
+
+function DeclarableRow({ port, mac, target }: MacPortProps) {
+    const declare = usePortDeclare({ machine: port.Machine.Name, port: port.Port, target });
+    return (
+        <GestureRow
+            {...macPortRow(port)}
+            gesture={declare}
+            trail={
+                <span className={styles.trail}>
+                    <Answer port={port} />
+                    <StatePill {...portReach(port)} />
+                    <GestureButton
+                        gesture={declare}
+                        label="Declare it public"
+                        name={`Declare :${port.Port} public`}
+                        title={`Declare ${port.Machine.Name === '' ? mac : port.Machine.Name}:${port.Port} public?`}
+                    />
+                </span>
+            }
+        />
+    );
+}
+
+export function MacPortRow({ port, mac, target }: MacPortProps) {
+    if (isDeclarable(port)) {
+        return <DeclarableRow mac={mac} port={port} target={target} />;
+    }
     return (
         <Row
-            lead={<Value look="raised">{`:${port.Port}`}</Value>}
-            leadSize="value"
-            sentence={aboutPort(port)}
-            title={port.Process === '' ? 'process not given yet' : port.Process}
+            {...macPortRow(port)}
             trail={
                 <span className={styles.trail}>
                     <Answer port={port} />
                     <StatePill {...portReach(port)} />
                 </span>
             }
-            trailSize="wide"
         />
     );
 }
@@ -145,7 +178,9 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
     );
 }
 
-function MacPorts({ of, name }: { of: PortsOf; name: string }) {
+type MacPortsProps = { of: PortsOf; name: string; target: Target | undefined };
+
+function MacPorts({ of, name, target }: MacPortsProps) {
     return (
         <Panel title="What listens on this Mac">
             {of.ports.length === 0 ? (
@@ -153,7 +188,9 @@ function MacPorts({ of, name }: { of: PortsOf; name: string }) {
                     {of.mac ? `Nothing listed on ${name}.` : `The answer names no Mac ${name}.`}
                 </p>
             ) : (
-                of.ports.map((port) => <MacPortRow key={port.Port} port={port} />)
+                of.ports.map((port) => (
+                    <MacPortRow key={port.Port} mac={name} port={port} target={target} />
+                ))
             )}
         </Panel>
     );
@@ -194,7 +231,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
             <Alarm found={found} go={go} name={name} />
             <HeldOutcomes>
                 {vm === undefined ? (
-                    <MacPorts name={name} of={of} />
+                    <MacPorts name={name} of={of} target={targetOf({ mac: found.mac })} />
                 ) : (
                     <VmPorts of={of} target={targetOf({ mac: found.mac })} vm={vm} />
                 )}

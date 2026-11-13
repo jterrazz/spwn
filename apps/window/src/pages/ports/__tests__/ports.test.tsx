@@ -1,13 +1,45 @@
+import type { PortsPort } from '@jterrazz/station-api';
 import { button, component, content, file, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { Screen } from '../../../design/index';
+import { Client } from '../../../engine/client';
+import { EngineProvider } from '../../../engine/react';
+import { replayTransport } from '../../../engine/replay';
 import { pageOver } from '../../../fixtures/page-over';
 import { recordingsOf } from '../../../fixtures/recordings';
+import { GestureConfirm } from '../../kit/gestures';
+import { MacPortRow } from '../ports';
 
 const recordingFor = await recordingsOf('mini-workspace', 'one-mac', 'stories', 'two-macs');
 
 function portsOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Ports' });
+}
+
+const EXPOSED: PortsPort = {
+    Answer: '',
+    Binds: ['0.0.0.0'],
+    Declared: null,
+    Device: false,
+    Machine: { Name: '', On: '' },
+    PID: 4100,
+    Port: 5000,
+    Process: 'python3',
+    Reach: 2,
+    Verified: null,
+};
+
+function macPortOver(port: PortsPort) {
+    const client = new Client(replayTransport(recordingFor('stories')));
+    return (
+        <EngineProvider client={client}>
+            <Screen>
+                <MacPortRow mac="macbook-pro" port={port} target={undefined} />
+            </Screen>
+            <GestureConfirm />
+        </EngineProvider>
+    );
 }
 
 describe('ports', () => {
@@ -75,6 +107,32 @@ describe('ports', () => {
                 await visitor.see(content('Nothing listed on jterrazz-macbook-pro.'));
             },
         );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a port reached outside Tailscale is declared public, and the engine says it is done', async () => {
+        // Given - a port of this Mac on every interface, which no declaration names
+        const result = await component.render(macPortOver(EXPOSED), async (visitor) => {
+            await visitor.see(content('python3'));
+
+            // When - Declare it public is clicked
+            await visitor.click(button('Declare :5000 public'));
+
+            // Then - it asks nothing, and the engine's answer settles the gesture done on its row
+            await visitor.see(content('Done'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a port a declaration already names offers no declare', async () => {
+        // Given - the same port, declared public by the LAN
+        const declared = { ...EXPOSED, Declared: { machine: '', port: 5000, via: 'lan' } };
+        const result = await component.render(macPortOver(declared), async (visitor) => {
+            await visitor.see(content('python3'));
+
+            // Then - no gesture is drawn on its row
+            await visitor.gone(button('Declare :5000 public'));
+        });
         expect(result.errors.text).toBe('');
     });
 });

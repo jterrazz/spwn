@@ -38,6 +38,7 @@ export const BRIDGED = [
     'machines.start',
     'machines.stop',
     'overview.read',
+    'ports.declare',
     'ports.list',
     'ports.share',
     'ports.stop-sharing',

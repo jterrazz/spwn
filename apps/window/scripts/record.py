@@ -190,6 +190,7 @@ GESTURES = {
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
         {"call": "accounts.share", "in": {"Account": "claude", "With": "linux-1", "For": 12 * 3600 * 10**9}},
+        {"call": "ports.declare", "in": {"Machine": "", "Port": "5000", "Via": "lan"}},
     ],
     "engine-stopped": [
         {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}},

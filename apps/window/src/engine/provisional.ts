@@ -278,6 +278,15 @@ export function portsMacOf(
     );
 }
 
+const OUTSIDE_TAILSCALE = 2;
+
+// outside: ports.list names no gesture per port: a port reached outside Tailscale that no declaration names public is
+// outside: the one ports.declare takes, by the LAN it answers on, until each port carries the gesture it allows.
+export const EXPOSED_ROUTE = 'lan';
+export function isDeclarable(port: PortsPort): boolean {
+    return port.Reach === OUTSIDE_TAILSCALE && port.Declared === null;
+}
+
 // outside: ports.list gives a share a public and a local address and no address to open from the window's Mac: a
 // outside: local one opens only on the Mac its row is flagged this_mac, until each share carries that address.
 export function shareOpensFromHere(share: PortsSharedPort, onThisMac: boolean): string {
