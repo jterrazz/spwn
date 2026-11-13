@@ -14,6 +14,11 @@ export function wordOf<E extends Worded>(of: E, code: CodeOf<E>): StationWord {
     return table[code];
 }
 
+export function wordOfSent(of: Worded, sent: string): string {
+    const table: Readonly<Record<string, StationWord>> = WORDS[of];
+    return Object.hasOwn(table, sent) ? (table[sent]?.Word ?? sent) : sent;
+}
+
 export function codesOf<E extends Worded>(of: E): readonly CodeOf<E>[] {
     const table: Table<E> = WORDS[of];
     return Object.keys(table).filter((code): code is Extract<CodeOf<E>, string> =>

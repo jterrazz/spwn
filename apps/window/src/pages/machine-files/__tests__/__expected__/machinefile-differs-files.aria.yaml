@@ -12,7 +12,7 @@
     - term: Makes
     - definition: a Mac
     - term: System
-    - definition: macos
+    - definition: macOS
     - term: Extends
     - definition:
       - button "jterrazz-base"

@@ -72,9 +72,9 @@ describe('model', () => {
         ];
         const mixin = [factsOf(explain, 'jterrazz-base'), extendedBy(explain, 'jterrazz-base')];
 
-        // Then - the file makes a computer on macos and extends the mixin; the mixin sets the arch alone
+        // Then - the file makes a computer on macOS, the engine's word for its code, and extends the mixin; the mixin sets the arch alone
         expect(file).toStrictEqual([
-            { makes: 'computer', system: 'macos · arm64' },
+            { makes: 'computer', system: 'macOS · arm64' },
             [{ identity: 'blue', name: 'jterrazz-base' }],
         ]);
         expect(mixin).toStrictEqual([{ makes: '', system: 'arm64' }, []]);

@@ -6,6 +6,7 @@ import type {
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
+import { wordOfSent } from '../../engine/engine-words';
 import { SHELVES } from '../packages/model';
 
 export const CHAPTERS = [...SHELVES, 'Access'] as const;
@@ -38,10 +39,11 @@ export function factsOf(
         (value) => file === explain.Name || value.Origin.Name === file,
     );
     const text = new Map(values.map((value) => [value.Key, value.Text]));
-    const named = [text.get('machine.system.os'), text.get('machine.system.version')]
+    const os = text.get('machine.system.os') ?? '';
+    const named = [os === '' ? '' : wordOfSent('CatalogOS', os), text.get('machine.system.version')]
         .filter((part) => part !== undefined && part !== '')
         .join(' ');
-    const arch = text.get('machine.system.arch') ?? '';
+    const arch = wordOfSent('CatalogArch', text.get('machine.system.arch') ?? '');
     return {
         makes: text.get('machine.kind') ?? '',
         system: [named, arch].filter((part) => part !== '').join(' · '),
