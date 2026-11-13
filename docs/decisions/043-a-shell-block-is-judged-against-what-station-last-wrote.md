@@ -1,4 +1,4 @@
-# ADR-042: A shell block is judged against what station last wrote
+# ADR-043: A shell block is judged against what station last wrote
 
 **Status:** Proposed
 **Date:** 2026-11-12
