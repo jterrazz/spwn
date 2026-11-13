@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -11,6 +12,23 @@ import (
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
+
+type noteLog struct {
+	mu    sync.Mutex
+	lines []string
+}
+
+func (n *noteLog) add(line string) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.lines = append(n.lines, line)
+}
+
+func (n *noteLog) all() []string {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	return append([]string(nil), n.lines...)
+}
 
 // value: a kept tailnet whose next failUnshare unshares and failShared
 // reads fail, as a serve that times out.
@@ -146,14 +164,14 @@ func TestAnEntryTheReconciliationFailsToRemoveGoesAtTheNextTick(t *testing.T) {
 // value: an engine started over a tailnet that funnels 443 from 40000 for
 // a VM deleted while it was down, whose reconciliation could not read the
 // tailnet; db, local, running.
-func staleFunnel(t *testing.T, failShared int, kept ...ports.Reservation) (harness, *flakyTailnet, *[]string) {
+func staleFunnel(t *testing.T, failShared int, kept ...ports.Reservation) (harness, *flakyTailnet, *noteLog) {
 	t.Helper()
 	h := newHarness(t, model.VMRecord{Name: "db", Lifetime: model.Persistent})
 	tn := &flakyTailnet{keptTailnet: funneledFrom40000(), failShared: failShared}
 	h.d.tn = tn
 	h.d.o.Rights = rightsTo(catalog.AudienceLocal, 5432)
-	var log []string
-	h.d.note = func(line string) { log = append(log, line) }
+	log := &noteLog{}
+	h.d.note = log.add
 	h.d.reservations = kept
 	ctx := t.Context()
 	h.d.refreshSelf(ctx)
@@ -162,7 +180,7 @@ func staleFunnel(t *testing.T, failShared int, kept ...ports.Reservation) (harne
 	h.d.vms["db"].state = engine.StateRunning
 	h.d.mu.Unlock()
 	h.d.reconcileServe(ctx)
-	return h, tn, &log
+	return h, tn, log
 }
 
 func reservedPort(h harness, vm string, port int) int {
@@ -231,13 +249,14 @@ func TestATailnetNeverReadGivesOutNoPortUntilATickReadsIt(t *testing.T) {
 		t.Errorf("db is not reserved after the tick that read the tailnet")
 	}
 	said := 0
-	for _, l := range *log {
+	lines := log.all()
+	for _, l := range lines {
 		if strings.Contains(l, "could not be read") {
 			said++
 		}
 	}
 	if said != 1 {
-		t.Errorf("the failed reads were said %d times, want once: %v", said, *log)
+		t.Errorf("the failed reads were said %d times, want once: %v", said, lines)
 	}
 }
 
