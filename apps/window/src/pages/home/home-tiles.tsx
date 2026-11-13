@@ -7,6 +7,7 @@ import { AWAKE_WORDS, POWER_SOURCE_WORDS } from '../../engine/words';
 import { bytes, clock, duration, sentence } from '../../model/format';
 import { useActivity } from '../activity/reading';
 import { CpuTile, NotGivenTile, split, Unknown, unknownOf } from '../activity/tiles';
+import { DiskTile } from '../disk/disk-tile';
 import { Tiles } from '../page';
 
 const NS_PER_MS = 1_000_000;
@@ -18,15 +19,24 @@ const LABELS = {
     memory: 'Memory free',
 } as const;
 
-function DiskFreeTile({ report }: { report: ActivityReport }) {
+const BYTES_PER_GB = 1e9;
+
+function heldBy(mac: MachinesMacView): number {
+    return (mac.VMs ?? []).reduce((sum, vm) => sum + Math.max(vm.SizeGB, 0) * BYTES_PER_GB, 0);
+}
+
+function DiskFreeTile({ report, mac }: { report: ActivityReport; mac: MachinesMacView }) {
     const { disk_free: free, disk_total: total } = report.last.sample;
     if (free === undefined || total === undefined || total <= 0) {
-        return <NotGivenTile label={LABELS.disk} />;
+        return <DiskTile held={heldBy(mac)} label={LABELS.disk} shows="free" target={undefined} />;
     }
     const { value, unit } = split(bytes(free));
     return (
         <Tile
-            foot={`of ${bytes(total)}`}
+            foot={sentence([
+                `of ${bytes(total)}`,
+                heldBy(mac) > 0 ? `machines hold ${bytes(heldBy(mac))}` : undefined,
+            ])}
             label={LABELS.disk}
             unit={unit}
             value={value}
@@ -98,7 +108,7 @@ export function HomeTiles({ mac }: { mac: MachinesMacView }) {
                 {unknown !== undefined || report === undefined ? (
                     <Unknown label={LABELS.disk} state={unknown ?? 'reading'} />
                 ) : (
-                    <DiskFreeTile report={report} />
+                    <DiskFreeTile mac={mac} report={report} />
                 )}
             </Tiles>
         </>

@@ -7,6 +7,7 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import type { Route } from '../../shell/route';
 import { ActivityTiles } from '../activity/tiles';
+import { DiskTile } from '../disk/disk-tile';
 import { HeldOutcomes } from '../kit/gestures';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { DeleteGesture } from '../machine/gestures';
@@ -64,7 +65,12 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
     return (
         <Page>
             <Head name={name} overview={overview} />
-            <ActivityTiles found={found} fourth={<MachinesTile found={found} />} up={up} />
+            <ActivityTiles
+                disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
+                found={found}
+                fourth={<MachinesTile found={found} />}
+                up={up}
+            />
             <HeldOutcomes>
                 <NeedsOf
                     go={go}
@@ -102,6 +108,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
         <Page>
             <Head name={vm.Name} overview={overview} />
             <ActivityTiles
+                disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
                 found={found}
                 fourth={server ? <CheckTile vm={vm} /> : undefined}
                 up={up}

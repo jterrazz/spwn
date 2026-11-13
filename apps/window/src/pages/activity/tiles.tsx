@@ -1,5 +1,5 @@
 import type { ActivityReport } from '@jterrazz/station-api';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { Bar, Chart, identityOf, MissingMark, Tile } from '../../design/index';
 import type { Identity } from '../../design/index';
@@ -153,9 +153,32 @@ function labelsOf(of: string | undefined): Labels {
     return { cpu: named('CPU'), disk: named('Disk'), memory: named('Memory'), up: named('Uptime') };
 }
 
-type TilesProps = { found: Found; up: number; of?: string; fourth?: ReactNode };
+// value: a disk the meter does not measure is drawn by the tile the page hands, its own read of the disk.
+function DiskHeld({
+    report,
+    label,
+    disk,
+}: {
+    report: ActivityReport;
+    label: string;
+    disk: ReactElement | undefined;
+}) {
+    const held = diskOf(report.last.sample);
+    if (held === undefined && disk !== undefined) {
+        return disk;
+    }
+    return <HeldTile held={held} label={label} shown={bytes} />;
+}
 
-export function ActivityTiles({ found, up, of, fourth }: TilesProps) {
+type TilesProps = {
+    found: Found;
+    up: number;
+    of?: string;
+    fourth?: ReactNode;
+    disk?: ReactElement | undefined;
+};
+
+export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
     const name = found.vm?.Name ?? found.mac.Name;
     const labels = labelsOf(of);
     const { readers, shown } = useActivity(found, '1h');
@@ -180,11 +203,7 @@ export function ActivityTiles({ found, up, of, fourth }: TilesProps) {
                             label={labels.memory}
                             shown={memory}
                         />
-                        <HeldTile
-                            held={diskOf(report.last.sample)}
-                            label={labels.disk}
-                            shown={bytes}
-                        />
+                        <DiskHeld disk={disk} label={labels.disk} report={report} />
                     </>
                 )}
                 {fourth ?? <UptimeTile label={labels.up} report={report} up={up} />}
