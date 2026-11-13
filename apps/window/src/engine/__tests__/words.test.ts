@@ -191,7 +191,9 @@ describe('words', () => {
             'const L: Words<MachinesLifetime> = {};',
             "const L: Words<MachinesVM['Lifetime']> = {};",
             "const T: Tones<MachinefileOrigin['Layer']> = {};",
-            "const S: Words<'' | MachinesVM['Kind']> = {};",
+            "const S: Words<MachinesVM['Kind']> = {};",
+            "const C: Words<MachinesBirth['step']> = {};",
+            "const P: Tones<MachinefileChapterDrift['Chapter']> = {};",
             "const K: Readonly<Record<NonNullable<CatalogMethodSpec['OS']>, string>> = {};",
         ];
         const lawful = [
@@ -207,7 +209,7 @@ describe('words', () => {
 
         // Then - every forbidden line is found once, no lawful one
         expect(found).toStrictEqual([
-            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0],
         ]);
     });

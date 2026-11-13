@@ -6,7 +6,7 @@
     - heading "How it is applied" [level=2]
     - text: Can be undone
     - term: "On"
-    - definition: linux, macos
+    - definition: Linux, macOS VM
     - term: Needs one of
     - definition:
       - button "claude"
