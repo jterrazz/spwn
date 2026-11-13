@@ -197,7 +197,7 @@ function File({
     const own = useRead('machinefile.explain', input);
     const identities: Identities = new Map(
         drift.kind === 'read'
-            ? layersOf(drift.out).map((layer) => [layer.name, layer.identity] as const)
+            ? layersOf(drift.out.Plan).map((layer) => [layer.name, layer.identity] as const)
             : [],
     );
     return (
