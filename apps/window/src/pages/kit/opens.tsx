@@ -12,7 +12,7 @@ import styles from '../page.module.css';
 
 export const WITHHELD_OPENS = 'Not opened: what it would open looks like a secret';
 
-type OpenButtonProps = {
+export type OpenButtonProps = {
     label: string;
     openable: Openable | undefined;
     held: string;

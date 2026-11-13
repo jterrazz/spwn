@@ -60,8 +60,10 @@ import { Value } from '../../design/value';
 import { VALUE_STORIES } from '../../design/value.stories';
 import { Verdict } from '../../design/verdict';
 import { VERDICT_STORIES } from '../../design/verdict.stories';
+import { OPEN_BUTTON_STORIES } from '../kit/open-button.stories';
 import { entry } from './entry';
 import type { Entry } from './entry';
+import { OpenButtonSample } from './open-button-sample';
 
 export const ENTRIES: readonly Entry[] = [
     entry('Icon', 'Marks', { Component: Icon, stories: ICON_STORIES }),
@@ -92,6 +94,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('Button', 'Controls', { Component: Button, stories: BUTTON_STORIES }),
     entry('IconButton', 'Controls', { Component: IconButton, stories: ICON_BUTTON_STORIES }),
     entry('CopyButton', 'Controls', { Component: CopyButton, stories: COPY_BUTTON_STORIES }),
+    entry('OpenButton', 'Controls', { Component: OpenButtonSample, stories: OPEN_BUTTON_STORIES }),
     entry('Switch', 'Controls', { Component: Switch, frame: 'block', stories: SWITCH_STORIES }),
     entry('NavItem', 'Controls', { Component: NavItem, frame: 'nav', stories: NAV_ITEM_STORIES }),
     entry('SearchField', 'Controls', {
