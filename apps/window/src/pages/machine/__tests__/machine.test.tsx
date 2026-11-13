@@ -92,14 +92,16 @@ describe('machine', () => {
         const result = await component.render(
             overviewOver('stories', 'linux-1'),
             async (visitor) => {
-                // When - its overview has been read
+                // When - its overview and its file have been read
                 await visitor.see(content('No verdict from the engine.'));
                 await visitor.see(content('Why it exists'));
+                await visitor.see(content('8 differences from linux-dev.'));
             },
         );
 
-        // Then - no panel of needs is drawn on it
+        // Then - no panel of needs is drawn on it, and its file is the mockup's rows, Packages holding the settings
         expect(result.tree.text).not.toContain('Needs you');
+        expect(result.content.text).toContain('what is installed, and its settings');
     });
 
     test("a server's Overview draws its health, its check's latency and its last days", async () => {

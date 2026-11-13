@@ -9,9 +9,9 @@
     - tab "Ports"
     - tab "Accounts"
     - tab "Storage"
-  - heading "Matches jterrazz-macbook-pro." [level=1]
+  - heading "Matches" [level=1]
   - paragraph:
-    - img "Matches jterrazz-macbook-pro."
+    - img "Matches"
     - text: 4 of 4 apps match · Its machine file is
     - button "jterrazz-macbook-pro"
   - region "Upgrades":

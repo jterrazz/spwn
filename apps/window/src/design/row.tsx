@@ -9,8 +9,10 @@ import styles from './row.module.css';
 
 export type RowTemplate = 'catalog' | 'fleet' | 'flow' | 'meters';
 
-// value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared").
-type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: 'unsaid' | 'word' };
+// value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared");
+// value: `calm: 'pill'` draws it as a plain pill, where the mockup lists calm and deviating rows alike.
+type Calm = 'pill' | 'unsaid' | 'word';
+type RowState = { tone: Tone; word: string; asWritten?: boolean; calm?: Calm };
 
 // value: a column given `null` is kept empty in this row, so a list whose rows differ still aligns; a column
 // value: left `undefined` is not a column of this list at all. A value given as a string is plain text with
@@ -105,20 +107,29 @@ function classesOf(columns: Columns, size: 'regular' | 'slim', open: boolean): s
     ].join(' ');
 }
 
+function StateShown({ state }: { state: RowState }) {
+    const calm = isCalm(state.tone);
+    if (calm && state.calm === 'unsaid') {
+        return null;
+    }
+    const pill = calm && state.calm === 'pill';
+    return (
+        <StatePill
+            asWritten={state.asWritten ?? false}
+            quiet={!pill}
+            tone={pill ? 'plain' : state.tone}
+            word={state.word}
+        />
+    );
+}
+
 function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end' | 'start' }) {
     if (state === undefined) {
         return null;
     }
     return (
         <div className={`${styles.state} ${at === 'end' ? styles.atEnd : ''}`}>
-            {state === null || (state.calm === 'unsaid' && isCalm(state.tone)) ? null : (
-                <StatePill
-                    asWritten={state.asWritten ?? false}
-                    quiet
-                    tone={state.tone}
-                    word={state.word}
-                />
-            )}
+            {state === null ? null : <StateShown state={state} />}
         </div>
     );
 }

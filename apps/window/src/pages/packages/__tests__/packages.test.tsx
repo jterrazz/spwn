@@ -25,6 +25,7 @@ const recordingFor = await recordingsOf(
     'machinefile-kept',
     'mini-offline',
     'one-mac',
+    'stories',
     'stories-file',
     'two-macs',
 );
@@ -85,6 +86,18 @@ describe('Packages', () => {
         // Then - the first has no differences panel, the second lists ripgrep and fd to install
         await expect(kept.tree).toMatch(file('./__expected__/machinefile-kept.aria.yaml'));
         await expect(differs.tree).toMatch(file('./__expected__/machinefile-differs.aria.yaml'));
+    });
+
+    test("the head is the apps chapter's verdict, the whole file's being Its file's", async () => {
+        // Given - linux-1's Packages over stories: 3 apps differ, 8 differences in its whole file
+        const result = await component.render(windowOver('stories', 'linux-1'), async (visitor) => {
+            // When - its drift has been read
+            await visitor.see(heading('Differs from its file 3'));
+        });
+
+        // Then - the head counts the apps chapter, as the block under it does
+        expect(result.content.text).toContain('3 differences');
+        expect(result.content.text).not.toContain('8 differences from linux-dev.');
     });
 
     test("a line its machine lacks is a hollow square of its layer and a chip in its version's place", async () => {

@@ -56,8 +56,7 @@
     - region "Its file":
       - heading "Its file" [level=2]
       - button "Plan"
-      - button "Apps what is installed"
-      - button "Settings its settings"
+      - button "Packages what is installed, and its settings"
       - button "Ports which ports are shared, and with whom"
       - button "Accounts which accounts it borrows, and for how long"
     - button "Delete api…"

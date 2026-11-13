@@ -95,6 +95,13 @@ export function packageChapters(drift: MachinefileDrift): readonly MachinefileCh
     return chapters.filter((chapter) => PACKAGE_CHAPTERS.some((one) => one === chapter.Chapter));
 }
 
+// value: the Packages tab heads with the apps chapter's verdict; the whole file's is Its file's, on the Overview.
+const HEAD_CHAPTER: MachinefileChapter = 'apps';
+
+export function headChapter(drift: MachinefileDrift): MachinefileChapterDrift | undefined {
+    return (drift.Chapters ?? []).find((chapter) => chapter.Chapter === HEAD_CHAPTER);
+}
+
 function packageDifferences(drift: MachinefileDrift): readonly MachinefileDiffering[] {
     return packageChapters(drift).flatMap((chapter) => chapter.Differing ?? []);
 }

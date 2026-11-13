@@ -16,6 +16,14 @@ function leftOf(text: string): number {
     );
 }
 
+function heightOf(text: string): number {
+    return (
+        [...document.querySelectorAll('span')]
+            .find((one) => one.textContent === text)
+            ?.getBoundingClientRect().height ?? 0
+    );
+}
+
 describe('Row', () => {
     test('a row that opens keeps its link a gesture of its own, named apart', async () => {
         // Given - an account row that opens, its machine as a chip in its link slot
@@ -65,6 +73,26 @@ describe('Row', () => {
         // Then - the cut title carries its whole text as a tooltip, the one that fits none
         expect(result.html.text).toContain(`title="${LONG}"`);
         expect(result.html.text).not.toContain(`title="${SHORT}"`);
+    });
+
+    test('a calm state asked as a pill is a plain pill, and a quiet word otherwise', async () => {
+        // Given - two rows whose state is calm, one asking for a pill
+        let heights = { pill: 0, word: 0 };
+        await component.render(
+            <div style={{ width: 640 }}>
+                <Row state={{ calm: 'pill', tone: 'ok', word: 'Matches' }} title="Packages" />
+                <Row state={{ tone: 'ok', word: 'Present' }} title="mise" />
+            </div>,
+            async (visitor) => {
+                // When - both are drawn
+                await visitor.see(content('Present'));
+                heights = { pill: heightOf('Matches'), word: heightOf('Present') };
+            },
+        );
+
+        // Then - the pill stands 22 px, the quiet word only its line
+        expect(heights.pill).toBe(22);
+        expect(heights.word).toBeLessThan(22);
     });
 
     test('a nested row moves its mark and name in, and keeps its cells in their columns', async () => {

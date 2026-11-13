@@ -17,7 +17,7 @@ import { NotGiven, NoVerdict, Reading } from '../kit/readings';
 import { Page } from '../page';
 import { Differs } from './differs';
 import { Inventory } from './inventory';
-import { packageChapters } from './model';
+import { headChapter, packageChapters } from './model';
 import { PlanView } from './plan';
 
 import styles from './packages.module.css';
@@ -57,17 +57,22 @@ function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: strin
     if (drift.kind === 'failed') {
         return <NoVerdict line="What the engine answered is below" size="tab" />;
     }
+    const line = (
+        <>
+            {chaptersMatch(drift.out)}
+            <FileLink file={drift.out.Plan.Name} />
+        </>
+    );
+    const apps = headChapter(drift.out);
+    if (apps === undefined) {
+        return <NoVerdict line={line} size="tab" />;
+    }
     return (
         <Verdict
-            line={
-                <>
-                    {chaptersMatch(drift.out)}
-                    <FileLink file={drift.out.Plan.Name} />
-                </>
-            }
+            line={line}
             size="tab"
-            title={drift.out.Verdict.Sentence}
-            {...verdictShown(drift.out.Verdict)}
+            title={apps.Verdict.Sentence}
+            {...verdictShown(apps.Verdict)}
         />
     );
 }

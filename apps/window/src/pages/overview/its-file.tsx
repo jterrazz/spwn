@@ -2,7 +2,7 @@ import type { MachinefileChapter, MachinefileDrift } from '@jterrazz/station-api
 
 import { Button, Panel, Row, StatePill } from '../../design/index';
 import { useRead } from '../../engine/react';
-import { chapterWord, verdictShown } from '../../engine/shown';
+import { verdictShown } from '../../engine/shown';
 import { driftAsked } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
@@ -13,15 +13,16 @@ import styles from './overview.module.css';
 
 type Go = (to: Route) => void;
 
-const CHAPTER_TABS: readonly { chapter: MachinefileChapter; tab: Tab; about: string }[] = [
-    { about: 'what is installed', chapter: 'apps', tab: 'Packages' },
-    { about: 'its settings', chapter: 'settings', tab: 'Packages' },
+// value: the mockup's three rows, one per tab; Packages reads the apps chapter, as the Packages tab's head does.
+const FILE_ROWS: readonly { chapter: MachinefileChapter; tab: Tab; about: string }[] = [
+    { about: 'what is installed, and its settings', chapter: 'apps', tab: 'Packages' },
     { about: 'which ports are shared, and with whom', chapter: 'ports', tab: 'Ports' },
     { about: 'which accounts it borrows, and for how long', chapter: 'accounts', tab: 'Accounts' },
 ];
 
-function routeOf(chapter: MachinefileChapter): { tab: Tab; about: string } {
-    return CHAPTER_TABS.find((one) => one.chapter === chapter) ?? { about: '', tab: 'Packages' };
+function stateOf(drift: MachinefileDrift | undefined, chapter: MachinefileChapter) {
+    const read = (drift?.Chapters ?? []).find((one) => one.Chapter === chapter);
+    return read === undefined ? null : { ...verdictShown(read.Verdict), calm: 'pill' as const };
 }
 
 export function FileChapters({
@@ -50,27 +51,18 @@ export function FileChapters({
             note={drift?.Plan.Name ?? ''}
             title="Its file"
         >
-            {(drift === undefined
-                ? CHAPTER_TABS.map(({ chapter }) => ({ chapter, state: null }))
-                : (drift.Chapters ?? []).map((one) => ({
-                      chapter: one.Chapter,
-                      state: verdictShown(one.Verdict),
-                  }))
-            ).map(({ chapter, state }) => {
-                const { tab, about } = routeOf(chapter);
-                return (
-                    <Row
-                        key={chapter}
-                        onOpen={() => {
-                            go(machineRoute(vm, tab));
-                        }}
-                        sentence={about}
-                        size="slim"
-                        state={state}
-                        title={chapterWord(chapter)}
-                    />
-                );
-            })}
+            {FILE_ROWS.map(({ chapter, tab, about }) => (
+                <Row
+                    key={chapter}
+                    onOpen={() => {
+                        go(machineRoute(vm, tab));
+                    }}
+                    sentence={about}
+                    size="slim"
+                    state={stateOf(drift, chapter)}
+                    title={tab}
+                />
+            ))}
         </Panel>
     );
 }
