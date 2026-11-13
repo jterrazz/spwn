@@ -11,6 +11,9 @@
 .page .title {
     font-size: var(--text-page-verdict);
 }
+.verdict.tab {
+    padding-top: var(--space-6);
+}
 .tab .title {
     font-size: var(--text-tab-verdict);
 }

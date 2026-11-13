@@ -71,7 +71,7 @@
     padding: var(--space-8) 0 var(--space-12);
 }
 .planHead {
-    padding: var(--space-14) var(--space-4);
+    padding: var(--space-14) var(--space-4) var(--space-4);
 }
 .planTitle {
     margin: 0;
