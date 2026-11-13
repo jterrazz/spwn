@@ -3,7 +3,8 @@
 // value: default. It builds the proof pages, serves them, and saves <world>/<page>.png for each page of the
 // value: sidebar and <world>/<machine>-<tab>.png for each tab of each machine the world lists, the full height of
 // value: the page, and gallery.png, the design components, with gallery/<Component>.png, one reference image per
-// value: component the gallery enters, each opened by its start route (`?page=`, `?machine=&tab=`) so no capture clicks.
+// value: component the gallery enters, each opened by its start route (`?page=`, `?machine=&tab=`); the shots of
+// value: OPENED add a world's dialogs and clicked views, <world>/<name>.png, by the steps each declares.
 import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
@@ -25,7 +26,59 @@ const PAGES = [
 const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Accounts', 'Storage', 'Logs'];
 const PARALLEL = 6;
 
-type Shot = { name: string; query: string; entries?: boolean };
+// value: a step a shot takes once its start route has drawn: a button clicked by its whole accessible name, or a key
+// value: pressed, so a dialog or a view a click opens is captured too.
+type Step = { button: string } | { key: string };
+
+type Shot = { name: string; query: string; entries?: boolean; steps?: readonly Step[] };
+
+// value: the shots a start route alone cannot draw, each over the world that holds its subject: the dialogs, the
+// value: views a click opens, and the catalog items, each a page of its shelf.
+const OPENED: Readonly<Record<string, readonly Shot[]>> = {
+    stories: [
+        { name: 'catalog-item-node', query: 'page=catalog-apps&item=node' },
+        { name: 'catalog-item-agent-hooks', query: 'page=catalog-settings&item=agent-hooks' },
+        { name: 'dialog-find', query: 'page=home', steps: [{ key: 'Control+k' }] },
+        { name: 'dialog-new-machine-home', query: 'page=home', steps: [{ button: 'New machine' }] },
+        {
+            name: 'dialog-new-machine-mac',
+            query: 'machine=macbook-pro&tab=Overview',
+            steps: [{ button: 'New machine' }],
+        },
+        {
+            name: 'dialog-new-machine-file',
+            query: 'page=machine-files&file=linux-dev',
+            steps: [{ button: 'New machine' }],
+        },
+        {
+            name: 'dialog-delete-linux-1',
+            query: 'machine=linux-1&tab=Overview',
+            steps: [{ button: 'Delete linux-1…' }],
+        },
+        {
+            name: 'dialog-restart-infra',
+            query: 'machine=infra&tab=Overview',
+            steps: [{ button: 'Restart' }],
+        },
+        {
+            name: 'linux-1-packages-to-file',
+            query: 'machine=linux-1&tab=Packages',
+            steps: [{ button: 'Change the file' }],
+        },
+        {
+            name: 'linux-1-packages-plan',
+            query: 'machine=linux-1&tab=Packages',
+            steps: [{ button: 'Plan' }],
+        },
+    ],
+    'bare-mac': [
+        {
+            name: 'dialog-new-machine-start-here',
+            query: 'page=home',
+            steps: [{ button: 'New machine, a workspace' }],
+        },
+    ],
+};
 
 function fieldOf(value: unknown, key: string): unknown {
     if (typeof value !== 'object' || value === null) {
@@ -70,7 +123,29 @@ function shotsOf(world: string): Shot[] {
             query: `?world=${world}&machine=${machine}&tab=${tab}`,
         })),
     );
-    return [...pages, ...tabs];
+    const opened = (OPENED[world] ?? []).map((shot) => ({
+        ...shot,
+        name: `${world}/${shot.name}`,
+        query: `?world=${world}&${shot.query}`,
+    }));
+    return [...pages, ...tabs, ...opened];
+}
+
+async function take(page: Page, step: Step): Promise<void> {
+    await ('key' in step
+        ? page.keyboard.press(step.key)
+        : page.getByRole('button', { exact: true, name: step.button }).click({ timeout: 5000 }));
+    await page.waitForTimeout(300);
+}
+
+async function grow(page: Page): Promise<void> {
+    const height = Number(
+        await page.evaluate("document.querySelector('main > div:last-child')?.scrollHeight ?? 0"),
+    );
+    if (height > 700) {
+        await page.setViewportSize({ height: Math.min(height + 120, 6000), width: 1280 });
+        await page.waitForTimeout(200);
+    }
 }
 
 async function capture(browser: Browser, base: string, out: string, shot: Shot): Promise<string[]> {
@@ -89,12 +164,11 @@ async function capture(browser: Browser, base: string, out: string, shot: Shot):
     await page.waitForLoadState('networkidle');
     await page.evaluate('document.fonts.ready');
     await page.waitForTimeout(400);
-    const height = Number(
-        await page.evaluate("document.querySelector('main > div:last-child')?.scrollHeight ?? 0"),
-    );
-    if (height > 700) {
-        await page.setViewportSize({ height: Math.min(height + 120, 6000), width: 1280 });
-        await page.waitForTimeout(200);
+    for (const step of shot.steps ?? []) {
+        await take(page, step);
+    }
+    if (!(await page.getByRole('dialog').first().isVisible())) {
+        await grow(page);
     }
     await page.screenshot({ path: join(out, `${shot.name}.png`) });
     if (shot.entries === true) {

@@ -4,7 +4,7 @@
 # value: mockup's same page, the window's at the left. <captures> is one world's folder written by capture.ts, stories
 # value: by default, whose linux-1 and This Mac, PAIR_MAC (macbook-pro by default), its pairs use; <mockups> holds the
 # value: mockup's shot of each pair as <pair>.png, any width, and <live> the shots of a live-tauri.sh session holding
-# value: palette.png and destroy.png. Each side is the top of its shot at the window's 1280 x 820, scaled to 640 x 410;
+# value: palette.png and destroy.png; the dialogs and clicked views are capture.ts's OPENED shots. Each side is the top of its shot at the window's 1280 x 820, scaled to 640 x 410;
 # value: a pair is <out-dir>/<pair>.png, and three pairs stacked are <out-dir>/sheet-<n>.png. A pair whose shot is
 # value: missing is named and left out.
 set -euo pipefail
@@ -20,7 +20,11 @@ PAIRS=(
     c4-macports:"$mac"-ports c5-macacc:"$mac"-accounts
     c6-macstor:"$mac"-storage c7-maclogs:"$mac"-logs
     d1-files:machine-files d2-catalog:catalog d3-catapps:catalog-apps d4-catset:catalog-settings
+    d5-itemapp:catalog-item-node d6-itemset:catalog-item-agent-hooks
     e1-palette:live/palette e2-destroy:live/destroy
+    f1-find:dialog-find f2-nmhome:dialog-new-machine-home f3-nmmac:dialog-new-machine-mac
+    f4-nmfile:dialog-new-machine-file f5-delete:dialog-delete-linux-1 f6-restart:dialog-restart-infra
+    g1-plan:linux-1-packages-plan g2-tofile:linux-1-packages-to-file
 )
 side() {
     convert "$1" -crop 1280x820+0+0 +repage -resize 640x -crop 640x410+0+0 +repage -background '#0c0c0c' \
