@@ -70,3 +70,15 @@ func TestABlankOrTimestampOnlyLineTellsNothing(t *testing.T) {
 		}
 	}
 }
+
+func TestTheLastLinesLeaveWithTheirSecretsWithheld(t *testing.T) {
+	oom := "[ 4127.551] Out of memory: Killed process 812 (k3s-server) total-vm:2318764kB"
+	leaky := "k3s: login with " + "s" + "k-" + "Ab3dEAb3dEAb3dEAb3dE" + " failed"
+	got := LastLines([]string{oom, leaky, "systemd[1]: Reached target Power-Off."})
+	if len(got) != 3 || got[0] != oom || got[1] != "k3s: login with withheld failed" {
+		t.Errorf("LastLines = %q, want the token withheld and the other words kept", got)
+	}
+	if cause := CheckCause(got); cause != "out of memory" {
+		t.Errorf("the cause after the screen is %q", cause)
+	}
+}

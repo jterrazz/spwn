@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
@@ -37,7 +38,15 @@ func (s *Machinist) Log(ctx context.Context, name string) ([]string, error) {
 	if _, err := s.VM(name, "read the log of"); err != nil {
 		return nil, err
 	}
-	return s.engine.Console(ctx, name, 0)
+	lines, err := s.engine.Console(ctx, name, 0)
+	if lines == nil {
+		return nil, err
+	}
+	kept := make([]string, len(lines))
+	for i, line := range lines {
+		kept[i] = secret.Kept(line)
+	}
+	return kept, err
 }
 
 func (s *Machinist) LifetimeOf(name string) model.Lifetime {

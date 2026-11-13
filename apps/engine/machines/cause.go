@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 const (
@@ -25,12 +26,16 @@ func Meaningful(line string) bool {
 func LastLines(lines []string) []string {
 	// invariant: the last three lines, unless the line that tells the cause
 	// came before them: then that line and the two after it, so the cause
-	// is always among the lines kept.
+	// is always among the lines kept; each leaves with its secrets withheld.
 	from := max(0, len(lines)-LastLinesKept)
 	if at := causeLine(lines); at >= 0 && at < from {
 		from = at
 	}
-	return append([]string(nil), lines[from:min(len(lines), from+LastLinesKept)]...)
+	kept := append([]string(nil), lines[from:min(len(lines), from+LastLinesKept)]...)
+	for i, line := range kept {
+		kept[i] = secret.Kept(line)
+	}
+	return kept
 }
 
 func causeLine(lines []string) int {
