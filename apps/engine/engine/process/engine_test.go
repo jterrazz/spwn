@@ -20,6 +20,7 @@ import (
 )
 
 type fakeMachines struct {
+	mu      sync.Mutex
 	stuck   map[string]bool
 	records []model.VMRecord
 	saved   []model.VMRecord
@@ -28,6 +29,8 @@ type fakeMachines struct {
 func (f *fakeMachines) Records() ([]model.VMRecord, error) { return f.records, nil }
 
 func (f *fakeMachines) Save(r model.VMRecord) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.saved = append(f.saved, r)
 	return nil
 }
