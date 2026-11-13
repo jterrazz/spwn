@@ -75,6 +75,13 @@
 .danger:disabled {
     box-shadow: none;
 }
+.destroy:disabled {
+    background: linear-gradient(var(--primary-top), var(--primary-bottom));
+    color: var(--on-primary);
+    font-weight: var(--weight-medium);
+    box-shadow: none;
+    opacity: 0.35;
+}
 .busy:disabled {
     color: var(--t2);
 }
