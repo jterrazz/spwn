@@ -75,7 +75,7 @@
 .whole .rest {
     margin-left: auto;
     border-color: transparent;
-    background: var(--raise-2);
+    background: transparent;
 }
 .whole .rest:last-child {
     border-radius: var(--radius-cell) var(--radius-well) var(--radius-well) var(--radius-cell);

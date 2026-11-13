@@ -25,7 +25,7 @@
     - paragraph: "Not given yet No chart: no bar of this window holds a sample of the engine."
   - region "Memory":
     - heading "Memory" [level=2]
-    - text: pressure normal · swap 1.2 GB 12.4GB of 16 GB
+    - text: pressure normal · swap 1.2 GB 12.4GB of 16
     - paragraph: "Not given yet No chart: the engine kept fewer than two samples of it over this window."
   - region "Disk":
     - heading "Disk" [level=2]

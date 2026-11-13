@@ -49,9 +49,12 @@ function DiskBar({
             label: `${part.label} · ${bytes(part.bytes)}`,
             size: part.bytes,
         }));
+    const unsorted = Total - Free - held.reduce((sum, part) => sum + part.size, 0);
+    const used: SharePart[] =
+        unsorted > 0 ? [{ key: 'used', label: `Used · ${bytes(unsorted)}`, size: unsorted }] : [];
     const free: SharePart[] =
         Free > 0 ? [{ key: 'free', label: `Free · ${bytes(Free)}`, rest: true, size: Free }] : [];
-    return <ShareBar label={label} of={Total} parts={[...held, ...free]} />;
+    return <ShareBar label={label} of={Total} parts={[...held, ...used, ...free]} />;
 }
 
 function Legend({ parts, free }: { parts: readonly Part[]; free: number }) {

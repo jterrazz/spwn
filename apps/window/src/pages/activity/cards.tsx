@@ -123,17 +123,23 @@ function MemoryFigure({ report }: { report: ActivityReport }) {
     if (held.total === undefined) {
         return <Figure unit={`${unit} · its process`} value={value} />;
     }
-    return <Figure unit={`${unit} of ${memory(held.total)}`} value={value} />;
+    const total = split(memory(held.total));
+    const of = total.unit === unit ? total.value : memory(held.total);
+    return <Figure unit={`${unit} of ${of}`} value={value} />;
+}
+
+function swapOf(sample: ActivitySample): string | undefined {
+    if (sample.mem_total <= 0) {
+        return undefined;
+    }
+    return sample.swap_used > 0 ? `swap ${memory(sample.swap_used)}` : 'no swap';
 }
 
 function Memory({ report, name, span, history }: CardProps) {
     const { sample } = report.last;
     return (
         <Card
-            meta={sentence([
-                PRESSURE_WORDS[sample.pressure ?? ''],
-                sample.mem_total > 0 ? `swap ${memory(sample.swap_used)}` : undefined,
-            ])}
+            meta={sentence([PRESSURE_WORDS[sample.pressure ?? ''], swapOf(sample)])}
             title="Memory"
         >
             <MemoryFigure report={report} />

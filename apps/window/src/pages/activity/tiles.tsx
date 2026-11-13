@@ -7,6 +7,7 @@ import { ownState } from '../../engine/shown';
 import type { OwnState } from '../../engine/words';
 import { bytes, duration, memory, percent } from '../../model/format';
 import type { Found } from '../../model/machines';
+import type { Tone } from '../../tone';
 import { Tiles } from '../page';
 import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from './measures';
 import type { Held } from './measures';
@@ -81,11 +82,13 @@ function HeldTile({
     held,
     shown,
     identity,
+    tone = 'plain',
 }: {
     label: string;
     held: Held | undefined;
     shown: (value: number) => string;
     identity?: Identity | undefined;
+    tone?: Tone;
 }) {
     if (held === undefined) {
         return <NotGivenTile label={label} />;
@@ -105,6 +108,7 @@ function HeldTile({
                     identity={identity}
                     label={`${label} used of its total`}
                     percent={(held.used / held.total) * 100}
+                    tone={identity === undefined ? tone : 'plain'}
                     width="fixed"
                 />
             }
@@ -202,6 +206,7 @@ export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
                             identity={found.vm ? identityOf(found.vm.Name) : undefined}
                             label={labels.memory}
                             shown={memory}
+                            tone="new"
                         />
                         <DiskHeld disk={disk} label={labels.disk} report={report} />
                     </>
