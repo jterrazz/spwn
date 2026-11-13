@@ -25,6 +25,12 @@
     - button "Settings0"
   - region "Apps":
     - heading "Apps by layer, a later one wins" [level=2]
-    - region "jq": jq 1 app homebrew 5.0.1
-    - region "jterrazz-base": jterrazz-base 1 app jq 1.8.1
-    - region "jterrazz-macbook-pro": jterrazz-macbook-pro 2 apps lazygit 0.55.1 bat 0.25.0
+    - region "jq":
+      - paragraph: jq 1 app
+      - text: homebrew 5.0.1
+    - region "jterrazz-base":
+      - paragraph: jterrazz-base 1 app
+      - text: jq 1.8.1
+    - region "jterrazz-macbook-pro":
+      - paragraph: jterrazz-macbook-pro 2 apps
+      - text: lazygit 0.55.1 bat 0.25.0

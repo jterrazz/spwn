@@ -7,25 +7,12 @@ export type PanelProps = {
     note?: string;
     action?: ReactNode;
     padded?: boolean;
-    tone?: 'alert' | 'normal';
     children?: ReactNode;
 };
 
-export function Panel({
-    title,
-    note,
-    action,
-    padded = false,
-    tone = 'normal',
-    children,
-}: PanelProps) {
-    const classes = [
-        styles.panel,
-        padded ? styles.padded : '',
-        tone === 'alert' ? styles.alert : '',
-    ].join(' ');
+export function Panel({ title, note, action, padded = false, children }: PanelProps) {
     return (
-        <section aria-label={title} className={classes}>
+        <section aria-label={title} className={`${styles.panel} ${padded ? styles.padded : ''}`}>
             <div className={styles.head}>
                 <h2 className={styles.title}>
                     {title}

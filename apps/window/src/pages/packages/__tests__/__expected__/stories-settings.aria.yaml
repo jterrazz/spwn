@@ -32,4 +32,6 @@
     - button "Settings1" [pressed]
   - region "Settings":
     - heading "Settings by layer, a later one wins" [level=2]
-    - region "macbook-pro": macbook-pro 1 setting git-shortcuts Missing
+    - region "macbook-pro":
+      - paragraph: macbook-pro 1 setting
+      - text: git-shortcuts Missing

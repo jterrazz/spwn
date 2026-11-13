@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react';
+
 import styles from './caption.module.css';
 
-export function Caption({ children, rule = false }: { children: string; rule?: boolean }) {
-    return <p className={`${styles.caption} ${rule ? styles.rule : ''}`}>{children}</p>;
+export function Caption({ children }: { children: ReactNode }) {
+    return <p className={styles.caption}>{children}</p>;
 }

@@ -45,12 +45,8 @@ export default defineConfig({
         oxlint: {
             overrides: [
                 {
-                    files: [
-                        'src/design/chart.tsx',
-                        'src/design/code-block.tsx',
-                        'src/design/row.tsx',
-                    ],
-                    reason: 'a mark of a chart, a line of a code block and a column of a row are their position: the list is never reordered and holds no other identity',
+                    files: ['src/design/chart.tsx', 'src/design/row.tsx'],
+                    reason: 'a mark of a chart and a column of a row are their position: the list is never reordered and holds no other identity',
                     rules: { 'react/no-array-index-key': 'off' },
                 },
                 {
@@ -62,8 +58,8 @@ export default defineConfig({
                     },
                 },
                 {
-                    files: ['src/pages/logs/line-list.tsx'],
-                    reason: 'a log is a scrolling region the keyboard must reach to scroll it, so the box takes the Tab focus',
+                    files: ['src/design/code-block.tsx'],
+                    reason: 'a code block, a log among them, is a scrolling region the keyboard must reach to scroll it, so the box takes the Tab focus',
                     rules: { 'jsx-a11y/no-noninteractive-tabindex': 'off' },
                 },
                 {

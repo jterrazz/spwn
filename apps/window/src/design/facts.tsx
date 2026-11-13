@@ -9,7 +9,7 @@ export function Facts({
     layout = 'grid',
 }: {
     facts: readonly Fact[];
-    layout?: 'column' | 'grid' | 'line' | 'wide';
+    layout?: 'column' | 'grid' | 'line';
 }) {
     return (
         <dl className={`${styles.facts} ${layout === 'grid' ? '' : styles[layout]}`}>

@@ -1,30 +1,60 @@
 .code {
-    margin: 0;
     background: var(--inset);
     border-radius: var(--radius-well);
     padding: var(--space-12) var(--space-14);
+    margin-bottom: var(--space-10);
+}
+.lines {
+    --row: 21px;
+    height: var(--height);
     font-family: var(--font-mono);
     font-size: var(--text-label);
-    line-height: 1.75;
+    line-height: var(--row);
     color: var(--t2);
     overflow: auto;
+    overscroll-behavior: contain;
     user-select: text;
+}
+.extent {
+    min-width: max-content;
+    height: var(--extent);
+}
+.span {
+    transform: translateY(var(--offset));
 }
 .line {
     display: flex;
     gap: var(--space-14);
-    white-space: pre-wrap;
+    height: var(--row);
+    white-space: pre;
 }
 .number {
     color: var(--t3);
-    min-width: 22px;
+    min-width: 4ch;
     text-align: right;
     user-select: none;
     flex: none;
+}
+.mark {
+    flex: none;
+    margin-right: calc(-1 * var(--space-8));
+}
+.text {
+    min-width: 0;
 }
 .added {
     color: var(--ok);
 }
 .removed {
     color: var(--bad);
+}
+.none {
+    margin: 0;
+    color: var(--t3);
+}
+.foot {
+    margin: var(--space-10) 0 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-label);
+    color: var(--t3);
 }

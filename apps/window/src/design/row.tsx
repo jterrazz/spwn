@@ -7,7 +7,7 @@ import { TypeTag } from './type-tag';
 
 import styles from './row.module.css';
 
-export type RowTemplate = 'catalog' | 'flow' | 'machines' | 'meters';
+export type RowTemplate = 'catalog' | 'flow' | 'meters';
 
 type RowState = { tone: Tone; word: string };
 

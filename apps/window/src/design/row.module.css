@@ -63,10 +63,6 @@
 .catalog.valueLong {
     --column-value: 180px;
 }
-.machines {
-    --column-name: minmax(0, 1.3fr);
-    --column-cells: minmax(0, 1.6fr) 112px 150px;
-}
 .meters {
     --column-cells: 112px 150px;
 }

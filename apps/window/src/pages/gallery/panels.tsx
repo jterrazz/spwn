@@ -24,22 +24,20 @@ function MachinesPanel() {
             <RowHead
                 columns={[
                     { label: 'Machine' },
-                    { label: 'What it is for' },
                     { label: 'CPU', numeric: true },
                     { label: 'Memory, GB', numeric: true },
                 ]}
                 lead
-                template="machines"
+                template="meters"
             />
             <Row
                 cells={[
-                    'Lot L5.1 · images from a machine file',
                     <Chart key="c" label="CPU" size="row" values={[50, 60, 64]} />,
                     <Bar identity="purple" key="b" label="Memory" percent={72} />,
                 ]}
                 lead={<MachineIcon identity="purple" kind="workspace" />}
                 onOpen={nothing}
-                template="machines"
+                template="meters"
                 title="gate"
             />
         </Panel>
@@ -124,8 +122,8 @@ export function PanelsAndRows() {
                 </Panel>
                 <ColumnsPanel />
                 <MachinesPanel />
-                <Panel padded title="An alert panel" tone="alert">
-                    <Caption>A caption with no rule</Caption>
+                <Panel padded title="A captioned panel">
+                    <Caption>A caption heads a group of rows</Caption>
                 </Panel>
                 <Panel note="it says so" title="An empty panel" />
                 <Panel title="A field no call gives">
@@ -178,18 +176,18 @@ export function CodeBlocks() {
                 <CodeBlock
                     label="A log"
                     lines={[
-                        { text: 'station engine started' },
-                        { text: 'relay check failed', change: 'removed' },
-                        { text: 'relay restarted' },
+                        { number: 1, text: 'station engine started' },
+                        { change: 'removed', number: 2, text: 'relay check failed' },
+                        { number: 3, text: 'relay restarted' },
                     ]}
                 />
                 <CodeBlock
                     label="A diff"
                     lines={[
-                        { text: 'extends: [base, dev-tools]' },
-                        { text: 'apps:' },
-                        { text: '  - lazygit', change: 'added' },
-                        { text: '  - jq', change: 'removed' },
+                        { number: 1, text: 'extends: [base, dev-tools]' },
+                        { number: 2, text: 'apps:' },
+                        { change: 'added', number: 3, text: '  - lazygit' },
+                        { change: 'removed', number: 4, text: '  - jq' },
                     ]}
                     numbered
                 />

@@ -1,4 +1,4 @@
-import { AppIcon, Chip, DotStrip, StatePill, TypeTag } from '../../design/index';
+import { AppIcon, Caption, Chip, DotStrip, StatePill, TypeTag } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
@@ -65,7 +65,7 @@ function FileLine({ line, description }: { line: PlanLine; description: string }
 
 function LayerHead({ layer, shelf, dots }: { layer: Layer; shelf: Shelf; dots: boolean }) {
     return (
-        <div className={styles.head}>
+        <Caption>
             <Chip identity={layer.identity}>{layer.name === '' ? NO_LAYER_WORD : layer.name}</Chip>
             <span>{countWord(layer.lines.length, shelf)}</span>
             {dots ? (
@@ -74,7 +74,7 @@ function LayerHead({ layer, shelf, dots }: { layer: Layer; shelf: Shelf; dots: b
                     names={layer.lines.map((line) => line.Step.Package)}
                 />
             ) : null}
-        </div>
+        </Caption>
     );
 }
 

@@ -26,6 +26,12 @@
       - button "Skills0"
       - button "Settings1"
       - button "Access"
-    - region "macbook-pro": macbook-pro 3 apps gh GitHub CLI for repository management any version lazygit Terminal UI for git any version ghostty GPU-accelerated terminal emulator any version
-    - region "jq": jq 1 app homebrew manager macOS package manager any version
-    - region "jterrazz-base": jterrazz-base 1 app jq Command-line JSON processor any version
+    - region "macbook-pro":
+      - paragraph: macbook-pro 3 apps
+      - text: gh GitHub CLI for repository management any version lazygit Terminal UI for git any version ghostty GPU-accelerated terminal emulator any version
+    - region "jq":
+      - paragraph: jq 1 app
+      - text: homebrew manager macOS package manager any version
+    - region "jterrazz-base":
+      - paragraph: jterrazz-base 1 app
+      - text: jq Command-line JSON processor any version

@@ -10,9 +10,6 @@
     padding-bottom: var(--space-16);
     gap: var(--space-12);
 }
-.alert {
-    background: color-mix(in srgb, var(--bad) 10%, var(--panel));
-}
 .head {
     display: flex;
     align-items: center;
