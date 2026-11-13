@@ -216,7 +216,9 @@ describe('gestures', () => {
                 await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
 
                 // Then - the engine's words, and Dismiss clears them
-                const said = content('the engine is stopped on This Mac', { exact: false });
+                const said = content('the engine is stopped on jterrazz-macbook-pro', {
+                    exact: false,
+                });
                 await visitor.see(said);
                 await visitor.see(content('station engine start'));
                 await visitor.click(button('Dismiss'));
