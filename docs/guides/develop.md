@@ -21,6 +21,8 @@ make build                # .artifacts/go/station
 
 The binary reads nothing from the clone: the catalog's packages, the built-in Machinefiles, the dotfiles and the VM recipes are embedded, so any checkout is a checkout to build. Go 1.27+ and npm are the two requirements; `make install` touches nothing outside the checkout. `make provision` puts the build on the machine as the real `station` ([Release](release.md)).
 
+`make` is the only entry point: the Makefile carries the Turborepo filters (`!go-workspace` on both tasks, `!studio-station-specs` on `test`, [ADR-046](../decisions/046-the-repository-is-a-monorepo-of-members.md)), so a bare `npx turbo run test lint` also selects the Go workspace root, whose `golangci-lint run ./...` fails at the root (`./...` names no module of `go.work`), and the run stops there instead of running the gate.
+
 ## The make targets
 
 | Target               | Does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
