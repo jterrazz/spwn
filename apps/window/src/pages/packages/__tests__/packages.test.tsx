@@ -79,7 +79,7 @@ describe('Packages', () => {
             windowOver('machinefile-differs', 'jterrazz-macbook-pro'),
             async (visitor) => {
                 // When - both have been read to their inventory
-                await visitor.see(heading('Differs from its file'));
+                await visitor.see(heading('Differs from its file 2'));
                 await visitor.see(within(region('jterrazz-macbook-pro'), content('ripgrep')));
             },
         );
@@ -166,16 +166,16 @@ describe('Packages', () => {
         await expect(result.tree).toMatch(file('./__expected__/station-macos-differs.aria.yaml'));
     });
 
-    test('a plan is its asks and its steps, grouped by what each does', async () => {
+    test('a plan is its steps that change something, grouped by what each does, each from its layer', async () => {
         // Given - the plan of the built-in station-macos for This Mac, read over two-macs
         const plan = builtInPlan('machinefile.plan');
 
         // When - it is drawn
         const result = await component.render(<PlanSteps plan={plan} />, async (visitor) => {
-            await visitor.see(heading('To install'));
+            await visitor.see(heading('To install 2'));
         });
 
-        // Then - its password ask, then its installs and its settings, each with its condition
+        // Then - its installs and its settings, each from the file whose layer lists it, what stays left out
         await expect(result.tree).toMatch(file('./__expected__/station-macos-plan.aria.yaml'));
     });
 

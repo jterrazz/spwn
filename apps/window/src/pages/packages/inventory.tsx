@@ -37,7 +37,7 @@ function Lines({
                     count: countOn(layers, id, categories),
                     id,
                     label: id,
-                }))}
+                })).filter((option) => option.id !== 'Skills' || option.count > 0)}
                 value={shelf}
             />
             <Panel note={BY_LAYER} title={shelf}>

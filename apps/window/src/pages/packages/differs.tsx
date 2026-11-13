@@ -2,10 +2,12 @@ import type { MachinefilePlan } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../design/index';
-import { differingLines } from '../../engine/provisional';
+import type { Identity } from '../../design/index';
+import { differingLines, layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { ACTION_TONES, CONDITION_TONES } from '../../engine/tones';
 import { ACTION_WORDS, CONDITION_WORDS } from '../../engine/words';
+import { layersOf } from './model';
 
 import styles from './packages.module.css';
 
@@ -16,15 +18,21 @@ const DIRECTIONS: readonly { id: Direction; label: string }[] = [
     { id: 'file', label: 'Change the file' },
 ];
 
-function DiffRow({ line, toFile }: { line: PlanLine; toFile: boolean }) {
+type Layered = { name: string; identity: Identity | undefined };
+
+function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFile: boolean }) {
     const { Step, Seen } = line;
     return (
         <div className={styles.compare}>
             <div className={styles.item}>
                 <AppIcon kind={Step.Kind} name={Step.Package} />
                 <span className={styles.name}>{Step.Package}</span>
-                {Step.Version === '' ? null : <Value>{Step.Version}</Value>}
-                {Step.Origin.Name === '' ? null : <Value>{Step.Origin.Name}</Value>}
+                {Step.Version === '' ? null : <Value look="raised">{Step.Version}</Value>}
+                {layer.name === '' ? null : (
+                    <Value identity={layer.identity} look="raised">
+                        {layer.name}
+                    </Value>
+                )}
             </div>
             <div className={styles.state}>
                 <StatePill
@@ -74,6 +82,8 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
         return null;
     }
     const toFile = direction === 'file';
+    const all = [...(plan.Lines ?? []), ...(plan.Extra ?? [])];
+    const identities = new Map(layersOf(plan).map((layer) => [layer.name, layer.identity]));
     return (
         <Panel
             action={
@@ -85,6 +95,7 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
                     value={direction}
                 />
             }
+            note={String(lines.length)}
             title="Differs from its file"
         >
             <div className={`${styles.compare} ${styles.head}`}>
@@ -92,13 +103,17 @@ export function Differs({ plan, onPlan }: { plan: MachinefilePlan; onPlan: () =>
                 <span>This machine has</span>
                 <span className={styles.will}>{toFile ? 'The file will' : 'The machine will'}</span>
             </div>
-            {lines.map((line) => (
-                <DiffRow
-                    key={`${line.Step.Kind}/${line.Step.Package}`}
-                    line={line}
-                    toFile={toFile}
-                />
-            ))}
+            {lines.map((line) => {
+                const name = layerOf(line, all);
+                return (
+                    <DiffRow
+                        key={`${line.Step.Kind}/${line.Step.Package}`}
+                        layer={{ identity: identities.get(name), name }}
+                        line={line}
+                        toFile={toFile}
+                    />
+                );
+            })}
             <DiffFoot onPlan={onPlan} toFile={toFile} />
         </Panel>
     );

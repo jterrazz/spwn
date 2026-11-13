@@ -16,11 +16,11 @@
     - text: Its machine file is
     - button "macbook-pro"
   - region "Differs from its file":
-    - heading "Differs from its file" [level=2]
+    - heading "Differs from its file 2" [level=2]
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will git-shortcuts macbook-pro Missing Set gh macbook-pro Outdated 2.97.0 Keep The plan says each step before anything is applied.
+    - text: The file says This machine has The machine will git-shortcuts macbook-pro Not installed Set it gh macbook-pro Outdated 2.97.0 Keep it The plan says each step before anything is applied.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]
@@ -28,10 +28,9 @@
     - paragraph: Not given yet When it upgrades by itself, and its last run
   - group "Which packages":
     - button "Apps5"
-    - button "Skills0"
     - button "Settings1" [pressed]
   - region "Settings":
     - heading "Settings by layer, a later one wins" [level=2]
     - region "macbook-pro":
       - paragraph: macbook-pro 1 setting
-      - text: git-shortcuts Missing
+      - text: git-shortcuts Not installed

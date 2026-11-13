@@ -240,7 +240,7 @@ export function newestOutWord(newest: string): string {
 
 export const CONDITION_WORDS: Words<MachinefileSeen['Condition']> = {
     '': 'no condition given',
-    absent: 'missing',
+    absent: 'not installed',
     changed: 'changed',
     extra: 'extra',
     'not-managed': 'not managed',
@@ -251,12 +251,22 @@ export const CONDITION_WORDS: Words<MachinefileSeen['Condition']> = {
 
 export const ACTION_WORDS: Words<MachinefileLine['Action']> = {
     '': 'no action given',
-    adopt: 'adopt',
-    install: 'install',
-    keep: 'keep',
-    leave: 'leave',
-    remove: 'remove',
-    set: 'set',
+    adopt: 'adopt it',
+    install: 'install it',
+    keep: 'keep it',
+    leave: 'leave it',
+    remove: 'remove it',
+    set: 'set it',
+};
+
+export const PLAN_GROUP_WORDS: Words<MachinefileLine['Action']> = {
+    '': 'No action given',
+    adopt: 'To adopt',
+    install: 'To install',
+    keep: 'Unchanged',
+    leave: 'Left as is',
+    remove: 'To remove',
+    set: 'To set',
 };
 
 export const NEED_WORDS: Words<MachinefileAsked['Need']> = {

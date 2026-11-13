@@ -249,6 +249,16 @@ export function differingLines(plan: MachinefilePlan): readonly PlanLine[] {
     );
 }
 
+// outside: a step's Origin names the Machinefile that lists it, or the package that brought it (homebrew's is jq,
+// outside: "the manager of jq"); a brought line is drawn in its bringer's layer, until each step names its file.
+export function layerOf(line: PlanLine, all: readonly PlanLine[], seen = new Set()): string {
+    const by = all.find((one) => one.Step.Package === line.Step.Origin.Name);
+    seen.add(line.Step.Package);
+    return by === undefined || seen.has(by.Step.Package)
+        ? line.Step.Origin.Name
+        : layerOf(by, all, seen);
+}
+
 // outside: apps.list marks no entry a skill; the catalog files skills under one category, until each carries a kind.
 export function isSkill(category: CatalogApp['Category']): boolean {
     return category === 'Agent skills';

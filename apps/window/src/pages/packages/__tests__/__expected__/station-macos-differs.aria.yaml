@@ -1,7 +1,7 @@
 - region "Differs from its file":
-  - heading "Differs from its file" [level=2]
+  - heading "Differs from its file 4" [level=2]
   - group "Which side changes":
     - button "Change the machine" [pressed]
     - button "Change the file"
-  - text: The file says This machine has The machine will git station-macos Missing Install ohmyzsh station-macos Missing Install git-shortcuts station-macos Missing Set hushlogin station-macos Missing Set The plan says each step before anything is applied.
+  - text: The file says This machine has The machine will git station-macos Not installed Install it ohmyzsh station-macos Not installed Install it git-shortcuts station-macos Not installed Set it hushlogin station-macos Not installed Set it The plan says each step before anything is applied.
   - button "Plan"

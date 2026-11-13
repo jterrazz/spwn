@@ -29,7 +29,7 @@ function answered<N extends CallName>(world: string, request: Asked<N>): Out<N> 
 
 describe('model', () => {
     test("a file's lines are grouped by the layer that sets each, in the engine's order, a colour per position", () => {
-        // Given - This Mac's drift from its file over machinefile-differs
+        // Given - This Mac's drift from its file over machinefile-differs, homebrew brought by jq
         const plan = answered('machinefile-differs', {
             name: 'machinefile.drift',
             watch: false,
@@ -38,13 +38,12 @@ describe('model', () => {
         // When - its lines are grouped by layer
         const layers = layersOf(plan);
 
-        // Then - each layer once, as the engine first names it, with every line it sets
+        // Then - each file once, as the engine first names it; homebrew sits in the layer of jq, its bringer
         expect(
             layers.map((layer) => [layer.name, layer.identity, layer.lines.length]),
         ).toStrictEqual([
-            ['jq', 'blue', 1],
-            ['jterrazz-base', 'purple', 1],
-            ['jterrazz-macbook-pro', 'teal', 4],
+            ['jterrazz-base', 'blue', 2],
+            ['jterrazz-macbook-pro', 'purple', 4],
         ]);
     });
 

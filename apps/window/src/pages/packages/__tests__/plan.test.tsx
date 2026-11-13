@@ -40,7 +40,7 @@ describe('Plan', () => {
             }),
             async (visitor) => {
                 await visitor.click(button('Plan'));
-                await visitor.see(heading('To install'));
+                await visitor.see(heading('To install 2'));
 
                 // When - Apply is clicked, then confirmed in the dialog calls.json asks
                 await visitor.click(button('Apply'));
@@ -60,7 +60,8 @@ describe('Plan', () => {
         const result = await component.render(
             planOver('machinefile-kept', MAC),
             async (visitor) => {
-                await visitor.see(heading('To keep'));
+                await visitor.see(content('as declared'));
+                await visitor.gone(heading('To install', { exact: false }));
 
                 // When - Apply is clicked and confirmed
                 await visitor.click(button('Apply'));
@@ -96,7 +97,7 @@ describe('Plan', () => {
         const result = await component.render(
             planOver('machinefile-differs', MAC),
             async (visitor) => {
-                await visitor.see(heading('To install'));
+                await visitor.see(heading('To install 2'));
 
                 // When - Apply is clicked, then cancelled
                 await visitor.click(button('Apply'));

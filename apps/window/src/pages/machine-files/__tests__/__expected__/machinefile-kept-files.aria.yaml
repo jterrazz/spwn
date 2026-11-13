@@ -26,12 +26,9 @@
       - button "Skills0"
       - button "Settings0"
       - button "Access"
-    - region "jq":
-      - paragraph: jq 1 app
-      - text: homebrew manager macOS package manager any version
     - region "jterrazz-base":
-      - paragraph: jterrazz-base 1 app
-      - text: jq Command-line JSON processor any version
+      - paragraph: jterrazz-base 2 apps
+      - text: homebrew manager macOS package manager any version jq Command-line JSON processor any version
     - region "jterrazz-macbook-pro":
       - paragraph: jterrazz-macbook-pro 2 apps
       - text: lazygit Terminal UI for git any version bat Cat clone with syntax highlighting any version

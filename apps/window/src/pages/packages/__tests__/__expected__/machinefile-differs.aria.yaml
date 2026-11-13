@@ -16,11 +16,11 @@
     - text: Its machine file is
     - button "jterrazz-macbook-pro"
   - region "Differs from its file":
-    - heading "Differs from its file" [level=2]
+    - heading "Differs from its file 2" [level=2]
     - group "Which side changes":
       - button "Change the machine" [pressed]
       - button "Change the file"
-    - text: The file says This machine has The machine will ripgrep jterrazz-macbook-pro Missing Install fd jterrazz-macbook-pro Missing Install The plan says each step before anything is applied.
+    - text: The file says This machine has The machine will ripgrep jterrazz-macbook-pro Not installed Install it fd jterrazz-macbook-pro Not installed Install it The plan says each step before anything is applied.
     - button "Plan"
   - region "Upgrades":
     - heading "Upgrades" [level=2]
@@ -28,16 +28,12 @@
     - paragraph: Not given yet When it upgrades by itself, and its last run
   - group "Which packages":
     - button "Apps6" [pressed]
-    - button "Skills0"
     - button "Settings0"
   - region "Apps":
     - heading "Apps by layer, a later one wins" [level=2]
-    - region "jq":
-      - paragraph: jq 1 app
-      - text: homebrew 5.0.1
     - region "jterrazz-base":
-      - paragraph: jterrazz-base 1 app
-      - text: jq 1.8.1
+      - paragraph: jterrazz-base 2 apps
+      - text: homebrew 5.0.1 jq 1.8.1
     - region "jterrazz-macbook-pro":
       - paragraph: jterrazz-macbook-pro 4 apps
-      - text: lazygit 0.55.1 bat 0.25.0 ripgrep Missing fd Missing
+      - text: lazygit 0.55.1 bat 0.25.0 ripgrep Not installed fd Not installed

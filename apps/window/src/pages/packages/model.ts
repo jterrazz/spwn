@@ -2,7 +2,7 @@ import type { AppsReport, CatalogApp, MachinefilePlan } from '@jterrazz/station-
 
 import { IDENTITIES } from '../../design/index';
 import type { Identity } from '../../design/index';
-import { isSkill } from '../../engine/provisional';
+import { isSkill, layerOf } from '../../engine/provisional';
 import type { PlanLine } from '../../engine/provisional';
 import { CATALOG_SHELF_WORDS } from '../../engine/words';
 
@@ -37,8 +37,9 @@ export function shelfOf(line: PlanLine, categories: Categories): string {
 
 export function layersOf(plan: MachinefilePlan): readonly Layer[] {
     const groups = new Map<string, PlanLine[]>();
-    for (const line of plan.Lines ?? []) {
-        const name = line.Step.Origin.Name;
+    const all = plan.Lines ?? [];
+    for (const line of all) {
+        const name = layerOf(line, all);
         groups.set(name, [...(groups.get(name) ?? []), line]);
     }
     const layers = [...groups].map(([name, lines], index) => ({
