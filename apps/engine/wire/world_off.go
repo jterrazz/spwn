@@ -76,6 +76,7 @@ func (*worldMac) installer(catalog.Method, bool) appscontract.Installer  { retur
 func (*worldMac) bundler() appscontract.Bundler                          { return nil }
 func (*worldMac) managers(map[catalog.Method]appscontract.Installer)     {}
 func (*worldMac) budgets() lanes.Clock                                   { return nil }
+func (*worldMac) poolContext(ctx context.Context) context.Context        { return ctx }
 func (*worldMac) vault() accountscontract.Vault                          { return nil }
 func (*worldMac) identities() accountscontract.Identities                { return nil }
 func (*worldMac) secretSource() accountscontract.SecretSource            { return nil }

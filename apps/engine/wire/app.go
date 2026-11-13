@@ -328,15 +328,16 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	}
 	registered, _ := st.name().Get()
 	var budgets lanes.Clock = h.Clock
+	base := context.Background()
 	if world != nil {
-		budgets = world.budgets()
+		budgets, base = world.budgets(), world.poolContext(base)
 	}
 	m := machine{
 		world:  world,
 		raw:    raw,
 		door:   door,
 		far:    &late{},
-		pool:   lanes.NewPool(context.Background(), budgets, commandLane, walkLane),
+		pool:   lanes.NewPool(base, budgets, commandLane, walkLane),
 		sys:    h,
 		cat:    cat,
 		vars:   vars,

@@ -108,14 +108,17 @@ type worldMac struct {
 	run  *worldRun
 	name string
 
-	start func() *process.Engine
+	// invariant: serving guards start and served: a far Mac is served by the
+	// first caller that needs it, from any of the engines' goroutines.
+	serving sync.Mutex
+	start   func() *process.Engine
 	// invariant: mu guards starting, engine, began, tick and leave: an
 	// engine's own goroutines (its surfaces, a guest session, another Mac's
 	// engine) ask for this Mac's engine while the command ends it, and a
 	// reader takes the pointer once under mu, never twice. It is never held
 	// across a call into the engine, which may ask for this Mac again.
 	mu       sync.Mutex
-	starting bool
+	starting *engineStart
 	engine   *process.Engine
 	// value: when the world says the running engine started: a Mac rebooted
 	// under it, inside the command, ends it with its process.
@@ -516,28 +519,55 @@ func (m *worldMac) macs() remotecontract.EndpointDialer { return worldDialer{r: 
 // invariant: a Mac's engine runs in this process while the world says it
 // runs, and ends once it says otherwise or says it started since: begun at the first need of it,
 // then stepped over the world's clock until it is quiet, so a story that
-// waits on the engine is deterministic.
+// waits on the engine is deterministic. One caller starts it, for every
+// caller after it, so the start outlives the caller's context.
+//
+// invariant: a caller from outside the engine that finds a start in progress
+// waits for it, or for its own context, and then reads the engine that start
+// left, or its failure. Two callers are refused instead, since the start may
+// be waiting on them and would never end: what the engine runs in its own
+// lifetime (waits), and a job a pool shares (pooled), which runs on the
+// pool's context, not its asker's, and which a start that reads through the
+// pool joins by its key.
 func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
-	d, began := m.running()
-	if d != nil && m.runs() && !m.engineStarted().Equal(began) {
-		m.down(true)
-		d = m.current()
-	}
-	if d != nil {
-		if m.runs() {
-			return d, true
+	for {
+		d, began := m.running()
+		if d != nil && m.runs() && !m.engineStarted().Equal(began) {
+			m.down(true)
+			d = m.current()
 		}
-		m.down(false)
-		return nil, false
+		if d != nil {
+			if m.runs() {
+				return d, true
+			}
+			m.down(false)
+			return nil, false
+		}
+		start := m.starter()
+		if start == nil || !m.runs() {
+			return nil, false
+		}
+		s, mine := m.beginStarting()
+		if mine {
+			return m.begin(context.WithoutCancel(ctx), s, start)
+		}
+		if ctx.Value(waits{}) != nil || ctx.Value(pooled{}) != nil {
+			return nil, false
+		}
+		select {
+		case <-s.done:
+		case <-ctx.Done():
+			return nil, false
+		}
+		if s.failed {
+			return nil, false
+		}
 	}
-	if m.start == nil && m.name != m.run.w.ThisMac && m.run.far != nil && m.runs() {
-		m.serve()
-	}
-	if m.start == nil || !m.runs() || !m.beginStarting() {
-		return nil, false
-	}
-	defer m.endStarting()
-	d = m.start()
+}
+
+func (m *worldMac) begin(ctx context.Context, s *engineStart, start func() *process.Engine) (d *process.Engine, ok bool) {
+	defer func() { m.endStarting(s, ok) }()
+	d = start()
 	d.Remember(m.slice().Engine.Memory)
 	if kept := m.slice().Engine.Awake; kept != nil {
 		d.RememberAwake(*kept)
@@ -620,20 +650,29 @@ func (m *worldMac) hold(d *process.Engine, began time.Time) {
 	m.began, m.engine = began, d
 }
 
-func (m *worldMac) beginStarting() bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if m.starting {
-		return false
-	}
-	m.starting = true
-	return true
+// value: one start of a Mac's engine: done closes once it ended, and failed,
+// set before, says it began no engine.
+type engineStart struct {
+	done   chan struct{}
+	failed bool
 }
 
-func (m *worldMac) endStarting() {
+func (m *worldMac) beginStarting() (*engineStart, bool) {
 	m.mu.Lock()
-	m.starting = false
+	defer m.mu.Unlock()
+	if m.starting != nil {
+		return m.starting, false
+	}
+	m.starting = &engineStart{done: make(chan struct{})}
+	return m.starting, true
+}
+
+func (m *worldMac) endStarting(s *engineStart, ok bool) {
+	m.mu.Lock()
+	m.starting = nil
+	s.failed = !ok
 	m.mu.Unlock()
+	close(s.done)
 }
 
 func (m *worldMac) nextTick() int {
@@ -714,6 +753,24 @@ func (m *worldMac) release(d *process.Engine) {
 }
 
 func (m *worldMac) serve() *remotefake.Dialer {
+	m.serving.Lock()
+	defer m.serving.Unlock()
+	return m.serveLocked()
+}
+
+// invariant: a Mac of the world other than This Mac is served once, by
+// whichever caller needs it first, and its engine start is read under the
+// same lock that wrote it.
+func (m *worldMac) starter() func() *process.Engine {
+	m.serving.Lock()
+	defer m.serving.Unlock()
+	if m.start == nil && m.name != m.run.w.ThisMac && m.run.far != nil && m.runs() {
+		m.serveLocked()
+	}
+	return m.start
+}
+
+func (m *worldMac) serveLocked() *remotefake.Dialer {
 	if m.served == nil {
 		far := m.run.far(m)
 		m.served = remotefake.New()
@@ -843,6 +900,12 @@ type worldClock struct {
 }
 
 type waits struct{}
+
+type pooled struct{}
+
+func (*worldMac) poolContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, pooled{}, true)
+}
 
 type moves struct {
 	mu sync.Mutex
@@ -1100,7 +1163,7 @@ func (s worldSockets) DialUnix(ctx context.Context, _ string, _ time.Duration) (
 	if p, inside := m.placement(); inside {
 		m, guest = m.run.mac(p.Mac), p.VM
 	}
-	d, ok := m.up(context.WithoutCancel(ctx))
+	d, ok := m.up(ctx)
 	if !ok {
 		return nil, errEngineDown
 	}
