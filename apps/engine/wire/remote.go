@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
-	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	"io"
 	"slices"
 	"strconv"
@@ -55,7 +54,6 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Holder:  m.holder,
 		Version: Version(),
 		Label:   m.label,
-		Older:   appscalls.OlderIn,
 	})
 	m.far.router = r
 	return r

@@ -36,16 +36,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Args:    cobra.ArbitraryArgs,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringArrayVar(&in.Manager, "manager", nil, "update every app of a manager: "+strings.Join(d.Managers, ", "))
-			f.StringArrayVar(&in.Method, "method", nil, "--manager")
-			_ = f.MarkHidden("method")
 			f.BoolVar(&in.AllMachines, "all-machines", false, "on every Mac and workspace; servers are skipped")
 		},
 		Bind: binder(d.Managers),
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			if len(in.Method) > 0 {
-				env.Out.Now(nowWords(in))
-			}
-			req := appscalls.UpdateIn{Names: in.Names, Method: in.Manager}
+			req := appscalls.UpdateIn{Names: in.Names, Managers: in.Manager}
 			if in.AllMachines {
 				return everyMachine(ctx, env, d, req, io)
 			}

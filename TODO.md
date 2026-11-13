@@ -55,13 +55,8 @@ MacBook runs station v3 and the owner opens the design.
 
 ## The next minor release: the v2 words go
 The hidden aliases (`status`, `start`, `stop`, `tools`, `secrets`, `config`,
-`storage`, `run`, `probe`, `--always-on`), v3.0's `apps update --method` and
-`station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
-minor removes them (the `method` a v3.0 station's update need names, which the
-menu bar still reads, and that every fix of an update waiting still carries in
-v3.0's word, goes with `--method`, and with them v3.0's manager words,
-`catalog.OlderManager`, which an apps.update to an older peer is written in),
-with the `machines supervise` retirement shim and the
+`run`, `probe`, `--always-on`) and `station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
+minor removes them, with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`, `lend_list`), once
 `studio doctor` reads `station.overview.read/v1`.
 
@@ -231,7 +226,6 @@ becomes the bottleneck.
 - The apps place an app by kind, so a method whose selector names an OS version (`version: '>=15'`) is placed on every version of that OS, while the resolution judges the range (ADR-038). Starts with the first such selector: the shelf places by the machine's system, as the resolution does.
 - For an app with a mise method, `present` stops at the first PATH hit (`apps/engine/apps/calls/inventory.go:383`), and mise's shims come first: a shim for a project's pin hides the owner's other copy (`/opt/homebrew/bin/node`), so the app reads not installed and apply installs a global mise copy over it. Found by the L3.1 re-verify (2026-11-11). Starts with a test: the lookup scans the PATH past the folders mise keeps.
 - A move from a copy station cannot uninstall ends on a failed "cannot" step if its branch (`apps/engine/apps/calls/operations.go:638`) goes; no test holds it (mutation M9 of the L3.1 re-verify survives). Starts with one test.
-- A v3.0 station prints a fix as every arg a flag, so a v3.1 peer's update waiting shows there as `station apps update --manager brew --method brew`, a command v3.0 has no `--manager` for. Found by the L3.1 fix round (2026-11-11); goes with the next minor, when no v3.0 reads a peer.
 - An apt install of a package the owner held (`apt-mark hold`) is kept back without a failure, so the app reads not installed after a run that said it installed, and apt waits for dpkg's lock up to its own `DPkg::Lock::Timeout` (120 s on gate2's Ubuntu, `apt-config dump`) with nothing said meanwhile. Found by the L3.2 security verify (2026-11-11, its F6). Starts with the first install seen to stall or be kept back: the install reads `apt-mark showhold` first and refuses a held package, and passes its own lock timeout.
 - Two installs at once (two terminals, or a terminal and the engine) are not serialised: apt's own lock refuses the second apt run, but two releases each read, then rewrite, their record in turn, and the second may write over what the first recorded. Found by the L3.2 security verify (2026-11-11, its F8). Starts with an apps lock of station's own, the one `disk{}.Lock` a VM record takes, held around every install, update and removal.
 - A checksums file that names the asset on two lines with two sums vouches by its first line alone (`listed` in `apps/engine/apps/adapter/githubrelease/githubrelease.go`), where the two disagreeing should refuse it. Found by the L3.2 security verify (2026-11-11, its F10, experiment `two-lines-first-wins`). Starts with one test: every line naming the asset is a voucher.

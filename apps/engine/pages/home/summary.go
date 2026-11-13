@@ -175,9 +175,7 @@ func fixWords(name string, args map[string]string) string {
 	}
 	keys := make([]string, 0, len(args))
 	for k := range args {
-		// outside: an update's `method` is its manager again, in the word a
-		// v3.0 menu bar reads; the command says `manager` alone.
-		if k != "name" && k != "path" && (k != "method" || args["manager"] == "") {
+		if k != "name" && k != "path" {
 			keys = append(keys, k)
 		}
 	}

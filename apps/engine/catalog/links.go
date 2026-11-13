@@ -106,31 +106,3 @@ func providerOf(it Item, method string, sys System) string {
 	}
 	return by
 }
-
-// outside: a station older than the managers as items (v3.0) names a
-// manager by its own word, in `apps update --method`, in a fix's `method`
-// and in apps.update's Method: each of today's keys it has a manager of,
-// by that word (Homebrew's `cask` is its `brew`); a key absent here is
-// one it has no manager of. Kept until the hidden --method goes.
-var olderManagers = map[string]string{"brew": "brew", "cask": "brew", "npm": "npm", "bun": "bun", "uv": "uv", "mise": "mise", "skill": "skills"}
-
-func OlderManager(key string) (word string, ok bool) {
-	// value: the word a v3.0 station reads for a manager key; false for a
-	// key it has no manager of.
-	word, ok = olderManagers[key]
-	return word, ok
-}
-
-func ManagerOfOlder(word string) string {
-	// value: today's key for a manager word a v3.0 station says (`skills`
-	// is `skill`); any other word as it came.
-	if _, today := olderManagers[word]; today {
-		return word
-	}
-	for key, then := range olderManagers {
-		if then == word {
-			return key
-		}
-	}
-	return word
-}

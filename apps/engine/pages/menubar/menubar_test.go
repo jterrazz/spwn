@@ -88,18 +88,17 @@ func TestHomeDrawsAMacsServersThenItsWorkspaces(t *testing.T) {
 }
 
 // invariant: MB-16: each update line's Update all updates what it counts,
-// its manager's updates, never the other line's too, the line of a v3.0
-// station, which names its manager `method`, alike.
+// its manager's updates, never the other line's too.
 func TestEachUpdateLineUpdatesItsOwnManager(t *testing.T) {
 	needs := []overview.Need{
 		{Section: "apps", Subject: "tools", Text: "1 tools update waiting", Call: CallUpdate, Args: map[string]string{"manager": "tools"}},
-		{Section: "apps", Subject: "pkgs", Text: "2 pkgs updates waiting", Call: CallUpdate, Args: map[string]string{"method": "pkgs"}},
+		{Section: "apps", Subject: "pkgs", Text: "2 pkgs updates waiting", Call: CallUpdate, Args: map[string]string{"manager": "pkgs"}},
 	}
 	p := Page(Reading{Home: &overview.Summary{Needs: needs}}, page.Context{})
 	got := map[string]string{}
 	for _, a := range p.Actions {
 		if strings.HasPrefix(a.ID, ActionUpdateAll) {
-			got[strings.Join(a.Rows, ",")] = a.Run.In["Method"]
+			got[strings.Join(a.Rows, ",")] = a.Run.In["Managers"]
 		}
 	}
 	if len(got) != 2 || got["0-tools"] != `["tools"]` || got["1-pkgs"] != `["pkgs"]` {

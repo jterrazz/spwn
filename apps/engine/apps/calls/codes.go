@@ -55,8 +55,8 @@ func updating(in UpdateIn) string {
 	switch {
 	case len(in.Names) > 0:
 		return strings.Join(in.Names, ", ")
-	case len(in.Method) > 0:
-		return "the " + strings.Join(in.Method, ", ") + " apps"
+	case len(in.Managers) > 0:
+		return "the " + strings.Join(in.Managers, ", ") + " apps"
 	}
 	return "the apps with an update"
 }
