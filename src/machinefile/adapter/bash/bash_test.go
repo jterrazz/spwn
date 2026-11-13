@@ -59,6 +59,9 @@ func TestBashStopsAtTheFirstLineThatFails(t *testing.T) {
 		{name: "a pipe", lines: "false | cat\ntouch ran\n", exit: 1, said: "station: exit 1 at: false | cat"},
 		{name: "a multi-line if", lines: "if [ -d / ]; then\n  cd /\n  test -d /nonexistent\nfi\ntouch ran\n", exit: 1, said: "station: exit 1 at: if [ -d / ]; then"},
 		{name: "an exit", lines: "exit 7\ntouch ran\n", exit: 7, said: "station: exit 7 at: exit 7"},
+		{name: "a line ending in CR", lines: "false\r\ntouch ran\r\n", exit: 1, said: "station: exit 1 at: false"},
+		{name: "a comment ending in a backslash", lines: "  # a note \\\nfalse\ntouch ran\n", exit: 1, said: "station: exit 1 at: false"},
+		{name: "a command reading the lines' descriptor", lines: "if { true <&3; } 2>/dev/null; then exit 9; fi\nexit 4\n", exit: 4, said: "station: exit 4 at: exit 4"},
 		{name: "a test that guards", lines: "test -d /nonexistent || mkdir -p sub\ncd sub\nexport GOT=1\nif [ \"$GOT\" = 1 ]; then\n  cat <<END > ran\nheredoc\nEND\nfi\necho a \\\n  b\n", ran: true},
 	}
 	for _, c := range cases {
