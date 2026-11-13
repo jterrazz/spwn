@@ -11,10 +11,20 @@ export const IDENTITIES = [
 
 export type Identity = 'system' | (typeof IDENTITIES)[number];
 
-export function identityOf(name: string): Identity {
-    let sum = 0;
-    for (const char of name) {
-        sum += char.codePointAt(0) ?? 0;
-    }
-    return IDENTITIES[sum % IDENTITIES.length] ?? 'system';
+// value: the mockup's seven machine colours, in its order; slate is a colour of what is no machine.
+const MACHINE_IDENTITIES = [
+    'blue',
+    'purple',
+    'teal',
+    'indigo',
+    'pink',
+    'sky',
+    'lilac',
+] as const satisfies readonly Identity[];
+
+// invariant: a machine's colour is the next of the seven by its place among the machines listed, every Mac's in
+// invariant: turn, so two machines of a Mac differ while a Mac holds seven or fewer; a Mac itself has none.
+export function identityOf(name: string, listed: readonly string[]): Identity | undefined {
+    const at = listed.indexOf(name);
+    return at === -1 ? undefined : MACHINE_IDENTITIES[at % MACHINE_IDENTITIES.length];
 }

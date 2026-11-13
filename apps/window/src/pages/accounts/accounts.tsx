@@ -6,16 +6,7 @@ import type {
 } from '@jterrazz/station-api';
 
 import { CopyButton } from '../../design/copy-button';
-import {
-    AppIcon,
-    Button,
-    identityOf,
-    MachineChip,
-    Panel,
-    Row,
-    StatePill,
-    Value,
-} from '../../design/index';
+import { AppIcon, Button, MachineChip, Panel, Row, StatePill, Value } from '../../design/index';
 import { looksSecret } from '../../design/secret';
 import { Openable } from '../../engine/opener';
 import { machineKindOf } from '../../engine/provisional';
@@ -29,6 +20,7 @@ import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { ChapterDiffers } from '../kit/chapter-differs';
 import { GestureRow, HeldOutcomes } from '../kit/gestures';
+import { useIdentityOf } from '../kit/identity';
 import { OpenButton } from '../kit/opens';
 import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { Page } from '../page';
@@ -64,6 +56,7 @@ function Withheld({ fields }: { fields: readonly string[] }) {
 
 function Holder({ found, name, go }: { found: Found; name: string; go: Go }) {
     const known = (found.mac.VMs ?? []).find((candidate) => candidate.Name === name);
+    const identityOf = useIdentityOf();
     if (!known) {
         return <Value>{name}</Value>;
     }

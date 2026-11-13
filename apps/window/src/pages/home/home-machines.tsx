@@ -1,6 +1,6 @@
 import type { ActivityReport, MachinesMacView, MachinesVM } from '@jterrazz/station-api';
 
-import { Bar, Chart, identityOf, MachineIcon, Panel, Row, RowHead } from '../../design/index';
+import { Bar, Chart, MachineIcon, Panel, Row, RowHead } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { memory, percent } from '../../model/format';
@@ -9,6 +9,7 @@ import type { Route } from '../../shell/route';
 import { chartedOf, cpuOf, marksOf } from '../activity/measures';
 import { useActivity } from '../activity/reading';
 import { split } from '../activity/tiles';
+import { useIdentityOf } from '../kit/identity';
 
 import styles from './home.module.css';
 
@@ -86,6 +87,7 @@ function macCells(name: string, report: ActivityReport | undefined) {
 export function vmCells(
     vm: Pick<MachinesVM, 'Name' | 'Purpose' | 'Resources'>,
     report: ActivityReport | undefined,
+    identity?: Identity,
 ) {
     const purpose = vm.Purpose === '' ? null : vm.Purpose;
     const usage = report?.last.vms?.find((one) => one.vm === vm.Name);
@@ -98,7 +100,7 @@ export function vmCells(
         <Cpu key="cpu" name={vm.Name} value={percent(usage.cpu)} />,
         total > 0 ? (
             <Held
-                identity={identityOf(vm.Name)}
+                identity={identity}
                 key="memory"
                 name={vm.Name}
                 total={total}
@@ -111,6 +113,7 @@ export function vmCells(
 function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
     const { readers, shown } = useActivity({ mac }, '1h');
     const report = shown?.kind === 'read' && shown.out.silent !== true ? shown.out : undefined;
+    const identityOf = useIdentityOf();
     return (
         <>
             {readers}
@@ -126,7 +129,7 @@ function MacRows({ mac, go }: { mac: MachinesMacView; go: Go }) {
             />
             {(mac.VMs ?? []).map((vm) => (
                 <Row
-                    cells={vmCells(vm, report)}
+                    cells={vmCells(vm, report, identityOf(vm.Name))}
                     key={vm.Name}
                     lead={<MachineIcon identity={identityOf(vm.Name)} kind={machineKindOf(vm)} />}
                     leadSize="machine"

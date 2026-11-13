@@ -6,6 +6,7 @@ import { inboxIsUrgent, machineKindOf } from '../engine/provisional';
 import { useReach } from '../engine/react';
 import type { Reading } from '../engine/react';
 import { engineState, macState, ownState, vmState } from '../engine/shown';
+import { machineNamesOf } from '../model/machines';
 import { onListKey } from './keys';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
@@ -53,6 +54,7 @@ function Places({ needs, place }: { needs: readonly OverviewNeed[]; place: Place
 
 function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route'>) {
     const on = (machine: string) => route.page === 'machine' && route.machine === machine;
+    const listed = machineNamesOf(macs);
     return (
         <div aria-labelledby="side-machines" className={styles.group} role="group">
             <h2 className={styles.caption} id="side-machines">
@@ -77,7 +79,7 @@ function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route
                             label={vm.Name}
                             lead={
                                 <MachineIcon
-                                    identity={identityOf(vm.Name)}
+                                    identity={identityOf(vm.Name, listed)}
                                     kind={machineKindOf(vm)}
                                 />
                             }

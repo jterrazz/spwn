@@ -1,10 +1,12 @@
 import type { MachinesMacView, MachinesRoom } from '@jterrazz/station-api';
 
-import { identityOf, MemoryGrid, Panel, ShareBar, Tile } from '../../design/index';
+import { MemoryGrid, Panel, ShareBar, Tile } from '../../design/index';
 import type { MemoryHolder } from '../../design/index';
 import { useWatch } from '../../engine/react';
 import { GIB, memory } from '../../model/format';
 import { NotGivenTile, split, Unknown } from '../activity/tiles';
+import { useIdentityOf } from '../kit/identity';
+import type { IdentityOf } from '../kit/identity';
 import { NotGiven } from '../kit/readings';
 
 const MEMORY_FREE = 'Memory free';
@@ -26,6 +28,7 @@ function useRooms(): 'no-answer' | 'reading' | readonly MachinesRoom[] {
 
 export function MemoryFreeTile() {
     const rooms = useRooms();
+    const identityOf = useIdentityOf();
     if (typeof rooms === 'string') {
         return <Unknown label={MEMORY_FREE} state={rooms} />;
     }
@@ -68,7 +71,11 @@ function beingCreated(macs: readonly MachinesMacView[], mac: string, vm: string)
     );
 }
 
-function holdersOf(room: MachinesRoom, macs: readonly MachinesMacView[]): MemoryHolder[] {
+function holdersOf(
+    room: MachinesRoom,
+    macs: readonly MachinesMacView[],
+    identityOf: IdentityOf,
+): MemoryHolder[] {
     return [
         {
             identity: 'system',
@@ -88,6 +95,7 @@ function holdersOf(room: MachinesRoom, macs: readonly MachinesMacView[]): Memory
 
 export function MemoryPanel({ macs, only }: { macs: readonly MachinesMacView[]; only?: string }) {
     const rooms = useRooms();
+    const identityOf = useIdentityOf();
     if (rooms === 'reading') {
         return null;
     }
@@ -112,7 +120,7 @@ export function MemoryPanel({ macs, only }: { macs: readonly MachinesMacView[]; 
             {shown.map((room) => (
                 <MemoryGrid
                     free={squares(room.Capacity.Free)}
-                    holders={holdersOf(room, macs)}
+                    holders={holdersOf(room, macs, identityOf)}
                     key={room.Mac}
                     name={room.Mac}
                     total={squares(room.Capacity.Total)}

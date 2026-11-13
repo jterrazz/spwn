@@ -14,6 +14,10 @@ export function macsOf(out: MachinesListOutput | undefined): readonly MachinesMa
     return out?.All.Macs ?? [];
 }
 
+export function machineNamesOf(macs: readonly MachinesMacView[]): readonly string[] {
+    return macs.flatMap((mac) => (mac.VMs ?? []).map((vm) => vm.Name));
+}
+
 export function findMachine(macs: readonly MachinesMacView[], name: string): Found | undefined {
     for (const mac of macs) {
         if (mac.Name === name) {

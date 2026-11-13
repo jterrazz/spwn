@@ -1,7 +1,7 @@
 import type { DiskReading, ImagesReport, MachinesMacView, Target } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Button, identityOf, MachineIcon, Panel, Row, Switch } from '../../design/index';
+import { Button, MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { diskGestureOf, machineKindOf } from '../../engine/provisional';
 import { useReach, useRead, useWatch } from '../../engine/react';
 import type { Reading } from '../../engine/react';
@@ -13,6 +13,7 @@ import { shortDay } from '../activity/when';
 import { Freed, useFreeAll } from '../disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../disk/disk-view';
 import { HeldOutcomes } from '../kit/gestures';
+import { useIdentityOf } from '../kit/identity';
 import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { chosenMac, imagesOn } from './chosen';
@@ -102,6 +103,7 @@ function Images({ images, mac }: ImagesProps) {
 }
 
 function Machines({ mac, go }: { mac: MachinesMacView; go: Go }) {
+    const identityOf = useIdentityOf();
     return (
         <Panel note="what is inside one is on its own Storage tab" title="Machines">
             <Row

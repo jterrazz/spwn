@@ -1,6 +1,6 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
-import { Button, identityOf, MachineIcon, StatePill, Switch } from '../../design/index';
+import { Button, MachineIcon, StatePill, Switch } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useWatch } from '../../engine/react';
 import { engineViewWord, macState, vmKindWord, vmLifetimeWord, vmState } from '../../engine/shown';
@@ -10,6 +10,7 @@ import { targetOf } from '../../model/machines';
 import type { Found } from '../../model/machines';
 import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
+import { useIdentityOf } from '../kit/identity';
 import { LifecycleGestures } from './gestures';
 import { TerminalButton } from './terminal';
 
@@ -87,6 +88,7 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
 export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
     const { mac, vm } = found;
     const name = vm?.Name ?? mac.Name;
+    const identityOf = useIdentityOf();
     return (
         <div className={styles.header}>
             <div className={styles.inner}>

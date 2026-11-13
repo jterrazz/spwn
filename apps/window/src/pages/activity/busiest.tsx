@@ -1,11 +1,12 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import { useState } from 'react';
 
-import { Bar, identityOf, MachineIcon, Panel, Row, Switch } from '../../design/index';
+import { Bar, MachineIcon, Panel, Row, Switch } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
+import { useIdentityOf } from '../kit/identity';
 import { busiestWithVms, vmOf } from './measures';
 import type { Busy } from './measures';
 
@@ -44,6 +45,7 @@ function Process({
     go: (to: Route) => void;
 }) {
     const vm = row.vm === undefined ? undefined : vmOf(found.mac, row.vm);
+    const identityOf = useIdentityOf();
     const name = row.vm ?? row.name;
     const measured = (
         <BusyShare

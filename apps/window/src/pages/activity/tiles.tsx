@@ -1,13 +1,14 @@
 import type { ActivityReport } from '@jterrazz/station-api';
 import type { ReactElement, ReactNode } from 'react';
 
-import { Bar, Chart, identityOf, MissingMark, Tile } from '../../design/index';
+import { Bar, Chart, MissingMark, Tile } from '../../design/index';
 import type { Identity } from '../../design/index';
 import { ownState } from '../../engine/shown';
 import type { OwnState } from '../../engine/words';
 import { bytes, duration, memory, percent } from '../../model/format';
 import type { Found } from '../../model/machines';
 import type { Tone } from '../../tone';
+import { useIdentityOf } from '../kit/identity';
 import { Tiles } from '../page';
 import { chartedOf, cpuOf, diskOf, marksOf, memoryOf } from './measures';
 import type { Held } from './measures';
@@ -188,6 +189,7 @@ export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
     const { readers, shown } = useActivity(found, '1h');
     const unknown = unknownOf(shown);
     const report = shown?.kind === 'read' ? shown.out : undefined;
+    const identityOf = useIdentityOf();
     return (
         <>
             {readers}

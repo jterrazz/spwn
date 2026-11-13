@@ -1,7 +1,7 @@
 import type { MachinesVM } from '@jterrazz/station-api';
 
 import { Icon } from '../../design/icon';
-import { identityOf, MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
+import { MachineIcon, MissingMark, Panel, Row, Tile } from '../../design/index';
 import { machineKindOf } from '../../engine/provisional';
 import { useRead, useWatch } from '../../engine/react';
 import { birthSentence, verdictShown, vmState } from '../../engine/shown';
@@ -11,6 +11,7 @@ import type { Found } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import { between, firstUnitOf } from '../activity/when';
+import { useIdentityOf } from '../kit/identity';
 import { Unanswered } from '../kit/readings';
 
 import styles from './overview.module.css';
@@ -51,6 +52,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
     const listing = useWatch('machines.list', {});
     const read = listing.kind === 'read' ? listing.out.All.Read : undefined;
     const vms = found.mac.VMs ?? [];
+    const identityOf = useIdentityOf();
     if (vms.length === 0) {
         return null;
     }

@@ -14,7 +14,7 @@ import {
 } from '../../design/index';
 import { codesOf, wordOf } from '../../engine/engine-words';
 import { machineKindOf } from '../../engine/provisional';
-import { findMachine } from '../../model/machines';
+import { findMachine, machineNamesOf } from '../../model/machines';
 import { machineRoute } from '../../shell/route';
 import type { Route } from '../../shell/route';
 import type { InstallLine, System } from './item-model';
@@ -124,7 +124,7 @@ export function MachineChips({
                 }
                 return (
                     <MachineChip
-                        identity={found.vm ? identityOf(name) : undefined}
+                        identity={identityOf(name, machineNamesOf(macs))}
                         key={name}
                         kind={found.vm ? machineKindOf(found.vm) : 'mac'}
                         name={name}

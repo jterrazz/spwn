@@ -6,6 +6,7 @@ import { moved } from '../design/focus';
 import { AppIcon, identityOf, MachineIcon, Modal } from '../design/index';
 import { isSkill } from '../engine/provisional';
 import { useWatch } from '../engine/react';
+import { machineNamesOf } from '../model/machines';
 import { everything, matching, resultKey } from './finds';
 import type { Group, Result } from './finds';
 import type { PlainPage, Route } from './route';
@@ -56,6 +57,7 @@ type ListProps = {
     groups: readonly Group[];
     chosen: number;
     id: string;
+    listed: readonly string[];
     onPick: (result: Result) => void;
     onHover: (event: MouseEvent, index: number) => void;
 };
@@ -81,7 +83,7 @@ function startsOf(groups: readonly Group[]): readonly number[] {
     );
 }
 
-function List({ groups, chosen, id, onPick, onHover }: ListProps) {
+function List({ groups, chosen, id, listed, onPick, onHover }: ListProps) {
     const starts = startsOf(groups);
     return (
         <div aria-label="Results" className={styles.list} id={id} role="listbox">
@@ -108,11 +110,7 @@ function List({ groups, chosen, id, onPick, onHover }: ListProps) {
                                 )}
                                 {result.machine === undefined ? null : (
                                     <MachineIcon
-                                        identity={
-                                            result.machine.kind === 'mac'
-                                                ? undefined
-                                                : identityOf(result.machine.name)
-                                        }
+                                        identity={identityOf(result.machine.name, listed)}
                                         kind={result.machine.kind}
                                     />
                                 )}
@@ -205,7 +203,14 @@ export function Find(props: FindProps) {
                 value={query}
             />
             <div ref={list}>
-                <List chosen={at} groups={groups} id={id} onHover={hover} onPick={pick} />
+                <List
+                    chosen={at}
+                    groups={groups}
+                    id={id}
+                    listed={machineNamesOf(props.macs)}
+                    onHover={hover}
+                    onPick={pick}
+                />
             </div>
         </Modal>
     );
