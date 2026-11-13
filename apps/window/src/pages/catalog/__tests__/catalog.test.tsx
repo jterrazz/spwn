@@ -14,7 +14,7 @@ function windowOver(world: string, initial: Route) {
 const category = (name: string, count: number) => button(`${name}${count}`, { exact: true });
 
 const EVERY_PACKAGE =
-    'Everything station knows how to install or set, 148 packages · choose what to browse';
+    'Everything station knows how to install or set, 139 packages · choose what to browse';
 
 describe('Catalog', () => {
     test('the catalog is a chooser of three shelves, each with the categories the engine gave', async () => {
@@ -99,11 +99,12 @@ describe('Catalog', () => {
             windowOver('stories', { page: 'catalog-settings' }),
             async (visitor) => {
                 // When - settings.list and settings.matrix have answered
-                await visitor.see(content('1 of 2 machines OK'));
+                await visitor.see(content('0 of 4 machines OK'));
             },
         );
 
-        // Then - each setting with the matrix's count
+        // Then - each setting with the matrix's count, the Checked settings, sent with no package, left off
+        expect(result.tree.text).not.toContain('filevault');
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });
 

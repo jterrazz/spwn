@@ -35,6 +35,10 @@ export function packageOfApp(report: AppsReport): Package {
     };
 }
 
+export function settingsInCatalog(rows: readonly SettingsRow[]): SettingsRow[] {
+    return rows.filter((row) => row.Package.Name !== '');
+}
+
 export function packageOfSetting(row: SettingsRow): Package {
     return { category: row.Package.Category, description: row.Package.Description, name: row.Name };
 }

@@ -11,7 +11,7 @@ import type { Route } from '../../shell/route';
 import { Absent, NoVerdict, Reading as ReadingVerdict, Unanswered } from '../kit/readings';
 import { Page } from '../page';
 import { Listing } from './listing';
-import { appsOn, packageOfApp, packageOfSetting } from './model';
+import { appsOn, packageOfApp, packageOfSetting, settingsInCatalog } from './model';
 import type { Shelf } from './model';
 import { SHELVES } from './shelves';
 
@@ -124,7 +124,7 @@ function SettingsShelf({ open }: { open: Open }) {
         <Page>
             <NoVerdict line={ABOUT} size="page" />
             <Listing
-                items={settings.out ?? []}
+                items={settingsInCatalog(settings.out ?? [])}
                 packageOf={packageOfSetting}
                 renderRow={(row) => (
                     <SettingRow held={held.get(row.Name)} key={row.Name} open={open} row={row} />

@@ -7,7 +7,7 @@ import { ownState } from '../../engine/shown';
 import type { Route } from '../../shell/route';
 import { Absent } from '../kit/readings';
 import { Page } from '../page';
-import { appsOn, categoriesOf, packageOfApp, packageOfSetting } from './model';
+import { appsOn, categoriesOf, packageOfApp, packageOfSetting, settingsInCatalog } from './model';
 import type { Package, Shelf } from './model';
 import { categoryWord, SHELVES } from './shelves';
 
@@ -27,7 +27,9 @@ function packagesOf(
     settings: Reading<null | SettingsRow[]>,
 ): readonly Package[] | undefined {
     if (shelf === 'settings') {
-        return settings.kind === 'read' ? (settings.out ?? []).map(packageOfSetting) : undefined;
+        return settings.kind === 'read'
+            ? settingsInCatalog(settings.out ?? []).map(packageOfSetting)
+            : undefined;
     }
     return apps.kind === 'read' ? appsOn(shelf, apps.out ?? []).map(packageOfApp) : undefined;
 }

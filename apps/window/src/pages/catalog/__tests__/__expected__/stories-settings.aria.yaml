@@ -5,7 +5,7 @@
     - text: "Everything station knows how to install or set: apps, agent skills and settings, each one a package"
   - searchbox "Search the catalog"
   - group "Category":
-    - button "All settings34" [pressed]
+    - button "All settings25" [pressed]
     - button "Shell2"
     - button "Terminal4"
     - button "Security6"
@@ -14,7 +14,6 @@
     - button "Headless5"
     - button "Network1"
     - button "Agents2"
-    - button "No category given9"
   - region "Settings":
     - paragraph: Shell 2
     - 'button "docker-shortcuts setting Docker shortcuts: dclean, dclean-images, dreset, each asks first 0 of 6 machines OK"'
@@ -49,13 +48,3 @@
     - paragraph: Agents 2
     - 'button "agent-hooks setting The agent hook: station sees what Claude Code and Codex do, and what they wait for 0 of 4 machines OK"'
     - 'button "herdr-machine setting Herdr reaches every workspace of this Mac: its agents show in Herdr 0 of 2 machines OK"'
-    - paragraph: No category given 9
-    - button "filevault setting 2 of 2 machines OK"
-    - button "firewall setting 1 of 2 machines OK"
-    - button "sip setting 2 of 2 machines OK"
-    - button "automatic-updates setting 2 of 2 machines OK"
-    - button "screen-lock setting 2 of 2 machines OK"
-    - button "gatekeeper setting 2 of 2 machines OK"
-    - button "remote-login setting 0 of 2 machines OK"
-    - button "time-machine setting 2 of 2 machines OK"
-    - button "macos-updates setting 2 of 2 machines OK"
