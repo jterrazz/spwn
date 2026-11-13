@@ -783,6 +783,8 @@ func rules() []rule {
 		{"NoSubprocessInSample", ruleNoSubprocessInSample, "apps/engine/activity/adapter/macos/mutant_exec.go", "package macos\n\nimport _ \"os/exec\"\n", "apps/engine/activity/adapter/macos/mutant_exec.go"},
 		{"Vocabulary", ruleVocabularySource, "apps/engine/apps/mutant_vocabulary.go", "package apps\n\ntype mutantLease struct{ Fleet string }\n", "apps/engine/apps/mutant_vocabulary.go"},
 		{"VocabularyAwake", ruleVocabularySource, "apps/engine/ports/mutant_awake.go", "package ports\n\ntype mutantStrip struct {\n\tHeld bool `json:\"power\"`\n}\n\nconst mutantHeld = \"Power session held\"\n", "apps/engine/ports/mutant_awake.go"},
+		{"VMRecordLocked", ruleVMRecordLocked, "apps/engine/engine/process/mutant_record.go", "package process\n\nfunc mutantWant(v *vmState) string { return v.rec.Want }\n", "apps/engine/engine/process/mutant_record.go"},
+		{"VMRecordLockedName", ruleVMRecordLocked, "apps/engine/engine/process/mutant_name.go", "package process\n\nfunc mutantRename(v *vmState) { v.name = \"other\" }\n", "apps/engine/engine/process/mutant_name.go"},
 		{"Registries", ruleRegistries, "apps/engine/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "apps/engine/pages/apps/mutant_registries.go"},
 	}
 }
