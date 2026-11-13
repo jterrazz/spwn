@@ -89,6 +89,28 @@ describe('Packages', () => {
         await expect(differs.tree).toMatch(file('./__expected__/machinefile-differs.aria.yaml'));
     });
 
+    test("a line its machine lacks is a hollow square of its layer and a chip in its version's place", async () => {
+        // Given - This Mac's Packages over machinefile-differs, where ripgrep is not installed
+        let square = '';
+        let layer = '';
+        await component.render(
+            windowOver('machinefile-differs', 'jterrazz-macbook-pro'),
+            async (visitor) => {
+                // When - its layer is drawn
+                await visitor.see(within(region('jterrazz-macbook-pro'), content('ripgrep')));
+                square =
+                    document.querySelector('i[title="ripgrep"]')?.getAttribute('data-tone') ?? '';
+                layer =
+                    document.querySelector('section[aria-label="jterrazz-macbook-pro"]')
+                        ?.innerHTML ?? '';
+            },
+        );
+
+        // Then - its square is hollow in its condition's tone, and the chip says it in the engine's word
+        expect(square).toBe('warn');
+        expect(layer).toContain('>not installed<');
+    });
+
     test("the file's lines switch to its settings, still grouped by the layer that sets each", async () => {
         // Given - the window on This Mac's Packages over stories-file, whose file sets one setting
         const result = await component.render(

@@ -36,4 +36,4 @@
       - text: homebrew 5.0.1 jq 1.8.1
     - region "jterrazz-macbook-pro":
       - paragraph: jterrazz-macbook-pro 4 apps
-      - text: lazygit 0.55.1 bat 0.25.0 ripgrep Not installed fd Not installed
+      - text: lazygit 0.55.1 bat 0.25.0 ripgrep not installed fd not installed

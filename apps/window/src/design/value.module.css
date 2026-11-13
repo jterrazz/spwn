@@ -21,6 +21,23 @@
     border-radius: var(--radius-control);
     padding: var(--space-2) 9px;
 }
+.toned {
+    --tone: var(--t2);
+    color: var(--tone);
+    background: color-mix(in srgb, var(--tone) 14%, transparent);
+}
+.toned[data-tone='warn'] {
+    --tone: var(--warn);
+}
+.toned[data-tone='bad'] {
+    --tone: var(--bad);
+}
+.toned[data-tone='ok'] {
+    --tone: var(--ok);
+}
+.toned[data-tone='new'] {
+    --tone: var(--new);
+}
 .square {
     width: 7px;
     height: 7px;

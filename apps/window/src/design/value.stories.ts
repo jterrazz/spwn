@@ -16,6 +16,10 @@ export const VALUE_STORIES: readonly Story<ValueProps>[] = [
         name: 'raised, the system identity',
         props: { children: 'macos', identity: 'system', look: 'raised' },
     },
+    {
+        name: 'raised, in a tone',
+        props: { children: 'not installed', look: 'raised', tone: 'warn' },
+    },
     { name: 'long text, cut in the middle', props: { children: PATH } },
     { name: 'long text, raised', props: { children: PATH, look: 'raised' } },
     { name: 'withheld', props: { children: SECRET_SAMPLE } },

@@ -10,3 +10,20 @@
     border-radius: var(--radius-cell);
     background: var(--c);
 }
+.hollow {
+    --line-tone: var(--t3);
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--line-tone);
+}
+.hollow[data-tone='warn'] {
+    --line-tone: var(--warn);
+}
+.hollow[data-tone='bad'] {
+    --line-tone: var(--bad);
+}
+.hollow[data-tone='ok'] {
+    --line-tone: var(--ok);
+}
+.hollow[data-tone='new'] {
+    --line-tone: var(--new);
+}

@@ -1,5 +1,6 @@
-import { AppIcon, Caption, DotStrip, StatePill, TypeTag, Value } from '../../design/index';
+import { AppIcon, Caption, DotStrip, TypeTag, Value } from '../../design/index';
 import type { PlanLine } from '../../engine/provisional';
+import type { Tone } from '../../tone';
 import { CONDITION_TONES } from '../../engine/tones';
 import { ANY_VERSION_WORD, CATALOG_KIND_WORDS, CONDITION_WORDS } from '../../engine/words';
 import { countWord } from './model';
@@ -29,20 +30,22 @@ function Name({ line, kinded }: { line: PlanLine; kinded: boolean }) {
     );
 }
 
+function notOnTheMachine(line: PlanLine, differing: ReadonlySet<PlanLine>): boolean {
+    return differing.has(line) && line.Seen.Version === '';
+}
+
 function MachineLine({ line, differs }: { line: PlanLine; differs: boolean }) {
     const { Seen } = line;
     return (
         <div className={`${styles.line} ${styles.machine}`}>
             <Name kinded={false} line={line} />
             <span className={styles.chip}>
-                {differs ? (
-                    <StatePill
-                        tone={CONDITION_TONES[Seen.Condition]}
-                        word={CONDITION_WORDS[Seen.Condition]}
-                    />
-                ) : Seen.Version === '' ? null : (
-                    <Value look="raised">{Seen.Version}</Value>
-                )}
+                {Seen.Version !== '' ? <Value look="raised">{Seen.Version}</Value> : null}
+                {Seen.Version === '' && differs ? (
+                    <Value look="raised" tone={CONDITION_TONES[Seen.Condition]}>
+                        {CONDITION_WORDS[Seen.Condition]}
+                    </Value>
+                ) : null}
             </span>
             <span />
         </div>
@@ -63,15 +66,29 @@ function FileLine({ line, description }: { line: PlanLine; description: string }
     );
 }
 
-function LayerHead({ layer, shelf, dots }: { layer: Layer; shelf: Shelf; dots: boolean }) {
+type LayerHeadProps = { layer: Layer; shelf: Shelf; look: Look };
+
+function hollowOf(layer: Layer, look: Look): ReadonlyMap<string, Tone> {
+    if (look.kind !== 'machine') {
+        return new Map();
+    }
+    return new Map(
+        layer.lines
+            .filter((line) => notOnTheMachine(line, look.differing))
+            .map((line) => [line.Step.Package, CONDITION_TONES[line.Seen.Condition]]),
+    );
+}
+
+function LayerHead({ layer, shelf, look }: LayerHeadProps) {
     return (
         <Caption>
             <Value identity={layer.identity} look="raised">
                 {layer.name === '' ? NO_LAYER_WORD : layer.name}
             </Value>
             <span>{countWord(layer.lines.length, shelf)}</span>
-            {dots ? (
+            {look.kind === 'machine' ? (
                 <DotStrip
+                    hollow={hollowOf(layer, look)}
                     identity={layer.identity}
                     names={layer.lines.map((line) => line.Step.Package)}
                 />
@@ -100,7 +117,7 @@ export function LayerList({
                     className={styles.layer}
                     key={layer.name}
                 >
-                    <LayerHead dots={look.kind === 'machine'} layer={layer} shelf={shelf} />
+                    <LayerHead layer={layer} look={look} shelf={shelf} />
                     {layer.lines.map((line) =>
                         look.kind === 'machine' ? (
                             <MachineLine

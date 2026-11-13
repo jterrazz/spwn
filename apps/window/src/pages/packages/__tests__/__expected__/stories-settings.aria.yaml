@@ -33,4 +33,4 @@
     - heading "Settings by layer, a later one wins" [level=2]
     - region "macbook-pro":
       - paragraph: macbook-pro 1 setting
-      - text: git-shortcuts Not installed
+      - text: git-shortcuts not installed
