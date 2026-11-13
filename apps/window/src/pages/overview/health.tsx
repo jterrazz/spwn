@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
-import { clock, seconds, sentence } from '../../model/format';
-import { agoOf, between, shortDay } from '../activity/when';
+import { clock, duration, seconds, sentence } from '../../model/format';
+import { between, shortDay } from '../activity/when';
 
 import styles from './overview.module.css';
 
@@ -25,8 +25,14 @@ function Step({ label, children }: { label: string; children: ReactNode }) {
     );
 }
 
-function ageOf(at: string | undefined): string | undefined {
-    return agoOf(at, new Date().toISOString());
+const NS_PER_DAY = 86_400 * NS_PER_SECOND;
+
+export function ageOf(at: string | undefined): string | undefined {
+    const span = between(at, new Date().toISOString());
+    if (span === undefined) {
+        return undefined;
+    }
+    return `${span < NS_PER_DAY ? seconds(span) : duration(span)} ago`;
 }
 
 export function Health({ vm }: { vm: MachinesVM }) {
