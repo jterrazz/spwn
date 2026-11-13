@@ -586,7 +586,12 @@ func (m *worldMac) begin(ctx context.Context, s *engineStart, start func() *proc
 	// that engine that asks for it meanwhile never reads it as a successor.
 	m.hold(d, m.engineStarted())
 	m.surfaces(ctx, d)
-	m.settle(ctx)
+	// invariant: a start begun in an engine's lifetime (waits) leaves the
+	// settling to the command: that command waits on this very start at its
+	// end (close, up), and is the one that moves the clock a settle waits on.
+	if ctx.Value(waits{}) == nil {
+		m.settle(ctx)
+	}
 	return d, true
 }
 

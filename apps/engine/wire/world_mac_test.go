@@ -187,6 +187,31 @@ func TestWorldMacStartThatDialsItsOwnMacIsRefusedNotWaited(t *testing.T) {
 	}
 }
 
+func TestWorldMacStartBegunInAnEnginesLifetimeLeapsTheClockItself(t *testing.T) {
+	started, release := make(chan struct{}), make(chan struct{})
+	m := coldMac(func(*worldMac) *process.Engine {
+		close(started)
+		<-release
+		return quietEngine(catalog.Mac, quietReservations{})
+	})
+	inside := context.WithValue(context.Background(), waits{}, true)
+	go func() { _ = dialMac(inside, m) }()
+	<-started
+	bound, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- dialMac(context.Background(), m) }()
+	close(release)
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("the command that met an engine's start was refused: %v", err)
+		}
+	case <-bound.Done():
+		t.Fatal("the start begun in an engine's lifetime waited on a clock only the command it blocks moves")
+	}
+}
+
 func TestWorldMacWaiterLeavesWhenItsContextEnds(t *testing.T) {
 	started, release := make(chan struct{}), make(chan struct{})
 	m := coldMac(func(*worldMac) *process.Engine {
