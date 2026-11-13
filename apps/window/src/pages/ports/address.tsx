@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { CopyButton } from '../../design/copy-button';
-import { Button, Value } from '../../design/index';
+import { Button } from '../../design/index';
 import { QrCode } from '../../design/qr-code';
 import type { Openable } from '../../engine/opener';
 import { OpenButton } from '../kit/opens';
@@ -15,37 +15,43 @@ type AddressProps = {
     qr: boolean;
     label?: string;
     opens?: Opens | undefined;
-    drawn?: 'links' | 'whole';
 };
 
-export function Address({ label = '', url, qr, opens, drawn = 'whole' }: AddressProps) {
+const JOINED = ' · ';
+
+export function Address({ label = '', url, qr, opens }: AddressProps) {
     const [open, setOpen] = useState(false);
     if (url === '') {
         return null;
     }
     return (
         <div className={styles.address}>
-            {label === '' ? null : <span className={styles.label}>{label}</span>}
-            {drawn === 'whole' ? <Value>{url}</Value> : null}
             <span className={styles.links}>
-                <CopyButton name={`Copy ${url}`} text={url} />
+                {label === '' ? null : `${label}${JOINED}`}
+                <CopyButton name={`Copy ${url}`} text={url} variant="inline" />
                 {opens === undefined ? null : (
-                    <OpenButton
-                        held={opens.held}
-                        label="Open"
-                        openable={opens.openable}
-                        variant="link"
-                    />
+                    <>
+                        {JOINED}
+                        <OpenButton
+                            held={opens.held}
+                            label="Open"
+                            openable={opens.openable}
+                            variant="inline"
+                        />
+                    </>
                 )}
                 {qr ? (
-                    <Button
-                        onClick={() => {
-                            setOpen(!open);
-                        }}
-                        variant="link"
-                    >
-                        {open ? 'Hide QR code' : 'QR code'}
-                    </Button>
+                    <>
+                        {JOINED}
+                        <Button
+                            onClick={() => {
+                                setOpen(!open);
+                            }}
+                            variant="inline"
+                        >
+                            {open ? 'Hide QR code' : 'QR code'}
+                        </Button>
+                    </>
                 ) : null}
             </span>
             {open ? <QrCode text={url} /> : null}

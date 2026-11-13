@@ -24,11 +24,14 @@
       - text: :5173 Vite node https://jterrazz-macbook-pro.tail1234.ts.net:40001 Private
       - button "Stop sharing"
       - button "Copy https://jterrazz-macbook-pro.tail1234.ts.net:40001": Copy
+      - text: ·
       - button "Open"
+      - text: ·
       - button "Hide QR code"
       - img "QR code of https://jterrazz-macbook-pro.tail1234.ts.net:40001"
     - region "Port 7000":
       - text: :7000 server jterrazz-macbook-pro.tail1234.ts.net:40002 Private
       - button "Stop sharing"
       - button "Copy jterrazz-macbook-pro.tail1234.ts.net:40002": Copy
+      - text: ·
       - button "QR code"

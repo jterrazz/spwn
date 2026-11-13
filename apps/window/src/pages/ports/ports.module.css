@@ -18,13 +18,9 @@
     padding: var(--space-2) 0 var(--space-2) calc(56px + var(--space-12));
 }
 .links {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-8);
-}
-.label {
     font-size: var(--text-label);
     color: var(--t3);
+    white-space: pre-wrap;
 }
 .empty {
     margin: 0;

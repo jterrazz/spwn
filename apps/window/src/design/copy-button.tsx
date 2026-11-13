@@ -3,13 +3,18 @@ import { useEffect, useState } from 'react';
 import { Button } from './button';
 import { looksSecret } from './secret';
 
-export type CopyButtonProps = { text: string; name?: string | undefined; label?: string };
+export type CopyButtonProps = {
+    text: string;
+    name?: string | undefined;
+    label?: string;
+    variant?: 'inline' | 'link';
+};
 
 type Said = 'copied' | 'idle' | 'refused';
 
 const REST_AFTER_MS = 1500;
 
-export function CopyButton({ text, name, label = 'Copy' }: CopyButtonProps) {
+export function CopyButton({ text, name, label = 'Copy', variant = 'link' }: CopyButtonProps) {
     const [said, setSaid] = useState<Said>('idle');
     useEffect(() => {
         if (said === 'idle') {
@@ -40,7 +45,7 @@ export function CopyButton({ text, name, label = 'Copy' }: CopyButtonProps) {
             onClick={() => {
                 void copy();
             }}
-            variant="link"
+            variant={variant}
         >
             {words[said]}
         </Button>

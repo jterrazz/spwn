@@ -18,7 +18,6 @@ export const LOCAL_ELSEWHERE =
 function ShareAddress({ share, onThisMac }: { share: PortsSharedPort; onThisMac: boolean }) {
     return (
         <Address
-            drawn="links"
             label={share.detail}
             opens={
                 share.http

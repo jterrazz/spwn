@@ -45,6 +45,26 @@
 .danger {
     color: var(--bad);
 }
+.inline,
+.inline:hover,
+.inline:active {
+    height: auto;
+    padding: 0;
+    background: none;
+    color: var(--t3);
+    font-size: var(--text-label);
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+}
+.inline:hover {
+    text-decoration-color: var(--t1);
+}
+.inline:disabled {
+    box-shadow: none;
+    text-decoration: none;
+}
 .destroy {
     background: var(--bad);
     color: var(--t1);

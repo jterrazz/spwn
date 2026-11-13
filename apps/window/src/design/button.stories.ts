@@ -5,6 +5,7 @@ import type { Story } from './story';
 const WORDS = {
     danger: 'Delete workspace…',
     destroy: 'Delete',
+    inline: 'QR code',
     link: '3 more can wait',
     plain: 'Stop',
     primary: 'Open in Terminal',
