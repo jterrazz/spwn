@@ -26,7 +26,6 @@ export type Result = {
     label: string;
     detail: string;
     to: { action: Action } | { route: Route };
-    shortcut?: string | undefined;
     mark?: undefined | { name: string; kind: string };
     machine?: undefined | { name: string; kind: 'mac' | MachineKind };
 };
@@ -63,7 +62,6 @@ function page(held: Held, kind: Kind, one: PlainPage): Result {
         detail: kind === 'Places' ? 'page' : '',
         kind,
         label: held.titles[one],
-        shortcut: one === 'home' ? '⌘0' : undefined,
         to: { route: { page: one } },
     };
 }

@@ -118,9 +118,7 @@ function List({ groups, chosen, id, onPick, onHover }: ListProps) {
                                     />
                                 )}
                                 <span className={styles.label}>{result.label}</span>
-                                <span className={styles.detail}>
-                                    {result.shortcut ?? result.detail}
-                                </span>
+                                <span className={styles.detail}>{result.detail}</span>
                             </div>
                         );
                     })}
