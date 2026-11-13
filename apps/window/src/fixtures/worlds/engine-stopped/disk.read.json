@@ -1,0 +1,5 @@
+{"world": "engine-stopped", "station": "dev", "exchanges": [
+{"request":{"watch":"disk.read","in":{}},"answers":[{"v":2,"out":{"Total":0,"Free":0,"Rows":null,"Pending":false}},{"v":2,"out":{"Total":0,"Free":0,"Rows":null,"Pending":false}},{"v":2,"done":true}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"api"}},"answers":[{"v":2,"error":{"message":"the engine is not running","hint":"run station --help","exit":1}}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"linux-1"}},"answers":[{"v":2,"error":{"message":"the engine is not running","hint":"run station --help","exit":1}}]}
+]}

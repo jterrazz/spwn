@@ -1,0 +1,6 @@
+{"world": "stories-file", "station": "dev", "exchanges": [
+{"request":{"watch":"disk.read","in":{}},"answers":[{"v":2,"out":{"Total":994000000000,"Free":388000000000,"Rows":null,"Pending":false}},{"v":2,"out":{"Total":994000000000,"Free":388000000000,"Rows":null,"Pending":false}},{"v":2,"done":true}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"agent-7f"}},"answers":[{"v":2,"out":{"Total":40000000000,"Free":30000000000,"Rows":null,"Pending":false}},{"v":2,"out":{"Total":40000000000,"Free":30000000000,"Rows":null,"Pending":false}},{"v":2,"done":true}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"api"}},"answers":[{"v":2,"error":{"type":"refused","code":"vm_stopped","message":"api is stopped","hint":"station machines start api"}}]},
+{"request":{"watch":"disk.read","in":{},"target":{"name":"linux-1"}},"answers":[{"v":2,"out":{"Total":40000000000,"Free":30000000000,"Rows":null,"Pending":false}},{"v":2,"out":{"Total":40000000000,"Free":30000000000,"Rows":null,"Pending":false}},{"v":2,"done":true}]}
+]}

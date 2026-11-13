@@ -1,0 +1,4 @@
+{"world": "two-macs", "station": "dev", "exchanges": [
+{"request":{"call":"machines.log","in":{"VM":"api"}},"answers":[{"v":2,"out":{"Lines":null}}]},
+{"request":{"call":"machines.log","in":{"VM":"linux-1"}},"answers":[{"v":2,"out":{"Lines":null}}]}
+]}

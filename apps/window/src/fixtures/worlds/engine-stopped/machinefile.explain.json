@@ -1,0 +1,5 @@
+{"world": "engine-stopped", "station": "dev", "exchanges": [
+{"request":{"call":"machinefile.explain","in":{}},"answers":[{"v":2,"error":{"type":"not-found","code":"machinefile.not-found","subject":"jterrazz-macbook-pro","detail":{"by":""},"message":"no Machinefile named jterrazz-macbook-pro","hint":"give this machine one: station init --machinefile <name>"}}]},
+{"request":{"call":"machinefile.explain","in":{},"target":{"name":"api"}},"answers":[{"v":2,"error":{"message":"the engine is not running","hint":"run station --help","exit":1}}]},
+{"request":{"call":"machinefile.explain","in":{},"target":{"name":"linux-1"}},"answers":[{"v":2,"error":{"message":"the engine is not running","hint":"run station --help","exit":1}}]}
+]}

@@ -1,0 +1,3 @@
+{"world": "machinefile-kept", "station": "dev", "exchanges": [
+{"request":{"call":"images.list","in":{}},"answers":[{"v":2,"out":[{"Record":{"name":"station-linux","version":"2026.11.01","base":"ghcr.io/cirruslabs/ubuntu:24.04","station":"v3.0.0","recipe_sha":"","built_at":"2026-11-01T08:00:00Z","size_gb":4},"Newest":true,"VMs":["api","linux-1"],"Mac":"jterrazz-macbook-pro"},{"Record":{"name":"station-linux","version":"2026.10.20","base":"ghcr.io/cirruslabs/ubuntu:24.04","station":"v3.0.0","recipe_sha":"","built_at":"2026-10-20T08:00:00Z","size_gb":3},"Newest":false,"VMs":null,"Mac":"jterrazz-macbook-pro"}]}]}
+]}

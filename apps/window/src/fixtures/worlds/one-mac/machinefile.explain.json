@@ -1,0 +1,3 @@
+{"world": "one-mac", "station": "dev", "exchanges": [
+{"request":{"call":"machinefile.explain","in":{}},"answers":[{"v":2,"error":{"type":"not-found","code":"machinefile.not-found","subject":"jterrazz-macbook-pro","detail":{"by":""},"message":"no Machinefile named jterrazz-macbook-pro","hint":"give this machine one: station init --machinefile <name>"}}]}
+]}

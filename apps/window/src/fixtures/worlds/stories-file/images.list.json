@@ -1,0 +1,3 @@
+{"world": "stories-file", "station": "dev", "exchanges": [
+{"request":{"call":"images.list","in":{}},"answers":[{"v":2,"out":[{"Record":{"name":"station-linux","version":"3","base":"ghcr.io/cirruslabs/ubuntu:24.04","station":"v4.0.0","recipe_sha":"","built_at":"2026-11-01T10:30:00Z","size_gb":4},"Newest":true,"VMs":["agent-7f","api","linux-1"],"Mac":"macbook-pro"}]}]}
+]}

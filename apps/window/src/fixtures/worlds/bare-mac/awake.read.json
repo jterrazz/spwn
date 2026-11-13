@@ -1,0 +1,3 @@
+{"world": "bare-mac", "station": "dev", "exchanges": [
+{"request":{"watch":"awake.read","in":{}},"answers":[{"v":2,"error":{"message":"Awake runs on a Mac","hint":"run it on a Mac","exit":2}}]}
+]}

@@ -1,0 +1,3 @@
+{"world": "engine-stopped", "station": "dev", "exchanges": [
+{"request":{"call":"images.list","in":{}},"answers":[{"v":2,"out":[{"Record":{"name":"station-linux","version":"1","base":"ghcr.io/cirruslabs/ubuntu:24.04","station":"","recipe_sha":"","built_at":"2026-10-20T09:00:00Z","size_gb":12},"Newest":true,"VMs":["api","linux-1"],"Mac":"jterrazz-macbook-pro"}]}]}
+]}
