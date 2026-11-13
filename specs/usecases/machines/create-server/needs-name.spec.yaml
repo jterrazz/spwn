@@ -1,8 +1,0 @@
-description: 'a server needs a name: others will type it, so station picks none'
-env: two-macs
-runs:
-    - command: 'machines create --server'
-      exit: 2
-      stderr: |
-          Error: a server needs a name
-          Hint: station machines create <name> --server

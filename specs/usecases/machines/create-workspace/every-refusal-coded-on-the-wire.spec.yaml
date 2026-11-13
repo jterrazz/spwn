@@ -1,0 +1,15 @@
+description: 'with no image built, a create''s refusals each carry their type and code on the wire'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''map(select(.error) | {id, type: .error.type, code: .error.code, subject: .error.subject}) | sort_by(.id) | .[]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"api","Image":"station-linux"},"Confirm":"yes"}}
+          {"v":2,"id":"2","call":"machines.create-server","in":{"Image":"station-linux"}}
+          {"v":2,"id":"3","call":"machines.create-workspace","in":{"Request":{"Name":"api","Image":"linux"}}}
+      exit: 0
+      stdout: |
+          {"id":"1","type":"refused","code":"image.no-linux-binary","subject":null}
+          {"id":"2","type":"refused","code":"machines.server-needs-name","subject":null}
+          {"id":"3","type":"not-found","code":"machines.unknown-image","subject":"linux"}

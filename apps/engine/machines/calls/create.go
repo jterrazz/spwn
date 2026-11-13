@@ -19,9 +19,9 @@ import (
 )
 
 var (
-	errServerNeedsName = &model.KindRuleError{Why: "a server needs a name", Fix: "station machines create <name> --server"}
-	errCheckForServers = &model.KindRuleError{Why: "a health check is for servers", Fix: "station machines create <name> --server --check <url>"}
-	errServerBridged   = &model.KindRuleError{Why: "a server stays behind its Mac: --network bridged is for macOS workspaces", Fix: "share its ports instead: station ports share"}
+	ServerNeedsNameRule = &model.KindRuleError{Why: "a server needs a name", Fix: "station machines create <name> --server"}
+	CheckForServersRule = &model.KindRuleError{Why: "a health check is for servers", Fix: "station machines create <name> --server --check <url>"}
+	ServerBridgedRule   = &model.KindRuleError{Why: "a server stays behind its Mac: --network bridged is for macOS workspaces", Fix: "share its ports instead: station ports share"}
 )
 
 func validCheck(check string) bool {
@@ -125,11 +125,11 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 	}
 	switch {
 	case server && r.Name == "":
-		return r, errServerNeedsName
+		return r, ServerNeedsNameRule
 	case server && r.Network == model.Bridged:
-		return r, errServerBridged
+		return r, ServerBridgedRule
 	case !server && r.Check != "":
-		return r, errCheckForServers
+		return r, CheckForServersRule
 	case r.Check != "" && !validCheck(r.Check):
 		return r, &model.BadCheckError{Value: r.Check}
 	}
@@ -150,6 +150,9 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, &model.NoEngineError{Hypervisor: s.engine.Name(), Cause: err}
 	}
 	if _, _, err = s.img.Latest(ctx, r.Image); err != nil {
+		if unbuilt := new(model.NoImageError); errors.As(err, &unbuilt) {
+			return r, &model.NoImageError{Image: unbuilt.Image, Mac: s.ThisMacName(), Fetched: unbuilt.Fetched}
+		}
 		return r, err
 	}
 	held, err := s.claims(ctx)
@@ -176,7 +179,7 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		r.Size.DiskBytes = size.DiskBytes
 	}
 	if left, ok := s.memoryLeft(ctx); ok && r.Size.MemoryBytes > left {
-		return r, &model.TooBigError{Mac: "This Mac", AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
+		return r, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(max(left, 0) >> 30)}
 	}
 	if err := s.engineUp(ctx, false); err != nil {
 		return r, err
@@ -194,7 +197,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	// check that does not start it (create's, before its questions) lets
 	// such an engine through: the create itself starts it.
 	if s.engineAPI == nil {
-		return &model.EngineDownError{Mac: "This Mac", Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
+		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
 	}
 	_, err := s.engineAPI.Ping(ctx)
 	if !errors.Is(err, model.ErrEngineDown) {
@@ -202,7 +205,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	}
 	installed := s.h.Exists(catalog.EnginePlist(s.h.Home()))
 	if installed || s.o.StartEngine == nil || !s.engine.Installed() {
-		return &model.EngineDownError{Mac: "This Mac", Installed: installed}
+		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: installed}
 	}
 	if !start {
 		return nil
@@ -212,7 +215,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	}
 	if _, err := s.engineAPI.Ping(ctx); err != nil {
 		if errors.Is(err, model.ErrEngineDown) {
-			return &model.EngineDownError{Mac: "This Mac", Installed: true}
+			return &model.EngineDownError{Mac: s.ThisMacName(), Installed: true}
 		}
 		return err
 	}
@@ -220,7 +223,7 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 }
 
 // value: every name All machines holds, for a VM's name the Mac it is on,
-// worded as the owner reads it: This Mac, or that Mac's short name; and
+// by the Name machines.list gives it, This Mac's included; and
 // every agent's of a running workspace of a Mac that answers, and those a
 // workspace held when it last stopped, of one stopped or of a silent Mac.
 func (s *Machinist) claims(ctx context.Context) (claims, error) {
@@ -231,12 +234,8 @@ func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	c := claims{held: map[string]claim{}, on: map[string]string{}}
 	for _, h := range allMachines.Macs {
 		c.held[h.Name] = claimMac
-		mac := "This Mac"
-		if !h.ThisMac {
-			mac = strings.TrimPrefix(h.Name, s.o.User+"-")
-		}
 		for _, vm := range h.VMs {
-			c.held[vm.Name], c.on[vm.Name] = claimVM, mac
+			c.held[vm.Name], c.on[vm.Name] = claimVM, h.Name
 			if vm.Lifetime.Kind() != machine.Workspace {
 				continue
 			}

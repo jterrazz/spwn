@@ -6,8 +6,8 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
-	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -64,7 +64,7 @@ type CreateIn struct {
 var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 	// invariant: a workspace, ephemeral or persistent; always on is a server's.
 	Name: "machines.create-workspace", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
-	Errors: []fail.Code{confirm.YesNeeded},
+	Errors: workspaceRefusals(),
 	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {
 		r := in.Request
 		r.Server = false
@@ -94,7 +94,7 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 	// invariant: a server is always on, behind its Mac, and named; station
 	// sets up nothing inside it (SPEC §7.1).
 	Name: "machines.create-server", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
-	Errors: []fail.Code{confirm.YesNeeded},
+	Errors: serverRefusals(),
 	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
 		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check}
 		if image := missingImage(ctx, d, r); image != "" {
@@ -137,7 +137,7 @@ func build(ctx context.Context, d Deps, image string, p call.Progress) error {
 	if last != "" {
 		p.Done(last, err)
 	}
-	return err
+	return imagescalls.Worded(err)
 }
 
 func create(ctx context.Context, d Deps, r machines.CreateRequest, p call.Progress) (machines.Created, error) {

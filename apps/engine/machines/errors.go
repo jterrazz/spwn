@@ -62,12 +62,12 @@ type UnknownImageError struct{ Image string }
 func (e *UnknownImageError) Error() string { return "unknown image \"" + e.Image + "\"" }
 
 type NoImageError struct {
-	Image string
+	Image, Mac string
 	// value: station only fetches the image: it has no recipe to build it from.
 	Fetched bool
 }
 
-func (e *NoImageError) Error() string { return "image " + e.Image + " is not built on This Mac" }
+func (e *NoImageError) Error() string { return "image " + e.Image + " is not built on " + e.Mac }
 
 type NoEngineError struct {
 	Hypervisor string
@@ -174,8 +174,8 @@ type NameTakenError struct {
 	Name string
 	VM   bool
 	Mac  bool
-	// value: the Mac a VM of that name is on, as the owner reads it; for an
-	// agent, the workspace it runs on.
+	// value: the Mac a VM of that name is on, by the Name machines.list
+	// gives it; for an agent, the workspace it runs on.
 	On string
 	// value: the agent that holds the name, its own or the name's ·<n>.
 	Agent string

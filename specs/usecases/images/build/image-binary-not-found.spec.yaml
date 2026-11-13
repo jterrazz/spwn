@@ -1,5 +1,7 @@
 description: 'a --binary that does not exist is refused before anything is fetched'
-env: two-macs
+env:
+    - two-macs
+    - engine
 runs:
     - command: 'images build station-linux --binary $HOME/nowhere'
       exit: 2
@@ -10,3 +12,9 @@ runs:
       exit: 0
       stdout: |
           3
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.build","in":{"Names":["station-linux"],"Binary":"/nowhere"}}
+      exit: 0
+      stdout: |
+          {"code":"image.binary-not-found","subject":"/nowhere","message":"/nowhere: no such file"}

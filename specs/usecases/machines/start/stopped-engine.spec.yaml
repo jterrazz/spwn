@@ -4,5 +4,5 @@ runs:
     - command: 'machines start api'
       exit: 1
       stderr: |
-          Error: the engine is stopped on This Mac
+          Error: the engine is stopped on jterrazz-macbook-pro
           Hint: station engine start

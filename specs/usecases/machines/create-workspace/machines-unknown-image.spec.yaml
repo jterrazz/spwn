@@ -1,0 +1,16 @@
+description: 'linux names no image: the built-in Linux image is station-linux alone'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create --image linux'
+      exit: 2
+      stderr: |
+          Error: unknown image "linux"
+          Hint: station images for the images
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Image":"linux"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.unknown-image","subject":"linux","message":"unknown image \"linux\""}

@@ -1,5 +1,7 @@
 description: 'a health check is for servers: a workspace create with --check is refused, nothing made'
-env: two-macs
+env:
+    - two-macs
+    - engine
 runs:
     - command: 'machines create box --check https://box:5173'
       exit: 2
@@ -10,3 +12,9 @@ runs:
       exit: 0
       stdout: |
           null
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"box","Check":"https://box:5173"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.check-for-servers","subject":null,"message":"a health check is for servers"}

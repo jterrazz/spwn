@@ -14,7 +14,7 @@ runs:
     - command: 'machines start infra --on jterrazz-mac-mini'
       exit: 1
       stderr: |
-          Error: the engine is stopped on This Mac
+          Error: the engine is stopped on jterrazz-mac-mini
           Hint: station engine start
     - command: 'engine --on jterrazz-mac-mini'
       exit: 0

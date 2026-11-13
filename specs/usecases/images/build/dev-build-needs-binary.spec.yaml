@@ -1,8 +1,0 @@
-description: 'a dev build asks for --binary before the hypervisor is asked anything'
-env: two-macs
-runs:
-    - command: 'images build station-linux'
-      exit: 2
-      stderr: |
-          Error: this station is a dev build: there is no release binary to put in the image
-          Hint: make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64

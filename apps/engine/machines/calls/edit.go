@@ -16,7 +16,7 @@ func (s *Machinist) CheckEdit(name string, c model.Change) error {
 	case c.None():
 		return &model.NothingToChangeError{Name: name}
 	case (c.Check != "" || c.NoCheck) && rec.Lifetime != model.AlwaysOn:
-		return &model.KindRuleError{Why: errCheckForServers.Why, Fix: "a workspace's health is three steps: station machines " + name}
+		return &model.KindRuleError{Why: CheckForServersRule.Why, Fix: "a workspace's health is three steps: station machines " + name}
 	case c.Check != "" && c.NoCheck:
 		return &model.KindRuleError{Why: "--check and --no-check ask opposite things", Fix: "station machines edit " + name + " --check <url>"}
 	case c.Check != "" && !validCheck(c.Check):

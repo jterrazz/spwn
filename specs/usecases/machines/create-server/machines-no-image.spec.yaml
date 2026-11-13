@@ -1,0 +1,8 @@
+description: 'with no image built on its Mac, a server''s create is refused off a terminal in that Mac''s name'
+env: one-mac
+runs:
+    - command: 'machines create infra --server'
+      exit: 2
+      stderr: |
+          Error: image station-linux is not built on jterrazz-macbook-pro
+          Hint: station images build station-linux

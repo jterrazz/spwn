@@ -1,0 +1,22 @@
+description: 'a workspace that asks more memory than its Mac has left is refused before any effect, coded'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create --memory 60G'
+      exit: 2
+      stderr: |
+          Error: not enough memory on jterrazz-macbook-pro: 60 GB asked, 4 GB left for VMs
+          Hint: ask for less: --memory 4G
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	jterrazz-macbook-pro	Mac	jterrazz-macbook-pro	Engine running
+          ○	api	Workspace	jterrazz-macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	jterrazz-macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, detail}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"big","Image":"station-linux","Size":{"MemoryBytes":64424509440}},"Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.not-enough-memory","subject":"jterrazz-macbook-pro","detail":{"asked_gb":"60","left_gb":"4"}}

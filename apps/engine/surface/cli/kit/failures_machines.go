@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
@@ -75,50 +76,45 @@ func takenHint(e *model.NameTakenError) string {
 
 func vmFailure(err error) (*fail.Error, bool) {
 	var notVM *model.NotAVMError
-	var badLifetime *model.BadLifetimeError
-	var unknownImage *model.UnknownImageError
-	var noImage *model.NoImageError
-	var noEngine *model.NoEngineError
-	var tooBig *model.TooBigError
 	var badSize *model.BadSizeError
 	var noUnit *model.SizeNeedsUnitError
 	var created *model.CreateFailedError
 	var noBoot *model.DidNotBootError
 	var unhealthy *model.UnhealthyError
-	var down *model.EngineDownError
-	var network *model.BadNetworkError
 	var nothing *model.NothingToChangeError
 	var shrinks *model.DiskShrinksError
 	var kindRule *model.KindRuleError
+	var tooBig *model.TooBigError
+	var noImage *model.NoImageError
+	var down *model.EngineDownError
+	var badLifetime *model.BadLifetimeError
 	var badCheck *model.BadCheckError
-	var serverLifetime *model.ServerLifetimeError
+	var unknownImage *model.UnknownImageError
 	var serverTemplate *model.ServerTemplateError
+	var network *model.BadNetworkError
+	var noEngine *model.NoEngineError
+	var serverLifetime *model.ServerLifetimeError
 	var agent *model.AgentNotStartedError
 	if f, ok := pipeFailure(err); ok {
 		return f, true
 	}
 	switch {
-	case errors.As(err, &down):
-		return failed(down.Error(), "station engine start", err), true
+	case errors.As(err, &tooBig), errors.As(err, &noImage), errors.As(err, &down), errors.As(err, &badLifetime),
+		errors.As(err, &badCheck), errors.As(err, &unknownImage),
+		errors.As(err, &serverTemplate), errors.As(err, &network), errors.As(err, &noEngine),
+		errors.Is(err, machinescalls.ServerNeedsNameRule), errors.Is(err, machinescalls.CheckForServersRule),
+		errors.Is(err, machinescalls.ServerBridgedRule):
+		return Translate(machinescalls.Worded(err), ""), true
 	case errors.As(err, &agent):
 		return failed(agent.Name+" is ready, but its agent did not start: "+Translate(agent.Cause, "").Message, "station agents start \"<task>\" --on "+agent.Name, err), true
 	case errors.As(err, &serverLifetime):
 		return usage(serverLifetime.Error(), "station machines create "+serverLifetime.Name+" --server"), true
-	case errors.As(err, &serverTemplate):
-		return usage(serverTemplate.Error(), "station machines create <name> --server"), true
 	case errors.As(err, &kindRule):
 		return usage(kindRule.Error(), kindRule.Fix), true
-	case errors.As(err, &badCheck):
-		return usage(badCheck.Error(), "--check https://<name>:6443/readyz, or --check <name>:6443"), true
 	case errors.As(err, &nothing):
 		return usage(nothing.Error(), "station machines edit "+nothing.Name+" --memory 8G"), true
 	case errors.As(err, &shrinks):
 		return usage(shrinks.Error(), shrinks.Name+" has "+strconv.FormatFloat(float64(shrinks.Has)/1e9, 'f', 1, 64)+" GB: ask for more"), true
-	case errors.As(err, &network):
-		if network.Bridge {
-			return usage(network.Error(), "share its ports instead: station ports share"), true
-		}
-		return usage(network.Error(), "station machines create --network nat"), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
 	case errors.As(err, &unhealthy):
@@ -127,21 +123,6 @@ func vmFailure(err error) (*fail.Error, bool) {
 		return failed(created.Error(), "fix the cause, then run station machines create again", err), true
 	case errors.As(err, &notVM):
 		return usage(notVM.Error(), notAVMHint(notVM)), true
-	case errors.As(err, &badLifetime):
-		return usage(badLifetime.Error(), "station machines create --persistent"), true
-	case errors.As(err, &unknownImage):
-		return usage(unknownImage.Error(), "station images for the images"), true
-	case errors.As(err, &noImage) && noImage.Fetched:
-		return usage("image "+noImage.Image+" is not on This Mac", "station images update "+noImage.Image), true
-	case errors.As(err, &noImage):
-		return usage(noImage.Error(), "station images build "+noImage.Image), true
-	case errors.As(err, &noEngine):
-		return usage(noEngine.Error(), "station apps install "+noEngine.Hypervisor), true
-	case errors.As(err, &tooBig):
-		if tooBig.LeftGB < 1 {
-			return usage(tooBig.Error(), "stop a VM first: station machines"), true
-		}
-		return usage(tooBig.Error(), "ask for less: --memory "+strconv.Itoa(tooBig.LeftGB)+"G"), true
 	case errors.As(err, &noUnit):
 		return usage(noUnit.Error(), "--"+noUnit.Flag+" "+noUnit.Value+"G"), true
 	case errors.As(err, &badSize):

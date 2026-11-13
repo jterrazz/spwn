@@ -8,7 +8,7 @@ runs:
     - command: 'machines create --memory 40G --on mac-mini'
       exit: 2
       stderr: |
-          Error: not enough memory on This Mac: 40 GB asked, 36 GB left for VMs
+          Error: not enough memory on jterrazz-mac-mini: 40 GB asked, 36 GB left for VMs
           Hint: ask for less: --memory 36G
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[1].vms[] | .name]'''
       exit: 0

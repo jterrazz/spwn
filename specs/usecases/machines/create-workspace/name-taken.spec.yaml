@@ -4,5 +4,5 @@ runs:
     - command: 'machines create linux-1'
       exit: 2
       stderr: |
-          Error: "linux-1" is taken (on This Mac)
+          Error: "linux-1" is taken (on jterrazz-macbook-pro)
           Hint: pick another name

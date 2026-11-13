@@ -1,0 +1,16 @@
+description: 'a server needs a name: others will type it, so station picks none'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create --server'
+      exit: 2
+      stderr: |
+          Error: a server needs a name
+          Hint: station machines create <name> --server
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Image":"station-linux"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.server-needs-name","subject":null,"message":"a server needs a name"}

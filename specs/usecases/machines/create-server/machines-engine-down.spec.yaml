@@ -1,0 +1,8 @@
+description: 'with the engine stopped no server is created, and the hint starts it'
+env: engine-stopped
+runs:
+    - command: 'machines create web --server'
+      exit: 1
+      stderr: |
+          Error: the engine is stopped on jterrazz-macbook-pro
+          Hint: station engine start

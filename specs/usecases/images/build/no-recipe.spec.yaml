@@ -1,8 +1,0 @@
-description: 'macos has no recipe in station: it is fetched where it is released, never built'
-env: two-macs
-runs:
-    - command: 'images build macos'
-      exit: 2
-      stderr: |
-          Error: station has no recipe for macos: it is fetched, never built here
-          Hint: station images update macos

@@ -516,6 +516,9 @@
       "schema": "station.images.build/v1",
       "where": "in-engine",
       "errors": [
+        "image.binary-not-found",
+        "image.no-linux-binary",
+        "image.no-recipe",
         "image.unknown"
       ],
       "in": "BuildIn"
@@ -650,7 +653,16 @@
       "where": "in-engine",
       "confirm": "build-image",
       "errors": [
-        "confirm.yes-needed"
+        "confirm.yes-needed",
+        "image.no-linux-binary",
+        "machines.bad-check",
+        "machines.bad-network",
+        "machines.engine-down",
+        "machines.no-image",
+        "machines.not-enough-memory",
+        "machines.server-bridged",
+        "machines.server-needs-name",
+        "machines.unknown-image"
       ],
       "in": "CreateServerIn",
       "out": "Created"
@@ -661,7 +673,16 @@
       "where": "in-engine",
       "confirm": "build-image",
       "errors": [
-        "confirm.yes-needed"
+        "confirm.yes-needed",
+        "image.no-linux-binary",
+        "machines.bad-lifetime",
+        "machines.bad-network",
+        "machines.check-for-servers",
+        "machines.engine-down",
+        "machines.no-image",
+        "machines.not-enough-memory",
+        "machines.server-template",
+        "machines.unknown-image"
       ],
       "in": "CreateIn",
       "out": "Created"

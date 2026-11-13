@@ -1,0 +1,11 @@
+description: 'a dev build cannot build the missing image a server asks for, its code on the wire'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Name":"infra","Image":"station-linux","Confirm":"yes"}}
+      exit: 0
+      stdout: |
+          {"code":"image.no-linux-binary","subject":null,"message":"this station is a dev build: there is no release binary to put in the image"}

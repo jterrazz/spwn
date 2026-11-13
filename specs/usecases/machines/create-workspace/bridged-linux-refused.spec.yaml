@@ -1,8 +1,0 @@
-description: 'a linux workspace stays behind its Mac: --network bridged is refused before anything is made'
-env: two-macs
-runs:
-    - command: 'machines create --network bridged'
-      exit: 2
-      stderr: |
-          Error: --network bridged is for macOS images: a linux workspace stays behind its Mac
-          Hint: share its ports instead: station ports share

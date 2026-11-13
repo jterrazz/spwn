@@ -1,0 +1,8 @@
+description: 'a server that asks more memory than its Mac has left for VMs is refused in that Mac''s name'
+env: two-macs
+runs:
+    - command: 'machines create big --server --memory 60G'
+      exit: 2
+      stderr: |
+          Error: not enough memory on jterrazz-macbook-pro: 60 GB asked, 4 GB left for VMs
+          Hint: ask for less: --memory 4G

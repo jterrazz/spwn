@@ -28,12 +28,12 @@ type BuildIn struct {
 
 var Build = call.Call[Deps, BuildIn, []images.Record]{
 	Name: "images.build", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(),
-	Errors: []fail.Code{Unknown},
+	Errors: buildRefusals(),
 	Run: func(ctx context.Context, d Deps, in BuildIn, p call.Progress) ([]images.Record, error) {
 		steps := stepper(p)
 		records, err := d.Images.Build(ctx, in.Names, in.Binary, steps.step)
 		steps.end(err)
-		return records, worded(err)
+		return records, Worded(err)
 	},
 }
 
@@ -49,7 +49,7 @@ var Update = call.Call[Deps, UpdateIn, []images.Update]{
 		steps := stepper(p)
 		updates, err := d.Images.Update(ctx, in.Names, steps.step)
 		steps.end(err)
-		return updates, worded(err)
+		return updates, Worded(err)
 	},
 }
 
@@ -86,7 +86,7 @@ var Delete = call.Call[Deps, DeleteIn, []images.Record]{
 	Errors: []fail.Code{Unknown, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) ([]images.Record, error) {
 		if err := d.Images.CheckDelete(ctx, in.Image, in.Version); err != nil {
-			return nil, worded(err)
+			return nil, Worded(err)
 		}
 		name := in.Image
 		if in.Version != "" {

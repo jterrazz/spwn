@@ -1,0 +1,16 @@
+description: 'a linux workspace stays behind its Mac: --network bridged is refused before anything is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines create --network bridged'
+      exit: 2
+      stderr: |
+          Error: --network bridged is for macOS images: a linux workspace stays behind its Mac
+          Hint: share its ports instead: station ports share
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Image":"station-linux","Network":"bridged"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.bad-network","subject":"bridged","message":"--network bridged is for macOS images: a linux workspace stays behind its Mac"}

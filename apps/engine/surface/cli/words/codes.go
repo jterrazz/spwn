@@ -2,6 +2,7 @@ package words
 
 import (
 	"cmp"
+	"strconv"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
@@ -17,14 +18,18 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 )
 
 type Wording func(e *fail.Error) (message, hint string)
+
+const linuxBinaryHint = "make build-linux, then station images build station-linux --binary .artifacts/go/station-linux-arm64"
 
 // value: how the refusal of a gesture a typed name answers names the doing
 // and the done, by its action.
@@ -278,6 +283,69 @@ func Codes() map[fail.Code]Wording {
 		},
 		accountscalls.ToServer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a server: station shares no account with it", "give it its secrets with your own tooling"
+		},
+		machinescalls.NotEnoughMemory: func(e *fail.Error) (string, string) {
+			said := "not enough memory on " + e.Subject + ": " + e.Detail["asked_gb"] + " GB asked, " + e.Detail["left_gb"] + " GB left for VMs"
+			if left, _ := strconv.Atoi(e.Detail["left_gb"]); left < 1 {
+				return said, "stop a VM first: station machines"
+			}
+			return said, "ask for less: --memory " + e.Detail["left_gb"] + "G"
+		},
+		machinescalls.NoImage: func(e *fail.Error) (string, string) {
+			if e.Detail["fetched"] == "yes" {
+				return "image " + e.Subject + " is not on " + e.Detail["mac"], "station images update " + e.Subject
+			}
+			return "image " + e.Subject + " is not built on " + e.Detail["mac"], "station images build " + e.Subject
+		},
+		machinescalls.EngineDown: func(e *fail.Error) (string, string) {
+			if e.Detail["installed"] == "yes" {
+				return "the engine is stopped on " + e.Subject, "station engine start"
+			}
+			return "the engine is not installed on " + e.Subject, "station engine start"
+		},
+		machinescalls.BadLifetime: func(e *fail.Error) (string, string) {
+			return (&machines.BadLifetimeError{Value: e.Subject}).Error(), "station machines create --persistent"
+		},
+		machinescalls.ServerNeedsName: func(*fail.Error) (string, string) {
+			return machinescalls.ServerNeedsNameRule.Why, machinescalls.ServerNeedsNameRule.Fix
+		},
+		machinescalls.CheckForServers: func(*fail.Error) (string, string) {
+			return machinescalls.CheckForServersRule.Why, machinescalls.CheckForServersRule.Fix
+		},
+		machinescalls.ServerBridged: func(*fail.Error) (string, string) {
+			return machinescalls.ServerBridgedRule.Why, machinescalls.ServerBridgedRule.Fix
+		},
+		machinescalls.BadCheck: func(e *fail.Error) (string, string) {
+			return (&machines.BadCheckError{Value: e.Subject}).Error(), "--check https://<name>:6443/readyz, or --check <name>:6443"
+		},
+		machinescalls.UnknownImage: func(e *fail.Error) (string, string) {
+			return (&machines.UnknownImageError{Image: e.Subject}).Error(), "station images for the images"
+		},
+		machinescalls.ServerTemplate: func(e *fail.Error) (string, string) {
+			return (&machines.ServerTemplateError{Name: e.Subject}).Error(), "station machines create <name> --server"
+		},
+		machinescalls.BadNetwork: func(e *fail.Error) (string, string) {
+			bridge := e.Detail["bridge"] == "yes"
+			said := (&machines.BadNetworkError{Value: e.Subject, Bridge: bridge}).Error()
+			if bridge {
+				return said, "share its ports instead: station ports share"
+			}
+			return said, "station machines create --network nat"
+		},
+		machinescalls.NoHypervisor: func(e *fail.Error) (string, string) {
+			return (&machines.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
+		},
+		imagescalls.NoLinuxBinary: func(*fail.Error) (string, string) {
+			return (&images.NoLinuxBinaryError{}).Error(), linuxBinaryHint
+		},
+		imagescalls.BinaryNotFound: func(e *fail.Error) (string, string) {
+			return (&images.BinaryNotFoundError{Path: e.Subject}).Error(), linuxBinaryHint
+		},
+		imagescalls.NoRecipe: func(e *fail.Error) (string, string) {
+			return (&images.NoRecipeError{Image: e.Subject}).Error(), "station images update " + e.Subject
+		},
+		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
+			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
 		},
 		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
 			return e.Subject + " stays: only an ephemeral workspace that is stopped, or whose agent finished, is deleted by a cleanup", "station machines cleanup"

@@ -1,0 +1,23 @@
+description: 'a workspace made from a server''s Machinefile is refused before anything is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/infra-base.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: infra-base
+          machine: { kind: server, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+      exit: 0
+    - command: 'machines create web --from infra-base'
+      exit: 2
+      stderr: |
+          Error: infra-base is a server's Machinefile: station sets up nothing inside a server
+          Hint: station machines create <name> --server
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"web","From":"infra-base"}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.server-template","subject":"infra-base","message":"infra-base is a server's Machinefile: station sets up nothing inside a server"}

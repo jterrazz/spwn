@@ -1,0 +1,8 @@
+description: 'a create aimed at another Mac is refused for memory in the name of that Mac'
+env: two-macs
+runs:
+    - command: 'machines create big --memory 60G --on jterrazz-mac-mini'
+      exit: 2
+      stderr: |
+          Error: not enough memory on jterrazz-mac-mini: 60 GB asked, 36 GB left for VMs
+          Hint: ask for less: --memory 36G

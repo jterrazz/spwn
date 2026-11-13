@@ -4,10 +4,10 @@ runs:
     - command: 'machines create --image macos'
       exit: 2
       stderr: |
-          Error: image macos is not on This Mac
+          Error: image macos is not on jterrazz-macbook-pro
           Hint: station images update macos
     - command: 'machines create --image macos --yes'
       exit: 2
       stderr: |
-          Error: image macos is not on This Mac
+          Error: image macos is not on jterrazz-macbook-pro
           Hint: station images update macos

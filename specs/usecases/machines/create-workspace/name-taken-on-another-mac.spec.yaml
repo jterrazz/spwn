@@ -4,5 +4,5 @@ runs:
     - command: 'machines create infra'
       exit: 2
       stderr: |
-          Error: "infra" is taken (on mac-mini)
+          Error: "infra" is taken (on jterrazz-mac-mini)
           Hint: pick another name

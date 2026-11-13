@@ -6,7 +6,7 @@ runs:
     - command: 'machines create'
       exit: 1
       stderr: |
-          Error: the engine is stopped on This Mac
+          Error: the engine is stopped on x
           Hint: station engine start
     - command: '--version >/dev/null; /usr/bin/grep -c -e ''tart clone'' -e launchctl .calls'
       exit: 1
