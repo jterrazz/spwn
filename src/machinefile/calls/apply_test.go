@@ -23,12 +23,16 @@ type calls struct {
 	hook   func()
 	broken []string
 	asked  []string
+	// value: the deadline of each install, zero for none.
+	until []time.Time
 }
 
-func (c *calls) Invoke(_ context.Context, _ machine.Ref, name string, in, out any, _ call.Progress) error {
+func (c *calls) Invoke(ctx context.Context, _ machine.Ref, name string, in, out any, _ call.Progress) error {
 	c.asked = append(c.asked, name)
 	switch name {
 	case appscalls.Install.Name:
+		until, _ := ctx.Deadline()
+		c.until = append(c.until, until)
 		give(out, c.answer)
 		if c.hook != nil {
 			c.hook()
@@ -118,5 +122,38 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 		if d.Detail == "" {
 			t.Errorf("%s kept with no words", d.Line.Step.Item)
 		}
+	}
+}
+
+func TestAPhaseInAVMHoldsItsItemsToTheirShare(t *testing.T) {
+	// invariant: inside a VM's phase (image, boot) the items run within
+	// catalog.ItemsBound, so the owner's lines keep catalog.RunBound of the
+	// phase's bound; apply's own phase bounds them by nothing.
+	l := machinefile.Line{Step: machinefile.Step{Item: "tool", Kind: catalog.KindApp, Method: "pkg"}, Action: machinefile.Install}
+	for _, c := range []struct {
+		phase catalog.Phase
+		share time.Duration
+	}{{catalog.PhaseBoot, catalog.ItemsBound}, {catalog.PhaseImage, catalog.ItemsBound}, {catalog.PhaseApply, 0}} {
+		t.Run(string(c.phase), func(t *testing.T) {
+			fake := &calls{answer: []apps.Outcome{{Name: "tool", Result: catalog.StateOK}}}
+			r := run{d: Deps{Calls: fake, Ledger: &ledger{}, Now: epoch}, in: ApplyIn{Phase: c.phase}, name: "ws", ended: map[string]catalog.State{}, there: map[string]bool{}}
+			ref, cancel := context.WithTimeout(context.Background(), c.share)
+			defer cancel()
+			due, _ := ref.Deadline()
+			r.carry(context.Background(), []machinefile.Line{l})
+			if len(fake.until) != 1 {
+				t.Fatalf("installed %d times; want once", len(fake.until))
+			}
+			got := fake.until[0]
+			if c.share == 0 {
+				if !got.IsZero() {
+					t.Fatalf("the install ran until %v; want no bound", got)
+				}
+				return
+			}
+			if off := got.Sub(due); off < 0 || off > time.Minute {
+				t.Fatalf("the install had %v; want the items' share, %v", off+c.share, c.share)
+			}
+		})
 	}
 }

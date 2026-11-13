@@ -18,7 +18,7 @@ const (
 	addressWait = 60 * time.Second
 	stopWait    = 120 * time.Second
 	recipeWait  = 30 * time.Minute
-	bakeWait    = 30 * time.Minute
+	bakeWait    = catalog.PhaseBound
 	pollEvery   = time.Second
 	remoteBin   = "/tmp/station"
 )

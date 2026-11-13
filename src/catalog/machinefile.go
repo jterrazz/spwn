@@ -105,7 +105,15 @@ type RunSpec struct {
 	Upgrade string `yaml:"upgrade,omitempty"`
 }
 
-const RunBound = 20 * time.Minute // value: the longest the owner's lines of one phase run.
+// value: the bounds of a phase run inside a VM (image, boot): its items
+// carried out within their own share, then its owner's lines within
+// theirs, so the bound of the whole is the sum, and lines that run long
+// end as a broken run step, never as the phase cut short.
+const (
+	ItemsBound = 15 * time.Minute
+	RunBound   = 20 * time.Minute
+	PhaseBound = ItemsBound + RunBound
+)
 
 // value: a size in megabytes, gigabytes or terabytes: `512M`, `32G`, `1T`.
 

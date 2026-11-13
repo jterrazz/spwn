@@ -102,21 +102,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			out.Bound = plan.Name
 		}
 		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}}
-		for i, l := range plan.Lines {
-			if ctx.Err() != nil {
-				for _, rest := range plan.Lines[i:] {
-					out.Done = append(out.Done, machinefile.Done{Line: rest, State: catalog.StateAbsent, Reason: machinefile.NotRun})
-				}
-				break
-			}
-			done := r.line(ctx, l)
-			r.ended[l.Step.Item] = done.State
-			r.there[l.Step.Item] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
-			if done.Reason == machinefile.NotRun {
-				r.ended[l.Step.Item] = catalog.StateBroken
-			}
-			out.Done = append(out.Done, done)
-		}
+		out.Done = r.carry(ctx, plan.Lines)
 		if err := ctx.Err(); err != nil {
 			out.Interrupted = true
 			return out, errors.Join(err, relock(ctx, d, plan, out.Done))
@@ -239,6 +225,36 @@ type run struct {
 	// value: the apps that read there once their line ended, whose blocks
 	// may be written.
 	there map[string]bool
+}
+
+// invariant: the items are carried out one at a time in the plan's
+// order; a phase run inside a VM (image, boot) gives them their own share
+// of its bound (catalog.ItemsBound), so the owner's lines after them keep
+// theirs: an item still running at the end of the share ends there, and
+// those after it are not run.
+func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
+	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, catalog.ItemsBound)
+		defer cancel()
+	}
+	out := make([]machinefile.Done, 0, len(lines))
+	for i, l := range lines {
+		if ctx.Err() != nil {
+			for _, rest := range lines[i:] {
+				out = append(out, machinefile.Done{Line: rest, State: catalog.StateAbsent, Reason: machinefile.NotRun})
+			}
+			break
+		}
+		done := r.line(ctx, l)
+		r.ended[l.Step.Item] = done.State
+		r.there[l.Step.Item] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
+		if done.Reason == machinefile.NotRun {
+			r.ended[l.Step.Item] = catalog.StateBroken
+		}
+		out = append(out, done)
+	}
+	return out
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
