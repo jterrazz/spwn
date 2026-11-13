@@ -223,6 +223,15 @@
     border-radius: var(--radius-well);
     transition: background var(--motion-hover);
 }
+.linked > .opener {
+    align-self: stretch;
+    margin-block: calc(-1 * var(--space-8));
+    padding-block: var(--space-8);
+}
+.linked.slim > .opener {
+    margin-block: calc(-1 * var(--space-4));
+    padding-block: var(--space-4);
+}
 .opener:hover {
     background: var(--raise);
 }
