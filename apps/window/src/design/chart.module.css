@@ -1,5 +1,5 @@
 .chart {
-    --c: var(--t3);
+    --c: var(--new);
     display: flex;
     align-items: flex-end;
     gap: var(--space-2);
