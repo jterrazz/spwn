@@ -1,6 +1,7 @@
 import type { PortsSharedPort, Target } from '@jterrazz/station-api';
 
 import { TypeTag, Value } from '../../design/index';
+import { isCalm } from '../../design/state-pill';
 import { Openable, shareAddressOf } from '../../engine/opener';
 import { shareToWord } from '../../engine/shown';
 import { SHARE_STATE_TONES } from '../../engine/tones';
@@ -64,6 +65,7 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
             <section aria-label={`Port ${share.guest_port}`} className={styles.shared}>
                 <GestureRow
                     {...row}
+                    state={isCalm(row.state.tone) ? undefined : row.state}
                     {...(to === '' ? {} : { tag: shareToWord(to), tagLook: 'hint' as const })}
                     sentence={<Value>{shareAddressOf(share)}</Value>}
                     trail={stopButton}

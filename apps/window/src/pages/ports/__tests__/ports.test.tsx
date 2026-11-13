@@ -124,6 +124,31 @@ describe('ports', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test("a VM Overview's calm share keeps no empty state column, so its address has the room", async () => {
+        // Given - linux-1's Overview over stories, its port 3000 shared and running
+        let gap = -1;
+        const result = await component.render(
+            pageOver(recordingFor('stories'), { machine: 'linux-1', page: 'machine', tab: 'Overview' }),
+            async (visitor) => {
+                // When - its Ports panel is drawn
+                await visitor.see(region('Port 3000'));
+                const row = document.querySelector('section[aria-label="Port 3000"]');
+                const text = row?.querySelector('span[title*="://"]')?.closest('div');
+                const stop = [...(row?.querySelectorAll('button') ?? [])].find(
+                    (one) => one.textContent === 'Stop sharing',
+                );
+                gap =
+                    (stop?.getBoundingClientRect().left ?? 0) -
+                    (text?.getBoundingClientRect().right ?? 0);
+            },
+        );
+
+        // Then - the address column runs up to the gesture, no state column between them
+        expect(gap).toBeGreaterThanOrEqual(0);
+        expect(gap).toBeLessThan(40);
+        expect(result.errors.text).toBe('');
+    });
+
     test('a port a declaration already names offers no declare', async () => {
         // Given - the same port, declared public by the LAN
         const declared = { ...EXPOSED, Declared: { machine: '', port: 5000, via: 'lan' } };
