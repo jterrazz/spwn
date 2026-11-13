@@ -60,7 +60,12 @@ export function ItemHead({
     );
 }
 
+const EVERY_SYSTEM = Object.keys(SYSTEM_WORDS).filter((system): system is System => system !== '');
+
 export function systemsWord(systems: readonly System[]): string {
+    if (EVERY_SYSTEM.every((system) => systems.includes(system))) {
+        return 'any system';
+    }
     return systems.map((system) => SYSTEM_WORDS[system]).join(', ');
 }
 

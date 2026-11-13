@@ -20,15 +20,12 @@ function HowApplied({ row, go, routeOf }: ItemProps & { row: SettingsRow }) {
     const systems = systemsWord(setting.Kinds ?? []);
     const facts = [
         { label: 'On', value: systems === '' ? null : systems },
-        {
-            label: needs.oneOf ? 'Needs one of' : 'Needs',
-            value:
-                needs.names.length === 0 ? null : (
-                    <ItemChips go={go} names={needs.names} routeOf={routeOf} />
-                ),
-        },
         { label: 'Asks you for', value: asks.length === 0 ? null : asks.join(', ') },
     ].filter((fact) => fact.value !== null);
+    const needed = {
+        label: needs.oneOf ? 'Needs one of' : 'Needs',
+        value: <ItemChips go={go} names={needs.names} routeOf={routeOf} />,
+    };
     return (
         <Panel
             action={undone ? <StatePill tone={undone.tone} word={undone.word} /> : undefined}
@@ -36,6 +33,7 @@ function HowApplied({ row, go, routeOf }: ItemProps & { row: SettingsRow }) {
             title="How it is applied"
         >
             {facts.length === 0 ? null : <Facts facts={facts} layout="line" />}
+            {needs.names.length === 0 ? null : <Facts facts={[needed]} layout="line" />}
         </Panel>
     );
 }
@@ -70,6 +68,10 @@ function Changes({ row }: { row: SettingsRow }) {
             </div>
         </Panel>
     );
+}
+
+function machinesWord(count: number): string {
+    return count === 1 ? '1 machine' : `${count} machines`;
 }
 
 function countedOn(name: string, matrix: SettingsMatrix | undefined): string[] | undefined {
@@ -114,7 +116,7 @@ export function SettingItem({
                             factOf('Category', categoryWord(setting.Category)),
                             factOf('Declared in', null),
                             factOf(
-                                'Machines it is for',
+                                on === undefined ? 'Machines' : machinesWord(on.length),
                                 on === undefined ? null : (
                                     <MachineChips go={props.go} macs={props.macs} names={on} />
                                 ),

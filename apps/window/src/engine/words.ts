@@ -159,9 +159,9 @@ export const LIFETIME_WORDS: Words<VmLifetime> = {
 };
 
 export const SYSTEM_WORDS: Words<MachinesVM['Kind']> = {
-    linux: 'linux',
-    mac: 'mac',
-    macos: 'macos',
+    linux: 'Linux',
+    mac: 'Mac',
+    macos: 'macOS VM',
 };
 
 export const VM_CHECK_WORDS: Words<'' | NonNullable<MachinesCheckStatus['state']>> = {

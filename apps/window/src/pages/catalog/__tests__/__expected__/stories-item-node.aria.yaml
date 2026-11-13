@@ -4,7 +4,7 @@
   - button "Add to a machine" [disabled]
   - region "How it is installed":
     - heading "How it is installed" [level=2]
-    - text: mac, linux, macos mise node · lts
+    - text: any system mise node · lts
     - term: Puts on your path
     - definition: node npm npx
   - region "Version":
