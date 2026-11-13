@@ -420,8 +420,18 @@ func Codes() map[fail.Code]Wording {
 			return "station is not installed on " + cmp.Or(e.Detail["label"], e.Subject), "install it there (scripts/install.sh), then add it again"
 		},
 		call.FarTooOld: func(e *fail.Error) (string, string) {
-			mac := cmp.Or(e.Detail["label"], e.Subject)
-			return mac + " runs station " + e.Detail["version"] + ", which has no " + e.Detail["call"], "update station on " + mac + " (scripts/install.sh there)"
+			far := cmp.Or(e.Detail["label"], e.Subject)
+			repair := "update station on " + far + " (scripts/install.sh there)"
+			if image := e.Detail["image"]; image != "" {
+				repair = "station images build " + image + ", then make " + far + " again from it: station machines delete " + far + " --confirm=" + far + ", then station machines create " + far + " --image " + image
+			}
+			if floor := e.Detail["floor"]; floor != "" {
+				return far + " runs station " + e.Detail["version"] + ": this station speaks to " + floor + " and later", repair
+			}
+			return far + " runs station " + e.Detail["version"] + ", which has no " + e.Detail["call"], repair
+		},
+		call.CallerTooOld: func(e *fail.Error) (string, string) {
+			return "station " + e.Detail["version"] + " is older than " + e.Detail["floor"] + ", the first release the far station speaks to", "update station here (scripts/install.sh)"
 		},
 	}
 	for code, word := range usage() {

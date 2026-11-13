@@ -4,9 +4,9 @@ runs:
     - command: 'ports declare 5000 --via lan --on mac-mini'
       exit: 1
       stderr: |
-          Error: mac-mini runs station v3.0.0, which has no ports.declare
+          Error: mac-mini runs station v3.2.0, which has no ports.declare
           Hint: update station on mac-mini (scripts/install.sh there)
-    - command: 'world upgrade jterrazz-mac-mini v3.1.0'
+    - command: 'world upgrade jterrazz-mac-mini v3.3.0'
       exit: 0
     - command: 'ports declare 5000 --via lan --on mac-mini'
       exit: 0

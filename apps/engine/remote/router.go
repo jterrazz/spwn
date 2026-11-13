@@ -182,16 +182,26 @@ func (r *Router) inEngine(name string) bool {
 }
 
 func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string) (*link, error) {
-	// invariant: a call the far Hello lacks is asked again of a fresh
-	// connection, so a Mac upgraded since its connection was opened serves it.
+	// invariant: a call the far Hello lacks, or a far release before
+	// api.Floor, is asked again of a fresh connection, so a Mac upgraded since
+	// its connection was opened serves it; a far release before the floor is
+	// refused before any call is sent.
 	l, hello, fresh, err := r.connect(ctx, t)
-	if err == nil && !fresh && !slices.Contains(hello.Calls, name) {
+	if err == nil && !fresh && (!slices.Contains(hello.Calls, name) || api.BeforeFloor(hello.Version)) {
 		r.drop(t.Mac(), l)
 		r.release(l)
 		l, hello, _, err = r.connect(ctx, t)
 	}
 	if err != nil {
 		return nil, err
+	}
+	if api.BeforeFloor(hello.Version) {
+		r.release(l)
+		detail := map[string]string{"version": hello.Version, "floor": api.Floor}
+		if r.reach.Label != nil {
+			detail["label"] = r.reach.Label(t.Mac())
+		}
+		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
 	if !slices.Contains(hello.Calls, name) {
 		r.release(l)

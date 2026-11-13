@@ -71,7 +71,7 @@
                     }
                 ]
             },
-            "station": "v3.1.0"
+            "station": "v3.3.0"
         },
         "jterrazz-mac-mini": {
             "engine": {
@@ -133,7 +133,7 @@
                     }
                 ]
             },
-            "station": "v3.0.0",
+            "station": "v3.2.0",
             "lacks": ["ports.declare", "activity.read"]
         }
     },

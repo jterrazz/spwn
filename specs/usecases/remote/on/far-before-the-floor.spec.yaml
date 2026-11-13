@@ -1,0 +1,17 @@
+description: 'a far Mac on a release before the floor is refused whatever it serves; a build of no release is not'
+env: mini-old
+runs:
+    - command: 'world upgrade jterrazz-mac-mini v3.1.0'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini runs station v3.1.0: this station speaks to v3.2.0 and later
+          Hint: update station on mac-mini (scripts/install.sh there)
+    - command: 'world upgrade jterrazz-mac-mini v3.1.0-3-gabcdef1'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	5000 on jterrazz-mac-mini	declared public (your LAN)

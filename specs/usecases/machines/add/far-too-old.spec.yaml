@@ -8,11 +8,11 @@ runs:
     - command: 'machines add jterrazz-mac-mini --user jterrazz.agent'
       exit: 0
       stdout: |
-          ●	mac-mini	added · ssh answers · station v3.0.0
-          ◐	mac-mini	runs v3.0.0 · update station there (scripts/install.sh)
+          ●	mac-mini	added · ssh answers · station v3.2.0
+          ◐	mac-mini	runs v3.2.0 · update station there (scripts/install.sh)
     - command: 'machines | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
-          ◐	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running · runs v3.0.0
+          ◐	jterrazz-mac-mini	Mac	jterrazz-mac-mini	Engine running · runs v3.2.0
           ●	infra	Server	jterrazz-mac-mini	Running · always on	8 CPU	24 GB
-          ◐	mac-mini	runs v3.0.0	update station there (scripts/install.sh)
+          ◐	mac-mini	runs v3.2.0	update station there (scripts/install.sh)

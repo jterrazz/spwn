@@ -56,7 +56,7 @@ func events() []event {
 		{"advance", []string{"<duration>"}, advance},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
-		{"upgrade", []string{"<mac>", "<version>"}, upgrade},
+		{"upgrade", []string{"<machine>", "<version>"}, upgrade},
 		{"address", []string{"<vm>", "<ip>"}, address},
 		{"slow", []string{"<machine>", "<duration>"}, slow},
 		{"reads", []string{"<mac>", "<fact>", "<value>"}, reads},
@@ -299,7 +299,13 @@ func unopened(w *World, args []string) error {
 	return nil
 }
 
+// invariant: a VM's station is the one inside it, which its guest serves;
+// a Mac's is its engine's, and its station's once the world names one.
 func upgrade(w *World, args []string) error {
+	if slice, ok := w.Macs[args[0]]; ok && w.Holder(args[0]) != "" {
+		slice.Station = args[1]
+		return nil
+	}
 	m, err := w.known(args[0])
 	if err != nil {
 		return err

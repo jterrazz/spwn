@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 )
@@ -25,7 +26,9 @@ const maxFrame = 64 << 20
 func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word call.Wording) error {
 	// invariant: serves frames until the caller closes its side; each
 	// request runs on its own, its answers written whole, one line each, and
-	// the server returns once every request has answered.
+	// the server returns once every request has answered. A caller whose
+	// hello names a release before api.Floor is answered its hello, and every
+	// request after it is refused unrun.
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	out := &writer{w: w}
@@ -33,9 +36,17 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 	defer running.Wait()
 	s := bufio.NewScanner(r)
 	s.Buffer(make([]byte, 0, 64<<10), maxFrame)
+	caller := ""
 	for s.Scan() {
 		var f api.Frame
 		if err := json.Unmarshal(s.Bytes(), &f); err != nil {
+			continue
+		}
+		if f.Hello != nil && api.BeforeFloor(f.Hello.Version) {
+			caller = f.Hello.Version
+		}
+		if caller != "" && f.Hello == nil {
+			out.write(api.Frame{ID: f.ID, Error: call.ToWire(tooOld(caller), word)})
 			continue
 		}
 		running.Go(func() { answer(ctx, f, out, calls, word) })
@@ -85,6 +96,10 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		}
 		reply(api.Frame{Done: true})
 	}
+}
+
+func tooOld(version string) error {
+	return fail.New(fail.Refused, call.CallerTooOld, "", map[string]string{"version": version, "floor": api.Floor})
 }
 
 func orNull(raw json.RawMessage) json.RawMessage {

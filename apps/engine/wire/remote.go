@@ -49,7 +49,7 @@ func (m machine) router(env kit.Env) *remote.Router {
 	}
 	r := remote.NewRouter(m.registry(env), m.profile, remote.Reach{
 		Macs:    macs,
-		Engine:  unix.New(guestRelay{m.macEngine()}, func() contract.Hello { return m.far.router.Served() }),
+		Engine:  unix.New(guestRelay{m.macEngine()}, func() contract.Hello { return m.far.router.Served() }, m.imageOf),
 		Locate:  m.locate,
 		Holder:  m.holder,
 		Version: Version(),
@@ -128,6 +128,21 @@ func (m machine) macOf(ctx context.Context, name string) (string, bool) {
 	}
 	mac, err := m.holder(ctx, name)
 	return mac, err == nil && mac != ""
+}
+
+// value: the image a VM of this Mac was made from, as its record keeps it;
+// empty for a name this Mac keeps no VM record of.
+func (m machine) imageOf(vm string) string {
+	records, err := m.machines(false).Records()
+	if err != nil {
+		return ""
+	}
+	for _, r := range records {
+		if r.Name == vm {
+			return r.Image
+		}
+	}
+	return ""
 }
 
 type guestRelay struct{ d macEngine }

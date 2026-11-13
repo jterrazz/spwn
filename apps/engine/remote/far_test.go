@@ -12,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/fake"
+	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract/contracttest"
 )
 
@@ -28,9 +29,9 @@ func laptopReaching(t *testing.T, miniVersion string) (r *remote.Router, macs, e
 	}
 	macs, engine = fake.New(), fake.New()
 	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: miniVersion})
-	engine.Serve(laptop.Ref.Name, fake.Mac{Registry: contracttest.Far(), Profile: linux1, Version: "v3.1.0"})
+	engine.Serve(laptop.Ref.Name, fake.Mac{Registry: contracttest.Far(), Profile: linux1, Version: "v3.3.0"})
 	r = remote.NewRouter(registry, laptop, remote.Reach{
-		Macs: macs, Engine: engine, Version: "v3.1.0",
+		Macs: macs, Engine: engine, Version: "v3.3.0",
 		Locate: func(name string) (machine.Ref, bool) {
 			switch name {
 			case linux1.Ref.Name:
@@ -52,7 +53,7 @@ func laptopReaching(t *testing.T, miniVersion string) (r *remote.Router, macs, e
 }
 
 func TestOnAnotherMacTheCallRunsThereAndItsAnswerIsWholeHere(t *testing.T) {
-	r, _, _, ran := laptopReaching(t, "v3.1.0")
+	r, _, _, ran := laptopReaching(t, "v3.3.0")
 	out, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -66,7 +67,7 @@ func TestOnAnotherMacTheCallRunsThereAndItsAnswerIsWholeHere(t *testing.T) {
 }
 
 func TestAVMOfThisMacIsReachedThroughThisMacsEngine(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.1.0")
+	r, macs, _, _ := laptopReaching(t, "v3.3.0")
 	macs.Down(mini)
 	out, err := call.Invoke(t.Context(), r, machine.Ref{Name: "linux-1"}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	if err != nil || out.App != "jq" {
@@ -75,16 +76,29 @@ func TestAVMOfThisMacIsReachedThroughThisMacsEngine(t *testing.T) {
 }
 
 func TestAFarBinaryWithoutTheCallIsTooOldAndSaysItsVersion(t *testing.T) {
-	r, _, _, _ := laptopReaching(t, "v3.0.0")
+	r, _, _, _ := laptopReaching(t, "v3.2.0")
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, call.Call[struct{}, struct{}, struct{}]{Name: "ports.declare"}, struct{}{}, nil)
 	var e *fail.Error
-	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v3.0.0" || e.Detail["call"] != "ports.declare" {
-		t.Errorf("ports.declare on a mini that lacks it: %v, want far-too-old naming the mini, v3.0.0 and the call", err)
+	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v3.2.0" || e.Detail["call"] != "ports.declare" {
+		t.Errorf("ports.declare on a mini that lacks it: %v, want far-too-old naming the mini, v3.2.0 and the call", err)
+	}
+}
+
+func TestAFarReleaseBeforeTheFloorIsRefusedAndABuildOfNoReleaseIsServed(t *testing.T) {
+	r, macs, _, ran := laptopReaching(t, "v3.1.0")
+	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
+	var e *fail.Error
+	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v3.1.0" || e.Detail["floor"] != api.Floor {
+		t.Errorf("installing jq on a mini at v3.1.0: %v, want far-too-old naming the mini, v3.1.0 and the floor", err)
+	}
+	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "dev"})
+	if out, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil); err != nil || out.App != "jq" || *ran != 0 {
+		t.Errorf("the same install once the mini runs a build of no release: %+v, %v; want jq installed there", out, err)
 	}
 }
 
 func TestAMacThatDoesNotAnswerIsUnreachableNamed(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.1.0")
+	r, macs, _, _ := laptopReaching(t, "v3.3.0")
 	macs.Down(mini)
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	var e *fail.Error
@@ -94,7 +108,7 @@ func TestAMacThatDoesNotAnswerIsUnreachableNamed(t *testing.T) {
 }
 
 func TestAServerRunsAFrameForItsOwnMachineHereAndForItsVMOverItsEngine(t *testing.T) {
-	r, _, _, ran := laptopReaching(t, "v3.1.0")
+	r, _, _, ran := laptopReaching(t, "v3.3.0")
 	if _, err := r.Serve(t.Context(), machine.Ref{Name: "laptop-alias"}, "apps.install-at-target", []byte(`{"App":"jq"}`), nil); err != nil || *ran != 1 {
 		t.Errorf("a frame for the laptop itself: %v, ran %d; want it run here once", err, *ran)
 	}
@@ -106,8 +120,8 @@ func TestAServerRunsAFrameForItsOwnMachineHereAndForItsVMOverItsEngine(t *testin
 }
 
 func TestAVMOfAnotherMacIsReachedThroughThatMacsEngineNeverByItsOwnName(t *testing.T) {
-	r, macs, engine, _ := laptopReaching(t, "v3.1.0")
-	macs.Serve(infra.Ref.Name, fake.Mac{Registry: contracttest.Far(), Profile: infra, Version: "v3.1.0"})
+	r, macs, engine, _ := laptopReaching(t, "v3.3.0")
+	macs.Serve(infra.Ref.Name, fake.Mac{Registry: contracttest.Far(), Profile: infra, Version: "v3.3.0"})
 	engine.Down(laptop.Ref.Name)
 	out, err := call.Invoke(t.Context(), r, machine.Ref{Name: infra.Ref.Name}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	if err != nil || out.App != "jq" {
@@ -119,7 +133,7 @@ func TestAVMOfAnotherMacIsReachedThroughThatMacsEngineNeverByItsOwnName(t *testi
 }
 
 func TestANameNoMacHoldsIsRefusedWithoutDiallingIt(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.1.0")
+	r, macs, _, _ := laptopReaching(t, "v3.3.0")
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: "nope"}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 	if !errors.Is(err, errNoMachine) {
 		t.Errorf("a call to nope: %v, want the holder's no-machine answer", err)
@@ -130,30 +144,30 @@ func TestANameNoMacHoldsIsRefusedWithoutDiallingIt(t *testing.T) {
 }
 
 func TestAMacUpgradedWhileTheConnectionLivesServesTheCallItLacked(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.0.0")
+	r, macs, _, _ := laptopReaching(t, "v3.2.0")
 	if _, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, portsDeclare, struct{}{}, nil); !isType(err, fail.FarTooOld) {
-		t.Fatalf("ports.declare on the mini at v3.0.0: %v, want far-too-old", err)
+		t.Fatalf("ports.declare on the mini at v3.2.0: %v, want far-too-old", err)
 	}
-	macs.Serve(mini, fake.Mac{Registry: withPortsDeclare(t), Profile: contracttest.Mini, Version: "v3.1.0"})
+	macs.Serve(mini, fake.Mac{Registry: withPortsDeclare(t), Profile: contracttest.Mini, Version: "v3.3.0"})
 	if _, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, portsDeclare, struct{}{}, nil); err != nil {
-		t.Errorf("the same ports.declare after the mini is upgraded to v3.1.0: %v, want it declared", err)
+		t.Errorf("the same ports.declare after the mini is upgraded to v3.3.0: %v, want it declared", err)
 	}
 }
 
 func TestAMacAsleepAtTheFirstCallAnswersOnceItWakes(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.1.0")
+	r, macs, _, _ := laptopReaching(t, "v3.3.0")
 	macs.Down(mini)
 	if _, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil); !isType(err, fail.Unreachable) {
 		t.Fatalf("a call to the mini asleep: %v, want unreachable", err)
 	}
-	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "v3.1.0"})
+	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "v3.3.0"})
 	if out, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil); err != nil || out.App != "jq" {
 		t.Errorf("the same call once the mini wakes: %+v, %v; want jq installed there", out, err)
 	}
 }
 
 func TestAMacWhoseLinkDroppedIsDialedAgainAndOneLiveLinkServesEveryCall(t *testing.T) {
-	r, macs, _, _ := laptopReaching(t, "v3.1.0")
+	r, macs, _, _ := laptopReaching(t, "v3.3.0")
 	install := func() error {
 		_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, farInstall, contracttest.InstallIn{App: "jq"}, nil)
 		return err
@@ -165,7 +179,7 @@ func TestAMacWhoseLinkDroppedIsDialedAgainAndOneLiveLinkServesEveryCall(t *testi
 	if err := install(); !isType(err, fail.Unreachable) {
 		t.Fatalf("a call after the mini's link dropped: %v, want unreachable", err)
 	}
-	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "v3.1.0"})
+	macs.Serve(mini, fake.Mac{Registry: contracttest.Far(), Profile: contracttest.Mini, Version: "v3.3.0"})
 	if err := install(); err != nil {
 		t.Errorf("a call once the mini answers again: %v, want it run there", err)
 	}
@@ -175,13 +189,13 @@ func TestAMacWhoseLinkDroppedIsDialedAgainAndOneLiveLinkServesEveryCall(t *testi
 }
 
 func TestACallTheLinkLacksNeverCutsTheCallsStillRidingIt(t *testing.T) {
-	r, _, _, _ := laptopReaching(t, "v3.0.0")
+	r, _, _, _ := laptopReaching(t, "v3.2.0")
 	updates, err := r.Watch(t.Context(), machine.Ref{Name: mini}, "activity.read", struct{}{}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if _, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, portsDeclare, struct{}{}, nil); !isType(err, fail.FarTooOld) {
-		t.Fatalf("ports.declare on the mini at v3.0.0: %v, want far-too-old", err)
+		t.Fatalf("ports.declare on the mini at v3.2.0: %v, want far-too-old", err)
 	}
 	read := 0
 	for u := range updates {
@@ -202,7 +216,7 @@ func isType(err error, want fail.Type) bool {
 
 var portsDeclare = call.Call[struct{}, struct{}, struct{}]{Name: "ports.declare"}
 
-// value: the mini's calls once upgraded to v3.1.0, which adds ports.declare.
+// value: the mini's calls once upgraded to v3.3.0, which adds ports.declare.
 func withPortsDeclare(t *testing.T) *call.Registry {
 	t.Helper()
 	handlers := []call.Handler{call.Bind(call.Call[struct{}, struct{}, struct{}]{

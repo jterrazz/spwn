@@ -1,0 +1,21 @@
+description: 'a VM before the floor is refused with how to rebuild its image; a build of no release is not'
+fixture: ../../__fixtures__/docker/
+env: two-macs
+runs:
+    - command: 'world upgrade linux-1 v3.1.0'
+      exit: 0
+    - command: 'run docker rm --yes --on linux-1'
+      exit: 1
+      stderr: |
+          → now: dclean
+          Error: linux-1 runs station v3.1.0: this station speaks to v3.2.0 and later
+          Hint: station images build linux, then make linux-1 again from it: station machines delete linux-1 --confirm=linux-1, then station machines create linux-1 --image linux
+    - command: 'world upgrade linux-1 v3.1.0-3-gabcdef1'
+      exit: 0
+    - command: 'run docker rm --yes --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	containers	2 removed
+      stderr: |
+          → now: dclean

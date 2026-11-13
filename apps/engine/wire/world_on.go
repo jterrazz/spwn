@@ -968,7 +968,10 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	if w == nil {
 		w = &out
 	}
-	err := serve.Stream(ctx, cmd.Stdin, w, serve.Local(far.registry, far.profile, Version()), func(err error) *fail.Error { return kit.Translate(err, "") })
+	g.r.w.Lock()
+	version := cmp.Or(slice.Station, Version())
+	g.r.w.Unlock()
+	err := serve.Stream(ctx, cmd.Stdin, w, serve.Local(far.registry, far.profile, version), func(err error) *fail.Error { return kit.Translate(err, "") })
 	return contract.GuestResult{Stdout: out.String()}, err
 }
 

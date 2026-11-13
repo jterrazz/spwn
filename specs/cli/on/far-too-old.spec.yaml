@@ -9,12 +9,12 @@ runs:
             "type": "far-too-old",
             "code": "remote.far-too-old",
             "subject": "y",
-            "message": "y runs station v3.0.0, which has no apps.list",
+            "message": "y runs station v3.2.0, which has no apps.list",
             "hint": "update station on y (scripts/install.sh there)",
             "fix": null
           }
       stderr: |
-          Error: y runs station v3.0.0, which has no apps.list
+          Error: y runs station v3.2.0, which has no apps.list
           Hint: update station on y (scripts/install.sh there)
       files:
           .calls:

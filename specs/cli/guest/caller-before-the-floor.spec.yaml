@@ -1,0 +1,9 @@
+description: 'a caller of a release before the floor is answered its hello, and its call refused unrun'
+fixture: ./__fixtures__/vm/
+env: engine
+runs:
+    - command: '--version >/dev/null; printf ''%s\n'' ''{"v":2,"id":"1","hello":{"version":"v3.1.0"}}'' ''{"v":2,"id":"2","call":"activity.sample"}'' | HOME=$PWD/vm STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT=$PWD/vm/root "$STATION" guest serve --stdio | /usr/bin/jq -c ''if .id == "1" then [.id, (.hello != null)] else [.id, .error.code, .error.message] end'' | /usr/bin/sort'
+      exit: 0
+      stdout: |
+          ["1",true]
+          ["2","remote.caller-too-old","station v3.1.0 is older than v3.2.0, the first release the far station speaks to"]

@@ -186,3 +186,50 @@ func TestACallForAnotherMachineRidesFarAndOneForThisMachineRunsHere(t *testing.T
 		t.Fatalf("far was asked %v, want mac-mini's stop alone", far.asked)
 	}
 }
+
+func streamed(t *testing.T, caller string) (frames map[string]api.Frame, ran int) {
+	t.Helper()
+	registry, err := call.NewRegistry([]call.Handler{call.Bind(call.Call[struct{}, struct{}, struct{}]{
+		Name: "ports.declare", Where: call.AtTarget, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (struct{}, error) {
+			ran++
+			return struct{}{}, nil
+		},
+	}, struct{}{})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := `{"v":2,"id":"1","hello":{"version":"` + caller + `"}}` + "\n" + `{"v":2,"id":"2","call":"ports.declare"}` + "\n"
+	var out strings.Builder
+	if err := serve.Stream(t.Context(), strings.NewReader(in), &out, serve.Local(registry, laptop, "v3.3.0"), func(err error) *fail.Error {
+		var f *fail.Error
+		errors.As(err, &f)
+		return f
+	}); err != nil {
+		t.Fatal(err)
+	}
+	frames = map[string]api.Frame{}
+	for line := range strings.Lines(out.String()) {
+		var f api.Frame
+		if err := json.Unmarshal([]byte(line), &f); err != nil {
+			t.Fatalf("%q: %v", line, err)
+		}
+		frames[f.ID] = f
+	}
+	return frames, ran
+}
+
+func TestACallerOfAReleaseBeforeTheFloorIsAnsweredItsHelloAndRefusedEveryCall(t *testing.T) {
+	frames, ran := streamed(t, "v3.1.0")
+	if frames["1"].Hello == nil || frames["1"].Hello.Version != "v3.3.0" {
+		t.Errorf("the hello of a caller at v3.1.0 was answered %+v, want this station's hello", frames["1"])
+	}
+	refused := frames["2"].Error
+	if ran != 0 || refused == nil || refused.Code != call.CallerTooOld || refused.Detail["version"] != "v3.1.0" || refused.Detail["floor"] != api.Floor {
+		t.Errorf("a call from a caller at v3.1.0 ran %d times and answered %+v, want it refused unrun as %s", ran, refused, call.CallerTooOld)
+	}
+	frames, ran = streamed(t, "dev")
+	if ran != 1 || frames["2"].Error != nil {
+		t.Errorf("a call from a build of no release ran %d times and answered %+v, want it run", ran, frames["2"].Error)
+	}
+}

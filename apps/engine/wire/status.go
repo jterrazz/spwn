@@ -122,7 +122,7 @@ func (s hostedServers) Hosted(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	ask := unix.New(guestRelay(s), nil)
+	ask := unix.New(guestRelay(s), nil, nil)
 	for name, vm := range live {
 		if vm.State != engine.StateRunning {
 			continue
