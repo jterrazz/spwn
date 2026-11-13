@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 )
 
 func (s *Machinist) VM(name, verb string) (model.VMRecord, error) {
@@ -48,12 +49,12 @@ func (s *Machinist) LifetimeOf(name string) model.Lifetime {
 }
 
 func (s *Machinist) CheckStart(name string) error {
-	_, err := s.VM(name, "start")
+	_, err := s.VM(name, engine.VMStart)
 	return err
 }
 
 func (s *Machinist) CheckStop(name string) error {
-	_, err := s.VM(name, "stop")
+	_, err := s.VM(name, engine.VMStop)
 	return err
 }
 
@@ -64,11 +65,11 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	if err := s.EngineUp(ctx); err != nil {
 		return err
 	}
-	return s.engineAPI.Do(ctx, "start", name)
+	return s.engineAPI.Do(ctx, engine.VMStart, name)
 }
 
 func (s *Machinist) KeepAgents(name string, agents []string) error {
-	rec, err := s.VM(name, "stop")
+	rec, err := s.VM(name, engine.VMStop)
 	if err != nil {
 		return err
 	}
@@ -85,13 +86,13 @@ func (s *Machinist) Stop(ctx context.Context, name string) error {
 	if err := s.EngineUp(ctx); err != nil {
 		return err
 	}
-	return s.engineAPI.Do(ctx, "stop", name)
+	return s.engineAPI.Do(ctx, engine.VMStop, name)
 }
 
 func (s *Machinist) StopDirect(ctx context.Context, name string) error {
 	// value: the stop the engine's own Stop everything takes for a run that
 	// outlived the engine.
-	rec, err := s.VM(name, "stop")
+	rec, err := s.VM(name, engine.VMStop)
 	if err != nil {
 		return err
 	}
@@ -107,7 +108,7 @@ func (s *Machinist) StopDirect(ctx context.Context, name string) error {
 }
 
 func (s *Machinist) restartVM(ctx context.Context, name string, say func(phase, detail string)) (model.RestartReport, error) {
-	if _, err := s.VM(name, "restart"); err != nil {
+	if _, err := s.VM(name, engine.VMRestart); err != nil {
 		return model.RestartReport{}, err
 	}
 	if err := s.EngineUp(ctx); err != nil {
@@ -115,7 +116,7 @@ func (s *Machinist) restartVM(ctx context.Context, name string, say func(phase, 
 	}
 	started := s.h.Now()
 	say("restarting", "poweroff, then start")
-	if err := s.engineAPI.Do(ctx, "restart", name); err != nil {
+	if err := s.engineAPI.Do(ctx, engine.VMRestart, name); err != nil {
 		return model.RestartReport{}, err
 	}
 	say("back", "the engine runs it again")
@@ -132,13 +133,13 @@ func (s *Machinist) restartVM(ctx context.Context, name string, say func(phase, 
 }
 
 func (s *Machinist) Delete(ctx context.Context, name string) (model.DeleteReport, error) {
-	if _, err := s.VM(name, "delete"); err != nil {
+	if _, err := s.VM(name, engine.VMDelete); err != nil {
 		return model.DeleteReport{}, err
 	}
 	if err := s.EngineUp(ctx); err != nil {
 		return model.DeleteReport{}, err
 	}
-	if err := s.engineAPI.Do(ctx, "delete", name); err != nil {
+	if err := s.engineAPI.Do(ctx, engine.VMDelete, name); err != nil {
 		return model.DeleteReport{}, err
 	}
 	return model.DeleteReport{Name: name}, nil

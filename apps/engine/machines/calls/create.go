@@ -16,6 +16,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 )
 
 var (
@@ -359,7 +360,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	}
 	say(model.StepRunning)
 	_ = born(model.BornBooting)
-	if err = s.engineAPI.Do(ctx, "run", r.Name); err != nil {
+	if err = s.engineAPI.Do(ctx, engine.VMRun, r.Name); err != nil {
 		return failed(s.unhealthy(ctx, r.Name, err))
 	}
 	say(model.StepAddress)
@@ -382,7 +383,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, progress 
 	if allMachines, err := s.AllMachines(ctx, false); err == nil {
 		_ = s.SSHBlocks(ctx, allMachines)
 	}
-	_ = s.engineAPI.Do(ctx, "ready", r.Name)
+	_ = s.engineAPI.Do(ctx, engine.VMReady, r.Name)
 	var reserved []model.Reserved
 	var env map[string]string
 	if !server {
