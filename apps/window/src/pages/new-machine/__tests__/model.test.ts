@@ -30,7 +30,7 @@ describe('model', () => {
             ...EMPTY_DRAFT,
             cpus: '2',
             diskGB: '40',
-            image: 'linux',
+            image: 'station-linux',
             lifetime: 'persistent' as const,
             memoryGB: ' 6 ',
             name: ' gate5 ',
@@ -43,9 +43,9 @@ describe('model', () => {
         // Then - sizes are bytes, and a server never carries a lifetime
         const Size = { CPUs: 2, DiskBytes: 40 * 2 ** 30, MemoryBytes: 6 * 2 ** 30 };
         expect(workspace).toStrictEqual({
-            Request: { Image: 'linux', Lifetime: 'persistent', Name: 'gate5', Size },
+            Request: { Image: 'station-linux', Lifetime: 'persistent', Name: 'gate5', Size },
         });
-        expect(server).toStrictEqual({ Image: 'linux', Name: 'gate5', Size });
+        expect(server).toStrictEqual({ Image: 'station-linux', Name: 'gate5', Size });
     });
 
     test('a size that is not a whole count is not sent', () => {
@@ -61,14 +61,18 @@ describe('model', () => {
     });
 
     test('the images offered are the names images.list gives, each once', () => {
-        // Given - two versions of linux and one of macos, then no answer
-        const reports = [record('linux', '2'), record('linux', '1'), record('macos', '1')];
+        // Given - two versions of station-linux and one of macos, then no answer
+        const reports = [
+            record('station-linux', '2'),
+            record('station-linux', '1'),
+            record('macos', '1'),
+        ];
 
         // When - the names are read
         const names = imagesOf(reports);
 
         // Then - each name once, in the engine's order
-        expect(names).toStrictEqual(['linux', 'macos']);
+        expect(names).toStrictEqual(['station-linux', 'macos']);
         expect(imagesOf(null)).toStrictEqual([]);
     });
 });
