@@ -1,7 +1,7 @@
 description: 'an update fetches the newest released linux beside the version held; its VMs keep the older'
 env: two-macs
 runs:
-    - command: 'images update linux'
+    - command: 'images update station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.03	fetched

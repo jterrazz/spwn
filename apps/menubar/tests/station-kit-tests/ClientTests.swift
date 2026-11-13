@@ -208,7 +208,7 @@ final class ClientTests: XCTestCase {
         let calls = Recorded()
         let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path, launcher: RecordingLauncher(calls: calls)).run(try fixtureAction("new-vm"), answers: ["Request.Lifetime": "persistent"])
         XCTAssertNil(status)
-        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}}},"v":2}"#])
+        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"station-linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}}},"v":2}"#])
         XCTAssertEqual(calls.all, [])
     }
 

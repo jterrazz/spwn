@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"errors"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -39,12 +38,11 @@ func validCheck(check string) bool {
 	return ok && mac != "" && err == nil && n > 0 && n < 65536
 }
 
-// value: the image a name stands for, by its name or one it was renamed
-// from; else the image a Machinefile of that name is built into, set up
+// value: the image of that name; else the image a Machinefile of that name is built into, set up
 // by the first boot of the built-in image of its system.
 func (s *Machinist) imageOf(ctx context.Context, name string) (catalog.Image, bool) {
 	for _, img := range s.o.Images {
-		if img.Name == name || slices.Contains(img.RenamedFrom, name) {
+		if img.Name == name {
 			return img, true
 		}
 	}
@@ -59,7 +57,7 @@ func (s *Machinist) imageOf(ctx context.Context, name string) (catalog.Image, bo
 	if !ok {
 		return catalog.Image{}, false
 	}
-	img.Name, img.Machinefile, img.RenamedFrom = t.Name, t.Name, nil
+	img.Name, img.Machinefile = t.Name, t.Name
 	return img, true
 }
 

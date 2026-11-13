@@ -1,13 +1,11 @@
-3 images on 2 Macs · 1 older · station-linux not built yet
-  macos not built yet
+3 images on 2 Macs · 1 older · macos not built yet
 
 Images
                    version       size  on
-  ● linux          2026.11.01  4.0 GB  This Mac  linux-1 · api
-  ○ linux          2026.10.20  4.0 GB  This Mac  older
-    → station images delete linux@2026.10.20
-  ● linux          2026.11.01  4.0 GB  mac-mini  infra
-  ○ station-linux                                not built yet
+  ● station-linux  2026.11.01  4.0 GB  This Mac  linux-1 · api
+  ○ station-linux  2026.10.20  4.0 GB  This Mac  older
+    → station images delete station-linux@2026.10.20
+  ● station-linux  2026.11.01  4.0 GB  mac-mini  infra
   ○ macos                                        not built yet
 
 → station images update

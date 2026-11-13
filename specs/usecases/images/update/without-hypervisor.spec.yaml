@@ -1,7 +1,7 @@
 description: 'without tart, images update is refused before anything is pulled, with the install that gives it'
 env: no-tart
 runs:
-    - command: 'images update linux'
+    - command: 'images update station-linux'
       exit: 2
       stderr: |
           Error: tart is required by images

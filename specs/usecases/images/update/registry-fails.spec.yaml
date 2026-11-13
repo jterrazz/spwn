@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: 'world fault ImageSource.Latest 1'
       exit: 0
-    - command: 'images update linux'
+    - command: 'images update station-linux'
       exit: 1
       stderr: |
           Error: the registry did not answer for station-linux: the registry does not answer, as the world scripted it

@@ -26,23 +26,23 @@ func (s *Builder) needsBinary(given string) error {
 	return nil
 }
 
-func (s *Builder) binary(ctx context.Context, given string) (string, error) {
+func (s *Builder) binary(ctx context.Context, image, given string) (string, error) {
 	if given != "" {
 		if !s.m.Exists(given) {
 			return "", &images.BinaryNotFoundError{Path: given}
 		}
 		return given, nil
 	}
-	return s.download(ctx)
+	return s.download(ctx, image)
 }
 
-func (s *Builder) download(ctx context.Context) (string, error) {
+func (s *Builder) download(ctx context.Context, image string) (string, error) {
 	cached := path.Join(s.o.Cache, releaseAsset+"-"+s.o.Version)
 	if s.m.Exists(cached) {
 		return cached, nil
 	}
 	fail := func(cause error) error {
-		return &images.BuildFailedError{Image: "linux", Step: "fetching " + releaseAsset + " " + s.o.Version, Cause: cause}
+		return &images.BuildFailedError{Image: image, Step: "fetching " + releaseAsset + " " + s.o.Version, Cause: cause}
 	}
 	base := releaseBase + s.o.Version + "/"
 	status, sums, err := s.m.Get(ctx, base+"checksums.txt")

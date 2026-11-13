@@ -5,7 +5,7 @@ fixture:
     - ./__fixtures__/stuck/
 env: engine
 runs:
-    - command: '--version > /dev/null; /bin/mkdir -p Library/LaunchAgents .local/state/station/vms .local/state/station/runs; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; printf ''{"name":"api","image":"linux","version":"2026.11.07","lifetime":"persistent"}\n'' > .local/state/station/vms/api.json; echo running > .tart-vms/api; s=$(/bin/sh -c ''/bin/sleep 9 > /dev/null 2>&1 & echo $!''); echo $s > .local/state/station/runs/api.pid; : > launchctl.loaded; "$STATION" engine stop --yes; echo "exit $?"; /bin/kill $s 2> /dev/null; /usr/bin/grep -c "^launchctl bootout" .calls || true'
+    - command: '--version > /dev/null; /bin/mkdir -p Library/LaunchAgents .local/state/station/vms .local/state/station/runs; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; printf ''{"name":"api","image":"station-linux","version":"2026.11.07","lifetime":"persistent"}\n'' > .local/state/station/vms/api.json; echo running > .tart-vms/api; s=$(/bin/sh -c ''/bin/sleep 9 > /dev/null 2>&1 & echo $!''); echo $s > .local/state/station/runs/api.pid; : > launchctl.loaded; "$STATION" engine stop --yes; echo "exit $?"; /bin/kill $s 2> /dev/null; /usr/bin/grep -c "^launchctl bootout" .calls || true'
       exit: 0
       stdout: |
           ✗	engine	api did not stop · the engine keeps running

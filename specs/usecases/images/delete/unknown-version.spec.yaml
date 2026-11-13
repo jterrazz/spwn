@@ -1,8 +1,8 @@
 description: 'a version never held is refused, pointing at the versions'
 env: two-macs
 runs:
-    - command: 'images delete linux@1999.01.01 --yes'
+    - command: 'images delete station-linux@1999.01.01 --yes'
       exit: 2
       stderr: |
-          Error: image linux has no version 1999.01.01
+          Error: image station-linux has no version 1999.01.01
           Hint: station images lists the versions

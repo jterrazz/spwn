@@ -4,7 +4,7 @@ fixture:
     - ../__fixtures__/launchctl/
 env: engine
 runs:
-    - command: '--version > /dev/null; /bin/mkdir -p Library/LaunchAgents .local/state/station/vms .local/state/station/runs; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; printf ''{"name":"api","image":"linux","version":"2026.11.07","lifetime":"persistent"}\n'' > .local/state/station/vms/api.json; s=$(/bin/sh -c ''/bin/sleep 9 > /dev/null 2>&1 & echo $!''); echo $s > .local/state/station/runs/api.pid; : > launchctl.loaded; "$STATION" engine stop; echo "exit $?"; "$STATION" engine stop --yes; echo "exit $?"; /bin/kill $s 2> /dev/null; /usr/bin/grep -E "^(ssh|tart|launchctl bootout)" .calls | /usr/bin/sed -E ''s/gui\/[0-9]+/gui\/U/''; /usr/bin/jq -r .want .local/state/station/vms/api.json'
+    - command: '--version > /dev/null; /bin/mkdir -p Library/LaunchAgents .local/state/station/vms .local/state/station/runs; : > Library/LaunchAgents/com.jterrazz.station.engine.plist; printf ''{"name":"api","image":"station-linux","version":"2026.11.07","lifetime":"persistent"}\n'' > .local/state/station/vms/api.json; s=$(/bin/sh -c ''/bin/sleep 9 > /dev/null 2>&1 & echo $!''); echo $s > .local/state/station/runs/api.pid; : > launchctl.loaded; "$STATION" engine stop; echo "exit $?"; "$STATION" engine stop --yes; echo "exit $?"; /bin/kill $s 2> /dev/null; /usr/bin/grep -E "^(ssh|tart|launchctl bootout)" .calls | /usr/bin/sed -E ''s/gui\/[0-9]+/gui\/U/''; /usr/bin/jq -r .want .local/state/station/vms/api.json'
       exit: 0
       stdout: |
           exit 2

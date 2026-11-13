@@ -1,7 +1,7 @@
 description: 'a --binary that does not exist is refused before anything is fetched'
 env: two-macs
 runs:
-    - command: 'images build linux --binary $HOME/nowhere'
+    - command: 'images build station-linux --binary $HOME/nowhere'
       exit: 2
       stderr: |
           Error: {{workdir}}/nowhere: no such file

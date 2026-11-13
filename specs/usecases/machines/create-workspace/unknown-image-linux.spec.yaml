@@ -1,0 +1,8 @@
+description: 'linux names no image: the built-in Linux image is station-linux alone'
+env: two-macs
+runs:
+    - command: 'machines create --image linux'
+      exit: 2
+      stderr: |
+          Error: unknown image "linux"
+          Hint: station images for the images

@@ -8,11 +8,10 @@ All machines
   ◐ mac-mini    Mac                   unreachable  100.98.133.20  -
 Images
                    version       size  on
-  ● linux          2026.11.01  4.0 GB  jterrazz-macbook-pro  linux-1 · api
-  ○ linux          2026.10.20  4.0 GB  jterrazz-macbook-pro  older
-    → station images delete linux@2026.10.20
-  ● linux          2026.11.01  4.0 GB  jterrazz-mac-mini     infra
-  ○ station-linux                                            not built yet
+  ● station-linux  2026.11.01  4.0 GB  jterrazz-macbook-pro  linux-1 · api
+  ○ station-linux  2026.10.20  4.0 GB  jterrazz-macbook-pro  older
+    → station images delete station-linux@2026.10.20
+  ● station-linux  2026.11.01  4.0 GB  jterrazz-mac-mini     infra
   ○ macos                                                    not built yet
 Tailscale
   ● Tailscale        Running · jterrazz-macbook-pro.tail1234.ts.net

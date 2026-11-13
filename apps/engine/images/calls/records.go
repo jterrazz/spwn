@@ -17,16 +17,12 @@ const (
 
 func DiskName(image, version string) string { return imagePrefix + image + "-" + version }
 
-// invariant: an image's versions are those held under its name and under
-// each name it was renamed from, the newest first.
+// invariant: an image's versions are those held under its name, the
+// newest first.
 func (s *Builder) records(img catalog.Image) ([]images.Record, error) {
-	var out []images.Record
-	for _, name := range append([]string{img.Name}, img.RenamedFrom...) {
-		held, err := s.store.List(context.Background(), name)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, held...)
+	out, err := s.store.List(context.Background(), img.Name)
+	if err != nil {
+		return nil, err
 	}
 	slices.SortStableFunc(out, func(a, b images.Record) int { return images.CompareVersions(b.Version, a.Version) })
 	return out, nil

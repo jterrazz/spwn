@@ -112,7 +112,7 @@ func (s vmSheet) kind(h model.MacView, picked string) page.Field {
 }
 
 func system(key string) page.Field {
-	return page.Field{Key: key, Label: "System", Kind: page.FieldSegmented, Default: "linux", Options: []page.Option{{Value: "linux", Label: "Linux"}, {Value: "macos", Label: "macOS"}}}
+	return page.Field{Key: key, Label: "System", Kind: page.FieldSegmented, Default: "station-linux", Options: []page.Option{{Value: "station-linux", Label: "Linux"}, {Value: "macos", Label: "macOS"}}}
 }
 
 // invariant: SPEC A9 1-8: every stop labeled, the part past the Mac's

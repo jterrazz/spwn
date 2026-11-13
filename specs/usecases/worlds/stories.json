@@ -859,7 +859,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "3",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v4.0.0",
@@ -975,7 +975,7 @@
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "always-on",
                         "want": "running",
@@ -1028,7 +1028,7 @@
                 },
                 "linux-3": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1099,7 +1099,7 @@
                 },
                 "review-bot": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "running",
@@ -1171,7 +1171,7 @@
                         }
                     }
                 },
-                "station-image-linux-3": {
+                "station-image-station-linux-3": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -1542,7 +1542,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "3",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v4.0.0",
@@ -1625,7 +1625,7 @@
             "vms": {
                 "agent-7f": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1693,7 +1693,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -1708,7 +1708,7 @@
                 },
                 "linux-1": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "3",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -1814,7 +1814,7 @@
                         "[   31.774052] node[1190]: hmr update /src/pages/index.astro"
                     ]
                 },
-                "station-image-linux-3": {
+                "station-image-station-linux-3": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -1902,7 +1902,7 @@
     },
     "now": "2026-11-07T10:30:00Z",
     "registry": {
-        "linux": "3"
+        "station-linux": "3"
     },
     "this_mac": "macbook-pro",
     "user": "jterrazz"

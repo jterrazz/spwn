@@ -75,7 +75,7 @@ final class NewVMSheetTests: XCTestCase {
         defer { engine.stop() }
         let status = await ActionRunner(executable: "/u/bin/station", socket: engine.path).run(action, answers: ["Request.Lifetime": "persistent", "Share": "claude", "Options": Answers.open])
         XCTAssertNil(status)
-        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}},"Share":["claude"],"ShareFor":14400000000000},"v":2}"#])
+        XCTAssertEqual(engine.received, [#"{"call":"machines.create-workspace","id":"1","in":{"Request":{"Image":"station-linux","Lifetime":"persistent","Name":"linux-2","Network":"nat","Size":{"MemoryBytes":8589934592}},"Share":["claude"],"ShareFor":14400000000000},"v":2}"#])
     }
 
     func testCreateAndOpenInTerminalOpensItOnceMade() async throws {

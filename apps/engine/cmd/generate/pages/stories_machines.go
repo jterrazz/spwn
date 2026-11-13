@@ -62,7 +62,7 @@ func everyMachine() Scene {
 }
 
 func sceneVM(name, mac string, life model.Lifetime, state model.VMState, cpus int, memoryGB int64, ip string) model.VM {
-	vm := sized(model.VM{Name: name, Image: "linux", Version: "3", Mac: mac, Kind: catalog.Linux, Lifetime: life, State: state, SizeGB: 40, IP: ip, CreatedAt: storyNow.Add(-5 * 24 * time.Hour)}, cpus, memoryGB)
+	vm := sized(model.VM{Name: name, Image: "station-linux", Version: "3", Mac: mac, Kind: catalog.Linux, Lifetime: life, State: state, SizeGB: 40, IP: ip, CreatedAt: storyNow.Add(-5 * 24 * time.Hour)}, cpus, memoryGB)
 	if state == model.Running {
 		vm.Guest, vm.SSH = "connected", true
 		vm.BootAt = storyNow.Add(-2 * time.Hour)

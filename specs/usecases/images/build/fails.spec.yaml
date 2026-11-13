@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: 'world fault Guest.Exec 1'
       exit: 0
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 1
       stderr: |
           Error: image station-linux: the recipe failed: the guest connection broke, as the world scripted it
@@ -14,7 +14,7 @@ runs:
       stdout: |
           2026.11.01
           2026.10.20
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.04	built

@@ -1,7 +1,7 @@
 description: 'inside a server, images update is refused: only a Mac makes VMs'
 env: in-server
 runs:
-    - command: 'images update linux'
+    - command: 'images update station-linux'
       exit: 2
       stderr: |
           Error: infra keeps no images: only a Mac makes VMs

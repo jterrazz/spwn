@@ -298,8 +298,8 @@ func allMachines() model.AllMachines {
 	return model.AllMachines{Macs: []model.MacView{
 		{Name: "macbook", User: "jterrazz", StationVersion: "v2.0.0-250", ThisMac: true, Reachable: true, Engine: model.EngineView{Known: true, Running: true, Version: "v2.0.0-250"}, Node: model.Node{Online: true, IP: "100.98.133.14"},
 			VMs: []model.VM{
-				sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", CreatedAt: built}, 4, 4),
-				sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8),
+				sized(model.VM{Name: "linux-1", Image: "station-linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", CreatedAt: built}, 4, 4),
+				sized(model.VM{Name: "api", Image: "station-linux", Version: "3", Mac: "macbook", Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8),
 			}},
 		{Name: "mac-mini", User: "jterrazz", StationVersion: "v2.0.0-248", Reachable: true, Engine: model.EngineView{Known: true, Running: true, Version: "v2.0.0-248"}, Node: model.Node{Online: true, IP: "100.98.133.20"}},
 	}}
@@ -331,7 +331,7 @@ func machineLists() []Fixture {
 // section: running, then stopped.
 func server() pagemachines.VMOverview {
 	f := allMachines()
-	vm := sized(model.VM{Name: "infra", Image: "linux", Version: "3", Mac: "mac-mini", Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Want: "running", Check: "https://infra:6443/readyz", Device: "infra", CreatedAt: built}, 8, 24)
+	vm := sized(model.VM{Name: "infra", Image: "station-linux", Version: "3", Mac: "mac-mini", Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Want: "running", Check: "https://infra:6443/readyz", Device: "infra", CreatedAt: built}, 8, 24)
 	f.Macs[1].VMs = []model.VM{vm}
 	f.Macs[1].User = "jterrazz.agent"
 	return pagemachines.VMOverview{All: f, Mac: f.Macs[1], VM: vm}
@@ -350,9 +350,9 @@ func sshPages() []Fixture {
 
 func imageReports() []images.Report {
 	return []images.Report{
-		{Record: images.Record{Name: "linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "jterrazz-macbook-pro"},
-		{Record: images.Record{Name: "linux", Version: "2026.10.20", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "jterrazz-macbook-pro"},
-		{Record: images.Record{Name: "linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "jterrazz-mac-mini"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"linux-1", "api"}, Mac: "jterrazz-macbook-pro"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.10.20", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-240", BuiltAt: built.AddDate(0, 0, -20), SizeGB: 4}, Mac: "jterrazz-macbook-pro"},
+		{Record: images.Record{Name: "station-linux", Version: "2026.11.01", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: "v2.0.0-250", BuiltAt: built, SizeGB: 4}, Newest: true, VMs: []string{"infra"}, Mac: "jterrazz-mac-mini"},
 	}
 }
 

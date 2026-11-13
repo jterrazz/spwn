@@ -42,10 +42,6 @@
                   },
                   {
                     "kind": "text",
-                    "text": "station-linux not built yet"
-                  },
-                  {
-                    "kind": "text",
                     "text": "macos not built yet"
                   }
                 ]
@@ -96,9 +92,9 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/linux@2026.11.01",
+            "id": "jterrazz-macbook-pro/station-linux@2026.11.01",
             "mark": "ok",
-            "label": "linux",
+            "label": "station-linux",
             "cells": [
               {
                 "kind": "version",
@@ -134,9 +130,9 @@
         },
         {
           "row": {
-            "id": "jterrazz-macbook-pro/linux@2026.10.20",
+            "id": "jterrazz-macbook-pro/station-linux@2026.10.20",
             "mark": "absent",
-            "label": "linux",
+            "label": "station-linux",
             "cells": [
               {
                 "kind": "version",
@@ -161,15 +157,15 @@
             },
             "reason": "outdated",
             "hint": {
-              "command": "station images delete linux@2026.10.20"
+              "command": "station images delete station-linux@2026.10.20"
             }
           }
         },
         {
           "row": {
-            "id": "jterrazz-mac-mini/linux@2026.11.01",
+            "id": "jterrazz-mac-mini/station-linux@2026.11.01",
             "mark": "ok",
-            "label": "linux",
+            "label": "station-linux",
             "cells": [
               {
                 "kind": "version",
@@ -201,18 +197,6 @@
         },
         {
           "row": {
-            "id": "station-linux",
-            "mark": "absent",
-            "label": "station-linux",
-            "detail": {
-              "kind": "text",
-              "text": "not built yet"
-            },
-            "reason": "missing"
-          }
-        },
-        {
-          "row": {
             "id": "macos",
             "mark": "absent",
             "label": "macos",
@@ -231,7 +215,7 @@
         },
         {
           "mark": "absent",
-          "n": 3
+          "n": 2
         }
       ]
     }

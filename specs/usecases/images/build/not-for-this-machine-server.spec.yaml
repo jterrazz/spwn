@@ -1,7 +1,7 @@
 description: 'inside a server, images build is refused: only a Mac makes VMs'
 env: in-server
 runs:
-    - command: 'images build linux'
+    - command: 'images build station-linux'
       exit: 2
       stderr: |
           Error: infra keeps no images: only a Mac makes VMs

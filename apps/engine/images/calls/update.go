@@ -71,14 +71,6 @@ func (s *Builder) Update(ctx context.Context, names []string, progress func(imag
 func (s *Builder) updateOne(ctx context.Context, name string, progress func(images.Step)) (images.Update, error) {
 	img, _ := s.image(ctx, name)
 	latest, err := s.source.Latest(ctx, name)
-	// invariant: an image renamed is asked of its registry by each name
-	// it was known by too, for one release.
-	for _, was := range img.RenamedFrom {
-		if !errors.Is(err, imagescontract.ErrNotReleased) {
-			break
-		}
-		latest, err = s.source.Latest(ctx, was)
-	}
 	switch {
 	case errors.Is(err, imagescontract.ErrNotReleased):
 		return images.Update{}, &images.NotReleasedError{Image: name, Buildable: img.Recipe != ""}

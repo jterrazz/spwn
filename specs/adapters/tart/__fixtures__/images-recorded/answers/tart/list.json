@@ -1,5 +1,5 @@
 [
-  {"Source":"local","Name":"station-image-linux-2026.11.01","Disk":50,"Size":5,"Accessed":"2026-11-01T09:00:00Z","Running":false,"State":"stopped"},
-  {"Source":"local","Name":"station-image-linux-2026.11.07","Disk":50,"Size":6,"Accessed":"2026-11-07T09:00:00Z","Running":false,"State":"stopped"},
+  {"Source":"local","Name":"station-image-station-linux-2026.11.01","Disk":50,"Size":5,"Accessed":"2026-11-01T09:00:00Z","Running":false,"State":"stopped"},
+  {"Source":"local","Name":"station-image-station-linux-2026.11.07","Disk":50,"Size":6,"Accessed":"2026-11-07T09:00:00Z","Running":false,"State":"stopped"},
   {"Source":"OCI","Name":"ghcr.io/cirruslabs/ubuntu:24.04","Disk":20,"Size":5,"Accessed":"2026-11-01T09:00:00Z","Running":false,"State":"stopped"}
 ]

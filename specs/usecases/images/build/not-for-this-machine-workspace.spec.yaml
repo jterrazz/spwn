@@ -1,7 +1,7 @@
 description: 'inside a workspace, images build is refused: only a Mac makes VMs'
 env: in-workspace
 runs:
-    - command: 'images build linux'
+    - command: 'images build station-linux'
       exit: 2
       stderr: |
           Error: linux-1 keeps no images: only a Mac makes VMs

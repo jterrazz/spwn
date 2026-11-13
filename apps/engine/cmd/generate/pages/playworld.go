@@ -137,7 +137,7 @@ func PlayWorld(base []byte) []byte {
 		miniMac: {Model: "Mac16,11", Chip: "Apple M4 Pro", Memory: 64 * gb, CPUs: 14},
 		airName: {Model: "Mac15,12", Chip: "Apple M3", Memory: 24 * gb, CPUs: 8},
 	}
-	w := playWorld{Now: storyNow, ThisMac: proName, User: "jterrazz", Macs: map[string]*playMac{}, Registry: map[string]string{"linux": "3"}}
+	w := playWorld{Now: storyNow, ThisMac: proName, User: "jterrazz", Macs: map[string]*playMac{}, Registry: map[string]string{"station-linux": "3"}}
 	known := map[string]any{}
 	past := profiles()
 	pid := 1000
@@ -161,9 +161,9 @@ func PlayWorld(base []byte) []byte {
 			Tailnet:     &playNode{Self: ports.Self{Node: ports.Node{ID: h.Name, Name: h.Name, DNSName: h.Name + tailnet, IP: h.Node.IP, Online: true}, Sharing: ports.SharingState{Backend: "Running", On: true, DNSName: h.Name + tailnet}}},
 			Meter:       playMeterOf(past[h.Name], meterSample(cpu[h.Name], hw.CPUs, hw.Memory, storyNow.Add(-macUp(f, h.Name)))),
 			Facts:       macFacts(h.ThisMac),
-			Stores:      &playStores{Images: []images.Record{{Name: "linux", Version: "3", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
+			Stores:      &playStores{Images: []images.Record{{Name: "station-linux", Version: "3", Base: "ghcr.io/cirruslabs/ubuntu:24.04", Station: stationVer, BuiltAt: storyNow.Add(-6 * 24 * time.Hour), SizeGB: 4}}},
 		}
-		m.VMs["station-image-linux-3"] = &playVM{Disk: true, Size: model.Size{Disk: 4e9}}
+		m.VMs["station-image-station-linux-3"] = &playVM{Disk: true, Size: model.Size{Disk: 4e9}}
 		if h.ThisMac {
 			m.Engine.Awake = &awake.Kept{Session: f.Awake.Session}
 			m.Disk = &playDisk{Total: 994e9, Free: 388e9}

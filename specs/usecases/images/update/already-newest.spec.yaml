@@ -1,7 +1,7 @@
 description: 'an image at its newest released version is said so, nothing fetched; bare asks every image held'
 env: two-macs
 runs:
-    - command: 'images update linux'
+    - command: 'images update station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.03	fetched

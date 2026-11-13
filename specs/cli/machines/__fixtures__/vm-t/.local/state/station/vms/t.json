@@ -1,6 +1,6 @@
 {
   "name": "t",
-  "image": "linux",
+  "image": "station-linux",
   "version": "2026.11.07",
   "lifetime": "ephemeral",
   "cpus": 4,

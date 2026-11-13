@@ -115,7 +115,7 @@ func (s *Builder) Build(ctx context.Context, r images.BuildRequest, progress fun
 	if _, err = s.e.Version(ctx); err != nil {
 		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Cause: err}
 	}
-	binary, err := s.binary(ctx, r.Binary)
+	binary, err := s.binary(ctx, wanted[0].img.Name, r.Binary)
 	if err != nil {
 		return nil, err
 	}

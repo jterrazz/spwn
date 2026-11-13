@@ -1,7 +1,7 @@
 description: 'inside a workspace, images delete is refused: only a Mac makes VMs'
 env: in-workspace
 runs:
-    - command: 'images delete linux --yes'
+    - command: 'images delete station-linux --yes'
       exit: 2
       stderr: |
           Error: linux-1 keeps no images: only a Mac makes VMs

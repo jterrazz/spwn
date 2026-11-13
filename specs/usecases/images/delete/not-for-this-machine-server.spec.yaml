@@ -1,7 +1,7 @@
 description: 'inside a server, images delete is refused: only a Mac makes VMs'
 env: in-server
 runs:
-    - command: 'images delete linux --yes'
+    - command: 'images delete station-linux --yes'
       exit: 2
       stderr: |
           Error: infra keeps no images: only a Mac makes VMs

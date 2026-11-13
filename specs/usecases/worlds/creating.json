@@ -30,7 +30,7 @@
             "vms": {
                 "linux-4": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "2026.11.01",
                         "lifetime": "ephemeral",
                         "created_at": "2026-11-04T10:00:00Z",

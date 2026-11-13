@@ -1,7 +1,7 @@
 description: 'an update on another Mac fetches the image there, This Mac''s untouched'
 env: two-macs
 runs:
-    - command: 'images update linux --on jterrazz-mac-mini'
+    - command: 'images update station-linux --on jterrazz-mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

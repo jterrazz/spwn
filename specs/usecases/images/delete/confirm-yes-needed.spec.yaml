@@ -1,7 +1,7 @@
 description: 'off a terminal, deleting a version without --yes is refused and the image kept'
 env: two-macs
 runs:
-    - command: 'images delete linux@2026.10.20 </dev/null'
+    - command: 'images delete station-linux@2026.10.20 </dev/null'
       exit: 2
       stderr: |
           Error: refusing to delete without --yes

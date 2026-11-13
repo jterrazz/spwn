@@ -273,7 +273,7 @@ func (d Deps) create(ctx context.Context, in StartIn, p call.Progress) (string, 
 		return "", err
 	}
 	created, err := call.Invoke(ctx, d.Calls, machine.Ref{Name: in.New.Mac}, machinescalls.CreateWorkspace, machinescalls.CreateIn{
-		Request: machines.CreateRequest{Image: cmp.Or(in.New.Image, "linux"), Name: in.Name, Lifetime: machines.Ephemeral, Size: size},
+		Request: machines.CreateRequest{Image: cmp.Or(in.New.Image, "station-linux"), Name: in.Name, Lifetime: machines.Ephemeral, Size: size},
 		Confirm: in.New.Confirm,
 	}, p)
 	if err != nil {

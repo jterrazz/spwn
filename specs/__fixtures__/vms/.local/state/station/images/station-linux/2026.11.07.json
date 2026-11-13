@@ -1,5 +1,5 @@
 {
-  "name": "linux",
+  "name": "station-linux",
   "version": "2026.11.07",
   "base": "ghcr.io/cirruslabs/ubuntu:24.04",
   "station": "v3.0.0",

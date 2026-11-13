@@ -84,7 +84,7 @@
             "vms": {
                 "linux-1": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "2026.11.01",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -115,7 +115,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "2026.11.01",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -129,7 +129,7 @@
                     },
                     "guest": {}
                 },
-                "station-image-linux-2026.11.01": {
+                "station-image-station-linux-2026.11.01": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -137,7 +137,7 @@
                         "Disk": 4000000000
                     }
                 },
-                "station-image-linux-2026.10.20": {
+                "station-image-station-linux-2026.10.20": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -149,7 +149,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "2026.10.20",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -158,7 +158,7 @@
                         "size_gb": 3
                     },
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "2026.11.01",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -610,7 +610,7 @@
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "2026.11.01",
                         "lifetime": "persistent",
                         "want": "running",
@@ -625,7 +625,7 @@
                     "pid": 2001,
                     "guest": {}
                 },
-                "station-image-linux-2026.11.01": {
+                "station-image-station-linux-2026.11.01": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -637,7 +637,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "2026.11.01",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",
@@ -736,6 +736,6 @@
     },
     "user": "jterrazz",
     "registry": {
-        "linux": "2026.11.03"
+        "station-linux": "2026.11.03"
     }
 }

@@ -3,7 +3,7 @@
     "this_mac": "jterrazz-macbook-pro",
     "user": "jterrazz",
     "registry": {
-        "linux": "2026.11.03"
+        "station-linux": "2026.11.03"
     },
     "macs": {
         "jterrazz-macbook-pro": {
@@ -36,7 +36,7 @@
                 }
             },
             "vms": {
-                "station-image-linux-2026.11.01": {
+                "station-image-station-linux-2026.11.01": {
                     "disk": true,
                     "size": {
                         "CPUs": 0,
@@ -48,7 +48,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "2026.11.01",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "v3.0.0",

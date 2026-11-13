@@ -20,11 +20,11 @@
                 },
                 "vm_user": "admin"
             },
-            "images": ["station-image-linux-1"],
+            "images": ["station-image-station-linux-1"],
             "vms": {
                 "linux-1": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "1",
                         "lifetime": "ephemeral",
                         "want": "running",
@@ -41,7 +41,7 @@
                 },
                 "api": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "1",
                         "lifetime": "persistent",
                         "want": "stopped",
@@ -59,7 +59,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "1",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",
@@ -96,11 +96,11 @@
                 "restart-after-power-cut": "autorestart=1\nwomp=1",
                 "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
             },
-            "images": ["station-image-linux-1"],
+            "images": ["station-image-station-linux-1"],
             "vms": {
                 "infra": {
                     "kept": {
-                        "image": "linux",
+                        "image": "station-linux",
                         "version": "1",
                         "lifetime": "always-on",
                         "want": "running",
@@ -120,7 +120,7 @@
             "stores": {
                 "images": [
                     {
-                        "name": "linux",
+                        "name": "station-linux",
                         "version": "1",
                         "base": "ghcr.io/cirruslabs/ubuntu:24.04",
                         "station": "",

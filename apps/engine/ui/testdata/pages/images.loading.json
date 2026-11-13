@@ -85,87 +85,77 @@
       "items": [
         {
           "row": {
-            "id": "jterrazz-macbook-pro/linux@2026.11.01",
-            "mark": "pending",
-            "label": "linux",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "size",
-                "n": 4000000000,
-                "stale": true
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-macbook-pro/linux@2026.10.20",
-            "mark": "pending",
-            "label": "linux",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "size",
-                "n": 4000000000,
-                "stale": true
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "jterrazz-mac-mini/linux@2026.11.01",
-            "mark": "pending",
-            "label": "linux",
-            "cells": [
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "size",
-                "n": 4000000000,
-                "stale": true
-              },
-              {
-                "kind": "pending"
-              },
-              {
-                "kind": "pending"
-              }
-            ],
-            "detail": {
-              "kind": "none"
-            }
-          }
-        },
-        {
-          "row": {
-            "id": "station-linux",
+            "id": "jterrazz-macbook-pro/station-linux@2026.11.01",
             "mark": "pending",
             "label": "station-linux",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "size",
+                "n": 4000000000,
+                "stale": true
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-macbook-pro/station-linux@2026.10.20",
+            "mark": "pending",
+            "label": "station-linux",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "size",
+                "n": 4000000000,
+                "stale": true
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "jterrazz-mac-mini/station-linux@2026.11.01",
+            "mark": "pending",
+            "label": "station-linux",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "size",
+                "n": 4000000000,
+                "stale": true
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
             "detail": {
               "kind": "none"
             }
@@ -185,7 +175,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 5
+          "n": 4
         }
       ]
     }

@@ -1,7 +1,7 @@
 description: 'without tart, images build is refused before anything is pulled, with the install that gives it'
 env: no-tart
 runs:
-    - command: 'images build linux'
+    - command: 'images build station-linux'
       exit: 2
       stderr: |
           Error: tart is required by images

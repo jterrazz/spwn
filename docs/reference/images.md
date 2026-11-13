@@ -31,7 +31,7 @@ station images build studio-linux     # a Machinefile of yours or of the shared 
 
 An image is built from a Machinefile of a VM that says `vm.image.from`, the base its disk starts from (`ghcr.io/cirruslabs/ubuntu:24.04`, pulled once, about 5 GB, and cloned for the build), read from every source as `station plan` reads it: a name no source holds is `no image "<name>"`, and a Machinefile that makes no image (a mixin, a computer's, a VM's with no `vm.image.from`) is refused naming why, both exit 2. The version is the UTC date, `2026.11.07`, with `.2` for a second build the same day. The record keeps the Machinefile, the hash of the recipe files and the hash of the Machinefile's chain (every file it extends, its overlay) and lock, so a bare `build` rebuilds an image whose recipe, Machinefile or lock changed; it also keeps the lock the build VM wrote once its image phase ran, the versions the image carries. Images need Tart: `station apps install tart`.
 
-`linux`, the image's name before it was named after its Machinefile, still names `station-linux` for one release, in every images command and in `machines create --image`; the versions built under it are listed, used and deleted as `station-linux`'s.
+`station-linux` is the built-in Linux image's only name: `linux` names no image, in any images command or in `machines create --image` (`unknown image "linux"`).
 
 `macos` has no recipe: a macOS workspace starts from `ghcr.io/cirruslabs/macos-tahoe-base` (the `station-macos` Machinefile's `vm.image.from`), as Cirrus Labs made it. Its `admin` has a passwordless sudo because that base ships `/etc/sudoers.d/admin-nopasswd`, not because station set it, so `station apply` there asks no password only while that file stays ([ADR-034](../decisions/034-apply-carries-a-machinefile-the-ledger-bounds-removal.md)).
 
@@ -42,7 +42,7 @@ station images update           # every image this Mac holds
 station images update station-linux     # ●  station-linux  2026.11.03  fetched
 ```
 
-Station releases no image: each Mac builds its own. An update asks the registry `ghcr.io/jterrazz/station-<image>` (one tag per version, and by the name an image was renamed from for one release, `station-linux`'s as `linux`) for the newest version, and an image it does not offer (the registry answers 403 or 404) exits 1 with `image station-linux is not released` and the hint `station images build station-linux`, the gesture that makes it here. A version the registry does offer is fetched only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
+Station releases no image: each Mac builds its own. An update asks the registry `ghcr.io/jterrazz/station-<image>` (one tag per version) for the newest version, and an image it does not offer (the registry answers 403 or 404) exits 1 with `image station-linux is not released` and the hint `station images build station-linux`, the gesture that makes it here. A version the registry does offer is fetched only when it is newer than every version held: `is the newest` otherwise. The fetched version lands whole as an image disk beside the others, or not at all: a registry that does not answer, or a fetch that fails, exits 1 and leaves the image as it was. Like a build, it changes only the next VMs.
 
 ## The recipe
 

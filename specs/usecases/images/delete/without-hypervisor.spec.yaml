@@ -1,7 +1,7 @@
 description: 'without tart, images delete is refused before anything is deleted, with the install that gives it'
 env: no-tart
 runs:
-    - command: 'images delete linux --yes'
+    - command: 'images delete station-linux --yes'
       exit: 2
       stderr: |
           Error: tart is required by images

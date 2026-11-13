@@ -1,9 +1,6 @@
 package catalog
 
-import (
-	"embed"
-	"slices"
-)
+import "embed"
 
 type ImageDefaults struct {
 	CPUs                   int
@@ -16,11 +13,8 @@ type Image struct {
 	// built-in template it is made from, its name the image's.
 	Name, Base, Recipe, Bake, Cleanup, Firstboot string
 	Machinefile                                  string
-	// value: the names the image was known by, read as its own for one
-	// release.
-	RenamedFrom []string
-	Defaults    ImageDefaults
-	Kind        MachineKind
+	Defaults                                     ImageDefaults
+	Kind                                         MachineKind
 }
 
 //go:embed images
@@ -39,7 +33,6 @@ var builtinImages = []Image{
 	{
 		Name:        "station-linux",
 		Machinefile: "station-linux",
-		RenamedFrom: []string{"linux"},
 		Recipe:      "images/linux.sh",
 		Bake:        "images/linux-bake.sh",
 		Cleanup:     "images/linux-cleanup.sh",
@@ -55,10 +48,8 @@ var builtinImages = []Image{
 }
 
 func (c Catalog) Image(name string) (Image, bool) {
-	// value: the image a name stands for, by its name or one it was renamed
-	// from.
 	for _, img := range c.Images {
-		if img.Name == name || slices.Contains(img.RenamedFrom, name) {
+		if img.Name == name {
 			return img, true
 		}
 	}

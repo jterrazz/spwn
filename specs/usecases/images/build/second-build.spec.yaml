@@ -2,11 +2,11 @@ description: 'a second build the same UTC day is version .2, beside the first'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.04	built
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.04.2	built

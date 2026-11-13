@@ -99,7 +99,7 @@ func (s *Builder) image(ctx context.Context, name string) (catalog.Image, error)
 	if !ok {
 		return catalog.Image{Name: name}, &images.NoRecipeError{Image: name}
 	}
-	img.Name, img.Machinefile, img.RenamedFrom = name, name, nil
+	img.Name, img.Machinefile = name, name
 	return img, nil
 }
 

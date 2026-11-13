@@ -1,8 +1,8 @@
-description: 'a build makes linux''s next version on This Mac; the VMs made from the older one keep it'
+description: 'a build makes station-linux''s next version on This Mac; the VMs made from the older one keep it'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
-    - command: 'images build linux --binary $HOME/station-linux'
+    - command: 'images build station-linux --binary $HOME/station-linux'
       exit: 0
       stdout: |
           ●	station-linux	2026.11.04	built

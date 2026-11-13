@@ -4,17 +4,17 @@ env:
     - two-macs
     - terminal
 runs:
-    - command: '--version >/dev/null; terminal "$STATION" images delete linux@2026.10.20'
+    - command: '--version >/dev/null; terminal "$STATION" images delete station-linux@2026.10.20'
       stdin: |
-          see Delete linux@2026.10.20?
+          see Delete station-linux@2026.10.20?
           send y
           see deleted
           screen
       exit: 0
       stdout: |
-          ┃ Delete linux@2026.10.20?
+          ┃ Delete station-linux@2026.10.20?
           ┃
-          ●       linux   2026.10.20      deleted
+          ●       station-linux   2026.10.20      deleted
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version) \(.vms | join(","))"'''
       exit: 0
       stdout: |

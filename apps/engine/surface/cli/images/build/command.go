@@ -29,7 +29,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:       "build [<image>...]",
 		Short:     "Build images; bare, every image that is missing or whose recipe changed",
-		Example:   "  station images build\n  station images build linux --binary .artifacts/go/station-linux-arm64",
+		Example:   "  station images build\n  station images build station-linux --binary .artifacts/go/station-linux-arm64",
 		Args:      cobra.ArbitraryArgs,
 		ValidArgs: imageNames(d.Images),
 		Declare: func(f *pflag.FlagSet, in *Input) {

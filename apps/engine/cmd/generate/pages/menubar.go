@@ -64,9 +64,9 @@ const (
 // This Mac with linux-1 (running, two ports shared) and api (stopped), the
 // mini with infra, a healthy server.
 func twoMacs() model.AllMachines {
-	linux1 := sized(model.VM{Name: "linux-1", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", Guest: "connected", CreatedAt: built}, 4, 4)
-	api := sized(model.VM{Name: "api", Image: "linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8)
-	infra := sized(model.VM{Name: "infra", Image: "linux", Version: "3", Mac: miniName, Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Guest: "connected", Want: "running",
+	linux1 := sized(model.VM{Name: "linux-1", Image: "station-linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Ephemeral, State: model.Running, SizeGB: 20, IP: "192.168.64.5", Guest: "connected", CreatedAt: built}, 4, 4)
+	api := sized(model.VM{Name: "api", Image: "station-linux", Version: "3", Mac: thisMacName, Kind: catalog.Linux, Lifetime: model.Persistent, State: model.Stopped, SizeGB: 40, CreatedAt: built}, 4, 8)
+	infra := sized(model.VM{Name: "infra", Image: "station-linux", Version: "3", Mac: miniName, Kind: catalog.Linux, Lifetime: model.AlwaysOn, State: model.Running, SizeGB: 80, IP: "192.168.64.7", Guest: "connected", Want: "running",
 		Check: "https://infra:6443/readyz", Device: "infra", CreatedAt: built, CheckStatus: model.CheckStatus{State: model.CheckPassing, At: keepAwakeNow.Add(-40 * time.Second), Answer: "200"}}, 8, 24)
 	infra.Resources.DiskBytes = 80 * gb
 	running := model.EngineView{Known: true, Running: true, Version: "v3.0.0"}

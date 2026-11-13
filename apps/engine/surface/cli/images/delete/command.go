@@ -27,7 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "delete <image>[@<version>]",
 		Short:   "Delete one version of an image, or every version; the VMs made from it stay",
-		Example: "  station images delete linux@2026.11.01 --yes\n  station images delete linux --yes",
+		Example: "  station images delete station-linux@2026.11.01 --yes\n  station images delete station-linux --yes",
 		Args:    cobra.ExactArgs(1),
 		Bind: func(in *Input, args []string) error {
 			in.Image, in.Version, _ = strings.Cut(args[0], "@")
