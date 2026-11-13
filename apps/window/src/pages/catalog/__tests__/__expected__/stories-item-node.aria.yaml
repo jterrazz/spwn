@@ -9,7 +9,7 @@
     - definition: node npm npx
   - region "Version":
     - heading "Version" [level=2]
-    - term: On this Mac
+    - term: On your machines
     - definition: Not installed
     - term: Rule
     - definition: Not given yet

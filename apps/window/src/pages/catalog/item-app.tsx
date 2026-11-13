@@ -78,7 +78,7 @@ function Version({ report }: { report: AppsReport }) {
         <Panel padded title="Version">
             <Facts
                 facts={[
-                    { label: 'On this Mac', value: here },
+                    { label: 'On your machines', value: here },
                     { label: 'Rule', value: <MissingMark /> },
                     {
                         label: 'Newest',
