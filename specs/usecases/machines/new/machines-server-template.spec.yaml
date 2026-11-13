@@ -1,0 +1,18 @@
+description: 'machines.new from a server''s file is refused: a workspace follows it, never a server'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/edge.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: edge
+          machine: { kind: server, system: { os: ubuntu, version: '24.04' } }
+          vm: { image: { from: 'ghcr.io/cirruslabs/ubuntu:24.04' } }
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.new","in":{"From":"edge"}}
+      exit: 0
+      stdout: |
+          {"code":"machines.server-template","subject":"edge"}

@@ -162,6 +162,15 @@ type AllMachines struct {
 	Read time.Time
 }
 
+type Unasked struct {
+	// value: a create asked for its machine file alone: that file, its
+	// image, size and lifetime, no name; the kind its name is given by;
+	// the built-in image whose own file it is, empty for a user's file.
+	Request CreateRequest
+	Kind    catalog.MachineKind
+	Builtin string
+}
+
 type CreateRequest struct {
 	Image, Name string
 	// value: a workspace's, ephemeral or persistent; a server's is always on.

@@ -28,13 +28,14 @@ const (
 	NameTaken       fail.Code = "machines.name-taken"
 	BeingCreated    fail.Code = "machines.being-created"
 	BadPurpose      fail.Code = "machines.bad-purpose"
+	TooLittle       fail.Code = "machines.too-little-memory"
 )
 
 // value: the refusals both creates declare, each coded by Worded; each
 // create adds those only it can end in, and a missing hypervisor is their
 // need, refused before they run.
 func createRefusals() []fail.Code {
-	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, BadCreator, BadPurpose, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
+	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, BadCreator, BadPurpose, TooLittle, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
 }
 
 func workspaceRefusals() []fail.Code {
@@ -72,6 +73,7 @@ func Worded(err error) error {
 		taken  *machines.NameTakenError
 		born   *machines.BeingCreatedError
 		why    *machines.BadPurposeError
+		little *machines.TooLittleMemoryError
 	)
 	switch {
 	case errors.As(err, &tooBig):
@@ -104,6 +106,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, BadName, bad.Name, nil)
 	case errors.As(err, &taken):
 		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On, "agent": taken.Agent})
+	case errors.As(err, &little):
+		return refused(fail.Refused, TooLittle, strconv.FormatInt(little.AskedBytes, 10), nil)
 	case errors.As(err, &why):
 		return refused(fail.Refused, BadPurpose, why.Purpose, nil)
 	case errors.As(err, &born):

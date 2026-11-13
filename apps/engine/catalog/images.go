@@ -27,12 +27,18 @@ const (
 	gibibyte = 1 << 30
 )
 
+// value: the built-in image a workspace is made of when none is named,
+// and its Machinefile's name.
+const (
+	LinuxImage = "station-linux"
+)
+
 // value: the images station knows; an image is no package of the catalog's
 // files, and reaches its readers through Catalog.Images.
 var builtinImages = []Image{
 	{
-		Name:        "station-linux",
-		Machinefile: "station-linux",
+		Name:        LinuxImage,
+		Machinefile: LinuxImage,
 		Recipe:      "images/linux.sh",
 		Bake:        "images/linux-bake.sh",
 		Cleanup:     "images/linux-cleanup.sh",

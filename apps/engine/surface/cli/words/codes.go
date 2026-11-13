@@ -20,6 +20,7 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -153,6 +154,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		machinefilecalls.CatalogNewer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", "update station"
+		},
+		machinefilecalls.NotATemplate: func(e *fail.Error) (string, string) {
+			return (&machinefile.NotTemplateError{Name: e.Subject}).Error(), "station explain --machinefile " + e.Subject
 		},
 		machinefilecalls.Mixin: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a mixin (it says no machine): it is extended, never applied", "extend it from a Machinefile that says its machine"
@@ -349,6 +353,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
 			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
+		},
+		machinescalls.TooLittle: func(*fail.Error) (string, string) {
+			return (&machines.TooLittleMemoryError{}).Error(), "ask for " + strconv.Itoa(machines.MinMemoryBytes>>30) + " GB or more: --memory " + strconv.Itoa(machines.MinMemoryBytes>>30) + "G"
 		},
 		machinescalls.BadPurpose: func(e *fail.Error) (string, string) {
 			return (&machines.BadPurposeError{Purpose: e.Subject}).Error(), "say what it is for in one shorter line"

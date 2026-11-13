@@ -237,7 +237,7 @@ func (s vmSheet) server(h model.MacView) []page.Action {
 	form := &page.Form{Title: "New VM", Subtitle: s.subtitle(h, id), Split: []string{ActionCreateOpen + id}, Primary: create(),
 		Fields: []page.Field{s.on(h, func(mac string) string { return ActionNewServerOn + mac }), s.name(vm, "A server needs a name you will recognize"), options}}
 	if h.Laptop {
-		form.Warn = name + " may sleep: a server pauses with it."
+		form.Warn = model.MaySleep(s.all, h)
 	}
 	run := &page.Run{Call: CallCreateServer, Target: macTarget(h.Name, s.self)}
 	a := page.Action{ID: id, Label: "New VM", Icon: "plus", Priority: 1, Mutates: true, Sheet: page.SheetNewVM, Form: form, Run: run,

@@ -15,6 +15,11 @@ type Counts struct {
 	Machines, Running, Stopped int
 }
 
+func MaySleep(f AllMachines, h MacView) string {
+	// value: what a server made on a laptop is warned of.
+	return Label(f, h) + " may sleep: a server pauses with it."
+}
+
 func Label(f AllMachines, h MacView) string {
 	if h.ThisMac {
 		return "This Mac"

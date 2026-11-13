@@ -1,0 +1,11 @@
+description: 'a server of less than 2 GB is refused before anything is made, its code on the wire'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-server","in":{"Name":"infra2","Image":"station-linux","Size":{"MemoryBytes":1073741824}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.too-little-memory","message":"a VM takes at least 2 GB of memory","hint":"ask for 2 GB or more: --memory 2G"}

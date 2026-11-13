@@ -16,7 +16,7 @@ runs:
           ●	linux-1	Created	Ephemeral · 2 CPU · 8 GB · 80 GB
       files:
           .calls: { contains: 'tart set linux-1 --cpu 2 --memory 8192 --disk-size 80' }
-    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 512M --name half; kill $d; wait $d'
+    - command: '--version >/dev/null; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --memory 2560M --name mid; kill $d; wait $d'
       exit: 0
       stdout: |
           ●	Running
@@ -24,7 +24,7 @@ runs:
           ●	SSH answers
           ●	vite	5173	https://macbook.tail1234.ts.net:40003
           ●	expo	8081	https://macbook.tail1234.ts.net:40002
-          ●	half	Created	Ephemeral · 4 CPU · 0.5 GB · 20 GB
+          ●	mid	Created	Ephemeral · 4 CPU · 2.5 GB · 20 GB
     - command: 'machines create --memory 12X'
       exit: 2
       stderr: |

@@ -1,0 +1,19 @@
+description: 'machines.new from the owner''s own file takes its size and lifetime, and offers no server'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit jterrazz-macbook-pro machinefiles/docs-bot.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: docs-bot
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm: { lifetime: persistent, resources: { cpus: 6, memory: 3G, disk: 30G } }
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {From, Size, Lifetime, Server, Servers: [.On[].Server]}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"machines.new","in":{"From":"docs-bot"}}
+      exit: 0
+      stdout: |
+          {"From":"docs-bot","Size":{"CPUs":6,"MemoryBytes":3221225472,"DiskBytes":30000000000},"Lifetime":"persistent","Server":null,"Servers":[null,null]}

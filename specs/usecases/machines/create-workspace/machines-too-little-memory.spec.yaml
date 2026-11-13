@@ -1,0 +1,16 @@
+description: 'a workspace of less than 2 GB is refused before anything is made, on the wire and the CLI'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Image":"station-linux","Size":{"MemoryBytes":1073741824}}}}
+      exit: 0
+      stdout: |
+          {"code":"machines.too-little-memory","subject":"1073741824","message":"a VM takes at least 2 GB of memory"}
+    - command: 'machines create --memory 1G'
+      exit: 2
+      stderr: |
+          Error: a VM takes at least 2 GB of memory
+          Hint: ask for 2 GB or more: --memory 2G

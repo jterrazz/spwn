@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -60,6 +61,11 @@ type Machines interface {
 	// value: keeps when each other Mac answered, and its VMs then.
 	Remember(ctx context.Context, f machines.AllMachines) error
 	CheckCreate(ctx context.Context, r machines.CreateRequest) (machines.CreateRequest, error)
+	// value: what a create from that machine file makes asked nothing
+	// else; station-linux's for none.
+	Unasked(ctx context.Context, from string) (machines.Unasked, error)
+	// value: the name a create of that kind takes unasked over the fleet f.
+	NameFor(ctx context.Context, kind catalog.MachineKind, f machines.AllMachines) (string, error)
 	// value: build is nil when the image is built, or when the owner was
 	// not asked to build it.
 	Create(ctx context.Context, r machines.CreateRequest, build ImageBuild, progress func(machines.Step)) (machines.Created, error)
@@ -122,7 +128,7 @@ type Machines interface {
 
 func All(d Deps) []call.Handler {
 	return []call.Handler{
-		call.BindWatch(List, d), call.Bind(CreateWorkspace, d), call.Bind(CreateServer, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(Delete, d),
+		call.BindWatch(List, d), call.BindWatch(NewSheet, d), call.Bind(CreateWorkspace, d), call.Bind(CreateServer, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(Delete, d),
 		call.Bind(Restart, d), call.Bind(RestartMac, d), call.Bind(Add, d), call.Bind(Forget, d), call.Bind(Unlock, d), call.Bind(SSH, d), call.Bind(Edit, d),
 		call.Bind(Log, d), call.Bind(Cleanup, d), call.Bind(Wake, d), call.Bind(Remind, d),
 	}

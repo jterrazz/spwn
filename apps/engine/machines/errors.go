@@ -90,6 +90,12 @@ func (e *NoEngineError) Error() string { return e.Hypervisor + " is not installe
 
 func (e *NoEngineError) Unwrap() error { return e.Cause }
 
+type TooLittleMemoryError struct{ AskedBytes int64 }
+
+func (e *TooLittleMemoryError) Error() string {
+	return "a VM takes at least " + strconv.Itoa(MinMemoryBytes>>30) + " GB of memory"
+}
+
 type TooBigError struct {
 	Mac             string
 	AskedGB, LeftGB int

@@ -1543,6 +1543,44 @@ export type MachinesCallsLogOut = {
     Lines: string[] | null;
 };
 
+export type MachinesCallsNewIn = {
+    From?: string;
+    On?: string;
+};
+
+export type MachinesCallsNewMachine = {
+    From: string;
+    Lifetime: 'ephemeral' | 'persistent' | 'always-on';
+    Lifetimes: ('ephemeral' | 'persistent' | 'always-on')[] | null;
+    Mac: string;
+    MinMemory: number;
+    Name: string;
+    On: MachinesCallsNewOn[] | null;
+    PurposeMax: number;
+    Server: MachinesCallsNewServer | null;
+    Size: MachinesResources;
+};
+
+export type MachinesCallsNewOn = {
+    Mac: string;
+    MaxMemory: number;
+    Ready: boolean;
+    Room: MachinesRoom | null;
+    Server: MachinesCallsNewServerOn | null;
+    ThisMac: boolean;
+    Verdict: CoreVerdictVerdict;
+};
+
+export type MachinesCallsNewServer = {
+    Image: string;
+    Size: MachinesResources;
+};
+
+export type MachinesCallsNewServerOn = {
+    Fit: 'fits' | 'no-room';
+    Verdict: CoreVerdictVerdict;
+};
+
 export type MachinesCallsRemindIn = {
     Name?: string;
 };
@@ -2991,6 +3029,8 @@ export type MachinesListInput = MachinesCallsListIn;
 export type MachinesListOutput = MachinesCallsListOut;
 export type MachinesLogInput = MachinesCallsVMIn;
 export type MachinesLogOutput = MachinesCallsLogOut;
+export type MachinesNewInput = MachinesCallsNewIn;
+export type MachinesNewOutput = MachinesCallsNewMachine;
 export type MachinesRemindInput = MachinesCallsRemindIn;
 export type MachinesRemindOutput = MachinesReminded;
 export type MachinesRestartInput = MachinesCallsRestartIn;
@@ -3119,6 +3159,7 @@ export interface Calls {
     'machines.forget': { in: MachinesForgetInput; out: MachinesForgetOutput; watch: false; confirm: 'forget' };
     'machines.list': { in: MachinesListInput; out: MachinesListOutput; watch: true };
     'machines.log': { in: MachinesLogInput; out: MachinesLogOutput; watch: false };
+    'machines.new': { in: MachinesNewInput; out: MachinesNewOutput; watch: true };
     'machines.remind': { in: MachinesRemindInput; out: MachinesRemindOutput; watch: false };
     'machines.restart': { in: MachinesRestartInput; out: MachinesRestartOutput; watch: false; confirm: 'restart-mac' };
     'machines.restart-mac': { in: MachinesRestartMacInput; out: MachinesRestartMacOutput; watch: false; confirm: 'restart-mac' };

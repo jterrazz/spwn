@@ -1,0 +1,351 @@
+{
+  "$defs": {
+    "core.verdict.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Sentence": {
+          "type": "string"
+        },
+        "Tone": {
+          "enum": [
+            "ok",
+            "warn",
+            "bad",
+            "plain",
+            "new"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Sentence",
+        "Tone"
+      ],
+      "type": "object"
+    },
+    "machines.Capacity": {
+      "additionalProperties": false,
+      "properties": {
+        "Free": {
+          "type": "integer"
+        },
+        "MacOS": {
+          "type": "integer"
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "VMs": {
+          "items": {
+            "$ref": "#/$defs/machines.Share"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Free",
+        "MacOS",
+        "Total",
+        "VMs"
+      ],
+      "type": "object"
+    },
+    "machines.PresetOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fit": {
+          "enum": [
+            "fits",
+            "no-room"
+          ],
+          "type": "string"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        },
+        "Preset": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Fit",
+        "MemoryBytes",
+        "Preset"
+      ],
+      "type": "object"
+    },
+    "machines.Resources": {
+      "additionalProperties": false,
+      "properties": {
+        "CPUs": {
+          "type": "integer"
+        },
+        "DiskBytes": {
+          "type": "integer"
+        },
+        "MemoryBytes": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CPUs",
+        "DiskBytes",
+        "MemoryBytes"
+      ],
+      "type": "object"
+    },
+    "machines.Room": {
+      "additionalProperties": false,
+      "properties": {
+        "Capacity": {
+          "$ref": "#/$defs/machines.Capacity"
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "Presets": {
+          "items": {
+            "$ref": "#/$defs/machines.PresetOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "RoomFor": {
+          "enum": [
+            "small",
+            "workspace",
+            "gate",
+            "none"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Capacity",
+        "Mac",
+        "Presets",
+        "RoomFor"
+      ],
+      "type": "object"
+    },
+    "machines.Share": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "machines.calls.NewIn": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "On": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "machines.calls.NewMachine": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "Lifetime": {
+          "enum": [
+            "ephemeral",
+            "persistent",
+            "always-on"
+          ],
+          "type": "string"
+        },
+        "Lifetimes": {
+          "items": {
+            "enum": [
+              "ephemeral",
+              "persistent",
+              "always-on"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Mac": {
+          "type": "string"
+        },
+        "MinMemory": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "On": {
+          "items": {
+            "$ref": "#/$defs/machines.calls.NewOn"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "PurposeMax": {
+          "type": "integer"
+        },
+        "Server": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.calls.NewServer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Size": {
+          "$ref": "#/$defs/machines.Resources"
+        }
+      },
+      "required": [
+        "From",
+        "Lifetime",
+        "Lifetimes",
+        "Mac",
+        "MinMemory",
+        "Name",
+        "On",
+        "PurposeMax",
+        "Server",
+        "Size"
+      ],
+      "type": "object"
+    },
+    "machines.calls.NewOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Mac": {
+          "type": "string"
+        },
+        "MaxMemory": {
+          "type": "integer"
+        },
+        "Ready": {
+          "type": "boolean"
+        },
+        "Room": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.Room"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Server": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/machines.calls.NewServerOn"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ThisMac": {
+          "type": "boolean"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Mac",
+        "MaxMemory",
+        "Ready",
+        "Room",
+        "Server",
+        "ThisMac",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "machines.calls.NewServer": {
+      "additionalProperties": false,
+      "properties": {
+        "Image": {
+          "type": "string"
+        },
+        "Size": {
+          "$ref": "#/$defs/machines.Resources"
+        }
+      },
+      "required": [
+        "Image",
+        "Size"
+      ],
+      "type": "object"
+    },
+    "machines.calls.NewServerOn": {
+      "additionalProperties": false,
+      "properties": {
+        "Fit": {
+          "enum": [
+            "fits",
+            "no-room"
+          ],
+          "type": "string"
+        },
+        "Verdict": {
+          "$ref": "#/$defs/core.verdict.Verdict"
+        }
+      },
+      "required": [
+        "Fit",
+        "Verdict"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/studio-station/blob/main/packages/api/schemas/calls/machines.new.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch machines.new of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/machines.calls.NewIn"
+    },
+    "out": {
+      "$ref": "#/$defs/machines.calls.NewMachine"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "machines.new",
+  "type": "object"
+}

@@ -671,6 +671,7 @@
         "machines.not-enough-memory",
         "machines.server-bridged",
         "machines.server-needs-name",
+        "machines.too-little-memory",
         "machines.unknown-image"
       ],
       "in": "CreateServerIn",
@@ -695,6 +696,7 @@
         "machines.no-image",
         "machines.not-enough-memory",
         "machines.server-template",
+        "machines.too-little-memory",
         "machines.unknown-image"
       ],
       "in": "CreateIn",
@@ -747,6 +749,19 @@
       "where": "at-target",
       "in": "VMIn",
       "out": "LogOut"
+    },
+    {
+      "name": "machines.new",
+      "schema": "station.machines.new/v1",
+      "where": "in-process",
+      "errors": [
+        "machinefile.not-a-template",
+        "machinefile.not-found",
+        "machines.server-template"
+      ],
+      "in": "NewIn",
+      "out": "NewMachine",
+      "watch": true
     },
     {
       "name": "machines.remind",

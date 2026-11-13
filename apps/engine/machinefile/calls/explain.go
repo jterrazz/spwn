@@ -65,6 +65,7 @@ const (
 	Invalid        fail.Code = "machinefile.invalid"
 	NewerSchema    fail.Code = "machinefile.newer-schema"
 	Mixin          fail.Code = "machinefile.mixin"
+	NotATemplate   fail.Code = "machinefile.not-a-template"
 	VMOnComputer   fail.Code = "machinefile.vm-on-a-computer"
 	Cycle          fail.Code = "machinefile.cycle"
 	NoMethod       fail.Code = "machinefile.no-method"
@@ -224,6 +225,7 @@ func Worded(err error) error {
 		notFound  *machinefile.NotFoundError
 		mixin     *machinefile.MixinError
 		vm        *machinefile.VMOnComputerError
+		notImage  *machinefile.NotTemplateError
 		cycle     *machinefile.CycleError
 		none      *machinefile.NoMethodError
 		pin       *machinefile.UnpinnableError
@@ -255,6 +257,8 @@ func Worded(err error) error {
 		return refused(fail.NotFound, NotFound, notFound.Name, map[string]string{"by": notFound.By})
 	case errors.As(err, &mixin):
 		return refused(fail.Refused, Mixin, mixin.Name, nil)
+	case errors.As(err, &notImage):
+		return refused(fail.Refused, NotATemplate, notImage.Name, nil)
 	case errors.As(err, &vm):
 		return refused(fail.Refused, VMOnComputer, vm.Name, map[string]string{"file": vm.File})
 	case errors.As(err, &cycle):

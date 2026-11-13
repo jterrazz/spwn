@@ -153,6 +153,10 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, claims{}, &model.UnknownImageError{Image: r.Image}
 	}
 	r.Image = img.Name
+	r.Size = unaskedSize(img, server, r.Size)
+	if r.Size.MemoryBytes < model.MinMemoryBytes {
+		return r, claims{}, &model.TooLittleMemoryError{AskedBytes: r.Size.MemoryBytes}
+	}
 	network, err := networkFor(img, r.Network)
 	if err != nil {
 		return r, claims{}, err
@@ -174,23 +178,58 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 	case !held.free(r.Name):
 		return r, claims{}, held.taken(r.Name)
 	}
-	size := model.Resources{CPUs: img.Defaults.CPUs, MemoryBytes: img.Defaults.MemoryBytes, DiskBytes: img.Defaults.DiskBytes}
-	if server {
-		size = model.ServerSize()
-	}
-	if r.Size.CPUs == 0 {
-		r.Size.CPUs = size.CPUs
-	}
-	if r.Size.MemoryBytes == 0 {
-		r.Size.MemoryBytes = size.MemoryBytes
-	}
-	if r.Size.DiskBytes == 0 {
-		r.Size.DiskBytes = size.DiskBytes
-	}
 	if c, ok := s.capacity(ctx); ok && !model.Fits(r.Size, c) {
 		return r, claims{}, &model.TooBigError{Mac: s.ThisMacName(), AskedGB: int(r.Size.MemoryBytes >> 30), LeftGB: int(c.Free >> 30)}
 	}
 	return r, held, nil
+}
+
+// value: the size a create makes: each part asked, else the image's
+// default, a server's own when it is one.
+func unaskedSize(img catalog.Image, server bool, asked model.Resources) model.Resources {
+	size := model.Resources{CPUs: img.Defaults.CPUs, MemoryBytes: img.Defaults.MemoryBytes, DiskBytes: img.Defaults.DiskBytes}
+	if server {
+		size = model.ServerSize()
+	}
+	return model.Resources{
+		CPUs:        cmp.Or(asked.CPUs, size.CPUs),
+		MemoryBytes: cmp.Or(asked.MemoryBytes, size.MemoryBytes),
+		DiskBytes:   cmp.Or(asked.DiskBytes, size.DiskBytes),
+	}
+}
+
+func (s *Machinist) Unasked(ctx context.Context, from string) (model.Unasked, error) {
+	// value: what a create of a workspace from that machine file makes
+	// when asked nothing else, its name aside: its file, image, size and
+	// lifetime; the built-in image whose own file it is, which a server
+	// may be made of.
+	r, _, err := s.fromTemplate(ctx, model.CreateRequest{From: cmp.Or(from, catalog.LinuxImage)})
+	if err != nil {
+		return model.Unasked{}, err
+	}
+	img, ok := s.imageOf(ctx, r.Image)
+	if !ok {
+		return model.Unasked{}, &model.UnknownImageError{Image: r.Image}
+	}
+	r.Image, r.Lifetime = img.Name, cmp.Or(r.Lifetime, model.Ephemeral)
+	r.Size = unaskedSize(img, false, r.Size)
+	out := model.Unasked{Request: r, Kind: img.Kind}
+	for _, builtin := range s.o.Images {
+		if builtin.Name == img.Name && builtin.Machinefile == r.From {
+			out.Builtin = builtin.Name
+		}
+	}
+	return out, nil
+}
+
+func (s *Machinist) NameFor(ctx context.Context, kind catalog.MachineKind, f model.AllMachines) (string, error) {
+	// value: the name a create of that kind takes unasked over the fleet
+	// as read.
+	held, err := s.claimsOf(ctx, f)
+	if err != nil {
+		return "", err
+	}
+	return allocateName(string(kind), held), nil
 }
 
 // value: refuses an image not built on this Mac, in its name.
@@ -247,6 +286,10 @@ func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	if err != nil {
 		return claims{}, err
 	}
+	return s.claimsOf(ctx, allMachines)
+}
+
+func (s *Machinist) claimsOf(ctx context.Context, allMachines model.AllMachines) (claims, error) {
 	c := claims{held: map[string]claim{}, on: map[string]string{}}
 	for _, h := range allMachines.Macs {
 		c.held[h.Name] = claimMac
