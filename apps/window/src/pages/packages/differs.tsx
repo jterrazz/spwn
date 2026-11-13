@@ -39,15 +39,21 @@ function DiffRow({ line, layer, toFile }: { line: PlanLine; layer: Layered; toFi
                     tone={CONDITION_TONES[Seen.Condition]}
                     word={CONDITION_WORDS[Seen.Condition]}
                 />
-                <span className={styles.muted}>
-                    {Seen.Version === '' ? Seen.Detail : Seen.Version}
-                </span>
+                {Seen.Version === '' ? (
+                    <span className={styles.muted}>{Seen.Detail}</span>
+                ) : (
+                    <Value look="raised">{Seen.Version}</Value>
+                )}
             </div>
             <div className={styles.will}>
                 {toFile ? (
                     <span className={styles.muted}>not given</span>
                 ) : (
-                    <StatePill tone={ACTION_TONES[line.Action]} word={ACTION_WORDS[line.Action]} />
+                    <StatePill
+                        dotted={false}
+                        tone={ACTION_TONES[line.Action]}
+                        word={ACTION_WORDS[line.Action]}
+                    />
                 )}
             </div>
         </div>

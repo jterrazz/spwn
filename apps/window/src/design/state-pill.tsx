@@ -14,11 +14,13 @@ export function StatePill({
     word,
     quiet = false,
     asWritten = false,
+    dotted = true,
 }: {
     tone: Tone;
     word: string;
     quiet?: boolean;
     asWritten?: boolean;
+    dotted?: boolean;
 }) {
     if (word.trim() === '') {
         throw new Error('A state pill carries its word: a colour alone is no state.');
@@ -27,5 +29,9 @@ export function StatePill({
     if (quiet && CALM.has(tone)) {
         return <span className={styles.quiet}>{shown}</span>;
     }
-    return <span className={`${styles.pill} ${styles[tone]}`}>{shown}</span>;
+    return (
+        <span className={`${styles.pill} ${styles[tone]} ${dotted ? '' : styles.undotted}`}>
+            {shown}
+        </span>
+    );
 }

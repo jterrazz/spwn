@@ -42,7 +42,8 @@
     border-radius: var(--radius-hair);
     transform: rotate(45deg);
 }
-.plain::before {
+.plain::before,
+.undotted::before {
     display: none;
 }
 @keyframes pulse {
