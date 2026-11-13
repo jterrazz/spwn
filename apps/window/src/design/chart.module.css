@@ -36,6 +36,13 @@
 .chart:not(.activity) .mark:last-child {
     background: var(--c);
 }
+.activity.last .mark:not(.gap) {
+    background: var(--t4);
+    opacity: 1;
+}
+.activity.last .mark:not(.gap):last-child {
+    background: var(--c);
+}
 .ok {
     --c: var(--ok);
 }

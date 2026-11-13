@@ -1,11 +1,11 @@
-import type { MachinesUptimeDay, MachinesVM } from '@jterrazz/station-api';
+import type { MachinesLatencyPoint, MachinesUptimeDay, MachinesVM } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../design/index';
 import type { Measured } from '../../design/index';
 import { vmCheck, vmSsh, vmState } from '../../engine/shown';
 import { clock, seconds, sentence } from '../../model/format';
-import { shortDay } from '../activity/when';
+import { agoOf, between, shortDay } from '../activity/when';
 
 import styles from './overview.module.css';
 
@@ -25,10 +25,14 @@ function Step({ label, children }: { label: string; children: ReactNode }) {
     );
 }
 
+function ageOf(at: string | undefined): string | undefined {
+    return agoOf(at, new Date().toISOString());
+}
+
 export function Health({ vm }: { vm: MachinesVM }) {
-    const at = clock(vm.CheckStatus.at);
+    const age = ageOf(vm.CheckStatus.at);
     return (
-        <Panel note={at === undefined ? '' : `checked at ${at}`} padded title="Health">
+        <Panel note={age === undefined ? '' : `checked ${age}`} padded title="Health">
             <div className={styles.steps}>
                 <Step label="Its state">
                     <StatePill {...vmState(vm)} />
@@ -53,10 +57,9 @@ export function Health({ vm }: { vm: MachinesVM }) {
 
 export function CheckTile({ vm }: { vm: MachinesVM }) {
     const last = (vm.Latency ?? []).at(-1);
-    const at = clock(vm.CheckStatus.at);
     return (
         <Tile
-            foot={sentence([vmCheck(vm).word, at === undefined ? undefined : `at ${at}`])}
+            foot={sentence([vmCheck(vm).word, ageOf(vm.CheckStatus.at)])}
             label="Check"
             unit={last ? 'ms' : ''}
             value={last ? millis(last.took) : <MissingMark />}
@@ -64,11 +67,18 @@ export function CheckTile({ vm }: { vm: MachinesVM }) {
     );
 }
 
+function spanOf(points: readonly MachinesLatencyPoint[]): string | undefined {
+    const [first, second] = points;
+    const kept = between(first?.at, points.at(-1)?.at);
+    const step = between(first?.at, second?.at);
+    return kept === undefined || step === undefined ? undefined : seconds(kept + step);
+}
+
 export function CheckLatency({ vm }: { vm: MachinesVM }) {
     const points = vm.Latency ?? [];
-    const first = points[0];
     const last = points.at(-1);
     const tallest = Math.max(0, ...points.map((point) => point.took));
+    const span = spanOf(points);
     return (
         <Panel
             action={
@@ -76,23 +86,26 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                     <span className={styles.meta}>{`${millis(last.took)} ms now`}</span>
                 ) : undefined
             }
+            note={span === undefined ? '' : `last ${span === '1 h' ? 'hour' : span}`}
             padded
             title="Check latency"
         >
-            {first && last && points.length > 1 ? (
+            {span !== undefined && points.length > 1 ? (
                 <div>
                     <Chart
+                        accent="last"
                         label="Latency of the check"
                         marks={points.map(
                             (point) => `${clock(point.at) ?? point.at} · ${millis(point.took)} ms`,
                         )}
                         size="activity"
+                        tone="new"
                         values={points.map((point) =>
                             tallest > 0 ? (point.took / tallest) * 100 : 0,
                         )}
                     />
                     <div className={styles.axis}>
-                        <span>{clock(first.at)}</span>
+                        <span>{`${span} ago`}</span>
                         <span>Now</span>
                     </div>
                 </div>

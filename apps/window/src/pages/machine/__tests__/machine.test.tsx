@@ -1,4 +1,4 @@
-import { component, content, file, heading } from '@jterrazz/test';
+import { clock, component, content, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../fixtures/page-over';
@@ -70,7 +70,8 @@ describe('machine', () => {
     });
 
     test("a server's Overview draws its health, its check's latency and its last days", async () => {
-        // Given - infra's Overview over two-macs, a server on the other Mac
+        // Given - infra's Overview over two-macs, a server on the other Mac, read 3 s after its check
+        using _ = clock.at('2026-11-04T10:00:07Z');
         const result = await component.render(
             overviewOver('two-macs', 'infra'),
             async (visitor) => {
@@ -80,7 +81,8 @@ describe('machine', () => {
             },
         );
 
-        // Then - its state, address, SSH and check, and the latency of each check kept
+        // Then - its state, address, SSH and check aged from the read, and the latency of each check kept
+        expect(result.tree.text).toContain('checked 3 s ago');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-infra-overview.aria.yaml'));
     });
 

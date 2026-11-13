@@ -11,6 +11,7 @@ export type ChartProps = {
     marks?: readonly string[] | undefined;
     size?: Size;
     tone?: Tone;
+    accent?: 'every' | 'last';
 };
 
 const FLOOR: Readonly<Record<Size, number>> = { activity: 3, row: 12, tile: 12 };
@@ -19,11 +20,18 @@ function heightOf(value: number, size: Size): Measured {
     return { '--height': `${String(Math.max(FLOOR[size], Math.min(100, value)))}%` };
 }
 
-export function Chart({ values, label, marks, size = 'tile', tone = 'plain' }: ChartProps) {
+export function Chart({
+    values,
+    label,
+    marks,
+    size = 'tile',
+    tone = 'plain',
+    accent = 'every',
+}: ChartProps) {
     return (
         <div
             aria-label={label}
-            className={`${styles.chart} ${styles[size]} ${tone === 'plain' ? '' : styles[tone]}`}
+            className={`${styles.chart} ${styles[size]} ${tone === 'plain' ? '' : styles[tone]} ${accent === 'last' ? styles.last : ''}`}
             role="img"
         >
             {values.map((value, index) =>
