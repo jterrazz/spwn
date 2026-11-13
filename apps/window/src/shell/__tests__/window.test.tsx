@@ -26,7 +26,7 @@ const recordingFor = await recordingsOf(
     'bare-mac',
     'mini-offline',
     'one-mac',
-    'stories-file',
+    'stories',
     'two-macs',
 );
 
@@ -251,7 +251,7 @@ describe('Window', () => {
         // Given - the window on Home over bare-mac, which lists no VM
         const result = await component.render(windowOver('bare-mac', HOME), async (visitor) => {
             // When - Start here's New machine is clicked
-            await visitor.click(within(region('Start here'), button('New machine')));
+            await visitor.click(button('New machine, a workspace'));
 
             // Then - the New machine dialog opens
             await visitor.see(dialog('New machine on this Mac'));
@@ -260,34 +260,9 @@ describe('Window', () => {
     });
 
     test("a workspace's machine file offers New machine, which opens the dialog", async () => {
-        // Given - stories-file, where linux-dev explained by name answers what agent-7f's explain answers
-        const recording = recordingFor('stories-file');
-        const explained = recording.exchanges.find(
-            (exchange) =>
-                exchange.request.call === 'machinefile.explain' &&
-                JSON.stringify(exchange.request.target) === '{"name":"agent-7f"}',
-        );
-        const byName: Recording = {
-            ...recording,
-            exchanges: [
-                ...recording.exchanges,
-                ...(explained === undefined
-                    ? []
-                    : [
-                          {
-                              ...explained,
-                              request: {
-                                  call: 'machinefile.explain',
-                                  in: { Machinefile: 'linux-dev' },
-                              },
-                          },
-                      ]),
-            ],
-        };
+        // Given - stories, where the engine explains linux-dev by name as a file whose machine.kind is workspace
         const result = await component.render(
-            <EngineProvider client={new Client(replayTransport(byName))}>
-                <Window initial={{ file: 'linux-dev', page: 'machine-files' }} pages={PAGES} />
-            </EngineProvider>,
+            windowOver('stories', { file: 'linux-dev', page: 'machine-files' }),
             async (visitor) => {
                 // When - its head's New machine is clicked
                 await visitor.click(
