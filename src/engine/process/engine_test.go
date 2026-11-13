@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/netip"
+	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -229,5 +231,35 @@ func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	}
 	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
 		t.Errorf("stop_all answered %+v, want %+v", got, want)
+	}
+}
+
+func TestAStartSaysWhyItsMountsAreNotItsMachinefilesAndKeepsWhatItShared(t *testing.T) {
+	// invariant: a start whose folders are not its Machinefile's says why
+	// in daemon.log and on the VM's detail line, and the record keeps the
+	// folders the run shares, for a later start that cannot read them.
+	h := newHarness(t, model.VMRecord{Name: "web", Lifetime: model.Persistent, Template: "studio-linux"})
+	shared := []model.Mount{{Computer: "/Users/me/data", Guest: "/data"}}
+	why := "web's Machinefile studio-linux could not be read: it shares the folders of its last start"
+	h.d.o.Mounts = func(context.Context, string) (model.MountsRead, error) {
+		return model.MountsRead{Mounts: shared, Why: why}, nil
+	}
+	var notes []string
+	h.d.note = func(line string) { notes = append(notes, line) }
+	v, _ := h.d.find("web")
+	if err := h.d.start(cancelled(t), v); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(notes, func(n string) bool { return strings.HasSuffix(n, " web mounts: "+why) }) {
+		t.Errorf("daemon.log: %q; want the line of why", notes)
+	}
+	h.d.mu.Lock()
+	detail := v.detail
+	h.d.mu.Unlock()
+	if detail != why {
+		t.Errorf("detail %q; want %q", detail, why)
+	}
+	if n := len(h.m.saved); n != 1 || !slices.Equal(h.m.saved[n-1].Mounts, shared) {
+		t.Errorf("saved %v; want the record keeping %v", h.m.saved, shared)
 	}
 }

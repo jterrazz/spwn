@@ -1,0 +1,40 @@
+description: 'a start whose Machinefile cannot be read shares the folders of its last start, saying why'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p data'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [station-linux]
+          vm:
+            lifetime: persistent
+            mounts: [{ computer: ~/data, guest: /data }]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create web --from studio-linux >/dev/null'
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/studio-linux.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: [studio-linux
+      exit: 0
+    - command: 'machines restart web'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	web	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["jterrazz-macbook-pro"].vms["web"] | {folders: .booted.folders, kept: .kept.mounts}'' world.json'
+      exit: 0
+      stdout: |
+          {"folders":["{{workdir}}/data:tag=station-1"],"kept":[{"computer":"{{workdir}}/data","guest":"/data"}]}
+    - command: 'machines --json | /usr/bin/jq -r ''.macs[].vms[] | select(.name == "web") | .detail'''
+      exit: 0
+      stdout: |
+          web's Machinefile studio-linux could not be read (~/.config/station/machinefiles/studio-linux.yaml: line 1: did not find expected ',' or ']'): it shares the folders of its last start

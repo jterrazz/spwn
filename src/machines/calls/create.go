@@ -474,14 +474,15 @@ func (s *Machinist) Save(r model.VMRecord) error {
 	})
 }
 
-// invariant: the env is the engine's to write, at the VM's run: each write
-// of the create keeps the one stored, read in the same Update as its
-// write, so the create never writes back an env the engine replaced.
+// invariant: the env and the mounts are the engine's to write, at the
+// VM's run: each write of the create keeps the ones stored, read in the
+// same Update as its write, so the create never writes back what the
+// engine replaced.
 func (s *Machinist) writeBirth(r model.VMRecord) error {
 	return s.recs.Update(context.Background(), r.Name, func(stored *model.Record) {
-		env := stored.Env
+		env, mounts := stored.Env, stored.Mounts
 		*stored = storedOf(r)
-		stored.Env = env
+		stored.Env, stored.Mounts = env, mounts
 	})
 }
 

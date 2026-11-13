@@ -17,6 +17,15 @@ type Mount struct {
 	ReadOnly bool   `json:"read_only,omitempty"`
 }
 
+// value: the folders a start shares, and why they are not its
+// Machinefile's when they are not: one line for the owner, empty when they
+// are.
+
+type MountsRead struct {
+	Mounts []Mount
+	Why    string
+}
+
 func MountTag(i int) string {
 	// value: the tag the hypervisor shares the mount at index i under, and
 	// the guest mounts it by.

@@ -117,6 +117,9 @@ func (d *Engine) adopt(ctx context.Context) {
 		switch {
 		case live:
 			v.run, v.state = run, engine.StateRunning
+			if remembered && known.State == engine.StateRunning {
+				v.detail = known.Detail
+			}
 			d.connect(ctx, v)
 			continue
 		case remembered && (known.State == engine.StateBroken || known.State == engine.StateStale || !known.RerunAt.IsZero() || known.Detail == model.PoweredOffInside):
@@ -172,13 +175,17 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 			}
 		}
 	}
-	var mounts []model.Mount
+	var read model.MountsRead
 	if d.o.Mounts != nil {
-		m, err := d.o.Mounts(ctx, name)
+		r, err := d.o.Mounts(ctx, name)
 		if err != nil {
 			return err
 		}
-		mounts = m
+		read = r
+	}
+	mounts := read.Mounts
+	if read.Why != "" {
+		d.logf(name+" mounts", read.Why)
 	}
 	d.refreshSelf(ctx)
 	d.renderEnv(ctx, v)
@@ -186,8 +193,9 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	if err != nil {
 		return err
 	}
+	d.keepMounts(v, mounts)
 	d.mu.Lock()
-	v.run, v.end, v.state, v.detail, v.stopping, v.mounts, v.read = run, nil, engine.StateRunning, "", false, mounts, true
+	v.run, v.end, v.state, v.detail, v.stopping, v.mounts, v.read = run, nil, engine.StateRunning, read.Why, false, mounts, true
 	v.bootAt, v.check = d.h.Now(), model.CheckStatus{}
 	if v.rec.Lifetime == model.AlwaysOn && v.down && v.walk == nil {
 		v.walk = &model.RestartWalk{Step: 1, At: v.bootAt}
@@ -195,6 +203,21 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	d.mu.Unlock()
 	d.connect(ctx, v)
 	return nil
+}
+
+// invariant: a run's record keeps the folders its start shared, so a
+// later start whose Machinefile cannot be read shares them again.
+func (d *Engine) keepMounts(v *vmState, mounts []model.Mount) {
+	d.mu.Lock()
+	same := slices.Equal(v.rec.Mounts, mounts)
+	if !same {
+		v.rec.Mounts = slices.Clone(mounts)
+	}
+	rec := v.rec
+	d.mu.Unlock()
+	if !same {
+		_ = d.m.Save(rec)
+	}
 }
 
 func (d *Engine) tick(ctx context.Context) {

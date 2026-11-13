@@ -26,6 +26,9 @@ type Record struct {
 	// value: the Machinefile it was made from (create --from); empty for
 	// one made from an image alone.
 	Template string
+	// value: the folders of its Mac its last start shared: what a start
+	// shares when its Machinefile cannot be read.
+	Mounts []Mount
 }
 
 type MacRecord struct {

@@ -59,28 +59,61 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 
 // value: the folders of this Mac a VM shares at a start, read from the
 // Machinefile it was made from as it says them now; none for a VM made
-// from an image alone. A Machinefile that cannot be read, or a folder of
-// this Mac that is not there, refuses the start: tart itself refuses a
-// shared folder that is missing ("A directory sharing device
-// configuration is invalid"), naming no folder.
-func (m machine) vmMounts(ctx context.Context, vm string) ([]model.Mount, error) {
+// from an image alone.
+//
+// invariant: a start never needs its Machinefile. One that cannot be read
+// (missing, unparsable) shares the folders the last start shared, those
+// still on this Mac, and says why. A folder of this Mac that is not there
+// refuses the start of a workspace, naming it, since tart alone refuses a
+// missing shared folder naming none ("A directory sharing device
+// configuration is invalid"); an always-on server starts without it,
+// saying so, since nothing may keep a server down.
+func (m machine) vmMounts(ctx context.Context, vm string) (model.MountsRead, error) {
 	rec, err := m.stores.machines.Get(ctx, vm)
 	if err != nil {
-		return nil, err
+		return model.MountsRead{}, err
 	}
 	if rec.Template == "" {
-		return nil, nil
+		return model.MountsRead{}, nil
 	}
 	t, err := machineTemplates{m}.Template(ctx, rec.Template)
 	if err != nil {
-		return nil, err
-	}
-	for _, mt := range t.Mounts {
-		if info, err := m.sys.FS.Stat(mt.Computer); err != nil || !info.IsDir() {
-			return nil, errors.New(mt.Computer + ", which " + vm + "'s Machinefile " + rec.Template + " shares at " + mt.Guest + ", is no folder of this Mac: make it, or take it out of vm.mounts")
+		kept, gone := m.onThisMac(rec.Mounts)
+		why := vm + "'s Machinefile " + rec.Template + " could not be read (" + firstLineOf(err.Error()) + "): it shares the folders of its last start"
+		if len(rec.Mounts) == 0 {
+			why = vm + "'s Machinefile " + rec.Template + " could not be read (" + firstLineOf(err.Error()) + "): it shares no folder"
 		}
+		if len(gone) > 0 {
+			why += ", but " + gone[0].Computer + ", no folder of this Mac now"
+		}
+		return model.MountsRead{Mounts: kept, Why: why}, nil
 	}
-	return t.Mounts, nil
+	kept, gone := m.onThisMac(t.Mounts)
+	if len(gone) == 0 {
+		return model.MountsRead{Mounts: kept}, nil
+	}
+	missing := gone[0].Computer + ", which " + vm + "'s Machinefile " + rec.Template + " shares at " + gone[0].Guest + ", is no folder of this Mac"
+	if rec.Lifetime != model.AlwaysOn {
+		return model.MountsRead{}, errors.New(missing + ": make it, or take it out of vm.mounts")
+	}
+	return model.MountsRead{Mounts: kept, Why: missing + ": the server starts without it"}, nil
+}
+
+// value: the mounts whose folder is on this Mac, and those whose is not.
+func (m machine) onThisMac(mounts []model.Mount) (kept, gone []model.Mount) {
+	for _, mt := range mounts {
+		if info, err := m.sys.FS.Stat(mt.Computer); err != nil || !info.IsDir() {
+			gone = append(gone, mt)
+			continue
+		}
+		kept = append(kept, mt)
+	}
+	return kept, gone
+}
+
+func firstLineOf(text string) string {
+	line, _, _ := strings.Cut(strings.TrimSpace(text), "\n")
+	return line
 }
 
 // value: a folder of a mount on this Mac, its `~` opened at the home.

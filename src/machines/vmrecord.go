@@ -60,4 +60,6 @@ type VMRecord struct {
 	Agents []string
 	// value: the Machinefile it was made from; empty for none.
 	Template string
+	// value: the folders of its Mac its last start shared.
+	Mounts []Mount
 }
