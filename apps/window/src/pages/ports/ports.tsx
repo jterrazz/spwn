@@ -14,13 +14,11 @@ import { NoVerdict, Reading, Unanswered } from '../kit/readings';
 import { Needs } from '../needs/needs-panel';
 import { Page } from '../page';
 import { usePortDeclare, usePortShare } from './port-gestures';
-import { aboutPort, needsOf, portsOf } from './ports-of';
+import { aboutPort, lineOf, needsOf, portsOf } from './ports-of';
 import type { PortsOf } from './ports-of';
 import { SharedRow } from './shared-row';
 
 import styles from './ports.module.css';
-
-const MAC_LINE = 'The ports of its machines are on their own Ports tab';
 
 function Answer({ port }: { port: PortsPort }) {
     if (port.Answer === '') {
@@ -132,7 +130,7 @@ type VmPortsProps = { of: PortsOf; vm: string; target: Target | undefined };
 
 function VmPorts({ of, vm, target }: VmPortsProps) {
     const listening = of.ports.filter((port) => !isPortShared(port, of.shared));
-    const rest = listening.length + of.notShared.length + of.quiet.length;
+    const rest = listening.length + of.notShared.length;
     return (
         <>
             {of.shared.length === 0 && rest > 0 ? null : (
@@ -164,14 +162,6 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
                             value={String(row.count)}
                         />
                     ))}
-                    {of.quiet.map((row) => (
-                        <Row
-                            key={`quiet/${row.vm}`}
-                            size="slim"
-                            title="On ports the system keeps"
-                            value={String(row.count)}
-                        />
-                    ))}
                 </Panel>
             )}
         </>
@@ -194,16 +184,6 @@ function MacPorts({ of, name, target }: MacPortsProps) {
             )}
         </Panel>
     );
-}
-
-function lineOf(of: PortsOf, vm: string | undefined): string {
-    const range = of.mac?.range;
-    if (vm === undefined) {
-        return MAC_LINE;
-    }
-    return range
-        ? `It may share ports ${range.low} to ${range.high} with your devices`
-        : 'Its ports are shared from its Mac';
 }
 
 export function PortsTab({ found, go }: { found: Found; go: Go }) {

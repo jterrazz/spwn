@@ -2,7 +2,7 @@ import type { PortsListing, PortsPort } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import { portReach } from '../../../engine/shown';
-import { aboutPort, portsOf } from '../ports-of';
+import { aboutPort, lineOf, portsOf } from '../ports-of';
 
 function port(name: string, number: number, on: string): PortsPort {
     return {
@@ -86,6 +86,18 @@ describe('ports of', () => {
         expect(of.ports.map((row) => row.Port)).toStrictEqual([3000]);
         expect(of.shared.map((row) => row.guest_port)).toStrictEqual([3000]);
         expect(of.notShared.map((row) => row.count)).toStrictEqual([2]);
+    });
+
+    test("a VM's short-lived listeners are counted on its head line, never listed", () => {
+        // Given - the workspace's ports, 214 of its listeners on ports the system keeps
+        const of = portsOf(LISTING, { mac: 'mbp', thisMac: true, vm: 'workspace' });
+        const quiet = { ...of, quiet: [{ count: 214, vm: 'workspace' }] };
+
+        // Then - the line says the count after what it may share, and says nothing of it when there is none
+        expect(lineOf(quiet, 'workspace')).toBe(
+            'Its ports are shared from its Mac · 214 short-lived listeners not listed',
+        );
+        expect(lineOf(of, 'workspace')).toBe('Its ports are shared from its Mac');
     });
 
     test('a far Mac the listing does not name holds nothing', () => {
