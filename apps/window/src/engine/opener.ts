@@ -2,6 +2,7 @@ import type { AccountsAccount, MachinesSSHTarget, PortsSharedPort } from '@jterr
 
 import { EngineError } from './engine-error';
 import { isRecord } from './frame';
+import { shareOpensFromHere } from './provisional';
 import type { Ipc } from './tauri';
 
 type Opens = 'terminal' | 'url';
@@ -26,8 +27,8 @@ export class Openable {
         return hint === '' ? undefined : new Openable('terminal', hint);
     }
 
-    static ofShare(share: PortsSharedPort): Openable | undefined {
-        const url = shareAddressOf(share);
+    static ofShare(share: PortsSharedPort, onThisMac: boolean): Openable | undefined {
+        const url = shareOpensFromHere(share, onThisMac);
         return share.http && url !== '' ? new Openable('url', url) : undefined;
     }
 }

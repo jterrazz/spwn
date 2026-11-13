@@ -110,6 +110,7 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
                         of.shared.map((share) => (
                             <SharedRow
                                 key={`${share.vm}:${share.guest_port}`}
+                                onThisMac={of.mac?.this_mac === true}
                                 share={share}
                                 target={target}
                             />

@@ -56,7 +56,7 @@ describe('opener', () => {
     test("a share's address and an account's fix are the engine's fields as sent", async () => {
         // Given - a shared port with a public address, and npm's fix
         const { invoked, ipc } = fakeInvoke();
-        const share = Openable.ofShare(SHARE);
+        const share = Openable.ofShare(SHARE, true);
         const fix = Openable.ofFix(NPM);
 
         // When - each is opened
@@ -80,8 +80,8 @@ describe('opener', () => {
         const answers = [
             Openable.ofSsh({ Address: 'api', Command: '', User: 'admin' }),
             Openable.ofFix({ provider: 'npm', state: 'ok' }),
-            Openable.ofShare({ ...SHARE, http: false }),
-            Openable.ofShare({ ...SHARE, urls: { local: '', public: '' } }),
+            Openable.ofShare({ ...SHARE, http: false }, true),
+            Openable.ofShare({ ...SHARE, urls: { local: '', public: '' } }, true),
         ];
 
         // When - each is read
@@ -89,6 +89,25 @@ describe('opener', () => {
 
         // Then - none can be opened
         expect(made).toStrictEqual([]);
+    });
+
+    test("a share's local address opens from its own Mac alone, its public one from any", () => {
+        // Given - the same share with a public address, and with a local one alone
+        const localOnly = { ...SHARE, urls: { ...SHARE.urls, public: '' } };
+
+        // When - each is read on this Mac's row and on another Mac's
+        const opens = [
+            Openable.ofShare(SHARE, false)?.value,
+            Openable.ofShare(localOnly, true)?.value,
+            Openable.ofShare(localOnly, false)?.value,
+        ];
+
+        // Then - the public address anywhere, the local one on this Mac only
+        expect(opens).toStrictEqual([
+            'https://mac.tail1234.ts.net:40001',
+            'http://127.0.0.1:40001',
+            undefined,
+        ]);
     });
 
     test("the shell's refusal comes back as a refusal the page draws", async () => {
@@ -101,7 +120,7 @@ describe('opener', () => {
                     }),
                 ),
         );
-        const share = Openable.ofShare(SHARE);
+        const share = Openable.ofShare(SHARE, true);
 
         // When - it is opened
         const opened = share ? await tauriOpener(ipc)(share) : undefined;

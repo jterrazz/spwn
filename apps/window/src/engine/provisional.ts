@@ -262,3 +262,12 @@ export function portsMacOf(
         (thisMac ? macs.find((candidate) => candidate.this_mac) : undefined)
     );
 }
+
+// outside: ports.list gives a share a public and a local address and no address to open from the window's Mac: a
+// outside: local one opens only on the Mac its row is flagged this_mac, until each share carries that address.
+export function shareOpensFromHere(share: PortsSharedPort, onThisMac: boolean): string {
+    if (share.urls.public !== '') {
+        return share.urls.public;
+    }
+    return onThisMac ? share.urls.local : '';
+}

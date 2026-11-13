@@ -8,9 +8,9 @@ import { OpenButton } from '../kit/opens';
 
 import styles from './ports.module.css';
 
-const NO_WEB_ADDRESS = 'The engine gives no web address for this port';
+type Opens = { openable: Openable | undefined; held: string };
 
-type AddressProps = { url: string; qr: boolean; label?: string; opens?: Openable | undefined };
+type AddressProps = { url: string; qr: boolean; label?: string; opens?: Opens | undefined };
 
 export function Address({ label = '', url, qr, opens }: AddressProps) {
     const [open, setOpen] = useState(false);
@@ -25,9 +25,9 @@ export function Address({ label = '', url, qr, opens }: AddressProps) {
                 <CopyButton name={`Copy ${url}`} text={url} />
                 {opens === undefined ? null : (
                     <OpenButton
-                        held={NO_WEB_ADDRESS}
+                        held={opens.held}
                         label="Open"
-                        openable={opens}
+                        openable={opens.openable}
                         variant="link"
                     />
                 )}

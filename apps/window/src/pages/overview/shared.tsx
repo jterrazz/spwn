@@ -44,7 +44,7 @@ export function SharedPorts({ found, vm, go }: Props) {
             </Panel>
         );
     }
-    const { shared } = portsOf(listing.out, {
+    const { mac, shared } = portsOf(listing.out, {
         mac: found.mac.Name,
         thisMac: found.mac.ThisMac,
         vm,
@@ -56,6 +56,7 @@ export function SharedPorts({ found, vm, go }: Props) {
                 <SharedRow
                     compact
                     key={`${share.vm}:${share.guest_port}`}
+                    onThisMac={mac?.this_mac === true}
                     share={share}
                     target={targetOf({ mac: found.mac })}
                 />

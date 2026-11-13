@@ -12,13 +12,32 @@ import { usePortStop } from './port-gestures';
 
 import styles from './ports.module.css';
 
+export const LOCAL_ELSEWHERE =
+    'Not opened: its address is local to the Mac it is shared on, and the engine gives none to open from this Mac';
+
+function ShareAddress({ share, onThisMac }: { share: PortsSharedPort; onThisMac: boolean }) {
+    return (
+        <Address
+            opens={
+                share.http
+                    ? { held: LOCAL_ELSEWHERE, openable: Openable.ofShare(share, onThisMac) }
+                    : undefined
+            }
+            qr={share.urls.public !== ''}
+            url={shareAddressOf(share)}
+        />
+    );
+}
+
 export function SharedRow({
     share,
     target,
+    onThisMac,
     compact = false,
 }: {
     share: PortsSharedPort;
     target: Target | undefined;
+    onThisMac: boolean;
     compact?: boolean;
 }) {
     const to = share.to ?? '';
@@ -64,11 +83,7 @@ export function SharedRow({
                 }
                 trailSize="wide"
             />
-            <Address
-                opens={Openable.ofShare(share)}
-                qr={share.urls.public !== ''}
-                url={shareAddressOf(share)}
-            />
+            <ShareAddress onThisMac={onThisMac} share={share} />
         </section>
     );
 }
