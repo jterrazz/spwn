@@ -58,8 +58,8 @@ describe('replay', () => {
         // When - a stop with another confirmation is sent
         const refused = client.call('engine.stop', {});
 
-        // Then - the world holds no answer to it, and the engine still reads running
-        await expect(refused).rejects.toThrow('test holds no answer to call engine.stop');
+        // Then - no answer, with no reason and no world named, and the engine still reads running
+        await expect(refused).rejects.toMatchObject({ message: '', wire: undefined });
         await expect(client.call('engine.read', {})).resolves.toStrictEqual({ State: 'running' });
     });
 });

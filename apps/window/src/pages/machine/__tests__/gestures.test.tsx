@@ -108,7 +108,7 @@ describe('gestures', () => {
                 await visitor.click(button('Start'));
 
                 // Then - Start's failure replaces Stop's done
-                await visitor.see(content('two-macs holds no answer', { exact: false }));
+                await visitor.see(content('No answer from the engine', { exact: false }));
                 await visitor.gone(content('Done'));
             },
         );

@@ -37,7 +37,7 @@ describe('New machine', () => {
             // Then - the sheet closes on the engine's answer, and gate5's page opens on what the engine says of gate5
             await visitor.gone(sheet);
             await visitor.see(heading('gate5 does not answer.'));
-            await visitor.gone(content('two-macs holds no answer', { exact: false }));
+            await visitor.gone(content('No answer from the engine', { exact: false }));
         });
         expect(result.errors.text).toBe('');
     });

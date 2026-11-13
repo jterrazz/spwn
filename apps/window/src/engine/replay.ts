@@ -87,11 +87,13 @@ function play(receiver: Receiver, id: string, { frames, gap, first, onLast }: Pl
     return timers;
 }
 
-function reasonOf(shown: Link, world: string, key: string): string {
+// invariant: a request the world holds no answer for ends with no reason, as an engine that never answers does: the
+// invariant: window draws its own no-answer state, and the world's name never reaches the page.
+function reasonOf(shown: Link): string {
     if (shown.kind === 'absent') {
         return shown.reason;
     }
-    return shown.kind === 'open' ? `${world} holds no answer to ${key}` : 'connecting';
+    return shown.kind === 'open' ? '' : 'connecting';
 }
 
 export type Pace = {
@@ -216,7 +218,7 @@ class Staging {
             ? play(tracked, request.id, played)
             : [
                   setTimeout(() => {
-                      tracked.end(reasonOf(shown, this.recording.world, key), false);
+                      tracked.end(reasonOf(shown), false);
                   }, 0),
               ];
         this.live.add(held);

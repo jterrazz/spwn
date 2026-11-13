@@ -49,7 +49,7 @@
     - heading "No answer from the engine." [level=1]
     - paragraph:
       - img "no answer"
-      - text: No answer · mini-offline holds no answer
+      - text: No answer
     - text: CPU no answer Memory no answer Disk no answer Its machines 1machine Not given yet
     - region "Memory":
       - heading "Memory" [level=2]
@@ -59,4 +59,4 @@
       - button "infra always-on · 8 CPU · 24 GB Unknown"
     - region "Packages":
       - heading "Packages" [level=2]
-      - text: No answer No answer from the engine. mini-offline holds no answer
+      - text: No answer No answer from the engine.
