@@ -96,5 +96,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [042 Versions are semver ranges, applied every night](decisions/042-versions-are-semver-ranges-applied-nightly.md) (Proposed)
 - [043 A shell block is judged against what station last wrote](decisions/043-a-shell-block-is-judged-against-what-station-last-wrote.md) (Proposed)
 - [044 An image is baked from its Machinefile; the recipe is plumbing alone](decisions/044-an-image-is-baked-from-its-machinefile.md) (Proposed)
+- [045 The agents family retires, and an agent is a package](decisions/045-the-agents-family-retires-an-agent-is-a-package.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
