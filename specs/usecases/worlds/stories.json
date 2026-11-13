@@ -351,7 +351,254 @@
                 "memory": {
                     "infra": {
                         "state": "running",
-                        "boot_at": "2026-10-26T10:30:00Z"
+                        "boot_at": "2026-10-26T10:30:00Z",
+                        "check": {
+                            "state": "passing",
+                            "at": "2026-11-07T10:29:20Z",
+                            "answer": "200"
+                        },
+                        "latency": [
+                            {
+                                "at": "2026-11-07T09:31:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:32:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:33:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:34:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:35:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:36:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:37:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T09:38:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T09:39:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T09:40:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:41:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:42:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:43:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:44:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:45:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:46:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T09:47:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T09:48:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T09:49:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T09:50:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T09:51:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T09:52:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T09:53:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T09:54:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T09:55:00Z",
+                                "took": 64000000
+                            },
+                            {
+                                "at": "2026-11-07T09:56:00Z",
+                                "took": 98000000
+                            },
+                            {
+                                "at": "2026-11-07T09:57:00Z",
+                                "took": 91000000
+                            },
+                            {
+                                "at": "2026-11-07T09:58:00Z",
+                                "took": 58000000
+                            },
+                            {
+                                "at": "2026-11-07T09:59:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:00:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:01:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:02:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:03:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:04:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:05:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:06:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:07:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:08:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:09:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:10:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:11:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:12:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:13:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:14:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:15:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:16:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:17:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:18:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:19:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:20:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:21:00Z",
+                                "took": 42000000
+                            },
+                            {
+                                "at": "2026-11-07T10:22:00Z",
+                                "took": 40000000
+                            },
+                            {
+                                "at": "2026-11-07T10:23:00Z",
+                                "took": 38000000
+                            },
+                            {
+                                "at": "2026-11-07T10:24:00Z",
+                                "took": 36000000
+                            },
+                            {
+                                "at": "2026-11-07T10:25:00Z",
+                                "took": 34000000
+                            },
+                            {
+                                "at": "2026-11-07T10:26:00Z",
+                                "took": 41000000
+                            },
+                            {
+                                "at": "2026-11-07T10:27:00Z",
+                                "took": 39000000
+                            },
+                            {
+                                "at": "2026-11-07T10:28:00Z",
+                                "took": 37000000
+                            },
+                            {
+                                "at": "2026-11-07T10:29:00Z",
+                                "took": 35000000
+                            },
+                            {
+                                "at": "2026-11-07T10:30:00Z",
+                                "took": 42000000
+                            }
+                        ]
                     },
                     "linux-3": {
                         "state": "running",
@@ -642,6 +889,7 @@
                         "vm": "linux-3",
                         "guest_port": 8080,
                         "host_port": 40001,
+                        "by": "owner",
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     }
@@ -653,7 +901,36 @@
                         "via": "cloudflare-tunnel",
                         "url": "https://jterrazz.com"
                     }
-                ]
+                ],
+                "uptime": {
+                    "infra": {
+                        "since": "2026-09-08T10:30:00Z",
+                        "days": [
+                            {
+                                "date": "2026-10-18",
+                                "down_s": 240,
+                                "restarts": 1
+                            },
+                            {
+                                "date": "2026-10-30",
+                                "down_s": 240,
+                                "restarts": 1
+                            }
+                        ],
+                        "incidents": [
+                            {
+                                "from": "2026-10-18T04:30:00Z",
+                                "to": "2026-10-18T04:34:00Z",
+                                "cause": "out of memory"
+                            },
+                            {
+                                "from": "2026-10-30T04:30:00Z",
+                                "to": "2026-10-30T04:34:00Z",
+                                "cause": "out of memory"
+                            }
+                        ]
+                    }
+                }
             },
             "tailnet": {
                 "self": {
@@ -702,7 +979,7 @@
                         "version": "3",
                         "lifetime": "always-on",
                         "want": "running",
-                        "check": "https://infra:6443/readyz",
+                        "check": "https://jterrazz.com/healthz",
                         "created_at": "2026-11-02T10:30:00Z"
                     },
                     "disk": true,
@@ -733,6 +1010,20 @@
                             "Process": "kube-apiserver",
                             "PID": 10042
                         }
+                    ],
+                    "console": [
+                        "[    0.000000] Linux version 6.8.0-52-generic (buildd@lcy02) #53-Ubuntu SMP PREEMPT_DYNAMIC",
+                        "[    1.412903] virtio_net virtio1 enp0s1: renamed from eth0",
+                        "[    2.108344] EXT4-fs (vda1): mounted filesystem with ordered data mode",
+                        "[    3.221087] systemd[1]: Reached target Multi-User System.",
+                        "[    3.480112] systemd[1]: Started OpenBSD Secure Shell server.",
+                        "[    3.902667] systemd[1]: Started Tailscale node agent.",
+                        "[    4.337941] systemd[1]: Started station guest.",
+                        "[    5.016528] systemd[1]: Started nginx - A high performance web server.",
+                        "[    5.774190] systemd[1]: Started cloudflared - Cloudflare Tunnel.",
+                        "[    6.210455] cloudflared[612]: Registered tunnel connection connIndex=0 location=cdg04",
+                        "[    6.431879] k3s[744]: Running kube-apiserver --secure-port=6443",
+                        "[    9.883012] nginx[598]: GET /healthz 200 0.036s"
                     ]
                 },
                 "linux-3": {
@@ -1057,6 +1348,7 @@
             },
             "files": {
                 "machinefiles/jterrazz-base.machine.yaml": "machinefile: station.machinefile/v1\nname: jterrazz-base\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+                "machinefiles/linux-1.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-1\nmachine: { kind: workspace }\nextends: [linux-dev]\nports: { open: [3000], to: public }\n",
                 "machinefiles/linux-dev.machine.yaml": "machinefile: station.machinefile/v1\nname: linux-dev\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [jterrazz-base]\napps: [ripgrep]\n",
                 "machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [jterrazz-base]\napps: [lazygit]\n"
             },
@@ -1278,6 +1570,7 @@
                         "vm": "linux-1",
                         "guest_port": 5173,
                         "host_port": 40001,
+                        "by": "owner",
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     },
@@ -1285,6 +1578,7 @@
                         "vm": "linux-1",
                         "guest_port": 3000,
                         "host_port": 40002,
+                        "by": "owner",
                         "http": true,
                         "reserved_at": "2026-11-07T08:30:00Z"
                     }
@@ -1504,7 +1798,21 @@
                                 "folder": "/home/admin/app"
                             }
                         ]
-                    }
+                    },
+                    "console": [
+                        "[    0.000000] Linux version 6.8.0-52-generic (buildd@lcy02) #53-Ubuntu SMP PREEMPT_DYNAMIC",
+                        "[    1.388210] virtio_net virtio1 enp0s1: renamed from eth0",
+                        "[    2.090731] EXT4-fs (vda1): mounted filesystem with ordered data mode",
+                        "[    3.150962] systemd[1]: Reached target Multi-User System.",
+                        "[    3.402518] systemd[1]: Started OpenBSD Secure Shell server.",
+                        "[    3.871204] systemd[1]: Started station guest.",
+                        "[    4.655033] station-guest[411]: listening for its Mac over the one way in",
+                        "[    5.120847] station-guest[411]: credentials loaned by macbook-pro: github",
+                        "[    7.304291] sshd[702]: Accepted publickey for admin from 192.168.64.1 port 52211",
+                        "[   12.018664] node[1190]: vite v6.0.7 ready in 412 ms, listening on 5173",
+                        "[   12.540318] node[1203]: astro v5.1.2 dev server listening on 4321",
+                        "[   31.774052] node[1190]: hmr update /src/pages/index.astro"
+                    ]
                 },
                 "station-image-linux-3": {
                     "disk": true,

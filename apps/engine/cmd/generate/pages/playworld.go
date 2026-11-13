@@ -96,6 +96,7 @@ type playStores struct {
 	Shares       map[string][]accounts.Share `json:"shares,omitempty"`
 	Reservations []ports.Reservation         `json:"reservations,omitempty"`
 	Declarations []ports.Declaration         `json:"declarations,omitempty"`
+	Uptime       map[string]model.Uptime     `json:"uptime,omitempty"`
 }
 
 type playVM struct {
@@ -107,6 +108,7 @@ type playVM struct {
 	Guest     *struct{}        `json:"guest,omitempty"`
 	Listening []ports.Listener `json:"listening,omitempty"`
 	Agents    *playAgents      `json:"agents,omitempty"`
+	Console   []string         `json:"console,omitempty"`
 }
 
 type playKept struct {
@@ -128,6 +130,7 @@ type playAgents struct {
 
 func PlayWorld(base []byte) []byte {
 	f := everyMachine()
+	infraServes(&f)
 	cpu := map[string]float64{proName: .30, miniMac: .55, "linux-1": .37, "agent-7f": .04, "infra": .18, "linux-3": .60, "review-bot": .06}
 	hardware := map[string]coremachine.Hardware{
 		proName: {Model: "Mac16,5", Chip: "Apple M4 Max", Memory: 48 * gb, CPUs: 16},
@@ -190,7 +193,13 @@ func PlayWorld(base []byte) []byte {
 				if m.Engine.Memory == nil {
 					m.Engine.Memory = engine.Memory{}
 				}
-				m.Engine.Memory[vm.Name] = engine.Remembered{State: engine.StateRunning, BootAt: vm.BootAt}
+				m.Engine.Memory[vm.Name] = engine.Remembered{State: engine.StateRunning, BootAt: vm.BootAt, Check: vm.CheckStatus, Latency: vm.Latency}
+			}
+			if len(vm.Uptime.Days) > 0 {
+				if m.Stores.Uptime == nil {
+					m.Stores.Uptime = map[string]model.Uptime{}
+				}
+				m.Stores.Uptime[vm.Name] = vm.Uptime
 			}
 			w.Macs[vm.Name] = inside(f, vm, cpu[vm.Name], past[vm.Name])
 		}
@@ -213,7 +222,7 @@ func PlayWorld(base []byte) []byte {
 		}
 		for _, p := range f.portsOf(h.Name).AllMachines.Macs {
 			for _, s := range p.Shared {
-				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})
+				m.Stores.Reservations = append(m.Stores.Reservations, ports.Reservation{VM: s.VM, GuestPort: s.GuestPort, MacPort: s.Reserved, By: ports.ByOwner, HTTP: &s.HTTP, ReservedAt: storyNow.Add(-2 * time.Hour)})
 				m.Tailnet.Shares = append(m.Tailnet.Shares, ports.Share{Port: s.Reserved, Reserved: s.Reserved, Scheme: "https", Target: "http://127.0.0.1:" + strconv.Itoa(s.Reserved)})
 			}
 			for _, port := range p.Ports {
@@ -384,7 +393,7 @@ func playMachine(f Scene, mac string, vm model.VM, pid int) *playVM {
 	if vm.State != model.Running {
 		return v
 	}
-	v.PID, v.UpAt, v.Guest = pid, vm.BootAt, &struct{}{}
+	v.PID, v.UpAt, v.Guest, v.Console = pid, vm.BootAt, &struct{}{}, consoleOf(vm.Name)
 	for _, p := range f.portsOf(mac).AllMachines.Macs {
 		for _, port := range p.Ports {
 			if port.Machine.Name != vm.Name {

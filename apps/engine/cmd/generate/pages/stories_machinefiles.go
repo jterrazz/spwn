@@ -5,19 +5,22 @@ import (
 )
 
 const (
-	baseFile = "jterrazz-base"
-	devFile  = "linux-dev"
+	baseFile  = "jterrazz-base"
+	devFile   = "linux-dev"
+	exposedVM = "linux-1"
 )
 
 // value: the owner's Machinefiles as the play world keeps them on This
 // Mac, by path under its station files: a base every machine extends, the
-// Mac's own, and the workspace every dev VM is made from.
+// Mac's own, the workspace every dev VM is made from, and linux-1's, which
+// narrows it with the ports its Mac may open to the internet.
 func ownerFiles() map[string]string {
 	file := func(name string) string { return "machinefiles/" + name + catalog.MachinefileSuffix }
 	return map[string]string{
-		file(baseFile): "machinefile: station.machinefile/v1\nname: " + baseFile + "\nmachine: { kind: workspace }\napps: [jq, gh]\n",
-		file(proName):  "machinefile: station.machinefile/v1\nname: " + proName + "\nmachine: { kind: computer, system: { os: macos } }\nextends: [" + baseFile + "]\napps: [lazygit]\n",
-		file(devFile):  "machinefile: station.machinefile/v1\nname: " + devFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [" + baseFile + "]\napps: [ripgrep]\n",
+		file(baseFile):  "machinefile: station.machinefile/v1\nname: " + baseFile + "\nmachine: { kind: workspace }\napps: [jq, gh]\n",
+		file(proName):   "machinefile: station.machinefile/v1\nname: " + proName + "\nmachine: { kind: computer, system: { os: macos } }\nextends: [" + baseFile + "]\napps: [lazygit]\n",
+		file(devFile):   "machinefile: station.machinefile/v1\nname: " + devFile + "\nmachine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }\nextends: [" + baseFile + "]\napps: [ripgrep]\n",
+		file(exposedVM): "machinefile: station.machinefile/v1\nname: " + exposedVM + "\nmachine: { kind: workspace }\nextends: [" + devFile + "]\nports: { open: [3000], to: public }\n",
 	}
 }
 
@@ -39,5 +42,6 @@ func devApps(vm string) (*playApps, bool) {
 func devFiles() map[string]string {
 	files := ownerFiles()
 	delete(files, "machinefiles/"+proName+catalog.MachinefileSuffix)
+	delete(files, "machinefiles/"+exposedVM+catalog.MachinefileSuffix)
 	return files
 }

@@ -1,0 +1,25 @@
+description: 'the play world lists a Mac''s ports listening, shared and exposed, and a server''s check and record'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.all.macs[] | select(.this_mac) | {listening: ([.ports[] | select(.Machine.On == "macbook-pro")] | length), shared: [.shared[] | [.guest_port, .to]], exposed: [.shared[] | select(.to == "public") | .urls.public]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","target":{"name":"macbook-pro"},"in":{"AllMachines":true}}
+      exit: 0
+      stdout: |
+          {"listening":5,"shared":[[3000,"public"],[5173,"private"]],"exposed":["https://macbook-pro.tail77a797.ts.net:443"]}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.All.Macs[].VMs[]? | select(.Name == "infra") | {check: .Check, state: .CheckStatus.state, latency: (.Latency | length), days: (.Uptime.days | length)}][]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.list","target":{"name":"macbook-pro"},"in":{}}
+      exit: 0
+      stdout: |
+          {"check":"https://jterrazz.com/healthz","state":"passing","latency":60,"days":2}
+    - command: 'machines restart infra --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	infra	restarted

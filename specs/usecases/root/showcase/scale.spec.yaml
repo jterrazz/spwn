@@ -1,0 +1,27 @@
+description: 'the play world holds two Macs with six VMs from one image, and the logs two of them wrote'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.All.Macs[] | select(.Reachable) | (.VMs | length)]'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.list","target":{"name":"macbook-pro"},"in":{}}
+      exit: 0
+      stdout: |
+          [3,3]
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out[] | {image: .Record.name, vms: (.VMs | length)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"images.list","target":{"name":"macbook-pro"},"in":{}}
+      exit: 0
+      stdout: |
+          {"image":"station-linux","vms":3}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''{lines: (.out.Lines | length)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.log","target":{"name":"macbook-pro"},"in":{"VM":"linux-1"}}
+      exit: 0
+      stdout: |
+          {"lines":12}
+    - command: 'machines log infra --on mac-mini | /usr/bin/wc -l | /usr/bin/tr -d '' '''
+      exit: 0
+      stdout: |
+          12
