@@ -78,6 +78,8 @@ import (
 const (
 	quietTicks = 3
 	mostTicks  = 120
+	// value: the real time a settling waits, in all, for its guests' greetings.
+	greetBound = 2 * time.Second
 )
 
 // invariant: the spec build's world: read from $STATION_WORLD at start (seeded
@@ -695,10 +697,26 @@ func (m *worldMac) takeLeave() func() {
 	return leave
 }
 
+// invariant: a tick of the settling leaps the clock only once every guest
+// greeting the engine has said what it says at the start: in a world a
+// greeting waits on no clock, so it lands before the first leap however
+// loaded the gate, and the ticks a start takes never count it.
+//
+// hazard: a greeting that waits on the clock all the same (a guest's reply
+// asked for on the world's time) is waited for greetBound of real time in all,
+// once per settling, never once per tick.
 func (m *worldMac) settle(ctx context.Context) {
+	greeting, stop := context.WithTimeout(context.WithoutCancel(ctx), greetBound)
+	defer stop()
 	quiet := 0
 	for n := 0; n < mostTicks && quiet < quietTicks; n++ {
 		tick := m.nextTick()
+		if d := m.current(); d != nil {
+			select {
+			case <-d.Greeted():
+			case <-greeting.Done():
+			}
+		}
 		_ = m.run.clock().Sleep(ctx, time.Second)
 		d := m.current()
 		if d == nil {

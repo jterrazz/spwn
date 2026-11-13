@@ -63,6 +63,7 @@ type vmState struct {
 	check    model.CheckStatus
 	checking bool
 	ssh      bool
+	greeting bool
 	// value: a server's last check runs; the restart it walks, nil when
 	// none; its uptime record holds it down; it was marked since this
 	// engine began.
@@ -502,6 +503,7 @@ func (d *Engine) connect(ctx context.Context, v *vmState) {
 	v.gen++
 	v.cancel, v.guest, v.up = cancel, engine.GuestConnecting, make(chan struct{})
 	gen := v.gen
+	d.greetLocked(v)
 	d.mu.Unlock()
 	go d.session(gctx, v, gen)
 }
@@ -518,6 +520,7 @@ func (d *Engine) disconnect(v *vmState) {
 	v.gen++
 	v.cancel, v.guest, v.client, v.in, v.ssh = nil, engine.GuestAbsent, nil, nil, false
 	v.release()
+	d.greetedLocked(v)
 }
 
 func (v *vmState) release() {
@@ -545,12 +548,19 @@ func (d *Engine) session(ctx context.Context, v *vmState, gen int) {
 		if v.gen == gen {
 			v.cancel, v.guest, v.client, v.in = nil, engine.GuestAbsent, nil, nil
 			v.release()
+			d.greetedLocked(v)
 		}
 		d.mu.Unlock()
 	}()
 	backoff := time.Second
 	for d.alive(v) {
+		d.mu.Lock()
+		if v.gen == gen {
+			d.greetLocked(v)
+		}
+		d.mu.Unlock()
 		d.guestOnce(ctx, v, gen)
+		d.greetedBy(v, gen)
 		if !d.current(v, gen) || ctx.Err() != nil {
 			return
 		}
@@ -607,7 +617,7 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 	scanner := bufio.NewScanner(session)
 	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
 	for scanner.Scan() {
-		d.fromGuest(ctx, v, scanner.Bytes())
+		d.fromSession(ctx, v, gen, scanner.Bytes())
 	}
 	_ = session.Close()
 }

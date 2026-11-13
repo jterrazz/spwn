@@ -198,6 +198,7 @@ type Engine struct {
 	lastShared []ports.Share
 	everRead   bool
 	reconciled bool
+	greets     greetings
 	unreadSaid bool
 	// value: whether Begin is still running: no share is made until the
 	// start's reconciliation has run.
