@@ -243,24 +243,24 @@ describe('gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a workspace offers no Restart, and Open in Terminal is drawn but held, saying why', async () => {
+    test("a workspace offers no Restart, and Open in Terminal shows the engine's command before it is clicked", async () => {
         // Given - linux-1's page over two-macs
-        let why: null | string | undefined;
+        let shows: null | string | undefined;
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
-                // When - its header is drawn
+                // When - its header is drawn and machines.ssh has answered
                 await visitor.see(heading('linux-1 Running'));
-                why = [...document.querySelectorAll('button')]
+                await visitor.see(enabled(button('Open in Terminal')));
+                shows = [...document.querySelectorAll('button')]
                     .find((one) => one.textContent === 'Open in Terminal')
                     ?.getAttribute('title');
 
-                // Then - Start and Stop, no Restart, and the terminal held
-                await visitor.see(disabled(button('Open in Terminal')));
+                // Then - Start and Stop, no Restart, and the terminal offered
                 await visitor.gone(button('Restart'));
             },
         );
-        expect(why).toBe('The window cannot open a terminal yet');
+        expect(shows).toBe('ssh admin@linux-1');
         expect(result.errors.text).toBe('');
     });
 

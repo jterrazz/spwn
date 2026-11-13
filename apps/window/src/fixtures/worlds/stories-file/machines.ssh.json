@@ -1,0 +1,5 @@
+{"world": "stories-file", "station": "dev", "exchanges": [
+{"request":{"call":"machines.ssh","in":{"Name":"agent-7f"}},"answers":[{"v":2,"out":{"User":"admin","Address":"agent-7f","Command":"ssh admin@agent-7f"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"api"}},"answers":[{"v":2,"out":{"User":"admin","Address":"api","Command":"ssh admin@api"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"linux-1"}},"answers":[{"v":2,"out":{"User":"admin","Address":"linux-1","Command":"ssh admin@linux-1"}}]}
+]}

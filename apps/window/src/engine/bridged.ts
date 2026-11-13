@@ -34,6 +34,7 @@ export const BRIDGED = [
     'machines.list',
     'machines.log',
     'machines.restart',
+    'machines.ssh',
     'machines.start',
     'machines.stop',
     'overview.read',

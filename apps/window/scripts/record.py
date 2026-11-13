@@ -139,6 +139,7 @@ def asks(here):
         *[{"watch": "activity.read", "in": {"history": True, "of": vm["Name"], "machine": {"Name": vm["Name"], "On": mac["Name"]}}}
           for mac, vm in vms],
         *[{"call": "machines.log", "in": {"VM": vm["Name"]}} for _, vm in vms],
+        *[{"call": "machines.ssh", "in": {"Name": vm["Name"]}} for _, vm in vms],
         *[{"watch": "accounts.list", "in": {"VMs": True}} for _ in here],
         *[{"watch": "awake.read", "in": {}} for _ in here],
     ]}.values())

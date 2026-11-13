@@ -5,7 +5,7 @@
     - button "macbook-pro"
   - button "Start"
   - button "Stop"
-  - button "Open in Terminal" [disabled]
+  - button "Open in Terminal"
   - tablist "Tabs":
     - tab "Overview"
     - tab "Activity"

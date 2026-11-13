@@ -11,10 +11,9 @@ import type { Found } from '../../model/machines';
 import { machineRoute, TAB_PANEL, TABS } from '../../shell/route';
 import type { Route, Tab } from '../../shell/route';
 import { LifecycleGestures } from './gestures';
+import { TerminalButton } from './terminal';
 
 import styles from './machine.module.css';
-
-const NO_TERMINAL = 'The window cannot open a terminal yet';
 
 type Props = {
     found: Found;
@@ -83,16 +82,7 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
         );
     }
     return (
-        <LifecycleGestures
-            key={vm.Name}
-            mac={mac}
-            terminal={
-                <Button disabled title={NO_TERMINAL} variant="primary" yields>
-                    Open in Terminal
-                </Button>
-            }
-            vm={vm}
-        />
+        <LifecycleGestures key={vm.Name} mac={mac} terminal={<TerminalButton vm={vm} />} vm={vm} />
     );
 }
 
