@@ -135,7 +135,6 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	commands = append(commands, explainCommand(kenv, thisMac),
 		statusCommand(kenv, thisMac),
 		appsAlias(kenv, thisMac),
-		storageAlias(kenv, thisMac),
 		secretsAlias(kenv, thisMac),
 		retiredEngineCommand(kenv, thisMac),
 		guestCommand(kenv, thisMac),
