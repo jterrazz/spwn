@@ -52,7 +52,7 @@ func NightOf(u Upgraded, failed error, name string, at time.Time) Night {
 	// before its end keeps its error, so the owner reads it.
 	n := Night{At: at.UTC(), Machinefile: cmp.Or(u.Plan.Name, name), Waiting: u.Waiting, Interrupted: u.Interrupted, Unpulled: u.Unpulled}
 	if failed != nil && !u.Interrupted {
-		n.Error = failed.Error()
+		n.Error = screened(failed.Error())
 	}
 	n.seen(u)
 	return n

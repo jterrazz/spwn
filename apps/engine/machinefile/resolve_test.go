@@ -271,3 +271,37 @@ func TestAPackageProvidedByAnotherBringsItInFirst(t *testing.T) {
 		t.Errorf("steps %q; want %q", order, want)
 	}
 }
+
+func TestATokenInAnOptionOrARunLineIsWithheldInTheValues(t *testing.T) {
+	token := "sk-" + strings.Repeat("station-", 4) + "key"
+	served := `package: station.package/v1
+kind: app
+name: served
+description: told where to call
+options:
+    - { name: endpoint, label: Endpoint, type: string, required: true }
+methods:
+    - { os: any, script: { run: 'true' } }
+`
+	file := "machinefile: station.machinefile/v1\nname: top\nmachine: { kind: workspace, system: { os: ubuntu } }\napps: [{ name: served, options: { endpoint: " + token + " } }]\nrun:\n  boot: |\n    export KEY=" + token + "\n    make install\n"
+	lib := library(t, map[string]string{"machinefiles/top.machine.yaml": file}, map[string]string{"catalog/command-line/served.yaml": served})
+	r, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]machinefile.Value{}
+	for _, v := range r.Values {
+		got[v.Key] = v
+	}
+	if v := got["apps.served.endpoint"]; v.Text != "withheld" || !v.Withheld {
+		t.Errorf("an option holding a token reads %+v, want it withheld whole", v)
+	}
+	if v := got["run.boot"]; v.Text != "export KEY=withheld; make install" || !v.Withheld {
+		t.Errorf("a run line holding a token reads %+v, want the token withheld and the rest kept", v)
+	}
+	for _, v := range r.Values {
+		if strings.Contains(v.Text, token) {
+			t.Errorf("%s carries the token: %q", v.Key, v.Text)
+		}
+	}
+}

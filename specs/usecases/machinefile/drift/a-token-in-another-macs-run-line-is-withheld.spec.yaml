@@ -1,0 +1,21 @@
+description: 'a token in another Mac''s run line is withheld before its drift crosses back'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+          run:
+            boot: |
+              export API_KEY=sk-station-story-not-a-real-key
+      exit: 0
+    - command: 'drift --on jterrazz-mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Packages
+          ●	homebrew	script	present
+          ○	jq	brew	absent

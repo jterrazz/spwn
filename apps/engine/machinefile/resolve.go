@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
 // value: where one value of a resolution was read: the Machinefile or the
@@ -25,6 +26,9 @@ type Origin struct {
 type Value struct {
 	Key, Text string
 	Origin    Origin
+	// value: the text held a secret: an option's value is withheld whole,
+	// any other text word by word.
+	Withheld bool
 }
 
 // value: one package of the plan: what it is, the method that installs or
@@ -841,7 +845,8 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 			out = append(out, Value{Key: key + ".locked", Text: s.Locked, Origin: chose})
 		}
 		for _, k := range sortedNames(s.Values) {
-			out = append(out, Value{Key: key + "." + k, Text: string(s.Values[k]), Origin: s.Origin})
+			text, withheld := withhold(string(s.Values[k]))
+			out = append(out, Value{Key: key + "." + k, Text: text, Origin: s.Origin, Withheld: withheld})
 		}
 		if s.From != "" {
 			out = append(out, Value{Key: key + ".from", Text: s.From, Origin: s.Origin})
@@ -861,7 +866,21 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 			}
 		}
 	}
+	for i, v := range out {
+		if !v.Withheld {
+			out[i].Text, out[i].Withheld = secret.Screen(v.Text)
+		}
+	}
 	return out
+}
+
+func withhold(text string) (string, bool) {
+	// value: an option's value as an answer shows it: the whole of it is the
+	// word withheld when it holds a secret, since half a token is still one.
+	if secret.Shaped(text) {
+		return secret.Marker, true
+	}
+	return text, false
 }
 
 func Explain(r Resolved, key string) ([]Value, error) {

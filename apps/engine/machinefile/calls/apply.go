@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
@@ -58,7 +59,8 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// lines of its phase.
 	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
-	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (machinefile.Applied, error) {
+	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
+		defer func() { answer = answer.Answered() }()
 		if bad := badPhase(in.Phase, in.Remove); bad != nil {
 			return machinefile.Applied{}, bad
 		}
@@ -132,7 +134,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 // (saidLines), and what was applied stays applied.
 func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
 	task := "run." + string(s.Phase)
-	p.Step(task, strings.Join(machinefile.ScriptLines(s.Lines), "\n"))
+	p.Step(task, screened(strings.Join(machinefile.ScriptLines(s.Lines), "\n")))
 	out := &machinefile.Ran{Script: s, State: catalog.StateOK}
 	if d.Shell == nil {
 		out.State, out.Detail = catalog.StateBroken, "this machine runs no shell"
@@ -417,19 +419,24 @@ func (r *run) values(ctx context.Context, given map[string]catalog.OptionValue) 
 		if r.d.Vault == nil {
 			return nil, nil, errors.New(string(v) + " cannot be read: this machine has no vault")
 		}
-		secret, err := r.d.Vault.Get(ctx, ref)
+		plain, err := r.d.Vault.Get(ctx, ref)
 		if err != nil {
 			return nil, nil, errors.New(string(v) + " is not in this machine's vault")
 		}
-		values[k], secrets[string(secret)] = string(secret), string(v)
+		values[k], secrets[string(plain)] = string(plain), string(v)
 	}
 	return values, secrets, nil
 }
 
+func screened(text string) string {
+	kept, _ := secret.Screen(text)
+	return kept
+}
+
 func masked(words string, secrets map[string]string) string {
-	for secret, ref := range secrets {
-		if secret != "" {
-			words = strings.ReplaceAll(words, secret, ref)
+	for plain, ref := range secrets {
+		if plain != "" {
+			words = strings.ReplaceAll(words, plain, ref)
 		}
 	}
 	return words

@@ -43,16 +43,19 @@ describe('model', () => {
                     Key: 'machine.kind',
                     Origin: origin('jterrazz-macbook-pro', 'user'),
                     Text: 'computer',
+                    Withheld: false,
                 },
                 {
                     Key: 'machine.system.os',
                     Origin: origin('jterrazz-macbook-pro', 'user'),
                     Text: 'macos',
+                    Withheld: false,
                 },
                 {
                     Key: 'machine.system.arch',
                     Origin: origin('jterrazz-base', 'user'),
                     Text: 'arm64',
+                    Withheld: false,
                 },
             ],
         };

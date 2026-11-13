@@ -10,7 +10,9 @@ const ID page.ID = "machinefile"
 type ValueJSON struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
-	Layer string `json:"layer"`
+	// value: the value held a secret and is withheld.
+	Withheld bool   `json:"withheld,omitempty"`
+	Layer    string `json:"layer"`
 	// value: the Machinefile or the package that says it, and its file.
 	From string `json:"from"`
 	File string `json:"file,omitempty"`
@@ -35,7 +37,7 @@ func Contract(name string, files []machinefile.Origin, values []machinefile.Valu
 		body.Files = append(body.Files, FileJSON{Name: f.Name, Layer: string(f.Layer), File: f.File})
 	}
 	for _, v := range values {
-		body.Values = append(body.Values, ValueJSON{Key: v.Key, Value: v.Text, Layer: string(v.Origin.Layer), From: v.Origin.Name, File: v.Origin.File})
+		body.Values = append(body.Values, ValueJSON{Key: v.Key, Value: v.Text, Withheld: v.Withheld, Layer: string(v.Origin.Layer), From: v.Origin.Name, File: v.Origin.File})
 	}
 	return body
 }

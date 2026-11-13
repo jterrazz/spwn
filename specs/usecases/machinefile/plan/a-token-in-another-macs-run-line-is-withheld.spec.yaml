@@ -1,0 +1,22 @@
+description: 'a token in another Mac''s run line is withheld before its plan crosses back'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-mac-mini machinefiles/jterrazz-mac-mini.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-mac-mini
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+          run:
+            boot: |
+              export API_KEY=sk-station-story-not-a-real-key
+      exit: 0
+    - command: 'plan --on jterrazz-mac-mini --json | /usr/bin/jq -c ''{machinefile, run}'''
+      exit: 0
+      stdout: |
+          {"machinefile":"jterrazz-mac-mini","run":null}
+    - command: 'plan --on jterrazz-mac-mini --phase boot --json | /usr/bin/jq -c .run'
+      exit: 0
+      stdout: |
+          {"phase":"boot","machinefile":"jterrazz-mac-mini","lines":["export API_KEY=withheld"]}

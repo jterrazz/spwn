@@ -1390,6 +1390,7 @@ export type MachinefileValue = {
     Key: string;
     Origin: MachinefileOrigin;
     Text: string;
+    Withheld: boolean;
 };
 
 export type MachinefileWaiting = {

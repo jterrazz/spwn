@@ -31,12 +31,16 @@
         },
         "Text": {
           "type": "string"
+        },
+        "Withheld": {
+          "type": "boolean"
         }
       },
       "required": [
         "Key",
         "Origin",
-        "Text"
+        "Text",
+        "Withheld"
       ],
       "type": "object"
     },

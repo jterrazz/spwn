@@ -42,6 +42,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 		// own upgrade run to its end refreshes what the last night of that
 		// Machinefile says waits.
 		out, err := upgrade(ctx, d, in, p)
+		out = out.Answered()
 		out.Interrupted = out.Interrupted || ctx.Err() != nil
 		switch {
 		case in.Unattended:

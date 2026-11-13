@@ -1,0 +1,41 @@
+description: 'a token held by a plain string option is withheld whole in plan, plan --json and explain'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit jterrazz-macbook-pro catalog/command-line/served.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: app
+          name: served
+          description: An app told where to call
+          provides: [served]
+          options:
+              - name: endpoint
+                label: Endpoint
+                type: string
+                required: true
+          methods:
+              - os: macos
+                brew: eza
+      exit: 0
+    - command: 'world edit jterrazz-macbook-pro machinefiles/jterrazz-macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: jterrazz-macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [{ name: served, options: { endpoint: sk-station-story-not-a-real-key } }]
+      exit: 0
+    - command: 'plan --json | /usr/bin/jq -c ''.lines[] | select(.package == "served") | .values'''
+      exit: 0
+      stdout: |
+          {"endpoint":"withheld"}
+    - command: 'explain apps.served.endpoint'
+      exit: 0
+      stdout: |
+          # jterrazz-macbook-pro
+          	apps.served.endpoint	withheld	user	jterrazz-macbook-pro
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	served	brew	endpoint withheld

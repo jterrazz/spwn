@@ -34,7 +34,8 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 		if bad := badPhase(in.Phase, false); bad != nil {
 			return machinefile.Plan{}, bad
 		}
-		return judged(ctx, d, in.Machinefile, in.Phase)
+		p, err := judged(ctx, d, in.Machinefile, in.Phase)
+		return p.Answered(), err
 	},
 }
 
@@ -44,7 +45,8 @@ var Drift = call.Call[Deps, PlanIn, machinefile.Plan]{
 	Name: "machinefile.drift", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
-		return judged(ctx, d, in.Machinefile, in.Phase)
+		p, err := judged(ctx, d, in.Machinefile, in.Phase)
+		return p.Answered(), err
 	},
 }
 
