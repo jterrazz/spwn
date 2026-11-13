@@ -21,16 +21,14 @@
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 5173":
-      - text: :5173 Vite node Private
+      - text: :5173 Vite node https://jterrazz-macbook-pro.tail1234.ts.net:40001 Private
       - button "Stop sharing"
-      - text: https://jterrazz-macbook-pro.tail1234.ts.net:40001
       - button "Copy https://jterrazz-macbook-pro.tail1234.ts.net:40001": Copy
       - button "Open"
       - button "Hide QR code"
       - img "QR code of https://jterrazz-macbook-pro.tail1234.ts.net:40001"
     - region "Port 7000":
-      - text: :7000 server Private
+      - text: :7000 server jterrazz-macbook-pro.tail1234.ts.net:40002 Private
       - button "Stop sharing"
-      - text: jterrazz-macbook-pro.tail1234.ts.net:40002
       - button "Copy jterrazz-macbook-pro.tail1234.ts.net:40002": Copy
       - button "QR code"

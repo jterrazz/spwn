@@ -6,7 +6,6 @@ import { Openable, shareAddressOf } from '../../engine/opener';
 import { shareToWord } from '../../engine/shown';
 import { SHARE_STATE_TONES } from '../../engine/tones';
 import { SHARE_STATE_WORDS } from '../../engine/words';
-import { sentence } from '../../model/format';
 import { GestureButton, GestureRow } from '../kit/gestures';
 import { Address } from './address';
 import { usePortStop } from './port-gestures';
@@ -19,6 +18,8 @@ export const LOCAL_ELSEWHERE =
 function ShareAddress({ share, onThisMac }: { share: PortsSharedPort; onThisMac: boolean }) {
     return (
         <Address
+            drawn="links"
+            label={share.detail}
             opens={
                 share.http
                     ? { held: LOCAL_ELSEWHERE, openable: Openable.ofShare(share, onThisMac) }
@@ -77,7 +78,8 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
         <section aria-label={`Port ${share.guest_port}`} className={styles.shared}>
             <GestureRow
                 {...row}
-                sentence={sentence([label === '' ? undefined : share.process, share.detail])}
+                {...(label === '' ? {} : { tag: share.process, tagLook: 'hint' as const })}
+                sentence={<Value>{shareAddressOf(share)}</Value>}
                 trail={
                     <span className={styles.trail}>
                         {to === '' ? null : <TypeTag>{shareToWord(to)}</TypeTag>}

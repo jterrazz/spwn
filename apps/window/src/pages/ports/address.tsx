@@ -10,9 +10,15 @@ import styles from './ports.module.css';
 
 type Opens = { openable: Openable | undefined; held: string };
 
-type AddressProps = { url: string; qr: boolean; label?: string; opens?: Opens | undefined };
+type AddressProps = {
+    url: string;
+    qr: boolean;
+    label?: string;
+    opens?: Opens | undefined;
+    drawn?: 'links' | 'whole';
+};
 
-export function Address({ label = '', url, qr, opens }: AddressProps) {
+export function Address({ label = '', url, qr, opens, drawn = 'whole' }: AddressProps) {
     const [open, setOpen] = useState(false);
     if (url === '') {
         return null;
@@ -20,7 +26,7 @@ export function Address({ label = '', url, qr, opens }: AddressProps) {
     return (
         <div className={styles.address}>
             {label === '' ? null : <span className={styles.label}>{label}</span>}
-            <Value>{url}</Value>
+            {drawn === 'whole' ? <Value>{url}</Value> : null}
             <span className={styles.links}>
                 <CopyButton name={`Copy ${url}`} text={url} />
                 {opens === undefined ? null : (
